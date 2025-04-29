@@ -1,0 +1,16 @@
+[Unit]
+Description=Cliff Web Server (Flask for Cliff Apps)
+After=network.target
+
+[Service]
+User=squinlan
+WorkingDirectory=/home/squinlan/cliff_ai/web_server
+ExecStart=/home/squinlan/cliff_ai/web_server/start_web_server.sh
+Restart=always
+RestartSec=5
+Environment="FLASK_ENV=production"
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
+

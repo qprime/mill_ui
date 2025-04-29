@@ -1,0 +1,16 @@
+[Unit]
+Description=Cliff Device Manager (Flask API for Lab Manager)
+After=network.target
+
+[Service]
+User=squinlan
+WorkingDirectory=/home/squinlan/cliff_ai/lab_manager
+ExecStart=/home/squinlan/cliff_ai/lab_manager/start_device_api.sh
+Restart=always
+RestartSec=5
+Environment="FLASK_ENV=production"
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
+

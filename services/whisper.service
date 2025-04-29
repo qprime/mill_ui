@@ -1,0 +1,13 @@
+[Unit]
+Description=Whisper Transcription Server
+After=network.target
+
+[Service]
+WorkingDirectory=/home/squinlan/cliff_ai/whisper
+ExecStart=/home/squinlan/cliff_ai/whisper/run_whisper.sh
+Restart=always
+User=squinlan
+Group=squinlan
+
+[Install]
+WantedBy=multi-user.target

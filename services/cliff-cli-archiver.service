@@ -1,0 +1,17 @@
+[Unit]
+Description=Cliff CLI Archiver Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/squinlan/cliff_ai/cli_archiver/server
+ExecStart=/usr/bin/python3 /home/squinlan/cliff_ai/cli_archiver/server/app.py
+Restart=always
+User=squinlan
+RestartSec=5
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/usr/lib/python3/dist-packages"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1504,3 +1504,40 @@
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:56:20.793448+00:00", "command": "git push -u origin main"}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:57:03.139945+00:00", "command": "git pull --rebase origin main"}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:58:25.886536+00:00", "command": "git add ."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:58:36.246365+00:00", "command": "git commit -m \"Prep for rebase before initial push\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:58:44.411973+00:00", "command": "git pull --rebase origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:58:51.335833+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:59:40.907329+00:00", "command": "git push --force origin main"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T20:00:48.952961+00:00", "command": "ls"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T20:00:51.187120+00:00", "command": "cd .."}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T20:00:51.651581+00:00", "command": "ls"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T20:00:54.256791+00:00", "command": "cd .."}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T20:01:03.654354+00:00", "command": "ls -al | grep .zshrc"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:01:42.373751+00:00", "command": "ssh squinlan@jetson-nano"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:17:04.641602+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:17:21.765766+00:00", "command": "mkdir services"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:17:28.087901+00:00", "command": "gedit README.txt"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:18:17.199842+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:18:24.782380+00:00", "command": "mv README.txt services"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:19:22.513893+00:00", "command": "sudo cp /etc/systemd/system/cliff* services/"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:19:29.009755+00:00", "command": "cd services/"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:19:29.529819+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:19:37.214920+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:30:14.580018+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:30:42.208093+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:30:44.000431+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:30:44.570492+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:30:59.301346+00:00", "command": "rm -rf '~cliff_ai'/"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:31:20.268049+00:00", "command": "cd cliff_ai/"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:31:20.837258+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:31:27.243872+00:00", "command": "mkdir whisper"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:31:28.692380+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:31:30.651710+00:00", "command": "cd whisper"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:34:54.125722+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:37:59.220890+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:37:59.863213+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:07.814833+00:00", "command": "cd services"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:08.418536+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:56.809392+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:58.121944+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:40:42.348392+00:00", "command": "git add ."}

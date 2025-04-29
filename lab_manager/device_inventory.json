@@ -1,0 +1,62 @@
+{
+  "EQBeelink1": {
+    "device_id": "EQBeelink1",
+    "type": "Mini PC",
+    "model": "Beelink EQ R6",
+    "cpu": "AMD Ryzen 9 6900HX",
+    "ram": "24GB DDR5",
+    "storage": "1TB PCIe 4.0 SSD",
+    "os": "Ubuntu 24.04",
+    "ip_address": "192.168.0.37",
+    "role_tags": [
+      "Lab Manager Host",
+      "Device Manager",
+      "CLI Archiver Node"
+    ],
+    "configured": true,
+    "notes": "Primary AI lab manager system. Runs Flask API, CLI archiver, possibly other modules.",
+    "last_seen": "2025-04-24T19:46:48.802479"
+  },
+  "MacM2": {
+    "device_id": "MacM2",
+    "model": "MacBook Pro",
+    "cpu": "Apple M2 Max",
+    "os": "macOS Sequoia",
+    "ip_address": "192.168.0.195",
+    "role_tags": [
+      "Development",
+      "Main Workstation"
+    ],
+    "configured": true,
+    "notes": "Main MacBook used for development and fun.",
+    "last_seen": "2025-04-24T20:20:43.559939"
+  },
+  "jetson-nano": {
+    "ip_address": "192.168.0.63",
+    "type": "Single-Board Computer (SBC)",
+    "model": "NVIDIA Jetson Orin Nano Developer Kit",
+    "cpu": "6-core ARM Cortex-A78AE v8.2",
+    "ram": "8GB LPDDR5",
+    "storage": "eMMC or NVMe SSD",
+    "role_tags": [
+      "Whisper Node",
+      "Edge AI Node",
+      "LLM router"
+    ],
+    "docker_containers": [
+      ""
+    ],
+    "notes": "Hosts Whisper, light inference tasks, future Home Assistant bridge node",
+    "custom_field": "GPU:NVIDIA Ampere 1024-core",
+    "configured": true,
+    "device_id": "jetson-nano",
+    "last_seen": "2025-04-27T14:19:59.305913",
+    "last_updated": "2025-04-27T14:24:15.168224"
+  },
+  "test_device_123": {
+    "device_id": "test_device_123",
+    "type": "Virtual",
+    "os": "TestOS",
+    "last_seen": "2025-04-27T16:40:34.499886"
+  }
+}

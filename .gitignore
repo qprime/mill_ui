@@ -1,0 +1,66 @@
+# ====================
+# Core Cliff AI Ignore
+# ====================
+
+# System and Editor Junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+env/
+venv/
+
+# AI/Model Artifacts
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.tflite
+models/
+!models/mistral/
+models/mistral/original/*
+models/mistral/quantized/*
+!models/mistral/original/.gitkeep
+!models/mistral/quantized/.gitkeep
+
+# SSL Certificates and Keys
+*.crt
+*.key
+*.pem
+certs/
+web_server/*.crt
+web_server/*.key
+
+# CLI Logs / Voice Logs
+*.log
+logs/
+voice_input/recordings/
+voice_input/tmp/
+
+# Docker / Build / Flash Artifacts
+*.tar
+*.img
+*.iso
+Linux_for_Tegra/
+
+# Web Dev (Node, Dist, etc.)
+node_modules/
+dist/
+build/
+
+# Archives and Compression
+*.zip
+*.gz
+*.xz
+*.7z
+

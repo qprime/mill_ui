@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliff AI - Lab Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/slate/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div class="container py-3">
+    <h1 class="mb-4">Lab Manager - Device Inventory</h1>
+
+    <!-- Device Form -->
+    <div class="card mb-4">
+        <div class="card-header">Add / Update Device</div>
+        <div class="card-body">
+            <form id="device-form">
+                <div class="mb-3">
+                    <label for="device_id" class="form-label">Device ID *</label>
+                    <input type="text" class="form-control" id="device_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ip_address" class="form-label">IP Address *</label>
+                    <input type="text" class="form-control" id="ip_address" required>
+                </div>
+                
+                <!-- Collapsible Advanced Fields -->
+                <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFields" aria-expanded="false" aria-controls="advancedFields">
+                    Show Advanced Fields
+                </button>
+                <div class="collapse" id="advancedFields">
+                    <div class="card card-body">
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Device Type</label>
+                            <input type="text" class="form-control" id="type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cpu" class="form-label">CPU</label>
+                            <input type="text" class="form-control" id="cpu">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ram" class="form-label">RAM</label>
+                            <input type="text" class="form-control" id="ram">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storage" class="form-label">Storage</label>
+                            <input type="text" class="form-control" id="storage">
+                        </div>
+                        <div class="mb-3">
+                            <label for="role_tags" class="form-label">Role Tags (comma-separated)</label>
+                            <input type="text" class="form-control" id="role_tags">
+                        </div>
+                        <div class="mb-3">
+                            <label for="docker_containers" class="form-label">Docker Containers (comma-separated)</label>
+                            <input type="text" class="form-control" id="docker_containers">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="custom_field" class="form-label" title="Use key:value or freeform notes here. Example: GPU:NVIDIA">Custom Field</label>
+                            <input type="text" class="form-control" id="custom_field" placeholder="e.g., GPU:NVIDIA">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Device Table -->
+    <div class="card">
+        <div class="card-header">Current Devices</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-striped" id="device-table">
+                    <thead>
+                    <tr>
+                        <th>Device ID</th>
+                        <th>IP Address</th>
+                        <th>Type</th>
+                        <th>Model</th>
+                        <th>CPU</th>
+                        <th>RAM</th>
+                        <th>Storage</th>
+                        <th>Roles</th>
+                        <th>Docker</th>
+                        <th>Notes</th>
+                        <th>Custom</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Dynamic rows go here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = 'http://EQBeelink1.local:5000';
+
+async function loadDevices() {
+    const response = await axios.get(`${API_URL}/devices`);
+    const tbody = document.querySelector('#device-table tbody');
+    tbody.innerHTML = '';
+
+    for (const [id, device] of Object.entries(response.data)) {
+        const row = `<tr>
+            <td>${id}</td>
+            <td>${device.ip_address || ''}</td>
+            <td>${device.type || ''}</td>
+            <td>${device.model || ''}</td>
+            <td>${device.cpu || ''}</td>
+            <td>${device.ram || ''}</td>
+            <td>${device.storage || ''}</td>
+            <td>${(device.role_tags || []).join(', ')}</td>
+            <td>${(device.docker_containers || []).join(', ')}</td>
+            <td>${device.notes || ''}</td>
+            <td>${device.custom_field || ''}</td>
+            <td>
+                <button class="btn btn-sm btn-warning me-2" onclick="populateForm('${id}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteDevice('${id}')">Delete</button>
+            </td>
+        </tr>`;
+        tbody.innerHTML += row;
+    }
+}
+
+async function populateForm(id) {
+    const response = await axios.get(`${API_URL}/devices`);
+    const device = response.data[id];
+    document.getElementById('device_id').value = id;
+    document.getElementById('ip_address').value = device.ip_address || '';
+    document.getElementById('type').value = device.type || '';
+    document.getElementById('model').value = device.model || '';
+    document.getElementById('cpu').value = device.cpu || '';
+    document.getElementById('ram').value = device.ram || '';
+    document.getElementById('storage').value = device.storage || '';
+    document.getElementById('role_tags').value = (device.role_tags || []).join(', ');
+    document.getElementById('docker_containers').value = (device.docker_containers || []).join(', ');
+    document.getElementById('notes').value = device.notes || '';
+    document.getElementById('custom_field').value = device.custom_field || '';
+}
+
+async function submitForm(event) {
+    event.preventDefault();
+    const id = document.getElementById('device_id').value;
+    const device = {
+        ip_address: document.getElementById('ip_address').value,
+        type: document.getElementById('type').value,
+        model: document.getElementById('model').value,
+        cpu: document.getElementById('cpu').value,
+        ram: document.getElementById('ram').value,
+        storage: document.getElementById('storage').value,
+        role_tags: document.getElementById('role_tags').value.split(',').map(s => s.trim()),
+        docker_containers: document.getElementById('docker_containers').value.split(',').map(s => s.trim()),
+        notes: document.getElementById('notes').value,
+        custom_field: document.getElementById('custom_field').value,
+        configured: true
+    };
+
+    if (!id) {
+        alert('Device ID is required.');
+        return;
+    }
+
+    // NEW: Check if device already exists
+    const response = await axios.get(`${API_URL}/devices`);
+    const devices = response.data;
+
+    if (devices[id]) {
+        // device already exists -> update it
+        await axios.post(`${API_URL}/update/${id}`, device);
+    } else {
+        // device is new -> report it
+        device.device_id = id;
+        await axios.post(`${API_URL}/report`, device);
+    }
+
+    loadDevices();
+    document.getElementById('device-form').reset();
+}
+
+
+async function deleteDevice(id) {
+    if (confirm(`Are you sure you want to delete device '${id}'?`)) {
+        await axios.post(`${API_URL}/delete/${id}`);
+        loadDevices();
+    }
+}
+
+document.getElementById('device-form').addEventListener('submit', submitForm);
+
+loadDevices();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+

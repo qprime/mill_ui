@@ -1482,3 +1482,25 @@
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:41:50.378256+00:00", "command": "cd .."}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:41:53.855707+00:00", "command": "git init"}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:42:10.224854+00:00", "command": "git add ."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:42:24.080093+00:00", "command": "git commit -m \"Initial commit: Cliff_AI core structure, voice terminal, web server setup\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:42:51.839192+00:00", "command": "git config --global user.email \"squinlan.programming@gmail.com\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:43:05.381218+00:00", "command": "git config --global user.name \"qprime\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:43:17.941223+00:00", "command": "git commit -m \"Initial commit: Cliff_AI core structure, voice terminal, web server setup\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:43:58.729342+00:00", "command": "git remote add origin https://github.com/yourusername/cliff_ai.git"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:44:14.553163+00:00", "command": "git branch -M main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:44:14.801390+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:44:40.370504+00:00", "command": "git branch -M main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:44:43.197030+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:49:59.002038+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:50:39.003901+00:00", "command": "git branch -M main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:50:43.109017+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:51:46.470636+00:00", "command": "git remote set-url origin https://github.com/qprime/cliff_ai.git"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:51:53.262407+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:53:54.015389+00:00", "command": "ssh-keygen -t ed25519 -C \"your_email@example.com\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:54:22.492327+00:00", "command": "cat ~/.ssh/id_ed25519.pub"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:54:55.319550+00:00", "command": "ssh-keygen -t ed25519 -C \"squinlan.purchases@gmail.com\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:55:07.829601+00:00", "command": "cat ~/.ssh/id_ed25519.pub"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:56:12.675549+00:00", "command": "git remote set-url origin git@github.com:qprime/cliff_ai.git"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:56:20.793448+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:57:03.139945+00:00", "command": "git pull --rebase origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T19:58:25.886536+00:00", "command": "git add ."}

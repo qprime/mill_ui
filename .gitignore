@@ -64,3 +64,6 @@ build/
 *.xz
 *.7z
 
+
+memory/*/chroma.sqlite3
+memory/*/*.bin

@@ -1541,3 +1541,47 @@
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:56.809392+00:00", "command": "ls --color=auto"}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:39:58.121944+00:00", "command": "cd .."}
 {"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:40:42.348392+00:00", "command": "git add ."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:40:55.932662+00:00", "command": "git commit -m \"Cleaned and organized project structure for Cliff_AI\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:41:27.389363+00:00", "command": "git commit -m \"Added the whisper files that currently run on the jetson nano development board.\""}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:41:42.848043+00:00", "command": "git remote add origin git@github.com:qprime/cliff_ai.git"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:42:13.892411+00:00", "command": "git remote -v"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:42:22.337010+00:00", "command": "git push -u origin main"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:48:42.761039+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:43.514541+00:00", "command": "cd memory"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:44.263332+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:50.532655+00:00", "command": "cd cliff_state"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:51.121381+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:55.965446+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:53:56.863394+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:54:08.433424+00:00", "command": "tree -r ."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:57:49.335765+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:57:58.085198+00:00", "command": "cd cliff_state"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:57:58.648019+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:58:01.227838+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T20:58:09.531061+00:00", "command": "mv cli_logs.jsonl cliff_state/"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:17:52.932524+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:17:58.965500+00:00", "command": "ps -aef"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:26.063190+00:00", "command": "cd ../.."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:28.190645+00:00", "command": "cd memory"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:29.102233+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:36.665179+00:00", "command": "cd cliff_state"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:37.215239+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:40.648842+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:45.386082+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:46.136567+00:00", "command": "ls --color=auto"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:18:55.981566+00:00", "command": "rm cli_logs.jsonl"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:19:12.973719+00:00", "command": "ssh stephenquinlan@macm2.local"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T21:19:18.339661+00:00", "command": "ls -al | grep .zshrc"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T21:19:22.212666+00:00", "command": "ls"}
+{"hostname": "MacM2", "session_id": "MacM2-20250425-143611", "timestamp": "2025-04-29T21:19:26.434070+00:00", "command": "ps"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:19:58.761692+00:00", "command": "cd .."}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:20:01.605810+00:00", "command": "git status"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:20:50.517884+00:00", "command": "echo -e \"\\nmemory/*/chroma.sqlite3\\nmemory/*/*.bin\" >> .gitignore"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:20:58.276186+00:00", "command": "git add .gitignore"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:08.683973+00:00", "command": "git restore memory/accounting/chroma.sqlite3"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:08.883977+00:00", "command": "git restore memory/personal/chroma.sqlite3"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:09.080067+00:00", "command": "git restore memory/production/chroma.sqlite3"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:09.282585+00:00", "command": "git restore memory/research/chroma.sqlite3"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:17.574858+00:00", "command": "git rm --cached memory/cli_logs.jsonl"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:34.063074+00:00", "command": "git add cli_archiver/server/cli_log_store.py"}
+{"hostname": "EQBeelink1", "session_id": "EQBeelink1-20250425-132930", "timestamp": "2025-04-29T21:21:34.251794+00:00", "command": "git add memory/cliff_state/"}

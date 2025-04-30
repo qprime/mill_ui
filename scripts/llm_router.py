@@ -9,7 +9,7 @@ OPENAI_MODEL = "gpt-4o"
 def ask_llm(prompt: str, max_tokens=300) -> str:
     """Try local Mistral first, then fallback to GPT-4o if needed."""
     try:
-        res = requests.post(LOCAL_LLM_URL, json={"prompt": prompt, "max_tokens": max_tokens}, timeout=20)
+        res = requests.post(LOCAL_LLM_URL, json={"prompt": prompt, "max_tokens": max_tokens}, timeout=10)
         res.raise_for_status()
         output = res.json().get("response", "").strip()
 

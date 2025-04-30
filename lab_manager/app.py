@@ -11,17 +11,20 @@ memory_manager = MemoryManager()
 
 app = Flask(__name__)
 CORS(app)
-DATA_FILE = "device_inventory.json"
+DATA_FILE = os.path.expanduser("~/cliff_ai/memory/lab/device_inventory.json")
 
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE) as f:
-            return json.load(f)
+            lines = f.readlines()
+            return {json.loads(line)["device_id"]: json.loads(line) for line in lines}
     return {}
+
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+        for device in data.values():
+            f.write(json.dumps(device) + "\n")
 
 @app.route("/report", methods=["POST"])
 def report():

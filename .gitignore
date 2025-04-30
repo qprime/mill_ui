@@ -67,3 +67,5 @@ build/
 
 memory/*/chroma.sqlite3
 memory/*/*.bin
+memory/lab/device_inventory.json
+memory/cliff_state/cli_logs.jsonl

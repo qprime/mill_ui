@@ -1,0 +1,53 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cliff.local/schemas/chat_memory.schema.json",
+    "title": "Chat Memory Entry",
+    "description": "Schema for Cliff's chat memory entries (user + assistant dialogue with tags).",
+    "type": "object",
+    "properties": {
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When the message was recorded"
+      },
+      "role": {
+        "type": "string",
+        "enum": ["user", "cliff"],
+        "description": "Message author type"
+      },
+      "author": {
+        "type": "string",
+        "description": "Message author name or system"
+      },
+      "project": {
+        "type": "string",
+        "description": "Relevant project or scope (e.g., 'cliff_ai')"
+      },
+      "context_tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Topical tags used for filtering and memory lookup"
+      },
+      "message_type": {
+        "type": "string",
+        "enum": ["chat", "code_snippet", "file_ref", "decision", "task_reference", "context_switch"],
+        "description": "Type of message"
+      },
+      "content": {
+        "type": "string",
+        "description": "Full text of the message"
+      },
+      "related_files": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Optional file paths mentioned or affected"
+      },
+      "linked_tasks": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Optional task IDs this message relates to"
+      }
+    },
+    "required": ["timestamp", "role", "content"]
+  }
+  

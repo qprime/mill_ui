@@ -1,0 +1,76 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cliff.local/schemas/task_memory.schema.json",
+    "title": "Task Memory Entry",
+    "description": "Schema for tracking Cliff project tasks in task_state.jsonl.",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique task identifier"
+      },
+      "title": {
+        "type": "string",
+        "description": "Short description of the task"
+      },
+      "description": {
+        "type": "string",
+        "description": "Detailed task explanation"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["planned", "active", "paused", "completed", "blocked"],
+        "description": "Current task status"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When the task was created"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Last updated timestamp"
+      },
+      "files": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "File paths involved in this task"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Custom tags for filtering/grouping"
+      },
+      "steps": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Substeps or checklist items"
+      },
+      "current_step": {
+        "type": "integer",
+        "description": "Index of the current step in progress"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Additional notes"
+      },
+      "paused_state": {
+        "type": ["object", "null"],
+        "description": "Optional saved state for resuming",
+        "additionalProperties": true
+      },
+      "blocked_by": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Task IDs that block this one"
+      },
+      "related_tasks": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Other related task IDs"
+      }
+    },
+    "required": ["id", "title", "status", "created_at", "updated_at"]
+  }
+  

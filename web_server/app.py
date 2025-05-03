@@ -22,8 +22,8 @@ def voice_terminal():
     return render_template("voice_terminal.html")
 
 @app.route("/jsonl-review")
-def json_review():
-    return render_template("jasonl_review.html")
+def jsonl_review():
+    return render_template("jsonl_review.html")
 
 
 # 🔽 NEW ROUTES

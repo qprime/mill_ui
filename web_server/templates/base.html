@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Cliff AI{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Local Darkly Theme -->
+  <link href="{{ url_for('static', filename='css/darkly.css') }}" rel="stylesheet">
+  <p>{{ url_for('static', filename='css/darkly.css') }}</p>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-dark text-light">
+  <div class="container py-4">
+    <h1 class="mb-4">{% block header %}🧠 Cliff AI{% endblock %}</h1>
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

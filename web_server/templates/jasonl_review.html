@@ -61,7 +61,9 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-secondary" id="prevEntry">Back</button>
+          <button type="button" class="btn btn-outline-secondary" id="nextEntry">Next</button>
+          <button type="button" class="btn btn-secondary" id="closeEditor">Close</button>
           <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
         </div>
       </div>
@@ -69,90 +71,117 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-      <script>
-      let entries = [];
-      let currentIndex = null;
+  <script>
+    let entries = [];
+    let currentIndex = null;
 
-      document.getElementById('jsonlFile').addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    document.getElementById('jsonlFile').addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      localStorage.setItem('lastJsonlFile', file.name);
+      loadJsonl(file);
+    });
 
-        const text = await file.text();
-        entries = text.split('\n')
-          .filter(line => line.trim())
-          .map(line => {
-            try {
-              const parsed = JSON.parse(line);
-              return {
-                title: parsed.title || '',
-                source: parsed.source || '',
-                timestamp: parsed.timestamp || parsed.date || parsed.created_at || '',
-                topics: parsed.topics || '',
-                cleaned_text: parsed.cleaned_text || parsed.content || parsed.text || '',
-                _raw: parsed  // preserve full original for debugging or save
-              };
-            } catch (e) {
-              return {
-                title: 'Invalid JSON',
-                cleaned_text: line,
-                timestamp: '',
-                source: '',
-                topics: ''
-              };
-            }
-          });
-        renderTable();
-      });
+    function autoLoadLastFile() {
+      const input = document.getElementById('jsonlFile');
+      const fileList = input.files;
+      if (fileList.length > 0) {
+        loadJsonl(fileList[0]);
+      }
+    }
 
-      function renderTable() {
-        const tbody = document.querySelector('#jsonTable tbody');
-        tbody.innerHTML = '';
-        entries.forEach((entry, idx) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${idx + 1}</td>
-            <td>${entry.title || '(No title)'}</td>
-            <td>${entry.timestamp || '(No date)'}</td>
-            <td>${(entry.cleaned_text || '').slice(0, 80)}</td>
-            <td>
-              <button class="btn btn-sm btn-primary me-2" onclick="openEditor(${idx})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteEntry(${idx})">Delete</button>
-            </td>
-          `;
-          tbody.appendChild(row);
+    async function loadJsonl(file) {
+      const text = await file.text();
+      entries = text.split('\n')
+        .filter(line => line.trim())
+        .map(line => {
+          try {
+            return JSON.parse(line);
+          } catch (e) {
+            return { title: 'Invalid JSON', cleaned_text: line };
+          }
         });
-      }
+      renderTable();
+    }
 
-      function openEditor(idx) {
-        currentIndex = idx;
-        const entry = entries[idx];
-        document.getElementById('editTitle').value = entry.title || '';
-        document.getElementById('editSource').value = entry.source || '';
-        document.getElementById('editTimestamp').value = entry.timestamp || '';
-        document.getElementById('editTopics').value = entry.topics || '';
-        document.getElementById('editCleanedText').value = entry.cleaned_text || '';
-        new bootstrap.Modal(document.getElementById('editModal')).show();
-      }
-
-      document.getElementById('saveChanges').addEventListener('click', () => {
-        const title = document.getElementById('editTitle').value;
-        const source = document.getElementById('editSource').value;
-        const timestamp = document.getElementById('editTimestamp').value;
-        const topics = document.getElementById('editTopics').value;
-        const cleaned_text = document.getElementById('editCleanedText').value;
-        entries[currentIndex] = { title, source, timestamp, topics, cleaned_text };
-        renderTable();
-        bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+    function renderTable() {
+      const tbody = document.querySelector('#jsonTable tbody');
+      tbody.innerHTML = '';
+      entries.forEach((entry, idx) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${entry.title || '(No title)'}</td>
+          <td>${formatDate(entry.timestamp)}</td>
+          <td>${(entry.cleaned_text || '').slice(0, 80)}</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-2" onclick="openEditor(${idx})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${idx})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
+    }
 
-      function deleteEntry(idx) {
-        if (confirm('Are you sure you want to delete this entry?')) {
-          entries.splice(idx, 1);
-          renderTable();
-        }
+    function formatDate(timestamp) {
+      if (!timestamp) return '(No date)';
+      try {
+        const d = new Date(timestamp);
+        return isNaN(d) ? '(Invalid date)' : d.toLocaleDateString();
+      } catch {
+        return '(Invalid date)';
       }
-    </script>
+    }
 
+    function openEditor(idx) {
+      currentIndex = idx;
+      const entry = entries[idx];
+      document.getElementById('editTitle').value = entry.title || '';
+      document.getElementById('editSource').value = entry.source || '';
+      document.getElementById('editTimestamp').value = entry.timestamp || '';
+      document.getElementById('editTopics').value = entry.topics || '';
+      document.getElementById('editCleanedText').value = entry.cleaned_text || '';
+      new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+
+    document.getElementById('saveChanges').addEventListener('click', () => {
+      saveEdit();
+    });
+
+    document.getElementById('closeEditor').addEventListener('click', () => {
+      bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+    });
+
+    document.getElementById('nextEntry').addEventListener('click', () => {
+      saveEdit();
+      if (currentIndex < entries.length - 1) openEditor(currentIndex + 1);
+    });
+
+    document.getElementById('prevEntry').addEventListener('click', () => {
+      saveEdit();
+      if (currentIndex > 0) openEditor(currentIndex - 1);
+    });
+
+    function saveEdit() {
+      entries[currentIndex] = {
+        title: document.getElementById('editTitle').value,
+        source: document.getElementById('editSource').value,
+        timestamp: document.getElementById('editTimestamp').value,
+        topics: document.getElementById('editTopics').value,
+        cleaned_text: document.getElementById('editCleanedText').value
+      };
+      renderTable();
+      bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+    }
+
+    function deleteEntry(idx) {
+      if (confirm('Are you sure you want to delete this entry?')) {
+        entries.splice(idx, 1);
+        renderTable();
+      }
+    }
+
+    window.addEventListener('load', autoLoadLastFile);
+  </script>
 </body>
 </html>
-

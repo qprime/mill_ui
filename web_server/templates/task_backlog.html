@@ -8,7 +8,10 @@
 </head>
 <body class="bg-light">
   <div class="container py-4">
-    <h1 class="mb-4">🧠 Cliff Task Backlog</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="mb-0">🧠 Cliff Task Backlog</h1>
+      <a href="/tasks/create" class="btn btn-primary">➕ New Task</a>
+    </div>
 
     {% for status, tasks in tasks_by_status.items() %}
       <div class="mb-5">

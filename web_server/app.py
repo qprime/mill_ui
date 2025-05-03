@@ -42,6 +42,25 @@ def update_task_status():
         update_task(task_id, {"status": new_status})
     return redirect(url_for("show_tasks"))
 
+@app.route("/tasks/create", methods=["GET", "POST"])
+def create_task_form():
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        tags = request.form.get("tags", "").split(",")
+        files = request.form.get("files", "").split(",")
+        steps = request.form.get("steps", "").split("\n")
+
+        create_task(
+            title=title,
+            description=description,
+            tags=[t.strip() for t in tags if t.strip()],
+            files=[f.strip() for f in files if f.strip()],
+            steps=[s.strip() for s in steps if s.strip()]
+        )
+        return redirect(url_for("show_tasks"))
+    
+    return render_template("task_create.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

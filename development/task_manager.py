@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-TASK_FILE = Path("memory/development/task_state.jsonl")
+TASK_FILE = Path(__file__).resolve().parents[1] / "memory/development/task_state.jsonl"
 
 
 def _now():

@@ -13,6 +13,10 @@ def lab_manager():
 @app.route("/voice")
 def voice_terminal():
     return render_template("voice_terminal.html")
+    
+@app.route("/json-review")
+def voice_terminal():
+    return render_template("json_review.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

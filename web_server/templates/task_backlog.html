@@ -33,7 +33,17 @@
                 </li>
               </ul>
 
-              <small class="text-muted">Created: {{ task.created_at }} | Updated: {{ task.updated_at }}</small>
+              <form method="POST" action="/tasks/update" class="d-flex gap-2">
+                <input type="hidden" name="task_id" value="{{ task.id }}" />
+                <select name="new_status" class="form-select w-auto">
+                  {% for s in ['planned', 'active', 'paused', 'complete', 'blocked'] %}
+                    <option value="{{ s }}" {% if task.status == s %}selected{% endif %}>{{ s.title() }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-outline-primary btn-sm">Update</button>
+              </form>
+
+              <small class="text-muted d-block mt-2">Created: {{ task.created_at }} | Updated: {{ task.updated_at }}</small>
             </div>
           </div>
         {% endfor %}

@@ -1,5 +1,5 @@
 import argparse
-from development.task_manager import list_tasks, create_task
+from development.task_manager import list_tasks, create_task, update_task
 
 
 def print_task(task):
@@ -31,6 +31,14 @@ def handle_create(args):
     print_task(task)
 
 
+def handle_update(args):
+    updated = update_task(args.task_id, {"status": args.new_status})
+    if updated:
+        print(f"Task {args.task_id} updated to status '{args.new_status}'")
+    else:
+        print(f"Task {args.task_id} not found.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Manage Cliff AI tasks")
     subparsers = parser.add_subparsers(dest="command")
@@ -46,6 +54,11 @@ def main():
     create_parser.add_argument("--tags", nargs="*", default=[])
     create_parser.add_argument("--steps", nargs="*", default=[])
     create_parser.set_defaults(func=handle_create)
+
+    update_parser = subparsers.add_parser("update", help="Update task status")
+    update_parser.add_argument("task_id", required=True)
+    update_parser.add_argument("new_status", required=True, choices=["planned", "active", "paused", "complete", "blocked"])
+    update_parser.set_defaults(func=handle_update)
 
     args = parser.parse_args()
     if hasattr(args, "func"):

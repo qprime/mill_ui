@@ -3,7 +3,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from flask import Flask, render_template, request, redirect, url_for
-from development.task_manager import load_tasks, update_task
+from development.task_manager import load_tasks, update_task, create_task
 
 app = Flask(__name__, template_folder='templates')
 

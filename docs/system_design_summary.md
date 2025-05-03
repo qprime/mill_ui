@@ -6,12 +6,34 @@
 
 ### 🗉 Core Components
 
-#### 1. **Project Memory + Task Tracker**
+✅ Task Management System (Web + CLI)
 
-* Format: `tasks.jsonl` or SQLite DB
-* Tracks: task status, related files, notes, feature threads, and interruption state
-* Enables: resuming paused work, auto-surfacing "what’s next," backlog filtering
+Cliff AI now includes a unified task manager accessible via both the command line and web interface.
+📌 Features:
 
+    Backed by: memory/development/task_state.jsonl
+
+    Web UI:
+
+        /tasks: View task backlog grouped by status
+
+        /tasks/create: Submit new tasks via Bootstrap-styled form
+
+        Inline status updates via dropdown (planned, active, paused, complete, blocked)
+
+    CLI Support:
+
+        scripts/manage_tasks.py supports listing, creating, and updating tasks
+
+    Schema-aware: All tasks include title, description, files, tags, steps, timestamps, and status
+
+    Ready for future integration:
+
+        Task creation via voice input (Whisper → LLM → task_state)
+
+        Flagging conversation bubbles as tasks (/conversations pending)
+
+        Embedding or suggesting tasks using LLM agents
 #### 2. **Codebase Awareness**
 
 * Format: `code_index.json`, tokenized chunks (via `code_memory/`)

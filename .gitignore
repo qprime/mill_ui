@@ -65,7 +65,14 @@ build/
 *.7z
 
 
-memory/*/chroma.sqlite3
+memory/accounting/chroma.sqlite3
+memory/personal/chroma.sqlite3
+memory/production/chroma.sqlite3
+memory/research/chroma.sqlite3
+memory/cliff_state/chroma.sqlite3
+memory/lab/chroma.sqlite3
 memory/*/*.bin
 memory/lab/device_inventory.json
+memory/lab/lab_data.jsonl
+memory/production/*/
 memory/cliff_state/cli_logs.jsonl

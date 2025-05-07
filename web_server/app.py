@@ -1,9 +1,12 @@
 import sys
+import os
 from pathlib import Path
 import json
-sys.path.append(str(Path(__file__).resolve().parents[1]))
+from openai import OpenAI
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, url_for
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 from development.task_manager import load_tasks, update_task, create_task
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -13,20 +16,22 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 def home():
     return render_template("index.html")
 
+
 @app.route("/lab-manager")
 def lab_manager():
     return render_template("lab_manager.html")
 
+
 @app.route("/voice")
 def voice_terminal():
     return render_template("voice_terminal.html")
+
 
 @app.route("/jsonl-review")
 def jsonl_review():
     return render_template("jsonl_review.html")
 
 
-# 🔽 NEW ROUTES
 @app.route("/tasks")
 def show_tasks():
     tasks = load_tasks()
@@ -35,6 +40,7 @@ def show_tasks():
         grouped.setdefault(task["status"], []).append(task)
     return render_template("task_backlog.html", tasks_by_status=grouped)
 
+
 @app.route("/tasks/update", methods=["POST"])
 def update_task_status():
     task_id = request.form.get("task_id")
@@ -42,6 +48,7 @@ def update_task_status():
     if task_id and new_status:
         update_task(task_id, {"status": new_status})
     return redirect(url_for("show_tasks"))
+
 
 @app.route("/tasks/create", methods=["GET", "POST"])
 def create_task_form():
@@ -63,6 +70,7 @@ def create_task_form():
     
     return render_template("task_create.html")
 
+
 @app.route("/chatlog")
 def chatlog():
     root_dir = Path(__file__).resolve().parent.parent
@@ -70,18 +78,112 @@ def chatlog():
     print("Resolved path:", log_path)
     messages = []
     if log_path.exists():
-        print("✅ File exists!")
         with open(log_path, "r") as f:
             for line in f:
                 try:
-                    obj = json.loads(line.strip())
-                    print("Parsed line:", obj)
-                    messages.append(obj)
-                except json.JSONDecodeError as e:
-                    print("❌ JSON decode error:", e)
-    else:
-        print("❌ File missing.")
+                    messages.append(json.loads(line.strip()))
+                except json.JSONDecodeError:
+                    continue
     return render_template("chatlog.html", messages=messages)
+
+
+@app.route("/voice/log", methods=["POST"])
+def log_voice_interaction():
+    data = request.get_json()
+    user_text = data.get("user_text")
+    cliff_reply = data.get("cliff_reply")
+    context_tags = data.get("context_tags", ["voice"])
+
+    if not user_text or not cliff_reply:
+        return {"error": "Missing input"}, 400
+
+    log_entries = [
+        {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "role": "user",
+            "content": user_text,
+            "message_type": "input",
+            "context_tags": context_tags
+        },
+        {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "role": "cliff",
+            "content": cliff_reply,
+            "message_type": "response",
+            "context_tags": context_tags
+        }
+    ]
+
+    log_path = Path("memory/chat_logs") / f"{datetime.utcnow().date()}.jsonl"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(log_path, "a") as f:
+        for entry in log_entries:
+            f.write(json.dumps(entry) + "\n")
+
+    return {"status": "ok"}, 200
+
+
+@app.route("/prompt", methods=["POST"])
+def handle_prompt():
+    data = request.get_json()
+    user_input = data.get("input", "")
+    reply = f"Echo: {user_input}"
+    return jsonify({"response": reply})
+
+
+@app.route("/chat")
+def chat():
+    return render_template("chat.html")
+
+def build_system_prompt(emotions_enabled=False):
+    base = (
+        "You are GPT-4 Turbo with vision and long-context capabilities, running in a developer's custom chat assistant. "
+        "You can process base64 image inputs, reason over documents, analyze code, and assist with technical or creative tasks. "
+        "You are concise, intelligent, and focused."
+    )
+
+    emotion = (
+        "You also speak with subtle personality, adding warmth, dry humor, or snark when appropriate. Be professional but human."
+        if emotions_enabled
+        else "Avoid unnecessary emotional tone — stay factual, helpful, and minimal."
+    )
+
+    anti_gaslight = (
+        "Do not claim to be GPT-3.5 or deny capabilities you support (such as image input). "
+        "Assume full function unless told otherwise."
+    )
+
+    return {
+        "role": "system",
+        "content": f"{base} {emotion} {anti_gaslight}"
+    }
+
+@app.route("/ask", methods=["POST"])
+def ask_openai():
+    try:
+        data = request.get_json()
+        prompt = data.get("prompt", "")
+        tone = data.get("tone", "neutral")
+
+        if not prompt:
+            return jsonify({"error": "No prompt provided"}), 400
+
+        emotions_enabled = tone == "emotional"
+        system_message = build_system_prompt(emotions_enabled)
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[system_message, {"role": "user", "content": prompt}]
+        )
+
+        reply = response.choices[0].message.content
+        return jsonify({"response": reply, "model": "gpt-4"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Cliff Chat{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4">🧠 Cliff Chat</h1>
+  <div class="card mb-3">
+    <div class="card-body">
+      <form id="chatForm" class="d-flex flex-wrap gap-2 align-items-center">
+        <input type="text" id="userInput" class="form-control flex-grow-1" placeholder="Ask Cliff something...">
+        <select id="toneSelector" class="form-select w-auto">
+          <option value="neutral" selected>Neutral</option>
+          <option value="emotional">Witty</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="chatContainer" class="d-flex flex-column-reverse gap-3"></div>
+</div>
+
+<script>
+const chatContainer = document.getElementById("chatContainer");
+const chatForm = document.getElementById("chatForm");
+const userInput = document.getElementById("userInput");
+const toneSelector = document.getElementById("toneSelector");
+
+chatForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const prompt = userInput.value.trim();
+  const tone = toneSelector.value;
+  if (!prompt) return;
+
+  const timestamp = new Date().toISOString();
+  const exchange = document.createElement("div");
+  exchange.className = "card p-3 bg-dark text-light shadow-sm fade-in";
+  exchange.innerHTML = `
+    <div class="d-flex flex-column flex-md-row gap-3">
+      <div class="flex-fill">
+        <strong class="text-info">🧑 You:</strong>
+        <p class="mb-2">${prompt}</p>
+      </div>
+      <div class="flex-fill">
+        <strong class="text-warning">🤖 Cliff:</strong>
+        <p id="cliff-${timestamp}" class="text-muted mb-2 fst-italic">Thinking...</p>
+        <div class="text-end text-muted small" id="model-${timestamp}"></div>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-2 justify-content-end">
+      <button class="btn btn-outline-info btn-sm">➕ Create Task</button>
+      <button class="btn btn-outline-secondary btn-sm">📚 Add to RAG</button>
+      <button class="btn btn-outline-success btn-sm">🧠 Summarize</button>
+      <button class="btn btn-outline-light btn-sm">💾 Save</button>
+    </div>
+  `;
+  chatContainer.prepend(exchange);
+  userInput.value = "";
+
+  try {
+    const response = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, tone })
+    });
+    const data = await response.json();
+    const cliffResponse = document.getElementById(`cliff-${timestamp}`);
+    const modelTag = document.getElementById(`model-${timestamp}`);
+    cliffResponse.innerText = data.response || "(No response)";
+    cliffResponse.classList.remove("fst-italic", "text-muted");
+    modelTag.innerText = `Model: ${data.model || "unknown"}`;
+  } catch (err) {
+    document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
+  }
+});
+</script>
+
+<style>
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}

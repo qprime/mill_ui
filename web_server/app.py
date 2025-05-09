@@ -5,12 +5,32 @@ import json
 from openai import OpenAI
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
+from chromadb import PersistentClient
+
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from development.task_manager import load_tasks, update_task, create_task
+from scripts.rag_loader import ManualOpenAIEmbedder, load_summaries
+
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
+def get_project_context(user_prompt: str, max_docs: int = 3) -> str:
+    try:
+        client = PersistentClient(path="chroma_store")
+        collection = client.get_collection(
+            name="project_docs",
+            embedding_function=ManualOpenAIEmbedder()
+        )
+        result = collection.query(query_texts=[user_prompt], n_results=max_docs)
+        docs = result["documents"][0]
+        if not docs or all(doc.strip() == "" for doc in docs):
+            return "[No relevant project context found.]"
+        return "\n\n".join(docs)
+
+    except Exception as e:
+        print(f"⚠️ Failed to load project context: {e}")
+        return ""
 
 @app.route("/")
 def home():
@@ -159,6 +179,7 @@ def build_system_prompt(emotions_enabled=False):
         "content": f"{base} {emotion} {anti_gaslight}"
     }
 
+# Patched /ask to inject RAG context from Chroma
 @app.route("/ask", methods=["POST"])
 def ask_openai():
     try:
@@ -172,10 +193,18 @@ def ask_openai():
         emotions_enabled = tone == "emotional"
         system_message = build_system_prompt(emotions_enabled)
 
+        # 🔍 RAG injection
+        context = get_project_context(prompt)
+        print(f"🧠 Retrieved RAG context:\n{context}")
+        augmented_prompt = f"""You are helping the user based on this project context:\n{context}\n\nUser asked:\n{prompt}"""
+
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="gpt-4",
-            messages=[system_message, {"role": "user", "content": prompt}]
+            messages=[
+                system_message,
+                {"role": "user", "content": augmented_prompt}
+            ]
         )
 
         reply = response.choices[0].message.content
@@ -186,5 +215,7 @@ def ask_openai():
 
 
 
+
 if __name__ == "__main__":
+    load_summaries()  # <-- ensure Chroma is loaded on Flask startup
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

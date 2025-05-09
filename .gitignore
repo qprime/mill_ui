@@ -76,3 +76,7 @@ memory/lab/device_inventory.json
 memory/lab/lab_data.jsonl
 memory/production/*/
 memory/cliff_state/cli_logs.jsonl
+memory/development/module_summaries/
+memory/chat_logs/
+chroma_store/
+

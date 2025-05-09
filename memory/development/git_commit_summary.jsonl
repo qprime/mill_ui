@@ -1,0 +1,62 @@
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311421", "data": {"hash": "08470ce", "date": "2025-05-07", "message": "Updated the chat interface and did some debugging.  Also added a global navigation bar."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311437", "data": {"hash": "b5f817d", "date": "2025-05-03", "message": "Add bootstrap js file for modal popup."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311445", "data": {"hash": "3b0071f", "date": "2025-05-03", "message": "Updated the name of the jsonl reviewer page and fixed references to the page."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311449", "data": {"hash": "8bb89ea", "date": "2025-05-03", "message": "Added a base html for all files and a new chatlog page as the initial point for talking to cliff.  Also updated other files to use templates.  I still don't think bootstrap is working correctly, but the errors are gone and it is a good checkpoint."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311453", "data": {"hash": "62860ea", "date": "2025-05-03", "message": "Updates to the system design summary related to the notes application.  Also, fixed a bug related to adding a new note."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311457", "data": {"hash": "366e1e4", "date": "2025-05-03", "message": "feat(memory): add schemas and sample data for CLI logs, chat memory, and tasks"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311460", "data": {"hash": "176d75d", "date": "2025-05-03", "message": "feat: Add web-based task creation form and backlog integration"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311464", "data": {"hash": "272ce8d", "date": "2025-05-03", "message": "feat: Add web-based task manager with status controls"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311467", "data": {"hash": "bb9f368", "date": "2025-05-03", "message": "feat: MVP task backlog UI with Flask + Bootstrap"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311470", "data": {"hash": "3d08f52", "date": "2025-05-03", "message": "feat: Add task management system with CLI tracker and seed tasks"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311472", "data": {"hash": "c1de3d1", "date": "2025-05-03", "message": "Updated ignore for sqlite files in memory."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311475", "data": {"hash": "d260ba7", "date": "2025-05-03", "message": "Updates to the jsonl memory reviewer."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311478", "data": {"hash": "68916b4", "date": "2025-05-03", "message": "Removed debug folder and text files from repo."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311480", "data": {"hash": "45d6c6c", "date": "2025-05-03", "message": "Initial add of the parsed text and scripts used for my first processing of chatGPT conversations."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311483", "data": {"hash": "8bf7c5f", "date": "2025-05-03", "message": "Improvements to the field populations and additional fields."}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311486", "data": {"hash": "9d26a76", "date": "2025-05-03", "message": "Add JSONL review tool UI and editor modal for chat_cleaned files"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311489", "data": {"hash": "fa8a2e6", "date": "2025-04-30", "message": "Remove legacy lab_manager/device_inventory.json after migration to memory/lab/lab_data.jsonl"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311491", "data": {"hash": "9108d60", "date": "2025-04-30", "message": "Patch Lab Manager, add CLI + lab RAG tools, and finalize LLM router"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311495", "data": {"hash": "9e2e0ee", "date": "2025-04-30", "message": "Add global RAG query script for unified memory search"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311498", "data": {"hash": "397fd71", "date": "2025-04-30", "message": "Enable GPT-4o fallback in LLM router"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311501", "data": {"hash": "c19d1d2", "date": "2025-04-30", "message": "Add Lab Manager RAG support, local LLM server, and lab embedding/query scripts"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311504", "data": {"hash": "ec0578c", "date": "2025-04-30", "message": "Add .gitkeep to retain cliff_state/ folder structure"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311506", "data": {"hash": "0fab8d2", "date": "2025-04-30", "message": "Remove cli_logs.jsonl from Git tracking; now local-only"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311509", "data": {"hash": "d3ec98b", "date": "2025-04-30", "message": "Enable RAG-compatible JSONL logging for Lab Manager, Mistral server live"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311511", "data": {"hash": "d238af1", "date": "2025-04-29", "message": "Add: restored CLI log store module and initialized cliff_state memory"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311514", "data": {"hash": "b06ff99", "date": "2025-04-29", "message": "Cleaned and organized project structure for Cliff_AI"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311516", "data": {"hash": "043a5eb", "date": "2025-04-29", "message": "Prep for rebase before initial push"}}
+{"type": "commit", "timestamp": "2025-05-07T17:35:03.311519", "data": {"hash": "85d34fe", "date": "2025-04-29", "message": "Initial commit: Cliff_AI core structure, voice terminal, web server setup"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838681", "data": {"hash": "043a5eb", "date": "2025-04-29", "message": "Prep for rebase before initial push"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838702", "data": {"hash": "b06ff99", "date": "2025-04-29", "message": "Cleaned and organized project structure for Cliff_AI"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838718", "data": {"hash": "d238af1", "date": "2025-04-29", "message": "Add: restored CLI log store module and initialized cliff_state memory"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838733", "data": {"hash": "d3ec98b", "date": "2025-04-30", "message": "Enable RAG-compatible JSONL logging for Lab Manager, Mistral server live"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838740", "data": {"hash": "0fab8d2", "date": "2025-04-30", "message": "Remove cli_logs.jsonl from Git tracking; now local-only"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838748", "data": {"hash": "ec0578c", "date": "2025-04-30", "message": "Add .gitkeep to retain cliff_state/ folder structure"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838756", "data": {"hash": "c19d1d2", "date": "2025-04-30", "message": "Add Lab Manager RAG support, local LLM server, and lab embedding/query scripts"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838764", "data": {"hash": "397fd71", "date": "2025-04-30", "message": "Enable GPT-4o fallback in LLM router"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838773", "data": {"hash": "9e2e0ee", "date": "2025-04-30", "message": "Add global RAG query script for unified memory search"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838781", "data": {"hash": "9108d60", "date": "2025-04-30", "message": "Patch Lab Manager, add CLI + lab RAG tools, and finalize LLM router"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838789", "data": {"hash": "fa8a2e6", "date": "2025-04-30", "message": "Remove legacy lab_manager/device_inventory.json after migration to memory/lab/lab_data.jsonl"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838795", "data": {"hash": "9d26a76", "date": "2025-05-03", "message": "Add JSONL review tool UI and editor modal for chat_cleaned files"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838800", "data": {"hash": "8bf7c5f", "date": "2025-05-03", "message": "Improvements to the field populations and additional fields."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838804", "data": {"hash": "45d6c6c", "date": "2025-05-03", "message": "Initial add of the parsed text and scripts used for my first processing of chatGPT conversations."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838808", "data": {"hash": "68916b4", "date": "2025-05-03", "message": "Removed debug folder and text files from repo."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838812", "data": {"hash": "d260ba7", "date": "2025-05-03", "message": "Updates to the jsonl memory reviewer."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838816", "data": {"hash": "c1de3d1", "date": "2025-05-03", "message": "Updated ignore for sqlite files in memory."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838821", "data": {"hash": "3d08f52", "date": "2025-05-03", "message": "feat: Add task management system with CLI tracker and seed tasks"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838826", "data": {"hash": "bb9f368", "date": "2025-05-03", "message": "feat: MVP task backlog UI with Flask + Bootstrap"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838830", "data": {"hash": "272ce8d", "date": "2025-05-03", "message": "feat: Add web-based task manager with status controls"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838834", "data": {"hash": "176d75d", "date": "2025-05-03", "message": "feat: Add web-based task creation form and backlog integration"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838838", "data": {"hash": "366e1e4", "date": "2025-05-03", "message": "feat(memory): add schemas and sample data for CLI logs, chat memory, and tasks"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838842", "data": {"hash": "62860ea", "date": "2025-05-03", "message": "Updates to the system design summary related to the notes application.  Also, fixed a bug related to adding a new note."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838846", "data": {"hash": "8bb89ea", "date": "2025-05-03", "message": "Added a base html for all files and a new chatlog page as the initial point for talking to cliff.  Also updated other files to use templates.  I still don't think bootstrap is working correctly, but the errors are gone and it is a good checkpoint."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838850", "data": {"hash": "3b0071f", "date": "2025-05-03", "message": "Updated the name of the jsonl reviewer page and fixed references to the page."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838855", "data": {"hash": "b5f817d", "date": "2025-05-03", "message": "Add bootstrap js file for modal popup."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838859", "data": {"hash": "08470ce", "date": "2025-05-07", "message": "Updated the chat interface and did some debugging.  Also added a global navigation bar."}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838863", "data": {"hash": "e46e292", "date": "2025-05-07", "message": "Untrack generated memory files and logs; updated .gitignore"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838873", "data": {"hash": "a5607e0", "date": "2025-05-07", "message": "Add automated doc updater script with post-commit support"}}
+{"type": "commit", "timestamp": "2025-05-07T17:50:57.838878", "data": {"hash": "ae2fd08", "date": "2025-05-07", "message": "Add project overview README for Cliff AI"}}
+{"type": "commit", "timestamp": "2025-05-07T17:53:57.478908", "data": {"hash": "bbed5b6", "date": "2025-05-07", "message": "Add cli-archiver overview README."}}
+{"type": "commit", "timestamp": "2025-05-07T17:56:10.106163", "data": {"hash": "892af8d", "date": "2025-05-07", "message": "Add development overview README."}}
+{"type": "commit", "timestamp": "2025-05-07T17:59:58.427649", "data": {"hash": "cd8f01f", "date": "2025-05-07", "message": "Added folder summary README."}}
+{"type": "commit", "timestamp": "2025-05-07T18:15:45.885165", "data": {"hash": "fdb225a", "date": "2025-05-07", "message": "Trigger update for README generation test", "files": ["voice_input/README_PLACEHOLDER.txt"]}}

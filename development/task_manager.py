@@ -37,7 +37,9 @@ def create_task(title, description, files=None, tags=None, steps=None):
         "notes": "",
         "paused_state": None,
         "blocked_by": [],
-        "related_tasks": []
+        "related_tasks": [],
+        "archived": False,
+        "order": 0
     }
     save_task(task)
     return task
@@ -70,3 +72,14 @@ def get_task(task_id):
         if task["id"] == task_id:
             return task
     return None
+
+def reorder_tasks_by_ids(ordered_ids):
+    tasks = load_tasks()
+
+    id_to_index = {tid: idx for idx, tid in enumerate(ordered_ids)}
+
+    for task in tasks:
+        if task["status"] == "planned" and task["id"] in id_to_index:
+            task["order"] = id_to_index[task["id"]]
+
+    save_tasks(tasks)

@@ -33,11 +33,23 @@ def jsonl_review():
 
 @app.route("/tasks")
 def show_tasks():
-    tasks = load_tasks()
+    tasks = [t for t in load_tasks() if not t.get("archived")]
+    
+    # Sort "planned" tasks by `order`, fallback to 0
+    for task in tasks:
+        if task["status"] == "planned":
+            task.setdefault("order", 0)
+
     grouped = {}
     for task in tasks:
         grouped.setdefault(task["status"], []).append(task)
+
+    # sort planned tasks by `order`
+    if "planned" in grouped:
+        grouped["planned"].sort(key=lambda t: t.get("order", 0))
+
     return render_template("task_backlog.html", tasks_by_status=grouped)
+
 
 @app.route("/tasks/update", methods=["POST"])
 def update_task_status():
@@ -194,6 +206,29 @@ def ask_openai():
         print("🚨 Exception in /ask route:")
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/tasks/archive/<task_id>", methods=["POST"])
+def archive_task(task_id):
+    update_task(task_id, {
+        "archived": True,
+        "updated_at": datetime.utcnow().isoformat()
+    })
+    return redirect(url_for("show_tasks"))
+
+@app.route("/tasks/reorder", methods=["POST"])
+def reorder_tasks():
+    from development.task_manager import reorder_tasks_by_ids
+
+    data = request.get_json()
+    ids = data.get("ids", [])
+
+    if not isinstance(ids, list):
+        return jsonify({"error": "Invalid format"}), 400
+
+    reorder_tasks_by_ids(ids)
+    return jsonify({"status": "ok"}), 200
+
+
 
 if __name__ == "__main__":
     load_summaries()

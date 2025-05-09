@@ -1,56 +1,35 @@
+# app.py (merged: restored all routes + preserved current AI integration)
 import sys
 import os
 from pathlib import Path
 import json
-from openai import OpenAI
-from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
-from chromadb import PersistentClient
-
-
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from development.task_manager import load_tasks, update_task, create_task
-from scripts.rag_loader import ManualOpenAIEmbedder, load_summaries
 
+from scripts.utils.ai_router import get_router
+from chromadb import PersistentClient
+from scripts.rag_loader import load_summaries
+from development.task_manager import load_tasks, update_task, create_task
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-
-def get_project_context(user_prompt: str, max_docs: int = 3) -> str:
-    try:
-        client = PersistentClient(path="chroma_store")
-        collection = client.get_collection(
-            name="project_docs",
-            embedding_function=ManualOpenAIEmbedder()
-        )
-        result = collection.query(query_texts=[user_prompt], n_results=max_docs)
-        docs = result["documents"][0]
-        if not docs or all(doc.strip() == "" for doc in docs):
-            return "[No relevant project context found.]"
-        return "\n\n".join(docs)
-
-    except Exception as e:
-        print(f"⚠️ Failed to load project context: {e}")
-        return ""
+router = get_router("openai")
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
 @app.route("/lab-manager")
 def lab_manager():
     return render_template("lab_manager.html")
-
 
 @app.route("/voice")
 def voice_terminal():
     return render_template("voice_terminal.html")
 
-
 @app.route("/jsonl-review")
 def jsonl_review():
     return render_template("jsonl_review.html")
-
 
 @app.route("/tasks")
 def show_tasks():
@@ -60,7 +39,6 @@ def show_tasks():
         grouped.setdefault(task["status"], []).append(task)
     return render_template("task_backlog.html", tasks_by_status=grouped)
 
-
 @app.route("/tasks/update", methods=["POST"])
 def update_task_status():
     task_id = request.form.get("task_id")
@@ -68,7 +46,6 @@ def update_task_status():
     if task_id and new_status:
         update_task(task_id, {"status": new_status})
     return redirect(url_for("show_tasks"))
-
 
 @app.route("/tasks/create", methods=["GET", "POST"])
 def create_task_form():
@@ -87,15 +64,13 @@ def create_task_form():
             steps=[s.strip() for s in steps if s.strip()]
         )
         return redirect(url_for("show_tasks"))
-    
-    return render_template("task_create.html")
 
+    return render_template("task_create.html")
 
 @app.route("/chatlog")
 def chatlog():
     root_dir = Path(__file__).resolve().parent.parent
     log_path = root_dir / "memory/chat_logs/2025-05-03.jsonl"
-    print("Resolved path:", log_path)
     messages = []
     if log_path.exists():
         with open(log_path, "r") as f:
@@ -105,7 +80,6 @@ def chatlog():
                 except json.JSONDecodeError:
                     continue
     return render_template("chatlog.html", messages=messages)
-
 
 @app.route("/voice/log", methods=["POST"])
 def log_voice_interaction():
@@ -143,14 +117,12 @@ def log_voice_interaction():
 
     return {"status": "ok"}, 200
 
-
 @app.route("/prompt", methods=["POST"])
 def handle_prompt():
     data = request.get_json()
     user_input = data.get("input", "")
     reply = f"Echo: {user_input}"
     return jsonify({"response": reply})
-
 
 @app.route("/chat")
 def chat():
@@ -179,7 +151,23 @@ def build_system_prompt(emotions_enabled=False):
         "content": f"{base} {emotion} {anti_gaslight}"
     }
 
-# Patched /ask to inject RAG context from Chroma
+def get_project_context(user_prompt: str, max_docs: int = 3) -> str:
+    try:
+        client = PersistentClient(path=str(Path(__file__).resolve().parent.parent / "chroma_store"))
+        from scripts.rag_loader import EmbedFunction
+        collection = client.get_collection(
+            name="project_docs",
+            embedding_function=EmbedFunction()
+        )
+        result = collection.query(query_texts=[user_prompt], n_results=max_docs)
+        docs = result["documents"][0]
+        if not docs or all(doc.strip() == "" for doc in docs):
+            return "[No relevant project context found.]"
+        return "\n\n".join(docs)
+    except Exception as e:
+        print(f"⚠️ Failed to load project context: {e}")
+        return ""
+
 @app.route("/ask", methods=["POST"])
 def ask_openai():
     try:
@@ -193,29 +181,20 @@ def ask_openai():
         emotions_enabled = tone == "emotional"
         system_message = build_system_prompt(emotions_enabled)
 
-        # 🔍 RAG injection
         context = get_project_context(prompt)
         print(f"🧠 Retrieved RAG context:\n{context}")
         augmented_prompt = f"""You are helping the user based on this project context:\n{context}\n\nUser asked:\n{prompt}"""
 
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                system_message,
-                {"role": "user", "content": augmented_prompt}
-            ]
-        )
-
-        reply = response.choices[0].message.content
+        messages = [system_message, {"role": "user", "content": augmented_prompt}]
+        reply = router.chat(messages, model="gpt-4")
         return jsonify({"response": reply, "model": "gpt-4"})
 
     except Exception as e:
+        import traceback
+        print("🚨 Exception in /ask route:")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-
-
-
 if __name__ == "__main__":
-    load_summaries()  # <-- ensure Chroma is loaded on Flask startup
+    load_summaries()
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

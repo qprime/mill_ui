@@ -1,27 +1,17 @@
-# rag_loader.py (patched to force clean collection with correct embedding function)
+# rag_loader.py (patched to use callable wrapper for Chroma embedding interface)
 import os
 from pathlib import Path
-from openai import OpenAI
 import tiktoken
 from chromadb import PersistentClient
-from chromadb.config import Settings
+from scripts.utils.ai_router import get_router
 
-SUMMARY_DIR = Path("memory/development/module_summaries")
+SUMMARY_DIR = Path(__file__).resolve().parent.parent / "memory" / "development" / "module_summaries"
+
 COLLECTION_NAME = "project_docs"
 
-# Manual embedding wrapper that matches Chroma's required interface
-
-class ManualOpenAIEmbedder:
-    def __init__(self, model="text-embedding-3-small"):
-        self.model = model
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
+class EmbedFunction:
     def __call__(self, input: list[str]) -> list[list[float]]:
-        response = self.client.embeddings.create(
-            model=self.model,
-            input=input
-        )
-        return [d.embedding for d in response.data]
+        return get_router("openai").embed(input)
 
 def count_tokens(text, model="text-embedding-3-small"):
     encoding = tiktoken.encoding_for_model(model)
@@ -29,11 +19,11 @@ def count_tokens(text, model="text-embedding-3-small"):
 
 def load_summaries():
     print("📥 Loading module summaries into ChromaDB...")
-    #client = Client(Settings(persist_directory="chroma_store"))
+    print("📁 Using Chroma DB path:", Path("chroma_store").resolve())
 
-    client = PersistentClient(path="chroma_store")
+    client = PersistentClient(path=str(Path(__file__).resolve().parent.parent / "chroma_store"))
 
-    # Force delete and recreate collection with proper embedding function
+
     try:
         client.delete_collection(COLLECTION_NAME)
         print(f"🧹 Cleared existing collection: {COLLECTION_NAME}")
@@ -42,20 +32,22 @@ def load_summaries():
 
     collection = client.create_collection(
         name=COLLECTION_NAME,
-        embedding_function=ManualOpenAIEmbedder()
+        embedding_function=EmbedFunction()
     )
+    print(f"📄 Scanning: {SUMMARY_DIR}")
 
     for summary_file in SUMMARY_DIR.glob("*.md"):
         doc_id = summary_file.stem
         with open(summary_file, "r", encoding="utf-8") as f:
             content = f.read().strip()
+            print(f"📦 Embedding {doc_id} from {summary_file}")
+
 
         if not content:
             continue
 
         try:
             tokens = count_tokens(content)
-
             collection.upsert(
                 documents=[content],
                 ids=[doc_id],
@@ -67,11 +59,12 @@ def load_summaries():
 
 def query_project_docs(question: str, n_results=3):
     print(f"\n🔍 Query: {question}\n")
-    client = PersistentClient(path="chroma_store")
+    client = PersistentClient(path=str(Path(__file__).resolve().parent.parent / "chroma_store"))
+
 
     collection = client.get_collection(
         name=COLLECTION_NAME,
-        embedding_function=ManualOpenAIEmbedder()  # ← ensure same embedder
+        embedding_function=EmbedFunction()
     )
 
     results = collection.query(query_texts=[question], n_results=n_results)

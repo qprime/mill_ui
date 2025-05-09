@@ -95,3 +95,6 @@
 
 ## Auto-update: 2025-05-07 18:15:45
 - [fdb225a] Trigger update for README generation test (2025-05-07)
+
+## Auto-update: 2025-05-09 09:31:59
+- [6ee1ba4] feat: Add unified OpenAI embedding wrapper and wire project RAG into chat UI (2025-05-09)

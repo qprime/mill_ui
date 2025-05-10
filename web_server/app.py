@@ -33,22 +33,39 @@ def jsonl_review():
 
 @app.route("/tasks")
 def show_tasks():
-    tasks = [t for t in load_tasks() if not t.get("archived")]
-    
-    # Sort "planned" tasks by `order`, fallback to 0
+    raw_tasks = load_tasks()
+    print(f"🔍 Total tasks loaded: {len(raw_tasks)}")
+
+    # Debug all task archive flags
+    for t in raw_tasks:
+        print(f"  - {t['id']}: archived = {t.get('archived')}")
+
+    # Filter non-archived tasks
+    tasks = [t for t in raw_tasks if not str(t.get("archived", "false")).lower() == "true"]
+
+    if not tasks:
+        print("⚠️ No tasks passed the archive filter")
+
+    # Sort "planned" tasks by `order`
     for task in tasks:
-        if task["status"] == "planned":
+        if task.get("status") == "planned":
             task.setdefault("order", 0)
 
+    # Group by status
     grouped = {}
     for task in tasks:
-        grouped.setdefault(task["status"], []).append(task)
+        status = task.get("status", "unknown")
+        grouped.setdefault(status, []).append(task)
 
-    # sort planned tasks by `order`
     if "planned" in grouped:
         grouped["planned"].sort(key=lambda t: t.get("order", 0))
 
+    print("🧪 Grouped:")
+    for k, v in grouped.items():
+        print(f"  - {k}: {len(v)} tasks")
+
     return render_template("task_backlog.html", tasks_by_status=grouped)
+
 
 
 @app.route("/tasks/update", methods=["POST"])

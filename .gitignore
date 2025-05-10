@@ -80,3 +80,11 @@ memory/development/module_summaries/
 memory/chat_logs/
 chroma_store/
 
+# Generated annotation/chunking output
+memory/development/code_chunks/
+memory/development/annotated_chunks/
+memory/development/reconstructed/
+memory/development/file_summaries/
+memory/tasks/
+scripts/annotate_project_annotated.py
+project_structure.txt

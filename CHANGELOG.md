@@ -104,3 +104,9 @@
 
 ## Auto-update: 2025-05-09 18:19:00
 - [a220dd9] prepping to update and integrate system_design_summary.md and project_structure.md into RAG contexts.  This isn't done yet, but I wanted to get the files in place. (2025-05-09)
+
+## Auto-update: 2025-05-09 18:55:58
+- [7e4718a] Updated the tasks for archiving and reordering in the UI. (2025-05-09)
+
+## Auto-update: 2025-05-10 11:39:41
+- [c606788] Some additional fixes to improve the tasking architecture and interface. (2025-05-10)

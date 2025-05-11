@@ -110,3 +110,6 @@
 
 ## Auto-update: 2025-05-10 11:39:41
 - [c606788] Some additional fixes to improve the tasking architecture and interface. (2025-05-10)
+
+## Auto-update: 2025-05-10 11:43:48
+- [d4c034f] chore: checkpoint CLI chunking, annotation, and reconstruction; add preamble support (2025-05-10)

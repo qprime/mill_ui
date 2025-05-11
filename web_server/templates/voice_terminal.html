@@ -3,94 +3,110 @@
 
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-4">🎙️ CLIFF Voice Terminal</h1>
+  <h1 class="mb-4">🎙️ CLIFF Voice Terminal</h1>
 
-    <button id="recordButton" class="btn btn-primary">🎤 Start Recording</button>
-    <p id="status" class="mt-3">Status: Idle</p>
+  <button id="recordButton" class="btn btn-primary">🎤 Start Recording</button>
+  <input type="file" id="audioFile" accept=".wav,.mp3" class="form-control mt-3" />
+  <p id="status" class="mt-3">Status: Idle</p>
 
-    <h2 class="mt-4">Transcription:</h2>
-    <p id="transcript" class="bg-secondary p-2 rounded">...</p>
+  <h2 class="mt-4">Transcription:</h2>
+  <p id="transcript" class="bg-secondary p-2 rounded">...</p>
+  <p id="metrics" class="text-muted small">⏱️ Duration: N/A | 🧮 Words: N/A</p>
 
-    <h2 class="mt-4">Mistral LLM Response:</h2>
-    <p id="llmResponse" class="bg-dark p-2 rounded">...</p>
-</div>
-{% endblock %}
+  <h2 class="mt-4">Mistral LLM Response:</h2>
+  <p id="llmResponse" class="bg-dark p-2 rounded">...</p>
 
-{% block scripts %}
-<script>
-let mediaRecorder;
-let audioChunks = [];
-let recording = false;
+  <script>
+    console.log("🎯 voice_terminal.js inline loaded");
 
-const recordButton = document.getElementById("recordButton");
-const status = document.getElementById("status");
-const transcript = document.getElementById("transcript");
-const llmResponse = document.getElementById("llmResponse");
+    let mediaRecorder;
+    let audioChunks = [];
+    let recording = false;
 
-recordButton.onclick = async () => {
-    if (!recording) {
+    const recordButton = document.getElementById("recordButton");
+    const fileInput = document.getElementById("audioFile");
+    const status = document.getElementById("status");
+    const transcript = document.getElementById("transcript");
+    const llmResponse = document.getElementById("llmResponse");
+    const metrics = document.getElementById("metrics");
+
+    navigator.permissions.query({ name: 'microphone' }).then(result => {
+      console.log("Mic permission state:", result.state);
+    });
+
+    recordButton.onclick = async () => {
+      if (!recording) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
 
         mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
+          audioChunks.push(event.data);
         };
 
         mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioChunks = [];
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'recording.wav');
 
-            status.innerText = "Status: Sending audio...";
-
-            const formData = new FormData();
-            formData.append('file', audioBlob, 'recording.wav');
-
-            try {
-                const response = await fetch('https://192.168.0.179:8001/transcribe', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-                transcript.innerText = result.text;
-                status.innerText = "Status: Transcription done";
-
-                try {
-                    const mistralResponse = await fetch('https://192.168.0.37:5000/ask', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ prompt: result.text })
-                    });
-
-                    const mistralResult = await mistralResponse.json();
-                    llmResponse.innerText = mistralResult.response;
-                    status.innerText = "Status: Complete";
-
-                } catch (error) {
-                    console.error('Error sending to Mistral server:', error);
-                    llmResponse.innerText = "Error contacting Mistral.";
-                }
-            } catch (error) {
-                console.error('Error sending audio to Whisper:', error);
-                transcript.innerText = "Error transcribing audio.";
-                status.innerText = "Status: Error";
-            }
+          await transcribeAndQuery(formData);
+          console.log("🔊 AudioBlob size:", audioBlob.size);
         };
+        
 
         mediaRecorder.start();
         recording = true;
         recordButton.innerText = "🛑 Stop Recording";
         status.innerText = "Status: Recording...";
-
-    } else {
+      } else {
         mediaRecorder.stop();
         recording = false;
         recordButton.innerText = "🎤 Start Recording";
         status.innerText = "Status: Processing...";
+      }
+    };
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await transcribeAndQuery(formData);
+    });
+
+    async function transcribeAndQuery(formData) {
+      const start = performance.now();
+      status.innerText = "Status: Uploading...";
+
+      try {
+        console.log("🎬 Sending audio to Whisper server...");
+
+        const response = await fetch("https://192.168.0.179:8001/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        transcript.innerText = result.text;
+        const wordCount = result.text.trim().split(/\s+/).length;
+        const duration = ((performance.now() - start) / 1000).toFixed(2);
+        metrics.innerText = `⏱️ Duration: ${duration}s | 🧮 Words: ${wordCount}`;
+        status.innerText = "Status: Transcription complete.";
+
+        // const mistralResponse = await fetch("https://192.168.0.37:5000/ask", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ prompt: result.text }),
+        // });
+        // const mistralResult = await mistralResponse.json();
+        // llmResponse.innerText = mistralResult.response;
+        llmResponse.innerText = "LLM query disabled (Mistral offline).";
+      } catch (err) {
+        console.error("Transcription or LLM error:", err);
+        status.innerText = `Status: Error - ${err.message}`;
+
+      }
     }
-};
-</script>
+  </script>
+</div>
 {% endblock %}

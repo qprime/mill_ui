@@ -1,13 +1,12 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import whisper
+from faster_whisper import WhisperModel
 import tempfile
 import os
 
 app = FastAPI()
 
-# Allow CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,13 +15,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# CORS Preflight Handler
 @app.options("/transcribe")
 async def options_transcribe():
     return JSONResponse(content={"message": "CORS preflight OK"}, status_code=200)
 
-# Load the Whisper model
-model = whisper.load_model("base")
+# Load the model with GPU acceleration
+model = WhisperModel("large-v2", compute_type="auto")
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
@@ -31,7 +29,8 @@ async def transcribe_audio(file: UploadFile = File(...)):
         tmp_path = tmp.name
 
     try:
-        result = model.transcribe(tmp_path)
-        return {"text": result['text']}
+        segments, info = model.transcribe(tmp_path)
+        text = " ".join([segment.text for segment in segments])
+        return {"text": text}
     finally:
         os.remove(tmp_path)

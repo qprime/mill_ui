@@ -1,0 +1,14 @@
+[Unit]
+Description=Cliff TTS Server (Coqui)
+After=network.target
+
+[Service]
+WorkingDirectory=/home/squinlan/cliff_ai/voice_pipeline
+ExecStart=/home/squinlan/cliff_ai/voice_pipeline/run_tts.sh
+Restart=always
+RestartSec=5
+User=squinlan
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target

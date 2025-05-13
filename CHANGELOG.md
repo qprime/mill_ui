@@ -113,3 +113,12 @@
 
 ## Auto-update: 2025-05-10 11:43:48
 - [d4c034f] chore: checkpoint CLI chunking, annotation, and reconstruction; add preamble support (2025-05-10)
+
+## Auto-update: 2025-05-11 11:16:15
+- [a9f1053] Readme and a folder for a future idea to curate voices out of various sources to build a new TTS voice. (2025-05-10)
+- [b180f18] feat(whisper): enable HTTPS inference service on SkyTech with GPU acceleration (2025-05-11)
+- [d661308] Merge branch 'main' of github.com:qprime/cliff_ai (2025-05-11)
+- [2824e1b] Fixed the voice_terminal to send recordings to fast-whisper running on the skytech. (2025-05-11)
+
+## Auto-update: 2025-05-11 11:22:36
+- [02efbc1] Initial readme and folder for the TTS pipeline. (2025-05-11)

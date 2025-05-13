@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 import json
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+import requests
+from io import BytesIO
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from scripts.utils.ai_router import get_router
@@ -245,7 +247,31 @@ def reorder_tasks():
     reorder_tasks_by_ids(ids)
     return jsonify({"status": "ok"}), 200
 
+@app.route("/voice/speak", methods=["POST"])
+def voice_speak():
+    try:
+        data = request.get_json()
+        text = data.get("text", "").strip()
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
 
+        # Send to Coqui TTS
+        tts_response = requests.post(
+            "https://192.168.0.179:5042/speak",
+            json={"text": text},
+            verify=False  # Only for self-signed local certs
+        )
+
+        if tts_response.status_code != 200:
+            return jsonify({"error": "TTS server error"}), 500
+
+        # Serve back the WAV audio
+        return send_file(BytesIO(tts_response.content), mimetype="audio/wav")
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     load_summaries()

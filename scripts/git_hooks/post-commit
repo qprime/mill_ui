@@ -1,0 +1,4 @@
+#!/bin/bash
+# CLIFF AI post-commit hook
+echo "[CLIFF] Updating script registry..."
+python3 scripts/metadata/update_script_registry.py

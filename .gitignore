@@ -88,3 +88,4 @@ memory/development/file_summaries/
 memory/tasks/
 scripts/annotate_project_annotated.py
 project_structure.txt
+memory/metadata/

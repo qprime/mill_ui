@@ -1,31 +1,37 @@
 import sys
-from pathlib import Path
-
-ROOT_DIR = str(Path(__file__).resolve().parents[2])
-sys.path.append(ROOT_DIR)
-
-from chromadb import PersistentClient
-from scripts.embedding.embed_cli_logs import get_embedding_function
-from pathlib import Path
 import os
 import json
+from pathlib import Path
+from chromadb import PersistentClient
+from scripts.embedding.embed_cli_logs import get_embedding_function
 
+# --- Setup root and import paths ---
+ROOT_DIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_DIR))
+
+# --- Embedding wrapper ---
 def EmbedFunction():
     return get_embedding_function()
 
+# --- Main loader ---
 def load_summaries():
-    root = Path(__file__).resolve().parents[2] / "memory/development/module_summaries"
-    client = PersistentClient(path="memory/development/chroma")
-    collection = client.get_or_create_collection(name="project_docs", embedding_function=EmbedFunction())
+    summary_dir = ROOT_DIR / "memory/development/module_summaries"
+    chroma_path = ROOT_DIR / "memory/development/chroma"
+
+    client = PersistentClient(path=str(chroma_path))
+    collection = client.get_or_create_collection(
+        name="project_docs",
+        embedding_function=EmbedFunction()
+    )
 
     docs = []
     ids = []
-    for file in root.glob("*.md"):
-        text = file.read_text()
-        if not text.strip():
-            continue
-        docs.append(text)
-        ids.append(str(file.stem))
+
+    for file in summary_dir.glob("*.md"):
+        text = file.read_text().strip()
+        if text:
+            docs.append(text)
+            ids.append(file.stem)
 
     if docs:
         print(f"📚 Loading {len(docs)} summaries into ChromaDB...")

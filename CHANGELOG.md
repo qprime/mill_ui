@@ -122,3 +122,7 @@
 
 ## Auto-update: 2025-05-11 11:22:36
 - [02efbc1] Initial readme and folder for the TTS pipeline. (2025-05-11)
+
+## Auto-update: 2025-05-14 14:09:17
+- [7f33a9a] Enable XTTS voice cloning with runtime speaker_wav support and PyTorch 2.6 compatibility (2025-05-13)
+- [ab3f689] UI updates to make the voice test page easier to use and benchmark. (2025-05-14)

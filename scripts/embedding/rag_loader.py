@@ -3,11 +3,11 @@ import os
 import json
 from pathlib import Path
 from chromadb import PersistentClient
-from scripts.embedding.embed_cli_logs import get_embedding_function
-
-# --- Setup root and import paths ---
+# Add project root to sys.path
 ROOT_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(ROOT_DIR))
+sys.path.insert(0, str(ROOT_DIR))  # Insert BEFORE imports
+
+from scripts.embedding.embed_cli_logs import get_embedding_function
 
 # --- Embedding wrapper ---
 def EmbedFunction():

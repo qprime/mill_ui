@@ -4,7 +4,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GIT_HOOKS_DIR = REPO_ROOT / ".git" / "hooks"
-SOURCE_HOOK = REPO_ROOT / "scripts" / "git_hooks" / "post-commit"
+SOURCE_HOOK = REPO_ROOT / "scripts" / "git_hooks" / "post-commit.sh"
 TARGET_HOOK = GIT_HOOKS_DIR / "post-commit"
 
 def install_hook():

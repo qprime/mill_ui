@@ -196,10 +196,29 @@ def get_project_context(prompt: str, max_docs: int = 3) -> str:
         print(f"⚠️ Failed to load combined context: {e}")
         return "[No relevant project context found.]"
 
+def get_cliff_status():
+    from flask import request
+    import platform
+
+    return {
+        "model": "gpt-4o",
+        "context_window_tokens": 128000,
+        "voice_enabled": True,
+        "whisper_endpoint": "https://192.168.0.179:8001/transcribe",
+        "tts_enabled": True,
+        "rag_enabled": True,
+        "active_modules": [
+            "code_chunking", "cli_logger", "task_manager", "memory_graph", "voice_pipeline"
+        ],
+        "ui_mode": "web",  # or "CLI" if you build that later
+        "request_ip": request.remote_addr,
+        "host": platform.node()
+    }
 
 @app.route("/ask", methods=["POST"])
 def ask_openai():
     try:
+        import time
         data = request.get_json()
         prompt = data.get("prompt", "")
         tone = data.get("tone", "neutral")
@@ -213,24 +232,48 @@ def ask_openai():
         base_context = build_context_prompt_fragments()
         rag_context = get_project_context(prompt)
 
+        status = get_cliff_status()
+        status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
+
         full_context = "\n\n".join([
             "# CLIFF Project Context",
-            *base_context[:5],  # summary, goals, interfaces, memory domains, modules
-            f"# Retrieved Summaries (RAG)\n{rag_context}"
+            *base_context[:5],
+            f"# Retrieved Summaries (RAG)\n{rag_context}",
+            f"# System Runtime Status\n{status_block}"
         ])
 
-        print(f"🧠 Injected context:\n{full_context}")
         augmented_prompt = f"""{full_context}\n\nUser asked:\n{prompt}"""
-        
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
+
+        # Start timer
+        start = time.time()
         reply = router.chat(messages, model="gpt-4o")
-        return jsonify({"response": reply, "model": "gpt-4o"})
+        end = time.time()
+
+        # Estimate token counts (rough heuristic for now)
+        def count_tokens(text):
+            return len(text.split())
+
+        tokens_in = sum(count_tokens(m["content"]) for m in messages)
+        tokens_out = count_tokens(reply)
+        latency_ms = int((end - start) * 1000)
+
+        return jsonify({
+            "response": reply,
+            "model": "gpt-4o",
+            "metrics": {
+                "latency_ms": latency_ms,
+                "tokens_in": tokens_in,
+                "tokens_out": tokens_out
+            }
+        })
 
     except Exception as e:
         import traceback
         print("🚨 Exception in /ask route:")
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
     
 @app.route("/tasks/archive/<task_id>", methods=["POST"])
 def archive_task(task_id):

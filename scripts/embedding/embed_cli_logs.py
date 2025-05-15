@@ -1,58 +1,46 @@
 import os
-import json
-from pathlib import Path
-import chromadb
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 
-# --- Setup embedding function ---
-openai_ef = OpenAIEmbeddingFunction(
-    api_key=os.getenv("OPENAI_API_KEY"),  # Set this in your shell or .bashrc
-    model_name="text-embedding-3-small"
-)
+def get_embedding_function():
+    api_key = os.getenv("OPENAI_API_KEY")
+    model_name = "text-embedding-3-small"
+    return OpenAIEmbeddingFunction(api_key=api_key, model_name=model_name)
 
-# --- Connect to Chroma ---
-chroma_client = chromadb.PersistentClient(path="../memory/cliff_state")
+# Optional: keep embedding logic for CLI use
+if __name__ == "__main__":
+    import json
+    from pathlib import Path
+    import chromadb
 
-# --- Rebuild the collection if needed ---
-if "cli_logs" in [c.name for c in chroma_client.list_collections()]:
-    chroma_client.delete_collection("cli_logs")
+    chroma_client = chromadb.PersistentClient(path="memory/cliff_state")
+    cli_log_path = Path("memory/cliff_state/cli_logs.jsonl")
 
-collection = chroma_client.get_or_create_collection(
-    name="cli_logs",
-    embedding_function=openai_ef
-)
+    if not cli_log_path.exists():
+        print("❌ CLI log file not found.")
+        exit(1)
 
-# --- Load CLI logs ---
-cli_log_path = Path("../memory/cliff_state/cli_logs.jsonl")
-if not cli_log_path.exists():
-    print("❌ CLI log file not found.")
-    exit(1)
+    with cli_log_path.open("r", encoding="utf-8") as f:
+        lines = [json.loads(line) for line in f]
 
-with cli_log_path.open("r", encoding="utf-8") as f:
-    lines = [json.loads(line) for line in f.readlines()]
+    documents = []
+    metadatas = []
+    ids = []
 
-# --- Prepare batch documents ---
-documents = []
-metadatas = []
-ids = []
+    for idx, log in enumerate(lines):
+        text = f"{log['timestamp']} {log['hostname']} {log['command']}"
+        documents.append(text)
+        metadatas.append({
+            "source": "cli_logs",
+            "hostname": log["hostname"],
+            "session_id": log["session_id"]
+        })
+        ids.append(f"cli-{idx}")
 
-for idx, log in enumerate(lines):
-    text = f"{log['timestamp']} {log['hostname']} {log['command']}"
-    documents.append(text)
-    metadatas.append({
-        "source": "cli_logs",
-        "hostname": log["hostname"],
-        "session_id": log["session_id"]
-    })
-    ids.append(f"cli-{idx}")
-
-# --- Embed and persist ---
-collection.add(
-    documents=documents,
-    ids=ids,
-    metadatas=metadatas
-)
-
-chroma_client.persist()
-print(f"✅ Embedded {len(documents)} CLI commands into cliff_state memory.")
-
+    collection = chroma_client.get_or_create_collection(
+        name="cli_logs",
+        embedding_function=get_embedding_function()
+    )
+    collection.delete(where={})  # Optional: clear old data
+    collection.add(documents=documents, ids=ids, metadatas=metadatas)
+    chroma_client.persist()
+    print(f"✅ Embedded {len(documents)} CLI commands into cliff_state memory.")

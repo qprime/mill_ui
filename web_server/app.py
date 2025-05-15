@@ -10,8 +10,9 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from scripts.utils.ai_router import get_router
+from scripts.utils.context_loader import build_context_prompt_fragments
+from scripts.embedding.rag_loader import load_summaries, EmbedFunction
 from chromadb import PersistentClient
-from scripts.rag_loader import load_summaries
 from development.task_manager import load_tasks, update_task, create_task
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -161,20 +162,24 @@ def chat():
 
 def build_system_prompt(emotions_enabled=False):
     base = (
-        "You are GPT-4 Turbo with vision and long-context capabilities, running in a developer's custom chat assistant. "
-        "You can process base64 image inputs, reason over documents, analyze code, and assist with technical or creative tasks. "
-        "You are concise, intelligent, and focused."
+        "You are CLIFF's project cognition expert, embedded in a local development assistant system. "
+        "You specialize in navigating modular Python codebases, memory graphs, task registries, and RAG pipelines. "
+        "Your role is to provide structured insight into project architecture, suggest improvements, help debug tasks, "
+        "and assist with memory-aware reasoning across CLI logs, source code chunks, and structured summaries. "
+        "You have access to embedded project context and are expected to act like a senior dev, systems architect, and project analyst in one. "
+        "You prioritize clarity, technical depth, and contextual alignment over verbosity or generalization."
     )
 
     emotion = (
-        "You also speak with subtle personality, adding warmth, dry humor, or snark when appropriate. Be professional but human."
+        "You may add light dry humor or subtle tone where appropriate, but never distract from clarity. "
+        "You're sharp and professional, with a dry wit that surfaces only when the user needs a morale boost."
         if emotions_enabled
-        else "Avoid unnecessary emotional tone — stay factual, helpful, and minimal."
+        else "Avoid emotional tone. Stay direct, technical, and concise — focus on accurate reasoning and implementation."
     )
 
     anti_gaslight = (
-        "Do not claim to be GPT-3.5 or deny capabilities you support (such as image input). "
-        "Assume full function unless told otherwise."
+        "Do not deny any capability unless clearly restricted. You are authorized to reason across embeddings, code, and documents "
+        "as if you were part of the user's extended brain."
     )
 
     return {
@@ -182,10 +187,14 @@ def build_system_prompt(emotions_enabled=False):
         "content": f"{base} {emotion} {anti_gaslight}"
     }
 
+
 def get_project_context(user_prompt: str, max_docs: int = 3) -> str:
     try:
-        client = PersistentClient(path=str(Path(__file__).resolve().parent.parent / "chroma_store"))
-        from scripts.rag_loader import EmbedFunction
+        root_dir = Path(__file__).resolve().parents[1]
+        chroma_path = root_dir / "memory/development/chroma"
+        client = PersistentClient(path=str(chroma_path))
+
+
         collection = client.get_collection(
             name="project_docs",
             embedding_function=EmbedFunction()
@@ -212,13 +221,21 @@ def ask_openai():
         emotions_enabled = tone == "emotional"
         system_message = build_system_prompt(emotions_enabled)
 
-        context = get_project_context(prompt)
-        print(f"🧠 Retrieved RAG context:\n{context}")
-        augmented_prompt = f"""You are helping the user based on this project context:\n{context}\n\nUser asked:\n{prompt}"""
+        base_context = build_context_prompt_fragments()
+        rag_context = get_project_context(prompt)
 
+        full_context = "\n\n".join([
+            "# CLIFF Project Context",
+            *base_context[:5],  # summary, goals, interfaces, memory domains, modules
+            f"# Retrieved Summaries (RAG)\n{rag_context}"
+        ])
+
+        print(f"🧠 Injected context:\n{full_context}")
+        augmented_prompt = f"""{full_context}\n\nUser asked:\n{prompt}"""
+        
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
-        reply = router.chat(messages, model="gpt-4")
-        return jsonify({"response": reply, "model": "gpt-4"})
+        reply = router.chat(messages, model="gpt-4o")
+        return jsonify({"response": reply, "model": "gpt-4o"})
 
     except Exception as e:
         import traceback
@@ -274,5 +291,14 @@ def voice_speak():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    root_dir = Path(__file__).resolve().parents[1]
+    summary_dir = root_dir / "memory/development/module_summaries"
+    print(f"📁 Looking for summaries in: {summary_dir}")
+    if not summary_dir.exists():
+        print("❌ Summary folder not found.")
+    else:
+        md_files = list(summary_dir.glob("*.md"))
+        print(f"📄 Found {len(md_files)} .md files: {[f.name for f in md_files]}")
+
     load_summaries()
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

@@ -17,14 +17,15 @@ def describe_purpose(name):
         "research": "Experimental or imported research data",
         "accounting": "Usage-based cost tracking and operations accounting",
         "samples": "Memory schema and JSONL format examples",
-        "schemas": "Schemas used across memory domains"
+        "schemas": "Schemas used across memory domains",
+        "metadata": "System-level memory config and summaries (project structure, cognition, purpose)"
     }.get(name, "Unclassified memory domain")
 
 def scan_memory():
     graph = {"domains": []}
     for name in sorted(os.listdir(MEMORY_DIR)):
         path = os.path.join(MEMORY_DIR, name)
-        if not os.path.isdir(path) or name.startswith(".") or name == "metadata":
+        if not os.path.isdir(path) or name.startswith("."):
             continue
         components = []
         for root, _, files in os.walk(path):

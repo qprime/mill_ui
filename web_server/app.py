@@ -188,25 +188,14 @@ def build_system_prompt(emotions_enabled=False):
     }
 
 
-def get_project_context(user_prompt: str, max_docs: int = 3) -> str:
+def get_project_context(prompt: str, max_docs: int = 3) -> str:
     try:
-        root_dir = Path(__file__).resolve().parents[1]
-        chroma_path = root_dir / "memory/development/chroma"
-        client = PersistentClient(path=str(chroma_path))
-
-
-        collection = client.get_collection(
-            name="project_docs",
-            embedding_function=EmbedFunction()
-        )
-        result = collection.query(query_texts=[user_prompt], n_results=max_docs)
-        docs = result["documents"][0]
-        if not docs or all(doc.strip() == "" for doc in docs):
-            return "[No relevant project context found.]"
-        return "\n\n".join(docs)
+        from scripts.utils.context_router import get_combined_context
+        return get_combined_context(prompt, max_docs)
     except Exception as e:
-        print(f"⚠️ Failed to load project context: {e}")
-        return ""
+        print(f"⚠️ Failed to load combined context: {e}")
+        return "[No relevant project context found.]"
+
 
 @app.route("/ask", methods=["POST"])
 def ask_openai():

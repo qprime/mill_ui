@@ -40,6 +40,10 @@ persona_templates = {
     ),
 }
 
-def get_persona_prompt(persona: str) -> str:
+def get_persona_prompt(persona: str) -> dict:
     base = persona_templates.get(persona, persona_templates["default"])
-    return f"{base} {emotion_prompt} {anti_gaslight_prompt}"
+    return {
+        "role": "system",
+        "content": f"{base} {emotion_prompt} {anti_gaslight_prompt}"
+    }
+

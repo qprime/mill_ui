@@ -6,11 +6,11 @@ import json
 from datetime import datetime
 import requests
 from io import BytesIO
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file, send_from_directory
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from scripts.utils.ai_router import get_router
-from scripts.utils.context_loader import build_context_prompt_fragments
+from scripts.llm.ai_router import get_router
+from scripts.llm.context_loader import build_context_prompt_fragments
 from scripts.embedding.rag_loader import load_summaries, EmbedFunction
 from chromadb import PersistentClient
 from development.task_manager import load_tasks, update_task, create_task
@@ -21,6 +21,11 @@ router = get_router("openai")
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route('/dashboard')
+def serve_dashboard():
+    dashboard_path = os.path.join(app.root_path, 'static/dashboard')
+    return send_from_directory(dashboard_path, 'index.html')
 
 @app.route("/lab-manager")
 def lab_manager():
@@ -160,41 +165,43 @@ def handle_prompt():
 def chat():
     return render_template("chat.html")
 
-def build_system_prompt(emotions_enabled=False):
-    base = (
-        "You are CLIFF's project cognition expert, embedded in a local development assistant system. "
-        "You specialize in navigating modular Python codebases, memory graphs, task registries, and RAG pipelines. "
-        "Your role is to provide structured insight into project architecture, suggest improvements, help debug tasks, "
-        "and assist with memory-aware reasoning across CLI logs, source code chunks, and structured summaries. "
-        "You have access to embedded project context and are expected to act like a senior dev, systems architect, and project analyst in one. "
-        "You prioritize clarity, technical depth, and contextual alignment over verbosity or generalization."
+
+
+# context_loader.py (inside scripts/llm)
+from typing import List, Optional
+
+def get_project_context(prompt: str, paths: Optional[List[str]] = None, max_docs: int = 3) -> str:
+    """
+    Retrieve relevant context using ChromaDB summaries.
+    Optionally filter by memory paths or domains.
+    """
+    import chromadb
+    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+
+    client = chromadb.PersistentClient(path="memory/chroma")
+    collection = client.get_or_create_collection(
+        name="module_summaries",
+        embedding_function=SentenceTransformerEmbeddingFunction()
     )
 
-    emotion = (
-        "You may add light dry humor or subtle tone where appropriate, but never distract from clarity. "
-        "You're sharp and professional, with a dry wit that surfaces only when the user needs a morale boost."
-        if emotions_enabled
-        else "Avoid emotional tone. Stay direct, technical, and concise — focus on accurate reasoning and implementation."
-    )
+    filters = {}
+    if paths:
+        filters["path"] = {"$in": paths}
 
-    anti_gaslight = (
-        "Do not deny any capability unless clearly restricted. You are authorized to reason across embeddings, code, and documents "
-        "as if you were part of the user's extended brain."
-    )
-
-    return {
-        "role": "system",
-        "content": f"{base} {emotion} {anti_gaslight}"
-    }
-
-
-def get_project_context(prompt: str, max_docs: int = 3) -> str:
     try:
-        from scripts.utils.context_router import get_combined_context
-        return get_combined_context(prompt, max_docs)
+        results = collection.query(
+            query_texts=[prompt],
+            n_results=max_docs,
+            where=filters if filters else None
+        )
+
+        docs = results.get("documents", [[]])[0]
+        return "\n\n".join(docs)
+
     except Exception as e:
-        print(f"⚠️ Failed to load combined context: {e}")
-        return "[No relevant project context found.]"
+        print(f"⚠️ get_project_context failed: {e}")
+        return "[No relevant context found.]"
+
 
 def get_cliff_status():
     from flask import request
@@ -219,6 +226,10 @@ def get_cliff_status():
 def ask_openai():
     try:
         import time
+        from scripts.llm.context_router import route_context
+        from scripts.llm.personas import get_persona_prompt
+        
+
         data = request.get_json()
         prompt = data.get("prompt", "")
         tone = data.get("tone", "neutral")
@@ -226,12 +237,18 @@ def ask_openai():
         if not prompt:
             return jsonify({"error": "No prompt provided"}), 400
 
-        emotions_enabled = tone == "emotional"
-        system_message = build_system_prompt(emotions_enabled)
+        # 🧠 Stage 1: Local LLM to classify prompt
+        routing = route_context(prompt)
+        persona = routing.get("persona", "default")
+        suggested_context = routing.get("suggested_context", [])
+        emotions_enabled = (tone == "emotional")
 
-        base_context = build_context_prompt_fragments()
-        rag_context = get_project_context(prompt)
+        # 🧠 Stage 2: Construct persona system message
+        system_message = get_persona_prompt(persona)
 
+        # 🧠 Stage 3: Build contextual memory fragments
+        base_context = build_context_prompt_fragments(paths=suggested_context)
+        rag_context = get_project_context(prompt, paths=suggested_context)
         status = get_cliff_status()
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
@@ -242,18 +259,15 @@ def ask_openai():
             f"# System Runtime Status\n{status_block}"
         ])
 
-        augmented_prompt = f"""{full_context}\n\nUser asked:\n{prompt}"""
+        augmented_prompt = f"{full_context}\n\nUser asked:\n{prompt}"
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
 
-        # Start timer
+        # 🔁 Forward to OpenAI (or fallback) LLM
         start = time.time()
         reply = router.chat(messages, model="gpt-4o")
         end = time.time()
 
-        # Estimate token counts (rough heuristic for now)
-        def count_tokens(text):
-            return len(text.split())
-
+        def count_tokens(text): return len(text.split())
         tokens_in = sum(count_tokens(m["content"]) for m in messages)
         tokens_out = count_tokens(reply)
         latency_ms = int((end - start) * 1000)
@@ -261,6 +275,7 @@ def ask_openai():
         return jsonify({
             "response": reply,
             "model": "gpt-4o",
+            "routing": routing,
             "metrics": {
                 "latency_ms": latency_ms,
                 "tokens_in": tokens_in,
@@ -270,9 +285,9 @@ def ask_openai():
 
     except Exception as e:
         import traceback
-        print("🚨 Exception in /ask route:")
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
     
 @app.route("/tasks/archive/<task_id>", methods=["POST"])

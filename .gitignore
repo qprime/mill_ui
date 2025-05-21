@@ -64,6 +64,8 @@ build/
 *.xz
 *.7z
 
+blendercam/
+
 
 memory/accounting/chroma.sqlite3
 memory/personal/chroma.sqlite3

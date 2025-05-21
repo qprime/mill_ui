@@ -1,6 +1,9 @@
 import requests
 import json
 
+from .personas import get_persona_prompt
+
+
 LLAMA_SERVER_URL = "http://192.168.0.179:5050/v1/chat/completions"
 MODEL_NAME = "phi-3.5.Q4_K_M"
 

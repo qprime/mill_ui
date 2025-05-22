@@ -2,35 +2,125 @@
 {% block title %}Cliff Chat{% endblock %}
 
 {% block content %}
-<div class="container-fluid d-flex flex-column vh-100 bg-dark text-light">
-  <!-- Chat container grows to fill available space -->
-  <div id="chatContainer" class="flex-grow-1 overflow-auto d-flex flex-column-reverse gap-3 p-3"></div>
+<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light" style="padding-left: 0;">
+  <!-- Sidebar with voice controls -->
+  <div class="d-flex flex-column bg-secondary p-3 gap-3" style="width: 200px; min-width: 200px; height: 100vh; overflow-y: auto; position: sticky; top: 0;">
+    <button type="button" id="voiceBtn" class="btn btn-success">🎙️ Talk to Cliff</button>
+    <div id="micStatus" class="text-info small">Idle</div>
+    <button id="toggleInput" class="btn btn-outline-light btn-sm">✏️ Enable Typing</button>
 
-  <!-- Input area at bottom -->
-  <div class="card bg-secondary text-light m-0">
-    <form id="chatForm" class="d-flex flex-wrap gap-2 align-items-center p-2">
-      <input type="text" id="userInput" class="form-control flex-grow-1" placeholder="Ask Cliff something...">
-      <select id="toneSelector" class="form-select w-auto">
+    <div id="inputControls" class="d-none flex-column gap-2 mt-3">
+      <input type="text" id="userInput" class="form-control" placeholder="Ask Cliff something...">
+      <select id="toneSelector" class="form-select">
         <option value="neutral" selected>Neutral</option>
         <option value="emotional">Witty</option>
       </select>
-      <button type="submit" class="btn btn-primary">Send</button>
-      <button type="button" id="voiceBtn" class="btn btn-secondary">🎙️</button>
-    </form>
+      <button id="sendBtn" class="btn btn-primary">Send</button>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="flex-grow-1 d-flex flex-column position-relative">
+    <div id="chatContainer" class="flex-grow-1 overflow-auto d-flex flex-column gap-3 p-3" style="min-height: 0; scroll-behavior: smooth;"></div>
   </div>
 </div>
 
 <script>
 const chatContainer = document.getElementById("chatContainer");
-const chatForm = document.getElementById("chatForm");
 const userInput = document.getElementById("userInput");
 const toneSelector = document.getElementById("toneSelector");
+const sendBtn = document.getElementById("sendBtn");
 const voiceBtn = document.getElementById("voiceBtn");
+const toggleInput = document.getElementById("toggleInput");
+const inputControls = document.getElementById("inputControls");
+const micStatus = document.getElementById("micStatus");
 
-chatForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const prompt = userInput.value.trim();
-  const tone = toneSelector.value;
+let recorder, chunks = [], recording = false;
+
+function setStatus(text, pulse = false, done = false) {
+  micStatus.innerText = text;
+  voiceBtn.classList.remove("pulse-processing", "btn-danger");
+  voiceBtn.classList.add("btn-success");
+  voiceBtn.innerText = "🎙️ Talk to Cliff";
+  if (pulse) voiceBtn.classList.add("pulse-processing");
+  if (done) voiceBtn.style.border = "2px solid lime";
+}
+
+sendBtn.onclick = () => {
+  handleChatSubmission(userInput.value.trim(), toneSelector.value);
+};
+
+toggleInput.onclick = () => {
+  inputControls.classList.toggle("d-none");
+};
+
+voiceBtn.onclick = async () => {
+  if (recording) {
+    recorder.stop();
+    recording = false;
+    voiceBtn.innerText = "🎙️ Talk to Cliff";
+    voiceBtn.classList.remove("btn-danger");
+    voiceBtn.classList.add("btn-success");
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recording = true;
+    setStatus("Recording...", true);
+    voiceBtn.innerText = "🛑 Stop Talking";
+    voiceBtn.classList.remove("btn-success");
+    voiceBtn.classList.add("btn-danger");
+
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = async () => {
+      setStatus("Transcribing…", true);
+      const blob = new Blob(chunks, { type: 'audio/wav' });
+      const formData = new FormData();
+      formData.append('file', blob, 'recording.wav');
+
+      try {
+        const res = await fetch("https://192.168.0.179:8001/transcribe", {
+          method: "POST",
+          body: formData,
+          mode: "cors",
+          credentials: "omit"
+        });
+        const data = await res.json();
+        const text = data.text || "";
+        if (text) {
+          setStatus("Submitting to Cliff…", true);
+          await handleChatSubmission(text, toneSelector.value);
+          setStatus("Done.", false, true);
+        } else {
+          setStatus("No speech detected", false);
+        }
+      } catch (err) {
+        console.error("Whisper error:", err);
+        setStatus("Error during transcription", false);
+      }
+    };
+
+    recorder.start();
+  } catch (err) {
+    console.error("Microphone error:", err);
+    setStatus("Mic error", false);
+  }
+};
+
+// Ensure new responses scroll into alignment with the top of the sidebar
+function scrollChatToAlignWithSidebar() {
+  const chatEntries = chatContainer.children;
+  if (chatEntries.length > 0) {
+    const newestEntry = chatEntries[0];
+    newestEntry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Update the chat submission handler to call scroll alignment
+async function handleChatSubmission(prompt, tone) {
   if (!prompt) return;
 
   const timestamp = new Date().toISOString();
@@ -47,16 +137,10 @@ chatForm.addEventListener("submit", async (e) => {
         <p id="cliff-${timestamp}" class="text-muted mb-2 fst-italic">Thinking...</p>
         <div class="text-end text-muted small" id="model-${timestamp}"></div>
       </div>
-    </div>
-    <div class="d-flex gap-2 mt-2 justify-content-end">
-      <button class="btn btn-outline-info btn-sm">➕ Create Task</button>
-      <button class="btn btn-outline-secondary btn-sm">📚 Add to RAG</button>
-      <button class="btn btn-outline-success btn-sm">🧠 Summarize</button>
-      <button class="btn btn-outline-light btn-sm">💾 Save</button>
-    </div>
-  `;
+    </div>`;
   chatContainer.prepend(exchange);
   userInput.value = "";
+  scrollChatToAlignWithSidebar();
 
   try {
     const response = await fetch("/ask", {
@@ -69,45 +153,13 @@ chatForm.addEventListener("submit", async (e) => {
     const modelTag = document.getElementById(`model-${timestamp}`);
     cliffResponse.innerText = data.response || "(No response)";
     cliffResponse.classList.remove("fst-italic", "text-muted");
-
     const metrics = data.metrics || {};
-    const latency = metrics.latency_ms ? `🕒 ${metrics.latency_ms}ms` : "";
-    const tokensIn = metrics.tokens_in ? `🔼 ${metrics.tokens_in} tokens` : "";
-    const tokensOut = metrics.tokens_out ? `🔽 ${metrics.tokens_out} tokens` : "";
-
-    modelTag.innerText = `Model: ${data.model || "unknown"} ${latency} ${tokensIn} ${tokensOut}`;
+    modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
+    scrollChatToAlignWithSidebar();
   } catch (err) {
     document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
   }
-});
-
-// 🎙️ Voice-to-text input via Whisper server
-voiceBtn.addEventListener("click", async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
-  let chunks = [];
-
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = async () => {
-    const blob = new Blob(chunks, { type: 'audio/wav' });
-    const formData = new FormData();
-    formData.append('file', blob, 'recording.wav');
-
-    try {
-      const res = await fetch("https://192.168.0.179:8001/transcribe", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      userInput.value = data.text || "";
-    } catch (err) {
-      console.error("Whisper error:", err);
-    }
-  };
-
-  recorder.start();
-  setTimeout(() => recorder.stop(), 5000); // auto-stop after 5 seconds
-});
+}
 </script>
 
 <style>
@@ -117,6 +169,15 @@ voiceBtn.addEventListener("click", async () => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.pulse-processing {
+  animation: pulse-yellow 2s infinite;
+  border: 2px solid yellow;
+}
+@keyframes pulse-yellow {
+  0% { border-color: yellow; box-shadow: 0 0 5px yellow; }
+  50% { border-color: gold; box-shadow: 0 0 15px gold; }
+  100% { border-color: yellow; box-shadow: 0 0 5px yellow; }
 }
 </style>
 {% endblock %}

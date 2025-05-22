@@ -13,7 +13,7 @@ from scripts.llm.ai_router import get_router
 from scripts.llm.context_loader import build_context_prompt_fragments
 from scripts.embedding.rag_loader import load_summaries, EmbedFunction
 from chromadb import PersistentClient
-from development.task_manager import load_tasks, update_task, create_task
+from scripts.tasking.task_manager import load_tasks, update_task, create_task, get_task
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 router = get_router("openai")
@@ -103,6 +103,24 @@ def create_task_form():
         return redirect(url_for("show_tasks"))
 
     return render_template("task_create.html")
+
+@app.route("/tasks/edit/<task_id>", methods=["GET", "POST"])
+def edit_task(task_id):
+
+    if request.method == "POST":
+        updated_data = {
+            "title": request.form.get("title"),
+            "description": request.form.get("description"),
+            "tags": [t.strip() for t in request.form.get("tags", "").split(",") if t.strip()],
+            "files": [f.strip() for f in request.form.get("files", "").split(",") if f.strip()],
+            "steps": [s.strip() for s in request.form.get("steps", "").split("\n") if s.strip()],
+            "updated_at": datetime.utcnow().isoformat()
+        }
+        update_task(task_id, updated_data)
+        return redirect(url_for("show_tasks"))
+
+    task = get_task(task_id)
+    return render_template("task_edit.html", task=task)
 
 @app.route("/chatlog")
 def chatlog():

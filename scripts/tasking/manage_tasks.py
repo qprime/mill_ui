@@ -1,5 +1,5 @@
 import argparse
-from development.task_manager import list_tasks, create_task, update_task
+from scripts.tasking.task_manager import list_tasks, create_task, update_task
 
 
 def print_task(task):

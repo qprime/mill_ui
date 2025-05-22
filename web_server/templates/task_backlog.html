@@ -32,9 +32,14 @@
                 </li>
               </ul>
 
-              <form method="POST" action="/tasks/archive/{{ task.id }}">
-                <button type="submit" class="btn btn-sm btn-outline-warning mt-2">Archive</button>
-              </form>
+              <div class="d-flex gap-2 mt-2">
+                <form method="POST" action="/tasks/archive/{{ task.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-warning">Archive</button>
+                </form>
+                <a href="/tasks/edit/{{ task.id }}" class="btn btn-sm btn-outline-info">Edit</a>
+              </div>
+
+              
 
               <form method="POST" action="/tasks/update" class="d-flex gap-2 mt-2">
                 <input type="hidden" name="task_id" value="{{ task.id }}" />

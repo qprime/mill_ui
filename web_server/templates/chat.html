@@ -151,15 +151,87 @@ async function handleChatSubmission(prompt, tone) {
     const data = await response.json();
     const cliffResponse = document.getElementById(`cliff-${timestamp}`);
     const modelTag = document.getElementById(`model-${timestamp}`);
-    cliffResponse.innerText = data.response || "(No response)";
+    cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
     cliffResponse.classList.remove("fst-italic", "text-muted");
     const metrics = data.metrics || {};
     modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
     scrollChatToAlignWithSidebar();
-  } catch (err) {
-    document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
-  }
+
+    cliffResponse.querySelectorAll(".btn-copy").forEach(btn => {
+    btn.onclick = () => {
+      const code = btn.closest(".position-relative").querySelector("code").innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerText = "Copied!";
+        setTimeout(() => btn.innerText = "Copy", 2000);
+      });
+    };
+  });
+  
+
+  cliffResponse.querySelectorAll(".btn-run").forEach(btn => {
+    btn.onclick = async () => {
+      const block = btn.closest(".position-relative");
+      const code = block.querySelector("code").innerText;
+      btn.innerText = "Running…";
+      try {
+        const res = await fetch("/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: code })
+        });
+        const result = await res.json();
+        btn.innerText = result.returncode === 0 ? "✅ Done" : "⚠️ Error";
+        console.log("CLI result:", result);
+
+        // ✅ Add [Show Output] button
+        const outputBtn = document.createElement("button");
+        outputBtn.className = "btn btn-sm btn-outline-info ms-2";
+        outputBtn.innerText = "▶ Show Output";
+        outputBtn.onclick = () => {
+          document.getElementById("outputStdout").innerText = result.stdout || "(no output)";
+          document.getElementById("outputStderr").innerText = result.stderr || "";
+          document.getElementById("outputCode").innerText = `Return code: ${result.returncode}`;
+          new bootstrap.Modal(document.getElementById("outputModal")).show();
+        };
+        block.appendChild(outputBtn);
+
+      } catch (err) {
+        console.error("Run error:", err);
+        btn.innerText = "❌ Fail";
+      }
+      setTimeout(() => btn.innerText = "Run", 3000);
+    };
+
+  });
+} catch (err) {
+  document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
 }
+}
+
+
+function formatCodeBlocks(text) {
+  const codeBlockRegex = /```(?:shell|bash)?\n([\s\S]*?)```/g;
+  return text.replace(codeBlockRegex, (_, code) => {
+    const escaped = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return `
+      <div class="cli-wrapper border rounded bg-black text-light position-relative mt-2 mb-3 p-2">
+        <pre class="m-0"><code class="language-bash">${escaped}</code></pre>
+        <div class="btn-group btn-group-sm position-absolute top-0 end-0 m-1">
+          <button class="btn btn-outline-light btn-copy">Copy</button>
+          <button class="btn btn-outline-success btn-run">Run</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+
+
+
+
 </script>
 
 <style>
@@ -179,5 +251,36 @@ async function handleChatSubmission(prompt, tone) {
   50% { border-color: gold; box-shadow: 0 0 15px gold; }
   100% { border-color: yellow; box-shadow: 0 0 5px yellow; }
 }
+
+.cli-wrapper {
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+.cli-wrapper pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 </style>
+
+<!-- Output Modal -->
+<div class="modal fade" id="outputModal" tabindex="-1" aria-labelledby="outputModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="outputModalLabel">Command Output</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="outputStdout" class="text-success"></code></pre>
+        <pre><code id="outputStderr" class="text-warning"></code></pre>
+        <div id="outputCode" class="text-muted small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

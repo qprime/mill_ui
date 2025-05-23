@@ -48,6 +48,10 @@ function setStatus(text, pulse = false, done = false) {
 
 sendBtn.onclick = () => {
   handleChatSubmission(userInput.value.trim(), toneSelector.value);
+  cliffResponse.querySelectorAll("pre code").forEach(block => {
+    hljs.highlightElement(block);
+  });
+
 };
 
 toggleInput.onclick = () => {
@@ -148,77 +152,85 @@ async function handleChatSubmission(prompt, tone) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, tone })
     });
+
     const data = await response.json();
     const cliffResponse = document.getElementById(`cliff-${timestamp}`);
     const modelTag = document.getElementById(`model-${timestamp}`);
+
     cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
     cliffResponse.classList.remove("fst-italic", "text-muted");
+
+    // ✅ Trigger syntax highlighting
+    cliffResponse.querySelectorAll("pre code").forEach(block => {
+      hljs.highlightElement(block);
+    });
+
     const metrics = data.metrics || {};
     modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
     scrollChatToAlignWithSidebar();
 
     cliffResponse.querySelectorAll(".btn-copy").forEach(btn => {
-    btn.onclick = () => {
-      const code = btn.closest(".position-relative").querySelector("code").innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        btn.innerText = "Copied!";
-        setTimeout(() => btn.innerText = "Copy", 2000);
-      });
-    };
-  });
-  
-
-  cliffResponse.querySelectorAll(".btn-run").forEach(btn => {
-    btn.onclick = async () => {
-      const block = btn.closest(".position-relative");
-      const code = block.querySelector("code").innerText;
-      btn.innerText = "Running…";
-      try {
-        const res = await fetch("/run", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command: code })
+      btn.onclick = () => {
+        const code = btn.closest(".position-relative").querySelector("code").innerText;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.innerText = "Copied!";
+          setTimeout(() => btn.innerText = "Copy", 2000);
         });
-        const result = await res.json();
-        btn.innerText = result.returncode === 0 ? "✅ Done" : "⚠️ Error";
-        console.log("CLI result:", result);
+      };
+    });
 
-        // ✅ Add [Show Output] button
-        const outputBtn = document.createElement("button");
-        outputBtn.className = "btn btn-sm btn-outline-info ms-2";
-        outputBtn.innerText = "▶ Show Output";
-        outputBtn.onclick = () => {
-          document.getElementById("outputStdout").innerText = result.stdout || "(no output)";
-          document.getElementById("outputStderr").innerText = result.stderr || "";
-          document.getElementById("outputCode").innerText = `Return code: ${result.returncode}`;
-          new bootstrap.Modal(document.getElementById("outputModal")).show();
-        };
-        block.appendChild(outputBtn);
+    cliffResponse.querySelectorAll(".btn-run").forEach(btn => {
+      btn.onclick = async () => {
+        const block = btn.closest(".position-relative");
+        const code = block.querySelector("code").innerText;
+        btn.innerText = "Running…";
+        try {
+          const res = await fetch("/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ command: code })
+          });
+          const result = await res.json();
+          btn.innerText = result.returncode === 0 ? "✅ Done" : "⚠️ Error";
 
-      } catch (err) {
-        console.error("Run error:", err);
-        btn.innerText = "❌ Fail";
-      }
-      setTimeout(() => btn.innerText = "Run", 3000);
-    };
+          const outputBtn = document.createElement("button");
+          outputBtn.className = "btn btn-sm btn-outline-info ms-2";
+          outputBtn.innerText = "▶ Show Output";
+          outputBtn.onclick = () => {
+            document.getElementById("outputStdout").innerText = result.stdout || "(no output)";
+            document.getElementById("outputStderr").innerText = result.stderr || "";
+            document.getElementById("outputCode").innerText = `Return code: ${result.returncode}`;
+            new bootstrap.Modal(document.getElementById("outputModal")).show();
+          };
+          block.appendChild(outputBtn);
 
-  });
-} catch (err) {
-  document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
-}
+        } catch (err) {
+          console.error("Run error:", err);
+          btn.innerText = "❌ Fail";
+        }
+        setTimeout(() => btn.innerText = "Run", 3000);
+      };
+    });
+
+  } catch (err) {
+    document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
+  }
 }
 
 
 function formatCodeBlocks(text) {
-  const codeBlockRegex = /```(?:shell|bash)?\n([\s\S]*?)```/g;
-  return text.replace(codeBlockRegex, (_, code) => {
-    const escaped = code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+  const languageMap = {
+    js: "javascript",
+    html: "xml"
+  };
+
+
+  return text.replace(codeBlockRegex, (_, lang, code) => {
+    const language = (lang || "bash").toLowerCase();
     return `
       <div class="cli-wrapper border rounded bg-black text-light position-relative mt-2 mb-3 p-2">
-        <pre class="m-0"><code class="language-bash">${escaped}</code></pre>
+        <pre class="m-0"><code class="language-${language}">${code}</code></pre>
         <div class="btn-group btn-group-sm position-absolute top-0 end-0 m-1">
           <button class="btn btn-outline-light btn-copy">Copy</button>
           <button class="btn btn-outline-success btn-run">Run</button>
@@ -227,6 +239,9 @@ function formatCodeBlocks(text) {
     `;
   });
 }
+
+
+
 
 
 

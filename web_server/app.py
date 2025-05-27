@@ -12,7 +12,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from scripts.llm.ai_router import get_router
-from scripts.llm.context_loader import build_context_prompt_fragments
+from scripts.llm.context_loader import build_context_prompt_fragments, load_context_for_persona
 from scripts.embedding.rag_loader import load_summaries, EmbedFunction
 from chromadb import PersistentClient
 from scripts.tasking.task_manager import load_tasks, update_task, create_task, get_task
@@ -207,52 +207,6 @@ def chat():
 # context_loader.py (inside scripts/llm)
 from typing import List, Optional
 
-def get_project_context(prompt: str, paths: Optional[List[str]] = None, max_docs: int = 3) -> str:
-    """
-    Retrieve relevant context using ChromaDB summaries.
-    Optionally filter by memory paths or domains.
-    Logs details about path filtering and results found.
-    """
-    import chromadb
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
-    try:
-        client = chromadb.PersistentClient(path="memory/chroma")
-        collection = client.get_or_create_collection(
-            name="module_summaries",
-            embedding_function=SentenceTransformerEmbeddingFunction()
-        )
-    except Exception as init_error:
-        print(f"❌ ChromaDB init failed: {init_error}")
-        return "[Error initializing memory store.]"
-
-    filters = {}
-    if paths:
-        filters["path"] = {"$in": paths}
-        print(f"🔍 Filtering context by paths: {paths}")
-
-    try:
-        results = collection.query(
-            query_texts=[prompt],
-            n_results=max_docs,
-            where=filters if filters else None
-        )
-
-        docs = results.get("documents", [[]])[0]
-        context = "\n\n".join(docs)
-
-        if docs:
-            print(f"✅ Retrieved {len(docs)} documents for context ({sum(len(d) for d in docs)} chars total).")
-        else:
-            print("⚠️ No documents matched the query.")
-
-        return context if context.strip() else "[No relevant context found.]"
-
-    except Exception as query_error:
-        print(f"⚠️ get_project_context failed during query: {query_error}")
-        return "[No relevant context found.]"
-
-
 
 def get_cliff_status():
     from flask import request
@@ -283,7 +237,7 @@ def ask_openai():
         from scripts.distillation.distill_text import distill_text
         from scripts.llm.context_loader import (
             build_context_prompt_fragments,
-            get_project_context,
+            load_context_for_persona,
             get_cliff_status
         )
 
@@ -311,11 +265,15 @@ def ask_openai():
 
         system_message = get_persona_prompt(persona)
         base_context = build_context_prompt_fragments(paths=suggested_context)
-        rag_context = get_project_context(distilled_prompt, paths=suggested_context)
+        rag_context = load_context_for_persona(distilled_prompt, persona, suggested_context)
         if rag_context.strip() in ("", "[No relevant context found.]", "[Error initializing memory store.]"):
             rag_context = "⚠️ No relevant project memory was found for this query. Do not hallucinate or invent answers."
 
         status = get_cliff_status()
+        print("[ask_openai] Cliff system status:")
+        for k, v in status.items():
+            print(f"  {k}: {v}")
+
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
         full_context = "\n\n".join([

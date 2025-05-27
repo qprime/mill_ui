@@ -14,7 +14,6 @@ DEFAULT_GUIDANCE = {
 }
 
 def fill_guidance_defaults(guidance: dict) -> tuple[dict, list[str]]:
-    """Fills missing guidance parameters and returns warnings for each default used."""
     warnings = []
     final = guidance.copy()
     for key, value in DEFAULT_GUIDANCE.items():
@@ -23,33 +22,47 @@ def fill_guidance_defaults(guidance: dict) -> tuple[dict, list[str]]:
             warnings.append(f"guidance parameter '{key}' missing, using default '{value}'")
     return final, warnings
 
-def distill_text(cleaned_text: str, guidance: dict) -> dict:
-    """Sends cleaned text to LLM and returns distilled output and metadata."""
+def distill_text(cleaned_text: str, guidance: dict, strict_mode: bool = False) -> dict:
     guidance_filled, warnings = fill_guidance_defaults(guidance)
 
+    # Wrap input in explicit guard delimiters for strict mode
+    if strict_mode:
+        user_input = f"BEGIN_INPUT\n{cleaned_text}\nEND_INPUT"
+    else:
+        user_input = cleaned_text
+
+    # Construct system prompt
     system_prompt = (
-        "You are a distillation engine. Your job is to reduce a cleaned input string to a minimal, logically sound instruction.\n"
-        "Use the following constraints:\n"
+        "You are an English language expert with a specialty in summarizing and distilling text to its most succinct, meaningful form. "
+        "Your role is to extract only what is necessary to preserve the speaker's intent, actions, and key thoughts.\n"
+        "Do not infer or fabricate any content not directly stated by the speaker.\n"
+        "Preserve any expressed uncertainty, questions, or feedback-seeking behavior in a concise and meaningful way.\n"
+        "Avoid including examples, answers, or suggestions that were not present in the input.\n"
+        "Only summarize what appears between BEGIN_INPUT and END_INPUT, if those markers are present.\n"
         f"- persona: {guidance_filled['persona']}\n"
         f"- task_type: {guidance_filled['task_type']}\n"
         f"- tone: {guidance_filled['tone']}\n"
         f"- urgency: {guidance_filled['urgency']}\n\n"
-        "Return only the final instruction text."
+        "Return only the final distilled output."
     )
 
     payload = {
         "model": MODEL_NAME,
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": cleaned_text}
+            {"role": "user", "content": user_input}
         ],
-        "temperature": 0.2
+        "temperature": 0.5 if strict_mode else 0.2
     }
 
     try:
         response = requests.post(LLAMA_SERVER_URL, json=payload, timeout=15)
         response.raise_for_status()
         distilled = response.json()["choices"][0]["message"]["content"].strip()
+
+        # Post-check for hallucinated content
+        if strict_mode and "`" in distilled and "`" not in cleaned_text:
+            warnings.append("Distilled text contains code-like output not present in input. Possible hallucination.")
 
     except Exception as e:
         distilled = cleaned_text
@@ -59,6 +72,7 @@ def distill_text(cleaned_text: str, guidance: dict) -> dict:
         "distilled_text": distilled,
         "metadata": {
             **guidance_filled,
+            "strict_mode": strict_mode,
             "warnings": warnings
         },
         "original_input": {
@@ -69,10 +83,10 @@ def distill_text(cleaned_text: str, guidance: dict) -> dict:
 
 def batch_distill(
     text_guidance_pairs: list[tuple[str, dict]],
-    output_path: Path
+    output_path: Path,
+    strict_mode: bool = False
 ) -> None:
-    """Processes a batch of cleaned text + guidance into JSONL output."""
     with output_path.open("w", encoding="utf-8") as f:
         for cleaned_text, guidance in text_guidance_pairs:
-            result = distill_text(cleaned_text, guidance)
+            result = distill_text(cleaned_text, guidance, strict_mode=strict_mode)
             f.write(json.dumps(result) + "\n")

@@ -19,10 +19,10 @@ default_guidance = {
 
 def run_single_example():
     raw = """
-    Okay, so I'm using the original app you gave me, not the download one. I have a feeling that if I open that, it's probably not anything real. That just hasn't worked in the past. So, I have the original one. I need to send it to my desktop, which I can do that right now. I send that to desktop, copy the email list, add to home screen. Okay, so I'm calling it tagger. Add. It's right on my home screen. I don't know if I opened it. It's opening right up. I'm still doing it locally, but let's... I don't actually see how to add a picture. I've got save. Let's see. Photo close. Okay, so it looks like I need to take a picture and then save, sort of add a photo, and add tags. That's not the end of the world. It's not the workflow I look for. But now, I guess I need to maybe turn on Wi-Fi and see if it'll still work. Yeah, just a note. What I was hoping for was something where I could take a picture from within the app, right? It'd be like, tick, tick, you know, and I'd click it, and then it would open the camera. I would take the picture, and then I went back to the app, I would take the picture, and then I went back to the app, and I would add tags. So, I'm going to turn off Wi-Fi and see if there's still a stuff. I'm a little unsure what else to find for the quick version, if this works.
-    """
+this'll be my sidechat area today... So first thing I'm wondering: Can I prompt you to request additional resources only if needed?  For instance, could I teach you about a project, but not necessarily give you every file in the code project whole (maybe you just get the RAG of the functions).  Then could you request one or several original files for clarification?  If so, could I automate that to a degree?  We're doing this in the context of cliff where I control the contexts before sending to the openai api.
+ """
     cleaned = clean_text(raw)
-    result = distill_text(cleaned, default_guidance)
+    result = distill_text(cleaned, default_guidance, strict_mode=True)
     print(json.dumps(result, indent=2))
 
 def run_batch_example():
@@ -44,4 +44,4 @@ def run_batch_example():
 
 if __name__ == "__main__":
     run_single_example()
-    run_batch_example()
+    # run_batch_example()

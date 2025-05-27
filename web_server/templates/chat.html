@@ -2,7 +2,7 @@
 {% block title %}Cliff Chat{% endblock %}
 
 {% block content %}
-<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light p-0">
+<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light p-0" data-chat-id="{{ chat_id }}">
 
   <!-- Sidebar with voice + text controls -->
   <div class="d-flex flex-column bg-secondary p-3 gap-3" style="width: 200px; min-width: 200px; height: 100vh; overflow-y: auto; position: sticky; top: 0;">
@@ -136,6 +136,7 @@ function scrollChatToAlignWithSidebar() {
 async function handleChatSubmission(prompt, tone) {
   if (!prompt) return;
 
+  const chatId = document.body.dataset.chatId;  // ← Add this
   const timestamp = new Date().toISOString();
   const exchange = document.createElement("div");
   exchange.className = "card p-3 bg-dark text-light shadow-sm fade-in";
@@ -163,7 +164,7 @@ async function handleChatSubmission(prompt, tone) {
     const response = await fetch("/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, tone })
+      body: JSON.stringify({ prompt, tone, chat_id: chatId })  // ← Include it
     });
 
     const data = await response.json();

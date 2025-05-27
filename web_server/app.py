@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 from datetime import datetime
 import requests
+import uuid
 
 from io import BytesIO
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file, send_from_directory
@@ -15,6 +16,7 @@ from scripts.llm.context_loader import build_context_prompt_fragments
 from scripts.embedding.rag_loader import load_summaries, EmbedFunction
 from chromadb import PersistentClient
 from scripts.tasking.task_manager import load_tasks, update_task, create_task, get_task
+from scripts.chatting.chat_logger import log_chat_turn
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 router = get_router("openai")
@@ -199,9 +201,8 @@ def handle_prompt():
 
 @app.route("/chat")
 def chat():
-    return render_template("chat.html")
-
-
+    chat_id = str(uuid.uuid4())
+    return render_template("chat.html", chat_id=chat_id)
 
 # context_loader.py (inside scripts/llm)
 from typing import List, Optional
@@ -210,19 +211,25 @@ def get_project_context(prompt: str, paths: Optional[List[str]] = None, max_docs
     """
     Retrieve relevant context using ChromaDB summaries.
     Optionally filter by memory paths or domains.
+    Logs details about path filtering and results found.
     """
     import chromadb
     from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
-    client = chromadb.PersistentClient(path="memory/chroma")
-    collection = client.get_or_create_collection(
-        name="module_summaries",
-        embedding_function=SentenceTransformerEmbeddingFunction()
-    )
+    try:
+        client = chromadb.PersistentClient(path="memory/chroma")
+        collection = client.get_or_create_collection(
+            name="module_summaries",
+            embedding_function=SentenceTransformerEmbeddingFunction()
+        )
+    except Exception as init_error:
+        print(f"❌ ChromaDB init failed: {init_error}")
+        return "[Error initializing memory store.]"
 
     filters = {}
     if paths:
         filters["path"] = {"$in": paths}
+        print(f"🔍 Filtering context by paths: {paths}")
 
     try:
         results = collection.query(
@@ -232,11 +239,19 @@ def get_project_context(prompt: str, paths: Optional[List[str]] = None, max_docs
         )
 
         docs = results.get("documents", [[]])[0]
-        return "\n\n".join(docs)
+        context = "\n\n".join(docs)
 
-    except Exception as e:
-        print(f"⚠️ get_project_context failed: {e}")
+        if docs:
+            print(f"✅ Retrieved {len(docs)} documents for context ({sum(len(d) for d in docs)} chars total).")
+        else:
+            print("⚠️ No documents matched the query.")
+
+        return context if context.strip() else "[No relevant context found.]"
+
+    except Exception as query_error:
+        print(f"⚠️ get_project_context failed during query: {query_error}")
         return "[No relevant context found.]"
+
 
 
 def get_cliff_status():
@@ -275,20 +290,17 @@ def ask_openai():
         data = request.get_json()
         raw_input = data.get("prompt", "")
         tone = data.get("tone", "neutral")
+        chat_id = data.get("chat_id")  # Required; injected in JS via data attribute
 
-        if not raw_input:
-            return jsonify({"error": "No prompt provided"}), 400
+        if not raw_input or not chat_id:
+            return jsonify({"error": "Missing prompt or chat_id"}), 400
 
-        # 🧼 Stage 1: Clean raw input
         cleaned = clean_text(raw_input)
-
-        # 🧠 Stage 2: Classify intent and persona using cleaned input
         routing = route_context(cleaned)
         persona = routing.get("persona", "default")
         suggested_context = routing.get("suggested_context", [])
         emotions_enabled = (tone == "emotional")
 
-        # ✂️ Stage 3: Distill input with classified persona
         distilled_result = distill_text(cleaned, {
             "persona": persona,
             "task_type": "specification",
@@ -297,12 +309,12 @@ def ask_openai():
         }, strict_mode=True)
         distilled_prompt = distilled_result["distilled_text"]
 
-        # 👤 Stage 4: Construct system persona message
         system_message = get_persona_prompt(persona)
-
-        # 📚 Stage 5: Build context prompt blocks (base + RAG + status)
         base_context = build_context_prompt_fragments(paths=suggested_context)
         rag_context = get_project_context(distilled_prompt, paths=suggested_context)
+        if rag_context.strip() in ("", "[No relevant context found.]", "[Error initializing memory store.]"):
+            rag_context = "⚠️ No relevant project memory was found for this query. Do not hallucinate or invent answers."
+
         status = get_cliff_status()
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
@@ -313,26 +325,41 @@ def ask_openai():
             f"# System Runtime Status\n{status_block}"
         ])
 
-        # 🧠 Final prompt assembly
         augmented_prompt = f"{full_context}\n\nUser asked:\n{distilled_prompt}"
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
 
-        # 🚀 LLM call
         start = time.time()
         reply = router.chat(messages, model="gpt-4o")
         end = time.time()
 
-        # 📊 Metrics
         def count_tokens(text): return len(text.split())
         tokens_in = sum(count_tokens(m["content"]) for m in messages)
         tokens_out = count_tokens(reply)
         latency_ms = int((end - start) * 1000)
 
+        # 🔐 Extract high-level context path
+        context_path = routing.get("suggested_context", ["uncategorized"])[0]
+        top_context = context_path.split("/")[0]
+
+        # 📝 Log turn
+        log_chat_turn(
+            context=top_context,
+            chat_id=chat_id,
+            user_input=raw_input,
+            cleaned=distilled_result["original_input"]["cleaned_text"],
+            distilled=distilled_prompt,
+            routing=routing,
+            response=reply,
+            model="gpt-4o"
+        )
+
         return jsonify({
             "response": reply,
+            "rag_empty": rag_context.startswith("⚠️"),
             "model": "gpt-4o",
             "routing": routing,
-            "distilled_input": distilled_result["distilled_text"],
+            "chat_id": chat_id,
+            "distilled_input": distilled_prompt,
             "original_input": distilled_result["original_input"]["cleaned_text"],
             "metrics": {
                 "latency_ms": latency_ms,
@@ -341,11 +368,11 @@ def ask_openai():
             }
         })
 
-
     except Exception as e:
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 
 

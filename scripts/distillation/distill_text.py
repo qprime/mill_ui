@@ -13,6 +13,10 @@ DEFAULT_GUIDANCE = {
     "urgency": "normal"
 }
 
+def is_fact_query(text: str) -> bool:
+    return text.strip().lower().startswith(("what", "when", "where", "who", "how many", "how much"))
+
+
 def fill_guidance_defaults(guidance: dict) -> tuple[dict, list[str]]:
     warnings = []
     final = guidance.copy()
@@ -25,6 +29,18 @@ def fill_guidance_defaults(guidance: dict) -> tuple[dict, list[str]]:
 def distill_text(cleaned_text: str, guidance: dict, strict_mode: bool = False) -> dict:
     guidance_filled, warnings = fill_guidance_defaults(guidance)
 
+    if is_fact_query(cleaned_text):
+        return {
+            "distilled_text": cleaned_text,
+            "metadata": {**guidance_filled, "bypassed": True},
+            "original_input": {
+                "cleaned_text": cleaned_text,
+                "guidance": guidance
+            }
+        }
+
+
+    
     # Wrap input in explicit guard delimiters for strict mode
     if strict_mode:
         user_input = f"BEGIN_INPUT\n{cleaned_text}\nEND_INPUT"

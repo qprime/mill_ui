@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
+from difflib import SequenceMatcher
+
 
 def load_json(path: Path) -> dict:
     if path.exists():
@@ -8,12 +10,14 @@ def load_json(path: Path) -> dict:
             return json.load(f)
     return {}
 
+
 def load_module_summaries(md_dir: Path) -> List[str]:
     return [
         f.read_text().strip()
         for f in sorted(md_dir.glob("*.md"))
         if f.read_text().strip()
     ]
+
 
 def load_base_context() -> Dict[str, any]:
     root = Path(__file__).resolve().parents[2]
@@ -26,8 +30,6 @@ def load_base_context() -> Dict[str, any]:
         "module_summaries": load_module_summaries(root / "memory/development/module_summaries")
     }
 
-from typing import List, Optional
-from scripts.llm.context_loader import load_base_context
 
 def build_context_prompt_fragments(paths: Optional[List[str]] = None) -> List[str]:
     """
@@ -37,7 +39,6 @@ def build_context_prompt_fragments(paths: Optional[List[str]] = None) -> List[st
     ctx = load_base_context()
 
     if paths:
-        # You could expand this logic with partial matching or tag-mapping later
         fragments = []
         if "summary" in paths:
             fragments.append(f"# Project Summary\n{ctx['summary'].get('long_description', '')}")
@@ -53,7 +54,6 @@ def build_context_prompt_fragments(paths: Optional[List[str]] = None) -> List[st
             fragments.append(f"# Module Summaries\n" + "\n\n".join(ctx["module_summaries"]))
         return fragments
 
-    # Default: return the full set
     return [
         f"# Project Summary\n{ctx['summary'].get('long_description', '')}",
         f"# Core Goals\n" + "\n".join(f"- {g}" for g in ctx['summary'].get("core_goals", [])),
@@ -64,3 +64,27 @@ def build_context_prompt_fragments(paths: Optional[List[str]] = None) -> List[st
     ]
 
 
+def get_project_context(query: str, paths: Optional[List[str]] = None, top_n: int = 3) -> str:
+    """
+    Retrieve the top-N most relevant context fragments based on string similarity to the query.
+    Future version may use vector-based retrieval.
+    """
+    all_chunks = build_context_prompt_fragments(paths)
+    scored: List[Tuple[str, float]] = [
+        (chunk, SequenceMatcher(None, query.lower(), chunk.lower()).ratio())
+        for chunk in all_chunks
+    ]
+    top_chunks = sorted(scored, key=lambda x: x[1], reverse=True)[:top_n]
+    return "\n\n".join(chunk for chunk, _ in top_chunks)
+
+
+def get_cliff_status() -> dict:
+    """
+    Stub: Return mock or real-time system status.
+    """
+    return {
+        "uptime": "running",
+        "memory_usage": "not tracked",
+        "active_contexts": 3,
+        "last_distill": "just now"
+    }

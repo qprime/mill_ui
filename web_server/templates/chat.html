@@ -2,13 +2,19 @@
 {% block title %}Cliff Chat{% endblock %}
 
 {% block content %}
-<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light" style="padding-left: 0;">
-  <!-- Sidebar with voice controls -->
+<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light p-0">
+
+  <!-- Sidebar with voice + text controls -->
   <div class="d-flex flex-column bg-secondary p-3 gap-3" style="width: 200px; min-width: 200px; height: 100vh; overflow-y: auto; position: sticky; top: 0;">
+    
+    <!-- Voice Button -->
     <button type="button" id="voiceBtn" class="btn btn-success">🎙️ Talk to Cliff</button>
     <div id="micStatus" class="text-info small">Idle</div>
+
+    <!-- Toggle for text input -->
     <button id="toggleInput" class="btn btn-outline-light btn-sm">✏️ Enable Typing</button>
 
+    <!-- Optional Text Input Form -->
     <div id="inputControls" class="d-none flex-column gap-2 mt-3">
       <input type="text" id="userInput" class="form-control" placeholder="Ask Cliff something...">
       <select id="toneSelector" class="form-select">
@@ -19,11 +25,20 @@
     </div>
   </div>
 
-  <!-- Chat area -->
+  <!-- Main Chat Display Area -->
   <div class="flex-grow-1 d-flex flex-column position-relative">
-    <div id="chatContainer" class="flex-grow-1 overflow-auto d-flex flex-column gap-3 p-3" style="min-height: 0; scroll-behavior: smooth;"></div>
+
+    <!-- Chat Output Container -->
+    <div id="chatContainer" class="flex-grow-1 overflow-auto d-flex flex-column gap-3 p-3"
+         style="min-height: 0; scroll-behavior: smooth;">
+      <!-- Dynamic chat entries will render here -->
+    </div>
+
+    <!-- (Optional) Modal or footer controls can go here -->
+    
   </div>
 </div>
+
 
 <script>
 const chatContainer = document.getElementById("chatContainer");
@@ -48,10 +63,6 @@ function setStatus(text, pulse = false, done = false) {
 
 sendBtn.onclick = () => {
   handleChatSubmission(userInput.value.trim(), toneSelector.value);
-  cliffResponse.querySelectorAll("pre code").forEach(block => {
-    hljs.highlightElement(block);
-  });
-
 };
 
 toggleInput.onclick = () => {
@@ -114,7 +125,6 @@ voiceBtn.onclick = async () => {
   }
 };
 
-// Ensure new responses scroll into alignment with the top of the sidebar
 function scrollChatToAlignWithSidebar() {
   const chatEntries = chatContainer.children;
   if (chatEntries.length > 0) {
@@ -123,7 +133,6 @@ function scrollChatToAlignWithSidebar() {
   }
 }
 
-// Update the chat submission handler to call scroll alignment
 async function handleChatSubmission(prompt, tone) {
   if (!prompt) return;
 
@@ -134,7 +143,11 @@ async function handleChatSubmission(prompt, tone) {
     <div class="d-flex flex-column flex-md-row gap-3">
       <div class="flex-fill">
         <strong class="text-info">🧑 You:</strong>
-        <p class="mb-2">${prompt}</p>
+        <div class="toggle-original-distilled mb-2">
+          <p class="user-original">${prompt}</p>
+          <p class="user-distilled d-none text-info fst-italic">(Distilled loading...)</p>
+          <button class="btn btn-sm btn-outline-secondary toggle-distill-btn">Toggle Distilled</button>
+        </div>
       </div>
       <div class="flex-fill">
         <strong class="text-warning">🤖 Cliff:</strong>
@@ -156,6 +169,17 @@ async function handleChatSubmission(prompt, tone) {
     const data = await response.json();
     const cliffResponse = document.getElementById(`cliff-${timestamp}`);
     const modelTag = document.getElementById(`model-${timestamp}`);
+    // Update distilled toggle display
+    const toggleBlock = cliffResponse.closest(".card").querySelector(".toggle-original-distilled");
+    if (toggleBlock) {
+      const distilledEl = toggleBlock.querySelector(".user-distilled");
+      distilledEl.innerText = `(Distilled) ${data.distilled_input || "N/A"}`;
+
+      toggleBlock.querySelector(".toggle-distill-btn").onclick = () => {
+        toggleBlock.querySelector(".user-original").classList.toggle("d-none");
+        toggleBlock.querySelector(".user-distilled").classList.toggle("d-none");
+      };
+    }
 
     cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
     cliffResponse.classList.remove("fst-italic", "text-muted");
@@ -213,10 +237,11 @@ async function handleChatSubmission(prompt, tone) {
     });
 
   } catch (err) {
-    document.getElementById(`cliff-${timestamp}`).innerText = "(Error contacting Cliff)";
+    console.error("Ask error:", err);
+    const cliffResponse = document.getElementById(`cliff-${timestamp}`);
+    if (cliffResponse) cliffResponse.innerText = "(Error contacting Cliff)";
   }
 }
-
 
 function formatCodeBlocks(text) {
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
@@ -224,7 +249,6 @@ function formatCodeBlocks(text) {
     js: "javascript",
     html: "xml"
   };
-
 
   return text.replace(codeBlockRegex, (_, lang, code) => {
     const language = (lang || "bash").toLowerCase();
@@ -239,15 +263,8 @@ function formatCodeBlocks(text) {
     `;
   });
 }
-
-
-
-
-
-
-
-
 </script>
+
 
 <style>
 .fade-in {

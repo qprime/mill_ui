@@ -264,27 +264,45 @@ def ask_openai():
         import time
         from scripts.llm.context_router import route_context
         from scripts.llm.personas import get_persona_prompt
-        
+        from scripts.distillation.cleaner import clean_text
+        from scripts.distillation.distill_text import distill_text
+        from scripts.llm.context_loader import (
+            build_context_prompt_fragments,
+            get_project_context,
+            get_cliff_status
+        )
 
         data = request.get_json()
-        prompt = data.get("prompt", "")
+        raw_input = data.get("prompt", "")
         tone = data.get("tone", "neutral")
 
-        if not prompt:
+        if not raw_input:
             return jsonify({"error": "No prompt provided"}), 400
 
-        # 🧠 Stage 1: Local LLM to classify prompt
-        routing = route_context(prompt)
+        # 🧼 Stage 1: Clean raw input
+        cleaned = clean_text(raw_input)
+
+        # 🧠 Stage 2: Classify intent and persona using cleaned input
+        routing = route_context(cleaned)
         persona = routing.get("persona", "default")
         suggested_context = routing.get("suggested_context", [])
         emotions_enabled = (tone == "emotional")
 
-        # 🧠 Stage 2: Construct persona system message
+        # ✂️ Stage 3: Distill input with classified persona
+        distilled_result = distill_text(cleaned, {
+            "persona": persona,
+            "task_type": "specification",
+            "tone": tone,
+            "urgency": "medium"
+        }, strict_mode=True)
+        distilled_prompt = distilled_result["distilled_text"]
+
+        # 👤 Stage 4: Construct system persona message
         system_message = get_persona_prompt(persona)
 
-        # 🧠 Stage 3: Build contextual memory fragments
+        # 📚 Stage 5: Build context prompt blocks (base + RAG + status)
         base_context = build_context_prompt_fragments(paths=suggested_context)
-        rag_context = get_project_context(prompt, paths=suggested_context)
+        rag_context = get_project_context(distilled_prompt, paths=suggested_context)
         status = get_cliff_status()
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
@@ -295,14 +313,16 @@ def ask_openai():
             f"# System Runtime Status\n{status_block}"
         ])
 
-        augmented_prompt = f"{full_context}\n\nUser asked:\n{prompt}"
+        # 🧠 Final prompt assembly
+        augmented_prompt = f"{full_context}\n\nUser asked:\n{distilled_prompt}"
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
 
-        # 🔁 Forward to OpenAI (or fallback) LLM
+        # 🚀 LLM call
         start = time.time()
         reply = router.chat(messages, model="gpt-4o")
         end = time.time()
 
+        # 📊 Metrics
         def count_tokens(text): return len(text.split())
         tokens_in = sum(count_tokens(m["content"]) for m in messages)
         tokens_out = count_tokens(reply)
@@ -312,6 +332,8 @@ def ask_openai():
             "response": reply,
             "model": "gpt-4o",
             "routing": routing,
+            "distilled_input": distilled_result["distilled_text"],
+            "original_input": distilled_result["original_input"]["cleaned_text"],
             "metrics": {
                 "latency_ms": latency_ms,
                 "tokens_in": tokens_in,
@@ -319,10 +341,12 @@ def ask_openai():
             }
         })
 
+
     except Exception as e:
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 
     

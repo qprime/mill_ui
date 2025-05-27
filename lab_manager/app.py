@@ -2,12 +2,14 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 from datetime import datetime
+from pathlib import Path
+
 import os
 import sys
-sys.path.append(os.path.expanduser("~/cliff_ai/scripts"))
-from memory_manager import MemoryManager
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-memory_manager = MemoryManager()
+from scripts.memory.memory_manager import add_to_domain
+
 
 app = Flask(__name__)
 CORS(app)
@@ -33,12 +35,13 @@ def report():
     all_data = load_data()
     all_data[device_data["device_id"]] = device_data
     save_data(all_data)
-    memory_manager.add_to_domain(
-        domain="production",
+    add_to_domain(
+        domain="lab",
         text=f"Device reported: {device_data['device_id']}",
         source="lab_manager",
         tags=["device", "report"]
     )
+
 
     return jsonify({"status": "ok", "device": device_data["device_id"]})
 
@@ -65,12 +68,13 @@ def update_device(device_id):
     
     save_data(all_data)
         
-    memory_manager.add_to_domain(
-        domain="production",
+    add_to_domain(
+        domain="lab",
         text=f"Device updated: {device_id} with fields {list(new_fields.keys())}",
         source="lab_manager",
         tags=["device", "update"]
     )
+
 
 
     return jsonify({"status": "updated", "device": all_data[device_id]})
@@ -115,12 +119,13 @@ def delete_device(device_id):
 
     save_data(all_data)
     
-    memory_manager.add_to_domain(
-        domain="production",
+    add_to_domain(
+        domain="lab",
         text=f"Device deleted: {device_id}",
         source="lab_manager",
         tags=["device", "delete"]
     )
+
 
     return jsonify({"status": "deleted", "device": device_id})
 

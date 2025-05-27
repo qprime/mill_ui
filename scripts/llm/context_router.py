@@ -2,6 +2,7 @@ import requests
 import json
 from .personas import get_persona_prompt
 from scripts.llm.ai_router import get_router
+from scripts.memory.memory_manager import get_known_contexts
 
 LLAMA_SERVER_URL = "http://192.168.0.179:5050/v1/chat/completions"
 MODEL_NAME = "phi-3.5.Q4_K_M"
@@ -9,15 +10,7 @@ OPENAI_MODEL = "gpt-4o"
 
 # --- Persona stub (future switch logic can plug into this) ---
 KNOWN_PERSONAS = ["developer", "accountant", "assistant", "lab_manager"]
-KNOWN_CONTEXTS = [
-    "development/code_chunks",
-    "development/project_summaries",
-    "lab_manager",
-    "cli_logs",
-    "voice_pipeline",
-    "accounting/expenses",
-    "personal_notes",
-]
+KNOWN_CONTEXTS = get_known_contexts()
 
 router_backup = get_router("openai")
 

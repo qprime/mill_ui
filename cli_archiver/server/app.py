@@ -1,4 +1,5 @@
 # cli_archiver/server/app.py
+from pathlib import Path
 
 from flask import Flask, request, jsonify
 from cli_log_store import save_cli_logs
@@ -8,9 +9,9 @@ import json
 
 import sys
 import os
-sys.path.append(os.path.expanduser("~/cliff_ai/scripts"))
-from memory_manager import MemoryManager
-memory_manager = MemoryManager()
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from scripts.memory.memory_manager import add_to_domain
 
 app = Flask(__name__)
 CORS(app)
@@ -38,7 +39,7 @@ def receive_cli_logs():
         if not any(command_text.startswith(junk) for junk in MEMORY_JUNK_COMMANDS):
             try:
                 print(f"[CLI Logger Server] Pushing to memory: {command_text}")
-                memory_manager.add_to_domain(
+                add_to_domain(
                     domain="production",
                     text=f"CLI Command from {hostname}: {command_text}",
                     source="cli_logger",

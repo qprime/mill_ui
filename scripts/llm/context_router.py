@@ -1,6 +1,6 @@
 import requests
 import json
-from .personas import get_persona_prompt
+from .personas import get_persona_prompt, get_personas
 from scripts.llm.ai_router import get_router
 from scripts.memory.memory_manager import get_known_contexts
 
@@ -9,7 +9,7 @@ MODEL_NAME = "phi-3.5.Q4_K_M"
 OPENAI_MODEL = "gpt-4o"
 
 # --- Persona stub (future switch logic can plug into this) ---
-KNOWN_PERSONAS = ["cliff_core", "lab_manager", "assistant"]
+KNOWN_PERSONAS = get_personas()
 
 KNOWN_CONTEXTS = get_known_contexts()
 

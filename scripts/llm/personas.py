@@ -46,3 +46,8 @@ def get_persona_prompt(persona: str) -> dict:
         "content": f"{entry['prompt']} {emotion_prompt} {anti_gaslight_prompt}"
     }
 
+def get_personas() -> list[str]:
+    """
+    Returns a list of valid persona identifiers (used for chat types, routing, and filtering).
+    """
+    return list(persona_registry.keys())

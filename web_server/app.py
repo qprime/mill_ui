@@ -236,7 +236,6 @@ def ask_openai():
         from scripts.distillation.cleaner import clean_text
         from scripts.distillation.distill_text import distill_text
         from scripts.llm.context_loader import (
-            build_context_prompt_fragments,
             load_context_for_persona,
             get_cliff_status
         )
@@ -245,15 +244,15 @@ def ask_openai():
         raw_input = data.get("prompt", "")
         tone = data.get("tone", "neutral")
         chat_id = data.get("chat_id")  # Required; injected in JS via data attribute
-
+        print("***Chat_ID: " + chat_id)
         if not raw_input or not chat_id:
             return jsonify({"error": "Missing prompt or chat_id"}), 400
 
+        # 🔍 Clean + Route + Distill Prompt
         cleaned = clean_text(raw_input)
         routing = route_context(cleaned)
         persona = routing.get("persona", "default")
         suggested_context = routing.get("suggested_context", [])
-        emotions_enabled = (tone == "emotional")
 
         distilled_result = distill_text(cleaned, {
             "persona": persona,
@@ -263,26 +262,31 @@ def ask_openai():
         }, strict_mode=True)
         distilled_prompt = distilled_result["distilled_text"]
 
+        # 🎭 Persona + Context
         system_message = get_persona_prompt(persona)
-        base_context = build_context_prompt_fragments(paths=suggested_context)
-        rag_context = load_context_for_persona(distilled_prompt, persona, suggested_context)
-        if rag_context.strip() in ("", "[No relevant context found.]", "[Error initializing memory store.]"):
-            rag_context = "⚠️ No relevant project memory was found for this query. Do not hallucinate or invent answers."
+        context_blocks = load_context_for_persona(distilled_prompt, persona, suggested_context, chat_id=chat_id)
 
+        sidecar_context = context_blocks["sidecar"]
+        project_memory = context_blocks["memory"]
+
+        # 📊 System Status
         status = get_cliff_status()
         print("[ask_openai] Cliff system status:")
         for k, v in status.items():
             print(f"  {k}: {v}")
-
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
+        # 🧠 Final Full Context
         full_context = "\n\n".join([
-            "# CLIFF Project Context",
-            *base_context[:5],
-            f"# Retrieved Summaries (RAG)\n{rag_context}",
-            f"# System Runtime Status\n{status_block}"
+            "# Recent Conversation (last few turns)",
+            sidecar_context or "(No recent interaction yet.)",
+            "# Related Project Memory",
+            project_memory,
+            "# System Runtime Status",
+            status_block
         ])
 
+        # 🧑‍💻 Compose Messages + Send
         augmented_prompt = f"{full_context}\n\nUser asked:\n{distilled_prompt}"
         messages = [system_message, {"role": "user", "content": augmented_prompt}]
 
@@ -290,18 +294,15 @@ def ask_openai():
         reply = router.chat(messages, model="gpt-4o")
         end = time.time()
 
+        # ⏱️ Metrics
         def count_tokens(text): return len(text.split())
         tokens_in = sum(count_tokens(m["content"]) for m in messages)
         tokens_out = count_tokens(reply)
         latency_ms = int((end - start) * 1000)
 
-        # 🔐 Extract high-level context path
-        context_path = routing.get("suggested_context", ["uncategorized"])[0]
-        top_context = context_path.split("/")[0]
-
-        # 📝 Log turn
+        # 🧾 Logging
         log_chat_turn(
-            context=top_context,
+            persona=persona,
             chat_id=chat_id,
             user_input=raw_input,
             cleaned=distilled_result["original_input"]["cleaned_text"],
@@ -313,7 +314,7 @@ def ask_openai():
 
         return jsonify({
             "response": reply,
-            "rag_empty": rag_context.startswith("⚠️"),
+            "rag_empty": project_memory.strip().startswith("⚠️"),
             "model": "gpt-4o",
             "routing": routing,
             "chat_id": chat_id,

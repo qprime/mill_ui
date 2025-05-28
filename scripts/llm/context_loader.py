@@ -5,6 +5,8 @@ from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
 from .personas import persona_registry
 from scripts.memory.memory_manager import get_known_contexts
+from scripts.memory.memory_manager import load_sidecar_summary
+
 
 
 
@@ -109,11 +111,7 @@ def get_cliff_status() -> dict:
 
 
 
-def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list[str]) -> str:
-    """
-    Load memory context (RAG) for the given prompt, persona, and suggested contexts.
-    Falls back to the persona's default contexts if the suggested list is empty or unknown.
-    """
+def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list[str], chat_id: str = None) -> dict:
     known = get_known_contexts()
     paths = [p for p in suggested_contexts if p in known]
 
@@ -124,8 +122,18 @@ def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list
     else:
         print(f"[context_loader] Using routed paths for {persona}: {paths}")
 
-    if persona == "cliff_core":
-        return "\n\n".join(get_cliff_core_base_context())
+    sidecar = ""
+    if chat_id:
+        sidecar = load_sidecar_summary(chat_id, persona)
 
-    return get_project_context(prompt, paths=paths)
+    if persona == "cliff_core":
+        base = "\n\n".join(get_cliff_core_base_context())
+    else:
+        base = get_project_context(prompt, paths=paths)
+
+    return {
+        "sidecar": sidecar,
+        "memory": base
+    }
+
 

@@ -185,6 +185,28 @@ async function handleChatSubmission(prompt, tone) {
     cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
     cliffResponse.classList.remove("fst-italic", "text-muted");
 
+    // Debug display toggle
+    if (data.debug) {
+      const debugBtn = document.createElement("button");
+      debugBtn.className = "btn btn-sm btn-outline-warning mt-2";
+      debugBtn.textContent = "Show Debug";
+      
+      const debugBlock = document.createElement("pre");
+      debugBlock.style.display = "none";
+      debugBlock.className = "bg-black text-light p-2 mt-2 border rounded";
+      debugBlock.textContent = JSON.stringify(data.debug, null, 2);
+      
+      debugBtn.onclick = () => {
+        const visible = debugBlock.style.display === "block";
+        debugBlock.style.display = visible ? "none" : "block";
+        debugBtn.textContent = visible ? "Show Debug" : "Hide Debug";
+      };
+
+      cliffResponse.parentElement.appendChild(debugBtn);
+      cliffResponse.parentElement.appendChild(debugBlock);
+    }
+
+
     // ✅ Trigger syntax highlighting
     cliffResponse.querySelectorAll("pre code").forEach(block => {
       hljs.highlightElement(block);

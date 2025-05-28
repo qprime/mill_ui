@@ -324,7 +324,19 @@ def ask_openai():
                 "latency_ms": latency_ms,
                 "tokens_in": tokens_in,
                 "tokens_out": tokens_out
+            },
+            "debug": {
+                "full_context": full_context,
+                "distilled_input": distilled_prompt,
+                "model": "gpt-4o",
+                "routing": routing,
+                "metrics": {
+                    "latency_ms": latency_ms,
+                    "tokens_in": tokens_in,
+                    "tokens_out": tokens_out
+                }
             }
+
         })
 
     except Exception as e:

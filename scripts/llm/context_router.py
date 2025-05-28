@@ -62,7 +62,9 @@ def route_context(prompt: str, active_persona: str | None = None, active_context
 
     # Filter context and finalize return
     result["persona"] = persona
-    result["suggested_context"] = [c for c in result.get("suggested_context", []) if c in KNOWN_CONTEXTS]
+    if persona != "assistant":
+        result["suggested_context"] = [c for c in result["suggested_context"] if not c.startswith("personal/")]
+
     if not result["suggested_context"]:
         result["suggested_context"] = ["development"]
     result.setdefault("confidence", 0.0)

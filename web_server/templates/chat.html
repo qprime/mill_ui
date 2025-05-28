@@ -336,6 +336,76 @@ function formatCodeBlocks(text) {
     `;
   });
 }
+
+const chatId = document.body.dataset.chatId;
+
+// Save Summary
+document.getElementById("saveSummaryBtn").onclick = async () => {
+  const summary = document.getElementById("summaryBox").value;
+  const res = await fetch(`/chat/${chatId}/update_summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ summary })
+  });
+  if (res.ok) alert("✅ Summary saved.");
+  else alert("❌ Failed to save summary.");
+};
+
+// Save Facts
+document.getElementById("saveFactsBtn").onclick = async () => {
+  const factInputs = document.querySelectorAll(".fact-pair");
+  const facts = {};
+  factInputs.forEach(el => {
+    const key = el.querySelector(".fact-key").value.trim();
+    const val = el.querySelector(".fact-value").value.trim();
+    if (key) facts[key] = val;
+  });
+
+  const res = await fetch(`/chat/${chatId}/update_facts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ facts: JSON.stringify(facts) })
+  });
+  if (res.ok) alert("✅ Facts saved.");
+  else alert("❌ Failed to save facts.");
+};
+
+// Add Fact Row
+document.getElementById("addFactBtn").onclick = () => {
+  const row = document.createElement("div");
+  row.className = "fact-pair d-flex mb-2 gap-2";
+  row.innerHTML = `
+    <input class="form-control form-control-sm fact-key" placeholder="Key">
+    <input class="form-control form-control-sm fact-value" placeholder="Value">
+  `;
+  document.getElementById("factsContainer").appendChild(row);
+};
+
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch(`/chat/${chatId}/sidecar`);
+    const data = await res.json();
+
+    // Load summary
+    document.getElementById("summaryBox").value = data.summary || "";
+
+    // Load facts
+    const factsContainer = document.getElementById("factsContainer");
+    Object.entries(data.facts || {}).forEach(([key, value]) => {
+      const row = document.createElement("div");
+      row.className = "fact-pair d-flex mb-2 gap-2";
+      row.innerHTML = `
+        <input class="form-control form-control-sm fact-key" placeholder="Key" value="${key}">
+        <input class="form-control form-control-sm fact-value" placeholder="Value" value="${value}">
+      `;
+      factsContainer.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error("[Memory Sidebar] Failed to load sidecar data:", err);
+  }
+});
+
 </script>
 
 

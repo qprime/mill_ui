@@ -142,56 +142,6 @@ def edit_task(task_id):
     task = get_task(task_id)
     return render_template("task_edit.html", task=task)
 
-@app.route("/chatlog")
-def chatlog():
-    root_dir = Path(__file__).resolve().parent.parent
-    log_path = root_dir / "memory/chat_logs/2025-05-03.jsonl"
-    messages = []
-    if log_path.exists():
-        with open(log_path, "r") as f:
-            for line in f:
-                try:
-                    messages.append(json.loads(line.strip()))
-                except json.JSONDecodeError:
-                    continue
-    return render_template("chatlog.html", messages=messages)
-
-@app.route("/voice/log", methods=["POST"])
-def log_voice_interaction():
-    data = request.get_json()
-    user_text = data.get("user_text")
-    cliff_reply = data.get("cliff_reply")
-    context_tags = data.get("context_tags", ["voice"])
-
-    if not user_text or not cliff_reply:
-        return {"error": "Missing input"}, 400
-
-    log_entries = [
-        {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "role": "user",
-            "content": user_text,
-            "message_type": "input",
-            "context_tags": context_tags
-        },
-        {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "role": "cliff",
-            "content": cliff_reply,
-            "message_type": "response",
-            "context_tags": context_tags
-        }
-    ]
-
-    log_path = Path("memory/chat_logs") / f"{datetime.utcnow().date()}.jsonl"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(log_path, "a") as f:
-        for entry in log_entries:
-            f.write(json.dumps(entry) + "\n")
-
-    return {"status": "ok"}, 200
-
 @app.route("/prompt", methods=["POST"])
 def handle_prompt():
     data = request.get_json()
@@ -345,6 +295,99 @@ def ask_openai():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/chat/<chat_id>/update_summary", methods=["POST"])
+def update_summary(chat_id):
+    from scripts.chatting.chat_logger import get_chat_log_paths
+
+    new_summary = request.form.get("summary", "")
+    persona = "cliff_core"
+    paths = get_chat_log_paths(chat_id, persona)
+    sidecar_path = paths["sidecar"]
+
+    print(f"[update_summary] Writing summary to: {sidecar_path.resolve()}")
+    print(f"[update_summary] Exists? {sidecar_path.exists()}")
+
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)  # ← fix here
+
+    if sidecar_path.exists():
+        try:
+            with open(sidecar_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"[update_summary] Failed to load existing sidecar: {e}")
+            data = {"chat_id": chat_id, "turns": []}
+    else:
+        data = {"chat_id": chat_id, "turns": []}
+
+    data["summary"] = new_summary
+
+    with open(sidecar_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+    return jsonify({"status": "ok"})
+
+
+
+
+
+@app.route("/chat/<chat_id>/update_facts", methods=["POST"])
+def update_facts(chat_id):
+    from scripts.chatting.chat_logger import get_chat_log_paths
+
+    persona = "cliff_core"  # TODO: make dynamic later
+    try:
+        facts = json.loads(request.form.get("facts", "{}"))
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid facts JSON"}), 400
+
+    paths = get_chat_log_paths(chat_id, persona)
+    sidecar_path = paths["sidecar"]
+
+    print(f"[update_facts] Writing facts to: {sidecar_path.resolve()}")
+    print(f"[update_facts] Exists? {sidecar_path.exists()}")
+
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if sidecar_path.exists():
+        try:
+            with open(sidecar_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"[update_facts] Failed to load existing sidecar: {e}")
+            data = {"chat_id": chat_id, "turns": []}
+    else:
+        data = {"chat_id": chat_id, "turns": []}
+
+    data["facts"] = facts
+
+    with open(sidecar_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+    return jsonify({"status": "ok"})
+
+
+@app.route("/chat/<chat_id>/sidecar", methods=["GET"])
+def get_sidecar_data(chat_id):
+    from scripts.chatting.chat_logger import get_chat_log_paths
+
+    persona = "cliff_core"
+    paths = get_chat_log_paths(chat_id, persona)
+    sidecar_path = paths["sidecar"]
+
+    if not sidecar_path.exists():
+        return jsonify({"summary": "", "facts": {}})
+
+    try:
+        with open(sidecar_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[get_sidecar_data] Failed to read sidecar: {e}")
+        return jsonify({"summary": "", "facts": {}})
+
+    return jsonify({
+        "summary": data.get("summary", ""),
+        "facts": data.get("facts", {})
+    })
 
 
     

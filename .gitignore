@@ -91,3 +91,7 @@ memory/tasks/
 scripts/annotate_project_annotated.py
 project_structure.txt
 memory/metadata/
+
+# Ignore G-code and previews
+*.nc
+*.png

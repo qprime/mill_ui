@@ -1,10 +1,13 @@
 import os
 from pathlib import Path
-from cam_generator.core.loader import load_heightmap
-from cam_generator.core.toolpath import generate_raster_toolpath
-from cam_generator.core.gcode_writer import write_gcode
-from cam_generator.core.job_loader import load_job_config
 import yaml
+
+from cam_generator.core.loader import load_heightmap
+from cam_generator.core.job_loader import load_job_config
+from cam_generator.core.gcode_writer import write_gcode
+from cam_generator.path_builders.raster import generate_raster_xyz_path
+from cam_generator.gcode.emit_gcode import emit_gcode_from_path
+from cam_generator.optimizers.reduce_colinear import reduce_colinear_path
 
 def generate_all_passes(image_path, config_path, output_dir, pass_names=None, margin_mm=0.0, job_config_path="config/job_config.yaml"):
     image_path = Path(image_path)
@@ -29,6 +32,15 @@ def generate_all_passes(image_path, config_path, output_dir, pass_names=None, ma
             margin_px : -margin_px if margin_px else None,
         ]
 
+    header_lines = []
+    footer_lines = []
+    header_file = Path("config/header.gcode")
+    footer_file = Path("config/footer.gcode")
+    if header_file.exists():
+        header_lines = header_file.read_text().splitlines()
+    if footer_file.exists():
+        footer_lines = footer_file.read_text().splitlines()
+
     if pass_names is None:
         pass_names = ["coarse", "medium", "fine"]
 
@@ -40,16 +52,27 @@ def generate_all_passes(image_path, config_path, output_dir, pass_names=None, ma
 
         scaled_map = heightmap * (z_scale / heightmap.max())
 
-        gcode = generate_raster_toolpath(
+        # Generate raster path
+        path = generate_raster_xyz_path(
             scaled_map,
             scale_xy=scale_xy,
-            tool_diameter=tool_dia,
             stepover=stepover,
             direction="zigzag-x",
             z_clamp=pass_cfg.get("z_clamp", None),
-            z_safe=safe_height,
+        )
+
+        # Apply colinear reduction
+        path, removed = reduce_colinear_path(path)
+        print(f"    [•] Removed {removed} colinear points from {pass_name} pass")
+
+        gcode = emit_gcode_from_path(
+            path,
             feedrate=feedrate,
-            units=units
+            safe_height=safe_height,
+            ramp_distance=5.0,
+            units=units,
+            header_lines=header_lines,
+            footer_lines=footer_lines
         )
 
         outfile = output_dir / f"{basename}_{pass_name}.nc"

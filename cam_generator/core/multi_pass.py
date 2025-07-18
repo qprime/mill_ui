@@ -8,6 +8,7 @@ from cam_generator.core.gcode_writer import write_gcode
 from cam_generator.path_builders.raster import generate_raster_xyz_path
 from cam_generator.gcode.emit_gcode import emit_gcode_from_path
 from cam_generator.optimizers.reduce_colinear import reduce_colinear_path
+from cam_generator.analysis.curvature import compute_row_slopes, map_slopes_to_stepovers
 
 def generate_all_passes(image_path, config_path, output_dir, pass_names=None, margin_mm=0.0, job_config_path="config/job_config.yaml"):
     image_path = Path(image_path)
@@ -49,8 +50,20 @@ def generate_all_passes(image_path, config_path, output_dir, pass_names=None, ma
         z_scale = pass_cfg.get("z_scale", 2.0)
         tool_dia = pass_cfg["tool_diameter"]
         stepover = pass_cfg["stepover"]
+        use_adaptive = pass_cfg.get("adaptive_stepover", False)
 
         scaled_map = heightmap * (z_scale / heightmap.max())
+
+        # Optional smoothing
+        if pass_cfg.get("smooth_heightmap", False):
+            import cv2
+            smoothed = cv2.GaussianBlur(scaled_map, (3, 3), 0)
+            scaled_map = smoothed
+
+        # Compute adaptive stepover if enabled
+        if use_adaptive:
+            row_slopes = compute_row_slopes(scaled_map, scale_xy)
+            stepover = map_slopes_to_stepovers(row_slopes, min_step=0.4, max_step=stepover)
 
         # Generate raster path
         path = generate_raster_xyz_path(

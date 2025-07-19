@@ -1,3 +1,5 @@
+from gcode.ramp import generate_z_ramp
+
 def emit_gcode_from_path(
     path,
     feedrate=300,
@@ -7,42 +9,34 @@ def emit_gcode_from_path(
     header_lines=None,
     footer_lines=None
 ):
-    gcode = list(header_lines) if header_lines else []
+    gcode = []
 
-    gcode.append("G21" if units == 'mm' else "G20")
+    if header_lines:
+        gcode.extend(header_lines)
+
+    gcode.append("G21" if units == "mm" else "G20")
     gcode.append("G90 ; Absolute positioning")
     gcode.append(f"G0 Z{safe_height:.3f}")
-
-    last_x = last_y = last_z = None
 
     for row in path:
         if not row:
             continue
+
         start_x, start_y, start_z = row[0]
+        gcode.append(f"G0 X{start_x:.3f} Y{start_y:.3f}")
+        ramp_pts = generate_z_ramp(start_x, start_y, safe_height, start_z, step_mm=ramp_distance / 10)
+        for rx, ry, rz in ramp_pts:
+            gcode.append(f"G1 X{rx:.3f} Y{ry:.3f} Z{rz:.3f} F{feedrate}")
 
-        # Ramp from safe_height to Z
-        ramp_zs = [
-            safe_height + (start_z - safe_height) * (i / max(1, len(row)))
-            for i in range(len(row))
-        ]
-        for i, (x, y, z) in enumerate(zip(
-            [pt[0] for pt in row], [pt[1] for pt in row], ramp_zs
-        )):
-            if (x != last_x or y != last_y or z != last_z):
-                gcode.append(f"G1 X{x:.3f} Y{y:.3f} Z{z:.3f} F{feedrate}")
-                last_x, last_y, last_z = x, y, z
 
-        # Full path after ramp
         for x, y, z in row[1:]:
-            if (x != last_x or y != last_y or z != last_z):
-                gcode.append(f"G1 X{x:.3f} Y{y:.3f} Z{z:.3f} F{feedrate}")
-                last_x, last_y, last_z = x, y, z
+            gcode.append(f"G1 X{x:.3f} Y{y:.3f} Z{z:.3f} F{feedrate}")
 
-        # Lift to safe height
         gcode.append(f"G0 Z{safe_height:.3f}")
 
-    gcode.append(f"G0 Z{safe_height:.3f} ; Safe height")
+    gcode.append(f"G0 Z{safe_height:.3f} ; Final retract")
     gcode.append("G0 X0 Y0 ; Return to origin")
+
     if footer_lines:
         gcode.extend(footer_lines)
 

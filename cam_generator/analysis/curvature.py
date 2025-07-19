@@ -1,22 +1,11 @@
 import numpy as np
+from scipy.ndimage import sobel
 
-def compute_row_slopes(heightmap, scale_xy=0.1):
+def compute_slope_map(heightmap, scale_xy=0.1):
     """
-    Computes an average slope magnitude per raster row using np.gradient.
-    Returns a 1D array of slope values (same length as number of rows).
+    Compute slope (gradient magnitude) per pixel in mm/mm.
     """
-    grad_y, grad_x = np.gradient(heightmap, scale_xy)
-    slope_mag = np.sqrt(grad_x**2 + grad_y**2)
-    row_slopes = np.mean(slope_mag, axis=1)
-    return row_slopes
-
-def map_slopes_to_stepovers(row_slopes, min_step=0.4, max_step=1.0, invert=False):
-    """
-    Map normalized slopes [0–1] to stepover values [max_step–min_step] (inverse).
-    If invert=False, high slope = small step.
-    """
-    norm_slopes = (row_slopes - np.min(row_slopes)) / max(1e-6, np.ptp(row_slopes))
-    if invert:
-        norm_slopes = 1.0 - norm_slopes
-    stepovers = min_step + (1.0 - norm_slopes) * (max_step - min_step)
-    return stepovers
+    dz_dx = sobel(heightmap, axis=1) / (8.0 * scale_xy)
+    dz_dy = sobel(heightmap, axis=0) / (8.0 * scale_xy)
+    slope = np.sqrt(dz_dx ** 2 + dz_dy ** 2)
+    return slope

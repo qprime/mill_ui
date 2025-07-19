@@ -1,7 +1,9 @@
 import numpy as np
 
 def is_colinear(p1, p2, p3, tolerance=1e-2):
-    # Check if three points are approximately colinear (in 2D)
+    """
+    Check if three 2D points are approximately colinear (ignores Z).
+    """
     v1 = np.array([p2[0] - p1[0], p2[1] - p1[1]])
     v2 = np.array([p3[0] - p2[0], p3[1] - p2[1]])
     cross = np.cross(v1, v2)
@@ -9,15 +11,15 @@ def is_colinear(p1, p2, p3, tolerance=1e-2):
 
 def reduce_colinear_path(path, tolerance=1e-2):
     """
-    Reduce colinear moves in a raster path.
+    Remove unnecessary colinear points from a raster path.
 
-    Parameters:
-        path: List[List[(x, y, z)]]
-        tolerance: float — max deviation to still consider points colinear
+    Args:
+        path: List of List of (x, y, z) tuples (i.e. rows of points)
+        tolerance: float — max deviation to still consider colinear
 
     Returns:
-        reduced_path: same shape as input, but with reduced inner points
-        total_removed: number of skipped points
+        new_path: cleaned path with same shape
+        total_removed: int — count of removed points
     """
     reduced_path = []
     total_removed = 0
@@ -27,14 +29,13 @@ def reduce_colinear_path(path, tolerance=1e-2):
             reduced_path.append(row)
             continue
 
-        reduced_row = [row[0]]
+        new_row = [row[0]]
         for i in range(1, len(row) - 1):
-            p1, p2, p3 = row[i - 1], row[i], row[i + 1]
-            if not is_colinear(p1, p2, p3, tolerance):
-                reduced_row.append(p2)
+            if not is_colinear(row[i - 1], row[i], row[i + 1], tolerance):
+                new_row.append(row[i])
             else:
                 total_removed += 1
-        reduced_row.append(row[-1])
-        reduced_path.append(reduced_row)
+        new_row.append(row[-1])
+        reduced_path.append(new_row)
 
     return reduced_path, total_removed

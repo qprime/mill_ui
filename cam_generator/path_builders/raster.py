@@ -7,7 +7,9 @@ def generate_raster_xyz_path(
     direction='x',
     z_clamp=None,
     slope_map=None,
-    adaptive=True
+    adaptive=True,
+    offset_x=0.0,
+    offset_y=0.0
 ):
     """
     Generate XYZ toolpath using raster pattern (zigzag-x) with optional adaptive stepover.
@@ -20,6 +22,8 @@ def generate_raster_xyz_path(
         z_clamp: [min, max] or dict or None
         slope_map: 2D array matching heightmap
         adaptive: bool — enable adaptive stepover if slope_map is present
+        offset_x: float — shift X origin (e.g. for border alignment)
+        offset_y: float — shift Y origin
 
     Returns:
         List of List of (x, y, z) tuples (raster path)
@@ -40,7 +44,7 @@ def generate_raster_xyz_path(
 
     path = []
     for i, row_idx in enumerate(range(0, h, base_dx)):
-        y = row_idx * scale_xy
+        y = row_idx * scale_xy + offset_y
         row = []
 
         xs = list(range(w))
@@ -50,7 +54,7 @@ def generate_raster_xyz_path(
         x_pos = 0
         while x_pos < len(xs):
             col_idx = xs[x_pos]
-            x = col_idx * scale_xy
+            x = col_idx * scale_xy + offset_x
             z = -heightmap[row_idx, col_idx]
 
             if z_min is not None:

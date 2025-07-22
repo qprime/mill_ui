@@ -3,7 +3,8 @@
 coarse:
   tool_diameter: 6.35     # 1/4"
   stepover: 3.0
-  z_scale: 2.0
+  z_scale: 3.0
+  z_clamp: [-2.8, 0.0]
   tool_type: flat         # Rapid roughing
 
 medium:
@@ -15,6 +16,6 @@ medium:
 fine:
   tool_diameter: 3.175    # 1/8"
   stepover: 0.4
-  z_scale: 2.0
+  z_scale: 3.0
   tool_type: ball         # Detail surface
-  z_clamp: [-1.5, -0.1]
+  z_clamp: [-3.0, -0.0]

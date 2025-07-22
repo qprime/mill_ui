@@ -1,41 +1,55 @@
 import os
 from pathlib import Path
 from datetime import datetime
+import shutil
+
 from cam_generator.core.multi_pass import generate_all_passes
 from cam_generator.core.preview import preview_toolpath
 from cam_generator.core.time_estimator import estimate_cut_time
 
 # === User Parameters ===
-job_name = "Dragon1"  # must match folder in ../cliff_ai/memory/images/
+job_name = "Dragon1"  # Folder name inside image_root
 ENABLE_PREVIEW = True
 
 # === Paths ===
-image_root = Path("/home/squinlan/cliff_ai/memory/images")
+image_root = Path("/home/squinlan/cliff_ai/memory/cam_projects")
 output_root = Path("output")
 
-# === Step 1: Resolve input image path ===
-image_folder = image_root / job_name
-image_path = image_folder / "image.png"
-if not image_path.exists():
-    raise FileNotFoundError(f"Expected image not found at: {image_path}")
+# === Resolve project paths ===
+project_folder = image_root / job_name
+image_path = project_folder / "input" / "image.png"
+config_path = project_folder / "config" / "default_passes.yaml"
+job_config_path = project_folder / "config" / "job_config.yaml"
 
-# === Step 2: Create numbered output folder ===
+if not image_path.exists():
+    raise FileNotFoundError(f"[!] image.png not found at {image_path}")
+if not config_path.exists():
+    raise FileNotFoundError(f"[!] default_passes.yaml not found at {config_path}")
+if not job_config_path.exists():
+    raise FileNotFoundError(f"[!] job_config.yaml not found at {job_config_path}")
+
+# === Create next available output folder ===
 existing = sorted(output_root.glob(f"*_{job_name}"))
 next_index = len(existing)
 output_folder = output_root / f"{next_index:02d}_{job_name}"
 output_folder.mkdir(parents=True, exist_ok=False)
 
-print(f"[+] Output will be saved to: {output_folder}")
+print(f"[+] Output folder: {output_folder}")
 
-# === Step 3: Run generation ===
+# === Save config snapshot for reproducibility ===
+shutil.copy(config_path, output_folder / "default_passes.yaml")
+shutil.copy(job_config_path, output_folder / "job_config.yaml")
+
+# === Run CAM pass generation ===
 generate_all_passes(
     image_path=image_path,
-    config_path="config/default_passes.yaml",
+    config_path=output_folder / "default_passes.yaml",  # use the snapshot
     output_dir=output_folder,
-    margin_mm=3.0
+    margin_mm=3.0,
+    job_config_path=output_folder / "job_config.yaml"   # use the snapshot
 )
 
-# === Step 4: Preview (optional) ===
+# === Optional preview and timing summary ===
 if ENABLE_PREVIEW:
     for gcode_file in output_folder.glob("*.nc"):
         with open(gcode_file) as f:

@@ -78,6 +78,14 @@ def generate_all_passes(
             offset_y=border_margin
         )
 
+        # Apply z_buffer if defined for this pass (e.g., coarse)
+        z_buffer = pass_cfg.get("z_buffer", 0.0)
+        if z_buffer > 0:
+            for row in path:
+                for i, (x, y, z) in enumerate(row):
+                    row[i] = (x, y, z + z_buffer)
+
+
         header_path = Path("config/header.gcode")
         footer_path = Path("config/footer.gcode")
         header_lines = header_path.read_text().splitlines() if header_path.exists() else []

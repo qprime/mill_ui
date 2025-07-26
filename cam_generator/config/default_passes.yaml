@@ -7,13 +7,14 @@ coarse:
   z_clamp: [-2.8, 0.0]
   z_buffer: 0.5           # <-- New: leave 0.5mm of material above final surface
   tool_type: flat
+  max_feedrate: 500
 
-
-medium:
-  tool_diameter: 3.175    # 1/8"
-  stepover: 1.5
-  z_scale: 2.0
-  tool_type: flat         # Optional pre-finish
+#medium:
+#  tool_diameter: 3.175    # 1/8"
+#  stepover: 1.5
+#  z_scale: 2.0
+#  z_buffer: 0.25
+#  tool_type: flat         # Optional pre-finish
 
 fine:
   tool_diameter: 3.175    # 1/8"
@@ -21,3 +22,5 @@ fine:
   z_scale: 3.0
   tool_type: ball         # Detail surface
   z_clamp: [-3.0, -0.0]
+  z_smooth_kernel: 5
+  max_feedrate: 900

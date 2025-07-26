@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 import numpy as np
@@ -82,7 +81,7 @@ def generate_all_passes(
     border_margin = job_config.get("border_margin", 2.0)
 
     safe_height = job_config.get("safe_height", 5.0)
-    feedrate = job_config.get("default_feedrate", 300)
+    default_feedrate = job_config.get("default_feedrate", 300)
     units = job_config.get("units", "mm")
 
     basename = image_path.stem
@@ -97,7 +96,6 @@ def generate_all_passes(
 
     slope_map = compute_slope_map(heightmap, scale_xy) if enabled["adaptive_stepover"] else None
 
-    # Only use defined passes in role order
     pass_roles = ["coarse", "medium", "fine"]
     if pass_names is None:
         pass_names = [p for p in pass_roles if p in config]
@@ -111,6 +109,7 @@ def generate_all_passes(
         z_scale = pass_cfg.get("z_scale", 2.0)
         tool_dia = pass_cfg["tool_diameter"]
         stepover = pass_cfg["stepover"]
+        pass_feedrate = pass_cfg.get("max_feedrate", default_feedrate)
 
         scaled_map = heightmap * (z_scale / heightmap.max())
 
@@ -123,7 +122,8 @@ def generate_all_passes(
             slope_map=slope_map,
             adaptive=enabled["adaptive_stepover"],
             offset_x=border_margin,
-            offset_y=border_margin
+            offset_y=border_margin,
+            z_smooth_kernel=pass_cfg.get("z_smooth_kernel", 3)
         )
 
         z_buffer = pass_cfg.get("z_buffer", 0.0)
@@ -146,10 +146,18 @@ def generate_all_passes(
             z_vals = [pt[2] for row in path for pt in row]
             border_depth = min(z_vals)
             border_path = generate_border_path(width_mm, height_mm, border_depth, margin=border_margin)
-            border_gcode = emit_gcode_from_path(border_path, feedrate, safe_height, 5.0, units, [], [])
+            border_gcode = emit_gcode_from_path(border_path, pass_feedrate, safe_height, 5.0, units, [], [])
             gcode.extend(border_gcode)
 
-        main_gcode = emit_gcode_from_path(path, feedrate, safe_height, 5.0 if enabled["ramp"] else 0.0, units, [], [])
+        main_gcode = emit_gcode_from_path(
+            path,
+            pass_feedrate,
+            safe_height,
+            5.0 if enabled["ramp"] else 0.0,
+            units,
+            [],
+            []
+        )
         gcode.extend(main_gcode)
 
         if enabled["colinear"]:
@@ -159,7 +167,7 @@ def generate_all_passes(
 
         point_count = sum(len(row) for row in path)
         z_vals = [pt[2] for row in path for pt in row]
-        runtime = estimate_cut_time(gcode, feedrate)
+        runtime = estimate_cut_time(gcode, pass_feedrate)
 
         reporter.add_pass_report(pass_name, point_count, min(z_vals), max(z_vals), runtime, 0, 0, [])
         outfile = output_dir / f"{basename}_{pass_name}.nc"

@@ -1,5 +1,12 @@
 import numpy as np
 
+def sample_smoothed_z(heightmap, x, y, kernel=3):
+    half = kernel // 2
+    x0, x1 = max(0, x - half), min(heightmap.shape[1], x + half + 1)
+    y0, y1 = max(0, y - half), min(heightmap.shape[0], y + half + 1)
+    region = heightmap[y0:y1, x0:x1]
+    return np.mean(region)
+
 def generate_raster_xyz_path(
     heightmap,
     scale_xy,
@@ -9,7 +16,8 @@ def generate_raster_xyz_path(
     slope_map=None,
     adaptive=True,
     offset_x=0.0,
-    offset_y=0.0
+    offset_y=0.0,
+    z_smooth_kernel=3
 ):
     """
     Generate XYZ toolpath using raster pattern (zigzag-x) with optional adaptive stepover.
@@ -24,7 +32,8 @@ def generate_raster_xyz_path(
         adaptive: bool — enable adaptive stepover if slope_map is present
         offset_x: float — shift X origin (e.g. for border alignment)
         offset_y: float — shift Y origin
-
+        z_smooth_kernel: int — smoothing kernel size (odd number, e.g., 3 or 5)
+    
     Returns:
         List of List of (x, y, z) tuples (raster path)
     """
@@ -32,7 +41,6 @@ def generate_raster_xyz_path(
     base_dx = int(stepover / scale_xy)
     base_dx = max(1, base_dx)
 
-    # Z clamping setup
     if isinstance(z_clamp, dict):
         z_min = z_clamp.get("min", None)
         z_max = z_clamp.get("max", None)
@@ -55,7 +63,9 @@ def generate_raster_xyz_path(
         while x_pos < len(xs):
             col_idx = xs[x_pos]
             x = col_idx * scale_xy + offset_x
-            z = -heightmap[row_idx, col_idx]
+
+            z_val = sample_smoothed_z(heightmap, col_idx, row_idx, kernel=z_smooth_kernel)
+            z = -z_val
 
             if z_min is not None:
                 z = max(z, z_min)
@@ -64,7 +74,6 @@ def generate_raster_xyz_path(
 
             row.append((x, y, z))
 
-            # Adaptive stepover
             if adaptive and slope_map is not None:
                 slope = slope_map[row_idx, col_idx]
                 if slope < 0.02:

@@ -8,7 +8,7 @@ from cam_generator.core.preview import preview_toolpath
 from cam_generator.core.time_estimator import estimate_cut_time
 
 # === User Parameters ===
-job_name = "Dragon1"  # Folder name inside image_root
+job_name = "Flamingo6"  # Folder name inside image_root
 ENABLE_PREVIEW = True
 
 # === Paths ===

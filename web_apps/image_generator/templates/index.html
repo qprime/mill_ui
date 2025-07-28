@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CLIFF-AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 2rem; }
+        .form-label { margin-top: 1rem; }
+        #image-preview { max-width: 100%; margin-top: 2rem; border-radius: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">CLIFF-AI Image Generator</h1>
+        <form id="gen-form">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" name="title" id="title">
+
+            <label class="form-label">Image Description <span id="assist-btn" class="badge bg-info" style="cursor:pointer;" title="Let AI help with prompt">?</span></label>
+            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+
+            <label class="form-label">Persona (Artist)</label>
+            <select class="form-select" name="persona" id="persona" required>
+                <option value="" disabled selected>Select persona</option>
+                {% for p in personas %}
+                  <option value="{{p.name}}">{{p.name}}</option>
+                {% endfor %}
+            </select>
+
+            <label class="form-label">Style</label>
+            <select class="form-select" name="style" id="style" required>
+                <option value="" disabled selected>Select style</option>
+                {% for s in styles %}
+                  <option value="{{s.name}}">{{s.name}}</option>
+                {% endfor %}
+            </select>
+
+            <label class="form-label">Model</label>
+            <select class="form-select" name="model" id="model" required>
+                {% for m in models %}
+                  <option value="{{m}}">{{m}}</option>
+                {% endfor %}
+            </select>
+
+            <label class="form-label">Size</label>
+            <select class="form-select" name="size" id="size" required>
+                {% for sz in model_sizes[models[0]] %}
+                  <option value="{{sz}}">{{sz}}</option>
+                {% endfor %}
+            </select>
+
+            <label class="form-label">Metadata (optional)</label>
+            <input type="text" class="form-control" name="metadata" id="metadata">
+
+            <button type="submit" class="btn btn-primary mt-4">Generate Image</button>
+        </form>
+
+        <img id="image-preview" style="display:none;">
+    </div>
+
+    <script>
+      // Dynamically update size dropdown based on model
+      const modelSizes = {{ model_sizes | tojson }};
+      document.getElementById("model").addEventListener("change", function() {
+        const sizeSel = document.getElementById("size");
+        sizeSel.innerHTML = "";
+        let ms = modelSizes[this.value];
+        for (let i = 0; i < ms.length; ++i) {
+          let opt = document.createElement("option");
+          opt.value = ms[i];
+          opt.innerText = ms[i];
+          sizeSel.appendChild(opt);
+        }
+      });
+
+      // P

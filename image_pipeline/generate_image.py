@@ -69,8 +69,12 @@ def generate_dalle_image(config_name: str):
     })
 
     if response.status_code != 200:
-        print(f"[!] API error {response.status_code}:\n{response.json()}")
+        try:
+            print(f"[!] API error {response.status_code}:\n{response.json()}")
+        except Exception:
+            print(f"[!] API error {response.status_code} (non-JSON response):\n{response.text}")
         return
+
 
     try:
         b64_data = response.json()["data"][0]["b64_json"]

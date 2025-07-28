@@ -1,0 +1,14 @@
+{
+  "title": "Descriptive Title Here",
+  "subject": "Describe your subject and scene here. Be detailed but direct.",
+  "persona": "Persona Name (must match personas.json exactly)",
+  "style": "Style Name (must match styles.json exactly)",
+  "size": "1024x1024",
+  "metadata": {
+    "created_by": "CLIFF-AI",
+    "approved": false,
+    "model": "gpt-image-1",
+    "source": "generate_image.py",
+    "notes": "Notes about prompt intent, test run, changes, or carve details."
+  }
+}

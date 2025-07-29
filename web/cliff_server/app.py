@@ -9,7 +9,7 @@ import uuid
 
 from io import BytesIO
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file, send_from_directory
-sys.path.append(str(Path(__file__).resolve().parents[1]))
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 
 from scripts.llm.ai_router import get_router
 from scripts.llm.context_loader import build_context_prompt_fragments, load_context_for_persona

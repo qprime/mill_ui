@@ -29,6 +29,7 @@ class OpenAIEmbedder(EmbeddingBackend):
     def __init__(self, model="text-embedding-3-small"):
         self.model = model
         self.api_key = os.getenv("OPENAI_API_KEY")
+        print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))
         self.client = OpenAIClient(api_key=self.api_key) if _use_new_sdk else None
 
     def embed(self, inputs):
@@ -43,6 +44,8 @@ class OpenAIEmbedder(EmbeddingBackend):
 class OpenAIChat(ChatBackend):
     def __init__(self):
         self.api_key = os.getenv("OPENAI_API_KEY")
+        print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))
+
         self.client = OpenAIClient(api_key=self.api_key) if _use_new_sdk else None
 
     def chat(self, messages, model="gpt-4"):

@@ -97,3 +97,10 @@ memory/metadata/
 *.png
 
 scripts/metadata/script_registry.jsonl
+
+memory/chatting/chat_logs/
+web_server/memory/chat_logs/
+memory/development/chroma/
+memory_tree.txt
+context_dump.txt
+

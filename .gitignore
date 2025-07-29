@@ -96,7 +96,6 @@ memory/metadata/
 # Ignore G-code and previews
 *.nc
 *.png
-
 scripts/metadata/script_registry.jsonl
 
 memory/chatting/chat_logs/
@@ -108,3 +107,11 @@ context_dump.txt
 memory/personal/
 tree.txt
 context/generated/
+cam_generator/output/
+.vscode
+image_pipeline/output/
+memory/cam_projects/
+memory/exports/
+memory/personal/debug_outputs
+.model_cache/
+

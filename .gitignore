@@ -95,3 +95,5 @@ memory/metadata/
 # Ignore G-code and previews
 *.nc
 *.png
+
+scripts/metadata/script_registry.jsonl

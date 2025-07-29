@@ -1,3 +1,7 @@
+"""
+FastAPI server for Whisper transcription with GPU acceleration.
+"""
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -19,7 +23,6 @@ app.add_middleware(
 async def options_transcribe():
     return JSONResponse(content={"message": "CORS preflight OK"}, status_code=200)
 
-# Load the model with GPU acceleration
 model = WhisperModel("large-v2", compute_type="auto")
 
 @app.post("/transcribe")
@@ -27,7 +30,6 @@ async def transcribe_audio(file: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(await file.read())
         tmp_path = tmp.name
-
     try:
         segments, info = model.transcribe(tmp_path)
         text = " ".join([segment.text for segment in segments])

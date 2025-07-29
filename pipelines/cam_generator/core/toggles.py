@@ -1,5 +1,8 @@
+"""
+Returns enabled toolpath algorithms from a job config.
+"""
+
 def get_enabled_algorithms(job_cfg):
-    # fallback defaults if not defined
     default = {
         "ramp": True,
         "colinear": True,

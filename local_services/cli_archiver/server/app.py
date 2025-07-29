@@ -1,16 +1,17 @@
-# cli_archiver/server/app.py
-from pathlib import Path
+"""
+Flask API for receiving and storing CLI logs, and pushing commands to memory.
+"""
 
+from pathlib import Path
 from flask import Flask, request, jsonify
 from cli_log_store import save_cli_logs
 from flask_cors import CORS
 import os
 import json
-
 import sys
 import os
-sys.path.append(str(Path(__file__).resolve().parents[1]))
 
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 from scripts.memory.memory_manager import add_to_domain
 
 app = Flask(__name__)
@@ -28,14 +29,11 @@ def save_cli_logs(logs):
 def receive_cli_logs():
     incoming_logs = request.json.get("logs", [])
     for log in incoming_logs:
-        save_cli_logs([log])  # ✅ still save to local file
+        save_cli_logs([log])
         command_text = log.get("command", "").strip()
         hostname = log.get("hostname", "unknown")
-
         MEMORY_JUNK_COMMANDS = ["ls", "pwd", "cd", "clear", "reset", "exit", "stty", "resize"]
-
         print(f"[CLI Logger Server] Received command: {command_text}")
-
         if not any(command_text.startswith(junk) for junk in MEMORY_JUNK_COMMANDS):
             try:
                 print(f"[CLI Logger Server] Pushing to memory: {command_text}")
@@ -50,10 +48,7 @@ def receive_cli_logs():
                 print(f"[CLI Logger Server] ERROR adding to memory: {e}")
         else:
             print(f"[CLI Logger Server] Skipped junk command for memory: {command_text}")
-
     return jsonify({"status": "ok"})
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050)
-

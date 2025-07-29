@@ -1,3 +1,7 @@
+"""
+Logs CLI commands to the CLIFF server with session and heartbeat tracking.
+"""
+
 import os
 import sys
 import socket
@@ -5,7 +9,6 @@ import subprocess
 import json
 from datetime import datetime, timezone
 
-# --- Compatibility shim for datetime.UTC ---
 try:
     UTC = datetime.UTC  # Python 3.12+
 except AttributeError:
@@ -14,10 +17,8 @@ except AttributeError:
 SESSION_FILE = os.path.expanduser("~/.cliff_session_id")
 HEARTBEAT_FILE = os.path.expanduser("~/.cliff_cli_heartbeat")
 
-# Always dynamically detect the hostname
 MY_HOSTNAME = socket.gethostname()
 
-# Hardcoded dynamic server decision
 if MY_HOSTNAME == "EQBeelink1":
     SERVER_URL = "http://localhost:5050/cli-logs"
 else:
@@ -53,9 +54,7 @@ def log_command(cmd):
             "timestamp": datetime.now(UTC).isoformat(),
             "command": cmd.strip()
         }
-        payload = {"logs": [command_record]}  # Always wrap inside 'logs' array
-
-        #print("[CLI Logger] Payload about to be sent:", json.dumps(payload))  # (Keep this for next test!)
+        payload = {"logs": [command_record]}
 
         subprocess.run(
             ["curl", "-X", "POST", "-H", "Content-Type: application/json",
@@ -66,10 +65,8 @@ def log_command(cmd):
     except Exception as e:
         print(f"[CLI Logger] Logging error: {e}", file=sys.stderr)
 
-
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         command = " ".join(sys.argv[1:])
         print(f"Logged and pushed: {command}")
         log_command(command)
-

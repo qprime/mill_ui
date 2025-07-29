@@ -1,3 +1,7 @@
+"""
+Loads YAML job configuration files for CAM jobs.
+"""
+
 import yaml
 from pathlib import Path
 

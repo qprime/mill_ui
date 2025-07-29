@@ -1,3 +1,7 @@
+"""
+Emits G-code lines from toolpath points and pass config.
+"""
+
 from gcode.ramp import generate_z_ramp
 
 def emit_gcode_from_path(

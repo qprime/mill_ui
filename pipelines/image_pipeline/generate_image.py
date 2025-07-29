@@ -1,3 +1,7 @@
+"""
+Generates images using OpenAI's DALL·E model from configuration files.
+"""
+
 import os
 import sys
 import json
@@ -15,7 +19,6 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# Load personas and styles
 with open("../personas/cam_image_experts/personas.json") as f:
     PERSONAS = {p["name"]: p for p in json.load(f)["personas"]}
 
@@ -36,7 +39,6 @@ def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
     )
 
 def generate_dalle_image(config_name: str):
-    # Load config
     config_path = Path("./") / f"{config_name}.json"
     if not config_path.exists():
         print(f"[!] Config not found: {config_path}")
@@ -56,11 +58,10 @@ def generate_dalle_image(config_name: str):
         print(f"[!] {e}")
         return
 
-    config["prompt"] = prompt  # Save generated prompt back into config
+    config["prompt"] = prompt
 
     print(f"[+] Requesting gpt-image-1 image for prompt: {prompt}")
 
-    # Make API request
     response = requests.post(API_URL, headers=HEADERS, json={
         "model": "gpt-image-1",
         "prompt": prompt,
@@ -75,7 +76,6 @@ def generate_dalle_image(config_name: str):
             print(f"[!] API error {response.status_code} (non-JSON response):\n{response.text}")
         return
 
-
     try:
         b64_data = response.json()["data"][0]["b64_json"]
     except KeyError:
@@ -83,10 +83,8 @@ def generate_dalle_image(config_name: str):
         print(response.json())
         return
 
-    # Decode image
     image_data = base64.b64decode(b64_data)
 
-    # Save artifacts
     out_dir = Path("output") / config_name
     out_dir.mkdir(parents=True, exist_ok=True)
 

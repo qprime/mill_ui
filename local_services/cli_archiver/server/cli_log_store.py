@@ -1,3 +1,7 @@
+"""
+Utilities for saving CLI logs to the memory store.
+"""
+
 import os
 import json
 from pathlib import Path
@@ -11,4 +15,3 @@ def save_cli_logs(logs: list[dict]):
         for entry in logs:
             json.dump(entry, f)
             f.write("\n")
-

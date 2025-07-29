@@ -1,12 +1,10 @@
+"""
+Generates helical or sloped Z-ramps for safe tool entry into material.
+"""
+
 import numpy as np
 
 def generate_z_ramp(x, y, z_start, z_end, step_mm=0.5):
-    """
-    Generate a ramp-down at (x, y) from z_start to z_end in uniform steps.
-
-    Returns:
-        List of (x, y, z) points.
-    """
     if z_start == z_end:
         return [(x, y, z_end)]
 

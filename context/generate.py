@@ -1,3 +1,7 @@
+"""
+Generates unified context dumps and file lists for the CLIFF AI repo.
+"""
+
 import os
 import sys
 import subprocess

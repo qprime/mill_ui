@@ -1,3 +1,7 @@
+"""
+Tracks and writes toolpath pass reports and summary data.
+"""
+
 import json
 from pathlib import Path
 
@@ -6,7 +10,6 @@ class PassReporter:
         self.job_name = job_name
         self.output_dir = Path(output_dir)
         self.reports = []
-
     def add_pass_report(self, pass_name, point_count, z_min, z_max, time_min, removed_colinear, removed_deduped, algorithms):
         self.reports.append({
             "pass": pass_name,
@@ -18,13 +21,11 @@ class PassReporter:
             "deduped_removed": int(removed_deduped),
             "algorithms": algorithms
         })
-
     def write_json(self):
         out_path = self.output_dir / f"{self.job_name}_summary.json"
         with open(out_path, "w") as f:
             json.dump(self.reports, f, indent=2)
         print(f"\n[✓] Wrote summary to {out_path}")
-
     def print_summary(self):
         print("\n=== Pass Summary ===")
         for r in self.reports:

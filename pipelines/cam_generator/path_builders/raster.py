@@ -1,3 +1,7 @@
+"""
+Generates raster XYZ toolpaths from heightmaps with optional adaptive stepover.
+"""
+
 import numpy as np
 
 def sample_smoothed_z(heightmap, x, y, kernel=3):
@@ -19,24 +23,6 @@ def generate_raster_xyz_path(
     offset_y=0.0,
     z_smooth_kernel=3
 ):
-    """
-    Generate XYZ toolpath using raster pattern (zigzag-x) with optional adaptive stepover.
-
-    Args:
-        heightmap: 2D numpy array
-        scale_xy: float, mm per pixel
-        stepover: float, base stepover in mm
-        direction: 'x' or 'zigzag-x'
-        z_clamp: [min, max] or dict or None
-        slope_map: 2D array matching heightmap
-        adaptive: bool — enable adaptive stepover if slope_map is present
-        offset_x: float — shift X origin (e.g. for border alignment)
-        offset_y: float — shift Y origin
-        z_smooth_kernel: int — smoothing kernel size (odd number, e.g., 3 or 5)
-    
-    Returns:
-        List of List of (x, y, z) tuples (raster path)
-    """
     h, w = heightmap.shape
     base_dx = int(stepover / scale_xy)
     base_dx = max(1, base_dx)

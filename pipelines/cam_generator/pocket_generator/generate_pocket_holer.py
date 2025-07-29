@@ -1,3 +1,6 @@
+"""
+Generates G-code for smart pocket holer with configurable parameters.
+"""
 
 import yaml
 

@@ -14,8 +14,8 @@ python3 scripts/metadata/generate_memory_graph.py
 # echo "[CLIFF] Refreshing Chroma project summaries..."
 # python3 scripts/embedding/rag_loader.py
 
-echo "[CLIFF] Rechunking modified code..."
-python3 scripts/chunking/chunk_all_code.py
+#echo "[CLIFF] Rechunking modified code..."
+#python3 scripts/chunking/chunk_all_code.py
 
 # Removed: Embedding code chunks into ChromaDB
 # echo "[CLIFF] Embedding code chunks into ChromaDB..."

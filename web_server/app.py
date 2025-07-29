@@ -13,8 +13,6 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from scripts.llm.ai_router import get_router
 from scripts.llm.context_loader import build_context_prompt_fragments, load_context_for_persona
-from scripts.embedding.rag_loader import load_summaries, EmbedFunction
-from chromadb import PersistentClient
 from scripts.tasking.task_manager import load_tasks, update_task, create_task, get_task
 from scripts.chatting.chat_logger import log_chat_turn
 
@@ -168,7 +166,6 @@ def get_cliff_status():
         "voice_enabled": True,
         "whisper_endpoint": "https://192.168.0.179:8001/transcribe",
         "tts_enabled": True,
-        "rag_enabled": True,
         "active_modules": [
             "code_chunking", "cli_logger", "task_manager", "memory_graph", "voice_pipeline"
         ],
@@ -448,5 +445,4 @@ if __name__ == "__main__":
         md_files = list(summary_dir.glob("*.md"))
         print(f"📄 Found {len(md_files)} .md files: {[f.name for f in md_files]}")
 
-    load_summaries()
     app.run(host="0.0.0.0", port=8080, ssl_context=("cert/web_server.crt", "cert/web_server.key"), debug=True)

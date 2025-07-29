@@ -10,13 +10,15 @@ python3 scripts/metadata/generate_project_graph.py
 echo "[CLIFF] Regenerating memory graph..."
 python3 scripts/metadata/generate_memory_graph.py
 
-echo "[CLIFF] Refreshing Chroma project summaries..."
-python3 scripts/embedding/rag_loader.py
+# Removed: Chroma project summaries/RAG embedding
+# echo "[CLIFF] Refreshing Chroma project summaries..."
+# python3 scripts/embedding/rag_loader.py
 
 echo "[CLIFF] Rechunking modified code..."
 python3 scripts/chunking/chunk_all_code.py
 
-echo "[CLIFF] Embedding code chunks into ChromaDB..."
-python3 scripts/embedding/embed_code_chunks.py
+# Removed: Embedding code chunks into ChromaDB
+# echo "[CLIFF] Embedding code chunks into ChromaDB..."
+# python3 scripts/embedding/embed_code_chunks.py
 
 echo "[CLIFF] Post-commit tasks complete."

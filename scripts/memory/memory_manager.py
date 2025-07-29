@@ -82,7 +82,7 @@ def get_memory_path(domain: str, subpath: str = "") -> Path:
     """
     return MEMORY_ROOT / domain / subpath
 
-def get_chat_log_paths(chat_id: str, persona: str, domain: str = "chat_logs") -> dict:
+def get_chat_log_paths(chat_id: str, persona: str, domain: str = "chatting/chat_logs") -> dict:
     base = MEMORY_ROOT / domain / persona / chat_id
     return {
         "dir": base,
@@ -90,7 +90,7 @@ def get_chat_log_paths(chat_id: str, persona: str, domain: str = "chat_logs") ->
         "sidecar": base / "sidecar.json"
     }
 
-def ensure_chat_log_folder(chat_id: str, persona: str, domain: str = "chat_logs") -> Path:
+def ensure_chat_log_folder(chat_id: str, persona: str, domain: str = "chatting/chat_logs") -> Path:
     paths = get_chat_log_paths(chat_id, persona, domain)
     paths["dir"].mkdir(parents=True, exist_ok=True)
     return paths
@@ -103,7 +103,7 @@ def load_sidecar_summary(chat_id: str, persona: str, max_turns: int = 5) -> str:
     paths = get_chat_log_paths(chat_id, persona)
     sidecar_path = paths["sidecar"]
     from pprint import pprint
-    print(f"[🧪 sidecar] Looking for: {sidecar_path.resolve()}")
+    pprint(f"[memory_manager.py][🧪 load_sidecar_summary] Looking for: {sidecar_path.resolve()}")
     if not sidecar_path.exists():
         return ""
 
@@ -112,7 +112,7 @@ def load_sidecar_summary(chat_id: str, persona: str, max_turns: int = 5) -> str:
             data = json.load(f)
             turns = data.get("turns", [])[-max_turns:]
     except Exception as e:
-        print(f"[load_sidecar_summary] Failed to read sidecar: {e}")
+        print(f"[memory_manager.py][load_sidecar_summary] Failed to read sidecar: {e}")
         return ""
 
     formatted = []

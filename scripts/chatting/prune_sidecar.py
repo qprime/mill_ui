@@ -15,14 +15,14 @@ def prune_sidecar(chat_id: str, persona: str) -> None:
 
     path = get_chat_log_paths(chat_id, persona)["sidecar"]
     if not path.exists():
-        print(f"[prune_sidecar] No sidecar found at: {path}")
+        print(f"[prune_sidecar.py][prune_sidecar] No sidecar found at: {path}")
         return
 
     try:
         with open(path, "r", encoding="utf-8") as f:
             turns = json.load(f).get("turns", [])
     except Exception as e:
-        print(f"[prune_sidecar] Failed to read sidecar: {e}")
+        print(f"[prune_sidecar.py][prune_sidecar] Failed to read sidecar: {e}")
         return
 
     cleaned_turns = []
@@ -40,7 +40,7 @@ def prune_sidecar(chat_id: str, persona: str) -> None:
                 }, strict_mode=True)
                 input_clean = distilled["distilled_text"]
             except Exception as e:
-                print(f"[prune_sidecar] Distillation failed on turn: {e}")
+                print(f"[prune_sidecar.py][prune_sidecar] Distillation failed on turn: {e}")
 
         cleaned_turns.append({
             "input": input_clean.strip(),
@@ -52,6 +52,6 @@ def prune_sidecar(chat_id: str, persona: str) -> None:
     try:
         with open(path, "w", encoding="utf-8") as f:
             json.dump({"turns": trimmed}, f, indent=2)
-        print(f"[prune_sidecar] Wrote {len(trimmed)} distilled turns to {path}")
+        print(f"[prune_sidecar.py][prune_sidecar] Wrote {len(trimmed)} distilled turns to {path}")
     except Exception as e:
-        print(f"[prune_sidecar] Failed to write sidecar: {e}")
+        print(f"[prune_sidecar.py][prune_sidecar] Failed to write sidecar: {e}")

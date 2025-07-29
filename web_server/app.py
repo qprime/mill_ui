@@ -19,6 +19,8 @@ from scripts.chatting.chat_logger import log_chat_turn
 app = Flask(__name__, template_folder='templates', static_folder='static')
 router = get_router("openai")
 
+DEBUG=False
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -60,7 +62,7 @@ def jsonl_review():
 @app.route("/tasks")
 def show_tasks():
     raw_tasks = load_tasks()
-    print(f"🔍 Total tasks loaded: {len(raw_tasks)}")
+    print(f"[app.py][show_tasks]🔍 Total tasks loaded: {len(raw_tasks)}")
 
     # Debug all task archive flags
     for t in raw_tasks:
@@ -191,7 +193,7 @@ def ask_openai():
         raw_input = data.get("prompt", "")
         tone = data.get("tone", "neutral")
         chat_id = data.get("chat_id")  # Required; injected in JS via data attribute
-        print("***Chat_ID: " + chat_id)
+        print("[app.py][ask_openai]***Chat_ID: " + chat_id)
         if not raw_input or not chat_id:
             return jsonify({"error": "Missing prompt or chat_id"}), 400
 
@@ -218,20 +220,30 @@ def ask_openai():
 
         # 📊 System Status
         status = get_cliff_status()
-        print("[ask_openai] Cliff system status:")
+        if DEBUG:
+            print("[app.py][ask_openai] Cliff system status:")
         for k, v in status.items():
-            print(f"  {k}: {v}")
+            if DEBUG:
+                print(f"[app.py][ask_openai]  {k}: {v}")
         status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
 
-        # 🧠 Final Full Context
-        full_context = "\n\n".join([
+        # 🧠 Final Full Context (robust stringify)
+        def format_block(block):
+            if isinstance(block, str):
+                return block
+            if isinstance(block, dict):
+                return block.get("content", "")
+            return str(block)
+
+        full_context = "\n\n".join(map(format_block, [
             "# Recent Conversation (last few turns)",
             sidecar_context or "(No recent interaction yet.)",
             "# Related Project Memory",
             project_memory,
             "# System Runtime Status",
             status_block
-        ])
+        ]))
+
 
         # 🧑‍💻 Compose Messages + Send
         augmented_prompt = f"{full_context}\n\nUser asked:\n{distilled_prompt}"
@@ -301,8 +313,8 @@ def update_summary(chat_id):
     paths = get_chat_log_paths(chat_id, persona)
     sidecar_path = paths["sidecar"]
 
-    print(f"[update_summary] Writing summary to: {sidecar_path.resolve()}")
-    print(f"[update_summary] Exists? {sidecar_path.exists()}")
+    print(f"[app.py][update_summary] Writing summary to: {sidecar_path.resolve()}")
+    print(f"[app.py][update_summary] Exists? {sidecar_path.exists()}")
 
     sidecar_path.parent.mkdir(parents=True, exist_ok=True)  # ← fix here
 
@@ -311,7 +323,7 @@ def update_summary(chat_id):
             with open(sidecar_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            print(f"[update_summary] Failed to load existing sidecar: {e}")
+            print(f"[app.py][update_summary] Failed to load existing sidecar: {e}")
             data = {"chat_id": chat_id, "turns": []}
     else:
         data = {"chat_id": chat_id, "turns": []}
@@ -340,8 +352,8 @@ def update_facts(chat_id):
     paths = get_chat_log_paths(chat_id, persona)
     sidecar_path = paths["sidecar"]
 
-    print(f"[update_facts] Writing facts to: {sidecar_path.resolve()}")
-    print(f"[update_facts] Exists? {sidecar_path.exists()}")
+    print(f"[app.py][update_facts] Writing facts to: {sidecar_path.resolve()}")
+    print(f"[app.py][update_facts] Exists? {sidecar_path.exists()}")
 
     sidecar_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -350,7 +362,7 @@ def update_facts(chat_id):
             with open(sidecar_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            print(f"[update_facts] Failed to load existing sidecar: {e}")
+            print(f"[app.py][update_facts] Failed to load existing sidecar: {e}")
             data = {"chat_id": chat_id, "turns": []}
     else:
         data = {"chat_id": chat_id, "turns": []}
@@ -378,7 +390,7 @@ def get_sidecar_data(chat_id):
         with open(sidecar_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"[get_sidecar_data] Failed to read sidecar: {e}")
+        print(f"[app.py][get_sidecar_data] Failed to read sidecar: {e}")
         return jsonify({"summary": "", "facts": {}})
 
     return jsonify({

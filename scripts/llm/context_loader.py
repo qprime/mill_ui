@@ -6,6 +6,8 @@ from difflib import SequenceMatcher
 from .personas import persona_registry
 from scripts.memory.memory_manager import get_known_contexts
 from scripts.memory.memory_manager import load_sidecar_summary
+from scripts.memory.memory_manager import get_chat_log_paths
+
 
 
 
@@ -15,6 +17,15 @@ def load_json(path: Path) -> dict:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+
+def load_sidecar(chat_id: str, persona: str) -> dict:
+    paths = get_chat_log_paths(chat_id, persona)
+    path = paths["sidecar"]
+    if not path.exists():
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 
 def get_cliff_core_base_context() -> List[str]:
     ctx = load_base_context()
@@ -70,7 +81,7 @@ def build_context_prompt_fragments(paths: list, prompt: str = "") -> list:
                     score = SequenceMatcher(None, prompt.lower(), text[:500].lower()).ratio()
                     context_chunks.append((score, text.strip()))
             except Exception as e:
-                print(f"[build_context_prompt_fragments] Failed to read {f}: {e}")
+                print(f"[context_loader.py][build_context_prompt_fragments] Failed to read {f}: {e}")
 
     # Sort by similarity and return top 5–10
     context_chunks.sort(key=lambda x: x[0], reverse=True)
@@ -124,12 +135,20 @@ def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list
 
     sidecar = ""
     if chat_id:
-        sidecar = load_sidecar_summary(chat_id, persona)
+
+        sidecar = load_sidecar(chat_id, persona)
+        if sidecar.get("memory_enabled", True) is False:
+            print(f"[context_loader] Memory disabled for {chat_id}. Suppressing memory.")
+            return {
+                "sidecar": sidecar,
+                "memory": ""
+            }
 
     if persona == "cliff_core":
         base = "\n\n".join(get_cliff_core_base_context())
     else:
         base = get_project_context(prompt, paths=paths)
+
 
     return {
         "sidecar": sidecar,

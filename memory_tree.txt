@@ -1,0 +1,231 @@
+memory
+├── tasks
+│   ├── task_fbf77b8f
+│   │   └── task.json
+│   ├── task_f6ac488b
+│   │   └── task.json
+│   ├── task_f4ad1f09
+│   │   └── task.json
+│   ├── task_f0750ae0
+│   │   └── task.json
+│   ├── task_d20cf456
+│   │   └── task.json
+│   ├── task_d1dfca38
+│   │   └── task.json
+│   ├── task_d188e19b
+│   │   └── task.json
+│   ├── task_bd46a63f
+│   │   └── task.json
+│   ├── task_b80b3667
+│   │   └── task.json
+│   ├── task_a9cbec39
+│   │   └── task.json
+│   ├── task_a432e219
+│   │   └── task.json
+│   ├── task_a2eee295
+│   │   └── task.json
+│   ├── task_99cc428a
+│   │   └── task.json
+│   ├── task_80ee36d9
+│   │   └── task.json
+│   ├── task_7801c3ea
+│   │   └── task.json
+│   ├── task_7431955a
+│   │   └── task.json
+│   ├── task_6cece1ab
+│   │   └── task.json
+│   ├── task_68c761b2
+│   │   └── task.json
+│   ├── task_5198d6d7
+│   │   └── task.json
+│   ├── task_4c2d00a7
+│   │   └── task.json
+│   ├── task_4beedc65
+│   │   └── task.json
+│   ├── task_4472fdf0
+│   │   └── task.json
+│   ├── task_3d0b4d5f
+│   │   └── task.json
+│   ├── task_301d77e9
+│   │   └── task.json
+│   ├── task_2c4ac9e0
+│   │   └── task.json
+│   ├── task_22f1e4ae
+│   │   └── task.json
+│   ├── task_21178ce7
+│   │   └── task.json
+│   ├── task_0ccce321
+│   │   └── task.json
+│   └── task_0c3af9a8
+│       └── task.json
+├── schemas
+│   ├── tool_log.schema.json
+│   ├── task_memory.schema.json
+│   └── chat_memory.schema.json
+├── samples
+│   ├── tool_log.jsonl
+│   ├── task_memory.jsonl
+│   └── chat_memory.jsonl
+├── research
+│   ├── chroma.sqlite3
+│   └── 8f35cc74-7163-49e9-88ef-9b22ea3293af
+│       ├── link_lists.bin
+│       ├── length.bin
+│       ├── header.bin
+│       └── data_level0.bin
+├── production
+│   ├── e999b1ba-5e9e-444e-bdbb-271e2d86873b
+│   │   ├── link_lists.bin
+│   │   ├── length.bin
+│   │   ├── index_metadata.pickle
+│   │   ├── header.bin
+│   │   └── data_level0.bin
+│   └── chroma.sqlite3
+├── personal
+│   ├── chroma.sqlite3
+│   ├── chat_prepped.jsonl
+│   ├── chat_export.jsonl
+│   ├── chat_cleaned_recovered.jsonl
+│   ├── chat_cleaned_raw_fallback.jsonl
+│   ├── chat_cleaned.jsonl
+│   └── b6cfd250-c839-4aff-983e-5458aff9ddb8
+│       ├── link_lists.bin
+│       ├── length.bin
+│       ├── header.bin
+│       └── data_level0.bin
+├── metadata
+│   ├── project_summary.json
+│   ├── project_manifest.json
+│   ├── project_graph.json
+│   └── memory_graph.json
+├── lab
+│   ├── lab_data.jsonl
+│   ├── e5a27a89-ae8d-4d35-97de-e5025e7dc053
+│   │   ├── link_lists.bin
+│   │   ├── length.bin
+│   │   ├── header.bin
+│   │   └── data_level0.bin
+│   ├── device_inventory.json
+│   └── chroma.sqlite3
+├── development
+│   ├── system_design_summary.md
+│   ├── reconstructed
+│   │   └── task_manager.py
+│   ├── project_structure.md
+│   ├── module_summaries
+│   │   ├── whisper.md
+│   │   ├── web_server.md
+│   │   ├── voice_pipeline.md
+│   │   ├── voice_input.md
+│   │   ├── voice_harvester.md
+│   │   ├── venv.md
+│   │   ├── services.md
+│   │   ├── scripts.md
+│   │   ├── models.md
+│   │   ├── llm_server.md
+│   │   ├── lab_manager.md
+│   │   ├── docs.md
+│   │   ├── development.md
+│   │   ├── config.md
+│   │   ├── cli_archiver.md
+│   │   └── chroma_store.md
+│   ├── git_commit_summary.jsonl
+│   ├── file_summaries
+│   │   └── annotate_project.md
+│   ├── code_chunks
+│   │   ├── whisper
+│   │   │   └── whisper_server.json
+│   │   ├── web_server
+│   │   │   └── app.json
+│   │   ├── voice_pipeline
+│   │   │   └── tts_server.json
+│   │   ├── scripts
+│   │   │   ├── utils
+│   │   │   │   ├── llm_router.json
+│   │   │   │   ├── context_router.json
+│   │   │   │   ├── context_loader.json
+│   │   │   │   └── ai_router.json
+│   │   │   ├── test
+│   │   │   │   └── test_clean_chat.json
+│   │   │   ├── tasking
+│   │   │   │   ├── task_manager.json
+│   │   │   │   └── manage_tasks.json
+│   │   │   ├── metadata
+│   │   │   │   ├── update_script_registry.json
+│   │   │   │   ├── update_project_docs.json
+│   │   │   │   ├── tree_clean.json
+│   │   │   │   ├── generate_project_graph.json
+│   │   │   │   └── generate_memory_graph.json
+│   │   │   ├── memory_tools
+│   │   │   │   ├── preclean_chat_export.json
+│   │   │   │   └── batch_clean_chat.json
+│   │   │   ├── llm
+│   │   │   │   ├── personas.json
+│   │   │   │   ├── context_router.json
+│   │   │   │   ├── context_loader.json
+│   │   │   │   └── ai_router.json
+│   │   │   ├── embedding
+│   │   │   │   ├── rag_loader.json
+│   │   │   │   ├── embed_code_chunks.json
+│   │   │   │   └── embed_cli_logs.json
+│   │   │   ├── distillation
+│   │   │   │   ├── test_distill.json
+│   │   │   │   ├── distill_text.json
+│   │   │   │   └── cleaner.json
+│   │   │   ├── dev
+│   │   │   │   └── setup_git_hooks.json
+│   │   │   ├── chunking
+│   │   │   │   ├── chunk_functions.json
+│   │   │   │   └── chunk_all_code.json
+│   │   │   └── chatting
+│   │   │       └── chat_logger.json
+│   │   ├── router
+│   │   │   └── context_router.json
+│   │   ├── llm_server
+│   │   │   ├── model_runner.json
+│   │   │   └── llm_service.json
+│   │   ├── lab_manager
+│   │   │   └── app.json
+│   │   ├── development
+│   │   │   └── task_manager.json
+│   │   └── cli_archiver
+│   │       ├── server
+│   │       │   ├── cli_log_store.json
+│   │       │   └── app.json
+│   │       └── cliff_cli_logger.json
+│   ├── chroma
+│   │   ├── f231b607-f15d-4514-a2ad-d4416635189a
+│   │   │   ├── link_lists.bin
+│   │   │   ├── length.bin
+│   │   │   ├── index_metadata.pickle
+│   │   │   ├── header.bin
+│   │   │   └── data_level0.bin
+│   │   ├── chroma.sqlite3
+│   │   └── b34ab72f-4911-430e-aaa3-df25ce832a75
+│   │       ├── link_lists.bin
+│   │       ├── length.bin
+│   │       ├── index_metadata.pickle
+│   │       ├── header.bin
+│   │       └── data_level0.bin
+│   └── annotated_chunks
+│       └── development
+│           └── task_manager.json
+├── cliff_state
+│   ├── cli_logs.jsonl
+│   ├── chroma.sqlite3
+│   └── 14b331f5-18be-4947-84dc-147c004c4f59
+│       ├── link_lists.bin
+│       ├── length.bin
+│       ├── header.bin
+│       └── data_level0.bin
+├── chat_logs
+│   └── 2025-05-03.jsonl
+└── accounting
+    ├── chroma.sqlite3
+    └── 6b86bbe7-5ada-4b8f-b058-243ab6f00c03
+        ├── link_lists.bin
+        ├── length.bin
+        ├── header.bin
+        └── data_level0.bin
+
+78 directories, 151 files

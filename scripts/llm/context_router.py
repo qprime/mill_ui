@@ -53,11 +53,11 @@ def route_context(prompt: str, active_persona: str | None = None, active_context
         response = requests.post(LLAMA_SERVER_URL, json=payload, timeout=8)
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"].strip()
-        print("[context_router] Phi raw output:")
-        print(content)
+        print("[context_router.py][context_router] Phi raw output:")
+        print("[context_router.py][context_router] "+content)
         result = parse_tag_output(content)
     except Exception as e:
-        print("[context_router] Phi failed, escalating to OpenAI. Reason:", e)
+        print("[context_router.py][context_router] Phi failed, escalating to OpenAI. Reason:", e)
         result = route_with_openai(prompt, system_prompt)
 
     # Filter context and finalize return
@@ -82,7 +82,7 @@ def route_with_openai(prompt: str, system_prompt: str) -> dict:
         return parse_tag_output(content)
 
     except Exception as e:
-        print("[context_router] OpenAI fallback also failed:", e)
+        print("[context_router.py][context_router] OpenAI fallback also failed:", e)
         return {
             "persona": "unknown",
             "suggested_context": ["unknown"],

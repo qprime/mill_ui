@@ -13,15 +13,15 @@ MAX_TURNS = 5
 
 
 def get_chat_log_path(context: str, chat_id: str) -> Path:
-    return Path(f"memory/chat_logs/{context}/{chat_id}/full_log.jsonl")
+    return Path(f"memory/chatting/chat_logs/{context}/{chat_id}/full_log.jsonl")
 
 
 def get_sidecar_path(context: str, chat_id: str) -> Path:
-    return Path(f"memory/chat_logs/{context}/{chat_id}/sidecar.json")
+    return Path(f"memory/chatting/chat_logs/{context}/{chat_id}/sidecar.json")
 
 
 def ensure_chat_folder(context: str, chat_id: str) -> None:
-    path = Path(f"memory/chat_logs/{context}/{chat_id}")
+    path = Path(f"memory/chatting/chat_logs/{context}/{chat_id}")
     path.mkdir(parents=True, exist_ok=True)
 
 
@@ -74,7 +74,7 @@ def log_chat_turn(persona: str, chat_id: str = None,
         "response": response,
         "model": model
     }
-    print(f"[🧠 log_chat_turn] Called with chat_id={chat_id}, persona={persona}")
+    print(f"[chat_logger.py][🧠 log_chat_turn] Called with chat_id={chat_id}, persona={persona}")
 
     append_to_chat_log(persona, chat_id, turn)
     update_sidecar(persona, chat_id, turn)

@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block title %}Cliff Chat{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex flex-row bg-dark text-light p-0" data-chat-id="{{ chat_id }}">
+
+  <!-- Sidebar with voice + text controls -->
+  <div class="d-flex flex-column bg-secondary p-3 gap-3" style="width: 200px; min-width: 200px; height: 100vh; overflow-y: auto; position: sticky; top: 0;">
+    
+    <!-- Voice Button -->
+    <button type="button" id="voiceBtn" class="btn btn-success">🎙️ Talk to Cliff</button>
+    <div id="micStatus" class="text-info small">Idle</div>
+
+    <!-- Toggle for text input -->
+    <button id="toggleInput" class="btn btn-outline-light btn-sm">✏️ Enable Typing</button>
+
+    <!-- Optional Text Input Form -->
+    <div id="inputControls" class="d-none flex-column gap-2 mt-3">
+      <input type="text" id="userInput" class="form-control" placeholder="Ask Cliff something...">
+      <select id="toneSelector" class="form-select">
+        <option value="neutral" selected>Neutral</option>
+        <option value="emotional">Witty</option>
+      </select>
+      <button id="sendBtn" class="btn btn-primary">Send</button>
+    </div>
+  </div>
+
+  <!-- Main Chat Display Area -->
+  <div class="flex-grow-1 d-flex flex-column position-relative" style="margin-right: 320px;">
+
+    <!-- Memory Sidebar -->
+    <div id="memorySidebar" class="position-fixed end-0 top-0 bg-light text-dark p-3 shadow"
+        style="width: 320px; height: 100vh; overflow-y: auto; z-index: 1040;">
+      <h4>🧠 Memory</h4>
+
+      <!-- Toggle Memory -->
+      <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="memoryEnabledToggle">
+        <label class="form-check-label" for="memoryEnabledToggle">Enable Memory</label>
+      </div>
+
+      <!-- Summary Editor -->
+      <label for="summaryBox" class="form-label">Chat Summary</label>
+      <textarea id="summaryBox" class="form-control mb-3" rows="6" placeholder="Summary loading…"></textarea>
+      <button id="saveSummaryBtn" class="btn btn-sm btn-outline-primary w-100 mb-3">💾 Save Summary</button>
+
+      <!-- Fact Editor -->
+      <h5 class="mt-3">Facts</h5>
+      <div id="factsContainer" class="mb-3"></div>
+      <button id="addFactBtn" class="btn btn-sm btn-secondary mb-2">➕ Add Fact</button>
+      <button id="saveFactsBtn" class="btn btn-sm btn-success w-100">💾 Save Facts</button>
+
+      <!-- Advanced Memory Controls -->
+      <h5 class="mt-4">🧪 Experimental</h5>
+
+      <!-- Semantic Decay Toggle -->
+      <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="enableDecayToggle">
+        <label class="form-check-label" for="enableDecayToggle">Enable Semantic Decay</label>
+      </div>
+
+      <!-- Fact Ranking Toggle -->
+      <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="enableRankingToggle">
+        <label class="form-check-label" for="enableRankingToggle">Enable Fact Ranking</label>
+      </div>
+
+      <!-- Inline Recall Toggle -->
+      <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="enableRecallToggle">
+        <label class="form-check-label" for="enableRecallToggle">Inline Memory Recall</label>
+      </div>
+
+      <button id="saveAdvancedBtn" class="btn btn-sm btn-outline-info w-100">💾 Save Advanced Settings</button>
+
+    </div>
+
+    
+
+
+    <!-- Chat Output Container -->
+    <div id="chatContainer" class="flex-grow-1 overflow-auto d-flex flex-column gap-3 p-3"
+         style="min-height: 0; scroll-behavior: smooth;">
+      <!-- Dynamic chat entries will render here -->
+    </div>
+
+    <!-- (Optional) Modal or footer controls can go here -->
+    
+  </div>
+</div>
+
+
+<script>
+const chatContainer = document.getElementById("chatContainer");
+const userInput = document.getElementById("userInput");
+const toneSelector = document.getElementById("toneSelector");
+const sendBtn = document.getElementById("sendBtn");
+const voiceBtn = document.getElementById("voiceBtn");
+const toggleInput = document.getElementById("toggleInput");
+const inputControls = document.getElementById("inputControls");
+const micStatus = document.getElementById("micStatus");
+
+let recorder, chunks = [], recording = false;
+
+function setStatus(text, pulse = false, done = false) {
+  micStatus.innerText = text;
+  voiceBtn.classList.remove("pulse-processing", "btn-danger");
+  voiceBtn.classList.add("btn-success");
+  voiceBtn.innerText = "🎙️ Talk to Cliff";
+  if (pulse) voiceBtn.classList.add("pulse-processing");
+  if (done) voiceBtn.style.border = "2px solid lime";
+}
+
+sendBtn.onclick = () => {
+  handleChatSubmission(userInput.value.trim(), toneSelector.value);
+};
+
+toggleInput.onclick = () => {
+  inputControls.classList.toggle("d-none");
+};
+
+voiceBtn.onclick = async () => {
+  if (recording) {
+    recorder.stop();
+    recording = false;
+    voiceBtn.innerText = "🎙️ Talk to Cliff";
+    voiceBtn.classList.remove("btn-danger");
+    voiceBtn.classList.add("btn-success");
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recording = true;
+    setStatus("Recording...", true);
+    voiceBtn.innerText = "🛑 Stop Talking";
+    voiceBtn.classList.remove("btn-success");
+    voiceBtn.classList.add("btn-danger");
+
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = async () => {
+      setStatus("Transcribing…", true);
+      const blob = new Blob(chunks, { type: 'audio/wav' });
+      const formData = new FormData();
+      formData.append('file', blob, 'recording.wav');
+
+      try {
+        const res = await fetch("https://192.168.0.179:8001/transcribe", {
+          method: "POST",
+          body: formData,
+          mode: "cors",
+          credentials: "omit"
+        });
+        const data = await res.json();
+        const text = data.text || "";
+        if (text) {
+          setStatus("Submitting to Cliff…", true);
+          await handleChatSubmission(text, toneSelector.value);
+          setStatus("Done.", false, true);
+        } else {
+          setStatus("No speech detected", false);
+        }
+      } catch (err) {
+        console.error("Whisper error:", err);
+        setStatus("Error during transcription", false);
+      }
+    };
+
+    recorder.start();
+  } catch (err) {
+    console.error("Microphone error:", err);
+    setStatus("Mic error", false);
+  }
+};
+
+function scrollChatToAlignWithSidebar() {
+  const chatEntries = chatContainer.children;
+  if (chatEntries.length > 0) {
+    const newestEntry = chatEntries[0];
+    newestEntry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+async function handleChatSubmission(prompt, tone) {
+  if (!prompt) return;
+
+  const chatId = document.body.dataset.chatId;  // ← Add this
+  const timestamp = new Date().toISOString();
+  const exchange = document.createElement("div");
+  exchange.className = "card p-3 bg-dark text-light shadow-sm fade-in";
+  exchange.innerHTML = `
+    <div class="d-flex flex-column flex-md-row gap-3">
+      <div class="flex-fill">
+        <strong class="text-info">🧑 You:</strong>
+        <div class="toggle-original-distilled mb-2">
+          <p class="user-original">${prompt}</p>
+          <p class="user-distilled d-none text-info fst-italic">(Distilled loading...)</p>
+          <button class="btn btn-sm btn-outline-secondary toggle-distill-btn">Toggle Distilled</button>
+        </div>
+      </div>
+      <div class="flex-fill">
+        <strong class="text-warning">🤖 Cliff:</strong>
+        <p id="cliff-${timestamp}" class="text-muted mb-2 fst-italic">Thinking...</p>
+        <div class="text-end text-muted small" id="model-${timestamp}"></div>
+      </div>
+    </div>`;
+  chatContainer.prepend(exchange);
+  userInput.value = "";
+  scrollChatToAlignWithSidebar();
+
+  try {
+    const response = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, tone, chat_id: chatId })  // ← Include it
+    });
+
+    const data = await response.json();
+    const cliffResponse = document.getElementById(`cliff-${timestamp}`);
+    const modelTag = document.getElementById(`model-${timestamp}`);
+    // Update distilled toggle display
+    const toggleBlock = cliffResponse.closest(".card").querySelector(".toggle-original-distilled");
+    if (toggleBlock) {
+      const distilledEl = toggleBlock.querySelector(".user-distilled");
+      distilledEl.innerText = `(Distilled) ${data.distilled_input || "N/A"}`;
+
+      toggleBlock.querySelector(".toggle-distill-btn").onclick = () => {
+        toggleBlock.querySelector(".user-original").classList.toggle("d-none");
+        toggleBlock.querySelector(".user-distilled").classList.toggle("d-none");
+      };
+    }
+
+    cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
+    cliffResponse.classList.remove("fst-italic", "text-muted");
+
+    // Debug display toggle
+    if (data.debug) {
+      const debugBtn = document.createElement("button");
+      debugBtn.className = "btn btn-sm btn-outline-warning mt-2";
+      debugBtn.textContent = "Show Debug";
+      
+      const debugBlock = document.createElement("pre");
+      debugBlock.style.display = "none";
+      debugBlock.className = "bg-black text-light p-2 mt-2 border rounded";
+      debugBlock.textContent = JSON.stringify(data.debug, null, 2);
+      
+      debugBtn.onclick = () => {
+        const visible = debugBlock.style.display === "block";
+        debugBlock.style.display = visible ? "none" : "block";
+        debugBtn.textContent = visible ? "Show Debug" : "Hide Debug";
+      };
+
+      cliffResponse.parentElement.appendChild(debugBtn);
+      cliffResponse.parentElement.appendChild(debugBlock);
+    }
+
+
+    // ✅ Trigger syntax highlighting
+    cliffResponse.querySelectorAll("pre code").forEach(block => {
+      hljs.highlightElement(block);
+    });
+
+    const metrics = data.metrics || {};
+    modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
+    scrollChatToAlignWithSidebar();
+
+    cliffResponse.querySelectorAll(".btn-copy").forEach(btn => {
+      btn.onclick = () => {
+        const code = btn.closest(".position-relative").querySelector("code").innerText;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.innerText = "Copied!";
+          setTimeout(() => btn.innerText = "Copy", 2000);
+        });
+      };
+    });
+
+    cliffResponse.querySelectorAll(".btn-run").forEach(btn => {
+      btn.onclick = async () => {
+        const block = btn.closest(".position-relative");
+        const code = block.querySelector("code").innerText;
+        btn.innerText = "Running…";
+        try {
+          const res = await fetch("/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ command: code })
+          });
+          const result = await res.json();
+          btn.innerText = result.returncode === 0 ? "✅ Done" : "⚠️ Error";
+
+          const outputBtn = document.createElement("button");
+          outputBtn.className = "btn btn-sm btn-outline-info ms-2";
+          outputBtn.innerText = "▶ Show Output";
+          outputBtn.onclick = () => {
+            document.getElementById("outputStdout").innerText = result.stdout || "(no output)";
+            document.getElementById("outputStderr").innerText = result.stderr || "";
+            document.getElementById("outputCode").innerText = `Return code: ${result.returncode}`;
+            new bootstrap.Modal(document.getElementById("outputModal")).show();
+          };
+          block.appendChild(outputBtn);
+
+        } catch (err) {
+          console.error("Run error:", err);
+          btn.innerText = "❌ Fail";
+        }
+        setTimeout(() => btn.innerText = "Run", 3000);
+      };
+    });
+
+  } catch (err) {
+    console.error("Ask error:", err);
+    const cliffResponse = document.getElementById(`cliff-${timestamp}`);
+    if (cliffResponse) cliffResponse.innerText = "(Error contacting Cliff)";
+  }
+}
+
+function formatCodeBlocks(text) {
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+  const languageMap = {
+    js: "javascript",
+    html: "xml"
+  };
+
+  return text.replace(codeBlockRegex, (_, lang, code) => {
+    const language = (lang || "bash").toLowerCase();
+    return `
+      <div class="cli-wrapper border rounded bg-black text-light position-relative mt-2 mb-3 p-2">
+        <pre class="m-0"><code class="language-${language}">${code}</code></pre>
+        <div class="btn-group btn-group-sm position-absolute top-0 end-0 m-1">
+          <button class="btn btn-outline-light btn-copy">Copy</button>
+          <button class="btn btn-outline-success btn-run">Run</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+const chatId = document.body.dataset.chatId;
+
+// Save Summary
+document.getElementById("saveSummaryBtn").onclick = async () => {
+  const summary = document.getElementById("summaryBox").value;
+  const memoryEnabled = document.getElementById("memoryEnabledToggle").checked;
+  const res = await fetch(`/chat/${chatId}/update_summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ summary, memory_enabled: memoryEnabled })
+  });
+  if (res.ok) alert("✅ Summary saved.");
+  else alert("❌ Failed to save summary.");
+};
+
+// Save Facts
+document.getElementById("saveFactsBtn").onclick = async () => {
+  const factInputs = document.querySelectorAll(".fact-pair");
+  const facts = {};
+  factInputs.forEach(el => {
+    const key = el.querySelector(".fact-key").value.trim();
+    const val = el.querySelector(".fact-value").value.trim();
+    if (key) facts[key] = val;
+  });
+
+  const res = await fetch(`/chat/${chatId}/update_facts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ facts: JSON.stringify(facts) })
+  });
+  if (res.ok) alert("✅ Facts saved.");
+  else alert("❌ Failed to save facts.");
+};
+
+// Add Fact Row
+document.getElementById("addFactBtn").onclick = () => {
+  const row = document.createElement("div");
+  row.className = "fact-pair d-flex mb-2 gap-2";
+  row.innerHTML = `
+    <input class="form-control form-control-sm fact-key" placeholder="Key">
+    <input class="form-control form-control-sm fact-value" placeholder="Value">
+  `;
+  document.getElementById("factsContainer").appendChild(row);
+};
+
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch(`/chat/${chatId}/sidecar`);
+    const data = await res.json();
+
+    // Load summary
+    document.getElementById("summaryBox").value = data.summary || "";
+
+    // Load memory toggle
+    document.getElementById("memoryEnabledToggle").checked = data.memory_enabled !== false;
+    
+    // Load facts
+    const factsContainer = document.getElementById("factsContainer");
+    Object.entries(data.facts || {}).forEach(([key, value]) => {
+      const row = document.createElement("div");
+      row.className = "fact-pair d-flex mb-2 gap-2";
+      row.innerHTML = `
+        <input class="form-control form-control-sm fact-key" placeholder="Key" value="${key}">
+        <input class="form-control form-control-sm fact-value" placeholder="Value" value="${value}">
+      `;
+      factsContainer.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error("[Memory Sidebar] Failed to load sidecar data:", err);
+  }
+});
+
+</script>
+
+
+<style>
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.pulse-processing {
+  animation: pulse-yellow 2s infinite;
+  border: 2px solid yellow;
+}
+@keyframes pulse-yellow {
+  0% { border-color: yellow; box-shadow: 0 0 5px yellow; }
+  50% { border-color: gold; box-shadow: 0 0 15px gold; }
+  100% { border-color: yellow; box-shadow: 0 0 5px yellow; }
+}
+
+.cli-wrapper {
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+.cli-wrapper pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+</style>
+
+<!-- Output Modal -->
+<div class="modal fade" id="outputModal" tabindex="-1" aria-labelledby="outputModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="outputModalLabel">Command Output</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="outputStdout" class="text-success"></code></pre>
+        <pre><code id="outputStderr" class="text-warning"></code></pre>
+        <div id="outputCode" class="text-muted small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

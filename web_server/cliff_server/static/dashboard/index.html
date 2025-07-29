@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cliff AI Project Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <!-- HEADER -->
+  <header class="flex items-center justify-between bg-gray-800 text-white px-4 py-2">
+    <div class="text-lg font-bold">CLIFF AI Project Dashboard</div>
+    <div class="text-sm">Idle</div>
+    <div class="text-sm">11:28</div>
+  </header>
+
+  <!-- MAIN GRID LAYOUT -->
+  <main class="grid grid-cols-1 xl:grid-cols-4 gap-4 p-4">
+    <!-- MODULES & SERVICES -->
+    <section class="col-span-1 bg-white shadow rounded p-4">
+      <h2 class="font-bold text-lg mb-2">Modules & Services</h2>
+      <ul class="space-y-1">
+        <li class="flex justify-between"><span>Whisper</span><span class="text-green-600">Live</span></li>
+        <li class="flex justify-between"><span>Embedding Engine</span><span class="text-gray-400">Inactive</span></li>
+        <li class="flex justify-between"><span>Task Manager</span><span class="text-red-500">Error</span></li>
+        <li class="flex justify-between"><span>Memory Registry</span><span class="text-green-600">Active</span></li>
+        <li class="flex justify-between"><span>LLM Router</span><span class="text-green-600">Active</span></li>
+        <li class="flex justify-between"><span>Lab Manager</span><span class="text-green-600">Active</span></li>
+        <li class="flex justify-between"><span>Voice Pipeline</span><span class="text-green-600">Active</span></li>
+        <li class="flex justify-between"><span>Auth/API Config</span><span class="text-gray-400">-</span></li>
+      </ul>
+    </section>
+
+    <!-- CURRENT FOCUS + MEMORY OBJECT GRAPH -->
+    <section class="col-span-1 bg-white shadow rounded p-4">
+      <h2 class="font-bold text-lg mb-2">Current Focus</h2>
+      <div class="bg-gray-100 p-4 rounded h-48 flex items-center justify-center">
+        <p class="text-sm text-gray-600">[Memory Object ➝ Code Chunk ➝ Summary]</p>
+      </div>
+    </section>
+
+    <!-- PROJECT SNAPSHOTS & METRICS -->
+    <section class="col-span-1 bg-white shadow rounded p-4">
+      <h2 class="font-bold text-lg mb-2">Project Snapshots & To-Dos</h2>
+      <ul class="list-disc pl-5 text-sm">
+        <li>Set up Orin Nano</li>
+        <li>Install dependencies</li>
+        <li>Create JSON store</li>
+      </ul>
+      <div class="mt-4">
+        <h3 class="font-semibold">Metrics</h3>
+        <ul class="text-sm">
+          <li>Chunking rate: 625/hr</li>
+          <li>Token usage: 18.5k</li>
+        </ul>
+        <h3 class="mt-2 font-semibold">Data Coverage</h3>
+        <div class="w-full bg-gray-200 h-2 rounded">
+          <div class="bg-blue-600 h-2 rounded" style="width: 82%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECT EXPLORER -->
+    <section class="col-span-1 bg-white shadow rounded p-4">
+      <h2 class="font-bold text-lg mb-2">Project Explorer</h2>
+      <ul class="text-sm font-mono">
+        <li>📁 scripts/
+          <ul class="ml-4">
+            <li>📄 cti_annotated.py</li>
+          </ul>
+        </li>
+        <li>📁 memory/
+          <ul class="ml-4">
+            <li>📄 embeddings.json</li>
+            <li>📄 chunk_graph.json</li>
+          </ul>
+        </li>
+        <li>📁 config/web-server</li>
+        <li>📄 project_manifest.json</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="flex items-center justify-between bg-gray-800 text-white px-4 py-2 text-sm">
+    <span>On branch main</span>
+    <span>Last commit ab12cd</span>
+    <span>Chunks indexed 26%</span>
+  </footer>
+</body>
+</html>

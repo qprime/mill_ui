@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Edit Task{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">✏️ Edit Task</h1>
+
+  <form method="POST" action="/tasks/edit/{{ task.id }}">
+    <input type="hidden" name="task_id" value="{{ task.id }}">
+
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="3" required>{{ task.description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="tags" class="form-label">Tags (comma-separated)</label>
+      <input type="text" class="form-control" id="tags" name="tags" value="{{ task.tags | join(', ') }}">
+    </div>
+
+    <div class="mb-3">
+      <label for="files" class="form-label">Files (comma-separated paths)</label>
+      <input type="text" class="form-control" id="files" name="files" value="{{ task.files | join(', ') }}">
+    </div>
+
+    <div class="mb-3">
+      <label for="steps" class="form-label">Steps (one per line)</label>
+      <textarea class="form-control" id="steps" name="steps" rows="4">{{ task.steps | join('\n') }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="/tasks" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

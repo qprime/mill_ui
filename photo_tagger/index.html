@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000"/>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Photo Tagger</title>
+</head>
+<body>
+  <h1>📸 Photo Tagger</h1>
+
+  <input type="file" accept="image/*" capture="environment" id="photoInput" />
+  <button id="recordBtn">🎤 Record Note</button>
+  <input type="text" id="tagsInput" placeholder="Add tags..." list="tagSuggestions" />
+  <datalist id="tagSuggestions"></datalist>
+  <button id="saveBtn">💾 Save</button>
+
+  <div id="gallery"></div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+    }
+    </script>
+
+</body>
+</html>

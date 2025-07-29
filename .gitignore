@@ -81,6 +81,7 @@ memory/cliff_state/cli_logs.jsonl
 memory/development/module_summaries/
 memory/chat_logs/
 chroma_store/
+memory/development
 
 # Generated annotation/chunking output
 memory/development/code_chunks/
@@ -105,3 +106,4 @@ memory_tree.txt
 context_dump.txt
 
 memory/personal/
+tree.txt

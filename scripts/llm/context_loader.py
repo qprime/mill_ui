@@ -1,15 +1,23 @@
+"""Context loader and retriever for CLIFF-AI memory and persona management.
+
+Provides functions for loading, filtering, and assembling project context
+fragments, module summaries, and persona-specific memory for retrieval-augmented generation.
+"""
+
 from pathlib import Path
 import os
+import sys
 import json
 from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
 from .personas import persona_registry
 from scripts.memory.memory_manager import get_known_contexts
-from scripts.memory.memory_manager import load_sidecar_summary
+from scripts.memory.sidecar_manager import get_curated_sidecar
 from scripts.memory.memory_manager import get_chat_log_paths
 
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-
+from context.code_context_generator import generate_context
 
 
 def load_json(path: Path) -> dict:
@@ -17,6 +25,7 @@ def load_json(path: Path) -> dict:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+
 
 def load_sidecar(chat_id: str, persona: str) -> dict:
     paths = get_chat_log_paths(chat_id, persona)
@@ -60,53 +69,11 @@ def load_base_context() -> Dict[str, any]:
     }
 
 
-def build_context_prompt_fragments(paths: list, prompt: str = "") -> list:
-    import glob
-    from difflib import SequenceMatcher
+def get_codebase_context(query: str, paths: Optional[List[str]] = None, top_n: int = 3) -> str:
+    root_dir = Path(__file__).resolve().parents[2]
+    context_text = generate_context(str(root_dir))
+    return context_text
 
-    context_chunks = []
-
-    for path in paths:
-        abs_path = os.path.join("memory", path)
-        if not os.path.exists(abs_path):
-            continue
-
-        files = glob.glob(f"{abs_path}/**/*.*", recursive=True)
-        for f in files:
-            if not f.endswith((".md", ".jsonl", ".json")):
-                continue
-            try:
-                with open(f, "r", encoding="utf-8") as infile:
-                    text = infile.read()
-                    score = SequenceMatcher(None, prompt.lower(), text[:500].lower()).ratio()
-                    context_chunks.append((score, text.strip()))
-            except Exception as e:
-                print(f"[context_loader.py][build_context_prompt_fragments] Failed to read {f}: {e}")
-
-    # Sort by similarity and return top 5–10
-    context_chunks.sort(key=lambda x: x[0], reverse=True)
-    top_chunks = [chunk for _, chunk in context_chunks[:8]]
-    return top_chunks
-
-
-
-def get_project_context(query: str, paths: Optional[List[str]] = None, top_n: int = 3) -> str:
-    """
-    Retrieve the top-N most relevant context fragments based on string similarity to the query.
-    Future version may use vector-based retrieval.
-    """
-    all_chunks = build_context_prompt_fragments(paths)
-    scored: List[Tuple[str, float]] = [
-        (chunk, SequenceMatcher(None, query.lower(), chunk.lower()).ratio())
-        for chunk in all_chunks
-    ]
-    top_chunks = sorted(scored, key=lambda x: x[1], reverse=True)[:top_n]
-
-    # print(f"[get_project_context] Searching RAG in: {paths}")
-    # print(f"[get_project_context] Using distilled prompt: {prompt}")
-    # print(f"[get_project_context] Found RAG length: {len(context)} chars")
-
-    return "\n\n".join(chunk for chunk, _ in top_chunks)
 
 
 def get_cliff_status() -> dict:
@@ -119,7 +86,6 @@ def get_cliff_status() -> dict:
         "active_contexts": 3,
         "last_distill": "just now"
     }
-
 
 
 def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list[str], chat_id: str = None) -> dict:
@@ -135,24 +101,15 @@ def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list
 
     sidecar = ""
     if chat_id:
-
         sidecar = load_sidecar(chat_id, persona)
-        if sidecar.get("memory_enabled", True) is False:
-            print(f"[context_loader] Memory disabled for {chat_id}. Suppressing memory.")
-            return {
-                "sidecar": sidecar,
-                "memory": ""
-            }
-
+        
     if persona == "cliff_core":
         base = "\n\n".join(get_cliff_core_base_context())
     else:
-        base = get_project_context(prompt, paths=paths)
-
+        base = get_codebase_context(prompt, paths=paths)
 
     return {
         "sidecar": sidecar,
         "memory": base
     }
-
 

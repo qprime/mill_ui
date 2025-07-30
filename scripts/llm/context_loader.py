@@ -10,9 +10,8 @@ import sys
 import json
 from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
-from .personas import persona_registry
+from scripts.llm.personas_manager import get_persona, legacy_persona_registry
 from scripts.memory.memory_manager import get_known_contexts
-from scripts.memory.sidecar_manager import get_curated_sidecar
 from scripts.memory.memory_manager import get_chat_log_paths
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -93,7 +92,7 @@ def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list
     paths = [p for p in suggested_contexts if p in known]
 
     if not paths:
-        fallback = persona_registry.get(persona, {}).get("default_contexts", [])
+        fallback = legacy_persona_registry.get(persona, {}).get("default_contexts", [])
         paths = [p for p in fallback if p in known]
         print(f"[context_loader] Using fallback paths for {persona}: {paths}")
     else:

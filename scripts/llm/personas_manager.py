@@ -1,4 +1,28 @@
-# cliff_ai/router/personas.py
+"""
+personas_manager.py
+
+Central persona manager for CLIFF AI.
+- Loads all persona JSONs from the top-level personas directory.
+- Supports legacy code-based personas for non-distillation roles.
+- Exposes a unified API for persona lookup and registry.
+"""
+
+import os
+import json
+from pathlib import Path
+
+# Path to the persona JSONs (top-level 'personas/')
+PERSONA_DIR = Path(__file__).resolve().parent.parent / "personas"
+
+def load_json_personas():
+    personas = {}
+    for file in PERSONA_DIR.glob("*.json"):
+        with open(file, "r", encoding="utf-8") as f:
+            persona = json.load(f)
+            personas[persona["name"]] = persona
+    return personas
+
+# ---- Legacy code-based personas (not for distillation) ----
 
 emotion_prompt = (
     "You may add light dry humor or subtle tone where appropriate, but never distract from clarity. "
@@ -10,7 +34,7 @@ anti_gaslight_prompt = (
     "as if you were part of the user's extended brain."
 )
 
-persona_registry = {
+legacy_persona_registry = {
     "cliff_core": {
         "description": "Project architect / lead dev / PM hybrid for CLIFF AI",
         "default_contexts": ["development"],
@@ -38,16 +62,34 @@ persona_registry = {
     }
 }
 
-
-def get_persona_prompt(persona: str) -> dict:
-    entry = persona_registry.get(persona, persona_registry["assistant"])
+def get_legacy_persona_prompt(persona: str) -> dict:
+    entry = legacy_persona_registry.get(persona, legacy_persona_registry["assistant"])
     return {
         "role": "system",
         "content": f"{entry['prompt']} {emotion_prompt} {anti_gaslight_prompt}"
     }
 
-def get_personas() -> list[str]:
+def get_legacy_personas() -> list[str]:
+    return list(legacy_persona_registry.keys())
+
+# ---- Unified API ----
+
+_json_personas = load_json_personas()
+
+def get_persona(persona_name: str) -> dict:
     """
-    Returns a list of valid persona identifiers (used for chat types, routing, and filtering).
+    Returns the persona dict (from JSON) for distillation/persona routing.
+    Falls back to legacy persona registry for CLIFF chat roles.
     """
-    return list(persona_registry.keys())
+    if persona_name in _json_personas:
+        return _json_personas[persona_name]
+    elif persona_name in legacy_persona_registry:
+        return legacy_persona_registry[persona_name]
+    else:
+        raise ValueError(f"Unknown persona: {persona_name}")
+
+def list_all_personas() -> list[str]:
+    """
+    Lists all valid persona names (JSON and legacy).
+    """
+    return sorted(set(_json_personas.keys()) | set(legacy_persona_registry.keys()))

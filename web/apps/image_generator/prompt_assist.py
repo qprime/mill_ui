@@ -43,7 +43,7 @@ def assist_prompt():
     )
 
     chat_response = client.chat.completions.create(
-        model="gpt-4.1-mini",  # Or "gpt-4-1-mini"
+        model="gpt-4.1-mini",  # Or "gpt-4.1-mini"
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Generate the image prompt now."}

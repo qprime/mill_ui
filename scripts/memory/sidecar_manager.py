@@ -1,68 +1,80 @@
-# sidecar_manager.py
+"""
+sidecar_manager.py
 
-from pathlib import Path
-from typing import List, Dict, Any
+Manages loading, saving, appending, pruning, and LLM-based distillation of CLIFF AI sidecar (session memory) logs.
+All LLM distillation is routed through the central distillation_manager with persona-based configuration.
+Only sidecar-related logic and helpers should live here—no direct LLM/system prompt logic.
+
+"""
+
 import json
-from scripts.llm.llm_tools import distill_sidecar_llm 
-from scripts.memory.memory_manager import get_chat_log_paths, ensure_chat_log_folder
+from pathlib import Path
+from scripts.distillation.distillation_manager import distill
 
+# Assume sidecar JSONs live here (adapt path as needed)
+SIDECAR_DIR = Path("memory/sidecar")
 
-def get_sidecar_path(chat_id: str, persona: str) -> Path:
-    ensure_chat_log_folder(chat_id, persona)
-    paths = get_chat_log_paths(chat_id, persona)
-    path = paths.get("sidecar")
-    if path is None:
-        raise RuntimeError(f"No sidecar path for chat_id={chat_id} persona={persona}")
-    return Path(path)
+def get_sidecar_path(chat_id, persona="sidecar"):
+    # This should match your actual storage convention
+    return SIDECAR_DIR / f"{chat_id}_{persona}.json"
 
-def load_sidecar(chat_id: str, persona: str) -> List[Dict[str, Any]]:
+def load_sidecar(chat_id, persona="sidecar"):
     path = get_sidecar_path(chat_id, persona)
     if not path.exists():
         return []
     with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    # Support both {"turns": [...]} or raw list
+    if isinstance(data, dict) and "turns" in data:
+        return data["turns"]
+    return data
 
+def save_distilled_sidecar(chat_id, distilled, persona="sidecar"):
+    out_path = get_sidecar_path(chat_id, f"{persona}_distilled")
+    with open(out_path, "w", encoding="utf-8") as f:
+        # If already JSON, dump prettily; else, save as text
+        try:
+            obj = json.loads(distilled)
+            json.dump(obj, f, indent=2)
+        except Exception:
+            f.write(distilled)
 
-def save_sidecar(chat_id: str, persona: str, entries: List[Dict[str, Any]]):
+def format_entries_for_distillation(entries):
+    return json.dumps(entries, indent=2)
+
+def distill_sidecar(chat_id, persona="sidecar"):
+    entries = load_sidecar(chat_id, persona)
+    if not entries:
+        print(f"[sidecar_manager] No sidecar entries for chat_id={chat_id}, persona={persona}")
+        return None
+
+    prompt = format_entries_for_distillation(entries)
+    distilled_output = distill(prompt, persona_name=persona)
+    save_distilled_sidecar(chat_id, distilled_output, persona)
+    return distilled_output
+
+def add_sidecar_entry(chat_id, persona, entry):
+    turns = load_sidecar(chat_id, persona)
+    turns.append(entry)
     path = get_sidecar_path(chat_id, persona)
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(entries, f, indent=2)
+        json.dump({"turns": turns}, f, indent=2)
 
-def add_sidecar_entry(chat_id: str, persona: str, entry: Dict[str, Any]):
-    entries = load_sidecar(chat_id, persona)
-    entries.append(entry)
-    save_sidecar(chat_id, persona, entries)
-
-def distill_sidecar(chat_id: str, persona: str) -> List[Dict[str, Any]]:
-    entries = load_sidecar(chat_id, persona)
-    distilled = distill_sidecar_llm(entries)
-    save_sidecar(chat_id, persona, distilled)
-    return distilled
-
-def get_curated_sidecar(chat_id: str, persona: str) -> List[Dict[str, Any]]:
-    """Load or distill sidecar as needed (e.g. on size, time, user command)."""
-    entries = load_sidecar(chat_id, persona)
-    # Example: distill if entries > 10, or always distill per policy
-    if len(entries) > 10:
-        return distill_sidecar(chat_id, persona)
-    return entries
-
-def prune_conflicting_sidecar_entries(chat_id: str, persona: str, code_context: str) -> None:
-    """Remove or tag any sidecar entries now obsolete due to updated canonical context."""
-    entries = load_sidecar(chat_id, persona)
-    pruned = [
-        e for e in entries
-        if not (e['type'] == "code" and e['content'] in code_context)
-    ]
-    save_sidecar(chat_id, persona, pruned)
-
-def update_sidecar_field(chat_id: str, persona: str, field: str, value: Any):
+def prune_sidecar(chat_id, persona="sidecar", max_turns=5):
+    turns = load_sidecar(chat_id, persona)
+    trimmed = turns[-max_turns:]
     path = get_sidecar_path(chat_id, persona)
-    if path.exists():
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    else:
-        data = {"chat_id": chat_id}
-    data[field] = value
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump({"turns": trimmed}, f, indent=2)
+
+    print(f"[sidecar_manager] Pruned sidecar for chat_id={chat_id}, persona={persona} to {len(trimmed)} turns.")
+
+# -- Example main/test entry point --
+if __name__ == "__main__":
+    import sys
+    chat_id = sys.argv[1]
+    print(f"Distilling sidecar for chat_id={chat_id} (persona='sidecar')...")
+    output = distill_sidecar(chat_id, persona="sidecar")
+    print("\n[Distilled Sidecar Output]:\n", output)

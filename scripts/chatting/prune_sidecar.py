@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from scripts.chatting.chat_logger import get_chat_log_paths
 from scripts.distillation.cleaner import clean_text
-from scripts.distillation.distill_text import distill_text
+from scripts.distillation.distillation_manager import distill
 
 # === Config ===
 PRUNE_ENABLED = True
@@ -32,13 +32,8 @@ def prune_sidecar(chat_id: str, persona: str) -> None:
 
         if DISTILL_ENABLED:
             try:
-                distilled = distill_text(input_clean, {
-                    "persona": persona,
-                    "task_type": "summary",
-                    "tone": "neutral",
-                    "urgency": "low"
-                }, strict_mode=True)
-                input_clean = distilled["distilled_text"]
+                # Use persona="turn" or "chat" depending on your logic; here "turn" is assumed for single-turn distillation.
+                input_clean = distill(input_clean, persona_name="turn")
             except Exception as e:
                 print(f"[prune_sidecar.py][prune_sidecar] Distillation failed on turn: {e}")
 

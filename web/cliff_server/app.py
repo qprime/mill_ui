@@ -163,7 +163,7 @@ def ask_openai():
     try:
         import time
         from scripts.llm.context_router import route_context
-        from scripts.llm.personas import get_persona_prompt
+        from scripts.llm.personas_manager import get_legacy_persona_prompt
         from scripts.distillation.cleaner import clean_text
         from scripts.distillation.distill_text import distill_text
         from scripts.llm.context_loader import (
@@ -187,7 +187,7 @@ def ask_openai():
             "urgency": "medium"
         }, strict_mode=True)
         distilled_prompt = distilled_result["distilled_text"]
-        system_message = get_persona_prompt(persona)
+        system_message = get_legacy_persona_prompt(persona)
         context_blocks = load_context_for_persona(distilled_prompt, persona, suggested_context, chat_id=chat_id)
         sidecar_context = context_blocks["sidecar"]
         project_memory = context_blocks["memory"]

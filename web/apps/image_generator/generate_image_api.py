@@ -2,7 +2,7 @@ import os
 import json
 import base64
 import requests
-from pathlib import Path
+
 from flask import request, jsonify, send_file
 from tempfile import NamedTemporaryFile
 

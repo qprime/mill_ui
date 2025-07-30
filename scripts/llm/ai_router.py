@@ -1,80 +1,35 @@
-# ai_router.py
-from abc import ABC, abstractmethod
-import os
+"""ai_router.py
 
-### === Interface Definitions === ###
+Unified LLM and embedding router for CLIFF AI.
+Provides a central interface for chat and embedding requests.
+All provider logic (OpenAI, Phi, etc.) is routed through client.py.
+"""
 
-class EmbeddingBackend(ABC):
-    @abstractmethod
-    def embed(self, inputs: list[str]) -> list[list[float]]:
-        pass
-
-class ChatBackend(ABC):
-    @abstractmethod
-    def chat(self, messages: list[dict], model: str = "gpt-4") -> str:
-        pass
-
-
-### === Concrete Backends === ###
-
-# OpenAI Backend
-try:
-    from openai import OpenAI as OpenAIClient
-    _use_new_sdk = True
-except ImportError:
-    import openai as OpenAIClient
-    _use_new_sdk = False
-
-class OpenAIEmbedder(EmbeddingBackend):
-    def __init__(self, model="text-embedding-3-small"):
-        self.model = model
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        #print("OPENAI_API_KEY::", os.getenv("OPENAI_API_KEY"))
-        self.client = OpenAIClient(api_key=self.api_key) if _use_new_sdk else None
-
-    def embed(self, inputs):
-        if _use_new_sdk:
-            response = self.client.embeddings.create(input=inputs, model=self.model)
-            return [d.embedding for d in response.data]
-        else:
-            OpenAIClient.api_key = self.api_key
-            response = OpenAIClient.Embedding.create(input=inputs, model=self.model)
-            return [d["embedding"] for d in response["data"]]
-
-class OpenAIChat(ChatBackend):
-    def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        #print("OPENAI_API_KEY:!", os.getenv("OPENAI_API_KEY"))
-
-        self.client = OpenAIClient(api_key=self.api_key) if _use_new_sdk else None
-
-    def chat(self, messages, model="gpt-4"):
-        if _use_new_sdk:
-            res = self.client.chat.completions.create(model=model, messages=messages)
-            return res.choices[0].message.content
-        else:
-            res = OpenAIClient.ChatCompletion.create(model=model, messages=messages)
-            return res["choices"][0]["message"]["content"]
-
-
-### === Central Router === ###
+from scripts.llm.client import get_chat_completion, get_embedding
 
 class AIRouter:
-    def __init__(self, embedder: EmbeddingBackend, chatter: ChatBackend):
-        self.embedder = embedder
-        self.chatter = chatter
+    """Central router for AI chat and embedding requests."""
 
-    def embed(self, inputs: list[str]) -> list[list[float]]:
-        return self.embedder.embed(inputs)
+    def embed(self, inputs: list[str], model: str = "text-embedding-3-small") -> list[list[float]]:
+        return get_embedding(inputs, model=model)
 
-    def chat(self, messages: list[dict], model="gpt-4") -> str:
-        return self.chatter.chat(messages, model)
+    def chat(self, messages: list[dict], model: str = "gpt-4.1-mini") -> str:
+        return get_chat_completion(messages, model=model)
 
-
-### === Factory === ###
-
-def get_router(source="openai") -> AIRouter:
+def get_router(source: str = "openai") -> AIRouter:
+    """
+    Returns a configured AIRouter.
+    For now, only 'openai' is supported, but this is future-proofed for multi-backend.
+    """
     if source == "openai":
-        return AIRouter(OpenAIEmbedder(), OpenAIChat())
+        return AIRouter()
     else:
         raise ValueError(f"Unknown AI source: {source}")
+
+# Optional: Test code for direct CLI/test usage
+if __name__ == "__main__":
+    # Minimal smoke test for router functionality
+    router = get_router()
+    msg = [{"role": "user", "content": "Say hello as CLIFF."}]
+    print("[Test] Chat:", router.chat(msg))
+    print("[Test] Embedding:", router.embed(["hello world"]))

@@ -9,7 +9,7 @@ Returns context suggestion, persona, confidence, and clarify flag.
 
 import json
 from scripts.memory.memory_manager import get_known_contexts
-import openai
+from scripts.llm.client import get_chat_completion
 
 OPENAI_MODEL = "gpt-4.1-mini"
 
@@ -42,20 +42,18 @@ def route_context(prompt: str, active_persona: str | None = None, active_context
     )
 
     try:
-        client = openai.OpenAI(api_key=None)  # Uses env variable
-        completion = client.chat.completions.create(
-            model=OPENAI_MODEL,
+        content = get_chat_completion(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
             ],
+            model=OPENAI_MODEL,
             temperature=0.0,
             max_tokens=128,
-        )
-        content = completion.choices[0].message.content.strip()
+        ).strip()
         result = parse_tag_output(content)
     except Exception as e:
-        print("[context_router.py][route_context] OpenAI call failed:", e)
+        print("[context_router.py][route_context] LLM call failed:", e)
         result = {
             "persona": persona,
             "suggested_context": ["development"],

@@ -7,7 +7,7 @@ import os
 import json
 from pathlib import Path
 from typing import Optional
-import openai
+from scripts.llm.client import get_chat_completion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DISTILLER_MODEL = "gpt-4.1-mini"
@@ -17,7 +17,6 @@ DEFAULT_GUIDANCE = {
     "tone": "neutral",
     "urgency": "normal"
 }
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 def is_fact_query(text: str) -> bool:
     return text.strip().lower().startswith(("what", "when", "where", "who", "how many", "how much"))
@@ -58,16 +57,15 @@ For each turn, you are only to return a distilled summary.  Nothing else.  Your 
 """
     )
     try:
-        response = client.chat.completions.create(
-            model=DISTILLER_MODEL,
+        distilled = get_chat_completion(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
             ],
+            model=DISTILLER_MODEL,
             temperature=0.5 if strict_mode else 0.2,
             max_tokens=400
-        )
-        distilled = response.choices[0].message.content.strip()
+        ).strip()
         if strict_mode and "`" in distilled and "`" not in cleaned_text:
             warnings.append("Distilled text contains code-like output not present in input. Possible hallucination.")
     except Exception as e:

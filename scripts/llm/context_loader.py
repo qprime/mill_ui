@@ -16,7 +16,7 @@ from scripts.memory.memory_manager import get_chat_log_paths
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from context.code_context_generator import generate_context
+from context.code_context import generate_context
 
 
 def load_json(path: Path) -> dict:

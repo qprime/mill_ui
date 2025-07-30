@@ -7,7 +7,7 @@ import os
 import json
 from pathlib import Path
 from typing import Optional
-from scripts.llm.client import get_chat_completion
+from cliff_ai.scripts.llm.client import get_chat_completion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DISTILLER_MODEL = "gpt-4.1-mini"

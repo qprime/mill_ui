@@ -6,12 +6,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 from datetime import datetime
-from pathlib import Path
 import os
-import sys
-
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-from scripts.memory.memory_manager import add_to_domain
+from cliff_ai.scripts.memory.memory_manager import add_to_domain  # <- Absolute package import
 
 app = Flask(__name__)
 CORS(app)

@@ -1,106 +1,99 @@
-"""
-context_router.py
+"""Context loader and retriever for CLIFF-AI memory and persona management.
 
-Routes prompt context for CLIFF AI using OpenAI GPT-4.1-min only.
-All legacy fallback logic and Phi/Llama references have been removed.
-Returns context suggestion, persona, confidence, and clarify flag.
-
+Provides functions for loading, filtering, and assembling project context
+fragments, module summaries, and persona-specific memory for retrieval-augmented generation.
 """
 
+from pathlib import Path
+import os
 import json
-from scripts.memory.memory_manager import get_known_contexts
-from scripts.llm.client import get_chat_completion
+from typing import List, Dict, Optional, Tuple
+from difflib import SequenceMatcher
 
-OPENAI_MODEL = "gpt-4.1-mini"
+from cliff_ai.scripts.llm.personas_manager import get_persona, legacy_persona_registry
+from cliff_ai.scripts.memory.memory_manager import get_known_contexts, get_chat_log_paths
+from cliff_ai.context.code_context import generate_context
 
-# Preload valid context paths
-KNOWN_CONTEXTS = get_known_contexts()
+def load_json(path: Path) -> dict:
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-def route_context(prompt: str, active_persona: str | None = None, active_context: list[str] | None = None) -> dict:
-    persona = active_persona or "cliff_core"
+def load_sidecar(chat_id: str, persona: str) -> dict:
+    paths = get_chat_log_paths(chat_id, persona)
+    path = paths["sidecar"]
+    if not path.exists():
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-    # If explicit context provided, return it with full confidence.
-    if active_context:
-        return {
-            "persona": persona,
-            "suggested_context": [c for c in active_context if c in KNOWN_CONTEXTS],
-            "confidence": 1.0,
-            "clarify": False
-        }
+def get_cliff_core_base_context() -> List[str]:
+    ctx = load_base_context()
+    fragments = [
+        f"# Project Summary\n{ctx['summary'].get('long_description', '')}",
+        f"# Core Goals\n" + "\n".join(f"- {g}" for g in ctx['summary'].get("core_goals", [])),
+        f"# Interfaces\n" + "\n".join(f"- {i}" for i in ctx['summary'].get("primary_interfaces", [])),
+        f"# Memory Domains\n" + "\n".join(f"- {d['name']}: {d['purpose']}" for d in ctx['memory_graph'].get("domains", [])),
+        f"# Modules\n" + "\n".join(f"- {m['name']}" for m in ctx['project_graph'].get("modules", [])),
+        f"# Module Summaries\n" + "\n\n".join(ctx["module_summaries"])
+    ]
+    return fragments
 
-    # Compose system prompt
-    system_prompt = (
-        "You are a context classification assistant for CLIFF AI.\n"
-        "Your task is to choose the most relevant CONTEXT path(s) from the list below\n"
-        "based on the user's prompt. These paths are folders where related memory is stored.\n\n"
-        f"Valid CONTEXT paths: {', '.join(KNOWN_CONTEXTS)}\n\n"
-        "Return only valid paths. Respond in the format:\n"
-        "CONTEXT: <comma-separated list of valid CONTEXT paths>\n"
-        "CONFIDENCE: <float between 0.0 and 1.0>\n"
-        "CLARIFY: <true or false>\n\n"
-        "DO NOT include explanation or commentary."
-    )
+def load_module_summaries(md_dir: Path) -> List[str]:
+    return [
+        f.read_text().strip()
+        for f in sorted(md_dir.glob("*.md"))
+        if f.read_text().strip()
+    ]
 
-    try:
-        content = get_chat_completion(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ],
-            model=OPENAI_MODEL,
-            temperature=0.0,
-            max_tokens=128,
-        ).strip()
-        result = parse_tag_output(content)
-    except Exception as e:
-        print("[context_router.py][route_context] LLM call failed:", e)
-        result = {
-            "persona": persona,
-            "suggested_context": ["development"],
-            "confidence": 0.0,
-            "clarify": True
-        }
-
-    result["persona"] = persona
-    if persona != "assistant":
-        result["suggested_context"] = [c for c in result["suggested_context"] if not c.startswith("personal/")]
-
-    if not result["suggested_context"]:
-        result["suggested_context"] = ["development"]
-    result.setdefault("confidence", 0.0)
-    result.setdefault("clarify", False)
-    return result
-
-
-def parse_tag_output(text: str) -> dict:
-    """
-    Parses the output of the context classification model.
-    Expects lines like:
-      CONTEXT: context_a, context_b
-      CONFIDENCE: 0.95
-      CLARIFY: false
-    """
-    result = {
-        "persona": "unknown",
-        "suggested_context": [],
-        "confidence": 0.0,
-        "clarify": False
+def load_base_context() -> Dict[str, any]:
+    root = Path(__file__).resolve().parents[2]
+    meta_path = root / "memory/metadata"
+    return {
+        "summary": load_json(meta_path / "project_summary.json"),
+        "memory_graph": load_json(meta_path / "memory_graph.json"),
+        "project_graph": load_json(meta_path / "project_graph.json"),
+        "module_summaries": load_module_summaries(root / "memory/development/module_summaries")
     }
 
-    for line in text.splitlines():
-        line = line.strip()
-        if line.startswith("PERSONA:"):
-            result["persona"] = line.split(":", 1)[1].strip()
-        elif line.startswith("CONTEXT:"):
-            result["suggested_context"] = [x.strip() for x in line.split(":", 1)[1].split(",")]
-        elif line.startswith("CONFIDENCE:"):
-            try:
-                result["confidence"] = float(line.split(":", 1)[1].strip())
-            except ValueError:
-                pass
-        elif line.startswith("CLARIFY:"):
-            result["clarify"] = "true" in line.lower()
-        elif not line or not ":" in line:
-            break
+def get_codebase_context(query: str, paths: Optional[List[str]] = None, top_n: int = 3) -> str:
+    root_dir = Path(__file__).resolve().parents[2]
+    context_text = generate_context(str(root_dir))
+    return context_text
 
-    return result
+def get_cliff_status() -> dict:
+    """
+    Stub: Return mock or real-time system status.
+    """
+    return {
+        "uptime": "running",
+        "memory_usage": "not tracked",
+        "active_contexts": 3,
+        "last_distill": "just now"
+    }
+
+def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list[str], chat_id: str = None) -> dict:
+    known = get_known_contexts()
+    paths = [p for p in suggested_contexts if p in known]
+
+    if not paths:
+        fallback = legacy_persona_registry.get(persona, {}).get("default_contexts", [])
+        paths = [p for p in fallback if p in known]
+        print(f"[context_loader] Using fallback paths for {persona}: {paths}")
+    else:
+        print(f"[context_loader] Using routed paths for {persona}: {paths}")
+
+    sidecar = ""
+    if chat_id:
+        sidecar = load_sidecar(chat_id, persona)
+        
+    if persona == "cliff_core":
+        base = "\n\n".join(get_cliff_core_base_context())
+    else:
+        base = get_codebase_context(prompt, paths=paths)
+
+    return {
+        "sidecar": sidecar,
+        "memory": base
+    }

@@ -4,15 +4,12 @@ Flask API for receiving and storing CLI logs, and pushing commands to memory.
 
 from pathlib import Path
 from flask import Flask, request, jsonify
-from cli_log_store import save_cli_logs
+from .cli_log_store import save_cli_logs   # <-- relative import (if in the same package/folder)
 from flask_cors import CORS
 import os
 import json
-import sys
-import os
 
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-from scripts.memory.memory_manager import add_to_domain
+from cliff_ai.scripts.memory.memory_manager import add_to_domain  # <-- absolute package import
 
 app = Flask(__name__)
 CORS(app)

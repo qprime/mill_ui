@@ -8,17 +8,18 @@ import numpy as np
 import yaml
 import json
 from scipy.ndimage import zoom
-from cam_generator.core.loader import load_heightmap
-from cam_generator.core.job_loader import load_job_config
-from cam_generator.core.gcode_writer import write_gcode
-from path_builders.raster import generate_raster_xyz_path
-from gcode.emit_gcode import emit_gcode_from_path
-from optimizers.reduce_colinear import reduce_colinear_path
-from optimizers.prune_redundant import deduplicate_path
-from analysis.curvature import compute_slope_map
-from cam_generator.core.pass_reporter import PassReporter
-from cam_generator.core.time_estimator import estimate_cut_time
-from cam_generator.core.toggles import get_enabled_algorithms
+
+from pipelines.cam_generator.core.loader import load_heightmap
+from pipelines.cam_generator.core.job_loader import load_job_config
+from pipelines.cam_generator.core.gcode_writer import write_gcode
+from pipelines.cam_generator.path_builders.raster import generate_raster_xyz_path
+from pipelines.cam_generator.gcode.emit_gcode import emit_gcode_from_path
+from pipelines.cam_generator.optimizers.reduce_colinear import reduce_colinear_path
+from pipelines.cam_generator.optimizers.prune_redundant import deduplicate_path
+from pipelines.cam_generator.analysis.curvature import compute_slope_map
+from pipelines.cam_generator.core.pass_reporter import PassReporter
+from pipelines.cam_generator.core.time_estimator import estimate_cut_time
+from pipelines.cam_generator.core.toggles import get_enabled_algorithms
 
 def generate_surface_map(path, target_shape=None):
     height = len(path)
@@ -122,7 +123,7 @@ def generate_all_passes(
         gcode.append("G90 ; Absolute positioning")
         gcode.append(f"G0 Z{safe_height:.3f}")
         if pass_name == "coarse" and job_config.get("add_border", False):
-            from path_builders.border import generate_border_path
+            from pipelines.cam_generator.path_builders.border import generate_border_path
             height_px, width_px = heightmap.shape
             width_mm = width_px * scale_xy + 2 * border_margin
             height_mm = height_px * scale_xy + 2 * border_margin

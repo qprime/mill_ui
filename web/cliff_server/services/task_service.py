@@ -1,9 +1,6 @@
 """Task services for CLIFF."""
-import sys
-from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[3]))
-from scripts.memory.task_manager import load_tasks, update_task, create_task, get_task
+from cliff_ai.scripts.memory.task_manager import load_tasks, update_task, create_task, get_task
 
 def get_active_tasks_grouped():
     raw_tasks = load_tasks()
@@ -45,5 +42,6 @@ def archive_task_entry(task_id):
     })
 
 def reorder_tasks_by_ids(ids):
-    from development.task_manager import reorder_tasks_by_ids as _reorder
+    # NOTE: Ensure correct import path! If this is in the main project, use full package path:
+    from cliff_ai.development.task_manager import reorder_tasks_by_ids as _reorder
     _reorder(ids)

@@ -20,8 +20,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 
 from scripts.llm.ai_router import get_router
 from scripts.llm.context_loader import load_context_for_persona
-from scripts.tasking.task_manager import load_tasks, update_task, create_task, get_task
-from scripts.chatting.chat_logger import log_chat_turn
+from scripts.memory.task_manager import load_tasks, update_task, create_task, get_task
+from scripts.memory.chat_manager import log_chat_turn
 
 MAIN_CHAT_MODEL = "gpt-4.1"
 
@@ -164,8 +164,7 @@ def ask_openai():
         import time
         from scripts.llm.context_router import route_context
         from scripts.llm.personas_manager import get_legacy_persona_prompt
-        from scripts.distillation.cleaner import clean_text
-        from scripts.distillation.distill_text import distill_text
+        from scripts.llm.distill_text import distill_text
         from scripts.llm.context_loader import (
             load_context_for_persona,
             get_cliff_status
@@ -176,11 +175,10 @@ def ask_openai():
         chat_id = data.get("chat_id")
         if not raw_input or not chat_id:
             return jsonify({"error": "Missing prompt or chat_id"}), 400
-        cleaned = clean_text(raw_input)
-        routing = route_context(cleaned)
+        routing = route_context(raw_input)
         persona = routing.get("persona", "default")
         suggested_context = routing.get("suggested_context", [])
-        distilled_result = distill_text(cleaned, {
+        distilled_result = distill_text(raw_input, {
             "persona": persona,
             "task_type": "specification",
             "tone": tone,

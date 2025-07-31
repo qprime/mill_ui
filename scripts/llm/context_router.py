@@ -10,9 +10,9 @@ import json
 from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
 
-from cliff_ai.personas.personas_manager import get_persona, legacy_persona_registry
-from cliff_ai.scripts.memory.memory_manager import get_known_contexts, get_chat_log_paths
-from cliff_ai.continuum.code_context import generate_context
+from personas.personas_manager import get_persona, legacy_persona_registry
+from scripts.memory.memory_manager import get_known_contexts, get_chat_log_paths
+from continuum.code_context import generate_context
 
 def load_json(path: Path) -> dict:
     if path.exists():

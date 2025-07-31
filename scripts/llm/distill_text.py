@@ -5,9 +5,11 @@ Replaces local LLAMA-CPT distillation with OpenAI's API.
 
 import os
 import json
+import re
 from pathlib import Path
 from typing import Optional
-from cliff_ai.scripts.llm.client import get_chat_completion
+
+from scripts.llm.client import get_chat_completion
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DISTILLER_MODEL = "gpt-4.1-mini"
@@ -17,6 +19,36 @@ DEFAULT_GUIDANCE = {
     "tone": "neutral",
     "urgency": "normal"
 }
+
+SYSTEM_PROMPT = """
+You are a technical distillation engine.
+
+Your ONLY job is to extract technical facts, actions, or key content *already present* in the input.
+
+Output ONLY the extracted content between these markers:
+
+<<<DISTILL_START
+... distilled content here ...
+DISTILL_END>>>
+
+Do NOT generate summaries, answers, or any content outside these markers.
+
+- If the input is a user question or command (e.g. 'List all folders'), output an EMPTY block between the markers.
+- If the input is only meta-chatter, greetings, or instructions to the assistant, also output an EMPTY block.
+
+Examples:
+
+Input: 'I finished refactoring the code and committed to main.'
+Output:
+<<<DISTILL_START
+Refactored code committed to main.
+DISTILL_END>>>
+
+Input: 'List all folders.'
+Output:
+<<<DISTILL_START
+DISTILL_END>>>
+"""
 
 def is_fact_query(text: str) -> bool:
     return text.strip().lower().startswith(("what", "when", "where", "who", "how many", "how much"))
@@ -29,6 +61,19 @@ def fill_guidance_defaults(guidance: dict) -> tuple[dict, list[str]]:
             final[key] = value
             warnings.append(f"guidance parameter '{key}' missing, using default '{value}'")
     return final, warnings
+
+def extract_distilled_block(text: str) -> Optional[str]:
+    """
+    Extracts content between <<<DISTILL_START ... DISTILL_END>>>.
+    Returns None if empty or if 'NA', 'N/A', etc. is detected.
+    """
+    m = re.search(r'<<<DISTILL_START\n?(.*?)\n?DISTILL_END>>>', text, re.DOTALL | re.IGNORECASE)
+    if m:
+        result = m.group(1).strip()
+        if not result or result.lower() in {"na", "n/a", "na.", "n.a.", "none", "not applicable"}:
+            return None
+        return result
+    return None
 
 def distill_text(cleaned_text: str, guidance: dict, strict_mode: bool = False) -> dict:
     guidance_filled, warnings = fill_guidance_defaults(guidance)
@@ -45,21 +90,10 @@ def distill_text(cleaned_text: str, guidance: dict, strict_mode: bool = False) -
         user_input = f"BEGIN_INPUT\n{cleaned_text}\nEND_INPUT"
     else:
         user_input = cleaned_text
-    system_prompt = (
-        """
-You are a distillation engine for technical chat logs. 
-Extract only facts, technical actions, or content that must persist in the session.
-Never include requests for brevity, meta-instructions, or conversational intent.
-If the input is only meta-chatter, greetings, or instructions to the assistant, return an empty string.
-If in doubt, prefer less over more.
-Return only the distilled factual content, as a fragment or phrase if possible.
-For each turn, you are only to return a distilled summary.  Nothing else.  Your job is distillation, not responses.
-"""
-    )
     try:
         distilled = get_chat_completion(
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
             ],
             model=DISTILLER_MODEL,
@@ -68,11 +102,14 @@ For each turn, you are only to return a distilled summary.  Nothing else.  Your 
         ).strip()
         if strict_mode and "`" in distilled and "`" not in cleaned_text:
             warnings.append("Distilled text contains code-like output not present in input. Possible hallucination.")
+        distilled_block = extract_distilled_block(distilled)
+        if distilled_block is None:
+            distilled_block = cleaned_text
     except Exception as e:
-        distilled = cleaned_text
+        distilled_block = cleaned_text
         warnings.append(f"LLM request failed: {str(e)}. Outputting cleaned text only.")
     return {
-        "distilled_text": distilled,
+        "distilled_text": distilled_block,
         "metadata": {
             **guidance_filled,
             "strict_mode": strict_mode,

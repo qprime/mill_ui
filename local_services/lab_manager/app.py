@@ -7,7 +7,7 @@ from flask_cors import CORS
 import json
 from datetime import datetime
 import os
-from cliff_ai.scripts.memory.memory_manager import add_to_domain  # <- Absolute package import
+from scripts.memory.memory_manager import add_to_domain  # <- Absolute package import
 
 app = Flask(__name__)
 CORS(app)

@@ -7,7 +7,7 @@ using LLM persona and style configuration. All LLM calls route through client.py
 import os
 import json
 from flask import Flask, request, jsonify
-from cliff_ai.scripts.llm.client import get_chat_completion  # <--- changed
+from scripts.llm.client import get_chat_completion  # <--- changed
 
 app = Flask(__name__)
 

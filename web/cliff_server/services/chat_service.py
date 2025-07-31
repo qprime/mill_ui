@@ -1,12 +1,12 @@
 """Handles chat, context routing, distillation, logging, and sidecar/project memory assembly."""
 
-from cliff_ai.scripts.llm.ai_router import get_router
-from cliff_ai.scripts.llm.context_router import route_context
-from cliff_ai.personas.personas_manager import get_legacy_persona_prompt
-from cliff_ai.scripts.llm.distill_text import distill_text
-from cliff_ai.scripts.llm.context_loader import load_context_for_persona
-from cliff_ai.scripts.memory.chat_manager import log_chat_turn
-from cliff_ai.web.cliff_server.services.status_service import get_cliff_status
+from scripts.llm.ai_router import get_router
+from scripts.llm.context_router import route_context
+from personas.personas_manager import get_legacy_persona_prompt
+from scripts.llm.distill_text import distill_text
+from scripts.llm.context_loader import load_context_for_persona
+from scripts.memory.chat_manager import log_chat_turn
+from web.cliff_server.services.status_service import get_cliff_status
 
 MAIN_CHAT_MODEL = "gpt-4.1"
 router = get_router("openai")
@@ -95,11 +95,11 @@ def generate_chat_reply(data):
     }
 
 def update_chat_summary(chat_id, summary):
-    from cliff_ai.scripts.memory.sidecar_manager import update_sidecar_field
+    from scripts.memory.sidecar_manager import update_sidecar_field
     update_sidecar_field(chat_id, "cliff_core", "summary", summary)
 
 def update_chat_facts(chat_id, facts_json):
-    from cliff_ai.scripts.memory.sidecar_manager import update_sidecar_field
+    from scripts.memory.sidecar_manager import update_sidecar_field
     import json
     try:
         facts = json.loads(facts_json)
@@ -108,7 +108,7 @@ def update_chat_facts(chat_id, facts_json):
     update_sidecar_field(chat_id, "cliff_core", "facts", facts)
 
 def get_sidecar_data(chat_id):
-    from cliff_ai.scripts.chatting.chat_logger import get_chat_log_paths
+    from scripts.memory.chat_manager import get_chat_log_paths
     persona = "cliff_core"
     paths = get_chat_log_paths(chat_id, persona)
     sidecar_path = paths["sidecar"]

@@ -1,5 +1,6 @@
 #!/bin/bash
 # Activate tests/venv, set PYTHONPATH, cd to repo root, run pytest as a module
+# echo "OPENAI_API_KEY in this shell: $OPENAI_API_KEY"
 
 SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
@@ -17,4 +18,4 @@ pip install -q --upgrade pip pytest
 export PYTHONPATH="$REPO_ROOT"
 cd "$REPO_ROOT" || exit 1
 
-python3 -m pytest tests/unit -v
+python3 -m pytest tests/unit -v -s

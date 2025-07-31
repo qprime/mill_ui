@@ -1,73 +1,61 @@
-import re
-
+import pytest
+import time
 from scripts.llm.distill_text import distill_text
 
-def call_distiller(input_text):
-    # Call the actual distiller. (No need for stub, just use real function now)
+# Test cases: (input, expect_nonempty, expect_bypassed)
+CASES = [
+    ("Refactor completed. Merged into dev branch.", True, False),
+    ("List all top-level folders.", False, True),
+    ("What are the current tasks?", False, True),
+    ("System update scheduled for 4pm.", True, False),
+    ("Hi Cliff, just checking in!", False, True),
+    ("I created a new 'tests/' directory for the project.", True, False),
+    ("Please summarize the last 15 minutes.", False, True),
+    ("Bug fixed in context_loader.py (line 42).", True, False),
+    ("NA", False, True),
+    ("N/A", False, True),
+    ("none", False, True),
+    # Add more cases here as you refine your prompt/logic!
+]
+
+@pytest.mark.parametrize("input_text,expect_nonempty,expect_bypassed", CASES)
+def test_distiller(input_text, expect_nonempty, expect_bypassed, capsys):
+    start = time.time()
     result = distill_text(input_text, guidance={}, strict_mode=False)
-    return result.get("distilled_text", "")
+    elapsed = time.time() - start
 
-def main():
-    test_cases = [
-        {
-            "input": "Refactor completed. Merged into dev branch.",
-            "expect_nonempty": True
-        },
-        {
-            "input": "List all top-level folders.",
-            "expect_nonempty": False
-        },
-        {
-            "input": "What are the current tasks?",
-            "expect_nonempty": False
-        },
-        {
-            "input": "System update scheduled for 4pm.",
-            "expect_nonempty": True
-        },
-        {
-            "input": "Hi Cliff, just checking in!",
-            "expect_nonempty": False
-        },
-        {
-            "input": "I created a new 'tests/' directory for the project.",
-            "expect_nonempty": True
-        },
-        {
-            "input": "Please summarize the last 15 minutes.",
-            "expect_nonempty": False
-        },
-        {
-            "input": "Bug fixed in context_loader.py (line 42).",
-            "expect_nonempty": True
-        },
-        # Add some NA test cases!
-        {
-            "input": "NA",
-            "expect_nonempty": False
-        },
-        {
-            "input": "N/A",
-            "expect_nonempty": False
-        },
-        {
-            "input": "none",
-            "expect_nonempty": False
-        },
-    ]
+    distilled = result.get("distilled_text", "")
+    bypassed = result.get("metadata", {}).get("bypassed", False)
+    fallback = result.get("metadata", {}).get("fallback", False)
 
-    for idx, case in enumerate(test_cases):
-        print(f"\n--- TEST {idx+1} ---")
-        print(f"Input: {case['input']}")
-        distilled = call_distiller(case["input"])
-        print(f"Distilled: {repr(distilled)}")
-        if case["expect_nonempty"]:
-            assert distilled and distilled.lower() not in {"na", "n/a", "none", "na.", "n.a."}, \
-                f"Expected distilled content, got: {repr(distilled)}"
-        else:
-            assert not distilled or distilled.lower() in {"na", "n/a", "none", "na.", "n.a."}, \
-                f"Expected EMPTY or NA distilled content, got: {repr(distilled)}"
-        print("PASS")
+    # Print for *every* test run, not just on failure
+    print(
+        f"\nInput:      {input_text!r}\n"
+        f"Distilled:  {distilled!r}\n"
+        f"Bypassed:   {bypassed}\n"
+        f"Fallback:   {fallback}\n"
+        f"Elapsed:    {elapsed:.2f}s\n"
+        f"{'-'*40}"
+    )
 
-if __name__ == "__main__":
-    main()
+    # Assert backend was (or wasn't) called as expected
+    assert bypassed == expect_bypassed, f"Expected bypassed={expect_bypassed}, got {bypassed} for input: {input_text!r}"
+
+    # Assert content according to updated logic
+    if expect_nonempty:
+        assert distilled.strip(), f"Expected distilled content, got: {repr(distilled)}"
+        assert distilled.lower() not in {"na", "n/a", "none", "na.", "n.a."}, f"Expected *not* NA/none, got: {repr(distilled)}"
+    else:
+        # For "bypassed" cases, allow empty, NA, or original text as fallback
+        assert not distilled or \
+               distilled.lower() in {"na", "n/a", "none", "na.", "n.a."} or \
+               distilled == input_text, \
+            f"Expected EMPTY, NA, or fallback (original) for: {repr(input_text)}, got: {repr(distilled)}"
+
+def test_api_call_time():
+    import time
+    t0 = time.time()
+    result = distill_text("This is a factual update for the database.", guidance={}, strict_mode=False)
+    elapsed = time.time() - t0
+    # Accept fast calls as real (lowered threshold for speed)
+    assert elapsed > 0.2, f"API call seems too fast ({elapsed:.2f}s) — may not have called backend"

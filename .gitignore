@@ -2,6 +2,11 @@
 # Core Cliff AI Ignore
 # ====================
 
+# One-off dumps and graphs
+context.txt
+graph.txt
+vulture.txt
+
 # System and Editor Junk
 .DS_Store
 Thumbs.db
@@ -114,4 +119,3 @@ memory/cam_projects/
 memory/exports/
 memory/personal/debug_outputs
 .model_cache/
-

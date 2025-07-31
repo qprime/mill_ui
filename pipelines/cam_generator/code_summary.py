@@ -6,9 +6,9 @@ YAML_HEADER = "\n\n# === YAML FILES ===\n\n"
 
 # Allow only these relative folders
 ALLOWED_DIRS = {
-    ".", "analysis", "config", "core", "gcode", 
-    "optimizers", "path_builders", "pocket_holer", 
-    "prompt_templates", "visualization", "path_builders", "viewer"
+    ".", "analysis", "config", "core", "gcode",
+    "optimizers", "path_builders", "pocket_holer",
+    "prompt_templates", "visualization", "viewer"
 }
 
 # Normalize for comparison

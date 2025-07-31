@@ -5,7 +5,7 @@ Tests the enhancement pipeline for heightmaps using different enhancement strate
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-from image_pipeline.core.enhance import enhance_heightmap
+from pipelines.image_pipeline.enhance import enhance_heightmap
 
 def load_image(image_path: str):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)

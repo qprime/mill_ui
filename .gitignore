@@ -2,29 +2,35 @@
 # Core Cliff AI Ignore
 # ====================
 
-# One-off dumps and graphs
+# One-off dumps and generated graphs
 context.txt
 graph.txt
 vulture.txt
+project_structure.txt
+memory_tree.txt
+context_dump.txt
 
-# System and Editor Junk
+# System and editor junk
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
 *.bak
 *.tmp
+.vscode
 
-# Python
+# Python artifacts
 __pycache__/
 *.py[cod]
 *.pyo
+
+# Virtual environments
 .env
 .venv/
 env/
 venv/
 
-# AI/Model Artifacts
+# AI / Model artifacts
 *.pt
 *.ckpt
 *.safetensors
@@ -38,7 +44,7 @@ models/mistral/quantized/*
 !models/mistral/original/.gitkeep
 !models/mistral/quantized/.gitkeep
 
-# SSL Certificates and Keys
+# SSL certificates and keys
 *.crt
 *.key
 *.pem
@@ -46,77 +52,71 @@ certs/
 web_server/*.crt
 web_server/*.key
 
-# CLI Logs / Voice Logs
+# Logs
 *.log
 logs/
+memory/chatting/chat_logs/
+web_server/memory/chat_logs/
 voice_input/recordings/
 voice_input/tmp/
 
-# Docker / Build / Flash Artifacts
+# Docker / build artifacts
 *.tar
 *.img
 *.iso
 Linux_for_Tegra/
 
-# Web Dev (Node, Dist, etc.)
+# Web development
 node_modules/
 dist/
 build/
 
-# Archives and Compression
+# Archives and compressed files
 *.zip
 *.gz
 *.xz
 *.7z
 
+# BlenderCAM artifacts
 blendercam/
 
-
-memory/accounting/chroma.sqlite3
-memory/personal/chroma.sqlite3
-memory/production/chroma.sqlite3
-memory/research/chroma.sqlite3
-memory/cliff_state/chroma.sqlite3
-memory/lab/chroma.sqlite3
-memory/*/*.bin
-memory/lab/device_inventory.json
-memory/lab/lab_data.jsonl
-memory/production/*/
-memory/cliff_state/cli_logs.jsonl
-memory/development/module_summaries/
-memory/chat_logs/
-chroma_store/
-memory/development
-
-# Generated annotation/chunking output
-memory/development/code_chunks/
-memory/development/annotated_chunks/
-memory/development/reconstructed/
-memory/development/file_summaries/
-memory/tasks/
-scripts/annotate_project_annotated.py
-project_structure.txt
-memory/metadata/
-
-# Ignore G-code and previews
+# G-code and previews
 *.nc
 *.png
 scripts/metadata/script_registry.jsonl
 
-memory/chatting/chat_logs/
-web_server/memory/chat_logs/
-memory/development/chroma/
-memory_tree.txt
-context_dump.txt
-
+# Memory storage and outputs
+chroma_store/
+memory/accounting/chroma.sqlite3
+memory/*/chroma.sqlite3
+memory/*/*.bin
+memory/lab/device_inventory.json
+memory/lab/lab_data.jsonl
+memory/metadata/
 memory/personal/
-tree.txt
-context/generated/
-cam_generator/output/
-.vscode
-image_pipeline/output/
-memory/cam_projects/
-memory/sidecar/
-memory/exports/
 memory/personal/debug_outputs
+memory/production/
+memory/research/
+memory/cliff_state/
+memory/lab/
+memory/cam_projects/
+memory/exports/
+memory/sidecar/
+
+# Generated annotation/chunking output
+memory/development/
+memory/development/code_chunks/
+memory/development/annotated_chunks/
+memory/development/reconstructed/
+memory/development/file_summaries/
+memory/development/module_summaries/
+memory/tasks/
+memory/chat_logs/
+
+# Scripts outputs
+scripts/annotate_project_annotated.py
+
+# Pipeline outputs and caches
+cam_generator/output/
+image_pipeline/output/
 .model_cache/

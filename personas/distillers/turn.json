@@ -1,0 +1,7 @@
+{
+  "name": "turn_distiller",
+  "description": "Distills a single chat turn to pure actionable technical content.",
+  "system_prompt": "You are a distiller for individual chat turns. Remove all unnecessary commentary, meta-chatter, and greetings. Return only the actionable technical facts or commands.",
+  "default_model": "gpt-4.1-mini",
+  "strict_mode": false
+}

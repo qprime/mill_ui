@@ -1,0 +1,8 @@
+{
+  "name": "assistant",
+  "description": "General-purpose assistant without access to CLIFF memory",
+  "default_contexts": ["chat_logs", "personal"],
+  "system_prompt": "You are CLIFF, a helpful assistant without internal project context. Stick to general-purpose responses.",
+  "default_model": "gpt-4.1-mini",
+  "strict_mode": true
+}

@@ -5,7 +5,7 @@
 
 import logging
 import json
-from ai_core.context_router import route_context
+from ai_core.context_manager import route_context
 from ai_core.distill_text import distill_text
 from ai_core.client import get_chat_completion
 from memory.chat_manager import log_chat_turn

@@ -2,7 +2,7 @@
 
 from cliff_ai.scripts.llm.ai_router import get_router
 from cliff_ai.scripts.llm.context_router import route_context
-from cliff_ai.scripts.llm.personas_manager import get_legacy_persona_prompt
+from cliff_ai.personas.personas_manager import get_legacy_persona_prompt
 from cliff_ai.scripts.llm.distill_text import distill_text
 from cliff_ai.scripts.llm.context_loader import load_context_for_persona
 from cliff_ai.scripts.memory.chat_manager import log_chat_turn

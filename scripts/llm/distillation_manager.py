@@ -6,7 +6,7 @@ from the canonical personas_manager. Only one API to maintain.
 
 import os
 from typing import Any, Dict
-from cliff_ai.scripts.llm.personas_manager import get_persona
+from cliff_ai.personas.personas_manager import get_persona
 from cliff_ai.scripts.llm.client import get_chat_completion
 
 def distill(input_text: str, persona_name: str = "chat", model: str = None, strict_mode: bool = None) -> str:

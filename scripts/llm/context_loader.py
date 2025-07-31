@@ -10,7 +10,7 @@ import sys
 import json
 from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
-from scripts.llm.personas_manager import get_persona, legacy_persona_registry
+from personas.personas_manager import get_persona, legacy_persona_registry
 from scripts.memory.memory_manager import get_known_contexts
 from scripts.memory.memory_manager import get_chat_log_paths
 

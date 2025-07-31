@@ -7,12 +7,11 @@ Central persona manager for CLIFF AI.
 - Exposes a unified API for persona lookup and registry.
 """
 
-import os
 import json
 from pathlib import Path
 
 # Path to the persona JSONs (top-level 'personas/')
-PERSONA_DIR = Path(__file__).resolve().parent.parent / "personas"
+PERSONA_DIR = Path(".")
 
 def load_json_personas():
     personas = {}

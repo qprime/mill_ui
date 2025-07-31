@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 
 from cliff_ai.scripts.llm.personas_manager import get_persona, legacy_persona_registry
 from cliff_ai.scripts.memory.memory_manager import get_known_contexts, get_chat_log_paths
-from cliff_ai.context.code_context import generate_context
+from cliff_ai.continuum.code_context import generate_context
 
 def load_json(path: Path) -> dict:
     if path.exists():

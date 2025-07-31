@@ -116,6 +116,7 @@ cam_generator/output/
 .vscode
 image_pipeline/output/
 memory/cam_projects/
+memory/sidecar/
 memory/exports/
 memory/personal/debug_outputs
 .model_cache/

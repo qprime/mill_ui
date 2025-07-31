@@ -16,7 +16,7 @@ import argparse
 from collections import defaultdict
 
 DEFAULT_INCLUDE_EXTS = (".py", ".js")
-DEFAULT_EXCLUDE_DIRS = {".git", "venv", ".venv", "__pycache__", "memory"}
+DEFAULT_EXCLUDE_DIRS = {".git", "venv", ".venv", "__pycache__"}
 
 def should_include_file(filename, include_exts=DEFAULT_INCLUDE_EXTS):
     return filename.endswith(include_exts)
@@ -80,10 +80,13 @@ def generate_project_graph(
     return output
 
 def write_project_graph(graph, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_dir = os.path.dirname(output_path)
+    if output_dir:  # Only create if directory specified
+        os.makedirs(output_dir, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(graph, f, indent=2)
     print(f"[INFO] Project graph written to {output_path}")
+
 
 def print_stats(graph):
     print(f"[STATS] Modules: {len(graph['modules'])}")

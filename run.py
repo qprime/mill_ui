@@ -9,6 +9,8 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 ENTRYPOINTS = {
     "web": "web.cliff_server.app",
     "whisper": "local_services.whisper.whisper_server",
+    "context": "continuum.code_context",
+    "graph": "continuum.project_graph",
     # Add more as needed
     # "imagegen": "pipelines.image_pipeline.generate_image",
     # "labmgr": "local_services.lab_manager.app",

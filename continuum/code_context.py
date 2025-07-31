@@ -17,7 +17,7 @@ import argparse
 import re
 
 DEFAULT_INCLUDE_EXTENSIONS = ('.py', '.htm', '.html', '.js', '.service', '.yaml', '.yml')
-DEFAULT_EXCLUDE_DIRS = {'.git', '__pycache__', 'venv', '.venv', 'node_modules', '.mypy_cache', 'memory'}
+DEFAULT_EXCLUDE_DIRS = {'.git', '__pycache__', 'venv', '.venv'}
 
 def should_include_file(filename, include_exts=DEFAULT_INCLUDE_EXTENSIONS):
     return filename.endswith(include_exts)
@@ -136,6 +136,9 @@ def main():
     )
     print_stats(stats)
     if args.output:
+        output_dir = os.path.dirname(args.output)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
         with open(args.output, "w", encoding="utf-8") as out:
             out.write(context)
         print(f"[INFO] Context written to {args.output}")

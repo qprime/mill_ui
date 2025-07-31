@@ -1,7 +1,7 @@
 """Tasks blueprint: handles /tasks routes for backlog, creation, editing, update, archive, reorder."""
 
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
-from services.task_service import (
+from ..services.task_service import (
     get_active_tasks_grouped,
     update_task_status,
     create_task_entry,

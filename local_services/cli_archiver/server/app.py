@@ -9,7 +9,7 @@ from flask_cors import CORS
 import os
 import json
 
-from scripts.memory.memory_manager import add_to_domain  # <-- absolute package import
+from memory.memory_manager import add_to_domain  # <-- absolute package import
 
 app = Flask(__name__)
 CORS(app)

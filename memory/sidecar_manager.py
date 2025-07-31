@@ -9,7 +9,7 @@ Only sidecar-related logic and helpers should live here—no direct LLM/system p
 
 import json
 from pathlib import Path
-from scripts.llm.distillation_manager import distill
+from ai_core.distillation_manager import distill
 
 # Assume sidecar JSONs live here (adapt path as needed)
 SIDECAR_DIR = Path("memory/sidecar")

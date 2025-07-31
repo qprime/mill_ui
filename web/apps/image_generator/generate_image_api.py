@@ -28,7 +28,7 @@ def generate_image_api():
         # Try to assemble using subject/persona/style if present
         try:
             # Load persona and style libraries
-            persona_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../personas/cam_image_experts/personas.json"))
+            persona_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../personas/cam_image_experts/ai_core.personas.json"))
             style_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../personas/cam_image_experts/styles.json"))
             with open(persona_path) as pf:
                 PERSONAS = {p["name"]: p for p in json.load(pf)["personas"]}
@@ -37,7 +37,7 @@ def generate_image_api():
             subject = config["subject"]
             persona = config["persona"]
             style = config["style"]
-            persona_data = PERSONAS.get(persona)
+            persona_data = ai_core.personas.get(persona)
             style_data = STYLES.get(style)
             prompt = (
                 f"{subject}, in the style of {persona_data['genre']}. "

@@ -1,125 +1,122 @@
-"""Handles chat, context routing, distillation, logging, and sidecar/project memory assembly."""
+# chat_service.py
+#
+# CLIFF AI: Central chat service logic (with correct imports and actual function calls).
+# Handles chat LLM input, distillation, routing, logging, and summary/fact/sidecar management.
 
-from scripts.llm.ai_router import get_router
-from scripts.llm.context_router import route_context
-from personas.personas_manager import get_legacy_persona_prompt
-from scripts.llm.distill_text import distill_text
-from scripts.llm.context_loader import load_context_for_persona
-from scripts.memory.chat_manager import log_chat_turn
-from web.cliff_server.services.status_service import get_cliff_status
+import logging
+import json
+from ai_core.context_router import route_context
+from ai_core.distill_text import distill_text
+from ai_core.client import get_chat_completion
+from memory.chat_manager import log_chat_turn
+from memory.sidecar_manager import add_sidecar_entry, load_sidecar, distill_sidecar
 
-MAIN_CHAT_MODEL = "gpt-4.1"
-router = get_router("openai")
+MAIN_CHAT_MODEL = "gpt-4.1-mini"
+SIDECAR_PERSONA = "system"  # Use 'system' for summary/facts, 'sidecar' for general logs if needed
 
-def generate_chat_reply(data):
-    import time
-    raw_input = data.get("prompt", "")
-    tone = data.get("tone", "neutral")
-    chat_id = data.get("chat_id")
-    if not raw_input or not chat_id:
-        return {"error": "Missing prompt or chat_id"}
-    routing = route_context(raw_input)
-    persona = routing.get("persona", "default")
-    suggested_context = routing.get("suggested_context", [])
-    distilled_result = distill_text(raw_input, {
-        "persona": persona,
-        "task_type": "specification",
-        "tone": tone,
-        "urgency": "medium"
-    }, strict_mode=True)
-    distilled_prompt = distilled_result["distilled_text"]
-    system_message = get_legacy_persona_prompt(persona)
-    context_blocks = load_context_for_persona(distilled_prompt, persona, suggested_context, chat_id=chat_id)
-    sidecar_context = context_blocks["sidecar"]
-    project_memory = context_blocks["memory"]
-    status = get_cliff_status()
-    status_block = "\n".join(f"- {k.replace('_', ' ').capitalize()}: {v}" for k, v in status.items())
+def generate_chat_reply(data: dict) -> dict:
+    persona = data.get("persona", "cliff_core")
+    raw_input = data.get("input") or data.get("prompt") or ""
+    chat_id = data.get("chat_id", None)
 
-    def format_block(block):
-        if isinstance(block, str):
-            return block
-        if isinstance(block, dict):
-            return block.get("content", "")
-        return str(block)
-    full_context = "\n\n".join(map(format_block, [
-        "# Recent Conversation (last few turns)",
-        sidecar_context or "(No recent interaction yet.)",
-        "# Related Project Memory",
-        project_memory,
-        "# System Runtime Status",
-        status_block
-    ]))
-    augmented_prompt = f"{full_context}\n\nUser asked:\n{distilled_prompt}"
-    messages = [system_message, {"role": "user", "content": augmented_prompt}]
-    start = time.time()
-    reply = router.chat(messages, model=MAIN_CHAT_MODEL)
-    end = time.time()
-    def count_tokens(text): return len(text.split())
-    tokens_in = sum(count_tokens(m["content"]) for m in messages)
-    tokens_out = count_tokens(reply)
-    latency_ms = int((end - start) * 1000)
+    distilled_result = distill_text(
+        raw_input,
+        {"persona": persona, "task_type": "chat"},
+        strict_mode=True,
+    )
+
+    cleaned = (
+        distilled_result.get("original_input", {}).get("cleaned_text", raw_input)
+        if isinstance(distilled_result, dict)
+        else raw_input
+    )
+    distilled_prompt = (
+        distilled_result.get("distilled_text", cleaned)
+        if isinstance(distilled_result, dict)
+        else cleaned
+    )
+
+    routing = route_context(distilled_prompt, persona)
+
+    messages = []
+    system_prompt = routing.get("system_prompt") if isinstance(routing, dict) else None
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": distilled_prompt})
+
+    try:
+        reply = get_chat_completion(
+            messages=messages,
+            model=MAIN_CHAT_MODEL,
+        )
+    except Exception as e:
+        logging.error(f"Model call failed: {e}")
+        reply = "[Model error: see logs]"
+
     log_chat_turn(
         persona=persona,
         chat_id=chat_id,
         user_input=raw_input,
-        cleaned=distilled_result["original_input"]["cleaned_text"],
+        cleaned=cleaned,
         distilled=distilled_prompt,
         routing=routing,
         response=reply,
         model=MAIN_CHAT_MODEL
     )
+
+    # Ensure compatibility with old and new UI
     return {
-        "response": reply,
-        "rag_empty": project_memory.strip().startswith("⚠️"),
-        "model": MAIN_CHAT_MODEL,
-        "routing": routing,
+        "persona": persona,
         "chat_id": chat_id,
-        "distilled_input": distilled_prompt,
-        "original_input": distilled_result["original_input"]["cleaned_text"],
-        "metrics": {
-            "latency_ms": latency_ms,
-            "tokens_in": tokens_in,
-            "tokens_out": tokens_out
+        "user_input": raw_input,
+        "cleaned": cleaned,
+        "distilled": distilled_prompt,
+        "routing": routing,
+        "response": reply,
+        "model": MAIN_CHAT_MODEL,
+        "original_input": {
+            "cleaned_text": cleaned,
+            "raw_input": raw_input,
         },
-        "debug": {
-            "full_context": full_context,
-            "distilled_input": distilled_prompt,
-            "model": MAIN_CHAT_MODEL,
-            "routing": routing,
-            "metrics": {
-                "latency_ms": latency_ms,
-                "tokens_in": tokens_in,
-                "tokens_out": tokens_out
-            }
-        }
+        "distilled_input": distilled_prompt,
+        "CliffsDistillation": distilled_prompt,
+        "Response": reply,
     }
 
 def update_chat_summary(chat_id, summary):
-    from scripts.memory.sidecar_manager import update_sidecar_field
-    update_sidecar_field(chat_id, "cliff_core", "summary", summary)
+    """
+    Update chat summary in sidecar.
+    """
+    entry = {"summary": summary}
+    add_sidecar_entry(chat_id, SIDECAR_PERSONA, entry)
+    distill_sidecar(chat_id, SIDECAR_PERSONA)
+    logging.info(f"Updated summary for chat {chat_id}")
 
 def update_chat_facts(chat_id, facts_json):
-    from scripts.memory.sidecar_manager import update_sidecar_field
-    import json
-    try:
+    """
+    Update chat facts in sidecar.
+    """
+    if isinstance(facts_json, str):
         facts = json.loads(facts_json)
-    except json.JSONDecodeError:
-        facts = {}
-    update_sidecar_field(chat_id, "cliff_core", "facts", facts)
+    else:
+        facts = facts_json
+    entry = {"facts": facts}
+    add_sidecar_entry(chat_id, SIDECAR_PERSONA, entry)
+    distill_sidecar(chat_id, SIDECAR_PERSONA)
+    logging.info(f"Updated facts for chat {chat_id}")
 
 def get_sidecar_data(chat_id):
-    from scripts.memory.chat_manager import get_chat_log_paths
-    persona = "cliff_core"
-    paths = get_chat_log_paths(chat_id, persona)
-    sidecar_path = paths["sidecar"]
-    if not sidecar_path.exists():
-        return {"summary": "", "facts": {}}
+    """
+    Return all sidecar entries (summary, facts, etc) for the chat.
+    """
     try:
-        with open(sidecar_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception:
-        return {"summary": "", "facts": {}}
-    return {
-        "summary": data.get("summary", ""),
-        "facts": data.get("facts", {})
-    }
+        turns = load_sidecar(chat_id, SIDECAR_PERSONA)
+        # Flatten out summaries/facts into a single dict, last write wins
+        meta = {}
+        for entry in turns:
+            meta.update(entry)
+        return meta
+    except Exception as e:
+        logging.error(f"Failed to load sidecar for {chat_id}: {e}")
+        return {}
+

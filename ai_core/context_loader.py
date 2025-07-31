@@ -6,19 +6,25 @@ fragments, module summaries, and persona-specific memory for retrieval-augmented
 
 from pathlib import Path
 import os
+import sys
 import json
 from typing import List, Dict, Optional, Tuple
 from difflib import SequenceMatcher
+from ai_core.personas.personas_manager import get_persona, legacy_persona_registry
+from memory.memory_manager import get_known_contexts
+from memory.memory_manager import get_chat_log_paths
 
-from personas.personas_manager import get_persona, legacy_persona_registry
-from scripts.memory.memory_manager import get_known_contexts, get_chat_log_paths
+# sys.path.append(str(Path(__file__).resolve().parents[2]))
+
 from continuum.code_context import generate_context
+
 
 def load_json(path: Path) -> dict:
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+
 
 def load_sidecar(chat_id: str, persona: str) -> dict:
     paths = get_chat_log_paths(chat_id, persona)
@@ -27,6 +33,7 @@ def load_sidecar(chat_id: str, persona: str) -> dict:
         return {}
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def get_cliff_core_base_context() -> List[str]:
     ctx = load_base_context()
@@ -40,6 +47,7 @@ def get_cliff_core_base_context() -> List[str]:
     ]
     return fragments
 
+
 def load_module_summaries(md_dir: Path) -> List[str]:
     return [
         f.read_text().strip()
@@ -47,9 +55,11 @@ def load_module_summaries(md_dir: Path) -> List[str]:
         if f.read_text().strip()
     ]
 
+
 def load_base_context() -> Dict[str, any]:
     root = Path(__file__).resolve().parents[2]
     meta_path = root / "memory/metadata"
+
     return {
         "summary": load_json(meta_path / "project_summary.json"),
         "memory_graph": load_json(meta_path / "memory_graph.json"),
@@ -57,10 +67,13 @@ def load_base_context() -> Dict[str, any]:
         "module_summaries": load_module_summaries(root / "memory/development/module_summaries")
     }
 
+
 def get_codebase_context(query: str, paths: Optional[List[str]] = None, top_n: int = 3) -> str:
     root_dir = Path(__file__).resolve().parents[2]
     context_text = generate_context(str(root_dir))
     return context_text
+
+
 
 def get_cliff_status() -> dict:
     """
@@ -72,6 +85,7 @@ def get_cliff_status() -> dict:
         "active_contexts": 3,
         "last_distill": "just now"
     }
+
 
 def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list[str], chat_id: str = None) -> dict:
     known = get_known_contexts()
@@ -97,3 +111,4 @@ def load_context_for_persona(prompt: str, persona: str, suggested_contexts: list
         "sidecar": sidecar,
         "memory": base
     }
+

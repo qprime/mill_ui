@@ -91,4 +91,4 @@ def list_all_personas() -> list[str]:
     """
     Lists all valid persona names (JSON and legacy).
     """
-    return sorted(set(_json_personas.keys()) | set(legacy_persona_registry.keys()))
+    return sorted(set(_json_ai_core.personas.keys()) | set(legacy_persona_registry.keys()))

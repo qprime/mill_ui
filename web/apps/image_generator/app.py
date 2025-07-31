@@ -11,7 +11,7 @@ from prompt_assist import assist_prompt
 HERE = Path(__file__).resolve().parent
 CLIFF_ROOT = HERE.parent.parent
 
-PERSONAS_PATH = CLIFF_ROOT / "personas" / "cam_image_experts" / "personas.json"
+PERSONAS_PATH = CLIFF_ROOT / "personas" / "cam_image_experts" / "ai_core.personas.json"
 STYLES_PATH   = CLIFF_ROOT / "personas" / "cam_image_experts" / "styles.json"
 
 print("HERE:", HERE)

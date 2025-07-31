@@ -7,12 +7,12 @@ using LLM persona and style configuration. All LLM calls route through client.py
 import os
 import json
 from flask import Flask, request, jsonify
-from scripts.llm.client import get_chat_completion  # <--- changed
+from ai_core.client import get_chat_completion  # <--- changed
 
 app = Flask(__name__)
 
 CLIFF_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-PERSONAS_PATH = os.path.join(CLIFF_ROOT, "personas", "cam_image_experts", "personas.json")
+PERSONAS_PATH = os.path.join(CLIFF_ROOT, "personas", "cam_image_experts", "ai_core.personas.json")
 STYLES_PATH = os.path.join(CLIFF_ROOT, "personas", "cam_image_experts", "styles.json")
 
 with open(PERSONAS_PATH, 'r', encoding='utf-8') as f:
@@ -29,7 +29,7 @@ def assist_prompt():
     persona = data.get('persona')
     style = data.get('style')
 
-    persona_data = PERSONAS.get(persona, {})
+    persona_data = ai_core.personas.get(persona, {})
     style_data = STYLES.get(style, {})
 
     persona_desc = persona_data.get('description', '')

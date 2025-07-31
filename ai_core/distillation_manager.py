@@ -6,8 +6,8 @@ from the canonical personas_manager. Only one API to maintain.
 
 import os
 from typing import Any, Dict
-from personas.personas_manager import get_persona
-from scripts.llm.client import get_chat_completion
+from ai_core.personas.personas_manager import get_persona
+from ai_core.client import get_chat_completion
 
 def distill(input_text: str, persona_name: str = "chat", model: str = None, strict_mode: bool = None) -> str:
     persona = get_persona(persona_name)

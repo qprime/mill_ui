@@ -19,14 +19,14 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-with open("../personas/cam_image_experts/personas.json") as f:
+with open("../personas/cam_image_experts/ai_core.personas.json") as f:
     PERSONAS = {p["name"]: p for p in json.load(f)["personas"]}
 
 with open("../personas/cam_image_experts/styles.json") as f:
     STYLES = {s["name"]: s for s in json.load(f)["styles"]}
 
 def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
-    persona = PERSONAS.get(persona_name)
+    persona = ai_core.personas.get(persona_name)
     style = STYLES.get(style_name)
 
     if not persona or not style:

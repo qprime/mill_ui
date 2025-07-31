@@ -2,7 +2,7 @@
 
 import re
 from typing import Optional
-from scripts.llm.client import get_chat_completion
+from ai_core.client import get_chat_completion
 
 DISTILLER_MODEL = "gpt-4.1-mini"
 

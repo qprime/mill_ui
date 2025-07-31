@@ -1,6 +1,6 @@
 import pytest
 import time
-from scripts.llm.distill_text import distill_text
+from ai_core.distill_text import distill_text
 
 # Test cases: (input, expect_nonempty, expect_bypassed)
 CASES = [

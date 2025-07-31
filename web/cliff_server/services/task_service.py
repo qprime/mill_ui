@@ -1,6 +1,6 @@
 """Task services for CLIFF."""
 
-from scripts.memory.task_manager import load_tasks, update_task, create_task, get_task
+from memory.task_manager import load_tasks, update_task, create_task, get_task
 
 def get_active_tasks_grouped():
     raw_tasks = load_tasks()
@@ -43,5 +43,5 @@ def archive_task_entry(task_id):
 
 def reorder_tasks_by_ids(ids):
     # NOTE: Ensure correct import path! If this is in the main project, use full package path:
-    from scripts.memory.task_manager import reorder_tasks_by_ids as _reorder
+    from memory.task_manager import reorder_tasks_by_ids as _reorder
     _reorder(ids)

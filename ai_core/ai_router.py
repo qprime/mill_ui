@@ -5,7 +5,7 @@ Provides a central interface for chat and embedding requests.
 All provider logic (OpenAI, Phi, etc.) is routed through client.py.
 """
 
-from scripts.llm.client import get_chat_completion, get_embedding
+from ai_core.client import get_chat_completion, get_embedding
 
 class AIRouter:
     def embed(self, inputs: list[str], model: str = "text-embedding-3-small") -> list[list[float]]:

@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-from scripts.memory.memory_manager import get_chat_log_paths, ensure_chat_log_folder
-from scripts.memory.sidecar_manager import add_sidecar_entry, distill_sidecar
+from memory.memory_manager import get_chat_log_paths, ensure_chat_log_folder
+from memory.sidecar_manager import add_sidecar_entry, distill_sidecar
 
 def append_to_chat_log(persona: str, chat_id: str, entry: dict) -> None:
     """

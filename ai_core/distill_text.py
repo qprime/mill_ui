@@ -34,31 +34,34 @@ def extract_distilled_block (text :str )->Optional [str ]:
         return None 
     return content 
 
-def distill_text (input_text ,guidance =None ,strict_mode =False ):
-    prompt =SYSTEM_PROMPT +f"\n\nInput: '{input_text }'\nOutput:"
-    messages =[
-    {"role":"system","content":SYSTEM_PROMPT },
-    {"role":"user","content":f"Input: '{input_text }'\nOutput:"}
+def distill_text(input_text, guidance=None, strict_mode=False):
+    """
+    Returns distilled technical content or the original input.
+    - Never returns empty string or NA/none markers.
+    - If no technical content is found, falls back to input and sets 'bypassed': True.
+    """
+    prompt = SYSTEM_PROMPT + f"\n\nInput: '{input_text}'\nOutput:"
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": f"Input: '{input_text}'\nOutput:"}
     ]
-    try :
-        print ("CALLING get_chat_completion with:",messages )
-        resp =get_chat_completion (messages ,model =DISTILLER_MODEL ,temperature =0.0 )
-        print ("RECEIVED:",resp )
-        content =extract_distilled_block (resp )
-        if not content :
-            print ("DISTILLATION: EMPTY BLOCK or NA—returning original text")
-
+    try:
+        print("CALLING get_chat_completion with:", messages)
+        resp = get_chat_completion(messages, model=DISTILLER_MODEL, temperature=0.0)
+        print("RECEIVED:", resp)
+        content = extract_distilled_block(resp)
+        if not content:
+            print("DISTILLATION: EMPTY BLOCK or NA—returning original text")
             return {
-            "distilled_text":input_text ,
-            "metadata":{"bypassed":False ,"fallback":True }
+                "distilled_text": input_text,
+                "metadata": {"bypassed": True, "fallback": True}
             }
-        print ("DISTILLATION:",content )
-        return {"distilled_text":content ,"metadata":{"bypassed":False }}
-    except Exception as e :
-        print (f"EXCEPTION in distill_text: {e }")
-
+        print("DISTILLATION:", content)
+        return {"distilled_text": content, "metadata": {"bypassed": False}}
+    except Exception as e:
+        print(f"EXCEPTION in distill_text: {e}")
         return {
-        "distilled_text":input_text ,
-        "metadata":{"bypassed":False ,"error":str (e ),"fallback":True }
+            "distilled_text": input_text,
+            "metadata": {"bypassed": True, "error": str(e), "fallback": True}
         }
 

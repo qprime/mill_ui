@@ -1,149 +1,140 @@
 """
-Context generator for CLIFF AI.
-
-Modes:
-1. Default: Recursively collects all relevant codebase files under a root directory,
-   concatenates their contents with file boundary markers, and optionally scrubs whitespace.
-2. Docstrings-only: With --docstrings-only, includes only the top-level docstring of each file,
-   maintaining file markers.
-
-Optimized for LLM ingestion, context assembly, and future modular filtering.
+[pipeline]
+TODO: describe module functionality.
 """
 
-#!/usr/bin/env python3
+import os 
+import argparse 
+import re 
 
-import os
-import argparse
-import re
+DEFAULT_INCLUDE_EXTENSIONS =('.py','.htm','.html','.js','.service','.yaml','.yml')
+DEFAULT_EXCLUDE_DIRS ={'.git','__pycache__','venv','.venv'}
 
-DEFAULT_INCLUDE_EXTENSIONS = ('.py', '.htm', '.html', '.js', '.service', '.yaml', '.yml')
-DEFAULT_EXCLUDE_DIRS = {'.git', '__pycache__', 'venv', '.venv'}
+def should_include_file (filename ,include_exts =DEFAULT_INCLUDE_EXTENSIONS ):
+    return filename .endswith (include_exts )
 
-def should_include_file(filename, include_exts=DEFAULT_INCLUDE_EXTENSIONS):
-    return filename.endswith(include_exts)
+def should_exclude_dir (dirname ):
+    return dirname in DEFAULT_EXCLUDE_DIRS 
 
-def should_exclude_dir(dirname):
-    return dirname in DEFAULT_EXCLUDE_DIRS
+def scrub_whitespace (text ):
+    text =re .sub (r'\n{3,}','\n\n',text )
+    text ='\n'.join (line .rstrip ()for line in text .splitlines ())
+    return text .replace ('\r\n','\n').replace ('\r','\n')
 
-def scrub_whitespace(text):
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    text = '\n'.join(line.rstrip() for line in text.splitlines())
-    return text.replace('\r\n', '\n').replace('\r', '\n')
+def count_tokens (text ):
+    return len (text .split ())
 
-def count_tokens(text):
-    return len(text.split())
+def get_top_level_docstring (text ):
 
-def get_top_level_docstring(text):
-    
-    text = text.lstrip()
-    if text.startswith('"""') or text.startswith("'''"):
-        triple = text[:3]
-        end = text.find(triple, 3)
-        if end != -1:
-            return text[:end+3]
+    text =text .lstrip ()
+    if text .startswith ('"""')or text .startswith ("'''"):
+        triple =text [:3 ]
+        end =text .find (triple ,3 )
+        if end !=-1 :
+            return text [:end +3 ]
     return ""
 
-def generate_context(
-    root_dir,
-    include_exts=DEFAULT_INCLUDE_EXTENSIONS,
-    exclude_dirs=DEFAULT_EXCLUDE_DIRS,
-    scrub=True,
-    file_filter=None,
-    stats_list=None,
-    docstrings_only=False,
+def generate_context (
+root_dir ,
+include_exts =DEFAULT_INCLUDE_EXTENSIONS ,
+exclude_dirs =DEFAULT_EXCLUDE_DIRS ,
+scrub =True ,
+file_filter =None ,
+stats_list =None ,
+docstrings_only =False ,
 ):
-    parts = []
-    stats = []
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if not should_exclude_dir(d)]
-        for fname in sorted(filenames):
-            if not should_include_file(fname, include_exts):
-                continue
-            abs_path = os.path.join(dirpath, fname)
-            rel_path = os.path.relpath(abs_path, root_dir)
-            if file_filter and not file_filter(rel_path):
-                continue
-            try:
-                with open(abs_path, "r", encoding="utf-8") as f:
-                    text = f.read()
-            except Exception as e:
-                print(f"[WARN] Failed to read {rel_path}: {e}")
-                continue
+    parts =[]
+    stats =[]
+    for dirpath ,dirnames ,filenames in os .walk (root_dir ):
+        dirnames [:]=[d for d in dirnames if not should_exclude_dir (d )]
+        for fname in sorted (filenames ):
+            if not should_include_file (fname ,include_exts ):
+                continue 
+            abs_path =os .path .join (dirpath ,fname )
+            rel_path =os .path .relpath (abs_path ,root_dir )
+            if file_filter and not file_filter (rel_path ):
+                continue 
+            try :
+                with open (abs_path ,"r",encoding ="utf-8")as f :
+                    text =f .read ()
+            except Exception as e :
+                print (f"[WARN] Failed to read {rel_path }: {e }")
+                continue 
 
-            if docstrings_only and fname.endswith('.py'):
-                content = get_top_level_docstring(text)
-                if content:
-                    display_text = content
-                else:
-                    display_text = ""  
-            elif docstrings_only:
-                display_text = ""  
-            else:
-                display_text = text
-                if scrub:
-                    display_text = scrub_whitespace(display_text)
+            if docstrings_only and fname .endswith ('.py'):
+                content =get_top_level_docstring (text )
+                if content :
+                    display_text =content 
+                else :
+                    display_text =""
+            elif docstrings_only :
+                display_text =""
+            else :
+                display_text =text 
+                if scrub :
+                    display_text =scrub_whitespace (display_text )
 
-            size = len(display_text.encode("utf-8"))
-            tokens = count_tokens(display_text)
-            stats.append((rel_path, size, tokens))
-            parts.append(f"### FILE: {rel_path} ###\n{display_text}\n")
+            size =len (display_text .encode ("utf-8"))
+            tokens =count_tokens (display_text )
+            stats .append ((rel_path ,size ,tokens ))
+            parts .append (f"### FILE: {rel_path } ###\n{display_text }\n")
 
-    if stats_list is not None:
-        stats_list.extend(stats)
-    return "\n".join(parts)
+    if stats_list is not None :
+        stats_list .extend (stats )
+    return "\n".join (parts )
 
-def print_stats(stats):
-    file_count = len(stats)
-    total_bytes = sum(size for _, size, _ in stats)
-    total_tokens = sum(tokens for _, _, tokens in stats)
-    print(f"[STATS] Files included: {file_count}")
-    print(f"[STATS] Total size: {total_bytes} bytes")
-    print(f"[STATS] Estimated total tokens: {total_tokens}")
-    print(f"[STATS] Top 5 largest files:")
-    for rel_path, size, tokens in sorted(stats, key=lambda x: -x[1])[:5]:
-        print(f"  {rel_path} | {size} bytes | {tokens} tokens")
+def print_stats (stats ):
+    file_count =len (stats )
+    total_bytes =sum (size for _ ,size ,_ in stats )
+    total_tokens =sum (tokens for _ ,_ ,tokens in stats )
+    print (f"[STATS] Files included: {file_count }")
+    print (f"[STATS] Total size: {total_bytes } bytes")
+    print (f"[STATS] Estimated total tokens: {total_tokens }")
+    print (f"[STATS] Top 5 largest files:")
+    for rel_path ,size ,tokens in sorted (stats ,key =lambda x :-x [1 ])[:5 ]:
+        print (f"  {rel_path } | {size } bytes | {tokens } tokens")
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate concatenated codebase context for CLIFF or LLM ingestion."
+def main ():
+    parser =argparse .ArgumentParser (
+    description ="Generate concatenated codebase context for CLIFF or LLM ingestion."
     )
-    parser.add_argument(
-        "root_dir",
-        help="Root directory of the codebase to scan.",
+    parser .add_argument (
+    "root_dir",
+    help ="Root directory of the codebase to scan.",
     )
-    parser.add_argument(
-        "-o", "--output",
-        help="Write result to this file (default: stdout)",
+    parser .add_argument (
+    "-o","--output",
+    help ="Write result to this file (default: stdout)",
     )
-    parser.add_argument(
-        "--no-scrub",
-        action="store_true",
-        help="Disable whitespace normalization/scrubbing (default: scrub whitespace)."
+    parser .add_argument (
+    "--no-scrub",
+    action ="store_true",
+    help ="Disable whitespace normalization/scrubbing (default: scrub whitespace)."
     )
-    parser.add_argument(
-        "--docstrings-only",
-        action="store_true",
-        help="Include only the top-level docstring of each Python file."
+    parser .add_argument (
+    "--docstrings-only",
+    action ="store_true",
+    help ="Include only the top-level docstring of each Python file."
     )
-    args = parser.parse_args()
+    args =parser .parse_args ()
 
-    stats = []
-    context = generate_context(
-        args.root_dir,
-        scrub=not args.no_scrub,
-        stats_list=stats,
-        docstrings_only=args.docstrings_only,
+    stats =[]
+    context =generate_context (
+    args .root_dir ,
+    scrub =not args .no_scrub ,
+    stats_list =stats ,
+    docstrings_only =args .docstrings_only ,
     )
-    print_stats(stats)
-    if args.output:
-        output_dir = os.path.dirname(args.output)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(args.output, "w", encoding="utf-8") as out:
-            out.write(context)
-        print(f"[INFO] Context written to {args.output}")
-    else:
-        print(context)
+    print_stats (stats )
+    if args .output :
+        output_dir =os .path .dirname (args .output )
+        if output_dir :
+            os .makedirs (output_dir ,exist_ok =True )
+        with open (args .output ,"w",encoding ="utf-8")as out :
+            out .write (context )
+        print (f"[INFO] Context written to {args .output }")
+    else :
+        print (context )
 
-if __name__ == "__main__":
-    main()
+if __name__ =="__main__":
+    main ()

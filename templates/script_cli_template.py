@@ -1,12 +1,15 @@
-"""[Script Purpose]: Short, direct summary."""
+"""
+[misc]
+TODO: describe module functionality.
+"""
 
-import argparse
+import argparse 
 
-def main():
-    parser = argparse.ArgumentParser(description="[What this script does]")
-    # parser.add_argument(...)
-    args = parser.parse_args()
-    # Main logic here
+def main ():
+    parser =argparse .ArgumentParser (description ="[What this script does]")
 
-if __name__ == "__main__":
-    main()
+    args =parser .parse_args ()
+
+
+if __name__ =="__main__":
+    main ()

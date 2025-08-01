@@ -1,56 +1,57 @@
 """
-Runs CAM job generation, saves config snapshot, and optionally previews G-code.
+[pipeline]
+TODO: describe module functionality.
 """
 
-import os
-from pathlib import Path
-from datetime import datetime
-import shutil
+import os 
+from pathlib import Path 
+from datetime import datetime 
+import shutil 
 
-from cam_generator.core.multi_pass import generate_all_passes
-from cam_generator.core.preview import preview_toolpath
-from cam_generator.core.time_estimator import estimate_cut_time
+from cam_generator .core .multi_pass import generate_all_passes 
+from cam_generator .core .preview import preview_toolpath 
+from cam_generator .core .time_estimator import estimate_cut_time 
 
-job_name = "Flamingo6"
-ENABLE_PREVIEW = True
+job_name ="Flamingo6"
+ENABLE_PREVIEW =True 
 
-image_root = Path("/home/squinlan/cliff_ai/memory/cam_projects")
-output_root = Path("output")
+image_root =Path ("/home/squinlan/cliff_ai/memory/cam_projects")
+output_root =Path ("output")
 
-project_folder = image_root / job_name
-image_path = project_folder / "input" / "image.png"
-config_path = project_folder / "config" / "default_passes.yaml"
-job_config_path = project_folder / "config" / "job_config.yaml"
+project_folder =image_root /job_name 
+image_path =project_folder /"input"/"image.png"
+config_path =project_folder /"config"/"default_passes.yaml"
+job_config_path =project_folder /"config"/"job_config.yaml"
 
-if not image_path.exists():
-    raise FileNotFoundError(f"[!] image.png not found at {image_path}")
-if not config_path.exists():
-    raise FileNotFoundError(f"[!] default_passes.yaml not found at {config_path}")
-if not job_config_path.exists():
-    raise FileNotFoundError(f"[!] job_config.yaml not found at {job_config_path}")
+if not image_path .exists ():
+    raise FileNotFoundError (f"[!] image.png not found at {image_path }")
+if not config_path .exists ():
+    raise FileNotFoundError (f"[!] default_passes.yaml not found at {config_path }")
+if not job_config_path .exists ():
+    raise FileNotFoundError (f"[!] job_config.yaml not found at {job_config_path }")
 
-existing = sorted(output_root.glob(f"*_{job_name}"))
-next_index = len(existing)
-output_folder = output_root / f"{next_index:02d}_{job_name}"
-output_folder.mkdir(parents=True, exist_ok=False)
+existing =sorted (output_root .glob (f"*_{job_name }"))
+next_index =len (existing )
+output_folder =output_root /f"{next_index :02d}_{job_name }"
+output_folder .mkdir (parents =True ,exist_ok =False )
 
-print(f"[+] Output folder: {output_folder}")
+print (f"[+] Output folder: {output_folder }")
 
-shutil.copy(config_path, output_folder / "default_passes.yaml")
-shutil.copy(job_config_path, output_folder / "job_config.yaml")
+shutil .copy (config_path ,output_folder /"default_passes.yaml")
+shutil .copy (job_config_path ,output_folder /"job_config.yaml")
 
-generate_all_passes(
-    image_path=image_path,
-    config_path=output_folder / "default_passes.yaml",
-    output_dir=output_folder,
-    margin_mm=3.0,
-    job_config_path=output_folder / "job_config.yaml"
+generate_all_passes (
+image_path =image_path ,
+config_path =output_folder /"default_passes.yaml",
+output_dir =output_folder ,
+margin_mm =3.0 ,
+job_config_path =output_folder /"job_config.yaml"
 )
 
-if ENABLE_PREVIEW:
-    for gcode_file in output_folder.glob("*.nc"):
-        with open(gcode_file) as f:
-            lines = f.read().splitlines()
-        preview_toolpath(lines, z_fade=True, show=False, save_path=f"{gcode_file.with_suffix('.png')}")
-        minutes = estimate_cut_time(lines)
-        print(f"{gcode_file.name}: {minutes:.1f} min")
+if ENABLE_PREVIEW :
+    for gcode_file in output_folder .glob ("*.nc"):
+        with open (gcode_file )as f :
+            lines =f .read ().splitlines ()
+        preview_toolpath (lines ,z_fade =True ,show =False ,save_path =f"{gcode_file .with_suffix ('.png')}")
+        minutes =estimate_cut_time (lines )
+        print (f"{gcode_file .name }: {minutes :.1f} min")

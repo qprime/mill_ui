@@ -1,11 +1,11 @@
-"""Brief one-line summary of what this module does.
-
-More detail if needed.
+"""
+[misc]
+TODO: describe module functionality.
 """
 
-def main():
+def main ():
     """Main entrypoint for CLI or script use."""
-    pass
+    pass 
 
-if __name__ == "__main__":
-    main()
+if __name__ =="__main__":
+    main ()

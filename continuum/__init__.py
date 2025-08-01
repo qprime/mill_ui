@@ -1,6 +1,6 @@
 """
-Cliff Continuum: Meta-operations for self-healing, auto-refactor, and continuous code improvement.
-This module provides the high-level API and shared utilities.
+[pipeline]
+TODO: describe module functionality.
 """
 
 from .git_ops import *
@@ -10,4 +10,4 @@ from .patcher import *
 from .review import *
 from .self_heal import *
 
-CONTINUUM_VERSION = "0.1.0"
+CONTINUUM_VERSION ="0.1.0"

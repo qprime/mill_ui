@@ -1,12 +1,15 @@
-# scripts/llm/distill_text.py
+"""
+[AI core]
+TODO: describe module functionality.
+"""
 
-import re
-from typing import Optional
-from ai_core.client import get_chat_completion
+import re 
+from typing import Optional 
+from ai_core .client import get_chat_completion 
 
-DISTILLER_MODEL = "gpt-4.1-mini"
+DISTILLER_MODEL ="gpt-4.1-mini"
 
-SYSTEM_PROMPT = """
+SYSTEM_PROMPT ="""
 You are a technical distillation engine.
 Your ONLY job is to extract technical facts, actions, or key content *already present* in the input.
 
@@ -22,40 +25,40 @@ If you cannot extract any technical content, return the original input text as t
 
 """
 
-def extract_distilled_block(text: str) -> Optional[str]:
-    m = re.search(r'<<<DISTILL_START\s*(.*?)\s*DISTILL_END>>>', text, re.DOTALL)
-    if not m:
-        return None
-    content = m.group(1).strip()
-    if not content or content.lower() in {"na", "n/a", "none", "na.", "n.a."}:
-        return None
-    return content
+def extract_distilled_block (text :str )->Optional [str ]:
+    m =re .search (r'<<<DISTILL_START\s*(.*?)\s*DISTILL_END>>>',text ,re .DOTALL )
+    if not m :
+        return None 
+    content =m .group (1 ).strip ()
+    if not content or content .lower ()in {"na","n/a","none","na.","n.a."}:
+        return None 
+    return content 
 
-def distill_text(input_text, guidance=None, strict_mode=False):
-    prompt = SYSTEM_PROMPT + f"\n\nInput: '{input_text}'\nOutput:"
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Input: '{input_text}'\nOutput:"}
+def distill_text (input_text ,guidance =None ,strict_mode =False ):
+    prompt =SYSTEM_PROMPT +f"\n\nInput: '{input_text }'\nOutput:"
+    messages =[
+    {"role":"system","content":SYSTEM_PROMPT },
+    {"role":"user","content":f"Input: '{input_text }'\nOutput:"}
     ]
-    try:
-        print("CALLING get_chat_completion with:", messages)  # <-- Debug print
-        resp = get_chat_completion(messages, model=DISTILLER_MODEL, temperature=0.0)
-        print("RECEIVED:", resp)  # <-- Debug print
-        content = extract_distilled_block(resp)
-        if not content:
-            print("DISTILLATION: EMPTY BLOCK or NA—returning original text")
-            # fallback: always return the original input text
+    try :
+        print ("CALLING get_chat_completion with:",messages )
+        resp =get_chat_completion (messages ,model =DISTILLER_MODEL ,temperature =0.0 )
+        print ("RECEIVED:",resp )
+        content =extract_distilled_block (resp )
+        if not content :
+            print ("DISTILLATION: EMPTY BLOCK or NA—returning original text")
+
             return {
-                "distilled_text": input_text,
-                "metadata": {"bypassed": False, "fallback": True}
+            "distilled_text":input_text ,
+            "metadata":{"bypassed":False ,"fallback":True }
             }
-        print("DISTILLATION:", content)
-        return {"distilled_text": content, "metadata": {"bypassed": False}}
-    except Exception as e:
-        print(f"EXCEPTION in distill_text: {e}")  # <-- Debug print
-        # fallback: always return the original input text
+        print ("DISTILLATION:",content )
+        return {"distilled_text":content ,"metadata":{"bypassed":False }}
+    except Exception as e :
+        print (f"EXCEPTION in distill_text: {e }")
+
         return {
-            "distilled_text": input_text,
-            "metadata": {"bypassed": False, "error": str(e), "fallback": True}
+        "distilled_text":input_text ,
+        "metadata":{"bypassed":False ,"error":str (e ),"fallback":True }
         }
 

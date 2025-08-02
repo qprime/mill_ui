@@ -23,7 +23,11 @@ def load_json_personas(category=""):
                 print(f"ERROR: Could not parse JSON in file {file}: {e}")
                 continue
             # Support for multi-persona files (optional)
-            if isinstance(data, dict) and "personas" in data and isinstance(data["personas"], list):
+            if (
+                isinstance(data, dict)
+                and "personas" in data
+                and isinstance(data["personas"], list)
+            ):
                 for persona in data["personas"]:
                     if "name" not in persona:
                         print(f"WARNING: Persona in {file} missing 'name': {persona}")
@@ -32,9 +36,10 @@ def load_json_personas(category=""):
             elif isinstance(data, dict) and "name" in data:
                 personas[data["name"]] = data
             else:
-                print(f"WARNING: Could not parse persona file (no 'name'): {file}\nData: {data}")
+                print(
+                    f"WARNING: Could not parse persona file (no 'name'): {file}\nData: {data}"
+                )
     return personas
-
 
 
 def get_persona(persona_name: str, category: str = "") -> dict:
@@ -42,6 +47,7 @@ def get_persona(persona_name: str, category: str = "") -> dict:
     if persona_name in personas:
         return personas[persona_name]
     raise ValueError(f"Unknown persona: {persona_name} (category: '{category}')")
+
 
 def list_all_personas(category: str = "") -> list[str]:
     return sorted(load_json_personas(category).keys())

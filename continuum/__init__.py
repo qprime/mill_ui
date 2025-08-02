@@ -10,4 +10,4 @@ from .patcher import *
 from .review import *
 from .self_heal import *
 
-CONTINUUM_VERSION ="0.1.0"
+CONTINUUM_VERSION = "0.1.0"

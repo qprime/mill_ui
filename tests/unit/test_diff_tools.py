@@ -28,4 +28,3 @@ def test_side_by_side_diff():
     assert len(diff) == 2
     assert diff[0] == "left1      | right1"
     assert diff[1] == "left2      | right2"
-

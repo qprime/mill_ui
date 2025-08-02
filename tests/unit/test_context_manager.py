@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_route_context_returns_known_contexts(monkeypatch):
     # Monkeypatch LLM to always return a specific context
     def mock_get_chat_completion(messages, model, temperature, max_tokens):
@@ -7,10 +8,12 @@ def test_route_context_returns_known_contexts(monkeypatch):
 
     # Patch the correct function BEFORE import
     import ai_core.client
+
     monkeypatch.setattr(ai_core.client, "get_chat_completion", mock_get_chat_completion)
 
     # Now import after patch
     from ai_core.context_manager import route_context
+
     prompt = "Show me developer logs."
     persona = "cliff_core"
     result = route_context(prompt, persona)
@@ -18,11 +21,13 @@ def test_route_context_returns_known_contexts(monkeypatch):
     assert "development" in result
     assert "chat_logs" in result
 
+
 from ai_core.context_manager import (
     load_persona_context,
     get_cliff_status,
     ContextBundle,
 )
+
 
 def test_load_persona_context_default():
     prompt = "Summarize the project."
@@ -34,6 +39,7 @@ def test_load_persona_context_default():
     assert isinstance(bundle.memory, str)
     assert bundle.sidecar is None or isinstance(bundle.sidecar, dict)
 
+
 def test_load_persona_context_with_context():
     prompt = "Show lab data."
     persona = "lab_manager"
@@ -43,10 +49,12 @@ def test_load_persona_context_with_context():
     assert set(bundle.context_paths) & set(suggested_context)
     assert isinstance(bundle.memory, str)
 
+
 def test_get_cliff_status():
     status = get_cliff_status()
     assert isinstance(status, dict)
     assert "status" in status
+
 
 def test_fallback_context(monkeypatch):
     # Simulate unknown suggested contexts
@@ -55,4 +63,7 @@ def test_fallback_context(monkeypatch):
     bundle = load_persona_context(prompt, persona, suggested_context=["foo", "bar"])
     assert isinstance(bundle.context_paths, list)
     # Should fallback to at least one known context
-    assert any(ctx in ["development", "chat_logs", "personal", "cliff_state", "lab"] for ctx in bundle.context_paths)
+    assert any(
+        ctx in ["development", "chat_logs", "personal", "cliff_state", "lab"]
+        for ctx in bundle.context_paths
+    )

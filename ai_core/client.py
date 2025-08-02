@@ -16,6 +16,7 @@ if not api_key:
 
 client = openai.OpenAI(api_key=api_key)
 
+
 def get_chat_completion(messages, model, **kwargs):
     """
     Call the OpenAI Chat Completion API.
@@ -23,12 +24,11 @@ def get_chat_completion(messages, model, **kwargs):
     Raises: RuntimeError on failure.
     """
     try:
-        resp = client.chat.completions.create(
-            model=model, messages=messages, **kwargs
-        )
+        resp = client.chat.completions.create(model=model, messages=messages, **kwargs)
         return resp.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"OpenAI chat completion failed: {e}")
+
 
 def get_embedding(input, model, **kwargs):
     """

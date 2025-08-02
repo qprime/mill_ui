@@ -16,8 +16,8 @@ from ai_core.personas.personas_manager import get_persona
 from ai_core.client import get_chat_completion
 
 
-
 import re
+
 
 def extract_distilled_block(text: str, pattern: str = None) -> str:
     if not pattern:
@@ -50,7 +50,7 @@ def distill(input_text, persona):
         strict = persona_data["strict_mode"]
         print("4")
         extract_pattern = persona_data.get("extract_pattern")
-        if(extract_pattern):
+        if extract_pattern:
             print("distill.distill.extract_pattern:" + extract_pattern)
         print("5")
         system_prompt = persona_data["system_prompt"]
@@ -70,7 +70,7 @@ def distill(input_text, persona):
             messages=messages,
             model=model,
             temperature=0.0 if strict else 0.2,
-            max_tokens=512
+            max_tokens=512,
         )
         print("RAW MODEL RESPONSE:", repr(raw_resp))
         resp = raw_resp.strip()
@@ -89,10 +89,11 @@ def distill(input_text, persona):
                 "bypassed": content == input_text,
                 "persona": persona,
                 "extract_pattern": extract_pattern,
-            }
+            },
         }
     except Exception as e:
         import traceback
+
         print("DISTILL EXCEPTION:", e)
         print(traceback.format_exc())
         # Re-raise to propagate, or comment this out for fallback:
@@ -107,4 +108,3 @@ def distill(input_text, persona):
         #         "extract_pattern": None,
         #     }
         # }
-

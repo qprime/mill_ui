@@ -5,83 +5,66 @@ TODO: describe module functionality.
 
 import logging 
 import json 
-from ai_core .context_manager import route_context 
-from ai_core .distill_text import distill_text 
+from ai_core .context_manager import context 
+from ai_core .distill import distill 
 from ai_core .client import get_chat_completion 
 from memory .chat_manager import log_chat_turn 
 from memory .sidecar_manager import add_sidecar_entry ,load_sidecar ,distill_sidecar 
 
-MAIN_CHAT_MODEL ="gpt-4.1-mini"
+MAIN_CHAT_MODEL ="gpt-4.1"
 SIDECAR_PERSONA ="system"
 
-def generate_chat_reply (data :dict )->dict :
-    persona =data .get ("persona","cliff_core")
-    raw_input =data .get ("input")or data .get ("prompt")or ""
-    chat_id =data .get ("chat_id",None )
+import logging
+import traceback
 
-    distilled_result =distill_text (
-    raw_input ,
-    {"persona":persona ,"task_type":"chat"},
-    strict_mode =True ,
-    )
+def generate_chat_reply(data: dict) -> dict:
+    """
+    Handles the main chat exchange, with robust error handling.
+    """
+    try:
+        persona = "cliff_core"
+        raw_input = data.get("input") or data.get("prompt") or ""
+        chat_id = data.get("chat_id", None)
 
-    cleaned =(
-    distilled_result .get ("original_input",{}).get ("cleaned_text",raw_input )
-    if isinstance (distilled_result ,dict )
-    else raw_input 
-    )
-    distilled_prompt =(
-    distilled_result .get ("distilled_text",cleaned )
-    if isinstance (distilled_result ,dict )
-    else cleaned 
-    )
+        distilled_prompt = distill(raw_input, "turn_distiller")["distilled_text"]
+        print("DISTILLED_PROMPT: " + distilled_prompt)
+        system_prompt = context(distilled_prompt, persona, chat_id=chat_id)
+        messages = [{"role": "system", "content": system_prompt}]
 
-    routing =route_context (distilled_prompt ,persona )
+        try:
+            reply = get_chat_completion(
+                messages=messages,
+                model=MAIN_CHAT_MODEL,
+            )
+        except Exception as model_exc:
+            logging.error("Model call failed: %s\n%s", model_exc, traceback.format_exc())
+            reply = "[Model error: see logs]"
 
-    messages =[]
-    system_prompt =routing .get ("system_prompt")if isinstance (routing ,dict )else None 
-    if system_prompt :
-        messages .append ({"role":"system","content":system_prompt })
-    messages .append ({"role":"user","content":distilled_prompt })
-
-    try :
-        reply =get_chat_completion (
-        messages =messages ,
-        model =MAIN_CHAT_MODEL ,
+        log_chat_turn(
+            persona=persona,
+            chat_id=chat_id,
+            user_input=raw_input,
+            distilled=distilled_prompt,
+            response=reply,
+            model=MAIN_CHAT_MODEL,
         )
-    except Exception as e :
-        logging .error (f"Model call failed: {e }")
-        reply ="[Model error: see logs]"
 
-    log_chat_turn (
-    persona =persona ,
-    chat_id =chat_id ,
-    user_input =raw_input ,
-    cleaned =cleaned ,
-    distilled =distilled_prompt ,
-    routing =routing ,
-    response =reply ,
-    model =MAIN_CHAT_MODEL 
-    )
+        return {
+            "persona": persona,
+            "chat_id": chat_id,
+            "user_input": raw_input,
+            "distilled": distilled_prompt,
+            "response": reply,
+            "model": MAIN_CHAT_MODEL,
+        }
+    except Exception as top_exc:
+        logging.error("Fatal error in generate_chat_reply: %s\n%s", top_exc, traceback.format_exc())
+        # Safe minimal error response for the UI/upstream
+        return {
+            "error": "Internal error in chat engine. Please try again or contact support.",
+            "details": str(top_exc),
+        }
 
-
-    return {
-    "persona":persona ,
-    "chat_id":chat_id ,
-    "user_input":raw_input ,
-    "cleaned":cleaned ,
-    "distilled":distilled_prompt ,
-    "routing":routing ,
-    "response":reply ,
-    "model":MAIN_CHAT_MODEL ,
-    "original_input":{
-    "cleaned_text":cleaned ,
-    "raw_input":raw_input ,
-    },
-    "distilled_input":distilled_prompt ,
-    "CliffsDistillation":distilled_prompt ,
-    "Response":reply ,
-    }
 
 def update_chat_summary (chat_id ,summary ):
     """

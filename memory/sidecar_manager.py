@@ -5,7 +5,7 @@ TODO: describe module functionality.
 
 import json 
 from pathlib import Path 
-from ai_core .distillation_manager import distill 
+from ai_core.distill import distill 
 
 
 SIDECAR_DIR =Path ("memory/sidecar")
@@ -25,15 +25,12 @@ def load_sidecar (chat_id ,persona ="sidecar"):
         return data ["turns"]
     return data 
 
-def save_distilled_sidecar (chat_id ,distilled ,persona ="sidecar"):
-    out_path =get_sidecar_path (chat_id ,f"{persona }_distilled")
-    with open (out_path ,"w",encoding ="utf-8")as f :
+def save_distilled_sidecar(chat_id, distilled, persona="sidecar"):
+    out_path = get_sidecar_path(chat_id, f"{persona}_distilled")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(distilled, f, ensure_ascii=False, indent=2)
 
-        try :
-            obj =json .loads (distilled )
-            json .dump (obj ,f ,indent =2 )
-        except Exception :
-            f .write (distilled )
+
 
 def format_entries_for_distillation (entries ):
     return json .dumps (entries ,indent =2 )
@@ -45,8 +42,8 @@ def distill_sidecar (chat_id ,persona ="sidecar"):
         return None 
 
     prompt =format_entries_for_distillation (entries )
-    distilled_output =distill (prompt ,persona_name =persona )
-    save_distilled_sidecar (chat_id ,distilled_output ,persona )
+    distilled_output =distill(prompt ,persona =persona )
+    save_distilled_sidecar(chat_id ,distilled_output ,persona )
     return distilled_output 
 
 def add_sidecar_entry (chat_id ,persona ,entry ):

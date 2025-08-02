@@ -1,160 +1,96 @@
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Optional, List, Dict, Any
+import os
 
-# Example import; update to match your real project paths
-from ai_core.personas.personas_manager import legacy_persona_registry
+# Import your actual sidecar and persona loaders
+from memory.sidecar_manager import load_sidecar
+from continuum.code_context import generate_context
+from continuum.project_graph import generate_project_graph
+from ai_core.personas.personas_manager import get_persona
 
-@dataclass
-class ContextBundle:
-    persona: str
-    context_paths: List[str]
-    memory: str
-    sidecar: Optional[dict] = None
 
-def route_context(
-    prompt: str, 
-    persona: str = "cliff_core", 
-    model: str = "gpt-4.1-mini"
-) -> List[str]:
+from typing import Optional
+
+def load_source_code_context(headers_only: bool = False, root_dir: str = ".") -> str:
     """
-    Uses the LLM to classify the user's prompt and suggest the most relevant context(s).
-    Returns a list of context path names (strings).
+    Loads concatenated code context for the entire source tree.
+    If headers_only is True, only Python top-level docstrings are included.
     """
-    from ai_core.client import get_chat_completion
-
-    tag_instruction = (
-        "You are a context routing engine for CLIFF AI.\n"
-        "Given a user prompt and available memory/context domains, "
-        "output ONLY the names of the most relevant context(s) as a Python list of strings."
+    return generate_context(
+        root_dir=root_dir,
+        scrub=True,
+        docstrings_only=headers_only,
+        function_signatures=True,
     )
-    known_contexts = get_known_contexts()
-    messages = [
-        {"role": "system", "content": tag_instruction + "\n\n" + str(known_contexts)},
-        {"role": "user", "content": f"Prompt: {prompt}\n\nOutput: "}
-    ]
-    try:
-        resp = get_chat_completion(
-            messages, model=model, temperature=0.0, max_tokens=256
-        )
-        return _parse_tag_output(resp)
-    except Exception:
-        # If the LLM fails, fallback to all known contexts
-        return list(known_contexts)
 
-def load_persona_context(
+def load_project_graph_context(root_dir: str = ".") -> str:
+    """
+    Loads and formats the project graph context for LLM ingestion.
+    """
+    graph = generate_project_graph(root_dir)
+    lines = ["# PROJECT GRAPH"]
+    for module in graph.get("modules", []):
+        lines.append(f"\n## Module: {module['name']}")
+        lines.append("Files:\n" + "\n".join(f"  - {f}" for f in module.get("files", [])))
+        if module.get("links_to"):
+            lines.append(f"Links to: {', '.join(module['links_to'])}")
+        else:
+            lines.append("Links to: (none)")
+    return "\n".join(lines)
+
+def load_persona_context(persona_name: str, category: str = "") -> str:
+    """
+    Loads the system prompt or persona context string.
+    """
+    persona = get_persona(persona_name, category)
+    return persona.get("system_prompt", "")
+
+def load_generic_memory() -> str:
+    """
+    Loads generic memory or knowledge not covered by other domains (stub).
+    """
+    return ""
+
+def context(
     prompt: str,
-    persona: str = "cliff_core",
-    suggested_context: Optional[List[str]] = None,
-    chat_id: Optional[str] = None
-) -> ContextBundle:
+    persona: str,
+    chat_id: Optional[str] = None,
+    headers_only: bool = False,
+    root_dir: str = ".",
+    persona_category: str = ""
+) -> str:
     """
-    Main entrypoint: Assembles a ContextBundle for the given persona and prompt.
+    Returns a fully assembled context string for LLM injection:
+    Persona (system prompt), Sidecar, Project Graph, Source Code (in that order).
     """
-    known_contexts = get_known_contexts()
-    context_paths = _filter_context_paths(persona, suggested_context or [], known_contexts)
-    sidecar = _load_sidecar(chat_id, persona) if chat_id else None
+    context_blocks = []
 
-    if persona == "cliff_core":
-        memory = _get_cliff_core_base_context()
-    else:
-        memory = _get_codebase_context(prompt, paths=context_paths)
+    # --- Load Persona Context (system prompt/role) ---
+    persona_context = load_persona_context(persona, persona_category)
+    if persona_context:
+        context_blocks.append(persona_context)
 
-    return ContextBundle(
-        persona=persona,
-        context_paths=context_paths,
-        memory=memory,
-        sidecar=sidecar
-    )
+    # --- Load Sidecar (session/persona memory) ---
+    if chat_id:
+        from memory.sidecar_manager import load_sidecar
+        sidecar_context = load_sidecar(chat_id, persona)
+        if sidecar_context:
+            context_blocks.append(sidecar_context)
 
-def get_cliff_status() -> Dict[str, Any]:
-    """
-    Stub for CLIFF AI health/status (expand as needed).
-    """
-    return {"status": "OK", "uptime": "n/a"}
+    # --- Load Project Graph Context ---
+    project_graph_context = load_project_graph_context(root_dir=root_dir)
+    if project_graph_context:
+        context_blocks.append(project_graph_context)
 
-# ---- Internal helpers below ----
+    # --- Load Source Code Context ---
+    code_context = load_source_code_context(headers_only=headers_only, root_dir=root_dir)
+    if code_context:
+        context_blocks.append(code_context)
 
-def _parse_tag_output(output: str) -> List[str]:
-    """
-    Expects LLM output to be a Python list of strings, e.g. "['development', 'chat_logs']".
-    """
-    import ast
-    try:
-        val = ast.literal_eval(output.strip())
-        if isinstance(val, list) and all(isinstance(x, str) for x in val):
-            return val
-    except Exception:
-        pass
-    return []
+    # --- Load Generic Memory Context (stub) ---
+    generic_memory_context = load_generic_memory()
+    if generic_memory_context:
+        context_blocks.append(generic_memory_context)
 
-def _load_sidecar(chat_id: str, persona: str) -> Optional[dict]:
-    """
-    Loads any session/persona-specific sidecar memory. (Stub, expand as needed.)
-    """
-    # Stub: Sidecars not implemented in this version
-    return None
-
-def _load_json(path: str) -> dict:
-    import json
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def _load_module_summaries(paths: List[str]) -> List[str]:
-    """
-    Loads all .md summaries for the given context paths.
-    """
-    frags = []
-    for p in paths:
-        try:
-            frag = _load_json(f"{p}/summary.md")
-            frags.append(frag)
-        except Exception:
-            continue
-    return frags
-
-def _load_base_context() -> List[str]:
-    """
-    Loads the baseline context from memory/development/context_base.md.
-    """
-    try:
-        with open("memory/development/context_base.md", "r", encoding="utf-8") as f:
-            return [f.read()]
-    except Exception:
-        return []
-
-def _get_cliff_core_base_context() -> str:
-    """
-    Loads and joins base context for cliff_core.
-    """
-    return "\n\n".join(_load_base_context())
-
-def _get_codebase_context(prompt: str, paths: List[str]) -> str:
-    """
-    Loads and joins codebase context from selected memory paths and summaries.
-    """
-    frags = _load_base_context()
-    frags += _load_module_summaries(paths)
-    return "\n\n".join([frag for frag in frags if frag])
-
-def _filter_context_paths(persona: str, suggested: List[str], known: List[str]) -> List[str]:
-    """
-    Returns the suggested context paths that are known, or falls back to persona defaults.
-    """
-    if suggested:
-        paths = [p for p in suggested if p in known]
-        if paths:
-            return paths
-    # Fallback: use legacy persona defaults
-    fallback = legacy_persona_registry.get(persona, {}).get("default_contexts", [])
-    return [p for p in fallback if p in known] or known
-
-def get_known_contexts() -> List[str]:
-    """
-    Returns the list of known context domains for routing.
-    """
-    # Update with your project logic for valid context domains
-    return [
-        "development", "chat_logs", "personal", "cliff_state", "lab",
-        # Add more as your project expands
-    ]
-
+    # Assemble final context string in the correct order
+    full_context = "\n\n".join([str(block) for block in context_blocks if block])
+    return full_context

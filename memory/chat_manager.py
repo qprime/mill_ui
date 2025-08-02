@@ -21,8 +21,7 @@ def append_to_chat_log (persona :str ,chat_id :str ,entry :dict )->None :
         f .write (json .dumps (entry )+"\n")
 
 def log_chat_turn (persona :str ,chat_id :str =None ,
-user_input :str ="",cleaned :str ="",
-distilled :str ="",routing :dict =None ,
+user_input :str ="", distilled :str ="",
 response :str ="",model :str ="")->None :
     """
     Log a chat turn to both the full log and the sidecar (session memory).
@@ -36,9 +35,7 @@ response :str ="",model :str ="")->None :
     turn ={
     "timestamp":entry_time ,
     "input":user_input ,
-    "cleaned":cleaned ,
     "distilled":distilled ,
-    "routing":routing or {},
     "response":response ,
     "model":model 
     }

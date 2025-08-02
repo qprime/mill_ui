@@ -42,17 +42,12 @@ def extract_distilled_block(text: str, pattern: str = None) -> str:
 
 def distill(input_text, persona):
     try:
-        print("1")
         persona_data = get_persona(persona)
-        print("2")
         model = persona_data["default_model"]
-        print("3")
         strict = persona_data["strict_mode"]
-        print("4")
         extract_pattern = persona_data.get("extract_pattern")
-        if extract_pattern:
-            print("distill.distill.extract_pattern:" + extract_pattern)
-        print("5")
+        # if extract_pattern:
+        #     print("distill.distill.extract_pattern:" + extract_pattern)
         system_prompt = persona_data["system_prompt"]
         if not isinstance(system_prompt, str):
             if isinstance(system_prompt, list):
@@ -65,7 +60,6 @@ def distill(input_text, persona):
             {"role": "user", "content": input_text},
         ]
 
-        print("6")
         raw_resp = get_chat_completion(
             messages=messages,
             model=model,
@@ -75,7 +69,6 @@ def distill(input_text, persona):
         print("RAW MODEL RESPONSE:", repr(raw_resp))
         resp = raw_resp.strip()
 
-        print("7")
         content = input_text
         if extract_pattern:
             extracted = extract_distilled_block(resp, extract_pattern)

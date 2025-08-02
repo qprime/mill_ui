@@ -28,9 +28,12 @@ def generate_chat_reply(data: dict) -> dict:
         chat_id = data.get("chat_id", None)
 
         distilled_prompt = distill(raw_input, "turn_distiller")["distilled_text"]
-        print("DISTILLED_PROMPT: " + distilled_prompt)
+        print("chat_service.generate_chat_reply.DISTILLED_PROMPT: " + distilled_prompt)
         system_prompt = context(distilled_prompt, persona, chat_id=chat_id)
-        messages = [{"role": "system", "content": system_prompt}]
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": distilled_prompt}
+        ]
 
         try:
             reply = get_chat_completion(
@@ -56,7 +59,7 @@ def generate_chat_reply(data: dict) -> dict:
             "persona": persona,
             "chat_id": chat_id,
             "user_input": raw_input,
-            "distilled": distilled_prompt,
+            "distilled_input": distilled_prompt,
             "response": reply,
             "model": MAIN_CHAT_MODEL,
         }

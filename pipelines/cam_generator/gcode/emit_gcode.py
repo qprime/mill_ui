@@ -3,7 +3,7 @@
 TODO: describe module functionality.
 """
 
-from gcode.ramp import generate_z_ramp
+from pipelines.cam_generator.gcode.ramp import generate_z_ramp
 
 
 def emit_gcode_from_path(

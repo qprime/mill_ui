@@ -1,62 +1,123 @@
 """
 [pipeline]
-TODO: describe module functionality.
+CLIFF-AI CAM runner: generates toolpaths and G-code for a given project/job.
+- Always run from CLIFF-AI repo root (e.g., `python run.py --job <job_name>`)
+- Inputs: image.png and configs under memory/cam_projects/{job}/
+- Outputs: all artifacts to memory/cam_projects/{job}/cam_output/
+- Callable both as a script (with CLI arg) or as a function for automation/pipeline/web use.
 """
 
-import os
+import argparse
 from pathlib import Path
-from datetime import datetime
 import shutil
 
-from cam_generator.core.multi_pass import generate_all_passes
-from cam_generator.core.preview import preview_toolpath
-from cam_generator.core.time_estimator import estimate_cut_time
+from pipelines.cam_generator.core.multi_pass import generate_all_passes
+from pipelines.cam_generator.core.preview import preview_toolpath
+from pipelines.cam_generator.core.time_estimator import estimate_cut_time
 
-job_name = "Flamingo6"
-ENABLE_PREVIEW = True
+def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True):
+    """
+    Run CAM toolpath + G-code pipeline for a single job.
 
-image_root = Path("/home/squinlan/cliff_ai/memory/cam_projects")
-output_root = Path("output")
+    Args:
+        job_name (str): Name of the job folder in memory/cam_projects/
+        base_dir (Path or str): CLIFF-AI project root (default: auto-detect from cwd)
+        enable_preview (bool): Whether to generate PNG previews for G-code
+        verbose (bool): Print status and file paths
+    """
+    if base_dir is None:
+        base_dir = Path(__file__).resolve().parent.parent.parent  # .../cliff_ai/
+    else:
+        base_dir = Path(base_dir).resolve()
 
-project_folder = image_root / job_name
-image_path = project_folder / "input" / "image.png"
-config_path = project_folder / "config" / "default_passes.yaml"
-job_config_path = project_folder / "config" / "job_config.yaml"
+    mem_root = base_dir / "memory" / "cam_projects"
+    project_folder = mem_root / job_name
 
-if not image_path.exists():
-    raise FileNotFoundError(f"[!] image.png not found at {image_path }")
-if not config_path.exists():
-    raise FileNotFoundError(f"[!] default_passes.yaml not found at {config_path }")
-if not job_config_path.exists():
-    raise FileNotFoundError(f"[!] job_config.yaml not found at {job_config_path }")
+    image_path = project_folder / "input" / "image.png"
+    config_path = project_folder / "config" / "default_passes.yaml"
+    job_config_path = project_folder / "config" / "job_config.yaml"
+    output_folder = project_folder / "cam_output"
 
-existing = sorted(output_root.glob(f"*_{job_name }"))
-next_index = len(existing)
-output_folder = output_root / f"{next_index :02d}_{job_name }"
-output_folder.mkdir(parents=True, exist_ok=False)
+    # Checks
+    for p, label in [
+        (image_path, "input image"),
+        (config_path, "default_passes.yaml"),
+        (job_config_path, "job_config.yaml"),
+    ]:
+        if not p.exists():
+            raise FileNotFoundError(f"[!] Required {label} not found: {p}")
 
-print(f"[+] Output folder: {output_folder }")
+    # Clean/create output folder
+    if output_folder.exists():
+        shutil.rmtree(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
 
-shutil.copy(config_path, output_folder / "default_passes.yaml")
-shutil.copy(job_config_path, output_folder / "job_config.yaml")
+    # Copy configs to output for traceability
+    shutil.copy(config_path, output_folder / "default_passes.yaml")
+    shutil.copy(job_config_path, output_folder / "job_config.yaml")
 
-generate_all_passes(
-    image_path=image_path,
-    config_path=output_folder / "default_passes.yaml",
-    output_dir=output_folder,
-    margin_mm=3.0,
-    job_config_path=output_folder / "job_config.yaml",
-)
+    if verbose:
+        print(f"[+] Input image: {image_path}")
+        print(f"[+] Configs: {config_path}, {job_config_path}")
+        print(f"[+] Output folder: {output_folder}")
 
-if ENABLE_PREVIEW:
-    for gcode_file in output_folder.glob("*.nc"):
-        with open(gcode_file) as f:
-            lines = f.read().splitlines()
-        preview_toolpath(
-            lines,
-            z_fade=True,
-            show=False,
-            save_path=f"{gcode_file .with_suffix ('.png')}",
-        )
-        minutes = estimate_cut_time(lines)
-        print(f"{gcode_file .name }: {minutes :.1f} min")
+    generate_all_passes(
+        image_path=image_path,
+        config_path=output_folder / "default_passes.yaml",
+        output_dir=output_folder,
+        margin_mm=3.0,
+        job_config_path=output_folder / "job_config.yaml",  # or wherever you copied it
+    )
+
+
+    if enable_preview:
+        for gcode_file in output_folder.glob("*.nc"):
+            with open(gcode_file) as f:
+                lines = f.read().splitlines()
+            preview_toolpath(
+                lines,
+                z_fade=True,
+                show=False,
+                save_path=f"{gcode_file.with_suffix('.png')}",
+            )
+            minutes = estimate_cut_time(lines)
+            if verbose:
+                print(f"{gcode_file.name}: {minutes:.1f} min")
+
+# --- CLI Entrypoint ---
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate CNC toolpaths and G-code for a CLIFF-AI CAM job."
+    )
+    parser.add_argument(
+        "--job",
+        required=True,
+        help="Job/project name (matches subfolder in memory/cam_projects/)",
+    )
+    parser.add_argument(
+        "--no-preview",
+        action="store_true",
+        help="Skip PNG preview generation.",
+    )
+    parser.add_argument(
+        "--base-dir",
+        default=None,
+        help="Override CLIFF-AI project root (default: parent of this script)",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Minimal output.",
+    )
+    args = parser.parse_args()
+
+    run_cam_pipeline(
+        job_name=args.job,
+        base_dir=args.base_dir,
+        enable_preview=not args.no_preview,
+        verbose=not args.quiet,
+    )
+
+if __name__ == "__main__":
+    main()

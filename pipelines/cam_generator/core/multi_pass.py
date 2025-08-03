@@ -74,13 +74,16 @@ def generate_all_passes(
     output_dir,
     pass_names=None,
     margin_mm=0.0,
-    job_config_path="config/job_config.yaml",
+    job_config_path=None,   # <-- now defaults to None, must be explicitly passed!
 ):
     image_path = Path(image_path)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
+    # Use job_config_path provided, or fallback to default (legacy support)
+    if job_config_path is None:
+        job_config_path = "config/job_config.yaml"
     job_config = load_job_config(job_config_path)
     enabled = get_enabled_algorithms(job_config)
     border_margin = job_config.get("border_margin", 2.0)
@@ -88,7 +91,13 @@ def generate_all_passes(
     default_feedrate = job_config.get("default_feedrate", 300)
     units = job_config.get("units", "mm")
     basename = image_path.stem
-    heightmap, scale_xy = load_heightmap(str(image_path), scale_xy=0.1, scale_z=1.0)
+    # --- Pass job_config_path to load_heightmap!
+    heightmap, scale_xy = load_heightmap(
+        str(image_path),
+        job_config_path=job_config_path,
+        scale_xy=0.1,
+        scale_z=1.0,
+    )
     if margin_mm > 0:
         margin_px = int(margin_mm / scale_xy)
         heightmap = heightmap[
@@ -133,10 +142,7 @@ def generate_all_passes(
         gcode.append("G90 ; Absolute positioning")
         gcode.append(f"G0 Z{safe_height :.3f}")
         if pass_name == "coarse" and job_config.get("add_border", False):
-            from pipelines.cam_generator.path_builders.border import (
-                generate_border_path,
-            )
-
+            from pipelines.cam_generator.path_builders.border import generate_border_path
             height_px, width_px = heightmap.shape
             width_mm = width_px * scale_xy + 2 * border_margin
             height_mm = height_px * scale_xy + 2 * border_margin
@@ -169,9 +175,9 @@ def generate_all_passes(
         reporter.add_pass_report(
             pass_name, point_count, min(z_vals), max(z_vals), runtime, 0, 0, []
         )
-        outfile = output_dir / f"{basename }_{pass_name }.nc"
+        outfile = output_dir / f"{basename}_{pass_name}.nc"
         write_gcode(gcode, outfile)
-        print(f"[✓] Wrote {outfile }")
+        print(f"[✓] Wrote {outfile}")
         paths[pass_name] = path
         surface_maps[pass_name] = generate_surface_map(path)
     reporter.print_summary()
@@ -201,8 +207,8 @@ def generate_all_passes(
             )
         if violations:
             print(
-                f"[❌] Toolpath validation failed with {len (violations )} violations."
+                f"[❌] Toolpath validation failed with {len(violations)} violations."
             )
-            print(f"     See {validation_path .name } for details.")
+            print(f"     See {validation_path.name} for details.")
         else:
             print("[✅] Toolpath validation passed.")

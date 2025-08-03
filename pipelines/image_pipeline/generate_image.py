@@ -1,50 +1,38 @@
 """
-[pipeline]
-TODO: describe module functionality.
+[CLIFF AI: Image Generation Pipeline]
+
+This module generates DALL·E/gpt-image-1 images from structured subject, persona, and style.
+- Loads personas and styles via ai_core.personas.personas_manager and ai_core.personas.styles.
+- All OpenAI API calls are routed through ai_core.client for maintainability.
+- Designed for headless, programmatic use by CLIFF or pipeline agents.
+
+This file is formatted for optimal AI context/RAG/maintenance.
 """
 
-import os
 import sys
 import json
 import base64
-import requests
 from pathlib import Path
-from dotenv import load_dotenv
 
-load_dotenv()
-
-API_KEY = os.getenv("OPENAI_API_KEY")
-API_URL = "https://api.openai.com/v1/images/generations"
-HEADERS = {
-    "Authorization": f"Bearer {API_KEY }",
-    "Content-Type": "application/json",
-}
-
-with open("../personas/cam_image_experts/ai_core.personas.json") as f:
-    PERSONAS = {p["name"]: p for p in json.load(f)["personas"]}
-
-with open("../personas/cam_image_experts/styles.json") as f:
-    STYLES = {s["name"]: s for s in json.load(f)["styles"]}
-
+from ai_core.personas.personas_manager import get_persona
+from ai_core.personas.styles import get_style
+from ai_core.client import get_image_generation
 
 def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
-    persona = ai_core.personas.get(persona_name)
-    style = STYLES.get(style_name)
-
+    persona = get_persona(persona_name, category="cam/artists")
+    style = get_style(style_name, category="cam/styles")
     if not persona or not style:
-        raise ValueError(f"Invalid persona or style: {persona_name }, {style_name }")
-
+        raise ValueError(f"Invalid persona or style: {persona_name}, {style_name}")
     return (
-        f"{subject }, in the style of {persona ['genre']}. "
-        f"{persona ['prompting_style']}. "
-        f"{style ['machinability_prompt']}"
+        f"{subject}, in the style of {persona['genre']}. "
+        f"{persona['prompting_style']}. "
+        f"{style['machinability_prompt']}"
     )
 
-
 def generate_dalle_image(config_name: str):
-    config_path = Path("./") / f"{config_name }.json"
+    config_path = Path(f"{config_name}.json")
     if not config_path.exists():
-        print(f"[!] Config not found: {config_path }")
+        print(f"[!] Config not found: {config_path}")
         return
 
     with open(config_path) as f:
@@ -58,51 +46,32 @@ def generate_dalle_image(config_name: str):
     try:
         prompt = assemble_prompt(subject, persona, style)
     except ValueError as e:
-        print(f"[!] {e }")
+        print(f"[!] {e}")
         return
 
     config["prompt"] = prompt
-
-    print(f"[+] Requesting gpt-image-1 image for prompt: {prompt }")
-
-    response = requests.post(
-        API_URL,
-        headers=HEADERS,
-        json={"model": "gpt-image-1", "prompt": prompt, "size": size, "n": 1},
-    )
-
-    if response.status_code != 200:
-        try:
-            print(f"[!] API error {response .status_code }:\n{response .json ()}")
-        except Exception:
-            print(
-                f"[!] API error {response .status_code } (non-JSON response):\n{response .text }"
-            )
-        return
+    print(f"[+] Requesting gpt-image-1 image for prompt: {prompt}")
 
     try:
-        b64_data = response.json()["data"][0]["b64_json"]
-    except KeyError:
-        print("[!] Unexpected API response format.")
-        print(response.json())
+        b64_images = get_image_generation(prompt, model="gpt-image-1", size=size, n=1)
+        b64_data = b64_images[0]
+    except Exception as e:
+        print(f"[!] Image generation failed: {e}")
         return
 
     image_data = base64.b64decode(b64_data)
-
     out_dir = Path("output") / config_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with open(out_dir / "image.png", "wb") as f:
         f.write(image_data)
-
-    with open(out_dir / f"{config_name }.json", "w") as f:
+    with open(out_dir / f"{config_name}.json", "w") as f:
         json.dump(config, f, indent=2)
 
-    print(f"[✓] Image and config saved to: {out_dir }")
-
+    print(f"[✓] Image and config saved to: {out_dir}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python generate_dalle_image.py <config_name>")
+        print("Usage: python generate_image.py <config_name>")
     else:
         generate_dalle_image(sys.argv[1])

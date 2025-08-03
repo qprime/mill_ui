@@ -13,6 +13,7 @@ def load_json_personas(category=""):
     personas = {}
     # Set the search directory based on category or default
     search_dir = PERSONA_DIR / category if category else PERSONA_DIR
+    print(f"DEBUG: Searching in {search_dir.resolve()}")
 
     # Use rglob to search recursively for all .json files
     for file in search_dir.rglob("*.json"):
@@ -23,12 +24,16 @@ def load_json_personas(category=""):
                 print(f"ERROR: Could not parse JSON in file {file}: {e}")
                 continue
             # Support for multi-persona files (optional)
+
+            print(f"DEBUG: Found persona '{data.get('name')}' in {file}")
+
             if (
                 isinstance(data, dict)
                 and "personas" in data
                 and isinstance(data["personas"], list)
             ):
                 for persona in data["personas"]:
+                        
                     if "name" not in persona:
                         print(f"WARNING: Persona in {file} missing 'name': {persona}")
                         continue

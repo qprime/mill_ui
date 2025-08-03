@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/services/status_service.py
+# type: status_utility
+# tags: service, status, web, flask
+# owner: cliff
+# depends_on: platform, flask
+# description: Provides service status details for the CLIFF server's web interface.
 
 import platform
 from flask import request

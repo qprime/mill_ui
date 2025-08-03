@@ -1,8 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
-
+# path: pipelines/cam_generator/optimizers/prune_redundant.py
+# type: optimization_utility
+# tags: cam, optimizer, deduplication, pruning
+# owner: cliff
+# depends_on: None
+# description: Prunes redundant points in paths for CAM optimization.
 
 def deduplicate_path(path, tolerance=1e-5):
     cleaned = []

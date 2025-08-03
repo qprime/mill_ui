@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/pocket_generator/generate_pocket_holer.py
+# type: G-code generator
+# tags: cam, gcode, config, generator
+# owner: cliff
+# depends_on: yaml
+# description: Generates G-code for CNC pocket holes based on YAML configuration.
 
 import yaml
 

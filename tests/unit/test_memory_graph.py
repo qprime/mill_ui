@@ -1,6 +1,9 @@
-"""
-[testing] Unit tests for memory.memory_graph.describe_purpose function.
-"""
+# path: tests/unit/test_memory_graph.py
+# type: unit test
+# tags: pytest, memory, test, graph
+# owner: cliff
+# depends_on: memory/memory_graph.py
+# description: Verify memory graph purpose description functionality.
 
 import pytest
 from memory.memory_graph import describe_purpose

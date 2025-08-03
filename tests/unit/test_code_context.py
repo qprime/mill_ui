@@ -1,6 +1,9 @@
-"""
-[testing] Unit tests for continuum.code_context module.
-"""
+# path: tests/unit/test_code_context.py
+# type: unit_tests
+# tags: testing, code_context, utils
+# owner: cliff
+# depends_on: continuum/code_context.py
+# description: Unit tests for code context utilities in the continuum package.
 
 import os
 import tempfile

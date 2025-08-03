@@ -1,3 +1,10 @@
+# path: continuum/regen_metadata_headers.py
+# type: metadata utility
+# tags: metadata, regeneration, headers, script
+# owner: cliff
+# depends_on: ai_core.client,continuum.file_crawl
+# description: Regenerates metadata headers for Python files to facilitate AI context selection.
+
 import os
 import re
 import sys
@@ -5,7 +12,7 @@ import shutil
 from pathlib import Path
 
 from ai_core import client
-from file_crawl import find_relative_files
+from continuum.file_crawl import find_relative_files
 
 BACKUP_SUFFIX = '.bak'
 
@@ -91,9 +98,9 @@ def update_single_file(
     dry_run=False,
     backup=True,
     print_only=False,
-    skip_inits=True
+    skip_inits=True,
+    force=False,
 ):
-    # Support both absolute and relative paths
     abs_path = os.path.abspath(file_path)
     rel_path = os.path.relpath(abs_path, root)
     if should_skip(abs_path, skip_inits):
@@ -103,7 +110,8 @@ def update_single_file(
         code = f.read()
     old_header, code_body = strip_top_header(code)
     new_header = get_llm_header(rel_path, code_body)
-    if new_header.strip() == old_header.strip():
+    # Only skip if not forcing
+    if not force and new_header.strip() == old_header.strip():
         print(f"[SKIP] {rel_path}: Header unchanged")
         return
     if dry_run or print_only:
@@ -122,6 +130,7 @@ def update_metadata_headers(
     backup=True,
     print_only=False,
     skip_inits=True,
+    force=False,
     file_path=None
 ):
     """Update headers in all Python files (or one file if file_path is set)."""
@@ -133,6 +142,7 @@ def update_metadata_headers(
             backup=backup,
             print_only=print_only,
             skip_inits=skip_inits,
+            force=force,
         )
         return
 
@@ -148,6 +158,7 @@ def update_metadata_headers(
             backup=backup,
             print_only=print_only,
             skip_inits=skip_inits,
+            force=force,
         )
 
 def main():
@@ -159,6 +170,7 @@ def main():
     parser.add_argument('--no-backup', action='store_true', help='Do not create .bak backups')
     parser.add_argument('--print-only', action='store_true', help='Only print headers+snippets, do not modify files')
     parser.add_argument('--include-inits', action='store_true', help='Update __init__.py files (normally skipped)')
+    parser.add_argument('--force', action='store_true', help='Regenerate header even if unchanged')
     args = parser.parse_args()
 
     update_metadata_headers(
@@ -167,6 +179,7 @@ def main():
         backup=not args.no_backup,
         print_only=args.print_only,
         skip_inits=not args.include_inits,
+        force=args.force,
         file_path=args.file,
     )
 

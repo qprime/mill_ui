@@ -1,3 +1,10 @@
+# path: tests/unit/test_context_manager.py
+# type: unit_tests
+# tags: testing, context_manager, context_selection, pytest
+# owner: cliff
+# depends_on: ai_core.context_manager, ai_core.client
+# description: Validates context manager functionality in various scenarios for LLM.
+
 import pytest
 
 

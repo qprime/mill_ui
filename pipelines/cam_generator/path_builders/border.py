@@ -1,8 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
-
+# path: pipelines/cam_generator/path_builders/border.py
+# type: border_path_function
+# tags: cam, path, border, utils
+# owner: cliff
+# depends_on: None
+# description: Generates a rectangular border path for CAM processes based on input dimensions.
 
 def generate_border_path(width, height, depth, margin=1.0):
     x0 = margin

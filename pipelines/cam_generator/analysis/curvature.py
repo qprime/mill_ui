@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/analysis/curvature.py
+# type: analysis_module
+# tags: cam, analysis, curvature, numpy, scipy
+# owner: cliff
+# depends_on: numpy, scipy.ndimage.sobel
+# description: Computes slope maps from heightmaps for curvature analysis in CAM generation.
 
 import numpy as np
 from scipy.ndimage import sobel

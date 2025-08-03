@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/image_pipeline/test_enhancement.py
+# type: test module
+# tags: image, enhancement, test, visualization
+# owner: cliff
+# depends_on: pipelines/image_pipeline/enhance.py
+# description: Compares original and enhanced images from image pipeline for testing purposes.
 
 import numpy as np
 import cv2

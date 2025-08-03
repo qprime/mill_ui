@@ -1,14 +1,9 @@
-"""
-[AI Core Module] - OpenAI Client Interface
-
-Unified, agent-optimized client for all OpenAI API calls:
-- Chat completions
-- Embeddings
-- Image generations (DALL·E/gpt-image-1)
-
-All API key logic is loaded at module import for immediate failure.
-Errors are surfaced as RuntimeError for all agent pipelines.
-"""
+# path: ai_core/client.py
+# type: API client
+# tags: openai, api, client, chat, embedding, image, sdk, http
+# owner: cliff
+# depends_on: os, openai, requests
+# description: Interacts with various OpenAI APIs like chat, embedding, and image generation.
 
 import os
 import openai

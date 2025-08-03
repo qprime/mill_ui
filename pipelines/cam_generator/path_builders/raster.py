@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/path_builders/raster.py
+# type: path generation
+# tags: cam, raster, numpy, heightmap, utility
+# owner: cliff
+# depends_on: numpy
+# description: Generates raster tool paths for CAM based on heightmaps and various parameters.
 
 import numpy as np
 

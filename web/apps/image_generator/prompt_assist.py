@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/apps/image_generator/prompt_assist.py
+# type: prompt assistance endpoint
+# tags: web, api, prompt_generation, image_helper
+# owner: cliff
+# depends_on: ai_core/client.py
+# description: Serves an API endpoint for generating tailored image prompts using AI personas and styles.
 
 import os
 import json

@@ -1,7 +1,9 @@
-"""
-[local services]
-TODO: describe module functionality.
-"""
+# path: local_services/whisper/whisper_server.py
+# type: API server module
+# tags: whisper, transcription, audio, FastAPI
+# owner: cliff
+# depends_on: fastapi, faster_whisper
+# description: Provides a FastAPI server for audio transcription using WhisperModel.
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware

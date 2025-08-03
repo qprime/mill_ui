@@ -1,7 +1,9 @@
-"""
-[misc]
-TODO: describe module functionality.
-"""
+# path: templates/script_cli_template.py
+# type: CLI utility
+# tags: cli, template, argparse, script
+# owner: cliff
+# depends_on: argparse
+# description: Template for command-line interface scripts using argparse.
 
 import argparse
 

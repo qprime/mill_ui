@@ -1,15 +1,9 @@
-"""
-[CLIFF AI: File Discovery Utility]
-
-This module provides a central, project-aware API for discovering files in the CLIFF AI codebase.
-- Excludes system, venv, cache, and memory folders by default.
-- Supports customizable filtering (by extension, path, etc.).
-- Returns file metadata if needed for UI or agent use.
-- Designed to be used by all CLIFF modules (web, CLI, LLM context, agents).
-
-Headers and docstrings are written for maximum AI and human parsing.
-(For minimal RAG use, headers can be stripped via utility function.)
-"""
+# path: continuum/file_crawl.py
+# type: file crawler
+# tags: filesystem, crawler, utils, file management
+# owner: cliff
+# depends_on: os, pathlib, typing
+# description: Recursively searches and filters project files based on extensions and other criteria.
 
 import os
 from pathlib import Path

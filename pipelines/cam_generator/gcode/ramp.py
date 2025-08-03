@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/gcode/ramp.py
+# type: gcode utility
+# tags: cam, gcode, ramp, numpy
+# owner: cliff
+# depends_on: numpy
+# description: Generates z-axis ramp coordinates for G-code. Used in toolpath generation.
 
 import numpy as np
 

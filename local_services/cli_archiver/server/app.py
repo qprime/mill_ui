@@ -1,7 +1,9 @@
-"""
-[local services]
-TODO: describe module functionality.
-"""
+# path: local_services/cli_archiver/server/app.py
+# type: flask_web_service
+# tags: server, cli, logger, web
+# owner: cliff
+# depends_on: .cli_log_store, memory.memory_manager
+# description: Flask web service to receive and process CLI logs for archival.
 
 from pathlib import Path
 from flask import Flask, request, jsonify

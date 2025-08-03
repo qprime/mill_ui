@@ -1,7 +1,9 @@
-"""
-[local services]
-TODO: describe module functionality.
-"""
+# path: local_services/cli_archiver/cliff_cli_logger.py
+# type: logging utility
+# tags: cli, logging, heartbeat, session
+# owner: cliff
+# depends_on: os, sys, socket, subprocess, json, datetime
+# description: Tracks and logs CLI sessions and commands to a remote server.
 
 import os
 import sys

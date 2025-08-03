@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/services/task_service.py
+# type: task management
+# tags: tasks, service, backend
+# owner: cliff
+# depends_on: memory/task_manager.py
+# description: Provides interfaces for task retrieval and manipulation within the server.
 
 from memory.task_manager import load_tasks, update_task, create_task, get_task
 

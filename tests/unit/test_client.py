@@ -1,3 +1,10 @@
+# path: tests/unit/test_client.py
+# type: unit_tests
+# tags: testing, client, api, mock, error_handling
+# owner: cliff
+# depends_on: ai_core/client.py
+# description: Validates client API error handling in absence of API keys.
+
 import os
 import pytest
 

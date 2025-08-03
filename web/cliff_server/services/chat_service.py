@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/services/chat_service.py
+# type: chat service module
+# tags: chat, service, ai_core, memory, error_handling
+# owner: cliff
+# depends_on: ai_core/context_manager.py, ai_core/distill.py, ai_core/client.py, memory/chat_manager.py, memory/sidecar_manager.py
+# description: Manages chat interactions, sidecar data, and error handling for AI chats.
 
 import logging
 import json

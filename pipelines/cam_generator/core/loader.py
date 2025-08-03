@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/core/loader.py
+# type: data_loader_module
+# tags: cam, loader, image, config, heightmap
+# owner: cliff
+# depends_on: pipelines/cam_generator/core/job_loader.py
+# description: Loads and processes heightmap data for CAM processing system.
 
 import cv2
 import numpy as np

@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/apps/image_generator/app.py
+# type: web service
+# tags: flask, api, webapp, image_generation
+# owner: cliff
+# depends_on: generate_image_api.py, prompt_assist.py
+# description: Serves as the Flask web service for image generation and prompt assistance.
 
 from flask import Flask, render_template, request, jsonify
 from pathlib import Path

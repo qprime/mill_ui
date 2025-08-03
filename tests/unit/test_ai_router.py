@@ -1,3 +1,10 @@
+# path: tests/unit/test_ai_router.py
+# type: test_suite
+# tags: pytest, unit_test, ai_router
+# owner: cliff
+# depends_on: ai_core/ai_router.py
+# description: Ensures the AIRouter functionality handles embeddings and chat completions correctly.
+
 import pytest
 
 from ai_core.ai_router import AIRouter, get_router

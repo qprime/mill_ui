@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/blueprints/chat.py
+# type: chat_blueprint
+# tags: blueprint, chat, flask, web_service
+# owner: cliff
+# depends_on: web/cliff_server/services/chat_service.py
+# description: Manages chat routes and interactions for the Flask web service.
 
 import uuid
 import traceback

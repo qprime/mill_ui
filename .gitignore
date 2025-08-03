@@ -120,3 +120,4 @@ scripts/annotate_project_annotated.py
 cam_generator/output/
 image_pipeline/output/
 .model_cache/
+.bak

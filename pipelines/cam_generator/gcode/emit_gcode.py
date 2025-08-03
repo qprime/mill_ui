@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/gcode/emit_gcode.py
+# type: gcode_emission
+# tags: gcode, cam, cnc, path
+# owner: cliff
+# depends_on: pipelines/cam_generator/gcode/ramp.py
+# description: Generates G-code for CNC machines from provided toolpaths.
 
 from pipelines.cam_generator.gcode.ramp import generate_z_ramp
 

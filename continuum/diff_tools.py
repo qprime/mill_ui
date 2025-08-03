@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/diff_tools.py
+# type: diff utilities
+# tags: diff, utilities, text comparison
+# owner: cliff
+# depends_on: difflib
+# description: Provides utilities for generating and comparing text diffs.
 
 import difflib
 from typing import List

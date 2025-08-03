@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/blueprints/dashboard.py
+# type: Web Blueprint
+# tags: flask, blueprint, routing, web_server
+# owner: cliff
+# depends_on: flask, os
+# description: Defines routes for the dashboard section of a Flask web application.
 
 from flask import Blueprint, render_template, send_from_directory, current_app
 import os

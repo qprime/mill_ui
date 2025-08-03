@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/core/preview.py
+# type: visualization tool
+# tags: preview, toolpath, gcode, matplotlib
+# owner: cliff
+# depends_on: matplotlib.pyplot
+# description: Visualizes G-code toolpaths using matplotlib, with optional Z-depth coloring.
 
 import matplotlib.pyplot as plt
 

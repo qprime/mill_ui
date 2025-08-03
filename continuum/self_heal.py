@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/self_heal.py
+# type: module
+# tags: self-heal, patcher, git, diff, recovery
+# owner: cliff
+# depends_on: continuum/patcher.py, continuum/git_ops.py, continuum/diff_tools.py
+# description: Provides functions to auto-heal code files, review changes, and revert if tests fail.
 
 from .patcher import replace_file_if_changed, write_file
 from .git_ops import git_restore

@@ -1,16 +1,9 @@
-"""
-[CLIFF AI: Image Generation Pipeline]
-
-This script generates an image using OpenAI's gpt-image-1, based on a project config.
-- Input:  <project_folder>
-    Looks for: cliff_ai/memory/cam_projects/<project_folder>/input/image.json
-- Output:
-    Overwrites: cliff_ai/memory/cam_projects/<project_folder>/input/image.png
-- The JSON input must contain valid persona/style names and subject.
-- This script is safe for CLI, automation, and webapp calls.
-
-No reliance on config filename. No folder name mutation.
-"""
+# path: pipelines/image_pipeline/generate_image.py
+# type: image generation
+# tags: generate, image, pipeline, dalle, prompt, ai_core
+# owner: cliff
+# depends_on: ai_core/personas/personas_manager.py, ai_core/personas/styles.py, ai_core/client.py
+# description: Orchestrate image generation using DALL-E and configured personas and styles.
 
 import sys
 import json

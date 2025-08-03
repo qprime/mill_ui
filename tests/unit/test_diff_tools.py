@@ -1,6 +1,9 @@
-"""
-[testing] Unit tests for continuum.diff_tools module.
-"""
+# path: tests/unit/test_diff_tools.py
+# type: unit test module
+# tags: testing, diff, utilities
+# owner: cliff
+# depends_on: continuum.diff_tools
+# description: Validates diff generation utilities for change detection.
 
 import pytest
 from continuum.diff_tools import get_unified_diff, side_by_side_diff, has_changes

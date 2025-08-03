@@ -1,7 +1,9 @@
-"""
-[local services]
-TODO: describe module functionality.
-"""
+# path: local_services/lab_manager/app.py
+# type: web service
+# tags: flask, api, inventory, lab
+# owner: cliff
+# depends_on: memory/memory_manager.py
+# description: Manages lab device inventory and endpoints for device reporting, querying, and management.
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS

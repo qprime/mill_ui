@@ -1,7 +1,9 @@
-"""
-[AI core]
-TODO: describe module functionality.
-"""
+# path: ai_core/ai_router.py
+# type: routing module
+# tags: ai, routing, embeddings, chat
+# owner: cliff
+# depends_on: ai_core/client.py
+# description: Provides routing for AI functionalities including embeddings and chat completions.
 
 from ai_core.client import get_chat_completion, get_embedding
 

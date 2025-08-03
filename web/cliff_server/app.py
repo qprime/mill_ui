@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/app.py
+# type: web_application
+# tags: flask, server, blueprints, chat, tasks, dashboard
+# owner: cliff
+# depends_on: .blueprints.chat, .blueprints.tasks, .blueprints.dashboard
+# description: Initializes and runs the Flask server application with chat, tasks, and dashboard components.
 
 from flask import Flask
 from .blueprints.chat import chat_bp

@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/optimizers/reduce_colinear.py
+# type: geometry_optimizer
+# tags: optimization, cam, geometry, numpy
+# owner: cliff
+# depends_on: numpy
+# description: Provides functions to optimize CAM paths by reducing colinear points.
 
 import numpy as np
 

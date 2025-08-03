@@ -1,10 +1,9 @@
 # path: continuum/project_graph.py
-# type: project_graph_generator
-# tags: graph, context, cli, file_crawl, metadata
+# type: graph_builder
+# tags: project, dependency, graph, metadata
 # owner: cliff
 # depends_on: continuum/file_crawl.py
-# description: Builds a structured, metadata-aware project graph for CLIFF AI, using file_crawl and extracting optional file headers for LLM context.
-
+# description: Constructs a dependency graph of project modules and files.
 
 import re
 import json
@@ -47,9 +46,13 @@ def parse_metadata_header(path: Path):
     except Exception:
         return {}
 
-def rel_path(path: Path):
-    """Path relative to repo root, as string."""
-    return str(path.relative_to(Path('.').resolve()))
+def rel_path(path: Path, root_dir: Path):
+    try:
+        return str(path.resolve().relative_to(root_dir.resolve()))
+    except Exception:
+        return str(path.name)
+
+
 
 def module_for_file(path: Path):
     """Infers module by top-level folder name."""
@@ -63,7 +66,7 @@ def file_links(path: Path):
     """Optionally, parses direct file imports. (Skip for now, add if needed.)"""
     return []
 
-def build_project_graph():
+def build_project_graph(root_dir="."):
     modules = defaultdict(lambda: {
         "files": [],
         "links_to": set(),
@@ -74,9 +77,9 @@ def build_project_graph():
         "description": None
     })
 
-    py_files = find_files(Path('.'), allowed_ext=[".py"])
+    py_files = find_files(Path(root_dir), allowed_ext=[".py"])
     for path in py_files:
-        rel = rel_path(path)
+        rel = rel_path(path, root_dir)
         mod = module_for_file(path)
         meta = parse_metadata_header(path)
         file_entry = {
@@ -127,7 +130,14 @@ def build_project_graph():
     return {"summary": summary, "modules": sorted(output, key=lambda x: x["name"])}
 
 if __name__ == "__main__":
-    graph = build_project_graph()
-    with open("project_graph.json", "w", encoding="utf-8") as f:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--root', type=str, default='.', help='Project root directory')
+    parser.add_argument('--out', type=str, default='project_graph.json', help='Output file')
+    args = parser.parse_args()
+
+    graph = build_project_graph(args.root)
+    with open(args.out, "w", encoding="utf-8") as f:
         json.dump(graph, f, indent=2, sort_keys=True)
-    print("Project graph written to project_graph.json")
+    print(f"Project graph written to {args.out}")
+

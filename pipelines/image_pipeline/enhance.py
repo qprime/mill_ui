@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/image_pipeline/enhance.py
+# type: image enhancement
+# tags: image, enhancement, preprocessing, numpy, opencv
+# owner: cliff
+# depends_on: numpy, opencv
+# description: Provides functions for heightmap image enhancement in image processing pipelines.
 
 import numpy as np
 import cv2

@@ -1,7 +1,9 @@
-"""
-[local services]
-TODO: describe module functionality.
-"""
+# path: local_services/cli_archiver/server/cli_log_store.py
+# type: log storage module
+# tags: cli, archive, server, jsonl, log
+# owner: cliff
+# depends_on: os, json, pathlib, datetime
+# description: Persists CLI logs to a JSON lines file on server side.
 
 import os
 import json

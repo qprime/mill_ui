@@ -1,11 +1,9 @@
-"""
-[pipeline]
-CLIFF-AI CAM runner: generates toolpaths and G-code for a given project/job.
-- Always run from CLIFF-AI repo root (e.g., `python run.py --job <job_name>`)
-- Inputs: image.png and configs under memory/cam_projects/{job}/
-- Outputs: all artifacts to memory/cam_projects/{job}/cam_output/
-- Callable both as a script (with CLI arg) or as a function for automation/pipeline/web use.
-"""
+# path: pipelines/cam_generator/runner.py
+# type: CAM pipeline runner
+# tags: cam, pipeline, CNC, toolpath, G-code
+# owner: cliff
+# depends_on: multi_pass.py, preview.py, time_estimator.py
+# description: Orchestrates the execution of CAM pipeline steps for CNC G-code generation.
 
 import argparse
 from pathlib import Path

@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/cliff_server/blueprints/tasks.py
+# type: task_blueprint
+# tags: flask, blueprint, tasks, web, server
+# owner: cliff
+# depends_on: ..services.task_service
+# description: Manages task-related web routes for Flask application.
 
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from ..services.task_service import (

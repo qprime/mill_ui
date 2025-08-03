@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/review.py
+# type: code_review_module
+# tags: review, diff, filesystem, output
+# owner: cliff
+# depends_on: continuum/diff_tools.py
+# description: Provides utilities to generate and summarize diffs, prompting for human review.
 
 import os
 from .diff_tools import get_unified_diff

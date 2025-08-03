@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/core/pass_reporter.py
+# type: reporting_module
+# tags: cam, report, json, utilities
+# owner: cliff
+# depends_on: pathlib, json
+# description: Manages generation of CAM pass reports and outputs as JSON.
 
 import json
 from pathlib import Path

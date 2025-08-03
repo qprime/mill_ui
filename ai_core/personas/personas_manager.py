@@ -1,7 +1,9 @@
-"""
-PersonasManager: Loads and provides access to persona configurations from JSON files in PERSONA_DIR and subdirectories.
-Supports filtering by category, where 'category' is the immediate subfolder containing each persona JSON.
-"""
+# path: ai_core/personas/personas_manager.py
+# type: persona_management
+# tags: persona, json, loading, management
+# owner: cliff
+# depends_on: json, pathlib
+# description: Manages loading and accessing persona data from JSON files.
 
 import json
 from pathlib import Path

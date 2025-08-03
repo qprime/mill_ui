@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/patcher.py
+# type: file_patching_utils
+# tags: backup, file, io, utils
+# owner: cliff
+# depends_on: shutil, pathlib
+# description: Provides utility functions for backing up and patching files.
 
 import shutil
 from pathlib import Path

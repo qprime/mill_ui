@@ -1,7 +1,9 @@
-"""
-[misc]
-TODO: describe module functionality.
-"""
+# path: run.py
+# type: entrypoint script
+# tags: web, whisper, context, graph, image, cam, headers
+# owner: cliff
+# depends_on: web.cliff_server.app,local_services.whisper.whisper_server,continuum.code_context,continuum.project_graph,pipelines.image_pipeline.generate_image,pipelines.cam_generator.runner,continuum.regen_metadata_headers
+# description: Orchestrates running various project entrypoints based on command-line input.
 
 import sys
 import subprocess

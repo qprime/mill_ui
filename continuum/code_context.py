@@ -1,14 +1,9 @@
-"""
-Extracts codebase context for LLM injection.
-
-Modes:
-- Full code (default)
-- Docstrings only (--docstrings-only)
-- Function/class signatures only (--function-signatures)
-- Metadata headers only (--headers-only, uses new schema)
-
-Supports whitespace scrubbing (--no-scrub).
-"""
+# path: continuum/code_context.py
+# type: context_generator
+# tags: metadata, header, token, count, utils
+# owner: cliff
+# depends_on: tiktoken, pathlib, argparse, os, json, re
+# description: Generates structured context and token stats from the codebase for AI ingestion.
 
 import os
 import argparse

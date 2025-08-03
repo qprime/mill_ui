@@ -1,3 +1,10 @@
+# path: tests/unit/test_personas_manager.py
+# type: unit_test_module
+# tags: personas, testing, unit, manager
+# owner: cliff
+# depends_on: ai_core/personas/personas_manager.py
+# description: Validates personas management functionality in unit tests.
+
 import json
 import pytest
 

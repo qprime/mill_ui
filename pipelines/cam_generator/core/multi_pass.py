@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/core/multi_pass.py
+# type: CAM processing
+# tags: cam, generator, multi-pass, gcode, path-optimization
+# owner: cliff
+# depends_on: loader.py, job_loader.py, gcode_writer.py, raster.py, emit_gcode.py, reduce_colinear.py, prune_redundant.py, curvature.py, pass_reporter.py, time_estimator.py, toggles.py
+# description: Orchestrates multi-pass CAM path generation, G-code writing, and validation.
 
 import os
 from pathlib import Path

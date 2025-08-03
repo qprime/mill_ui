@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/command.py
+# type: command execution module
+# tags: subprocess, command, utility, system
+# owner: cliff
+# depends_on: subprocess
+# description: Provides an interface for running system commands with optional output streaming.
 
 import subprocess
 from typing import List, Optional, Union
@@ -16,12 +18,6 @@ def run_command(
     stream: bool = False,
     shell: bool = False,
 ) -> subprocess.CompletedProcess:
-    """
-    Run a shell/system command. Returns a CompletedProcess object.
-    - If stream is True, prints stdout/stderr live.
-    - If capture_output, captures output in .stdout/.stderr.
-    - Set shell=True to run a raw shell command string.
-    """
     if stream:
 
         proc = subprocess.Popen(

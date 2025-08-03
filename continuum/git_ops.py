@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: continuum/git_ops.py
+# type: Git Utilities
+# tags: git, subprocess, utils
+# owner: cliff
+# depends_on: subprocess
+# description: Provides utility functions for interacting with Git via subprocess commands.
 
 import subprocess
 from typing import List, Optional

@@ -1,15 +1,9 @@
-"""
-[AI Core: distill.py]
-
-Single-point distillation utility for CLIFF AI.
-
-- Provides the main `distill()` function to extract concise, intent-preserving text content.
-- Accepts input text, persona name, model, system prompt, strictness, and (optionally) a regex extraction pattern.
-- Persona and extraction pattern are dynamically loaded from persona JSON files in categorized subfolders.
-- Calls LLM (e.g., GPT-4.1) to generate distilled content.
-- No business logic or application orchestration; purely distillation-focused.
-
-"""
+# path: ai_core/distill.py
+# type: text_processing
+# tags: distillation, persona, chat, regex
+# owner: cliff
+# depends_on: ai_core/personas/personas_manager.py, ai_core/client.py
+# description: Extracts and distills text responses based on personas and chat completions.
 
 import re
 from ai_core.personas.personas_manager import get_persona

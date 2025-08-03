@@ -1,7 +1,9 @@
-"""
-[web]
-TODO: describe module functionality.
-"""
+# path: web/apps/image_generator/generate_image_api.py
+# type: image_generation_api
+# tags: api, image, generator, flask, openai
+# owner: cliff
+# depends_on: flask, requests, os, json, base64, tempfile
+# description: Flask endpoint for generating images using OpenAI API given prompt and style inputs.
 
 import os
 import json

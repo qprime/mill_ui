@@ -1,7 +1,9 @@
-"""
-[pipeline]
-TODO: describe module functionality.
-"""
+# path: pipelines/cam_generator/core/time_estimator.py
+# type: time estimation utility
+# tags: CAM, G-code, time estimation, utility
+# owner: cliff
+# depends_on: math
+# description: Estimates G-code cut time for CAM operations with configurable parameters.
 
 import math
 

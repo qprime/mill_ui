@@ -1,12 +1,15 @@
 """
 [CLIFF AI: Image Generation Pipeline]
 
-This module generates DALL·E/gpt-image-1 images from structured subject, persona, and style.
-- Loads personas and styles via ai_core.personas.personas_manager and ai_core.personas.styles.
-- All OpenAI API calls are routed through ai_core.client for maintainability.
-- Designed for headless, programmatic use by CLIFF or pipeline agents.
+This script generates an image using OpenAI's gpt-image-1, based on a project config.
+- Input:  <project_folder>
+    Looks for: cliff_ai/memory/cam_projects/<project_folder>/input/image.json
+- Output:
+    Overwrites: cliff_ai/memory/cam_projects/<project_folder>/input/image.png
+- The JSON input must contain valid persona/style names and subject.
+- This script is safe for CLI, automation, and webapp calls.
 
-This file is formatted for optimal AI context/RAG/maintenance.
+No reliance on config filename. No folder name mutation.
 """
 
 import sys
@@ -29,13 +32,23 @@ def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
         f"{style['machinability_prompt']}"
     )
 
-def generate_dalle_image(config_name: str):
-    config_path = Path(f"{config_name}.json")
-    if not config_path.exists():
-        print(f"[!] Config not found: {config_path}")
+def generate_dalle_image(project_folder: str):
+    # Absolute path to input/output folder
+    base_dir = Path("memory/cam_projects") / project_folder / "input"
+    json_path = base_dir / "image.json"
+    png_path = base_dir / "image.png"
+
+    print(f"DEBUG: project_folder='{project_folder}'")
+    print(f"DEBUG: json_path='{json_path}' (exists: {json_path.exists()})")
+
+    print(f"DEBUG: Absolute json_path: {json_path.resolve()}")
+    print(f"DEBUG: Exists? {json_path.exists()}")
+
+    if not json_path.exists():
+        print(f"[!] Input not found: {json_path}")
         return
 
-    with open(config_path) as f:
+    with open(json_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
     subject = config["subject"]
@@ -60,18 +73,16 @@ def generate_dalle_image(config_name: str):
         return
 
     image_data = base64.b64decode(b64_data)
-    out_dir = Path("output") / config_name
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    with open(out_dir / "image.png", "wb") as f:
+    with open(png_path, "wb") as f:
         f.write(image_data)
-    with open(out_dir / f"{config_name}.json", "w") as f:
-        json.dump(config, f, indent=2)
+    print(f"[✓] Image written to: {png_path}")
 
-    print(f"[✓] Image and config saved to: {out_dir}")
+    # (Optional) Overwrite config with full prompt, if you want:
+    # with open(json_path, "w", encoding="utf-8") as f:
+    #     json.dump(config, f, indent=2)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python generate_image.py <config_name>")
+        print("Usage: python generate_image.py <project_folder>")
     else:
         generate_dalle_image(sys.argv[1])

@@ -15,6 +15,7 @@ ENTRYPOINTS = {
     "whisper": "local_services.whisper.whisper_server",
     "context": "continuum.code_context",
     "graph": "continuum.project_graph",
+    "generate_image": "pipelines.image_pipeline.generate_image"
 }
 
 

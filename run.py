@@ -16,7 +16,8 @@ ENTRYPOINTS = {
     "context": "continuum.code_context",
     "graph": "continuum.project_graph",
     "generate_image": "pipelines.image_pipeline.generate_image",
-    "generate_cam": "pipelines.cam_generator.runner"
+    "generate_cam": "pipelines.cam_generator.runner",
+    "regen_headers": "continuum.regen_metadata_headers"
 }
 
 

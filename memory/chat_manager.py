@@ -1,7 +1,9 @@
-"""
-[memory]
-TODO: describe module functionality.
-"""
+# path: memory/chat_manager.py
+# type: chat_logging_module
+# tags: chat, logging, memory, sidecar, distillation
+# owner: cliff
+# depends_on: memory.memory_manager, memory.sidecar_manager
+# description: Handles chat logging, appends to JSONL, manages sidecar session memory.
 
 import os
 import json

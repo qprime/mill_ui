@@ -1,7 +1,9 @@
-"""
-[memory]
-TODO: describe module functionality.
-"""
+# path: memory/sidecar_manager.py
+# type: sidecar_management
+# tags: sidecar, distill, chat, json, file_io
+# owner: cliff
+# depends_on: ai_core/distill.py
+# description: Manages chat session sidecars for storing and distilling conversational context.
 
 import json
 from pathlib import Path

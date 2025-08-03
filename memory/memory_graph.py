@@ -1,7 +1,9 @@
-"""
-[memory]
-TODO: describe module functionality.
-"""
+# path: memory/memory_graph.py
+# type: memory scanner
+# tags: memory, graph, json, file system
+# owner: cliff
+# depends_on: os, json
+# description: Scans and organizes memory-related data into a structured JSON graph.
 
 import os
 import json

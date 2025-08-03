@@ -1,7 +1,9 @@
-"""
-[memory]
-TODO: describe module functionality.
-"""
+# path: memory/task_manager.py
+# type: task management module
+# tags: task, utils, json, file handling
+# owner: cliff
+# depends_on: json, uuid, datetime, pathlib
+# description: Manages task persistence like creation, saving, loading, updating, and ordering in a json-based file system.
 
 import json
 import uuid

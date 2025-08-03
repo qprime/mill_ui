@@ -1,7 +1,9 @@
-"""
-[memory]
-TODO: describe module functionality.
-"""
+# path: memory/memory_manager.py
+# type: memory management
+# tags: memory, chat_log, context, jsonl
+# owner: cliff
+# depends_on: pathlib, json, datetime
+# description: Manages chat logs and memory records, allows adding and retrieving memory contexts.
 
 from pathlib import Path
 from typing import List

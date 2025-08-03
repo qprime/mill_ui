@@ -1,0 +1,10 @@
+{
+  "name": "High Relief",
+  "description": "Deeper, more dramatic projection. Edges may cast shadows. Pushes heightmaps to the limit of depth range.",
+  "carving_traits": [
+    "Needs strong void separation between elements",
+    "Can require longer carve times and deeper passes",
+    "Emphasizes volumetric depth over surface detail"
+  ],
+  "machinability_prompt": "Render as a grayscale heightmap with deep sculptural contrast. Lighter grays are raised, darker grays are deeply recessed. Avoid ambient occlusion, lighting gradients, or textured shading."
+}

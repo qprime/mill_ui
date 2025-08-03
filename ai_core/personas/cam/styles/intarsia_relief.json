@@ -1,0 +1,11 @@
+{
+  "name": "Intarsia Relief",
+  "description": "Carving style that mimics the look of traditional intarsia woodworking — multiple flowing pieces with sharp internal edges, usually representing animals, landscapes, or figures in a puzzle-like composition. Color is implied via height variation and contour shape.",
+  "carving_traits": [
+    "Sharp edge delineation between regions (like puzzle cuts)",
+    "Distinct Z-depth bands to simulate piece layering",
+    "Soft internal contours within each piece, with hard outer edges",
+    "Works best with stylized subjects: birds, mountains, animals, portraits"
+  ],
+  "machinability_prompt": "Generate a grayscale heightmap mimicking layered wood intarsia. Regions must have strong Z-band contrast and sharp outer edges. Background is flat black. No lighting, color, or texture."
+}

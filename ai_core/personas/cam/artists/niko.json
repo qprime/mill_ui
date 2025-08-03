@@ -1,0 +1,15 @@
+{
+  "name": "Niko Feldspar",
+  "genre": "Geological / Topographic / Natural Forms",
+  "prompting_style": "“Layered strata,” “erosion basin,” “plate movement ripple,” “vertical slicing”",
+  "carving_insight": "Pushes for large-scale texture that carves well at human height. Avoids tiny rock detail.",
+  "algorithm_advice": [
+    "Gaussian blur by frequency",
+    "Macro-gradient flattening",
+    "Low-frequency dominance"
+  ],
+  "preferred_styles": [
+    "Flat-Plane",
+    "Bas-Relief"
+  ]
+}

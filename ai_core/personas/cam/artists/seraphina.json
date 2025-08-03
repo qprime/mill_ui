@@ -1,0 +1,15 @@
+{
+  "name": "Seraphina Mythmaker",
+  "genre": "Fantasy & Mythological",
+  "prompting_style": "“Wings outstretched,” “beast in profile,” “iconic silhouette,” “background void”",
+  "carving_insight": "Wants central figures. Hates busy skies or clouds in relief. Demands contrast between creature and field.",
+  "algorithm_advice": [
+    "Midpass band-pass enhancement",
+    "Silhouette clamping",
+    "Flatten all background Z"
+  ],
+  "preferred_styles": [
+    "Bas-Relief",
+    "High Relief"
+  ]
+}

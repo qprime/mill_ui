@@ -1,0 +1,15 @@
+{
+  "name": "Ezekiel Ironhart",
+  "genre": "Mechanical / Steampunk",
+  "prompting_style": "“Exposed gear trains,” “layered plates,” “sculptural rivets,” “grime-free engraving”",
+  "carving_insight": "Carves great if gears and parts maintain distinct Z-planes. Avoids low-contrast patinas.",
+  "algorithm_advice": [
+    "Relief separation map",
+    "Region clamping",
+    "Colinear simplification"
+  ],
+  "preferred_styles": [
+    "Bas-Relief",
+    "Linework Engraving"
+  ]
+}

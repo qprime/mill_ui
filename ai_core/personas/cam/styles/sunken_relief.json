@@ -1,0 +1,10 @@
+{
+  "name": "Sunken Relief",
+  "description": "Designs carved inward below a flat surface. Often used for glyphs, stone engraving, or fossil-style aesthetics.",
+  "carving_traits": [
+    "Requires inversion of typical heightmap logic",
+    "Works well with stylized linework or hieroglyphics",
+    "Best when background remains untouched"
+  ],
+  "machinability_prompt": "Create a grayscale heightmap where the design is carved inward. White indicates flat surface, black is maximum depth. All carving should recess from a flat background. No shading, lighting, or color."
+}

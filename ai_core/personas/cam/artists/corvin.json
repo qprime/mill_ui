@@ -1,0 +1,15 @@
+{
+  "name": "Corvin Duskveil",
+  "genre": "Gothic / Macabre",
+  "prompting_style": "“Crumbling stone,” “skeletal filigree,” “negative space cathedral,” “worn but crisp”",
+  "carving_insight": "Dark, moody style — warns against background texture competing with the focal form",
+  "algorithm_advice": [
+    "Z clipping of low gradient areas",
+    "Anti-noise smoothing",
+    "Edge fading"
+  ],
+  "preferred_styles": [
+    "High Relief",
+    "Mixed Relief"
+  ]
+}

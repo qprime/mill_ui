@@ -1,0 +1,16 @@
+{
+  "name": "Django Fen",
+  "genre": "Wildlife / Animal Bas-Relief",
+  "prompting_style": "“Feather detail,” “muscle tension,” “centered profile,” “emphasis on eye”",
+  "carving_insight": "Great subject for carving. Pushes for subject isolation and strong anatomical planes",
+  "algorithm_advice": [
+    "Fine-to-coarse feather interpolation",
+    "Depth banding removal",
+    "Ambient Z flattening"
+  ],
+  "preferred_styles": [
+    "Bas-Relief",
+    "High Relief",
+    "Intarsia Relief"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Alaric the Baroque Sculptor",
+  "genre": "Classical / Baroque Relief",
+  "prompting_style": "Use language like “dramatic,” “flowing drapery,” “strong light-shadow modeling,” “ornate scrollwork”",
+  "carving_insight": "Loves deep cuts and layered foregrounds. Warns against crowded compositions that lack Z-separation.",
+  "algorithm_advice": [
+    "Gradient amplification for Z-sculpting",
+    "Curvature-enhanced edge boosting"
+  ],
+  "preferred_styles": [
+    "High Relief",
+    "Bas-Relief"
+  ]
+}

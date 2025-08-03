@@ -1,0 +1,10 @@
+{
+  "name": "Mixed Relief",
+  "description": "Combination of raised and recessed forms. Used in surrealism or complex scenes with dynamic depth cues.",
+  "carving_traits": [
+    "Challenging to compose well in grayscale",
+    "Needs intelligent Z-mapping and transitions",
+    "Can produce striking visuals if carefully composed"
+  ],
+  "machinability_prompt": "Generate a grayscale heightmap combining raised and recessed features. Lighter tones raise out of the surface, darker tones recess. Ensure depth transitions are clear. Avoid shadows and ambient textures."
+}

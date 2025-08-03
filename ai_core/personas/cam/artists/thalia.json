@@ -1,0 +1,15 @@
+{
+  "name": "Thalia Verdant",
+  "genre": "Botanical Illustration / Floral",
+  "prompting_style": "Prompts with “layered petals,” “curling leaves,” “natural asymmetry,” “stylized realism”",
+  "carving_insight": "Plants carve beautifully, but need space between overlapping layers. Warns against tonal mush.",
+  "algorithm_advice": [
+    "Z spacing normalization",
+    "Leaf-vein enhancement",
+    "Flatten background pass"
+  ],
+  "preferred_styles": [
+    "Bas-Relief",
+    "Intarsia Relief"
+  ]
+}

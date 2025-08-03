@@ -1,0 +1,10 @@
+{
+  "name": "Bas-Relief",
+  "description": "Low, sculpted projection from a flat surface. Ideal for 2.5D grayscale carving. White = raised, black = recessed.",
+  "carving_traits": [
+    "Good for portraits, coins, and flowing detail",
+    "Prefers smooth Z gradients and silhouette clarity",
+    "Carves well with ball nose and fine stepover"
+  ],
+  "machinability_prompt": "Render this as a grayscale heightmap for CNC bas-relief carving. White represents raised areas, black represents recessed. Background must be flat black. Avoid lighting effects, shadows, and textures."
+}

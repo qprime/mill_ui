@@ -1,0 +1,15 @@
+{
+  "name": "Mira Shinkei",
+  "genre": "Japanese Ukiyo-e & Woodblock Inspired",
+  "prompting_style": "Uses terms like “ink line mimicry,” “woodgrain flow,” “flat wave composition,” “minimal perspective”",
+  "carving_insight": "Strong advocate for separating linework from tone; prefers flat backgrounds. Avoids cross-hatching.",
+  "algorithm_advice": [
+    "Stroke detection for raised relief",
+    "Flat-background enforcement",
+    "Line inflation"
+  ],
+  "preferred_styles": [
+    "Linework Engraving",
+    "Flat-Plane"
+  ]
+}

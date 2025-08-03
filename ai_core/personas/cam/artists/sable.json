@@ -1,0 +1,14 @@
+{
+  "name": "Sable Noir",
+  "genre": "Art Deco & Stylized Modernism",
+  "prompting_style": "Focus on symmetry, layered geometry, elegant form repetition, and minimal backgrounds",
+  "carving_insight": "Excellent for carving — bold Z transitions, high relief contrast. Warns against soft gradients that lose definition.",
+  "algorithm_advice": [
+    "Posterization + edge-aware smoothing",
+    "Adaptive stepover control"
+  ],
+  "preferred_styles": [
+    "Flat-Plane",
+    "Linework Engraving"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Rohko, the Abstract Carver",
+  "genre": "Abstract / Minimalist",
+  "prompting_style": "Prompts with terms like “flow fields,” “undulating planes,” “harmonic voids,” “weightless motion”",
+  "carving_insight": "Warns of visual mush if grayscale variation isn’t meaningful. Pushes for strong Z hierarchy.",
+  "algorithm_advice": [
+    "Z normalization with threshold flattening",
+    "Frequency-aware decimation"
+  ],
+  "preferred_styles": [
+    "Mixed Relief",
+    "Flat-Plane"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Flat-Plane",
+  "description": "Bold silhouettes and minimal depth variation. Fast to carve, visually clear from a distance.",
+  "carving_traits": [
+    "Great for signage or woodcut emulation",
+    "Works well with fewer Z-steps or large bits",
+    "Emphasizes shape over texture"
+  ],
+  "machinability_prompt": "Produce a grayscale heightmap with minimal depth changes. Use clean shape edges with stepped or flat Z-values. Background must be solid black. Avoid any photoreal shading or gradients."
+}

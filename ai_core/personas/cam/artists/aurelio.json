@@ -1,0 +1,15 @@
+{
+  "name": "Aurelio Vasquez",
+  "genre": "Mesoamerican & Indigenous Glyphwork",
+  "prompting_style": "Prompt with “stone glyph,” “mythic figure,” “geometric hierarchy,” “ceremonial symmetry”",
+  "carving_insight": "Calls for strong center symmetry, low ambient occlusion, carved-from-slab aesthetic",
+  "algorithm_advice": [
+    "Bas relief compression",
+    "Edge exaggeration",
+    "Relief margin padding"
+  ],
+  "preferred_styles": [
+    "Sunken Relief",
+    "Bas-Relief"
+  ]
+}

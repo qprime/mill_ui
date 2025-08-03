@@ -1,0 +1,10 @@
+{
+  "name": "Linework Engraving",
+  "description": "Thin lines or silhouette cuts, often V-carved or used for logos and text.",
+  "carving_traits": [
+    "Needs high-contrast edges and minimal gradients",
+    "Prefers clean vector-like forms",
+    "Not suitable for sculpted detail or volume"
+  ],
+  "machinability_prompt": "Output a grayscale heightmap optimized for V-carving. Lines should be raised above a flat black background. No gradients, textures, or lighting. High contrast silhouettes preferred."
+}

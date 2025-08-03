@@ -1,187 +1,133 @@
-"""
-AI PROJECT GRAPH.
-Encodes the top-level modules, all discovered code files, and their cross-module links.
-Optimized for minimal tokens and AI ingestion.
-"""
+# path: continuum/project_graph.py
+# type: project_graph_generator
+# tags: graph, context, cli, file_crawl, metadata
+# owner: cliff
+# depends_on: continuum/file_crawl.py
+# description: Builds a structured, metadata-aware project graph for CLIFF AI, using file_crawl and extracting optional file headers for LLM context.
 
-import os
-import json
+
 import re
-import argparse
+import json
+from pathlib import Path
 from collections import defaultdict
+from continuum.file_crawl import find_files, is_excluded
 
-try:
-    import tiktoken
-except ImportError:
-    tiktoken = None
+# Adjust for your repo layout as needed
+MODULE_DIRS = [
+    "ai_core",
+    "pipelines",
+    "continuum",
+    "web",
+    "memory",   # include if code, else remove
+    # Add more top-level dirs as needed
+]
 
-DEFAULT_INCLUDE_EXTS = (".py", ".js")
-DEFAULT_EXCLUDE_DIRS = {".git", "venv", ".venv", "__pycache__", "tests"}
+# Pattern to match header metadata fields, e.g. "# key: value"
+HEADER_FIELD_RE = re.compile(r'#\s*(\w+):\s*(.*)')
 
-
-def should_include_file(filename, include_exts=DEFAULT_INCLUDE_EXTS):
-    return filename.endswith(include_exts)
-
-
-def should_exclude_dir(dirname):
-    return dirname in DEFAULT_EXCLUDE_DIRS
-
-
-def collect_modules(root_dir):
-    modules = set()
-    for item in os.listdir(root_dir):
-        path = os.path.join(root_dir, item)
-        if os.path.isdir(path) and not item.startswith("."):
-            modules.add(item)
-    return modules
-
-
-def collect_files_and_links(
-    root_dir,
-    modules,
-    include_exts=DEFAULT_INCLUDE_EXTS,
-    exclude_dirs=DEFAULT_EXCLUDE_DIRS,
-    minimize_file_paths=False,
-):
-    module_files = defaultdict(list)
-    link_map = defaultdict(set)
-    for root, dirs, files in os.walk(root_dir):
-        dirs[:] = [d for d in dirs if not should_exclude_dir(d)]
-        rel_root = os.path.relpath(root, root_dir)
-        parts = rel_root.split(os.sep)
-        if parts[0] not in modules:
-            continue
-        for file in files:
-            if not should_include_file(file, include_exts):
-                continue
-            module = parts[0]
-            rel_path = os.path.join(rel_root, file)
-            if minimize_file_paths:
-                rel_path = os.path.basename(rel_path)
-            abs_path = os.path.join(root, file)
-            module_files[module].append(rel_path)
-            update_links(module, abs_path, modules, link_map)
-    return module_files, link_map
-
-
-def update_links(current_module, filepath, modules, link_map):
+def parse_metadata_header(path: Path):
+    """
+    Reads metadata header from the top of a file, returns dict.
+    Returns empty dict if none present.
+    """
+    meta = {}
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            text = f.read()
+        with open(path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if not line.strip().startswith("#"):
+                    break  # Stop at first code/import
+                m = HEADER_FIELD_RE.match(line)
+                if m:
+                    key, value = m.group(1).lower(), m.group(2).strip()
+                    if key == "tags":
+                        meta[key] = [t.strip() for t in value.split(",")]
+                    else:
+                        meta[key] = value
+            return meta
     except Exception:
-        return
-    for module in modules:
-        if module == current_module:
-            continue
-        if re.search(rf"\bimport {re.escape(module)}\b", text) or f"{module}/" in text:
-            link_map[current_module].add(module)
+        return {}
 
+def rel_path(path: Path):
+    """Path relative to repo root, as string."""
+    return str(path.relative_to(Path('.').resolve()))
 
-def generate_project_graph(
-    root_dir,
-    include_exts=DEFAULT_INCLUDE_EXTS,
-    exclude_dirs=DEFAULT_EXCLUDE_DIRS,
-    minimize_file_paths=False,
-):
-    modules = collect_modules(root_dir)
-    module_files, link_map = collect_files_and_links(
-        root_dir,
-        modules,
-        include_exts,
-        exclude_dirs,
-        minimize_file_paths=minimize_file_paths,
-    )
-    output = {"modules": []}
-    for module in sorted(module_files.keys()):
-        files = sorted(set(module_files[module]))
-        links = sorted(link_map[module]) if link_map[module] else []
-        output["modules"].append(
-            {
-                "name": module,
-                "files": files,
-                "links_to": links,
-            }
-        )
-    return output
+def module_for_file(path: Path):
+    """Infers module by top-level folder name."""
+    parts = path.parts
+    for mod in MODULE_DIRS:
+        if mod in parts:
+            return mod
+    return "root"
 
+def file_links(path: Path):
+    """Optionally, parses direct file imports. (Skip for now, add if needed.)"""
+    return []
 
-def scrub_graph_for_tokens(graph):
-    # Remove empty lists, sort lists, strip unneeded whitespace
-    for mod in graph.get("modules", []):
-        mod["files"] = sorted(set(f.strip() for f in mod.get("files", []) if f.strip()))
-        mod["links_to"] = sorted(
-            set(s.strip() for s in mod.get("links_to", []) if s.strip())
-        )
-        # Remove keys that are empty
-        empty_keys = [k for k, v in mod.items() if not v]
-        for k in empty_keys:
-            del mod[k]
-    # Optionally, sort the modules by name
-    graph["modules"] = sorted(graph["modules"], key=lambda m: m["name"])
-    return graph
+def build_project_graph():
+    modules = defaultdict(lambda: {
+        "files": [],
+        "links_to": set(),
+        # new metadata fields (optional, filled if header found)
+        "type": None,
+        "tags": None,
+        "owner": None,
+        "description": None
+    })
 
+    py_files = find_files(Path('.'), allowed_ext=[".py"])
+    for path in py_files:
+        rel = rel_path(path)
+        mod = module_for_file(path)
+        meta = parse_metadata_header(path)
+        file_entry = {
+            "name": rel,
+            "links_to": [],  # Optionally, fill with file-level imports
+        }
+        # Add metadata if present
+        for k in ["type", "tags", "owner", "description"]:
+            if k in meta:
+                file_entry[k] = meta[k]
+        modules[mod]["files"].append(file_entry)
 
-def count_tokens(text, encoding_name="cl100k_base"):
-    if not tiktoken:
-        print("[WARNING] tiktoken not installed. Token count unavailable.")
-        return None
-    enc = tiktoken.get_encoding(encoding_name)
-    return len(enc.encode(text))
+        # Promote module-level metadata if file is __init__.py or main file
+        if path.name in {"__init__.py", "main.py"}:
+            for k in ["type", "tags", "owner", "description"]:
+                if k in meta:
+                    modules[mod][k] = meta[k]
 
+        # Parse and add module links (import tree)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith("import ") or line.strip().startswith("from "):
+                        for other_mod in MODULE_DIRS:
+                            if f"{other_mod}." in line or f"{other_mod}/" in line:
+                                modules[mod]["links_to"].add(other_mod)
+        except Exception:
+            pass
 
-def write_project_graph(graph, output_path):
-    output_dir = os.path.dirname(output_path)
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(graph, f, ensure_ascii=False, indent=2)
-    print(f"[INFO] Project graph written to {output_path}")
+    # Build output: minimal, sorted, omit empty fields
+    output = []
+    for mod, d in modules.items():
+        obj = {"name": mod}
+        for key in ["type", "tags", "owner", "description"]:
+            if d[key]:
+                obj[key] = d[key]
+        obj["files"] = d["files"]
+        if d["links_to"]:
+            obj["links_to"] = sorted(d["links_to"] - {mod})  # Exclude self-links
+        output.append(obj)
 
+    # Optional: top-level summary
+    summary = {
+        "module_count": len(output),
+        "file_count": sum(len(m["files"]) for m in output),
+    }
 
-def print_stats(graph, output_text=None):
-    print(f"[STATS] Modules: {len(graph['modules'])}")
-    for module in graph["modules"]:
-        print(
-            f"  {module['name']}: {len(module.get('files', []))} files, links to {len(module.get('links_to', []))} modules"
-        )
-    if output_text:
-        tk = count_tokens(output_text)
-        if tk is not None:
-            print(f"[TOKENS] Output tokens: {tk}")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate a project graph for CLIFF or other codebase."
-    )
-    parser.add_argument(
-        "root_dir",
-        help="Root directory of the project to scan.",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Write result to this file (default: memory/metadata/project_graph.json)",
-        default=None,
-    )
-    parser.add_argument(
-        "--minimize-file-paths",
-        action="store_true",
-        help="Only store file basenames (reduce tokens but lose hierarchy).",
-    )
-    args = parser.parse_args()
-    root_dir = os.path.abspath(os.path.expanduser(args.root_dir))
-    output_file = args.output or os.path.join(
-        root_dir, "memory/metadata/project_graph.json"
-    )
-    graph = generate_project_graph(
-        root_dir, minimize_file_paths=args.minimize_file_paths
-    )
-    graph = scrub_graph_for_tokens(graph)
-    output_text = json.dumps(graph, ensure_ascii=False, separators=(",", ":"))
-    print_stats(graph, output_text)
-    write_project_graph(graph, output_file)
-
+    return {"summary": summary, "modules": sorted(output, key=lambda x: x["name"])}
 
 if __name__ == "__main__":
-    main()
+    graph = build_project_graph()
+    with open("project_graph.json", "w", encoding="utf-8") as f:
+        json.dump(graph, f, indent=2, sort_keys=True)
+    print("Project graph written to project_graph.json")

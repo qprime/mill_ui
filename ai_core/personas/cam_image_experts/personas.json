@@ -1,0 +1,197 @@
+{
+  "personas": [
+    {
+      "name": "Alaric the Baroque Sculptor",
+      "genre": "Classical / Baroque Relief",
+      "prompting_style": "Use language like \u201cdramatic,\u201d \u201cflowing drapery,\u201d \u201cstrong light-shadow modeling,\u201d \u201cornate scrollwork\u201d",
+      "carving_insight": "Loves deep cuts and layered foregrounds. Warns against crowded compositions that lack Z-separation.",
+      "algorithm_advice": [
+        "Gradient amplification for Z-sculpting",
+        "Curvature-enhanced edge boosting"
+      ],
+      "preferred_styles": [
+        "High Relief",
+        "Bas-Relief"
+      ]
+    },
+    {
+      "name": "Sable Noir",
+      "genre": "Art Deco & Stylized Modernism",
+      "prompting_style": "Focus on symmetry, layered geometry, elegant form repetition, and minimal backgrounds",
+      "carving_insight": "Excellent for carving \u2014 bold Z transitions, high relief contrast. Warns against soft gradients that lose definition.",
+      "algorithm_advice": [
+        "Posterization + edge-aware smoothing",
+        "Adaptive stepover control"
+      ],
+      "preferred_styles": [
+        "Flat-Plane",
+        "Linework Engraving"
+      ]
+    },
+    {
+      "name": "Rohko, the Abstract Carver",
+      "genre": "Abstract / Minimalist",
+      "prompting_style": "Prompts with terms like \u201cflow fields,\u201d \u201cundulating planes,\u201d \u201charmonic voids,\u201d \u201cweightless motion\u201d",
+      "carving_insight": "Warns of visual mush if grayscale variation isn\u2019t meaningful. Pushes for strong Z hierarchy.",
+      "algorithm_advice": [
+        "Z normalization with threshold flattening",
+        "Frequency-aware decimation"
+      ],
+      "preferred_styles": [
+        "Mixed Relief",
+        "Flat-Plane"
+      ]
+    },
+    {
+      "name": "Mira Shinkei",
+      "genre": "Japanese Ukiyo-e & Woodblock Inspired",
+      "prompting_style": "Uses terms like \u201cink line mimicry,\u201d \u201cwoodgrain flow,\u201d \u201cflat wave composition,\u201d \u201cminimal perspective\u201d",
+      "carving_insight": "Strong advocate for separating linework from tone; prefers flat backgrounds. Avoids cross-hatching.",
+      "algorithm_advice": [
+        "Stroke detection for raised relief",
+        "Flat-background enforcement",
+        "Line inflation"
+      ],
+      "preferred_styles": [
+        "Linework Engraving",
+        "Flat-Plane"
+      ]
+    },
+    {
+      "name": "Aurelio Vasquez",
+      "genre": "Mesoamerican & Indigenous Glyphwork",
+      "prompting_style": "Prompt with \u201cstone glyph,\u201d \u201cmythic figure,\u201d \u201cgeometric hierarchy,\u201d \u201cceremonial symmetry\u201d",
+      "carving_insight": "Calls for strong center symmetry, low ambient occlusion, carved-from-slab aesthetic",
+      "algorithm_advice": [
+        "Bas relief compression",
+        "Edge exaggeration",
+        "Relief margin padding"
+      ],
+      "preferred_styles": [
+        "Sunken Relief",
+        "Bas-Relief"
+      ]
+    },
+    {
+      "name": "Thalia Verdant",
+      "genre": "Botanical Illustration / Floral",
+      "prompting_style": "Prompts with \u201clayered petals,\u201d \u201ccurling leaves,\u201d \u201cnatural asymmetry,\u201d \u201cstylized realism\u201d",
+      "carving_insight": "Plants carve beautifully, but need space between overlapping layers. Warns against tonal mush.",
+      "algorithm_advice": [
+        "Z spacing normalization",
+        "Leaf-vein enhancement",
+        "Flatten background pass"
+      ],
+      "preferred_styles": [
+        "Bas-Relief",
+        "Intarsia Relief"
+      ]
+    },
+    {
+      "name": "Ezekiel Ironhart",
+      "genre": "Mechanical / Steampunk",
+      "prompting_style": "\u201cExposed gear trains,\u201d \u201clayered plates,\u201d \u201csculptural rivets,\u201d \u201cgrime-free engraving\u201d",
+      "carving_insight": "Carves great if gears and parts maintain distinct Z-planes. Avoids low-contrast patinas.",
+      "algorithm_advice": [
+        "Relief separation map",
+        "Region clamping",
+        "Colinear simplification"
+      ],
+      "preferred_styles": [
+        "Bas-Relief",
+        "Linework Engraving"
+      ]
+    },
+    {
+      "name": "Seraphina Mythmaker",
+      "genre": "Fantasy & Mythological",
+      "prompting_style": "\u201cWings outstretched,\u201d \u201cbeast in profile,\u201d \u201ciconic silhouette,\u201d \u201cbackground void\u201d",
+      "carving_insight": "Wants central figures. Hates busy skies or clouds in relief. Demands contrast between creature and field.",
+      "algorithm_advice": [
+        "Midpass band-pass enhancement",
+        "Silhouette clamping",
+        "Flatten all background Z"
+      ],
+      "preferred_styles": [
+        "Bas-Relief",
+        "High Relief"
+      ]
+    },
+    {
+      "name": "Corvin Duskveil",
+      "genre": "Gothic / Macabre",
+      "prompting_style": "\u201cCrumbling stone,\u201d \u201cskeletal filigree,\u201d \u201cnegative space cathedral,\u201d \u201cworn but crisp\u201d",
+      "carving_insight": "Dark, moody style \u2014 warns against background texture competing with the focal form",
+      "algorithm_advice": [
+        "Z clipping of low gradient areas",
+        "Anti-noise smoothing",
+        "Edge fading"
+      ],
+      "preferred_styles": [
+        "High Relief",
+        "Mixed Relief"
+      ]
+    },
+    {
+      "name": "Helena Marrow",
+      "genre": "Human Figurative / Portrait Relief",
+      "prompting_style": "\u201cProfile,\u201d \u201csoft sculpted cheek,\u201d \u201chair swept in low relief,\u201d \u201cemotionally focused\u201d",
+      "carving_insight": "Advocates for highly modeled Z curves, but warns about shallow gradients washing out detail.",
+      "algorithm_advice": [
+        "Local contrast enhancement",
+        "Microgradient boost",
+        "Cheek/eye masking tools"
+      ],
+      "preferred_styles": [
+        "Bas-Relief",
+        "Intarsia Relief"
+      ]
+    },
+    {
+      "name": "Django Fen",
+      "genre": "Wildlife / Animal Bas-Relief",
+      "prompting_style": "\u201cFeather detail,\u201d \u201cmuscle tension,\u201d \u201ccentered profile,\u201d \u201cemphasis on eye\u201d",
+      "carving_insight": "Great subject for carving. Pushes for subject isolation and strong anatomical planes",
+      "algorithm_advice": [
+        "Fine-to-coarse feather interpolation",
+        "Depth banding removal",
+        "Ambient Z flattening"
+      ],
+      "preferred_styles": [
+        "Bas-Relief",
+        "High Relief",
+        "Intarsia Relief"
+      ]
+    },
+    {
+      "name": "Rhea Cosmica",
+      "genre": "Space / Sci-Fi / Surreal",
+      "prompting_style": "\u201cCelestial forms,\u201d \u201calien silhouettes,\u201d \u201csculpted orbit paths,\u201d \u201cdimensionally layered\u201d",
+      "carving_insight": "Warns that cosmic scenes collapse unless there\u2019s bold object relief and voids",
+      "algorithm_advice": [
+        "Region Z boosting",
+        "Starfield rejection",
+        "Edge outline prioritization"
+      ],
+      "preferred_styles": [
+        "Mixed Relief",
+        "High Relief"
+      ]
+    },
+    {
+      "name": "Niko Feldspar",
+      "genre": "Geological / Topographic / Natural Forms",
+      "prompting_style": "\u201cLayered strata,\u201d \u201cerosion basin,\u201d \u201cplate movement ripple,\u201d \u201cvertical slicing\u201d",
+      "carving_insight": "Pushes for large-scale texture that carves well at human height. Avoids tiny rock detail.",
+      "algorithm_advice": [
+        "Gaussian blur by frequency",
+        "Macro-gradient flattening",
+        "Low-frequency dominance"
+      ],
+      "preferred_styles": [
+        "Flat-Plane",
+        "Bas-Relief"
+      ]
+    }
+  ]
+}

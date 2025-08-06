@@ -1,16 +1,10 @@
-# path: local_services/whisper/whisper_server.py
-# type: API server module
-# tags: whisper, transcription, audio, FastAPI
-# owner: cliff
-# depends_on: fastapi, faster_whisper
-# description: Provides a FastAPI server for audio transcription using WhisperModel.
-
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from faster_whisper import WhisperModel
 import tempfile
 import os
+import uvicorn
 
 app = FastAPI()
 
@@ -22,14 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.options("/transcribe")
 async def options_transcribe():
     return JSONResponse(content={"message": "CORS preflight OK"}, status_code=200)
 
-
 model = WhisperModel("large-v2", compute_type="auto")
-
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
@@ -42,3 +33,13 @@ async def transcribe_audio(file: UploadFile = File(...)):
         return {"text": text}
     finally:
         os.remove(tmp_path)
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "local_services.whisper.whisper_server:app",
+        host="0.0.0.0",
+        port=8001,
+        ssl_keyfile="local_services/whisper/cert/whisper.key",
+        ssl_certfile="local_services/whisper/cert/whisper.crt"
+    )

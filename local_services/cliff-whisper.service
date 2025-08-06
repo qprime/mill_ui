@@ -1,0 +1,15 @@
+[Unit]
+Description=Cliff AI - Whisper Transcription Service
+After=network.target
+
+[Service]
+ExecStart=/home/squinlan/cliff_ai/.venv/bin/python /home/squinlan/cliff_ai/run.py whisper
+WorkingDirectory=/home/squinlan/cliff_ai
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=5
+User=squinlan
+
+
+[Install]
+WantedBy=multi-user.target

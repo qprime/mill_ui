@@ -1,7 +1,7 @@
 {
   "title": "Descriptive Title Here",
   "subject": "Describe your subject and scene here. Be detailed but direct.",
-  "persona": "Persona Name (must match ai_core.personas.json exactly)",
+  "persona": "Persona Name (must match cortex.personas.json exactly)",
   "style": "Style Name (must match styles.json exactly)",
   "size": "1024x1024",
   "metadata": {

@@ -1,4 +1,4 @@
-# path: ai_core/client.py
+# path: cortex/client.py
 # type: API client
 # tags: openai, api, client, chat, embedding, image, sdk, http
 # owner: cliff

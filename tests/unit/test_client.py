@@ -2,13 +2,13 @@
 # type: unit_tests
 # tags: testing, client, api, mock, error_handling
 # owner: cliff
-# depends_on: ai_core/client.py
+# depends_on: cortex/client.py
 # description: Validates client API error handling in absence of API keys.
 
 import os
 import pytest
 
-from ai_core.client import get_chat_completion, get_embedding
+from cortex.client import get_chat_completion, get_embedding
 
 
 def test_get_chat_completion_no_api_key(monkeypatch):

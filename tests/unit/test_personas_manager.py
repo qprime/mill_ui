@@ -2,13 +2,13 @@
 # type: unit_test_module
 # tags: personas, testing, unit, manager
 # owner: cliff
-# depends_on: ai_core/personas/personas_manager.py
+# depends_on: cortex/personas/personas_manager.py
 # description: Validates personas management functionality in unit tests.
 
 import json
 import pytest
 
-from ai_core.personas.personas_manager import (
+from cortex.personas.personas_manager import (
     get_legacy_persona_prompt,
     get_legacy_personas,
     get_persona,

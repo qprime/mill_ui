@@ -1,4 +1,4 @@
-# path: ai_core/personas/personas_manager.py
+# path: cortex/personas/personas_manager.py
 # type: persona_management
 # tags: persona, json, loading, management
 # owner: cliff
@@ -8,7 +8,7 @@
 import json
 from pathlib import Path
 
-PERSONA_DIR = Path("ai_core/personas")
+PERSONA_DIR = Path("cortex/personas")
 
 
 def load_json_personas(category=""):

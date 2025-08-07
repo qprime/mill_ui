@@ -2,19 +2,19 @@
 # type: prompt assistance endpoint
 # tags: web, api, prompt_generation, image_helper
 # owner: cliff
-# depends_on: ai_core/client.py
+# depends_on: cortex/client.py
 # description: Serves an API endpoint for generating tailored image prompts using AI personas and styles.
 
 import os
 import json
 from flask import Flask, request, jsonify
-from ai_core.client import get_chat_completion
+from cortex.client import get_chat_completion
 
 app = Flask(__name__)
 
 CLIFF_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 PERSONAS_PATH = os.path.join(
-    CLIFF_ROOT, "personas", "cam_image_experts", "ai_core.personas.json"
+    CLIFF_ROOT, "personas", "cam_image_experts", "cortex.personas.json"
 )
 STYLES_PATH = os.path.join(CLIFF_ROOT, "personas", "cam_image_experts", "styles.json")
 
@@ -33,7 +33,7 @@ def assist_prompt():
     persona = data.get("persona")
     style = data.get("style")
 
-    persona_data = ai_core.personas.get(persona, {})
+    persona_data = cortex.personas.get(persona, {})
     style_data = STYLES.get(style, {})
 
     persona_desc = persona_data.get("description", "")

@@ -1,8 +1,8 @@
-# path: ai_core/context_manager.py
+# path: cortex/context_manager.py
 # type: context assembly
 # tags: context, persona, graph, memory, loader
 # owner: cliff
-# depends_on: memory.sidecar_manager, continuum.code_context, continuum.project_graph, ai_core.personas.personas_manager
+# depends_on: memory.sidecar_manager, continuum.code_context, continuum.project_graph, cortex.personas.personas_manager
 # description: Assembles various context elements for LLM, including persona, sidecar, project graph, and source code.
 
 from typing import Optional, List, Dict, Any
@@ -12,7 +12,7 @@ import os
 from memories.sidecar_manager import load_sidecar
 from continuum.code_context import generate_context
 from continuum.project_graph import build_project_graph
-from ai_core.personas.personas_manager import get_persona
+from cortex.personas.personas_manager import get_persona
 
 
 from typing import Optional

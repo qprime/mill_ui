@@ -2,7 +2,7 @@
 # type: metadata utility
 # tags: metadata, regeneration, headers, script
 # owner: cliff
-# depends_on: ai_core.client,continuum.file_crawl
+# depends_on: cortex.client,continuum.file_crawl
 # description: Regenerates metadata headers for Python files to facilitate AI context selection.
 
 import os
@@ -11,7 +11,7 @@ import sys
 import shutil
 from pathlib import Path
 
-from ai_core import client
+from cortex import client
 from continuum.file_crawl import find_relative_files
 
 BACKUP_SUFFIX = '.bak'
@@ -32,11 +32,11 @@ The header should be at the very top, formatted as plain # key: value lines.
 Do NOT regenerate the code body, only return the header block.
 
 Example:
-# path: ai_core/personas/styles.py
+# path: cortex/personas/styles.py
 # type: persona_styles_module
 # tags: persona, style, cam, config_loader
 # owner: cliff
-# depends_on: ai_core/personas/personas_manager.py
+# depends_on: cortex/personas/personas_manager.py
 # description: Loads CAM style configs for persona prompting. Used by image generator.
 """
 

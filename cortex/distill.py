@@ -1,13 +1,13 @@
-# path: ai_core/distill.py
+# path: cortex/distill.py
 # type: text_processing
 # tags: distillation, persona, chat, regex
 # owner: cliff
-# depends_on: ai_core/personas/personas_manager.py, ai_core/client.py
+# depends_on: cortex/personas/personas_manager.py, cortex/client.py
 # description: Extracts and distills text responses based on personas and chat completions.
 
 import re
-from ai_core.personas.personas_manager import get_persona
-from ai_core.client import get_chat_completion
+from cortex.personas.personas_manager import get_persona
+from cortex.client import get_chat_completion
 
 
 import re

@@ -2,7 +2,7 @@
 # type: unit_tests
 # tags: testing, context_manager, context_selection, pytest
 # owner: cliff
-# depends_on: ai_core.context_manager, ai_core.client
+# depends_on: cortex.context_manager, cortex.client
 # description: Validates context manager functionality in various scenarios for LLM.
 
 import pytest
@@ -14,12 +14,12 @@ def test_route_context_returns_known_contexts(monkeypatch):
         return "['development', 'chat_logs']"
 
     # Patch the correct function BEFORE import
-    import ai_core.client
+    import cortex.client
 
-    monkeypatch.setattr(ai_core.client, "get_chat_completion", mock_get_chat_completion)
+    monkeypatch.setattr(cortex.client, "get_chat_completion", mock_get_chat_completion)
 
     # Now import after patch
-    from ai_core.context_manager import route_context
+    from cortex.context_manager import route_context
 
     prompt = "Show me developer logs."
     persona = "cliff_core"
@@ -29,7 +29,7 @@ def test_route_context_returns_known_contexts(monkeypatch):
     assert "chat_logs" in result
 
 
-from ai_core.context_manager import (
+from cortex.context_manager import (
     load_persona_context,
     get_cliff_status,
     ContextBundle,

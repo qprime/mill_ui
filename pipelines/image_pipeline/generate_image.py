@@ -1,8 +1,8 @@
 # path: pipelines/image_pipeline/generate_image.py
 # type: image generation
-# tags: generate, image, pipeline, dalle, prompt, ai_core
+# tags: generate, image, pipeline, dalle, prompt, cortex
 # owner: cliff
-# depends_on: ai_core/personas/personas_manager.py, ai_core/personas/styles.py, ai_core/client.py
+# depends_on: cortex/personas/personas_manager.py, cortex/personas/styles.py, cortex/client.py
 # description: Orchestrate image generation using DALL-E and configured personas and styles.
 
 import sys
@@ -10,9 +10,9 @@ import json
 import base64
 from pathlib import Path
 
-from ai_core.personas.personas_manager import get_persona
-from ai_core.personas.styles import get_style
-from ai_core.client import get_image_generation
+from cortex.personas.personas_manager import get_persona
+from cortex.personas.styles import get_style
+from cortex.client import get_image_generation
 
 def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
     persona = get_persona(persona_name, category="cam/artists")

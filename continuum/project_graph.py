@@ -13,7 +13,7 @@ from continuum.file_crawl import find_files, is_excluded
 
 # Adjust for your repo layout as needed
 MODULE_DIRS = [
-    "ai_core",
+    "cortex",
     "pipelines",
     "continuum",
     "web",

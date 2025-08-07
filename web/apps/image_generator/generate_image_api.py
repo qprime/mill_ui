@@ -39,7 +39,7 @@ def generate_image_api():
             persona_path = os.path.abspath(
                 os.path.join(
                     os.path.dirname(__file__),
-                    "../../personas/cam_image_experts/ai_core.personas.json",
+                    "../../personas/cam_image_experts/cortex.personas.json",
                 )
             )
             style_path = os.path.abspath(
@@ -55,7 +55,7 @@ def generate_image_api():
             subject = config["subject"]
             persona = config["persona"]
             style = config["style"]
-            persona_data = ai_core.personas.get(persona)
+            persona_data = cortex.personas.get(persona)
             style_data = STYLES.get(style)
             prompt = (
                 f"{subject }, in the style of {persona_data ['genre']}. "

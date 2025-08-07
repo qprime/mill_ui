@@ -1,15 +1,15 @@
 # path: web/cliff_server/services/chat_service.py
 # type: chat service module
-# tags: chat, service, ai_core, memory, error_handling
+# tags: chat, service, cortex, memory, error_handling
 # owner: cliff
-# depends_on: ai_core/context_manager.py, ai_core/distill.py, ai_core/client.py, memorieschat_manager.py, memoriessidecar_manager.py
+# depends_on: cortex/context_manager.py, cortex/distill.py, cortex/client.py, memorieschat_manager.py, memoriessidecar_manager.py
 # description: Manages chat interactions, sidecar data, and error handling for AI chats.
 
 import logging
 import json
-from ai_core.context_manager import context
-from ai_core.distill import distill
-from ai_core.client import get_chat_completion
+from cortex.context_manager import context
+from cortex.distill import distill
+from cortex.client import get_chat_completion
 from memories.chat_manager import log_chat_turn
 from memories.sidecar_manager import add_sidecar_entry, load_sidecar, distill_sidecar
 

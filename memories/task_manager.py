@@ -1,4 +1,4 @@
-# path: memory/task_manager.py
+# path: memoriestask_manager.py
 # type: task management module
 # tags: task, utils, json, file handling
 # owner: cliff
@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-TASKS_DIR = PROJECT_ROOT / "memory/tasks"
+TASKS_DIR = PROJECT_ROOT / "memoriestasks"
 
 
 def _now():

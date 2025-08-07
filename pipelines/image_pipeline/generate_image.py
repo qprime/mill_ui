@@ -27,7 +27,7 @@ def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
 
 def generate_dalle_image(project_folder: str):
     # Absolute path to input/output folder
-    base_dir = Path("memory/cam_projects") / project_folder / "input"
+    base_dir = Path("memoriescam_projects") / project_folder / "input"
     json_path = base_dir / "image.json"
     png_path = base_dir / "image.png"
 

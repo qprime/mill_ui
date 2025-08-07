@@ -1,4 +1,4 @@
-# path: memory/memory_graph.py
+# path: memoriesmemory_graph.py
 # type: memory scanner
 # tags: memory, graph, json, file system
 # owner: cliff
@@ -45,7 +45,7 @@ def scan_memory():
         graph["domains"].append(
             {
                 "name": name,
-                "path": f"memory/{name }",
+                "path": f"memories{name }",
                 "purpose": describe_purpose(name),
                 "components": sorted(components),
                 "links_to": [],

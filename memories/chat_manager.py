@@ -1,4 +1,4 @@
-# path: memory/chat_manager.py
+# path: memorieschat_manager.py
 # type: chat_logging_module
 # tags: chat, logging, memory, sidecar, distillation
 # owner: cliff
@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-from memory.memory_manager import get_chat_log_paths, ensure_chat_log_folder
-from memory.sidecar_manager import add_sidecar_entry, distill_sidecar
+from memories.memory_manager import get_chat_log_paths, ensure_chat_log_folder
+from memories.sidecar_manager import add_sidecar_entry, distill_sidecar
 
 
 def append_to_chat_log(persona: str, chat_id: str, entry: dict) -> None:

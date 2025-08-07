@@ -2,11 +2,11 @@
 # type: unit test
 # tags: pytest, memory, test, graph
 # owner: cliff
-# depends_on: memory/memory_graph.py
+# depends_on: memoriesmemory_graph.py
 # description: Verify memory graph purpose description functionality.
 
 import pytest
-from memory.memory_graph import describe_purpose
+from memories.memory_graph import describe_purpose
 
 
 @pytest.mark.parametrize(

@@ -2,10 +2,10 @@
 # type: task management
 # tags: tasks, service, backend
 # owner: cliff
-# depends_on: memory/task_manager.py
+# depends_on: memoriestask_manager.py
 # description: Provides interfaces for task retrieval and manipulation within the server.
 
-from memory.task_manager import load_tasks, update_task, create_task, get_task
+from memories.task_manager import load_tasks, update_task, create_task, get_task
 
 
 def get_active_tasks_grouped():
@@ -53,6 +53,6 @@ def archive_task_entry(task_id):
 
 def reorder_tasks_by_ids(ids):
 
-    from memory.task_manager import reorder_tasks_by_ids as _reorder
+    from memories.task_manager import reorder_tasks_by_ids as _reorder
 
     _reorder(ids)

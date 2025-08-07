@@ -9,7 +9,7 @@ from typing import Optional, List, Dict, Any
 import os
 
 # Import your actual sidecar and persona loaders
-from memory.sidecar_manager import load_sidecar
+from memories.sidecar_manager import load_sidecar
 from continuum.code_context import generate_context
 from continuum.project_graph import build_project_graph
 from ai_core.personas.personas_manager import get_persona
@@ -85,7 +85,7 @@ def context(
 
     # --- Load Sidecar (session/persona memory) ---
     if chat_id:
-        from memory.sidecar_manager import load_sidecar
+        from memories.sidecar_manager import load_sidecar
 
         sidecar_context = load_sidecar(chat_id, persona)
         if sidecar_context:

@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-CLI_LOG_PATH = Path("memory/cliff_state/cli_logs.jsonl")
+CLI_LOG_PATH = Path("memoriescliff_state/cli_logs.jsonl")
 
 
 def save_cli_logs(logs: list[dict]):

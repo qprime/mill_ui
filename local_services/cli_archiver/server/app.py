@@ -12,12 +12,12 @@ from flask_cors import CORS
 import os
 import json
 
-from memory.memory_manager import add_to_domain
+from memories.memory_manager import add_to_domain
 
 app = Flask(__name__)
 CORS(app)
 
-SAVE_PATH = "/home/squinlan/cliff_ai/memory/cliff_state/cli_logs.jsonl"
+SAVE_PATH = "/home/squinlan/cliff_ai/memoriescliff_state/cli_logs.jsonl"
 
 
 def save_cli_logs(logs):

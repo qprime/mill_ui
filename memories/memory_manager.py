@@ -1,4 +1,4 @@
-# path: memory/memory_manager.py
+# path: memoriesmemory_manager.py
 # type: memory management
 # tags: memory, chat_log, context, jsonl
 # owner: cliff
@@ -41,7 +41,7 @@ def add_to_domain(
     domain: str, text: str, source: str = "unknown", tags: List[str] = []
 ):
     """
-    Append a memory record to a given domain. Writes to memory/<domain>/memory_log.jsonl.
+    Append a memory record to a given domain. Writes to memories<domain>/memory_log.jsonl.
     """
     target_path = MEMORY_ROOT / domain / "memory_log.jsonl"
     target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -59,7 +59,7 @@ def add_to_domain(
 
 def get_memory_path(domain: str, subpath: str = "") -> Path:
     """
-    Returns a resolved path under memory/<domain>/<subpath>
+    Returns a resolved path under memories<domain>/<subpath>
     """
     return MEMORY_ROOT / domain / subpath
 

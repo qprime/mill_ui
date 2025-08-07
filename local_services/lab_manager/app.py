@@ -2,7 +2,7 @@
 # type: web service
 # tags: flask, api, inventory, lab
 # owner: cliff
-# depends_on: memory/memory_manager.py
+# depends_on: memoriesmemory_manager.py
 # description: Manages lab device inventory and endpoints for device reporting, querying, and management.
 
 from flask import Flask, request, jsonify
@@ -10,11 +10,11 @@ from flask_cors import CORS
 import json
 from datetime import datetime
 import os
-from memory.memory_manager import add_to_domain
+from memories.memory_manager import add_to_domain
 
 app = Flask(__name__)
 CORS(app)
-DATA_FILE = os.path.expanduser("~/cliff_ai/memory/lab/device_inventory.json")
+DATA_FILE = os.path.expanduser("~/cliff_ai/memorieslab/device_inventory.json")
 
 
 def load_data():

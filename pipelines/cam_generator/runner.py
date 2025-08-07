@@ -18,7 +18,7 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
     Run CAM toolpath + G-code pipeline for a single job.
 
     Args:
-        job_name (str): Name of the job folder in memory/cam_projects/
+        job_name (str): Name of the job folder in memoriescam_projects/
         base_dir (Path or str): CLIFF-AI project root (default: auto-detect from cwd)
         enable_preview (bool): Whether to generate PNG previews for G-code
         verbose (bool): Print status and file paths
@@ -91,7 +91,7 @@ def main():
     parser.add_argument(
         "--job",
         required=True,
-        help="Job/project name (matches subfolder in memory/cam_projects/)",
+        help="Job/project name (matches subfolder in memoriescam_projects/)",
     )
     parser.add_argument(
         "--no-preview",

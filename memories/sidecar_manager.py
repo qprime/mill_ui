@@ -1,4 +1,4 @@
-# path: memory/sidecar_manager.py
+# path: memoriessidecar_manager.py
 # type: sidecar_management
 # tags: sidecar, distill, chat, json, file_io
 # owner: cliff
@@ -10,7 +10,7 @@ from pathlib import Path
 from ai_core.distill import distill
 
 
-SIDECAR_DIR = Path("memory/sidecar")
+SIDECAR_DIR = Path("memoriessidecar")
 
 
 def get_sidecar_path(chat_id, persona="sidecar"):

@@ -2,7 +2,7 @@
 # type: chat service module
 # tags: chat, service, cortex, memory, error_handling
 # owner: cliff
-# depends_on: cortex/context_manager.py, cortex/distill.py, cortex/client.py, memorieschat_manager.py, memoriessidecar_manager.py
+# depends_on: cortex/context_manager.py, cortex/distill.py, cortex/client.py, memorieschat_manager.py, memories/sidecar_manager.py
 # description: Manages chat interactions, sidecar data, and error handling for AI chats.
 
 import logging

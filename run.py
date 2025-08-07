@@ -2,7 +2,7 @@
 # type: entrypoint script
 # tags: web, whisper, context, graph, image, cam, headers
 # owner: cliff
-# depends_on: web.cliff_server.app,local_services.whisper.whisper_server,continuum.code_context,continuum.project_graph,pipelines.image_pipeline.generate_image,pipelines.cam_generator.runner,continuum.regen_metadata_headers
+# depends_on: web.cliff_server.app,services.whisper.whisper_server,continuum.code_context,continuum.project_graph,skills.image_pipeline.generate_image,skills.cam_generator.runner,continuum.regen_metadata_headers
 # description: Orchestrates running various project entrypoints based on command-line input.
 
 import sys
@@ -14,11 +14,11 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 ENTRYPOINTS = {
     "web": "web.cliff_server.app",
-    "whisper": "local_services.whisper.whisper_server",
+    "whisper": "services.whisper.whisper_server",
     "context": "continuum.code_context",
     "graph": "continuum.project_graph",
-    "generate_image": "pipelines.image_pipeline.generate_image",
-    "generate_cam": "pipelines.cam_generator.runner",
+    "generate_image": "skills.image_pipeline.generate_image",
+    "generate_cam": "skills.cam_generator.runner",
     "regen_headers": "continuum.regen_metadata_headers"
 }
 

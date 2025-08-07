@@ -1,8 +1,0 @@
-{
-  "description": "Describe what this config controls.",
-  "parameters": {
-    "key1": "value1",
-    "key2": "value2"
-  },
-  "notes": "Optional: explain how/when to override or extend."
-}

@@ -55,8 +55,7 @@ web_server/*.key
 # Logs
 *.log
 logs/
-memorieschatting/chat_logs/
-web_server/memorieschat_logs/
+web_server/memories/chat_logs/
 voice_input/recordings/
 voice_input/tmp/
 
@@ -87,34 +86,36 @@ scripts/metadata/script_registry.jsonl
 
 # Memory storage and outputs
 chroma_store/
-memoriesaccounting/chroma.sqlite3
+memories/chatting/chat_logs/
+memories/accounting/chroma.sqlite3
 memories*/chroma.sqlite3
 memories*/*.bin
-memorieslab/device_inventory.json
-memorieslab/lab_data.jsonl
-memoriesmetadata/
-memoriespersonal/
-memoriespersonal/debug_outputs
-memoriesproduction/
-memoriesresearch/
-memoriescliff_state/
-memorieslab/
-memoriescam_projects/
-memoriesexports/
-memoriessidecar/
+memories/lab/device_inventory.json
+memories/lab/lab_data.jsonl
+memories/metadata/
+memories/personal/
+memories/personal/debug_outputs
+memories/production/
+memories/research/
+memories/cliff_state/
+memories/lab/
+memories/cam_projects/
+memories/exports/
+memories/sidecar/
+memories/infrastructure
 
 # Generated annotation/chunking output
-memoriesdevelopment/
-memoriesdevelopment/code_chunks/
-memoriesdevelopment/annotated_chunks/
-memoriesdevelopment/reconstructed/
-memoriesdevelopment/file_summaries/
-memoriesdevelopment/module_summaries/
-memoriestasks/
-memorieschat_logs/
+memories/development/
+memories/development/code_chunks/
+memories/development/annotated_chunks/
+memories/development/reconstructed/
+memories/development/file_summaries/
+memories/development/module_summaries/
+memories/tasks/
+memories/chat_logs/
 
 # Scripts outputs
-scripts/annotate_project_annotated.py
+scripts/*
 
 # Pipeline outputs and caches
 cam_generator/output/

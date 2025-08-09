@@ -28,7 +28,7 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
     else:
         base_dir = Path(base_dir).resolve()
 
-    mem_root = base_dir / "memory" / "cam_projects"
+    mem_root = base_dir / "memories" / "cam_projects"
     project_folder = mem_root / job_name
 
     image_path = project_folder / "input" / "image.png"

@@ -51,6 +51,10 @@ No human or agent is to bypass these pathways for data or code changes—system 
     - *Usage:* Track live and historical system health, including unit tests, integration tests, hardware diagnostics, and resource logs.
     - *Note:* All health and status signals should be written here for ongoing monitoring.
 
+**sysadmin/**
+    - *Definition:* Place for scripts handling runtime environment tools such as memory backup.
+    - *Usage:* 
+    - *Note:* 
 ---
 
 ## Operating Principles
@@ -74,5 +78,11 @@ No human or agent is to bypass these pathways for data or code changes—system 
 - All updates require human review and confirmation before becoming active ground truth.
 
 ---
+
+## Build/Run Notes
+- All applications run through run.py at the root of the project.
+- The project uses one .venv that lives at the root of the project.
+- pip freeze > requirements.txt is available in the root of the project.
+- For some applications, we will run as system services in /etc/systemd/system, though those services will still execute through run.py.
 
 **END cliff.mind.md**

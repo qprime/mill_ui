@@ -31,6 +31,7 @@
 9. Deterministic outputs; seed any randomness from config.
 10. Helpers are pure and composable.
 11. Follow the canonical skeleton exactly.
+12. Do not use decorators, they will interfere with AST and project graphs.
 
 ---
 
@@ -45,81 +46,78 @@
 7. Break complex comprehensions into loops.
 8. Uniform file layout (imports → constants → dataclasses → helpers → interface).
 
+**Refactor-Friendly Python Rules (v1.1)**
+
+* Top metadata header only (no comments/docstrings).
+* One file, one public API (`api` key in header).
+* Absolute imports only (`skills.foo.bar`, `continuum.tools.refactor` etc.).
+* ≤25 lines per function unless unavoidable.
+* Flat control flow (nest ≤2).
+* All inputs explicit, all outputs deterministic.
+* Helpers pure and composable.
+* If a module returns structured output, use a dict or dataclass that’s **obvious from the name**—no special “norm”/“met” helpers unless actually needed for the function’s job.
+* No unused “standard” fields — if a return shape doesn’t need `error` or `metrics`, don’t include them.
 
 
-##Sample Python File Skeleton##
-# path: skills/example/do_thing.py
-# desc: Transform input payload
-# api: run
-# tags: example,transform
+
+##Sample Python File Skeleton:
+
+
+# path: {package_path}/{module_name}.py
+# desc: {short_description}
+# api: {public_function_name}
+# tags: {comma,separated,tags}
 
 from __future__ import annotations
+
+import argparse
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, TypedDict
+from typing import Any, Dict, Mapping, Optional
 
-__all__ = ["run"]
-
-
-# --------------------
-# Types & Config
-# --------------------
-
-class Result(TypedDict):
-    ok: bool
-    data: Dict[str, Any]
-    error: Optional[str]
-    metrics: Dict[str, Any]
+__all__ = ["{public_function_name}"]
 
 
 @dataclass(frozen=True)
 class Config:
-    mode: str = "default"
-    limit: int = 0
-    eps: float = 1e-6
-    seed: Optional[int] = None
+    limit: Optional[int] = None
 
 
-# --------------------
-# Pure Helpers
-# --------------------
-
-def _validate(payload: Dict[str, Any]) -> Optional[str]:
-    if not isinstance(payload, dict):
-        return "payload must be a dict"
-    return None
+def _to_dict(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    return dict(payload)
 
 
-def _normalize(payload: Dict[str, Any]) -> Dict[str, Any]:
-    return {str(k): payload[k] for k in payload}
+def _normalize_keys(d: Dict[str, Any]) -> Dict[str, Any]:
+    return {str(k): v for k, v in d.items()}
 
 
-def _process(payload: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
-    if cfg.limit and len(payload) > cfg.limit:
-        ks = list(payload)[: cfg.limit]
-        return {k: payload[k] for k in ks}
-    return payload
+def _apply_limit(d: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
+    if isinstance(cfg.limit, int) and cfg.limit >= 0:
+        return {k: d[k] for k in list(d)[: cfg.limit]} if cfg.limit else {}
+    return d
 
 
-def _metrics(payload: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
-    return {
-        "n_items": len(payload),
-        "mode": cfg.mode,
-        "limit": cfg.limit,
-        "eps": cfg.eps,
-    }
+def {public_function_name}(payload: Mapping[str, Any], config: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+    cfg = Config(**config) if isinstance(config, Mapping) else Config()
+    data = _to_dict(payload)
+    data = _normalize_keys(data)
+    return _apply_limit(data, cfg)
 
 
-# --------------------
-# Public Interface
-# --------------------
+def main() -> None:
+    parser = argparse.ArgumentParser(description="{short_description}")
+    parser.add_argument("--limit", type=int, help="Limit number of keys processed")
+    parser.add_argument("--payload", type=str, help="Payload as key=value pairs, comma-separated")
+    args = parser.parse_args()
 
-def run(payload: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Result:
-    e = _validate(payload)
-    if e:
-        return {"ok": False, "data": {}, "error": e, "metrics": {}}
+    payload = {}
+    if args.payload:
+        for pair in args.payload.split(","):
+            k, v = pair.split("=", 1)
+            payload[k] = v
 
-    cfg = Config(**config) if isinstance(config, dict) else Config()
-    norm = _normalize(payload)
-    out = _process(norm, cfg)
-    met = _metrics(out, cfg)
-    return {"ok": True, "data": out, "error": None, "metrics": met}
+    result = {public_function_name}(payload, {"limit": args.limit})
+    print(result)
+
+
+if __name__ == "__main__":
+    main()

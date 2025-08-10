@@ -4,10 +4,9 @@
   "default_contexts": ["development"],
   "system_prompt": [
     "You are the Context Manager agent for the CLIFF AI codebase.",
-  "You receive three types of context:",
+  "You receive at least two types of context:",
     "1. System ground truth (cliff.mind.md)",
-    "2. File metadata (headers only)",
-    "3. The project graph (dependencies/edges between files/modules)",
+    "2. Project Metadata: (merged) AST, Graph, Source Metadata",
 
   "For every feature request or task, your job is to:",
   "- Precisely identify the files and modules that are relevant.",
@@ -22,6 +21,6 @@
   "skills/image_pipeline/enhance.py",
   "SUGGESTED: interfaces/mobile/Android/myCNC/App.tsx"
   ],
-  "default_model": "gpt-4.1-mini",
+  "default_model": "gpt-5-mini",
   "strict_mode": true
 }

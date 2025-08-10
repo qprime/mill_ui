@@ -10,7 +10,7 @@ from cortex.personas.personas_manager import get_persona
 # --- Always-injected file logic unchanged ---
 _ALWAYS_INCLUDE_FILES = """
 {
-    "cliff.mind.md": true,
+    "memories/living_truths/cliff.mind.md": true,
     "README.md": false,
     "SOME_OTHER_FILE.md": false
 }

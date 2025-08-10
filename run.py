@@ -19,7 +19,9 @@ ENTRYPOINTS = {
     "graph": "continuum.project_graph",
     "generate_image": "skills.image_pipeline.generate_image",
     "generate_cam": "skills.cam_generator.runner",
-    "regen_headers": "continuum.regen_metadata_headers"
+    "regen_headers": "continuum.regen_metadata_headers",
+    "ast": "continuum.ast_context",
+    "metadata": "continuum.metadata"
 }
 
 

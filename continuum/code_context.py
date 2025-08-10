@@ -1,215 +1,181 @@
 # path: continuum/code_context.py
-# type: context_generator
-# tags: metadata, header, token, count, utils
+# type: context_builder
+# tags: project, metadata, header
 # owner: cliff
-# depends_on: tiktoken, pathlib, argparse, os, json, re
-# description: Generates structured context and token stats from the codebase for AI ingestion.
+# depends_on: continuum/file_crawl.py
+# description: Extracts metadata headers or stripped code from all project files for AI ingestion.
 
-import os
 import argparse
 import re
-import json
+import os
 from pathlib import Path
 import tiktoken
+import json
 
-# Modern header extraction regex (from your latest version)
+from continuum.file_crawl import find_files
+
 HEADER_FIELD_RE = re.compile(r'#\s*(\w+):\s*(.*)')
-
-DEFAULT_INCLUDE_EXTENSIONS = (".py", ".js", ".yaml", ".yml")
-DEFAULT_EXCLUDE_DIRS = {".git", "__pycache__", "venv", ".venv", "tests"}
-
-def should_include_file(filename, include_exts=DEFAULT_INCLUDE_EXTENSIONS):
-    return filename.endswith(include_exts)
-
-def should_exclude_dir(dirname):
-    return dirname in DEFAULT_EXCLUDE_DIRS
+DEFAULT_INCLUDE_EXTENSIONS = [".py", ".js", ".yaml", ".yml"]
 
 def scrub_whitespace(text):
+    """Remove excessive whitespace from text."""
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = "\n".join(line.rstrip() for line in text.splitlines())
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
+def strip_non_header_comments_and_docstrings(code):
+    """Remove comments and docstrings from code, but preserve structure."""
+    out_lines = []
+    in_docstring = False
+    docstring_delim = None
+    lines = code.splitlines()
+    
+    for line in lines:
+        stripped = line.strip()
+        if not in_docstring:
+            # Check for docstring start
+            if (stripped.startswith('"""') or stripped.startswith("'''")):
+                # Single-line docstring
+                if (stripped.count('"""') == 2 or stripped.count("'''") == 2) and len(stripped) > 6:
+                    continue
+                # Multi-line docstring start
+                in_docstring = True
+                docstring_delim = stripped[:3]
+                continue
+            # Skip comment lines
+            if stripped.startswith("#"):
+                continue
+            # Remove inline comments but preserve the code
+            line_no_trail_comment = re.sub(r'(?<!["\'])#.*', '', line)
+            out_lines.append(line_no_trail_comment.rstrip())
+        else:
+            # Check for docstring end
+            if docstring_delim and docstring_delim in stripped:
+                in_docstring = False
+                docstring_delim = None
+            continue
+    
+    code_no_comments = "\n".join(out_lines)
+    return scrub_whitespace(code_no_comments)
+
 def count_tokens(text: str, model_name: str = "gpt-4.1"):
+    """Count tokens in text using the specified model's tokenizer."""
     try:
         enc = tiktoken.encoding_for_model(model_name)
     except KeyError:
         enc = tiktoken.get_encoding("cl100k_base")
     return len(enc.encode(text))
 
-def get_function_signatures(text):
-    lines = text.splitlines()
-    output = []
-    for line in lines:
-        stripped = line.strip()
-        if stripped.startswith("def ") or stripped.startswith("class "):
-            output.append(line.rstrip())
-    return "\n".join(output)
-
-def get_top_level_docstring(text):
-    text = text.lstrip()
-    if text.startswith('"""') or text.startswith("'''"):
-        triple = text[:3]
-        end = text.find(triple, 3)
-        if end != -1:
-            return text[: end + 3]
-    return ""
-
-# --- Modern metadata header extraction (from your latest code) ---
-
-def extract_metadata_header(path: Path):
-    meta = {}
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if not line.strip().startswith("#"):
-                    break  # Stop at first code/import
-                m = HEADER_FIELD_RE.match(line)
-                if m:
-                    key, value = m.group(1).lower(), m.group(2).strip()
-                    if key == "tags":
-                        meta[key] = [t.strip() for t in value.split(",")]
-                    else:
-                        meta[key] = value
-            return meta
-    except Exception:
-        return {}
-
-def collect_all_headers(root_dir, include_exts=(".py",)):
-    results = []
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if not should_exclude_dir(d)]
-        for fname in filenames:
-            if should_include_file(fname, include_exts):
-                path = os.path.join(dirpath, fname)
-                meta = extract_metadata_header(Path(path))
-                if meta:
-                    results.append({"path": str(path), "header": meta})
-    return results
-
-
-# --- End metadata header logic ---
-
-def generate_context(
-    root_dir,
-    include_exts=DEFAULT_INCLUDE_EXTENSIONS,
-    exclude_dirs=DEFAULT_EXCLUDE_DIRS,
-    scrub=True,
-    file_filter=None,
-    stats_list=None,
-    docstrings_only=False,
-    function_signatures=False,
+def generate_code_context(
+    root_dir: str,
+    mode: str = "code",
+    model_name: str = "gpt-4.1"
 ):
-    parts = []
+    root_path = Path(root_dir).resolve()
+    files = find_files(root_path, allowed_ext=DEFAULT_INCLUDE_EXTENSIONS)
+    blocks = []
     stats = []
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if not should_exclude_dir(d)]
-        for fname in sorted(filenames):
-            if not should_include_file(fname, include_exts):
-                continue
-            abs_path = os.path.join(dirpath, fname)
-            rel_path = os.path.relpath(abs_path, root_dir)
-            if file_filter and not file_filter(rel_path):
-                continue
-            try:
-                with open(abs_path, "r", encoding="utf-8") as f:
-                    text = f.read()
-            except Exception as e:
-                print(f"[WARN] Failed to read {rel_path}: {e}")
-                continue
+    
+    for file_path in files:
+        try:
+            file_abs = Path(file_path).resolve()
+            # Robust relative path (works even if file_abs isn't strictly under root_path)
+            rel_path = os.path.relpath(str(file_abs), start=str(root_path))
+        except Exception:
+            # Fallback: just use the name
+            rel_path = Path(file_path).name
 
-            if function_signatures and fname.endswith(".py"):
-                display_text = get_function_signatures(text)
-            elif docstrings_only and fname.endswith(".py"):
-                display_text = get_top_level_docstring(text)
-            elif docstrings_only:
-                display_text = ""
-            else:
-                display_text = text
-                if scrub:
-                    display_text = scrub_whitespace(display_text)
-
-            size = len(display_text.encode("utf-8"))
-            tokens = count_tokens(display_text)
-            stats.append((rel_path, size, tokens))
-            if display_text.strip():
-                parts.append(f"### FILE: {rel_path} ###\n{display_text}\n")
-
-    if stats_list is not None:
-        stats_list.extend(stats)
-    return "\n".join(parts)
+        try:
+            with open(file_abs, 'r', encoding='utf-8') as f:
+                lines = []
+                first_line = True
+                
+                for line in f:
+                    # If first line isn't a comment, skip this file (no header)
+                    if first_line:
+                        if not line.strip().startswith("#"):
+                            break
+                        first_line = False
+                    
+                    # Collect header lines (those starting with #)
+                    if line.strip().startswith("#"):
+                        lines.append(line)
+                    else:
+                        # Hit first non-header line
+                        if mode == "metadata":
+                            # In metadata mode, we're done - we got the header
+                            break
+                        else:
+                            # In code mode, reset and start collecting code
+                            lines = []
+                            lines.append(line)  # Include this first non-header line
+                            # Read the rest of the file
+                            for remaining_line in f:
+                                lines.append(remaining_line)
+                            break
+                
+                # Skip if no content collected
+                if not lines:
+                    continue
+                
+                # Process based on mode
+                if mode == "metadata":
+                    # Output header block with a blank line separator so downstream parsers can split blocks.
+                    block = "".join(lines).rstrip() + "\n\n"
+                else:  # code mode
+                    # Process the code (strip comments/docstrings, clean whitespace)
+                    code = "".join(lines)
+                    code = strip_non_header_comments_and_docstrings(code)
+                    code = scrub_whitespace(code)
+                    if not code.strip():
+                        continue
+                    # Prepend file marker in code mode
+                    block = f"### FILE: {rel_path} ###\n{code.strip()}\n"
+                
+                blocks.append(block)
+                size = len(block.encode("utf-8"))
+                tokens = count_tokens(block, model_name=model_name)
+                stats.append((rel_path, size, tokens))
+                
+        except (OSError, UnicodeDecodeError):
+            continue
+    
+    return "".join(blocks), stats
 
 def print_stats(stats):
+    """Print statistics about processed files."""
     file_count = len(stats)
     total_bytes = sum(size for _, size, _ in stats)
     total_tokens = sum(tokens for _, _, tokens in stats)
+    
     print(f"[STATS] Files included: {file_count}")
     print(f"[STATS] Total size: {total_bytes} bytes")
     print(f"[STATS] Estimated total tokens: {total_tokens}")
     print(f"[STATS] Top 5 largest files:")
+    
     for rel_path, size, tokens in sorted(stats, key=lambda x: -x[1])[:5]:
         print(f"  {rel_path} | {size} bytes | {tokens} tokens")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate concatenated codebase context or metadata headers for CLIFF or LLM ingestion."
-    )
-    parser.add_argument(
-        "root_dir",
-        help="Root directory of the codebase to scan.",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Write result to this file (default: stdout)",
-    )
-    parser.add_argument(
-        "--no-scrub",
-        action="store_true",
-        help="Disable whitespace normalization/scrubbing (default: scrub whitespace).",
-    )
-    parser.add_argument(
-        "--docstrings-only",
-        action="store_true",
-        help="Include only the top-level docstring of each Python file.",
-    )
-    parser.add_argument(
-        "--function-signatures",
-        action="store_true",
-        help="Include only function/class signatures (+ first docstring, if present) in each Python file.",
-    )
-    parser.add_argument(
-        "--headers-only",
-        action="store_true",
-        help="Extract only the modern metadata headers (JSON).",
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("root_dir", help="Root directory to scan.")
+    parser.add_argument("-o", "--output", help="Write result to this file (default: none)")
+    parser.add_argument("--mode", choices=["code", "metadata"], default="code", 
+                       help="Extraction mode: code or metadata")
+    parser.add_argument("--model-name", default="gpt-4.1")
     args = parser.parse_args()
 
-    if args.headers_only:
-        # Use modern header extractor, output JSON
-        headers = collect_all_headers(args.root_dir)
-        output = json.dumps(headers, indent=2, sort_keys=True)
-        stats = None
-    else:
-        stats = []
-        output = generate_context(
-            args.root_dir,
-            scrub=not args.no_scrub,
-            stats_list=stats,
-            docstrings_only=args.docstrings_only,
-            function_signatures=args.function_signatures,
-        )
+    result, stats = generate_code_context(
+        root_dir=args.root_dir,
+        mode=args.mode,
+        model_name=args.model_name,
+    )
 
-    if stats:
-        print_stats(stats)
-    if args.output:
-        output_dir = os.path.dirname(args.output)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(args.output, "w", encoding="utf-8") as out:
-            out.write(output)
-        print(f"[INFO] Context written to {args.output}")
-    else:
-        print(output)
+    if args.output and result:
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(result)
+
+    print_stats(stats)
 
 if __name__ == "__main__":
     main()

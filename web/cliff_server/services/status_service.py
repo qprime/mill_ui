@@ -11,7 +11,7 @@ from flask import request
 
 def get_cliff_status():
     return {
-        "model": "gpt-4.1",
+        "model": "gpt-5",
         "context_window_tokens": 128000,
         "voice_enabled": True,
         "whisper_endpoint": "https://192.168.0.179:8001/transcribe",

@@ -57,8 +57,7 @@ def distill(input_text, persona):
         raw_resp = get_chat_completion(
             messages=messages,
             model=model,
-            temperature=0.0 if strict else 0.2,
-            max_tokens=512,
+            max_completion_tokens=512,
         )
         print("RAW MODEL RESPONSE:", repr(raw_resp))
         resp = raw_resp.strip()

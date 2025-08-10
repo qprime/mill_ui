@@ -55,7 +55,7 @@ def assist_prompt():
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Generate the image prompt now."},
         ],
-        model="gpt-4.1-mini",
+        model="gpt-5-mini",
         max_tokens=250,
         temperature=0.6,
         n=1,

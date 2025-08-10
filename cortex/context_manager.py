@@ -1,69 +1,95 @@
-# path: cortex/context_manager.py
-# type: context assembly
-# tags: context, persona, graph, memory, loader
-# owner: cliff
-# depends_on: memory.sidecar_manager, continuum.code_context, continuum.project_graph, cortex.personas.personas_manager
-# description: Assembles various context elements for LLM, including persona, sidecar, project graph, and source code.
-
 from typing import Optional, List, Dict, Any
 import os
+import json
 
-# Import your actual sidecar and persona loaders
 from memories.sidecar_manager import load_sidecar
-from continuum.code_context import generate_context
+from continuum.metadata import fetch_metadata
 from continuum.project_graph import build_project_graph
 from cortex.personas.personas_manager import get_persona
 
+# --- Always-injected file logic unchanged ---
+_ALWAYS_INCLUDE_FILES = """
+{
+    "cliff.mind.md": true,
+    "README.md": false,
+    "SOME_OTHER_FILE.md": false
+}
+"""
+def get_always_injected_file_paths() -> Dict[str, bool]:
+    return json.loads(_ALWAYS_INCLUDE_FILES)
 
-from typing import Optional
+def load_always_injected_files() -> str:
+    injected = []
+    for file_path, enabled in get_always_injected_file_paths().items():
+        if enabled:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                injected.append(f"\n# {file_path}\n{content}")
+            except Exception as e:
+                injected.append(f"\n# {file_path}\n[Could not read: {e}]")
+    return "\n\n".join(injected)
 
-
-def load_source_code_context(headers_only: bool = False, root_dir: str = ".") -> str:
-    """
-    Loads concatenated code context for the entire source tree.
-    If headers_only is True, only Python top-level docstrings are included.
-    """
-    return generate_context(
-        root_dir=root_dir,
-        scrub=True,
-        docstrings_only=headers_only,
-        function_signatures=True,
-    )
-
-
-def load_project_graph_context(root_dir: str = ".") -> str:
-    """
-    Loads and formats the project graph context for LLM ingestion.
-    """
-    graph = build_project_graph(root_dir)
-    lines = ["# PROJECT GRAPH"]
-    for module in graph.get("modules", []):
-        lines.append(f"\n## Module: {module['name']}")
-        lines.append(
-            "Files:\n" + "\n".join(f"  - {f}" for f in module.get("files", []))
-        )
-        if module.get("links_to"):
-            lines.append(f"Links to: {', '.join(module['links_to'])}")
-        else:
-            lines.append("Links to: (none)")
-    return "\n".join(lines)
-
+# --- Persona helpers ---
+def get_persona_context_filters(persona_name, persona_category=""):
+    persona = get_persona(persona_name, persona_category)
+    return persona.get("default_contexts", [])
 
 def load_persona_context(persona_name: str, category: str = "") -> str:
-    """
-    Loads the system prompt or persona context string.
-    """
     persona = get_persona(persona_name, category)
     return persona.get("system_prompt", "")
 
-
 def load_generic_memory() -> str:
-    """
-    Loads generic memory or knowledge not covered by other domains (stub).
-    """
     return ""
 
+# --- Context builders for each context tag/persona ---
+def context_for_development(persona, chat_id, headers_only, root_dir, persona_category):
+    """Everything needed for 'development' context."""
+    blocks = []
+    # Sidecar memory (if any)
+    if chat_id:
+        sidecar_context = load_sidecar(chat_id, persona)
+        if sidecar_context:
+            blocks.append(sidecar_context)
+    # Project graph
+    project_graph_context = build_project_graph(root_dir)
+    if project_graph_context:
+        # Formatting, see original for details
+        blocks.append(json.dumps(project_graph_context, indent=2))
+    # Metadata
+    metadata_context, stats = fetch_metadata(root_dir=root_dir)
+    if metadata_context:
+        blocks.append(metadata_context)
+    
+    return "\n\n".join(str(b) for b in blocks if b)
 
+def context_for_distiller_intent(persona, chat_id, headers_only, root_dir, persona_category):
+    """Slimmed context for intent distillation. Add blocks as needed."""
+    blocks = []
+    # Project graph
+    project_graph_context = build_project_graph(root_dir)
+    if project_graph_context:
+        # Formatting, see original for details
+        blocks.append(json.dumps(project_graph_context, indent=2))
+    # Source code
+    code_context = fetch_metadata(root_dir=root_dir)
+    if code_context:
+        blocks.append(code_context)
+    return "\n\n".join(str(b) for b in blocks if b)
+
+def context_for_distiller_context(persona, chat_id, headers_only, root_dir, persona_category):
+    """Slimmed context for context-block distiller."""
+    return ""  # Replace with actual logic when needed
+
+# --- DISPATCH TABLE ---
+CONTEXT_BUILDERS = {
+    "development": context_for_development,
+    "distiller_intent": context_for_distiller_intent,
+    "distiller_context": context_for_distiller_context,
+    # Add new context tags and functions as needed
+}
+
+# --- Main context function ---
 def context(
     prompt: str,
     persona: str,
@@ -72,42 +98,39 @@ def context(
     root_dir: str = ".",
     persona_category: str = "",
 ) -> str:
-    """
-    Returns a fully assembled context string for LLM injection:
-    Persona (system prompt), Sidecar, Project Graph, Source Code (in that order).
-    """
     context_blocks = []
 
-    # --- Load Persona Context (system prompt/role) ---
+    # 1. Persona prompt/system role
     persona_context = load_persona_context(persona, persona_category)
     if persona_context:
         context_blocks.append(persona_context)
 
-    # --- Load Sidecar (session/persona memory) ---
-    if chat_id:
-        from memories.sidecar_manager import load_sidecar
+    # 2. Always-injected files
+    always_injected = load_always_injected_files()
+    if always_injected:
+        context_blocks.append(always_injected)
 
-        sidecar_context = load_sidecar(chat_id, persona)
-        if sidecar_context:
-            context_blocks.append(sidecar_context)
+    # 3. Persona-based context blocks (using dispatch table)
+    context_filters = get_persona_context_filters(persona, persona_category)
+    if not context_filters:
+        # fallback: default to 'development'
+        context_filters = ["development"]
 
-    # --- Load Project Graph Context ---
-    project_graph_context = load_project_graph_context(root_dir=root_dir)
-    if project_graph_context:
-        context_blocks.append(project_graph_context)
+    for ctx_tag in context_filters:
+        builder = CONTEXT_BUILDERS.get(ctx_tag)
+        if builder:
+            block = builder(persona, chat_id, headers_only, root_dir, persona_category)
+            if block:
+                context_blocks.append(block)
+        else:
+            # Optionally: log or warn unknown context type
+            pass
 
-    # --- Load Source Code Context ---
-    code_context = load_source_code_context(
-        headers_only=headers_only, root_dir=root_dir
-    )
-    if code_context:
-        context_blocks.append(code_context)
+    # 4. Generic memory context (if you ever use it)
+    # generic_memory_context = load_generic_memory()
+    # if generic_memory_context:
+    #     context_blocks.append(generic_memory_context)
 
-    # --- Load Generic Memory Context (stub) ---
-    generic_memory_context = load_generic_memory()
-    if generic_memory_context:
-        context_blocks.append(generic_memory_context)
-
-    # Assemble final context string in the correct order
+    # Compose final prompt context
     full_context = "\n\n".join([str(block) for block in context_blocks if block])
     return full_context

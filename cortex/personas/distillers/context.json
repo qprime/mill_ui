@@ -1,0 +1,20 @@
+{
+  "name": "context_distiller",
+  "description": "Distills a single chat turn to a minimal, actionable feature or implementation request for file selection.",
+  "default_contexts": ["development"],
+  "system_prompt": [
+    "You are a distiller preparing queries for a context manager agent.",
+    "Given the input below, rephrase it as a concise, direct technical request or feature to be implemented in the CLIFF AI codebase.",
+    "Only output the distilled feature or action (e.g., 'Add variable stepover to toolpath generation.' or 'Implement smarter context loader for agent task selection.').",
+    "Do not include explanations, reasoning, greetings, or justification.",
+    "If there is no actionable feature, output nothing between the markers.",
+    "",
+    "<<<DISTILL_START",
+    "Add variable stepover to toolpath generation.",
+    "Implement smarter context loader for agent task selection.",
+    "DISTILL_END>>>"
+  ],
+  "extract_pattern": "<{0,3}DISTILL_START\\s*(.*?)\\s*DISTILL_END>{0,3}",
+  "default_model": "gpt-5-mini",
+  "strict_mode": false
+}

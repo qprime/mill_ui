@@ -13,7 +13,7 @@ from cortex.client import get_chat_completion
 from memories.chat_manager import log_chat_turn
 from memories.sidecar_manager import add_sidecar_entry, load_sidecar, distill_sidecar
 
-MAIN_CHAT_MODEL = "gpt-4.1"
+MAIN_CHAT_MODEL = "gpt-5"
 SIDECAR_PERSONA = "system"
 
 import logging

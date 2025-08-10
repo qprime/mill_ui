@@ -16,8 +16,11 @@
     "Keep formatting clean and uncluttered—avoid extra newlines.",
     "Keep answers direct and concise, do not add greetings or sign-offs.",
     "Always ensure code blocks start and end with triple backticks on their own lines.",
-    "Respond concisely"
+    "Respond concisely",
+    "Never make unsupported assumptions about the content of a file or configuration.",
+    "If, from the user's request, you infer that context is missing, request it."
+    
   ],
-  "default_model": "gpt-4.1-mini",
+  "default_model": "gpt-5",
   "strict_mode": true
 }

@@ -1,126 +1,102 @@
-=== FILE: stack.guidance.md ===
-# Header Format
-# path: <path>/<to>/<file.ext>
-# desc: <short single sentence>
-# api: <single public symbol>
-# tags: <comma,separated,tags>
-
-# Keys
-path — unique merge key
-desc — single short sentence
-api — one public export
-tags — for search/graph
+# path: docs/app.stack.guidance.md
+# desc: Stack rules for Flask + HTMX + Shoelace UI
+# api: app_stack_guidance
+# tags: stack,flask,htmx,ui
 
 # GLOBAL PRINCIPLES
-1) One file, one job; one public symbol.
-2) Small functions; flat control flow (nest ≤2); early returns.
-3) No comments; intent lives in header + names.
-4) Explicit types; stable return shapes; no hidden globals.
-5) Absolute imports from app roots; no dynamic require/import.
-6) Deterministic outputs; pass randomness/config explicitly.
-7) Uniform layout: imports → types → constants → helpers → api.
+# - One file, one job; one public symbol.
+# - Small functions; flat control flow; early returns.
+# - Intent lives in the header + names; no comments beyond headers.
+# - Deterministic outputs; explicit config.
+# - Uniform layout: imports → types → constants → helpers → api.
+# - Module manifests describe capabilities, dependencies, and entry points.
 
-=== SECTION: TypeScript (ts/tsx) ===
-- Pure by default; ≤20 lines per function unless unavoidable.
-- Data-first: inputs/outputs are plain objects.
-- Never use `any` on public surfaces.
-- Prefer tiny helpers over generic cleverness.
+---
 
-# Sample (utility)
-// path: lib/normalize/toKebab.ts
-// desc: Convert string to kebab-case
-// api: toKebab
-// tags: string,normalize
-export type ToKebabInput = { value: string };
-const SEP = /[^\p{L}\p{N}]+/u;
-function _split(v: string){ return v.trim().split(SEP).filter(Boolean); }
-export function toKebab(i: ToKebabInput){ return _split(i.value).map(s=>s.toLowerCase()).join("-"); }
+## BACKEND
 
-=== SECTION: React Native UI (tsx) ===
-- One component per file; default export.
-- Presentational only; effects/data in small hooks.
-- Props are flat + typed; avoid prop drilling (lift or store).
-- Styles are constant objects; no inline objects in JSX.
-- Platform-agnostic; gate rare platform bits via tiny adapters.
-- Accessibility: set `accessibilityLabel` and testIDs.
+### Framework
+- **Flask** for all backend routing and REST APIs.
+- Use blueprints: one blueprint per domain, located in `interfaces/<domain>/api.py`.
+- REST endpoints return JSON only; no templates in API routes.
+- JSON response shape:
+  ```json
+  { "ok": true, "data": ..., "error": null }
+  ```
+- Prefer Pydantic (optional) for request/response schema validation.
 
-# Sample (component)
-// path: apps/reviewer/ItemRow.tsx
-// desc: Pressable row with title/meta
-// api: ItemRow
-// tags: ui,reviewer,row
-import React from "react";
-import { Pressable, Text, View } from "react-native";
-export type ItemRowProps = { title:string; meta?:string; onPress?:()=>void; testID?:string; };
-export default function ItemRow(p: ItemRowProps){
-  return (
-    <Pressable onPress={p.onPress} accessibilityLabel={p.title} testID={p.testID}>
-      <View style={S.row}><Text style={S.title}>{p.title}</Text>{p.meta ? <Text style={S.meta}>{p.meta}</Text> : null}</View>
-    </Pressable>
-  );
-}
-const S = {
-  row:{ padding:12, gap:6, flexDirection:"column" } as const,
-  title:{ fontSize:16, fontWeight:"600" } as const,
-  meta:{ fontSize:12, opacity:0.7 } as const,
-};
+### API Structure
+- `/api/<domain>/<resource>` for REST.
+- `/app/<module>/<page>` for server-rendered UI pages.
+- Keep logic separate from routing; views call pure helpers.
 
-# Sample (hook)
-// path: lib/hooks/usePaginatedList.ts
-// desc: Load items page-by-page
-// api: usePaginatedList
-// tags: hooks,data
-import { useEffect,useMemo,useState } from "react";
-export type Page<T> = { items:T[]; next?:string };
-export type Loader<T,P extends object=object> = (a:P & {cursor?:string})=>Promise<Page<T>>;
-export function usePaginatedList<T,P extends object=object>(load:Loader<T,P>, params:P){
-  const [items,setItems]=useState<T[]>([]); const [cursor,setCursor]=useState<string|undefined>(); const [busy,setBusy]=useState(false);
-  const canLoadMore = useMemo(()=>!!cursor || items.length===0,[cursor,items.length]);
-  async function loadMore(){ if(busy||!canLoadMore) return; setBusy(true); const p=await load({...params,cursor}); setItems(v=>v.concat(p.items)); setCursor(p.next); setBusy(false); }
-  useEffect(()=>{ setItems([]); setCursor(undefined); },[JSON.stringify(params)]);
-  return { items, loadMore, canLoadMore, busy };
-}
+---
 
-=== SECTION: API Client (ts) ===
-- One service per file; export a factory or typed function.
-- Typed req/resp; do not return raw `Response`.
-- Build URLs from base + path constants; JSON only.
-- Never throw strings; return `{ ok, data? , error? }`.
-- No implicit auth; pass token via options or store adapter.
+## UI
 
-# Sample (client)
-// path: lib/api/reviewer.ts
-// desc: Reviewer service client
-// api: createReviewerClient
-// tags: api,reviewer
-export type ReviewerItem={ id:string; title:string; meta?:string };
-export type ListArgs={ cursor?:string; limit?:number };
-export type ListResult={ ok:true; data:{ items:ReviewerItem[]; next?:string } }|{ ok:false; error:{ code:string; message:string } };
-export type Http=(url:string, init?:RequestInit)=>Promise<Response>;
-const PATH={ list:"/api/reviewer/list" };
-export function createReviewerClient(base:string, http:Http){
-  async function list(a:ListArgs={}):Promise<ListResult>{
-    const url=new URL(PATH.list,base); if(a.cursor) url.searchParams.set("cursor",a.cursor); if(a.limit!=null) url.searchParams.set("limit",String(a.limit));
-    try{ const res=await http(url.toString(),{method:"GET"}); const payload=await res.json();
-      return res.ok ? { ok:true, data:payload } : { ok:false, error:{ code:String(res.status), message:payload?.message??"Request failed" } };
-    }catch(e){ return { ok:false, error:{ code:"NETWORK", message:(e as Error).message } }; }
-  }
-  return { list };
-}
+### Mode
+- **Server-driven HTML** using Jinja2 templates + HTMX.
+- No Node, no JS bundling. All UI logic is in Python and small HTML fragments.
+- Templates live in `/interfaces/<module>/templates/`.
+- Base shell: `base.html.jinja` with `<head>` imports for HTMX, Hyperscript, and Shoelace (CDN).
+- Dark mode by default using CSS variables.
 
-=== SECTION: JSON Manifest (apps/<module>/manifest.json) ===
-- One manifest per module; strict + minimal; declarative only.
-- Stable `id` (kebab-case); explicit `requires`/`provides`.
-- Keep `ground_truth.md` next to the manifest.
-- All referenced files must exist at build time.
+### Fragments
+- Each UI fragment ≤ ~100 lines; one responsibility (list, row, form).
+- Routes returning fragments named `render_<thing>()` and kept in a single public function per file.
+- Use HTMX attributes:
+  - `hx-get`, `hx-post`, `hx-trigger`
+  - `hx-target`, `hx-swap="innerHTML"`
+- Use Hyperscript for small behaviors instead of custom JS.
 
-# Minimal Schema (v1)
+### Components / Styling
+- Use **Shoelace** web components via CDN for buttons, inputs, dialogs.
+- All shared CSS in `/interfaces/_shared/styles/vars.css`.
+- No inline styles except quick prototypes.
+
+---
+
+## PWA (OPTIONAL)
+- Add `public/manifest.webmanifest` + `public/sw.js` for installable app on Android.
+- Keep service worker minimal (cache shell + icons).
+- Enable `display: standalone` and dark theme colors.
+
+---
+
+## MODULE MANIFEST
+
+Example for a UI + API module:
+
+```json
 {
-  "id":"reviewer",
-  "name":"Reviewer",
-  "entry":"index.tsx",
-  "ground_truth":"ground_truth.md",
-  "requires":["auth","user"],
-  "provides":["reviewList","reviewEditor"],
-  "schema_version":"1.0.0"
+  "id": "reviewer",
+  "name": "Reviewer",
+  "entry": "routes.py",
+  "ground_truth": "ground_truth.md",
+  "requires": ["auth", "user"],
+  "provides": ["reviewList", "reviewEditor"],
+  "schema_version": "1.0.0"
 }
+```
+
+Rules:
+- `entry` points to the Flask blueprint file.
+- `templates/` contains HTML fragments referenced by routes.
+- `ground_truth.md` documents module purpose, APIs, and UI components.
+- Dependencies (`requires`) and exports (`provides`) are explicit.
+- The loader discovers and mounts modules based on this manifest.
+
+---
+
+## TESTING
+- API: pytest + HTTP client for REST endpoints.
+- UI: snapshot test rendered fragments; verify HTMX swaps.
+- PWA: optional Lighthouse run for installability and performance.
+
+---
+
+## DEPLOYMENT
+- Python 3.10+
+- `pip install flask jinja2`
+- Optional: `pip install gunicorn` for production serving.
+- Static assets (Shoelace, HTMX, Hyperscript) via CDN — no build pipeline.

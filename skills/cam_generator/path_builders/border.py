@@ -1,9 +1,7 @@
 # path: skills/cam_generator/path_builders/border.py
-# type: border_path_function
-# tags: cam, path, border, utils
-# owner: cliff
-# depends_on: None
-# description: Generates a rectangular border path for CAM processes based on input dimensions.
+# # desc: Rectangular border path helper.
+# api: generate_border_path
+# tags: cam
 
 def generate_border_path(width, height, depth, margin=1.0):
     x0 = margin

@@ -1,18 +1,15 @@
-# Job-level configuration for CNC carving
-
-units: mm              # mm or inch
-stock_width: 200.0     # in mm
+units: mm
+stock_width: 200.0
 stock_height: 150.0
-stock_thickness: 19.0  # thickness of material (Z)
+stock_thickness: 19.0
 
-origin: bottom-left    # bottom-left, center, top-left, etc.
-safe_height: 5.0       # Z height for safe travel moves
-default_feedrate: 300  # mm/min
+origin: bottom-left
+safe_height: 5.0
+default_feedrate: 300
 invert_heightmap_z: true
 add_border: true
 border_margin: 2.0
 
-# Optional naming or project tags
 job_name: "test_relief"
 material: "mdf"
 
@@ -21,4 +18,3 @@ algorithms:
   colinear: true
   dedupe: true
   adaptive_stepover: true
-

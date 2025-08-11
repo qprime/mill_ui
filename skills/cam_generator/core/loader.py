@@ -1,18 +1,15 @@
 # path: skills/cam_generator/core/loader.py
-# type: data_loader_module
-# tags: cam, loader, image, config, heightmap
-# owner: cliff
-# depends_on: skills/cam_generator/core/job_loader.py
-# description: Loads and processes heightmap data for CAM processing system.
+# # desc: Load heightmap PNG → normalized depth map.
+# api: load_heightmap
+# tags: cam
 
 import cv2
 import numpy as np
 from skills.cam_generator.core.job_loader import load_job_config
 
-
 def load_heightmap(png_path, job_config_path=None, scale_xy=0.1, scale_z=2.0):
     if job_config_path is None:
-        job_config_path = "config/job_config.yaml"  # fallback for legacy use
+        job_config_path = "config/job_config.yaml"
     job_config = load_job_config(job_config_path)
     img = cv2.imread(png_path, cv2.IMREAD_UNCHANGED)
     if img is None:

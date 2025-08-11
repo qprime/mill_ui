@@ -1,18 +1,14 @@
 # path: skills/cam_generator/pocket_generator/generate_pocket_holer.py
-# type: G-code generator
-# tags: cam, gcode, config, generator
-# owner: cliff
-# depends_on: yaml
-# description: Generates G-code for CNC pocket holes based on YAML configuration.
+# # desc: Legacy pocket holer generator (unused).
+# api: generate_smart_pocket_holer_gcode
+# tags: cam
 
 import yaml
-
 
 def load_pocket_config(path="pocket_config.yaml"):
     with open(path, "r") as f:
         cfg = yaml.safe_load(f)
     return cfg
-
 
 def generate_smart_pocket_holer_gcode(cfg):
     depths = cfg["pocket_depths"]
@@ -59,7 +55,6 @@ def generate_smart_pocket_holer_gcode(cfg):
     gcode.append("G0 Z5.000")
     gcode.append("G0 X0 Y0")
     return "\n".join(gcode)
-
 
 if __name__ == "__main__":
     cfg = load_pocket_config()

@@ -1,9 +1,7 @@
 # path: skills/cam_generator/core/toggles.py
-# type: configuration utility
-# tags: cam, configuration, utilities, algorithms
-# owner: cliff
-# depends_on: None
-# description: Provides default algorithm enablement states and toggles for CAM job configurations.
+# # desc: Return enabled algorithm toggles.
+# api: get_enabled_algorithms
+# tags: cam
 
 def get_enabled_algorithms(job_cfg):
     default = {

@@ -1,13 +1,10 @@
 # path: skills/cam_generator/analysis/curvature.py
-# type: analysis_module
-# tags: cam, analysis, curvature, numpy, scipy
-# owner: cliff
-# depends_on: numpy, scipy.ndimage.sobel
-# description: Computes slope maps from heightmaps for curvature analysis in CAM generation.
+# # desc: Slope map via Sobel for adaptive stepover.
+# api: compute_slope_map
+# tags: cam
 
 import numpy as np
 from scipy.ndimage import sobel
-
 
 def compute_slope_map(heightmap, scale_xy=0.1):
     dz_dx = sobel(heightmap, axis=1) / (8.0 * scale_xy)

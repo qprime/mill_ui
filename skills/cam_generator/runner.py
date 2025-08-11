@@ -1,9 +1,7 @@
 # path: skills/cam_generator/runner.py
-# type: CAM pipeline runner
-# tags: cam, pipeline, CNC, toolpath, G-code
-# owner: cliff
-# depends_on: multi_pass.py, preview.py, time_estimator.py
-# description: Orchestrates the execution of CAM pipeline steps for CNC G-code generation.
+# # desc: CLI entry wrapper for multi-pass CAM pipeline.
+# api: run_cam_pipeline
+# tags: cam
 
 import argparse
 from pathlib import Path
@@ -14,17 +12,8 @@ from skills.cam_generator.core.preview import preview_toolpath
 from skills.cam_generator.core.time_estimator import estimate_cut_time
 
 def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True):
-    """
-    Run CAM toolpath + G-code pipeline for a single job.
-
-    Args:
-        job_name (str): Name of the job folder in memoriescam_projects/
-        base_dir (Path or str): CLIFF-AI project root (default: auto-detect from cwd)
-        enable_preview (bool): Whether to generate PNG previews for G-code
-        verbose (bool): Print status and file paths
-    """
     if base_dir is None:
-        base_dir = Path(__file__).resolve().parent.parent.parent  # .../cliff_ai/
+        base_dir = Path(__file__).resolve().parent.parent.parent
     else:
         base_dir = Path(base_dir).resolve()
 
@@ -36,7 +25,6 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
     job_config_path = project_folder / "config" / "job_config.yaml"
     output_folder = project_folder / "cam_output"
 
-    # Checks
     for p, label in [
         (image_path, "input image"),
         (config_path, "default_passes.yaml"),
@@ -45,12 +33,10 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
         if not p.exists():
             raise FileNotFoundError(f"[!] Required {label} not found: {p}")
 
-    # Clean/create output folder
     if output_folder.exists():
         shutil.rmtree(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
 
-    # Copy configs to output for traceability
     shutil.copy(config_path, output_folder / "default_passes.yaml")
     shutil.copy(job_config_path, output_folder / "job_config.yaml")
 
@@ -64,9 +50,8 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
         config_path=output_folder / "default_passes.yaml",
         output_dir=output_folder,
         margin_mm=3.0,
-        job_config_path=output_folder / "job_config.yaml",  # or wherever you copied it
+        job_config_path=output_folder / "job_config.yaml",
     )
-
 
     if enable_preview:
         for gcode_file in output_folder.glob("*.nc"):
@@ -82,8 +67,6 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
             if verbose:
                 print(f"{gcode_file.name}: {minutes:.1f} min")
 
-# --- CLI Entrypoint ---
-
 def main():
     parser = argparse.ArgumentParser(
         description="Generate CNC toolpaths and G-code for a CLIFF-AI CAM job."
@@ -91,7 +74,7 @@ def main():
     parser.add_argument(
         "--job",
         required=True,
-        help="Job/project name (matches subfolder in memoriescam_projects/)",
+        help="Job/project name (matches subfolder in memories/cam_projects/)",
     )
     parser.add_argument(
         "--no-preview",

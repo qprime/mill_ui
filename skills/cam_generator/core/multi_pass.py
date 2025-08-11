@@ -1,13 +1,12 @@
 # path: skills/cam_generator/core/multi_pass.py
-# desc: Multi-pass heightmap CAM generation with absolute relief mapping and optional border
+# # desc: Main pipeline: load, build passes, emit gcode, report.
 # api: generate_all_passes
-# tags: cam,gcode,relief,border
+# tags: cam
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
-
 
 import json
 import numpy as np
@@ -26,15 +25,12 @@ from skills.cam_generator.optimizers.reduce_colinear import reduce_colinear_path
 from skills.cam_generator.path_builders.border import generate_border_path
 from skills.cam_generator.path_builders.raster import generate_raster_xyz_path
 
-
 def _fail(where: str, err: Exception) -> None:
     raise RuntimeError(f"{where} error: {type(err).__name__}: {err}") from err
-
 
 def _ensure(cond: bool, where: str, msg: str) -> None:
     if not cond:
         raise RuntimeError(f"{where} failed: {msg}")
-
 
 def _normalize(heightmap: np.ndarray, percentiles: Optional[Sequence[float]], gamma: float) -> np.ndarray:
     try:
@@ -57,7 +53,6 @@ def _normalize(heightmap: np.ndarray, percentiles: Optional[Sequence[float]], ga
     except Exception as e:
         _fail("_normalize", e)
 
-
 def _apply_zero_threshold(n: np.ndarray, thresh: Optional[float], thresh_pct: Optional[float]) -> np.ndarray:
     try:
         if thresh_pct is not None:
@@ -69,7 +64,6 @@ def _apply_zero_threshold(n: np.ndarray, thresh: Optional[float], thresh_pct: Op
         return n
     except Exception as e:
         _fail("_apply_zero_threshold", e)
-
 
 def _smooth_mm(
     zmap_mm: np.ndarray,
@@ -96,7 +90,6 @@ def _smooth_mm(
     except Exception as e:
         _fail("_smooth_mm", e)
 
-
 def _surface_from_path(
     path: List[List[Tuple[float, float, float]]],
     target_shape: Optional[Tuple[int, int]] = None,
@@ -118,7 +111,6 @@ def _surface_from_path(
     except Exception as e:
         _fail("_surface_from_path", e)
 
-
 def _detect_conflicts(surfaces: Dict[str, np.ndarray]) -> List[Dict[str, float]]:
     try:
         out: List[Dict[str, float]] = []
@@ -136,7 +128,6 @@ def _detect_conflicts(surfaces: Dict[str, np.ndarray]) -> List[Dict[str, float]]
         return out
     except Exception as e:
         _fail("_detect_conflicts", e)
-
 
 def _load_cfgs_and_image(
     image_path: Path,
@@ -156,7 +147,6 @@ def _load_cfgs_and_image(
     except Exception as e:
         _fail("_load_cfgs_and_image", e)
 
-
 def _apply_margin(heightmap: np.ndarray, scale_xy: float, margin_mm: float) -> np.ndarray:
     try:
         if margin_mm <= 0:
@@ -169,7 +159,6 @@ def _apply_margin(heightmap: np.ndarray, scale_xy: float, margin_mm: float) -> n
         return heightmap[mpx:-mpx, mpx:-mpx]
     except Exception as e:
         _fail("_apply_margin", e)
-
 
 def _prepare_norm_map(heightmap: np.ndarray, job_cfg: dict) -> np.ndarray:
     try:
@@ -185,7 +174,6 @@ def _prepare_norm_map(heightmap: np.ndarray, job_cfg: dict) -> np.ndarray:
         )
     except Exception as e:
         _fail("_prepare_norm_map", e)
-
 
 def _depth_map_mm(norm_map: np.ndarray, job_cfg: dict, pass_cfg: dict) -> Tuple[np.ndarray, float]:
     try:
@@ -212,8 +200,6 @@ def _depth_map_mm(norm_map: np.ndarray, job_cfg: dict, pass_cfg: dict) -> Tuple[
     except Exception as e:
         _fail("_depth_map_mm", e)
 
-# --- NEW: layered roughing helper -------------------------------------------
-
 def layerize_path_by_stepdown(
     path: List[List[Tuple[float, float, float]]],
     z_stepdown: float,
@@ -221,24 +207,13 @@ def layerize_path_by_stepdown(
     insert_blank_between_layers: bool = True,
     tol: float = 1e-6,
 ) -> List[List[Tuple[float, float, float]]]:
-    """
-    Convert a single path into multiple Z layers (classic roughing),
-    but on deeper layers only emit row *segments* where additional
-    material is actually removed (skip unchanged spans to avoid air cuts).
-
-    - z_stepdown: positive mm per layer (e.g., 1.5)
-    - min_last_layer: ensure final layer delta <= this (e.g., 0.5)
-    - insert_blank_between_layers: add [] between layers to force a retract
-    """
     if not path or z_stepdown <= 0:
         return path
 
-    # Overall deepest target (most negative Z)
     z_min = min(pt[2] for r in path for pt in r)
     if z_min >= 0.0:
         return path
 
-    # Build descending layer limits: -step, -2*step, ..., z_min
     limits: List[float] = []
     d = -float(z_stepdown)
     while d > z_min:
@@ -247,7 +222,6 @@ def layerize_path_by_stepdown(
     if not limits or limits[-1] > z_min:
         limits.append(z_min)
     if min_last_layer > 0 and len(limits) >= 1:
-        # Keep the last delta small if needed
         last_delta = limits[-1] - z_min
         if last_delta > min_last_layer:
             limits.insert(len(limits)-1, z_min + min_last_layer)
@@ -259,10 +233,8 @@ def layerize_path_by_stepdown(
         layer_had_work = False
 
         for row in path:
-            # Clamp at current and previous layer
             row_L   = [(x, y, max(z, L)) for (x, y, z) in row]
             if prev_limit is None:
-                # First layer: keep full rows (shallow pass)
                 if row_L:
                     layered.append(row_L)
                     layer_had_work = True
@@ -270,7 +242,6 @@ def layerize_path_by_stepdown(
 
             row_prev = [(x, y, max(z, prev_limit)) for (x, y, z) in row]
 
-            # Emit only the spans where z_L < z_prev (i.e., new material removed)
             seg: List[Tuple[float, float, float]] = []
             in_seg = False
             for (pL, pP) in zip(row_L, row_prev):
@@ -283,7 +254,6 @@ def layerize_path_by_stepdown(
                         seg.append(pL)
                 else:
                     if in_seg:
-                        # close segment if it has at least 1 point
                         if seg:
                             layered.append(seg)
                             layer_had_work = True
@@ -302,9 +272,6 @@ def layerize_path_by_stepdown(
         layered.pop()
 
     return layered
-# ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-
 
 def _build_path(
     zmap_mm: np.ndarray,
@@ -333,21 +300,17 @@ def _build_path(
 
         path = _gen(skip_mask)
 
-        # Fallback: if the keepout mask erased everything (edge cases), regenerate unmasked
         if not isinstance(path, list) or len(path) == 0:
-            # print("[warn] keepout erased path; regenerating without skip mask")
             path = _gen(None)
 
         _ensure(isinstance(path, list) and len(path) > 0, "_build_path", "empty path")
 
-        # Apply z_buffer (leave stock for next tool)
         zb = float(pass_cfg.get("z_buffer", 0.0))
         if zb > 0.0:
             for row in path:
                 for i, (x, y, z) in enumerate(row):
                     row[i] = (x, y, z + zb)
 
-        # Optional layered roughing
         z_stepdown = float(pass_cfg.get("z_stepdown", 0.0) or 0.0)
         min_last = float(pass_cfg.get("min_last_layer", 0.0) or 0.0)
         if z_stepdown > 0.0:
@@ -364,10 +327,6 @@ def _build_path(
     except Exception as e:
         _fail("_build_path", e)
 
-
-# --- NEW: diameter-aware keepout --------------------------------------------
-
-
 def _compute_diameter_keepout_mask(
     fine_zmap_mm: np.ndarray,
     coarse_limit_mm: float,
@@ -375,40 +334,34 @@ def _compute_diameter_keepout_mask(
     tool_diam_mm: float,
     xy_clear_mm: float = 0.5,
 ) -> np.ndarray:
-    """
-    Boolean mask (True = skip) that keeps the coarse tool's cylindrical footprint
-    away from the boundary between regions the fine pass must cut deeper than the
-    coarse height limit and regions it doesn't.
-
-    Inputs:
-      - fine_zmap_mm: HEIGHT map in +mm (0..relief)
-      - coarse_limit_mm: HEIGHT in +mm (e.g., 6.5)
-      - scale_xy_mm: pixel pitch in mm
-      - tool_diam_mm: coarse tool diameter
-      - xy_clear_mm: extra lateral clearance beyond tool radius
-    """
-    # HEIGHT-domain comparison: 'deeper' where fine needs to exceed coarse height limit
     deeper = fine_zmap_mm > (float(coarse_limit_mm) + 1e-6)
 
-    # If there's no boundary (all True or all False), nothing to keep out → no skip
     if not deeper.any() or not (~deeper).any():
         return np.zeros_like(deeper, dtype=bool)
 
-    # Distance to the boundary from BOTH sides, in mm
     dist_in_mm  = distance_transform_edt(deeper)   * float(scale_xy_mm)
     dist_out_mm = distance_transform_edt(~deeper)  * float(scale_xy_mm)
     dist_to_boundary_mm = np.minimum(dist_in_mm, dist_out_mm)
 
-    # Keep-out band width = tool radius + clearance
     keepout_radius_mm = float(tool_diam_mm) * 0.5 + float(xy_clear_mm)
 
-    # Skip only within the boundary band; allow deep interiors and shallow exteriors
     skip = dist_to_boundary_mm < keepout_radius_mm
     return skip
 
-
-# -----------------------------------------------------------------------------
-
+def _path_lengths_mm(path: List[List[Tuple[float, float, float]]]) -> Tuple[float, float]:
+    xy = 0.0
+    zz = 0.0
+    for row in path:
+        if not row: continue
+        prev = row[0]
+        for pt in row[1:]:
+            dx = pt[0] - prev[0]
+            dy = pt[1] - prev[1]
+            dz = pt[2] - prev[2]
+            xy += (dx*dx + dy*dy) ** 0.5
+            zz += abs(dz)
+            prev = pt
+    return xy, zz
 
 def _emit_gcode_for_pass(
     name: str,
@@ -421,7 +374,7 @@ def _emit_gcode_for_pass(
     border_margin: float,
     safe_height: float,
     enabled: dict,
-    ramp_distance: Optional[float] = None,   # NEW
+    ramp_distance: Optional[float] = None,
 ) -> List[str]:
     try:
         gcode: List[str] = []
@@ -429,7 +382,6 @@ def _emit_gcode_for_pass(
         gcode.append("G90")
         gcode.append(f"G0 Z{safe_height:.3f}")
 
-        # default ramp distance if caller didn't pass one
         if ramp_distance is None:
             ramp_distance = 5.0 if enabled.get("ramp", True) else 0.0
 
@@ -452,8 +404,6 @@ def _emit_gcode_for_pass(
     except Exception as e:
         _fail("_emit_gcode_for_pass", e)
 
-
-
 def _optimize_and_report(
     name: str,
     path: List[List[Tuple[float, float, float]]],
@@ -472,9 +422,10 @@ def _optimize_and_report(
 
         pts = sum(len(r) for r in path)
         _ensure(pts > 0, "_optimize_and_report", "zero points after optimize")
-        zvals = [pt[2] for r in path for pt in r]  # <-- fixed list-comp
-        runtime = estimate_cut_time(gcode, feed)
-        reporter.add_pass_report(name, pts, min(zvals), max(zvals), runtime, 0, 0, [])
+        zvals = [pt[2] for r in path for pt in r]
+        runtime = estimate_cut_time(gcode)  # estimator now robust/auto-units
+        xy_mm, z_mm = _path_lengths_mm(path)
+        reporter.add_pass_report(name, pts, min(zvals), max(zvals), runtime, 0, 0, [], xy_km=xy_mm/1000.0, z_km=z_mm/1000.0)
 
         outfile = output_dir / f"{basename}_{name}.nc"
         write_gcode(gcode, outfile)
@@ -483,7 +434,6 @@ def _optimize_and_report(
         return path, surface
     except Exception as e:
         _fail("_optimize_and_report", e)
-
 
 def _finalize_validation(paths: Dict[str, List[List[Tuple[float, float, float]]]], surfaces: Dict[str, np.ndarray], output_dir: Path) -> None:
     try:
@@ -565,40 +515,32 @@ def generate_all_passes(
             p = cfg_passes[name]
             feed = float(p.get("max_feedrate", default_feed))
 
-            # Depth map (HEIGHT domain, 0..relief)
             zmap_mm, _relief_mm = _depth_map_mm(norm_map, job_cfg, p)
 
-            # --- Diameter-aware keepout for coarse (HEIGHT-domain comparison) ---
             skip_mask = None
             if name == "coarse" and ("fine" in cfg_passes) and bool(p.get("diameter_keepout", True)):
                 fine_zmap_mm, _ = _depth_map_mm(norm_map, job_cfg, cfg_passes["fine"])
 
-                # Coarse minimum machining Z (negative), including buffer
                 zc = p.get("z_clamp", [-1e-6, 0.0])
                 if isinstance(zc, (list, tuple)) and len(zc) == 2:
-                    coarse_min_z = float(zc[0]) + float(p.get("z_buffer", 0.0))  # e.g., -6.5
+                    coarse_min_z = float(zc[0]) + float(p.get("z_buffer", 0.0))
                 elif isinstance(zc, dict) and "min" in zc:
                     coarse_min_z = float(zc["min"]) + float(p.get("z_buffer", 0.0))
                 else:
                     coarse_min_z = 0.0 + float(p.get("z_buffer", 0.0))
 
-                # Convert to HEIGHT for comparison with fine_zmap_mm
-                coarse_height_limit = -coarse_min_z  # e.g., 6.5 mm
+                coarse_height_limit = -coarse_min_z
 
                 skip_mask = _compute_diameter_keepout_mask(
                     fine_zmap_mm=fine_zmap_mm,
-                    coarse_limit_mm=coarse_height_limit,  # HEIGHT-domain limit
+                    coarse_limit_mm=coarse_height_limit,
                     scale_xy_mm=scale_xy,
                     tool_diam_mm=float(p.get("tool_diameter", 6.35)),
                     xy_clear_mm=float(p.get("xy_clearance", 0.5)),
                 )
-                # Optional quick telemetry:
-                # print(f"[coarse] diameter keepout active; skip {(np.mean(skip_mask)*100):.1f}% of pixels")
-            # --------------------------------------------------------------------
 
             path = _build_path(zmap_mm, p, enabled, scale_xy, border_margin, slope_map, skip_mask=skip_mask)
 
-            # Per-pass ramp distance (coarse often 0.0)
             ramp_dist = float(p.get("ramp_distance", 5.0 if enabled.get("ramp", True) else 0.0))
 
             gcode = _emit_gcode_for_pass(
@@ -620,4 +562,3 @@ def generate_all_passes(
         print("[stage] reporting + validation complete")
     except Exception as e:
         _fail("generate_all_passes:reporting", e)
-

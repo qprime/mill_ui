@@ -1,22 +1,15 @@
 # path: skills/cam_generator/gcode/emit_gcode.py
-# type: gcode_emission
-# tags: gcode, cam, cnc, path
-# owner: cliff
-# depends_on: skills/cam_generator/gcode/ramp.py
-# description: Generates G-code for CNC machines from provided toolpaths.
-
-# skills/cam_generator/gcode/emit_gcode.py
+# # desc: Emit G-code from path with staydown/retract logic.
+# api: emit_gcode_from_path
+# tags: cam
 
 from skills.cam_generator.gcode.ramp import generate_z_ramp
 
-# Tunables (kept internal; no API change)
-_LINK_CLEARANCE = 0.6       # mm above surface for intra-row hops
-_SAME_ROW_Y_TOL = 1e-4      # treat ~equal Y as same raster row
-
+_LINK_CLEARANCE = 0.6
+_SAME_ROW_Y_TOL = 1e-4
 
 def _fmt(val: float) -> str:
     return f"{val:.3f}"
-
 
 def _g0_xyz(x=None, y=None, z=None) -> str:
     parts = ["G0"]
@@ -27,7 +20,6 @@ def _g0_xyz(x=None, y=None, z=None) -> str:
     if z is not None:
         parts.append(f"Z{_fmt(z)}")
     return " ".join(parts)
-
 
 def _g1_xyzf(x=None, y=None, z=None, f=None) -> str:
     parts = ["G1"]
@@ -41,7 +33,6 @@ def _g1_xyzf(x=None, y=None, z=None, f=None) -> str:
         parts.append(f"F{int(round(f))}")
     return " ".join(parts)
 
-
 def _emit_header(units: str, safe_z: float, header_lines):
     g = []
     if header_lines:
@@ -51,7 +42,6 @@ def _emit_header(units: str, safe_z: float, header_lines):
     g.append(_g0_xyz(z=safe_z))
     return g
 
-
 def _emit_footer(safe_z: float, footer_lines):
     g = []
     g.append(f"{_g0_xyz(z=safe_z)} ; Final retract")
@@ -60,31 +50,23 @@ def _emit_footer(safe_z: float, footer_lines):
         g.extend(footer_lines)
     return g
 
-
 def _rapid_to_xy(g, x, y):
     g.append(_g0_xyz(x=x, y=y))
-
 
 def _rapid_to_z(g, z):
     g.append(_g0_xyz(z=z))
 
-
 def _plunge_to(g, z, plunge_feed):
     g.append(_g1_xyzf(z=z, f=plunge_feed))
 
-
 def _ramp_entry(g, x, y, safe_z, target_z, ramp_distance, plunge_feed):
-    # Generate a smooth Z ramp only when requested
     ramp_pts = generate_z_ramp(x, y, safe_z, target_z, step_mm=ramp_distance / 10.0)
     for rx, ry, rz in ramp_pts:
         g.append(_g1_xyzf(x=rx, y=ry, z=rz, f=plunge_feed))
 
-
 def _cut_segment(g, row, cut_feed):
-    # Assumes tool is already positioned at row[0]
     for (x, y, z) in row[1:]:
         g.append(_g1_xyzf(x=x, y=y, z=z, f=cut_feed))
-
 
 def _same_raster_row(prev_row, start_y) -> bool:
     if not prev_row:
@@ -92,18 +74,12 @@ def _same_raster_row(prev_row, start_y) -> bool:
     prev_y = float(prev_row[0][1])
     return abs(float(start_y) - prev_y) <= _SAME_ROW_Y_TOL
 
-
 def _staydown_link(g, start_x, start_y, start_z, safe_z, plunge_feed):
-    """
-    Rapid Z-up just enough (or to safe_z if needed), rapid XY to next start,
-    then controlled plunge back to start_z.
-    """
     target_link_z = start_z + _LINK_CLEARANCE
     z_up = target_link_z if target_link_z < safe_z else safe_z
     _rapid_to_z(g, z_up)
     _rapid_to_xy(g, start_x, start_y)
     _plunge_to(g, start_z, plunge_feed)
-
 
 def _full_retract_move(g, start_x, start_y, start_z, safe_z, ramp_distance, plunge_feed):
     _rapid_to_z(g, safe_z)
@@ -112,7 +88,6 @@ def _full_retract_move(g, start_x, start_y, start_z, safe_z, ramp_distance, plun
         _ramp_entry(g, start_x, start_y, safe_z, start_z, ramp_distance, plunge_feed)
     else:
         _plunge_to(g, start_z, plunge_feed)
-
 
 def emit_gcode_from_path(
     path,
@@ -123,16 +98,8 @@ def emit_gcode_from_path(
     header_lines=None,
     footer_lines=None,
 ):
-    """
-    Emit G-code for a path (list of rows; each row is list[(x,y,z)]).
-    Behavior:
-      - G0 for all non-cut moves (Z-up and XY traverses)
-      - G1 only for plunges/ramp and cutting
-      - Stay-down linking across same-row fragments (tiny rapid Z-up, rapid XY, G1 plunge)
-    Signature remains unchanged.
-    """
     cut_feed = float(feedrate)
-    plunge_feed = float(feedrate)  # keep unified unless you expose separate config
+    plunge_feed = float(feedrate)
 
     g = []
     g.extend(_emit_header(units, safe_height, header_lines))
@@ -148,7 +115,6 @@ def emit_gcode_from_path(
         start_x, start_y, start_z = float(row[0][0]), float(row[0][1]), float(row[0][2])
 
         if i == 0:
-            # First segment: rapid to XY, then descend (optional ramp)
             _rapid_to_xy(g, start_x, start_y)
             if ramp_distance > 0.0:
                 _ramp_entry(g, start_x, start_y, safe_height, start_z, ramp_distance, plunge_feed)
@@ -162,7 +128,6 @@ def emit_gcode_from_path(
 
         _cut_segment(g, row, cut_feed)
 
-        # Park just above last cut so next iteration can decide link strategy
         last_z = float(row[-1][2])
         park_z = min(safe_height, last_z + _LINK_CLEARANCE)
         _rapid_to_z(g, park_z)

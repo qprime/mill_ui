@@ -1,9 +1,7 @@
 # path: skills/cam_generator/core/preview.py
-# type: visualization tool
-# tags: preview, toolpath, gcode, matplotlib
-# owner: cliff
-# depends_on: matplotlib.pyplot
-# description: Visualizes G-code toolpaths using matplotlib, with optional Z-depth coloring.
+# # desc: Matplotlib XY preview of G-code.
+# api: preview_toolpath
+# tags: cam
 
 import matplotlib.pyplot as plt
 
@@ -24,12 +22,12 @@ def preview_toolpath(gcode_lines, z_fade=False, show=True, save_path=None):
             elif p.startswith("Y"): y = float(p[1:])
             elif p.startswith("Z"): z = float(p[1:])
 
-        if s.startswith("G1"):  # cut moves only
+        if s.startswith("G1"):
             if z is None: z = last_z
             if x is not None and y is not None:
                 x_vals_cut.append(x); y_vals_cut.append(y); z_vals_cut.append(z)
             last_z = z
-        else:  # G0 (rapids) – optional light overlay
+        else:
             if x is not None and y is not None:
                 x_vals_rapid.append(x); y_vals_rapid.append(y)
             if z is not None: last_z = z
@@ -42,7 +40,6 @@ def preview_toolpath(gcode_lines, z_fade=False, show=True, save_path=None):
     else:
         ax.plot(x_vals_cut, y_vals_cut, linewidth=0.5)
 
-    # (Optional) draw rapids faintly on top for context
     if x_vals_rapid:
         ax.plot(x_vals_rapid, y_vals_rapid, linewidth=0.2, alpha=0.25)
 

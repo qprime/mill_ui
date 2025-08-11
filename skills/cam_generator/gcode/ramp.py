@@ -1,12 +1,9 @@
 # path: skills/cam_generator/gcode/ramp.py
-# type: gcode utility
-# tags: cam, gcode, ramp, numpy
-# owner: cliff
-# depends_on: numpy
-# description: Generates z-axis ramp coordinates for G-code. Used in toolpath generation.
+# # desc: Generate Z ramp points for entry/exit.
+# api: generate_z_ramp
+# tags: cam
 
 import numpy as np
-
 
 def generate_z_ramp(x, y, z_start, z_end, step_mm=0.5):
     if z_start == z_end:

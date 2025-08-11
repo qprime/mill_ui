@@ -1,13 +1,10 @@
 # path: skills/cam_generator/core/pass_reporter.py
-# type: reporting_module
-# tags: cam, report, json, utilities
-# owner: cliff
-# depends_on: pathlib, json
-# description: Manages generation of CAM pass reports and outputs as JSON.
+# # desc: Collect per-pass metrics and write JSON.
+# api: PassReporter
+# tags: cam
 
 import json
 from pathlib import Path
-
 
 class PassReporter:
     def __init__(self, job_name, output_dir):
@@ -25,19 +22,24 @@ class PassReporter:
         removed_colinear,
         removed_deduped,
         algorithms,
+        xy_km=None,
+        z_km=None,
     ):
-        self.reports.append(
-            {
-                "pass": pass_name,
-                "points": int(point_count),
-                "z_min": round(float(z_min), 3),
-                "z_max": round(float(z_max), 3),
-                "estimated_time_min": round(float(time_min), 1),
-                "colinear_removed": int(removed_colinear),
-                "deduped_removed": int(removed_deduped),
-                "algorithms": algorithms,
-            }
-        )
+        r = {
+            "pass": pass_name,
+            "points": int(point_count),
+            "z_min": round(float(z_min), 3),
+            "z_max": round(float(z_max), 3),
+            "estimated_time_min": round(float(time_min), 1),
+            "colinear_removed": int(removed_colinear),
+            "deduped_removed": int(removed_deduped),
+            "algorithms": algorithms,
+        }
+        if xy_km is not None:
+            r["xy_km"] = round(float(xy_km), 3)
+        if z_km is not None:
+            r["z_km"] = round(float(z_km), 3)
+        self.reports.append(r)
 
     def write_json(self):
         out_path = self.output_dir / f"{self .job_name }_summary.json"
@@ -52,6 +54,10 @@ class PassReporter:
             print(f"   Points         : {r ['points']}")
             print(f"   Z bounds       : {r ['z_min']} to {r ['z_max']} mm")
             print(f"   Estimated time : {r ['estimated_time_min']} min")
+            if 'xy_km' in r:
+                print(f"   XY distance    : {r['xy_km']} km")
+            if 'z_km' in r:
+                print(f"   Z distance     : {r['z_km']} km")
             print(f"   Colinear trim  : {r ['colinear_removed']}")
             print(f"   Deduped trim   : {r ['deduped_removed']}")
             print(f"   Algorithms     : {', '.join (r ['algorithms'])}")

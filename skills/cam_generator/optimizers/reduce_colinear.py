@@ -1,19 +1,15 @@
 # path: skills/cam_generator/optimizers/reduce_colinear.py
-# type: geometry_optimizer
-# tags: optimization, cam, geometry, numpy
-# owner: cliff
-# depends_on: numpy
-# description: Provides functions to optimize CAM paths by reducing colinear points.
+# # desc: Trim colinear points from a path.
+# api: reduce_colinear_path
+# tags: cam
 
 import numpy as np
-
 
 def is_colinear(p1, p2, p3, tolerance=1e-2):
     v1 = np.array([p2[0] - p1[0], p2[1] - p1[1]])
     v2 = np.array([p3[0] - p2[0], p3[1] - p2[1]])
     cross = np.cross(v1, v2)
     return abs(cross) < tolerance
-
 
 def reduce_colinear_path(path, tolerance=1e-2):
     reduced_path = []

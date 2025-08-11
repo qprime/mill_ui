@@ -5,7 +5,113 @@
 # depends_on: skills/cam_generator/gcode/ramp.py
 # description: Generates G-code for CNC machines from provided toolpaths.
 
+# skills/cam_generator/gcode/emit_gcode.py
+
 from skills.cam_generator.gcode.ramp import generate_z_ramp
+
+# Tunables (kept internal; no API change)
+_LINK_CLEARANCE = 0.6       # mm above surface for intra-row hops
+_SAME_ROW_Y_TOL = 1e-4      # treat ~equal Y as same raster row
+
+
+def _fmt(val: float) -> str:
+    return f"{val:.3f}"
+
+
+def _g0_xyz(x=None, y=None, z=None) -> str:
+    parts = ["G0"]
+    if x is not None:
+        parts.append(f"X{_fmt(x)}")
+    if y is not None:
+        parts.append(f"Y{_fmt(y)}")
+    if z is not None:
+        parts.append(f"Z{_fmt(z)}")
+    return " ".join(parts)
+
+
+def _g1_xyzf(x=None, y=None, z=None, f=None) -> str:
+    parts = ["G1"]
+    if x is not None:
+        parts.append(f"X{_fmt(x)}")
+    if y is not None:
+        parts.append(f"Y{_fmt(y)}")
+    if z is not None:
+        parts.append(f"Z{_fmt(z)}")
+    if f is not None:
+        parts.append(f"F{int(round(f))}")
+    return " ".join(parts)
+
+
+def _emit_header(units: str, safe_z: float, header_lines):
+    g = []
+    if header_lines:
+        g.extend(header_lines)
+    g.append("G21" if units == "mm" else "G20")
+    g.append("G90 ; Absolute positioning")
+    g.append(_g0_xyz(z=safe_z))
+    return g
+
+
+def _emit_footer(safe_z: float, footer_lines):
+    g = []
+    g.append(f"{_g0_xyz(z=safe_z)} ; Final retract")
+    g.append("G0 X0 Y0 ; Return to origin")
+    if footer_lines:
+        g.extend(footer_lines)
+    return g
+
+
+def _rapid_to_xy(g, x, y):
+    g.append(_g0_xyz(x=x, y=y))
+
+
+def _rapid_to_z(g, z):
+    g.append(_g0_xyz(z=z))
+
+
+def _plunge_to(g, z, plunge_feed):
+    g.append(_g1_xyzf(z=z, f=plunge_feed))
+
+
+def _ramp_entry(g, x, y, safe_z, target_z, ramp_distance, plunge_feed):
+    # Generate a smooth Z ramp only when requested
+    ramp_pts = generate_z_ramp(x, y, safe_z, target_z, step_mm=ramp_distance / 10.0)
+    for rx, ry, rz in ramp_pts:
+        g.append(_g1_xyzf(x=rx, y=ry, z=rz, f=plunge_feed))
+
+
+def _cut_segment(g, row, cut_feed):
+    # Assumes tool is already positioned at row[0]
+    for (x, y, z) in row[1:]:
+        g.append(_g1_xyzf(x=x, y=y, z=z, f=cut_feed))
+
+
+def _same_raster_row(prev_row, start_y) -> bool:
+    if not prev_row:
+        return False
+    prev_y = float(prev_row[0][1])
+    return abs(float(start_y) - prev_y) <= _SAME_ROW_Y_TOL
+
+
+def _staydown_link(g, start_x, start_y, start_z, safe_z, plunge_feed):
+    """
+    Rapid Z-up just enough (or to safe_z if needed), rapid XY to next start,
+    then controlled plunge back to start_z.
+    """
+    target_link_z = start_z + _LINK_CLEARANCE
+    z_up = target_link_z if target_link_z < safe_z else safe_z
+    _rapid_to_z(g, z_up)
+    _rapid_to_xy(g, start_x, start_y)
+    _plunge_to(g, start_z, plunge_feed)
+
+
+def _full_retract_move(g, start_x, start_y, start_z, safe_z, ramp_distance, plunge_feed):
+    _rapid_to_z(g, safe_z)
+    _rapid_to_xy(g, start_x, start_y)
+    if ramp_distance > 0.0:
+        _ramp_entry(g, start_x, start_y, safe_z, start_z, ramp_distance, plunge_feed)
+    else:
+        _plunge_to(g, start_z, plunge_feed)
 
 
 def emit_gcode_from_path(
@@ -17,42 +123,49 @@ def emit_gcode_from_path(
     header_lines=None,
     footer_lines=None,
 ):
-    gcode = []
+    """
+    Emit G-code for a path (list of rows; each row is list[(x,y,z)]).
+    Behavior:
+      - G0 for all non-cut moves (Z-up and XY traverses)
+      - G1 only for plunges/ramp and cutting
+      - Stay-down linking across same-row fragments (tiny rapid Z-up, rapid XY, G1 plunge)
+    Signature remains unchanged.
+    """
+    cut_feed = float(feedrate)
+    plunge_feed = float(feedrate)  # keep unified unless you expose separate config
 
-    if header_lines:
-        gcode.extend(header_lines)
+    g = []
+    g.extend(_emit_header(units, safe_height, header_lines))
 
-    gcode.append("G21" if units == "mm" else "G20")
-    gcode.append("G90 ; Absolute positioning")
-    gcode.append(f"G0 Z{safe_height :.3f}")
+    if not path:
+        g.extend(_emit_footer(safe_height, footer_lines))
+        return g
 
-    for row in path:
+    for i, row in enumerate(path):
         if not row:
             continue
 
-        start_x, start_y, start_z = row[0]
-        gcode.append(f"G0 X{start_x :.3f} Y{start_y :.3f}")
+        start_x, start_y, start_z = float(row[0][0]), float(row[0][1]), float(row[0][2])
 
-        if ramp_distance > 0.0:
-            ramp_pts = generate_z_ramp(
-                start_x, start_y, safe_height, start_z, step_mm=ramp_distance / 10
-            )
-            for rx, ry, rz in ramp_pts:
-                gcode.append(f"G1 X{rx :.3f} Y{ry :.3f} Z{rz :.3f} F{feedrate }")
+        if i == 0:
+            # First segment: rapid to XY, then descend (optional ramp)
+            _rapid_to_xy(g, start_x, start_y)
+            if ramp_distance > 0.0:
+                _ramp_entry(g, start_x, start_y, safe_height, start_z, ramp_distance, plunge_feed)
+            else:
+                _plunge_to(g, start_z, plunge_feed)
         else:
-            gcode.append(
-                f"G1 X{start_x :.3f} Y{start_y :.3f} Z{start_z :.3f} F{feedrate }"
-            )
+            if _same_raster_row(path[i - 1], start_y):
+                _staydown_link(g, start_x, start_y, start_z, safe_height, plunge_feed)
+            else:
+                _full_retract_move(g, start_x, start_y, start_z, safe_height, ramp_distance, plunge_feed)
 
-        for x, y, z in row[1:]:
-            gcode.append(f"G1 X{x :.3f} Y{y :.3f} Z{z :.3f} F{feedrate }")
+        _cut_segment(g, row, cut_feed)
 
-        gcode.append(f"G0 Z{safe_height :.3f}")
+        # Park just above last cut so next iteration can decide link strategy
+        last_z = float(row[-1][2])
+        park_z = min(safe_height, last_z + _LINK_CLEARANCE)
+        _rapid_to_z(g, park_z)
 
-    gcode.append(f"G0 Z{safe_height :.3f} ; Final retract")
-    gcode.append("G0 X0 Y0 ; Return to origin")
-
-    if footer_lines:
-        gcode.extend(footer_lines)
-
-    return gcode
+    g.extend(_emit_footer(safe_height, footer_lines))
+    return g

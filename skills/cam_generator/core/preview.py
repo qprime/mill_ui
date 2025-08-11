@@ -7,39 +7,48 @@
 
 import matplotlib.pyplot as plt
 
-
 def preview_toolpath(gcode_lines, z_fade=False, show=True, save_path=None):
-    x_vals = []
-    y_vals = []
-    z_vals = []
+    x_vals_cut, y_vals_cut, z_vals_cut = [], [], []
+    x_vals_rapid, y_vals_rapid = [], []
+
+    last_z = 0.0
     for line in gcode_lines:
-        if line.startswith("G1") or line.startswith("G0"):
-            parts = line.split()
-            x = y = z = None
-            for part in parts:
-                if part.startswith("X"):
-                    x = float(part[1:])
-                elif part.startswith("Y"):
-                    y = float(part[1:])
-                elif part.startswith("Z"):
-                    z = float(part[1:])
+        s = line.split(";", 1)[0].strip()
+        if not s or not s.startswith(("G0", "G1")):
+            continue
+
+        parts = s.split()
+        x = y = z = None
+        for p in parts:
+            if p.startswith("X"): x = float(p[1:])
+            elif p.startswith("Y"): y = float(p[1:])
+            elif p.startswith("Z"): z = float(p[1:])
+
+        if s.startswith("G1"):  # cut moves only
+            if z is None: z = last_z
             if x is not None and y is not None:
-                x_vals.append(x)
-                y_vals.append(y)
-                z_vals.append(z if z is not None else z_vals[-1] if z_vals else 0)
+                x_vals_cut.append(x); y_vals_cut.append(y); z_vals_cut.append(z)
+            last_z = z
+        else:  # G0 (rapids) – optional light overlay
+            if x is not None and y is not None:
+                x_vals_rapid.append(x); y_vals_rapid.append(y)
+            if z is not None: last_z = z
+
     fig, ax = plt.subplots(figsize=(10, 8))
-    if z_fade:
-        sc = ax.scatter(x_vals, y_vals, c=z_vals, cmap="viridis", s=0.5)
+    if z_fade and z_vals_cut:
+        vmin = min(z_vals_cut); vmax = max(z_vals_cut)
+        sc = ax.scatter(x_vals_cut, y_vals_cut, c=z_vals_cut, s=0.5, vmin=vmin, vmax=vmax, cmap="viridis")
         plt.colorbar(sc, label="Z Depth (mm)")
     else:
-        ax.plot(x_vals, y_vals, linewidth=0.5, color="black")
-    ax.set_title("Toolpath Preview")
-    ax.set_xlabel("X (mm)")
-    ax.set_ylabel("Y (mm)")
-    ax.set_aspect("equal")
-    ax.grid(True)
-    if save_path:
-        plt.savefig(save_path, dpi=300)
-    if show:
-        plt.show()
+        ax.plot(x_vals_cut, y_vals_cut, linewidth=0.5)
+
+    # (Optional) draw rapids faintly on top for context
+    if x_vals_rapid:
+        ax.plot(x_vals_rapid, y_vals_rapid, linewidth=0.2, alpha=0.25)
+
+    ax.set_title("Toolpath Preview (cuts only)")
+    ax.set_xlabel("X (mm)"); ax.set_ylabel("Y (mm)")
+    ax.set_aspect("equal"); ax.grid(True)
+    if save_path: plt.savefig(save_path, dpi=300)
+    if show: plt.show()
     plt.close()

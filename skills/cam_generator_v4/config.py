@@ -122,30 +122,36 @@ def load_config(project_dir: Path) -> Dict[str, Any]:
         "work_offset_mm": dict(cfg["job"]["machine"].get("work_offset_mm", {"x": 0.0, "y": 0.0, "z": 0.0})),
     }
 
-    # STL options: CAM + PROOF
+    # STL options: CAM + PROOF + AUTOPITCH(always on)
     stl_cfg = dict(cfg["job"].get("stl", {}))
     # CAM controls
     stl_cfg.setdefault("enable", True)
-    stl_cfg.setdefault("per_band", True)            # CAM bands
-    stl_cfg.setdefault("add_skirt", True)           # CAM skirts (base+walls)
-    stl_cfg.setdefault("z_exaggeration", 1.0)       # CAM z-exag (usually 1.0)
-    stl_cfg.setdefault("base_mm_last", 0.0)         # extra base on final CAM band
-    stl_cfg.setdefault("max_triangles", 0)          # 0 = unlimited (full res)
-    stl_cfg.setdefault("crop_changed", True)        # crop band meshes to changed bbox
-    stl_cfg.setdefault("crop_eps_mm", 0.01)         # 'changed' threshold
-    stl_cfg.setdefault("crop_margin_px", 4)         # bbox padding (pixels)
+    stl_cfg.setdefault("per_band", True)
+    stl_cfg.setdefault("add_skirt", True)
+    stl_cfg.setdefault("z_exaggeration", 1.0)
+    stl_cfg.setdefault("base_mm_last", 0.0)
+    stl_cfg.setdefault("max_triangles", 0)           # 0 = unlimited
+    stl_cfg.setdefault("crop_changed", True)
+    stl_cfg.setdefault("crop_eps_mm", 0.01)
+    stl_cfg.setdefault("crop_margin_px", 4)
+
+    # AUTOPITCH hints (no enable flag; always on)
+    autop = dict(stl_cfg.get("autopitch", {}))
+    # If you know which pass is the finest, name it here; otherwise we auto-pick by smallest tool diameter.
+    autop.setdefault("finest_pass_name", None)
+    # Used only if we cannot find a stepover on that pass.
+    autop.setdefault("default_stepover_frac", 0.30)
+    stl_cfg["autopitch"] = autop
 
     # PROOF controls
     proof_cfg = dict(stl_cfg.get("proof", {}))
     proof_cfg.setdefault("enable", True)
-    # target size can be set as {width,height} or target_width_mm/target_height_mm
-    proof_cfg.setdefault("target_size_mm", {"width": 200.0})  # 200 mm wide sample by default
+    proof_cfg.setdefault("target_size_mm", {"width": 200.0})
     proof_cfg.setdefault("add_skirt", True)
     proof_cfg.setdefault("z_exaggeration", 1.25)
     proof_cfg.setdefault("base_mm", 6.0)
     proof_cfg.setdefault("per_band", False)
-    proof_cfg.setdefault("max_triangles", 2_000_000)  # cap triangles by downsampling
-
+    proof_cfg.setdefault("max_triangles", 2_000_000)
     stl_cfg["proof"] = proof_cfg
 
     return {

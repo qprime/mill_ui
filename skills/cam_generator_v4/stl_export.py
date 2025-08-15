@@ -1,12 +1,13 @@
 # path: skills/cam_generator_v4/stl_export.py
-# desc: Export STL meshes for CAM (surfaces) and PROOF (printable) in one run
+# desc: Export STL meshes for CAM (surfaces) and PROOF (printable) in one run.
+#       Mesh pitch is auto-derived from the finish pass stepover (always on).
 # api: export_stl
 
 from __future__ import annotations
 
 from math import ceil, sqrt
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple, List
 
 import numpy as np
 
@@ -17,7 +18,7 @@ from skills.cam_generator_v4.stl_writer import write_binary_stl
 __all__ = ["export_stl"]
 
 
-# ---------- small config helpers ----------
+# ---------- tiny config helpers ----------
 
 def _b(d: Mapping[str, Any], k: str, dv: bool) -> bool:
     return bool(d.get(k, dv))
@@ -37,7 +38,7 @@ def _i(d: Mapping[str, Any], k: str, dv: int) -> int:
         return int(dv)
 
 
-# ---------- plan/bands helpers ----------
+# ---------- bands helpers ----------
 
 def _bands(plan: Mapping[str, Any]) -> Optional[Dict[str, Dict[str, np.ndarray]]]:
     b = plan.get("bands")
@@ -53,7 +54,7 @@ def _bands(plan: Mapping[str, Any]) -> Optional[Dict[str, Dict[str, np.ndarray]]
     return out or None
 
 
-def _ordered_band_names(plan: Mapping[str, Any], bands: Mapping[str, Any]) -> list[str]:
+def _ordered_band_names(plan: Mapping[str, Any], bands: Mapping[str, Any]) -> List[str]:
     ordered = [p.get("name") for p in plan.get("passes", []) if isinstance(p, dict)]
     return [n for n in ordered if n in bands] or list(bands.keys())
 
@@ -90,8 +91,18 @@ def _downsample_to_triangle_budget(z: np.ndarray,
     tris = _estimate_top_triangles(h, w)
     if max_top_tris <= 0 or tris <= max_top_tris:
         return z, pitch_mm
-    # choose stride s so 2*((h/s-1)*(w/s-1)) <= max_top_tris
     s = max(1, int(ceil(sqrt(tris / float(max_top_tris)))))
+    z2 = z[::s, ::s]
+    return z2, pitch_mm * s
+
+
+def _enforce_min_pitch(z: np.ndarray, pitch_mm: float, min_pitch_mm: float) -> Tuple[np.ndarray, float]:
+    """
+    Ensure mesh pitch is not finer than min_pitch_mm by striding.
+    """
+    if min_pitch_mm <= 0 or pitch_mm >= min_pitch_mm:
+        return z, pitch_mm
+    s = max(1, int(ceil(min_pitch_mm / float(pitch_mm))))
     z2 = z[::s, ::s]
     return z2, pitch_mm * s
 
@@ -102,7 +113,9 @@ def _downsample_if_needed(z: np.ndarray, pitch_mm: float, max_top_tris: int) -> 
     return _downsample_to_triangle_budget(z, pitch_mm, max_top_tris)
 
 
-def _retarget_pitch(z: np.ndarray, pitch_mm: float, target_w_mm: float | None, target_h_mm: float | None) -> float:
+def _retarget_pitch(z: np.ndarray, pitch_mm: float,
+                    target_w_mm: Optional[float],
+                    target_h_mm: Optional[float]) -> float:
     """
     Change pitch to meet target width/height in mm without resampling (keeps resolution).
     """
@@ -110,9 +123,9 @@ def _retarget_pitch(z: np.ndarray, pitch_mm: float, target_w_mm: float | None, t
         return pitch_mm
     h, w = z.shape
     pitch = pitch_mm
-    if target_w_mm:
+    if target_w_mm is not None:
         pitch = float(target_w_mm) / max(1, (w - 1))
-    if target_h_mm:
+    if target_h_mm is not None:
         pitch = min(pitch, float(target_h_mm) / max(1, (h - 1)))
     return pitch
 
@@ -143,20 +156,163 @@ def _crop_band_surface(top_before: np.ndarray,
                        margin_px: int,
                        pitch_mm: float) -> Tuple[np.ndarray, float]:
     """
-    Crop band surface to the minimal rectangle covering areas that changed
-    (bot_after < top_before - eps). Returns (z_cropped, pitch_mm) — pitch unchanged.
-    If nothing changed, returns a minimal 2x2 crop at one pixel (smallest valid mesh).
+    Crop band surface to the minimal rectangle covering areas that changed.
+    Returns (z_cropped, pitch_mm). If nothing changed, returns a minimal 2x2 crop.
     """
     assert top_before.shape == bot_after.shape
     changed = bot_after < (top_before - float(eps_mm))
     bbox = _bbox_from_mask(changed, margin_px)
     if bbox is None:
-        # No change: return a tiny 2x2 area from the corner to keep a valid mesh.
         h, w = bot_after.shape
         h2 = min(h, 2)
         w2 = min(w, 2)
         return bot_after[:h2, :w2], pitch_mm
     return _crop_to_bbox(bot_after, bbox), pitch_mm
+
+
+# ---------- autopitch (always on) ----------
+
+def _find_pass_by_name(cfg_passes: List[Mapping[str, Any]], name: str) -> Optional[Mapping[str, Any]]:
+    for p in cfg_passes:
+        if str(p.get("name", "")).lower() == str(name).lower():
+            return p
+    return None
+
+
+def _finish_tool_diameter_mm(plan: Mapping[str, Any],
+                             cfg_passes: List[Mapping[str, Any]],
+                             finest_name: Optional[str]) -> Optional[float]:
+    """
+    Diameter from:
+      1) explicitly named finest pass in cfg (if provided),
+      2) else the smallest tool diameter across plan['passes'],
+      3) else the smallest tool diameter across cfg_passes.
+    """
+    if finest_name:
+        # try plan first (includes resolved tools), then cfg
+        for source in (plan.get("passes") or [], cfg_passes):
+            for p in source:
+                if str(p.get("name", "")).lower() == finest_name.lower():
+                    t = (p.get("tool") or {})
+                    d = t.get("diameter_mm") if isinstance(t, dict) else None
+                    if d:
+                        try:
+                            return float(d)
+                        except Exception:
+                            pass
+        # fall through to auto-pick below if missing
+    # pick smallest diameter seen
+    best: Optional[float] = None
+    for p in (plan.get("passes") or []):
+        t = (p.get("tool") or {})
+        d = t.get("diameter_mm") if isinstance(t, dict) else None
+        if d is None:
+            continue
+        try:
+            val = float(d)
+        except Exception:
+            continue
+        best = val if best is None else min(best, val)
+    if best is not None:
+        return best
+    for p in cfg_passes:
+        t = (p.get("tool") or {})
+        d = t.get("diameter_mm") if isinstance(t, dict) else None
+        if d is None:
+            continue
+        try:
+            val = float(d)
+        except Exception:
+            continue
+        best = val if best is None else min(best, val)
+    return best
+
+
+def _stepover_mm_for_pass(plan: Mapping[str, Any],
+                          cfg_passes: List[Mapping[str, Any]],
+                          name: Optional[str],
+                          diameter_mm: Optional[float],
+                          default_frac: float) -> Optional[float]:
+    """
+    Stepover mm from pass (name matches), falling back to fraction*diameter.
+    Recognized keys: 'stepover_mm', 'stepover_frac' (0..1), 'stepover_percent' (0..100).
+    """
+    def from_mapping(p: Mapping[str, Any]) -> Optional[float]:
+        # exact mm
+        if "stepover_mm" in p:
+            try:
+                v = float(p["stepover_mm"])
+                if v > 0:
+                    return v
+            except Exception:
+                pass
+        # fraction
+        if "stepover_frac" in p and diameter_mm:
+            try:
+                frac = float(p["stepover_frac"])
+                if 0 < frac <= 1:
+                    return frac * float(diameter_mm)
+            except Exception:
+                pass
+        # percent
+        if "stepover_percent" in p and diameter_mm:
+            try:
+                pct = float(p["stepover_percent"])
+                if 0 < pct <= 100:
+                    return (pct / 100.0) * float(diameter_mm)
+            except Exception:
+                pass
+        return None
+
+    if name:
+        # try plan pass (resolved), then cfg pass (declared)
+        for source in (plan.get("passes") or [], cfg_passes):
+            for p in source:
+                if str(p.get("name", "")).lower() == name.lower():
+                    val = from_mapping(p)
+                    if val and val > 0:
+                        return val
+
+    # fallback: look across passes and pick smallest positive stepover
+    best: Optional[float] = None
+    for source in (plan.get("passes") or [], cfg_passes):
+        for p in source:
+            val = from_mapping(p)
+            if val and val > 0:
+                best = val if best is None else min(best, val)
+    if best and best > 0:
+        return best
+
+    # final fallback: default fraction * diameter
+    if diameter_mm and diameter_mm > 0:
+        return max(0.0, float(default_frac)) * float(diameter_mm)
+    return None
+
+
+def _autopitch_min_pitch_mm(plan: Mapping[str, Any],
+                            cfg: Mapping[str, Any]) -> float:
+    """
+    Compute min mesh pitch from the chosen "finest" pass stepover:
+        P_min = stepover_mm / 2
+    Always enabled. Uses cfg['stl']['autopitch'] hints for
+    finest_pass_name and default_stepover_frac (fallback).
+    """
+    stl_cfg = cfg.get("stl", {}) if isinstance(cfg.get("stl"), dict) else {}
+    ap = stl_cfg.get("autopitch", {}) if isinstance(stl_cfg.get("autopitch"), dict) else {}
+
+    finest_name = ap.get("finest_pass_name")
+    default_frac = _f(ap, "default_stepover_frac", 0.30)
+
+    cfg_passes = list(cfg.get("passes") or [])
+    d_mm = _finish_tool_diameter_mm(plan, cfg_passes, finest_name)
+    if not d_mm or d_mm <= 0.0:
+        return 0.0
+
+    s_mm = _stepover_mm_for_pass(plan, cfg_passes, finest_name, d_mm, default_frac)
+    if not s_mm or s_mm <= 0.0:
+        return 0.0
+
+    return s_mm / 2.0
 
 
 # ---------- main export ----------
@@ -167,68 +323,68 @@ def export_stl(plan_result: Mapping[str, Any],
     """
     Emits both CAM and PROOF meshes in one run.
 
-    CAM (for FreeCAD toolpathing):
+    CAM (for FreeCAD):
       - CAM_output/meshes/relief_final.stl
       - CAM_output/meshes/stock_after_{NN}_{pass}.stl (if per_band true)
-      - Options to crop band meshes to changed areas and cap triangles
+      - Auto-pitch-from-tool (always on), crop-to-changed, triangle cap.
 
-    PROOF (for printing / client samples):
-      - CAM_output/meshes/proof/proof_final.stl
-      - Optional per-band proof STLs
-      - Retarget XY size (target_size_mm), auto-downsample to max_triangles
-      - Skirt/base + z_exaggeration for visual clarity
+    PROOF:
+      - CAM_output/meshes/proof/proof_final.stl (+ optional per-band)
+      - Retarget XY size, downsample to triangle cap, base/skirt, Z exaggeration.
     """
     stl_cfg = cfg.get("stl", {}) if isinstance(cfg.get("stl"), dict) else {}
     if not _b(stl_cfg, "enable", True):
         return {"ok": True, "enabled": False}
 
     hm = load_heightmap(dict(cfg))
-    z0 = hm["z_mm"]                    # full-resolution relief surface (final)
+    z0 = hm["z_mm"]
     pitch0 = float(hm["pixel_pitch_mm"])
 
     top_z = float(cfg["stock"]["top_z_mm"])
     max_depth = float(cfg["heightmap"]["max_depth_mm"])
     stock_bottom = top_z - max_depth
 
-    # --- CAM options ---
+    # CAM options
     cam_add_walls = _b(stl_cfg, "add_skirt", True)
     cam_per_band = _b(stl_cfg, "per_band", True)
     cam_z_exag = _f(stl_cfg, "z_exaggeration", 1.0)
     base_mm_last = _f(stl_cfg, "base_mm_last", 0.0)
-    cam_max_tris = _i(stl_cfg, "max_triangles", 0)          # 0 = unlimited (full res)
-    cam_crop = _b(stl_cfg, "crop_changed", True)            # crop band meshes to changed bbox
+    cam_max_tris = _i(stl_cfg, "max_triangles", 0)          # 0 = unlimited
+    cam_crop = _b(stl_cfg, "crop_changed", True)
     cam_crop_eps = _f(stl_cfg, "crop_eps_mm", 0.01)
     cam_crop_margin_px = _i(stl_cfg, "crop_margin_px", 4)
+
+    # Auto pitch from tool (ALWAYS ON)
+    min_pitch_tool_mm = _autopitch_min_pitch_mm(plan_result, cfg)
 
     mesh_dir = Path(out_dir) / "meshes"
     mesh_dir.mkdir(parents=True, exist_ok=True)
 
-    # ---- CAM final surface ----
-    z_final, pitch_final = _downsample_to_triangle_budget(z0, pitch0, cam_max_tris)
+    # CAM final
+    z_final, pitch_final = _enforce_min_pitch(z0, pitch0, min_pitch_tool_mm)
+    z_final, pitch_final = _downsample_to_triangle_budget(z_final, pitch_final, cam_max_tris)
     final_cam = mesh_dir / "relief_final.stl"
     _emit(final_cam, z_final, pitch_final, stock_bottom, cam_add_walls, top_z, cam_z_exag)
 
-    cam_files: list[str] = [str(final_cam)]
+    cam_files: List[str] = [str(final_cam)]
 
-    # ---- CAM per-band stock-after ----
+    # CAM per-band
     bands = _bands(plan_result) if cam_per_band else None
     if isinstance(bands, dict):
         names = _ordered_band_names(plan_result, bands)
         for idx, name in enumerate(names, 1):
             top_before = bands[name]["top"]
-            bot_after = bands[name]["bot"]  # stock surface after this band
+            bot_after = bands[name]["bot"]
 
-            z_band = bot_after
-            pitch_band = pitch0
-
-            # crop to changed area for big savings
+            z_band, pitch_band = bot_after, pitch0
             if cam_crop:
-                z_band, pitch_band = _crop_band_surface(top_before, bot_after,
-                                                        eps_mm=cam_crop_eps,
-                                                        margin_px=cam_crop_margin_px,
-                                                        pitch_mm=pitch0)
+                z_band, pitch_band = _crop_band_surface(
+                    top_before, bot_after, eps_mm=cam_crop_eps,
+                    margin_px=cam_crop_margin_px, pitch_mm=pitch0
+                )
 
-            # cap triangle count if requested
+            # enforce tool-aware pitch, then global triangle cap
+            z_band, pitch_band = _enforce_min_pitch(z_band, pitch_band, min_pitch_tool_mm)
             z_band, pitch_band = _downsample_to_triangle_budget(z_band, pitch_band, cam_max_tris)
 
             is_last = idx == len(names)
@@ -238,11 +394,11 @@ def export_stl(plan_result: Mapping[str, Any],
             _emit(out, z_band, pitch_band, z_base, True, top_z, cam_z_exag)
             cam_files.append(str(out))
 
-    # --- PROOF options (unchanged logic, kept here for completeness) ---
+    # PROOF (unchanged)
     proof_cfg = stl_cfg.get("proof", {}) if isinstance(stl_cfg.get("proof"), dict) else {}
     proof_enable = _b(proof_cfg, "enable", True)
     proof_dir = mesh_dir / "proof"
-    proof_files: list[str] = []
+    proof_files: List[str] = []
     if proof_enable:
         proof_dir.mkdir(parents=True, exist_ok=True)
         tgt_w = proof_cfg.get("target_size_mm", {}).get("width") if isinstance(proof_cfg.get("target_size_mm"), dict) else proof_cfg.get("target_width_mm")
@@ -280,4 +436,8 @@ def export_stl(plan_result: Mapping[str, Any],
         "cam": cam_files,
         "proof": proof_files,
         "mesh_dir": str(mesh_dir),
+        "autopitch": {
+            "min_pitch_tool_mm": float(min_pitch_tool_mm or 0.0),
+            "max_triangles": int(cam_max_tris or 0),
+        },
     }

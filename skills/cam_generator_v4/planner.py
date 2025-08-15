@@ -1,8 +1,3 @@
-# path: skills/cam_generator_v4/planner.py  
-# desc: Orchestrate CAM planning with border support
-# api: plan
-# tags: cam,planning,border
-
 from __future__ import annotations
 from typing import Any, Dict, Tuple, List
 from pathlib import Path
@@ -14,6 +9,7 @@ from .bands import make_bands
 from .border import generate_rect_border_moves
 from .strategy_rough_zslices import plan_rough
 from .strategy_raster_finish import plan_finish
+from .strategy_border_rect import plan_border_rect  # NEW
 
 __all__ = ["plan"]
 
@@ -27,7 +23,6 @@ def _norm01(a: np.ndarray) -> np.ndarray:
     return ((a - mn) / (mx - mn) * 255.0).astype(np.uint8)
 
 def _append_border_if_enabled(pass_cfg: Dict[str, Any], cfg: Dict[str, Any], moves: List[_Move]) -> List[_Move]:
-    """Add border toolpath if enabled in pass config."""
     border = pass_cfg.get("border") or {}
     if not border.get("enable", False):
         return moves
@@ -36,7 +31,6 @@ def _append_border_if_enabled(pass_cfg: Dict[str, Any], cfg: Dict[str, Any], mov
     tool = pass_cfg.get("tool", {}) or {}
     tool_diam = float(tool.get("diameter_mm", 0.0) or 0.0)
 
-    # Get border parameters
     stepover = border.get("stepover_mm", None)
     if stepover is None:
         stepover = float(pass_cfg.get("stepover_mm", 0.0) or (0.6 * tool_diam))
@@ -46,34 +40,22 @@ def _append_border_if_enabled(pass_cfg: Dict[str, Any], cfg: Dict[str, Any], mov
     depth = float(border.get("depth_mm", cfg["heightmap"].get("max_depth_mm", 1.0)))
     feed = float(pass_cfg.get("feed_mm_per_min", 800.0))
 
-    # Generate border moves outside the carving area
     border_moves = generate_rect_border_moves(
         bounds_mm=bounds,
-        inset_mm=inset,  # positive inset puts border outside the carving area
+        inset_mm=inset,
         width_mm=width,
         target_depth_mm=depth,
         stepover_mm=stepover,
         feed_mm_min=feed,
         climb_ccw=True,
     )
-    
+
     if not border_moves:
         return moves
-    
-    # Put border moves first so they're cut before the main carving
+
     return border_moves + moves
 
 def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Main planning function that orchestrates the entire CAM process.
-    
-    Steps:
-    1. Load heightmap
-    2. Compute pass bands  
-    3. Generate toolpaths for each pass
-    4. Add borders if configured
-    5. Save debug images
-    """
     hm = load_heightmap(cfg)
     S = hm["z_mm"].astype(np.float32, copy=False)
     pitch = float(hm["pixel_pitch_mm"])
@@ -81,7 +63,6 @@ def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
 
     bands = make_bands(S, Zs, pitch, cfg)
 
-    # Save debug images
     reports_dir = Path(cfg["paths"]["reports_dir"])
     reports_dir.mkdir(parents=True, exist_ok=True)
     for name, b in bands["pass_bands"].items():
@@ -90,18 +71,26 @@ def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
         Image.fromarray(_norm01(b["dz"])).save(reports_dir / f"band_{name}_dz.png")
 
     passes_out: List[Dict[str, Any]] = []
-    
+    band_map: Dict[str, Dict[str, np.ndarray]] = bands["pass_bands"]
+
     for p in cfg["passes"]:
         name = str(p["name"])
-        role = str(p.get("role"))
-        band = bands["pass_bands"][name]
+        role = str(p.get("role") or "")
+        strategy = str(p.get("strategy") or "")
+        moves: List[_Move] = []
 
-        # Generate base toolpath based on role
-        if role == "rough":
+        # NEW: border strategy as a first-class pass using passes.yaml fields
+        if strategy == "border_rect":
+            moves = plan_border_rect(p, cfg["heightmap"])
+
+        elif role == "rough":
+            b = band_map.get(name)
+            if b is None:
+                raise KeyError(f"Missing band for pass '{name}' (role=rough)")
             moves = plan_rough(
                 name,
-                band["top"],
-                band["bot"],
+                b["top"],
+                b["bot"],
                 pitch,
                 float(p.get("stepover_mm") or 0.75 * float(p["tool"].get("diameter_mm") or 1.0)),
                 float(p.get("stepdown_mm") or 0.5 * float(p["tool"].get("diameter_mm") or 1.0)),
@@ -109,25 +98,27 @@ def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
                 float(p.get("feed_mm_per_min") or 1000.0),
                 float(p.get("plunge_mm_per_min") or 400.0),
             )
+
         elif role == "finish":
+            b = band_map.get(name)
+            if b is None:
+                raise KeyError(f"Missing band for pass '{name}' (role=finish)")
             moves = plan_finish(
                 name,
-                S,                  # follow final surface
-                band["top"],        # stock plane
-                band["bot"],        # S
+                S,
+                b["top"],
+                b["bot"],
                 pitch,
                 float(p.get("stepover_mm") or 0.4 * float(p["tool"].get("diameter_mm") or 1.0)),
                 float(cfg["stock"]["safe_z_mm"]),
                 float(p.get("feed_mm_per_min") or 1200.0),
                 float(p.get("plunge_mm_per_min") or 400.0),
             )
-        else:
-            moves = []
 
-        # Add border if configured
+        # Optional additive per-pass border from nested config (kept for backwards-compat)
         moves = _append_border_if_enabled(p, cfg, moves)
 
-        passes_out.append({"name": name, "role": role, "tool": p["tool"], "moves": moves})
+        passes_out.append({"name": name, "role": role, "tool": p.get("tool", {}), "moves": moves})
 
     return {
         "project_name": cfg.get("project_name") or "cam_v4",

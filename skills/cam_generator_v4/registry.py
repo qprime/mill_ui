@@ -1,21 +1,18 @@
-# path: cam_generator/registry.py
-# desc: Strategy registry mapping names to callables
-# api: get_strategy
-# tags: registry,strategy
-
 from __future__ import annotations
 from typing import Callable, Dict
 
 from skills.cam_generator_v4.strategy_rough_zslices import plan_rough
 from skills.cam_generator_v4.strategy_raster_finish import plan_finish
 from skills.cam_generator_v4.strategy_pencil import plan_pencil
+from skills.cam_generator_v4.strategy_border_rect import plan_border_rect
 
 __all__ = ["get_strategy"]
 
 _REGISTRY: Dict[str, Callable[..., object]] = {
     "rough_zslices": plan_rough,
-    "raster_finish": plan_finish,   # signature now: (env, band_top, band_bot, ...)
+    "raster_finish": plan_finish,
     "pencil": plan_pencil,
+    "border_rect": plan_border_rect,
 }
 
 def get_strategy(name: str) -> Callable[..., object]:

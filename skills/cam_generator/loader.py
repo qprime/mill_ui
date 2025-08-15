@@ -5,7 +5,16 @@
 
 import cv2
 import numpy as np
-from skills.cam_generator.core.job_loader import load_job_config
+
+import yaml
+from pathlib import Path
+
+def load_job_config(path):
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Job config not found: {path }")
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
 
 def load_heightmap(png_path, job_config_path=None, scale_xy=0.1, scale_z=2.0):
     if job_config_path is None:

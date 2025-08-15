@@ -7,11 +7,10 @@ import argparse
 from pathlib import Path
 import shutil
 
-from skills.cam_generator.core.multi_pass import generate_all_passes
-from skills.cam_generator.core.preview import preview_toolpath
-from skills.cam_generator.core.time_estimator import estimate_cut_time
+from skills.cam_generator.pipeline import generate_passes
+from skills.cam_generator.time_estimator import estimate_cut_time
 
-def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True):
+def run_cam_pipeline(job_name, base_dir=None, verbose=True):
     if base_dir is None:
         base_dir = Path(__file__).resolve().parent.parent.parent
     else:
@@ -45,7 +44,7 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
         print(f"[+] Configs: {config_path}, {job_config_path}")
         print(f"[+] Output folder: {output_folder}")
 
-    generate_all_passes(
+    generate_passes(
         image_path=image_path,
         config_path=output_folder / "default_passes.yaml",
         output_dir=output_folder,
@@ -53,19 +52,12 @@ def run_cam_pipeline(job_name, base_dir=None, enable_preview=True, verbose=True)
         job_config_path=output_folder / "job_config.yaml",
     )
 
-    if enable_preview:
-        for gcode_file in output_folder.glob("*.nc"):
-            with open(gcode_file) as f:
-                lines = f.read().splitlines()
-            preview_toolpath(
-                lines,
-                z_fade=True,
-                show=False,
-                save_path=f"{gcode_file.with_suffix('.png')}",
-            )
-            minutes = estimate_cut_time(lines)
-            if verbose:
-                print(f"{gcode_file.name}: {minutes:.1f} min")
+    for gcode_file in output_folder.glob("*.nc"):
+        with open(gcode_file) as f:
+            lines = f.read().splitlines()
+        minutes = estimate_cut_time(lines)
+        if verbose:
+            print(f"{gcode_file.name}: {minutes:.1f} min")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -75,11 +67,6 @@ def main():
         "--job",
         required=True,
         help="Job/project name (matches subfolder in memories/cam_projects/)",
-    )
-    parser.add_argument(
-        "--no-preview",
-        action="store_true",
-        help="Skip PNG preview generation.",
     )
     parser.add_argument(
         "--base-dir",
@@ -96,7 +83,6 @@ def main():
     run_cam_pipeline(
         job_name=args.job,
         base_dir=args.base_dir,
-        enable_preview=not args.no_preview,
         verbose=not args.quiet,
     )
 

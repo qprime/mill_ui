@@ -3,7 +3,7 @@
 # api: emit_gcode_from_path
 # tags: cam
 
-from skills.cam_generator.gcode.ramp import generate_z_ramp
+from skills.cam_generator.ramp import generate_z_ramp
 
 _LINK_CLEARANCE = 0.6
 _SAME_ROW_Y_TOL = 1e-4

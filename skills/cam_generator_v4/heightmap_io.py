@@ -10,48 +10,47 @@ from typing import Any, Dict, Tuple, Optional
 import numpy as np
 from PIL import Image
 
-def _read_png(path: Path) -> np.ndarray:
+def _read_image_norm01_and_bitdepth(path: Path) -> Tuple[np.ndarray, int]:
+    """
+    Returns (normalized_float32_array_in_[0,1], bit_depth={8|16}).
+    Single open, no redundant I/O.
+    """
     im = Image.open(path)
-    # 16-bit grayscale
     if im.mode == "I;16":
         arr = np.array(im, dtype=np.uint16)
         mn = float(arr.min()); mx = float(arr.max()); rng = mx - mn
-        if rng <= 0: return np.zeros_like(arr, dtype=np.float32)
-        return ((arr.astype(np.float32) - mn) / rng).astype(np.float32)
-    # 8-bit grayscale (or convert)
+        if rng <= 0:
+            return np.zeros_like(arr, dtype=np.float32), 16
+        norm = (arr.astype(np.float32) - mn) / rng
+        return norm.astype(np.float32), 16
+
+    # Fallback to 8-bit grayscale
     if im.mode != "L":
         im = im.convert("L")
     arr = np.array(im, dtype=np.uint8)
-    return (arr.astype(np.float32) / 255.0).astype(np.float32)
+    norm = (arr.astype(np.float32) / 255.0).astype(np.float32)
+    return norm, 8
 
-def _apply_floor_and_gamma(norm01: np.ndarray, 
-                          floor_gray: float, 
+def _apply_floor_and_gamma(norm01: np.ndarray,
+                          floor_gray: float,
                           gamma: float,
                           bit_depth: int) -> np.ndarray:
-    """Apply floor removal and gamma scaling to normalized image data."""
-    # Convert back to original bit depth for floor calculation
     if bit_depth == 16:
         gray_values = norm01 * 65535.0
         max_gray = 65535.0
     else:
         gray_values = norm01 * 255.0
         max_gray = 255.0
-    
-    # Apply floor removal: values below floor_gray become 0
-    floor_mask = gray_values <= floor_gray
+
+    floor_mask = gray_values <= floor_gray  # not used further, but keep behavior readable
     adjusted_values = np.maximum(gray_values - floor_gray, 0.0)
-    
-    # Renormalize to 0-1 based on remaining range
+
     remaining_range = max_gray - floor_gray
-    if remaining_range > 0:
-        norm_adjusted = adjusted_values / remaining_range
-    else:
-        norm_adjusted = np.zeros_like(adjusted_values)
-    
-    # Apply gamma scaling
+    norm_adjusted = adjusted_values / remaining_range if remaining_range > 0 else np.zeros_like(adjusted_values)
+
     if gamma != 1.0:
         norm_adjusted = np.power(norm_adjusted, gamma)
-    
+
     return norm_adjusted.astype(np.float32)
 
 def _to_surface(norm01: np.ndarray,
@@ -61,12 +60,9 @@ def _to_surface(norm01: np.ndarray,
                 floor_gray: float = 0.0,
                 gamma: float = 1.0,
                 bit_depth: int = 8) -> np.ndarray:
-    """Convert normalized image to surface heights with optional floor removal and gamma scaling."""
-    
-    # Apply floor removal and gamma scaling if specified
     if floor_gray > 0.0 or gamma != 1.0:
         norm01 = _apply_floor_and_gamma(norm01, floor_gray, gamma, bit_depth)
-    
+
     v = norm01 if white_is_high else (1.0 - norm01)
     depth = (1.0 - v) * float(max_depth_mm)
     return (float(top_z_mm) - depth).astype(np.float32)
@@ -81,7 +77,6 @@ def _derive_pixel_pitch_mm_from_target(size_px: Tuple[int,int],
     if wmm <= 0.0 and hmm <= 0.0:
         raise ValueError("target_size_mm must include width_mm or height_mm (>0)")
     if wmm > 0.0 and hmm > 0.0:
-        # keep inside requested box
         pitch_w = wmm / float(W)
         pitch_h = hmm / float(H)
         return min(pitch_w, pitch_h)
@@ -90,45 +85,23 @@ def _derive_pixel_pitch_mm_from_target(size_px: Tuple[int,int],
     return hmm / float(H)
 
 def load_heightmap(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Single entry used by planner.plan(cfg).
-    Supports:
-      - explicit heightmap.pixel_pitch_mm > 0
-      - auto-pitch when heightmap.pixel_pitch_mm <= 0 using heightmap.target_size_mm.{width_mm|height_mm}
-      - floor_gray: removes noise floor (gray values below this become background)
-      - gamma: non-linear scaling for more dramatic relief (< 1.0 emphasizes highlights)
-    Returns:
-      {"z_mm": float32[H,W], "pixel_pitch_mm": float, "size_px": (H,W), "size_mm": (W*pitch, H*pitch)}
-    Also writes back to cfg["heightmap"]:
-      pixel_pitch_mm, bounds_mm, size_px, size_mm
-    """
     hm_cfg = cfg.get("heightmap", {})
-    img_path = hm_cfg.get("image_path")
-    if not img_path:
-        # fallback to paths.image if you keep that in cfg
-        img_path = cfg.get("paths", {}).get("image")
+    img_path = hm_cfg.get("image_path") or cfg.get("paths", {}).get("image")
     if not img_path:
         raise ValueError("heightmap.image_path is required (or paths.image)")
+    img_path = str(img_path)
+    path = Path(img_path)
 
-    # Required numeric params
     max_depth_mm = float(hm_cfg["max_depth_mm"])
     top_z_mm = float(cfg.get("stock", {}).get("top_z_mm", 0.0))
     white_is_high = bool(hm_cfg.get("white_is_high", True))
-    
-    # NEW: Floor removal and gamma scaling parameters
     floor_gray = float(hm_cfg.get("floor_gray", 0.0))
     gamma = float(hm_cfg.get("gamma", 1.0))
 
-    # Load image and detect bit depth
-    im = Image.open(Path(img_path))
-    bit_depth = 16 if im.mode == "I;16" else 8
-    
-    # Load image → normalized → surface
-    z_norm = _read_png(Path(img_path))
-    z_mm = _to_surface(z_norm, max_depth_mm, top_z_mm, white_is_high, floor_gray, gamma, bit_depth)
+    norm01, bit_depth = _read_image_norm01_and_bitdepth(path)
+    z_mm = _to_surface(norm01, max_depth_mm, top_z_mm, white_is_high, floor_gray, gamma, bit_depth)
     H, W = z_mm.shape
 
-    # Resolve pixel pitch
     pitch_cfg = float(hm_cfg.get("pixel_pitch_mm", 0.0) or 0.0)
     if pitch_cfg > 0.0:
         pitch = pitch_cfg
@@ -137,7 +110,7 @@ def load_heightmap(cfg: Dict[str, Any]) -> Dict[str, Any]:
 
     width_mm, height_mm = W * pitch, H * pitch
 
-    # Persist resolved values for all downstream modules
+    # reflect back computed values for downstream consumers
     hm_cfg["pixel_pitch_mm"] = float(pitch)
     hm_cfg["bounds_mm"] = (0.0, width_mm, 0.0, height_mm)
     hm_cfg["size_px"] = (H, W)

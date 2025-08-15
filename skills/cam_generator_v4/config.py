@@ -1,7 +1,6 @@
 # path: skills/cam_generator_v4/config.py
-# desc: Load and validate job and passes configs; resolve project paths
+# desc: Load job/passes and expose normalized run config including STL options
 # api: load_config
-# tags: config,io
 
 from __future__ import annotations
 
@@ -44,7 +43,6 @@ def _load_yaml(p: Path) -> Dict[str, Any]:
 
 
 def _merge_passes(run_list: List[str], lib: Mapping[str, Any], overrides: Mapping[str, Any]) -> List[Dict[str, Any]]:
-    """Build the ordered pass list from job 'passes' names, merging library + per-job overrides."""
     out: List[Dict[str, Any]] = []
     for name in run_list:
         base = lib.get(name)
@@ -75,15 +73,7 @@ def _validate(cfg: Dict[str, Any], paths: _Paths) -> Dict[str, Any]:
 
 
 def load_config(project_dir: Path) -> Dict[str, Any]:
-    """
-    Load the project config bundle and return a normalized runtime dict.
-
-    Supports either:
-      - explicit heightmap.pixel_pitch_mm > 0, or
-      - auto-pitch later from heightmap.target_size_mm when pixel_pitch_mm == 0.
-    """
     paths = _paths(project_dir)
-
     passes_yaml = _load_yaml(paths.passes_yaml)
     job_yaml = _load_yaml(paths.job_yaml)
 
@@ -101,30 +91,26 @@ def load_config(project_dir: Path) -> Dict[str, Any]:
     }
     _ = _validate(cfg, paths)
 
-    # Resolve pass run list (order from job file)
     run_passes = _merge_passes(
         cfg["job"]["passes"],
         cfg["passes"]["passes"],
         cfg["job"].get("overrides", {}),
     )
 
-    # Output extension
     out_ext = cfg["job"].get("output", {}).get("extension", "nc")
 
-    # Heightmap block (allow explicit pitch or auto via target_size_mm)
     hm_job = cfg["job"]["heightmap"]
     heightmap_cfg: Dict[str, Any] = {
-        # Always point at the project's input image; override here if you later add per-job image names
         "image_path": str(paths.input_image),
-        # If set to 0.0, downstream loader will derive pitch from target_size_mm
         "pixel_pitch_mm": float(hm_job.get("pixel_pitch_mm", 0.0) or 0.0),
         "target_size_mm": dict(hm_job.get("target_size_mm", {})),
         "max_depth_mm": float(hm_job["max_depth_mm"]),
         "carve_threshold_mm": float(hm_job.get("carve_threshold_mm", 0.0)),
         "white_is_high": bool(hm_job.get("white_is_high", True)),
+        "floor_gray": float(hm_job.get("floor_gray", 0.0)),
+        "gamma": float(hm_job.get("gamma", 1.0)),
     }
 
-    # Stock & machine blocks (unchanged behavior)
     stock_cfg = {
         "top_z_mm": float(cfg["job"]["stock"]["top_z_mm"]),
         "safe_z_mm": float(cfg["job"]["stock"]["safe_z_mm"]),
@@ -136,6 +122,32 @@ def load_config(project_dir: Path) -> Dict[str, Any]:
         "work_offset_mm": dict(cfg["job"]["machine"].get("work_offset_mm", {"x": 0.0, "y": 0.0, "z": 0.0})),
     }
 
+    # STL options: CAM + PROOF
+    stl_cfg = dict(cfg["job"].get("stl", {}))
+    # CAM controls
+    stl_cfg.setdefault("enable", True)
+    stl_cfg.setdefault("per_band", True)            # CAM bands
+    stl_cfg.setdefault("add_skirt", True)           # CAM skirts (base+walls)
+    stl_cfg.setdefault("z_exaggeration", 1.0)       # CAM z-exag (usually 1.0)
+    stl_cfg.setdefault("base_mm_last", 0.0)         # extra base on final CAM band
+    stl_cfg.setdefault("max_triangles", 0)          # 0 = unlimited (full res)
+    stl_cfg.setdefault("crop_changed", True)        # crop band meshes to changed bbox
+    stl_cfg.setdefault("crop_eps_mm", 0.01)         # 'changed' threshold
+    stl_cfg.setdefault("crop_margin_px", 4)         # bbox padding (pixels)
+
+    # PROOF controls
+    proof_cfg = dict(stl_cfg.get("proof", {}))
+    proof_cfg.setdefault("enable", True)
+    # target size can be set as {width,height} or target_width_mm/target_height_mm
+    proof_cfg.setdefault("target_size_mm", {"width": 200.0})  # 200 mm wide sample by default
+    proof_cfg.setdefault("add_skirt", True)
+    proof_cfg.setdefault("z_exaggeration", 1.25)
+    proof_cfg.setdefault("base_mm", 6.0)
+    proof_cfg.setdefault("per_band", False)
+    proof_cfg.setdefault("max_triangles", 2_000_000)  # cap triangles by downsampling
+
+    stl_cfg["proof"] = proof_cfg
+
     return {
         "project_name": cfg["job"].get("project_name", paths.base.name),
         "paths": cfg["paths"],
@@ -144,4 +156,5 @@ def load_config(project_dir: Path) -> Dict[str, Any]:
         "machine": machine_cfg,
         "output": {"extension": out_ext},
         "passes": run_passes,
+        "stl": stl_cfg,
     }

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>{% block title %}CLIFF{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; background: #111; color:#eee; }
+      .container { max-width: 960px; margin: 0 auto; padding: 1rem; }
+      .stack { display:flex; flex-direction:column; gap:.75rem; }
+      .row { display:flex; gap:.5rem; align-items:center; }
+      textarea, input, button { font: inherit; }
+      textarea { width:100%; min-height: 6rem; background:#1b1b1b; color:#eee; border:1px solid #333; border-radius:8px; padding:.75rem; }
+      button { background:#2b2b2b; color:#eee; border:1px solid #444; border-radius:8px; padding:.5rem .9rem; cursor:pointer; }
+      .assistant-response { background:#181818; border:1px solid #333; border-radius:8px; padding:.75rem; }
+      .muted { color:#aaa; font-size:.9rem; }
+    </style>
+  </head>
+  <body>
+    <div class="container">{% block content %}{% endblock %}</div>
+  </body>
+</html>

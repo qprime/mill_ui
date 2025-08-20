@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+  <h1>Chat</h1>
+  <form hx-post="/ask" hx-target="#responses" hx-swap="beforeend" class="stack">
+    <textarea name="message" placeholder="Type your message..."></textarea>
+    <div class="row">
+      <input type="hidden" name="chat_id" value="">
+      <button type="submit">Send</button>
+      <span class="muted">Returns a small HTML fragment</span>
+    </div>
+  </form>
+  <div id="responses" class="stack"></div>
+{% endblock %}

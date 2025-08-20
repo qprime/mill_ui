@@ -6,8 +6,8 @@ After=network.target
 User=squinlan
 WorkingDirectory=/home/squinlan/cliff_ai
 # If you use a virtualenv, activate it here (optional)
-# Environment="VIRTUAL_ENV=/home/squinlan/cliff_ai/.venv"
-# Environment="PATH=/home/squinlan/cliff_ai/.venv/bin:%PATH%"
+Environment="VIRTUAL_ENV=/home/squinlan/cliff_ai/.venv"
+Environment="PATH=/home/squinlan/cliff_ai/.venv/bin:%PATH%"
 ExecStart=/usr/bin/python3 /home/squinlan/cliff_ai/run.py web
 Restart=always
 RestartSec=2

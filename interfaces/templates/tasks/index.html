@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+  <h1>Tasks</h1>
+  {% if data.groups %}
+    {% for status, items in data.groups.items() %}
+      <h3>{{ status|capitalize }} ({{ items|length }})</h3>
+      <div class="stack">
+      {% for t in items %}
+        <form class="row" method="post" action="/tasks/status">
+          <div style="flex:1">{{ t.title or t.id }}</div>
+          <input type="hidden" name="task_id" value="{{ t.id }}">
+          <select name="status">
+            {% for s in ["todo","doing","done","blocked"] %}
+              <option value="{{ s }}" {% if t.status==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          <button>Save</button>
+        </form>
+      {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No active tasks.</p>
+  {% endif %}
+{% endblock %}

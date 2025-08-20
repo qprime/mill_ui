@@ -13,7 +13,7 @@ import traceback
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 ENTRYPOINTS = {
-    "web": "web.cliff_server.app",
+    "web": "interfaces.app",
     "whisper": "services.whisper.whisper_server",
     "context": "continuum.code_context",
     "graph": "continuum.project_graph",

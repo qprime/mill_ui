@@ -29,6 +29,21 @@ def _inject_offset(order_obj: dict, dx: float, dy: float, gutter: float | None) 
     order_obj["job_overrides"] = jover
     return order_obj
 
+def _rot_bbox(w: float, h: float, deg: int) -> tuple[float, float, float, float]:
+    """BBox of a W×H rect with corners (0,0),(W,0),(W,H),(0,H) rotated about (0,0)."""
+    d = deg % 360
+    if d == 0:
+        xs, ys = [0, w, w, 0], [0, 0, h, h]
+    elif d == 90:
+        xs, ys = [0, 0, -h, -h], [0, w, w, 0]
+    elif d == 180:
+        xs, ys = [0, -w, -w, 0], [0, 0, -h, -h]
+    elif d == 270:
+        xs, ys = [0, 0, h, h], [0, -w, -w, 0]
+    else:
+        raise ValueError("rotation_deg must be 0/90/180/270")
+    return min(xs), min(ys), max(xs), max(ys)
+
 def compose_sheet(layout_path: str, packs_dir: str | None = None, debug_svg: bool = False) -> List[Dict[str, str]]:
     sheet = _read_json(Path(layout_path))
     parts = sheet.get("parts", [])
@@ -48,17 +63,29 @@ def compose_sheet(layout_path: str, packs_dir: str | None = None, debug_svg: boo
         x = float(part.get("x", 0.0))
         y = float(part.get("y", 0.0))
         gutter = float(part.get("gutter_mm", default_gutter))
+        rotation = int(part.get("rotation_deg", 0))
 
-        # load original order and inject offsets
         order_obj = _read_json(Path(order_ref))
-        order_obj = _inject_offset(order_obj, x, y, gutter)
+        W = float(order_obj["width_mm"])
+        H = float(order_obj["height_mm"])
 
-        # write a temp order file
+        # 1) bbox of rotated local rect (about 0,0)
+        minx, miny, maxx, maxy = _rot_bbox(W, H, rotation)
+
+        # 2) translate so rotated bbox lower-left snaps to target (x,y)
+        dx = x - minx
+        dy = y - miny
+
+        # 3) inject both origin offset and rotation into a temp order
+        order_obj = _inject_offset(order_obj, dx, dy, gutter)
+        jover = dict(order_obj.get("job_overrides", {}))
+        jover["rotation_deg"] = rotation
+        order_obj["job_overrides"] = jover
+
         out_name = f"composed_{idx:02d}_{uuid.uuid4().hex[:8]}.json"
         tmp_order = tmp_dir / out_name
         _write_json(tmp_order, order_obj)
 
-        # run the pipeline for this placed part
         artifacts.append(
             generate_door_cam(
                 order_path=str(tmp_order),
@@ -66,7 +93,6 @@ def compose_sheet(layout_path: str, packs_dir: str | None = None, debug_svg: boo
                 debug_svg=(str(tmp_order.with_suffix(".svg")) if debug_svg else None),
             )
         )
-
     return artifacts
 
 def _build_parser() -> argparse.ArgumentParser:

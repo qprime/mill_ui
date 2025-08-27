@@ -20,8 +20,11 @@
 
   "job_overrides": {
   "origin_offset_mm": { "dx": 12, "dy": 20 },
-  "gutter_mm": 12
+  "gutter_mm": 12,
+  "final_cut_through": true,
+  "final_cut_honor_tabs": true
 },
+
 
   "tool_strategy": "multi",
   "use_back_hinge_job": true

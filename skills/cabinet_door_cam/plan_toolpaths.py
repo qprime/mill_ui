@@ -209,15 +209,23 @@ def _perimeter_with_onion_skin(
     tab_w: float,
     tab_h: float,
 ) -> List[Move]:
-    """Exterior contour offset outward by tool radius; stepdowns to (thickness - onion)."""
+    """
+    Exterior contour offset outward by tool radius; stepdowns to (thickness - onion).
+    If tabs are enabled, evenly space `tab_count` tabs around the perimeter and
+    lift Z by `tab_h` over a path distance of `tab_w` at each tab location on
+    the final rectangle. Tabs are respected at every stepdown (simpler & strong).
+    """
     moves: List[Move] = []
     final_depth = -(max(0.0, thickness_mm - onion_mm))
     if final_depth == 0.0:
         return moves
 
     r = tool.diameter_mm / 2.0
+    # Outside compensation
     rect = Rect(stock.x - r, stock.y - r, stock.w + 2 * r, stock.h + 2 * r)
-    corners = [
+
+    # Perimeter vertices (CW)
+    verts = [
         (rect.x, rect.y),
         (rect.x + rect.w, rect.y),
         (rect.x + rect.w, rect.y + rect.h),
@@ -225,15 +233,173 @@ def _perimeter_with_onion_skin(
         (rect.x, rect.y),
     ]
 
+    # Helpers
+    def _seg_len(p0: tuple[float, float], p1: tuple[float, float]) -> float:
+        return math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+
+    def _point_along(p0: tuple[float, float], p1: tuple[float, float], dist: float) -> tuple[float, float]:
+        L = _seg_len(p0, p1)
+        if L <= 1e-9:
+            return p0
+        t = max(0.0, min(1.0, dist / L))
+        return (p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t)
+
+    perim = sum(_seg_len(verts[i], verts[i+1]) for i in range(4))
+    # Tab positions along perimeter (distance from start vertex)
+    tab_positions: List[float] = []
+    if use_tabs and tab_count > 0 and tab_w > 0.0 and tab_h > 0.0 and perim > tab_count * tab_w + 1.0:
+        spacing = perim / tab_count
+        # center tabs within each interval
+        tab_positions = [i * spacing + spacing * 0.5 for i in range(tab_count)]
+
+    # For each depth pass
     for z in _z_passes(abs(final_depth), tool.max_stepdown_mm, material_max_step):
         z = -abs(z)
-        moves += [Move("rapid", x=corners[0][0], y=corners[0][1], z=safe_z),
-                  Move("set_feed", f=feed_z),
-                  Move("plunge", z=z)]
-        for (x, y) in corners[1:]:
-            moves += [Move("set_feed", f=feed_xy), Move("cut", x=x, y=y, z=z)]
-        moves += [Move("retract", z=safe_z)]
+
+        # Walk edges, honoring tabs by splitting edges where a tab segment falls
+        run_start = 0.0
+        tab_idx = 0
+        edge_start_cum = 0.0
+
+        # Precompute a simple iterator over edge segments
+        edges = [(verts[i], verts[i+1]) for i in range(4)]
+
+        # Move to start of first edge
+        sx, sy = verts[0]
+        moves += [Move("rapid", x=sx, y=sy, z=safe_z), Move("set_feed", f=feed_z), Move("plunge", z=z)]
+
+        for (p0, p1) in edges:
+            L = _seg_len(p0, p1)
+            edge_pos = 0.0
+            while edge_pos < L - 1e-6:
+                # Determine the next cut segment end considering a pending tab
+                next_cut_end = L
+                lift = False
+                lift_start = 0.0
+                lift_end = 0.0
+
+                if tab_idx < len(tab_positions):
+                    # Position of the next tab relative to current edge
+                    tab_center_global = tab_positions[tab_idx]
+                    if tab_center_global + (tab_w / 2.0) <= edge_start_cum:
+                        tab_idx += 1
+                    else:
+                        tab_center_on_edge = tab_center_global - edge_start_cum
+                        if -tab_w/2.0 <= tab_center_on_edge <= L + tab_w/2.0:
+                            # Tab overlaps this edge; compute its local start/end
+                            lift = True
+                            lift_start = max(0.0, tab_center_on_edge - tab_w / 2.0)
+                            lift_end = min(L, tab_center_on_edge + tab_w / 2.0)
+                            next_cut_end = max(0.0, lift_start)
+                        else:
+                            # No tab on this edge segment; cut to end
+                            next_cut_end = L
+                # Cut from current edge_pos to next_cut_end at depth z
+                if next_cut_end > edge_pos + 1e-6:
+                    cx0, cy0 = _point_along(p0, p1, edge_pos)
+                    cx1, cy1 = _point_along(p0, p1, next_cut_end)
+                    moves += [Move("set_feed", f=feed_xy), Move("cut", x=cx1, y=cy1, z=z)]
+                    edge_pos = next_cut_end
+
+                if lift:
+                    # Rise over tab (z + tab_h), then drop back
+                    tx0, ty0 = _point_along(p0, p1, lift_start)
+                    tx1, ty1 = _point_along(p0, p1, lift_end)
+                    moves += [
+                        Move("set_feed", f=feed_z), Move("plunge", z=z + tab_h),
+                        Move("set_feed", f=feed_xy), Move("cut", x=tx1, y=ty1, z=z + tab_h),
+                        Move("set_feed", f=feed_z), Move("plunge", z=z),
+                    ]
+                    edge_pos = max(edge_pos, lift_end)
+                    tab_idx += 1
+            edge_start_cum += L
+
+        # Close the loop back to start point
+        moves += [Move("set_feed", f=feed_xy), Move("cut", x=sx, y=sy, z=z), Move("retract", z=safe_z)]
+
     return moves
+
+def _perimeter_cut_through(
+    stock: Rect,
+    thickness_mm: float,
+    tool: ToolPack,
+    feed_xy: float,
+    feed_z: float,
+    safe_z: float,
+    honor_tabs: bool,
+    tab_count: int,
+    tab_w: float,
+    tab_h: float,
+) -> List[Move]:
+    """
+    Single final pass that cuts fully through (z = -thickness_mm).
+    If honor_tabs=True, rises over tab islands (same spacing/size).
+    """
+    moves: List[Move] = []
+    r = tool.diameter_mm / 2.0
+    rect = Rect(stock.x - r, stock.y - r, stock.w + 2 * r, stock.h + 2 * r)
+    verts = [
+        (rect.x, rect.y),
+        (rect.x + rect.w, rect.y),
+        (rect.x + rect.w, rect.y + rect.h),
+        (rect.x, rect.y + rect.h),
+        (rect.x, rect.y),
+    ]
+    z = -abs(thickness_mm)
+
+    def _seg_len(p0, p1): return math.hypot(p1[0]-p0[0], p1[1]-p0[1])
+    def _point_along(p0,p1,d):
+        L=_seg_len(p0,p1); 
+        if L<=1e-9: return p0
+        t=max(0.0,min(1.0,d/L)); 
+        return (p0[0]+(p1[0]-p0[0])*t, p0[1]+(p1[1]-p0[1])*t)
+
+    perim = sum(_seg_len(verts[i], verts[i+1]) for i in range(4))
+    tab_positions: List[float] = []
+    if honor_tabs and tab_count>0 and tab_w>0.0 and tab_h>0.0 and perim>tab_count*tab_w+1.0:
+        spacing = perim / tab_count
+        tab_positions = [i*spacing + spacing*0.5 for i in range(tab_count)]
+
+    sx, sy = verts[0]
+    moves += [Move("rapid", x=sx, y=sy, z=safe_z), Move("set_feed", f=feed_z), Move("plunge", z=z)]
+
+    edge_start_cum = 0.0
+    for (p0, p1) in [(verts[i], verts[i+1]) for i in range(4)]:
+        L = _seg_len(p0, p1); edge_pos = 0.0
+        while edge_pos < L - 1e-6:
+            next_cut_end = L; lift=False; lift_start=0.0; lift_end=0.0
+            if tab_positions:
+                tc = tab_positions[0]
+                if tc + (tab_w/2.0) <= edge_start_cum:
+                    tab_positions.pop(0)
+                elif -tab_w/2.0 <= (tc - edge_start_cum) <= L + tab_w/2.0:
+                    lift = True
+                    tab_center_on_edge = tc - edge_start_cum
+                    lift_start = max(0.0, tab_center_on_edge - tab_w/2.0)
+                    lift_end   = min(L,   tab_center_on_edge + tab_w/2.0)
+                    next_cut_end = max(0.0, lift_start)
+
+            if next_cut_end > edge_pos + 1e-6:
+                cx0, cy0 = _point_along(p0, p1, edge_pos)
+                cx1, cy1 = _point_along(p0, p1, next_cut_end)
+                moves += [Move("set_feed", f=feed_xy), Move("cut", x=cx1, y=cy1, z=z)]
+                edge_pos = next_cut_end
+
+            if lift:
+                tx0, ty0 = _point_along(p0, p1, lift_start)
+                tx1, ty1 = _point_along(p0, p1, lift_end)
+                moves += [
+                    Move("set_feed", f=feed_z), Move("plunge", z=z + tab_h),
+                    Move("set_feed", f=feed_xy), Move("cut", x=tx1, y=ty1, z=z + tab_h),
+                    Move("set_feed", f=feed_z), Move("plunge", z=z),
+                ]
+                edge_pos = max(edge_pos, lift_end)
+                tab_positions.pop(0) if tab_positions else None
+        edge_start_cum += L
+
+    moves += [Move("set_feed", f=feed_xy), Move("cut", x=sx, y=sy, z=z), Move("retract", z=safe_z)]
+    return moves
+
 
 def _tool(cfg: MergedConfig, tool_id: str) -> ToolPack:
     for _role, pack in cfg.tools.items():
@@ -333,6 +499,28 @@ def plan_toolpaths(cfg: MergedConfig, geo: Geometry) -> Dict[str, JobPlan]:
         tab_h=tab_h,
     )
     jobs["front_profile"] = JobPlan(name="front_profile", tool=profile_tool, moves=front_profile_moves, face="front")
+
+    # ---------------- FINAL CUT-THROUGH (optional separate job) ----------------
+    if bool(order.final_cut_through):
+        honor_tabs = bool(order.final_cut_honor_tabs)
+        cut_through_moves: List[Move] = []
+        cut_through_moves += _with_spindle_preamble(profile_tool)
+        cut_through_moves += _perimeter_cut_through(
+            stock=geo.stock_rect,
+            thickness_mm=order.thickness_mm,
+            tool=profile_tool,
+            feed_xy=prof_xy,
+            feed_z=prof_z,
+            safe_z=safe_z,
+            honor_tabs=honor_tabs,
+            tab_count=tab_count if honor_tabs else 0,
+            tab_w=tab_w if honor_tabs else 0.0,
+            tab_h=tab_h if honor_tabs else 0.0,
+        )
+        jobs["front_cut_through"] = JobPlan(
+            name="front_cut_through", tool=profile_tool, moves=cut_through_moves, face="front"
+        )
+
 
     # ---------------- BACK: hinges (spiral) ----------------
     back_hinges_moves: List[Move] = []

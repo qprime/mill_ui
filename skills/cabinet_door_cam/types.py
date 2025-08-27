@@ -115,7 +115,10 @@ class OrderSpec:
     safe_z_override_mm: Optional[float]
     origin_offset_dx_mm: float | None  
     origin_offset_dy_mm: float | None  
-    gutter_mm: float | None            
+    gutter_mm: float | None     
+    final_cut_through: bool | None      
+    final_cut_honor_tabs: bool | None   
+       
 
 @dataclass(frozen=True)
 class MergedConfig:

@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/style.schema.json",
+  "title": "Door Style Template",
+  "type": "object",
+  "required": ["style_id", "version", "units", "ops", "border", "panel_depth", "multi_tool", "defaults", "constraints"],
+  "properties": {
+    "style_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "units": { "type": "string", "enum": ["mm"] },
+
+    "ops": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["pocket_border", "raster_center", "corner_anchor_pockets", "profile_cut", "BACKSIDE: hinge_bores"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "border": {
+      "type": "object",
+      "required": ["target_ratio", "min_mm", "max_mm", "clearance_mm"],
+      "properties": {
+        "target_ratio": { "type": "number", "exclusiveMinimum": 0 },
+        "min_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "max_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "clearance_mm": { "type": "number", "minimum": 0 }
+      },
+      "allOf": [
+        { "properties": { "max_mm": { "type": "number" } } }
+      ]
+    },
+
+    "panel_depth": {
+      "type": "object",
+      "required": ["target_of_thickness", "min_mm", "max_mm", "safety_floor_mm"],
+      "properties": {
+        "target_of_thickness": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "min_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "max_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "safety_floor_mm": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+
+    "corner_anchors": {
+      "type": "object",
+      "required": ["enabled_default", "face_default", "placement_mode_default", "inset_xy_mm_default", "inset_diagonal_mm_default", "diameter_mm_default", "depth_mm_default", "clearance_mm"],
+      "properties": {
+        "enabled_default": { "type": "boolean" },
+        "face_default": { "type": "string", "enum": ["front", "back"] },
+        "placement_mode_default": { "type": "string", "enum": ["xy", "diagonal"] },
+        "inset_xy_mm_default": {
+          "type": "object",
+          "required": ["dx", "dy"],
+          "properties": {
+            "dx": { "type": "number", "exclusiveMinimum": 0 },
+            "dy": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "inset_diagonal_mm_default": { "type": "number", "exclusiveMinimum": 0 },
+        "diameter_mm_default": { "type": "number", "exclusiveMinimum": 0 },
+        "depth_mm_default": { "type": "number", "minimum": 0 },
+        "clearance_mm": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+
+    "hinge": {
+      "type": "object",
+      "required": ["enabled_default", "diameter_mm", "depth_mm", "edge_offsets_mm", "from_side", "min_spacing_mm"],
+      "properties": {
+        "enabled_default": { "type": "boolean" },
+        "diameter_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "depth_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "edge_offsets_mm": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "oneOf": [ { "type": "number", "exclusiveMinimum": 0 }, { "type": "string", "enum": ["mirror"] } ] }
+        },
+        "from_side": { "type": "string", "enum": ["left_right"] },
+        "min_spacing_mm": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+
+    "multi_tool": {
+      "type": "object",
+      "required": ["enabled_default", "stages", "hinge_stage"],
+      "properties": {
+        "enabled_default": { "type": "boolean" },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "tool_id"],
+            "properties": {
+              "name": { "type": "string", "enum": ["rough_panel", "finish_panel", "profile_cut"] },
+              "tool_id": { "type": "string", "minLength": 1 },
+              "stock_to_leave_mm": { "type": "number", "minimum": 0 },
+              "onion_skin_mm": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "hinge_stage": {
+          "type": "object",
+          "required": ["tool_id", "job"],
+          "properties": {
+            "tool_id": { "type": "string", "minLength": 1 },
+            "job": { "type": "string", "enum": ["back"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "defaults": {
+      "type": "object",
+      "required": ["tabs", "tab", "onion_skin_mm"],
+      "properties": {
+        "tabs": { "type": "boolean" },
+        "tab": {
+          "type": "object",
+          "required": ["width_mm", "height_mm", "count"],
+          "properties": {
+            "width_mm": { "type": "number", "exclusiveMinimum": 0 },
+            "height_mm": { "type": "number", "exclusiveMinimum": 0 },
+            "count": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "onion_skin_mm": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+
+    "constraints": {
+      "type": "object",
+      "required": ["min_feature_width_factor_of_tool"],
+      "properties": {
+        "min_feature_width_factor_of_tool": { "type": "number", "exclusiveMinimum": 1.0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

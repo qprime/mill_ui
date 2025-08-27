@@ -25,6 +25,7 @@ ENTRYPOINTS = {
     "regen_headers": "continuum.regen_metadata_headers",
     "ast": "continuum.ast_context",
     "metadata": "continuum.metadata",
+    "generate_cabinet": "skills.cabinet_door_cam.generate_door_cam",
 }
 
 

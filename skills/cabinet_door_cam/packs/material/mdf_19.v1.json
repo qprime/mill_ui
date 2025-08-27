@@ -1,0 +1,23 @@
+{
+  "material_id": "mdf_19",
+  "version": 1,
+  "density_kg_m3": 700,
+  "finish_pref": "climb_pocket, conventional_profile",
+
+  "feeds": {
+    "default_feed_xy_mm_min": 1800,
+    "default_plunge_z_mm_min": 450,
+    "finish_feed_xy_mm_min": 1200
+  },
+
+  "depths": {
+    "max_stepdown_mm": 2.5
+  },
+
+  "raster": {
+    "stepover_factor_of_diam": 0.45,
+    "angle_deg": 0
+  },
+
+  "cooling": "dry"
+}

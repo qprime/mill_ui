@@ -1,0 +1,23 @@
+{
+  "tool_id": "half_flat_12p7",
+  "version": 1,
+  "type": "flat_endmill",
+  "diameter_mm": 12.7,
+  "flutes": 2,
+  "rpm": 18000,
+
+  "feeds": {
+    "xy_mm_min": 3000,
+    "z_mm_min": 600,
+    "finish_xy_mm_min": 2000
+  },
+
+  "stepover_factor": 0.45,
+  "max_stepdown_mm": 3.0,
+
+  "lead_in": {
+    "ramp_type": "helical",
+    "ramp_angle_deg": 3.0,
+    "min_radius_mm": 6.5
+  }
+}

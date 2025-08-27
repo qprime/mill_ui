@@ -1,0 +1,15 @@
+{
+  "sheet_size_mm": { "w": 1231, "h": 1245 },   // 48.5" x 49.0" example
+  "origin": "lower_left",
+  "gutter_mm": 12,
+  "parts": [
+    { "order": "skills/cabinet_door_cam/orders/example_600x800x19.json", "x": 12, "y": 20 },
+    { "order": "skills/cabinet_door_cam/orders/example_600x800x19.json", "x": 12, "y": 20 + 800 + 12 },
+    { "order": "skills/cabinet_door_cam/orders/example_600x800x19.json", "x": 12 + 600 + 12, "y": 20 },
+    { "order": "skills/cabinet_door_cam/orders/example_600x800x19.json", "x": 12 + 600 + 12, "y": 20 + 800 + 12 }
+  ],
+  "keepouts": [
+    { "x": 0, "y": 0, "w": 30, "h": 1245 },     // left clamp strip (optional / not enforced yet)
+    { "x": 0, "y": 0, "w": 1231, "h": 30 }      // bottom clamp strip (optional / not enforced yet)
+  ]
+}

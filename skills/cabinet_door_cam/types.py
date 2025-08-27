@@ -113,6 +113,9 @@ class OrderSpec:
     tool_strategy: Literal["multi"]
     use_back_hinge_job: bool
     safe_z_override_mm: Optional[float]
+    origin_offset_dx_mm: float | None  
+    origin_offset_dy_mm: float | None  
+    gutter_mm: float | None            
 
 @dataclass(frozen=True)
 class MergedConfig:

@@ -25,13 +25,26 @@ def _panel_depth_mm(cfg: MergedConfig) -> float:
     d = max(d, s.panel_safety_floor_mm)
     return round_mm(d)
 
+# replace _panel_and_border_rects(...) with the offset-aware version
 def _panel_and_border_rects(cfg: MergedConfig, bw: float) -> tuple[Rect, Rect, Rect]:
     W, H = cfg.order.width_mm, cfg.order.height_mm
-    stock = Rect(0.0, 0.0, round_mm(W), round_mm(H))
-    border = Rect(bw, bw, round_mm(W - 2*bw), round_mm(H - 2*bw))
-    # clearance between border pocket and panel raster
+    dx = float(cfg.order.origin_offset_dx_mm or 0.0)   # NEW
+    dy = float(cfg.order.origin_offset_dy_mm or 0.0)   # NEW
+
+    stock = Rect(dx, dy, round_mm(W), round_mm(H))
+    border = Rect(
+        stock.x + bw,
+        stock.y + bw,
+        round_mm(W - 2 * bw),
+        round_mm(H - 2 * bw),
+    )
     c = cfg.style.border_clearance_mm
-    panel = Rect(border.x + c, border.y + c, round_mm(border.w - 2*c), round_mm(border.h - 2*c))
+    panel = Rect(
+        border.x + c,
+        border.y + c,
+        round_mm(border.w - 2 * c),
+        round_mm(border.h - 2 * c),
+    )
     return stock, border, panel
 
 def _anchor_positions(cfg: MergedConfig, panel: Rect) -> List[Circle]:

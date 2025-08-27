@@ -114,6 +114,8 @@ def _load_style(p: Path) -> StyleSpec:
 def _load_order(p: Path, style: StyleSpec) -> OrderSpec:
     j = load_json(p)
     ca = j.get("corner_anchors", {})
+    jover = j.get("job_overrides", {})             
+    oofs  = jover.get("origin_offset_mm", {})      
     return OrderSpec(
         width_mm=j["width_mm"],
         height_mm=j["height_mm"],
@@ -132,7 +134,10 @@ def _load_order(p: Path, style: StyleSpec) -> OrderSpec:
         anchors_depth_mm=float(ca.get("depth_mm", style.anchors_depth_mm_default)),
         tool_strategy=j.get("tool_strategy", "multi"),
         use_back_hinge_job=bool(j.get("use_back_hinge_job", style.stages.hinge_job == "back")),
-        safe_z_override_mm=j.get("job_overrides", {}).get("safe_z_mm"),
+        safe_z_override_mm=jover.get("safe_z_mm"),
+        origin_offset_dx_mm=oofs.get("dx"),        
+        origin_offset_dy_mm=oofs.get("dy"),        
+        gutter_mm=jover.get("gutter_mm"),          
     )
 
 def resolve_config(order_path: Path, packs_dir: Optional[Path] = None) -> MergedConfig:

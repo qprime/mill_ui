@@ -18,6 +18,11 @@
     "depth_mm": 2.0
   },
 
+  "job_overrides": {
+  "origin_offset_mm": { "dx": 12, "dy": 20 },
+  "gutter_mm": 12
+},
+
   "tool_strategy": "multi",
   "use_back_hinge_job": true
 }

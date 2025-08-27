@@ -13,9 +13,9 @@
     "enabled": true,
     "face": "front",
     "placement_mode": "xy",
-    "inset_xy_mm": { "dx": 18, "dy": 18 },
-    "diameter_mm": 12.0,
-    "depth_mm": 2.0
+    "inset_xy_mm": { "dx": 25, "dy": 25 },
+    "diameter_mm": 25.1,
+    "depth_mm": 7.52
   },
 
   "job_overrides": {

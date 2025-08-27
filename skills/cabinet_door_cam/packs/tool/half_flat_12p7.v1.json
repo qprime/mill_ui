@@ -3,11 +3,11 @@
   "version": 1,
   "type": "flat_endmill",
   "diameter_mm": 12.7,
-  "flutes": 2,
+  "flutes": 4,
   "rpm": 18000,
 
   "feeds": {
-    "xy_mm_min": 3000,
+    "xy_mm_min": 5000,
     "z_mm_min": 600,
     "finish_xy_mm_min": 2000
   },

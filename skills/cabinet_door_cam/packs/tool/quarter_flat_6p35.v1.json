@@ -7,7 +7,7 @@
   "rpm": 18000,
 
   "feeds": {
-    "xy_mm_min": 2000,
+    "xy_mm_min": 4000,
     "z_mm_min": 500,
     "finish_xy_mm_min": 1400
   },

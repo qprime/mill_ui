@@ -16,8 +16,8 @@ DEFAULT_ORDER_DIR = (Path(__file__).parent / "orders").resolve()
 DEFAULT_PACKS_DIR = (Path(__file__).parent / "packs").resolve()
 
 # === Best-guess GRBL modal header (safe to edit for your shop standard) ===
-# G17=XY plane, G21=mm, G90=absolute axes, G94=feed/min, G90.1=absolute IJK, G54=work offset 1
-GRBL_HEADER = "G17 G21 G90 G94 G90.1 G54"  # <- tweak here if needed (e.g., add G49/G40/G80 per your post)
+# G17=XY plane, G21=mm, G90=absolute axes, G94=feed/min, G54=work offset 1
+GRBL_HEADER = "G17 G21 G90 G94 G54"  # <- tweak here if needed (e.g., add G49/G40/G80 per your post)
 
 # === Default pack filenames (relative to DEFAULT_PACKS_DIR unless you pass explicit paths) ===
 MACHINE_PACK_FILE = "machine/altmill.v1.json"

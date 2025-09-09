@@ -45,72 +45,115 @@ def grid_positions(cols: int, rows: int, cell_w: float, cell_h: float,
         for c in range(cols):
             yield (ox + c * (cell_w + gap_x), oy + r * (cell_h + gap_y))
 
-def apply_grid_layout(items: List[Dict[str, Any]], layout_cfg: Dict[str, Any], 
-                      sheet_width: float, sheet_height: float) -> None:
+def apply_grid_layout(items, layout_cfg, sheet_width: float, sheet_height: float) -> None:
     """
-    Apply grid layout positions to items in-place.
-    Modifies items by adding 'placement' field with calculated positions.
-    
-    Args:
-        items: List of item dictionaries to position
-        layout_cfg: Layout configuration with cols, rows, gaps, border
-        sheet_width: Sheet width in mm
-        sheet_height: Sheet height in mm
+    Grid placement with symmetric sheet border, precise gaps, offcut bias,
+    and selectable fit mode:
+      fit = "tight"  -> cells sized from item outer dims (max W/H)
+      fit = "fill"   -> cells derived from available interior (current behavior)
     """
     if not layout_cfg or layout_cfg.get("type") != "grid":
         return
-    
-    # Get grid parameters
-    cols = layout_cfg.get("cols", 2)
-    rows = layout_cfg.get("rows", 2)
-    gap_x = layout_cfg.get("gap_x_mm", 10)
-    gap_y = layout_cfg.get("gap_y_mm", 10)
-    border = layout_cfg.get("border_mm", 20)
-    
-    # Find max dimensions among items to determine cell size
-    max_w = 0
-    max_h = 0
-    
-    for item in items:
-        if item.get("kind") == "template" and item.get("type") == "Shaker":
-            params = item.get("params", {})
-            max_w = max(max_w, float(params.get("outer_w", 0)))
-            max_h = max(max_h, float(params.get("outer_h", 0)))
-        elif item.get("kind") == "shape":
-            geom = item.get("geometry", {})
-            if item.get("type") == "Rect":
-                max_w = max(max_w, float(geom.get("w_mm", 0)))
-                max_h = max(max_h, float(geom.get("h_mm", 0)))
-            elif item.get("type") == "Circle":
-                d = float(geom.get("diameter_mm", 0))
-                max_w = max(max_w, d)
-                max_h = max(max_h, d)
-    
-    # Calculate cell size
-    if max_w > 0 and max_h > 0:
-        cell_w = max_w
-        cell_h = max_h
+
+    cols = int(layout_cfg.get("cols", 1))
+    rows = int(layout_cfg.get("rows", 1))
+    gap_x = float(layout_cfg.get("gap_x_mm", 0.0))
+    gap_y = float(layout_cfg.get("gap_y_mm", 0.0))
+    border = float(layout_cfg.get("border_mm", 0.0))
+    bias = (layout_cfg.get("cutoff_bias") or "bottom-left").lower()
+    fit  = (layout_cfg.get("fit") or "fill").lower()  # "tight" or "fill"
+
+    assert cols > 0 and rows > 0, "rows/cols must be positive"
+
+    # --- item outer size helper
+    def item_size_mm(it):
+        if it.get("kind") == "template" and it.get("type") == "Shaker":
+            p = it.get("params", {})
+            return float(p.get("outer_w", 0)), float(p.get("outer_h", 0))
+        if it.get("kind") == "shape":
+            t = it.get("type"); g = it.get("geometry", {})
+            if t == "Rect":
+                return float(g.get("w_mm", 0)), float(g.get("h_mm", 0))
+            if t == "Circle":
+                d = float(g.get("diameter_mm", 0)); return d, d
+        return 0.0, 0.0
+
+    # --- available interior after sheet border and gaps
+    avail_w = sheet_width  - 2 * border - (cols - 1) * gap_x
+    avail_h = sheet_height - 2 * border - (rows - 1) * gap_y
+    if avail_w <= 0 or avail_h <= 0:
+        raise ValueError("Grid + borders/gaps exceed sheet size")
+
+    if fit == "tight":
+        # cells from actual parts (tight packing)
+        max_w = max((item_size_mm(it)[0] for it in items), default=0.0)
+        max_h = max((item_size_mm(it)[1] for it in items), default=0.0)
+        cell_w, cell_h = max_w, max_h
+
+        block_w = cols * cell_w + (cols - 1) * gap_x
+        block_h = rows * cell_h + (rows - 1) * gap_y
+
+        if block_w > avail_w + 1e-6 or block_h > avail_h + 1e-6:
+            raise ValueError(
+                f"Tight pack does not fit: block {block_w:.2f}×{block_h:.2f} > "
+                f"avail {avail_w:.2f}×{avail_h:.2f} (reduce borders/gaps or size)"
+            )
     else:
-        # Calculate from available space
-        cell_w = (sheet_width - 2*border - (cols-1)*gap_x) / cols
-        cell_h = (sheet_height - 2*border - (rows-1)*gap_y) / rows
-    
-    # Generate grid positions
-    positions = list(grid_positions(
-        cols=cols, rows=rows,
-        cell_w=cell_w, cell_h=cell_h,
-        origin=(border, border),
-        gap_x=gap_x, gap_y=gap_y
-    ))
-    
-    # Apply positions to items that don't already have placement
-    for idx, item in enumerate(items):
-        if not item.get("placement") and idx < len(positions):
-            x, y = positions[idx]
-            # Position at center of cell
-            item["placement"] = {
-                "center_xy_mm": [x + cell_w/2, y + cell_h/2]
-            }
+        # fill interior evenly (legacy behavior)
+        cell_w = avail_w / cols
+        cell_h = avail_h / rows
+        block_w = cols * cell_w + (cols - 1) * gap_x
+        block_h = rows * cell_h + (rows - 1) * gap_y
+        # validate items fit these cells
+        too_big = []
+        for it in items:
+            w, h = item_size_mm(it)
+            if (w and w > cell_w + 1e-6) or (h and h > cell_h + 1e-6):
+                ident = it.get("id") or f"{it.get('kind','?')}/{it.get('type','?')}"
+                too_big.append(f"{ident}: {w:.2f}×{h:.2f} > cell {cell_w:.2f}×{cell_h:.2f}")
+        if too_big:
+            raise ValueError("Item(s) too large for grid cells -> " + "; ".join(too_big))
+
+    # --- choose origin per offcut bias
+    ox = border; oy = border  # bottom-left
+    if bias == "bottom-right":
+        ox = sheet_width - border - block_w
+    elif bias == "top-left":
+        oy = sheet_height - border - block_h
+    elif bias == "top-right":
+        ox = sheet_width  - border - block_w
+        oy = sheet_height - border - block_h
+
+    # --- place centers
+    positions = []
+    for r in range(rows):
+        for c in range(cols):
+            x = ox + c * (cell_w + gap_x) + 0.5 * cell_w
+            y = oy + r * (cell_h + gap_y) + 0.5 * cell_h
+            positions.append((x, y))
+
+    i = 0
+    for it in items:
+        if it.get("placement"):  # leave manual placements untouched
+            continue
+        if i >= len(positions):
+            break
+        cx, cy = positions[i]
+        it["placement"] = {"center_xy_mm": [cx, cy]}
+        i += 1
+
+    # --- debug: report offcuts (helps target a 12" right strip)
+    right_offcut  = sheet_width  - (ox + block_w) - border
+    top_offcut    = sheet_height - (oy + block_h) - border
+    left_offcut   = ox - border
+    bottom_offcut = oy - border
+    print(
+        f"[layout] offcuts mm (L,R,T,B) = "
+        f"{left_offcut:.2f}, {right_offcut:.2f}, {top_offcut:.2f}, {bottom_offcut:.2f}"
+    )
+
+
+
 
 def export_final(sheet: cq.Workplane,
                  out_dir: Path,

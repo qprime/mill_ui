@@ -26,13 +26,13 @@ def build_from_layout(layout_path: Path) -> Path:
         raise ValueError(f"Unsupported component type: {comp['type']}")
     p = comp["props"]
 
-    # PASS anchor_recess through to the spec (this was missing before)
+    # Pass anchor_recess through to the spec (was missing before)
     spec = ShakerSpec(
         outer_w=float(p["outer_w"]), outer_h=float(p["outer_h"]),
         thickness=float(p.get("thickness", s["thickness_mm"])),
         stile_w=float(p["stile_w"]), rail_h=float(p["rail_h"]),
         panel_recess=float(p.get("panel_recess", 0)),
-        anchor_recess=p.get("anchor_recess")  # <-- NEW
+        anchor_recess=p.get("anchor_recess")  # <-- pass through
     )
 
     base = build_shaker(spec)

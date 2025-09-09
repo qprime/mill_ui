@@ -38,7 +38,7 @@ def build_shaker(spec: ShakerSpec) -> cq.Workplane:
     # Base door blank extruded +Z
     door = cq.Workplane("XY").rect(W, H).extrude(T)
 
-    # Recess pocket: cut from the door's TOP face workplane
+    # Recess pocket: cut from the door's TOP face workplane (face center origin)
     pocket_w = W - 2 * stile
     pocket_h = H - 2 * rail
     if pocket_w > 0 and pocket_h > 0 and recess > 0:
@@ -84,7 +84,7 @@ def _get_flat_anchor_cfg(spec: ShakerSpec) -> Optional[_RoundAnchorsCfg]:
     """
     Read component.props.anchor_recess from the flat Shaker spec.
     """
-    anchors = getattr(spec, "anchor_recess", None)
+    anchors = spec.anchor_recess
     if not anchors or not anchors.get("enabled", False):
         return None
     return _RoundAnchorsCfg.from_json(anchors)
@@ -104,7 +104,7 @@ def cut_round_anchor_recesses(door: cq.Workplane, spec: ShakerSpec) -> cq.Workpl
     """
     Cut four circular pockets inside the panel recess.
     - Uses flat JSON block: component.props.anchor_recess
-    - Cuts from top face (Z=0) downward by (panel_recess + extra_depth_mm)
+    - Cuts from the top face (Z=0) downward by (panel_recess + extra_depth_mm)
     - No-ops if disabled or if panel_recess <= 0
     """
     cfg = _get_flat_anchor_cfg(spec)
@@ -117,27 +117,31 @@ def cut_round_anchor_recesses(door: cq.Workplane, spec: ShakerSpec) -> cq.Workpl
 
     x0, y0, x1, y1 = _recess_rect_from_shaker(spec)
 
-    # Corner centers (relative to DOOR LOWER-LEFT origin (0,0))
+    # Corner centers (door-local coords; lower-left origin (0,0))
     if cfg.corners:
-        tl = (x0 + cfg.corners["tl"]["dx"], y1 - cfg.corners["tl"]["dy"])
-        tr = (x1 - cfg.corners["tr"]["dx"], y1 - cfg.corners["tr"]["dy"])
-        br = (x1 - cfg.corners["br"]["dx"], y0 + cfg.corners["br"]["dy"])
-        bl = (x0 + cfg.corners["bl"]["dx"], y0 + cfg.corners["bl"]["dy"])
+        tl = (x0 + float(cfg.corners["tl"]["dx"]), y1 - float(cfg.corners["tl"]["dy"]))
+        tr = (x1 - float(cfg.corners["tr"]["dx"]), y1 - float(cfg.corners["tr"]["dy"]))
+        br = (x1 - float(cfg.corners["br"]["dx"]), y0 + float(cfg.corners["br"]["dy"]))
+        bl = (x0 + float(cfg.corners["bl"]["dx"]), y0 + float(cfg.corners["bl"]["dy"]))
     else:
-        L = cfg.offsets_mm["left"]; R = cfg.offsets_mm["right"]
-        T = cfg.offsets_mm["top"];  B = cfg.offsets_mm["bottom"]
+        L = float(cfg.offsets_mm["left"]);  R = float(cfg.offsets_mm["right"])
+        T = float(cfg.offsets_mm["top"]);   B = float(cfg.offsets_mm["bottom"])
         tl = (x0 + L, y1 - T); tr = (x1 - R, y1 - T)
         br = (x1 - R, y0 + B); bl = (x0 + L, y0 + B)
 
-    r = cfg.diameter_mm / 2.0
-    total_depth = -(recess_depth + cfg.extra_depth_mm)  # negative into the solid
+    r = float(cfg.diameter_mm) / 2.0
+    total_depth = -(recess_depth + float(cfg.extra_depth_mm))  # negative goes into the solid
 
-    # IMPORTANT: anchor the workplane origin at the TOP FACE, LOWER-LEFT vertex
-    # so (cx,cy) are absolute in door-local coordinates.
-    wp = door.faces(">Z").vertices("<XY").workplane()
+    centers = [tl, tr, br, bl]
 
-    for (cx, cy) in (tl, tr, br, bl):
-        wp = wp.center(cx, cy).circle(r).cutBlind(total_depth).center(-cx, -cy)
+    # Create a workplane anchored to the TOP-FACE LOWER-LEFT so (0,0) = door lower-left,
+    # then push all four points and cut in a single op chain that mutates `door`.
+    door = (door
+            .faces(">Z").vertices("<XY").workplane()
+            .pushPoints(centers)
+            .circle(r)
+            .cutBlind(total_depth))
 
-    # Return the mutated door solid
+    # IMPORTANT: return the SOLID workplane (door), not the sketch workplane.
     return door
+

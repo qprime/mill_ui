@@ -36,8 +36,9 @@ def _feature_depth_mm(feature: Dict[str, Any], sheet_thickness: float) -> float:
 def _create_kerf_cut(shape_type: str, geometry: Dict, placement: Optional[Dict], 
                      kerf_width: float, sheet_thickness: float) -> Tuple[Optional[cq.Workplane], Optional[cq.Workplane]]:
     """
-    Create a kerf ring (cut) and the floating interior part.
-    Returns (kerf_solid, floating_part) or (None, None) if failed.
+    Create a kerf cut and the floating interior part.
+    Uses the actual kerf width for visual representation and proper spacing.
+    Returns (cut_solid, floating_part) or (None, None) if failed.
     """
     cx, cy = 0, 0
     if placement and "center_xy_mm" in placement:
@@ -49,16 +50,16 @@ def _create_kerf_cut(shape_type: str, geometry: Dict, placement: Optional[Dict],
             h = float(geometry.get("h_mm", 0))
             
             if w > kerf_width * 2 and h > kerf_width * 2:
-                # Create kerf ring
+                # Create kerf ring at actual tool width
                 outer = (cq.Workplane("XY").center(cx, cy)
-                        .rect(w + kerf_width, h + kerf_width)
+                        .rect(w + kerf_width/2, h + kerf_width/2)
                         .extrude(-sheet_thickness - _EPS))
                 inner = (cq.Workplane("XY").center(cx, cy)
-                        .rect(w - kerf_width, h - kerf_width)
+                        .rect(w - kerf_width/2, h - kerf_width/2)
                         .extrude(-sheet_thickness - _EPS))
                 kerf = outer.cut(inner)
                 
-                # Create floating part
+                # Create floating part (inside the kerf)
                 floating = (cq.Workplane("XY").center(cx, cy)
                            .rect(w - kerf_width, h - kerf_width)
                            .extrude(-sheet_thickness))
@@ -70,7 +71,8 @@ def _create_kerf_cut(shape_type: str, geometry: Dict, placement: Optional[Dict],
             r = d / 2.0
             
             if r > kerf_width:
-                # Create kerf ring
+                # Create kerf ring at actual tool width
+                # The centerline is at radius r, kerf extends ±kerf_width/2
                 outer = (cq.Workplane("XY").center(cx, cy)
                         .circle(r + kerf_width/2)
                         .extrude(-sheet_thickness - _EPS))
@@ -79,7 +81,7 @@ def _create_kerf_cut(shape_type: str, geometry: Dict, placement: Optional[Dict],
                         .extrude(-sheet_thickness - _EPS))
                 kerf = outer.cut(inner)
                 
-                # Create floating part
+                # Create floating part (inside the kerf)
                 floating = (cq.Workplane("XY").center(cx, cy)
                            .circle(r - kerf_width/2)
                            .extrude(-sheet_thickness))

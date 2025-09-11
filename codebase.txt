@@ -1,0 +1,3022 @@
+
+=====================================
+FILE: ./io/__init__.py
+=====================================
+
+=====================================
+FILE: ./io/readwrite.py
+=====================================
+
+import json, pathlib
+def save_json(path, obj): p=pathlib.Path(path); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(json.dumps(obj, indent=2, sort_keys=True), encoding='utf-8'); return str(p.resolve())
+def load_json(path): return json.loads(pathlib.Path(path).read_text(encoding='utf-8'))
+
+=====================================
+FILE: ./io/schema.py
+=====================================
+SHAPE_SCHEMA={'type':'object'}
+TOOL_SCHEMA={'type':'object'}
+
+=====================================
+FILE: ./compositions/panels/circle_mount.py
+=====================================
+# path: skills/mill_ui/compositions/panels/circle_mount.py
+from __future__ import annotations
+from typing import Dict, Any, List, Tuple
+import math
+from skills.mill_ui.compositions.base import TemplateBase, register_template
+
+def _rect(center: Tuple[float, float], w: float, h: float, feature: Dict[str, Any], id_: str = "") -> Dict[str, Any]:
+    cx, cy = float(center[0]), float(center[1])
+    return {
+        "kind": "shape",
+        "type": "Rect",
+        "id": id_,
+        "geometry": {"w_mm": float(w), "h_mm": float(h)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+def _circle(center: Tuple[float, float], d: float, feature: Dict[str, Any], id_: str = "") -> Dict[str, Any]:
+    cx, cy = float(center[0]), float(center[1])
+    return {
+        "kind": "shape",
+        "type": "Circle",
+        "id": id_,
+        "geometry": {"diameter_mm": float(d)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+@register_template("CircleMount")
+class CircleMount(TemplateBase):
+    def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[Dict[str, Any]]:
+        out: List[Dict[str, Any]] = []
+
+        # Disk (optional). If provided, cut a round blank with outside profile.
+        disk = params.get("disk") or {}
+        if "diameter_mm" in disk:
+            d_disk = float(disk.get("diameter_mm", 0.0))
+            if d_disk > 0:
+                out.append(_circle((0.0, 0.0), d_disk, {"type": "profile", "depth": "through", "side": "outside"}, id_="mount:disk"))
+
+        # Center port (required for a mount use-case)
+        port = params.get("port") or {}
+        d_port = float(port.get("diameter_mm", port.get("diameter", 0.0)))
+        if d_port > 0:
+            out.append(_circle((0.0, 0.0), d_port, {"type": "hole", "depth": "through"}, id_="mount:port"))
+
+        # Optional bolt circle: through holes and optional counterbores
+        bc = params.get("bolt_circle") or {}
+        bc_d = float(bc.get("diameter_mm", 0.0))
+        bc_n = int(bc.get("count", 0))
+        thru_d = float(bc.get("through_d_mm", 0.0))
+        cb_d = float(bc.get("counterbore_d_mm", 0.0))
+        cb_depth = float(bc.get("counterbore_depth_mm", 0.0))
+        if bc_d > 0 and bc_n > 0 and thru_d > 0:
+            r = bc_d * 0.5
+            for i in range(bc_n):
+                t = 2.0 * math.pi * (i / bc_n)
+                x = r * math.cos(t)
+                y = r * math.sin(t)
+                if cb_d > 0 and cb_depth > 0:
+                    out.append(_circle((x, y), cb_d, {"type": "pocket", "depth_mm": cb_depth}, id_=f"mount:cb:{i+1}"))
+                out.append(_circle((x, y), thru_d, {"type": "hole", "depth": "through"}, id_=f"mount:hole:{i+1}"))
+
+        return out
+
+=====================================
+FILE: ./compositions/cabinets/shaker.py
+=====================================
+# path: skills/mill_ui/compositions/cabinets/shaker.py
+from __future__ import annotations
+from typing import Dict, Any, List, Tuple
+from skills.mill_ui.compositions.base import TemplateBase, register_template
+
+def _rect(center: Tuple[float, float], w: float, h: float, feature: Dict[str, Any], id_: str = "") -> Dict[str, Any]:
+    cx, cy = float(center[0]), float(center[1])
+    return {
+        "kind": "shape",
+        "type": "Rect",
+        "id": id_,
+        "geometry": {"w_mm": float(w), "h_mm": float(h)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+def _circle(center: Tuple[float, float], d: float, feature: Dict[str, Any], id_: str = "") -> Dict[str, Any]:
+    cx, cy = float(center[0]), float(center[1])
+    return {
+        "kind": "shape",
+        "type": "Circle",
+        "id": id_,
+        "geometry": {"diameter_mm": float(d)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+@register_template("Shaker")
+class Shaker(TemplateBase):
+    def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[Dict[str, Any]]:
+        w = float(params.get("outer_w", 0.0))
+        h = float(params.get("outer_h", 0.0))
+        stile_w = float(params.get("stile_w", 0.0))
+        rail_h  = float(params.get("rail_h", 0.0))
+        panel_recess = float(params.get("panel_recess", 0.0))
+
+        out: List[Dict[str, Any]] = []
+
+        # Outer perimeter profile (through), offset handled by planner via side="outside"
+        out.append(_rect((0.0, 0.0), w, h, {"type": "profile", "depth": "through", "side": "outside"}, id_="door:outer"))
+
+        # Panel recess pocket
+        if panel_recess > 0.0 and w > 2 * stile_w and h > 2 * rail_h:
+            in_w = max(0.0, w - 2 * stile_w)
+            in_h = max(0.0, h - 2 * rail_h)
+            out.append(_rect((0.0, 0.0), in_w, in_h, {"type": "pocket", "depth_mm": panel_recess}, id_="door:panel"))
+
+        # Optional anchor recess pockets in corners
+        ar = params.get("anchor_recess") or {}
+        if ar.get("enabled"):
+            ar_d = float(ar.get("diameter_mm", 0.0))
+            extra_depth = float(ar.get("extra_depth_mm", 0.0))
+            offs = ar.get("offsets_mm") or {}
+            off_l = float(offs.get("left", 0.0))
+            off_r = float(offs.get("right", 0.0))
+            off_t = float(offs.get("top", 0.0))
+            off_b = float(offs.get("bottom", 0.0))
+            hx = w * 0.5
+            hy = h * 0.5
+            pts = [
+                (-(hx - off_l),  (hy - off_t)),
+                ( (hx - off_r),  (hy - off_t)),
+                (-(hx - off_l), -(hy - off_b)),
+                ( (hx - off_r), -(hy - off_b)),
+            ]
+            for i, p in enumerate(pts, start=1):
+                out.append(_circle(p, ar_d, {"type": "pocket", "depth_mm": extra_depth}, id_=f"door:anchor:{i}"))
+
+        return out
+
+=====================================
+FILE: ./compositions/__init__.py
+=====================================
+# path: skills/mill_ui/compositions/__init__.py
+from .base import register_template, resolve_templates, REGISTRY
+
+# Ensure template modules import to populate REGISTRY
+# (safe if modules are absent; guarded import keeps core usable)
+try:
+    from .cabinets import shaker as _tmpl_shaker  # noqa: F401
+except Exception:
+    pass
+try:
+    from .panels import circle_mount as _tmpl_circle_mount  # noqa: F401
+except Exception:
+    pass
+
+=====================================
+FILE: ./compositions/retistry.py
+=====================================
+# path: skills/mill_ui/compositions/registry.py
+from .base import REGISTRY, register_template
+__all__ = ["REGISTRY", "register_template"]
+
+=====================================
+FILE: ./compositions/base.py
+=====================================
+# path: skills/mill_ui/compositions/base.py
+from __future__ import annotations
+from typing import Dict, Any, List, Tuple
+import copy
+
+REGISTRY: Dict[str, type] = {}
+
+def register_template(name: str):
+    def deco(cls):
+        REGISTRY[name] = cls
+        return cls
+    return deco
+
+class TemplateBase:
+    def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[Dict[str, Any]]:
+        raise NotImplementedError
+
+def _offset_items(items: List[Dict[str, Any]], center_xy_mm: Tuple[float, float]) -> List[Dict[str, Any]]:
+        cx, cy = float(center_xy_mm[0]), float(center_xy_mm[1])
+        out: List[Dict[str, Any]] = []
+        for it in items:
+            j = copy.deepcopy(it)
+            plc = j.get("placement") or {}
+            inner = plc.get("center_xy_mm")
+            if isinstance(inner, (list, tuple)) and len(inner) == 2:
+                j.setdefault("placement", {})["center_xy_mm"] = (float(inner[0]) + cx, float(inner[1]) + cy)
+            else:
+                j["placement"] = {"center_xy_mm": (cx, cy)}
+            out.append(j)
+        return out
+
+def resolve_templates(items: List[Dict[str, Any]], *, sheet_thickness_mm: float) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for it in items:
+        if it.get("kind") != "template":
+            out.append(it)
+            continue
+        tname = it.get("type")
+        params = it.get("params") or {}
+        center = None
+        plc = it.get("placement") or {}
+        if isinstance(plc.get("center_xy_mm"), (list, tuple)) and len(plc["center_xy_mm"]) == 2:
+            center = (float(plc["center_xy_mm"][0]), float(plc["center_xy_mm"][1]))
+        cls = REGISTRY.get(str(tname))
+        if not cls:
+            continue
+        inst: TemplateBase = cls()
+        built = inst.expand(params, sheet_thickness_mm)
+        if center is not None:
+            built = _offset_items(built, center)
+        # id threading
+        base_id = it.get("id") or ""
+        if base_id:
+            for k, b in enumerate(built):
+                if "id" not in b or not b["id"]:
+                    b["id"] = f"{base_id}:{k+1}"
+        out.extend(built)
+    return out
+
+=====================================
+FILE: ./tests/__init__.py
+=====================================
+
+=====================================
+FILE: ./tests/run_all.py
+=====================================
+
+import sys, unittest
+from pathlib import Path
+def main()->int:
+    start_dir=Path(__file__).parent/'unit'
+    skills_root=(Path(__file__).resolve().parents[2])
+    if str(skills_root) not in sys.path: sys.path.insert(0, str(skills_root))
+    suite=unittest.defaultTestLoader.discover(str(start_dir), pattern='test_*.py', top_level_dir=str(skills_root))
+    return 0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1
+if __name__=='__main__': raise SystemExit(main())
+
+=====================================
+FILE: ./tests/unit/test_io.py
+=====================================
+
+import unittest, json, os, tempfile
+from skills.mill_ui.api.io import save_json, load_json, dump_canonical, stable_hash
+class TestIO(unittest.TestCase):
+    def test_save_load(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=os.path.join(d,'obj.json'); saved=save_json(p, {'b':1,'a':2})
+            self.assertTrue(os.path.exists(saved))
+            obj=load_json(saved); self.assertEqual(obj['a'],2)
+            self.assertEqual(stable_hash(obj), stable_hash({'a':2,'b':1}))
+
+=====================================
+FILE: ./tests/unit/test_svg_export.py
+=====================================
+import unittest
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.api.cad import apply_grid_layout, render_svg_layout
+
+class TestSvgExport(unittest.TestCase):
+    def test_svg_basic(self):
+        panel = Panel(width=100.0, height=80.0, thickness=12.0)
+        items = [
+            {"kind":"shape","type":"Rect","geometry":{"w_mm":30,"h_mm":20}},
+            {"kind":"shape","type":"Circle","geometry":{"diameter_mm":10}},
+        ]
+        placements = apply_grid_layout(panel, items, rows=1, cols=2, gap_x=10, border=5, fit="tight")
+        svg = render_svg_layout(panel, placements)
+        self.assertIn('<svg', svg)
+        self.assertIn('class="panel"', svg)
+        self.assertIn('class="item"', svg)
+        self.assertIn('<circle', svg)
+
+=====================================
+FILE: ./tests/unit/test_planner_pipeline.py
+=====================================
+# path: skills/mill_ui/tests/unit/test_planner_pipeline.py
+import unittest
+from skills.mill_ui.api.cam import write_gcode
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.planner.pipeline import hints_to_moves
+
+class TestPlannerPipeline(unittest.TestCase):
+    def test_hints_to_moves_end_to_end(self):
+        # Tool DB: 1/8" (3.175mm) and 1/4" (6.35mm)
+        tool_db = [
+            {"name": "SmallFlat", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},
+            {"name": "BigFlat",   "diameter": 6.35,  "kind": "flat", "rpm": 12000, "feed_xy": 800, "feed_z": 280},
+        ]
+        material = Material(name="MDF")
+        machine = Machine(name="default_grbl")
+        stock = Stock(width=300, height=200, thickness=12)
+
+        hints = {
+            "units": "mm",
+            "min_channel_width_mm": 6.0,
+            "pockets": [
+                {"shape": "Rect", "geometry": {"w_mm": 40, "h_mm": 30}, "center_xy_mm": (50, 60), "depth_mm": 3.0}
+            ],
+            "holes": [
+                {"shape": "Circle", "geometry": {"diameter_mm": 5.0}, "center_xy_mm": (100, 50), "depth_mm": 12.0}
+            ],
+            "profiles": [
+                {"shape": "Rect", "geometry": {"w_mm": 60, "h_mm": 40}, "center_xy_mm": (150, 80), "depth_mm": 12.0}
+            ],
+            "engraves": []
+        }
+
+        moves = hints_to_moves(
+            hints,
+            tool_db=tool_db,
+            material=material,
+            machine=machine,
+            stock=stock,
+            safe_z=6.0,
+        )
+        self.assertTrue(len(moves) > 0)
+
+        gcode = write_gcode(moves, safe_z=6.0)
+        # Basic sanity checks
+        self.assertIn("G21", gcode)         # mm
+        self.assertIn("M3 S", gcode)        # spindle on with rpm at least once
+        self.assertTrue(gcode.strip().endswith("(end)"))  # our post footer
+
+if __name__ == "__main__":
+    unittest.main()
+
+=====================================
+FILE: ./tests/unit/test_cookbook.py
+=====================================
+# path: skills/mill_ui/tests/unit/test_cookbook.py
+import unittest
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.recipes.cookbook.examples import (
+    example_progressive_hole_grid,
+    example_organizer_tray_rect_islands,
+    example_counterbored_holes,
+)
+
+class TestCookbookExamples(unittest.TestCase):
+    def setUp(self):
+        self.panel = Panel(width=300, height=200, thickness=12, safe_z=6.0)
+        # Simple 1/8 + 1/4 tool DB
+        self.tool_db = [
+            {"name": "SmallFlat", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},
+            {"name": "BigFlat",   "diameter": 6.35,  "kind": "flat", "rpm": 12000, "feed_xy": 800, "feed_z": 280},
+        ]
+
+    def _comments(self, moves):
+        return [m.get("text","") for m in moves if m.get("kind") == "comment"]
+
+    def _depths(self, moves):
+        return [m.get("z") for m in moves if m.get("kind") == "cut" and m.get("z") is not None]
+
+    def test_progressive_hole_grid(self):
+        moves, gcode = example_progressive_hole_grid(self.panel, tool_db=self.tool_db)
+        comments = self._comments(moves)
+        # Should include at least one of these, depending on hole sizes selected
+        self.assertTrue(any(tag in c for c in comments for tag in ("drill_peck", "bore_helical", "pocket_circle_concentric")))
+        self.assertIn("M3 S", gcode)
+
+    def test_organizer_tray_region_rect_islands(self):
+        moves, _ = example_organizer_tray_rect_islands(self.panel, tool_db=self.tool_db, depth_mm=5.0)
+        comments = self._comments(moves)
+        self.assertTrue(any("pocket_region_rect_raster" in c for c in comments))
+        zs = set(self._depths(moves))
+        self.assertIn(-5.0, zs)  # bottom depth present
+
+    def test_counterbored_holes(self):
+        moves, _ = example_counterbored_holes(self.panel, tool_db=self.tool_db, bore_d_mm=20.0)
+        comments = self._comments(moves)
+        # Expect a pocket of the bore + a hole op
+        self.assertTrue(any(("pocket_circle_concentric" in c) or ("pocket_raster" in c) for c in comments))
+        self.assertTrue(any("drill_peck" in c or "bore_helical" in c for c in comments))
+
+if __name__ == "__main__":
+    unittest.main()
+
+=====================================
+FILE: ./tests/unit/__init__.py
+=====================================
+
+=====================================
+FILE: ./tests/unit/test_toolpath_post.py
+=====================================
+
+import unittest
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_feed, move_set_rpm, move_rapid, move_cut, move_retract
+from skills.mill_ui.cam.post.gcode import write_gcode
+class TestToolpathPost(unittest.TestCase):
+    def test_moves_and_post(self):
+        moves=[
+            move_comment('hello(world)'), move_set_rpm(12000), move_set_feed(800),
+            move_rapid(x=0,y=0,z=5), move_cut(x=10,y=0,z=0), move_retract(5),
+        ]
+        out=write_gcode(moves, safe_z=6.0)
+        self.assertIn('G21', out); self.assertIn('(hello[world])', out); self.assertIn('M3 S12000', out)
+        self.assertTrue(out.strip().splitlines()[-4].startswith('G0 Z6.000'))
+
+=====================================
+FILE: ./tests/unit/test_numeric.py
+=====================================
+
+import unittest
+from skills.mill_ui.core.numeric import round_mm, round_feed, clamp
+class TestNumeric(unittest.TestCase):
+    def test_round_mm(self): self.assertEqual(round_mm(0.00051), 0.001)
+    def test_round_feed(self): self.assertEqual(round_feed(123.45), 123.5)
+    def test_clamp(self): self.assertEqual(clamp(11,0,10),10)
+
+=====================================
+FILE: ./tests/unit/line_size.py
+=====================================
+import unittest
+from skills.mill_ui.api.cad import item_size_mm
+
+class TestPolylineSize(unittest.TestCase):
+    def test_size(self):
+        it = {"kind":"shape","type":"Polyline","geometry":{"points":[[0,0],[10,0],[10,5],[0,5]]}}
+        self.assertEqual(item_size_mm(it), (10.0, 5.0))
+
+=====================================
+FILE: ./tests/unit/test_toolpath.py
+=====================================
+import unittest
+from skills.mill_ui.cam.path.toolpath import (
+    move_comment, move_set_feed, move_set_rpm, move_rapid, move_cut, move_retract
+)
+
+class TestToolpathHelpers(unittest.TestCase):
+    def test_comment(self):
+        m = move_comment("hi")
+        self.assertEqual(m["kind"], "comment")
+        self.assertEqual(m["text"], "hi")
+
+    def test_setters(self):
+        self.assertEqual(move_set_feed(800)["feed"], 800)
+        self.assertEqual(move_set_rpm(12000)["rpm"], 12000)
+
+    def test_motion(self):
+        r = move_rapid(x=1, y=2, z=3)
+        self.assertEqual((r["x"], r["y"], r["z"]), (1, 2, 3))
+
+        c = move_cut(x=4, y=5, z=-1, feed=700)
+        self.assertEqual((c["x"], c["y"], c["z"], c["feed"]), (4, 5, -1, 700))
+
+        t = move_retract(6)
+        self.assertEqual((t["kind"], t["z"]), ("retract", 6))
+
+=====================================
+FILE: ./tests/unit/test_layout_place.py
+=====================================
+import unittest
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.api.cad import apply_grid_layout, item_size_mm
+
+class TestApplyGridLayout(unittest.TestCase):
+    def setUp(self):
+        self.panel = Panel(width=300.0, height=200.0, thickness=12.0)
+
+    def test_tight_fit(self):
+        # Max item size will be 60x70, which fits:
+        # height check: 2*70 + 10 gap = 150 <= available 150 (with border=20)
+        items = [
+            {"kind":"shape","type":"Rect","geometry":{"w_mm":50,"h_mm":30}},
+            {"kind":"shape","type":"Circle","geometry":{"diameter_mm":40}},
+            {"kind":"door","params":{"outer_w":60,"outer_h":70}},
+        ]
+        placements = apply_grid_layout(
+            self.panel, items,
+            rows=2, cols=2, gap_x=10, gap_y=10, border=20, fit="tight"
+        )
+        cw = placements[0]["cell_size_mm"][0]
+        ch = placements[0]["cell_size_mm"][1]
+        self.assertAlmostEqual(cw, 60.0)
+        self.assertAlmostEqual(ch, 70.0)
+        self.assertAlmostEqual(placements[0]["center_xy_mm"][0], 20 + cw/2)
+        self.assertAlmostEqual(placements[0]["center_xy_mm"][1], 20 + ch/2)
+
+    def test_even_fill(self):
+        items = [{"kind":"shape","type":"Rect","geometry":{"w_mm":10,"h_mm":10}} for _ in range(6)]
+        placements = apply_grid_layout(self.panel, items, rows=2, cols=3, gap_x=10, gap_y=10, border=10, fit="even")
+        cw, ch = placements[0]["cell_size_mm"]
+        avail_w = self.panel.width - 2*10 - (3-1)*10
+        avail_h = self.panel.height - 2*10 - (2-1)*10
+        self.assertAlmostEqual(cw, avail_w/3)
+        self.assertAlmostEqual(ch, avail_h/2)
+
+    def test_item_size_mm(self):
+        self.assertEqual(item_size_mm({"kind":"door","params":{"outer_w":20,"outer_h":30}}), (20.0,30.0))
+        self.assertEqual(item_size_mm({"kind":"shape","type":"Rect","geometry":{"w_mm":5,"h_mm":7}}), (5.0,7.0))
+        self.assertEqual(item_size_mm({"kind":"shape","type":"Circle","geometry":{"diameter_mm":8}}), (8.0,8.0))
+
+    def test_tight_fit_overflow_raises(self):
+        items = [{"kind":"shape","type":"Rect","geometry":{"w_mm":200,"h_mm":200}}]
+        with self.assertRaises(ValueError):
+            apply_grid_layout(self.panel, items, rows=1, cols=2, gap_x=50, border=20, fit="tight")
+
+=====================================
+FILE: ./tests/unit/test_gcode_smoke.py
+=====================================
+import unittest
+from skills.mill_ui.cam.post.gcode import write_gcode
+
+class TestGcodeSmoke(unittest.TestCase):
+    def test_simple(self):
+        moves = [
+            {"kind":"comment","text":"hello"},
+            {"kind":"set_rpm","rpm":12000},
+            {"kind":"set_feed","feed":800},
+            {"kind":"rapid","x":0,"y":0,"z":5},
+            {"kind":"cut","x":10,"y":0,"z":0},
+            {"kind":"retract","z":5},
+        ]
+        out = write_gcode(moves, safe_z=6.0)
+        self.assertIn("M3 S12000", out)
+        self.assertIn("F800.0", out)
+        self.assertIn("G0 Z6.000", out)  # final safe Z
+
+=====================================
+FILE: ./tests/unit/test_strategies.py
+=====================================
+# path: skills/mill_ui/tests/unit/test_strategies.py
+import unittest
+from skills.mill_ui.api.cad import rectangle
+from skills.mill_ui.cam.model.tool import Tool
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.strategies import (
+    onion_skin_then_finish,
+    profile_outline_with_tabs,
+    pocket_then_onion_skin_profile,
+)
+
+class TestStrategies(unittest.TestCase):
+    def setUp(self):
+        tool = Tool(name="1/4in", diameter=6.35)
+        self.setup = Setup(
+            stock=Stock(100,100,12.7),
+            tool=tool,
+            material=Material(),
+            machine=Machine(),
+            safe_z=6.0,
+        )
+        self.shape = rectangle(20, 10)
+
+    def test_onion_skin_then_finish(self):
+        moves = onion_skin_then_finish(self.shape, self.setup, total_depth_mm=6.0, skin_mm=0.5, spring_pass=True)
+        zs = [m.get("z") for m in moves if m.get("kind") == "cut" and m.get("z") is not None]
+        self.assertIn(-5.5, zs)               # rough to 6.0-0.5
+        self.assertGreaterEqual(zs.count(-6.0), 2)  # finish + spring pass
+
+    def test_profile_with_tabs(self):
+        moves = profile_outline_with_tabs(self.shape, self.setup, depth_mm=6.0, tab_count=2, tab_height_mm=2.0)
+        zs = [m.get("z") for m in moves if m.get("kind") == "cut" and m.get("z") is not None]
+        self.assertIn(-6.0, zs)
+        self.assertTrue(any(z > -6.0 for z in zs))  # tab lift present
+
+    def test_pocket_then_onion_skin_profile(self):
+        moves = pocket_then_onion_skin_profile(self.shape, self.setup, total_depth_mm=6.0, skin_mm=0.5, spring_pass=True)
+        # Comments prove both stages were emitted
+        comments = [m.get("text","") for m in moves if m.get("kind") == "comment"]
+        self.assertTrue(any("pocket_raster" in c for c in comments))
+        self.assertTrue(any("onion_skin_then_finish" in c for c in comments))
+        # Depths: pocket reaches bottom; onion-skin rough is at total-skin; finish at bottom
+        zs = sorted({m.get("z") for m in moves if m.get("kind") == "cut" and m.get("z") is not None})
+        self.assertIn(-5.5, zs)   # onion-skin rough (6.0 - 0.5)
+        self.assertIn(-6.0, zs)   # pocket & finish bottom
+
+=====================================
+FILE: ./tests/unit/test_gcode.py
+=====================================
+import unittest
+from skills.mill_ui.cam.post.gcode import write_gcode
+
+class TestGcodeWriter(unittest.TestCase):
+    def test_mm_units_and_safe_end(self):
+        moves = [
+            {"kind":"comment","text":"hello(world)"},
+            {"kind":"set_rpm","rpm":12000},
+            {"kind":"set_feed","feed":800},
+            {"kind":"rapid","x":0,"y":0,"z":5},
+            {"kind":"cut","x":10,"y":0,"z":0},
+            {"kind":"retract","z":5},
+        ]
+        out = write_gcode(moves, safe_z=6.0, unit="mm", prec=3)
+        self.assertIn("(hello[world])", out)  # comment sanitized
+        self.assertIn("G21", out)             # mm
+        self.assertIn("M3 S12000", out)       # rpm
+        self.assertIn("F800.0", out)          # feed
+        # final safe Z must be 6.000 (not the prior retract at 5.000)
+        self.assertTrue(out.strip().splitlines()[-4].startswith("G0 Z6.000"))
+
+    def test_inch_units(self):
+        out = write_gcode([{"kind":"rapid","x":1,"y":2,"z":3}], unit="inch", prec=3)
+        self.assertIn("G20", out)  # inch
+
+    def test_unhandled_kind_is_commented(self):
+        out = write_gcode([{"kind":"teleport","x":1}], unit="mm")
+        self.assertIn("(unhandled move kind: teleport)", out)
+
+    def test_trailing_newline(self):
+        out = write_gcode([], unit="mm")
+        self.assertTrue(out.endswith("\n"))
+
+if __name__ == "__main__":
+    unittest.main()
+
+=====================================
+FILE: ./tests/unit/test_geom_parse.py
+=====================================
+import unittest
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.cad.geom_parse import rect_from_variant, circle_from_variant, is_stock_boundary_rect
+
+class TestGeomParse(unittest.TestCase):
+    def test_rect_variants(self):
+        r1 = rect_from_variant({"min_x":0,"min_y":1,"max_x":10,"max_y":11})
+        self.assertEqual((r1["min_x"], r1["max_y"]), (0.0, 11.0))
+
+        r2 = rect_from_variant({"bbox":{"xmin":0,"ymin":1,"xmax":10,"max_y":11}})
+        self.assertEqual((r2["min_y"], r2["max_x"]), (1.0, 10.0))
+
+        r3 = rect_from_variant({"points":[[0,1],[10,11]]})
+        self.assertEqual((r3["min_x"], r3["max_y"]), (0.0, 11.0))
+
+        r4 = rect_from_variant({"x":0,"y":1,"width":10,"height":10})
+        self.assertEqual((r4["max_x"], r4["max_y"]), (10.0, 11.0))
+
+    def test_circle_variants(self):
+        c1 = circle_from_variant({"center_x":5,"center_y":6,"radius_mm":2})
+        self.assertEqual(c1, (5.0, 6.0, 2.0))
+        c2 = circle_from_variant({"center":{"x":5,"y":6},"diameter_mm":8})
+        self.assertEqual(c2, (5.0, 6.0, 4.0))
+
+    def test_boundary_check(self):
+        panel = Panel(width=300, height=200, thickness=12)
+        self.assertTrue(is_stock_boundary_rect({"min_x":0,"min_y":0,"max_x":300,"max_y":200}, panel))
+        self.assertFalse(is_stock_boundary_rect({"min_x":1,"min_y":0,"max_x":300,"max_y":200}, panel))
+
+=====================================
+FILE: ./tests/unit/test_models_ops.py
+=====================================
+
+import unittest
+from skills.mill_ui.api.cad import rectangle
+from skills.mill_ui.cam.model.tool import Tool
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.ops.profile import profile_outline
+from skills.mill_ui.cam.ops.pocket import pocket_raster
+from skills.mill_ui.cam.ops.drill import drill_peck
+from skills.mill_ui.cam.ops.face import face_zigzag
+from skills.mill_ui.cam.ops.engrave import engrave_lines
+class TestModelsOps(unittest.TestCase):
+    def setUp(self):
+        self.tool=Tool(name='1/4in flat', diameter=6.35)
+        self.setup=Setup(stock=Stock(100,100,12.7), tool=self.tool, material=Material(), machine=Machine())
+    def test_profile(self):
+        shp=rectangle(20,10); moves=profile_outline(shp, self.setup, depth=6.0, step_down=3.0)
+        self.assertTrue(any(m.get('kind')=='cut' and m.get('z')==-3.0 for m in moves))
+        self.assertTrue(any(m.get('kind')=='cut' and m.get('z')==-6.0 for m in moves))
+    def test_pocket(self):
+        shp=rectangle(20,10); moves=pocket_raster(shp, self.setup, depth=3.0, stepover=5.0)
+        self.assertTrue(any(m.get('kind')=='cut' and m.get('z')==-3.0 for m in moves))
+    def test_drill(self):
+        moves=drill_peck([(0,0),(10,10)], self.setup, depth=5.0, peck=2.0)
+        self.assertTrue(any(m.get('kind')=='retract' for m in moves))
+    def test_face(self):
+        moves=face_zigzag(30,20,self.setup,step=10.0,depth=0.5)
+        self.assertTrue(any(m.get('kind')=='cut' and m.get('z')==-0.5 for m in moves))
+    def test_engrave(self):
+        lines=[[(0,0),(10,0),(10,10)]]; moves=engrave_lines(lines, self.setup, z=-0.3)
+        self.assertTrue(any(m.get('kind')=='cut' and m.get('z')==-0.3 for m in moves))
+
+=====================================
+FILE: ./tests/unit/test_hashing.py
+=====================================
+
+import unittest
+from skills.mill_ui.core.hashing import dump_canonical, stable_hash
+class TestHashing(unittest.TestCase):
+    def test_order(self):
+        a=dump_canonical({'b':1,'a':2}); self.assertLess(a.find('\n  "a"'), a.find('\n  "b"'))
+    def test_hash(self):
+        self.assertNotEqual(stable_hash({'a':1}), stable_hash({'a':2}))
+        self.assertEqual(stable_hash({'a':1,'b':2}), stable_hash({'b':2,'a':1}))
+
+=====================================
+FILE: ./tests/unit/test_hints.py
+=====================================
+import unittest
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.api.cad import apply_grid_layout
+from skills.mill_ui.api.cam import build_cam_hints
+
+class TestHints(unittest.TestCase):
+    def test_door_expansion_profiles_pockets(self):
+        panel = Panel(width=600, height=300, thickness=12)
+        # Single door item
+        items = [{
+            "kind": "door",
+            "id": "D1",
+            "params": {
+                "outer_w": 200.0, "outer_h": 100.0,
+                "stile_w": 20.0, "rail_h": 25.0,
+                "panel_recess": 3.0
+            }
+        }]
+        placements = apply_grid_layout(panel, items, rows=1, cols=1, border=10, fit="tight")
+        # mimic resolved items (add placement to each item)
+        resolved = []
+        for pl in placements:
+            item = dict(pl["item"])
+            item["placement"] = {"center_xy_mm": pl["center_xy_mm"]}
+            resolved.append(item)
+        hints = build_cam_hints(items_resolved=resolved, sheet_thickness=panel.thickness, kerf_width_mm=3.175)
+
+        # Check outer profile present
+        profs = [p for p in hints["profiles"] if p["shape"]=="Rect"]
+        self.assertTrue(any(abs(p["geometry"]["w_mm"]-200.0)<1e-6 and abs(p["geometry"]["h_mm"]-100.0)<1e-6 for p in profs))
+        # Check pocket present with inner dims
+        pockets = hints["pockets"]
+        self.assertTrue(any(abs(p["geometry"]["w_mm"]-(200-2*20))<1e-6 and abs(p["geometry"]["h_mm"]-(100-2*25))<1e-6 for p in pockets))
+        # Depths
+        self.assertTrue(any(abs(p["depth_mm"]-panel.thickness)<1e-6 for p in profs))
+        self.assertTrue(any(abs(p["depth_mm"]-3.0)<1e-6 for p in pockets))
+
+    def test_pass_through_shape(self):
+        panel = Panel(width=200, height=200, thickness=12)
+        items = [{
+            "kind": "shape",
+            "id": "S1",
+            "type": "Circle",
+            "geometry": {"diameter_mm": 10},
+            "feature": {"type": "hole", "depth": "through"}
+        }]
+        pl = apply_grid_layout(panel, items, rows=1, cols=1, fit="tight")
+        resolved = []
+        for r in pl:
+            it = dict(r["item"])
+            it["placement"] = {"center_xy_mm": r["center_xy_mm"]}
+            resolved.append(it)
+        hints = build_cam_hints(items_resolved=resolved, sheet_thickness=panel.thickness)
+        self.assertTrue(any(rec["shape"]=="Circle" for rec in hints["holes"]))
+
+=====================================
+FILE: ./__init__.py
+=====================================
+__all__ = ['api']
+
+=====================================
+FILE: ./api/__init__.py
+=====================================
+
+=====================================
+FILE: ./api/cad.py
+=====================================
+from __future__ import annotations
+from typing import List, Tuple, Iterable
+from skills.mill_ui.cad.primitives import rectangle, circle, rounded_rect
+from skills.mill_ui.cad.transforms import Transform2D, place
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.cad.layout.place import grid_place, row_place, col_place, apply_grid_layout, item_size_mm
+from skills.mill_ui.cad.compose import union, diff, intersect
+from skills.mill_ui.cad.export.svg import render_svg_layout
+
+__all__ = [
+    "rectangle", "circle", "rounded_rect",
+    "Transform2D", "place", "Panel",
+    "grid_place", "row_place", "col_place",
+    "apply_grid_layout", "item_size_mm",
+    "union", "diff", "intersect",
+    "render_svg_layout",
+]
+
+=====================================
+FILE: ./api/io.py
+=====================================
+
+from skills.mill_ui.io.readwrite import save_json, load_json
+from skills.mill_ui.core.hashing import dump_canonical, stable_hash
+__all__ = ['save_json','load_json','dump_canonical','stable_hash']
+
+=====================================
+FILE: ./api/cam.py
+=====================================
+# path: skills/mill_ui/api/cam.py
+from skills.mill_ui.cam.model.tool import Tool, ToolKind
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.model.hints import build_cam_hints
+
+from skills.mill_ui.cam.ops.profile import profile_outline
+from skills.mill_ui.cam.ops.pocket import pocket_raster
+from skills.mill_ui.cam.ops.drill import drill_peck
+from skills.mill_ui.cam.ops.face import face_zigzag
+from skills.mill_ui.cam.ops.engrave import engrave_lines
+from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
+
+from skills.mill_ui.cam.post.gcode import write_gcode
+
+# Ensure template registration when api.cam is imported
+try:
+    from skills.mill_ui.compositions.cabinets import shaker  # noqa: F401
+    from skills.mill_ui.compositions.panels import circle_mount  # noqa: F401
+except Exception:
+    pass
+
+__all__ = [
+    "Tool", "ToolKind", "Material", "Machine", "Stock", "Setup",
+    "build_cam_hints",
+    "profile_outline", "pocket_raster", "drill_peck", "face_zigzag", "engrave_lines",
+    "bore_helical", "pocket_circle_concentric",
+    "write_gcode",
+]
+
+=====================================
+FILE: ./recipes/components.py
+=====================================
+# path: skills/mill_ui/recipes/components.py
+from __future__ import annotations
+from typing import List, Dict, Any, Tuple
+
+def counterbore(center_xy: Tuple[float, float], *, through_d_mm: float, bore_d_mm: float, bore_depth_mm: float) -> List[Dict[str, Any]]:
+    cx, cy = float(center_xy[0]), float(center_xy[1])
+    return [
+        {  # shallow pocket for the counterbore
+            "kind": "shape",
+            "type": "Circle",
+            "geometry": {"diameter_mm": float(bore_d_mm)},
+            "placement": {"center_xy_mm": (cx, cy)},
+            "feature": {"type": "pocket", "depth_mm": float(bore_depth_mm)},
+        },
+        {  # through hole
+            "kind": "shape",
+            "type": "Circle",
+            "geometry": {"diameter_mm": float(through_d_mm)},
+            "placement": {"center_xy_mm": (cx, cy)},
+            "feature": {"type": "hole", "depth": "through"},
+        },
+    ]
+
+def shelf_pin_grid(origin_xy: Tuple[float, float], *, rows: int, cols: int, pitch_x_mm: float, pitch_y_mm: float, hole_d_mm: float, depth: str | float = "through") -> List[Dict[str, Any]]:
+    ox, oy = float(origin_xy[0]), float(origin_xy[1])
+    items: List[Dict[str, Any]] = []
+    for r in range(rows):
+        for c in range(cols):
+            cx = ox + c * float(pitch_x_mm)
+            cy = oy + r * float(pitch_y_mm)
+            feature = {"type": "hole", "depth": "through"} if depth == "through" else {"type": "hole", "depth_mm": float(depth)}
+            items.append({
+                "kind": "shape",
+                "type": "Circle",
+                "geometry": {"diameter_mm": float(hole_d_mm)},
+                "placement": {"center_xy_mm": (cx, cy)},
+                "feature": feature,
+            })
+    return items
+
+def slot_pocket(center_xy: Tuple[float, float], *, length_mm: float, width_mm: float, depth: str | float = "through") -> List[Dict[str, Any]]:
+    cx, cy = float(center_xy[0]), float(center_xy[1])
+    feat = {"type": "pocket", "depth": "through"} if depth == "through" else {"type": "pocket", "depth_mm": float(depth)}
+    # Full-depth pocket is acceptable for slots with your current ops
+    return [{
+        "kind": "shape",
+        "type": "Rect",
+        "geometry": {"w_mm": float(length_mm), "h_mm": float(width_mm)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feat,
+    }]
+
+def dogbone_rect(center_xy: Tuple[float, float], *, w_mm: float, h_mm: float, tool_d_mm: float) -> List[Dict[str, Any]]:
+    cx, cy = float(center_xy[0]), float(center_xy[1])
+    w, h, td = float(w_mm), float(h_mm), float(tool_d_mm)
+    rx = w * 0.5
+    ry = h * 0.5
+    holes = []
+    for dx in (-rx, rx):
+        for dy in (-ry, ry):
+            holes.append({
+                "kind": "shape",
+                "type": "Circle",
+                "geometry": {"diameter_mm": td},
+                "placement": {"center_xy_mm": (cx + dx, cy + dy)},
+                "feature": {"type": "hole", "depth": "through"},
+            })
+    rect_profile = {
+        "kind": "shape",
+        "type": "Rect",
+        "geometry": {"w_mm": w, "h_mm": h},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": {"type": "profile", "depth": "through", "side": "outside"},
+    }
+    return [rect_profile] + holes
+
+=====================================
+FILE: ./recipes/library.py
+=====================================
+
+from skills.mill_ui.cad.shape import Shape2D
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.ops.pocket import pocket_raster
+from skills.mill_ui.cam.ops.profile import profile_outline
+def pocket_then_profile(shape:Shape2D, setup:Setup, depth:float, stepover:float):
+    moves=[]; moves+=pocket_raster(shape, setup, depth=depth, stepover=stepover); moves+=profile_outline(shape, setup, depth=depth); return moves
+
+=====================================
+FILE: ./recipes/__init__.py
+=====================================
+
+=====================================
+FILE: ./recipes/cookbook/examples.py
+=====================================
+# path: skills/mill_ui/recipes/cookbook/examples.py
+from __future__ import annotations
+from typing import List, Dict, Any, Tuple
+
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.api.cam import build_cam_hints, write_gcode
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.planner.pipeline import hints_to_moves
+
+# Optional helpers if present (components shipped earlier)
+try:
+    from skills.mill_ui.recipes.components import shelf_pin_grid, counterbore
+    _HAS_COMPONENTS = True
+except Exception:
+    _HAS_COMPONENTS = False
+
+
+def _mk_setup_objs(panel: Panel) -> Tuple[Material, Machine, Stock]:
+    material = Material(name="MDF")
+    machine = Machine(name="default_grbl")
+    stock = Stock(width=panel.width, height=panel.height, thickness=panel.thickness)
+    return material, machine, stock
+
+
+def example_progressive_hole_grid(
+    panel: Panel,
+    *,
+    tool_db: List[Dict[str, Any]],
+    origin_xy: Tuple[float, float] = (40.0, 40.0),
+    rows: int = 3,
+    cols: int = 4,
+    pitch_x_mm: float = 30.0,
+    pitch_y_mm: float = 30.0,
+    start_d_mm: float = 4.0,
+    step_d_mm: float = 2.0,
+) -> Tuple[List[Dict[str, Any]], str]:
+    """
+    Generates a grid of holes that increase in diameter across the grid.
+    Exercises hole policy: small drill, medium bore, large pocket-circle.
+    """
+    ox, oy = origin_xy
+    items: List[Dict[str, Any]] = []
+
+    if _HAS_COMPONENTS:
+        # uniform grid then adjust diameters progressively
+        items = shelf_pin_grid((ox, oy), rows=rows, cols=cols,
+                               pitch_x_mm=pitch_x_mm, pitch_y_mm=pitch_y_mm,
+                               hole_d_mm=start_d_mm, depth="through")
+        for i, it in enumerate(items):
+            r = i // cols
+            c = i % cols
+            it["geometry"]["diameter_mm"] = start_d_mm + (r * cols + c) * step_d_mm
+    else:
+        # fallback: synthesize explicitly with placements
+        for r in range(rows):
+            for c in range(cols):
+                cx = ox + c * pitch_x_mm
+                cy = oy + r * pitch_y_mm
+                d = start_d_mm + (r * cols + c) * step_d_mm
+                items.append({
+                    "kind": "shape",
+                    "type": "Circle",
+                    "geometry": {"diameter_mm": d},
+                    "placement": {"center_xy_mm": (cx, cy)},
+                    "feature": {"type": "hole", "depth": "through"},
+                })
+
+    material, machine, stock = _mk_setup_objs(panel)
+    hints = build_cam_hints(items_resolved=items, sheet_thickness=panel.thickness)
+    moves = hints_to_moves(
+        hints, tool_db=tool_db, material=material, machine=machine, stock=stock, safe_z=panel.safe_z
+    )
+    gcode = write_gcode(moves, safe_z=panel.safe_z)
+    return moves, gcode
+
+
+def example_organizer_tray_rect_islands(
+    panel: Panel,
+    *,
+    tool_db: List[Dict[str, Any]],
+    center_xy: Tuple[float, float] = (150.0, 100.0),
+    outer_w_mm: float = 160.0,
+    outer_h_mm: float = 100.0,
+    depth_mm: float = 8.0,
+) -> Tuple[List[Dict[str, Any]], str]:
+    """
+    Rectangular pocket with rectangular islands (compartments).
+    Uses Region with Rect outer + Rect holes (supported by pocket_region_rect_raster).
+    """
+    cx, cy = center_xy
+    # Create 4 compartments by leaving two rectangular islands
+    hole_w = outer_w_mm * 0.3
+    hole_h = outer_h_mm * 0.8
+    items = [{
+        "kind": "shape",
+        "type": "Region",
+        "geometry": {
+            "outer": {"type": "Rect", "geometry": {"w_mm": outer_w_mm, "h_mm": outer_h_mm}, "center_xy_mm": (cx, cy)},
+            "holes": [
+                {"type": "Rect", "geometry": {"w_mm": hole_w, "h_mm": hole_h}, "center_xy_mm": (cx - outer_w_mm*0.25, cy)},
+                {"type": "Rect", "geometry": {"w_mm": hole_w, "h_mm": hole_h}, "center_xy_mm": (cx + outer_w_mm*0.25, cy)},
+            ],
+        },
+        "feature": {"type": "pocket", "depth_mm": depth_mm},
+    }]
+
+    material, machine, stock = _mk_setup_objs(panel)
+    hints = build_cam_hints(items_resolved=items, sheet_thickness=panel.thickness)
+    moves = hints_to_moves(
+        hints, tool_db=tool_db, material=material, machine=machine, stock=stock, safe_z=panel.safe_z
+    )
+    gcode = write_gcode(moves, safe_z=panel.safe_z)
+    return moves, gcode
+
+
+def example_counterbored_holes(
+    panel: Panel,
+    *,
+    tool_db: List[Dict[str, Any]],
+    centers: List[Tuple[float, float]] = ((80.0, 60.0), (120.0, 60.0)),
+    through_d_mm: float = 5.0,
+    bore_d_mm: float = 20.0,
+    bore_depth_mm: float = 3.0,
+) -> Tuple[List[Dict[str, Any]], str]:
+    """
+    Classic counterbore: shallow circular pocket + through hole at the same center.
+    """
+    items: List[Dict[str, Any]] = []
+    for c in centers:
+        if _HAS_COMPONENTS:
+            items.extend(counterbore(c, through_d_mm=through_d_mm, bore_d_mm=bore_d_mm, bore_depth_mm=bore_depth_mm))
+        else:
+            cx, cy = c
+            items.append({
+                "kind": "shape", "type": "Circle",
+                "geometry": {"diameter_mm": bore_d_mm},
+                "placement": {"center_xy_mm": (cx, cy)},
+                "feature": {"type": "pocket", "depth_mm": bore_depth_mm},
+            })
+            items.append({
+                "kind": "shape", "type": "Circle",
+                "geometry": {"diameter_mm": through_d_mm},
+                "placement": {"center_xy_mm": (cx, cy)},
+                "feature": {"type": "hole", "depth": "through"},
+            })
+
+    material, machine, stock = _mk_setup_objs(panel)
+    hints = build_cam_hints(items_resolved=items, sheet_thickness=panel.thickness)
+    moves = hints_to_moves(
+        hints, tool_db=tool_db, material=material, machine=machine, stock=stock, safe_z=panel.safe_z
+    )
+    gcode = write_gcode(moves, safe_z=panel.safe_z)
+    return moves, gcode
+
+=====================================
+FILE: ./recipes/cookbook/__init__.py
+=====================================
+# path: skills/mill_ui/recipes/cookbook/__init__.py
+# empty on purpose
+
+=====================================
+FILE: ./cam/__init__.py
+=====================================
+
+=====================================
+FILE: ./cam/path/__init__.py
+=====================================
+
+=====================================
+FILE: ./cam/path/toolpath.py
+=====================================
+
+def move_comment(text:str): return {'kind':'comment','text':text}
+def move_set_feed(feed:float): return {'kind':'set_feed','feed':feed}
+def move_set_rpm(rpm:float): return {'kind':'set_rpm','rpm':rpm}
+def move_rapid(x=None,y=None,z=None): return {'kind':'rapid','x':x,'y':y,'z':z}
+def move_cut(x=None,y=None,z=None,feed=None): return {'kind':'cut','x':x,'y':y,'z':z,'feed':feed}
+def move_retract(z:float): return {'kind':'retract','z':z}
+
+=====================================
+FILE: ./cam/path/strategies.py
+=====================================
+# path: skills/mill_ui/cam/path/strategies.py
+from __future__ import annotations
+from typing import List, Set, Optional
+from skills.mill_ui.cad.shape import Shape2D
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.ops.profile import profile_outline
+from skills.mill_ui.cam.ops.pocket import pocket_raster
+from skills.mill_ui.cam.planner.params import stepdown_for, stepover_for
+from skills.mill_ui.cam.path.toolpath import (
+    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+)
+
+def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> List[dict]:
+    """One finish loop at target depth."""
+    pts = shape.points
+    if not pts:
+        return []
+    target_z = -abs(float(depth_mm))
+    m: List[dict] = []
+    m.append(move_comment("finish_profile_pass"))
+    m.append(move_set_rpm(setup.tool.rpm))
+    m.append(move_set_feed(setup.tool.feed_xy))
+    p0 = pts[0]
+    m.append(move_rapid(x=p0.x, y=p0.y, z=setup.safe_z))
+    m.append(move_cut(z=target_z, feed=setup.tool.feed_z))   # plunge at Z feed
+    m.append(move_set_feed(setup.tool.feed_xy))              # restore XY feed
+    for p in pts[1:]:
+        m.append(move_cut(x=p.x, y=p.y))
+    m.append(move_retract(setup.safe_z))
+    return m
+
+def onion_skin_then_finish(
+    shape: Shape2D,
+    setup: Setup,
+    total_depth_mm: float,
+    *,
+    skin_mm: float = 0.5,
+    step_down_mm: Optional[float] = None,
+    spring_pass: bool = False,
+) -> List[dict]:
+    """
+    Rough to (total_depth - skin), then do a single finish pass at total_depth.
+    Optionally add a duplicate finish 'spring' pass to clean deflection.
+    """
+    total = abs(float(total_depth_mm))
+    skin  = max(0.0, float(skin_mm))
+    if skin == 0.0:
+        # simple profile
+        sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
+        return profile_outline(shape, setup, depth=total, step_down=sd)
+
+    rough_depth = max(0.0, total - skin)
+    sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
+
+    moves: List[dict] = []
+    moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={total:.3f}"))
+    if rough_depth > 0:
+        moves += profile_outline(shape, setup, depth=rough_depth, step_down=sd)
+    moves += _finish_profile_pass(shape, setup, depth_mm=total)
+    if spring_pass:
+        moves += _finish_profile_pass(shape, setup, depth_mm=total)
+    return moves
+
+def _evenly_spaced_indices(n: int, k: int) -> Set[int]:
+    if k <= 0 or n <= 0:
+        return set()
+    # spread k indices across 0..n-1 (skip 0 to avoid first plunge)
+    return {max(1, round(i * (n - 1) / k)) for i in range(1, k + 1)}
+
+def profile_outline_with_tabs(
+    shape: Shape2D,
+    setup: Setup,
+    *,
+    depth_mm: float,
+    step_down_mm: Optional[float] = None,
+    tab_count: int = 4,
+    tab_height_mm: float = 3.0,
+) -> List[dict]:
+    """
+    Profile with tabs on the final pass: insert small Z lifts (tab_height) at k evenly spaced edges.
+    """
+    pts = shape.points
+    if not pts:
+        return []
+
+    total = abs(float(depth_mm))
+    sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
+
+    moves: List[dict] = []
+    moves.append(move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+
+    target = -total
+    z = 0.0
+    p0 = pts[0]
+
+    while z > target + 1e-9:
+        z_next = max(target, z - sd)
+        # one pass loop
+        moves.append(move_rapid(x=p0.x, y=p0.y, z=setup.safe_z))
+        moves.append(move_cut(z=z_next, feed=setup.tool.feed_z))
+        moves.append(move_set_feed(setup.tool.feed_xy))   # restore XY feed
+
+        if z_next > target + 1e-9:
+            # roughing pass: no tabs, just trace
+            for p in pts[1:]:
+                moves.append(move_cut(x=p.x, y=p.y))
+        else:
+            # final pass: add tab lifts
+            idxs = _evenly_spaced_indices(len(pts) - 1, tab_count)
+            for i, p in enumerate(pts[1:], start=1):
+                moves.append(move_cut(x=p.x, y=p.y))
+                if i in idxs:
+                    # lift up towards stock by tab_height, then back down to bottom
+                    lift_z = -max(0.0, total - float(tab_height_mm))
+                    moves.append(move_cut(z=lift_z))
+                    moves.append(move_cut(z=target))
+        moves.append(move_retract(setup.safe_z))
+        z = z_next
+
+    return moves
+
+# ------------------------------------------------------------------
+# Helper requested by tests:
+#   - Pocket the interior, then onion-skin profile finish.
+#   - Accepts total_depth_mm (as tests use), but also tolerates depth_mm.
+#   - If stepover not provided, derive from tool diameter.
+# ------------------------------------------------------------------
+def pocket_then_onion_skin_profile(
+    shape: Shape2D,
+    setup: Setup,
+    *,
+    total_depth_mm: Optional[float] = None,
+    skin_mm: float = 0.5,
+    spring_pass: bool = False,
+    stepover_mm: Optional[float] = None,
+    step_down_mm: Optional[float] = None,
+    depth_mm: Optional[float] = None,   # legacy alias
+) -> List[dict]:
+    # Resolve total depth from either name
+    total = total_depth_mm if total_depth_mm is not None else depth_mm
+    if total is None:
+        raise ValueError("pocket_then_onion_skin_profile requires total_depth_mm (or depth_mm).")
+    total = float(total)
+
+    # Default stepover if not supplied
+    so = stepover_mm if stepover_mm is not None else stepover_for(tool_diameter=setup.tool.diameter)
+
+    moves: List[dict] = []
+    moves.append(move_comment("pocket_then_onion_skin_profile"))
+    # Clear area first
+    moves += pocket_raster(shape, setup, depth=total, stepover=so)
+    # Then perimeter finish with skin
+    moves += onion_skin_then_finish(
+        shape, setup,
+        total_depth_mm=total,
+        skin_mm=skin_mm,
+        step_down_mm=step_down_mm,
+        spring_pass=spring_pass,
+    )
+    return moves
+
+=====================================
+FILE: ./cam/model/machine.py
+=====================================
+
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Machine:
+    name:str='default_grbl'; max_feed_xy:float=3000.0; max_feed_z:float=800.0; rapid_z:float=1000.0
+
+=====================================
+FILE: ./cam/model/hints.py
+=====================================
+# path: skills/mill_ui/cam/model/hints.py
+from __future__ import annotations
+from typing import Any, Dict, List, Optional, Tuple
+
+__all__ = ["build_cam_hints"]
+
+def _id(it: Dict[str, Any]) -> str:
+    return it.get("id") or ""
+
+def _xy(placement: Optional[Dict[str, Any]]) -> Optional[Tuple[float, float]]:
+    if not placement:
+        return None
+    v = placement.get("center_xy_mm")
+    if isinstance(v, (list, tuple)) and len(v) == 2:
+        return float(v[0]), float(v[1])
+    return None
+
+def _rect_geom(g: Dict[str, Any]) -> Dict[str, float]:
+    return {"w_mm": float(g.get("w_mm", 0.0)),
+            "h_mm": float(g.get("h_mm", 0.0))}
+
+def _circle_geom(g: Dict[str, Any]) -> Dict[str, float]:
+    return {"diameter_mm": float(g.get("diameter_mm", 0.0))}
+
+def _polyline_geom(g: Dict[str, Any]) -> Dict[str, Any]:
+    pts_raw = g.get("points") or []
+    pts = [(float(p[0]), float(p[1])) for p in pts_raw if isinstance(p, (tuple, list)) and len(p) == 2]
+    closed = bool(g.get("closed", False))
+    return {"points": pts, "closed": closed}
+
+def _depth_mm(feature: Dict[str, Any], sheet_thickness: float) -> float:
+    ftype = (feature or {}).get("type", feature.get("kind", "profile")).lower()
+    if ftype in ("pocket", "engrave"):
+        return float(feature.get("depth_mm", 0.0))
+    if feature.get("depth") == "through":
+        return float(sheet_thickness)
+    if "depth_mm" in feature:
+        return float(feature["depth_mm"])
+    return float(feature.get("depth", sheet_thickness))
+
+def _classify(item: Dict[str, Any], sheet_thickness: float) -> str:
+    """Return bucket: 'profiles' | 'pockets' | 'holes' | 'engraves'."""
+    f = (item.get("feature") or {})
+    ftype = (f.get("type") or f.get("kind") or "profile").lower()
+    t = (item.get("type") or "").lower()
+    if ftype == "pocket" or t == "region":
+        return "pockets"
+    if ftype == "engrave":
+        return "engraves"
+    if ftype == "hole" or (t == "circle" and ftype in ("drill", "hole")):
+        return "holes"
+    return "profiles"
+
+def _expand_door(item: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Expand a 'door' item into cuttable shapes (outer profile + panel pocket)."""
+    out: List[Dict[str, Any]] = []
+    params = item.get("params") or {}
+    center = _xy(item.get("placement"))
+    outer_w = float(params.get("outer_w", 0.0))
+    outer_h = float(params.get("outer_h", 0.0))
+    stile_w = float(params.get("stile_w", 0.0))
+    rail_h  = float(params.get("rail_h", 0.0))
+    panel_recess = float(params.get("panel_recess", 0.0))
+    # Outer perimeter
+    out.append({
+        "id": _id(item) or (item.get("id") or ""),
+        "type": "Rect",
+        "geometry": {"w_mm": outer_w, "h_mm": outer_h},
+        "placement": {"center_xy_mm": center},
+        "feature": {"type": "profile", "depth": "through", "side": "outside"},
+    })
+    # Panel pocket if any
+    if panel_recess > 0 and outer_w > 2 * stile_w and outer_h > 2 * rail_h:
+        in_w = max(0.0, outer_w - 2 * stile_w)
+        in_h = max(0.0, outer_h - 2 * rail_h)
+        out.append({
+            "id": (_id(item) + ":panel") if _id(item) else "",
+            "type": "Rect",
+            "geometry": {"w_mm": in_w, "h_mm": in_h},
+            "placement": {"center_xy_mm": center},
+            "feature": {"type": "pocket", "depth_mm": panel_recess}
+        })
+    return out
+
+def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: float,
+                    kerf_width_mm: float = 3.175, min_channel_width: float = 6.0) -> Dict[str, Any]:
+    """Build a CAM hint structure from resolved items (with placements).
+    
+    Supported shapes per record:
+      - type: 'Rect'     geometry: {w_mm, h_mm}
+      - type: 'Circle'   geometry: {diameter_mm}
+      - type: 'Polyline' geometry: {points:[[x,y],...], closed:bool}
+      - type: 'Region'   geometry: {
+                              outer: { type:'Rect'|'Circle'|'Polyline', geometry:{...}, center_xy_mm?:(x,y) },
+                              holes: [ { type:'Rect'|'Circle'|'Polyline', geometry:{...}, center_xy_mm?:(x,y) }, ... ]
+                           }
+    """
+    profiles: List[Dict[str, Any]] = []
+    pockets:  List[Dict[str, Any]] = []
+    holes:    List[Dict[str, Any]] = []
+    engraves: List[Dict[str, Any]] = []
+
+    # Expand special kinds (e.g., door) into concrete shapes
+    expanded: List[Dict[str, Any]] = []
+    for it in items_resolved:
+        if it.get("kind") == "door":
+            expanded.extend(_expand_door(it))
+        elif it.get("kind") == "shape" or it.get("type") in ("Rect", "Circle", "Polyline", "Region"):
+            expanded.append(it)
+        else:
+            expanded.append(it)
+
+    # Bucketize
+    T = float(sheet_thickness)
+    for it in expanded:
+        bucket = _classify(it, T)
+        gid = _id(it)
+        t   = it.get("type")
+        g   = it.get("geometry") or {}
+        p   = it.get("placement")
+        f   = it.get("feature") or {}
+        center = _xy(p)  # optional; Region may carry its own sub-centers
+        depth  = _depth_mm(f, T)
+        side   = (f.get("side") or it.get("side") or None)
+
+        rec = {
+            "id": gid,
+            "shape": t,      # 'Rect' | 'Circle' | 'Polyline' | 'Region'
+            "geometry": g,
+            "center_xy_mm": center,        # optional for Region (sub-shapes may override)
+            "depth_mm": depth,
+        }
+        if side and bucket == "profiles":
+            rec["side"] = str(side).lower()
+
+        if bucket == "profiles":
+            profiles.append(rec)
+        elif bucket == "pockets":
+            pockets.append(rec)
+        elif bucket == "holes":
+            holes.append(rec)
+        elif bucket == "engraves":
+            engraves.append(rec)
+
+    return {
+        "units": "mm",
+        "profiles": profiles,
+        "pockets": pockets,
+        "holes": holes,
+        "engraves": engraves,
+        "min_channel_width_mm": float(min_channel_width),
+        "items_resolved": items_resolved,
+    }
+
+=====================================
+FILE: ./cam/model/__init__.py
+=====================================
+
+=====================================
+FILE: ./cam/model/tool.py
+=====================================
+
+from dataclasses import dataclass
+from typing import Literal
+ToolKind = Literal['flat','ball','v']
+@dataclass(frozen=True)
+class Tool:
+    name:str; diameter:float; kind:ToolKind='flat'; rpm:float=12000.0; feed_xy:float=800.0; feed_z:float=300.0
+
+=====================================
+FILE: ./cam/model/stock.py
+=====================================
+
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Stock:
+    width:float; height:float; thickness:float; origin:str='lower_left_top'
+
+=====================================
+FILE: ./cam/model/setup.py
+=====================================
+
+from dataclasses import dataclass
+from skills.mill_ui.cam.model.tool import Tool
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+@dataclass(frozen=True)
+class Setup:
+    stock:Stock; tool:Tool; material:Material; machine:Machine; safe_z:float=5.0
+
+=====================================
+FILE: ./cam/model/material.py
+=====================================
+
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Material:
+    name:str='MDF'; chipload_min:float=0.02; chipload_max:float=0.08
+
+=====================================
+FILE: ./cam/post/__init__.py
+=====================================
+
+=====================================
+FILE: ./cam/post/gcode.py
+=====================================
+# path: skills/mill_ui/cam/post/gcode.py
+
+DEFAULT_HEADER = ['(begin)', 'G90', 'G21', 'G17', 'G94']
+DEFAULT_FOOTER = ['M5', 'M2', '(end)']
+
+def _fmt_num(v, prec):
+    q = 10 ** prec
+    return f"{round(v * q) / q:.{prec}f}"
+
+def _g0(x, y, z, prec):
+    parts = ['G0']
+    if x is not None: parts.append(f"X{_fmt_num(x, prec)}")
+    if y is not None: parts.append(f"Y{_fmt_num(y, prec)}")
+    if z is not None: parts.append(f"Z{_fmt_num(z, prec)}")
+    return " ".join(parts)
+
+def _g1(x, y, z, f, prec):
+    parts = ['G1']
+    if x is not None: parts.append(f"X{_fmt_num(x, prec)}")
+    if y is not None: parts.append(f"Y{_fmt_num(y, prec)}")
+    if z is not None: parts.append(f"Z{_fmt_num(z, prec)}")
+    if f is not None: parts.append(f"F{_fmt_num(f, max(0, prec - 2))}")
+    return " ".join(parts)
+
+def _rpm_line(s): 
+    return None if s is None else f"M3 S{int(round(s))}"
+
+def write_gcode(moves, *, unit='mm', prec=3, safe_z=5.0, header=None, footer=None):
+    if unit not in ('mm','inch'):
+        raise ValueError("unit must be 'mm' or 'inch'")
+    lines = []
+    hdr = list(DEFAULT_HEADER if header is None else header)
+    if unit == 'inch':
+        hdr = ['G20' if ln == 'G21' else ln for ln in hdr]
+        if 'G20' not in hdr: hdr.insert(1, 'G20')
+    else:
+        if 'G21' not in hdr: hdr.insert(1, 'G21')
+    lines.extend(hdr)
+
+    current_feed = None
+    current_rpm = None
+    current_z = None
+
+    for m in moves:
+        k = m.get('kind')
+        if k == 'comment':
+            t = (m.get('text') or '').replace('(', '[').replace(')', ']')
+            lines.append(f"({t})")
+        elif k == 'set_rpm':
+            rpm = m.get('rpm')
+            if rpm != current_rpm:
+                current_rpm = rpm
+                ln = _rpm_line(rpm)
+                if ln: lines.append(ln)
+        elif k == 'set_feed':
+            feed = m.get('feed')
+            if feed is not None and feed != current_feed:
+                current_feed = feed
+                lines.append(f"F{_fmt_num(feed, max(0, prec - 2))}")
+        elif k == 'rapid':
+            x, y, z = m.get('x'), m.get('y'), m.get('z')
+            lines.append(_g0(x, y, z, prec))
+            if z is not None: current_z = z
+        elif k == 'cut':
+            x, y, z = m.get('x'), m.get('y'), m.get('z')
+            lines.append(_g1(x, y, z, m.get('feed', current_feed), prec))
+            if z is not None: current_z = z
+            # NOTE: we intentionally do NOT update current_feed from a per-move feed,
+            # because ops re-issue move_set_feed() after plunges.
+        elif k == 'retract':
+            z = m.get('z', safe_z)
+            lines.append(_g0(None, None, z, prec))
+            current_z = z
+        else:
+            lines.append(f"(unhandled move kind: {k})")
+
+    if current_z is None or abs(current_z - safe_z) > 1e-9:
+        lines.append(_g0(None, None, safe_z, prec))
+    lines.extend(DEFAULT_FOOTER if footer is None else footer)
+    return "\n".join(lines) + "\n"
+
+=====================================
+FILE: ./cam/ops/drill.py
+=====================================
+
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+def drill_peck(points, setup:Setup, depth:float, peck:float=3.0):
+    moves=[]; moves.append(move_comment('drill_peck')); moves.append(move_set_rpm(setup.tool.rpm)); moves.append(move_set_feed(setup.tool.feed_z))
+    for (x,y) in points:
+        z=0.0; moves.append(move_rapid(x=x,y=y,z=setup.safe_z))
+        while z>-abs(depth):
+            z_next=max(z-peck,-abs(depth))
+            moves.append(move_cut(z=z_next))
+            moves.append(move_retract(setup.safe_z)); z=z_next
+    return moves
+
+=====================================
+FILE: ./cam/ops/profile.py
+=====================================
+# path: skills/mill_ui/cam/ops/profile.py
+from skills.mill_ui.cad.shape import Shape2D
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+
+def profile_outline(shape: Shape2D, setup: Setup, depth: float, step_down: float = 2.0):
+    moves = []
+    moves.append(move_comment('profile_outline'))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+    z = 0.0
+    target = -abs(depth)
+    while z > target:
+        z = max(z - step_down, target)
+        p0 = shape.points[0]
+        moves.append(move_rapid(x=p0.x, y=p0.y, z=setup.safe_z))
+        moves.append(move_cut(z=z, feed=setup.tool.feed_z))   # plunge at Z feed
+        moves.append(move_set_feed(setup.tool.feed_xy))       # restore XY feed
+        for p in shape.points[1:]:
+            moves.append(move_cut(x=p.x, y=p.y))
+        moves.append(move_retract(setup.safe_z))
+    return moves
+
+=====================================
+FILE: ./cam/ops/__init__.py
+=====================================
+
+=====================================
+FILE: ./cam/ops/pocket_region.py
+=====================================
+# path: skills/mill_ui/cam/ops/pocket_region.py
+from __future__ import annotations
+from typing import Dict, Any, List, Tuple, Optional
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import (
+    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+)
+
+def _rect_bounds(center: Tuple[float, float], w: float, h: float) -> Tuple[float, float, float, float]:
+    cx, cy = center
+    return (cx - w * 0.5, cy - h * 0.5, cx + w * 0.5, cy + h * 0.5)
+
+def _center_of(sub: Dict[str, Any], fallback: Tuple[float, float]) -> Tuple[float, float]:
+    c = sub.get("center_xy_mm")
+    if isinstance(c, (list, tuple)) and len(c) == 2:
+        return float(c[0]), float(c[1])
+    return fallback
+
+def _interval_subtract(base: List[Tuple[float, float]], cut: Tuple[float, float]) -> List[Tuple[float, float]]:
+    """Subtract one closed interval [a,b] from possibly-many base intervals. Returns merged result."""
+    a, b = cut
+    if a > b:
+        a, b = b, a
+    out: List[Tuple[float, float]] = []
+    for (x0, x1) in base:
+        # no overlap
+        if x1 <= a or x0 >= b:
+            out.append((x0, x1))
+            continue
+        # cut splits the interval
+        if x0 < a:
+            out.append((x0, max(x0, a)))
+        if x1 > b:
+            out.append((min(x1, b), x1))
+    # normalize (merge touching)
+    out.sort()
+    merged: List[Tuple[float, float]] = []
+    for seg in out:
+        if not merged or seg[0] > merged[-1][1]:
+            merged.append(seg)
+        else:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], seg[1]))
+    return merged
+
+def pocket_region_rect_raster(
+    region: Dict[str, Any],
+    setup: Setup,
+    *,
+    default_center_xy: Optional[Tuple[float, float]],
+    depth_mm: float,
+    stepover_mm: float,
+) -> List[dict]:
+    """
+    Raster pocket for a rectangular Region with rectangular holes.
+    - region geometry:
+        {"outer": {"type":"Rect","geometry":{"w_mm","h_mm"},"center_xy_mm"?:(x,y)},
+         "holes": [{"type":"Rect","geometry":{"w_mm","h_mm"},"center_xy_mm"?:(x,y)}, ...]}
+    - If sub 'center_xy_mm' missing, default_center_xy is used.
+    """
+    geom = region.get("geometry") or {}
+    outer = geom.get("outer") or {}
+    holes = geom.get("holes") or []
+
+    if (outer.get("type") or "").lower() != "rect":
+        raise NotImplementedError("pocket_region_rect_raster supports Rect outer only")
+
+    oc = _center_of(outer, default_center_xy or (0.0, 0.0))
+    og = outer.get("geometry") or {}
+    ow = float(og.get("w_mm", 0.0))
+    oh = float(og.get("h_mm", 0.0))
+    ominx, ominy, omaxx, omaxy = _rect_bounds(oc, ow, oh)
+
+    hole_rects: List[Tuple[float, float, float, float]] = []
+    for h in holes:
+        if (h.get("type") or "").lower() != "rect":
+            raise NotImplementedError("holes must be Rect for pocket_region_rect_raster")
+        hc = _center_of(h, default_center_xy or (0.0, 0.0))
+        hg = h.get("geometry") or {}
+        hw = float(hg.get("w_mm", 0.0))
+        hh = float(hg.get("h_mm", 0.0))
+        hole_rects.append(_rect_bounds(hc, hw, hh))
+
+    z_target = -abs(float(depth_mm))
+    so = max(0.1, float(stepover_mm))
+
+    moves: List[dict] = []
+    moves.append(move_comment("pocket_region_rect_raster"))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+
+    y = ominy
+    left_to_right = True
+    while y <= omaxy + 1e-9:
+        # start with whole outer span
+        spans: List[Tuple[float, float]] = [(ominx, omaxx)]
+        # subtract any hole spans that intersect this scanline
+        for (hx0, hy0, hx1, hy1) in hole_rects:
+            if y < hy0 or y > hy1:
+                continue
+            spans = _interval_subtract(spans, (hx0, hx1))
+            if not spans:
+                break
+        if spans:
+            spans.sort()
+            if not left_to_right:
+                spans = [(b, a) for (a, b) in reversed(spans)]
+            for (xs, xe) in spans:
+                # exact start/end for the chosen direction
+                x0, x1 = (xs, xe)
+                moves.append(move_rapid(x=x0, y=y, z=setup.safe_z))
+                moves.append(move_cut(z=z_target, feed=setup.tool.feed_z))
+                moves.append(move_set_feed(setup.tool.feed_xy))
+                moves.append(move_cut(x=x1, y=y))
+                moves.append(move_retract(setup.safe_z))
+        y += so
+        left_to_right = not left_to_right
+
+    return moves
+
+=====================================
+FILE: ./cam/ops/bore.py
+=====================================
+# path: skills/mill_ui/cam/ops/bore.py
+from __future__ import annotations
+import math
+from typing import List, Tuple
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import (
+    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+)
+from skills.mill_ui.cad.primitives import circle as circle_shape
+from skills.mill_ui.core.types import Vec2
+from skills.mill_ui.cam.ops.profile import profile_outline
+
+def _circle_points(cx: float, cy: float, r: float, segments: int = 80) -> List[Tuple[float, float]]:
+    pts: List[Tuple[float, float]] = []
+    for i in range(segments + 1):
+        t = 2.0 * math.pi * (i / segments)
+        pts.append((cx + r * math.cos(t), cy + r * math.sin(t)))
+    return pts
+
+def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup: Setup, *, depth: float,
+                 stepdown_mm: float = 2.5, segments: int = 60) -> List[dict]:
+    """
+    Medium holes (tool_d < D ≤ ~3*tool_d): descend in a helical path and circle at each layer.
+    This uses segmented moves (no G2/G3), but keeps the tool center at constant radius.
+    """
+    cx, cy = center_xy
+    tool_d = float(setup.tool.diameter)
+    D = float(hole_d_mm)
+    target = -abs(float(depth))
+    if D <= tool_d:
+        return []  # let planner choose drill instead
+
+    r_eff = max(0.01, (D - tool_d) * 0.5)
+    sd = max(0.1, float(stepdown_mm))
+
+    moves: List[dict] = []
+    moves.append(move_comment(f"bore_helical D={D:.3f} tool={tool_d:.3f} r_eff={r_eff:.3f}"))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+
+    # move to start at safe Z
+    start_x, start_y = cx + r_eff, cy
+    moves.append(move_rapid(x=start_x, y=start_y, z=setup.safe_z))
+
+    z = 0.0
+    while z > target + 1e-9:
+        z_next = max(target, z - sd)
+        # small helical ramp over one revolution down to z_next
+        for i in range(1, segments + 1):
+            t0 = 2.0 * math.pi * (i - 1) / segments
+            t1 = 2.0 * math.pi * (i) / segments
+            # linear Z interpolation over the circle
+            z_i = z + (z_next - z) * (i / segments)
+            x_i = cx + r_eff * math.cos(t1)
+            y_i = cy + r_eff * math.sin(t1)
+            if i == 1:
+                # begin ramp down; use plunge feed for first move
+                moves.append(move_cut(z=z_i, feed=setup.tool.feed_z))
+                moves.append(move_set_feed(setup.tool.feed_xy))
+            moves.append(move_cut(x=x_i, y=y_i, z=z_i))
+        z = z_next
+        # one circle at constant depth to clean the wall
+        ring = _circle_points(cx, cy, r_eff, segments)
+        moves.append(move_cut(x=ring[0][0], y=ring[0][1]))
+        for (x, y) in ring[1:]:
+            moves.append(move_cut(x=x, y=y))
+    moves.append(move_retract(setup.safe_z))
+    return moves
+
+def pocket_circle_concentric(center_xy: Tuple[float, float], circle_d_mm: float, setup: Setup, *,
+                             depth: float, stepover_mm: float, stepdown_mm: float = 3.0,
+                             segments: int = 90, finish: bool = True) -> List[dict]:
+    """
+    Large circular pockets (D > ~3*tool_d): clear with concentric rings from center outwards,
+    then (optionally) finish the wall with an inside profile.
+    """
+    cx, cy = center_xy
+    D = float(circle_d_mm)
+    tool_d = float(setup.tool.diameter)
+    r_wall = max(0.0, D * 0.5 - tool_d * 0.5)  # tool-center limit at the wall
+    if r_wall <= 0.0:
+        return []
+
+    sd = max(0.1, float(stepdown_mm))
+    so = max(0.1, float(stepover_mm))
+
+    moves: List[dict] = []
+    moves.append(move_comment(f"pocket_circle_concentric D={D:.3f} tool={tool_d:.3f} so={so:.3f}"))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+
+    # radii from inner to outer
+    radii: List[float] = []
+    r = max(so * 0.5, tool_d * 0.25)
+    while r < r_wall - 1e-6:
+        radii.append(r)
+        r += so
+    radii.append(r_wall)
+
+    z = 0.0
+    target = -abs(float(depth))
+    while z > target + 1e-9:
+        z_next = max(target, z - sd)
+        for ri in radii:
+            ring = _circle_points(cx, cy, ri, segments)
+            # position to ring start
+            moves.append(move_rapid(x=ring[0][0], y=ring[0][1], z=setup.safe_z))
+            moves.append(move_cut(z=z_next, feed=setup.tool.feed_z))
+            moves.append(move_set_feed(setup.tool.feed_xy))
+            # cut the ring
+            for (x, y) in ring[1:]:
+                moves.append(move_cut(x=x, y=y))
+            moves.append(move_retract(setup.safe_z))
+        z = z_next
+
+    if finish:
+        # finish the wall with an inside profile at bottom depth
+        # build a tool-center circle at (D - tool_d)
+        finish_d = max(0.0, D - tool_d)
+        shp = circle_shape(Vec2(cx, cy), finish_d * 0.5)
+        moves += profile_outline(shp, setup, depth=abs(target), step_down=abs(target))  # single pass at bottom
+
+    return moves
+
+=====================================
+FILE: ./cam/ops/pocket.py
+=====================================
+# path: skills/mill_ui/cam/ops/pocket.py
+from skills.mill_ui.cad.shape import Shape2D
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+
+def pocket_raster(shape: Shape2D, setup: Setup, depth: float, stepover: float):
+    b = shape.bounds()
+    moves = []
+    moves.append(move_comment('pocket_raster'))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+    y = b.miny
+    direction = 1
+    z = -abs(depth)
+    while y <= b.maxy:
+        x_start = b.minx if direction == 1 else b.maxx
+        x_end   = b.maxx if direction == 1 else b.minx
+        moves.append(move_rapid(x=x_start, y=y, z=setup.safe_z))
+        moves.append(move_cut(z=z, feed=setup.tool.feed_z))   # plunge at Z feed
+        moves.append(move_set_feed(setup.tool.feed_xy))       # restore XY feed
+        moves.append(move_cut(x=x_end, y=y))
+        moves.append(move_retract(setup.safe_z))
+        y += stepover
+        direction *= -1
+    return moves
+
+=====================================
+FILE: ./cam/ops/engrave.py
+=====================================
+# path: skills/mill_ui/cam/ops/engrave.py
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+
+def engrave_lines(lines, setup: Setup, z: float = -0.3):
+    moves = []
+    moves.append(move_comment('engrave_lines'))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+    for poly in lines:
+        if not poly:
+            continue
+        x0, y0 = poly[0]
+        moves.append(move_rapid(x=x0, y=y0, z=setup.safe_z))
+        moves.append(move_cut(z=z, feed=setup.tool.feed_z))   # plunge at Z feed
+        moves.append(move_set_feed(setup.tool.feed_xy))       # restore XY feed
+        for (x, y) in poly[1:]:
+            moves.append(move_cut(x=x, y=y))
+        moves.append(move_retract(setup.safe_z))
+    return moves
+
+=====================================
+FILE: ./cam/ops/face.py
+=====================================
+# path: skills/mill_ui/cam/ops/face.py
+from skills.mill_ui.cam.model.setup import Setup
+from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+
+def face_zigzag(width: float, height: float, setup: Setup, step: float = 10.0, depth: float = 0.5):
+    moves = []
+    moves.append(move_comment('face_zigzag'))
+    moves.append(move_set_rpm(setup.tool.rpm))
+    moves.append(move_set_feed(setup.tool.feed_xy))
+    y = 0.0
+    direction = 1
+    while y <= height:
+        x0, x1 = (0.0, width) if direction == 1 else (width, 0.0)
+        moves.append(move_rapid(x=x0, y=y, z=setup.safe_z))
+        moves.append(move_cut(z=-abs(depth), feed=setup.tool.feed_z))  # plunge
+        moves.append(move_set_feed(setup.tool.feed_xy))                # restore
+        moves.append(move_cut(x=x1, y=y))
+        moves.append(move_retract(setup.safe_z))
+        y += step
+        direction *= -1
+    return moves
+
+=====================================
+FILE: ./cam/planner/select.py
+=====================================
+# path: skills/mill_ui/cam/planner/select.py
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Iterable, Optional, Literal
+
+ToolKind = Literal["flat", "ball", "v"]
+
+@dataclass(frozen=True)
+class ToolSpec:
+    name: str
+    diameter: float
+    kind: ToolKind = "flat"
+    rpm: float = 12000.0
+    feed_xy: float = 800.0
+    feed_z: float = 300.0
+
+def _to_toolspecs(tool_db: Iterable[dict]) -> list[ToolSpec]:
+    out: list[ToolSpec] = []
+    for t in tool_db:
+        out.append(ToolSpec(
+            name=str(t.get("name", "")),
+            diameter=float(t.get("diameter", 0.0)),
+            kind=(t.get("kind") or "flat"),
+            rpm=float(t.get("rpm", 12000.0)),
+            feed_xy=float(t.get("feed_xy", 800.0)),
+            feed_z=float(t.get("feed_z", 300.0)),
+        ))
+    return sorted(out, key=lambda x: x.diameter)
+
+def pick_for_profile(tool_db: Iterable[dict]) -> ToolSpec:
+    """Profiles prefer largest tool (fastest perimeter time)."""
+    tools = _to_toolspecs(tool_db)
+    return tools[-1]
+
+def pick_for_pocket(tool_db: Iterable[dict], *, min_channel_width_mm: float) -> ToolSpec:
+    """Pocketing must fit channels → pick the largest tool ≤ channel width."""
+    tools = _to_toolspecs(tool_db)
+    feasible = [t for t in tools if t.diameter <= float(min_channel_width_mm)]
+    return feasible[-1] if feasible else tools[0]
+
+def pick_for_hole(tool_db: Iterable[dict], *, hole_diameter_mm: float) -> ToolSpec:
+    """Drilling/boring: pick the largest tool ≤ hole diameter."""
+    tools = _to_toolspecs(tool_db)
+    feasible = [t for t in tools if t.diameter <= float(hole_diameter_mm)]
+    return feasible[-1] if feasible else tools[0]
+
+def pick_for_engrave(tool_db: Iterable[dict]) -> ToolSpec:
+    """Engrave defaults to the smallest available flat/V bit."""
+    tools = _to_toolspecs(tool_db)
+    return tools[0]
+
+=====================================
+FILE: ./cam/planner/pipeline.py
+=====================================
+# path: skills/mill_ui/cam/planner/pipeline.py
+from __future__ import annotations
+from typing import Iterable, Dict, Any, List, Tuple
+
+from skills.mill_ui.core.types import Vec2
+from skills.mill_ui.cad.primitives import rectangle, circle as circle_shape
+from skills.mill_ui.cad.transforms import Transform2D, place
+from skills.mill_ui.cam.model.tool import Tool
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+from skills.mill_ui.cam.model.setup import Setup
+
+from skills.mill_ui.cam.ops.profile import profile_outline
+from skills.mill_ui.cam.ops.pocket import pocket_raster
+from skills.mill_ui.cam.ops.drill import drill_peck
+from skills.mill_ui.cam.ops.engrave import engrave_lines
+from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
+from skills.mill_ui.cam.ops.pocket_region import pocket_region_rect_raster
+
+from skills.mill_ui.cam.planner.select import (
+    pick_for_profile, pick_for_pocket, pick_for_hole, pick_for_engrave, ToolSpec
+)
+from skills.mill_ui.cam.planner.params import stepdown_for, stepover_for
+
+def _as_tool(spec: ToolSpec) -> Tool:
+    return Tool(
+        name=spec.name,
+        diameter=spec.diameter,
+        kind=spec.kind,  # type: ignore[arg-type]
+        rpm=spec.rpm,
+        feed_xy=spec.feed_xy,
+        feed_z=spec.feed_z,
+    )
+
+def _rect_shape(w: float, h: float, center: Tuple[float, float]) -> Any:
+    shp = rectangle(w, h)
+    cx, cy = center
+    return place(shp, Transform2D(tx=cx - w / 2.0, ty=cy - h / 2.0))
+
+def _circle_shape(d: float, center: Tuple[float, float]) -> Any:
+    cx, cy = center
+    return circle_shape(Vec2(cx, cy), d / 2.0)
+
+def _ensure_center(rec: Dict[str, Any]) -> Tuple[float, float]:
+    c = rec.get("center_xy_mm")
+    if isinstance(c, (list, tuple)) and len(c) == 2:
+        return float(c[0]), float(c[1])
+    return 0.0, 0.0
+
+def _pick_setup(spec: ToolSpec, *, stock: Stock, material: Material, machine: Machine, safe_z: float) -> Setup:
+    return Setup(
+        stock=stock,
+        tool=_as_tool(spec),
+        material=material,
+        machine=machine,
+        safe_z=safe_z,
+    )
+
+# -----------------------------
+# Offsets for profile side
+# -----------------------------
+def _offset_rect_shape(w: float, h: float, center: Tuple[float, float], offset: float):
+    w2 = w + 2.0 * offset
+    h2 = h + 2.0 * offset
+    if w2 <= 0 or h2 <= 0:
+        return None
+    return _rect_shape(w2, h2, center)
+
+def _offset_circle_shape(d: float, center: Tuple[float, float], offset: float):
+    d2 = d + 2.0 * offset
+    if d2 <= 0:
+        return None
+    return _circle_shape(d2, center)
+
+def hints_to_moves(
+    hints: Dict[str, Any],
+    *,
+    tool_db: Iterable[dict],
+    material: Material,
+    machine: Machine,
+    stock: Stock,
+    safe_z: float = 5.0,
+) -> List[Dict[str, Any]]:
+    """
+    Convert CAM hints (profiles/pockets/holes/engraves) to a flat list of moves.
+    """
+    moves: List[Dict[str, Any]] = []
+
+    min_channel = float(hints.get("min_channel_width_mm", 6.0))
+
+    # --- Pockets first (clear material)
+    for rec in hints.get("pockets", []):
+        geom = rec.get("geometry") or {}
+        shape_name = rec.get("shape")
+        t = pick_for_pocket(tool_db, min_channel_width_mm=min_channel)
+        setup = _pick_setup(t, stock=stock, material=material, machine=machine, safe_z=safe_z)
+        depth = float(rec.get("depth_mm", 0.0))
+        step_over = stepover_for(tool_diameter=t.diameter)
+        step_down = stepdown_for(tool_diameter=t.diameter, cap_mm=3.0)
+
+        if shape_name == "Rect":
+            w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
+            shape = _rect_shape(w, h, _ensure_center(rec))
+            moves += pocket_raster(shape, setup, depth=depth, stepover=step_over)
+        elif shape_name == "Circle":
+            # Use concentric rings for round pockets
+            d = float(geom.get("diameter_mm", 0.0))
+            cx, cy = _ensure_center(rec)
+            out = pocket_circle_concentric(
+                (cx, cy), d, setup,
+                depth=depth, stepover_mm=step_over, stepdown_mm=step_down, finish=True
+            )
+            if out:
+                moves += out
+            else:
+                # Fallback: raster over bbox if circle is too small
+                shape = _circle_shape(d, (cx, cy))
+                moves += pocket_raster(shape, setup, depth=depth, stepover=step_over)
+        elif shape_name == "Region":
+            # Rect outer + Rect holes
+            moves += pocket_region_rect_raster(
+                rec, setup,
+                default_center_xy=_ensure_center(rec),
+                depth_mm=depth,
+                stepover_mm=step_over,
+            )
+        else:
+            continue
+
+    # --- Holes (policy: drill → bore → circle-pocket)
+    for rec in hints.get("holes", []):
+        geom = rec.get("geometry") or {}
+        if rec.get("shape") != "Circle":
+            continue
+        D = float(geom.get("diameter_mm", 0.0))
+        t = pick_for_hole(tool_db, hole_diameter_mm=D)
+        setup = _pick_setup(t, stock=stock, material=material, machine=machine, safe_z=safe_z)
+        tool_d = float(t.diameter)
+        x, y = _ensure_center(rec)
+        depth = float(rec.get("depth_mm", 0.0))
+
+        if D <= tool_d + 1e-9:
+            peck = stepdown_for(tool_diameter=t.diameter, cap_mm=2.5)
+            moves += drill_peck([(x, y)], setup, depth=depth, peck=peck)
+        elif D <= 3.0 * tool_d + 1e-9:
+            sd = stepdown_for(tool_diameter=t.diameter, cap_mm=2.5)
+            moves += bore_helical((x, y), D, setup, depth=depth, stepdown_mm=sd)
+        else:
+            so = stepover_for(tool_diameter=t.diameter)
+            sd = stepdown_for(tool_diameter=t.diameter, cap_mm=3.0)
+            moves += pocket_circle_concentric((x, y), D, setup, depth=depth, stepover_mm=so, stepdown_mm=sd, finish=True)
+
+    # --- Profiles (finish perimeters last) with side offset
+    for rec in hints.get("profiles", []):
+        geom = rec.get("geometry") or {}
+        side = str(rec.get("side", "on")).lower()  # 'inside' | 'outside' | 'on'
+        t = pick_for_profile(tool_db)
+        setup = _pick_setup(t, stock=stock, material=material, machine=machine, safe_z=safe_z)
+        tool_r = 0.5 * float(t.diameter)
+        off = 0.0
+        if side == "outside":
+            off = +tool_r
+        elif side == "inside":
+            off = -tool_r
+
+        if rec.get("shape") == "Rect":
+            w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
+            shape = _offset_rect_shape(w, h, _ensure_center(rec), off) if off != 0.0 else _rect_shape(w, h, _ensure_center(rec))
+            if shape is None:
+                continue
+        elif rec.get("shape") == "Circle":
+            d = float(geom.get("diameter_mm", 0.0))
+            shape = _offset_circle_shape(d, _ensure_center(rec), off) if off != 0.0 else _circle_shape(d, _ensure_center(rec))
+            if shape is None:
+                continue
+        else:
+            continue
+
+        step_down = stepdown_for(tool_diameter=t.diameter, cap_mm=3.0)
+        depth = float(rec.get("depth_mm", 0.0))
+        moves += profile_outline(shape, setup, depth=depth, step_down=step_down)
+
+    # --- Engraves
+    for rec in hints.get("engraves", []):
+        geom = rec.get("geometry") or {}
+        lines = []
+        if rec.get("shape") == "Polyline":
+            pts = geom.get("points") or []
+            cx, cy = _ensure_center(rec)
+            line = [(float(p[0]) + cx, float(p[1]) + cy) for p in pts if isinstance(p, (tuple, list)) and len(p) == 2]
+            if line:
+                lines.append(line)
+        if not lines:
+            continue
+        t = pick_for_engrave(tool_db)
+        setup = _pick_setup(t, stock=stock, material=material, machine=machine, safe_z=safe_z)
+        moves += engrave_lines(lines, setup, z=-abs(float(rec.get("depth_mm", 0.3))))
+
+    return moves
+
+=====================================
+FILE: ./cam/planner/params.py
+=====================================
+# path: skills/mill_ui/cam/planner/params.py
+from __future__ import annotations
+from typing import Optional
+
+def feeds_for(*, feed_xy: float, feed_z: float) -> tuple[float, float]:
+    return float(feed_xy), float(feed_z)
+
+def stepdown_for(*, tool_diameter: float, cap_mm: Optional[float] = None) -> float:
+    """Default: 0.5×D, optionally capped."""
+    sd = 0.5 * float(tool_diameter)
+    return min(sd, float(cap_mm)) if cap_mm is not None else sd
+
+def stepover_for(*, tool_diameter: float, ratio: float = 0.4) -> float:
+    """Default: 40% stepover for raster pockets."""
+    return float(tool_diameter) * float(ratio)
+
+=====================================
+FILE: ./cam/tools/adapter.py
+=====================================
+# path: skills/mill_ui/cam/tools/adapter.py
+from __future__ import annotations
+from typing import List, Dict, Any, Optional
+import json
+
+def _kind_from_type(t: str) -> str:
+    t = (t or "").lower()
+    if "ball" in t:
+        return "ball"
+    if "taper" in t or "v_bit" in t or "v-" in t:
+        return "v"
+    # square_end_mill, roughing_end_mill, upcut_spiral, etc.
+    return "flat"
+
+def _first_value(d: Dict[str, Any]) -> Dict[str, Any]:
+    return next(iter(d.values()), {}) if isinstance(d, dict) else {}
+
+def load_tool_db(json_path: str, material: str = "MDF") -> List[Dict[str, Any]]:
+    """Return a mill_ui-compatible tool list from a rich tool_db.json."""
+    with open(json_path, "r", encoding="utf-8") as f:
+        db = json.load(f)
+
+    tools_out: List[Dict[str, Any]] = []
+    for t in db.get("tools", []):
+        feeds = t.get("feeds_speeds", {}) or {}
+        fs = feeds.get(material) or _first_value(feeds)
+
+        # Map to mill_ui tool dict the planner understands
+        tools_out.append({
+            "name": t.get("tool_id") or t.get("name") or "tool",
+            "diameter": float(t.get("diameter_mm", 0.0)),
+            "kind": _kind_from_type(t.get("type", "")),
+            "rpm": float(fs.get("rpm", 18000)),
+            "feed_xy": float(fs.get("feed_rate_mm_min", 2000)),
+            "feed_z": float(fs.get("plunge_rate_mm_min", 300)),
+            # Kept for potential future use (params.py/pipeline can read these later)
+            "depth_per_pass": float(fs.get("depth_per_pass_mm", 3.0)),
+            "stepover_percent": float(fs.get("step_over_percent", 40)),
+            "flutes": int(t.get("flutes", 2)),
+        })
+    return tools_out
+
+def select_tools_for_job(
+    json_path: str,
+    *,
+    material: str = "MDF",
+    needs_roughing: bool = True,
+    needs_finishing: bool = False,
+    needs_detail: bool = False,
+    max_depth_mm: float = 19.0
+) -> List[Dict[str, Any]]:
+    """Simple rule-based selection using tool_selection_rules; returns mapped tools."""
+    with open(json_path, "r", encoding="utf-8") as f:
+        db = json.load(f)
+
+    rule_ids = set()
+    rules = db.get("tool_selection_rules", {})
+    if needs_roughing:
+        # prefer deep_cuts if material thickness is large
+        if max_depth_mm > 10 and "deep_cuts" in rules:
+            rule_ids.update(rules["deep_cuts"])
+        rule_ids.update(rules.get("roughing_priority", []))
+    if needs_finishing:
+        rule_ids.update(rules.get("finishing_priority", []))
+    if needs_detail:
+        rule_ids.update(rules.get("fine_details", []))
+
+    wanted = {rid for rid in rule_ids}
+    chosen: List[Dict[str, Any]] = []
+    for t in db.get("tools", []):
+        if (t.get("tool_id") or "") in wanted:
+            # Map with material profile
+            feeds = t.get("feeds_speeds", {}) or {}
+            fs = feeds.get(material) or _first_value(feeds)
+            chosen.append({
+                "name": t.get("tool_id") or t.get("name") or "tool",
+                "diameter": float(t.get("diameter_mm", 0.0)),
+                "kind": _kind_from_type(t.get("type", "")),
+                "rpm": float(fs.get("rpm", 18000)),
+                "feed_xy": float(fs.get("feed_rate_mm_min", 2000)),
+                "feed_z": float(fs.get("plunge_rate_mm_min", 300)),
+                "depth_per_pass": float(fs.get("depth_per_pass_mm", 3.0)),
+                "stepover_percent": float(fs.get("step_over_percent", 40)),
+                "flutes": int(t.get("flutes", 2)),
+            })
+    # deterministic: largest → smallest by diameter
+    return sorted(chosen, key=lambda x: x["diameter"], reverse=True)
+
+=====================================
+FILE: ./core/__init__.py
+=====================================
+
+=====================================
+FILE: ./core/hashing.py
+=====================================
+
+import json, hashlib
+def dump_canonical(obj)->str: return json.dumps(obj, indent=2, sort_keys=True, separators=(',',':'))
+def stable_hash(obj)->str: return hashlib.sha256(dump_canonical(obj).encode('utf-8')).hexdigest()[:16]
+
+=====================================
+FILE: ./core/numeric.py
+=====================================
+
+GEOM_MM_PLACES=3
+FEED_MM_MIN_PLACES=1
+def round_mm(v:float)->float: return round(float(v),GEOM_MM_PLACES)
+def round_feed(v:float)->float: return round(float(v),FEED_MM_MIN_PLACES)
+def clamp(v:float, lo:float, hi:float)->float: return max(lo, min(hi, v))
+
+=====================================
+FILE: ./core/types.py
+=====================================
+
+from dataclasses import dataclass
+from typing import Iterable, Tuple, List
+
+@dataclass(frozen=True)
+class Vec2:
+    x: float; y: float
+    def __add__(self, o:'Vec2')->'Vec2': return Vec2(self.x+o.x, self.y+o.y)
+    def __sub__(self, o:'Vec2')->'Vec2': return Vec2(self.x-o.x, self.y-o.y)
+    def scale(self, s: float)->'Vec2': return Vec2(self.x*s, self.y*s)
+    def as_tuple(self)->Tuple[float,float]: return (self.x,self.y)
+
+@dataclass(frozen=True)
+class Bounds:
+    minx: float; miny: float; maxx: float; maxy: float
+    @staticmethod
+    def from_points(pts: Iterable[Vec2])->'Bounds':
+        xs=[p.x for p in pts]; ys=[p.y for p in pts]
+        return Bounds(min(xs),min(ys),max(xs),max(ys))
+    def expand(self, m: float)->'Bounds': return Bounds(self.minx-m,self.miny-m,self.maxx+m,self.maxy+m)
+    def width(self)->float: return self.maxx - self.minx
+    def height(self)->float: return self.maxy - self.miny
+
+@dataclass(frozen=True)
+class Transform2D:
+    tx: float=0.0; ty: float=0.0
+    def apply(self, p:Vec2)->Vec2: return Vec2(p.x+self.tx, p.y+self.ty)
+
+=====================================
+FILE: ./cad/layout/__init__.py
+=====================================
+
+=====================================
+FILE: ./cad/layout/place.py
+=====================================
+# path: skills/mill_ui/cad/layout/place.py
+from __future__ import annotations
+from typing import List, Dict, Tuple, Any
+from skills.mill_ui.cad.layout.panel import Panel
+
+__all__ = [
+    "grid_place", "row_place", "col_place",
+    "item_size_mm", "apply_grid_layout"
+]
+
+def grid_place(shape, rows: int, cols: int, pitch_x: float, pitch_y: float):
+    from skills.mill_ui.core.types import Vec2
+    from skills.mill_ui.cad.shape import Shape2D
+    out: List[Shape2D] = []
+    for r in range(rows):
+        for c in range(cols):
+            out.append(Shape2D([Vec2(p.x + c * pitch_x, p.y + r * pitch_y) for p in shape.points]))
+    return out
+
+def row_place(shape, count: int, pitch_x: float):
+    from skills.mill_ui.core.types import Vec2
+    from skills.mill_ui.cad.shape import Shape2D
+    return [Shape2D([Vec2(p.x + i * pitch_x, p.y) for p in shape.points]) for i in range(count)]
+
+def col_place(shape, count: int, pitch_y: float):
+    from skills.mill_ui.core.types import Vec2
+    from skills.mill_ui.cad.shape import Shape2D
+    return [Shape2D([Vec2(p.x, p.y + i * pitch_y) for p in shape.points]) for i in range(count)]
+
+# ------------------------------------------------------------------
+# Grid layout (pure math)
+# ------------------------------------------------------------------
+
+def item_size_mm(it: Dict[str, Any]) -> Tuple[float, float]:
+    """Return (w_mm, h_mm) for supported item dictionaries.
+
+    Supported items:
+      - {'kind':'door', 'params': {'outer_w': mm, 'outer_h': mm}}
+      - {'kind':'shape','type':'Rect','geometry':{'w_mm': mm, 'h_mm': mm}}
+      - {'kind':'shape','type':'Circle','geometry':{'diameter_mm': mm}}
+      - {'kind':'shape','type':'Polyline','geometry':{'points': [[x,y],...]}}
+    Unknown items return (0.0, 0.0).
+    """
+    if not isinstance(it, dict):
+        return 0.0, 0.0
+    k = it.get("kind")
+    if k == "door":
+        p = it.get("params", {})
+        return float(p.get("outer_w", 0.0)), float(p.get("outer_h", 0.0))
+    if k == "shape":
+        t = it.get("type")
+        g = it.get("geometry", {}) or {}
+        if t == "Rect":
+            return float(g.get("w_mm", 0.0)), float(g.get("h_mm", 0.0))
+        if t == "Circle":
+            d = float(g.get("diameter_mm", 0.0))
+            return d, d
+        if t == "Polyline":
+            pts = g.get("points") or []
+            xs = [float(p[0]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
+            ys = [float(p[1]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
+            if not xs or not ys:
+                return 0.0, 0.0
+            return (max(xs) - min(xs), max(ys) - min(ys))
+    return 0.0, 0.0
+
+def apply_grid_layout(
+    panel: Panel,
+    items: List[Dict[str, Any]],
+    *,
+    rows: int,
+    cols: int,
+    gap_x: float = 0.0,
+    gap_y: float = 0.0,
+    border: float = 0.0,
+    fit: str = "tight",   # 'tight' or 'even'
+) -> List[Dict[str, Any]]:
+    """Lay out items in a grid on a sheet (panel), returning placements.
+
+    Returns a list of placements: {'item': item, 'center_xy_mm': (cx, cy), 'cell_size_mm': (cw, ch)}
+
+    - If fit == 'tight': cell size is the max of item sizes; validated to fit interior area.
+    - If fit == 'even' : interior is divided evenly by rows/cols (legacy behavior).
+    """
+    if rows <= 0 or cols <= 0:
+        raise ValueError("rows and cols must be positive")
+    avail_w = panel.width  - 2 * border - (cols - 1) * gap_x
+    avail_h = panel.height - 2 * border - (rows - 1) * gap_y
+    if avail_w <= 0 or avail_h <= 0:
+        raise ValueError("Grid + borders/gaps leave no interior area")
+
+    # Determine cell size
+    if fit == "tight":
+        sizes = [item_size_mm(it) for it in items]
+        max_w = max((w for (w, _) in sizes), default=0.0)
+        max_h = max((h for (_, h) in sizes), default=0.0)
+        cell_w, cell_h = max_w, max_h
+        block_w = cols * cell_w + (cols - 1) * gap_x
+        block_h = rows * cell_h + (rows - 1) * gap_y
+        if block_w > avail_w + 1e-6 or block_h > avail_h + 1e-6:
+            raise ValueError(
+                f"Tight pack does not fit: block {block_w:.2f}×{block_h:.2f} > "
+                f"avail {avail_w:.2f}×{avail_h:.2f}"
+            )
+    else:
+        # 'even' fill: divide interior equally
+        cell_w = avail_w / cols
+        cell_h = avail_h / rows
+
+    placements: List[Dict[str, Any]] = []
+    idx = 0
+    for r in range(rows):
+        for c in range(cols):
+            if idx >= len(items):
+                return placements
+            cx = border + c * (cell_w + gap_x) + cell_w * 0.5
+            cy = border + r * (cell_h + gap_y) + cell_h * 0.5
+            placements.append({
+                "item": items[idx],
+                "center_xy_mm": (cx, cy),
+                "cell_size_mm": (cell_w, cell_h),
+                "row": r, "col": c
+            })
+            idx += 1
+    return placements
+
+
+=====================================
+FILE: ./cad/layout/panel.py
+=====================================
+
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Panel:
+    width: float; height: float; thickness: float; safe_z: float=5.0
+
+=====================================
+FILE: ./cad/geom_parse.py
+=====================================
+from __future__ import annotations
+from typing import Dict, Any, Optional, Tuple
+from skills.mill_ui.cad.layout.panel import Panel
+
+def _sf(v: Any, d: float = 0.0) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return d
+
+def rect_from_variant(geom: Dict[str, Any]) -> Optional[Dict[str, float]]:
+    """
+    Normalize various rectangle specs to {min_x,min_y,max_x,max_y} in mm.
+    Accepted forms: explicit bounds; alt 'bounds'/'bbox'; point arrays; x/y/width/height.
+    """
+    if not isinstance(geom, dict):
+        return None
+    keys = ("min_x", "min_y", "max_x", "max_y")
+    if all(k in geom for k in keys):
+        return {k: _sf(geom[k]) for k in keys}
+    alt = geom.get("bounds") or geom.get("bbox") or {}
+    if isinstance(alt, dict):
+        cand = {
+            "min_x": alt.get("min_x") or alt.get("xmin"),
+            "min_y": alt.get("min_y") or alt.get("ymin"),
+            "max_x": alt.get("max_x") or alt.get("xmax"),
+            "max_y": alt.get("max_y") or alt.get("ymax"),
+        }
+        if all(v is not None for v in cand.values()):
+            return {k: _sf(v) for k, v in cand.items()}
+    pts = geom.get("points")
+    if isinstance(pts, list) and len(pts) >= 2:
+        xs = [_sf(p[0]) for p in pts]
+        ys = [_sf(p[1]) for p in pts]
+        return {"min_x": min(xs), "min_y": min(ys), "max_x": max(xs), "max_y": max(ys)}
+    if {"x", "y", "width", "height"} <= set(geom.keys()):
+        x = _sf(geom["x"]); y = _sf(geom["y"])
+        w = _sf(geom["width"]); h = _sf(geom["height"])
+        return {"min_x": x, "min_y": y, "max_x": x + w, "max_y": y + h}
+    return None
+
+def circle_from_variant(g: Dict[str, Any]) -> Optional[Tuple[float, float, float]]:
+    """
+    (cx, cy, r) from {center_x/center_y,radius_mm} or {center:{x,y},diameter_mm}, etc.
+    """
+    if not isinstance(g, dict):
+        return None
+    if "center_x" in g and "center_y" in g:
+        if "radius_mm" in g:
+            return _sf(g["center_x"]), _sf(g["center_y"]), _sf(g["radius_mm"])
+        if "diameter_mm" in g:
+            return _sf(g["center_x"]), _sf(g["center_y"]), _sf(g["diameter_mm"]) / 2.0
+    c = g.get("center")
+    if isinstance(c, dict) and "x" in c and "y" in c:
+        if "radius_mm" in g:
+            return _sf(c["x"]), _sf(c["y"]), _sf(g["radius_mm"])
+        if "diameter_mm" in g:
+            return _sf(c["x"]), _sf(c["y"]), _sf(g["diameter_mm"]) / 2.0
+    return None
+
+def is_stock_boundary_rect(rect: Dict[str, float], panel: Panel, tol: float = 0.5) -> bool:
+    """
+    True if rect approximately equals the full sheet bounds [0,0]..[W,H] within tolerance.
+    """
+    return (
+        abs(_sf(rect["min_x"]) - 0.0) <= tol and
+        abs(_sf(rect["min_y"]) - 0.0) <= tol and
+        abs(_sf(rect["max_x"]) - panel.width)  <= tol and
+        abs(_sf(rect["max_y"]) - panel.height) <= tol
+    )
+
+=====================================
+FILE: ./cad/shape.py
+=====================================
+
+from dataclasses import dataclass
+from typing import List
+from skills.mill_ui.core.types import Vec2, Bounds
+@dataclass
+class Shape2D:
+    points: List[Vec2]   # closed polyline
+    def bounds(self)->Bounds: return Bounds.from_points(self.points)
+
+=====================================
+FILE: ./cad/__init__.py
+=====================================
+
+=====================================
+FILE: ./cad/primitives.py
+=====================================
+
+from typing import List
+from skills.mill_ui.core.types import Vec2
+from skills.mill_ui.cad.shape import Shape2D
+def rectangle(w:float, h:float, origin:Vec2|None=None)->Shape2D:
+    ox,oy=(origin.x,origin.y) if origin else (0.0,0.0)
+    pts=[Vec2(ox,oy),Vec2(ox+w,oy),Vec2(ox+w,oy+h),Vec2(ox,oy+h),Vec2(ox,oy)]
+    return Shape2D(pts)
+def circle(center:Vec2, r:float, segments:int=64)->Shape2D:
+    import math
+    pts=[Vec2(center.x + r*math.cos(2*math.pi*i/segments),
+              center.y + r*math.sin(2*math.pi*i/segments)) for i in range(segments)]
+    pts.append(pts[0]); return Shape2D(pts)
+def rounded_rect(w:float, h:float, r:float)->Shape2D:
+    import math
+    pts=[]; segs=16
+    def arc(cx,cy,start,end):
+        for i in range(segs+1):
+            t=start+(end-start)*i/segs
+            pts.append(Vec2(cx + r*math.cos(t), cy + r*math.sin(t)))
+    arc(r, h-r, math.pi, math.pi/2)
+    arc(w-r, h-r, math.pi/2, 0)
+    arc(w-r, r, 0, -math.pi/2)
+    arc(r, r, -math.pi/2, -math.pi)
+    pts.append(pts[0]); return Shape2D(pts)
+
+=====================================
+FILE: ./cad/transforms.py
+=====================================
+
+from skills.mill_ui.core.types import Vec2, Transform2D
+from skills.mill_ui.cad.shape import Shape2D
+def place(shape:Shape2D, t:Transform2D)->Shape2D: return Shape2D([t.apply(p) for p in shape.points])
+
+=====================================
+FILE: ./cad/export/svg.py
+=====================================
+from __future__ import annotations
+from typing import List, Dict, Any, Tuple
+from skills.mill_ui.cad.layout.panel import Panel
+from skills.mill_ui.cad.layout.place import item_size_mm
+
+__all__ = ["render_svg_layout"]
+
+def _svg_header(w: float, h: float) -> str:
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}">\n'
+        f'  <g transform="scale(1,-1) translate(0,-{h})">\n'
+        f'    <style> .panel {{ fill:none; stroke:#888; stroke-width:0.6; }} '
+        f'.item {{ fill:none; stroke:#000; stroke-width:0.5; }} </style>\n'
+    )
+
+def _svg_footer() -> str:
+    return "  </g>\n</svg>\n"
+
+def _rect_svg(x: float, y: float, w: float, h: float, cls: str) -> str:
+    return f'    <rect class="{cls}" x="{x:.3f}" y="{y:.3f}" width="{w:.3f}" height="{h:.3f}" />\n'
+
+def _circle_svg(cx: float, cy: float, r: float, cls: str) -> str:
+    return f'    <circle class="{cls}" cx="{cx:.3f}" cy="{cy:.3f}" r="{r:.3f}" />\n'
+
+def render_svg_layout(panel: Panel, placements: List[Dict[str, Any]]) -> str:
+    """Render a simple debug SVG for a panel + placed items.
+    For unknown items, draws the item's bounding box sized by item_size_mm.
+    """
+    w, h = panel.width, panel.height
+    out = _svg_header(w, h)
+    # panel border
+    out += _rect_svg(0.0, 0.0, w, h, "panel")
+    # items
+    for pl in placements:
+        item = pl.get("item", {})
+        cx, cy = pl.get("center_xy_mm", (0.0, 0.0))
+        kind = item.get("kind")
+        if kind == "shape":
+            t = item.get("type")
+            g = item.get("geometry", {})
+            if t == "Rect":
+                iw, ih = float(g.get("w_mm", 0.0)), float(g.get("h_mm", 0.0))
+                out += _rect_svg(cx - iw/2, cy - ih/2, iw, ih, "item")
+                continue
+            if t == "Circle":
+                d = float(g.get("diameter_mm", 0.0))
+                out += _circle_svg(cx, cy, d/2.0, "item")
+                continue
+        # fallback to bounding box of item size
+        iw, ih = item_size_mm(item)
+        out += _rect_svg(cx - iw/2, cy - ih/2, iw, ih, "item")
+    out += _svg_footer()
+    return out
+
+=====================================
+FILE: ./cad/export/step.py
+=====================================
+def write_step(path, bodies): open(path,'w',encoding='utf-8').write('STEP; stub\n')
+
+=====================================
+FILE: ./cad/export/__init__.py
+=====================================
+
+=====================================
+FILE: ./cad/export/stl.py
+=====================================
+def write_stl(path, tris): open(path,'w',encoding='utf-8').write('solid stub\nendsolid\n')
+
+=====================================
+FILE: ./cad/compose.py
+=====================================
+
+def union(*shapes): return shapes[0] if shapes else None
+def diff(a,b): return a
+def intersect(a,b): return a
+
+=====================================
+FILE: ./apps/compose_cam.py
+=====================================
+# path: skills/mill_ui/apps/compose_cam.py
+from __future__ import annotations
+import argparse, json, sys
+from pathlib import Path
+from typing import Dict, Any, List, Tuple
+
+from skills.mill_ui.compositions import resolve_templates  # auto-registers templates
+from skills.mill_ui.cam.model.hints import build_cam_hints
+from skills.mill_ui.cam.planner.pipeline import hints_to_moves
+from skills.mill_ui.cam.post.gcode import write_gcode
+from skills.mill_ui.cam.tools.adapter import load_tool_db, select_tools_for_job
+
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.stock import Stock
+
+def _size_of_item(it: Dict[str, Any]) -> Tuple[float, float]:
+    k = it.get("kind")
+    if k == "shape":
+        t = (it.get("type") or "").lower()
+        g = it.get("geometry") or {}
+        if t == "rect":
+            return float(g.get("w_mm", 0.0)), float(g.get("h_mm", 0.0))
+        if t == "circle":
+            d = float(g.get("diameter_mm", 0.0))
+            return d, d
+        if t == "polyline":
+            pts = g.get("points") or []
+            xs = [float(p[0]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
+            ys = [float(p[1]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
+            if not xs or not ys:
+                return 0.0, 0.0
+            return (max(xs) - min(xs), max(ys) - min(ys))
+        return 0.0, 0.0
+    if k == "template":
+        t = (it.get("type") or "").lower()
+        p = it.get("params") or {}
+        if t == "shaker":
+            return float(p.get("outer_w", 0.0)), float(p.get("outer_h", 0.0))
+        if t == "circlemount":
+            disk = p.get("disk") or {}
+            if "diameter_mm" in disk:
+                d = float(disk.get("diameter_mm", 0.0))
+                return d, d
+            port = p.get("port") or {}
+            d = float(port.get("diameter_mm", port.get("diameter", 0.0)))
+            return d, d
+    return 0.0, 0.0
+
+def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any], items: List[Dict[str, Any]]) -> None:
+    cols = int(layout.get("cols", 1))
+    rows = int(layout.get("rows", 1))
+    gap_x = float(layout.get("gap_x_mm", 0.0))
+    gap_y = float(layout.get("gap_y_mm", 0.0))
+    border = float(layout.get("border_mm", 0.0))
+    fit = str(layout.get("fit", "tight")).lower()
+
+    avail_w = panel_w - 2 * border - (cols - 1) * gap_x
+    avail_h = panel_h - 2 * border - (rows - 1) * gap_y
+    if avail_w <= 0 or avail_h <= 0:
+        raise ValueError("Grid + borders/gaps leave no interior area")
+
+    sizes = [_size_of_item(it) for it in items]
+    if fit == "tight":
+        max_w = max((w for (w, _) in sizes), default=0.0)
+        max_h = max((h for (_, h) in sizes), default=0.0)
+        cell_w, cell_h = max_w, max_h
+        block_w = cols * cell_w + (cols - 1) * gap_x
+        block_h = rows * cell_h + (rows - 1) * gap_y
+        if block_w > avail_w + 1e-6 or block_h > avail_h + 1e-6:
+            raise ValueError("Tight pack does not fit grid interior")
+    else:
+        cell_w = avail_w / cols
+        cell_h = avail_h / rows
+
+    idx = 0
+    for r in range(rows):
+        for c in range(cols):
+            if idx >= len(items):
+                return
+            cx = border + c * (cell_w + gap_x) + cell_w * 0.5
+            cy = border + r * (cell_h + gap_y) + cell_h * 0.5
+            items[idx].setdefault("placement", {})["center_xy_mm"] = (cx, cy)
+            idx += 1
+
+def _load_json(path: Path) -> Dict[str, Any]:
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+def _save_text(path: Path, s: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(s, encoding="utf-8")
+
+def _save_json(path: Path, obj: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
+
+def _default_tool_db() -> List[Dict[str, Any]]:
+    return [
+        {"name": "SmallFlat", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},
+        {"name": "BigFlat",   "diameter": 6.35,  "kind": "flat", "rpm": 12000, "feed_xy": 800, "feed_z": 280},
+    ]
+
+def main(argv: List[str]) -> int:
+    ap = argparse.ArgumentParser(prog="compose_cam", description="Resolve compositions, plan CAM, write G-code.")
+    ap.add_argument("--input", required=True, help="Input JSON (sheet/layout/items/templates).")
+    ap.add_argument("--outdir", required=True, help="Output directory for artifacts.")
+    ap.add_argument("--tool-db", default="", help="Path to rich tool_db.json.")
+    ap.add_argument("--material", default="MDF", help="Material key in tool_db.json feeds_speeds.")
+    ap.add_argument("--safe-z", type=float, default=6.0)
+    ap.add_argument("--prime-spindle", action="store_true", help="Insert M3 S0 via set_rpm=0 at job start.")
+    ap.add_argument("--auto-select", action="store_true", help="Select job tools via tool_selection_rules.")
+    args = ap.parse_args(argv)
+
+    in_path = Path(args.input)
+    outdir = Path(args.outdir)
+
+    data = _load_json(in_path)
+
+    sheet = data.get("sheet") or {}
+    panel_w = float(sheet.get("width_mm", 0.0))
+    panel_h = float(sheet.get("height_mm", 0.0))
+    panel_t = float(sheet.get("thickness_mm", 0.0))
+
+    items = list(data.get("items") or [])
+
+    layout = data.get("layout")
+    if isinstance(layout, dict):
+        _apply_grid_layout(panel_w, panel_h, layout, items)
+
+    # 1) resolve templates → concrete shapes (centered; then offset by placement if provided)
+    items_resolved = resolve_templates(items, sheet_thickness_mm=panel_t)
+
+    # 2) build hints
+    hints = build_cam_hints(
+        items_resolved=items_resolved,
+        sheet_thickness=panel_t,
+        kerf_width_mm=float(data.get("kerf_width_mm", 0.0))
+    )
+
+    # 3) tool database
+    if args.tool_db:
+        tools = (select_tools_for_job(args.tool_db, material=args.material)
+                 if args.auto_select else load_tool_db(args.tool_db, material=args.material))
+    else:
+        tools = _default_tool_db()
+
+    # 4) plan + post
+    material = Material(name=args.material)
+    machine = Machine(name="default_grbl")
+    stock = Stock(width=panel_w, height=panel_h, thickness=panel_t)
+
+    moves = hints_to_moves(hints, tool_db=tools, material=material, machine=machine, stock=stock, safe_z=float(args.safe_z))
+
+    if args.prime_spindle:
+        # prepend set_rpm=0 to generate 'M3 S0' in header per Claude's suggestion (optional)
+        moves = [{"kind": "set_rpm", "rpm": 0}] + moves
+
+    gcode = write_gcode(moves, safe_z=float(args.safe_z))
+
+    # 5) write artifacts
+    job = in_path.stem
+    _save_json(outdir / f"{job}_items_resolved.json", items_resolved)
+    _save_json(outdir / f"{job}_hints.json", hints)
+    _save_text(outdir / f"{job}.nc", gcode)
+
+    print(str(outdir / f"{job}.nc"))
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
+
+
+=====================================
+PROJECT STRUCTURE
+=====================================
+.
+├── api
+│   ├── cad.py
+│   ├── cam.py
+│   ├── __init__.py
+│   └── io.py
+├── apps
+│   └── compose_cam.py
+├── cad
+│   ├── compose.py
+│   ├── export
+│   │   ├── __init__.py
+│   │   ├── step.py
+│   │   ├── stl.py
+│   │   └── svg.py
+│   ├── geom_parse.py
+│   ├── __init__.py
+│   ├── layout
+│   │   ├── __init__.py
+│   │   ├── panel.py
+│   │   └── place.py
+│   ├── primitives.py
+│   ├── shape.py
+│   └── transforms.py
+├── cam
+│   ├── __init__.py
+│   ├── model
+│   │   ├── hints.py
+│   │   ├── __init__.py
+│   │   ├── machine.py
+│   │   ├── material.py
+│   │   ├── setup.py
+│   │   ├── stock.py
+│   │   └── tool.py
+│   ├── ops
+│   │   ├── bore.py
+│   │   ├── drill.py
+│   │   ├── engrave.py
+│   │   ├── face.py
+│   │   ├── __init__.py
+│   │   ├── pocket.py
+│   │   ├── pocket_region.py
+│   │   └── profile.py
+│   ├── path
+│   │   ├── __init__.py
+│   │   ├── strategies.py
+│   │   └── toolpath.py
+│   ├── planner
+│   │   ├── params.py
+│   │   ├── pipeline.py
+│   │   └── select.py
+│   ├── post
+│   │   ├── gcode.py
+│   │   └── __init__.py
+│   └── tools
+│       └── adapter.py
+├── compositions
+│   ├── base.py
+│   ├── cabinets
+│   │   └── shaker.py
+│   ├── __init__.py
+│   ├── panels
+│   │   └── circle_mount.py
+│   └── retistry.py
+├── core
+│   ├── hashing.py
+│   ├── __init__.py
+│   ├── numeric.py
+│   └── types.py
+├── __init__.py
+├── io
+│   ├── __init__.py
+│   ├── readwrite.py
+│   └── schema.py
+├── recipes
+│   ├── components.py
+│   ├── cookbook
+│   │   ├── examples.py
+│   │   └── __init__.py
+│   ├── __init__.py
+│   └── library.py
+└── tests
+    ├── __init__.py
+    ├── run_all.py
+    └── unit
+        ├── __init__.py
+        ├── line_size.py
+        ├── test_cookbook.py
+        ├── test_gcode.py
+        ├── test_gcode_smoke.py
+        ├── test_geom_parse.py
+        ├── test_hashing.py
+        ├── test_hints.py
+        ├── test_io.py
+        ├── test_layout_place.py
+        ├── test_models_ops.py
+        ├── test_numeric.py
+        ├── test_planner_pipeline.py
+        ├── test_strategies.py
+        ├── test_svg_export.py
+        ├── test_toolpath_post.py
+        └── test_toolpath.py
+
+22 directories, 80 files

@@ -26,6 +26,10 @@ ENTRYPOINTS = {
     "ast": "continuum.ast_context",
     "metadata": "continuum.metadata",
     "generate_cabinet": "skills.cabinet_door_cam.generate_door_cam",
+    "compose_cam": "skills.mill_ui.apps.compose_cam",
+    "mill_ts": "skills.mill_ui_ts.cli",
+    "mill_cam": "skills.mill_ui_cam.cli",
+    "mill_ui_tests": "skills.mill_ui.tests.run_all",
 }
 
 

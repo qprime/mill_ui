@@ -21,6 +21,12 @@ from skills.mill_ui.cam.ops.drill import drill_peck
 from skills.mill_ui.cam.ops.engrave import engrave_lines
 from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
 
+from skills.mill_ui.cam.path.strategies import pocket_then_finish_profile
+
+# --- Toggle: enable finish contour after raster pockets (Rect pockets) ---
+ENABLE_POCKET_FINISH_PROFILE = True
+CLEANUP_OFFSET_MM = 0.25  # radial stock to leave for the finish pass
+
 # ---------------- Shapes / Specs ----------------
 
 def _as_tool(spec: SimpleNamespace) -> Tool:
@@ -78,7 +84,7 @@ def _pass_key(op: str, tool_id: Dict[str, Any]) -> Tuple[str, float, str, Option
 def _mm_str(v: float) -> str:
     return f"{v:.2f}mm".replace(".00mm", "mm")
 
-# ---------------- Tool selection ----------------
+# ---------------- Tool selection (2.5D sane) ----------------
 
 def _flat_tools(db: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [t for t in db if str(t.get("kind","flat")).lower() != "ball"]
@@ -111,6 +117,7 @@ def _pick_for_engrave(db: List[Dict[str, Any]]) -> SimpleNamespace:
 # ---------------- Per-tool pass params ----------------
 
 def _stepdown_for_tool(spec: SimpleNamespace) -> float:
+    # Honor DB when present; otherwise 0.5*D capped at 3mm
     if getattr(spec, "depth_per_pass", None):
         return float(spec.depth_per_pass)
     return min(3.0, 0.5 * float(spec.diameter))
@@ -132,7 +139,7 @@ def plan_passes(
     safe_z: float = 6.0,
     prime_spindle: bool = False,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    kerf_mm = float(hints.get("kerf_width_mm", 0.0))
+    kerf_mm = float(hints.get("kerf_width_mm", 0.0))  # may be 0.0 if not provided
 
     passes: Dict[Tuple[str, float, str, Optional[str]], Dict[str, Any]] = {}
     summary_passes: List[Dict[str, Any]] = []
@@ -167,14 +174,30 @@ def plan_passes(
         if shape_name == "Rect":
             w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
             shp = _rect_shape(w, h, _ensure_center(rec))
-            p["moves"] += pocket_raster(shp, setup, depth=depth, stepover=step_over, stepdown=step_down)
+            if ENABLE_POCKET_FINISH_PROFILE:
+                # NOTE: correct kw: step_down_mm (not stepdown_mm)
+                p["moves"] += pocket_then_finish_profile(
+                    shp, setup,
+                    total_depth_mm=depth,
+                    stepover_mm=step_over,
+                    step_down_mm=step_down,
+                    cleanup_offset_mm=CLEANUP_OFFSET_MM,
+                )
+            else:
+                p["moves"] += pocket_raster(shp, setup, depth=depth, stepover=step_over, stepdown=step_down)
+
         elif shape_name == "Circle":
+            # Circle pockets already include a finishing ring when finish=True
             d = float(geom.get("diameter_mm", 0.0))
             cx, cy = _ensure_center(rec)
             p["moves"] += pocket_circle_concentric((cx, cy), d, setup,
-                                                   depth=depth, stepover_mm=step_over,
-                                                   stepdown_mm=step_down, finish=True)
+                                                   depth=depth,
+                                                   stepover_mm=step_over,
+                                                   stepdown_mm=step_down,
+                                                   finish=True)
+
         elif shape_name == "Region":
+            # Keep Region raster as-is for now (we can add a region-finish variant later)
             p["moves"] += pocket_region_rect_raster(rec, setup,
                                                     default_center_xy=_ensure_center(rec),
                                                     depth_mm=depth,
@@ -182,6 +205,7 @@ def plan_passes(
                                                     stepdown_mm=step_down)
         else:
             continue
+
         p["count"] += 1
 
     # ---------- Holes ----------
@@ -228,7 +252,7 @@ def plan_passes(
                 w2, h2 = max(0.0, w - t.diameter), max(0.0, h - t.diameter)
             else:
                 w2, h2 = w, h
-            if w2 <= 0.0 or h2 <= 0.0: continue
+            if w2 <= 0 or h2 <= 0: continue
             shp = _rect_shape(w2, h2, _ensure_center(rec))
         elif rec.get("shape") == "Circle":
             d = float(geom.get("diameter_mm", 0.0))
@@ -298,5 +322,5 @@ def plan_passes(
         summary_passes.append(info)
 
     job_summary = {"passes": summary_passes,
-                   "notes": "Grouped by operation and tool; DB depth_per_pass/stepover honored."}
+                   "notes": "Rect pockets use finish contour if enabled; circle pockets retain built-in finish ring."}
     return pass_list, job_summary

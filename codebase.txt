@@ -1672,22 +1672,14 @@ def _center_of(sub: Dict[str, Any], fallback: Tuple[float, float]) -> Tuple[floa
     return fallback
 
 def _interval_subtract(base: List[Tuple[float, float]], cut: Tuple[float, float]) -> List[Tuple[float, float]]:
-    """Subtract one closed interval [a,b] from possibly-many base intervals. Returns merged result."""
     a, b = cut
-    if a > b:
-        a, b = b, a
+    if a > b: a, b = b, a
     out: List[Tuple[float, float]] = []
     for (x0, x1) in base:
-        # no overlap
-        if x1 <= a or x0 >= b:
-            out.append((x0, x1))
-            continue
-        # cut splits the interval
-        if x0 < a:
-            out.append((x0, max(x0, a)))
-        if x1 > b:
-            out.append((min(x1, b), x1))
-    # normalize (merge touching)
+        if x1 <= a or x0 >= b:             # no overlap
+            out.append((x0, x1)); continue
+        if x0 < a: out.append((x0, max(x0, a)))
+        if x1 > b: out.append((min(x1, b), x1))
     out.sort()
     merged: List[Tuple[float, float]] = []
     for seg in out:
@@ -1704,25 +1696,20 @@ def pocket_region_rect_raster(
     default_center_xy: Optional[Tuple[float, float]],
     depth_mm: float,
     stepover_mm: float,
+    stepdown_mm: float = 3.0,
 ) -> List[dict]:
     """
-    Raster pocket for a rectangular Region with rectangular holes.
-    - region geometry:
-        {"outer": {"type":"Rect","geometry":{"w_mm","h_mm"},"center_xy_mm"?:(x,y)},
-         "holes": [{"type":"Rect","geometry":{"w_mm","h_mm"},"center_xy_mm"?:(x,y)}, ...]}
-    - If sub 'center_xy_mm' missing, default_center_xy is used.
+    Layered raster for a rectangular Region with rectangular holes (islands).
     """
     geom = region.get("geometry") or {}
     outer = geom.get("outer") or {}
     holes = geom.get("holes") or []
-
     if (outer.get("type") or "").lower() != "rect":
         raise NotImplementedError("pocket_region_rect_raster supports Rect outer only")
 
     oc = _center_of(outer, default_center_xy or (0.0, 0.0))
     og = outer.get("geometry") or {}
-    ow = float(og.get("w_mm", 0.0))
-    oh = float(og.get("h_mm", 0.0))
+    ow = float(og.get("w_mm", 0.0)); oh = float(og.get("h_mm", 0.0))
     ominx, ominy, omaxx, omaxy = _rect_bounds(oc, ow, oh)
 
     hole_rects: List[Tuple[float, float, float, float]] = []
@@ -1731,44 +1718,48 @@ def pocket_region_rect_raster(
             raise NotImplementedError("holes must be Rect for pocket_region_rect_raster")
         hc = _center_of(h, default_center_xy or (0.0, 0.0))
         hg = h.get("geometry") or {}
-        hw = float(hg.get("w_mm", 0.0))
-        hh = float(hg.get("h_mm", 0.0))
+        hw = float(hg.get("w_mm", 0.0)); hh = float(hg.get("h_mm", 0.0))
         hole_rects.append(_rect_bounds(hc, hw, hh))
 
     z_target = -abs(float(depth_mm))
     so = max(0.1, float(stepover_mm))
+    sd = max(0.1, float(stepdown_mm))
 
     moves: List[dict] = []
-    moves.append(move_comment("pocket_region_rect_raster"))
+    moves.append(move_comment(f"pocket_region_rect_raster so={so:.3f} sd={sd:.3f} depth={z_target:.3f}"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
 
-    y = ominy
+    # Z layers
+    z_levels = []
+    z = 0.0
+    while z > z_target + 1e-9:
+        z_next = max(z_target, z - sd)
+        z_levels.append(z_next)
+        z = z_next
+
     left_to_right = True
-    while y <= omaxy + 1e-9:
-        # start with whole outer span
-        spans: List[Tuple[float, float]] = [(ominx, omaxx)]
-        # subtract any hole spans that intersect this scanline
-        for (hx0, hy0, hx1, hy1) in hole_rects:
-            if y < hy0 or y > hy1:
-                continue
-            spans = _interval_subtract(spans, (hx0, hx1))
-            if not spans:
-                break
-        if spans:
-            spans.sort()
-            if not left_to_right:
-                spans = [(b, a) for (a, b) in reversed(spans)]
-            for (xs, xe) in spans:
-                # exact start/end for the chosen direction
-                x0, x1 = (xs, xe)
-                moves.append(move_rapid(x=x0, y=y, z=setup.safe_z))
-                moves.append(move_cut(z=z_target, feed=setup.tool.feed_z))
-                moves.append(move_set_feed(setup.tool.feed_xy))
-                moves.append(move_cut(x=x1, y=y))
-                moves.append(move_retract(setup.safe_z))
-        y += so
-        left_to_right = not left_to_right
+    for z in z_levels:
+        y = ominy
+        while y <= omaxy + 1e-9:
+            spans: List[Tuple[float, float]] = [(ominx, omaxx)]
+            for (hx0, hy0, hx1, hy1) in hole_rects:
+                if y < hy0 or y > hy1: continue
+                spans = _interval_subtract(spans, (hx0, hx1))
+                if not spans: break
+            if spans:
+                spans.sort()
+                if not left_to_right:
+                    spans = [(b, a) for (a, b) in reversed(spans)]
+                for (xs, xe) in spans:
+                    x0, x1 = (xs, xe)
+                    moves.append(move_rapid(x=x0, y=y, z=setup.safe_z))
+                    moves.append(move_cut(z=z, feed=setup.tool.feed_z))
+                    moves.append(move_set_feed(setup.tool.feed_xy))
+                    moves.append(move_cut(x=x1, y=y))
+                    moves.append(move_retract(setup.safe_z))
+            y += so
+            left_to_right = not left_to_right
 
     return moves
 
@@ -1905,27 +1896,48 @@ FILE: ./cam/ops/pocket.py
 # path: skills/mill_ui/cam/ops/pocket.py
 from skills.mill_ui.cad.shape import Shape2D
 from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+from skills.mill_ui.cam.path.toolpath import (
+    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+)
 
-def pocket_raster(shape: Shape2D, setup: Setup, depth: float, stepover: float):
+def pocket_raster(shape: Shape2D, setup: Setup, *, depth: float, stepover: float, stepdown: float):
+    """
+    Layered raster pocket:
+      - Descend in Z by 'stepdown' until reaching -abs(depth).
+      - For each layer, run horizontal scanlines every 'stepover'.
+    """
     b = shape.bounds()
+    z_target = -abs(float(depth))
+    sd = max(0.1, float(stepdown))
+    so = max(0.1, float(stepover))
+
     moves = []
-    moves.append(move_comment('pocket_raster'))
+    moves.append(move_comment(f"pocket_raster so={so:.3f} sd={sd:.3f} depth={z_target:.3f}"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
-    y = b.miny
+
+    # Build Z levels: e.g., 0 → -3 → -6 → ... → z_target
+    z_levels = []
+    z = 0.0
+    while z > z_target + 1e-9:
+        z_next = max(z_target, z - sd)
+        z_levels.append(z_next)
+        z = z_next
+
     direction = 1
-    z = -abs(depth)
-    while y <= b.maxy:
-        x_start = b.minx if direction == 1 else b.maxx
-        x_end   = b.maxx if direction == 1 else b.minx
-        moves.append(move_rapid(x=x_start, y=y, z=setup.safe_z))
-        moves.append(move_cut(z=z, feed=setup.tool.feed_z))   # plunge at Z feed
-        moves.append(move_set_feed(setup.tool.feed_xy))       # restore XY feed
-        moves.append(move_cut(x=x_end, y=y))
-        moves.append(move_retract(setup.safe_z))
-        y += stepover
-        direction *= -1
+    for z in z_levels:
+        y = b.miny
+        while y <= b.maxy + 1e-9:
+            x_start = b.minx if direction == 1 else b.maxx
+            x_end   = b.maxx if direction == 1 else b.minx
+            moves.append(move_rapid(x=x_start, y=y, z=setup.safe_z))
+            moves.append(move_cut(z=z, feed=setup.tool.feed_z))    # plunge to layer Z
+            moves.append(move_set_feed(setup.tool.feed_xy))        # restore XY feed
+            moves.append(move_cut(x=x_end, y=y))                   # scanline
+            moves.append(move_retract(setup.safe_z))
+            y += so
+            direction *= -1
+
     return moves
 
 =====================================
@@ -2060,7 +2072,7 @@ def _pass_key(op: str, tool_id: Dict[str, Any]) -> Tuple[str, float, str, Option
 def _mm_str(v: float) -> str:
     return f"{v:.2f}mm".replace(".00mm", "mm")
 
-# ---------------- Tool selection (2.5D sane) ----------------
+# ---------------- Tool selection ----------------
 
 def _flat_tools(db: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [t for t in db if str(t.get("kind","flat")).lower() != "ball"]
@@ -2070,7 +2082,6 @@ def _ball_or_v_tools(db: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def _pick_for_pocket(db: List[Dict[str, Any]]) -> SimpleNamespace:
     cands = _flat_tools(db)
-    # Prefer upcut/compression if annotated; else largest flat
     cands.sort(key=lambda t: (0 if str(t.get("rotation","")).lower() in ("upcut","compression") else 1,
                               -float(t.get("diameter", 0.0))))
     return _spec_from_dict(cands[0])
@@ -2094,13 +2105,11 @@ def _pick_for_engrave(db: List[Dict[str, Any]]) -> SimpleNamespace:
 # ---------------- Per-tool pass params ----------------
 
 def _stepdown_for_tool(spec: SimpleNamespace) -> float:
-    """Depth per pass (mm): use DB value when present; else 0.5*D capped at 3mm."""
     if getattr(spec, "depth_per_pass", None):
         return float(spec.depth_per_pass)
     return min(3.0, 0.5 * float(spec.diameter))
 
 def _stepover_for_tool(spec: SimpleNamespace) -> float:
-    """Step-over (mm): use DB percent when present; else 40% of diameter."""
     if getattr(spec, "stepover_percent", None):
         return float(spec.diameter) * (float(spec.stepover_percent) / 100.0)
     return float(spec.diameter) * 0.40
@@ -2152,20 +2161,24 @@ def plan_passes(
         if shape_name == "Rect":
             w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
             shp = _rect_shape(w, h, _ensure_center(rec))
-            p["moves"] += pocket_raster(shp, setup, depth=depth, stepover=step_over)
+            p["moves"] += pocket_raster(shp, setup, depth=depth, stepover=step_over, stepdown=step_down)
         elif shape_name == "Circle":
             d = float(geom.get("diameter_mm", 0.0))
             cx, cy = _ensure_center(rec)
-            p["moves"] += pocket_circle_concentric((cx, cy), d, setup, depth=depth,
-                                                   stepover_mm=step_over, stepdown_mm=step_down, finish=True)
+            p["moves"] += pocket_circle_concentric((cx, cy), d, setup,
+                                                   depth=depth, stepover_mm=step_over,
+                                                   stepdown_mm=step_down, finish=True)
         elif shape_name == "Region":
-            p["moves"] += pocket_region_rect_raster(rec, setup, default_center_xy=_ensure_center(rec),
-                                                    depth_mm=depth, stepover_mm=step_over)
+            p["moves"] += pocket_region_rect_raster(rec, setup,
+                                                    default_center_xy=_ensure_center(rec),
+                                                    depth_mm=depth,
+                                                    stepover_mm=step_over,
+                                                    stepdown_mm=step_down)
         else:
             continue
         p["count"] += 1
 
-    # ---------- Holes (policy; tool = pocket picker) ----------
+    # ---------- Holes ----------
     for rec in hints.get("holes", []):
         if rec.get("shape") != "Circle":
             continue
@@ -2173,12 +2186,12 @@ def plan_passes(
         D = float(geom.get("diameter_mm", 0.0))
         x, y = _ensure_center(rec)
         depth = float(rec.get("depth_mm", 0.0))
-        t = _pick_for_pocket(tool_db)  # upcut/flat preference for wood
+        t = _pick_for_pocket(tool_db)
         tool_d = float(t.diameter)
         eps = 0.05
         if D <= tool_d + eps:
             p = _get_or_make_pass("drill", t)
-            peck = min(_stepdown_for_tool(t), 2.5)  # peck shorter for stability
+            peck = min(_stepdown_for_tool(t), 2.5)
             p["moves"] += drill_peck([(x, y)], p["setup"], depth=depth, peck=peck)
         elif D <= 3.0 * tool_d + eps:
             p = _get_or_make_pass("bore", t)
@@ -2186,8 +2199,7 @@ def plan_passes(
             p["moves"] += bore_helical((x, y), D, p["setup"], depth=depth, stepdown_mm=sd)
         else:
             p = _get_or_make_pass("pocket", t)
-            so = _stepover_for_tool(t)
-            sd = _stepdown_for_tool(t)
+            so = _stepover_for_tool(t); sd = _stepdown_for_tool(t)
             p["moves"] += pocket_circle_concentric((x, y), D, p["setup"], depth=depth,
                                                    stepover_mm=so, stepdown_mm=sd, finish=True)
         passes[_pass_key(p["op"], p["tool"])]["count"] += 1
@@ -2210,8 +2222,7 @@ def plan_passes(
                 w2, h2 = max(0.0, w - t.diameter), max(0.0, h - t.diameter)
             else:
                 w2, h2 = w, h
-            if w2 <= 0.0 or h2 <= 0.0: 
-                continue
+            if w2 <= 0.0 or h2 <= 0.0: continue
             shp = _rect_shape(w2, h2, _ensure_center(rec))
         elif rec.get("shape") == "Circle":
             d = float(geom.get("diameter_mm", 0.0))
@@ -2221,8 +2232,7 @@ def plan_passes(
                 d2 = max(0.0, d - t.diameter)
             else:
                 d2 = d
-            if d2 <= 0.0:
-                continue
+            if d2 <= 0.0: continue
             shp = _circle_shape(d2, _ensure_center(rec))
         else:
             continue

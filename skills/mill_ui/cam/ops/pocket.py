@@ -1,19 +1,29 @@
 # path: skills/mill_ui/cam/ops/pocket.py
+from __future__ import annotations
 from skills.mill_ui.cad.shape import Shape2D
 from skills.mill_ui.cam.model.setup import Setup
 from skills.mill_ui.cam.path.toolpath import (
     move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
 )
 
-def pocket_raster(shape: Shape2D, setup: Setup, *, depth: float, stepover: float, stepdown: float):
+def pocket_raster(
+    shape: Shape2D,
+    setup: Setup,
+    *,
+    depth: float,
+    stepover: float,
+    stepdown: float | None = None,
+):
     """
     Layered raster pocket:
-      - Descend in Z by 'stepdown' until reaching -abs(depth).
+      - Descend in Z by 'stepdown' (defaults to min(3.0, 0.5*tool_d)) until reaching -abs(depth).
       - For each layer, run horizontal scanlines every 'stepover'.
+    Backward-compatible: 'stepdown' is optional.
     """
     b = shape.bounds()
     z_target = -abs(float(depth))
-    sd = max(0.1, float(stepdown))
+    # Default: 0.5 * tool_d capped at 3.0mm
+    sd = float(stepdown) if stepdown is not None else min(3.0, 0.5 * float(getattr(setup.tool, "diameter", 3.0)))
     so = max(0.1, float(stepover))
 
     moves = []
@@ -21,7 +31,7 @@ def pocket_raster(shape: Shape2D, setup: Setup, *, depth: float, stepover: float
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
 
-    # Build Z levels: e.g., 0 → -3 → -6 → ... → z_target
+    # Build Z levels: e.g., 0 → -sd → ... → z_target
     z_levels = []
     z = 0.0
     while z > z_target + 1e-9:

@@ -1,7 +1,11 @@
 # path: skills/mill_ui/cam/path/strategies.py
 from __future__ import annotations
 from typing import List, Set, Optional
+
 from skills.mill_ui.cad.shape import Shape2D
+from skills.mill_ui.cad.primitives import rectangle
+from skills.mill_ui.cad.transforms import Transform2D, place
+
 from skills.mill_ui.cam.model.setup import Setup
 from skills.mill_ui.cam.ops.profile import profile_outline
 from skills.mill_ui.cam.ops.pocket import pocket_raster
@@ -10,8 +14,11 @@ from skills.mill_ui.cam.path.toolpath import (
     move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
 )
 
+# ---------------------------------------------------------------------------
+# Internal helper: single finish loop at target depth for a given shape
+# ---------------------------------------------------------------------------
+
 def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> List[dict]:
-    """One finish loop at target depth."""
     pts = shape.points
     if not pts:
         return []
@@ -29,6 +36,10 @@ def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> List[
     m.append(move_retract(setup.safe_z))
     return m
 
+# ---------------------------------------------------------------------------
+# Profiles: onion-skin rough then finish (for external cutouts)
+# ---------------------------------------------------------------------------
+
 def onion_skin_then_finish(
     shape: Shape2D,
     setup: Setup,
@@ -39,20 +50,19 @@ def onion_skin_then_finish(
     spring_pass: bool = False,
 ) -> List[dict]:
     """
-    Rough to (total_depth - skin), then do a single finish pass at total_depth.
-    Optionally add a duplicate finish 'spring' pass to clean deflection.
+    For external profiles: rough to (total - skin), then single finish pass at total.
+    Optional spring pass to clean deflection.
     """
     total = abs(float(total_depth_mm))
     skin  = max(0.0, float(skin_mm))
-    if skin == 0.0:
-        # simple profile
-        sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
-        return profile_outline(shape, setup, depth=total, step_down=sd)
-
-    rough_depth = max(0.0, total - skin)
     sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
 
     moves: List[dict] = []
+    if skin <= 0.0:
+        moves += profile_outline(shape, setup, depth=total, step_down=sd)
+        return moves
+
+    rough_depth = max(0.0, total - skin)
     moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={total:.3f}"))
     if rough_depth > 0:
         moves += profile_outline(shape, setup, depth=rough_depth, step_down=sd)
@@ -60,6 +70,10 @@ def onion_skin_then_finish(
     if spring_pass:
         moves += _finish_profile_pass(shape, setup, depth_mm=total)
     return moves
+
+# ---------------------------------------------------------------------------
+# Profiles: tabs on the final pass
+# ---------------------------------------------------------------------------
 
 def _evenly_spaced_indices(n: int, k: int) -> Set[int]:
     if k <= 0 or n <= 0:
@@ -77,7 +91,8 @@ def profile_outline_with_tabs(
     tab_height_mm: float = 3.0,
 ) -> List[dict]:
     """
-    Profile with tabs on the final pass: insert small Z lifts (tab_height) at k evenly spaced edges.
+    Profile with tabs on the final pass: insert small Z lifts (tab_height) at
+    k evenly spaced edges. Tabs applied only on the bottom pass.
     """
     pts = shape.points
     if not pts:
@@ -112,7 +127,6 @@ def profile_outline_with_tabs(
             for i, p in enumerate(pts[1:], start=1):
                 moves.append(move_cut(x=p.x, y=p.y))
                 if i in idxs:
-                    # lift up towards stock by tab_height, then back down to bottom
                     lift_z = -max(0.0, total - float(tab_height_mm))
                     moves.append(move_cut(z=lift_z))
                     moves.append(move_cut(z=target))
@@ -121,42 +135,60 @@ def profile_outline_with_tabs(
 
     return moves
 
-# ------------------------------------------------------------------
-# Helper requested by tests:
-#   - Pocket the interior, then onion-skin profile finish.
-#   - Accepts total_depth_mm (as tests use), but also tolerates depth_mm.
-#   - If stepover not provided, derive from tool diameter.
-# ------------------------------------------------------------------
-def pocket_then_onion_skin_profile(
+# ---------------------------------------------------------------------------
+# Pockets: rough (shrunken) then finish profile on the true boundary
+# ---------------------------------------------------------------------------
+
+def pocket_then_finish_profile(
     shape: Shape2D,
     setup: Setup,
     *,
-    total_depth_mm: Optional[float] = None,
-    skin_mm: float = 0.5,
-    spring_pass: bool = False,
+    total_depth_mm: float,
     stepover_mm: Optional[float] = None,
     step_down_mm: Optional[float] = None,
-    depth_mm: Optional[float] = None,   # legacy alias
+    cleanup_offset_mm: float = 0.25,
 ) -> List[dict]:
-    # Resolve total depth from either name
-    total = total_depth_mm if total_depth_mm is not None else depth_mm
-    if total is None:
-        raise ValueError("pocket_then_onion_skin_profile requires total_depth_mm (or depth_mm).")
-    total = float(total)
+    """
+    For internal pockets (e.g., panel recess):
+      1) Raster pocket on a shrunken boundary that leaves cleanup_offset at the true wall.
+      2) Full-depth profile on the true inside boundary to clean the wall.
+    """
+    # Compute true bounds and center
+    xs = [p.x for p in shape.points]
+    ys = [p.y for p in shape.points]
+    minx, maxx = min(xs), max(xs)
+    miny, maxy = min(ys), max(ys)
+    cx = 0.5 * (minx + maxx)
+    cy = 0.5 * (miny + maxy)
+    w = maxx - minx
+    h = maxy - miny
 
-    # Default stepover if not supplied
-    so = stepover_mm if stepover_mm is not None else stepover_for(tool_diameter=setup.tool.diameter)
+    # Tool and pass parameters
+    tool_d = float(getattr(setup.tool, "diameter", 3.0))
+    tool_r = 0.5 * tool_d
+    sd = step_down_mm if step_down_mm is not None else stepdown_for(tool_diameter=tool_d, cap_mm=3.0)
+    so = stepover_mm if stepover_mm is not None else stepover_for(tool_diameter=tool_d)
 
     moves: List[dict] = []
-    moves.append(move_comment("pocket_then_onion_skin_profile"))
-    # Clear area first
-    moves += pocket_raster(shape, setup, depth=total, stepover=so)
-    # Then perimeter finish with skin
-    moves += onion_skin_then_finish(
-        shape, setup,
-        total_depth_mm=total,
-        skin_mm=skin_mm,
-        step_down_mm=step_down_mm,
-        spring_pass=spring_pass,
-    )
+
+    # 1) Rough pocket: shrink by (tool_radius + cleanup_offset)
+    #    This keeps the outermost raster tool-center at: boundary - (tool_r + cleanup_offset)
+    shrink = tool_r + float(cleanup_offset_mm)
+    w_rough = max(0.0, w - 2.0 * shrink)
+    h_rough = max(0.0, h - 2.0 * shrink)
+    if w_rough > 0.0 and h_rough > 0.0:
+        rough = rectangle(w_rough, h_rough)
+        rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
+        moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
+        moves += pocket_raster(rough, setup, depth=total_depth_mm, stepover=so, stepdown=sd)
+
+    # 2) Full-depth finish profile: inside boundary = (W - tool_d) x (H - tool_d)
+    w_fin = max(0.0, w - tool_d)
+    h_fin = max(0.0, h - tool_d)
+    if w_fin > 0.0 and h_fin > 0.0:
+        finish = rectangle(w_fin, h_fin)
+        finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
+        moves.append(move_comment("BEGIN finish profile pass"))
+        moves += profile_outline(finish, setup, depth=total_depth_mm, step_down=sd)
+
     return moves

@@ -1,0 +1,359 @@
+{
+  "tool_library_version": "1.0",
+  "machine_profile": {
+    "name": "Altmill 4x4",
+    "spindle": "PWNCNC 2.2kW",
+    "work_envelope_mm": [1219, 1219, 100],
+    "max_rpm": 24000,
+    "optimal_rpm_range": [14000, 18000],
+    "collet_sizes": ["6.35mm", "12.7mm"],
+    "notes": "Hobby CNC router, carbide tools recommended for MDF/plywood"
+  },
+  "tools": [
+    {
+      "tool_id": "hunricho_1_2_4f",
+      "name": "Hunricho 1/2\" 4-Flute Square End Mill",
+      "type": "square_end_mill",
+      "material": "carbide",
+      "coating": "AlTiN",
+      "hardness": "HRC45",
+      "diameter_mm": 12.7,
+      "diameter_inch": 0.5,
+      "flutes": 4,
+      "shank_mm": 12.7,
+      "cutting_length_mm": 35,
+      "overall_length_mm": 75,
+      "helix_angle": 35,
+      "applications": ["roughing", "slotting", "large_pockets"],
+      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood", "alloy_steel"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 16000,
+          "feed_rate_mm_min": 3000,
+          "feed_rate_ipm": 118,
+          "depth_per_pass_mm": 6.0,
+          "step_over_percent": 50,
+          "plunge_rate_mm_min": 500,
+          "chip_load_mm": 0.094
+        },
+        "plywood": {
+          "rpm": 14000,
+          "feed_rate_mm_min": 2500,
+          "feed_rate_ipm": 98,
+          "depth_per_pass_mm": 5.0,
+          "step_over_percent": 40,
+          "plunge_rate_mm_min": 400,
+          "chip_load_mm": 0.089
+        },
+        "hardwood": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 2000,
+          "feed_rate_ipm": 79,
+          "depth_per_pass_mm": 4.0,
+          "step_over_percent": 40,
+          "plunge_rate_mm_min": 300,
+          "chip_load_mm": 0.069
+        }
+      },
+      "notes": "Heavy duty workhorse. Excellent for door panels and large material removal."
+    },
+    {
+      "tool_id": "speed_tiger_1_4_3f",
+      "name": "Speed Tiger 1/4\" 3-Flute IAUE Rougher",
+      "type": "roughing_end_mill",
+      "material": "micrograin_carbide",
+      "coating": "uncoated",
+      "geometry": "U_type_high_feed",
+      "diameter_mm": 6.35,
+      "diameter_inch": 0.25,
+      "flutes": 3,
+      "shank_mm": 6.35,
+      "cutting_length_mm": 19,
+      "overall_length_mm": 57,
+      "applications": ["profiling", "roughing", "high_speed_removal", "aluminum", "adaptive_clearing"],
+      "suitable_materials": ["aluminum", "MDF", "plywood", "plastic", "wood"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 3500,
+          "feed_rate_ipm": 138,
+          "depth_per_pass_mm": 3.0,
+          "step_over_percent": 60,
+          "plunge_rate_mm_min": 600,
+          "chip_load_mm": 0.065
+        },
+        "aluminum": {
+          "rpm": 12000,
+          "feed_rate_mm_min": 2000,
+          "feed_rate_ipm": 79,
+          "depth_per_pass_mm": 2.0,
+          "step_over_percent": 50,
+          "plunge_rate_mm_min": 300,
+          "chip_load_mm": 0.056
+        }
+      },
+      "notes": "High-feed U-type design for rapid material removal. Optimized for aluminum but excellent in wood."
+    },
+    {
+      "tool_id": "cic_big_boy_3_8",
+      "name": "CIC Big Boy 3/8\" Upcut Rougher",
+      "type": "upcut_spiral",
+      "material": "carbide",
+      "coating": "ZrN_gold",
+      "part_number": "GDBIGBOY",
+      "diameter_mm": 9.525,
+      "diameter_inch": 0.375,
+      "flutes": 3,
+      "shank_mm": 9.525,
+      "cutting_length_mm": 31.75,
+      "overall_length_mm": 63.5,
+      "rotation": "upcut",
+      "applications": ["roughing", "deep_cuts", "rapid_removal", "chip_evacuation"],
+      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 5080,
+          "feed_rate_ipm": 200,
+          "depth_per_pass_mm": 3.0,
+          "step_over_percent": 50,
+          "plunge_rate_mm_min": 2540,
+          "chip_load_mm": 0.094
+        },
+        "plywood": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 4000,
+          "feed_rate_ipm": 157,
+          "depth_per_pass_mm": 2.5,
+          "step_over_percent": 40,
+          "plunge_rate_mm_min": 2000,
+          "chip_load_mm": 0.074
+        },
+        "hardwood": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 3000,
+          "feed_rate_ipm": 118,
+          "depth_per_pass_mm": 2.0,
+          "step_over_percent": 40,
+          "plunge_rate_mm_min": 1500,
+          "chip_load_mm": 0.056
+        }
+      },
+      "notes": "Ultimate upcut for speed. Cut deep, stay sharp. Excellent chip evacuation. Manufacturer recommends 200 IPM for hobby spindle."
+    },
+    {
+      "tool_id": "eanosic_ball_1_8",
+      "name": "EANOSIC 1/8\" Ball Nose",
+      "type": "ball_nose",
+      "material": "carbide",
+      "coating": "nano_blue",
+      "diameter_mm": 3.175,
+      "diameter_inch": 0.125,
+      "radius_mm": 1.5875,
+      "flutes": 2,
+      "shank_mm": 6.35,
+      "cutting_length_mm": 12.7,
+      "overall_length_mm": 50.8,
+      "applications": ["3d_carving", "contouring", "finishing", "detail_work", "engraving"],
+      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 20000,
+          "feed_rate_mm_min": 1500,
+          "feed_rate_ipm": 59,
+          "depth_per_pass_mm": 1.0,
+          "step_over_percent": 10,
+          "plunge_rate_mm_min": 200,
+          "chip_load_mm": 0.038
+        },
+        "hardwood": {
+          "rpm": 22000,
+          "feed_rate_mm_min": 1200,
+          "feed_rate_ipm": 47,
+          "depth_per_pass_mm": 0.8,
+          "step_over_percent": 8,
+          "plunge_rate_mm_min": 150,
+          "chip_load_mm": 0.027
+        }
+      },
+      "notes": "Fine detail work and 3D carving. Small stepover required for smooth finish. Blue nano coating for longevity."
+    },
+    {
+      "tool_id": "wexwe_ball_1_4",
+      "name": "WEXWE 1/4\" Ball Nose",
+      "type": "ball_nose",
+      "material": "carbide",
+      "coating": "MAH",
+      "diameter_mm": 6.35,
+      "diameter_inch": 0.25,
+      "radius_mm": 3.175,
+      "flutes": 2,
+      "shank_mm": 6.35,
+      "cutting_length_mm": 19,
+      "overall_length_mm": 57,
+      "applications": ["3d_carving", "large_radius", "contouring", "finishing", "bowls"],
+      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood", "stainless_steel"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 18000,
+          "feed_rate_mm_min": 2500,
+          "feed_rate_ipm": 98,
+          "depth_per_pass_mm": 2.0,
+          "step_over_percent": 15,
+          "plunge_rate_mm_min": 300,
+          "chip_load_mm": 0.069
+        },
+        "hardwood": {
+          "rpm": 20000,
+          "feed_rate_mm_min": 2000,
+          "feed_rate_ipm": 79,
+          "depth_per_pass_mm": 1.5,
+          "step_over_percent": 12,
+          "plunge_rate_mm_min": 250,
+          "chip_load_mm": 0.050
+        }
+      },
+      "notes": "Larger ball nose for smoother finishes on 3D surfaces. Good for bowls and curved surfaces. MAH coating for steel capability."
+    },
+    {
+      "tool_id": "spetool_tapered_ball",
+      "name": "SpeTool 1/32\" Tapered Ball Nose",
+      "type": "tapered_ball_nose",
+      "material": "carbide",
+      "coating": "ZrN",
+      "tip_diameter_mm": 0.8,
+      "tip_radius_mm": 0.4,
+      "shank_mm": 6.35,
+      "cutting_length_mm": 25.4,
+      "overall_length_mm": 76.2,
+      "taper_angle": 6.2,
+      "flutes": 2,
+      "applications": ["fine_detail", "engraving", "3d_detail", "text", "precision_carving"],
+      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 24000,
+          "feed_rate_mm_min": 800,
+          "feed_rate_ipm": 31,
+          "depth_per_pass_mm": 0.2,
+          "step_over_percent": 5,
+          "plunge_rate_mm_min": 100,
+          "chip_load_mm": 0.017
+        },
+        "hardwood": {
+          "rpm": 24000,
+          "feed_rate_mm_min": 600,
+          "feed_rate_ipm": 24,
+          "depth_per_pass_mm": 0.15,
+          "step_over_percent": 3,
+          "plunge_rate_mm_min": 80,
+          "chip_load_mm": 0.013
+        }
+      },
+      "notes": "Ultra-fine detail work. Very slow feeds required. Excellent for text and intricate 3D details. Use multiple spring passes."
+    },
+    {
+      "tool_id": "xyunenz_ball_1_2",
+      "name": "XYunEnZ 1/2\" Ball Nose",
+      "type": "ball_nose",
+      "material": "micrograin_carbide",
+      "coating": "uncoated",
+      "hardness": "HRC55",
+      "diameter_mm": 12.7,
+      "diameter_inch": 0.5,
+      "radius_mm": 6.35,
+      "flutes": 4,
+      "shank_mm": 12.7,
+      "cutting_length_mm": 32,
+      "overall_length_mm": 75,
+      "applications": ["large_3d", "bowls", "sculpture", "heavy_contouring", "rapid_3d"],
+      "suitable_materials": ["hardwood", "softwood", "MDF", "alloy_steel"],
+      "feeds_speeds": {
+        "MDF": {
+          "rpm": 14000,
+          "feed_rate_mm_min": 3000,
+          "feed_rate_ipm": 118,
+          "depth_per_pass_mm": 3.0,
+          "step_over_percent": 20,
+          "plunge_rate_mm_min": 400,
+          "chip_load_mm": 0.054
+        },
+        "hardwood": {
+          "rpm": 16000,
+          "feed_rate_mm_min": 2500,
+          "feed_rate_ipm": 98,
+          "depth_per_pass_mm": 2.5,
+          "step_over_percent": 18,
+          "plunge_rate_mm_min": 350,
+          "chip_load_mm": 0.039
+        }
+      },
+      "notes": "Large ball nose for rapid 3D work. Good for bowl roughing and large curved surfaces. Micrograin carbide for durability."
+    }
+  ],
+  "tool_selection_rules": {
+    "roughing_priority": ["cic_big_boy_3_8", "hunricho_1_2_4f", "speed_tiger_1_4_3f"],
+    "finishing_priority": ["eanosic_ball_1_8", "wexwe_ball_1_4", "spetool_tapered_ball"],
+    "large_features": ["hunricho_1_2_4f", "xyunenz_ball_1_2"],
+    "fine_details": ["spetool_tapered_ball", "eanosic_ball_1_8"],
+    "through_cuts": ["hunricho_1_2_4f", "cic_big_boy_3_8"],
+    "3d_carving": ["eanosic_ball_1_8", "wexwe_ball_1_4", "spetool_tapered_ball", "xyunenz_ball_1_2"],
+    "deep_cuts": ["cic_big_boy_3_8", "hunricho_1_2_4f"]
+  },
+  "material_properties": {
+    "MDF": {
+      "hardness": "soft",
+      "abrasive": true,
+      "chip_load_factor": 1.2,
+      "preferred_coating": ["AlTiN", "ZrN", "nano_blue"],
+      "notes": "Contains abrasive grit, use carbide tools only. Good surface finish achievable."
+    },
+    "plywood": {
+      "hardness": "medium",
+      "abrasive": true,
+      "chip_load_factor": 1.0,
+      "tear_out_prone": true,
+      "preferred_tools": ["downcut", "compression"],
+      "notes": "Use downcut to prevent top surface tearout. Watch for delamination."
+    },
+    "hardwood": {
+      "hardness": "hard", 
+      "abrasive": false,
+      "chip_load_factor": 0.8,
+      "notes": "Less abrasive than manufactured wood products. Good natural finish."
+    },
+    "softwood": {
+      "hardness": "soft",
+      "abrasive": false,
+      "chip_load_factor": 1.1,
+      "tear_out_prone": true,
+      "notes": "Prone to tearout, use sharp tools and proper speeds. Can be resinous."
+    }
+  },
+  "operation_templates": {
+    "roughing": {
+      "strategy": "adaptive_clearing",
+      "stock_to_leave_mm": 0.5,
+      "conventional_milling": false,
+      "notes": "Remove bulk material quickly, leave stock for finishing"
+    },
+    "profiling": {
+      "strategy": "conventional_milling",
+      "climb_finish_pass": true,
+      "stock_to_leave_mm": 0.1,
+      "notes": "Cut perimeter and holes, climb mill final pass"
+    },
+    "3d_finishing": {
+      "strategy": "parallel_finishing",
+      "tolerance_mm": 0.05,
+      "spring_passes": 1,
+      "notes": "Smooth 3D surfaces, consider radial toolpaths for bowls"
+    },
+    "detail_finishing": {
+      "strategy": "pencil_finishing", 
+      "spring_passes": 2,
+      "tolerance_mm": 0.01,
+      "notes": "Fine details, very conservative feeds, multiple passes"
+    }
+  }
+}

@@ -17,6 +17,8 @@ from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.stock import Stock
 
+from skills.mill_ui.cad.export.svg_dims import render_svg_with_dims
+
 # --------------------
 # HARD-CODED DEFAULTS
 # --------------------
@@ -28,7 +30,7 @@ PROJECTS_ROOT = Path("memories/cam_projects/sheet_layouts")
 
 # Match your legacy Z convention:
 #   stock BOTTOM = Z 0, stock TOP = Z thickness.
-Z_REFERENCE = "bottom"
+Z_REFERENCE = "top"
 
 # --------------------
 # IO helpers
@@ -81,41 +83,77 @@ def _size_of_item(it: Dict[str, Any]) -> Tuple[float, float]:
             return d, d
     return 0.0, 0.0
 
-def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any], items: List[Dict[str, Any]]) -> None:
+def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
+                       items: List[Dict[str, Any]], *, kerf_hint: float = 0.0) -> None:
+    """
+    Place items into a rows×cols grid on a panel, honoring gap semantics:
+
+      - gap_mode: "zero"    -> gap_x = gap_y = 0.00 (shared seams => one cut)
+      - gap_mode: "kerf"    -> gap_x = gap_y = kerf + gap_clearance_mm (default 0.10)
+      - gap_mode: "explicit" (default) -> use gap_x_mm / gap_y_mm as provided
+      - seam_clearance_mm (optional) overrides both gaps directly (explicit)
+
+    Only perimeter profiles that physically touch in design space will be eligible
+    for common-line cutting downstream. Internal items (pockets/holes) are independent.
+
+    kerf_hint: top-level kerf_width_mm passed in by the caller.
+    """
+    # --- gaps from mode ---
+    gap_mode = str(layout.get("gap_mode", "explicit")).lower()   # "explicit" | "kerf" | "zero"
+    kerf_mm = float(layout.get("kerf_width_mm", kerf_hint or 0.0))
+
+    if "seam_clearance_mm" in layout:
+        gap_x = gap_y = float(layout.get("seam_clearance_mm", 0.0))
+    else:
+        if gap_mode == "zero":
+            gap_x = gap_y = 0.0
+        elif gap_mode == "kerf":
+            clearance = float(layout.get("gap_clearance_mm", 0.10))
+            gap_x = gap_y = float(kerf_mm) + clearance
+        else:  # "explicit" (or anything else)
+            gap_x = float(layout.get("gap_x_mm", 0.0))
+            gap_y = float(layout.get("gap_y_mm", 0.0))
+
+    # --- grid dims ---
     cols = int(layout.get("cols", 1))
     rows = int(layout.get("rows", 1))
-    gap_x = float(layout.get("gap_x_mm", 0.0))
-    gap_y = float(layout.get("gap_y_mm", 0.0))
     border = float(layout.get("border_mm", 0.0))
-    fit = str(layout.get("fit", "tight")).lower()
+    fit = str(layout.get("fit", "tight")).lower()  # "tight" or "even"
 
-    avail_w = panel_w - 2 * border - (cols - 1) * gap_x
-    avail_h = panel_h - 2 * border - (rows - 1) * gap_y
-    if avail_w <= 0 or avail_h <= 0:
-        raise ValueError("Grid + borders/gaps leave no interior area")
+    # interior usable area (do NOT subtract gaps here; they belong to the block we place)
+    inner_w = panel_w - 2.0 * border
+    inner_h = panel_h - 2.0 * border
+    if inner_w <= 0.0 or inner_h <= 0.0:
+        raise ValueError("Grid + borders leave no interior area")
 
-    sizes = [_size_of_item(it) for it in items]
+    # cell size
     if fit == "tight":
-        max_w = max((w for (w, _) in sizes), default=0.0)
-        max_h = max((h for (_, h) in sizes), default=0.0)
+        # cells fit the max item size; block must fit the inner rectangle
+        max_w = max((_size_of_item(it)[0] for it in items), default=0.0)
+        max_h = max((_size_of_item(it)[1] for it in items), default=0.0)
         cell_w, cell_h = max_w, max_h
         block_w = cols * cell_w + (cols - 1) * gap_x
         block_h = rows * cell_h + (rows - 1) * gap_y
-        if block_w > avail_w + 1e-6 or block_h > avail_h + 1e-6:
+        if block_w > inner_w + 1e-6 or block_h > inner_h + 1e-6:
             raise ValueError("Tight pack does not fit grid interior")
     else:
-        cell_w = avail_w / cols
-        cell_h = avail_h / rows
+        # evenly divide inner area into cells, leaving the specified gaps between them
+        cell_w = (inner_w - (cols - 1) * gap_x) / cols
+        cell_h = (inner_h - (rows - 1) * gap_y) / rows
+        if cell_w <= 0.0 or cell_h <= 0.0:
+            raise ValueError("Grid + borders/gaps leave no interior area")
 
+    # --- placement (row-major) ---
     idx = 0
     for r in range(rows):
         for c in range(cols):
             if idx >= len(items):
                 return
-            cx = border + c * (cell_w + gap_x) + cell_w * 0.5
-            cy = border + r * (cell_h + gap_y) + cell_h * 0.5
+            cx = border + c * (cell_w + gap_x) + 0.5 * cell_w
+            cy = border + r * (cell_h + gap_y) + 0.5 * cell_h
             items[idx].setdefault("placement", {})["center_xy_mm"] = (cx, cy)
             idx += 1
+
 
 # --------------------
 # main
@@ -147,7 +185,10 @@ def main(argv: List[str]) -> int:
     # 2) apply grid placement BEFORE resolving templates
     layout = data.get("layout")
     if isinstance(layout, dict):
-        _apply_grid_layout(panel_w, panel_h, layout, items)  # grid BEFORE resolve
+        _apply_grid_layout(
+            panel_w, panel_h, layout, items,
+            kerf_hint=float(data.get("kerf_width_mm", 0.0))   # <— add this arg
+        )  # grid BEFORE resolve
 
     # 3) resolve templates -> concrete shapes (centered; then offset by placement if present)
     items_resolved = resolve_templates(items, sheet_thickness_mm=panel_t)
@@ -158,6 +199,16 @@ def main(argv: List[str]) -> int:
         sheet_thickness=panel_t,
         kerf_width_mm=float(data.get("kerf_width_mm", 0.0))
     )
+
+    # --- write dimensioned layout SVG (layout_dims.svg) ---
+    svg_dims = render_svg_with_dims(
+        panel_w, panel_h, panel_t,
+        placements=[{"item": it, "center_xy_mm": (it.get("placement") or {}).get("center_xy_mm", (0.0, 0.0))} for it in items],
+        hints=hints,
+        tol_mm=0.25,
+    )
+    _save_text(outdir / "layout_dims.svg", svg_dims)
+
 
     # 5) load REAL tool DB (hard-coded path)
     if not TOOL_DB_PATH.exists():

@@ -7,6 +7,7 @@ import math
 from skills.mill_ui.core.types import Vec2
 from skills.mill_ui.cad.primitives import rectangle, circle as circle_shape
 from skills.mill_ui.cad.transforms import Transform2D, place
+from skills.mill_ui.cad.shape import Shape2D
 
 from skills.mill_ui.cam.model.tool import Tool
 from skills.mill_ui.cam.model.material import Material
@@ -23,9 +24,11 @@ from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
 
 from skills.mill_ui.cam.path.strategies import pocket_then_finish_profile
 
-# --- Toggle: enable finish contour after raster pockets (Rect pockets) ---
-ENABLE_POCKET_FINISH_PROFILE = True
-CLEANUP_OFFSET_MM = 0.25  # radial stock to leave for the finish pass
+# --- Shared-edge merge toggle (default ON) -------------------------------
+MERGE_SHARED_EDGES = True
+MERGE_TOL_MM = 0.10
+MIN_OVERLAP_MM = 1.00  # must overlap at least this much to treat as a seam
+CLEANUP_OFFSET_MM = 0.25  # for pocket finish strategy
 
 # ---------------- Shapes / Specs ----------------
 
@@ -52,14 +55,10 @@ def _spec_from_dict(d: Dict[str, Any]) -> SimpleNamespace:
         stepover_percent=float(d.get("stepover_percent", 0.0)) if d.get("stepover_percent") is not None else None,
     )
 
-def _rect_shape(w: float, h: float, center: Tuple[float, float]) -> Any:
+def _rect_shape(w: float, h: float, center: Tuple[float, float]) -> Shape2D:
     shp = rectangle(w, h)
     cx, cy = center
     return place(shp, Transform2D(tx=cx - w / 2.0, ty=cy - h / 2.0))
-
-def _circle_shape(d: float, center: Tuple[float, float]) -> Any:
-    cx, cy = center
-    return circle_shape(Vec2(cx, cy), d / 2.0)
 
 def _ensure_center(rec: Dict[str, Any]) -> Tuple[float, float]:
     c = rec.get("center_xy_mm")
@@ -117,7 +116,6 @@ def _pick_for_engrave(db: List[Dict[str, Any]]) -> SimpleNamespace:
 # ---------------- Per-tool pass params ----------------
 
 def _stepdown_for_tool(spec: SimpleNamespace) -> float:
-    # Honor DB when present; otherwise 0.5*D capped at 3mm
     if getattr(spec, "depth_per_pass", None):
         return float(spec.depth_per_pass)
     return min(3.0, 0.5 * float(spec.diameter))
@@ -126,6 +124,35 @@ def _stepover_for_tool(spec: SimpleNamespace) -> float:
     if getattr(spec, "stepover_percent", None):
         return float(spec.diameter) * (float(spec.stepover_percent) / 100.0)
     return float(spec.diameter) * 0.40
+
+# ---------------- Edge helpers ----------------
+
+class _Edge:
+    # axis-aligned edge
+    __slots__ = ("orient","coord","a","b","rect_id","minx","miny","maxx","maxy")
+    def __init__(self, orient: str, coord: float, a: float, b: float,
+                 rect_id: str, minx: float, miny: float, maxx: float, maxy: float):
+        self.orient = orient  # 'v' or 'h'
+        self.coord = coord    # x for vertical, y for horizontal
+        self.a = min(a, b)
+        self.b = max(a, b)
+        self.rect_id = rect_id
+        self.minx, self.miny, self.maxx, self.maxy = minx, miny, maxx, maxy
+
+def _rect_edges(cx: float, cy: float, w: float, h: float, rect_id: str) -> List[_Edge]:
+    minx, miny = cx - w/2, cy - h/2
+    maxx, maxy = cx + w/2, cy + h/2
+    return [
+        _Edge("v", minx, miny, maxy, rect_id, minx, miny, maxx, maxy),  # left
+        _Edge("v", maxx, miny, maxy, rect_id, minx, miny, maxx, maxy),  # right
+        _Edge("h", miny, minx, maxx, rect_id, minx, miny, maxx, maxy),  # bottom
+        _Edge("h", maxy, minx, maxx, rect_id, minx, miny, maxx, maxy),  # top
+    ]
+
+def _overlap_len(a1: float, a2: float, b1: float, b2: float) -> float:
+    lo = max(min(a1, a2), min(b1, b2))
+    hi = min(max(a1, a2), max(b1, b2))
+    return max(0.0, hi - lo)
 
 # ---------------- Planner ----------------
 
@@ -143,6 +170,7 @@ def plan_passes(
 
     passes: Dict[Tuple[str, float, str, Optional[str]], Dict[str, Any]] = {}
     summary_passes: List[Dict[str, Any]] = []
+    merged_seams_count = 0
 
     def _get_or_make_pass(op_name: str, spec: SimpleNamespace) -> Dict[str, Any]:
         tool_id = _tool_identity(spec)
@@ -174,20 +202,15 @@ def plan_passes(
         if shape_name == "Rect":
             w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
             shp = _rect_shape(w, h, _ensure_center(rec))
-            if ENABLE_POCKET_FINISH_PROFILE:
-                # NOTE: correct kw: step_down_mm (not stepdown_mm)
-                p["moves"] += pocket_then_finish_profile(
-                    shp, setup,
-                    total_depth_mm=depth,
-                    stepover_mm=step_over,
-                    step_down_mm=step_down,
-                    cleanup_offset_mm=CLEANUP_OFFSET_MM,
-                )
-            else:
-                p["moves"] += pocket_raster(shp, setup, depth=depth, stepover=step_over, stepdown=step_down)
-
+            # Rough then finish the wall
+            p["moves"] += pocket_then_finish_profile(
+                shp, setup,
+                total_depth_mm=depth,
+                stepover_mm=step_over,
+                step_down_mm=step_down,
+                cleanup_offset_mm=CLEANUP_OFFSET_MM,
+            )
         elif shape_name == "Circle":
-            # Circle pockets already include a finishing ring when finish=True
             d = float(geom.get("diameter_mm", 0.0))
             cx, cy = _ensure_center(rec)
             p["moves"] += pocket_circle_concentric((cx, cy), d, setup,
@@ -195,9 +218,7 @@ def plan_passes(
                                                    stepover_mm=step_over,
                                                    stepdown_mm=step_down,
                                                    finish=True)
-
         elif shape_name == "Region":
-            # Keep Region raster as-is for now (we can add a region-finish variant later)
             p["moves"] += pocket_region_rect_raster(rec, setup,
                                                     default_center_xy=_ensure_center(rec),
                                                     depth_mm=depth,
@@ -205,7 +226,6 @@ def plan_passes(
                                                     stepdown_mm=step_down)
         else:
             continue
-
         p["count"] += 1
 
     # ---------- Holes ----------
@@ -234,55 +254,122 @@ def plan_passes(
                                                    stepover_mm=so, stepdown_mm=sd, finish=True)
         passes[_pass_key(p["op"], p["tool"])]["count"] += 1
 
-    # ---------- Profiles ----------
-    for rec in hints.get("profiles", []):
+    # ---------- Profiles (merge shared seams for Rects) ----------
+    rect_profiles = [rec for rec in hints.get("profiles", []) if str(rec.get("shape","")).lower() == "rect"]
+    if not MERGE_SHARED_EDGES or len(rect_profiles) == 0:
+        # Fallback: cut each rect perimeter with kerf-aware offset (outside)
+        for rec in rect_profiles:
+            t = _pick_for_profile(tool_db, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
+            p = _get_or_make_pass("profile", t)
+            setup: Setup = p["setup"]
+            depth = float(rec.get("depth_mm", 0.0))
+            w = float((rec.get("geometry") or {}).get("w_mm", 0.0))
+            h = float((rec.get("geometry") or {}).get("h_mm", 0.0))
+            shp = _rect_shape(w + t.diameter, h + t.diameter, _ensure_center(rec))  # outside offset
+            p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
+            p["count"] += 1
+    else:
+        # Build edges and classify seams vs exterior
+        edges: List[_Edge] = []
+        rect_infos: List[Tuple[str, float, float, float, float]] = []
+        for rec in rect_profiles:
+            rid = rec.get("id") or f"rect@{len(rect_infos)}"
+            cx, cy = _ensure_center(rec)
+            w = float((rec.get("geometry") or {}).get("w_mm", 0.0))
+            h = float((rec.get("geometry") or {}).get("h_mm", 0.0))
+            rect_infos.append((rid, cx, cy, w, h))
+            edges.extend(_rect_edges(cx, cy, w, h, rid))
+
+        # Index by (orient, coord rounded)
+        def _key(orient: str, coord: float) -> Tuple[str, int]:
+            return orient, int(round(coord / MERGE_TOL_MM))
+
+        buckets: Dict[Tuple[str,int], List[_Edge]] = {}
+        for e in edges:
+            buckets.setdefault(_key(e.orient, e.coord), []).append(e)
+
+        t = _pick_for_profile(tool_db, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
+        p = _get_or_make_pass("profile", t)
+        setup: Setup = p["setup"]
+
+        used_pairs: set[Tuple[str,str,float]] = set()
+        # 1) seams = pairs in same bucket with sufficient overlap and different rects
+        for k, lst in buckets.items():
+            if len(lst) < 2: continue
+            n = len(lst)
+            for i in range(n):
+                for j in range(i+1, n):
+                    a, b = lst[i], lst[j]
+                    if a.rect_id == b.rect_id: continue
+                    if a.orient != b.orient: continue
+                    if abs(a.coord - b.coord) > MERGE_TOL_MM: continue
+                    overlap = _overlap_len(a.a, a.b, b.a, b.b)
+                    if overlap < max(MIN_OVERLAP_MM, float(t.diameter)):
+                        continue
+                    # Emit on-center seam once
+                    if a.orient == "v":
+                        x = 0.5 * (a.coord + b.coord)
+                        y0, y1 = max(min(a.a, a.b), min(b.a, b.b)), min(max(a.a, a.b), max(b.a, b.b))
+                        shp = Shape2D([Vec2(x, y0), Vec2(x, y1)])
+                    else:  # 'h'
+                        y = 0.5 * (a.coord + b.coord)
+                        x0, x1 = max(min(a.a, a.b), min(b.a, b.b)), min(max(a.a, a.b), max(b.a, b.b))
+                        shp = Shape2D([Vec2(x0, y), Vec2(x1, y)])
+
+                    depth = max(
+                        float(next(rec for rec in rect_profiles if (rec.get("id") or "") == a.rect_id).get("depth_mm", 0.0)),
+                        float(next(rec for rec in rect_profiles if (rec.get("id") or "") == b.rect_id).get("depth_mm", 0.0)),
+                    )
+                    p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
+                    p["count"] += 1
+                    merged_seams_count += 1
+                    used_pairs.add((a.rect_id, b.rect_id, a.coord))
+
+        # 2) exterior edges = edges with no partner in tolerance
+        tool_r = 0.5 * float(t.diameter)
+        for e in edges:
+            bucket = buckets.get(_key(e.orient, e.coord), [])
+            if len([x for x in bucket if x.rect_id != e.rect_id and _overlap_len(x.a,x.b,e.a,e.b) >= MIN_OVERLAP_MM]) > 0:
+                continue  # seam handled already
+            # Exterior edge: offset outward by tool radius before cutting
+            if e.orient == "v":
+                x = e.coord
+                x_off = x - tool_r if math.isclose(x, e.minx, abs_tol=MERGE_TOL_MM) else x + tool_r
+                y0, y1 = e.a, e.b
+                shp = Shape2D([Vec2(x_off, y0), Vec2(x_off, y1)])
+            else:
+                y = e.coord
+                y_off = y - tool_r if math.isclose(y, e.miny, abs_tol=MERGE_TOL_MM) else y + tool_r
+                x0, x1 = e.a, e.b
+                shp = Shape2D([Vec2(x0, y_off), Vec2(x1, y_off)])
+
+            depth = float(next(rec for rec in rect_profiles if (rec.get("id") or "") == e.rect_id).get("depth_mm", 0.0))
+            p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
+            p["count"] += 1
+
+    # ---------- Circle Profiles (NEW): single perimeter, not a pocket ----------
+    circle_profiles = [rec for rec in hints.get("profiles", []) if str(rec.get("shape","")).lower() == "circle"]
+    for rec in circle_profiles:
         geom = rec.get("geometry") or {}
-        side = (rec.get("side") or "on").lower()
+        d = float(geom.get("diameter_mm", 0.0))
+        cx, cy = _ensure_center(rec)
+        side = str(rec.get("side", "on")).lower()  # 'inside' | 'outside' | 'on'
         t = _pick_for_profile(tool_db, kerf_mm=kerf_mm)
         p = _get_or_make_pass("profile", t)
         setup: Setup = p["setup"]
-        step_down = _stepdown_for_tool(t)
-        depth = float(rec.get("depth_mm", 0.0))
+        tool_r = 0.5 * float(t.diameter)
 
-        if rec.get("shape") == "Rect":
-            w, h = float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
-            if side == "outside":
-                w2, h2 = w + t.diameter, h + t.diameter
-            elif side == "inside":
-                w2, h2 = max(0.0, w - t.diameter), max(0.0, h - t.diameter)
-            else:
-                w2, h2 = w, h
-            if w2 <= 0 or h2 <= 0: continue
-            shp = _rect_shape(w2, h2, _ensure_center(rec))
-        elif rec.get("shape") == "Circle":
-            d = float(geom.get("diameter_mm", 0.0))
-            if side == "outside":
-                d2 = d + t.diameter
-            elif side == "inside":
-                d2 = max(0.0, d - t.diameter)
-            else:
-                d2 = d
-            if d2 <= 0.0: continue
-            shp = _circle_shape(d2, _ensure_center(rec))
-        else:
+        r = 0.5 * d
+        if side == "outside":
+            r += tool_r
+        elif side == "inside":
+            r -= tool_r
+        if r <= 0.0:
             continue
 
-        p["moves"] += profile_outline(shp, setup, depth=depth, step_down=step_down)
-        p["count"] += 1
-
-    # ---------- Engraves ----------
-    for rec in hints.get("engraves", []):
-        geom = rec.get("geometry") or {}
-        lines = []
-        if rec.get("shape") == "Polyline":
-            pts = geom.get("points") or []
-            cx, cy = _ensure_center(rec)
-            line = [(float(p[0]) + cx, float(p[1]) + cy) for p in pts if isinstance(p, (tuple, list)) and len(p) == 2]
-            if line: lines.append(line)
-        if not lines: continue
-        t = _pick_for_engrave(tool_db)
-        p = _get_or_make_pass("engrave", t)
-        p["moves"] += engrave_lines(lines, p["setup"], z=-abs(float(rec.get("depth_mm", 0.3))))
+        shp = circle_shape(Vec2(cx, cy), r)
+        depth = float(rec.get("depth_mm", 0.0))
+        p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
         p["count"] += 1
 
     # ---------- Summaries ----------
@@ -307,7 +394,6 @@ def plan_passes(
         return {"cut_length_xy_mm": cut_len_xy, "cut_length_3d_mm": cut_len_3d,
                 "plunge_travel_mm": plunge_z, "max_depth_mm": abs(min_z)}
 
-    summary_passes: List[Dict[str, Any]] = []
     for p in pass_list:
         s = _summarize_moves(p["moves"])
         info = {
@@ -321,6 +407,9 @@ def plan_passes(
         }
         summary_passes.append(info)
 
-    job_summary = {"passes": summary_passes,
-                   "notes": "Rect pockets use finish contour if enabled; circle pockets retain built-in finish ring."}
+    job_summary = {
+        "passes": summary_passes,
+        "notes": "Shared-edge merge is ON" if MERGE_SHARED_EDGES else "Shared-edge merge is OFF",
+        "merged_seams": merged_seams_count,
+    }
     return pass_list, job_summary

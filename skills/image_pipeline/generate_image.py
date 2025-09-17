@@ -11,7 +11,7 @@ import base64
 from pathlib import Path
 
 from cortex.personas.personas_manager import get_persona
-from cortex.personas.styles import get_style
+from cortex.personas.cam.styles import get_style
 from cortex.client import get_image_generation
 
 def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
@@ -27,7 +27,7 @@ def assemble_prompt(subject: str, persona_name: str, style_name: str) -> str:
 
 def generate_dalle_image(project_folder: str):
     # Absolute path to input/output folder
-    base_dir = Path("memoriescam_projects") / project_folder / "input"
+    base_dir = Path("memories/cam_projects") / project_folder / "input"
     json_path = base_dir / "image.json"
     png_path = base_dir / "image.png"
 
@@ -56,6 +56,13 @@ def generate_dalle_image(project_folder: str):
         return
 
     config["prompt"] = prompt
+
+    metadata = config.setdefault("metadata", {})
+    metadata.setdefault("created_by", "CLIFF-AI")
+    metadata.setdefault("approved", False)
+    metadata.setdefault("model", "gpt-image-1")
+    metadata.setdefault("source", "generate_dalle_image.py")
+
     print(f"[+] Requesting gpt-image-1 image for prompt: {prompt}")
 
     try:
@@ -70,9 +77,9 @@ def generate_dalle_image(project_folder: str):
         f.write(image_data)
     print(f"[✓] Image written to: {png_path}")
 
-    # (Optional) Overwrite config with full prompt, if you want:
-    # with open(json_path, "w", encoding="utf-8") as f:
-    #     json.dump(config, f, indent=2)
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+    print(f"[✓] Updated config: {json_path}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

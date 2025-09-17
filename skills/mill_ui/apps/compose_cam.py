@@ -1,6 +1,6 @@
 # path: skills/mill_ui/apps/compose_cam.py
 from __future__ import annotations
-import sys, json
+import sys, json, argparse
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
@@ -18,6 +18,7 @@ from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.stock import Stock
 
 from skills.mill_ui.cad.export.svg_dims import render_svg_with_dims
+from skills.mill_ui.cad.export.panel_stl import write_panel_stl
 
 # --------------------
 # HARD-CODED DEFAULTS
@@ -158,13 +159,45 @@ def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
 # --------------------
 # main
 # --------------------
-def main(argv: List[str]) -> int:
-    if len(argv) != 1:
-        print("usage: compose_cam <project_name>", file=sys.stderr)
-        print("  expects: memories/cam_projects/sheet_layouts/<project>/input/layout.json", file=sys.stderr)
-        return 2
+def _parse_args(argv: List[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="compose_cam",
+        description="Generate CAM outputs (G-code, reports, optional STL preview) for a sheet layout",
+    )
+    parser.add_argument("project", help="Project folder under memories/cam_projects/sheet_layouts")
+    parser.add_argument(
+        "--stl",
+        action="store_true",
+        help="Emit a simple review STL into the CAM folder",
+    )
+    parser.add_argument(
+        "--stl-resolution-mm",
+        type=float,
+        default=1.5,
+        help="Grid resolution (mm) for STL heightfield sampling (default: 1.5)",
+    )
+    parser.add_argument(
+        "--profile-onion-skin-mm",
+        type=float,
+        help="Leave this thickness (mm) for a final skin pass on profiles",
+    )
+    parser.add_argument(
+        "--tabs-count",
+        type=int,
+        help="Add evenly spaced tabs (count) on profile passes",
+    )
+    parser.add_argument(
+        "--tabs-height-mm",
+        type=float,
+        help="Tab height in mm when tabs are enabled",
+    )
+    return parser.parse_args(argv)
 
-    project = argv[0]
+
+def main(argv: List[str]) -> int:
+    args = _parse_args(argv)
+
+    project = args.project
     base = PROJECTS_ROOT / project
     in_path = base / "input" / "layout.json"
     outdir = base / "CAM"
@@ -181,6 +214,9 @@ def main(argv: List[str]) -> int:
     panel_t = float(sheet.get("thickness_mm", 0.0))
 
     items = list(data.get("items") or [])
+
+    cam_cfg = data.get("cam") if isinstance(data.get("cam"), dict) else {}
+    profile_cfg = cam_cfg.get("profile") if isinstance(cam_cfg.get("profile"), dict) else {}
 
     # 2) apply grid placement BEFORE resolving templates
     layout = data.get("layout")
@@ -222,6 +258,84 @@ def main(argv: List[str]) -> int:
     machine = Machine(name="default_grbl")
     stock = Stock(width=panel_w, height=panel_h, thickness=panel_t)
 
+    profile_opts: Dict[str, Any] = {}
+
+    # Layout defaults
+    if "onion_skin_mm" in profile_cfg:
+        try:
+            val = float(profile_cfg.get("onion_skin_mm", 0.0))
+            if val > 0.0:
+                profile_opts["onion_skin_mm"] = val
+        except Exception:
+            pass
+    tabs_cfg_layout = profile_cfg.get("tabs") if isinstance(profile_cfg.get("tabs"), dict) else None
+    if tabs_cfg_layout:
+        try:
+            cnt = int(tabs_cfg_layout.get("count", 0) or 0)
+        except Exception:
+            cnt = 0
+        if cnt > 0:
+            try:
+                height = float(tabs_cfg_layout.get("height_mm", 3.0))
+            except Exception:
+                height = 3.0
+            profile_opts["tabs"] = {"count": cnt, "height_mm": height}
+
+    # CLI overrides
+    onion_cli_positive = False
+    if args.profile_onion_skin_mm is not None:
+        try:
+            val = float(args.profile_onion_skin_mm)
+        except Exception:
+            val = 0.0
+        if val > 0.0:
+            profile_opts["onion_skin_mm"] = val
+            onion_cli_positive = True
+        else:
+            profile_opts.pop("onion_skin_mm", None)
+
+    tabs_from_cli = None
+    tabs_cli_positive = False
+    if args.tabs_count is not None:
+        try:
+            count_override = int(args.tabs_count)
+        except Exception:
+            count_override = 0
+        if count_override > 0:
+            tabs_from_cli = {"count": count_override}
+            tabs_cli_positive = True
+        else:
+            profile_opts.pop("tabs", None)
+    if (tabs_from_cli or "tabs" in profile_opts) and args.tabs_height_mm is not None:
+        try:
+            height_override = float(args.tabs_height_mm)
+        except Exception:
+            height_override = 3.0
+        if tabs_from_cli:
+            tabs_from_cli["height_mm"] = height_override
+        else:
+            profile_opts.setdefault("tabs", {})["height_mm"] = height_override
+    if tabs_from_cli:
+        height = tabs_from_cli.get("height_mm", profile_opts.get("tabs", {}).get("height_mm", 3.0))
+        tabs_from_cli.setdefault("height_mm", height)
+        profile_opts["tabs"] = tabs_from_cli
+
+    if "tabs" in profile_opts:
+        try:
+            if profile_opts["tabs"].get("count", 0) <= 0:
+                profile_opts.pop("tabs", None)
+        except Exception:
+            profile_opts.pop("tabs", None)
+
+    if "onion_skin_mm" in profile_opts and "tabs" in profile_opts:
+        if onion_cli_positive and not tabs_cli_positive:
+            profile_opts.pop("tabs", None)
+        elif tabs_cli_positive and not onion_cli_positive:
+            profile_opts.pop("onion_skin_mm", None)
+        else:
+            print("Cannot combine onion-skin and tabs options yet.", file=sys.stderr)
+            return 2
+
     passes, job_summary = plan_passes(
         hints,
         tool_db=tools,
@@ -230,6 +344,7 @@ def main(argv: List[str]) -> int:
         stock=stock,
         safe_z=float(SAFE_Z_MM),
         prime_spindle=False,
+        profile_opts=profile_opts,
     )
 
     # 7) optional Z remap to bottom-zero coordinates (legacy convention)
@@ -252,6 +367,18 @@ def main(argv: List[str]) -> int:
         fpath = outdir / p["filename"]
         _save_text(fpath, gcode)
         made_files.append(str(fpath))
+
+    if args.stl:
+        stl_path = outdir / "panel_preview.stl"
+        write_panel_stl(
+            stl_path,
+            width_mm=panel_w,
+            height_mm=panel_h,
+            thickness_mm=panel_t,
+            items=items_resolved,
+            resolution_mm=max(0.25, float(args.stl_resolution_mm)),
+        )
+        made_files.append(str(stl_path))
 
     # 8) summary.json
     job_summary.update({

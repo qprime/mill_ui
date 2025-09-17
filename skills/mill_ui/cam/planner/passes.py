@@ -22,7 +22,11 @@ from skills.mill_ui.cam.ops.drill import drill_peck
 from skills.mill_ui.cam.ops.engrave import engrave_lines
 from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
 
-from skills.mill_ui.cam.path.strategies import pocket_then_finish_profile
+from skills.mill_ui.cam.path.strategies import (
+    pocket_then_finish_profile,
+    onion_skin_then_finish,
+    profile_outline_with_tabs,
+)
 
 # --- Shared-edge merge toggle (default ON) -------------------------------
 MERGE_SHARED_EDGES = True
@@ -91,10 +95,21 @@ def _flat_tools(db: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def _ball_or_v_tools(db: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [t for t in db if str(t.get("kind","")).lower() in ("ball","v")]
 
-def _pick_for_pocket(db: List[Dict[str, Any]]) -> SimpleNamespace:
+def _pick_for_pocket(db: List[Dict[str, Any]], required_width_mm: float | None = None) -> SimpleNamespace:
     cands = _flat_tools(db)
+    if not cands:
+        raise ValueError("No flat tools available for pocketing")
     cands.sort(key=lambda t: (0 if str(t.get("rotation","")).lower() in ("upcut","compression") else 1,
                               -float(t.get("diameter", 0.0))))
+    if required_width_mm and required_width_mm > 0.0:
+        clearance = max(required_width_mm - 2 * CLEANUP_OFFSET_MM, 0.0)
+        valid = [t for t in cands if float(t.get("diameter", 0.0)) <= clearance]
+        if valid:
+            cands = valid
+        else:
+            valid = [t for t in cands if float(t.get("diameter", 0.0)) < required_width_mm]
+            if valid:
+                cands = valid
     return _spec_from_dict(cands[0])
 
 def _pick_for_profile(db: List[Dict[str, Any]], kerf_mm: float) -> SimpleNamespace:
@@ -156,6 +171,57 @@ def _overlap_len(a1: float, a2: float, b1: float, b2: float) -> float:
 
 # ---------------- Planner ----------------
 
+def _profile_moves_with_options(shape: Shape2D,
+                                setup: Setup,
+                                depth_mm: float,
+                                tool_spec: SimpleNamespace,
+                                onion_skin_mm: float,
+                                tabs_opts: Dict[str, Any]) -> List[Dict[str, Any]]:
+    step_down = _stepdown_for_tool(tool_spec)
+    tabs_count = 0
+    tabs_height = 0.0
+    tab_width = None
+    if tabs_opts and isinstance(tabs_opts, dict):
+        try:
+            tabs_count = int(tabs_opts.get("count", 0) or 0)
+        except Exception:
+            tabs_count = 0
+        try:
+            tabs_height = float(tabs_opts.get("height_mm", 3.0))
+        except Exception:
+            tabs_height = 3.0
+        if "width_mm" in tabs_opts:
+            try:
+                tab_width = float(tabs_opts.get("width_mm"))
+            except Exception:
+                tab_width = None
+
+    if onion_skin_mm > 0.0 and tabs_count > 0:
+        raise ValueError("Onion skin and tabs cannot yet be combined in the same profile pass")
+
+    if onion_skin_mm > 0.0:
+        return onion_skin_then_finish(
+            shape,
+            setup,
+            total_depth_mm=depth_mm,
+            skin_mm=onion_skin_mm,
+            step_down_mm=step_down,
+        )
+
+    if tabs_count > 0:
+        return profile_outline_with_tabs(
+            shape,
+            setup,
+            depth_mm=depth_mm,
+            step_down_mm=step_down,
+            tab_count=max(1, tabs_count),
+            tab_height_mm=max(0.1, tabs_height),
+            tab_width_mm=tab_width,
+        )
+
+    return profile_outline(shape, setup, depth_mm, step_down=step_down)
+
+
 def plan_passes(
     hints: Dict[str, Any],
     *,
@@ -165,12 +231,29 @@ def plan_passes(
     stock: Stock,
     safe_z: float = 6.0,
     prime_spindle: bool = False,
+    profile_opts: Optional[Dict[str, Any]] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     kerf_mm = float(hints.get("kerf_width_mm", 0.0))  # may be 0.0 if not provided
 
     passes: Dict[Tuple[str, float, str, Optional[str]], Dict[str, Any]] = {}
     summary_passes: List[Dict[str, Any]] = []
     merged_seams_count = 0
+
+    profile_opts = profile_opts or {}
+    try:
+        onion_skin_mm = max(0.0, float(profile_opts.get("onion_skin_mm", 0.0)))
+    except Exception:
+        onion_skin_mm = 0.0
+    tabs_opts = profile_opts.get("tabs") if isinstance(profile_opts.get("tabs"), dict) else {}
+    tabs_enabled = False
+    if isinstance(tabs_opts, dict):
+        try:
+            tabs_enabled = int(tabs_opts.get("count", 0) or 0) > 0
+        except Exception:
+            tabs_enabled = False
+
+    use_profile_options = onion_skin_mm > 0.0 or tabs_enabled
+    merge_shared_edges = MERGE_SHARED_EDGES and not use_profile_options
 
     def _get_or_make_pass(op_name: str, spec: SimpleNamespace) -> Dict[str, Any]:
         tool_id = _tool_identity(spec)
@@ -192,7 +275,14 @@ def plan_passes(
     for rec in hints.get("pockets", []):
         geom = rec.get("geometry") or {}
         shape_name = rec.get("shape")
-        t = _pick_for_pocket(tool_db)
+        shape_lower = str(shape_name or "").lower()
+        target_width = None
+        if shape_lower == "rect":
+            target_width = min(float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0)))
+        elif shape_lower == "circle":
+            target_width = float(geom.get("diameter_mm", 0.0))
+
+        t = _pick_for_pocket(tool_db, required_width_mm=target_width)
         p = _get_or_make_pass("pocket", t)
         setup: Setup = p["setup"]
         depth = float(rec.get("depth_mm", 0.0))
@@ -256,7 +346,7 @@ def plan_passes(
 
     # ---------- Profiles (merge shared seams for Rects) ----------
     rect_profiles = [rec for rec in hints.get("profiles", []) if str(rec.get("shape","")).lower() == "rect"]
-    if not MERGE_SHARED_EDGES or len(rect_profiles) == 0:
+    if not merge_shared_edges or len(rect_profiles) == 0:
         # Fallback: cut each rect perimeter with kerf-aware offset (outside)
         for rec in rect_profiles:
             t = _pick_for_profile(tool_db, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
@@ -266,7 +356,14 @@ def plan_passes(
             w = float((rec.get("geometry") or {}).get("w_mm", 0.0))
             h = float((rec.get("geometry") or {}).get("h_mm", 0.0))
             shp = _rect_shape(w + t.diameter, h + t.diameter, _ensure_center(rec))  # outside offset
-            p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
+            p["moves"] += _profile_moves_with_options(
+                shp,
+                setup,
+                depth,
+                t,
+                onion_skin_mm,
+                tabs_opts,
+            )
             p["count"] += 1
     else:
         # Build edges and classify seams vs exterior
@@ -369,7 +466,14 @@ def plan_passes(
 
         shp = circle_shape(Vec2(cx, cy), r)
         depth = float(rec.get("depth_mm", 0.0))
-        p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
+        p["moves"] += _profile_moves_with_options(
+            shp,
+            setup,
+            depth,
+            t,
+            onion_skin_mm,
+            tabs_opts,
+        )
         p["count"] += 1
 
     # ---------- Summaries ----------
@@ -407,9 +511,20 @@ def plan_passes(
         }
         summary_passes.append(info)
 
+    note = "Shared-edge merge is ON" if merge_shared_edges else "Shared-edge merge is OFF"
     job_summary = {
         "passes": summary_passes,
-        "notes": "Shared-edge merge is ON" if MERGE_SHARED_EDGES else "Shared-edge merge is OFF",
+        "notes": note,
         "merged_seams": merged_seams_count,
     }
+    if use_profile_options:
+        opts_summary: Dict[str, Any] = {}
+        if onion_skin_mm > 0.0:
+            opts_summary["onion_skin_mm"] = onion_skin_mm
+        if tabs_enabled:
+            opts_summary["tabs"] = {
+                "count": int(tabs_opts.get("count", 0)),
+                "height_mm": float(tabs_opts.get("height_mm", 3.0)),
+            }
+        job_summary["profile_options"] = opts_summary
     return pass_list, job_summary

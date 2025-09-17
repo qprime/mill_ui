@@ -1,5 +1,17 @@
 # path: skills/mill_ui/compositions/base.py
+"""Composable template framework used by mill_ui.
+
+Design notes (optimized for Codex-generated templates):
+
+- Treat every template like a UI tree: collect params into small dataclasses,
+  build semantic regions, then emit primitive shapes via helpers.
+- Prefer pure functions that return dictionaries; avoid mutating shared state.
+- Keep helpers here so generated templates naturally follow the same pattern.
+"""
+
 from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import Dict, Any, List, Tuple
 import copy
 
@@ -14,6 +26,65 @@ def register_template(name: str):
 class TemplateBase:
     def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[Dict[str, Any]]:
         raise NotImplementedError
+
+
+# ---------------------------------------------------------------------------
+# Primitive helpers
+# ---------------------------------------------------------------------------
+
+def rect_shape(center_xy_mm: Tuple[float, float], *, width_mm: float, height_mm: float,
+               feature: Dict[str, Any], shape_id: str) -> Dict[str, Any]:
+    cx, cy = float(center_xy_mm[0]), float(center_xy_mm[1])
+    return {
+        "kind": "shape",
+        "type": "Rect",
+        "id": shape_id,
+        "geometry": {"w_mm": float(width_mm), "h_mm": float(height_mm)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+
+def circle_shape(center_xy_mm: Tuple[float, float], *, diameter_mm: float,
+                 feature: Dict[str, Any], shape_id: str) -> Dict[str, Any]:
+    cx, cy = float(center_xy_mm[0]), float(center_xy_mm[1])
+    return {
+        "kind": "shape",
+        "type": "Circle",
+        "id": shape_id,
+        "geometry": {"diameter_mm": float(diameter_mm)},
+        "placement": {"center_xy_mm": (cx, cy)},
+        "feature": feature,
+    }
+
+
+@dataclass(frozen=True)
+class CenterRegion:
+    """Simple centered rectangle region used by multiple templates."""
+
+    width_mm: float
+    height_mm: float
+
+    @property
+    def half_width(self) -> float:
+        return float(self.width_mm) * 0.5
+
+    @property
+    def half_height(self) -> float:
+        return float(self.height_mm) * 0.5
+
+    def anchor_points(self, offsets: Dict[str, float]) -> List[Tuple[float, float]]:
+        left = float(offsets.get("left", 0.0))
+        right = float(offsets.get("right", 0.0))
+        top = float(offsets.get("top", 0.0))
+        bottom = float(offsets.get("bottom", 0.0))
+        hx, hy = self.half_width, self.half_height
+        return [
+            (-hx + left,  +hy - top),
+            (+hx - right, +hy - top),
+            (-hx + left,  -hy + bottom),
+            (+hx - right, -hy + bottom),
+        ]
 
 def _offset_items(items: List[Dict[str, Any]], center_xy_mm: Tuple[float, float]) -> List[Dict[str, Any]]:
     cx, cy = float(center_xy_mm[0]), float(center_xy_mm[1])

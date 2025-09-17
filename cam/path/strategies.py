@@ -1,10 +1,13 @@
 # path: skills/mill_ui/cam/path/strategies.py
 from __future__ import annotations
-from typing import List, Set, Optional
+from typing import List, Set, Optional, Tuple
+
+import math
 
 from skills.mill_ui.cad.shape import Shape2D
 from skills.mill_ui.cad.primitives import rectangle
 from skills.mill_ui.cad.transforms import Transform2D, place
+from skills.mill_ui.core.types import Vec2
 
 from skills.mill_ui.cam.model.setup import Setup
 from skills.mill_ui.cam.ops.profile import profile_outline
@@ -75,11 +78,28 @@ def onion_skin_then_finish(
 # Profiles: tabs on the final pass
 # ---------------------------------------------------------------------------
 
-def _evenly_spaced_indices(n: int, k: int) -> Set[int]:
-    if k <= 0 or n <= 0:
-        return set()
-    # spread k indices across 0..n-1 (skip 0 to avoid first plunge)
-    return {max(1, round(i * (n - 1) / k)) for i in range(1, k + 1)}
+def _segment_length(a: Vec2, b: Vec2) -> float:
+    return math.hypot(b.x - a.x, b.y - a.y)
+
+
+def _lerp_vec(a: Vec2, b: Vec2, t: float) -> Vec2:
+    return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
+
+
+def _tab_windows(perimeter: float, count: int, width: float) -> List[Tuple[float, float]]:
+    if count <= 0 or perimeter <= 0.0:
+        return []
+    spacing = perimeter / count
+    span = min(max(width, 0.1), spacing * 0.9)
+    half = 0.5 * span
+    windows = []
+    for i in range(count):
+        center = spacing * (i + 0.5)
+        start = max(0.0, center - half)
+        end = min(perimeter, center + half)
+        windows.append((start, end))
+    return windows
+
 
 def profile_outline_with_tabs(
     shape: Shape2D,
@@ -89,17 +109,35 @@ def profile_outline_with_tabs(
     step_down_mm: Optional[float] = None,
     tab_count: int = 4,
     tab_height_mm: float = 3.0,
+    tab_width_mm: Optional[float] = None,
 ) -> List[dict]:
-    """
-    Profile with tabs on the final pass: insert small Z lifts (tab_height) at
-    k evenly spaced edges. Tabs applied only on the bottom pass.
-    """
     pts = shape.points
     if not pts:
         return []
 
     total = abs(float(depth_mm))
     sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
+
+    perimeter_pts = pts[:-1] if pts[0] == pts[-1] else pts
+    if len(perimeter_pts) < 2 or tab_count <= 0:
+        return profile_outline(shape, setup, depth=total, step_down=sd)
+
+    segments: List[Tuple[Vec2, Vec2]] = []
+    lengths: List[float] = []
+    for i in range(len(perimeter_pts)):
+        a = perimeter_pts[i]
+        b = perimeter_pts[(i + 1) % len(perimeter_pts)]
+        segments.append((a, b))
+        lengths.append(_segment_length(a, b))
+
+    perimeter = sum(lengths)
+    if perimeter <= 0.0:
+        return profile_outline(shape, setup, depth=total, step_down=sd)
+
+    width = tab_width_mm if tab_width_mm is not None else max(setup.tool.diameter * 2.0, 6.0)
+    tab_windows = _tab_windows(perimeter, tab_count, width)
+    if not tab_windows:
+        return profile_outline(shape, setup, depth=total, step_down=sd)
 
     moves: List[dict] = []
     moves.append(move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"))
@@ -108,28 +146,76 @@ def profile_outline_with_tabs(
 
     target = -total
     z = 0.0
-    p0 = pts[0]
+    start_point = pts[0]
+
+    tab_height = max(0.0, float(tab_height_mm))
+    tab_z = min(0.0, target + tab_height)
 
     while z > target + 1e-9:
         z_next = max(target, z - sd)
-        # one pass loop
-        moves.append(move_rapid(x=p0.x, y=p0.y, z=setup.safe_z))
+        moves.append(move_rapid(x=start_point.x, y=start_point.y, z=setup.safe_z))
         moves.append(move_cut(z=z_next, feed=setup.tool.feed_z))
-        moves.append(move_set_feed(setup.tool.feed_xy))   # restore XY feed
+        moves.append(move_set_feed(setup.tool.feed_xy))
 
-        if z_next > target + 1e-9:
-            # roughing pass: no tabs, just trace
+        tab_active = tab_windows and z_next < tab_z + 1e-9
+        if not tab_active:
             for p in pts[1:]:
                 moves.append(move_cut(x=p.x, y=p.y))
-        else:
-            # final pass: add tab lifts
-            idxs = _evenly_spaced_indices(len(pts) - 1, tab_count)
-            for i, p in enumerate(pts[1:], start=1):
-                moves.append(move_cut(x=p.x, y=p.y))
-                if i in idxs:
-                    lift_z = -max(0.0, total - float(tab_height_mm))
-                    moves.append(move_cut(z=lift_z))
-                    moves.append(move_cut(z=target))
+            moves.append(move_retract(setup.safe_z))
+            z = z_next
+            continue
+
+        current_depth = z_next
+        window_iter = iter(tab_windows)
+        try:
+            current_window = next(window_iter)
+        except StopIteration:
+            current_window = None
+
+        dist = 0.0
+        moves.append(move_cut(x=start_point.x, y=start_point.y))
+
+        for (seg_start, seg_end), seg_len in zip(segments, lengths):
+            if seg_len <= 0.0:
+                continue
+
+            seg_offset = 0.0
+            while current_window and current_window[0] < dist + seg_len + 1e-9:
+                win_start, win_end = current_window
+                win_start = max(win_start, dist)
+                win_end = min(win_end, dist + seg_len)
+                if win_end <= win_start + 1e-9:
+                    try:
+                        current_window = next(window_iter)
+                        continue
+                    except StopIteration:
+                        current_window = None
+                        break
+
+                start_frac = (win_start - dist) / seg_len
+                end_frac = (win_end - dist) / seg_len
+
+                if start_frac > seg_offset + 1e-9:
+                    lead_point = _lerp_vec(seg_start, seg_end, start_frac)
+                    moves.append(move_cut(x=lead_point.x, y=lead_point.y))
+
+                lifts_to = max(tab_z, z_next)
+                moves.append(move_cut(z=lifts_to))
+                tab_point = _lerp_vec(seg_start, seg_end, end_frac)
+                moves.append(move_cut(x=tab_point.x, y=tab_point.y))
+                moves.append(move_cut(z=current_depth))
+
+                seg_offset = end_frac
+                try:
+                    current_window = next(window_iter)
+                except StopIteration:
+                    current_window = None
+                    break
+
+            if seg_offset < 1.0 - 1e-9:
+                moves.append(move_cut(x=seg_end.x, y=seg_end.y))
+            dist += seg_len
+
         moves.append(move_retract(setup.safe_z))
         z = z_next
 

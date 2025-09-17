@@ -3,10 +3,20 @@
   "machine_profile": {
     "name": "Altmill 4x4",
     "spindle": "PWNCNC 2.2kW",
-    "work_envelope_mm": [1219, 1219, 100],
+    "work_envelope_mm": [
+      1219,
+      1219,
+      100
+    ],
     "max_rpm": 24000,
-    "optimal_rpm_range": [14000, 18000],
-    "collet_sizes": ["6.35mm", "12.7mm"],
+    "optimal_rpm_range": [
+      14000,
+      18000
+    ],
+    "collet_sizes": [
+      "6.35mm",
+      "12.7mm"
+    ],
     "notes": "Hobby CNC router, carbide tools recommended for MDF/plywood"
   },
   "tools": [
@@ -24,8 +34,17 @@
       "cutting_length_mm": 35,
       "overall_length_mm": 75,
       "helix_angle": 35,
-      "applications": ["roughing", "slotting", "large_pockets"],
-      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood", "alloy_steel"],
+      "applications": [
+        "roughing",
+        "pocketing"
+      ],
+      "suitable_materials": [
+        "MDF",
+        "plywood",
+        "hardwood",
+        "softwood",
+        "alloy_steel"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 16000,
@@ -70,8 +89,18 @@
       "shank_mm": 6.35,
       "cutting_length_mm": 19,
       "overall_length_mm": 57,
-      "applications": ["profiling", "roughing", "high_speed_removal", "aluminum", "adaptive_clearing"],
-      "suitable_materials": ["aluminum", "MDF", "plywood", "plastic", "wood"],
+      "applications": [
+        "roughing",
+        "pocketing",
+        "profiling"
+      ],
+      "suitable_materials": [
+        "aluminum",
+        "MDF",
+        "plywood",
+        "plastic",
+        "wood"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 18000,
@@ -108,8 +137,17 @@
       "cutting_length_mm": 31.75,
       "overall_length_mm": 63.5,
       "rotation": "upcut",
-      "applications": ["roughing", "deep_cuts", "rapid_removal", "chip_evacuation"],
-      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "applications": [
+        "roughing",
+        "pocketing",
+        "profiling"
+      ],
+      "suitable_materials": [
+        "MDF",
+        "plywood",
+        "hardwood",
+        "softwood"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 18000,
@@ -154,8 +192,17 @@
       "shank_mm": 6.35,
       "cutting_length_mm": 12.7,
       "overall_length_mm": 50.8,
-      "applications": ["3d_carving", "contouring", "finishing", "detail_work", "engraving"],
-      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "applications": [
+        "3d_finishing",
+        "detail_finishing",
+        "engraving"
+      ],
+      "suitable_materials": [
+        "MDF",
+        "plywood",
+        "hardwood",
+        "softwood"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 20000,
@@ -191,8 +238,17 @@
       "shank_mm": 6.35,
       "cutting_length_mm": 19,
       "overall_length_mm": 57,
-      "applications": ["3d_carving", "large_radius", "contouring", "finishing", "bowls"],
-      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood", "stainless_steel"],
+      "applications": [
+        "3d_roughing",
+        "3d_finishing"
+      ],
+      "suitable_materials": [
+        "MDF",
+        "plywood",
+        "hardwood",
+        "softwood",
+        "stainless_steel"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 18000,
@@ -210,7 +266,7 @@
           "depth_per_pass_mm": 1.5,
           "step_over_percent": 12,
           "plunge_rate_mm_min": 250,
-          "chip_load_mm": 0.050
+          "chip_load_mm": 0.05
         }
       },
       "notes": "Larger ball nose for smoother finishes on 3D surfaces. Good for bowls and curved surfaces. MAH coating for steel capability."
@@ -228,8 +284,17 @@
       "overall_length_mm": 76.2,
       "taper_angle": 6.2,
       "flutes": 2,
-      "applications": ["fine_detail", "engraving", "3d_detail", "text", "precision_carving"],
-      "suitable_materials": ["MDF", "plywood", "hardwood", "softwood"],
+      "applications": [
+        "3d_finishing",
+        "detail_finishing",
+        "engraving"
+      ],
+      "suitable_materials": [
+        "MDF",
+        "plywood",
+        "hardwood",
+        "softwood"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 24000,
@@ -266,8 +331,16 @@
       "shank_mm": 12.7,
       "cutting_length_mm": 32,
       "overall_length_mm": 75,
-      "applications": ["large_3d", "bowls", "sculpture", "heavy_contouring", "rapid_3d"],
-      "suitable_materials": ["hardwood", "softwood", "MDF", "alloy_steel"],
+      "applications": [
+        "3d_roughing",
+        "3d_finishing"
+      ],
+      "suitable_materials": [
+        "hardwood",
+        "softwood",
+        "MDF",
+        "alloy_steel"
+      ],
       "feeds_speeds": {
         "MDF": {
           "rpm": 14000,
@@ -292,20 +365,49 @@
     }
   ],
   "tool_selection_rules": {
-    "roughing_priority": ["cic_big_boy_3_8", "hunricho_1_2_4f", "speed_tiger_1_4_3f"],
-    "finishing_priority": ["eanosic_ball_1_8", "wexwe_ball_1_4", "spetool_tapered_ball"],
-    "large_features": ["hunricho_1_2_4f", "xyunenz_ball_1_2"],
-    "fine_details": ["spetool_tapered_ball", "eanosic_ball_1_8"],
-    "through_cuts": ["hunricho_1_2_4f", "cic_big_boy_3_8"],
-    "3d_carving": ["eanosic_ball_1_8", "wexwe_ball_1_4", "spetool_tapered_ball", "xyunenz_ball_1_2"],
-    "deep_cuts": ["cic_big_boy_3_8", "hunricho_1_2_4f"]
+    "roughing_priority": [
+      "cic_big_boy_3_8",
+      "hunricho_1_2_4f",
+      "speed_tiger_1_4_3f"
+    ],
+    "finishing_priority": [
+      "eanosic_ball_1_8",
+      "wexwe_ball_1_4",
+      "spetool_tapered_ball"
+    ],
+    "large_features": [
+      "hunricho_1_2_4f",
+      "xyunenz_ball_1_2"
+    ],
+    "fine_details": [
+      "spetool_tapered_ball",
+      "eanosic_ball_1_8"
+    ],
+    "through_cuts": [
+      "hunricho_1_2_4f",
+      "cic_big_boy_3_8"
+    ],
+    "3d_carving": [
+      "eanosic_ball_1_8",
+      "wexwe_ball_1_4",
+      "spetool_tapered_ball",
+      "xyunenz_ball_1_2"
+    ],
+    "deep_cuts": [
+      "cic_big_boy_3_8",
+      "hunricho_1_2_4f"
+    ]
   },
   "material_properties": {
     "MDF": {
       "hardness": "soft",
       "abrasive": true,
       "chip_load_factor": 1.2,
-      "preferred_coating": ["AlTiN", "ZrN", "nano_blue"],
+      "preferred_coating": [
+        "AlTiN",
+        "ZrN",
+        "nano_blue"
+      ],
       "notes": "Contains abrasive grit, use carbide tools only. Good surface finish achievable."
     },
     "plywood": {
@@ -313,11 +415,14 @@
       "abrasive": true,
       "chip_load_factor": 1.0,
       "tear_out_prone": true,
-      "preferred_tools": ["downcut", "compression"],
+      "preferred_tools": [
+        "downcut",
+        "compression"
+      ],
       "notes": "Use downcut to prevent top surface tearout. Watch for delamination."
     },
     "hardwood": {
-      "hardness": "hard", 
+      "hardness": "hard",
       "abrasive": false,
       "chip_load_factor": 0.8,
       "notes": "Less abrasive than manufactured wood products. Good natural finish."
@@ -350,7 +455,7 @@
       "notes": "Smooth 3D surfaces, consider radial toolpaths for bowls"
     },
     "detail_finishing": {
-      "strategy": "pencil_finishing", 
+      "strategy": "pencil_finishing",
       "spring_passes": 2,
       "tolerance_mm": 0.01,
       "notes": "Fine details, very conservative feeds, multiple passes"

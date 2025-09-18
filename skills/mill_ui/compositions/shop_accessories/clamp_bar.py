@@ -78,6 +78,7 @@ class BarSpec:
     slot_pattern: SlotPattern
     band_height_mm: float
     band_depth_mm: float
+    band_offset_mm: float
     lip_height_mm: float
     lip_depth_mm: float
 
@@ -106,7 +107,7 @@ class BarSpec:
         if self.band_height_mm > 0.0 and self.band_depth_mm > 0.0:
             shapes.append(
                 rect_shape(
-                    (0.0, 0.0),
+                    (0.0, self.band_offset_mm),
                     width_mm=self.region.width_mm,
                     height_mm=self.band_height_mm,
                     feature={"type": "pocket", "depth_mm": self.band_depth_mm},
@@ -153,6 +154,8 @@ class ClampBarConfig:
     band_a_depth: float
     band_b_mm: float
     band_b_depth: float
+    band_a_offset_mm: float
+    band_b_offset_mm: float
     lip_a_mm: float
     lip_a_depth: float
     lip_b_mm: float
@@ -187,8 +190,10 @@ class ClampBarConfig:
             slot_pattern=slot_pattern,
             band_a_mm=float(params.get("band_a_h_mm", 0.0) or 0.0),
             band_a_depth=float(params.get("band_a_depth_mm", 0.0) or 0.0),
+            band_a_offset_mm=float(params.get("band_a_offset_mm", 0.0) or 0.0),
             band_b_mm=float(params.get("band_b_h_mm", 0.0) or 0.0),
             band_b_depth=float(params.get("band_b_depth_mm", 0.0) or 0.0),
+            band_b_offset_mm=float(params.get("band_b_offset_mm", 0.0) or 0.0),
             lip_a_mm=float(params.get("lip_a_h_mm", 0.0) or 0.0),
             lip_a_depth=float(params.get("lip_a_depth_mm", 0.0) or 0.0),
             lip_b_mm=float(params.get("lip_b_h_mm", 0.0) or 0.0),
@@ -209,6 +214,7 @@ class ClampBarConfig:
             slot_pattern=self.slot_pattern,
             band_height_mm=self.band_a_mm,
             band_depth_mm=self.band_a_depth,
+            band_offset_mm=float(self.band_a_offset_mm),
             lip_height_mm=self.lip_a_mm,
             lip_depth_mm=self.lip_a_depth,
         )
@@ -219,6 +225,7 @@ class ClampBarConfig:
             slot_pattern=self.slot_pattern,
             band_height_mm=self.band_b_mm,
             band_depth_mm=self.band_b_depth,
+            band_offset_mm=float(self.band_b_offset_mm),
             lip_height_mm=self.lip_b_mm,
             lip_depth_mm=self.lip_b_depth,
         )

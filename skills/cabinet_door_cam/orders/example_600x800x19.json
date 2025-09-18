@@ -1,7 +1,7 @@
 {
   "width_mm": 600,
   "height_mm": 800,
-  "thickness_mm": 19,
+  "thickness_mm": 19.5,
 
   "panel_depth_mm": 8,
 
@@ -22,7 +22,8 @@
   "origin_offset_mm": { "dx": 12, "dy": 20 },
   "gutter_mm": 12,
   "final_cut_through": true,
-  "final_cut_honor_tabs": true
+  "final_cut_honor_tabs": true,
+  "through_extra_mm": 0.6
 },
 
 

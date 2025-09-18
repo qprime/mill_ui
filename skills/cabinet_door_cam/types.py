@@ -118,6 +118,7 @@ class OrderSpec:
     gutter_mm: float | None     
     final_cut_through: bool | None      
     final_cut_honor_tabs: bool | None   
+    through_extra_mm: float | None  # extra depth past thickness for cut-through
        
 
 @dataclass(frozen=True)

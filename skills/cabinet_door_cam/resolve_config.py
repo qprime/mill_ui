@@ -139,7 +139,8 @@ def _load_order(p: Path, style: StyleSpec) -> OrderSpec:
         origin_offset_dy_mm=oofs.get("dy"),        
         gutter_mm=jover.get("gutter_mm"),
         final_cut_through=bool(jover.get("final_cut_through", False)),          # NEW
-        final_cut_honor_tabs=bool(jover.get("final_cut_honor_tabs", True)),     # NEW          
+        final_cut_honor_tabs=bool(jover.get("final_cut_honor_tabs", True)),     # NEW         
+        through_extra_mm=float(jover.get("through_extra_mm", 0.5)),  # default 0.5 mm 
     )
 
 def resolve_config(order_path: Path, packs_dir: Optional[Path] = None) -> MergedConfig:

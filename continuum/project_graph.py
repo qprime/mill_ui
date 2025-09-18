@@ -14,10 +14,10 @@ from continuum.file_crawl import find_files, is_excluded
 
 MODULE_DIRS = [
     "cortex",
-    "skills",
-    "continuum",
-    "web",
-    "memory",
+    #"skills",
+    #"interfaces",
+    #"continuum",
+    #"memory",
 ]
 
 HEADER_FIELD_RE = re.compile(r'#\s*(\w+):\s*(.*)')

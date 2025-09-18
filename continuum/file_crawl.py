@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Callable, Dict, Optional
 
 # Exclusion list: edit as project evolves
-EXCLUDE_DIRS = {'.git', '__pycache__', '.venv', 'venv', 'memory', 'output', '.mypy_cache', '.pytest_cache', 'dist', 'build'}
+EXCLUDE_DIRS = {'.git', '__pycache__', '.venv', 'venv', 'output', '.mypy_cache', '.pytest_cache', 'dist', 'build'}
 
 def is_excluded(path: Path) -> bool:
     """Return True if any part of the path matches an excluded directory."""

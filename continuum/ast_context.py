@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 import tiktoken
 
-EXCLUDE_DIRS = {'.venv', 'venv', 'env', '__pycache__', '.git', '.mypy_cache', '.idea', '.tox', 'site-packages'}
+EXCLUDE_DIRS = {'.venv', 'venv', 'env', '__pycache__', '.git', '.mypy_cache', '.idea', '.tox', 'site-packages', ".Trash-1000"}
 
 def is_excluded(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)

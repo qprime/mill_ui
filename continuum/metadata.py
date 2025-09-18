@@ -42,6 +42,8 @@ EXCLUDE_PATH_PATTERNS = (
     ".git/",
     "dist/",
     "build/",
+    "skills/",
+    "web/"
 )
 
 ALIASES = {

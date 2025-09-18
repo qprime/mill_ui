@@ -168,13 +168,13 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "--stl",
         action="store_true",
-        help="Emit a simple review STL into the CAM folder",
+        help="Emit STL meshes (prefers precise CAD export; falls back to raster preview)",
     )
     parser.add_argument(
         "--stl-resolution-mm",
         type=float,
-        default=1.5,
-        help="Grid resolution (mm) for STL heightfield sampling (default: 1.5)",
+        default=0.3,
+        help="Chordal tolerance (mm) for STL meshing when using CAD export",
     )
     parser.add_argument(
         "--profile-onion-skin-mm",
@@ -251,6 +251,8 @@ def main(argv: List[str]) -> int:
         sheet_thickness=panel_t,
         kerf_width_mm=float(data.get("kerf_width_mm", 0.0))
     )
+
+    kerf_value = float(hints.get("kerf_width_mm", 0.0) or 0.0)
 
     # --- write dimensioned layout SVG (layout_dims.svg) ---
     svg_dims = render_svg_with_dims(
@@ -409,16 +411,46 @@ def main(argv: List[str]) -> int:
         made_files.append(str(fpath))
 
     if args.stl:
-        stl_path = outdir / "panel_preview.stl"
-        write_panel_stl(
-            stl_path,
-            width_mm=panel_w,
-            height_mm=panel_h,
-            thickness_mm=panel_t,
-            items=items_resolved,
-            resolution_mm=max(0.25, float(args.stl_resolution_mm)),
-        )
-        made_files.append(str(stl_path))
+        stl_base_path = outdir / "panel_preview.stl"
+        mesh_tol = max(0.05, float(args.stl_resolution_mm))
+        stl_outputs: List[Path] = []
+
+        try:
+            from skills.mill_ui.cad.step_export import SheetSpec, export_stl
+        except ImportError:
+            export_error = "cadquery is required for CAD-derived STL; falling back to raster heightfield"
+            print(export_error, file=sys.stderr)
+        else:
+            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+            try:
+                stl_outputs = export_stl(
+                    sheet_spec,
+                    items_resolved,
+                    stl_base_path,
+                    kerf_mm=kerf_value,
+                    include_sheet=False,
+                    include_floating_parts=True,
+                    mesh_tolerance_mm=mesh_tol,
+                    angular_tolerance_deg=5.0,
+                )
+            except Exception as exc:  # pragma: no cover - cadquery backend
+                print(f"[!] STL export via CadQuery failed: {exc}; falling back to raster heightfield",
+                      file=sys.stderr)
+                stl_outputs = []
+
+        if not stl_outputs:
+            stl_path = stl_base_path
+            write_panel_stl(
+                stl_path,
+                width_mm=panel_w,
+                height_mm=panel_h,
+                thickness_mm=panel_t,
+                items=items_resolved,
+                resolution_mm=max(0.25, float(args.stl_resolution_mm)),
+            )
+            stl_outputs = [stl_path]
+
+        made_files.extend(str(path) for path in stl_outputs)
 
     if args.step:
         try:
@@ -428,7 +460,6 @@ def main(argv: List[str]) -> int:
         else:
             step_path = outdir / args.step_filename
             sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
-            kerf_value = float(hints.get("kerf_width_mm", 0.0) or 0.0)
             try:
                 export_step(sheet_spec, items_resolved, step_path, kerf_mm=kerf_value)
                 made_files.append(str(step_path))

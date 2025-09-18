@@ -63,10 +63,12 @@ def write_gcode(moves, *, unit='mm', prec=3, safe_z=5.0, header=None, footer=Non
             if z is not None: current_z = z
         elif k == 'cut':
             x, y, z = m.get('x'), m.get('y'), m.get('z')
-            lines.append(_g1(x, y, z, m.get('feed', current_feed), prec))
-            if z is not None: current_z = z
-            # NOTE: we intentionally do NOT update current_feed from a per-move feed,
-            # because ops re-issue move_set_feed() after plunges.
+            feed = m.get('feed', current_feed)
+            lines.append(_g1(x, y, z, feed, prec))
+            if z is not None:
+                current_z = z
+            if m.get('feed') is not None:
+                current_feed = feed
         elif k == 'retract':
             z = m.get('z', safe_z)
             lines.append(_g0(None, None, z, prec))

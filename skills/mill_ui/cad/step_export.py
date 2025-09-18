@@ -353,6 +353,52 @@ def build_step_solids(sheet: SheetSpec,
     return base, parts_out
 
 
+def export_stl(sheet: SheetSpec,
+               shapes: Iterable[Dict[str, Any]],
+               output_path: Path,
+               *,
+               kerf_mm: float | None = None,
+               include_sheet: bool = False,
+               include_floating_parts: bool = True,
+               mesh_tolerance_mm: float = 0.3,
+               angular_tolerance_deg: float = 5.0) -> List[Path]:
+    """Export STL meshes derived from the STEP solids.
+
+    Returns a list of generated file paths. When ``include_sheet`` is ``False``
+    and no floating parts are produced, the list may be empty so callers can
+    fall back to alternative previews.
+    """
+
+    if cq is None:  # pragma: no cover - optional dependency
+        raise ImportError("cadquery is required for STL export")
+
+    tol = max(0.01, float(mesh_tolerance_mm))
+    ang_tol = max(0.1, float(angular_tolerance_deg))
+
+    solid, parts = build_step_solids(
+        sheet,
+        shapes,
+        kerf_mm=kerf_mm,
+        include_floating_parts=include_floating_parts,
+    )
+
+    exported: List[Path] = []
+
+    def _export(body: cq.Workplane, path: Path) -> None:
+        cq.exporters.export(body.val(), str(path), tolerance=tol, angularTolerance=ang_tol)
+        exported.append(path)
+
+    if include_sheet:
+        _export(solid, output_path)
+
+    if include_floating_parts:
+        for idx, part in enumerate(parts, start=1):
+            part_path = output_path.with_name(output_path.stem + f"_part{idx}" + output_path.suffix)
+            _export(part, part_path)
+
+    return exported
+
+
 def export_step(sheet: SheetSpec,
                 shapes: Iterable[Dict[str, Any]],
                 output_path: Path,

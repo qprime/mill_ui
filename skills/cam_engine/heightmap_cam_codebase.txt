@@ -1,0 +1,2550 @@
+
+=====================================
+FILE: ./strategy_raster_finish.py
+=====================================
+from __future__ import annotations
+from typing import Dict, List, Optional, Iterable, Tuple
+import math
+import numpy as np
+
+from skills.cam_engine.kernels import compute_center_z_ball, scallop_to_stepover_mm
+from skills.cam_engine.masks import rest_mask_ball
+
+
+__all__ = ["plan_finish"]
+
+# Replace the constants section at the top of strategy_raster_finish.py
+
+VERTICAL_SERPENTINE = False  # set True for vertical
+Z_SMOOTH_WINDOW_PX = 7        # much smaller window - was 31, now 7
+Z_SMOOTH_PASSES = 1           # single pass - was 3, now 1  
+X_TOL_MM = 0.06              # skip points closer than this in X if Z change is tiny
+Z_TOL_MM = 0.20              # skip points if |ΔZ| < this (tuned for wood)
+
+_Move = Dict[str, float]
+
+
+# Much simpler smoothing - just light cleanup, not aggressive smoothing
+def _light_smooth1d(v: np.ndarray, win: int) -> np.ndarray:
+    """Very light smoothing to remove only the worst noise."""
+    if win <= 1:
+        return v.astype(np.float32, copy=False)
+    win = int(win) | 1
+    k = np.ones(win, dtype=np.float32) / float(win)
+    pad = win // 2
+    y = v.astype(np.float32, copy=True)
+    y = np.convolve(np.pad(y, pad, mode="edge"), k, mode="valid")
+    return y
+
+# Replace the _emit_row_moves function with minimal smoothing
+
+def _emit_row_moves(
+    y: int,
+    xs: int, xe: int, forward: bool,
+    surface: np.ndarray, top: np.ndarray, bot: np.ndarray,
+    pitch: float, safe_z: float, feed: float, plunge: float,
+    x_tol: float, z_tol: float
+) -> List[Dict[str, float]]:
+    moves: List[Dict[str, float]] = []
+    rng = range(xs, xe + 1) if forward else range(xe, xs - 1, -1)
+
+    # Clamp surface to band and apply MINIMAL smoothing
+    z_line = np.clip(surface[y, xs:xe + 1], bot[y, xs:xe + 1], top[y, xs:xe + 1]).astype(np.float32, copy=False)
+    z_line = _light_smooth1d(z_line, Z_SMOOTH_WINDOW_PX)  # Just a tiny bit of smoothing
+
+    # Map smoothed values back by x index
+    xs_arr = np.arange(xs, xe + 1, dtype=int)
+    z_at = dict(zip(xs_arr.tolist(), z_line.tolist()))
+
+    # Start move
+    start_x = xs if forward else xe
+    y_mm = y * pitch
+    x0_mm = start_x * pitch
+    z0 = float(z_at[start_x])
+
+    moves.append({"mode": 0, "x": x0_mm, "y": y_mm, "z": safe_z, "f": 0})
+    moves.append({"mode": 1, "x": x0_mm, "y": y_mm, "z": z0, "f": plunge})
+
+    last_x = x0_mm
+    last_z = z0
+    for x in rng:
+        x_mm = x * pitch
+        z = float(z_at[x])
+        if abs(x_mm - last_x) < x_tol and abs(z - last_z) < z_tol:
+            continue
+        moves.append({"mode": 1, "x": x_mm, "y": y_mm, "z": z, "f": feed})
+        last_x, last_z = x_mm, z
+
+    # Retract
+    end_x = xe if forward else xs
+    moves.append({"mode": 0, "x": end_x * pitch, "y": y_mm, "z": safe_z, "f": 0})
+    return moves
+
+
+def raster_finish_moves_with_rest(heightmap_mm: np.ndarray,
+                                  pixel_pitch_mm: float,
+                                  bounds_mm: Tuple[float, float, float, float],
+                                  tool_radius_mm: float,
+                                  stepover_mm: float,
+                                  angle_deg: float,
+                                  feed_mm_min: float,
+                                  rest_prev_tool_radius_mm: float | None = None,
+                                  rest_tol_mm: float = 0.01) -> List[_Move]:
+    """
+    Raster finish using per-tool center-Z; if rest_prev_tool_radius_mm is given,
+    only cut where the smaller tool can actually go deeper than the previous tool.
+    """
+    # 1) Per-tool center Z (guaranteed no-gouge)
+    z_center = compute_center_z_ball(heightmap_mm, pixel_pitch_mm, tool_radius_mm)
+
+    # 2) Optional rest mask (tool-aware)
+    rest_mask: np.ndarray | None = None
+    if rest_prev_tool_radius_mm is not None:
+        rest_mask = rest_mask_ball(heightmap_mm, pixel_pitch_mm,
+                                   prev_tool_radius_mm=rest_prev_tool_radius_mm,
+                                   this_tool_radius_mm=tool_radius_mm,
+                                   tol_mm=rest_tol_mm)
+
+    # 3) Build scanlines
+    xmin, xmax, ymin, ymax = bounds_mm
+    th = math.radians(angle_deg)
+    c, s = math.cos(th), math.sin(th)
+
+    def to_scan(x, y):  return (c*x + s*y, -s*x + c*y)
+    def to_world(u, v): return ( c*u - s*v,  s*u + c*v)
+
+    corners = [to_scan(x, y) for x, y in [(xmin,ymin),(xmax,ymin),(xmax,ymax),(xmin,ymax)]]
+    u_vals, v_vals = zip(*corners)
+    umin, umax = min(u_vals), max(u_vals)
+    vmin, vmax = min(v_vals), max(v_vals)
+
+    if stepover_mm <= 0:
+        return []
+
+    # 4) Emit moves; gate by rest_mask if present
+    h, w = z_center.shape
+    def px(x: float, y: float) -> tuple[int,int]:
+        ix = int(round((x - xmin) / pixel_pitch_mm))
+        iy = int(round((y - ymin) / pixel_pitch_mm))
+        ix = min(max(ix, 0), w - 1)
+        iy = min(max(iy, 0), h - 1)
+        return ix, iy
+
+    moves: List[_Move] = []
+    v = vmin
+    toggle = False
+    while v <= vmax + 1e-6:
+        (x0, y0) = to_world(umin, v)
+        (x1, y1) = to_world(umax, v)
+        if toggle:
+            x0, y0, x1, y1 = x1, y1, x0, y0
+
+        ix0, iy0 = px(x0, y0)
+        ix1, iy1 = px(x1, y1)
+
+        # If rest mask is enabled and neither endpoint is in-mask, skip this swath fast.
+        if rest_mask is not None and not (rest_mask[iy0, ix0] or rest_mask[iy1, ix1]):
+            v += stepover_mm
+            toggle = not toggle
+            continue
+
+        z0 = float(z_center[iy0, ix0]); z1 = float(z_center[iy1, ix1])
+
+        if rest_mask is not None:
+            # Walk across and punch small gaps (cheap & robust)
+            steps = max(2, int(round(abs((umax - umin)) / pixel_pitch_mm)))
+            for i in range(steps + 1):
+                t = i / steps
+                x = x0 + (x1 - x0) * t
+                y = y0 + (y1 - y0) * t
+                ix, iy = px(x, y)
+                if rest_mask[iy, ix]:
+                    z = float(z_center[iy, ix])
+                    moves.append({"mode": 1, "x": x, "y": y, "z": z, "f": feed_mm_min})
+        else:
+            moves.append({"mode": 1, "x": x0, "y": y0, "z": z0, "f": feed_mm_min})
+            moves.append({"mode": 1, "x": x1, "y": y1, "z": z1, "f": feed_mm_min})
+
+        v += stepover_mm
+        toggle = not toggle
+
+    return moves
+
+def _scan_indices(n: int, step: int) -> List[int]:
+    out = list(range(0, n, max(1, step)))
+    if out[-1] != n - 1:
+        out.append(n - 1)
+    return out
+
+
+
+def _smooth1d(v: np.ndarray, win: int, passes: int) -> np.ndarray:
+    """Improved 1D smoothing with edge preservation."""
+    if win <= 1 or passes <= 0:
+        return v
+    win = int(win) | 1
+    y = v.astype(np.float32, copy=True)
+    
+    # First apply standard smoothing
+    k = np.ones(win, dtype=np.float32) / float(win)
+    pad = win // 2
+    for _ in range(passes):
+        y = np.convolve(np.pad(y, pad, mode="edge"), k, mode="valid")
+    
+    return y
+
+def plan_finish(
+    pass_name: str,
+    surface_mm: np.ndarray,      # final S(x,y)
+    band_top: np.ndarray,        # stock plane
+    band_bot: np.ndarray,        # S(x,y)
+    pixel_pitch_mm: float,
+    stepover_mm: float,
+    safe_z_mm: float,
+    feed_mm_per_min: float,
+    plunge_mm_per_min: float,
+) -> List[Dict[str, float]]:
+    """
+    Independent serpentine finish with along-path smoothing + decimation.
+    """
+    assert band_top.shape == band_bot.shape == surface_mm.shape, "shape mismatch"
+    H, W = surface_mm.shape
+    step_px = max(1, int(round(stepover_mm / max(1e-9, pixel_pitch_mm))))
+    moves: List[Dict[str, float]] = []
+
+    if VERTICAL_SERPENTINE:
+        cols = _scan_indices(W, step_px)
+        for ci, x in enumerate(cols):
+            mask = (band_top[:, x] - band_bot[:, x]) > 1e-6
+            if not np.any(mask): 
+                continue
+            ys = int(np.argmax(mask))
+            ye = H - 1 - int(np.argmax(mask[::-1]))
+            forward = (ci % 2 == 0)
+            rng = range(ys, ye + 1) if forward else range(ye, ys - 1, -1)
+
+            # extract and smooth column
+            z_col = np.clip(surface_mm[ys:ye + 1, x], band_bot[ys:ye + 1, x], band_top[ys:ye + 1, x]).astype(np.float32, copy=False)
+            z_col = _smooth1d(z_col, Z_SMOOTH_WINDOW_PX, Z_SMOOTH_PASSES)
+            ys_arr = np.arange(ys, ye + 1, dtype=int)
+            z_at = dict(zip(ys_arr.tolist(), z_col.tolist()))
+
+            start_y = ys if forward else ye
+            x_mm = x * pixel_pitch_mm
+            y0_mm = start_y * pixel_pitch_mm
+            z0 = float(z_at[start_y])
+
+            moves.append({"mode": 0, "x": x_mm, "y": y0_mm, "z": safe_z_mm, "f": 0})
+            moves.append({"mode": 1, "x": x_mm, "y": y0_mm, "z": z0, "f": plunge_mm_per_min})
+
+            last_y = y0_mm
+            last_z = z0
+            for y in rng:
+                y_mm = y * pixel_pitch_mm
+                z = float(z_at[y])
+                if abs(y_mm - last_y) < X_TOL_MM and abs(z - last_z) < Z_TOL_MM:
+                    continue
+                moves.append({"mode": 1, "x": x_mm, "y": y_mm, "z": z, "f": feed_mm_per_min})
+                last_y, last_z = y_mm, z
+
+            end_y = ye if forward else ys
+            moves.append({"mode": 0, "x": x_mm, "y": end_y * pixel_pitch_mm, "z": safe_z_mm, "f": 0})
+    else:
+        rows = _scan_indices(H, step_px)
+        for ri, y in enumerate(rows):
+            mask = (band_top[y] - band_bot[y]) > 1e-6
+            if not np.any(mask): 
+                continue
+            xs = int(np.argmax(mask))
+            xe = W - 1 - int(np.argmax(mask[::-1]))
+            forward = (ri % 2 == 0)
+            moves.extend(_emit_row_moves(
+                y, xs, xe, forward,
+                surface_mm, band_top, band_bot,
+                pixel_pitch_mm, safe_z_mm, feed_mm_per_min, plunge_mm_per_min,
+                X_TOL_MM, Z_TOL_MM
+            ))
+    return moves
+
+
+
+def _raster_scanlines(bounds_mm: Tuple[float, float, float, float],
+                      pitch_mm: float,
+                      stepover_mm: float,
+                      angle_deg: float) -> List[List[Tuple[float, float]]]:
+    """Generate XY scanlines (list of polylines) inside [xmin,xmax]x[ymin,ymax] at given angle and stepover."""
+    xmin, xmax, ymin, ymax = bounds_mm
+    # rotate the bounding box into scan space
+    th = math.radians(angle_deg)
+    c, s = math.cos(th), math.sin(th)
+    def to_scan(x, y):  return (c*x + s*y, -s*x + c*y)
+    def to_world(u, v): return ( c*u - s*v,  s*u + c*v)
+
+    # Find extents in scan space
+    corners = [to_scan(x, y) for x, y in [(xmin,ymin),(xmax,ymin),(xmax,ymax),(xmin,ymax)]]
+    u_vals, v_vals = zip(*corners)
+    umin, umax = min(u_vals), max(u_vals)
+    vmin, vmax = min(v_vals), max(v_vals)
+
+    if stepover_mm <= 0:
+        return []
+
+    lines: List[List[Tuple[float,float]]] = []
+    v = vmin
+    toggle = False
+    while v <= vmax + 1e-6:
+        # two points define the line across u-span; clip to world bbox afterward
+        p0 = to_world(umin, v)
+        p1 = to_world(umax, v)
+        if toggle:
+            p0, p1 = p1, p0
+        lines.append([p0, p1])
+        v += stepover_mm
+        toggle = not toggle
+    return lines
+
+def raster_finish_moves(heightmap_mm: np.ndarray,
+                        pixel_pitch_mm: float,
+                        bounds_mm: Tuple[float, float, float, float],
+                        tool_radius_mm: float,
+                        scallop_mm: float,
+                        angle_deg: float,
+                        feed_mm_min: float) -> List[_Move]:
+    """Generate G1 moves for a raster finish using a tool-center Z map (no-gouge by construction)."""
+    # 1) tool-center surface from heightmap
+    z_center = compute_center_z_ball(heightmap_mm, pixel_pitch_mm, tool_radius_mm)
+
+    # 2) stepover from scallop
+    stepover_mm = scallop_to_stepover_mm(tool_radius_mm, scallop_mm)
+    if stepover_mm <= 0:
+        stepover_mm = max(pixel_pitch_mm, tool_radius_mm * 0.25)  # conservative fallback
+
+    # 3) scanline XYs
+    scanlines = _raster_scanlines(bounds_mm, pixel_pitch_mm, stepover_mm, angle_deg)
+    if not scanlines:
+        return []
+
+    # 4) sample z_center at each XY and emit moves
+    xmin, xmax, ymin, ymax = bounds_mm
+    h, w = z_center.shape
+    moves: List[_Move] = []
+    # simple mm->px mapping
+    def world_to_px(x: float, y: float) -> Tuple[int, int]:
+        ix = int(round((x - xmin) / pixel_pitch_mm))
+        iy = int(round((y - ymin) / pixel_pitch_mm))
+        # clamp
+        if ix < 0: ix = 0
+        if iy < 0: iy = 0
+        if ix >= w: ix = w - 1
+        if iy >= h: iy = h - 1
+        return ix, iy
+
+    for line in scanlines:
+        x0, y0 = line[0]
+        ix, iy = world_to_px(x0, y0)
+        z0 = float(z_center[iy, ix])
+        moves.append({"mode": 1, "x": x0, "y": y0, "z": z0, "f": feed_mm_min})
+        x1, y1 = line[1]
+        ix, iy = world_to_px(x1, y1)
+        z1 = float(z_center[iy, ix])
+        moves.append({"mode": 1, "x": x1, "y": y1, "z": z1, "f": feed_mm_min})
+
+    return moves
+
+# --- paste into strategy_raster_finish.py (or linking.py) ---
+
+def compute_link_z_mm(heightmap_mm: np.ndarray,
+                      pixel_pitch_mm: float,
+                      bounds_mm: Tuple[float, float, float, float],
+                      x0: float, y0: float, x1: float, y1: float,
+                      margin_mm: float) -> float:
+    """Sample the heightfield along the XY link and return a safe local link-Z."""
+    xmin, xmax, ymin, ymax = bounds_mm
+    h, w = heightmap_mm.shape
+    dx = x1 - x0
+    dy = y1 - y0
+    length = math.hypot(dx, dy)
+    if length <= 1e-6:
+        ix = int(round((x0 - xmin) / pixel_pitch_mm))
+        iy = int(round((y0 - ymin) / pixel_pitch_mm))
+        ix = min(max(ix, 0), w - 1)
+        iy = min(max(iy, 0), h - 1)
+        return float(heightmap_mm[iy, ix]) + margin_mm
+
+    # sample every ~1 pixel along the link
+    steps = max(2, int(math.ceil(length / pixel_pitch_mm)))
+    zmax = -1e9
+    for i in range(steps + 1):
+        t = i / steps
+        x = x0 + t * dx
+        y = y0 + t * dy
+        ix = int(round((x - xmin) / pixel_pitch_mm))
+        iy = int(round((y - ymin) / pixel_pitch_mm))
+        if ix < 0 or iy < 0 or ix >= w or iy >= h:
+            continue
+        z = float(heightmap_mm[iy, ix])
+        if z > zmax:
+            zmax = z
+    return (zmax if zmax > -1e8 else 0.0) + margin_mm
+
+=====================================
+FILE: ./planner.py
+=====================================
+from __future__ import annotations
+from typing import Any, Dict, Tuple, List
+from pathlib import Path
+import numpy as np
+from PIL import Image
+
+from .heightmap_io import load_heightmap
+from .bands import make_bands
+from .border import generate_rect_border_moves
+from .strategy_rough_zslices import plan_rough
+from .strategy_raster_finish import plan_finish
+from .strategy_border_rect import plan_border_rect  # NEW
+
+__all__ = ["plan"]
+
+_Move = Dict[str, float]
+
+def _norm01(a: np.ndarray) -> np.ndarray:
+    a = a.astype(np.float32, copy=False)
+    mn, mx = float(np.min(a)), float(np.max(a))
+    if mx <= mn + 1e-12:
+        return np.zeros_like(a, dtype=np.uint8)
+    return ((a - mn) / (mx - mn) * 255.0).astype(np.uint8)
+
+def _append_border_if_enabled(pass_cfg: Dict[str, Any], cfg: Dict[str, Any], moves: List[_Move]) -> List[_Move]:
+    border = pass_cfg.get("border") or {}
+    if not border.get("enable", False):
+        return moves
+
+    bounds = tuple(cfg["heightmap"]["bounds_mm"])
+    tool = pass_cfg.get("tool", {}) or {}
+    tool_diam = float(tool.get("diameter_mm", 0.0) or 0.0)
+
+    stepover = border.get("stepover_mm", None)
+    if stepover is None:
+        stepover = float(pass_cfg.get("stepover_mm", 0.0) or (0.6 * tool_diam))
+
+    inset = float(border.get("inset_mm", 2.0))
+    width = float(border.get("width_mm", 4.0))
+    depth = float(border.get("depth_mm", cfg["heightmap"].get("max_depth_mm", 1.0)))
+    feed = float(pass_cfg.get("feed_mm_per_min", 800.0))
+
+    border_moves = generate_rect_border_moves(
+        bounds_mm=bounds,
+        inset_mm=inset,
+        width_mm=width,
+        target_depth_mm=depth,
+        stepover_mm=stepover,
+        feed_mm_min=feed,
+        climb_ccw=True,
+    )
+
+    if not border_moves:
+        return moves
+
+    return border_moves + moves
+
+def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
+    hm = load_heightmap(cfg)
+    S = hm["z_mm"].astype(np.float32, copy=False)
+    pitch = float(hm["pixel_pitch_mm"])
+    Zs = float(cfg["stock"]["top_z_mm"])
+
+    bands = make_bands(S, Zs, pitch, cfg)
+
+    reports_dir = Path(cfg["paths"]["reports_dir"])
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    for name, b in bands["pass_bands"].items():
+        Image.fromarray(_norm01(b["top"])).save(reports_dir / f"band_{name}_top.png")
+        Image.fromarray(_norm01(b["bot"])).save(reports_dir / f"band_{name}_bot.png")
+        Image.fromarray(_norm01(b["dz"])).save(reports_dir / f"band_{name}_dz.png")
+
+    passes_out: List[Dict[str, Any]] = []
+    band_map: Dict[str, Dict[str, np.ndarray]] = bands["pass_bands"]
+
+    for p in cfg["passes"]:
+        name = str(p["name"])
+        role = str(p.get("role") or "")
+        strategy = str(p.get("strategy") or "")
+        moves: List[_Move] = []
+
+        # NEW: border strategy as a first-class pass using passes.yaml fields
+        if strategy == "border_rect":
+            moves = plan_border_rect(p, cfg["heightmap"])
+
+        elif role == "rough":
+            b = band_map.get(name)
+            if b is None:
+                raise KeyError(f"Missing band for pass '{name}' (role=rough)")
+            moves = plan_rough(
+                name,
+                b["top"],
+                b["bot"],
+                pitch,
+                float(p.get("stepover_mm") or 0.75 * float(p["tool"].get("diameter_mm") or 1.0)),
+                float(p.get("stepdown_mm") or 0.5 * float(p["tool"].get("diameter_mm") or 1.0)),
+                float(cfg["stock"]["safe_z_mm"]),
+                float(p.get("feed_mm_per_min") or 1000.0),
+                float(p.get("plunge_mm_per_min") or 400.0),
+            )
+
+        elif role == "finish":
+            b = band_map.get(name)
+            if b is None:
+                raise KeyError(f"Missing band for pass '{name}' (role=finish)")
+            moves = plan_finish(
+                name,
+                S,
+                b["top"],
+                b["bot"],
+                pitch,
+                float(p.get("stepover_mm") or 0.4 * float(p["tool"].get("diameter_mm") or 1.0)),
+                float(cfg["stock"]["safe_z_mm"]),
+                float(p.get("feed_mm_per_min") or 1200.0),
+                float(p.get("plunge_mm_per_min") or 400.0),
+            )
+
+        # Optional additive per-pass border from nested config (kept for backwards-compat)
+        moves = _append_border_if_enabled(p, cfg, moves)
+
+        passes_out.append({"name": name, "role": role, "tool": p.get("tool", {}), "moves": moves})
+
+    return {
+        "project_name": cfg.get("project_name") or "cam_v4",
+        "pixel_pitch_mm": pitch,
+        "passes": passes_out,
+        "bands": bands,
+    }
+
+=====================================
+FILE: ./strategy_border_rect.py
+=====================================
+# path: skills/cam_engine/strategy_border_rect.py
+# desc: Perimeter border strategy using rectangular offsets
+# api: plan_border_rect
+# tags: cam,strategy,border
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Dict, List, Mapping, Tuple
+
+from skills.cam_engine.border import generate_rect_border_moves
+
+_Move = Dict[str, float]
+_Bounds = Tuple[float, float, float, float]
+
+
+@dataclass(frozen=True)
+class _Inputs:
+    bounds_mm: _Bounds
+    inset_mm: float
+    width_mm: float
+    target_depth_mm: float
+    stepover_mm: float
+    feed_mm_min: float
+    climb_ccw: bool
+
+
+def _float(v: Any, default: float) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return float(default)
+
+
+def _resolve_inputs(pass_cfg: Mapping[str, Any], hm_cfg: Mapping[str, Any]) -> _Inputs:
+    bounds = tuple(hm_cfg.get("bounds_mm") or (0.0, 0.0, 0.0, 0.0))  # type: ignore[assignment]
+    tool = pass_cfg.get("tool") or {}
+    tool_diam = _float(tool.get("diameter_mm", 0.0), 0.0)
+
+    stepover = pass_cfg.get("stepover_mm")
+    stepover_mm = _float(stepover, 0.6 * tool_diam) if stepover is not None else (0.6 * tool_diam)
+
+    target_depth_mm = _float(
+        pass_cfg.get("target_depth_mm", hm_cfg.get("max_depth_mm", 1.0)),
+        1.0,
+    )
+
+    return _Inputs(
+        bounds_mm=(float(bounds[0]), float(bounds[1]), float(bounds[2]), float(bounds[3])),
+        inset_mm=_float(pass_cfg.get("inset_mm", 0.0), 0.0),
+        width_mm=_float(pass_cfg.get("width_mm", 0.0), 0.0),
+        target_depth_mm=target_depth_mm,
+        stepover_mm=stepover_mm,
+        feed_mm_min=_float(pass_cfg.get("feed_mm_per_min", 800.0), 800.0),
+        climb_ccw=bool(pass_cfg.get("climb_ccw", True)),
+    )
+
+
+def plan_border_rect(pass_cfg: Mapping[str, Any], heightmap_cfg: Mapping[str, Any]) -> List[_Move]:
+    if not bool(pass_cfg.get("enable", True)):
+        return []
+    i = _resolve_inputs(pass_cfg, heightmap_cfg)
+    return generate_rect_border_moves(
+        bounds_mm=i.bounds_mm,
+        inset_mm=i.inset_mm,
+        width_mm=i.width_mm,
+        target_depth_mm=i.target_depth_mm,
+        stepover_mm=i.stepover_mm,
+        feed_mm_min=i.feed_mm_min,
+        climb_ccw=i.climb_ccw,
+    )
+
+=====================================
+FILE: ./__main__.py
+=====================================
+# path: cam_generator/__main__.py
+# desc: Module entry point delegating to CLI
+# api: main
+# tags: cli,entry
+
+from __future__ import annotations
+
+from cam_generator.cli import run_cli
+
+__all__ = ["main"]
+
+
+def main() -> None:
+    run_cli()
+
+
+if __name__ == "__main__":
+    main()
+
+=====================================
+FILE: ./bands.py
+=====================================
+from __future__ import annotations
+from typing import Dict, Any, Tuple
+import numpy as np
+from collections import deque
+from .envelopes import compute_envelope
+
+__all__ = ["make_bands"]
+
+EPS = 1e-6
+
+def _max_filter1d_same(v: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return v.astype(np.float32, copy=False)
+    k = int(k) | 1
+    pad = k // 2
+    vv = np.pad(v.astype(np.float32, copy=False), (pad, pad), mode="edge")
+    out = np.empty(v.shape[0], dtype=np.float32)
+    q: deque[int] = deque()
+    for i in range(vv.shape[0]):
+        while q and vv[q[-1]] <= vv[i]:
+            q.pop()
+        q.append(i)
+        left = i - k + 1
+        if q[0] < left:
+            q.popleft()
+        if i >= k - 1:
+            out[i - (k - 1)] = vv[q[0]]
+    return out
+
+def _min_filter1d_same(v: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return v.astype(np.float32, copy=False)
+    k = int(k) | 1
+    pad = k // 2
+    vv = np.pad(v.astype(np.float32, copy=False), (pad, pad), mode="edge")
+    out = np.empty(v.shape[0], dtype=np.float32)
+    q: deque[int] = deque()
+    for i in range(vv.shape[0]):
+        while q and vv[q[-1]] >= vv[i]:
+            q.pop()
+        q.append(i)
+        left = i - k + 1
+        if q[0] < left:
+            q.popleft()
+        if i >= k - 1:
+            out[i - (k - 1)] = vv[q[0]]
+    return out
+
+def _dilate2d(a: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return a.astype(np.float32, copy=False)
+    a = a.astype(np.float32, copy=False)
+    H, W = a.shape
+    tmp = np.empty_like(a, dtype=np.float32)
+    out = np.empty_like(a, dtype=np.float32)
+    for y in range(H):
+        tmp[y, :] = _max_filter1d_same(a[y, :], k)
+    for x in range(W):
+        out[:, x] = _max_filter1d_same(tmp[:, x], k)
+    return out
+
+def _erode2d(a: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return a.astype(np.float32, copy=False)
+    a = a.astype(np.float32, copy=False)
+    H, W = a.shape
+    tmp = np.empty_like(a, dtype=np.float32)
+    out = np.empty_like(a, dtype=np.float32)
+    for y in range(H):
+        tmp[y, :] = _min_filter1d_same(a[y, :], k)
+    for x in range(W):
+        out[:, x] = _min_filter1d_same(tmp[:, x], k)
+    return out
+
+def _gray_close(a: np.ndarray, k: int) -> np.ndarray:
+    # closing = dilation then erosion (square SE of size k), same-sized output
+    return _erode2d(_dilate2d(a, k), k)
+
+def _tool_key(t: Dict[str, Any]) -> Tuple[str, float, float]:
+    return (str(t.get("type") or "").lower(),
+            float(t.get("diameter_mm") or 0.0),
+            float(t.get("angle_deg") or 0.0))
+
+def _order_tools_fine_to_coarse(passes: list) -> list:
+    seen = {}
+    for p in passes:
+        tk = _tool_key(p["tool"])
+        if tk not in seen:
+            seen[tk] = dict(p["tool"])
+    tools = list(seen.values())
+    tools.sort(key=lambda t: (float(t.get("diameter_mm") or 0.0), str(t.get("type"))))
+    return tools  # ascending diameter: fine -> coarse
+
+def make_bands(surface_mm: np.ndarray,
+               stock_top_z_mm: float,
+               pixel_pitch_mm: float,
+               cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Heavy-cloth barriers (fine→coarse) + per-pass bands:
+      N1 = S + delta
+      Ni = max( close(N_{i-1}, k_i), envelope_i(S), S + delta, N_{i-1} )
+    Rough pass i uses bot=Ni; finish uses bot=S (independent).
+    """
+    S = surface_mm.astype(np.float32, copy=False)
+    Zs = float(stock_top_z_mm)
+    passes = list(cfg["passes"])
+    tools_f2c = _order_tools_fine_to_coarse(passes)
+    delta = float(cfg.get("finish", {}).get("skin_mm", 0.3))
+
+    barriers: Dict[Tuple[str, float, float], np.ndarray] = {}
+    N_prev = S + delta
+
+    for t in tools_f2c:
+        tk = _tool_key(t)
+        r_px = max(1, int(round(0.8 * 0.5 * float(t.get("diameter_mm") or 0.0) / max(1e-9, pixel_pitch_mm))))
+        k = (2 * r_px + 1)
+        C = _gray_close(N_prev, k)
+        E = compute_envelope(S, t, pixel_pitch_mm)
+        N = np.maximum.reduce([N_prev, C, E, S + delta]).astype(np.float32, copy=False)
+        barriers[tk] = N
+        N_prev = N  # blankets are non-decreasing
+
+    pass_bands: Dict[str, Dict[str, np.ndarray]] = {}
+    current_top = np.full_like(S, Zs, dtype=np.float32)
+
+    def barrier_for(tool: Dict[str, Any]) -> np.ndarray:
+        return barriers[_tool_key(tool)]
+
+    for p in passes:
+        name = str(p["name"])
+        role = str(p.get("role"))
+        tool = p["tool"]
+
+        if role == "rough":
+            bot = barrier_for(tool)
+            top = current_top
+            dz = np.clip(top - bot, 0.0, None).astype(np.float32, copy=False)
+            pass_bands[name] = {"top": top, "bot": bot, "dz": dz}
+            current_top = bot  # next rough starts here
+
+        elif role == "finish":
+            bot = S
+            top = np.full_like(S, Zs, dtype=np.float32)
+            dz = np.clip(top - bot, 0.0, None).astype(np.float32, copy=False)
+            pass_bands[name] = {"top": top, "bot": bot, "dz": dz}
+
+        else:
+            pass_bands[name] = {"top": current_top, "bot": current_top, "dz": np.zeros_like(S, dtype=np.float32)}
+
+    return {"barriers": barriers, "pass_bands": pass_bands}
+
+=====================================
+FILE: ./stl_writer.py
+=====================================
+# path: skills/cam_engine/stl_writer.py
+# desc: Write binary STL from triangle stream
+# api: write_binary_stl
+
+from __future__ import annotations
+
+import io
+import math
+from pathlib import Path
+from struct import pack
+from typing import Iterable, Tuple
+
+__all__ = ["write_binary_stl"]
+
+_F3 = Tuple[float, float, float]
+_Tri = Tuple[_F3, _F3, _F3]
+
+
+def _normal(a: _F3, b: _F3, c: _F3) -> _F3:
+    ux, uy, uz = b[0] - a[0], b[1] - a[1], b[2] - a[2]
+    vx, vy, vz = c[0] - a[0], c[1] - a[1], c[2] - a[2]
+    nx = uy * vz - uz * vy
+    ny = uz * vx - ux * vz
+    nz = ux * vy - uy * vx
+    l = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
+    return (nx / l, ny / l, nz / l)
+
+
+def _write_header(f: io.BufferedWriter) -> None:
+    tag = b"heightmap-stl"
+    f.write(tag + b"\0" * (80 - len(tag)))
+
+
+def _write_count_placeholder(f: io.BufferedWriter) -> int:
+    f.write(pack("<I", 0))
+    return f.tell() - 4
+
+
+def _write_tri(f: io.BufferedWriter, a: _F3, b: _F3, c: _F3) -> None:
+    nx, ny, nz = _normal(a, b, c)
+    f.write(pack("<12fH", nx, ny, nz,
+                 a[0], a[1], a[2],
+                 b[0], b[1], b[2],
+                 c[0], c[1], c[2], 0))
+
+
+def write_binary_stl(path: Path, triangles: Iterable[_Tri]) -> None:
+    """
+    Write triangles to a binary STL at `path`.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    count = 0
+    with open(path, "wb") as f:
+        _write_header(f)
+        pos = _write_count_placeholder(f)
+        for a, b, c in triangles:
+            _write_tri(f, a, b, c)
+            count += 1
+        f.seek(pos)
+        f.write(pack("<I", count))
+
+=====================================
+FILE: ./stl_export.py
+=====================================
+# path: skills/cam_engine/stl_export.py
+# desc: Export STL meshes for CAM (surfaces) and PROOF (printable) in one run.
+#       Mesh pitch is auto-derived from the finish pass stepover (always on).
+# api: export_stl
+
+from __future__ import annotations
+
+from math import ceil, sqrt
+from pathlib import Path
+from typing import Any, Dict, Mapping, Optional, Tuple, List
+
+import numpy as np
+
+from skills.cam_engine.heightmap_io import load_heightmap
+from skills.cam_engine.heightfield_solid import triangulate_heightfield
+from skills.cam_engine.stl_writer import write_binary_stl
+
+__all__ = ["export_stl"]
+
+
+# ---------- tiny config helpers ----------
+
+def _b(d: Mapping[str, Any], k: str, dv: bool) -> bool:
+    return bool(d.get(k, dv))
+
+
+def _f(d: Mapping[str, Any], k: str, dv: float) -> float:
+    try:
+        return float(d.get(k, dv))
+    except Exception:
+        return float(dv)
+
+
+def _i(d: Mapping[str, Any], k: str, dv: int) -> int:
+    try:
+        return int(d.get(k, dv))
+    except Exception:
+        return int(dv)
+
+
+# ---------- bands helpers ----------
+
+def _bands(plan: Mapping[str, Any]) -> Optional[Dict[str, Dict[str, np.ndarray]]]:
+    b = plan.get("bands")
+    if not isinstance(b, dict):
+        return None
+    pb = b.get("pass_bands")
+    if not isinstance(pb, dict):
+        return None
+    out: Dict[str, Dict[str, np.ndarray]] = {}
+    for name, v in pb.items():
+        if isinstance(v, dict) and all(x in v for x in ("top", "bot", "dz")):
+            out[name] = {"top": v["top"], "bot": v["bot"], "dz": v["dz"]}
+    return out or None
+
+
+def _ordered_band_names(plan: Mapping[str, Any], bands: Mapping[str, Any]) -> List[str]:
+    ordered = [p.get("name") for p in plan.get("passes", []) if isinstance(p, dict)]
+    return [n for n in ordered if n in bands] or list(bands.keys())
+
+
+# ---------- geometry emit ----------
+
+def _emit(path: Path,
+          z: np.ndarray,
+          pitch: float,
+          base_z: float,
+          add_walls: bool,
+          top_z: float,
+          z_exag: float) -> None:
+    tris = triangulate_heightfield(z, pitch, base_z, add_walls, top_z, z_exag)
+    write_binary_stl(path, tris)
+
+
+# ---------- triangle estimation / downsample ----------
+
+def _estimate_top_triangles(h: int, w: int) -> int:
+    if h < 2 or w < 2:
+        return 0
+    return 2 * (h - 1) * (w - 1)
+
+
+def _downsample_to_triangle_budget(z: np.ndarray,
+                                   pitch_mm: float,
+                                   max_top_tris: int) -> Tuple[np.ndarray, float]:
+    """
+    Downsample by striding to keep top-surface triangles under max_top_tris.
+    Returns (z_ds, pitch_ds).
+    """
+    h, w = z.shape
+    tris = _estimate_top_triangles(h, w)
+    if max_top_tris <= 0 or tris <= max_top_tris:
+        return z, pitch_mm
+    s = max(1, int(ceil(sqrt(tris / float(max_top_tris)))))
+    z2 = z[::s, ::s]
+    return z2, pitch_mm * s
+
+
+def _enforce_min_pitch(z: np.ndarray, pitch_mm: float, min_pitch_mm: float) -> Tuple[np.ndarray, float]:
+    """
+    Ensure mesh pitch is not finer than min_pitch_mm by striding.
+    """
+    if min_pitch_mm <= 0 or pitch_mm >= min_pitch_mm:
+        return z, pitch_mm
+    s = max(1, int(ceil(min_pitch_mm / float(pitch_mm))))
+    z2 = z[::s, ::s]
+    return z2, pitch_mm * s
+
+
+# ---------- proof downsample/scale ----------
+
+def _downsample_if_needed(z: np.ndarray, pitch_mm: float, max_top_tris: int) -> Tuple[np.ndarray, float]:
+    return _downsample_to_triangle_budget(z, pitch_mm, max_top_tris)
+
+
+def _retarget_pitch(z: np.ndarray, pitch_mm: float,
+                    target_w_mm: Optional[float],
+                    target_h_mm: Optional[float]) -> float:
+    """
+    Change pitch to meet target width/height in mm without resampling (keeps resolution).
+    """
+    if target_w_mm is None and target_h_mm is None:
+        return pitch_mm
+    h, w = z.shape
+    pitch = pitch_mm
+    if target_w_mm is not None:
+        pitch = float(target_w_mm) / max(1, (w - 1))
+    if target_h_mm is not None:
+        pitch = min(pitch, float(target_h_mm) / max(1, (h - 1)))
+    return pitch
+
+
+# ---------- crop-to-changed for bands ----------
+
+def _crop_to_bbox(z: np.ndarray, bbox: Tuple[int, int, int, int]) -> np.ndarray:
+    y0, y1, x0, x1 = bbox
+    return z[y0:y1, x0:x1]
+
+
+def _bbox_from_mask(mask: np.ndarray, margin_px: int) -> Optional[Tuple[int, int, int, int]]:
+    ys, xs = np.where(mask)
+    if ys.size == 0:
+        return None
+    y0, y1 = int(ys.min()), int(ys.max()) + 1
+    x0, x1 = int(xs.min()), int(xs.max()) + 1
+    y0 = max(0, y0 - margin_px)
+    x0 = max(0, x0 - margin_px)
+    y1 = min(mask.shape[0], y1 + margin_px)
+    x1 = min(mask.shape[1], x1 + margin_px)
+    return (y0, y1, x0, x1)
+
+
+def _crop_band_surface(top_before: np.ndarray,
+                       bot_after: np.ndarray,
+                       eps_mm: float,
+                       margin_px: int,
+                       pitch_mm: float) -> Tuple[np.ndarray, float]:
+    """
+    Crop band surface to the minimal rectangle covering areas that changed.
+    Returns (z_cropped, pitch_mm). If nothing changed, returns a minimal 2x2 crop.
+    """
+    assert top_before.shape == bot_after.shape
+    changed = bot_after < (top_before - float(eps_mm))
+    bbox = _bbox_from_mask(changed, margin_px)
+    if bbox is None:
+        h, w = bot_after.shape
+        h2 = min(h, 2)
+        w2 = min(w, 2)
+        return bot_after[:h2, :w2], pitch_mm
+    return _crop_to_bbox(bot_after, bbox), pitch_mm
+
+
+# ---------- autopitch (always on) ----------
+
+def _find_pass_by_name(cfg_passes: List[Mapping[str, Any]], name: str) -> Optional[Mapping[str, Any]]:
+    for p in cfg_passes:
+        if str(p.get("name", "")).lower() == str(name).lower():
+            return p
+    return None
+
+
+def _finish_tool_diameter_mm(plan: Mapping[str, Any],
+                             cfg_passes: List[Mapping[str, Any]],
+                             finest_name: Optional[str]) -> Optional[float]:
+    """
+    Diameter from:
+      1) explicitly named finest pass in cfg (if provided),
+      2) else the smallest tool diameter across plan['passes'],
+      3) else the smallest tool diameter across cfg_passes.
+    """
+    if finest_name:
+        # try plan first (includes resolved tools), then cfg
+        for source in (plan.get("passes") or [], cfg_passes):
+            for p in source:
+                if str(p.get("name", "")).lower() == finest_name.lower():
+                    t = (p.get("tool") or {})
+                    d = t.get("diameter_mm") if isinstance(t, dict) else None
+                    if d:
+                        try:
+                            return float(d)
+                        except Exception:
+                            pass
+        # fall through to auto-pick below if missing
+    # pick smallest diameter seen
+    best: Optional[float] = None
+    for p in (plan.get("passes") or []):
+        t = (p.get("tool") or {})
+        d = t.get("diameter_mm") if isinstance(t, dict) else None
+        if d is None:
+            continue
+        try:
+            val = float(d)
+        except Exception:
+            continue
+        best = val if best is None else min(best, val)
+    if best is not None:
+        return best
+    for p in cfg_passes:
+        t = (p.get("tool") or {})
+        d = t.get("diameter_mm") if isinstance(t, dict) else None
+        if d is None:
+            continue
+        try:
+            val = float(d)
+        except Exception:
+            continue
+        best = val if best is None else min(best, val)
+    return best
+
+
+def _stepover_mm_for_pass(plan: Mapping[str, Any],
+                          cfg_passes: List[Mapping[str, Any]],
+                          name: Optional[str],
+                          diameter_mm: Optional[float],
+                          default_frac: float) -> Optional[float]:
+    """
+    Stepover mm from pass (name matches), falling back to fraction*diameter.
+    Recognized keys: 'stepover_mm', 'stepover_frac' (0..1), 'stepover_percent' (0..100).
+    """
+    def from_mapping(p: Mapping[str, Any]) -> Optional[float]:
+        # exact mm
+        if "stepover_mm" in p:
+            try:
+                v = float(p["stepover_mm"])
+                if v > 0:
+                    return v
+            except Exception:
+                pass
+        # fraction
+        if "stepover_frac" in p and diameter_mm:
+            try:
+                frac = float(p["stepover_frac"])
+                if 0 < frac <= 1:
+                    return frac * float(diameter_mm)
+            except Exception:
+                pass
+        # percent
+        if "stepover_percent" in p and diameter_mm:
+            try:
+                pct = float(p["stepover_percent"])
+                if 0 < pct <= 100:
+                    return (pct / 100.0) * float(diameter_mm)
+            except Exception:
+                pass
+        return None
+
+    if name:
+        # try plan pass (resolved), then cfg pass (declared)
+        for source in (plan.get("passes") or [], cfg_passes):
+            for p in source:
+                if str(p.get("name", "")).lower() == name.lower():
+                    val = from_mapping(p)
+                    if val and val > 0:
+                        return val
+
+    # fallback: look across passes and pick smallest positive stepover
+    best: Optional[float] = None
+    for source in (plan.get("passes") or [], cfg_passes):
+        for p in source:
+            val = from_mapping(p)
+            if val and val > 0:
+                best = val if best is None else min(best, val)
+    if best and best > 0:
+        return best
+
+    # final fallback: default fraction * diameter
+    if diameter_mm and diameter_mm > 0:
+        return max(0.0, float(default_frac)) * float(diameter_mm)
+    return None
+
+
+def _autopitch_min_pitch_mm(plan: Mapping[str, Any],
+                            cfg: Mapping[str, Any]) -> float:
+    """
+    Compute min mesh pitch from the chosen "finest" pass stepover:
+        P_min = stepover_mm / 2
+    Always enabled. Uses cfg['stl']['autopitch'] hints for
+    finest_pass_name and default_stepover_frac (fallback).
+    """
+    stl_cfg = cfg.get("stl", {}) if isinstance(cfg.get("stl"), dict) else {}
+    ap = stl_cfg.get("autopitch", {}) if isinstance(stl_cfg.get("autopitch"), dict) else {}
+
+    finest_name = ap.get("finest_pass_name")
+    default_frac = _f(ap, "default_stepover_frac", 0.30)
+
+    cfg_passes = list(cfg.get("passes") or [])
+    d_mm = _finish_tool_diameter_mm(plan, cfg_passes, finest_name)
+    if not d_mm or d_mm <= 0.0:
+        return 0.0
+
+    s_mm = _stepover_mm_for_pass(plan, cfg_passes, finest_name, d_mm, default_frac)
+    if not s_mm or s_mm <= 0.0:
+        return 0.0
+
+    return s_mm / 2.0
+
+
+# ---------- main export ----------
+
+def export_stl(plan_result: Mapping[str, Any],
+               cfg: Mapping[str, Any],
+               out_dir: Path) -> Dict[str, Any]:
+    """
+    Emits both CAM and PROOF meshes in one run.
+
+    CAM (for FreeCAD):
+      - CAM_output/meshes/relief_final.stl
+      - CAM_output/meshes/stock_after_{NN}_{pass}.stl (if per_band true)
+      - Auto-pitch-from-tool (always on), crop-to-changed, triangle cap.
+
+    PROOF:
+      - CAM_output/meshes/proof/proof_final.stl (+ optional per-band)
+      - Retarget XY size, downsample to triangle cap, base/skirt, Z exaggeration.
+    """
+    stl_cfg = cfg.get("stl", {}) if isinstance(cfg.get("stl"), dict) else {}
+    if not _b(stl_cfg, "enable", True):
+        return {"ok": True, "enabled": False}
+
+    hm = load_heightmap(dict(cfg))
+    z0 = hm["z_mm"]
+    pitch0 = float(hm["pixel_pitch_mm"])
+
+    top_z = float(cfg["stock"]["top_z_mm"])
+    max_depth = float(cfg["heightmap"]["max_depth_mm"])
+    stock_bottom = top_z - max_depth
+
+    # CAM options
+    cam_add_walls = _b(stl_cfg, "add_skirt", True)
+    cam_per_band = _b(stl_cfg, "per_band", True)
+    cam_z_exag = _f(stl_cfg, "z_exaggeration", 1.0)
+    base_mm_last = _f(stl_cfg, "base_mm_last", 0.0)
+    cam_max_tris = _i(stl_cfg, "max_triangles", 0)          # 0 = unlimited
+    cam_crop = _b(stl_cfg, "crop_changed", True)
+    cam_crop_eps = _f(stl_cfg, "crop_eps_mm", 0.01)
+    cam_crop_margin_px = _i(stl_cfg, "crop_margin_px", 4)
+
+    # Auto pitch from tool (ALWAYS ON)
+    min_pitch_tool_mm = _autopitch_min_pitch_mm(plan_result, cfg)
+
+    mesh_dir = Path(out_dir) / "meshes"
+    mesh_dir.mkdir(parents=True, exist_ok=True)
+
+    # CAM final
+    z_final, pitch_final = _enforce_min_pitch(z0, pitch0, min_pitch_tool_mm)
+    z_final, pitch_final = _downsample_to_triangle_budget(z_final, pitch_final, cam_max_tris)
+    final_cam = mesh_dir / "relief_final.stl"
+    _emit(final_cam, z_final, pitch_final, stock_bottom, cam_add_walls, top_z, cam_z_exag)
+
+    cam_files: List[str] = [str(final_cam)]
+
+    # CAM per-band
+    bands = _bands(plan_result) if cam_per_band else None
+    if isinstance(bands, dict):
+        names = _ordered_band_names(plan_result, bands)
+        for idx, name in enumerate(names, 1):
+            top_before = bands[name]["top"]
+            bot_after = bands[name]["bot"]
+
+            z_band, pitch_band = bot_after, pitch0
+            if cam_crop:
+                z_band, pitch_band = _crop_band_surface(
+                    top_before, bot_after, eps_mm=cam_crop_eps,
+                    margin_px=cam_crop_margin_px, pitch_mm=pitch0
+                )
+
+            # enforce tool-aware pitch, then global triangle cap
+            z_band, pitch_band = _enforce_min_pitch(z_band, pitch_band, min_pitch_tool_mm)
+            z_band, pitch_band = _downsample_to_triangle_budget(z_band, pitch_band, cam_max_tris)
+
+            is_last = idx == len(names)
+            z_base = stock_bottom - (base_mm_last if is_last else 0.0)
+
+            out = mesh_dir / f"stock_after_{idx:02d}_{name}.stl"
+            _emit(out, z_band, pitch_band, z_base, True, top_z, cam_z_exag)
+            cam_files.append(str(out))
+
+    # PROOF (unchanged)
+    proof_cfg = stl_cfg.get("proof", {}) if isinstance(stl_cfg.get("proof"), dict) else {}
+    proof_enable = _b(proof_cfg, "enable", True)
+    proof_dir = mesh_dir / "proof"
+    proof_files: List[str] = []
+    if proof_enable:
+        proof_dir.mkdir(parents=True, exist_ok=True)
+        tgt_w = proof_cfg.get("target_size_mm", {}).get("width") if isinstance(proof_cfg.get("target_size_mm"), dict) else proof_cfg.get("target_width_mm")
+        tgt_h = proof_cfg.get("target_size_mm", {}).get("height") if isinstance(proof_cfg.get("target_size_mm"), dict) else proof_cfg.get("target_height_mm")
+        tgt_w_mm = float(tgt_w) if tgt_w is not None else None
+        tgt_h_mm = float(tgt_h) if tgt_h is not None else None
+
+        proof_add_walls = _b(proof_cfg, "add_skirt", True)
+        proof_z_exag = _f(proof_cfg, "z_exaggeration", 1.25)
+        proof_base_mm = _f(proof_cfg, "base_mm", 6.0)
+        proof_per_band = _b(proof_cfg, "per_band", False)
+        max_tris = _i(proof_cfg, "max_triangles", 2_000_000)
+
+        # final proof
+        z_ds, pitch_ds = _downsample_if_needed(z0, pitch0, max_tris)
+        pitch_ds = _retarget_pitch(z_ds, pitch_ds, tgt_w_mm, tgt_h_mm)
+        proof_final = proof_dir / "proof_final.stl"
+        _emit(proof_final, z_ds, pitch_ds, stock_bottom - proof_base_mm, proof_add_walls, top_z, proof_z_exag)
+        proof_files.append(str(proof_final))
+
+        # per-band proofs (optional)
+        if proof_per_band and isinstance(bands, dict):
+            names = _ordered_band_names(plan_result, bands)
+            for idx, name in enumerate(names, 1):
+                surface = bands[name]["bot"]
+                z_ds_b, pitch_ds_b = _downsample_if_needed(surface, pitch0, max_tris)
+                pitch_ds_b = _retarget_pitch(z_ds_b, pitch_ds_b, tgt_w_mm, tgt_h_mm)
+                out = proof_dir / f"proof_after_{idx:02d}_{name}.stl"
+                _emit(out, z_ds_b, pitch_ds_b, stock_bottom - proof_base_mm, True, top_z, proof_z_exag)
+                proof_files.append(str(out))
+
+    return {
+        "ok": True,
+        "enabled": True,
+        "cam": cam_files,
+        "proof": proof_files,
+        "mesh_dir": str(mesh_dir),
+        "autopitch": {
+            "min_pitch_tool_mm": float(min_pitch_tool_mm or 0.0),
+            "max_triangles": int(cam_max_tris or 0),
+        },
+    }
+
+=====================================
+FILE: ./__init__.py
+=====================================
+# path: skills/cam_generator/__init__.py
+# desc: Package exports for CAM engine (mm-only)
+# api: __all__
+# tags: cam,package
+
+from __future__ import annotations
+__all__ = []
+=====================================
+FILE: ./depth_pass.py
+=====================================
+# path: skills/cam_engine/depth_pass.py
+# desc: Expand toolpath moves into layered step-downs
+# api: apply_depth_passes
+# tags: cam,toolpath,stepdown
+
+from __future__ import annotations
+import math
+from typing import Dict, Iterable, List
+
+__all__ = ["apply_depth_passes"]
+
+_Move = Dict[str, float]
+
+def _floors(top_z: float, min_z: float, step: float) -> List[float]:
+    if step <= 0 or top_z <= min_z:
+        return [min_z]
+    n = max(1, int(math.ceil((top_z - min_z) / step)))
+    floors = [top_z - i * step for i in range(1, n + 1)]
+    floors[-1] = min_z
+    return floors
+
+def _clamp_z(m: _Move, floor_z: float) -> _Move:
+    if "z" in m:
+        v = float(m["z"])
+        if v < floor_z:
+            m = dict(m)
+            m["z"] = floor_z
+    return m
+
+def apply_depth_passes(moves: Iterable[_Move], top_z: float, safe_z: float, stepdown_mm: float) -> List[_Move]:
+    seq = list(moves)
+    if not seq or stepdown_mm <= 0:
+        return seq
+    min_z = min(float(m.get("z", top_z)) for m in seq)
+    out: List[_Move] = []
+    for floor in _floors(top_z, min_z, stepdown_mm):
+        out.append({"mode": 0, "z": safe_z})
+        out.extend(_clamp_z(m, floor) for m in seq)
+    return out
+
+=====================================
+FILE: ./masks.py
+=====================================
+# path: cam_generator/masks.py
+# desc: Build XY masks for passes and apply radius-aware erosion
+# api: make_mask
+# tags: mask,morphology
+
+from __future__ import annotations
+
+from typing import Tuple
+
+import numpy as np
+
+__all__ = ["make_mask"]
+
+
+def _chessboard_distance(mask: np.ndarray) -> np.ndarray:
+    h, w = mask.shape
+    inf = 10**9
+    d = np.full((h, w), inf, dtype=np.int32)
+    d[~mask] = 0
+    for y in range(h):
+        for x in range(w):
+            v = d[y, x]
+            if y > 0:
+                v = min(v, d[y - 1, x] + 1)
+                if x > 0:
+                    v = min(v, d[y - 1, x - 1] + 1)
+                if x + 1 < w:
+                    v = min(v, d[y - 1, x + 1] + 1)
+            if x > 0:
+                v = min(v, d[y, x - 1] + 1)
+            d[y, x] = v
+    for y in range(h - 1, -1, -1):
+        for x in range(w - 1, -1, -1):
+            v = d[y, x]
+            if y + 1 < h:
+                v = min(v, d[y + 1, x] + 1)
+                if x > 0:
+                    v = min(v, d[y + 1, x - 1] + 1)
+                if x + 1 < w:
+                    v = min(v, d[y + 1, x + 1] + 1)
+            if x + 1 < w:
+                v = min(v, d[y, x + 1] + 1)
+            d[y, x] = v
+    return d
+
+
+def make_mask(top: np.ndarray, bot: np.ndarray, pixel_pitch_mm: float, tool_radius_mm: float, epsilon: float = 1e-4) -> np.ndarray:
+    base = (top - bot) > epsilon
+    r_px = max(0, int(round(tool_radius_mm / pixel_pitch_mm)))
+    if r_px <= 0:
+        return base
+    dist = _chessboard_distance(base)
+    return dist > r_px
+
+def rest_mask_ball(heightmap_mm: np.ndarray,
+                   pixel_pitch_mm: float,
+                   prev_tool_radius_mm: float,
+                   this_tool_radius_mm: float,
+                   tol_mm: float = 0.01) -> np.ndarray:
+    """
+    True where the smaller tool (this_tool_radius_mm) can go meaningfully deeper
+    than the larger tool (prev_tool_radius_mm) on this heightfield.
+    """
+    from skills.cam_engine.kernels import compute_center_z_ball  # local import = paste-friendly
+
+    z_prev = compute_center_z_ball(heightmap_mm, pixel_pitch_mm, prev_tool_radius_mm)
+    z_this = compute_center_z_ball(heightmap_mm, pixel_pitch_mm, this_tool_radius_mm)
+
+    # If the smaller tool's center surface is lower than the bigger tool's by tol, it can remove stock there.
+    return (z_this + float(tol_mm)) < z_prev
+=====================================
+FILE: ./registry.py
+=====================================
+from __future__ import annotations
+from typing import Callable, Dict
+
+from skills.cam_engine.strategy_rough_zslices import plan_rough
+from skills.cam_engine.strategy_raster_finish import plan_finish
+from skills.cam_engine.strategy_pencil import plan_pencil
+from skills.cam_engine.strategy_border_rect import plan_border_rect
+
+__all__ = ["get_strategy"]
+
+_REGISTRY: Dict[str, Callable[..., object]] = {
+    "rough_zslices": plan_rough,
+    "raster_finish": plan_finish,
+    "pencil": plan_pencil,
+    "border_rect": plan_border_rect,
+}
+
+def get_strategy(name: str) -> Callable[..., object]:
+    if name not in _REGISTRY:
+        raise KeyError(f"Unknown strategy '{name}'")
+    return _REGISTRY[name]
+
+=====================================
+FILE: ./strategy_pencil.py
+=====================================
+# path: cam_generator/strategy_pencil.py
+# desc: Pencil strategy placeholder
+# api: plan_pencil
+# tags: strategy,pencil
+
+from __future__ import annotations
+
+from typing import Dict, List
+
+__all__ = ["plan_pencil"]
+
+
+def plan_pencil(pass_name: str) -> List[Dict[str, float]]:
+    return []
+
+=====================================
+FILE: ./border.py
+=====================================
+# path: skills/cam_engine/border.py
+# desc: Generate rectangular border toolpaths around carving area
+# api: generate_rect_border_moves
+# tags: border,toolpath,cam
+
+from __future__ import annotations
+from typing import Dict, List, Tuple
+
+__all__ = ["generate_rect_border_moves"]
+
+_Move = Dict[str, float]
+Bounds = Tuple[float, float, float, float]
+
+def _rect_path(xmin: float, xmax: float, ymin: float, ymax: float, z: float, feed: float, ccw: bool) -> List[_Move]:
+    """Generate moves for a single rectangular path."""
+    pts = [(xmin, ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax)]
+    if not ccw:
+        pts = pts[::-1]
+    moves: List[_Move] = []
+    for (x, y) in pts + [pts[0]]:  # close the loop
+        moves.append({"mode": 1, "x": float(x), "y": float(y), "z": float(z), "f": float(feed)})
+    return moves
+
+def generate_rect_border_moves(bounds_mm: Bounds,
+                               inset_mm: float,
+                               width_mm: float,
+                               target_depth_mm: float,
+                               stepover_mm: float,
+                               feed_mm_min: float,
+                               climb_ccw: bool = True) -> List[_Move]:
+    """
+    Generate concentric rectangular border toolpaths.
+    
+    Args:
+        bounds_mm: (xmin, xmax, ymin, ymax) of the carving area
+        inset_mm: Distance from carving edge to start of border (positive = outside carving)
+        width_mm: Total width of border ring
+        target_depth_mm: Depth to cut border (positive value)
+        stepover_mm: Distance between concentric border passes
+        feed_mm_min: Feed rate for cutting moves
+        climb_ccw: True for climb milling (CCW), False for conventional (CW)
+    
+    Returns:
+        List of move dictionaries for the border toolpath
+    """
+    xmin, xmax, ymin, ymax = bounds_mm
+    
+    if stepover_mm <= 0.0 or width_mm <= 0.0:
+        return []
+
+    # For outside border: start at inset_mm outside the carving area
+    # and extend width_mm further out
+    inner_border_offset = inset_mm  # distance outside carving area to start border
+    outer_border_offset = inset_mm + width_mm  # distance outside carving area to end border
+    
+    z = -abs(float(target_depth_mm))  # Ensure depth is negative
+
+    moves: List[_Move] = []
+    current_offset = inner_border_offset
+    toggle = False
+    
+    # Generate concentric rectangles from inner to outer
+    while current_offset <= outer_border_offset + 1e-9:
+        # Calculate rectangle bounds for this pass
+        # Expand the carving bounds by current_offset in all directions
+        x0 = xmin - current_offset
+        x1 = xmax + current_offset  
+        y0 = ymin - current_offset
+        y1 = ymax + current_offset
+        
+        # Ensure valid rectangle (should always be valid when expanding outward)
+        if x1 <= x0 or y1 <= y0:
+            break
+            
+        # Alternate direction for each pass to minimize tool travel
+        ccw = climb_ccw ^ toggle
+        moves.extend(_rect_path(x0, x1, y0, y1, z, feed_mm_min, ccw))
+        
+        # Move to next pass
+        current_offset += stepover_mm
+        toggle = not toggle
+        
+        # Stop if we've reached the outer boundary
+        if current_offset > outer_border_offset:
+            break
+
+    return moves
+=====================================
+FILE: ./cli.py
+=====================================
+# path: skills/cam_engine/cli.py
+# desc: Plan CAM, write G-code, and export STL meshes
+# api: run_cli
+
+from __future__ import annotations
+
+import argparse
+import json
+import traceback
+from pathlib import Path
+from typing import Any, Dict, List
+
+from skills.cam_engine.config import load_config
+from skills.cam_engine.planner import plan
+from skills.cam_engine.gcode_writer import write_gcode
+from skills.cam_engine.serialize import to_json
+from skills.cam_engine.depth_pass import apply_depth_passes
+from skills.cam_engine.stl_export import export_stl
+
+__all__ = ["run_cli", "main"]
+
+
+def _ensure_dirs(base: Path) -> Dict[str, Path]:
+    d = {
+        "project": base,
+        "input": base / "input",
+        "config": base / "config",
+        "output": base / "CAM_output",
+        "reports": base / "CAM_output" / "reports",
+    }
+    for v in d.values():
+        v.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _quantize_moves_z(moves: List[Dict[str, Any]], dz_mm: float) -> List[Dict[str, Any]]:
+    if dz_mm <= 0:
+        return moves
+    out: List[Dict[str, Any]] = []
+    inv = 1.0 / float(dz_mm)
+    for m in moves:
+        if "z" in m:
+            mm = dict(m)
+            mm["z"] = round(float(mm["z"]) * inv) / inv
+            out.append(mm)
+        else:
+            out.append(m)
+    return out
+
+
+def _emit_passes(plan_result: Dict[str, Any], cfg: Dict[str, Any], dirs: Dict[str, Path]) -> None:
+    passes = plan_result.get("passes", [])
+    for p in passes:
+        pass_cfg = next((pp for pp in cfg["passes"] if pp.get("name") == p.get("name")), {})
+        stepdown = float(pass_cfg.get("stepdown_mm", 0.0)) if isinstance(pass_cfg, dict) else 0.0
+        tool = p.get("tool", {}) or {}
+        dia_mm = float(tool.get("diameter_mm", 0.0))
+
+        if stepdown > 0.0:
+            moves = apply_depth_passes(
+                p["moves"],
+                cfg["stock"]["top_z_mm"],
+                cfg["stock"]["safe_z_mm"],
+                stepdown,
+            )
+        else:
+            moves = p["moves"]
+
+        dz = 0.005 if dia_mm and dia_mm <= 1.0 else 0.01
+        moves = _quantize_moves_z(moves, dz_mm=dz)
+
+        out_path = dirs["output"] / f"{p['name']}.{cfg['output']['extension']}"
+        write_gcode(out_path, moves, cfg["machine"], cfg["stock"])
+
+
+def run_cli() -> None:
+    parser = argparse.ArgumentParser(description="CAM v4 planner/emit")
+    parser.add_argument(
+        "--project",
+        required=True,
+        help="Path to a project folder (contains config + input image/heightmap)",
+    )
+    args = parser.parse_args()
+    project_dir = Path(args.project).resolve()
+    dirs = _ensure_dirs(project_dir)
+
+    try:
+        cfg = load_config(project_dir)
+
+        cfg.setdefault("output", {})
+        cfg["output"].setdefault("extension", "nc")
+        cfg.setdefault("stock", {})
+        cfg["stock"].setdefault("top_z_mm", float(cfg.get("origin_z_mm", 0.0)))
+        cfg["stock"].setdefault("safe_z_mm", float(cfg.get("safe_z_mm", 5.0)))
+
+        plan_result = plan(cfg)
+
+        _emit_passes(plan_result, cfg, dirs)
+
+        mesh_info = export_stl(plan_result, cfg, dirs["output"])
+
+        plan_json_path = dirs["reports"] / "plan.json"
+        with plan_json_path.open("w", encoding="utf-8") as f:
+            json.dump(to_json(plan_result), f, indent=2)
+
+        print(json.dumps({
+            "ok": True,
+            "project": str(project_dir),
+            "output_dir": str(dirs["output"]),
+            "plan_report": str(plan_json_path),
+            "stl": mesh_info,
+        }))
+
+    except Exception as e:
+        err_path = dirs["reports"] / "error.log"
+        with err_path.open("w", encoding="utf-8") as f:
+            f.write(f"{type(e).__name__}: {e}\n")
+            f.write(traceback.format_exc())
+
+        print(json.dumps({
+            "ok": False,
+            "error": str(e),
+            "error_log": str(err_path),
+        }))
+
+
+def main() -> None:
+    run_cli()
+
+
+if __name__ == "__main__":
+    main()
+
+=====================================
+FILE: ./serialize.py
+=====================================
+# path: cam_generator/serialize.py
+# desc: Create deterministic JSON summary of plan results
+# api: to_json
+# tags: json,report
+
+from __future__ import annotations
+
+from typing import Any, Dict, List
+import numpy as np
+
+__all__ = ["to_json"]
+
+def _stats(a: np.ndarray) -> Dict[str, float]:
+    a = a.astype(np.float32, copy=False)
+    return {
+        "min": float(np.min(a)),
+        "max": float(np.max(a)),
+        "mean": float(np.mean(a)),
+        "std": float(np.std(a)),
+    }
+
+def to_json(plan_result: Dict[str, Any]) -> Dict[str, Any]:
+    # Pass list is the only hard requirement
+    passes = plan_result.get("passes", []) or []
+
+    bands_json: Dict[str, Any] = {}
+    bands = plan_result.get("bands")
+    pass_bands = bands.get("pass_bands") if isinstance(bands, dict) else None
+
+    if isinstance(pass_bands, dict):
+        for p in passes:
+            name = p.get("name")
+            b = pass_bands.get(name) if name is not None else None
+            if isinstance(b, dict) and all(k in b for k in ("top", "bot", "dz")):
+                bands_json[name] = {
+                    "top_stats": _stats(b["top"]),
+                    "bot_stats": _stats(b["bot"]),
+                    "dz_stats": _stats(b["dz"]),
+                }
+
+    passes_json: List[Dict[str, Any]] = []
+    for p in passes:
+        passes_json.append({
+            "name": p.get("name"),
+            "role": p.get("role"),
+            "tool": p.get("tool"),
+            "move_count": int(len(p.get("moves", []))),
+        })
+
+    out = {
+        "project_name": plan_result.get("project_name"),
+        "pixel_pitch_mm": float(plan_result.get("pixel_pitch_mm", 0.0)),
+        "passes": passes_json,
+    }
+    if bands_json:
+        out["bands"] = bands_json
+    return out
+
+=====================================
+FILE: ./envelopes.py
+=====================================
+from __future__ import annotations
+from typing import Dict
+import numpy as np
+from collections import deque
+
+__all__ = ["compute_envelope"]
+
+def _max_filter1d_same(v: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return v.astype(np.float32, copy=False)
+    k = int(k) | 1
+    pad = k // 2
+    vv = np.pad(v.astype(np.float32, copy=False), (pad, pad), mode="edge")
+    out = np.empty(v.shape[0], dtype=np.float32)
+    q: deque[int] = deque()
+    for i in range(vv.shape[0]):
+        while q and vv[q[-1]] <= vv[i]:
+            q.pop()
+        q.append(i)
+        left = i - k + 1
+        if q[0] < left:
+            q.popleft()
+        if i >= k - 1:
+            out[i - (k - 1)] = vv[q[0]]
+    return out
+
+def _dilate2d(a: np.ndarray, k: int) -> np.ndarray:
+    if k <= 1:
+        return a.astype(np.float32, copy=False)
+    a = a.astype(np.float32, copy=False)
+    H, W = a.shape
+    tmp = np.empty_like(a, dtype=np.float32)
+    out = np.empty_like(a, dtype=np.float32)
+    for y in range(H):
+        tmp[y, :] = _max_filter1d_same(a[y, :], k)
+    for x in range(W):
+        out[:, x] = _max_filter1d_same(tmp[:, x], k)
+    return out
+
+def compute_envelope(surface_mm: np.ndarray, tool: Dict[str, object], pixel_pitch_mm: float) -> np.ndarray:
+    """
+    Conservative 'can't-go-below' surface for rough-safety.
+    Flat-style dilation with radius ~= tool radius (safe over-approx for any tool).
+    """
+    diam = float((tool or {}).get("diameter_mm") or 0.0)
+    r_px = max(1, int(round(0.5 * diam / max(1e-9, pixel_pitch_mm))))
+    k = 2 * r_px + 1
+    return _dilate2d(surface_mm, k)
+
+=====================================
+FILE: ./heightmap_io.py
+=====================================
+# path: cam_generator/heightmap_io.py
+# desc: Load 8/16-bit PNG heightmap and map to surface Z in mm with floor removal and gamma scaling
+# api: load_heightmap
+# tags: image,io,mm
+
+from __future__ import annotations
+from pathlib import Path
+from typing import Any, Dict, Tuple, Optional
+
+import numpy as np
+from PIL import Image
+
+def _read_image_norm01_and_bitdepth(path: Path) -> Tuple[np.ndarray, int]:
+    """
+    Returns (normalized_float32_array_in_[0,1], bit_depth={8|16}).
+    Single open, no redundant I/O.
+    """
+    im = Image.open(path)
+    if im.mode == "I;16":
+        arr = np.array(im, dtype=np.uint16)
+        mn = float(arr.min()); mx = float(arr.max()); rng = mx - mn
+        if rng <= 0:
+            return np.zeros_like(arr, dtype=np.float32), 16
+        norm = (arr.astype(np.float32) - mn) / rng
+        return norm.astype(np.float32), 16
+
+    # Fallback to 8-bit grayscale
+    if im.mode != "L":
+        im = im.convert("L")
+    arr = np.array(im, dtype=np.uint8)
+    norm = (arr.astype(np.float32) / 255.0).astype(np.float32)
+    return norm, 8
+
+def _apply_floor_and_gamma(norm01: np.ndarray,
+                          floor_gray: float,
+                          gamma: float,
+                          bit_depth: int) -> np.ndarray:
+    if bit_depth == 16:
+        gray_values = norm01 * 65535.0
+        max_gray = 65535.0
+    else:
+        gray_values = norm01 * 255.0
+        max_gray = 255.0
+
+    floor_mask = gray_values <= floor_gray  # not used further, but keep behavior readable
+    adjusted_values = np.maximum(gray_values - floor_gray, 0.0)
+
+    remaining_range = max_gray - floor_gray
+    norm_adjusted = adjusted_values / remaining_range if remaining_range > 0 else np.zeros_like(adjusted_values)
+
+    if gamma != 1.0:
+        norm_adjusted = np.power(norm_adjusted, gamma)
+
+    return norm_adjusted.astype(np.float32)
+
+def _to_surface(norm01: np.ndarray,
+                max_depth_mm: float,
+                top_z_mm: float,
+                white_is_high: bool,
+                floor_gray: float = 0.0,
+                gamma: float = 1.0,
+                bit_depth: int = 8) -> np.ndarray:
+    if floor_gray > 0.0 or gamma != 1.0:
+        norm01 = _apply_floor_and_gamma(norm01, floor_gray, gamma, bit_depth)
+
+    v = norm01 if white_is_high else (1.0 - norm01)
+    depth = (1.0 - v) * float(max_depth_mm)
+    return (float(top_z_mm) - depth).astype(np.float32)
+
+def _derive_pixel_pitch_mm_from_target(size_px: Tuple[int,int],
+                                       target_size_mm: Optional[Dict[str, float]]) -> float:
+    if not target_size_mm:
+        raise ValueError("pixel_pitch_mm <= 0 but heightmap.target_size_mm not provided")
+    H, W = int(size_px[0]), int(size_px[1])
+    wmm = float(target_size_mm.get("width_mm", 0.0) or 0.0)
+    hmm = float(target_size_mm.get("height_mm", 0.0) or 0.0)
+    if wmm <= 0.0 and hmm <= 0.0:
+        raise ValueError("target_size_mm must include width_mm or height_mm (>0)")
+    if wmm > 0.0 and hmm > 0.0:
+        pitch_w = wmm / float(W)
+        pitch_h = hmm / float(H)
+        return min(pitch_w, pitch_h)
+    if wmm > 0.0:
+        return wmm / float(W)
+    return hmm / float(H)
+
+def load_heightmap(cfg: Dict[str, Any]) -> Dict[str, Any]:
+    hm_cfg = cfg.get("heightmap", {})
+    img_path = hm_cfg.get("image_path") or cfg.get("paths", {}).get("image")
+    if not img_path:
+        raise ValueError("heightmap.image_path is required (or paths.image)")
+    img_path = str(img_path)
+    path = Path(img_path)
+
+    max_depth_mm = float(hm_cfg["max_depth_mm"])
+    top_z_mm = float(cfg.get("stock", {}).get("top_z_mm", 0.0))
+    white_is_high = bool(hm_cfg.get("white_is_high", True))
+    floor_gray = float(hm_cfg.get("floor_gray", 0.0))
+    gamma = float(hm_cfg.get("gamma", 1.0))
+
+    norm01, bit_depth = _read_image_norm01_and_bitdepth(path)
+    z_mm = _to_surface(norm01, max_depth_mm, top_z_mm, white_is_high, floor_gray, gamma, bit_depth)
+    H, W = z_mm.shape
+
+    pitch_cfg = float(hm_cfg.get("pixel_pitch_mm", 0.0) or 0.0)
+    if pitch_cfg > 0.0:
+        pitch = pitch_cfg
+    else:
+        pitch = _derive_pixel_pitch_mm_from_target((H, W), hm_cfg.get("target_size_mm"))
+
+    width_mm, height_mm = W * pitch, H * pitch
+
+    # reflect back computed values for downstream consumers
+    hm_cfg["pixel_pitch_mm"] = float(pitch)
+    hm_cfg["bounds_mm"] = (0.0, width_mm, 0.0, height_mm)
+    hm_cfg["size_px"] = (H, W)
+    hm_cfg["size_mm"] = (width_mm, height_mm)
+    cfg["heightmap"] = hm_cfg
+
+    return {
+        "z_mm": z_mm,
+        "pixel_pitch_mm": float(pitch),
+        "size_px": (H, W),
+        "size_mm": (width_mm, height_mm),
+    }
+
+=====================================
+FILE: ./kernels.py
+=====================================
+# skills/cam_engine/kernels.py
+# purpose: contact kernel utilities (tool-center Z from heightmap)
+# api: compute_center_z_ball
+# deps: numpy only
+
+from __future__ import annotations
+from typing import Tuple
+import math
+import numpy as np
+from functools import lru_cache
+
+
+__all__ = ["compute_center_z_ball", "scallop_to_stepover_mm"]
+
+def scallop_to_stepover_mm(tool_radius_mm: float, scallop_mm: float) -> float:
+    """Approximate stepover from desired scallop height.
+    h ≈ s^2 / (8r)  =>  s ≈ sqrt(8 r h)
+    """
+    if tool_radius_mm <= 0 or scallop_mm <= 0:
+        return 0.0
+    return float(math.sqrt(8.0 * tool_radius_mm * scallop_mm))
+
+@lru_cache(maxsize=64)
+def _build_spherical_cap_kernel_mm(tool_radius_mm: float, pitch_mm: float) -> Tuple[np.ndarray, int]:
+    """Cached spherical-cap kernel. Keyed by (tool_radius_mm, pitch_mm)."""
+    if tool_radius_mm <= 0 or pitch_mm <= 0:
+        raise ValueError("tool_radius_mm and pitch_mm must be > 0")
+    r_px = int(math.ceil(tool_radius_mm / pitch_mm))
+    if r_px < 1:
+        r_px = 1
+    ys, xs = np.mgrid[-r_px:r_px+1, -r_px:r_px+1]
+    d2_px = xs*xs + ys*ys
+    r2_px = float(r_px * r_px)
+    inside = d2_px.astype(np.float32) <= r2_px
+    kernel = np.full((2*r_px+1, 2*r_px+1), -np.inf, dtype=np.float32)
+    d_mm = np.sqrt(d2_px.astype(np.float32)) * float(pitch_mm)
+    r_mm = float(tool_radius_mm)
+    z_offset = np.sqrt(np.maximum(0.0, r_mm*r_mm - d_mm*d_mm), dtype=np.float32)
+    kernel[inside] = z_offset[inside]
+    return kernel, r_px
+
+def compute_center_z_ball(heightmap_mm: np.ndarray, pitch_mm: float, tool_radius_mm: float) -> np.ndarray:
+    """Compute tool-center Z map for a ball-nose cutter by grayscale dilation with a spherical-cap kernel.
+
+    Inputs:
+      heightmap_mm: 2D float32 array, Z in mm (work coordinates)
+      pitch_mm:     mm per pixel
+      tool_radius_mm: ball radius in mm
+
+    Output:
+      z_center_mm: 2D float32 array (same shape), tool-center Z to reproduce the target without gouge.
+    """
+    if heightmap_mm.ndim != 2:
+        raise ValueError("heightmap_mm must be 2D")
+    h = np.asarray(heightmap_mm, dtype=np.float32)
+    kernel, r_px = _build_spherical_cap_kernel_mm(tool_radius_mm, pitch_mm)
+
+    # Pad with -inf so max() ignores off-image contributions
+    pad = int(r_px)
+    src = np.pad(h, ((pad, pad), (pad, pad)), mode="constant", constant_values=-np.inf)
+
+    # Dilation via sliding-window max with additive kernel.
+    # We avoid external deps; this is O(r^2 * HW) but fast enough for 100–400mm at typical pitches.
+    out = np.full_like(h, -np.inf, dtype=np.float32)
+    kh, kw = kernel.shape
+    for dy in range(kh):
+        ys = dy
+        ye = ys + h.shape[0]
+        row = src[ys:ye, :]  # view
+        for dx in range(kw):
+            kz = kernel[dy, dx]
+            if np.isneginf(kz):
+                continue
+            xs = dx
+            xe = xs + h.shape[1]
+            candidate = row[:, xs:xe] + kz
+            # out = maximum(out, candidate)
+            mask = candidate > out
+            if mask.any():
+                out[mask] = candidate[mask]
+
+    # Replace any residual -inf (shouldn't occur) with original heights
+    bad = ~np.isfinite(out)
+    if bad.any():
+        out[bad] = h[bad]
+    return out
+
+=====================================
+FILE: ./gcode_writer.py
+=====================================
+# path: cam_generator/gcode_writer.py
+# desc: Write GRBL-style G-code from moves with compact formatting
+# api: write_gcode
+# tags: gcode,io
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Dict, Iterable, List
+
+__all__ = ["write_gcode"]
+
+def _fmt(v: float) -> str:
+    s = f"{v:.3f}"
+    s = s.rstrip("0").rstrip(".")
+    return s if s else "0"
+
+def _header(machine: Dict[str, object], safe_z: float) -> List[str]:
+    # G21 mm, G90 absolute, G94 feed per minute, G17 XY plane, retract to safe Z
+    return ["G21", "G90", "G94", "G17", f"G0 Z{_fmt(safe_z)}"]
+
+def write_gcode(path: Path,
+                moves: Iterable[Dict[str, float]],
+                machine: Dict[str, object],
+                stock: Dict[str, float]) -> None:
+    """
+    Minimal, side-effect-free G-code writer.
+    - Ignores unknown fields in moves.
+    - Writes only changes (modal & coordinate de-dup).
+    - Always starts and ends at safe Z.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe_z = float(stock["safe_z_mm"])
+    lines: List[str] = _header(machine, safe_z)
+
+    last_mode = None
+    last_x = last_y = last_z = None
+    last_f = None
+
+    for m in moves:
+        mode = int(m["mode"])
+        x = float(m.get("x")) if "x" in m else None
+        y = float(m.get("y")) if "y" in m else None
+        z = float(m.get("z")) if "z" in m else None
+        f = int(m.get("f")) if "f" in m else None
+
+        parts: List[str] = []
+
+        if mode != last_mode:
+            parts.append("G0" if mode == 0 else "G1")
+            last_mode = mode
+
+        if x is not None and (last_x is None or abs(x - last_x) > 1e-9):
+            parts.append(f"X{_fmt(x)}"); last_x = x
+        if y is not None and (last_y is None or abs(y - last_y) > 1e-9):
+            parts.append(f"Y{_fmt(y)}"); last_y = y
+        if z is not None and (last_z is None or abs(z - last_z) > 1e-9):
+            parts.append(f"Z{_fmt(z)}"); last_z = z
+
+        if mode == 1 and f is not None and (last_f is None or f != last_f):
+            parts.append(f"F{f}")
+            last_f = f
+
+        if not parts:
+            # Force a Z emit (harmless no-op) to avoid blank lines
+            parts.append(f"Z{_fmt(last_z if last_z is not None else safe_z)}")
+
+        lines.append(" ".join(parts))
+
+    # Always retract to safe Z at end
+    if last_z is None or abs(last_z - safe_z) > 1e-9:
+        lines.append(f"G0 Z{_fmt(safe_z)}")
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+=====================================
+FILE: ./heightfield_solid.py
+=====================================
+# path: skills/cam_engine/heightfield_solid.py
+# desc: Triangulate a heightfield to a watertight solid with optional base/skirt
+# api: triangulate_heightfield
+
+from __future__ import annotations
+
+from typing import Generator, Iterable, Tuple
+
+import numpy as np
+
+__all__ = ["triangulate_heightfield"]
+
+_F3 = Tuple[float, float, float]
+_Tri = Tuple[_F3, _F3, _F3]
+
+
+def _p(x: float, y: float, z: float) -> _F3:
+    return (float(x), float(y), float(z))
+
+
+def _top_tris(z: np.ndarray, pitch: float) -> Generator[_Tri, None, None]:
+    h, w = z.shape
+    for j in range(h - 1):
+        y = j * pitch
+        y1 = (j + 1) * pitch
+        z0 = z[j]
+        z1 = z[j + 1]
+        for i in range(w - 1):
+            x = i * pitch
+            x1 = (i + 1) * pitch
+            a = _p(x, y, z0[i])
+            b = _p(x1, y, z0[i + 1])
+            c = _p(x1, y1, z1[i + 1])
+            d = _p(x, y1, z1[i])
+            # consistent winding (counter-clockwise outward normal)
+            yield (a, b, c)
+            yield (a, c, d)
+
+
+def _base_tris(h: int, w: int, pitch: float, zb: float) -> Generator[_Tri, None, None]:
+    # bottom face, reversed winding to point normal downward
+    for j in range(h - 1):
+        y = j * pitch
+        y1 = (j + 1) * pitch
+        for i in range(w - 1):
+            x = i * pitch
+            x1 = (i + 1) * pitch
+            a = _p(x, y, zb)
+            b = _p(x1, y, zb)
+            c = _p(x1, y1, zb)
+            d = _p(x, y1, zb)
+            yield (c, b, a)
+            yield (d, c, a)
+
+
+def _wall_side(col: np.ndarray, xs: float, ys0: float, axis: str,
+               pitch: float, zb: float, flip: bool) -> Generator[_Tri, None, None]:
+    n = col.size
+    for k in range(n - 1):
+        if axis in ("west", "east"):
+            a = _p(xs, ys0 + k * pitch, col[k])
+            d = _p(xs, ys0 + (k + 1) * pitch, col[k + 1])
+            b = _p(xs, ys0 + k * pitch, zb)
+            c = _p(xs, ys0 + (k + 1) * pitch, zb)
+        else:
+            a = _p(ys0 + k * pitch, xs, col[k])
+            d = _p(ys0 + (k + 1) * pitch, xs, col[k + 1])
+            b = _p(ys0 + k * pitch, xs, zb)
+            c = _p(ys0 + (k + 1) * pitch, xs, zb)
+        if flip:
+            yield (b, a, d)
+            yield (b, d, c)
+        else:
+            yield (a, b, c)
+            yield (a, c, d)
+
+
+def _walls(z: np.ndarray, pitch: float, zb: float) -> Generator[_Tri, None, None]:
+    h, w = z.shape
+    west = z[:, 0]
+    east = z[:, -1]
+    south = z[0, :]
+    north = z[-1, :]
+
+    yield from _wall_side(west, 0.0, 0.0, "west", pitch, zb, flip=False)
+    yield from _wall_side(east, (w - 1) * pitch, 0.0, "east", pitch, zb, flip=True)
+    yield from _wall_side(south, 0.0, 0.0, "south", pitch, zb, flip=True)
+    yield from _wall_side(north, 0.0, (h - 1) * pitch, "north", pitch, zb, flip=False)
+
+
+def _z_exaggerate(z: np.ndarray, top_z: float, k: float) -> np.ndarray:
+    if k == 1.0:
+        return z
+    # scale deltas around top_z to exaggerate relief for print proofs
+    return (top_z - (top_z - z) * float(k)).astype(np.float32, copy=False)
+
+
+def triangulate_heightfield(z_mm: np.ndarray,
+                            pixel_pitch_mm: float,
+                            base_plane_z_mm: float,
+                            add_base_and_walls: bool,
+                            top_z_mm: float,
+                            z_exaggeration: float = 1.0) -> Iterable[_Tri]:
+    """
+    Triangulate heightfield to triangles. If add_base_and_walls is True, returns a
+    watertight solid (top + walls + base).
+    """
+    z = np.asarray(z_mm, dtype=np.float32)
+    z = _z_exaggerate(z, float(top_z_mm), float(z_exaggeration))
+
+    h, w = z.shape
+    if h < 2 or w < 2:
+        return  # nothing to emit
+
+    yield from _top_tris(z, float(pixel_pitch_mm))
+
+    if add_base_and_walls:
+        yield from _base_tris(h, w, float(pixel_pitch_mm), float(base_plane_z_mm))
+        yield from _walls(z, float(pixel_pitch_mm), float(base_plane_z_mm))
+
+=====================================
+FILE: ./strategy_rough_zslices.py
+=====================================
+from __future__ import annotations
+from typing import Dict, List, Tuple
+import numpy as np
+
+__all__ = ["plan_rough"]
+
+EPS = 1e-6
+
+# ---- knobs ----
+BRIDGE_GAP_MM = 2.0   # keep-down bridge gaps <= this (feed at band_top)
+X_TOL_MM      = 1.0   # decimator: min X advance to keep a point
+Z_TOL_MM      = 0.05  # decimator: keep if |ΔZ| >= this
+
+def _scan_indices(n: int, step: int) -> List[int]:
+    out = list(range(0, n, max(1, step)))
+    if out[-1] != n - 1:
+        out.append(n - 1)
+    return out
+
+def _spans(mask: np.ndarray) -> List[Tuple[int, int, int, int]]:
+    """
+    Return [(xs, xe, gs, ge), ...] per row.
+    xs..xe inclusive is a 'material' span (mask True).
+    gs..ge is the following gap (mask False), or (-1,-1) at end.
+    """
+    n = mask.size
+    spans = []
+    i = 0
+    while i < n:
+        while i < n and not mask[i]:
+            i += 1
+        if i >= n:
+            break
+        xs = i
+        while i < n and mask[i]:
+            i += 1
+        xe = i - 1
+        gs = i
+        while i < n and not mask[i]:
+            i += 1
+        ge = i - 1 if gs < n else -1
+        spans.append((xs, xe, gs if gs < n else -1, ge))
+    return spans
+
+def plan_rough(
+    pass_name: str,
+    band_top: np.ndarray,
+    band_bot: np.ndarray,
+    pixel_pitch_mm: float,
+    stepover_mm: float,
+    stepdown_mm: float,          # kept for API; not used for per-pixel slope limiting
+    safe_z_mm: float,
+    feed_mm_per_min: float,
+    plunge_mm_per_min: float,
+) -> List[Dict[str, float]]:
+    """
+    Roughing with:
+      • Serpentine rows.
+      • Single-sweep per span following band_bot (no per-pixel stepdown serrations).
+      • Short gaps bridged keep-down at band_top (feed), not retract.
+      • X/Z decimator to collapse redundant points.
+    """
+    assert band_top.shape == band_bot.shape, "band top/bot mismatch"
+    H, W = band_top.shape
+    step_px = max(1, int(round(stepover_mm / max(1e-9, pixel_pitch_mm))))
+    bridge_gap_px = int(round(BRIDGE_GAP_MM / max(1e-9, pixel_pitch_mm)))
+
+    rows = _scan_indices(H, step_px)
+    moves: List[Dict[str, float]] = []
+
+    for ri, y in enumerate(rows):
+        row_mask = (band_top[y] - band_bot[y]) > EPS
+        if not np.any(row_mask):
+            continue
+
+        spans = _spans(row_mask)
+        forward = (ri % 2 == 0)
+        yi_mm = y * pixel_pitch_mm
+
+        # serpentine span order
+        span_idxs = range(len(spans)) if forward else range(len(spans) - 1, -1, -1)
+        for si in span_idxs:
+            xs, xe, gs, ge = spans[si]
+            if not forward:
+                xs, xe = xe, xs  # traverse reversed
+
+            # ---- enter span (retract then plunge) ----
+            start_x = xs
+            x0_mm = start_x * pixel_pitch_mm
+            z0 = float(np.clip(band_bot[y, start_x], band_bot[y, start_x], band_top[y, start_x]))
+            moves.append({"mode": 0, "x": x0_mm, "y": yi_mm, "z": safe_z_mm, "f": 0})
+            moves.append({"mode": 1, "x": x0_mm, "y": yi_mm, "z": z0, "f": plunge_mm_per_min})
+
+            # ---- cut span with decimation ----
+            rng = range(xs, xe + (1 if xs <= xe else -1), 1 if xs <= xe else -1)
+            last_x_mm = x0_mm
+            last_z = z0
+            for x in rng:
+                x_mm = x * pixel_pitch_mm
+                z_des = float(np.clip(band_bot[y, x], band_bot[y, x], band_top[y, x]))
+                if (abs(x_mm - last_x_mm) < X_TOL_MM) and (abs(z_des - last_z) < Z_TOL_MM):
+                    continue
+                moves.append({"mode": 1, "x": x_mm, "y": yi_mm, "z": z_des, "f": feed_mm_per_min})
+                last_x_mm, last_z = x_mm, z_des
+
+            # ensure span end is emitted
+            end_x = xe
+            end_x_mm = end_x * pixel_pitch_mm
+            end_z = float(np.clip(band_bot[y, end_x], band_bot[y, end_x], band_top[y, end_x]))
+            if (abs(end_x_mm - last_x_mm) >= 1e-9) or (abs(end_z - last_z) >= 1e-9):
+                moves.append({"mode": 1, "x": end_x_mm, "y": yi_mm, "z": end_z, "f": feed_mm_per_min})
+
+            # ---- link to next span ----
+            if gs != -1 and ge != -1:
+                gap_len = ge - gs + 1
+                if gap_len <= bridge_gap_px:
+                    # single-segment keep-down bridge at band_top (feed)
+                    br_start = end_x
+                    br_end = ge if forward else gs
+                    z_top_start = float(np.clip(band_top[y, br_start], band_bot[y, br_start], band_top[y, br_start]))
+                    z_top_end   = float(np.clip(band_top[y, br_end],   band_bot[y, br_end],   band_top[y, br_end]))
+                    # raise to local top if needed
+                    if abs(z_top_start - last_z) > 1e-9:
+                        moves.append({"mode": 1, "x": end_x_mm, "y": yi_mm, "z": z_top_start, "f": feed_mm_per_min})
+                    moves.append({"mode": 1, "x": br_end * pixel_pitch_mm, "y": yi_mm, "z": z_top_end, "f": feed_mm_per_min})
+                else:
+                    # long gap: retract & rapid to the start of next span
+                    next_x = gs if forward else ge
+                    moves.append({"mode": 0, "x": next_x * pixel_pitch_mm, "y": yi_mm, "z": safe_z_mm, "f": 0})
+
+        # end of row: retract
+        last_end = spans[-1][1] if forward else spans[0][0]
+        moves.append({"mode": 0, "x": last_end * pixel_pitch_mm, "y": yi_mm, "z": safe_z_mm, "f": 0})
+
+    return moves
+
+=====================================
+FILE: ./config.py
+=====================================
+# path: skills/cam_engine/config.py
+# desc: Load job/passes and expose normalized run config including STL options
+# api: load_config
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Mapping
+
+import yaml
+
+__all__ = ["load_config"]
+
+
+@dataclass(frozen=True)
+class _Paths:
+    base: Path
+    input_image: Path
+    passes_yaml: Path
+    job_yaml: Path
+    output_dir: Path
+    reports_dir: Path
+
+
+def _paths(base: Path) -> _Paths:
+    return _Paths(
+        base=base,
+        input_image=base / "input" / "image.png",
+        passes_yaml=base / "config" / "passes.yaml",
+        job_yaml=base / "config" / "job_config.yaml",
+        output_dir=base / "CAM_output",
+        reports_dir=base / "CAM_output" / "reports",
+    )
+
+
+def _load_yaml(p: Path) -> Dict[str, Any]:
+    with open(p, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    if not isinstance(data, dict):
+        raise ValueError(f"YAML root must be a mapping: {p}")
+    return data
+
+
+def _merge_passes(run_list: List[str], lib: Mapping[str, Any], overrides: Mapping[str, Any]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for name in run_list:
+        base = lib.get(name)
+        if not isinstance(base, Mapping):
+            raise ValueError(f"Pass '{name}' not found in passes.yaml")
+        merged = dict(base)
+        ov = overrides.get(name, {})
+        if not isinstance(ov, Mapping):
+            ov = {}
+        merged.update(ov)
+        merged["name"] = name
+        out.append(merged)
+    return out
+
+
+def _validate(cfg: Dict[str, Any], paths: _Paths) -> Dict[str, Any]:
+    if not paths.input_image.exists():
+        raise FileNotFoundError(str(paths.input_image))
+    if not paths.passes_yaml.exists():
+        raise FileNotFoundError(str(paths.passes_yaml))
+    if not paths.job_yaml.exists():
+        raise FileNotFoundError(str(paths.job_yaml))
+    if "passes" not in cfg or not isinstance(cfg["passes"], dict):
+        raise ValueError("passes.yaml must contain a 'passes' mapping")
+    if "passes" not in cfg["job"] or not isinstance(cfg["job"]["passes"], list):
+        raise ValueError("job_config.yaml must contain a 'passes' list")
+    return cfg
+
+
+def load_config(project_dir: Path) -> Dict[str, Any]:
+    paths = _paths(project_dir)
+    passes_yaml = _load_yaml(paths.passes_yaml)
+    job_yaml = _load_yaml(paths.job_yaml)
+
+    cfg = {
+        "paths": {
+            "base": str(paths.base),
+            "image": str(paths.input_image),
+            "passes_yaml": str(paths.passes_yaml),
+            "job_yaml": str(paths.job_yaml),
+            "output_dir": str(paths.output_dir),
+            "reports_dir": str(paths.reports_dir),
+        },
+        "passes": passes_yaml,
+        "job": job_yaml,
+    }
+    _ = _validate(cfg, paths)
+
+    run_passes = _merge_passes(
+        cfg["job"]["passes"],
+        cfg["passes"]["passes"],
+        cfg["job"].get("overrides", {}),
+    )
+
+    out_ext = cfg["job"].get("output", {}).get("extension", "nc")
+
+    hm_job = cfg["job"]["heightmap"]
+    heightmap_cfg: Dict[str, Any] = {
+        "image_path": str(paths.input_image),
+        "pixel_pitch_mm": float(hm_job.get("pixel_pitch_mm", 0.0) or 0.0),
+        "target_size_mm": dict(hm_job.get("target_size_mm", {})),
+        "max_depth_mm": float(hm_job["max_depth_mm"]),
+        "carve_threshold_mm": float(hm_job.get("carve_threshold_mm", 0.0)),
+        "white_is_high": bool(hm_job.get("white_is_high", True)),
+        "floor_gray": float(hm_job.get("floor_gray", 0.0)),
+        "gamma": float(hm_job.get("gamma", 1.0)),
+    }
+
+    stock_cfg = {
+        "top_z_mm": float(cfg["job"]["stock"]["top_z_mm"]),
+        "safe_z_mm": float(cfg["job"]["stock"]["safe_z_mm"]),
+    }
+    machine_cfg = {
+        "units": cfg["job"]["machine"].get("units", "mm"),
+        "gcode_dialect": cfg["job"]["machine"].get("gcode_dialect", "grbl"),
+        "origin": cfg["job"]["machine"].get("origin", "lower_left"),
+        "work_offset_mm": dict(cfg["job"]["machine"].get("work_offset_mm", {"x": 0.0, "y": 0.0, "z": 0.0})),
+    }
+
+    # STL options: CAM + PROOF + AUTOPITCH(always on)
+    stl_cfg = dict(cfg["job"].get("stl", {}))
+    # CAM controls
+    stl_cfg.setdefault("enable", True)
+    stl_cfg.setdefault("per_band", True)
+    stl_cfg.setdefault("add_skirt", True)
+    stl_cfg.setdefault("z_exaggeration", 1.0)
+    stl_cfg.setdefault("base_mm_last", 0.0)
+    stl_cfg.setdefault("max_triangles", 0)           # 0 = unlimited
+    stl_cfg.setdefault("crop_changed", True)
+    stl_cfg.setdefault("crop_eps_mm", 0.01)
+    stl_cfg.setdefault("crop_margin_px", 4)
+
+    # AUTOPITCH hints (no enable flag; always on)
+    autop = dict(stl_cfg.get("autopitch", {}))
+    # If you know which pass is the finest, name it here; otherwise we auto-pick by smallest tool diameter.
+    autop.setdefault("finest_pass_name", None)
+    # Used only if we cannot find a stepover on that pass.
+    autop.setdefault("default_stepover_frac", 0.30)
+    stl_cfg["autopitch"] = autop
+
+    # PROOF controls
+    proof_cfg = dict(stl_cfg.get("proof", {}))
+    proof_cfg.setdefault("enable", True)
+    proof_cfg.setdefault("target_size_mm", {"width": 200.0})
+    proof_cfg.setdefault("add_skirt", True)
+    proof_cfg.setdefault("z_exaggeration", 1.25)
+    proof_cfg.setdefault("base_mm", 6.0)
+    proof_cfg.setdefault("per_band", False)
+    proof_cfg.setdefault("max_triangles", 2_000_000)
+    stl_cfg["proof"] = proof_cfg
+
+    return {
+        "project_name": cfg["job"].get("project_name", paths.base.name),
+        "paths": cfg["paths"],
+        "heightmap": heightmap_cfg,
+        "stock": stock_cfg,
+        "machine": machine_cfg,
+        "output": {"extension": out_ext},
+        "passes": run_passes,
+        "stl": stl_cfg,
+    }
+
+
+=====================================
+PROJECT STRUCTURE
+=====================================
+.
+├── bands.py
+├── border.py
+├── cli.py
+├── config.py
+├── depth_pass.py
+├── envelopes.py
+├── gcode_writer.py
+├── heightfield_solid.py
+├── heightmap_io.py
+├── __init__.py
+├── kernels.py
+├── __main__.py
+├── masks.py
+├── planner.py
+├── registry.py
+├── serialize.py
+├── stl_export.py
+├── stl_writer.py
+├── strategy_border_rect.py
+├── strategy_pencil.py
+├── strategy_raster_finish.py
+└── strategy_rough_zslices.py
+
+1 directory, 22 files

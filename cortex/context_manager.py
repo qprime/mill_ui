@@ -10,7 +10,7 @@ from cortex.personas.personas_manager import get_persona
 # --- Always-injected file logic unchanged ---
 _ALWAYS_INCLUDE_FILES = """
 {
-    "memories/living_truths/cliff.mind.md": true,
+    "memories/living_truths/cliff.mind.md": false,
     "README.md": false,
     "SOME_OTHER_FILE.md": false
 }
@@ -51,11 +51,6 @@ def context_for_development(persona, chat_id, headers_only, root_dir, persona_ca
         sidecar_context = load_sidecar(chat_id, persona)
         if sidecar_context:
             blocks.append(sidecar_context)
-    # Project graph
-    project_graph_context = build_project_graph(root_dir)
-    if project_graph_context:
-        # Formatting, see original for details
-        blocks.append(json.dumps(project_graph_context, indent=2))
     # Metadata
     metadata_context, stats = fetch_metadata(root_dir=root_dir)
     if metadata_context:

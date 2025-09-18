@@ -191,6 +191,11 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
         type=float,
         help="Tab height in mm when tabs are enabled",
     )
+    parser.add_argument(
+        "--profile-cut-through-mm",
+        type=float,
+        help="Extra depth (mm) for profile passes to guarantee cut-through",
+    )
     return parser.parse_args(argv)
 
 
@@ -261,25 +266,39 @@ def main(argv: List[str]) -> int:
     profile_opts: Dict[str, Any] = {}
 
     # Layout defaults
-    if "onion_skin_mm" in profile_cfg:
-        try:
-            val = float(profile_cfg.get("onion_skin_mm", 0.0))
-            if val > 0.0:
-                profile_opts["onion_skin_mm"] = val
-        except Exception:
-            pass
-    tabs_cfg_layout = profile_cfg.get("tabs") if isinstance(profile_cfg.get("tabs"), dict) else None
-    if tabs_cfg_layout:
-        try:
-            cnt = int(tabs_cfg_layout.get("count", 0) or 0)
-        except Exception:
-            cnt = 0
-        if cnt > 0:
+    if isinstance(profile_cfg, dict):
+        if "onion_skin_mm" in profile_cfg:
             try:
-                height = float(tabs_cfg_layout.get("height_mm", 3.0))
+                val = float(profile_cfg.get("onion_skin_mm", 0.0))
+                if val > 0.0:
+                    profile_opts["onion_skin_mm"] = val
             except Exception:
-                height = 3.0
-            profile_opts["tabs"] = {"count": cnt, "height_mm": height}
+                pass
+        tabs_cfg_layout = profile_cfg.get("tabs") if isinstance(profile_cfg.get("tabs"), dict) else None
+        if tabs_cfg_layout:
+            try:
+                cnt = int(tabs_cfg_layout.get("count", 0) or 0)
+            except Exception:
+                cnt = 0
+            if cnt > 0:
+                try:
+                    height = float(tabs_cfg_layout.get("height_mm", 3.0))
+                except Exception:
+                    height = 3.0
+                tabs_entry = {"count": cnt, "height_mm": height}
+                if "width_mm" in tabs_cfg_layout:
+                    try:
+                        tabs_entry["width_mm"] = float(tabs_cfg_layout["width_mm"])
+                    except Exception:
+                        pass
+                profile_opts["tabs"] = tabs_entry
+        if "cut_through_mm" in profile_cfg:
+            try:
+                val = float(profile_cfg.get("cut_through_mm", 0.0))
+                if val > 0.0:
+                    profile_opts["cut_through_mm"] = val
+            except Exception:
+                pass
 
     # CLI overrides
     onion_cli_positive = False
@@ -315,10 +334,20 @@ def main(argv: List[str]) -> int:
             tabs_from_cli["height_mm"] = height_override
         else:
             profile_opts.setdefault("tabs", {})["height_mm"] = height_override
+    if tabs_from_cli and "width_mm" in profile_opts.get("tabs", {}):
+        tabs_from_cli.setdefault("width_mm", profile_opts["tabs"]["width_mm"])
     if tabs_from_cli:
-        height = tabs_from_cli.get("height_mm", profile_opts.get("tabs", {}).get("height_mm", 3.0))
-        tabs_from_cli.setdefault("height_mm", height)
         profile_opts["tabs"] = tabs_from_cli
+
+    if args.profile_cut_through_mm is not None:
+        try:
+            val = float(args.profile_cut_through_mm)
+        except Exception:
+            val = 0.0
+        if val > 0.0:
+            profile_opts["cut_through_mm"] = val
+        else:
+            profile_opts.pop("cut_through_mm", None)
 
     if "tabs" in profile_opts:
         try:

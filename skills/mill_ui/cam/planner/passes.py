@@ -251,6 +251,10 @@ def plan_passes(
             tabs_enabled = int(tabs_opts.get("count", 0) or 0) > 0
         except Exception:
             tabs_enabled = False
+    try:
+        cut_through_mm = max(0.0, float(profile_opts.get("cut_through_mm", 0.0)))
+    except Exception:
+        cut_through_mm = 0.0
 
     use_profile_options = onion_skin_mm > 0.0 or tabs_enabled
     merge_shared_edges = MERGE_SHARED_EDGES and not use_profile_options
@@ -352,7 +356,7 @@ def plan_passes(
             t = _pick_for_profile(tool_db, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
             p = _get_or_make_pass("profile", t)
             setup: Setup = p["setup"]
-            depth = float(rec.get("depth_mm", 0.0))
+            depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
             w = float((rec.get("geometry") or {}).get("w_mm", 0.0))
             h = float((rec.get("geometry") or {}).get("h_mm", 0.0))
             shp = _rect_shape(w + t.diameter, h + t.diameter, _ensure_center(rec))  # outside offset
@@ -417,6 +421,7 @@ def plan_passes(
                         float(next(rec for rec in rect_profiles if (rec.get("id") or "") == a.rect_id).get("depth_mm", 0.0)),
                         float(next(rec for rec in rect_profiles if (rec.get("id") or "") == b.rect_id).get("depth_mm", 0.0)),
                     )
+                    depth += cut_through_mm
                     p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
                     p["count"] += 1
                     merged_seams_count += 1
@@ -440,7 +445,7 @@ def plan_passes(
                 x0, x1 = e.a, e.b
                 shp = Shape2D([Vec2(x0, y_off), Vec2(x1, y_off)])
 
-            depth = float(next(rec for rec in rect_profiles if (rec.get("id") or "") == e.rect_id).get("depth_mm", 0.0))
+            depth = float(next(rec for rec in rect_profiles if (rec.get("id") or "") == e.rect_id).get("depth_mm", 0.0)) + cut_through_mm
             p["moves"] += profile_outline(shp, setup, depth=depth, step_down=_stepdown_for_tool(t))
             p["count"] += 1
 
@@ -465,7 +470,7 @@ def plan_passes(
             continue
 
         shp = circle_shape(Vec2(cx, cy), r)
-        depth = float(rec.get("depth_mm", 0.0))
+        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
         p["moves"] += _profile_moves_with_options(
             shp,
             setup,
@@ -517,7 +522,7 @@ def plan_passes(
         "notes": note,
         "merged_seams": merged_seams_count,
     }
-    if use_profile_options:
+    if use_profile_options or cut_through_mm > 0.0:
         opts_summary: Dict[str, Any] = {}
         if onion_skin_mm > 0.0:
             opts_summary["onion_skin_mm"] = onion_skin_mm
@@ -526,5 +531,7 @@ def plan_passes(
                 "count": int(tabs_opts.get("count", 0)),
                 "height_mm": float(tabs_opts.get("height_mm", 3.0)),
             }
+        if cut_through_mm > 0.0:
+            opts_summary["cut_through_mm"] = cut_through_mm
         job_summary["profile_options"] = opts_summary
     return pass_list, job_summary

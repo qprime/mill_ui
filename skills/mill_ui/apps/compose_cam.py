@@ -196,6 +196,17 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
         type=float,
         help="Extra depth (mm) for profile passes to guarantee cut-through",
     )
+    parser.add_argument(
+        "--step",
+        action="store_true",
+        help="Emit a STEP preview (requires cadquery)",
+    )
+    parser.add_argument(
+        "--step-filename",
+        type=str,
+        default="panel_preview.step",
+        help="Filename for the STEP preview (default: panel_preview.step)",
+    )
     return parser.parse_args(argv)
 
 
@@ -408,6 +419,21 @@ def main(argv: List[str]) -> int:
             resolution_mm=max(0.25, float(args.stl_resolution_mm)),
         )
         made_files.append(str(stl_path))
+
+    if args.step:
+        try:
+            from skills.mill_ui.cad.step_export import SheetSpec, export_step
+        except ImportError as exc:
+            print("cadquery is required for STEP export; install cadquery to enable --step", file=sys.stderr)
+        else:
+            step_path = outdir / args.step_filename
+            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+            kerf_value = float(hints.get("kerf_width_mm", 0.0) or 0.0)
+            try:
+                export_step(sheet_spec, items_resolved, step_path, kerf_mm=kerf_value)
+                made_files.append(str(step_path))
+            except Exception as exc:  # pragma: no cover - dependent on cadquery backend
+                print(f"[!] STEP export failed: {exc}", file=sys.stderr)
 
     # 8) summary.json
     job_summary.update({

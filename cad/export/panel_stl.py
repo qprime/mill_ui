@@ -8,8 +8,8 @@ from typing import Iterable, Mapping, Any, Tuple
 
 import numpy as np
 
-from skills.cam_generator_v4.heightfield_solid import triangulate_heightfield
-from skills.cam_generator_v4.stl_writer import write_binary_stl
+from skills.cam_engine.heightfield_solid import triangulate_heightfield
+from skills.cam_engine.stl_writer import write_binary_stl
 
 __all__ = ["write_panel_stl"]
 

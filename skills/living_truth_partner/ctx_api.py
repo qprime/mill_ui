@@ -14,6 +14,7 @@ from skills.memory_framework.actions import (
 from skills.memory_framework.models import Action
 from skills.memory_framework.registry import MemoryRegistry
 from skills.memory_framework.timeline import build_timeline
+from skills.memory_framework.utils import MEMORIES_ROOT, read_text
 
 ctx_api_bp = Blueprint("ctx_api", __name__)
 ctx_web_bp = Blueprint("ctx_web", __name__)
@@ -97,6 +98,104 @@ def api_registry_validate():
     reg = _registry()
     reg.validate_chain()
     return jsonify({"status": "ok"})
+
+
+# ---------- Enhancements for rich UI ----------
+
+
+@ctx_api_bp.get("/api/actions/<action_id>")
+def api_get_action(action_id: str):
+    reg = _registry()
+    action = get_action(reg, action_id)
+    # Collect artifacts and decisions linked to this action
+    artifacts = [
+        {
+            "id": m.id,
+            "purpose": m.purpose,
+            "title": m.title,
+            "path": m.content.path,
+            "created_at": m.created_at,
+        }
+        for m in reg.query({"type": "artifact"}, limit=1000)
+        if m.relations.thread_of == action_id
+    ]
+    decisions = [
+        {
+            "id": m.id,
+            "title": m.title,
+            "created_at": m.created_at,
+            "policy_check_path": m.content.path,
+        }
+        for m in reg.query({"type": "decision"}, limit=200)
+        if m.handle == action_id
+    ]
+    # Find latest capsule linked to action
+    capsules = [
+        m
+        for m in reg.query({"type": "capsule"}, limit=500)
+        if m.relations.thread_of == action_id
+    ]
+    latest_capsule = None
+    if capsules:
+        latest_capsule = sorted(capsules, key=lambda m: (m.created_at, m.id))[-1]
+    payload = {
+        "action": action.to_dict(),
+        "artifacts": artifacts,
+        "decisions": decisions,
+        "capsule": {
+            "id": latest_capsule.id,
+            "prompt_path": latest_capsule.content.path,
+        }
+        if latest_capsule
+        else None,
+    }
+    return jsonify(payload)
+
+
+@ctx_api_bp.get("/api/actions/<action_id>/artifacts")
+def api_action_artifacts(action_id: str):
+    reg = _registry()
+    items = [
+        {
+            "id": m.id,
+            "purpose": m.purpose,
+            "title": m.title,
+            "path": m.content.path,
+            "created_at": m.created_at,
+        }
+        for m in reg.query({"type": "artifact"}, limit=1000)
+        if m.relations.thread_of == action_id
+    ]
+    return jsonify({"artifacts": items})
+
+
+@ctx_api_bp.get("/api/actions/<action_id>/capsule")
+def api_action_capsule(action_id: str):
+    reg = _registry()
+    # latest capsule for this action
+    capsules = [
+        m
+        for m in reg.query({"type": "capsule"}, limit=500)
+        if m.relations.thread_of == action_id
+    ]
+    if not capsules:
+        return jsonify({"capsule": None})
+    cap = sorted(capsules, key=lambda m: (m.created_at, m.id))[-1]
+    prompt_path = cap.content.path
+    prompt_text = ""
+    if prompt_path:
+        abs_path = MEMORIES_ROOT / prompt_path
+        if abs_path.exists():
+            prompt_text = read_text(abs_path)
+    return jsonify(
+        {
+            "capsule": {
+                "id": cap.id,
+                "prompt_path": prompt_path,
+                "prompt_text": prompt_text,
+            }
+        }
+    )
 
 
 __all__ = ["ctx_api_bp", "ctx_web_bp"]

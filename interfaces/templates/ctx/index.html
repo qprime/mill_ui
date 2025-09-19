@@ -2,20 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Context Timeline</title>
+  <title>Cliff Context</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/static/ctx.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script defer src="/static/ctx.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      window.ctxInit && window.ctxInit();
+    });
+  </script>
+  <style>
+    /* small inline fallback if CSS fails to load */
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  </style>
+  <noscript>This UI requires JavaScript enabled.</noscript>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0f172a" />
 </head>
 <body>
-  <main>
-    <section id="escalations">
-      <h1>Pending Escalations</h1>
-      <ul id="escalation-list"></ul>
+  <header class="topbar">
+    <div class="brand">Cliff Context</div>
+    <div class="thread-controls">
+      <input id="handle-input" placeholder="thread handle (e.g. revolutionary-context-engine)" />
+      <button id="load-btn">Load</button>
+      <select id="recent-select"><option value="">Recent…</option></select>
+    </div>
+    <div class="actions">
+      <button id="validate-btn" title="Validate registry">Validate</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="composer card">
+      <h2>New Action</h2>
+      <form id="action-form">
+        <div class="grid">
+          <label>Title
+            <input name="title" required />
+          </label>
+          <label>Intent
+            <select name="intent">
+              <option value="doc.coauthor">doc.coauthor</option>
+              <option value="code.change_request">code.change_request</option>
+              <option value="doc.export">doc.export</option>
+              <option value="ops.run">ops.run</option>
+            </select>
+          </label>
+          <label>Executor
+            <select name="executor">
+              <option value="prose_llm">prose_llm</option>
+              <option value="codex_cli">codex_cli</option>
+              <option value="ops_shell">ops_shell</option>
+            </select>
+          </label>
+          <label>Visibility
+            <select name="visibility">
+              <option value="internal">internal</option>
+              <option value="external">external</option>
+            </select>
+          </label>
+        </div>
+        <label>Requirements
+          <textarea name="requirements" placeholder="One per line"></textarea>
+        </label>
+        <label>Include Paths (comma separated)
+          <input name="include" placeholder="src/app.py, docs/readme.md" />
+        </label>
+        <div class="form-actions">
+          <button type="submit">Create</button>
+        </div>
+      </form>
     </section>
-    <section id="timeline">
-      <h1>Timeline</h1>
-      <ul id="timeline-list"></ul>
+
+    <section class="timeline card">
+      <h2>Timeline</h2>
+      <ul id="timeline-list" class="list"></ul>
     </section>
+
+    <aside class="escalations card">
+      <h2>Pending Escalations</h2>
+      <ul id="escalation-list" class="list"></ul>
+    </aside>
   </main>
-  <script src="/static/ctx.js"></script>
+
+  <div id="viewer" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div id="viewer-title" class="modal-title"></div>
+        <button id="viewer-close">×</button>
+      </div>
+      <pre id="viewer-body" class="modal-body"></pre>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
 </body>
 </html>

@@ -162,7 +162,8 @@ def build_capsule(action: Action, registry: MemoryRegistry, *, actor: Actor | No
         created_at=stamp,
         updated_at=stamp,
     )
+    # Link capsule to action for traceability in timelines and previews
+    memory.relations.thread_of = action.id
     registry.register(memory)
 
     return CapsuleBuildResult(capsule=capsule_model, memory=memory)
-

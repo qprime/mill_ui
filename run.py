@@ -23,6 +23,7 @@ ENTRYPOINTS = {
     "cam_v3": "skills.cam_generator_v3.run_cam",
     "cam_engine": "skills.cam_engine.cli",
     "cam_v4": "skills.cam_engine.cli",
+    "ltp": "skills.living_truth_partner.cli",
     "regen_headers": "continuum.regen_metadata_headers",
     "ast": "continuum.ast_context",
     "metadata": "continuum.metadata",
@@ -31,6 +32,7 @@ ENTRYPOINTS = {
     "mill_ts": "skills.mill_ui_ts.cli",
     "mill_cam": "skills.mill_ui_cam.cli",
     "mill_ui_tests": "skills.mill_ui.tests.run_all",
+    "ltp_web": "interfaces.app",
 }
 
 

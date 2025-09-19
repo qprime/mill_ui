@@ -1,0 +1,6 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\begin{document}
+$body$
+\end{document}

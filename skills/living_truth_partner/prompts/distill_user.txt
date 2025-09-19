@@ -1,0 +1,11 @@
+Project: {title}
+Existing Summary:
+{existing_summary}
+
+Recent Notes:
+{notes}
+
+Document Snapshot:
+{doc}
+
+Respond with JSON only.

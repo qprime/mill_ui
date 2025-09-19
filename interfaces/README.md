@@ -8,6 +8,7 @@
 - `interfaces/adapters/api/` — JSON API endpoints
 - `interfaces/adapters/web/` — HTML/HTMX endpoints
 - `interfaces/templates/` — small, modular Jinja templates
+- `interfaces/static/` — shared JS/CSS assets (e.g., LTP workspace)
 
 ## Run (dev)
 ```bash
@@ -34,6 +35,15 @@ Open http://localhost:8080/tasks
 curl -s -X POST http://localhost:8080/api/tasks/call \
   -H 'Content-Type: application/json' \
   -d '{"action":"get_active_grouped"}'
+```
+
+### Living Truth Partner (web)
+Open https://localhost:8080/ltp?slug=<your-plan>
+
+### Living Truth Partner (API)
+```bash
+curl -s https://localhost:8080/api/ltp/projects/business_plan_q4/snapshot \
+  --cert web/cliff_server/cert/web_server.crt --key web/cliff_server/cert/web_server.key
 ```
 
 ## Notes

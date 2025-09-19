@@ -1,0 +1,12 @@
+Document: {doc}
+Section: {section}
+Section ID: {section_id}
+Intent: {intent}
+Constraints:
+{constraints}
+
+Context Summary:
+{summary}
+
+Current Section Markdown:
+{current}

@@ -28,9 +28,28 @@ async def transcribe_audio(file: UploadFile = File(...)):
         tmp.write(await file.read())
         tmp_path = tmp.name
     try:
-        segments, info = model.transcribe(tmp_path)
-        text = " ".join([segment.text for segment in segments])
-        return {"text": text}
+        segments, info = model.transcribe(tmp_path, word_timestamps=True)
+        text_parts = []
+        segment_payload = []
+        words_payload = []
+        for segment in segments:
+            segment_text = segment.text.strip()
+            if segment_text:
+                text_parts.append(segment_text)
+            word_items = []
+            if segment.words:
+                for word in segment.words:
+                    entry = {"start": word.start, "end": word.end, "word": word.word}
+                    word_items.append(entry)
+                    words_payload.append(entry)
+            segment_payload.append({
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment_text,
+                "words": word_items
+            })
+        text = " ".join(text_parts).strip()
+        return {"text": text, "words": words_payload, "segments": segment_payload, "language": info.language}
     finally:
         os.remove(tmp_path)
 

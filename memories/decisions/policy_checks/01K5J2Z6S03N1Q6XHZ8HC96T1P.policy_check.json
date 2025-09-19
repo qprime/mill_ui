@@ -1,0 +1,1 @@
+{"action_id":"01K5J2Z6S03N1Q6XHZ8HC96T1P","checks":{"freeze":{"active":false,"deny_intents":["ops.run","deploy"]},"pii":{"detected":[],"requires_executor":"scrub_executor"},"safety":{"hits":[],"paths":[],"required_tests":["pytest -q"]}},"evaluated_at":"2025-09-19T22:54:25.573Z"}

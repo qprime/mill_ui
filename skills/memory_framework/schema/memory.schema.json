@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Memory",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "purpose",
+    "title",
+    "tags",
+    "state",
+    "registry_status",
+    "relations",
+    "content",
+    "metadata",
+    "actor",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {"type": "string"},
+    "type": {
+      "type": "string",
+      "enum": [
+        "narrative",
+        "truth",
+        "artifact",
+        "action",
+        "capsule",
+        "decision",
+        "note",
+        "persona",
+        "policy"
+      ]
+    },
+    "purpose": {"type": "string"},
+    "handle": {"type": ["string", "null"]},
+    "title": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "state": {
+      "type": "string",
+      "enum": ["draft", "active", "review", "done", "archived"]
+    },
+    "registry_status": {
+      "type": "string",
+      "enum": ["staged", "registered", "referenced", "archived"]
+    },
+    "relations": {
+      "type": "object",
+      "properties": {
+        "thread_of": {"type": ["string", "null"]},
+        "derived_from": {"type": "array", "items": {"type": "string"}},
+        "produces": {"type": "array", "items": {"type": "string"}},
+        "links": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "path": {"type": ["string", "null"]},
+        "bytes": {"type": ["string", "null"]},
+        "sha256": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "owners": {"type": "array", "items": {"type": "string"}},
+        "constraints": {"type": "object"},
+        "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+        "visibility": {"type": "string", "enum": ["internal", "external"]},
+        "sensitivity": {"type": "string", "enum": ["low", "medium", "high", "safety", "pii"]},
+        "policy_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "actor": {
+      "type": "object",
+      "required": ["actor_id", "actor_type"],
+      "properties": {
+        "actor_id": {"type": "string"},
+        "actor_type": {"type": "string", "enum": ["human", "ai", "service"]}
+      },
+      "additionalProperties": false
+    },
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"}
+  },
+  "additionalProperties": false
+}

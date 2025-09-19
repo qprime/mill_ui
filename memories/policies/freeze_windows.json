@@ -1,0 +1,1 @@
+{ "windows_utc": [{"start":"2025-01-01T00:00:00Z","end":"2025-01-02T00:00:00Z"}], "deny_intents": ["ops.run","deploy"] }

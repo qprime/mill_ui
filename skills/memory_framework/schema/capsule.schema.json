@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Capsule",
+  "type": "object",
+  "required": [
+    "id",
+    "inputs",
+    "budgets",
+    "drops",
+    "prompt_path",
+    "prompt_sha256",
+    "timestamp"
+  ],
+  "properties": {
+    "id": {"type": "string"},
+    "inputs": {"type": "object"},
+    "budgets": {"type": "object"},
+    "drops": {"type": "array", "items": {"type": "object"}},
+    "prompt_path": {"type": "string"},
+    "prompt_sha256": {"type": "string"},
+    "timestamp": {"type": "string"}
+  },
+  "additionalProperties": false
+}

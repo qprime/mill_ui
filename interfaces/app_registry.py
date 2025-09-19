@@ -1,17 +1,22 @@
 from __future__ import annotations
-from typing import Iterable, Callable
+from typing import Callable, Iterable
+
 from flask import Flask
 
-# Explicit manifests
 from .apps.chat.manifest import register as register_chat
-from .apps.tasks.manifest import register as register_tasks
+from .apps.ctx.manifest import register as register_ctx
 from .apps.ltp.manifest import register as register_ltp
+from .apps.tasks.manifest import register as register_tasks
+
 
 def _manifests() -> Iterable[Callable[[Flask], None]]:
     yield register_chat
     yield register_tasks
     yield register_ltp
+    yield register_ctx
+
 
 def register_all_apps(app: Flask) -> None:
-    for reg in _manifests():
-        reg(app)
+    for manifest in _manifests():
+        manifest(app)
+

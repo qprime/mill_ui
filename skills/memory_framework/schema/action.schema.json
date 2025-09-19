@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Action",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "intent",
+    "status",
+    "actor",
+    "context_scope",
+    "executor",
+    "escalation_reasons",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {"type": "string"},
+    "title": {"type": "string"},
+    "intent": {"type": "string"},
+    "thread": {"type": ["string", "null"]},
+    "truth_ref": {"type": ["string", "null"]},
+    "requirements": {"type": "array", "items": {"type": "string"}},
+    "constraints": {"type": "object"},
+    "context_scope": {"type": "object"},
+    "executor": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "args": {"type": "object"}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "auto_checked", "ready", "needs_human", "applied", "failed"]
+    },
+    "escalation_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["guardrail_fail", "risk_flag", "confidence_gap", "policy_required"]
+      }
+    },
+    "actor": {
+      "type": "object",
+      "required": ["actor_id", "actor_type"],
+      "properties": {
+        "actor_id": {"type": "string"},
+        "actor_type": {"type": "string", "enum": ["human", "ai", "service"]}
+      }
+    },
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"}
+  },
+  "additionalProperties": false
+}

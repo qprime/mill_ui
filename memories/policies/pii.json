@@ -1,0 +1,1 @@
+{ "fields": ["ssn", "dob", "email"], "requires_executor": "scrub_executor" }

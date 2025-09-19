@@ -12,14 +12,6 @@ pytestmark = pytest.mark.skipif(
     not os.getenv("OPENAI_API_KEY"),
     reason="OPENAI_API_KEY not set; skipping live OpenAI API tests",
 )
-<<<<<<< HEAD
-=======
-pytestmark = pytest.mark.skipif(
-    not os.getenv("OPENAI_API_KEY"),
-    reason="OPENAI_API_KEY not set; skipping live OpenAI API tests",
-)
-
->>>>>>> 1f8c233 (Add repo-wide pytest harness and co-locate unit tests)
 
 def _chat_model() -> str:
     # Use a widely-available, low-cost model by default

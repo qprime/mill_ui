@@ -348,6 +348,49 @@ def plan_passes(
                                                    stepover_mm=so, stepdown_mm=sd, finish=True)
         passes[_pass_key(p["op"], p["tool"])]["count"] += 1
 
+    # ---------- Engraves ----------
+    for rec in hints.get("engraves", []):
+        geom = rec.get("geometry") or {}
+        shape_name = str(rec.get("shape") or rec.get("type") or "").lower()
+        lines: List[List[Tuple[float, float]]] = []
+
+        if shape_name == "polyline":
+            pts = geom.get("points") or []
+            cx, cy = _ensure_center(rec)
+            line: List[Tuple[float, float]] = []
+            for pt in pts:
+                if isinstance(pt, (list, tuple)) and len(pt) == 2:
+                    line.append((float(pt[0]) + cx, float(pt[1]) + cy))
+            if line:
+                lines.append(line)
+        elif shape_name == "rect":
+            w = float(geom.get("w_mm", 0.0))
+            h = float(geom.get("h_mm", 0.0))
+            if w > 0.0 and h > 0.0:
+                cx, cy = _ensure_center(rec)
+                half_w, half_h = 0.5 * w, 0.5 * h
+                lines.append([
+                    (cx - half_w, cy - half_h),
+                    (cx + half_w, cy - half_h),
+                    (cx + half_w, cy + half_h),
+                    (cx - half_w, cy + half_h),
+                    (cx - half_w, cy - half_h),
+                ])
+        else:
+            continue
+
+        if not lines:
+            continue
+
+        t = _pick_for_engrave(tool_db)
+        p = _get_or_make_pass("engrave", t)
+        setup: Setup = p["setup"]
+        depth = float(rec.get("depth_mm", 0.0))
+        if depth == 0.0:
+            depth = 0.3
+        p["moves"] += engrave_lines(lines, setup, z=-abs(depth))
+        p["count"] += len(lines)
+
     # ---------- Profiles (merge shared seams for Rects) ----------
     rect_profiles = [rec for rec in hints.get("profiles", []) if str(rec.get("shape","")).lower() == "rect"]
     if not merge_shared_edges or len(rect_profiles) == 0:

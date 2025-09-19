@@ -63,6 +63,7 @@ def render_svg_with_dims(
     circle_diams: List[float] = []
     outer_rects: List[Dict[str,Any]] = []
     inner_rects: List[Dict[str,Any]] = []
+    engrave_depths: List[float] = []
 
     if hints:
         # profiles
@@ -93,6 +94,14 @@ def render_svg_with_dims(
             _label_depth_if_any(body, rec)
             d=float((rec.get("geometry") or {}).get("diameter_mm",0.0))
             if d>0: circle_diams.append(round(d,1))
+        # engraves
+        for rec in (hints.get("engraves") or []):
+            pts = _draw_polyline(body, rec, "feature-engrave")
+            depth = rec.get("depth_mm")
+            if depth is not None:
+                engrave_depths.append(float(depth))
+                if pts:
+                    body.append(_text(pts[0][0], pts[0][1] + 6, f"d={float(depth):.1f}mm"))
 
         # stile/rail labels (outer vs inner rect match)
         _label_stile_rail(body, outer_rects, inner_rects)
@@ -121,6 +130,9 @@ def render_svg_with_dims(
         depths = sorted({float(p.get("depth_mm",0.0)) for p in (hints.get("pockets") or []) if "depth_mm" in p})
         if depths:
             legend_lines.append("Pocket depths: " + ", ".join(f"{d:.1f} mm" for d in depths))
+        engrave_set = sorted({round(d, 3) for d in engrave_depths if d is not None and d > 0.0})
+        if engrave_set:
+            legend_lines.append("Engrave depths: " + ", ".join(f"{d:.1f} mm" for d in engrave_set))
 
     # assemble final svg with legend to the right
     legend_w, legend_h = _legend_box_size(legend_lines)
@@ -158,6 +170,7 @@ def _svg_header(w,h):
         f'      .feature-profile {{ fill:none; stroke:#000; stroke-width:0.9; }}\n'
         f'      .feature-pocket  {{ fill:none; stroke:#0a0; stroke-width:0.7; stroke-dasharray:3 2; }}\n'
         f'      .feature-anchor  {{ fill:none; stroke:#a60; stroke-width:0.7; stroke-dasharray:2 2; }}\n'
+        f'      .feature-engrave {{ fill:none; stroke:#06c; stroke-width:0.6; stroke-dasharray:1.5 1.5; }}\n'
         f'      .feature-hole    {{ fill:none; stroke:#c00; stroke-width:0.9; }}\n'
         f'      .shared-edge     {{ stroke:#06c; stroke-width:1.2; stroke-dasharray:4 2; }}\n'
         f'      .dim {{ stroke:#06c; stroke-width:0.7; fill:none; }}\n'
@@ -205,6 +218,22 @@ def _legend_upright(x: float, y_top: float, lines: List[str], legend_w: float, l
     return "".join(out)
 
 # draw features
+def _polyline_svg(points: List[Tuple[float, float]], cls: str) -> str:
+    coords = " ".join(f"{x:.3f},{y:.3f}" for (x, y) in points)
+    return f'    <polyline class="{cls}" points="{coords}" />\n'
+
+def _draw_polyline(body: List[str], rec: Dict[str, Any], style: str) -> List[Tuple[float, float]]:
+    pts = (rec.get("geometry") or {}).get("points") or []
+    cx, cy = _xy(rec.get("center_xy_mm"))
+    out_pts: List[Tuple[float, float]] = []
+    for pt in pts:
+        if isinstance(pt, (list, tuple)) and len(pt) == 2:
+            out_pts.append((float(pt[0]) + cx, float(pt[1]) + cy))
+    if len(out_pts) >= 2:
+        body.append(_polyline_svg(out_pts, cls=style))
+        return out_pts
+    return []
+
 def _draw_rect_or_circle(body: List[str], rec: Dict[str, Any], style: str):
     t=str(rec.get("shape","")).lower(); cx,cy=_xy(rec.get("center_xy_mm")); g=rec.get("geometry") or {}
     if t=="rect":

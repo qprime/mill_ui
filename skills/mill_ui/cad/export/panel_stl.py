@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, Mapping, Any, Tuple
+from typing import Iterable, Mapping, Any, Tuple, List, Optional
 
 import numpy as np
 
@@ -107,6 +107,44 @@ def _apply_circle(height: np.ndarray,
             height[mask] = value
 
 
+def _polyline_points(item: Mapping[str, Any]) -> List[Tuple[float, float]]:
+    geom = item.get("geometry") or {}
+    pts = geom.get("points") or []
+    cx, cy = _center_xy(item)
+    out: List[Tuple[float, float]] = []
+    for pt in pts:
+        if isinstance(pt, (list, tuple)) and len(pt) == 2:
+            out.append((float(pt[0]) + cx, float(pt[1]) + cy))
+    return out
+
+
+def _apply_polyline(height: np.ndarray,
+                    x_grid: np.ndarray,
+                    y_grid: np.ndarray,
+                    points: List[Tuple[float, float]],
+                    *,
+                    diameter: float,
+                    mode: str,
+                    value: float,
+                    stock_thickness: float) -> None:
+    if diameter <= 0.0 or not points:
+        return
+    samples = list(points)
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        samples.append(((float(x0) + float(x1)) * 0.5, (float(y0) + float(y1)) * 0.5))
+    for pt in samples:
+        _apply_circle(
+            height,
+            x_grid,
+            y_grid,
+            pt,
+            diameter,
+            mode=mode,
+            value=value,
+            stock_thickness=stock_thickness,
+        )
+
+
 def write_panel_stl(path: Path,
                     *,
                     width_mm: float,
@@ -167,6 +205,18 @@ def write_panel_stl(path: Path,
                     continue
                 _apply_circle(heightmap, x_grid, y_grid, center, diameter,
                               mode="min", value=target_z, stock_thickness=thickness)
+        elif shape_type == "polyline":
+            points = _polyline_points(item)
+            if not points:
+                continue
+            line_width = float((feature or {}).get("line_width_mm", 1.0))
+            line_width = max(0.5, line_width)
+            mode = "min" if target_z < thickness else "set"
+            _apply_polyline(heightmap, x_grid, y_grid, points,
+                            diameter=line_width,
+                            mode=mode,
+                            value=target_z,
+                            stock_thickness=thickness)
         else:
             continue
 

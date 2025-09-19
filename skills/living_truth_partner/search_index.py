@@ -58,6 +58,9 @@ class SearchIndex:
         docs = sorted(config.docs.glob("*.ltd.md"))
         for doc_path in docs:
             slug = doc_path.stem
+            # Normalize '*.ltd.md' to logical doc id without '.ltd'
+            if slug.endswith(".ltd"):
+                slug = slug[:-4]
             text = doc_path.read_text(encoding="utf-8")
             index = MarkdownIndex.build(text)
             for section in index.sections():

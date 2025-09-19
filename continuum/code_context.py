@@ -9,7 +9,6 @@ import argparse
 import re
 import os
 from pathlib import Path
-import tiktoken
 import json
 
 from continuum.file_crawl import find_files
@@ -61,10 +60,16 @@ def strip_non_header_comments_and_docstrings(code):
 def count_tokens(text: str, model_name: str = "gpt-4.1"):
     """Count tokens in text using the specified model's tokenizer."""
     try:
-        enc = tiktoken.encoding_for_model(model_name)
-    except KeyError:
-        enc = tiktoken.get_encoding("cl100k_base")
-    return len(enc.encode(text))
+        import tiktoken  # local import to avoid hard dependency at module import time
+
+        try:
+            enc = tiktoken.encoding_for_model(model_name)
+        except KeyError:
+            enc = tiktoken.get_encoding("cl100k_base")
+        return len(enc.encode(text))
+    except Exception:
+        # If tokenizer is unavailable, return a simple whitespace token count as fallback
+        return len(text.split())
 
 def generate_code_context(
     root_dir: str,

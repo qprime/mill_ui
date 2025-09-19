@@ -6,14 +6,22 @@
 # description: Interacts with various OpenAI APIs like chat, embedding, and image generation.
 
 import os
-import openai
-import requests
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise RuntimeError("OPENAI_API_KEY not set in environment.")
 
-client = openai.OpenAI(api_key=api_key)
+def _require_api_key() -> str:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY not set in environment.")
+    return api_key
+
+
+def _get_openai_client():
+    api_key = _require_api_key()
+    try:
+        import openai  # type: ignore
+    except Exception as e:
+        raise RuntimeError("openai package not installed") from e
+    return openai.OpenAI(api_key=api_key)
 
 # --- Chat Completion (via SDK)
 def get_chat_completion(messages, model, **kwargs):
@@ -23,6 +31,7 @@ def get_chat_completion(messages, model, **kwargs):
     Raises: RuntimeError on failure.
     """
     try:
+        client = _get_openai_client()
         resp = client.chat.completions.create(model=model, messages=messages, **kwargs)
         return resp.choices[0].message.content
     except Exception as e:
@@ -36,6 +45,7 @@ def get_embedding(input, model, **kwargs):
     Raises: RuntimeError on failure.
     """
     try:
+        client = _get_openai_client()
         resp = client.embeddings.create(input=input, model=model, **kwargs)
         return [d.embedding for d in resp.data]
     except Exception as e:
@@ -49,6 +59,7 @@ def get_image_generation(prompt, model="gpt-image-1", size="1024x1024", n=1):
     Raises: RuntimeError on failure.
     """
     API_URL = "https://api.openai.com/v1/images/generations"
+    api_key = _require_api_key()
     HEADERS = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -60,6 +71,10 @@ def get_image_generation(prompt, model="gpt-image-1", size="1024x1024", n=1):
         "n": n,
     }
     try:
+        try:
+            import requests  # type: ignore
+        except Exception as e:
+            raise RuntimeError("requests package not installed") from e
         response = requests.post(API_URL, headers=HEADERS, json=payload)
         response.raise_for_status()
         data = response.json()
@@ -70,4 +85,3 @@ def get_image_generation(prompt, model="gpt-image-1", size="1024x1024", n=1):
         except Exception:
             err_detail = response.text if 'response' in locals() else str(e)
         raise RuntimeError(f"OpenAI image generation failed: {err_detail}")
-

@@ -1,11 +1,5 @@
-# path: tests/unit/test_memory_graph.py
-# type: unit test
-# tags: pytest, memory, test, graph
-# owner: cliff
-# depends_on: memoriesmemory_graph.py
-# description: Verify memory graph purpose description functionality.
-
 import pytest
+
 from memories.memory_graph import describe_purpose
 
 
@@ -19,3 +13,4 @@ from memories.memory_graph import describe_purpose
 )
 def test_describe_purpose(name, expected):
     assert describe_purpose(name) == expected
+

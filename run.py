@@ -34,6 +34,7 @@ ENTRYPOINTS = {
     "mill_ui_tests": "skills.mill_ui.tests.run_all",
     "ltp_web": "interfaces.app",
     "services": "services.cli",
+    "tests": "tools.test_runner",
 }
 
 

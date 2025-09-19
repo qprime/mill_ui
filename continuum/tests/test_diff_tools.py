@@ -1,10 +1,3 @@
-# path: tests/unit/test_diff_tools.py
-# type: unit test module
-# tags: testing, diff, utilities
-# owner: cliff
-# depends_on: continuum.diff_tools
-# description: Validates diff generation utilities for change detection.
-
 import pytest
 from continuum.diff_tools import get_unified_diff, side_by_side_diff, has_changes
 
@@ -31,3 +24,4 @@ def test_side_by_side_diff():
     assert len(diff) == 2
     assert diff[0] == "left1      | right1"
     assert diff[1] == "left2      | right2"
+

@@ -15,3 +15,7 @@ try:
     from .shop_accessories import clamp_bar as _tmpl_clamp_bar  
 except Exception:
     pass
+try:
+    from .panels import border as _tmpl_border  
+except Exception:
+    pass

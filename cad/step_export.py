@@ -67,6 +67,7 @@ class SharedSeam:
 
 _DEFAULT_KERF_MM = 3.175
 _EPSILON = 1.0  # extra depth for through cuts so STEP shows daylight
+_DEFAULT_LINE_WIDTH_MM = 1.0
 
 
 def _feature_depth_mm(feature: Dict[str, Any], sheet_thickness: float) -> float:
@@ -102,6 +103,21 @@ def _workplane_for_shape(shape: ResolvedShape) -> Optional[cq.Workplane]:
         r = d * 0.5
         return cq.Workplane("XY").center(cx, cy).circle(r)
     return None
+
+
+def _polyline_cut_solid(points: List[Tuple[float, float]], depth_mm: float, width_mm: float) -> Optional[cq.Workplane]:
+    # Disabled: polyline grooves are omitted from STEP because they dominate export time.
+    return None
+
+
+def _cut_polyline(sheet: cq.Workplane,
+                  points: List[Tuple[float, float]],
+                  depth_mm: float,
+                  width_mm: float) -> cq.Workplane:
+    groove = _polyline_cut_solid(points, depth_mm, width_mm)
+    if groove is None:
+        return sheet
+    return sheet.cut(groove)
 
 
 def _apply_profile_cut(sheet: cq.Workplane,
@@ -146,11 +162,15 @@ def _apply_profile_cut(sheet: cq.Workplane,
 
 def _apply_partial_cut(sheet: cq.Workplane,
                         shape: ResolvedShape,
-                        depth_mm: float) -> cq.Workplane:
-    base = _workplane_for_shape(shape)
-    if base is None or depth_mm <= 0:
+                        depth_mm: float,
+                        sheet_thickness: float) -> cq.Workplane:
+    depth = min(float(depth_mm), sheet_thickness)
+    if depth <= 0.0:
         return sheet
-    cut = base.extrude(-depth_mm)
+    base = _workplane_for_shape(shape)
+    if base is None:
+        return sheet
+    cut = base.extrude(-depth)
     return sheet.cut(cut)
 
 
@@ -328,7 +348,7 @@ def build_step_solids(sheet: SheetSpec,
                 )
         else:
             # partial cuts apply to the remaining sheet (and floating parts later)
-            base = _apply_partial_cut(base, shape, min(depth, sheet.thickness_mm))
+            base = _apply_partial_cut(base, shape, min(depth, sheet.thickness_mm), sheet.thickness_mm)
 
     if include_floating_parts and floating_parts:
         seams = _find_shared_rect_seams(rect_profiles)

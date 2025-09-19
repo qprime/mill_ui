@@ -410,6 +410,8 @@ def main(argv: List[str]) -> int:
         _save_text(fpath, gcode)
         made_files.append(str(fpath))
 
+    has_polylines = any(str(it.get("type") or "").lower() == "polyline" for it in items_resolved)
+
     if args.stl:
         stl_base_path = outdir / "panel_preview.stl"
         mesh_tol = max(0.05, float(args.stl_resolution_mm))
@@ -421,22 +423,26 @@ def main(argv: List[str]) -> int:
             export_error = "cadquery is required for CAD-derived STL; falling back to raster heightfield"
             print(export_error, file=sys.stderr)
         else:
-            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
-            try:
-                stl_outputs = export_stl(
-                    sheet_spec,
-                    items_resolved,
-                    stl_base_path,
-                    kerf_mm=kerf_value,
-                    include_sheet=False,
-                    include_floating_parts=True,
-                    mesh_tolerance_mm=mesh_tol,
-                    angular_tolerance_deg=5.0,
-                )
-            except Exception as exc:  # pragma: no cover - cadquery backend
-                print(f"[!] STL export via CadQuery failed: {exc}; falling back to raster heightfield",
-                      file=sys.stderr)
-                stl_outputs = []
+            if has_polylines:
+                print("[panel_stl] Skipping CadQuery STL due to polyline engraves; using heightfield fallback", file=sys.stderr)
+                export_stl = None  # type: ignore[assignment]
+            else:
+                sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+                try:
+                    stl_outputs = export_stl(
+                        sheet_spec,
+                        items_resolved,
+                        stl_base_path,
+                        kerf_mm=kerf_value,
+                        include_sheet=False,
+                        include_floating_parts=True,
+                        mesh_tolerance_mm=mesh_tol,
+                        angular_tolerance_deg=5.0,
+                    )
+                except Exception as exc:  # pragma: no cover - cadquery backend
+                    print(f"[!] STL export via CadQuery failed: {exc}; falling back to raster heightfield",
+                          file=sys.stderr)
+                    stl_outputs = []
 
         if not stl_outputs:
             stl_path = stl_base_path
@@ -458,13 +464,16 @@ def main(argv: List[str]) -> int:
         except ImportError as exc:
             print("cadquery is required for STEP export; install cadquery to enable --step", file=sys.stderr)
         else:
-            step_path = outdir / args.step_filename
-            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
-            try:
-                export_step(sheet_spec, items_resolved, step_path, kerf_mm=kerf_value)
-                made_files.append(str(step_path))
-            except Exception as exc:  # pragma: no cover - dependent on cadquery backend
-                print(f"[!] STEP export failed: {exc}", file=sys.stderr)
+            if has_polylines:
+                print("[STEP] Skipping output because polyline engraves would overwhelm CadQuery", file=sys.stderr)
+            else:
+                step_path = outdir / args.step_filename
+                sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+                try:
+                    export_step(sheet_spec, items_resolved, step_path, kerf_mm=kerf_value)
+                    made_files.append(str(step_path))
+                except Exception as exc:  # pragma: no cover - dependent on cadquery backend
+                    print(f"[!] STEP export failed: {exc}", file=sys.stderr)
 
     # 8) summary.json
     job_summary.update({

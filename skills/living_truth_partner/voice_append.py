@@ -80,8 +80,9 @@ class VoiceAppend:
     def _transcribe(url: str, audio_path: Path, verify: bool | str | Path | None) -> dict[str, Any]:
         with audio_path.open("rb") as data:
             files = {"file": (audio_path.name, data, "audio/wav")}
+            verify_arg = str(verify) if isinstance(verify, Path) else verify
             try:
-                response = httpx.post(url, files=files, timeout=120.0, verify=verify)
+                response = httpx.post(url, files=files, timeout=120.0, verify=verify_arg)
             except httpx.HTTPError as exc:
                 raise RuntimeError(f"Whisper request failed: {exc}") from exc
         response.raise_for_status()

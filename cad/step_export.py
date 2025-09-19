@@ -300,20 +300,18 @@ def build_step_solids(sheet: SheetSpec,
 
     floating_parts: Dict[str, cq.Workplane] = {}
     rect_profiles: Dict[str, RectProfileInfo] = {}
-    offset_x = -sheet.width_mm * 0.5
-    offset_y = -sheet.height_mm * 0.5
-
     resolved: List[ResolvedShape] = []
     for it in shapes:
         placement = dict(it.get("placement") or {})
-        cx, cy = 0.0, 0.0
+        # Interpret provided coordinates as relative to the sheet center.
+        # If absent, default to (0, 0) i.e., the center of the sheet.
         value = placement.get("center_xy_mm")
         if isinstance(value, (tuple, list)) and len(value) == 2:
-            cx = float(value[0]) + offset_x
-            cy = float(value[1]) + offset_y
+            cx = float(value[0])
+            cy = float(value[1])
         else:
-            cx = offset_x
-            cy = offset_y
+            cx = 0.0
+            cy = 0.0
         placement["center_xy_mm"] = [cx, cy]
 
         resolved.append(ResolvedShape(

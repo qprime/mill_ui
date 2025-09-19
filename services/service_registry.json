@@ -1,0 +1,46 @@
+{
+  "services": [
+    {
+      "id": "web",
+      "description": "Flask web server",
+      "unit": "cliff-web-server.service",
+      "unit_file": "services/cliff-web-server.service",
+      "scope": "system"
+    },
+    {
+      "id": "web-fixed",
+      "description": "Flask web server (fixed config)",
+      "unit": "cliff-web-server.fixed.service",
+      "unit_file": "services/cliff-web-server.fixed.service",
+      "scope": "system"
+    },
+    {
+      "id": "whisper",
+      "description": "Whisper transcription server",
+      "unit": "cliff-whisper.service",
+      "unit_file": "services/cliff-whisper.service",
+      "scope": "system"
+    },
+    {
+      "id": "tts",
+      "description": "Text to speech service",
+      "unit": "cliff-tts.service",
+      "unit_file": "services/cliff-tts.service",
+      "scope": "system"
+    },
+    {
+      "id": "device-manager",
+      "description": "Device manager",
+      "unit": "cliff-device-manager.service",
+      "unit_file": "services/cliff-device-manager.service",
+      "scope": "system"
+    },
+    {
+      "id": "cli-archiver",
+      "description": "CLI archiver",
+      "unit": "cliff-cli-archiver.service",
+      "unit_file": "services/cliff-cli-archiver.service",
+      "scope": "system"
+    }
+  ]
+}

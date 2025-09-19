@@ -33,6 +33,7 @@ ENTRYPOINTS = {
     "mill_cam": "skills.mill_ui_cam.cli",
     "mill_ui_tests": "skills.mill_ui.tests.run_all",
     "ltp_web": "interfaces.app",
+    "services": "services.cli",
 }
 
 

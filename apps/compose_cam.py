@@ -282,12 +282,17 @@ def main(argv: List[str]) -> int:
 
         ensure_project_structure(base)
 
-        # Find STEP file(s) in input folder
+        # Find STEP file(s) in input folder (prefer non-hidden, non-AppleDouble, largest first)
         input_dir = base / "input"
-        step_candidates = []
+        step_all: List[Path] = []
         for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
-            step_candidates.extend(sorted(input_dir.glob(pat)))
-        step_candidates = sorted(set(step_candidates))
+            step_all.extend(sorted(input_dir.glob(pat)))
+        def _is_good_step(p: Path) -> bool:
+            try:
+                return (not p.name.startswith("._")) and (not p.name.startswith(".")) and p.stat().st_size > 0
+            except Exception:
+                return False
+        step_candidates = sorted((p for p in step_all if _is_good_step(p)), key=lambda p: (-p.stat().st_size, p.name))
         if not step_candidates:
             print(f"No STEP files found in {input_dir} (expected .step or .stp)", file=sys.stderr)
             return 2
@@ -360,9 +365,15 @@ def main(argv: List[str]) -> int:
     # If no items are provided, try to import geometry directly from a STEP file in input/
     if not items:
         input_dir = base / "input"
-        step_candidates = []
+        step_all: List[Path] = []
         for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
-            step_candidates.extend(sorted(input_dir.glob(pat)))
+            step_all.extend(sorted(input_dir.glob(pat)))
+        def _is_good_rt(p: Path) -> bool:
+            try:
+                return (not p.name.startswith("._")) and (not p.name.startswith(".")) and p.stat().st_size > 0
+            except Exception:
+                return False
+        step_candidates = sorted((p for p in step_all if _is_good_rt(p)), key=lambda p: (-p.stat().st_size, p.name))
         if step_candidates:
             try:
                 from skills.mill_ui.cad.importers.step_to_items import infer_layout_from_step
@@ -385,7 +396,13 @@ def main(argv: List[str]) -> int:
                         panel_h = float(s.get("height_mm", panel_h))
                         panel_t = float(s.get("thickness_mm", panel_t))
                     items = list(inferred.get("items", []))
-                    print(f"[compose_cam] Using STEP geometry from {step_path.name} (items={len(items)})")
+                    if items:
+                        print(f"[compose_cam] Using STEP geometry from {step_path.name} (items={len(items)})")
+                    else:
+                        print(f"[compose_cam] STEP contained no usable 2.5D geometry: {step_path.name}", file=sys.stderr)
+        if not items:
+            print("No items to process. Provide items in layout.json or a valid STEP in input/", file=sys.stderr)
+            return 2
 
     cam_cfg = data.get("cam") if isinstance(data.get("cam"), dict) else {}
     profile_cfg = cam_cfg.get("profile") if isinstance(cam_cfg.get("profile"), dict) else {}
@@ -393,10 +410,19 @@ def main(argv: List[str]) -> int:
     # 2) apply grid placement BEFORE resolving templates
     layout = data.get("layout")
     if isinstance(layout, dict):
-        _apply_grid_layout(
-            panel_w, panel_h, layout, items,
-            kerf_hint=float(data.get("kerf_width_mm", 0.0))   # <— add this arg
-        )  # grid BEFORE resolve
+        if panel_w > 0.0 and panel_h > 0.0 and len(items) > 0:
+            try:
+                _apply_grid_layout(
+                    panel_w, panel_h, layout, items,
+                    kerf_hint=float(data.get("kerf_width_mm", 0.0))
+                )  # grid BEFORE resolve
+            except Exception as exc:
+                print(f"[compose_cam] Skipping grid layout due to: {exc}", file=sys.stderr)
+        else:
+            if len(items) == 0:
+                print("[compose_cam] No items to place; skipping grid layout", file=sys.stderr)
+            else:
+                print("[compose_cam] Sheet dimensions missing; skipping grid layout", file=sys.stderr)
 
     # 3) resolve templates -> concrete shapes (centered; then offset by placement if present)
     items_resolved = resolve_templates(items, sheet_thickness_mm=panel_t)

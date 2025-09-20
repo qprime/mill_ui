@@ -7,7 +7,7 @@ from typing import Iterable
 import pytest
 
 from memories.framework import actions, brief, policies, registry, timeline
-from memories.framework.executors import codex_cli, ops_shell, prose_llm
+from memories.framework.executors import ops_shell, prose_llm
 from memories.framework import utils
 
 MODULES: Iterable[object] = (
@@ -18,7 +18,6 @@ MODULES: Iterable[object] = (
     policies,
     timeline,
     prose_llm,
-    codex_cli,
     ops_shell,
 )
 
@@ -40,7 +39,6 @@ DIRECTORIES = [
 @pytest.fixture(autouse=True)
 def _offline_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OFFLINE", "1")
-    monkeypatch.setenv("ENABLE_CODEX_CLI", "0")
     monkeypatch.setenv("ENABLE_PANDOC", "0")
     monkeypatch.setenv("ENABLE_FFMPEG", "0")
     monkeypatch.setenv("ACTOR_SIGNING_SECRET", "test-secret")

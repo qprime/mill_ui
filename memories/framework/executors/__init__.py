@@ -21,6 +21,5 @@ def get_executor(name: str) -> ExecutorFn:
 
 
 # Import side effects to register executors
-from . import codex_cli  # noqa: E402,F401
 from . import ops_shell  # noqa: E402,F401
 from . import prose_llm  # noqa: E402,F401

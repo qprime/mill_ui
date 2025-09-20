@@ -80,7 +80,6 @@ def acceptance_demo(registry: MemoryRegistry | None = None) -> AcceptanceResult:
         truth_ref="cliff_ai.truth",
         requirements=["Add guard to memory manager"],
         constraints={"paths": ["memories/framework/critical.py"]},
-        executor={"name": "codex_cli", "args": {}},
     )
     code_action_id = code_action_memory.id
     auto_check(

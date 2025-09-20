@@ -13,7 +13,6 @@ from typing import Any, Iterator
 
 __all__ = [
     "OFFLINE",
-    "ENABLE_CODEX_CLI",
     "ENABLE_FFMPEG",
     "ENABLE_PANDOC",
     "MAX_DIFF_SLOC",
@@ -38,7 +37,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MEMORIES_ROOT = PROJECT_ROOT / "memories"
 
 OFFLINE = os.getenv("OFFLINE", "0") == "1"
-ENABLE_CODEX_CLI = os.getenv("ENABLE_CODEX_CLI", "0") == "1"
 ENABLE_PANDOC = os.getenv("ENABLE_PANDOC", "0") == "1"
 ENABLE_FFMPEG = os.getenv("ENABLE_FFMPEG", "0") == "1"
 WORKTREE_ROOT = Path(os.getenv("WORKTREE_ROOT", PROJECT_ROOT))
@@ -165,4 +163,3 @@ def trim_chars(text: str, limit: int) -> str:
 def copy_file(src: Path, dst: Path) -> None:
     ensure_dir(dst.parent)
     shutil.copy2(src, dst)
-

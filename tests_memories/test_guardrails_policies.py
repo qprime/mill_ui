@@ -11,7 +11,6 @@ def test_safety_guardrail_requires_decision(memory_registry) -> None:
         intent="code.change_request",
         requirements=["Touch safety path"],
         constraints={"paths": ["memories/framework/core.py"]},
-        executor={"name": "codex_cli", "args": {}},
     )
     action = Action.from_memory(memory)
     updated_action, policy_eval = actions.auto_check(

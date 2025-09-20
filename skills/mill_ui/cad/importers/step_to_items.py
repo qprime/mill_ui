@@ -101,21 +101,30 @@ def _wire_kind_info(wire) -> _WireInfo:
     return _WireInfo("other", (cx, cy), (0.0, 0.0))
 
 
-def _edge_sample_points(edge, *, segments: int = 16) -> List[Tuple[float, float]]:
+def _edge_sample_points(edge, *, segments: int = 16, deflection_mm: float = 0.2) -> List[Tuple[float, float]]:
     """Return a list of (x,y) points along an edge. Fallback to endpoints.
 
     Tries OCP (CadQuery backend) BRepAdaptor to evaluate points uniformly in
     parameter space; if unavailable, uses the edge's vertices.
     """
     pts: List[Tuple[float, float]] = []
-    # Try OCP (CadQuery modern backend)
+    # Try OCP (CadQuery modern backend) — prefer adaptive deflection sampling
     adp = None
     try:  # OCP backend
         from OCP.BRepAdaptor import BRepAdaptor_Curve  # type: ignore
+        from OCP.GCPnts import GCPnts_QuasiUniformDeflection  # type: ignore
         adp = BRepAdaptor_Curve(edge)
-        u0 = float(adp.FirstParameter())
-        u1 = float(adp.LastParameter())
-        n = max(2, int(segments))
+        u0 = float(adp.FirstParameter()); u1 = float(adp.LastParameter())
+        approx = GCPnts_QuasiUniformDeflection(adp, float(deflection_mm), u0, u1)
+        nb = int(getattr(approx, "NbPoints", lambda: 0)())
+        if nb >= 2:
+            for i in range(1, nb + 1):
+                u = float(approx.Parameter(i))
+                p = adp.Value(u)
+                pts.append((float(p.X()), float(p.Y())))
+            return pts
+        # Fallback to uniform parameter sampling if adaptive failed
+        n = max(32, int(segments))
         for k in range(n + 1):
             u = u0 + (u1 - u0) * (k / n)
             p = adp.Value(u)
@@ -126,10 +135,19 @@ def _edge_sample_points(edge, *, segments: int = 16) -> List[Tuple[float, float]
 
     try:  # OCC legacy backend
         from OCC.Core.BRepAdaptor import BRepAdaptor_Curve  # type: ignore
+        from OCC.Core.GCPnts import GCPnts_QuasiUniformDeflection  # type: ignore
         adp = BRepAdaptor_Curve(edge)
-        u0 = float(adp.FirstParameter())
-        u1 = float(adp.LastParameter())
-        n = max(2, int(segments))
+        u0 = float(adp.FirstParameter()); u1 = float(adp.LastParameter())
+        approx = GCPnts_QuasiUniformDeflection(adp, float(deflection_mm), u0, u1)
+        nb = int(getattr(approx, "NbPoints", lambda: 0)())
+        if nb >= 2:
+            for i in range(1, nb + 1):
+                u = float(approx.Parameter(i))
+                p = adp.Value(u)
+                pts.append((float(p.X()), float(p.Y())))
+            return pts
+        # Fallback to uniform parameter sampling
+        n = max(32, int(segments))
         for k in range(n + 1):
             u = u0 + (u1 - u0) * (k / n)
             p = adp.Value(u)
@@ -151,7 +169,7 @@ def _edge_sample_points(edge, *, segments: int = 16) -> List[Tuple[float, float]
     return []
 
 
-def _wire_polyline_points(wire, *, segments_per_curve: int = 16) -> List[Tuple[float, float]]:
+def _wire_polyline_points(wire, *, segments_per_curve: int = 24, deflection_mm: float = 0.2) -> List[Tuple[float, float]]:
     """Flatten a wire into a closed polyline approximating its boundary in XY.
 
     Edges that are not straight lines are uniformly sampled in parameter space
@@ -168,8 +186,8 @@ def _wire_polyline_points(wire, *, segments_per_curve: int = 16) -> List[Tuple[f
         except Exception:
             gt = ""
         if gt not in ("", "line"):
-            segs = max(4, int(segments_per_curve))
-        pts = _edge_sample_points(e, segments=segs)
+            segs = max(16, int(segments_per_curve))
+        pts = _edge_sample_points(e, segments=segs, deflection_mm=deflection_mm)
         for p in pts:
             if not out or (abs(out[-1][0] - p[0]) > tol or abs(out[-1][1] - p[1]) > tol):
                 out.append(p)
@@ -274,8 +292,8 @@ def infer_layout_from_step(
                 "side": "outside",
             })
         else:
-            # Generic outline: polyline profile sampled from wire
-            pts_abs = _wire_polyline_points(outer, segments_per_curve=24)
+            # Generic outline: polyline profile sampled from wire (adaptive deflection)
+            pts_abs = _wire_polyline_points(outer, segments_per_curve=64, deflection_mm=0.15)
             if pts_abs:
                 # Center at wire bbox center and store points relative to that
                 bb = _bounding_box(outer)

@@ -52,6 +52,7 @@ button:hover { border-color: #475569; }
 .hidden { display: none; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+.modal.hidden { display: none; }
 .modal-content { width: min(900px, 92vw); max-height: 88vh; background: #0f172a; border: 1px solid #1f2937; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; border-bottom: 1px solid #1f2937; }
 .modal-title { font-weight: 600; }

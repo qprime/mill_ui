@@ -2,6 +2,18 @@
 mill_ui — clean CAD/CAM library nucleus.
 Run tests: python -m skills.mill_ui.tests.run_all
 
+Project setup and STEP import:
+- Initialize or validate a sheet-layout project:
+  - `python run.py compose_cam <project> --setup`
+  - Creates `memories/cam_projects/sheet_layouts/<project>/{input,CAM}` and a skeleton `input/layout.json` if missing.
+- Update layout.json from a STEP file (sheet only):
+  - Place a `.step` or `.stp` file in `.../<project>/input/`
+  - `python run.py compose_cam <project> --update`
+  - Does not change `items[]`. If sheet dims are missing, infers width/height/thickness from the STEP.
+
+Direct STEP→CAM:
+- If `items[]` is empty and a STEP file exists in `input/`, `compose_cam` imports geometry at runtime (Rect/Circle profiles and circular holes) and runs CAM without modifying layout.json.
+
 Border template quick-start:
 - Add `{ "kind": "template", "type": "Border", "params": {...} }` to a layout `items[]`.
 - Required params: `outer_w_mm`, `outer_h_mm`, `inset_mm`, `band_mm`, `mode`.

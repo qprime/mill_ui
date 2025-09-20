@@ -170,15 +170,19 @@ def _edge_sample_points(edge, *, segments: int = 16, deflection_mm: float = 0.2)
 
 
 def _wire_polyline_points(wire, *, segments_per_curve: int = 24, deflection_mm: float = 0.2) -> List[Tuple[float, float]]:
-    """Flatten a wire into a closed polyline approximating its boundary in XY.
+    """Flatten a wire into an ordered, closed polyline approximating its XY boundary.
 
-    Edges that are not straight lines are uniformly sampled in parameter space
-    with a fixed segment count. The result is closed if possible and avoids
-    duplicating adjacent vertices within a small tolerance.
+    - Samples each edge (adaptive deflection where available).
+    - Orders edge polylines by endpoint connectivity so the path doesn't jump.
+    - Deduplicates adjacent points and closes the loop if needed.
     """
     tol = 1e-6
     edges = _edges_of(wire)
-    out: List[Tuple[float, float]] = []
+    if not edges:
+        return []
+
+    # 1) Sample each edge to a small polyline
+    parts: List[Dict[str, Any]] = []
     for e in edges:
         segs = 2
         try:
@@ -186,14 +190,74 @@ def _wire_polyline_points(wire, *, segments_per_curve: int = 24, deflection_mm: 
         except Exception:
             gt = ""
         if gt not in ("", "line"):
-            segs = max(16, int(segments_per_curve))
+            segs = max(32, int(segments_per_curve))
         pts = _edge_sample_points(e, segments=segs, deflection_mm=deflection_mm)
+        # ensure at least endpoints
+        if len(pts) < 2:
+            vs = _vertices_of(e)
+            if len(vs) >= 2:
+                try:
+                    pts = [(float(vs[0].X), float(vs[0].Y)), (float(vs[-1].X), float(vs[-1].Y))]
+                except Exception:
+                    continue
+        # prune adjacent duplicates
+        cleaned: List[Tuple[float, float]] = []
         for p in pts:
-            if not out or (abs(out[-1][0] - p[0]) > tol or abs(out[-1][1] - p[1]) > tol):
-                out.append(p)
-    if out and (abs(out[0][0] - out[-1][0]) > tol or abs(out[0][1] - out[-1][1]) > tol):
-        out.append(out[0])
-    return out
+            if not cleaned or (abs(cleaned[-1][0] - p[0]) > tol or abs(cleaned[-1][1] - p[1]) > tol):
+                cleaned.append(p)
+        if len(cleaned) >= 2:
+            parts.append({
+                "start": cleaned[0],
+                "end": cleaned[-1],
+                "pts": cleaned,
+            })
+
+    if not parts:
+        return []
+
+    # 2) Order parts by chaining endpoints (reverse parts as needed)
+    def _dist2(a: Tuple[float, float], b: Tuple[float, float]) -> float:
+        dx = a[0] - b[0]; dy = a[1] - b[1]
+        return dx*dx + dy*dy
+
+    used = [False] * len(parts)
+    # start from the piece with the smallest (x,y) to be stable
+    start_idx = min(range(len(parts)), key=lambda i: (parts[i]["start"][0], parts[i]["start"][1]))
+    path: List[Tuple[float, float]] = list(parts[start_idx]["pts"])  # copy
+    used[start_idx] = True
+    last = path[-1]
+
+    for _ in range(len(parts) - 1):
+        best = None
+        best_idx = -1
+        best_rev = False
+        best_d = float("inf")
+        for j, pr in enumerate(parts):
+            if used[j]:
+                continue
+            d_start = _dist2(last, pr["start"])  # try in forward order
+            if d_start < best_d:
+                best = pr; best_idx = j; best_rev = False; best_d = d_start
+            d_end = _dist2(last, pr["end"])  # or reversed
+            if d_end < best_d:
+                best = pr; best_idx = j; best_rev = True; best_d = d_end
+        if best is None:
+            break
+        seg = best["pts"]
+        if best_rev:
+            seg = list(reversed(seg))
+        # append without duplicating the join point
+        for p in seg:
+            if abs(path[-1][0] - p[0]) > tol or abs(path[-1][1] - p[1]) > tol:
+                path.append(p)
+        used[best_idx] = True
+        last = path[-1]
+
+    # 3) Close the path if needed
+    if path and (abs(path[0][0] - path[-1][0]) > tol or abs(path[0][1] - path[-1][1]) > tol):
+        path.append(path[0])
+
+    return path
 
 
 def _collect_solids(shape_or_wp) -> List[Any]:
@@ -208,6 +272,32 @@ def _collect_solids(shape_or_wp) -> List[Any]:
         return list(cq.Workplane("XY").add(shape_or_wp).solids().vals())
     except Exception:
         return []
+
+
+def _faces_xy_oriented(solid) -> List[Any]:
+    """Return faces of a solid that lie approximately in the XY plane (small Z extent).
+
+    Heuristic: face bounding box z-length close to 0 compared to the solid's z-span.
+    """
+    try:
+        bb_s = solid.BoundingBox()
+        z_span = float(getattr(bb_s, "zlen", 0.0) or 0.0)
+    except Exception:
+        z_span = 0.0
+    tol_z = max(1e-4, 1e-3 * max(1.0, z_span))  # ~0.001 * thickness or >= 1e-4 mm
+    faces: List[Any] = []
+    try:
+        all_faces = list(cq.Workplane("XY").add(solid).faces().vals())  # type: ignore[attr-defined]
+    except Exception:
+        all_faces = []
+    for f in all_faces:
+        try:
+            bbf = f.BoundingBox()
+            if float(getattr(bbf, "zlen", 0.0) or 0.0) <= tol_z:
+                faces.append(f)
+        except Exception:
+            continue
+    return faces
 
 
 def infer_layout_from_step(
@@ -244,14 +334,23 @@ def infer_layout_from_step(
         ymax = max(ymax, float(bb.ymax))
         thicknesses.append(float(bb.zlen))
 
-        wp = cq.Workplane("XY").add(s)
-        top_faces = wp.faces(">Z").vals()
-        if not top_faces:
-            top_faces = wp.faces("|Z").vals()
-        if not top_faces:
+        # Prefer faces that are XY oriented based on Z thickness of their bounding box
+        xy_faces = _faces_xy_oriented(s)
+        if not xy_faces:
+            # Fallback to faces with positive Z normal if detection failed
+            try:
+                xy_faces = list(cq.Workplane("XY").add(s).faces(">Z").vals())  # type: ignore[attr-defined]
+            except Exception:
+                xy_faces = []
+        if not xy_faces:
             continue
-        # Largest top face by area
-        face = max(top_faces, key=lambda f: getattr(f, 'Area', lambda: 0.0)() if hasattr(f, 'Area') else f.Area())
+        # Largest face by area among XY candidates
+        def _f_area(ff):
+            try:
+                return ff.Area()
+            except Exception:
+                return getattr(ff, 'Area', lambda: 0.0)()
+        face = max(xy_faces, key=_f_area)
         try:
             wires = face.wires().vals()
         except Exception:

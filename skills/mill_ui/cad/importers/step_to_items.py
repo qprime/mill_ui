@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import os
 
 try:
     import cadquery as cq  # type: ignore
@@ -392,7 +393,14 @@ def infer_layout_from_step(
             })
         else:
             # Generic outline: polyline profile sampled from wire (adaptive deflection)
-            pts_abs = _wire_polyline_points(outer, segments_per_curve=64, deflection_mm=0.15)
+            defl = None
+            try:
+                defl = float(os.getenv("MILL_UI_POLY_DEFLECTION_MM", ""))
+            except Exception:
+                defl = None
+            if not defl or defl <= 0:
+                defl = 0.15
+            pts_abs = _wire_polyline_points(outer, segments_per_curve=64, deflection_mm=defl)
             if pts_abs:
                 # Center at wire bbox center and store points relative to that
                 bb = _bounding_box(outer)

@@ -8,7 +8,7 @@ from typing import Any, Dict
 from skills.memory_framework.actions import (
     apply_action,
     approve_action,
-    build_capsule,
+    build_brief,
     create_action,
     get_action,
     run_action,
@@ -72,18 +72,18 @@ def _action_create(args: argparse.Namespace) -> Dict[str, Any]:
     return Action.from_memory(memory).to_dict()
 
 
-def _capsule_build(args: argparse.Namespace) -> Dict[str, Any]:
+def _brief_build(args: argparse.Namespace) -> Dict[str, Any]:
     reg = _registry()
     action = get_action(reg, args.action)
-    result = build_capsule(action, reg)
-    return {"capsule_id": result.capsule.id, "prompt_path": result.capsule.prompt_path}
+    result = build_brief(action, reg)
+    return {"brief_id": result.brief.id, "prompt_path": result.brief.prompt_path}
 
 
 def _run(args: argparse.Namespace) -> Dict[str, Any]:
     reg = _registry()
     action = get_action(reg, args.action)
-    capsule_result = build_capsule(action, reg)
-    updated_action, artifacts, result = run_action(reg, action_id=action.id, capsule=capsule_result.capsule)
+    brief_result = build_brief(action, reg)
+    updated_action, artifacts, result = run_action(reg, action_id=action.id, brief=brief_result.brief)
     return {
         "action": updated_action.to_dict(),
         "artifacts": [artifact.content.path for artifact in artifacts],
@@ -137,10 +137,10 @@ def _parser() -> argparse.ArgumentParser:
     action_create.add_argument("--thread")
     action_create.add_argument("--requirement", action="append")
 
-    capsule_cmd = sub.add_parser("capsule")
-    capsule_sub = capsule_cmd.add_subparsers(dest="capsule_cmd", required=True)
-    capsule_build = capsule_sub.add_parser("build")
-    capsule_build.add_argument("--action", required=True)
+    brief_cmd = sub.add_parser("brief")
+    brief_sub = brief_cmd.add_subparsers(dest="brief_cmd", required=True)
+    brief_build = brief_sub.add_parser("build")
+    brief_build.add_argument("--action", required=True)
 
     run_cmd = sub.add_parser("run")
     run_cmd.add_argument("--action", required=True)
@@ -169,8 +169,8 @@ def api(argv: list[str] | None = None) -> int:
         result = _new_narrative(args)
     elif args.command == "action" and args.action_cmd == "create":
         result = _action_create(args)
-    elif args.command == "capsule" and args.capsule_cmd == "build":
-        result = _capsule_build(args)
+    elif args.command == "brief" and args.brief_cmd == "build":
+        result = _brief_build(args)
     elif args.command == "run":
         result = _run(args)
     elif args.command == "approve":
@@ -191,4 +191,3 @@ def api(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(api())
-

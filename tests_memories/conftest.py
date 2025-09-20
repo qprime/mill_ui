@@ -6,14 +6,14 @@ from typing import Iterable
 
 import pytest
 
-from skills.memory_framework import actions, capsule, policies, registry, timeline
+from skills.memory_framework import actions, brief, policies, registry, timeline
 from skills.memory_framework.executors import codex_cli, ops_shell, prose_llm
 from skills.memory_framework import utils
 
 MODULES: Iterable[object] = (
     utils,
     registry,
-    capsule,
+    brief,
     actions,
     policies,
     timeline,
@@ -73,4 +73,3 @@ def tmp_memories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 @pytest.fixture
 def memory_registry(tmp_memories: Path) -> registry.MemoryRegistry:
     return registry.MemoryRegistry(root=tmp_memories)
-

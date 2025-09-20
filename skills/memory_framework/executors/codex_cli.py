@@ -58,13 +58,13 @@ def simulate_artifacts(action: Action) -> Dict[str, str]:
     }
 
 
-def run(action: Action, capsule, registry: MemoryRegistry) -> Tuple[Memory, List[Memory], dict]:
+def run(action: Action, brief, registry: MemoryRegistry) -> Tuple[Memory, List[Memory], dict]:
     run_dir = MEMORIES_ROOT / "actions" / action.id / "codex_cli"
     ensure_dir(run_dir)
 
-    prompt_path = Path(capsule.prompt_path)
+    prompt_path = Path(brief.prompt_path)
     if not prompt_path.is_absolute():
-        prompt_path = MEMORIES_ROOT / capsule.prompt_path
+        prompt_path = MEMORIES_ROOT / brief.prompt_path
     prompt_text = prompt_path.read_text(encoding="utf-8") if prompt_path.exists() else ""
 
     artifacts_map = simulate_artifacts(action)
@@ -94,9 +94,9 @@ def run(action: Action, capsule, registry: MemoryRegistry) -> Tuple[Memory, List
         "action_id": action.id,
         "executor": "codex_cli",
         "worktree_root": str(WORKTREE_ROOT),
-        "prompt_sha256": capsule.prompt_sha256,
-        "capsule_id": capsule.id,
-        "prompt_path": capsule.prompt_path,
+        "prompt_sha256": brief.prompt_sha256,
+        "brief_id": brief.id,
+        "prompt_path": brief.prompt_path,
         "inputs_hash": sha256_text(prompt_text),
         "artifacts": list(artifacts_map.keys()),
         "artifact_hashes": artifact_hashes,
@@ -129,4 +129,3 @@ def run(action: Action, capsule, registry: MemoryRegistry) -> Tuple[Memory, List
 
 
 register_executor("codex_cli", run)
-

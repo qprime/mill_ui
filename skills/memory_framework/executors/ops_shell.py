@@ -55,7 +55,7 @@ def simulate_artifacts(action: Action) -> Tuple[Dict[str, str], str]:
     return {rel_path: log_text}, summary
 
 
-def run(action: Action, capsule, registry: MemoryRegistry) -> Tuple[Memory, List[Memory], dict]:
+def run(action: Action, brief, registry: MemoryRegistry) -> Tuple[Memory, List[Memory], dict]:
     run_dir = MEMORIES_ROOT / "actions" / action.id / "ops_shell"
     ensure_dir(run_dir)
 
@@ -113,4 +113,3 @@ def run(action: Action, capsule, registry: MemoryRegistry) -> Tuple[Memory, List
 
 
 register_executor("ops_shell", run)
-

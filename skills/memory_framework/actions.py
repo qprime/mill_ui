@@ -4,11 +4,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .capsule import build_capsule
+from .brief import build_brief
 from .executors import get_executor
 from .guardrails import analyze_action
 from .ids import generate_ulid
-from .models import Action, Actor, Capsule as CapsuleModel, Decision, Memory, MemoryContent, MemoryMetadata, Relations
+from .models import Action, Actor, Brief as CapsuleModel, Decision, Memory, MemoryContent, MemoryMetadata, Relations
 from .policies import PolicyEvaluation, PolicyStore
 from .registry import MemoryRegistry
 from .signatures import sign_payload, verify_signature
@@ -20,7 +20,7 @@ __all__ = [
     "run_action",
     "approve_action",
     "apply_action",
-    "build_capsule",
+    "build_brief",
     "get_action",
 ]
 
@@ -140,12 +140,12 @@ def run_action(
     registry: MemoryRegistry,
     *,
     action_id: str,
-    capsule: CapsuleModel,
+    brief: CapsuleModel,
 ) -> Tuple[Action, List[Memory], Dict[str, Any]]:
     action = get_action(registry, action_id)
     executor_name = action.executor.get("name", DEFAULT_EXECUTOR["name"])
     executor = get_executor(executor_name)
-    updated_memory, artifacts, result = executor(action, capsule, registry)
+    updated_memory, artifacts, result = executor(action, brief, registry)
 
     updated_action = Action.from_memory(updated_memory)
     new_constraints = dict(updated_action.constraints)
@@ -276,4 +276,3 @@ def apply_action(registry: MemoryRegistry, *, action_id: str, actor_id: str | No
     )
     registry.register(memory)
     return memory
-

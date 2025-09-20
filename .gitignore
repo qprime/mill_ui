@@ -122,3 +122,12 @@ cam_generator/output/
 image_pipeline/output/
 .model_cache/
 .bak
+
+# Local trash and transient envs
+.Trash-1000/
+.venv_tests/
+._.DS_Store
+
+# Generated living docs
+living_docs/docs/
+living_docs/artifacts/

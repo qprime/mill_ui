@@ -6,19 +6,29 @@ from typing import Any, Dict, List
 
 from .executors.prose_llm import summarize_for_capsule
 from .ids import generate_ulid
-from .models import Action, Actor, Capsule as CapsuleModel, Memory, MemoryContent, MemoryMetadata, Relations
+from .models import Action, Actor, Brief as BriefModel, Memory
 from .registry import MemoryRegistry
-from .utils import MEMORIES_ROOT, WORKTREE_ROOT, ensure_dir, read_text, sha256_text, strip_comments, trim_chars, utc_now, write_text
+from .utils import (
+    MEMORIES_ROOT,
+    WORKTREE_ROOT,
+    ensure_dir,
+    read_text,
+    sha256_text,
+    strip_comments,
+    trim_chars,
+    utc_now,
+    write_text,
+)
 
-__all__ = ["build_capsule"]
+__all__ = ["build_brief"]
 
 MAX_NOTES = 3
 DEFAULT_MAX_CHARS = 8000
 
 
 @dataclass
-class CapsuleBuildResult:
-    capsule: CapsuleModel
+class BriefBuildResult:
+    brief: BriefModel
     memory: Memory
 
 
@@ -74,7 +84,13 @@ def _collect_files(includes: List[Any], drops: List[Dict[str, Any]], max_chars: 
     return collected
 
 
-def build_capsule(action: Action, registry: MemoryRegistry, *, actor: Actor | None = None, max_chars: int | None = None) -> CapsuleBuildResult:
+def build_brief(
+    action: Action,
+    registry: MemoryRegistry,
+    *,
+    actor: Actor | None = None,
+    max_chars: int | None = None,
+) -> BriefBuildResult:
     actor = actor or action.actor
     max_chars = max_chars or action.constraints.get("max_chars", DEFAULT_MAX_CHARS)
     drops: List[Dict[str, Any]] = []
@@ -131,20 +147,22 @@ def build_capsule(action: Action, registry: MemoryRegistry, *, actor: Actor | No
     prompt_text = "\n".join(prompt_parts)
 
     if len(prompt_text) > max_chars:
+        # Keep existing summarizer name for now
         prompt_text = summarize_for_capsule(prompt_text, max_chars)
         if len(prompt_text) > max_chars:
             prompt_text = trim_chars(prompt_text, max_chars)
         drops.append({"item": "prompt", "reason": "summarize", "max_chars": max_chars})
 
-    capsule_id = generate_ulid()
-    capsule_dir = MEMORIES_ROOT / "capsules" / capsule_id
-    ensure_dir(capsule_dir)
-    prompt_path = capsule_dir / "prompt.txt"
+    brief_id = generate_ulid()
+    # Keep on-disk folder name 'capsules' to avoid breaking existing tools/fixtures
+    brief_dir = MEMORIES_ROOT / "capsules" / brief_id
+    ensure_dir(brief_dir)
+    prompt_path = brief_dir / "prompt.txt"
     write_text(prompt_path, prompt_text)
     prompt_sha = sha256_text(prompt_text)
 
-    capsule_model = CapsuleModel(
-        id=capsule_id,
+    brief_model = BriefModel(
+        id=brief_id,
         inputs=inputs,
         budgets={"max_chars": max_chars},
         drops=drops,
@@ -154,16 +172,17 @@ def build_capsule(action: Action, registry: MemoryRegistry, *, actor: Actor | No
     )
 
     stamp = utc_now()
-    memory = capsule_model.to_memory(
+    memory = brief_model.to_memory(
         actor=actor,
-        title=f"Capsule for {action.title}",
+        title=f"Brief for {action.title}",
         registry_status="registered",
         state="active",
         created_at=stamp,
         updated_at=stamp,
     )
-    # Link capsule to action for traceability in timelines and previews
+    # Link brief to action for traceability in timelines and previews
     memory.relations.thread_of = action.id
     registry.register(memory)
 
-    return CapsuleBuildResult(capsule=capsule_model, memory=memory)
+    return BriefBuildResult(brief=brief_model, memory=memory)
+

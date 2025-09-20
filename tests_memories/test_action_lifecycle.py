@@ -18,9 +18,9 @@ def test_action_flow_to_apply(memory_registry, tmp_memories: Path) -> None:
     action = Action.from_memory(memory)
     actions.auto_check(memory_registry, action_id=action.id)
     action = actions.get_action(memory_registry, action.id)
-    capsule_result = actions.build_capsule(action, memory_registry)
+    brief_result = actions.build_brief(action, memory_registry)
     updated_action, artifacts, result = actions.run_action(
-        memory_registry, action_id=action.id, capsule=capsule_result.capsule
+        memory_registry, action_id=action.id, brief=brief_result.brief
     )
     assert updated_action.status in {"ready", "needs_human"}
     applied_memory = actions.apply_action(memory_registry, action_id=action.id)
@@ -40,8 +40,8 @@ def test_apply_requires_successful_exit(memory_registry) -> None:
     action = Action.from_memory(memory)
     actions.auto_check(memory_registry, action_id=action.id)
     action = actions.get_action(memory_registry, action.id)
-    capsule_result = actions.build_capsule(action, memory_registry)
-    actions.run_action(memory_registry, action_id=action.id, capsule=capsule_result.capsule)
+    brief_result = actions.build_brief(action, memory_registry)
+    actions.run_action(memory_registry, action_id=action.id, brief=brief_result.brief)
 
     action = actions.get_action(memory_registry, action.id)
     constraints = dict(action.constraints)

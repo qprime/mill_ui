@@ -50,9 +50,9 @@
       apply.onclick = () => applyAction(ev.id);
       wrap.appendChild(apply);
 
-      const capsule = document.createElement('button'); capsule.textContent = 'Capsule';
-      capsule.onclick = () => previewCapsule(ev.id);
-      wrap.appendChild(capsule);
+      const brief = document.createElement('button'); brief.textContent = 'Brief';
+      brief.onclick = () => previewBrief(ev.id);
+      wrap.appendChild(brief);
 
       const artifacts = document.createElement('button'); artifacts.textContent = 'Artifacts';
       artifacts.onclick = () => showArtifacts(ev.id);
@@ -122,12 +122,12 @@
     await fetchTimeline();
   }
 
-  async function previewCapsule(id) {
-    const res = await fetch(`/ctx/api/actions/${id}/capsule`);
+  async function previewBrief(id) {
+    const res = await fetch(`/ctx/api/actions/${id}/brief`);
     const data = await res.json();
-    const cap = data.capsule;
-    if (!cap) { toast('No capsule'); return; }
-    openViewer(`Capsule ${cap.id}`, cap.prompt_text || '(empty)');
+    const br = data.brief;
+    if (!br) { toast('No brief'); return; }
+    openViewer(`Brief ${br.id}`, br.prompt_text || '(empty)');
   }
 
   async function showArtifacts(id) {

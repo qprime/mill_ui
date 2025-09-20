@@ -37,12 +37,11 @@ def test_timeline_orders_events(memory_registry) -> None:
     action = Action.from_memory(action_memory)
     actions.auto_check(memory_registry, action_id=action.id)
     action = actions.get_action(memory_registry, action.id)
-    capsule_result = actions.build_capsule(action, memory_registry)
-    actions.run_action(memory_registry, action_id=action.id, capsule=capsule_result.capsule)
+    brief_result = actions.build_brief(action, memory_registry)
+    actions.run_action(memory_registry, action_id=action.id, brief=brief_result.brief)
 
     events = build_timeline(memory_registry, "thread-1")
     ids = [event["id"] for event in events]
     assert note_memory.id in ids
     assert action.id in ids
     assert ids.index(note_memory.id) < ids.index(action.id)
-

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Callable, Dict, Tuple
 
-from ..models import Action, Capsule, Memory
+from ..models import Action, Brief, Memory
 from ..registry import MemoryRegistry
 
-ExecutorFn = Callable[[Action, Capsule, MemoryRegistry], Tuple[Memory, list[Memory], dict]]
+ExecutorFn = Callable[[Action, Brief, MemoryRegistry], Tuple[Memory, list[Memory], dict]]
 
 _EXECUTORS: Dict[str, ExecutorFn] = {}
 

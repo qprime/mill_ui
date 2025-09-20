@@ -8,7 +8,7 @@ MemoryType = Literal[
     "truth",
     "artifact",
     "action",
-    "capsule",
+    "brief",
     "decision",
     "note",
     "persona",
@@ -341,7 +341,7 @@ class Action:
 
 
 @dataclass
-class Capsule:
+class Brief:
     id: str
     inputs: Dict[str, Any]
     budgets: Dict[str, Any]
@@ -364,8 +364,8 @@ class Capsule:
     def to_memory(self, *, actor: Actor, title: str, registry_status: RegistryStatus, state: MemoryState, created_at: str, updated_at: str) -> Memory:
         memory = Memory(
             id=self.id,
-            type="capsule",
-            purpose="plan.prompt",
+            type="brief",
+            purpose="brief.prompt",
             handle=None,
             title=title,
             tags=[],
@@ -378,7 +378,7 @@ class Capsule:
             created_at=created_at,
             updated_at=updated_at,
         )
-        memory.metadata.constraints["capsule"] = self.to_dict()
+        memory.metadata.constraints["brief"] = self.to_dict()
         return memory
 
 
@@ -428,7 +428,7 @@ __all__ = [
     "Action",
     "ActionStatus",
     "ArtifactMeta",
-    "Capsule",
+    "Brief",
     "Decision",
     "EscalationReason",
     "Memory",

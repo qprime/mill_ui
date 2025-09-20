@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, render_template, request
 from skills.memory_framework.actions import (
     apply_action,
     approve_action,
-    build_capsule,
+    build_brief,
     create_action,
     get_action,
     run_action,
@@ -58,8 +58,8 @@ def api_create_action():
 def api_run_action(action_id: str):
     reg = _registry()
     action = get_action(reg, action_id)
-    capsule_result = build_capsule(action, reg)
-    updated_action, artifacts, result = run_action(reg, action_id=action_id, capsule=capsule_result.capsule)
+    brief_result = build_brief(action, reg)
+    updated_action, artifacts, result = run_action(reg, action_id=action_id, brief=brief_result.brief)
     return jsonify(
         {
             "action": _action_payload(updated_action),
@@ -129,24 +129,24 @@ def api_get_action(action_id: str):
         for m in reg.query({"type": "decision"}, limit=200)
         if m.handle == action_id
     ]
-    # Find latest capsule linked to action
-    capsules = [
+    # Find latest brief linked to action
+    briefs = [
         m
-        for m in reg.query({"type": "capsule"}, limit=500)
+        for m in reg.query({"type": "brief"}, limit=500)
         if m.relations.thread_of == action_id
     ]
-    latest_capsule = None
-    if capsules:
-        latest_capsule = sorted(capsules, key=lambda m: (m.created_at, m.id))[-1]
+    latest_brief = None
+    if briefs:
+        latest_brief = sorted(briefs, key=lambda m: (m.created_at, m.id))[-1]
     payload = {
         "action": action.to_dict(),
         "artifacts": artifacts,
         "decisions": decisions,
-        "capsule": {
-            "id": latest_capsule.id,
-            "prompt_path": latest_capsule.content.path,
+        "brief": {
+            "id": latest_brief.id,
+            "prompt_path": latest_brief.content.path,
         }
-        if latest_capsule
+        if latest_brief
         else None,
     }
     return jsonify(payload)
@@ -169,19 +169,19 @@ def api_action_artifacts(action_id: str):
     return jsonify({"artifacts": items})
 
 
-@ctx_api_bp.get("/api/actions/<action_id>/capsule")
-def api_action_capsule(action_id: str):
+@ctx_api_bp.get("/api/actions/<action_id>/brief")
+def api_action_brief(action_id: str):
     reg = _registry()
-    # latest capsule for this action
-    capsules = [
+    # latest brief for this action
+    briefs = [
         m
-        for m in reg.query({"type": "capsule"}, limit=500)
+        for m in reg.query({"type": "brief"}, limit=500)
         if m.relations.thread_of == action_id
     ]
-    if not capsules:
-        return jsonify({"capsule": None})
-    cap = sorted(capsules, key=lambda m: (m.created_at, m.id))[-1]
-    prompt_path = cap.content.path
+    if not briefs:
+        return jsonify({"brief": None})
+    br = sorted(briefs, key=lambda m: (m.created_at, m.id))[-1]
+    prompt_path = br.content.path
     prompt_text = ""
     if prompt_path:
         abs_path = MEMORIES_ROOT / prompt_path
@@ -189,8 +189,8 @@ def api_action_capsule(action_id: str):
             prompt_text = read_text(abs_path)
     return jsonify(
         {
-            "capsule": {
-                "id": cap.id,
+            "brief": {
+                "id": br.id,
                 "prompt_path": prompt_path,
                 "prompt_text": prompt_text,
             }

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import actions, capsule, executors, guardrails, policies, registry, timeline
+from . import actions, brief, executors, guardrails, policies, registry, timeline
 from .ids import generate_ulid, ulid_timestamp_ms
 from .models import (
     Action,
     Actor,
     ArtifactMeta,
-    Capsule,
+    Brief,
     Decision,
     Memory,
     MemoryMetadata,
@@ -21,7 +21,7 @@ __all__ = [
     "Action",
     "Actor",
     "ArtifactMeta",
-    "Capsule",
+    "Brief",
     "Decision",
     "Memory",
     "MemoryMetadata",
@@ -30,7 +30,7 @@ __all__ = [
     "RegistryEntry",
     "RegistryStatus",
     "actions",
-    "capsule",
+    "brief",
     "executors",
     "generate_ulid",
     "guardrails",
@@ -44,4 +44,3 @@ __all__ = [
 def registry_from_env(root: Path | None = None) -> MemoryRegistry:
     base = root or Path("memories").resolve()
     return MemoryRegistry(base)
-

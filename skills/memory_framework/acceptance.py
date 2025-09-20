@@ -7,7 +7,7 @@ from .actions import (
     apply_action,
     approve_action,
     auto_check,
-    build_capsule,
+    build_brief,
     create_action,
     run_action,
 )
@@ -68,8 +68,8 @@ def acceptance_demo(registry: MemoryRegistry | None = None) -> AcceptanceResult:
     auto_check(registry, action_id=doc_action_id)
     latest_doc_memory = registry.latest(doc_action_id)
     doc_action = Action.from_memory(latest_doc_memory) if latest_doc_memory else Action.from_memory(doc_action_memory)
-    capsule_result = build_capsule(doc_action, registry, actor=actor)
-    run_action(registry, action_id=doc_action_id, capsule=capsule_result.capsule)
+    brief_result = build_brief(doc_action, registry, actor=actor)
+    run_action(registry, action_id=doc_action_id, brief=brief_result.brief)
 
     # Step 2: code change request hitting safety path
     code_action_memory = create_action(
@@ -90,8 +90,8 @@ def acceptance_demo(registry: MemoryRegistry | None = None) -> AcceptanceResult:
     )
     latest_code_memory = registry.latest(code_action_id)
     code_action = Action.from_memory(latest_code_memory) if latest_code_memory else Action.from_memory(code_action_memory)
-    capsule_code = build_capsule(code_action, registry, actor=actor)
-    run_action(registry, action_id=code_action_id, capsule=capsule_code.capsule)
+    brief_code = build_brief(code_action, registry, actor=actor)
+    run_action(registry, action_id=code_action_id, brief=brief_code.brief)
     approve_action(registry, action_id=code_action_id, approver_id="steve", reason="Safety reviewed")
     apply_action(registry, action_id=code_action_id, actor_id="steve")
 
@@ -109,12 +109,11 @@ def acceptance_demo(registry: MemoryRegistry | None = None) -> AcceptanceResult:
     auto_check(registry, action_id=export_action_id, context={"visibility": "external"})
     latest_export_memory = registry.latest(export_action_id)
     export_action = Action.from_memory(latest_export_memory) if latest_export_memory else Action.from_memory(export_action_memory)
-    capsule_export = build_capsule(export_action, registry, actor=actor)
-    run_action(registry, action_id=export_action_id, capsule=capsule_export.capsule)
+    brief_export = build_brief(export_action, registry, actor=actor)
+    run_action(registry, action_id=export_action_id, brief=brief_export.brief)
     approve_action(registry, action_id=export_action_id, approver_id="steve", reason="External OK")
 
     return AcceptanceResult(
         actions=[doc_action_id, code_action_id, export_action_id],
         artifacts=[],
     )
-

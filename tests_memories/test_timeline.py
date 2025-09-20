@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from skills.memory_framework import actions
-from skills.memory_framework.ids import generate_ulid
-from skills.memory_framework.models import Action, Actor, Memory, MemoryContent, MemoryMetadata, Relations
-from skills.memory_framework.timeline import build_timeline
-from skills.memory_framework.utils import utc_now
+from memories.framework import actions
+from memories.framework.ids import generate_ulid
+from memories.framework.models import Action, Actor, Memory, MemoryContent, MemoryMetadata, Relations
+from memories.framework.timeline import build_timeline
+from memories.framework.utils import utc_now
 
 
 def test_timeline_orders_events(memory_registry) -> None:

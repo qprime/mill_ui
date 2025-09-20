@@ -1,1 +1,1 @@
-{ "safety_critical_paths": ["skills/memory_framework/*", "safety_critical/*"], "required_tests": ["pytest -q"], "required_signers": ["steve"] }
+{ "safety_critical_paths": ["memories/framework/*", "safety_critical/*"], "required_tests": ["pytest -q"], "required_signers": ["steve"] }

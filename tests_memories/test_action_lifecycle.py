@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from skills.memory_framework import actions
-from skills.memory_framework.models import Action
-from skills.memory_framework.utils import utc_now
+from memories.framework import actions
+from memories.framework.models import Action
+from memories.framework.utils import utc_now
 
 
 def test_action_flow_to_apply(memory_registry, tmp_memories: Path) -> None:

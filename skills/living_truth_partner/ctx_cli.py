@@ -5,7 +5,7 @@ import json
 import os
 from typing import Any, Dict
 
-from skills.memory_framework.actions import (
+from memories.framework.actions import (
     apply_action,
     approve_action,
     build_brief,
@@ -13,11 +13,11 @@ from skills.memory_framework.actions import (
     get_action,
     run_action,
 )
-from skills.memory_framework.ids import generate_ulid
-from skills.memory_framework.models import Action, Actor, Memory, MemoryContent, MemoryMetadata, Relations
-from skills.memory_framework.registry import MemoryRegistry
-from skills.memory_framework.timeline import build_timeline
-from skills.memory_framework.utils import utc_now
+from memories.framework.ids import generate_ulid
+from memories.framework.models import Action, Actor, Memory, MemoryContent, MemoryMetadata, Relations
+from memories.framework.registry import MemoryRegistry
+from memories.framework.timeline import build_timeline
+from memories.framework.utils import utc_now
 
 __all__ = ["api"]
 

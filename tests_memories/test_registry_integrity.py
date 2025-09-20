@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from skills.memory_framework.ids import generate_ulid
-from skills.memory_framework.models import Actor, Memory, MemoryContent, MemoryMetadata, Relations
-from skills.memory_framework.registry import MemoryRegistry
-from skills.memory_framework.utils import utc_now
+from memories.framework.ids import generate_ulid
+from memories.framework.models import Actor, Memory, MemoryContent, MemoryMetadata, Relations
+from memories.framework.registry import MemoryRegistry
+from memories.framework.utils import utc_now
 
 
 def _memory(title: str, actor: Actor) -> Memory:
@@ -46,4 +46,3 @@ def test_hash_chain_validation(memory_registry: MemoryRegistry, tmp_memories: Pa
 
     with pytest.raises(ValueError):
         memory_registry.validate_chain()
-

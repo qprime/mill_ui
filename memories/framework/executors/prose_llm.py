@@ -17,15 +17,43 @@ def summarize_for_capsule(text: str, max_chars: int) -> str:
     if not text:
         return ""
     header = "SUMMARY\n"
-    chunks: List[str] = []
-    for line in text.splitlines():
-        stripped = line.strip()
-        if not stripped:
+    source_lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not source_lines:
+        return header
+
+    truth_line = next((line for line in source_lines if line.startswith("## ")), None)
+    ordered: List[str] = []
+    first_line = source_lines[0]
+    ordered.append(first_line)
+    if truth_line and truth_line not in ordered:
+        ordered.append(truth_line)
+    for line in source_lines[1:]:
+        if line in ordered:
             continue
-        chunks.append(stripped)
-        candidate = header + " ".join(chunks)
-        if len(candidate) >= max_chars:
+        ordered.append(line)
+
+    chunks: List[str] = []
+    for line in ordered:
+        candidate = header + " ".join(chunks + [line])
+        if len(candidate) > max_chars:
             break
+        chunks.append(line)
+
+    if truth_line and truth_line not in chunks:
+        if chunks:
+            chunks[-1] = truth_line
+        else:
+            payload = truth_line
+            available = max_chars - len(header)
+            if available <= 0:
+                return header[:max_chars]
+            if len(payload) > available:
+                if available <= 3:
+                    payload = payload[:available]
+                else:
+                    payload = payload[: available - 3] + "..."
+            chunks.append(payload)
+
     summary = header + " ".join(chunks)
     if len(summary) > max_chars:
         if max_chars <= 3:

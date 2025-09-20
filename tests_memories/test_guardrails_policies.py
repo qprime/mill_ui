@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from skills.memory_framework import actions
-from skills.memory_framework.models import Action
+from memories.framework import actions
+from memories.framework.models import Action
 
 
 def test_safety_guardrail_requires_decision(memory_registry) -> None:
@@ -10,14 +10,14 @@ def test_safety_guardrail_requires_decision(memory_registry) -> None:
         title="Guard safety",
         intent="code.change_request",
         requirements=["Touch safety path"],
-        constraints={"paths": ["skills/memory_framework/core.py"]},
+        constraints={"paths": ["memories/framework/core.py"]},
         executor={"name": "codex_cli", "args": {}},
     )
     action = Action.from_memory(memory)
     updated_action, policy_eval = actions.auto_check(
         memory_registry,
         action_id=action.id,
-        context={"paths": ["skills/memory_framework/core.py"], "sensitivity": "safety"},
+        context={"paths": ["memories/framework/core.py"], "sensitivity": "safety"},
     )
     assert updated_action.status == "needs_human"
     assert "policy_required" in updated_action.escalation_reasons
@@ -56,4 +56,3 @@ def test_doc_export_requires_decision(memory_registry) -> None:
     assert updated_action.status == "needs_human"
     assert "policy_required" in updated_action.escalation_reasons
     assert policy_eval.requires_decision
-

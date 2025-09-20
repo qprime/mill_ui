@@ -70,6 +70,7 @@ class PolicyStore:
         required_signers: List[str] = []
 
         paths = set(context.get("paths", []))
+        visibility = context.get("visibility", "internal")
         safety_hits = [
             path
             for path in paths
@@ -84,6 +85,16 @@ class PolicyStore:
         }
         if safety_hits:
             requires_decision = True
+            escalation_reasons.append("policy_required")
+            required_signers.extend(safety.get("required_signers", []))
+
+        visibility_section = {
+            "value": visibility,
+            "requires_decision": False,
+        }
+        if visibility == "external" and action.intent == "doc.export":
+            requires_decision = True
+            visibility_section["requires_decision"] = True
             escalation_reasons.append("policy_required")
             required_signers.extend(safety.get("required_signers", []))
 
@@ -122,6 +133,7 @@ class PolicyStore:
             "safety": safety_section,
             "pii": pii_section,
             "freeze": freeze_section,
+            "visibility": visibility_section,
         }
 
         policy_dir = MEMORIES_ROOT / "decisions" / "policy_checks"
@@ -161,4 +173,3 @@ class PolicyStore:
             required_signers=sorted(set(required_signers)),
             checks=checks,
         )
-

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, jsonify, render_template, request
 
-from skills.memory_framework.actions import (
+from memories.framework.actions import (
     apply_action,
     approve_action,
     build_brief,
@@ -11,10 +11,10 @@ from skills.memory_framework.actions import (
     run_action,
     auto_check,
 )
-from skills.memory_framework.models import Action
-from skills.memory_framework.registry import MemoryRegistry
-from skills.memory_framework.timeline import build_timeline
-from skills.memory_framework.utils import MEMORIES_ROOT, read_text
+from memories.framework.models import Action
+from memories.framework.registry import MemoryRegistry
+from memories.framework.timeline import build_timeline
+from memories.framework.utils import MEMORIES_ROOT, read_text
 
 ctx_api_bp = Blueprint("ctx_api", __name__)
 ctx_web_bp = Blueprint("ctx_web", __name__)

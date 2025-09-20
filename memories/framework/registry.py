@@ -34,8 +34,16 @@ class RegistryEntry:
 
 
 def _load_line(path: Path, line_no: int, raw: str) -> RegistryEntry:
-    data = json.loads(raw)
-    memory = Memory.from_dict(data["memory"])
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Malformed registry entry at {path}:{line_no}") from exc
+    try:
+        memory_payload = data["memory"]
+    except KeyError as exc:
+        raise ValueError(f"Missing memory payload at {path}:{line_no}") from exc
+
+    memory = Memory.from_dict(memory_payload)
     return RegistryEntry(
         memory=memory,
         chain_sha256=data["chain_sha256"],
@@ -227,4 +235,3 @@ def bootstrap_truth(registry: MemoryRegistry, *, actor_id: str = "cliff_ai", act
         }
     )
     return registry.register(memory)
-

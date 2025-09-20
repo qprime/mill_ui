@@ -79,14 +79,14 @@ def acceptance_demo(registry: MemoryRegistry | None = None) -> AcceptanceResult:
         thread="revolutionary-context-engine",
         truth_ref="cliff_ai.truth",
         requirements=["Add guard to memory manager"],
-        constraints={"paths": ["skills/memory_framework/critical.py"]},
+        constraints={"paths": ["memories/framework/critical.py"]},
         executor={"name": "codex_cli", "args": {}},
     )
     code_action_id = code_action_memory.id
     auto_check(
         registry,
         action_id=code_action_id,
-        context={"paths": ["skills/memory_framework/critical.py"], "sensitivity": "safety"},
+        context={"paths": ["memories/framework/critical.py"], "sensitivity": "safety"},
     )
     latest_code_memory = registry.latest(code_action_id)
     code_action = Action.from_memory(latest_code_memory) if latest_code_memory else Action.from_memory(code_action_memory)

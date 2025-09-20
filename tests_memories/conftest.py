@@ -6,9 +6,9 @@ from typing import Iterable
 
 import pytest
 
-from skills.memory_framework import actions, brief, policies, registry, timeline
-from skills.memory_framework.executors import codex_cli, ops_shell, prose_llm
-from skills.memory_framework import utils
+from memories.framework import actions, brief, policies, registry, timeline
+from memories.framework.executors import codex_cli, ops_shell, prose_llm
+from memories.framework import utils
 
 MODULES: Iterable[object] = (
     utils,
@@ -55,7 +55,7 @@ def tmp_memories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     for item in DIRECTORIES:
         (tmp_path / item).mkdir(parents=True, exist_ok=True)
     (tmp_path / "policies" / "safety.json").write_text(
-        '{ "safety_critical_paths": ["skills/memory_framework/*"], "required_tests": ["pytest -q"], "required_signers": ["steve"] }',
+        '{ "safety_critical_paths": ["memories/framework/*"], "required_tests": ["pytest -q"], "required_signers": ["steve"] }',
         encoding="utf-8",
     )
     (tmp_path / "policies" / "pii.json").write_text(

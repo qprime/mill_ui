@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cliff.ai/schemas/layout.json",
+  "title": "Sheet Layout",
+  "type": "object",
+  "required": ["schema_version", "sheet", "items"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "sheet": {
+      "type": "object",
+      "required": ["width_mm", "height_mm", "thickness_mm"],
+      "properties": {
+        "width_mm": {"type": "number", "minimum": 0},
+        "height_mm": {"type": "number", "minimum": 0},
+        "thickness_mm": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "type", "geometry"],
+        "properties": {
+          "kind": {"type": "string"},
+          "type": {"type": "string"},
+          "geometry": {"type": "object"},
+          "placement": {
+            "type": "object",
+            "properties": {
+              "center_xy_mm": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "feature": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "cols": {"type": "integer", "minimum": 1},
+        "rows": {"type": "integer", "minimum": 1},
+        "gap_mode": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "kerf_width_mm": {"type": "number", "minimum": 0}
+  },
+  "additionalProperties": true
+}
+

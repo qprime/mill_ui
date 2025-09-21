@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cliff.ai/schemas/summary.json",
+  "title": "CAM Summary",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project",
+    "sheet",
+    "output_dir",
+    "files",
+    "passes",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "project": {"type": "string"},
+    "sheet": {
+      "type": "object",
+      "required": ["width_mm", "height_mm", "thickness_mm"],
+      "properties": {
+        "width_mm": {"type": "number"},
+        "height_mm": {"type": "number"},
+        "thickness_mm": {"type": "number"}
+      },
+      "additionalProperties": false
+    },
+    "output_dir": {"type": "string"},
+    "files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "passes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["filename", "operation", "tool", "item_count", "metrics"],
+        "properties": {
+          "filename": {"type": "string"},
+          "operation": {"type": "string"},
+          "tool": {"type": "object"},
+          "item_count": {"type": "integer", "minimum": 0},
+          "metrics": {"type": "object"},
+          "description": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "notes": {"type": "string"},
+    "provenance": {
+      "type": "object",
+      "required": [
+        "code_git_sha",
+        "tool_db_hash",
+        "config_hash",
+        "native_caps",
+        "machine_profile",
+        "generated_by",
+        "artifacts"
+      ],
+      "properties": {
+        "code_git_sha": {
+          "type": ["string", "null"]
+        },
+        "tool_db_hash": {
+          "type": ["string", "null"]
+        },
+        "config_hash": {
+          "type": ["string", "null"]
+        },
+        "native_caps": {
+          "type": "object",
+          "properties": {
+            "cad": {"type": "boolean"},
+            "cam": {"type": "boolean"}
+          },
+          "required": ["cad"],
+          "additionalProperties": false
+        },
+        "machine_profile": {
+          "type": ["string", "null"]
+        },
+        "generated_by": {
+          "type": "object",
+          "required": ["app", "version"],
+          "properties": {
+            "app": {"type": "string"},
+            "version": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "name", "bytes", "sha256"],
+            "properties": {
+              "path": {"type": "string"},
+              "name": {"type": "string"},
+              "bytes": {"type": "integer", "minimum": 0},
+              "sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
+

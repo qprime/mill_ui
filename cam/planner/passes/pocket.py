@@ -8,6 +8,7 @@ from skills.mill_ui.cam.ops.drill import drill_peck
 from skills.mill_ui.cam.ops.engrave import engrave_lines
 from skills.mill_ui.cam.ops.pocket_region import pocket_region_rect_raster
 from skills.mill_ui.cam.path.strategies import pocket_then_finish_profile
+from skills.mill_ui.cam.planner.registry import register_strategy
 
 from .profile import circle_shape_mm, ensure_center, rect_shape
 from .tools import (
@@ -197,6 +198,11 @@ def plan_engrave_passes(
             engrave_lines(lines, record.setup, z=-abs(depth)),
             increment=len(lines),
         )
+
+
+register_strategy("pocket", "rect_raster", pocket_then_finish_profile)
+register_strategy("pocket", "circle_concentric", pocket_circle_concentric)
+register_strategy("pocket", "region_rect_raster", pocket_region_rect_raster)
 
 
 __all__ = [

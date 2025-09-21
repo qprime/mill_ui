@@ -2,15 +2,18 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
+import random
 import sys
 import textwrap
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from skills.mill_ui.core import Config, get_capabilities, load_config
+from skills.mill_ui.core.version import get_build_version, git_sha
 from skills.mill_ui.cad.ingest.sanitize import canonicalize_items
 from skills.mill_ui.cad.export.svg_dims import render_svg_with_dims
 from skills.mill_ui.cad.export.step import SheetSpec, export_step, export_stl
@@ -23,6 +26,15 @@ from skills.mill_ui.cam.planner.passes import plan_passes
 from skills.mill_ui.cam.post.gcode import write_gcode
 from skills.mill_ui.cam.tools.adapter import load_tool_db
 from skills.mill_ui.compositions import resolve_templates
+
+os.environ.setdefault("PYTHONHASHSEED", "0")
+random.seed(0)
+try:  # numpy is optional in this environment
+    import numpy as np
+
+    np.random.seed(0)
+except Exception:  # pragma: no cover - optional dependency
+    pass
 
 LOGGER = logging.getLogger("compose_cam")
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
@@ -42,6 +54,41 @@ def _save_text(path: Path, content: str) -> None:
 def _save_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def _hash_file(path: Path) -> str | None:
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(8192), b""):
+                if not chunk:
+                    break
+                digest.update(chunk)
+    except OSError:
+        return None
+    return digest.hexdigest()
+
+
+def _artifact_entry(path: Path) -> Optional[Dict[str, Any]]:
+    try:
+        stats = path.stat()
+    except OSError:
+        return None
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(8192), b""):
+                if not chunk:
+                    break
+                digest.update(chunk)
+    except OSError:
+        return None
+    return {
+        "path": str(path),
+        "name": path.name,
+        "bytes": int(stats.st_size),
+        "sha256": digest.hexdigest(),
+    }
 
 
 def _default_config_search_paths() -> List[Path]:
@@ -224,7 +271,7 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
             """
         ),
     )
-    parser.add_argument("layout", help="Path to layout.json or project identifier")
+    parser.add_argument("layout", nargs="?", help="Path to layout.json or project identifier")
 
     parser.add_argument("--config", dest="config_path", type=Path, help="Path to a configuration JSON file")
     parser.add_argument("--tool-db", dest="tool_db_path", type=Path, help="Override the tool database path")
@@ -248,12 +295,20 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--tabs-height-mm", type=float, help="Tab height in mm when tabs are enabled")
     parser.add_argument("--profile-cut-through-mm", type=float, help="Extra depth (mm) for profile passes to guarantee cut-through")
 
-    return parser.parse_args(argv)
+    parser.add_argument("--version", action="store_true", help="Print version information and exit")
+    args = parser.parse_args(argv)
+    if not args.version and not args.layout:
+        parser.error("layout argument is required unless --version is used")
+    return args
 
 
 def main(argv: Sequence[str]) -> int:
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
     args = _parse_args(argv)
+
+    if args.version:
+        print(f"compose_cam version: {get_build_version()}")
+        return 0
 
     try:
         config = load_config(
@@ -265,6 +320,13 @@ def main(argv: Sequence[str]) -> int:
     except FileNotFoundError as exc:
         print(str(exc), file=sys.stderr)
         return 2
+
+    try:
+        config_hash = hashlib.sha256(
+            json.dumps(config.as_dict(), sort_keys=True).encode("utf-8")
+        ).hexdigest()
+    except Exception:
+        config_hash = None
 
     try:
         layout_path, outdir, project_name = _resolve_layout_paths(args.layout, config)
@@ -308,8 +370,22 @@ def main(argv: Sequence[str]) -> int:
         print("Set CAM_TOOL_DB or use --tool-db to provide a valid path.", file=sys.stderr)
         return 2
 
+    tool_db_hash = _hash_file(tool_db_path)
+    try:
+        tool_db_raw = _load_json(tool_db_path)
+    except Exception:
+        tool_db_raw = {}
+
     material_name = config.material_name or "MDF"
     tools = load_tool_db(str(tool_db_path), material=material_name)
+
+    machine_profile_name = None
+    if isinstance(tool_db_raw, Mapping):
+        raw_profile = tool_db_raw.get("machine_profile")
+        if isinstance(raw_profile, Mapping):
+            name_val = raw_profile.get("name")
+            if isinstance(name_val, str) and name_val.strip():
+                machine_profile_name = name_val
 
     material = Material(name=material_name)
     machine = Machine(name="default_grbl")
@@ -402,6 +478,15 @@ def main(argv: Sequence[str]) -> int:
             LOGGER.info("Native CAD backends unavailable: skipping STEP export.")
 
     summary_path = outdir / "summary.json"
+    build_version = get_build_version()
+    code_sha = git_sha(short=True) or git_sha(short=False)
+    artifacts: List[Dict[str, Any]] = []
+    for produced in made_files:
+        entry = _artifact_entry(Path(produced))
+        if entry:
+            artifacts.append(entry)
+
+    job_summary["schema_version"] = "1.0"
     job_summary.update(
         {
             "project": project_name,
@@ -410,6 +495,21 @@ def main(argv: Sequence[str]) -> int:
             "files": [Path(f).name for f in made_files],
         }
     )
+    job_summary["provenance"] = {
+        "code_git_sha": code_sha,
+        "tool_db_hash": tool_db_hash,
+        "config_hash": config_hash,
+        "native_caps": {
+            "cad": bool(caps.native_cad),
+            "cam": bool(getattr(caps, "native_cam", False)),
+        },
+        "machine_profile": machine_profile_name,
+        "generated_by": {
+            "app": "compose_cam",
+            "version": build_version,
+        },
+        "artifacts": artifacts,
+    }
     if additional_notes:
         note = job_summary.get("notes", "")
         joined = " | ".join(additional_notes)
@@ -515,3 +615,12 @@ def _apply_grid_layout(
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
+# Ensure deterministic behaviour when randomised libraries are present.
+os.environ.setdefault("PYTHONHASHSEED", "0")
+random.seed(0)
+try:  # numpy is optional in this environment
+    import numpy as np
+
+    np.random.seed(0)
+except Exception:  # pragma: no cover - optional dependency
+    pass

@@ -8,6 +8,11 @@ Run tests: python -m skills.mill_ui.tests.run_all
 - The extension is required for CAM operations; build failures now surface immediately instead of silently falling back.
 - See `skills/mill_ui/cam/native/README.md` for build instructions and native-specific notes.
 
+## Native CAD exporter
+- STEP/STL previews now route through `skills.mill_ui.cad.native` (C++17/pybind11).
+- The Python helpers in `skills.mill_ui.cad.step_export` shim into the native module; CadQuery is no longer required.
+- See `skills/mill_ui/cad/native/README.md` for the current capabilities and roadmap toward an OCCT-backed modeller.
+
 Border template quick-start:
 - Add `{ "kind": "template", "type": "Border", "params": {...} }` to a layout `items[]`.
 - Required params: `outer_w_mm`, `outer_h_mm`, `inset_mm`, `band_mm`, `mode`.

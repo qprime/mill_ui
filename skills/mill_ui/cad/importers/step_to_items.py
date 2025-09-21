@@ -101,83 +101,6 @@ def _wire_kind_info(wire) -> _WireInfo:
     return _WireInfo("other", (cx, cy), (0.0, 0.0))
 
 
-def _edge_sample_points(edge, *, segments: int = 16) -> List[Tuple[float, float]]:
-    """Return a list of (x,y) points along an edge. Fallback to endpoints.
-
-    Tries OCP (CadQuery backend) BRepAdaptor to evaluate points uniformly in
-    parameter space; if unavailable, uses the edge's vertices.
-    """
-    pts: List[Tuple[float, float]] = []
-    # Try OCP (CadQuery modern backend)
-    adp = None
-    try:  # OCP backend
-        from OCP.BRepAdaptor import BRepAdaptor_Curve  # type: ignore
-        adp = BRepAdaptor_Curve(edge)
-        u0 = float(adp.FirstParameter())
-        u1 = float(adp.LastParameter())
-        n = max(2, int(segments))
-        for k in range(n + 1):
-            u = u0 + (u1 - u0) * (k / n)
-            p = adp.Value(u)
-            pts.append((float(p.X()), float(p.Y())))
-        return pts
-    except Exception:
-        pass
-
-    try:  # OCC legacy backend
-        from OCC.Core.BRepAdaptor import BRepAdaptor_Curve  # type: ignore
-        adp = BRepAdaptor_Curve(edge)
-        u0 = float(adp.FirstParameter())
-        u1 = float(adp.LastParameter())
-        n = max(2, int(segments))
-        for k in range(n + 1):
-            u = u0 + (u1 - u0) * (k / n)
-            p = adp.Value(u)
-            pts.append((float(p.X()), float(p.Y())))
-        return pts
-    except Exception:
-        pass
-
-    # Fallback: endpoints from vertices
-    verts = _vertices_of(edge)
-    if verts:
-        try:
-            pts = [(float(verts[0].X), float(verts[0].Y))]
-            if len(verts) > 1:
-                pts.append((float(verts[-1].X), float(verts[-1].Y)))
-            return pts
-        except Exception:
-            pass
-    return []
-
-
-def _wire_polyline_points(wire, *, segments_per_curve: int = 16) -> List[Tuple[float, float]]:
-    """Flatten a wire into a closed polyline approximating its boundary in XY.
-
-    Edges that are not straight lines are uniformly sampled in parameter space
-    with a fixed segment count. The result is closed if possible and avoids
-    duplicating adjacent vertices within a small tolerance.
-    """
-    tol = 1e-6
-    edges = _edges_of(wire)
-    out: List[Tuple[float, float]] = []
-    for e in edges:
-        segs = 2
-        try:
-            gt = str(getattr(e, "geomType")()).lower()
-        except Exception:
-            gt = ""
-        if gt not in ("", "line"):
-            segs = max(4, int(segments_per_curve))
-        pts = _edge_sample_points(e, segments=segs)
-        for p in pts:
-            if not out or (abs(out[-1][0] - p[0]) > tol or abs(out[-1][1] - p[1]) > tol):
-                out.append(p)
-    if out and (abs(out[0][0] - out[-1][0]) > tol or abs(out[0][1] - out[-1][1]) > tol):
-        out.append(out[0])
-    return out
-
-
 def _collect_solids(shape_or_wp) -> List[Any]:
     if cq is None:  # pragma: no cover
         return []
@@ -273,23 +196,6 @@ def infer_layout_from_step(
                 "placement": {"center_xy_mm": (_scale_val(cx, units), _scale_val(cy, units))},
                 "side": "outside",
             })
-        else:
-            # Generic outline: polyline profile sampled from wire
-            pts_abs = _wire_polyline_points(outer, segments_per_curve=24)
-            if pts_abs:
-                # Center at wire bbox center and store points relative to that
-                bb = _bounding_box(outer)
-                cx, cy = 0.5 * (bb.xmin + bb.xmax), 0.5 * (bb.ymin + bb.ymax)
-                pts_rel = [(_scale_val(px - cx, units), _scale_val(py - cy, units)) for (px, py) in pts_abs]
-                items.append({
-                    "id": f"solid{idx+1}:outer",
-                    "kind": "shape",
-                    "type": "Polyline",
-                    "geometry": {"points": pts_rel, "closed": True},
-                    "feature": {"type": "profile", "depth": "through"},
-                    "placement": {"center_xy_mm": (_scale_val(cx, units), _scale_val(cy, units))},
-                    "side": "on",
-                })
 
         # Detect circular holes from inner wires on the top face
         for w in wires:

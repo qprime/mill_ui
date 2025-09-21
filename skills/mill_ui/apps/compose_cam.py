@@ -277,37 +277,29 @@ def main(argv: List[str]) -> int:
         try:
             from skills.mill_ui.cad.importers.step_to_items import infer_layout_from_step
         except Exception as exc:
-            print(f"[update] STEP importer unavailable: {exc}", file=sys.stderr)
-            infer_layout_from_step = None  # type: ignore
+            print(f"Cannot update from STEP: {exc}", file=sys.stderr)
+            return 2
 
         ensure_project_structure(base)
 
-        # Find CAD files in input/ (prefer STEP, then DXF). Ignore hidden/AppleDouble.
+        # Find STEP file(s) in input folder (prefer non-hidden, non-AppleDouble, largest first)
         input_dir = base / "input"
         step_all: List[Path] = []
-        dxf_all: List[Path] = []
         for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
             step_all.extend(sorted(input_dir.glob(pat)))
-        for pat in ("*.dxf", "*.DXF"):
-            dxf_all.extend(sorted(input_dir.glob(pat)))
-        def _is_good(p: Path) -> bool:
+        def _is_good_step(p: Path) -> bool:
             try:
                 return (not p.name.startswith("._")) and (not p.name.startswith(".")) and p.stat().st_size > 0
             except Exception:
                 return False
-        step_candidates = sorted((p for p in step_all if _is_good(p)), key=lambda p: (-p.stat().st_size, p.name))
-        dxf_candidates = sorted((p for p in dxf_all if _is_good(p)), key=lambda p: (-p.stat().st_size, p.name))
-        use_step = bool(step_candidates and infer_layout_from_step is not None)
-        use_dxf = (not use_step) and bool(dxf_candidates)
-        if not (use_step or use_dxf):
-            print(f"No STEP/DXF files found in {input_dir} (expected .step/.stp or .dxf)", file=sys.stderr)
+        step_candidates = sorted((p for p in step_all if _is_good_step(p)), key=lambda p: (-p.stat().st_size, p.name))
+        if not step_candidates:
+            print(f"No STEP files found in {input_dir} (expected .step or .stp)", file=sys.stderr)
             return 2
-        if use_step and len(step_candidates) > 1:
+        step_path = step_candidates[0]
+        if len(step_candidates) > 1:
             others = ", ".join(p.name for p in step_candidates[1:])
-            print(f"[update] Using {step_candidates[0].name}; ignoring: {others}")
-        if use_dxf and len(dxf_candidates) > 1:
-            others = ", ".join(p.name for p in dxf_candidates[1:])
-            print(f"[update] Using {dxf_candidates[0].name}; ignoring: {others}")
+            print(f"[update] Using {step_path.name}; ignoring: {others}")
 
         # Load or create base layout
         if in_path.exists():
@@ -334,22 +326,12 @@ def main(argv: List[str]) -> int:
         if not sheet_overrides:
             sheet_overrides = None
 
-        # Infer from CAD (assume units mm; margin 5mm)
-        inferred = None
-        if use_step:
-            step_path = step_candidates[0]
-            try:
-                inferred = infer_layout_from_step(step_path, units="mm", margin_mm=5.0, sheet_overrides=sheet_overrides)  # type: ignore[misc]
-            except Exception as exc:
-                print(f"Failed to import STEP: {exc}", file=sys.stderr)
-                inferred = None
-        if inferred is None and use_dxf:
-            try:
-                from skills.mill_ui.cad.importers.dxf_to_items import infer_layout_from_dxf
-                inferred = infer_layout_from_dxf(dxf_candidates[0], units="mm", margin_mm=5.0, sheet_overrides=sheet_overrides)
-            except Exception as exc:
-                print(f"Failed to import DXF: {exc}", file=sys.stderr)
-                return 2
+        # Infer from STEP (assume units mm; margin 5mm)
+        try:
+            inferred = infer_layout_from_step(step_path, units="mm", margin_mm=5.0, sheet_overrides=sheet_overrides)
+        except Exception as exc:
+            print(f"Failed to import STEP: {exc}", file=sys.stderr)
+            return 2
 
         # Merge: keep items as-is; adopt sheet from inferred unless base already had nonzero dims
         merged = dict(base_layout)
@@ -364,8 +346,7 @@ def main(argv: List[str]) -> int:
         write_layout(in_path, merged)
         items_ct = len(merged.get("items", []))
         s = merged.get("sheet", {})
-        src_name = step_candidates[0].name if use_step else dxf_candidates[0].name
-        print(f"Updated {in_path} (sheet from {src_name} when missing): items={items_ct}, sheet={s.get('width_mm')}×{s.get('height_mm')}×{s.get('thickness_mm')} mm")
+        print(f"Updated {in_path} (sheet from {step_path.name} when missing): items={items_ct}, sheet={s.get('width_mm')}×{s.get('height_mm')}×{s.get('thickness_mm')} mm")
         return 0
 
     if not in_path.exists():
@@ -381,22 +362,18 @@ def main(argv: List[str]) -> int:
 
     items = list(data.get("items") or [])
 
-    # If no items are provided, try to import geometry directly from CAD in input/ (STEP preferred, DXF fallback)
+    # If no items are provided, try to import geometry directly from a STEP file in input/
     if not items:
         input_dir = base / "input"
         step_all: List[Path] = []
-        dxf_all: List[Path] = []
         for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
             step_all.extend(sorted(input_dir.glob(pat)))
-        for pat in ("*.dxf", "*.DXF"):
-            dxf_all.extend(sorted(input_dir.glob(pat)))
         def _is_good_rt(p: Path) -> bool:
             try:
                 return (not p.name.startswith("._")) and (not p.name.startswith(".")) and p.stat().st_size > 0
             except Exception:
                 return False
         step_candidates = sorted((p for p in step_all if _is_good_rt(p)), key=lambda p: (-p.stat().st_size, p.name))
-        dxf_candidates = sorted((p for p in dxf_all if _is_good_rt(p)), key=lambda p: (-p.stat().st_size, p.name))
         if step_candidates:
             try:
                 from skills.mill_ui.cad.importers.step_to_items import infer_layout_from_step
@@ -423,25 +400,6 @@ def main(argv: List[str]) -> int:
                         print(f"[compose_cam] Using STEP geometry from {step_path.name} (items={len(items)})")
                     else:
                         print(f"[compose_cam] STEP contained no usable 2.5D geometry: {step_path.name}", file=sys.stderr)
-        if not items and dxf_candidates:
-            try:
-                from skills.mill_ui.cad.importers.dxf_to_items import infer_layout_from_dxf
-                dxf_path = dxf_candidates[0]
-                inferred = infer_layout_from_dxf(dxf_path, units="mm", margin_mm=5.0,
-                                                 sheet_overrides={"width_mm": panel_w, "height_mm": panel_h, "thickness_mm": panel_t} if (panel_w>0 and panel_h>0 and panel_t>0) else None)
-            except Exception as exc:
-                print(f"[compose_cam] Failed to read DXF {dxf_path.name}: {exc}", file=sys.stderr)
-            else:
-                if panel_w <= 0 or panel_h <= 0 or panel_t <= 0:
-                    s = inferred.get("sheet", {})
-                    panel_w = float(s.get("width_mm", panel_w))
-                    panel_h = float(s.get("height_mm", panel_h))
-                    panel_t = float(s.get("thickness_mm", panel_t))
-                items = list(inferred.get("items", []))
-                if items:
-                    print(f"[compose_cam] Using DXF geometry from {dxf_path.name} (items={len(items)})")
-                else:
-                    print(f"[compose_cam] DXF contained no closed polylines: {dxf_path.name}", file=sys.stderr)
         if not items:
             print("No items to process. Provide items in layout.json or a valid STEP in input/", file=sys.stderr)
             return 2

@@ -68,15 +68,10 @@ def render_svg_with_dims(
     if hints:
         # profiles
         for rec in (hints.get("profiles") or []):
-            t = str(rec.get("shape", "")).lower()
-            if t == "polyline":
-                _draw_polyline(body, rec, "feature-profile")
-                _label_depth_if_any(body, rec)
-            else:
-                _draw_rect_or_circle(body, rec, "feature-profile")
-                _label_depth_if_any(body, rec)
-                _size_label_if_rect(body, rec)
-                if _is_rect(rec): outer_rects.append(rec)
+            _draw_rect_or_circle(body, rec, "feature-profile")
+            _label_depth_if_any(body, rec)
+            _size_label_if_rect(body, rec)
+            if _is_rect(rec): outer_rects.append(rec)
         # pockets
         for rec in (hints.get("pockets") or []):
             t = str(rec.get("shape","")).lower()

@@ -166,11 +166,6 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
     )
     parser.add_argument("project", help="Project folder under memories/cam_projects/sheet_layouts")
     parser.add_argument(
-        "--setup",
-        action="store_true",
-        help="Ensure project structure exists and layout.json is present/valid, then exit",
-    )
-    parser.add_argument(
         "--stl",
         action="store_true",
         help="Emit STL meshes (prefers precise CAD export; falls back to raster preview)",
@@ -207,11 +202,6 @@ def _parse_args(argv: List[str]) -> argparse.Namespace:
         help="Emit a STEP preview (requires cadquery)",
     )
     parser.add_argument(
-        "--update",
-        action="store_true",
-        help="Update input/layout.json from a STEP file in the project's input folder, then exit",
-    )
-    parser.add_argument(
         "--step-filename",
         type=str,
         default="panel_preview.step",
@@ -228,124 +218,8 @@ def main(argv: List[str]) -> int:
     in_path = base / "input" / "layout.json"
     outdir = base / "CAM"
 
-    # --- Setup mode: ensure structure + validate layout.json ---
-    if args.setup:
-        from skills.mill_ui.io.layout_utils import (
-            ensure_project_structure,
-            skeleton_layout,
-            write_layout,
-            load_layout,
-            validate_layout_json,
-        )
-
-        ensure_project_structure(base)
-        created = False
-        if not in_path.exists():
-            write_layout(in_path, skeleton_layout())
-            created = True
-
-        # Validate JSON
-        try:
-            data = load_layout(in_path)
-        except Exception as exc:
-            print(f"Invalid JSON in {in_path}: {exc}", file=sys.stderr)
-            return 2
-
-        ok, msg = validate_layout_json(data)
-        if not ok:
-            print(f"Layout validation failed: {msg}", file=sys.stderr)
-            return 2
-
-        # Ensure CAM exists
-        outdir.mkdir(parents=True, exist_ok=True)
-
-        if created:
-            print(f"Initialized project at {base} (created skeleton layout.json)")
-        else:
-            print(f"Project OK at {base}: layout.json valid and folders present")
-        return 0
-
-    # --- Update mode: read STEP from input/, update sheet dims in layout.json (do NOT write items) ---
-    if args.update:
-        from skills.mill_ui.io.layout_utils import (
-            ensure_project_structure,
-            skeleton_layout,
-            write_layout,
-            load_layout,
-            validate_layout_json,
-        )
-        try:
-            from skills.mill_ui.cad.importers.step_to_items import infer_layout_from_step
-        except Exception as exc:
-            print(f"Cannot update from STEP: {exc}", file=sys.stderr)
-            return 2
-
-        ensure_project_structure(base)
-
-        # Find STEP file(s) in input folder
-        input_dir = base / "input"
-        step_candidates = []
-        for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
-            step_candidates.extend(sorted(input_dir.glob(pat)))
-        step_candidates = sorted(set(step_candidates))
-        if not step_candidates:
-            print(f"No STEP files found in {input_dir} (expected .step or .stp)", file=sys.stderr)
-            return 2
-        step_path = step_candidates[0]
-        if len(step_candidates) > 1:
-            others = ", ".join(p.name for p in step_candidates[1:])
-            print(f"[update] Using {step_path.name}; ignoring: {others}")
-
-        # Load or create base layout
-        if in_path.exists():
-            try:
-                base_layout = load_layout(in_path)
-            except Exception as exc:
-                print(f"Invalid JSON in {in_path}: {exc}", file=sys.stderr)
-                return 2
-        else:
-            base_layout = skeleton_layout()
-
-        # Build optional sheet overrides from base layout if it looks set
-        sheet = base_layout.get("sheet") or {}
-        sheet_overrides = {}
-        try:
-            w = float(sheet.get("width_mm", 0.0))
-            h = float(sheet.get("height_mm", 0.0))
-            t = float(sheet.get("thickness_mm", 0.0))
-        except Exception:
-            w = h = t = 0.0
-        if w > 0: sheet_overrides["width_mm"] = w
-        if h > 0: sheet_overrides["height_mm"] = h
-        if t > 0: sheet_overrides["thickness_mm"] = t
-        if not sheet_overrides:
-            sheet_overrides = None
-
-        # Infer from STEP (assume units mm; margin 5mm)
-        try:
-            inferred = infer_layout_from_step(step_path, units="mm", margin_mm=5.0, sheet_overrides=sheet_overrides)
-        except Exception as exc:
-            print(f"Failed to import STEP: {exc}", file=sys.stderr)
-            return 2
-
-        # Merge: keep items as-is; adopt sheet from inferred unless base already had nonzero dims
-        merged = dict(base_layout)
-        if not (w > 0 and h > 0 and t > 0):
-            merged["sheet"] = inferred.get("sheet", merged.get("sheet", {}))
-
-        ok, msg = validate_layout_json(merged)
-        if not ok:
-            print(f"Updated layout failed validation: {msg}", file=sys.stderr)
-            return 2
-
-        write_layout(in_path, merged)
-        items_ct = len(merged.get("items", []))
-        s = merged.get("sheet", {})
-        print(f"Updated {in_path} (sheet from {step_path.name} when missing): items={items_ct}, sheet={s.get('width_mm')}×{s.get('height_mm')}×{s.get('thickness_mm')} mm")
-        return 0
-
     if not in_path.exists():
-        print(f"input not found: {in_path} (use --setup to create skeleton)", file=sys.stderr)
+        print(f"input not found: {in_path}", file=sys.stderr)
         return 2
 
     # 1) load layout
@@ -356,36 +230,6 @@ def main(argv: List[str]) -> int:
     panel_t = float(sheet.get("thickness_mm", 0.0))
 
     items = list(data.get("items") or [])
-
-    # If no items are provided, try to import geometry directly from a STEP file in input/
-    if not items:
-        input_dir = base / "input"
-        step_candidates = []
-        for pat in ("*.step", "*.stp", "*.STEP", "*.STP"):
-            step_candidates.extend(sorted(input_dir.glob(pat)))
-        if step_candidates:
-            try:
-                from skills.mill_ui.cad.importers.step_to_items import infer_layout_from_step
-            except Exception as exc:
-                print(f"[compose_cam] STEP present but importer unavailable: {exc}", file=sys.stderr)
-            else:
-                step_path = sorted(set(step_candidates))[0]
-                # Build sheet overrides from current sheet if provided
-                sheet_overrides = None
-                if panel_w > 0 and panel_h > 0 and panel_t > 0:
-                    sheet_overrides = {"width_mm": panel_w, "height_mm": panel_h, "thickness_mm": panel_t}
-                try:
-                    inferred = infer_layout_from_step(step_path, units="mm", margin_mm=5.0, sheet_overrides=sheet_overrides)
-                except Exception as exc:
-                    print(f"[compose_cam] Failed to read STEP {step_path.name}: {exc}", file=sys.stderr)
-                else:
-                    if panel_w <= 0 or panel_h <= 0 or panel_t <= 0:
-                        s = inferred.get("sheet", {})
-                        panel_w = float(s.get("width_mm", panel_w))
-                        panel_h = float(s.get("height_mm", panel_h))
-                        panel_t = float(s.get("thickness_mm", panel_t))
-                    items = list(inferred.get("items", []))
-                    print(f"[compose_cam] Using STEP geometry from {step_path.name} (items={len(items)})")
 
     cam_cfg = data.get("cam") if isinstance(data.get("cam"), dict) else {}
     profile_cfg = cam_cfg.get("profile") if isinstance(cam_cfg.get("profile"), dict) else {}

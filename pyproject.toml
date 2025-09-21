@@ -1,0 +1,24 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.6.0,<0.7",
+  "pybind11>=2.10"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cliff-ai"
+version = "0.0.0"
+description = "Internal build harness for the mill_ui native CAM extension"
+readme = "skills/mill_ui/README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+dynamic = []
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
+wheel.packages = [
+  "skills",
+]
+
+[tool.scikit-build.cmake]
+build-type = "Release"

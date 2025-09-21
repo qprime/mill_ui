@@ -2,6 +2,12 @@
 mill_ui — clean CAD/CAM library nucleus.
 Run tests: python -m skills.mill_ui.tests.run_all
 
+## Native CAM backend
+- The CAM planners now ship with a C++17 backend (`skills.mill_ui.cam.native`).
+- The public Python APIs are unchanged but heavy planning/post steps execute in C++.
+- The extension is required for CAM operations; build failures now surface immediately instead of silently falling back.
+- See `skills/mill_ui/cam/native/README.md` for build instructions and native-specific notes.
+
 Border template quick-start:
 - Add `{ "kind": "template", "type": "Border", "params": {...} }` to a layout `items[]`.
 - Required params: `outer_w_mm`, `outer_h_mm`, `inset_mm`, `band_mm`, `mode`.

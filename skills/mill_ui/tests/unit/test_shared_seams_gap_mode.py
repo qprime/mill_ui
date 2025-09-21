@@ -8,6 +8,7 @@ from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.stock import Stock
 from skills.mill_ui.cam.planner.passes import plan_passes
+from skills.mill_ui.core import Config
 
 
 class TestGapModeSharedSeams(unittest.TestCase):
@@ -51,6 +52,7 @@ class TestGapModeSharedSeams(unittest.TestCase):
 
         passes, summary = plan_passes(
             hints,
+            config=Config(merge_epsilon_mm=0.1, min_overlap_mm=1.0),
             tool_db=self.tool_db,
             material=self.material,
             machine=self.machine,

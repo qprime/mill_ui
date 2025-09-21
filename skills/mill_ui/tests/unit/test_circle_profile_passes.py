@@ -5,6 +5,7 @@ from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.stock import Stock
 from skills.mill_ui.cam.model.hints import build_cam_hints
 from skills.mill_ui.cam.planner.passes import plan_passes
+from skills.mill_ui.core import Config
 
 
 class TestCircleProfilePasses(unittest.TestCase):
@@ -37,6 +38,7 @@ class TestCircleProfilePasses(unittest.TestCase):
         hints = self._hints(side=side)
         passes, summary = plan_passes(
             hints,
+            config=Config(safe_z_mm=6.0),
             tool_db=self.tool_db,
             material=self.material,
             machine=self.machine,

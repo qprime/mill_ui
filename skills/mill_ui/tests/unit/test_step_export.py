@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from skills.mill_ui.cad.step_export import SheetSpec, build_step_solids, export_step, export_stl
+from skills.mill_ui.cad.export.step import SheetSpec, build_step_solids, export_step, export_stl
 from skills.mill_ui.cad.native.core import Solid
 
 

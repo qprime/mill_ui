@@ -1,106 +1,438 @@
-# path: skills/mill_ui/apps/compose_cam.py
+"""Compose CAM outputs for a sheet layout with configurable inputs."""
 from __future__ import annotations
-import sys, json, argparse
+
+import argparse
+import json
+import logging
+import os
+import sys
+import textwrap
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
-# Compositions auto-register templates
-from skills.mill_ui.compositions import resolve_templates
-
-# CAM pipeline pieces
+from skills.mill_ui.core import Config, get_capabilities, load_config
+from skills.mill_ui.cad.ingest.sanitize import canonicalize_items
+from skills.mill_ui.cad.export.svg_dims import render_svg_with_dims
+from skills.mill_ui.cad.export.step import SheetSpec, export_step, export_stl
+from skills.mill_ui.cad.export.panel_stl import write_panel_stl
 from skills.mill_ui.cam.model.hints import build_cam_hints
+from skills.mill_ui.cam.model.machine import Machine
+from skills.mill_ui.cam.model.material import Material
+from skills.mill_ui.cam.model.stock import Stock
 from skills.mill_ui.cam.planner.passes import plan_passes
 from skills.mill_ui.cam.post.gcode import write_gcode
 from skills.mill_ui.cam.tools.adapter import load_tool_db
+from skills.mill_ui.compositions import resolve_templates
 
-from skills.mill_ui.cam.model.material import Material
-from skills.mill_ui.cam.model.machine import Machine
-from skills.mill_ui.cam.model.stock import Stock
+LOGGER = logging.getLogger("compose_cam")
+PACKAGE_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = PACKAGE_ROOT.parent
 
-from skills.mill_ui.cad.export.svg_dims import render_svg_with_dims
-from skills.mill_ui.cad.export.panel_stl import write_panel_stl
 
-# --------------------
-# HARD-CODED DEFAULTS
-# --------------------
-# !!! UPDATE THIS PATH to your real DB if needed:
-TOOL_DB_PATH = Path("skills/mill_ui/cam/tools/tool_db.json")   # <-- set to your tool_db.json
-MATERIAL_NAME = "MDF"       # feeds/speeds profile to use from the DB
-SAFE_Z_MM = 6.0             # clearance height (mm) above TOP
-PROJECTS_ROOT = Path("memories/cam_projects/sheet_layouts")
-
-# Match your legacy Z convention:
-#   stock BOTTOM = Z 0, stock TOP = Z thickness.
-Z_REFERENCE = "top"
-
-# --------------------
-# IO helpers
-# --------------------
 def _load_json(path: Path) -> Dict[str, Any]:
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
 
-def _save_text(path: Path, s: str) -> None:
+
+def _save_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(s, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")
 
-def _save_json(path: Path, obj: Any) -> None:
+
+def _save_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
-# --------------------
-# Layout helpers (grid before resolve)
-# --------------------
-def _size_of_item(it: Dict[str, Any]) -> Tuple[float, float]:
-    k = it.get("kind")
-    if k == "shape":
-        t = (it.get("type") or "").lower()
-        g = it.get("geometry") or {}
-        if t == "rect":
-            return float(g.get("w_mm", 0.0)), float(g.get("h_mm", 0.0))
-        if t == "circle":
-            d = float(g.get("diameter_mm", 0.0))
-            return d, d
-        if t == "polyline":
-            pts = g.get("points") or []
-            xs = [float(p[0]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
-            ys = [float(p[1]) for p in pts if isinstance(p, (list, tuple)) and len(p) == 2]
-            if not xs or not ys:
-                return 0.0, 0.0
-            return (max(xs) - min(xs), max(ys) - min(ys))
-        return 0.0, 0.0
-    if k == "template":
-        t = (it.get("type") or "").lower()
-        p = it.get("params") or {}
-        if t == "shaker":
-            return float(p.get("outer_w", 0.0)), float(p.get("outer_h", 0.0))
-        if t == "circlemount":
-            disk = p.get("disk") or {}
-            if "diameter_mm" in disk:
-                d = float(disk.get("diameter_mm", 0.0))
-                return d, d
-            port = p.get("port") or {}
-            d = float(port.get("diameter_mm", port.get("diameter", 0.0)))
-            return d, d
-    return 0.0, 0.0
 
-def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
-                       items: List[Dict[str, Any]], *, kerf_hint: float = 0.0) -> None:
-    """
-    Place items into a rows×cols grid on a panel, honoring gap semantics:
+def _default_config_search_paths() -> List[Path]:
+    return [Path.cwd(), PACKAGE_ROOT, REPO_ROOT]
 
-      - gap_mode: "zero"    -> gap_x = gap_y = 0.00 (shared seams => one cut)
-      - gap_mode: "kerf"    -> gap_x = gap_y = kerf + gap_clearance_mm (default 0.10)
-      - gap_mode: "explicit" (default) -> use gap_x_mm / gap_y_mm as provided
-      - seam_clearance_mm (optional) overrides both gaps directly (explicit)
 
-    Only perimeter profiles that physically touch in design space will be eligible
-    for common-line cutting downstream. Internal items (pockets/holes) are independent.
+def _resolve_path(path: Optional[Path], bases: Sequence[Path]) -> Optional[Path]:
+    if path is None:
+        return None
+    candidates: List[Path] = []
+    if path.is_absolute():
+        candidates.append(path)
+    else:
+        for base in bases:
+            candidates.append((base / path).expanduser())
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved.exists():
+            return resolved
+    return candidates[0].resolve()
 
-    kerf_hint: top-level kerf_width_mm passed in by the caller.
-    """
-    # --- gaps from mode ---
-    gap_mode = str(layout.get("gap_mode", "explicit")).lower()   # "explicit" | "kerf" | "zero"
+
+def _resolve_layout_paths(target: str, config: Config) -> Tuple[Path, Path, str]:
+    raw = Path(target)
+    project_root = _resolve_path(config.project_root, [Path.cwd(), REPO_ROOT])
+
+    def _candidate_files() -> List[Path]:
+        bases: List[Path] = []
+        if raw.is_absolute():
+            bases.append(raw)
+        else:
+            bases.extend([(Path.cwd() / raw), raw])
+            if project_root is not None:
+                bases.append(project_root / raw)
+        return bases
+
+    layout_path: Optional[Path] = None
+    for candidate in _candidate_files():
+        candidate = candidate.expanduser()
+        if candidate.is_file():
+            layout_path = candidate
+            break
+        if candidate.is_dir():
+            candidate_layout = candidate / "input" / "layout.json"
+            if candidate_layout.exists():
+                layout_path = candidate_layout
+                break
+        if candidate.suffix.lower() == ".json":
+            potential = candidate if candidate.is_absolute() else (Path.cwd() / candidate)
+            if potential.exists():
+                layout_path = potential
+                break
+    if layout_path is None:
+        base = raw if raw.is_absolute() else (project_root / raw if project_root else Path.cwd() / raw)
+        layout_path = (base / "input" / "layout.json").expanduser()
+
+    layout_path = layout_path.resolve()
+    if not layout_path.exists():
+        raise FileNotFoundError(f"Layout file not found: {layout_path}")
+
+    if layout_path.parent.name.lower() == "input":
+        base_dir = layout_path.parent.parent
+    else:
+        base_dir = layout_path.parent
+    outdir = base_dir / "CAM"
+    project_name = base_dir.name or layout_path.stem
+    return layout_path, outdir, project_name
+
+
+def _append_note(notes: List[str], message: str) -> None:
+    if message not in notes:
+        notes.append(message)
+
+
+def _positive_float(value: Any) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    return number if number > 0.0 else 0.0
+
+
+def _positive_int(value: Any) -> int:
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return 0
+    return number if number > 0 else 0
+
+
+def _profile_options_from_sources(
+    profile_cfg: Optional[Mapping[str, Any]],
+    args: argparse.Namespace,
+) -> Tuple[Dict[str, Any], Optional[str]]:
+    opts: Dict[str, Any] = {}
+
+    if isinstance(profile_cfg, Mapping):
+        onion_layout = _positive_float(profile_cfg.get("onion_skin_mm"))
+        if onion_layout > 0.0:
+            opts["onion_skin_mm"] = onion_layout
+        tabs_cfg = profile_cfg.get("tabs")
+        if isinstance(tabs_cfg, Mapping):
+            count_layout = _positive_int(tabs_cfg.get("count"))
+            if count_layout > 0:
+                tabs_entry: Dict[str, Any] = {"count": count_layout}
+                height_layout = _positive_float(tabs_cfg.get("height_mm")) or 3.0
+                tabs_entry["height_mm"] = height_layout
+                width_layout = _positive_float(tabs_cfg.get("width_mm"))
+                if width_layout > 0.0:
+                    tabs_entry["width_mm"] = width_layout
+                opts["tabs"] = tabs_entry
+        cut_layout = _positive_float(profile_cfg.get("cut_through_mm"))
+        if cut_layout > 0.0:
+            opts["cut_through_mm"] = cut_layout
+
+    if args.profile_onion_skin_mm is not None:
+        onion_cli = _positive_float(args.profile_onion_skin_mm)
+        if onion_cli > 0.0:
+            opts["onion_skin_mm"] = onion_cli
+        else:
+            opts.pop("onion_skin_mm", None)
+
+    if args.tabs_count is not None:
+        count_cli = _positive_int(args.tabs_count)
+        if count_cli > 0:
+            tabs_entry = dict(opts.get("tabs", {}))
+            tabs_entry["count"] = count_cli
+            opts["tabs"] = tabs_entry
+        else:
+            opts.pop("tabs", None)
+
+    if args.tabs_height_mm is not None and "tabs" in opts:
+        height_cli = _positive_float(args.tabs_height_mm)
+        if height_cli > 0.0:
+            opts.setdefault("tabs", {})["height_mm"] = height_cli
+
+    if args.profile_cut_through_mm is not None:
+        cut_cli = _positive_float(args.profile_cut_through_mm)
+        if cut_cli > 0.0:
+            opts["cut_through_mm"] = cut_cli
+        else:
+            opts.pop("cut_through_mm", None)
+
+    if "tabs" in opts:
+        tabs_entry = dict(opts["tabs"])
+        count_val = _positive_int(tabs_entry.get("count"))
+        if count_val <= 0:
+            opts.pop("tabs", None)
+        else:
+            tabs_entry["count"] = count_val
+            tabs_entry.setdefault("height_mm", 3.0)
+            opts["tabs"] = tabs_entry
+
+    onion_positive = _positive_float(opts.get("onion_skin_mm")) > 0.0
+    tabs_positive = "tabs" in opts and _positive_int(opts["tabs"].get("count")) > 0
+    if onion_positive and tabs_positive:
+        return opts, "Cannot combine onion-skin and tabs options yet."
+
+    return opts, None
+
+
+def _remap_z_for_bottom(move: Mapping[str, Any], thickness: float) -> Dict[str, Any]:
+    updated = dict(move)
+    if "z" in updated and updated["z"] is not None:
+        updated["z"] = float(updated["z"]) + float(thickness)
+    return updated
+
+
+def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="compose_cam",
+        description="Generate CAM outputs (G-code, reports, optional STL preview) for a sheet layout",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent(
+            """
+            Examples:
+              compose_cam.py layout.json --tool-db ./tools.db --material MDF --safe-z 6 --z-ref top
+              CAM_TOOL_DB=./tools.db CAM_SAFE_Z=8 python apps/compose_cam.py layout.json
+              compose_cam.py layout.json --config ./config.json --merge-eps 0.02
+            """
+        ),
+    )
+    parser.add_argument("layout", help="Path to layout.json or project identifier")
+
+    parser.add_argument("--config", dest="config_path", type=Path, help="Path to a configuration JSON file")
+    parser.add_argument("--tool-db", dest="tool_db_path", type=Path, help="Override the tool database path")
+    parser.add_argument("--project-root", dest="project_root", type=Path, help="Override the project root directory")
+    parser.add_argument("--material", dest="material_name", help="Material name for feeds/speeds lookup")
+    parser.add_argument("--safe-z", dest="safe_z_mm", type=float, help="Safe Z clearance height in mm")
+    parser.add_argument("--z-ref", dest="z_reference", choices=["top", "bottom"], help="Reference plane for Z outputs")
+    parser.add_argument("--merge-eps", dest="merge_epsilon_mm", type=float, help="Tolerance (mm) for shared-edge detection")
+    parser.add_argument("--min-overlap-mm", dest="min_overlap_mm", type=float, help="Minimum overlap length (mm) for seam merging")
+    parser.add_argument("--min-overlap-ratio", dest="min_overlap_ratio", type=float, help="Minimum overlap ratio for seam merging")
+    parser.add_argument("--cleanup-offset-mm", dest="cleanup_offset_mm", type=float, help="Pocket cleanup offset (mm)")
+    parser.add_argument("--colinear-eps", dest="colinear_epsilon_deg", type=float, help="Angular tolerance (degrees) for colinearity checks")
+
+    parser.add_argument("--stl", action="store_true", help="Emit STL meshes using the native CAD exporter when available")
+    parser.add_argument("--stl-resolution-mm", type=float, default=0.3, help="Chordal tolerance (mm) for STL meshing")
+    parser.add_argument("--step", action="store_true", help="Emit a STEP preview using the native CAD exporter")
+    parser.add_argument("--step-filename", type=str, default="panel_preview.step", help="Filename for the STEP preview")
+
+    parser.add_argument("--profile-onion-skin-mm", type=float, help="Leave this thickness (mm) for a final skin pass on profiles")
+    parser.add_argument("--tabs-count", type=int, help="Add evenly spaced tabs (count) on profile passes")
+    parser.add_argument("--tabs-height-mm", type=float, help="Tab height in mm when tabs are enabled")
+    parser.add_argument("--profile-cut-through-mm", type=float, help="Extra depth (mm) for profile passes to guarantee cut-through")
+
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str]) -> int:
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+    args = _parse_args(argv)
+
+    try:
+        config = load_config(
+            cli_args=args,
+            env=os.environ,
+            config_path=args.config_path,
+            search_paths=_default_config_search_paths(),
+        )
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    try:
+        layout_path, outdir, project_name = _resolve_layout_paths(args.layout, config)
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    data = _load_json(layout_path)
+    sheet = data.get("sheet") or {}
+    panel_w = float(sheet.get("width_mm", 0.0))
+    panel_h = float(sheet.get("height_mm", 0.0))
+    panel_t = float(sheet.get("thickness_mm", 0.0))
+
+    items_raw = list(data.get("items") or [])
+    items = canonicalize_items(items_raw)
+
+    layout = data.get("layout") if isinstance(data.get("layout"), Mapping) else None
+    if layout:
+        _apply_grid_layout(panel_w, panel_h, layout, items, kerf_hint=float(data.get("kerf_width_mm", 0.0)))
+
+    items_resolved = resolve_templates(items, sheet_thickness_mm=panel_t)
+    hints = build_cam_hints(
+        items_resolved=items_resolved,
+        sheet_thickness=panel_t,
+        kerf_width_mm=float(data.get("kerf_width_mm", 0.0)),
+    )
+
+    svg_dims = render_svg_with_dims(
+        panel_w,
+        panel_h,
+        panel_t,
+        placements=[{"item": it, "center_xy_mm": (it.get("placement") or {}).get("center_xy_mm", (0.0, 0.0))} for it in items],
+        hints=hints,
+        tol_mm=0.25,
+    )
+
+    tool_db_path = _resolve_path(config.tool_db_path, [outdir.parent, REPO_ROOT])
+    if tool_db_path is None or not tool_db_path.exists():
+        message = "Tool database not found at: {}".format(tool_db_path or "<unset>")
+        print(message, file=sys.stderr)
+        print("Set CAM_TOOL_DB or use --tool-db to provide a valid path.", file=sys.stderr)
+        return 2
+
+    material_name = config.material_name or "MDF"
+    tools = load_tool_db(str(tool_db_path), material=material_name)
+
+    material = Material(name=material_name)
+    machine = Machine(name="default_grbl")
+    stock = Stock(width=panel_w, height=panel_h, thickness=panel_t)
+
+    profile_cfg = data.get("cam", {}).get("profile") if isinstance(data.get("cam"), Mapping) else None
+    profile_opts, profile_error = _profile_options_from_sources(profile_cfg, args)
+    if profile_error:
+        print(profile_error, file=sys.stderr)
+        return 2
+
+    passes, job_summary = plan_passes(
+        hints,
+        config=config,
+        tool_db=tools,
+        material=material,
+        machine=machine,
+        stock=stock,
+        safe_z=config.safe_z_mm,
+        profile_opts=profile_opts,
+    )
+
+    outdir.mkdir(parents=True, exist_ok=True)
+    made_files: List[str] = []
+    additional_notes: List[str] = []
+
+    caps = get_capabilities()
+
+    for planned in passes:
+        moves = planned["moves"]
+        if config.z_reference == "bottom":
+            mapped_moves = [_remap_z_for_bottom(mv, panel_t) for mv in moves]
+            safe_z_value = panel_t + config.safe_z_mm
+        else:
+            mapped_moves = moves
+            safe_z_value = config.safe_z_mm
+        gcode = write_gcode(mapped_moves, safe_z=safe_z_value)
+        gcode_path = outdir / planned["filename"]
+        _save_text(gcode_path, gcode)
+        made_files.append(str(gcode_path))
+
+    stl_outputs: List[Path] = []
+    if args.stl:
+        fallback_to_heightfield = False
+        stl_base = outdir / "panel_preview.stl"
+        if caps.native_cad:
+            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+            try:
+                stl_outputs = export_stl(
+                    sheet_spec,
+                    items_resolved,
+                    stl_base,
+                    kerf_mm=float(hints.get("kerf_width_mm", 0.0)),
+                    include_sheet=False,
+                    include_floating_parts=True,
+                    mesh_tolerance_mm=max(0.05, float(args.stl_resolution_mm)),
+                )
+            except Exception as exc:  # pragma: no cover - native exporter errors
+                LOGGER.warning("Native STL export failed (%s); falling back to heightfield", exc)
+                fallback_to_heightfield = True
+        else:
+            fallback_to_heightfield = True
+            LOGGER.info("Native CAD backends unavailable: using heightfield STL fallback.")
+            _append_note(additional_notes, "Native CAD backends unavailable: produced SVG/STL (heightfield) only.")
+
+        if fallback_to_heightfield:
+            write_panel_stl(
+                stl_base,
+                width_mm=panel_w,
+                height_mm=panel_h,
+                thickness_mm=panel_t,
+                items=items_resolved,
+                resolution_mm=max(0.25, float(args.stl_resolution_mm)),
+            )
+            stl_outputs = [stl_base]
+
+        made_files.extend(str(path) for path in stl_outputs)
+
+    if args.step:
+        if caps.native_cad:
+            sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
+            step_path = outdir / args.step_filename
+            try:
+                export_step(sheet_spec, items_resolved, step_path, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
+                made_files.append(str(step_path))
+            except Exception as exc:  # pragma: no cover - native exporter errors
+                LOGGER.warning("STEP export failed: %s", exc)
+        else:
+            _append_note(additional_notes, "Native CAD backends unavailable: produced SVG/STL (heightfield) only.")
+            LOGGER.info("Native CAD backends unavailable: skipping STEP export.")
+
+    summary_path = outdir / "summary.json"
+    job_summary.update(
+        {
+            "project": project_name,
+            "sheet": {"width_mm": panel_w, "height_mm": panel_h, "thickness_mm": panel_t},
+            "output_dir": str(outdir),
+            "files": [Path(f).name for f in made_files],
+        }
+    )
+    if additional_notes:
+        note = job_summary.get("notes", "")
+        joined = " | ".join(additional_notes)
+        job_summary["notes"] = f"{note} | {joined}" if note else joined
+    _save_json(summary_path, job_summary)
+
+    _save_text(outdir / "layout_dims.svg", svg_dims)
+
+    for file_path in made_files:
+        print(file_path)
+    print(summary_path)
+    return 0
+
+
+def _apply_grid_layout(
+    panel_w: float,
+    panel_h: float,
+    layout: Mapping[str, Any],
+    items: List[Dict[str, Any]],
+    *,
+    kerf_hint: float = 0.0,
+) -> None:
+    gap_mode = str(layout.get("gap_mode", "explicit")).lower()
     kerf_mm = float(layout.get("kerf_width_mm", kerf_hint or 0.0))
 
     if "seam_clearance_mm" in layout:
@@ -111,25 +443,52 @@ def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
         elif gap_mode == "kerf":
             clearance = float(layout.get("gap_clearance_mm", 0.10))
             gap_x = gap_y = float(kerf_mm) + clearance
-        else:  # "explicit" (or anything else)
+        else:
             gap_x = float(layout.get("gap_x_mm", 0.0))
             gap_y = float(layout.get("gap_y_mm", 0.0))
 
-    # --- grid dims ---
     cols = int(layout.get("cols", 1))
     rows = int(layout.get("rows", 1))
     border = float(layout.get("border_mm", 0.0))
-    fit = str(layout.get("fit", "tight")).lower()  # "tight" or "even"
+    fit = str(layout.get("fit", "tight")).lower()
 
-    # interior usable area (do NOT subtract gaps here; they belong to the block we place)
     inner_w = panel_w - 2.0 * border
     inner_h = panel_h - 2.0 * border
     if inner_w <= 0.0 or inner_h <= 0.0:
         raise ValueError("Grid + borders leave no interior area")
 
-    # cell size
+    def _size_of_item(it: Mapping[str, Any]) -> Tuple[float, float]:
+        kind = str(it.get("kind", "shape")).lower()
+        if kind == "shape":
+            geom = it.get("geometry") or {}
+            shape_type = str(it.get("type", "")).lower()
+            if shape_type == "rect":
+                return float(geom.get("w_mm", 0.0)), float(geom.get("h_mm", 0.0))
+            if shape_type == "circle":
+                diameter = float(geom.get("diameter_mm", 0.0))
+                return diameter, diameter
+            if shape_type == "polyline":
+                pts = geom.get("points") or []
+                xs = [float(pt[0]) for pt in pts if isinstance(pt, (list, tuple)) and len(pt) == 2]
+                ys = [float(pt[1]) for pt in pts if isinstance(pt, (list, tuple)) and len(pt) == 2]
+                if xs and ys:
+                    return max(xs) - min(xs), max(ys) - min(ys)
+        if kind == "template":
+            template_type = str(it.get("type", "")).lower()
+            params = it.get("params") or {}
+            if template_type == "shaker":
+                return float(params.get("outer_w", 0.0)), float(params.get("outer_h", 0.0))
+            if template_type == "circlemount":
+                disk = params.get("disk") or {}
+                if "diameter_mm" in disk:
+                    diameter = float(disk.get("diameter_mm", 0.0))
+                    return diameter, diameter
+                port = params.get("port") or {}
+                diameter = float(port.get("diameter_mm", port.get("diameter", 0.0)))
+                return diameter, diameter
+        return 0.0, 0.0
+
     if fit == "tight":
-        # cells fit the max item size; block must fit the inner rectangle
         max_w = max((_size_of_item(it)[0] for it in items), default=0.0)
         max_h = max((_size_of_item(it)[1] for it in items), default=0.0)
         cell_w, cell_h = max_w, max_h
@@ -138,13 +497,11 @@ def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
         if block_w > inner_w + 1e-6 or block_h > inner_h + 1e-6:
             raise ValueError("Tight pack does not fit grid interior")
     else:
-        # evenly divide inner area into cells, leaving the specified gaps between them
         cell_w = (inner_w - (cols - 1) * gap_x) / cols
         cell_h = (inner_h - (rows - 1) * gap_y) / rows
         if cell_w <= 0.0 or cell_h <= 0.0:
             raise ValueError("Grid + borders/gaps leave no interior area")
 
-    # --- placement (row-major) ---
     idx = 0
     for r in range(rows):
         for c in range(cols):
@@ -155,322 +512,6 @@ def _apply_grid_layout(panel_w: float, panel_h: float, layout: Dict[str, Any],
             items[idx].setdefault("placement", {})["center_xy_mm"] = (cx, cy)
             idx += 1
 
-
-# --------------------
-# main
-# --------------------
-def _parse_args(argv: List[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="compose_cam",
-        description="Generate CAM outputs (G-code, reports, optional STL preview) for a sheet layout",
-    )
-    parser.add_argument("project", help="Project folder under memories/cam_projects/sheet_layouts")
-    parser.add_argument(
-        "--stl",
-        action="store_true",
-        help="Emit STL meshes using the native CAD exporter",
-    )
-    parser.add_argument(
-        "--stl-resolution-mm",
-        type=float,
-        default=0.3,
-        help="Chordal tolerance (mm) for STL meshing when using CAD export",
-    )
-    parser.add_argument(
-        "--profile-onion-skin-mm",
-        type=float,
-        help="Leave this thickness (mm) for a final skin pass on profiles",
-    )
-    parser.add_argument(
-        "--tabs-count",
-        type=int,
-        help="Add evenly spaced tabs (count) on profile passes",
-    )
-    parser.add_argument(
-        "--tabs-height-mm",
-        type=float,
-        help="Tab height in mm when tabs are enabled",
-    )
-    parser.add_argument(
-        "--profile-cut-through-mm",
-        type=float,
-        help="Extra depth (mm) for profile passes to guarantee cut-through",
-    )
-    parser.add_argument(
-        "--step",
-        action="store_true",
-        help="Emit a STEP preview using the native CAD exporter",
-    )
-    parser.add_argument(
-        "--step-filename",
-        type=str,
-        default="panel_preview.step",
-        help="Filename for the STEP preview (default: panel_preview.step)",
-    )
-    return parser.parse_args(argv)
-
-
-def main(argv: List[str]) -> int:
-    args = _parse_args(argv)
-
-    project = args.project
-    base = PROJECTS_ROOT / project
-    in_path = base / "input" / "layout.json"
-    outdir = base / "CAM"
-
-    if not in_path.exists():
-        print(f"input not found: {in_path}", file=sys.stderr)
-        return 2
-
-    # 1) load layout
-    data = _load_json(in_path)
-    sheet = data.get("sheet") or {}
-    panel_w = float(sheet.get("width_mm", 0.0))
-    panel_h = float(sheet.get("height_mm", 0.0))
-    panel_t = float(sheet.get("thickness_mm", 0.0))
-
-    items = list(data.get("items") or [])
-
-    cam_cfg = data.get("cam") if isinstance(data.get("cam"), dict) else {}
-    profile_cfg = cam_cfg.get("profile") if isinstance(cam_cfg.get("profile"), dict) else {}
-
-    # 2) apply grid placement BEFORE resolving templates
-    layout = data.get("layout")
-    if isinstance(layout, dict):
-        _apply_grid_layout(
-            panel_w, panel_h, layout, items,
-            kerf_hint=float(data.get("kerf_width_mm", 0.0))   # <— add this arg
-        )  # grid BEFORE resolve
-
-    # 3) resolve templates -> concrete shapes (centered; then offset by placement if present)
-    items_resolved = resolve_templates(items, sheet_thickness_mm=panel_t)
-
-    # 4) build hints
-    hints = build_cam_hints(
-        items_resolved=items_resolved,
-        sheet_thickness=panel_t,
-        kerf_width_mm=float(data.get("kerf_width_mm", 0.0))
-    )
-
-    kerf_value = float(hints.get("kerf_width_mm", 0.0) or 0.0)
-
-    # --- write dimensioned layout SVG (layout_dims.svg) ---
-    svg_dims = render_svg_with_dims(
-        panel_w, panel_h, panel_t,
-        placements=[{"item": it, "center_xy_mm": (it.get("placement") or {}).get("center_xy_mm", (0.0, 0.0))} for it in items],
-        hints=hints,
-        tol_mm=0.25,
-    )
-    _save_text(outdir / "layout_dims.svg", svg_dims)
-
-
-    # 5) load REAL tool DB (hard-coded path)
-    if not TOOL_DB_PATH.exists():
-        print(f"tool_db.json not found at: {TOOL_DB_PATH}\n"
-              f"--> Update TOOL_DB_PATH in skills/mill_ui/apps/compose_cam.py", file=sys.stderr)
-        return 2
-    tools = load_tool_db(str(TOOL_DB_PATH), material=MATERIAL_NAME)
-
-    # 6) plan grouped passes
-    material = Material(name=MATERIAL_NAME)
-    machine = Machine(name="default_grbl")
-    stock = Stock(width=panel_w, height=panel_h, thickness=panel_t)
-
-    profile_opts: Dict[str, Any] = {}
-
-    # Layout defaults
-    if isinstance(profile_cfg, dict):
-        if "onion_skin_mm" in profile_cfg:
-            try:
-                val = float(profile_cfg.get("onion_skin_mm", 0.0))
-                if val > 0.0:
-                    profile_opts["onion_skin_mm"] = val
-            except Exception:
-                pass
-        tabs_cfg_layout = profile_cfg.get("tabs") if isinstance(profile_cfg.get("tabs"), dict) else None
-        if tabs_cfg_layout:
-            try:
-                cnt = int(tabs_cfg_layout.get("count", 0) or 0)
-            except Exception:
-                cnt = 0
-            if cnt > 0:
-                try:
-                    height = float(tabs_cfg_layout.get("height_mm", 3.0))
-                except Exception:
-                    height = 3.0
-                tabs_entry = {"count": cnt, "height_mm": height}
-                if "width_mm" in tabs_cfg_layout:
-                    try:
-                        tabs_entry["width_mm"] = float(tabs_cfg_layout["width_mm"])
-                    except Exception:
-                        pass
-                profile_opts["tabs"] = tabs_entry
-        if "cut_through_mm" in profile_cfg:
-            try:
-                val = float(profile_cfg.get("cut_through_mm", 0.0))
-                if val > 0.0:
-                    profile_opts["cut_through_mm"] = val
-            except Exception:
-                pass
-
-    # CLI overrides
-    onion_cli_positive = False
-    if args.profile_onion_skin_mm is not None:
-        try:
-            val = float(args.profile_onion_skin_mm)
-        except Exception:
-            val = 0.0
-        if val > 0.0:
-            profile_opts["onion_skin_mm"] = val
-            onion_cli_positive = True
-        else:
-            profile_opts.pop("onion_skin_mm", None)
-
-    tabs_from_cli = None
-    tabs_cli_positive = False
-    if args.tabs_count is not None:
-        try:
-            count_override = int(args.tabs_count)
-        except Exception:
-            count_override = 0
-        if count_override > 0:
-            tabs_from_cli = {"count": count_override}
-            tabs_cli_positive = True
-        else:
-            profile_opts.pop("tabs", None)
-    if (tabs_from_cli or "tabs" in profile_opts) and args.tabs_height_mm is not None:
-        try:
-            height_override = float(args.tabs_height_mm)
-        except Exception:
-            height_override = 3.0
-        if tabs_from_cli:
-            tabs_from_cli["height_mm"] = height_override
-        else:
-            profile_opts.setdefault("tabs", {})["height_mm"] = height_override
-    if tabs_from_cli and "width_mm" in profile_opts.get("tabs", {}):
-        tabs_from_cli.setdefault("width_mm", profile_opts["tabs"]["width_mm"])
-    if tabs_from_cli:
-        profile_opts["tabs"] = tabs_from_cli
-
-    if args.profile_cut_through_mm is not None:
-        try:
-            val = float(args.profile_cut_through_mm)
-        except Exception:
-            val = 0.0
-        if val > 0.0:
-            profile_opts["cut_through_mm"] = val
-        else:
-            profile_opts.pop("cut_through_mm", None)
-
-    if "tabs" in profile_opts:
-        try:
-            if profile_opts["tabs"].get("count", 0) <= 0:
-                profile_opts.pop("tabs", None)
-        except Exception:
-            profile_opts.pop("tabs", None)
-
-    if "onion_skin_mm" in profile_opts and "tabs" in profile_opts:
-        if onion_cli_positive and not tabs_cli_positive:
-            profile_opts.pop("tabs", None)
-        elif tabs_cli_positive and not onion_cli_positive:
-            profile_opts.pop("onion_skin_mm", None)
-        else:
-            print("Cannot combine onion-skin and tabs options yet.", file=sys.stderr)
-            return 2
-
-    passes, job_summary = plan_passes(
-        hints,
-        tool_db=tools,
-        material=material,
-        machine=machine,
-        stock=stock,
-        safe_z=float(SAFE_Z_MM),
-        prime_spindle=False,
-        profile_opts=profile_opts,
-    )
-
-    # 7) optional Z remap to bottom-zero coordinates (legacy convention)
-    def _remap_z_for_bottom(mv: Dict[str, Any], t: float) -> Dict[str, Any]:
-        if "z" in mv and mv["z"] is not None:
-            mv = dict(mv); mv["z"] = t + float(mv["z"])
-        return mv
-
-    outdir.mkdir(parents=True, exist_ok=True)
-    made_files: List[str] = []
-    for p in passes:
-        moves = p["moves"]
-        if Z_REFERENCE == "bottom":
-            moves = [_remap_z_for_bottom(m, panel_t) for m in moves]
-            safe_z = panel_t + SAFE_Z_MM
-        else:
-            safe_z = SAFE_Z_MM
-
-        gcode = write_gcode(moves, safe_z=safe_z)
-        fpath = outdir / p["filename"]
-        _save_text(fpath, gcode)
-        made_files.append(str(fpath))
-
-    if args.stl:
-        stl_base_path = outdir / "panel_preview.stl"
-        mesh_tol = max(0.05, float(args.stl_resolution_mm))
-        stl_outputs: List[Path] = []
-
-        from skills.mill_ui.cad.step_export import SheetSpec, export_stl
-
-        sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
-        try:
-            stl_outputs = export_stl(
-                sheet_spec,
-                items_resolved,
-                stl_base_path,
-                kerf_mm=kerf_value,
-                include_sheet=False,
-                include_floating_parts=True,
-                mesh_tolerance_mm=mesh_tol,
-                angular_tolerance_deg=5.0,
-            )
-        except Exception as exc:  # pragma: no cover - native exporter errors
-            print(f"[!] STL export failed: {exc}; falling back to raster heightfield", file=sys.stderr)
-            stl_outputs = []
-
-        if not stl_outputs:
-            stl_path = stl_base_path
-            write_panel_stl(
-                stl_path,
-                width_mm=panel_w,
-                height_mm=panel_h,
-                thickness_mm=panel_t,
-                items=items_resolved,
-                resolution_mm=max(0.25, float(args.stl_resolution_mm)),
-            )
-            stl_outputs = [stl_path]
-
-        made_files.extend(str(path) for path in stl_outputs)
-
-    if args.step:
-        from skills.mill_ui.cad.step_export import SheetSpec, export_step
-
-        step_path = outdir / args.step_filename
-        sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
-        try:
-            export_step(sheet_spec, items_resolved, step_path, kerf_mm=kerf_value)
-            made_files.append(str(step_path))
-        except Exception as exc:  # pragma: no cover - native exporter errors
-            print(f"[!] STEP export failed: {exc}", file=sys.stderr)
-
-    # 8) summary.json
-    job_summary.update({
-        "project": project,
-        "sheet": {"width_mm": panel_w, "height_mm": panel_h, "thickness_mm": panel_t},
-        "output_dir": str(outdir),
-        "files": [Path(f).name for f in made_files],
-    })
-    _save_json(outdir / "summary.json", job_summary)
-
-    for f in made_files:
-        print(f)
-    print(outdir / "summary.json")
-    return 0
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

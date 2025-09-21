@@ -9,6 +9,7 @@ vulture.txt
 project_structure.txt
 memory_tree.txt
 context_dump.txt
+**/code_context.txt
 
 # System and editor junk
 .DS_Store

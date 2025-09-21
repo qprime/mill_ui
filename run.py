@@ -35,6 +35,7 @@ ENTRYPOINTS = {
     "ltp_web": "interfaces.app",
     "services": "services.cli",
     "tests": "tools.test_runner",
+    "build_context": "tools.context_builder",
 }
 
 

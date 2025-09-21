@@ -524,39 +524,6 @@ def plan_passes(
         )
         p["count"] += 1
 
-    # ---------- Generic Polyline Profiles (centerline path; no side offset) ----------
-    poly_profiles = [rec for rec in hints.get("profiles", []) if str(rec.get("shape", "")).lower() == "polyline"]
-    for rec in poly_profiles:
-        geom = rec.get("geometry") or {}
-        pts_raw = geom.get("points") or []
-        if not isinstance(pts_raw, list) or len(pts_raw) < 2:
-            continue
-        cx, cy = _ensure_center(rec)
-        pts: List[Tuple[float, float]] = []
-        for p in pts_raw:
-            if isinstance(p, (list, tuple)) and len(p) == 2:
-                pts.append((float(p[0]) + cx, float(p[1]) + cy))
-        if len(pts) < 2:
-            continue
-        # ensure closed
-        if abs(pts[0][0] - pts[-1][0]) > 1e-9 or abs(pts[0][1] - pts[-1][1]) > 1e-9:
-            pts.append(pts[0])
-
-        t = _pick_for_profile(tool_db, kerf_mm=kerf_mm)
-        p = _get_or_make_pass("profile", t)
-        setup: Setup = p["setup"]
-        shp = Shape2D([Vec2(x, y) for (x, y) in pts])
-        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
-        p["moves"] += _profile_moves_with_options(
-            shp,
-            setup,
-            depth,
-            t,
-            onion_skin_mm,
-            tabs_opts,
-        )
-        p["count"] += 1
-
     # ---------- Summaries ----------
     pass_list = list(passes.values())
 

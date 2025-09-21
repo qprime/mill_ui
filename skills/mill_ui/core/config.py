@@ -11,7 +11,7 @@ import os
 
 _PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_TOOL_DB_PATH = (_PACKAGE_ROOT / "cam" / "tools" / "tool_db.json").resolve()
-_REPO_ROOT = _PACKAGE_ROOT.parent
+_REPO_ROOT = _PACKAGE_ROOT.parent.parent
 _DEFAULT_PROJECT_ROOT = (_REPO_ROOT / "memories" / "cam_projects" / "sheet_layouts").resolve()
 
 

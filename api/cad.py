@@ -6,6 +6,7 @@ from skills.mill_ui.cad.layout.panel import Panel
 from skills.mill_ui.cad.layout.place import grid_place, row_place, col_place, apply_grid_layout, item_size_mm
 from skills.mill_ui.cad.compose import union, diff, intersect
 from skills.mill_ui.cad.export.svg import render_svg_layout
+from skills.mill_ui.cad.export.step import SheetSpec, export_step, export_stl
 
 __all__ = [
     "rectangle", "circle", "rounded_rect",
@@ -14,4 +15,7 @@ __all__ = [
     "apply_grid_layout", "item_size_mm",
     "union", "diff", "intersect",
     "render_svg_layout",
+    "SheetSpec",
+    "export_step",
+    "export_stl",
 ]

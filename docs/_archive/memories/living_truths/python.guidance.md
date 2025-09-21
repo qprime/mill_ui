@@ -1,3 +1,9 @@
+---
+archived: true
+reason: "Superseded by AI_README_GUIDE.md"
+date: 2025-09-21
+---
+
 # Python Guidance v1
 
 ## Header Format

@@ -1,0 +1,24 @@
+{
+  "generated": [
+    "README.md",
+    "continuum/README.md",
+    "cortex/README.md",
+    "interfaces/README.md",
+    "living_docs/README.md",
+    "memories/README.md",
+    "services/README.md",
+    "skills/README.md",
+    "skills/mill_ui/README.md",
+    "skills/mill_ui/cam/native/README.md",
+    "skills/mill_ui/cad/native/README.md",
+    "tools/README.md",
+    "docs/AI_README_GUIDE.md"
+  ],
+  "archived": [
+    "memories/README_memories.md",
+    "memories/living_truths/python.guidance.md",
+    "memories/living_truths/modular.app.framework.design.md",
+    "memories/living_truths/app.stack.guidance.md"
+  ],
+  "issues": []
+}

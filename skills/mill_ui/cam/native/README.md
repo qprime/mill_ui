@@ -1,69 +1,61 @@
 # Native CAM Core
 
-The `skills.mill_ui.cam.native` package houses the C++ implementation of the
-CAM toolpath generators, exposed to Python via pybind11.  All internal CAM
-modules now require the native extension — build failures will surface early so
-they can be addressed rather than silently falling back to the retired
-pure-Python paths.
+Owner path: skills/mill_ui/cam/native/
 
-## Dependencies
+## 1. What this is
 
-| Component | Purpose | Notes |
-|-----------|---------|-------|
-| C++17 toolchain | Build the extension | clang ≥14 or gcc ≥11 recommended |
-| [pybind11] | Python bindings | Pulled in automatically by `pip install .` |
-| [OpenCascade (OCCT)] | STEP/B-rep handling | Install system packages (`brew install opencascade` or `apt install libocct-dev`) |
-| [Clipper2] | 2D offsetting/booleans | A minimal adapter ships in-tree; replace with the full library when enabling advanced geometry |
+The native CAM core provides the C++17 planners compiled via pybind11 for heavy operations.
+Python shims map project data structures into the compiled engine for deterministic toolpaths.
 
-> **Note**: The current implementation vendors lightweight stubs for the OCCT
-> and Clipper integrations so the module can build without those libraries in a
-> constrained environment.  Link against the real vendor libraries to unlock
-> STEP feature support and production-grade 2D offsetting.
+## 2. When to use it
 
-## Quick start
+- Produce performant pocket, profile, drilling, or bore toolpaths.
+- Validate native builds on a new platform or toolchain.
+- Extend the CAM kernel with additional geometry primitives or optimisations.
+
+## 3. How to run
+
+Build through the project install; use explicit CMake invocations when debugging.
 
 ```bash
-# From the repository root
 python -m pip install --upgrade pip
 pip install .
+cmake -S skills/mill_ui/cam/native/cpp -B build/native_cam && cmake --build build/native_cam
 ```
 
-`pip install .` uses [scikit-build-core] to configure CMake, compile the native
-module, and install the package in editable form.  Wheels are produced for the
-current platform as part of the build.
+## 4. Inputs & outputs (for AI & humans)
 
-### Platform setup
+- `skills/mill_ui/cam/native/cpp/` — CMake project for the native CAM engine.
+- `skills/mill_ui/cam/native/core.py` — Python shims gating native access.
+- `skills/mill_ui/cam/model/` — dataclasses converted before hitting the native bindings.
+- `skills/mill_ui/cam/ops/` — callers that delegate heavy work to the native layer.
+- `pyproject.toml` — scikit-build-core configuration that builds the extension during install.
 
-- **macOS (Apple Silicon / Intel)**
-  ```bash
-  brew install opencascade ninja cmake
-  # optional: brew install llvm   # for a recent clang
-  pip install .
-  ```
+## 5. Public surface
 
-- **Ubuntu 22.04+**
-  ```bash
-  sudo apt update
-  sudo apt install build-essential cmake ninja-build libocct-dev
-  pip install .
-  ```
+- `skills.mill_ui.cam.native.core.is_native_available()` — detect whether the extension loaded.
+- `skills.mill_ui.cam.native.core.pocket_raster(...)` — plan raster pockets via the native engine.
+- `skills.mill_ui.cam.native.core.profile_outline(...)` — generate profile passes.
+- `skills.mill_ui.cam.native.core.post_gcode(moves, ...)` — emit G-code strings natively.
+- `skills.mill_ui.cam.native.core.fit_arcs(paths, tol_mm)` — smooth moves with arc fitting.
 
-If OCCT is not available the build succeeds with stub functionality so the
-extension can still be compiled, but the native module remains the execution
-path for all CAM operations.
+## 6. Invariants & guardrails
 
-## Running tests
+- Requires a modern C++17 compiler and pybind11 headers.
+- Native API raises `RuntimeError` when accessed before a successful build; callers must guard with `is_native_available()`.
+- All geometry uses millimetres and matches the winding expected by composition templates.
+- Bindings remain deterministic; avoid introducing randomised behaviour inside C++ code.
 
-```bash
-pytest skills/mill_ui/tests/unit
-```
+## 7. Extension points
 
-When the native extension is present these tests exercise the pybind11 shims
-and algorithms.  Add platform-specific tests under
-`skills/mill_ui/cam/native/cpp/tests` and register them with `ctest` to extend
-coverage.
+- Add planners by implementing pybind11 bindings under `cpp/bindings` and exposing them in `core.py`.
+- Vendor extra geometry helpers under `cpp/geom2d` and wire them into Python wrappers.
+- Surface additional configuration by extending dataclasses in `skills.mill_ui.cam.model`.
 
-[pybind11]: https://pybind11.readthedocs.io/
-[OpenCascade (OCCT)]: https://www.opencascade.com/
-[Clipper2]: https://www.angusj.com/clipper2/Docs/Overview.htm
-[scikit-build-core]: https://scikit-build-core.readthedocs.io/
+## 8. AI reading order
+
+- `skills/mill_ui/cam/native/core.py` — Python facade around the native engine.
+- `skills/mill_ui/cam/native/cpp/src/facade.cpp` — C++ entry point that bridges planners.
+- `skills/mill_ui/cam/native/cpp/algo/plan_2d.cpp` — Core pocket/profile planning logic.
+- `skills/mill_ui/cam/native/cpp/algo/post_gcode.cpp` — Native G-code emitter implementation.
+- `skills/mill_ui/cam/native/cpp/CMakeLists.txt` — Build configuration for the CAM extension.

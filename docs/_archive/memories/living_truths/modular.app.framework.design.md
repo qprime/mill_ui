@@ -1,3 +1,9 @@
+---
+archived: true
+reason: "Superseded by AI_README_GUIDE.md"
+date: 2025-09-21
+---
+
 === FILE: modular.app.framework.design.md ===
 # Modular App Framework Guidance v1
 

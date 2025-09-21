@@ -1,3 +1,9 @@
+---
+archived: true
+reason: "Merged into memories/README.md per AI_README_GUIDE.md"
+date: 2025-09-21
+---
+
 # Memories Ledger
 
 The `memories/` root records every typed Memory emitted by the framework. Key locations:

@@ -28,6 +28,17 @@
                     <button type="button" data-mode="export">Export</button>
                 </div>
             </div>
+            <div class="ltp-status-bar">
+                <div id="ltp-whisper-status" class="ltp-status-chip" data-status="unknown">
+                    <span class="ltp-status-dot"></span>
+                    <span class="ltp-status-label">Whisper</span>
+                </div>
+                <div id="ltp-ledger-status" class="ltp-status-chip" data-status="hidden" hidden>
+                    <span class="ltp-status-dot"></span>
+                    <span class="ltp-status-label">Ledger</span>
+                    <span class="ltp-status-note"></span>
+                </div>
+            </div>
         </div>
         <div class="ltp-actions">
             <button id="ltp-record">Record</button>
@@ -40,6 +51,11 @@
             <button id="ltp-export-docx">Export DOCX</button>
         </div>
     </header>
+    <div id="ltp-ledger-banner" class="ltp-ledger-banner" hidden>
+        <strong>Ledger maintenance:</strong>
+        <span class="ltp-ledger-text"></span>
+        <a href="/chat" class="ltp-ledger-link" target="_blank" rel="noopener">Review</a>
+    </div>
     <main class="ltp-layout">
         <section class="ltp-panel" id="ltp-prompts-panel">
             <h2>Prompts</h2>

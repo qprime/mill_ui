@@ -4,6 +4,7 @@ from typing import Any, Iterable, Optional
 import tempfile
 from pathlib import Path
 from flask import Blueprint, jsonify, request
+import httpx
 from cortex.ai_router import get_router
 from skills.living_truth_partner.action_items import append as append_action, load as load_actions, set_state
 from skills.living_truth_partner.config import Config
@@ -35,6 +36,16 @@ def _config() -> Config:
 def _store(slug: str) -> tuple[Config, ProjectStore]:
     config = _config()
     return config, ProjectStore.open(config, slug)
+
+
+def _as_verify_arg(raw: Config | bool | str | Path | None) -> bool | str:
+    if raw is None:
+        return True
+    if isinstance(raw, bool):
+        return raw
+    if isinstance(raw, Path):
+        return str(raw)
+    return raw
 
 
 def _project_payload(info: ProjectInfo) -> dict[str, Any]:
@@ -224,6 +235,38 @@ def voice(slug: str):
         "sections": _sections(store)
     }
     return jsonify(payload)
+
+
+@ltp_api_bp.get("/status/whisper")
+def whisper_status():
+    config = _config()
+    url = str(config.whisper_url or "").strip()
+    if not url:
+        return jsonify({"ok": False, "url": "", "reason": "not_configured"})
+
+    verify_arg = _as_verify_arg(config.whisper_verify)
+    ok = False
+    reason = ""
+    status_code = None
+    try:
+        with httpx.Client(verify=verify_arg, timeout=5.0, follow_redirects=True) as client:
+            response = client.head(url)
+            status_code = response.status_code
+            reason = response.reason_phrase or ""
+            if status_code == 405:
+                ok = True
+            elif status_code is not None and status_code < 500:
+                ok = True
+    except httpx.RequestError as exc:
+        reason = str(exc)
+    except Exception as exc:  # pragma: no cover - defensive
+        reason = str(exc)
+    return jsonify({
+        "ok": ok,
+        "url": url,
+        "status": status_code,
+        "reason": reason,
+    })
 
 
 @ltp_api_bp.post("/projects/<slug>/tidy")

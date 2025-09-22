@@ -15,6 +15,12 @@
     artifactCache: new Map(),
     eventSource: null,
     sseActive: false,
+    policy: {
+      map: {},
+      known: [],
+      values: ['accept', 'verify', 'escalate'],
+    },
+    ledgerStatus: { needs_compaction: false, size_mb: 0, threshold_mb: 0 },
   };
 
   const els = {
@@ -54,9 +60,16 @@
     closeMachines: document.querySelector('[data-action="close-machines"]'),
     runCard: document.getElementById('run-card'),
     pushBtn: document.querySelector('[data-action="push-run"]'),
+    commitBtn: document.querySelector('[data-action="commit-run"]'),
     rerunBtn: document.querySelector('[data-action="rerun"]'),
     ignoreBtn: document.querySelector('[data-action="ignore-run"]'),
     operateQuick: document.querySelector('[data-action="operate-quick"]'),
+    policyCard: document.getElementById('policy-card'),
+    policyList: document.querySelector('[data-role="policy-list"]'),
+    policyEmpty: document.querySelector('[data-role="policy-empty"]'),
+    policyAddForm: document.getElementById('policy-add-form'),
+    policyRefresh: document.querySelector('[data-action="refresh-policy"]'),
+    ledgerAlert: document.getElementById('ace-ledger-alert'),
   };
 
   const api = (path, options = {}) => fetch(`/ace${path}`, {
@@ -166,6 +179,29 @@
     renderQuickPicks();
   }
 
+  async function loadPolicy() {
+    try {
+      const data = await api('/operate/policy').then(toJSON);
+      state.policy.map = data.policy || {};
+      state.policy.known = Array.isArray(data.known_types) ? data.known_types : [];
+      state.policy.values = Array.isArray(data.values) ? data.values : state.policy.values;
+      renderPolicy();
+    } catch (err) {
+      console.error('Failed to load operate policy', err);
+    }
+  }
+
+  async function loadLedgerStatus() {
+    try {
+      const res = await fetch('/api/system/ledger/status');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      state.ledgerStatus = await res.json();
+      renderLedgerStatus();
+    } catch (err) {
+      console.warn('Ledger status unavailable', err);
+    }
+  }
+
   async function loadHistory() {
     const data = await api('/history?limit=20').then(toJSON);
     state.history = data.runs || [];
@@ -199,6 +235,66 @@
       });
       els.quickBar.appendChild(btn);
     });
+  }
+
+  function renderPolicy() {
+    if (!els.policyList) return;
+    const known = state.policy.known || [];
+    els.policyList.innerHTML = '';
+    if (els.policyEmpty) {
+      els.policyEmpty.hidden = known.length > 0;
+    }
+    known.sort().forEach((type) => {
+      const row = document.createElement('div');
+      row.className = 'ace-policy-row';
+      const label = document.createElement('span');
+      label.textContent = type;
+      const select = document.createElement('select');
+      const current = (state.policy.map && state.policy.map[type]) || 'accept';
+      (state.policy.values || ['accept', 'verify', 'escalate']).forEach((value) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = value;
+        if (current === value) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', async () => {
+        try {
+          await api('/operate/policy', {
+            method: 'PATCH',
+            body: JSON.stringify({ [type]: select.value }),
+          }).then(toJSON);
+          state.policy.map[type] = select.value;
+        } catch (err) {
+          console.error('Failed to update operate policy', err);
+        }
+      });
+      row.appendChild(label);
+      row.appendChild(select);
+      els.policyList.appendChild(row);
+    });
+  }
+
+  function renderLedgerStatus() {
+    if (!els.ledgerAlert) return;
+    const status = state.ledgerStatus || {};
+    if (!status.needs_compaction) {
+      els.ledgerAlert.hidden = true;
+      els.ledgerAlert.textContent = '';
+      return;
+    }
+    const size = status.size_mb ?? 0;
+    const threshold = status.threshold_mb ?? 0;
+    els.ledgerAlert.hidden = false;
+    els.ledgerAlert.textContent = `Ledger at ${size} MB of ${threshold} MB – consider compaction.`;
+    const link = document.createElement('a');
+    link.href = '/chat';
+    link.textContent = 'Open chat';
+    link.style.marginLeft = 'auto';
+    link.target = '_blank';
+    els.ledgerAlert.appendChild(link);
   }
 
   function renderHistory() {
@@ -237,6 +333,9 @@
     renderArtifacts(run.artifacts || []);
     const running = run.status === 'running' || run.status === 'pending';
     els.pushBtn.disabled = run.mode !== 'build' || running;
+    if (els.commitBtn) {
+      els.commitBtn.disabled = run.mode !== 'build' || running;
+    }
     els.rerunBtn.disabled = running;
     els.ignoreBtn.disabled = running;
     state.activeTab = running ? 'system' : 'summary';
@@ -512,6 +611,45 @@
       });
     }
 
+    if (els.commitBtn) {
+      els.commitBtn.addEventListener('click', () => {
+        if (!state.currentRun) return;
+        const messageInput = prompt('Commit message', `Ace run ${state.currentRun.id}`);
+        if (messageInput === null) {
+          return;
+        }
+        const message = messageInput.trim() || `Ace run ${state.currentRun.id}`;
+        els.commitBtn.disabled = true;
+        api(`/runs/${state.currentRun.id}/commit`, { method: 'POST', body: JSON.stringify({ message }) })
+          .then((res) => res.json().catch(() => ({})))
+          .then((result) => {
+            els.commitBtn.disabled = false;
+            if (!result.ok) {
+              alert(result.stderr || result.error || 'Commit failed');
+            } else {
+              alert('Commit created');
+              loadHistory().catch(console.error);
+              if (state.currentRun) {
+                api(`/runs/${state.currentRun.id}/summary`)
+                  .then(toJSON)
+                  .then((data) => {
+                    state.currentRun = data.run;
+                    renderRun(data.run);
+                  })
+                  .catch(console.error);
+              }
+            }
+            if (result.log_path) {
+              fetchLog().catch(() => {});
+            }
+          })
+          .catch((err) => {
+            els.commitBtn.disabled = false;
+            console.error(err);
+          });
+      });
+    }
+
     if (els.rerunBtn) {
       els.rerunBtn.addEventListener('click', () => {
         if (!state.currentRun) return;
@@ -562,6 +700,36 @@
           .then(() => {
             els.machineForm.reset();
             loadMachines();
+          })
+          .catch(console.error);
+      });
+    }
+
+    if (els.policyRefresh) {
+      els.policyRefresh.addEventListener('click', () => {
+        loadPolicy();
+      });
+    }
+
+    if (els.policyAddForm) {
+      els.policyAddForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(els.policyAddForm);
+        const commandType = (formData.get('command_type') || '').toString().trim();
+        const value = (formData.get('value') || '').toString();
+        if (!commandType || !value) return;
+        api('/operate/policy', {
+          method: 'PATCH',
+          body: JSON.stringify({ [commandType]: value }),
+        })
+          .then(toJSON)
+          .then((data) => {
+            state.policy.map = data.policy || state.policy.map;
+            if (!state.policy.known.includes(commandType)) {
+              state.policy.known.push(commandType);
+            }
+            renderPolicy();
+            els.policyAddForm.reset();
           })
           .catch(console.error);
       });
@@ -644,7 +812,14 @@
 
   function init() {
     setupEvents();
-    Promise.all([loadMachines(), loadCommands(), loadHistory()]).catch(console.error);
+    Promise.all([
+      loadMachines(),
+      loadCommands(),
+      loadHistory(),
+      loadPolicy(),
+      loadLedgerStatus(),
+    ]).catch(console.error);
+    setInterval(loadLedgerStatus, 60000);
   }
 
   init();

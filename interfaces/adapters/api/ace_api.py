@@ -10,6 +10,13 @@ from ace_control import (
     RunManager,
     RunStatus,
 )
+from ace_control.operate_policy import (
+    ALLOWED_VALUES as OPERATE_POLICY_VALUES,
+    get_policy as operate_policy_get_map,
+    known_types as operate_policy_known_types,
+    set_policy as operate_policy_set_map,
+    update_policy as operate_policy_update_map,
+)
 
 ace_api_bp = Blueprint("ace_api_bp", __name__)
 
@@ -20,6 +27,8 @@ def create_run():
     brief_payload = payload.get("brief") or {}
     operate_action = payload.get("operate_action")
     brief = Brief.from_dict(brief_payload)
+    if brief.plan_preview == BriefPlanPreference.AUTO and any(tag.startswith("chat") for tag in brief.tags):
+        brief.plan_preview = BriefPlanPreference.SHOW
     if brief.plan_preview == BriefPlanPreference.SHOW and not payload.get("execute", False):
         outline = RunManager.plan_outline(brief)
         return jsonify({"status": "plan_required", "plan_outline": outline}), 202
@@ -117,6 +126,21 @@ def push_run(run_id: str):
     return jsonify(result), status_code
 
 
+@ace_api_bp.post("/runs/<run_id>/commit")
+def commit_run(run_id: str):
+    payload = request.get_json(force=True, silent=True) or {}
+    message = payload.get("message")
+    add_all = payload.get("add_all", True)
+    try:
+        result = _RUN_MANAGER.commit_run(run_id, message=message, add_all=bool(add_all))
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": "workspace_missing", "details": str(exc)}), 404
+    status_code = 200 if result.get("ok") else 409
+    return jsonify(result), status_code
+
+
 @ace_api_bp.post("/plan")
 def plan_endpoint():
     payload = request.get_json(force=True, silent=True) or {}
@@ -162,6 +186,45 @@ def operate_commands():
             "command_count": len(command.commands),
         })
     return jsonify({"commands": commands})
+
+
+@ace_api_bp.get("/operate/policy")
+def operate_policy_index():
+    policy = operate_policy_get_map()
+    known = list(operate_policy_known_types())
+    effective = {key: policy.get(key, "accept") for key in known}
+    return jsonify(
+        {
+            "policy": policy,
+            "known_types": known,
+            "effective": effective,
+            "values": sorted(OPERATE_POLICY_VALUES),
+        }
+    )
+
+
+@ace_api_bp.put("/operate/policy")
+def operate_policy_replace():
+    payload = request.get_json(force=True, silent=True) or {}
+    data = {
+        str(key): str(value)
+        for key, value in payload.items()
+        if str(value) in OPERATE_POLICY_VALUES
+    }
+    updated = operate_policy_set_map(data)
+    return jsonify({"policy": updated})
+
+
+@ace_api_bp.patch("/operate/policy")
+def operate_policy_patch():
+    payload = request.get_json(force=True, silent=True) or {}
+    data = {
+        str(key): str(value)
+        for key, value in payload.items()
+        if str(value) in OPERATE_POLICY_VALUES
+    }
+    updated = operate_policy_update_map(data)
+    return jsonify({"policy": updated})
 
 
 @ace_api_bp.get("/machines")

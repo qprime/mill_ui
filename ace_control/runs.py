@@ -16,6 +16,7 @@ from .ledger import record_memory_entry, write_summary_file
 from .machines import MachineProfile, MachineRegistry
 from .models import Brief, Mode, RunRecord, RunStatus, now_ts, path_relative_to
 from .operate import OPERATE_ACTIONS, OperateCommand
+from .operate_policy import evaluate_command_types
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNS_ROOT = PROJECT_ROOT / "runs"
@@ -204,6 +205,65 @@ class RunManager:
             "returncode": push_proc.returncode,
         }
 
+    def commit_run(
+        self,
+        run_id: str,
+        *,
+        message: Optional[str] = None,
+        add_all: bool = True,
+    ) -> Dict[str, object]:
+        record = self.get_run(run_id)
+        if record.mode != Mode.BUILD:
+            raise ValueError("commit_supported_for_build_runs_only")
+        primary_machine = record.machines[0] if record.machines else "skylink"
+        workspace = self._machine_workspace(primary_machine)
+        if not workspace.exists():
+            raise FileNotFoundError(f"Workspace {workspace} not found for machine {primary_machine}")
+
+        logs: List[str] = []
+        if add_all:
+            add_proc = subprocess.run(
+                ["git", "add", "-A"],
+                capture_output=True,
+                text=True,
+                cwd=workspace,
+            )
+            logs.append(
+                "".join(
+                    [
+                        "$ git add -A\n",
+                        add_proc.stdout,
+                        add_proc.stderr,
+                    ]
+                )
+            )
+        commit_message = message or f"Ace run {run_id}"
+        commit_cmd = ["git", "commit", "-m", commit_message]
+        commit_proc = subprocess.run(
+            commit_cmd,
+            capture_output=True,
+            text=True,
+            cwd=workspace,
+        )
+        logs.append(
+            "".join(
+                [
+                    f"$ {' '.join(commit_cmd)}\n",
+                    commit_proc.stdout,
+                    commit_proc.stderr,
+                ]
+            )
+        )
+        log_path = self._write_aux_log(self._run_dir(run_id), "commit.log", logs)
+        return {
+            "ok": commit_proc.returncode == 0,
+            "stdout": commit_proc.stdout,
+            "stderr": commit_proc.stderr,
+            "log_path": log_path,
+            "returncode": commit_proc.returncode,
+            "message": commit_message,
+        }
+
     def get_run_file(self, run_id: str, rel_path: str) -> Path:
         if not rel_path:
             raise FileNotFoundError("Empty path")
@@ -370,17 +430,64 @@ class RunManager:
     def _execute_operate(self, record: RunRecord, *, operate_action: Optional[str]) -> Dict[str, object]:
         run_dir = self._run_dir(record.id)
         commands: List[List[str]]
+        command_types: List[str] = []
         if operate_action and operate_action in OPERATE_ACTIONS:
             command = OPERATE_ACTIONS[operate_action]
             commands = command.commands
             headline = command.title
+            command_types.append(f"operate_action.{operate_action}")
         elif record.brief.text.strip() in OPERATE_ACTIONS:
             command = OPERATE_ACTIONS[record.brief.text.strip()]
             commands = command.commands
             headline = command.title
+            command_types.append(f"operate_action.{record.brief.text.strip()}")
         else:
             commands = [["bash", "-lc", record.brief.text]]
             headline = f"Operate: {record.brief.text[:60]}"
+            command_types.append("operate_action.freeform")
+
+        def _command_type(cmd: List[str]) -> str:
+            if not cmd:
+                return "command.unknown"
+            primary = Path(cmd[0]).name if cmd[0] else ""
+            if primary in {"bash", "sh", "zsh"}:
+                return "command.shell"
+            if primary:
+                return f"command.{primary}"
+            return "command.unknown"
+
+        command_types.extend(_command_type(cmd) for cmd in commands)
+
+        policy_decision = evaluate_command_types(command_types)
+        if policy_decision.is_escalate:
+            message = (
+                "Operate command blocked by policy: "
+                f"{', '.join(policy_decision.command_types)}"
+            )
+            return {
+                "status": RunStatus.FAILED,
+                "headline": "Operate command blocked",
+                "result_summary": message,
+                "artifacts": [],
+                "log_path": None,
+            }
+
+        if policy_decision.is_verify:
+            plan_body = "\n".join(" ".join(cmd) for cmd in commands)
+            plan_path = self._write_plan(run_dir, plan_body or "Commands pending verification")
+            message = (
+                "Operate command requires verification per policy: "
+                f"{', '.join(policy_decision.command_types)}"
+            )
+            return {
+                "status": RunStatus.CANCELLED,
+                "headline": "Verification required",
+                "result_summary": message,
+                "plan_summary": "Commands pending verification",
+                "diff_path": None,
+                "artifacts": [plan_path],
+                "log_path": None,
+            }
 
         outputs: List[str] = []
         summary_line: Optional[str] = None

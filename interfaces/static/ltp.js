@@ -21,6 +21,8 @@
     coauthorSuggestion: null,
     pendingBrief: null,
     pendingBriefContext: null,
+    whisperStatus: { ok: null, reason: '', status: null },
+    ledgerStatus: { needs_compaction: false, size_mb: 0, threshold_mb: 0 },
   };
 
   const refs = {
@@ -64,6 +66,10 @@
     briefText: document.getElementById('ltp-brief-text'),
     briefSend: document.getElementById('ltp-brief-send'),
     briefClose: document.getElementById('ltp-brief-close'),
+    whisperStatus: document.getElementById('ltp-whisper-status'),
+    ledgerBanner: document.getElementById('ltp-ledger-banner'),
+    ledgerText: document.querySelector('.ltp-ledger-text'),
+    ledgerLink: document.querySelector('.ltp-ledger-link'),
   };
 
   const fetchJSON = async (url, options = {}) => {
@@ -248,6 +254,41 @@
     refs.summary.textContent = JSON.stringify(state.summary, null, 2);
   };
 
+  const renderWhisperStatus = () => {
+    if (!refs.whisperStatus) return;
+    const status = state.whisperStatus || {};
+    let statusAttr = 'unknown';
+    if (status.ok === true) statusAttr = 'ok';
+    else if (status.ok === false) statusAttr = 'error';
+    refs.whisperStatus.dataset.status = statusAttr;
+    refs.whisperStatus.title = status.reason || '';
+    const label = refs.whisperStatus.querySelector('.ltp-status-label');
+    if (label) {
+      label.textContent = statusAttr === 'error' ? 'Whisper offline' : 'Whisper';
+    }
+    const disableAudio = statusAttr !== 'ok';
+    if (refs.recordBtn) refs.recordBtn.disabled = disableAudio;
+    if (refs.uploadBtn) refs.uploadBtn.disabled = disableAudio;
+  };
+
+  const renderLedgerStatus = () => {
+    if (!refs.ledgerBanner) return;
+    const status = state.ledgerStatus || {};
+    if (!status.needs_compaction) {
+      refs.ledgerBanner.hidden = true;
+      return;
+    }
+    const size = status.size_mb ?? 0;
+    const threshold = status.threshold_mb ?? 0;
+    if (refs.ledgerText) {
+      refs.ledgerText.textContent = `Size ${size} MB of ${threshold} MB`;
+    }
+    if (refs.ledgerLink) {
+      refs.ledgerLink.href = '/chat';
+    }
+    refs.ledgerBanner.hidden = false;
+  };
+
   const renderPreview = () => {
     if (!state.preview) {
       refs.previewBefore.textContent = '';
@@ -331,6 +372,8 @@
     renderSummary();
     renderPreview();
     renderCoauthorSuggestion();
+    renderWhisperStatus();
+    renderLedgerStatus();
   };
 
   const loadSnapshot = async () => {
@@ -341,6 +384,28 @@
     state.sections = data.sections || [];
     state.summary = data.summary || {};
     render();
+  };
+
+  const loadWhisperStatus = async () => {
+    try {
+      const data = await fetchJSON('/api/ltp/status/whisper');
+      state.whisperStatus = data;
+      renderWhisperStatus();
+    } catch (err) {
+      console.warn('Whisper status unavailable', err);
+      state.whisperStatus = { ok: false, reason: 'status_unavailable' };
+      renderWhisperStatus();
+    }
+  };
+
+  const loadLedgerStatus = async () => {
+    try {
+      const data = await fetchJSON('/api/system/ledger/status');
+      state.ledgerStatus = data;
+      renderLedgerStatus();
+    } catch (err) {
+      console.warn('Ledger status check failed', err);
+    }
   };
 
   const tidyNow = async () => {
@@ -707,6 +772,10 @@
     setMode(state.mode || 'draft');
     await Promise.all([loadMeta(), loadProjects()]);
     attachEvents();
+    loadWhisperStatus();
+    loadLedgerStatus();
+    setInterval(loadWhisperStatus, 30000);
+    setInterval(loadLedgerStatus, 60000);
     if (state.slug) {
       if (!state.projects.find((p) => p.slug === state.slug)) {
         state.projects.unshift({ slug: state.slug, title: state.slug, updated_at: '', owners: [], tags: [] });

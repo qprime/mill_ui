@@ -17,6 +17,8 @@
     </div>
   </header>
 
+  <div id="ace-ledger-alert" class="ace-ledger-alert" hidden></div>
+
   <section class="ace-card" id="compose-card">
     <h2>Compose Brief</h2>
     <form id="brief-form" class="ace-form">
@@ -107,6 +109,7 @@
       </div>
       <div class="ace-run-actions">
         <button type="button" data-action="push-run" disabled>Push</button>
+        <button type="button" data-action="commit-run" disabled>Commit</button>
         <button type="button" data-action="rerun" disabled>Re-run</button>
         <button type="button" data-action="ignore-run" disabled>Ignore</button>
       </div>
@@ -157,6 +160,26 @@
       <input type="text" name="codex_cmd" placeholder="codex command" value="codex run --mode=pro --stdin">
       <input type="text" name="host" placeholder="host (optional)">
       <button type="submit">Save</button>
+    </form>
+  </section>
+
+  <section class="ace-card" id="policy-card">
+    <div class="ace-section-head">
+      <h2>Operate Policy</h2>
+      <button type="button" data-action="refresh-policy">Refresh</button>
+    </div>
+    <div class="ace-policy-alert" data-role="policy-empty" hidden>
+      No command types observed yet. They will appear here as you run commands.
+    </div>
+    <div class="ace-policy-list" data-role="policy-list"></div>
+    <form id="policy-add-form" class="ace-form-inline">
+      <input type="text" name="command_type" placeholder="command.shell" required>
+      <select name="value">
+        <option value="accept">accept</option>
+        <option value="verify">verify</option>
+        <option value="escalate">escalate</option>
+      </select>
+      <button type="submit">Add / Update</button>
     </form>
   </section>
 </div>

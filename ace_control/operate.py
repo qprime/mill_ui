@@ -41,7 +41,7 @@ OPERATE_ACTIONS: Dict[str, OperateCommand] = {
         id="packages.apt_list",
         title="APT Packages",
         description="List top-level apt packages",
-        commands=[sh("apt list --installed")],
+        commands=[sh("apt list --installed | head -n 200")],
     ),
     "services.list": OperateCommand(
         id="services.list",

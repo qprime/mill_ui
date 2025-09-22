@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, jsonify, request, stream_with_context
 
 from ace_control import (
     Brief,
@@ -57,6 +57,19 @@ def run_stream(run_id: str):
     except FileNotFoundError:
         content = ""
     return Response(content, mimetype="text/plain")
+
+
+@ace_api_bp.get("/runs/<run_id>/sse")
+def run_sse(run_id: str):
+    def generate():
+        yield "retry: 5000\n\n"
+        for event in _RUN_MANAGER.log_event_stream(run_id):
+            yield event
+
+    response = Response(stream_with_context(generate()), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    return response
 
 
 @ace_api_bp.get("/runs/<run_id>/artifacts")

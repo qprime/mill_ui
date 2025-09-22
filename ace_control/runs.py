@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import json
+import os
+import shlex
+import shutil
 import subprocess
+import time
 import uuid
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
 from memories.framework import MemoryRegistry
 
 from .ledger import record_memory_entry, write_summary_file
-from .machines import MachineRegistry, MachineProfile
+from .machines import MachineProfile, MachineRegistry
 from .models import Brief, Mode, RunRecord, RunStatus, now_ts, path_relative_to
 from .operate import OPERATE_ACTIONS, OperateCommand
 
@@ -217,23 +221,77 @@ class RunManager:
                 raise FileNotFoundError(rel_path)
         return target
 
+    def log_event_stream(
+        self,
+        run_id: str,
+        *,
+        poll_interval: float = 2.0,
+        heartbeat_interval: float = 10.0,
+    ) -> Iterator[str]:
+        """Yield Server-Sent Event payloads for the run's log file."""
+
+        last_payload: Optional[str] = None
+        idle_time = 0.0
+        while True:
+            log_text = ""
+            record: Optional[RunRecord]
+            try:
+                record = self.get_run(run_id)
+            except FileNotFoundError:
+                record = None
+
+            log_path: Optional[Path] = None
+            if record and record.log_path:
+                try:
+                    log_path = self.get_run_file(run_id, record.log_path)
+                except FileNotFoundError:
+                    log_path = None
+            fallback = self._run_dir(run_id) / "codex.log"
+            if not log_path and fallback.exists():
+                log_path = fallback
+            if log_path and log_path.exists():
+                log_text = log_path.read_text(encoding="utf-8")
+
+            if log_text != last_payload:
+                event_data = json.dumps({"text": log_text})
+                yield _format_sse_event("log", event_data)
+                last_payload = log_text
+                idle_time = 0.0
+            else:
+                idle_time += poll_interval
+                if idle_time >= heartbeat_interval:
+                    yield _format_sse_event("heartbeat", '"ping"')
+                    idle_time = 0.0
+
+            if record and record.status not in {RunStatus.PENDING, RunStatus.RUNNING}:
+                if idle_time >= heartbeat_interval * 2:
+                    yield _format_sse_event("heartbeat", '"complete"')
+                    break
+
+            time.sleep(poll_interval)
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
     def _execute_build(self, record: RunRecord) -> Dict[str, object]:
         brief = record.brief
         run_dir = self._run_dir(record.id)
-        prompt_payload = {
+        prompt_payload: Dict[str, object] = {
             "brief_text": brief.text,
             "mode": "build",
             "machines": record.machines,
             "tags": record.tags,
             "plan_preference": brief.plan_preview.value,
         }
+        steering: Dict[str, str] = {}
         if brief.model:
             prompt_payload["model"] = brief.model
+            steering["model_hint"] = brief.model
         if brief.reasoning:
             prompt_payload["reasoning"] = brief.reasoning
+            steering["reasoning_hint"] = brief.reasoning
+        if steering:
+            prompt_payload["steering"] = steering
         if brief.notes:
             prompt_payload["notes"] = brief.notes
 
@@ -245,27 +303,32 @@ class RunManager:
         plan_summary: Optional[str] = None
         plan_path: Optional[str] = None
         diff_path: Optional[str] = None
-        artifacts: List[str] = []
+        artifact_set: set[str] = set()
 
-        for machine_name in record.machines:
+        machines = record.machines or ["skylink"]
+        for machine_name in machines:
             profile = self._safe_machine(machine_name)
+            workspace_hint = self._machine_workspace(machine_name)
             output, rc = self._invoke_codex(profile, prompt_payload, run_dir)
             combined_output.append(f"=== MACHINE {machine_name} (exit={rc}) ===\n{output}\n")
             sections = _parse_markers(output)
             if sections.plan and not plan_summary:
                 plan_summary = sections.plan.strip()
                 plan_path = self._write_plan(run_dir, sections.plan)
-                artifacts.append(plan_path)
+                artifact_set.add(plan_path)
             if sections.diff and not diff_path:
                 diff_path = self._write_diff(run_dir, sections.diff)
             if sections.artifacts:
-                artifacts.extend(sections.artifacts)
+                for artifact_entry in sections.artifacts:
+                    mirrored = self._mirror_artifact(run_dir, artifact_entry, workspace_hint)
+                    if mirrored:
+                        artifact_set.add(mirrored)
             if rc != 0:
                 log_path = self._write_log(run_dir, combined_output)
                 record.log_path = log_path
-                artifacts = sorted(set(artifacts))
+                artifact_list = self._finalize_artifacts(run_dir, artifact_set, diff_path)
                 record.diff_path = diff_path
-                record.artifacts = artifacts
+                record.artifacts = artifact_list
                 summary = sections.notes or "\n".join(output.splitlines()[:5])
                 if plan_path:
                     record.plan_summary = plan_summary
@@ -275,7 +338,7 @@ class RunManager:
                     "result_summary": summary,
                     "plan_summary": plan_summary,
                     "diff_path": diff_path,
-                    "artifacts": artifacts,
+                    "artifacts": artifact_list,
                     "log_path": log_path,
                 }
 
@@ -284,17 +347,13 @@ class RunManager:
 
         if not diff_path:
             diff_path = self._capture_git_diff(run_dir, record)
-            if diff_path:
-                artifacts.append(diff_path)
+        if diff_path:
+            artifact_set.add(diff_path)
 
-        artifacts = sorted(set(artifacts))
-
-        if artifacts:
-            artifacts_path = run_dir / "artifacts.json"
-            artifacts_path.write_text(json.dumps(artifacts, indent=2), encoding="utf-8")
+        artifact_list = self._finalize_artifacts(run_dir, artifact_set, diff_path)
 
         record.diff_path = diff_path
-        record.artifacts = artifacts
+        record.artifacts = artifact_list
         if plan_path:
             record.plan_summary = plan_summary
 
@@ -304,7 +363,7 @@ class RunManager:
             "result_summary": _headline_from_output(combined_output),
             "plan_summary": plan_summary,
             "diff_path": diff_path,
-            "artifacts": artifacts,
+            "artifacts": artifact_list,
             "log_path": log_path,
         }
 
@@ -324,34 +383,42 @@ class RunManager:
             headline = f"Operate: {record.brief.text[:60]}"
 
         outputs: List[str] = []
-        for cmd in commands:
-            try:
-                proc = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    cwd=self._machine_workspace(record.machines[0]),
+        summary_line: Optional[str] = None
+        machines = record.machines or ["skylink"]
+        for machine_name in machines:
+            profile = self._safe_machine(machine_name)
+            machine_chunks: List[str] = []
+            exit_code = 0
+            for cmd in commands:
+                body, rc = self._exec_on_machine(profile, cmd)
+                machine_chunks.append(f"$ {_format_cmd(cmd)}\n{body}\n")
+                if summary_line is None:
+                    summary_line = _headline_from_output([body])
+                if rc != 0:
+                    exit_code = rc
+                    break
+            outputs.append(
+                "\n".join(
+                    [f"=== MACHINE {machine_name} (exit={exit_code}) ==="] + machine_chunks
                 )
-                body = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
-                outputs.append(f"$ {' '.join(cmd)}\n{body}\n")
-                if proc.returncode != 0:
-                    raise RuntimeError(f"Command {' '.join(cmd)} exited {proc.returncode}")
-            except Exception as exc:
+            )
+            if exit_code != 0:
                 log_path = self._write_log(run_dir, outputs)
                 record.log_path = log_path
                 return {
                     "status": RunStatus.FAILED,
                     "headline": "Operate command failed",
-                    "result_summary": str(exc),
+                    "result_summary": f"{machine_name}: command exited {exit_code}",
                     "artifacts": [],
                     "log_path": log_path,
                 }
+
         log_path = self._write_log(run_dir, outputs)
         record.log_path = log_path
         return {
             "status": RunStatus.SUCCEEDED,
             "headline": headline,
-            "result_summary": _headline_from_output(outputs),
+            "result_summary": summary_line or _headline_from_output(outputs),
             "artifacts": [],
             "log_path": log_path,
         }
@@ -363,7 +430,16 @@ class RunManager:
         run_dir: Path,
     ) -> Tuple[str, int]:
         prompt_json = json.dumps(prompt_payload)
-        cmd, cwd = _codex_command(profile)
+        extra_flags: List[str] = []
+        codex_hint = profile.codex_cmd.lower()
+        if "codex" in codex_hint:
+            model = prompt_payload.get("model")
+            reasoning = prompt_payload.get("reasoning")
+            if model:
+                extra_flags.extend(["--model", str(model)])
+            if reasoning:
+                extra_flags.extend(["--reasoning", str(reasoning)])
+        cmd, cwd = _codex_command(profile, extra_flags)
         try:
             result = subprocess.run(
                 cmd,
@@ -371,13 +447,92 @@ class RunManager:
                 capture_output=True,
                 text=True,
                 cwd=str(cwd),
-                shell=isinstance(cmd, str),
             )
             output = result.stdout + ("\n" + result.stderr if result.stderr else "")
             return output.strip(), result.returncode
         except FileNotFoundError:
             message = f"Codex command not found for machine {profile.name}: {profile.codex_cmd}"
             return message, 1
+
+    def _exec_on_machine(self, profile: MachineProfile, cmd: List[str]) -> Tuple[str, int]:
+        if profile.type == "ssh" and profile.host:
+            workspace = profile.workspace or "."
+            remote_cmd = f"cd {shlex.quote(workspace)} && { _format_cmd(cmd) }"
+            argv = ["ssh", "-T", profile.host, "bash", "-lc", remote_cmd]
+            proc = subprocess.run(argv, capture_output=True, text=True)
+        elif profile.type == "docker" and profile.host:
+            formatted = profile.host.format(cmd=_format_cmd(cmd), workspace=profile.workspace)
+            argv = ["bash", "-lc", formatted]
+            proc = subprocess.run(argv, capture_output=True, text=True)
+        else:
+            workspace_path = Path(profile.workspace).expanduser()
+            if not workspace_path.exists():
+                workspace_path = PROJECT_ROOT
+            proc = subprocess.run(cmd, capture_output=True, text=True, cwd=workspace_path)
+        body = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
+        return body, proc.returncode
+
+    def _mirror_artifact(
+        self,
+        run_dir: Path,
+        artifact_entry: str,
+        workspace_hint: Optional[Path],
+    ) -> Optional[str]:
+        artifact_entry = artifact_entry.strip()
+        if not artifact_entry:
+            return None
+
+        raw_path = Path(artifact_entry)
+        candidates: List[Path] = []
+        if raw_path.is_absolute():
+            candidates.append(raw_path)
+        else:
+            if workspace_hint and workspace_hint.exists():
+                candidates.append(workspace_hint / raw_path)
+            candidates.append(PROJECT_ROOT / raw_path)
+            candidates.append(run_dir / raw_path)
+        source = next((candidate for candidate in candidates if candidate.exists()), None)
+        if not source:
+            return None
+
+        artifacts_root = run_dir / "artifacts"
+        artifacts_root.mkdir(parents=True, exist_ok=True)
+        if raw_path.is_absolute():
+            relative_target = Path(source.name)
+        else:
+            relative_target = _sanitize_relative(raw_path) or Path(source.name)
+        destination = artifacts_root / relative_target
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination = _ensure_unique_path(destination)
+
+        try:
+            if source.is_dir():
+                try:
+                    os.symlink(source, destination, target_is_directory=True)
+                except OSError:
+                    shutil.copytree(source, destination)
+            else:
+                try:
+                    os.symlink(source, destination)
+                except OSError:
+                    shutil.copy2(source, destination)
+        except Exception:
+            return None
+        return str(path_relative_to(PROJECT_ROOT, destination))
+
+    def _finalize_artifacts(
+        self,
+        run_dir: Path,
+        artifact_set: Iterable[str],
+        diff_path: Optional[str],
+    ) -> List[str]:
+        cleaned = sorted({artifact for artifact in artifact_set if artifact})
+        if diff_path:
+            cleaned = sorted({*cleaned, diff_path})
+        if cleaned:
+            artifacts_path = run_dir / "artifacts.json"
+            artifacts_path.write_text(json.dumps(cleaned, indent=2), encoding="utf-8")
+        return cleaned
 
     def _write_log(self, run_dir: Path, chunks: Iterable[str]) -> str:
         log_path = run_dir / "codex.log"
@@ -468,7 +623,6 @@ class RunManager:
     def _resolve_mode(self, brief: Brief, operate_action: Optional[str]) -> Mode:
         if brief.mode != Mode.AUTO:
             return brief.mode
-        # very light heuristic
         text = brief.text.lower()
         if operate_action:
             return Mode.OPERATE
@@ -494,16 +648,20 @@ class RunManager:
 # ----------------------------------------------------------------------
 
 
-def _codex_command(profile: MachineProfile) -> Tuple[object, Path]:
-    workspace = Path(profile.workspace).expanduser()
+def _codex_command(profile: MachineProfile, extra_flags: Optional[List[str]] = None) -> Tuple[List[str], Path]:
+    extra_flags = extra_flags or []
+    tokens = shlex.split(profile.codex_cmd) + extra_flags
+    workspace = profile.workspace or "."
     if profile.type == "ssh" and profile.host:
-        remote_cmd = f"cd {profile.workspace} && {profile.codex_cmd}"
-        cmd = f"ssh {profile.host} '{remote_cmd}'"
-        return cmd, PROJECT_ROOT
+        remote_cmd = f"cd {shlex.quote(workspace)} && {shlex.join(tokens)}"
+        return ["ssh", "-T", profile.host, "bash", "-lc", remote_cmd], PROJECT_ROOT
     if profile.type == "docker" and profile.host:
-        docker_cmd = profile.host.format(cmd=profile.codex_cmd, workspace=profile.workspace)
-        return docker_cmd, PROJECT_ROOT
-    return profile.codex_cmd, (workspace if workspace.exists() else PROJECT_ROOT)
+        formatted = profile.host.format(cmd=shlex.join(tokens), workspace=workspace)
+        return ["bash", "-lc", formatted], PROJECT_ROOT
+    workspace_path = Path(profile.workspace).expanduser()
+    if not workspace_path.exists():
+        workspace_path = PROJECT_ROOT
+    return tokens, workspace_path
 
 
 class _MarkerSections:
@@ -540,3 +698,29 @@ def _headline_from_output(chunks: Iterable[str]) -> str:
             if line and not line.startswith("==="):
                 return line[:160]
     return ""
+
+
+def _format_cmd(cmd: List[str]) -> str:
+    return shlex.join(cmd)
+
+
+def _sanitize_relative(path: Path) -> Path:
+    parts = [part for part in path.parts if part not in ("..", ".")]
+    return Path(*parts) if parts else Path()
+
+
+def _ensure_unique_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    base = path
+    counter = 1
+    while path.exists() and counter < 100:
+        path = base.with_name(f"{base.stem}_{counter}{base.suffix}")
+        counter += 1
+    if path.exists():
+        path = base.with_name(f"{base.stem}_{uuid.uuid4().hex[:6]}{base.suffix}")
+    return path
+
+
+def _format_sse_event(event: str, data: str) -> str:
+    return f"event: {event}\ndata: {data}\n\n"

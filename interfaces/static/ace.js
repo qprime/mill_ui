@@ -1,4 +1,8 @@
 (() => {
+  const LOG_THRESHOLD = 60000;
+  const DIFF_THRESHOLD = 40000;
+  const ARTIFACT_THRESHOLD = 20000;
+
   const state = {
     machines: [],
     commands: [],
@@ -9,6 +13,8 @@
     pendingBrief: null,
     activeTab: 'summary',
     artifactCache: new Map(),
+    eventSource: null,
+    sseActive: false,
   };
 
   const els = {
@@ -61,6 +67,90 @@
   function toJSON(res) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
+  }
+
+  function renderExpandable(preEl, text, threshold = 50000) {
+    if (!preEl) return;
+    const toggleId = preEl.dataset.toggleId;
+    let toggle = toggleId ? document.getElementById(toggleId) : null;
+    const content = text || '';
+    if (!content || content.length <= threshold) {
+      preEl.textContent = content;
+      preEl.dataset.expanded = 'true';
+      if (toggle) {
+        toggle.remove();
+        delete preEl.dataset.toggleId;
+      }
+      return;
+    }
+    if (!toggle) {
+      toggle = document.createElement('button');
+      const id = `expander-${Math.random().toString(36).slice(2)}`;
+      toggle.id = id;
+      toggle.type = 'button';
+      toggle.className = 'ace-expander';
+      preEl.dataset.toggleId = id;
+      preEl.after(toggle);
+    }
+    if (!preEl.dataset.expanded) {
+      preEl.dataset.expanded = 'false';
+    }
+    const apply = () => {
+      const expanded = preEl.dataset.expanded === 'true';
+      if (expanded) {
+        preEl.textContent = content;
+        toggle.textContent = 'Show less';
+      } else {
+        preEl.textContent = `${content.slice(0, threshold)}\n…`;
+        toggle.textContent = 'Show more';
+      }
+    };
+    toggle.onclick = () => {
+      preEl.dataset.expanded = preEl.dataset.expanded === 'true' ? 'false' : 'true';
+      apply();
+    };
+    apply();
+  }
+
+  function disconnectLogStream() {
+    if (state.eventSource) {
+      state.eventSource.close();
+      state.eventSource = null;
+    }
+    state.sseActive = false;
+  }
+
+  function connectLogStream(runId) {
+    if (!('EventSource' in window)) return false;
+    disconnectLogStream();
+    try {
+      const es = new EventSource(`/ace/runs/${runId}/sse`);
+      state.eventSource = es;
+      state.sseActive = false;
+      es.addEventListener('log', (evt) => {
+        try {
+          const payload = JSON.parse(evt.data || '{}');
+          renderExpandable(els.runLog, payload.text || '', LOG_THRESHOLD);
+          state.sseActive = true;
+        } catch (err) {
+          console.error(err);
+        }
+      });
+      es.addEventListener('heartbeat', () => {});
+      es.onerror = () => {
+        es.close();
+        state.eventSource = null;
+        state.sseActive = false;
+        if (!state.logTimer) {
+          state.logTimer = setInterval(fetchLog, 2500);
+          fetchLog().catch(() => {});
+        }
+      };
+      return true;
+    } catch (err) {
+      console.warn('SSE connection failed', err);
+      return false;
+    }
   }
 
   async function loadMachines() {
@@ -142,8 +232,8 @@
     els.runHeadline.textContent = run.headline || '';
     els.runResult.textContent = run.result_summary || '';
     els.runPlan.textContent = run.plan_summary || '—';
-    els.runDiff.textContent = '';
-    els.runLog.textContent = '';
+    renderExpandable(els.runDiff, '', DIFF_THRESHOLD);
+    renderExpandable(els.runLog, '', LOG_THRESHOLD);
     renderArtifacts(run.artifacts || []);
     const running = run.status === 'running' || run.status === 'pending';
     els.pushBtn.disabled = run.mode !== 'build' || running;
@@ -153,7 +243,7 @@
     activateTab(state.activeTab);
     if (!running) {
       stopPolling();
-      fetchLog();
+      fetchLog().catch(() => {});
       if (run.diff_path) fetchDiff(run.diff_path).catch(() => {});
     }
   }
@@ -194,7 +284,7 @@
       fetchDiff(state.currentRun.diff_path).catch(() => {});
     }
     if (tab === 'system') {
-      fetchLog();
+      fetchLog().catch(() => {});
     }
     if (tab === 'plan') {
       maybeFetchPlan();
@@ -203,15 +293,19 @@
 
   async function fetchDiff(path) {
     if (!state.currentRun) return;
-    const res = await api(`/runs/${state.currentRun.id}/file?path=${encodeURIComponent(path)}`);
-    if (!res.ok) throw new Error('diff load failed');
-    const text = await res.text();
-    els.runDiff.textContent = text;
+    try {
+      const res = await api(`/runs/${state.currentRun.id}/file?path=${encodeURIComponent(path)}`);
+      if (!res.ok) throw new Error('diff load failed');
+      const text = await res.text();
+      renderExpandable(els.runDiff, text, DIFF_THRESHOLD);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async function maybeFetchPlan() {
     if (!state.currentRun) return;
-    if (state.currentRun.plan_summary) return; // already present
+    if (state.currentRun.plan_summary) return;
     const candidate = (state.currentRun.artifacts || []).find((p) => /plan\.txt$/.test(p));
     if (!candidate) return;
     try {
@@ -219,7 +313,6 @@
       if (res.ok) {
         const text = await res.text();
         els.runPlan.textContent = text;
-        state.currentRun.plan_summary = text;
       }
     } catch (err) {
       console.warn(err);
@@ -242,7 +335,7 @@
         pre.className = 'ace-pre';
         li.appendChild(pre);
       }
-      pre.textContent = text;
+      renderExpandable(pre, text, ARTIFACT_THRESHOLD);
     } catch (err) {
       console.error(err);
     }
@@ -250,10 +343,17 @@
 
   function scheduleRunPolling(runId) {
     stopPolling();
-    state.logTimer = setInterval(fetchLog, 2500);
+    const usingSSE = connectLogStream(runId);
+    if (!usingSSE) {
+      if (!state.logTimer) {
+        state.logTimer = setInterval(fetchLog, 2500);
+      }
+    }
+    fetchLog().catch(() => {});
     state.refreshTimer = setInterval(async () => {
       try {
         const data = await api(`/runs/${runId}/summary`).then(toJSON);
+        if (!state.currentRun || state.currentRun.id !== runId) return;
         state.currentRun = data.run;
         renderRun(data.run);
         if (data.run.status !== 'running' && data.run.status !== 'pending') {
@@ -266,9 +366,15 @@
   }
 
   function stopPolling() {
-    if (state.logTimer) clearInterval(state.logTimer);
-    if (state.refreshTimer) clearInterval(state.refreshTimer);
-    state.logTimer = state.refreshTimer = null;
+    if (state.logTimer) {
+      clearInterval(state.logTimer);
+      state.logTimer = null;
+    }
+    if (state.refreshTimer) {
+      clearInterval(state.refreshTimer);
+      state.refreshTimer = null;
+    }
+    disconnectLogStream();
   }
 
   async function fetchLog() {
@@ -276,7 +382,8 @@
     try {
       const res = await api(`/runs/${state.currentRun.id}/stream`);
       if (!res.ok) return;
-      els.runLog.textContent = await res.text();
+      const text = await res.text();
+      renderExpandable(els.runLog, text, LOG_THRESHOLD);
     } catch (err) {
       console.error(err);
     }
@@ -318,19 +425,21 @@
         showPlan(data.plan_outline || []);
         return;
       }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      hidePlan();
       state.pendingBrief = null;
-      await loadHistory();
-      selectRun(data.run.id);
+      hidePlan();
+      if (data.run) {
+        loadHistory();
+        selectRun(data.run.id);
+      }
     } catch (err) {
       console.error(err);
     }
   }
 
   function showPlan(items) {
-    els.planOutline.textContent = (items || []).map((line, idx) => `${idx + 1}. ${line}`).join('\n');
+    const numbered = (items || []).map((line, idx) => `${idx + 1}. ${line}`);
+    els.planOutline.textContent = numbered.join('\n');
     els.planCard.hidden = false;
     els.composeCard.classList.add('blurred');
   }
@@ -338,38 +447,47 @@
   function hidePlan() {
     els.planCard.hidden = true;
     els.composeCard.classList.remove('blurred');
+    els.planOutline.textContent = '';
   }
 
   function focusTextarea() {
-    els.textarea.focus({ preventScroll: false });
+    els.textarea.focus();
   }
 
   function setupEvents() {
-    els.form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const wantsPlan = els.planSelect.value === 'show';
-      submitBrief(!wantsPlan).catch(console.error);
-    });
+    if (els.form) {
+      els.form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const wantsPlan = els.planSelect.value === 'show';
+        submitBrief(!wantsPlan).catch(console.error);
+      });
+    }
 
-    els.planConfirm.addEventListener('click', () => {
-      if (!state.pendingBrief) return;
-      submitBrief(true).catch(console.error);
-    });
+    if (els.planConfirm) {
+      els.planConfirm.addEventListener('click', () => {
+        if (!state.pendingBrief) return;
+        submitBrief(true).catch(console.error);
+      });
+    }
 
-    els.planCancel.addEventListener('click', () => {
-      hidePlan();
-      state.pendingBrief = null;
-    });
+    if (els.planCancel) {
+      els.planCancel.addEventListener('click', () => {
+        hidePlan();
+        state.pendingBrief = null;
+      });
+    }
 
     if (els.refreshBtn) {
-      els.refreshBtn.addEventListener('click', () => loadHistory().catch(console.error));
+      els.refreshBtn.addEventListener('click', () => {
+        loadHistory().catch(console.error);
+      });
     }
 
     if (els.tabs) {
       els.tabs.addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-tab]');
-        if (!button) return;
-        activateTab(button.dataset.tab);
+        const target = event.target.closest('button[data-tab]');
+        if (!target) return;
+        activateTab(target.dataset.tab);
       });
     }
 

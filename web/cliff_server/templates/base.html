@@ -20,10 +20,17 @@
 
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-dark text-light" data-chat-id="{{ chat_id }}">
+<body class="bg-dark text-light" data-chat-id="{{ chat_id | default('') }}" data-seed="{{ seed | default('') }}">
   <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">Cliff AI</a>
+      <div class="d-flex align-items-center gap-2">
+        <a class="navbar-brand" href="/">Cliff AI</a>
+        {% if ledger_status and ledger_status.needs_compaction %}
+          <span class="badge bg-warning text-dark" title="Ledger size {{ ledger_status.size_mb }} MB exceeds {{ ledger_status.threshold_mb }} MB threshold. Consider compacting.">
+            ⚠️ Ledger {{ ledger_status.size_mb }}MB
+          </span>
+        {% endif %}
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>

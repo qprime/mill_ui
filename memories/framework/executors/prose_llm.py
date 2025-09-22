@@ -65,6 +65,11 @@ def summarize_for_capsule(text: str, max_chars: int) -> str:
 
 def _artifact_memory(action: Action, *, purpose: str, title: str, rel_path: str) -> Memory:
     stamp = utc_now()
+    # Link artifacts to the chat thread via handle, and to the action via parent + lineage.
+    derived: list[str] = []
+    if action.truth_ref:
+        derived.append(action.truth_ref)
+    derived.append(action.id)
     return Memory(
         id=generate_ulid(),
         type="artifact",
@@ -74,7 +79,7 @@ def _artifact_memory(action: Action, *, purpose: str, title: str, rel_path: str)
         tags=[purpose],
         state="done",
         registry_status="staged",
-        relations=Relations(thread_of=action.id, derived_from=[action.truth_ref] if action.truth_ref else []),
+        relations=Relations(thread_of=action.id, derived_from=derived),
         content=MemoryContent(path=rel_path),
         metadata=MemoryMetadata(constraints={}, acceptance_criteria=[]),
         actor=action.actor,

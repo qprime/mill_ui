@@ -45,6 +45,17 @@ python scripts/ci_reproduce_sample.py
 - Artifact hashes recorded in manifests must match on-disk contents.
 - All workflows run with `OFFLINE=1`; remote fetches are disallowed by default.
 
+## 6.1 Traceability model
+
+- Chat‑centric threads: Every narrative is rooted at a `chat.session` Memory with `handle=<chat_id>`.
+- Chat turns: Each turn is a `chat.turn` Memory with `relations.thread_of=<session_id>` and the session’s `relations.produces` contains the turn IDs.
+- Actions, Briefs, Artifacts:
+  - `handle` is set to the originating `chat_id` so ad‑hoc queries group by thread.
+  - Parent edge (`relations.thread_of`) points to the immediate parent (e.g., Action for Brief/Artifact).
+  - Lineage (`relations.derived_from`) includes upstream IDs (e.g., Action ID, Truth ref, and optionally the Chat turn ID).
+
+This yields a traversable DAG: session → turns → actions → briefs/artifacts, with `handle` tying all items to the same thread.
+
 ## 7. Extension points
 
 - Create new domains by adding folders under `memories/` and documenting them here.

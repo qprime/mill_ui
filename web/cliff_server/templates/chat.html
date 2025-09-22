@@ -7,6 +7,23 @@
 <div class="container-fluid vh-100 d-flex flex-row bg-dark text-light p-0" data-chat-id="{{ chat_id }}">
   <!-- Sidebar with voice + text controls -->
   <div class="d-flex flex-column bg-secondary p-3 gap-3" style="width: 200px; min-width: 200px; height: 100vh; overflow-y: auto; position: sticky; top: 0;">
+    <div>
+      <label for="personaSelector" class="form-label text-light">Persona</label>
+      <select id="personaSelector" class="form-select form-select-sm">
+        {% for persona in personas %}
+          <option value="{{ persona }}" {% if persona == default_persona %}selected{% endif %}>{{ persona }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div id="conversationActions" class="d-flex flex-column gap-2">
+      <span class="fw-bold small text-light">Conversation Actions</span>
+      <button type="button" class="btn btn-outline-info btn-sm promotion-btn" data-scope="conversation" data-action="ideate">Branch Ideation</button>
+      <button type="button" class="btn btn-outline-warning btn-sm promotion-btn" data-scope="conversation" data-action="operate">Upgrade to Operation</button>
+      <button type="button" class="btn btn-outline-primary btn-sm promotion-btn" data-scope="conversation" data-action="build">Upgrade to Build</button>
+      <button type="button" class="btn btn-outline-success btn-sm promotion-btn" data-scope="conversation" data-action="task">Upgrade to Task</button>
+      <button type="button" class="btn btn-outline-light btn-sm promotion-btn" data-scope="conversation" data-action="document">Upgrade to Document</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm promotion-btn" data-scope="conversation" data-action="chat">Convert to Chat</button>
+    </div>
     <!-- Voice Button -->
     <button type="button" id="voiceBtn" class="btn btn-success">🎙️ Talk to Cliff</button>
     <div id="micStatus" class="text-info small">Idle</div>
@@ -38,7 +55,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  // Defensive lookups
   const chatContainer = document.getElementById("chatContainer");
   const userInput = document.getElementById("userInput");
   const toneSelector = document.getElementById("toneSelector");
@@ -47,8 +63,20 @@ document.addEventListener("DOMContentLoaded", function() {
   const toggleInput = document.getElementById("toggleInput");
   const inputControls = document.getElementById("inputControls");
   const micStatus = document.getElementById("micStatus");
+  const personaSelector = document.getElementById("personaSelector");
+  const chatId = document.body.dataset.chatId || "{{ chat_id }}";
+  const seedText = document.body.dataset.seed || "";
 
   let recorder, chunks = [], recording = false;
+
+  const TURN_PROMOTIONS = [
+    { action: "ideate", label: "Branch Ideation" },
+    { action: "operate", label: "Upgrade to Operation" },
+    { action: "build", label: "Upgrade to Build" },
+    { action: "task", label: "Upgrade to Task" },
+    { action: "document", label: "Upgrade to Document" },
+    { action: "chat", label: "Convert to Chat" },
+  ];
 
   function setStatus(text, pulse = false, done = false) {
     if (!micStatus || !voiceBtn) return;
@@ -58,6 +86,63 @@ document.addEventListener("DOMContentLoaded", function() {
     voiceBtn.innerText = "🎙️ Talk to Cliff";
     if (pulse) voiceBtn.classList.add("pulse-processing");
     if (done) voiceBtn.style.border = "2px solid lime";
+  }
+
+  if (toggleInput && inputControls && userInput) {
+    toggleInput.onclick = () => {
+      inputControls.classList.toggle("d-none");
+      if (!inputControls.classList.contains("d-none")) {
+        userInput.focus();
+      }
+    };
+  }
+
+  if (seedText && inputControls && userInput) {
+    inputControls.classList.remove("d-none");
+    userInput.value = seedText;
+  }
+
+  async function persistPersona(selected, { silent = false } = {}) {
+    if (!selected || !chatId) return;
+    try {
+      localStorage.setItem(`cliff.chat.persona.${chatId}`, selected);
+      await fetch("/persona", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, persona: selected })
+      });
+    } catch (err) {
+      if (!silent) {
+        console.error("Failed to persist persona", err);
+      }
+    }
+  }
+
+  async function loadPersonaFromServer() {
+    if (!chatId || !personaSelector) return;
+    try {
+      const res = await fetch(`/persona/${chatId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.persona && data.persona !== personaSelector.value) {
+        personaSelector.value = data.persona;
+        localStorage.setItem(`cliff.chat.persona.${chatId}`, data.persona);
+      }
+    } catch (err) {
+      console.warn("Unable to load persona", err);
+    }
+  }
+
+  if (personaSelector) {
+    personaSelector.addEventListener("change", () => {
+      persistPersona(personaSelector.value);
+    });
+    const storedPersona = localStorage.getItem(`cliff.chat.persona.${chatId}`);
+    if (storedPersona && storedPersona !== personaSelector.value) {
+      personaSelector.value = storedPersona;
+    }
+    persistPersona(personaSelector.value, { silent: true });
+    loadPersonaFromServer();
   }
 
   if (sendBtn && userInput && toneSelector) {
@@ -70,15 +155,6 @@ document.addEventListener("DOMContentLoaded", function() {
         handleChatSubmission(userInput.value.trim(), toneSelector.value);
       }
     });
-  }
-
-  if (toggleInput && inputControls && userInput) {
-    toggleInput.onclick = () => {
-      inputControls.classList.toggle("d-none");
-      if (!inputControls.classList.contains("d-none")) {
-        userInput.focus();
-      }
-    };
   }
 
   if (voiceBtn) {
@@ -103,9 +179,9 @@ document.addEventListener("DOMContentLoaded", function() {
         recorder.ondataavailable = e => chunks.push(e.data);
         recorder.onstop = async () => {
           setStatus("Transcribing…", true);
-          const blob = new Blob(chunks, { type: 'audio/wav' });
+          const blob = new Blob(chunks, { type: "audio/wav" });
           const formData = new FormData();
-          formData.append('file', blob, 'recording.wav');
+          formData.append("file", blob, "recording.wav");
           try {
             const res = await fetch("https://192.168.0.179:8001/transcribe", {
               method: "POST",
@@ -137,10 +213,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
   async function handleChatSubmission(prompt, tone) {
     if (!prompt) return;
-    const chatId = document.body.dataset.chatId || "{{ chat_id }}";
+    const persona = personaSelector ? personaSelector.value : "{{ default_persona }}";
     const timestamp = new Date().toISOString();
     const exchange = document.createElement("div");
     exchange.className = "card p-3 bg-dark text-light shadow-sm fade-in";
+    exchange.dataset.persona = persona;
+    exchange.dataset.turnId = "";
+    exchange.dataset.userInput = prompt;
+    exchange.dataset.distilled = "";
+    exchange.dataset.response = "";
+    exchange.dataset.model = "";
+
     exchange.innerHTML = `
       <div class="d-flex flex-column flex-md-row gap-3">
         <div class="flex-fill">
@@ -158,18 +241,19 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
       </div>`;
     chatContainer.prepend(exchange);
+    renderTurnActions(exchange);
     if (userInput) userInput.value = "";
 
     try {
       const response = await fetch("/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, tone, chat_id: chatId })
+        body: JSON.stringify({ prompt, tone, chat_id: chatId, persona })
       });
       const data = await response.json();
       const cliffResponse = document.getElementById(`cliff-${timestamp}`);
       const modelTag = document.getElementById(`model-${timestamp}`);
-      const toggleBlock = cliffResponse.closest(".card").querySelector(".toggle-original-distilled");
+      const toggleBlock = exchange.querySelector(".toggle-original-distilled");
       if (toggleBlock) {
         const distilledEl = toggleBlock.querySelector(".user-distilled");
         distilledEl.innerText = `(Distilled) ${data.distilled_input || "N/A"}`;
@@ -178,29 +262,23 @@ document.addEventListener("DOMContentLoaded", function() {
           toggleBlock.querySelector(".user-distilled").classList.toggle("d-none");
         };
       }
-      cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
-      cliffResponse.classList.remove("fst-italic", "text-muted");
-      if (data.debug) {
-        const debugBtn = document.createElement("button");
-        debugBtn.className = "btn btn-sm btn-outline-warning mt-2";
-        debugBtn.textContent = "Show Debug";
-        const debugBlock = document.createElement("pre");
-        debugBlock.style.display = "none";
-        debugBlock.className = "bg-black text-light p-2 mt-2 border rounded";
-        debugBlock.textContent = JSON.stringify(data.debug, null, 2);
-        debugBtn.onclick = () => {
-          const visible = debugBlock.style.display === "block";
-          debugBlock.style.display = visible ? "none" : "block";
-          debugBtn.textContent = visible ? "Show Debug" : "Hide Debug";
-        };
-        cliffResponse.parentElement.appendChild(debugBtn);
-        cliffResponse.parentElement.appendChild(debugBlock);
+      exchange.dataset.turnId = data.turn_memory_id || "";
+      exchange.dataset.distilled = data.distilled_input || "";
+      exchange.dataset.response = data.response || "";
+      exchange.dataset.model = data.model || "";
+
+      if (cliffResponse) {
+        cliffResponse.innerHTML = formatCodeBlocks(data.response || "(No response)");
+        cliffResponse.classList.remove("fst-italic", "text-muted");
+        cliffResponse.querySelectorAll("pre code").forEach(block => {
+          if (window.hljs) hljs.highlightElement(block);
+        });
       }
-      cliffResponse.querySelectorAll("pre code").forEach(block => {
-        if (window.hljs) hljs.highlightElement(block);
-      });
-      const metrics = data.metrics || {};
-      modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
+
+      if (modelTag) {
+        const metrics = data.metrics || {};
+        modelTag.innerText = `Model: ${data.model || "unknown"}  🕒 ${metrics.latency_ms || ""}ms 🔼 ${metrics.tokens_in || 0} 🔽 ${metrics.tokens_out || 0}`;
+      }
     } catch (err) {
       console.error("Ask error:", err);
       const cliffResponse = document.getElementById(`cliff-${timestamp}`);
@@ -208,9 +286,125 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  function renderTurnActions(card) {
+    const footer = document.createElement("div");
+    footer.className = "d-flex flex-wrap gap-1 mt-3 promotion-turn-controls";
+    TURN_PROMOTIONS.forEach(action => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-outline-info btn-sm promotion-btn";
+      btn.dataset.scope = "turn";
+      btn.dataset.action = action.action;
+      btn.textContent = action.label;
+      footer.appendChild(btn);
+    });
+    card.appendChild(footer);
+  }
+
+  async function handlePromotion({ button, scope, action }) {
+    const persona = personaSelector ? personaSelector.value : "{{ default_persona }}";
+    const payload = {
+      chat_id: chatId,
+      persona,
+      action,
+      scope,
+    };
+
+    let targetCard = null;
+    if (scope === "turn") {
+      targetCard = button.closest(".card[data-turn-id]");
+      if (!targetCard) {
+        displayPromotionResult(action, scope, { error: "Unable to locate chat turn." });
+        return;
+      }
+      const turnId = targetCard.dataset.turnId || "";
+      if (turnId) {
+        payload.turn_id = turnId;
+      }
+      payload.turn_fallback = {
+        turn_id: turnId || null,
+        user_input: targetCard.dataset.userInput || "",
+        response: targetCard.dataset.response || "",
+        distilled: targetCard.dataset.distilled || "",
+        persona: targetCard.dataset.persona || persona,
+        model: targetCard.dataset.model || "",
+      };
+    } else {
+      const cards = Array.from(chatContainer.querySelectorAll('.card[data-turn-id]')).reverse();
+      payload.turn_ids = cards.map(card => card.dataset.turnId).filter(Boolean);
+      payload.turn_fallbacks = cards.map(card => ({
+        turn_id: card.dataset.turnId || null,
+        user_input: card.dataset.userInput || "",
+        response: card.dataset.response || "",
+        distilled: card.dataset.distilled || "",
+        persona: card.dataset.persona || persona,
+        model: card.dataset.model || "",
+      }));
+    }
+
+    button.disabled = true;
+    const originalLabel = button.textContent;
+    button.textContent = "Working…";
+
+    try {
+      const res = await fetch("/promote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        displayPromotionResult(action, scope, { error: data.error || "Promotion failed." });
+      } else {
+        if (data.kind === "chat" && data.new_chat_url) {
+          window.open(data.new_chat_url, "_blank");
+        }
+        displayPromotionResult(action, scope, data);
+      }
+    } catch (err) {
+      console.error("Promotion error", err);
+      displayPromotionResult(action, scope, { error: String(err) });
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  }
+
+  function displayPromotionResult(action, scope, data) {
+    const card = document.createElement("div");
+    const hasError = Boolean(data.error);
+    card.className = `card mt-3 ${hasError ? 'border-danger' : 'border-info'} bg-dark text-light`;
+    const heading = `${action.replace(/_/g, ' ')} (${scope})`;
+    let body = "";
+    if (hasError) {
+      body = `<p class="mb-0 text-danger">${data.error}</p>`;
+    } else if (data.kind === "run") {
+      body = `<p class="mb-0">Started run <code>${data.run.id}</code></p>`;
+    } else if (data.kind === "action") {
+      body = `<p class="mb-0">Created action <code>${data.action_id}</code> with brief <code>${data.brief_id}</code></p>`;
+    } else if (data.kind === "task") {
+      body = `<p class="mb-0">Created task <code>${data.task.id}</code></p>`;
+    } else if (data.kind === "document") {
+      body = `<p class="mb-0">Created document <code>${data.slug}</code></p>`;
+    } else if (data.kind === "chat") {
+      body = `<p class="mb-0">Created new chat session <code>${data.new_chat_id}</code></p>`;
+    } else {
+      body = `<p class="mb-0">${data.message || "Promotion completed."}</p>`;
+    }
+    card.innerHTML = `<div class="card-body"><strong>${heading}</strong><div class="mt-2">${body}</div></div>`;
+    chatContainer.prepend(card);
+  }
+
+  document.addEventListener("click", event => {
+    const btn = event.target.closest(".promotion-btn");
+    if (!btn) return;
+    event.preventDefault();
+    if (btn.disabled) return;
+    handlePromotion({ button: btn, scope: btn.dataset.scope || "turn", action: btn.dataset.action });
+  });
+
   function formatCodeBlocks(text) {
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-    const languageMap = { js: "javascript", html: "xml" };
     return text.replace(codeBlockRegex, (_, lang, code) => {
       const language = (lang || "bash").toLowerCase();
       return `
@@ -224,7 +418,6 @@ document.addEventListener("DOMContentLoaded", function() {
       `;
     });
   }
-
 });
 </script>
 

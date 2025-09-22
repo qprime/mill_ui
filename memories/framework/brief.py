@@ -180,9 +180,14 @@ def build_brief(
         created_at=stamp,
         updated_at=stamp,
     )
-    # Link brief to action for traceability in timelines and previews
+    # Link brief to action and thread for traceability
+    # - Ensure it is part of the chat thread (handle)
+    # - Set parent edge to the action (thread_of)
+    # - Record lineage from the action id
+    memory.handle = action.thread
     memory.relations.thread_of = action.id
+    if action.id not in memory.relations.derived_from:
+        memory.relations.derived_from.append(action.id)
     registry.register(memory)
 
     return BriefBuildResult(brief=brief_model, memory=memory)
-

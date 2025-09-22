@@ -6,6 +6,7 @@
 # description: Initializes and runs the Flask server application with chat, tasks, and dashboard components.
 
 from flask import Flask
+from .services.ledger_service import get_ledger_status
 from .blueprints.chat import chat_bp
 from .blueprints.tasks import tasks_bp
 from .blueprints.dashboard import dashboard_bp
@@ -16,6 +17,11 @@ def create_app():
     app.register_blueprint(chat_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(dashboard_bp)
+
+    @app.context_processor
+    def inject_ledger_status():
+        return {"ledger_status": get_ledger_status()}
+
     return app
 
 

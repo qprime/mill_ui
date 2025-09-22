@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 from memories.framework import MemoryRegistry
+from memories.framework.threading import ensure_chat_session, link_produced
 from memories.framework.ids import generate_ulid
 from memories.framework.models import Actor, Memory, MemoryContent, MemoryMetadata, Relations
 
@@ -42,16 +43,30 @@ def record_memory_entry(
 ) -> Memory:
     actor = Actor(actor_id="ace_control", actor_type="ai")
     created = now_ts()
+    # Detect thread/chat linkage from tags: allow tags like "thread:<chat_id>" or "chat:<chat_id>"
+    chat_id = None
+    for tag in run.tags:
+        if isinstance(tag, str) and (tag.startswith("thread:") or tag.startswith("chat:")):
+            chat_id = tag.split(":", 1)[1].strip() or None
+            break
+    session_id = None
+    handle_value = run.id
+    thread_of_value = run.id
+    if chat_id:
+        session = ensure_chat_session(registry, chat_id=chat_id)
+        session_id = session.id
+        handle_value = chat_id
+        thread_of_value = session_id
     memory = Memory(
         id=generate_ulid(),
         type="note",
         purpose="ace.run.summary",
-        handle=run.id,
+        handle=handle_value,
         title=f"Ace run {run.id}",
         tags=list(set(["acecontrol", run.mode.value, run.status.value] + run.tags)),
         state="done" if run.status == RunStatus.SUCCEEDED else "active",
         registry_status="registered",
-        relations=Relations(thread_of=run.id),
+        relations=Relations(thread_of=thread_of_value),
         content=MemoryContent(path=_relative_path(summary_path) if summary_path.exists() else None),
         metadata=MemoryMetadata(constraints={
             "run_id": run.id,
@@ -63,5 +78,11 @@ def record_memory_entry(
         created_at=created,
         updated_at=created,
     )
-    registry.register(memory)
+    memory = registry.register(memory)
+    # Link the run summary under the session for forward traversal
+    if session_id:
+        try:
+            link_produced(registry, parent_id=session_id, child_id=memory.id)
+        except Exception:
+            pass
     return memory

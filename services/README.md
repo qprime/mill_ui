@@ -29,7 +29,7 @@ sudo ./services/install_system_service.sh web
 - `services/service_registry.json` — declared services, unit filenames, and scopes.
 - `services/*.service` — templated systemd unit files synced by the CLI.
 - `services/cli_archiver/` — helper code referenced by service units.
-- `web/cliff_server/cert/` — TLS assets consumed by the web service unit.
+- `interfaces/cert/` — TLS assets consumed by the web service unit.
 
 ## 5. Public surface
 

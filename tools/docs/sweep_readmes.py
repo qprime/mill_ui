@@ -221,7 +221,7 @@ README_SPECS: Dict[str, ReadmeSpec] = {
             "`interfaces/apps/<app>/manifest.py` — blueprint registration for each module.",
             "`interfaces/templates/` — shared Jinja layouts and HTMX fragments.",
             "`interfaces/static/` — static assets served by Flask (HTMX, CSS, icons).",
-            "`web/cliff_server/cert/` — development TLS certificates referenced by the runner.",
+            "`interfaces/cert/` — development TLS certificates referenced by the runner.",
         ],
         surface=[
             "`interfaces.app.create_app()` — build the Flask application with registered blueprints.",
@@ -231,7 +231,7 @@ README_SPECS: Dict[str, ReadmeSpec] = {
         ],
         invariants=[
             "Each app manifest must expose `register(app)` and attach its blueprints idempotently.",
-            "TLS defaults to `web/cliff_server/cert`; rotate certificates without changing the path.",
+            "TLS defaults to `interfaces/cert`; rotate certificates without changing the path.",
             "Adapters normalize payloads before calling services; keep translation logic minimal.",
             "Template fragments stay small (<100 lines) and rely on HTMX instead of custom JS.",
         ],
@@ -376,7 +376,7 @@ README_SPECS: Dict[str, ReadmeSpec] = {
             "`services/service_registry.json` — declared services, unit filenames, and scopes.",
             "`services/*.service` — templated systemd unit files synced by the CLI.",
             "`services/cli_archiver/` — helper code referenced by service units.",
-            "`web/cliff_server/cert/` — TLS assets consumed by the web service unit.",
+            "`interfaces/cert/` — TLS assets consumed by the web service unit.",
         ],
         surface=[
             "`services.cli.api(argv=None)` — command dispatcher returning systemd exit codes.",

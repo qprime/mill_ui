@@ -13,8 +13,8 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8080,
         ssl_context=(
-            "web/cliff_server/cert/web_server.crt",
-            "web/cliff_server/cert/web_server.key",
+            "interfaces/cert/web_server.crt",
+            "interfaces/cert/web_server.key",
         ),
         debug=False,
     )

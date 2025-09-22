@@ -2,7 +2,7 @@
 # type: entrypoint script
 # tags: web, whisper, context, graph, image, cam, headers
 # owner: cliff
-# depends_on: web.cliff_server.app,services.whisper.whisper_server,continuum.code_context,continuum.project_graph,skills.image_pipeline.generate_image,skills.cam_generator.runner,continuum.regen_metadata_headers
+# depends_on: interfaces.app,services.whisper.whisper_server,continuum.code_context,continuum.project_graph,skills.image_pipeline.generate_image,skills.cam_generator.runner,continuum.regen_metadata_headers
 # description: Orchestrates running various project entrypoints based on command-line input with detailed error reporting.
 
 import sys

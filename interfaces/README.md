@@ -28,7 +28,7 @@ python -m interfaces.app
 - `interfaces/apps/<app>/manifest.py` — blueprint registration for each module.
 - `interfaces/templates/` — shared Jinja layouts and HTMX fragments.
 - `interfaces/static/` — static assets served by Flask (HTMX, CSS, icons).
-- `web/cliff_server/cert/` — development TLS certificates referenced by the runner.
+- `interfaces/cert/` — development TLS certificates referenced by the runner.
 
 ## 5. Public surface
 
@@ -40,7 +40,7 @@ python -m interfaces.app
 ## 6. Invariants & guardrails
 
 - Each app manifest must expose `register(app)` and attach its blueprints idempotently.
-- TLS defaults to `web/cliff_server/cert`; rotate certificates without changing the path.
+- TLS defaults to `interfaces/cert`; rotate certificates without changing the path.
 - Adapters normalize payloads before calling services; keep translation logic minimal.
 - Template fragments stay small (<100 lines) and rely on HTMX instead of custom JS.
 

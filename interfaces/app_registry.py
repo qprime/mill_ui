@@ -3,6 +3,7 @@ from typing import Callable, Iterable
 
 from flask import Flask
 
+from .apps.ace.manifest import register as register_ace
 from .apps.chat.manifest import register as register_chat
 from .apps.ctx.manifest import register as register_ctx
 from .apps.ltp.manifest import register as register_ltp
@@ -14,9 +15,9 @@ def _manifests() -> Iterable[Callable[[Flask], None]]:
     yield register_tasks
     yield register_ltp
     yield register_ctx
+    yield register_ace
 
 
 def register_all_apps(app: Flask) -> None:
     for manifest in _manifests():
         manifest(app)
-

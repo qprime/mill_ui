@@ -38,6 +38,7 @@ python run.py services list
 - `python run.py compose_cam <sheet_slug> [--stl]` — generate toolpaths and exports for a sheet layout.
 - `python run.py services <command>` — proxy into `services.cli` for systemd operations.
 - `python run.py tests` — execute curated repo tests via `tools.test_runner`.
+- `flask --app interfaces.app --debug run` — exposes the AceControl API surface at `/ace/*` and UI at `/ace/`.
 
 ## 6. Invariants & guardrails
 

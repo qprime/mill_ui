@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}AceControl{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/ace.css"/>
+<div class="ace-root" data-role="ace-app">
+  <header class="ace-top">
+    <div class="ace-brand">
+      <span class="ace-logo">♠︎</span>
+      <div>
+        <h1>AceControl</h1>
+        <p class="muted">Voice-first briefs, one-tap runs.</p>
+      </div>
+    </div>
+    <div class="ace-actions">
+      <button type="button" data-action="refresh-history">Refresh</button>
+      <button type="button" data-action="open-machines">Machines</button>
+    </div>
+  </header>
+
+  <section class="ace-card" id="compose-card">
+    <h2>Compose Brief</h2>
+    <form id="brief-form" class="ace-form">
+      <label class="ace-field">
+        <span>What should Ace do?</span>
+        <textarea name="text" id="brief-text" placeholder="e.g. Add vine borders to mill_ui; rebuild web." required></textarea>
+      </label>
+      <div class="ace-voice-controls">
+        <button type="button" data-action="toggle-mic" aria-pressed="false">🎙 Start</button>
+        <span class="ace-mic-indicator" data-role="mic-indicator">Mic off</span>
+      </div>
+      <div class="ace-grid">
+        <label>
+          <span>Mode</span>
+          <select name="mode" id="brief-mode">
+            <option value="auto" selected>Auto</option>
+            <option value="build">Build</option>
+            <option value="operate">Operate</option>
+            <option value="ideate">Ideate</option>
+          </select>
+        </label>
+        <label>
+          <span>Plan Preference</span>
+          <select name="plan_preview" id="brief-plan">
+            <option value="auto" selected>Auto</option>
+            <option value="show">Show plan first</option>
+            <option value="skip">Skip plan</option>
+          </select>
+        </label>
+        <label>
+          <span>Machines</span>
+          <select name="machines" id="brief-machines" multiple></select>
+        </label>
+        <label>
+          <span>Tags</span>
+          <input type="text" name="tags" id="brief-tags" placeholder="#feature, #ops"/>
+        </label>
+      </div>
+      <details class="ace-advanced">
+        <summary>Advanced</summary>
+        <div class="ace-grid">
+          <label>
+            <span>Model override</span>
+            <input type="text" name="model" id="brief-model" placeholder="gpt-5-codex"/>
+          </label>
+          <label>
+            <span>Reasoning effort</span>
+            <select name="reasoning" id="brief-reasoning">
+              <option value="">auto</option>
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+          <label class="ace-field">
+            <span>Notes for planner</span>
+            <textarea name="notes" id="brief-notes" placeholder="Any additional hints"></textarea>
+          </label>
+        </div>
+      </details>
+      <div class="ace-form-actions">
+        <button type="submit" data-action="submit-brief">Run</button>
+        <button type="button" data-action="operate-quick" class="ghost">Operate Only</button>
+      </div>
+    </form>
+    <div class="ace-quick-picks">
+      <h3>Quick Picks</h3>
+      <div class="ace-chip-bar" data-role="quick-picks"></div>
+    </div>
+  </section>
+
+  <section class="ace-card" id="plan-card" hidden>
+    <div class="ace-plan">
+      <h2>Plan Preview</h2>
+      <pre data-role="plan-outline"></pre>
+      <div class="ace-form-actions">
+        <button type="button" data-action="confirm-plan">Looks good, Run</button>
+        <button type="button" data-action="cancel-plan" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="ace-card" id="run-card">
+    <div class="ace-run-header">
+      <div>
+        <h2 data-role="run-title">No run selected</h2>
+        <p class="muted" data-role="run-status">Create a brief to start.</p>
+      </div>
+      <div class="ace-run-actions">
+        <button type="button" data-action="push-run" disabled>Push</button>
+        <button type="button" data-action="rerun" disabled>Re-run</button>
+        <button type="button" data-action="ignore-run" disabled>Ignore</button>
+      </div>
+    </div>
+    <nav class="ace-tabs" data-role="run-tabs">
+      <button type="button" data-tab="summary" class="active">Summary</button>
+      <button type="button" data-tab="plan">Plan</button>
+      <button type="button" data-tab="diff">Diff</button>
+      <button type="button" data-tab="artifacts">Artifacts</button>
+      <button type="button" data-tab="system">System</button>
+    </nav>
+    <div class="ace-tab-content" data-tab-content="summary">
+      <p data-role="run-headline" class="ace-headline"></p>
+      <div data-role="run-result" class="ace-body"></div>
+    </div>
+    <div class="ace-tab-content" data-tab-content="plan" hidden>
+      <pre data-role="run-plan" class="ace-pre"></pre>
+    </div>
+    <div class="ace-tab-content" data-tab-content="diff" hidden>
+      <pre data-role="run-diff" class="ace-pre"></pre>
+    </div>
+    <div class="ace-tab-content" data-tab-content="artifacts" hidden>
+      <ul class="ace-list" data-role="run-artifacts"></ul>
+    </div>
+    <div class="ace-tab-content" data-tab-content="system" hidden>
+      <pre data-role="run-log" class="ace-pre"></pre>
+    </div>
+  </section>
+
+  <section class="ace-card" id="history-card">
+    <div class="ace-section-head">
+      <h2>Recent Runs</h2>
+      <span class="muted" data-role="history-count"></span>
+    </div>
+    <ul class="ace-history" data-role="history-list"></ul>
+  </section>
+
+  <section class="ace-card" id="machines-card" hidden>
+    <div class="ace-section-head">
+      <h2>Machines</h2>
+      <button type="button" data-action="close-machines">Close</button>
+    </div>
+    <ul class="ace-list" data-role="machine-list"></ul>
+    <form id="machine-form" class="ace-form-inline">
+      <input type="text" name="name" placeholder="name" required>
+      <input type="text" name="type" placeholder="type" value="local">
+      <input type="text" name="workspace" placeholder="workspace path" required>
+      <input type="text" name="codex_cmd" placeholder="codex command" value="codex run --mode=pro --stdin">
+      <input type="text" name="host" placeholder="host (optional)">
+      <button type="submit">Save</button>
+    </form>
+  </section>
+</div>
+<script src="/static/ace.js" defer></script>
+{% endblock %}

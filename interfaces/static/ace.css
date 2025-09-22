@@ -1,0 +1,79 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0f1c;
+  --card: #11182a;
+  --accent: #4bb7ff;
+  --text: #eef2ff;
+  --muted: #92a0c6;
+  --border: rgba(255,255,255,0.08);
+  --shadow: 0 20px 40px rgba(0,0,0,0.3);
+  font-family: "Inter", system-ui, sans-serif;
+}
+body { background: var(--bg); color: var(--text); margin: 0; }
+.ace-root { display: flex; flex-direction: column; gap: 1.25rem; }
+.ace-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 1.25rem; box-shadow: var(--shadow); }
+.blurred { filter: blur(2px); opacity: 0.5; pointer-events: none; }
+.ace-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.ace-brand { display:flex; align-items:center; gap:.9rem; }
+.ace-brand h1 { margin:0; font-size:1.5rem; }
+.ace-logo { display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:50%; background:rgba(75,183,255,0.15); color:var(--accent); font-size:1.2rem; }
+.ace-actions button { background:transparent; border:1px solid var(--border); border-radius:999px; padding:.4rem .9rem; color:var(--text); }
+
+.ace-form { display:flex; flex-direction:column; gap:.9rem; }
+.ace-field { display:flex; flex-direction:column; gap:.3rem; }
+.ace-field textarea { min-height:6rem; }
+
+textarea, input, select {
+  background: rgba(7, 10, 21, 0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: .65rem .8rem;
+  color: var(--text);
+  font: inherit;
+}
+textarea:focus, input:focus, select:focus { outline:2px solid rgba(75,183,255,0.35); }
+button { font:inherit; border-radius:14px; border:none; cursor:pointer; background:var(--accent); color:#04101f; padding:.6rem 1.1rem; }
+button.ghost { background:transparent; border:1px solid rgba(255,255,255,0.18); color:var(--text); }
+button:disabled { opacity:.4; cursor:not-allowed; }
+.ace-form-actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+
+.ace-voice-controls { display:flex; align-items:center; gap:.75rem; }
+.ace-mic-indicator { font-size:.9rem; color:var(--muted); }
+
+.ace-grid { display:grid; gap:.75rem; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+.ace-advanced { background:rgba(0,0,0,0.15); padding:.6rem .8rem; border-radius:12px; }
+.ace-advanced summary { cursor:pointer; font-weight:600; }
+
+.ace-quick-picks { margin-top:1rem; }
+.ace-chip-bar { display:flex; flex-wrap:wrap; gap:.5rem; }
+.ace-chip { border-radius:999px; padding:.35rem .75rem; border:1px solid rgba(75,183,255,0.4); background:transparent; color:var(--accent); font-size:.9rem; cursor:pointer; }
+
+.ace-run-header { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.ace-headline { font-size:1rem; margin:.25rem 0; }
+
+.ace-tabs { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem; }
+.ace-tabs button { background:rgba(0,0,0,0.2); color:var(--muted); }
+.ace-tabs button.active { background:var(--accent); color:#04101f; }
+.ace-tab-content { margin-top:1rem; }
+.ace-pre { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1rem; overflow:auto; max-height:40vh; white-space:pre-wrap; }
+.ace-body { white-space:pre-wrap; font-family:inherit; }
+
+.ace-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.75rem; }
+.ace-list li { display:flex; justify-content:space-between; align-items:center; gap:.75rem; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:.6rem .8rem; }
+.ace-list li button { padding:.45rem .9rem; }
+
+.ace-history { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.6rem; }
+.ace-history button { width:100%; text-align:left; background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:.7rem .9rem; color:var(--text); }
+.ace-history button .muted { display:block; margin-top:.2rem; }
+
+.ace-section-head { display:flex; justify-content:space-between; align-items:center; }
+
+.ace-form-inline { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+.ace-form-inline input { flex:1 1 140px; }
+
+@media (max-width: 720px) {
+  .ace-top { flex-direction:column; align-items:flex-start; }
+  .ace-actions { width:100%; display:flex; gap:.5rem; }
+  .ace-run-actions { width:100%; display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ace-form-inline { flex-direction:column; }
+}

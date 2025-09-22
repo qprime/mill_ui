@@ -1,0 +1,9 @@
+[
+  {
+    "name": "skylink",
+    "type": "local",
+    "workspace": "/home/steve/workspaces/cliff_ai",
+    "codex_cmd": "codex run --mode=pro --stdin",
+    "notes": "primary build box"
+  }
+]

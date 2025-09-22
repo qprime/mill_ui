@@ -34,7 +34,7 @@ python -m interfaces.app
 
 - `interfaces.app.create_app()` — build the Flask application with registered blueprints.
 - `interfaces.app_registry.register_all_apps(app)` — attach module manifests to the shell.
-- `interfaces/adapters/api/*.py` — JSON API adapters mirrored by the UI.
+- `interfaces/adapters/api/*.py` — JSON API adapters mirrored by the UI (includes AceControl v1).
 - `interfaces/adapters/web/*.py` — HTMX endpoints returning partial templates.
 
 ## 6. Invariants & guardrails
@@ -55,6 +55,11 @@ python -m interfaces.app
 
 - `interfaces/app.py` — Flask app factory and TLS runner.
 - `interfaces/app_registry.py` — Central manifest loader wiring modules.
+- `interfaces/apps/ace/manifest.py` — Registers the AceControl API + UI blueprints.
+- `interfaces/apps/ace/routes.py` — Serves the `/ace/` mobile-first interface.
+- `interfaces/templates/ace/index.html` — AceControl layout with compose/run/history views.
+- `interfaces/static/ace.js` — Client orchestration (voice capture, live polling, artifacts).
+- `interfaces/adapters/api/ace_api.py` — AceControl v1 runs, plan, machine, and operate endpoints.
 - `interfaces/apps/chat/manifest.py` — Example chat blueprint registration.
 - `interfaces/adapters/api/chat_api.py` — JSON API surface for chat traffic.
 - `interfaces/templates/base.html.jinja` — Base layout that loads shared assets.

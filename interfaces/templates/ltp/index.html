@@ -7,12 +7,27 @@
     <link rel="stylesheet" href="/static/ltp.css">
 </head>
 <body>
-<div id="ltp-app" data-slug="{{ slug }}">
+<div id="ltp-app" data-slug="{{ slug }}" data-mode="draft">
     <header class="ltp-bar">
-        <div class="ltp-field">
-            <label for="ltp-slug">Plan Slug</label>
-            <input id="ltp-slug" type="text" placeholder="business_plan_q4" value="{{ slug }}">
-            <button id="ltp-load">Open</button>
+        <div class="ltp-bar-top">
+            <div class="ltp-project">
+                <label for="ltp-project-select">Project</label>
+                <select id="ltp-project-select"></select>
+                <button id="ltp-project-new" type="button">New</button>
+            </div>
+            <div class="ltp-field">
+                <label for="ltp-slug">Open by Slug</label>
+                <input id="ltp-slug" type="text" placeholder="business_plan_q4" value="{{ slug }}">
+                <button id="ltp-load">Open</button>
+            </div>
+            <div class="ltp-mode-switch">
+                <span>Mode</span>
+                <div class="ltp-mode-buttons">
+                    <button type="button" data-mode="draft" class="active">Draft</button>
+                    <button type="button" data-mode="revise">Revise</button>
+                    <button type="button" data-mode="export">Export</button>
+                </div>
+            </div>
         </div>
         <div class="ltp-actions">
             <button id="ltp-record">Record</button>
@@ -29,13 +44,26 @@
         <section class="ltp-panel" id="ltp-prompts-panel">
             <h2>Prompts</h2>
             <ul id="ltp-prompts"></ul>
+            <h2>Tone Packs</h2>
+            <div id="ltp-tones" class="ltp-chip-group"></div>
             <h2>Suggestions</h2>
             <div id="ltp-suggestions"></div>
+            <h2>Quick Checks</h2>
+            <div id="ltp-quick-checks" class="ltp-chip-group"></div>
             <h2>Action Items</h2>
             <ul id="ltp-actions-list"></ul>
             <div class="ltp-field">
                 <input id="ltp-action-input" type="text" placeholder="Add an action item">
                 <button id="ltp-action-add">Add</button>
+            </div>
+            <div class="ltp-coauthor">
+                <h2>Co-author</h2>
+                <textarea id="ltp-coauthor-input" rows="3" placeholder="Ask for help drafting or refining a section"></textarea>
+                <div class="ltp-coauthor-actions">
+                    <select id="ltp-coauthor-section"></select>
+                    <button id="ltp-coauthor-send" type="button">Suggest</button>
+                </div>
+                <div id="ltp-coauthor-output"></div>
             </div>
         </section>
         <section class="ltp-panel" id="ltp-sections-panel">
@@ -50,12 +78,60 @@
             <div class="ltp-preview-actions">
                 <button id="ltp-apply" disabled>Apply</button>
                 <button id="ltp-cancel" disabled>Cancel</button>
+                <button id="ltp-brief" disabled>Generate Brief</button>
             </div>
         </section>
     </main>
     <section class="ltp-panel" id="ltp-summary-panel">
         <h2>Summary</h2>
         <pre id="ltp-summary"></pre>
+    </section>
+    <section id="ltp-template-modal" class="ltp-modal" hidden>
+        <div class="ltp-modal-card">
+            <header>
+                <h2>Create Project</h2>
+                <button type="button" id="ltp-template-close">×</button>
+            </header>
+            <form id="ltp-template-form">
+                <label>
+                    <span>Title</span>
+                    <input type="text" name="title" required placeholder="Quarterly Business Plan">
+                </label>
+                <label>
+                    <span>Slug (optional)</span>
+                    <input type="text" name="slug" placeholder="business-plan-q4">
+                </label>
+                <label>
+                    <span>Owners (comma separated)</span>
+                    <input type="text" name="owners" placeholder="steve, ops@cliff.ai">
+                </label>
+                <label>
+                    <span>Tags (comma separated)</span>
+                    <input type="text" name="tags" placeholder="strategy, finance">
+                </label>
+                <fieldset>
+                    <legend>Template</legend>
+                    <div id="ltp-template-options"></div>
+                </fieldset>
+                <footer>
+                    <button type="submit">Create &amp; Open</button>
+                </footer>
+            </form>
+        </div>
+    </section>
+    <section id="ltp-brief-modal" class="ltp-modal" hidden>
+        <div class="ltp-modal-card">
+            <header>
+                <h2>ACE Brief</h2>
+                <button type="button" id="ltp-brief-close">×</button>
+            </header>
+            <div class="ltp-brief-body">
+                <pre id="ltp-brief-text"></pre>
+            </div>
+            <footer>
+                <button type="button" id="ltp-brief-send">Send to ACE</button>
+            </footer>
+        </div>
     </section>
 </div>
 <script src="/static/ltp.js"></script>

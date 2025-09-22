@@ -12,11 +12,11 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 from skills.living_truth_partner.config import Config
 
-__all__ = ["ProjectStore"]
+__all__ = ["ProjectInfo", "ProjectStore"]
 
 _IDENTIFIER_RE = re.compile(r"[^a-z0-9-_]+")
 
@@ -45,6 +45,15 @@ def _infer_title(doc_path: Path, summary_path: Path) -> str:
 
 
 @dataclass(frozen=True)
+class ProjectInfo:
+    slug: str
+    title: str
+    updated_at: str
+    owners: List[str]
+    tags: List[str]
+
+
+@dataclass(frozen=True)
 class ProjectStore:
     config: Config
     slug: str
@@ -66,11 +75,20 @@ class ProjectStore:
         return cleaned or "ltp-doc"
 
     @classmethod
-    def create(cls, config: Config, slug: str, title: str, owners: Iterable[str], tags: Iterable[str]) -> ProjectStore:
+    def create(
+        cls,
+        config: Config,
+        slug: str,
+        title: str,
+        owners: Iterable[str],
+        tags: Iterable[str],
+        *,
+        body: Optional[str] = None,
+    ) -> ProjectStore:
         norm = cls.normalize_slug(slug or title)
         store = cls._build(config, norm, title)
         store._ensure_dirs()
-        store._ensure_doc()
+        store._write_doc(body)
         store._ensure_summary(list(owners), list(tags))
         store._ensure_links()
         store._ensure_discussion()
@@ -88,6 +106,34 @@ class ProjectStore:
             raise FileNotFoundError(store.doc_path)
         return store
 
+    @classmethod
+    def list(cls, config: Config, *, limit: Optional[int] = None) -> List[ProjectInfo]:
+        docs = sorted(
+            config.docs.glob("*.ltd.md"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        if limit is not None:
+            docs = docs[:limit]
+        projects: List[ProjectInfo] = []
+        for doc_path in docs:
+            slug = doc_path.stem
+            artifact_root = config.artifacts / slug
+            summary_path = artifact_root / "context_summary.json"
+            title = _infer_title(doc_path, summary_path)
+            updated_at = datetime.utcfromtimestamp(doc_path.stat().st_mtime).isoformat() + "Z"
+            owners: List[str] = []
+            tags: List[str] = []
+            if summary_path.exists():
+                try:
+                    data = json.loads(summary_path.read_text(encoding="utf-8"))
+                    owners = [str(item) for item in data.get("owners", []) if str(item).strip()]
+                    tags = [str(item) for item in data.get("tags", []) if str(item).strip()]
+                except json.JSONDecodeError:
+                    pass
+            projects.append(ProjectInfo(slug, title, updated_at, owners, tags))
+        return projects
+
     def new_history_note_path(self) -> Path:
         return self.history_root / f"{_timestamp()}_notes.md"
 
@@ -101,11 +147,22 @@ class ProjectStore:
         self.history_root.mkdir(parents=True, exist_ok=True)
         self.exports_root.mkdir(parents=True, exist_ok=True)
 
-    def _ensure_doc(self) -> None:
-        if self.doc_path.exists():
-            return
-        lines = [f"# {self.title or self.slug}", "", "## Discussion", "", "## Decisions", "", "## Next Steps", ""]
-        self.doc_path.write_text("\n".join(lines), encoding="utf-8")
+    def _write_doc(self, body: Optional[str]) -> None:
+        if body is None:
+            if self.doc_path.exists():
+                return
+            lines = [
+                f"# {self.title or self.slug}",
+                "",
+                "## Discussion",
+                "",
+                "## Decisions",
+                "",
+                "## Next Steps",
+                "",
+            ]
+            body = "\n".join(lines)
+        self.doc_path.write_text(body.rstrip() + "\n", encoding="utf-8")
 
     def _ensure_summary(self, owners: list[str], tags: list[str]) -> None:
         if self.summary_path.exists():

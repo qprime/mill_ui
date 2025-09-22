@@ -26,9 +26,6 @@
           <li class="nav-item">
             <a class="nav-link" href="/tasks">🧠 Tasks</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/chatlog">🗂️ Chat Log</a>
-          </li>
         </ul>
       </div>
     </div>
@@ -171,10 +168,10 @@
       pulse(llmResponse);
       status.innerText = "Status: Waiting for LLM...";
       const llmStart = performance.now();
-      const llm = await fetch("/ask", {
+      const llm = await fetch("/api/chat/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text })
+        body: JSON.stringify({ input: text })
       });
       const llmResult = await llm.json();
       const llmText = llmResult.response || "[LLM Error or empty response]";

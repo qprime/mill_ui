@@ -27,9 +27,8 @@
    ```
 
 4) Open the app:
-   - Chat shell:      http://<host>:<port>/app/chat
-   - Legacy chat:     http://<host>:<port>/app/chat/legacy
-   - Tasks skeleton:  http://<host>:<port>/app/tasks
+   - Chat shell:      http://<host>:<port>/chat
+   - Tasks skeleton:  http://<host>:<port>/tasks
 
 New unified manager
 --------------------

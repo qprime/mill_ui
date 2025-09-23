@@ -143,16 +143,31 @@ class AceControlRunManagerTests(unittest.TestCase):
             "mode": "ideate",
             "text": "Hello!",
             "machines": ["skylink"],
-            "context": {"include": False},
+            "context": {"include": True},
         })
+        fake_context = {
+            "context": {
+                "direct_files": [],
+                "neighbor_files": [],
+                "docs": {},
+                "tests": {},
+            }
+        }
         with patch("ace_control.runs.ModelRouter.plan_for", return_value=[plan]):
             with patch("ace_control.runs.get_router", return_value=dummy_router):
-                record = self.manager.start_run(brief)
+                with patch("ace_control.runs.assemble_context", return_value=fake_context):
+                    record = self.manager.start_run(brief)
 
         self.assertEqual(record.status, RunStatus.SUCCEEDED)
         self.assertIn("Hello there!", record.result_summary or "")
         self.assertTrue(dummy_router.called)
-        self.assertEqual(dummy_router.messages[1]["content"], "Hello!")
+        self.assertEqual(dummy_router.messages[-1]["content"], "Hello!")
+        # persona + conversation messages expected
+        system_messages = [m for m in dummy_router.messages if m["role"] == "system"]
+        self.assertGreaterEqual(len(system_messages), 1)
+        run_dir = self.manager._run_dir(record.id)
+        self.assertTrue((run_dir / "chat.log").exists())
+        self.assertTrue((run_dir / "conversation.json").exists())
 
     def test_build_run_handles_context_requests(self) -> None:
         workspace = Path(self.manager.machine_registry.get("skylink").workspace)

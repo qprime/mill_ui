@@ -12,20 +12,13 @@
     currentRunId: null,
     threadId: null,
     conversation: [],
+    defaultMachine: 'skylink',
   };
 
   const els = {
     chatLog: document.querySelector('[data-role="chat-log"]'),
     form: document.getElementById('chat-form'),
     input: document.getElementById('chat-input'),
-    includeContext: document.getElementById('include-context'),
-    includeCode: document.getElementById('include-code'),
-    contextScope: document.getElementById('context-scope'),
-    contextPersona: document.getElementById('context-persona'),
-    machineSelect: document.getElementById('machine-select'),
-    modelInput: document.getElementById('model-input'),
-    reasoningSelect: document.getElementById('reasoning-select'),
-    tagsInput: document.getElementById('tags-input'),
     history: document.querySelector('[data-role="history"]'),
     machineList: document.querySelector('[data-role="machine-list"]'),
     policyList: document.querySelector('[data-role="policy"]'),
@@ -44,13 +37,6 @@
       '"': '&quot;',
       "'": '&#39;',
     }[ch] || ch));
-  }
-
-  function parseTags(raw) {
-    return (raw || '')
-      .split(/[,\s]+/)
-      .map((t) => t.replace(/^#+/, '').trim())
-      .filter(Boolean);
   }
 
   function badge(status) {
@@ -513,38 +499,22 @@
   }
 
   function renderMachines() {
-    if (!els.machineList || !els.machineSelect) return;
-    els.machineList.innerHTML = '';
-    const fragList = document.createDocumentFragment();
-    state.machines.forEach((machine) => {
-      const span = document.createElement('span');
-      span.textContent = `${machine.name} • ${machine.workspace}`;
-      fragList.appendChild(span);
-    });
-    if (!state.machines.length) {
-      const empty = document.createElement('span');
-      empty.textContent = 'No machines registered';
-      fragList.appendChild(empty);
+    if (els.machineList) {
+      els.machineList.innerHTML = '';
+      const fragList = document.createDocumentFragment();
+      state.machines.forEach((machine) => {
+        const span = document.createElement('span');
+        span.textContent = `${machine.name} • ${machine.workspace}`;
+        fragList.appendChild(span);
+      });
+      if (!state.machines.length) {
+        const empty = document.createElement('span');
+        empty.textContent = 'No machines registered';
+        fragList.appendChild(empty);
+      }
+      els.machineList.appendChild(fragList);
     }
-    els.machineList.appendChild(fragList);
-
-    const current = els.machineSelect.value;
-    els.machineSelect.innerHTML = '';
-    state.machines.forEach((machine) => {
-      const opt = document.createElement('option');
-      opt.value = machine.name;
-      opt.textContent = machine.name;
-      els.machineSelect.appendChild(opt);
-    });
-    if (!state.machines.length) {
-      const opt = document.createElement('option');
-      opt.value = 'skylink';
-      opt.textContent = 'skylink';
-      els.machineSelect.appendChild(opt);
-    }
-    if (current && Array.from(els.machineSelect.options).some((o) => o.value === current)) {
-      els.machineSelect.value = current;
-    }
+    state.defaultMachine = state.machines[0]?.name || 'skylink';
   }
 
   function renderPolicy() {
@@ -719,58 +689,25 @@
   }
 
   function parseBriefForm(text) {
-    let mode = 'auto';
-    let planPreference = 'auto';
-    let payloadText = text.trim();
-    if (payloadText.toLowerCase().startsWith('command:')) {
-      mode = 'operate';
-      planPreference = 'skip';
-      payloadText = payloadText.slice(8).trim();
-    }
-    const includeContext = els.includeContext ? els.includeContext.checked : true;
-    const includeCode = els.includeCode ? els.includeCode.checked : false;
-    const scope = els.contextScope ? els.contextScope.value : 'auto';
-    const persona = els.contextPersona ? els.contextPersona.value.trim() : '';
-    const context = includeContext ? {
-      include: true,
-      include_code: includeCode,
-      include_persona: true,
-      scope,
-      persona: persona || null,
-    } : { include: false };
-    const machine = els.machineSelect && els.machineSelect.value
-      ? els.machineSelect.value
-      : (state.machines[0]?.name) || 'skylink';
-    const tagsValue = els.tagsInput ? els.tagsInput.value : '';
-    const modelValue = els.modelInput ? els.modelInput.value.trim() : '';
-    const reasoningValue = els.reasoningSelect ? els.reasoningSelect.value : '';
-    const tags = parseTags(tagsValue);
-
-    if (mode !== 'operate') {
-      mode = 'ideate';
-      planPreference = 'skip';
-      if (!tags.includes('chat')) {
-        tags.push('chat');
-      }
-    }
-
+    const payloadText = text.trim();
+    const tags = ['chat'];
     if (state.threadId) {
-      const threadTag = `thread:${state.threadId}`;
-      if (!tags.includes(threadTag)) {
-        tags.push(threadTag);
-      }
+      tags.push(`thread:${state.threadId}`);
     }
-
     const brief = {
-      mode,
+      mode: 'ideate',
       text: payloadText,
-      plan_preview: planPreference,
-      machines: [machine],
+      plan_preview: 'skip',
+      machines: [state.defaultMachine || (state.machines[0]?.name) || 'skylink'],
       tags,
-      context,
+      context: {
+        include: true,
+        include_code: true,
+        include_persona: true,
+        scope: 'auto',
+        persona: 'cliff_main/context',
+      },
     };
-    if (modelValue) brief.model = modelValue;
-    if (reasoningValue) brief.reasoning = reasoningValue;
     return brief;
   }
 
@@ -1108,9 +1045,6 @@
     els.history?.addEventListener('click', handleHistoryClick);
     document.querySelector('[data-action="refresh-machines"]')?.addEventListener('click', handleRefreshMachines);
     document.querySelector('[data-action="refresh-policy"]')?.addEventListener('click', handleRefreshPolicy);
-    document.querySelector('[data-action="promote-chat"]')?.addEventListener('click', () => {
-      notify('Promotion tools coming soon. Use run actions when ready to convert this chat into a build.', 'system');
-    });
     els.input?.addEventListener('keydown', (evt) => {
       if ((evt.metaKey || evt.ctrlKey) && evt.key === 'Enter') {
         submitChat(evt);
@@ -1120,9 +1054,6 @@
 
   async function bootstrap() {
     setupEvents();
-    if (els.contextPersona && !els.contextPersona.value) {
-      els.contextPersona.value = 'cliff_main/context';
-    }
     await Promise.all([loadMachines(), loadHistory(), loadPolicy()]);
   }
 

@@ -630,7 +630,7 @@ class RunManager:
         run_dir = self._run_dir(record.id)
         start_ts = time.time()
 
-        base_conversation = []
+        base_conversation: List[Dict[str, str]] = []
         for entry in getattr(record, "_conversation", []) or []:
             role = entry.get("role")
             content = entry.get("content")
@@ -665,6 +665,9 @@ class RunManager:
             prompt_payload["provider"] = provider_name
 
         context_artifact: Optional[str] = None
+        context_documents_artifact: Optional[str] = None
+        context_documents_payload: List[Dict[str, object]] = []
+        context_system_blocks: List[str] = []
         context_bundle: Optional[Dict[str, object]] = None
         if brief.context and brief.context.include:
             spec = ContextSpec(
@@ -682,6 +685,13 @@ class RunManager:
             context_path.write_text(json.dumps(context_bundle, indent=2), encoding="utf-8")
             context_artifact = str(path_relative_to(PROJECT_ROOT, context_path))
             prompt_payload["context_bundle"] = context_bundle
+            manifest = context_bundle.get("context", {}) if isinstance(context_bundle, dict) else {}
+            context_documents_payload, context_system_blocks = self._gather_context_documents(manifest)
+            if context_documents_payload:
+                prompt_payload["context_documents"] = context_documents_payload
+                docs_path = run_dir / "context_documents.json"
+                docs_path.write_text(json.dumps(context_documents_payload, indent=2), encoding="utf-8")
+                context_documents_artifact = str(path_relative_to(PROJECT_ROOT, docs_path))
 
         prompt_path = run_dir / "prompt.json"
         prompt_path.write_text(json.dumps(prompt_payload, indent=2), encoding="utf-8")
@@ -708,38 +718,12 @@ class RunManager:
             conversation_messages.append({"role": "user", "content": brief.text})
 
         messages = [{"role": "system", "content": persona_prompt}]
+        if context_system_blocks:
+            messages.append({"role": "system", "content": "Project context:
 
-        if context_bundle:
-            manifest = context_bundle.get("context", {}) if isinstance(context_bundle, dict) else {}
-            direct_files = manifest.get("direct_files", []) if isinstance(manifest, dict) else []
-            docs_map = manifest.get("docs", {}) if isinstance(manifest, dict) else {}
-            tests_map = manifest.get("tests", {}) if isinstance(manifest, dict) else {}
-            context_chunks: List[str] = []
-            for path in direct_files[:5]:
-                file_path = (PROJECT_ROOT / path).resolve()
-                if file_path.exists() and file_path.is_file():
-                    try:
-                        text = file_path.read_text(encoding="utf-8")
-                    except OSError:
-                        continue
-                    snippet = text.strip()
-                    if len(snippet) > 2000:
-                        snippet = snippet[:2000] + "\n..."
-                    context_chunks.append(f"# {path}\n{snippet}")
-            summary_lines: List[str] = []
-            if context_chunks:
-                summary_lines.append("\n\n".join(context_chunks))
-            if docs_map:
-                summary_lines.append(
-                    "Related docs: " + ", ".join(sorted({doc for docs in docs_map.values() for doc in docs}))
-                )
-            if tests_map:
-                summary_lines.append(
-                    "Related tests: " + ", ".join(sorted({test for tests in tests_map.values() for test in tests}))
-                )
-            if summary_lines:
-                messages.append({"role": "system", "content": "Project context:\n" + "\n\n".join(summary_lines)})
+" + "
 
+".join(context_system_blocks)})
         messages.extend(conversation_messages)
 
         router_client = get_router()
@@ -754,10 +738,15 @@ class RunManager:
             response_text = f"[error] {error_message}"
 
         with log_path.open("a", encoding="utf-8") as handle:
-            handle.write("USER:\n")
-            handle.write(brief.text + "\n\n")
-            handle.write("ASSISTANT:\n")
-            handle.write(response_text + "\n")
+            handle.write("USER:
+")
+            handle.write(brief.text + "
+
+")
+            handle.write("ASSISTANT:
+")
+            handle.write(response_text + "
+")
 
         headline = response_text.splitlines()[0][:160] if response_text else "Chat response"
         conversation_with_reply = conversation_messages + [{"role": "assistant", "content": response_text}]
@@ -769,6 +758,8 @@ class RunManager:
         artifacts = [record.log_path, str(path_relative_to(PROJECT_ROOT, conversation_path))]
         if context_artifact:
             artifacts.append(context_artifact)
+        if context_documents_artifact:
+            artifacts.append(context_documents_artifact)
 
         record._telemetry = {
             "provider": provider_name,
@@ -778,6 +769,7 @@ class RunManager:
             "model": model_name,
             "error": error_message,
             "conversation_turns": len(conversation_with_reply),
+            "context_documents": len(context_documents_payload),
         }
 
         return {
@@ -787,7 +779,6 @@ class RunManager:
             "artifacts": artifacts,
             "log_path": record.log_path,
         }
-
     def _execute_build(self, record: RunRecord) -> Dict[str, object]:
         brief = record.brief
         start_ts = time.time()
@@ -1226,6 +1217,81 @@ class RunManager:
             seen.add(key)
             merged.append(doc)
         return merged
+
+    def _gather_context_documents(
+        self,
+        manifest: Dict[str, object] | None,
+    ) -> Tuple[List[Dict[str, object]], List[str]]:
+        if not manifest:
+            return [], []
+
+        documents: List[Dict[str, object]] = []
+        system_blocks: List[str] = []
+        seen: set[str] = set()
+
+        def _read_file(path: str, *, source: str, limit: int) -> None:
+            if not path or path in seen:
+                return
+            file_path = (PROJECT_ROOT / path).resolve()
+            if not file_path.exists() or not file_path.is_file():
+                return
+            try:
+                text = file_path.read_text(encoding="utf-8")
+            except OSError:
+                return
+            seen.add(path)
+            truncated = False
+            snippet = text
+            if len(snippet) > limit:
+                snippet = snippet[:limit] + "\n..."
+                truncated = True
+            documents.append(
+                {
+                    "path": path,
+                    "source": source,
+                    "chars": len(text),
+                    "content": snippet,
+                    "truncated": truncated,
+                }
+            )
+            system_blocks.append(f"=== {source.upper()} {path} ===\n{snippet}")
+
+        direct_files = manifest.get("direct_files", []) if isinstance(manifest, dict) else []
+        for path in direct_files[:20]:
+            _read_file(path, source="direct", limit=20000)
+
+        neighbor_entries = manifest.get("neighbor_files", []) if isinstance(manifest, dict) else []
+        for entry in neighbor_entries[:12]:
+            if isinstance(entry, dict):
+                path = entry.get("path")
+            else:
+                path = entry
+            if isinstance(path, str):
+                _read_file(path, source="neighbor", limit=8000)
+
+        docs_map = manifest.get("docs", {}) if isinstance(manifest, dict) else {}
+        doc_paths: List[str] = []
+        if isinstance(docs_map, dict):
+            for values in docs_map.values():
+                if isinstance(values, list):
+                    for item in values:
+                        if isinstance(item, str):
+                            doc_paths.append(item)
+        for path in doc_paths[:10]:
+            _read_file(path, source="doc", limit=6000)
+
+        tests_map = manifest.get("tests", {}) if isinstance(manifest, dict) else {}
+        test_paths: List[str] = []
+        if isinstance(tests_map, dict):
+            for values in tests_map.values():
+                if isinstance(values, list):
+                    for item in values:
+                        if isinstance(item, str):
+                            test_paths.append(item)
+        for path in test_paths[:10]:
+            _read_file(path, source="test", limit=6000)
+
+        return documents, system_blocks
 
     def _fulfill_context_requests(
         self,

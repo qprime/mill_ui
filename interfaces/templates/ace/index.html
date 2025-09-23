@@ -29,43 +29,11 @@
 
   <main class="ace-main">
     <div class="ace-chat-log" data-role="chat-log"></div>
-    <form id="chat-form" class="ace-composer">
-      <textarea id="chat-input" name="text" placeholder="Describe the next change or type command: restart service" required></textarea>
-      <div class="ace-composer-toolbar">
-        <div class="ace-toggle-group">
-          <label><input type="checkbox" id="include-context" checked> Context</label>
-          <label><input type="checkbox" id="include-code"> Code Snapshot</label>
-          <label>Scope
-            <select id="context-scope">
-              <option value="auto" selected>auto</option>
-              <option value="changed">changed</option>
-              <option value="all">all</option>
-            </select>
-          </label>
-        </div>
-        <div class="ace-field-row">
-          <label>Persona <input type="text" id="context-persona" placeholder="cliff_main/context"></label>
-          <label>Machine
-            <select id="machine-select"></select>
-          </label>
-          <label>Model <input type="text" id="model-input" placeholder="auto"></label>
-          <label>Reasoning
-            <select id="reasoning-select">
-              <option value="">auto</option>
-              <option value="low">low</option>
-              <option value="medium">medium</option>
-              <option value="high">high</option>
-            </select>
-          </label>
-          <label>Tags <input type="text" id="tags-input" placeholder="#feature, #ops"></label>
-        </div>
-        <div class="ace-composer-actions">
-          <button type="submit" data-action="send">Send</button>
-          <button type="button" class="neutral" data-action="promote-chat">Promote</button>
-        </div>
-      </div>
-    </form>
   </main>
 </div>
+<form id="chat-form" class="ace-composer">
+  <textarea id="chat-input" name="text" placeholder="Ask ACE anything about cliff_ai…" rows="2" required></textarea>
+  <button type="submit" data-action="send">Send</button>
+</form>
 <script src="/static/ace.js" defer></script>
 {% endblock %}

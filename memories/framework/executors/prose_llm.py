@@ -7,7 +7,15 @@ from typing import Dict, List, Tuple
 from ..ids import generate_ulid
 from ..models import Action, Memory, MemoryContent, MemoryMetadata, Relations
 from ..registry import MemoryRegistry
-from ..utils import MEMORIES_ROOT, OFFLINE, ensure_dir, sha256_text, utc_now, write_json, write_text
+from ..utils import (
+    OFFLINE,
+    active_memories_root,
+    ensure_dir,
+    sha256_text,
+    utc_now,
+    write_json,
+    write_text,
+)
 from . import register_executor
 
 __all__ = ["run", "summarize_for_capsule", "simulate_artifacts"]
@@ -103,12 +111,13 @@ def simulate_artifacts(action: Action) -> Dict[str, str]:
 
 
 def run(action: Action, brief, registry: MemoryRegistry) -> Tuple[Memory, List[Memory], dict]:
-    run_dir = MEMORIES_ROOT / "actions" / action.id
+    root = active_memories_root()
+    run_dir = root / "actions" / action.id
     ensure_dir(run_dir)
 
     prompt_path = Path(brief.prompt_path)
     if not prompt_path.is_absolute():
-        prompt_path = MEMORIES_ROOT / brief.prompt_path
+        prompt_path = root / brief.prompt_path
     prompt_text = prompt_path.read_text(encoding="utf-8") if prompt_path.exists() else ""
 
     artifacts_map = simulate_artifacts(action)
@@ -116,7 +125,7 @@ def run(action: Action, brief, registry: MemoryRegistry) -> Tuple[Memory, List[M
     artifact_hashes: List[Dict[str, str]] = []
     for rel_str, body in artifacts_map.items():
         rel_path = Path(rel_str)
-        absolute = MEMORIES_ROOT / rel_path
+        absolute = root / rel_path
         ensure_dir(absolute.parent)
         write_text(absolute, body)
         artifact_hashes.append({"path": rel_str, "sha256": sha256_text(body)})

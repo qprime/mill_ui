@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from .ids import generate_ulid
 from .models import Actor, Memory, MemoryContent, MemoryMetadata, Relations
 from .registry import MemoryRegistry
-from .utils import MEMORIES_ROOT, ensure_dir, utc_now, write_json
+from .utils import active_memories_root, ensure_dir, utc_now, write_json
 
 __all__ = [
     "PolicyEvaluation",
@@ -28,7 +28,8 @@ class PolicyEvaluation:
 
 class PolicyStore:
     def __init__(self, root: Path | None = None):
-        self.root = root or (MEMORIES_ROOT / "policies")
+        base = active_memories_root()
+        self.root = root or (base / "policies")
         ensure_dir(self.root)
         self._cache: Dict[str, Any] = {}
 
@@ -136,7 +137,8 @@ class PolicyStore:
             "visibility": visibility_section,
         }
 
-        policy_dir = MEMORIES_ROOT / "decisions" / "policy_checks"
+        base = active_memories_root()
+        policy_dir = base / "decisions" / "policy_checks"
         ensure_dir(policy_dir)
         policy_path = policy_dir / f"{action.id}.policy_check.json"
         payload = {
@@ -157,7 +159,7 @@ class PolicyStore:
             state="active",
             registry_status="staged",
             relations=Relations(thread_of=action.id),
-            content=MemoryContent(path=str(policy_path.relative_to(MEMORIES_ROOT))),
+            content=MemoryContent(path=str(policy_path.relative_to(base))),
             metadata=MemoryMetadata(constraints={"checks": checks}),
             actor=Actor(actor_id="cliff_ai", actor_type="ai"),
             created_at=stamp,

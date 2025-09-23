@@ -14,7 +14,7 @@ from memories.framework.actions import (
 from memories.framework.models import Action
 from memories.framework.registry import MemoryRegistry
 from memories.framework.timeline import build_timeline
-from memories.framework.utils import MEMORIES_ROOT, read_text
+from memories.framework.utils import active_memories_root, read_text
 
 ctx_api_bp = Blueprint("ctx_api", __name__)
 ctx_web_bp = Blueprint("ctx_web", __name__)
@@ -184,7 +184,7 @@ def api_action_brief(action_id: str):
     prompt_path = br.content.path
     prompt_text = ""
     if prompt_path:
-        abs_path = MEMORIES_ROOT / prompt_path
+        abs_path = active_memories_root() / prompt_path
         if abs_path.exists():
             prompt_text = read_text(abs_path)
     return jsonify(

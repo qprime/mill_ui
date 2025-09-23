@@ -6,7 +6,7 @@ from typing import Iterable
 
 import pytest
 
-from memories.framework import actions, brief, policies, registry, timeline
+from memories.framework import actions, brief, policies, profile, registry, timeline
 from memories.framework.executors import ops_shell, prose_llm
 from memories.framework import utils
 
@@ -46,9 +46,9 @@ def _offline_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def tmp_memories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    for module in MODULES:
-        if hasattr(module, "MEMORIES_ROOT"):
-            monkeypatch.setattr(module, "MEMORIES_ROOT", tmp_path, raising=False)
+    monkeypatch.setenv("CLIFF_MEMORIES_ROOT", str(tmp_path))
+    profile.clear_cache()
+    profile.set_root_override(tmp_path)
     monkeypatch.setattr(utils, "WORKTREE_ROOT", tmp_path, raising=False)
     for item in DIRECTORIES:
         (tmp_path / item).mkdir(parents=True, exist_ok=True)
@@ -65,7 +65,10 @@ def tmp_memories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         encoding="utf-8",
     )
     (tmp_path / "truth" / "cliff_ai.mind.md").write_text("# Truth\n\n## Abstract\nBase truth.\n", encoding="utf-8")
-    return tmp_path
+    try:
+        yield tmp_path
+    finally:
+        profile.clear_root_override()
 
 
 @pytest.fixture

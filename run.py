@@ -36,6 +36,7 @@ ENTRYPOINTS = {
     "services": "services.cli",
     "tests": "tools.test_runner",
     "build_context": "tools.context_builder",
+    "memory_profile": "tools.memory_profile_cli",
 }
 
 

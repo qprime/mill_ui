@@ -11,21 +11,41 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from .profile import (
+    active_memories_root,
+    active_profile,
+    clear_cache as refresh_memories_profile,
+    clear_root_override,
+    is_test_profile,
+    profile_status,
+    set_active_profile,
+    set_root_override,
+)
+
 __all__ = [
     "OFFLINE",
     "ENABLE_FFMPEG",
     "ENABLE_PANDOC",
     "MAX_DIFF_SLOC",
+    "MEMORIES_ROOT",
     "WORKTREE_ROOT",
+    "active_memories_root",
+    "active_profile",
     "acquire_lock",
     "canonical_dumps",
+    "clear_root_override",
     "ensure_dir",
     "env_flag",
+    "is_test_profile",
+    "profile_status",
     "read_json",
     "read_text",
+    "refresh_memories_profile",
     "sha256_bytes",
     "sha256_file",
     "sha256_text",
+    "set_active_profile",
+    "set_root_override",
     "strip_comments",
     "trim_chars",
     "utc_now",
@@ -34,7 +54,29 @@ __all__ = [
 ]
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-MEMORIES_ROOT = PROJECT_ROOT / "memories"
+
+
+class _MemoriesRootProxy:
+    def __fspath__(self) -> str:
+        return os.fspath(active_memories_root())
+
+    def __truediv__(self, other: Any) -> Path:
+        return active_memories_root() / other
+
+    def __rtruediv__(self, other: Any) -> Path:
+        return Path(other) / active_memories_root()
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(active_memories_root(), item)
+
+    def __str__(self) -> str:
+        return str(active_memories_root())
+
+    def __repr__(self) -> str:
+        return f"MemoriesRootProxy({active_memories_root()!s})"
+
+
+MEMORIES_ROOT = _MemoriesRootProxy()
 
 OFFLINE = os.getenv("OFFLINE", "0") == "1"
 ENABLE_PANDOC = os.getenv("ENABLE_PANDOC", "0") == "1"

@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterator, List, Optional
 from .ids import generate_ulid
 from .models import Memory
 from .utils import (
-    MEMORIES_ROOT,
+    active_memories_root,
     acquire_lock,
     canonical_dumps,
     ensure_dir,
@@ -53,10 +53,10 @@ def _load_line(path: Path, line_no: int, raw: str) -> RegistryEntry:
 
 
 class MemoryRegistry:
-    def __init__(self, root: Path = MEMORIES_ROOT):
-        self.root = root
-        self.index_path = root / "index.jsonl"
-        self.lock_path = root / "index.jsonl.lock"
+    def __init__(self, root: Path | None = None):
+        self.root = root or active_memories_root()
+        self.index_path = self.root / "index.jsonl"
+        self.lock_path = self.root / "index.jsonl.lock"
         ensure_dir(self.root)
         if not self.index_path.exists():
             self.index_path.write_text("", encoding="utf-8")
@@ -204,7 +204,8 @@ class MemoryRegistry:
 
 
 def bootstrap_truth(registry: MemoryRegistry, *, actor_id: str = "cliff_ai", actor_type: str = "ai") -> Memory:
-    truth_path = MEMORIES_ROOT / "truth" / "cliff_ai.mind.md"
+    root = active_memories_root()
+    truth_path = root / "truth" / "cliff_ai.mind.md"
     ensure_dir(truth_path.parent)
     if not truth_path.exists():
         truth_path.write_text("# cliff_ai Mind\n", encoding="utf-8")
@@ -220,7 +221,7 @@ def bootstrap_truth(registry: MemoryRegistry, *, actor_id: str = "cliff_ai", act
             "state": "active",
             "registry_status": "staged",
             "relations": {"links": [], "derived_from": [], "produces": []},
-            "content": {"path": str(truth_path.relative_to(MEMORIES_ROOT))},
+            "content": {"path": str(truth_path.relative_to(root))},
             "metadata": {
                 "owners": ["steve"],
                 "constraints": {},

@@ -14,7 +14,7 @@ from .actions import (
 from .ids import generate_ulid
 from .models import Action, Actor, Memory, MemoryContent, MemoryMetadata, Relations
 from .registry import MemoryRegistry, bootstrap_truth
-from .utils import MEMORIES_ROOT, ensure_dir, utc_now
+from .utils import active_memories_root, ensure_dir, utc_now
 
 __all__ = ["acceptance_demo"]
 

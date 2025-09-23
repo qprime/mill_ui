@@ -12,7 +12,7 @@ from .models import Action, Actor, Brief as CapsuleModel, Decision, Memory, Memo
 from .policies import PolicyEvaluation, PolicyStore
 from .registry import MemoryRegistry
 from .signatures import sign_payload, verify_signature
-from .utils import MEMORIES_ROOT,  ensure_dir, utc_now, write_text
+from .utils import active_memories_root, ensure_dir, utc_now, write_text
 
 __all__ = [
     "create_action",
@@ -114,9 +114,10 @@ def auto_check(
     else:
         new_status = "ready"
 
+    root = active_memories_root()
     new_constraints = _action_constraints(action)
     new_constraints["policy_check_path"] = str(
-        policy_eval.path.relative_to(MEMORIES_ROOT)
+        policy_eval.path.relative_to(root)
     )
     new_constraints["required_tests"] = guard_report.required_tests
     new_constraints["delta_sloc"] = guard_report.delta_sloc
@@ -243,7 +244,8 @@ def apply_action(registry: MemoryRegistry, *, action_id: str, actor_id: str | No
             raise RuntimeError("No valid decision signature found")
 
     revert_rel = Path("artifacts") / "code.diff" / f"{action.id}.revert.patch"
-    revert_path = MEMORIES_ROOT / revert_rel
+    root = active_memories_root()
+    revert_path = root / revert_rel
     ensure_dir(revert_path.parent)
     revert_body = (
         f"--- revert\n+++ revert\n@@\n-apply\n+revert {action.id}\n"

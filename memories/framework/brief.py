@@ -9,8 +9,8 @@ from .ids import generate_ulid
 from .models import Action, Actor, Brief as BriefModel, Memory
 from .registry import MemoryRegistry
 from .utils import (
-    MEMORIES_ROOT,
     WORKTREE_ROOT,
+    active_memories_root,
     ensure_dir,
     read_text,
     sha256_text,
@@ -97,9 +97,11 @@ def build_brief(
 
     truth_memory = registry.latest(action.truth_ref or "cliff_ai.truth")
     if truth_memory and truth_memory.content.path:
-        truth_path = (MEMORIES_ROOT / truth_memory.content.path).resolve()
+        root = active_memories_root()
+        truth_path = (root / truth_memory.content.path).resolve()
     else:
-        truth_path = MEMORIES_ROOT / "truth" / "cliff_ai.mind.md"
+        root = active_memories_root()
+        truth_path = root / "truth" / "cliff_ai.mind.md"
     sections = action.constraints.get("sections", [])
     truth_sections = _load_truth_section(truth_path, sections)
     if not truth_sections and truth_path.exists():
@@ -155,7 +157,8 @@ def build_brief(
 
     brief_id = generate_ulid()
     # Keep on-disk folder name 'capsules' to avoid breaking existing tools/fixtures
-    brief_dir = MEMORIES_ROOT / "capsules" / brief_id
+    root = active_memories_root()
+    brief_dir = root / "capsules" / brief_id
     ensure_dir(brief_dir)
     prompt_path = brief_dir / "prompt.txt"
     write_text(prompt_path, prompt_text)
@@ -166,7 +169,7 @@ def build_brief(
         inputs=inputs,
         budgets={"max_chars": max_chars},
         drops=drops,
-        prompt_path=str(prompt_path.relative_to(MEMORIES_ROOT)),
+        prompt_path=str(prompt_path.relative_to(root)),
         prompt_sha256=prompt_sha,
         timestamp=utc_now(),
     )

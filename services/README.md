@@ -21,6 +21,7 @@ Call the `services` CLI through `run.py` (or invoke the module directly) with ex
 python run.py services list
 python run.py services install web --scope system
 python run.py services restart web
+python run.py services update ace-control   # uses sudo when installing system units
 sudo ./services/install_system_service.sh web
 ```
 
@@ -30,6 +31,7 @@ sudo ./services/install_system_service.sh web
 - `services/*.service` — templated systemd unit files synced by the CLI.
 - `services/cli_archiver/` — helper code referenced by service units.
 - `interfaces/cert/` — TLS assets consumed by the web service unit.
+- `%h/.config/ace/env` — optional environment overrides sourced by `ace-control.service` (e.g. `OPENAI_API_KEY`). Ensure it exists before running `services update`.
 
 ## 5. Public surface
 

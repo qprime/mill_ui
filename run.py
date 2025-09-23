@@ -16,6 +16,7 @@ ENTRYPOINTS = {
     "web": "interfaces.app",
     "whisper": "services.whisper.whisper_server",
     "context": "continuum.code_context",
+    "context_cache": "continuum.context_cache",
     "graph": "continuum.project_graph",
     "generate_image": "skills.image_pipeline.generate_image",
     "generate_cam": "skills.cam_generator.runner",

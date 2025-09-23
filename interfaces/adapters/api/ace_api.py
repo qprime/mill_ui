@@ -10,6 +10,12 @@ from ace_control import (
     RunManager,
     RunStatus,
 )
+from ace_control.config_store import (
+    load_budget_config,
+    load_router_config,
+    save_budget_config,
+    save_router_config,
+)
 from ace_control.operate_policy import (
     ALLOWED_VALUES as OPERATE_POLICY_VALUES,
     get_policy as operate_policy_get_map,
@@ -26,13 +32,14 @@ def create_run():
     payload = request.get_json(force=True, silent=True) or {}
     brief_payload = payload.get("brief") or {}
     operate_action = payload.get("operate_action")
+    conversation = payload.get("conversation")
     brief = Brief.from_dict(brief_payload)
     if brief.plan_preview == BriefPlanPreference.AUTO and any(tag.startswith("chat") for tag in brief.tags):
         brief.plan_preview = BriefPlanPreference.SHOW
     if brief.plan_preview == BriefPlanPreference.SHOW and not payload.get("execute", False):
         outline = RunManager.plan_outline(brief)
         return jsonify({"status": "plan_required", "plan_outline": outline}), 202
-    record = _RUN_MANAGER.start_run(brief, operate_action=operate_action)
+    record = _RUN_MANAGER.start_run(brief, operate_action=operate_action, conversation=conversation)
     return jsonify({"run": record.to_dict()})
 
 
@@ -138,6 +145,48 @@ def commit_run(run_id: str):
     except FileNotFoundError as exc:
         return jsonify({"ok": False, "error": "workspace_missing", "details": str(exc)}), 404
     status_code = 200 if result.get("ok") else 409
+    return jsonify(result), status_code
+
+
+@ace_api_bp.post("/runs/<run_id>/stage")
+def stage_run(run_id: str):
+    payload = request.get_json(force=True, silent=True) or {}
+    check_only = bool(payload.get("check_only", False))
+    try:
+        result = _RUN_MANAGER.stage_patch(run_id, check_only=check_only)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": "patch_missing", "details": str(exc)}), 404
+    status_code = 200 if result.get("ok") else 409
+    return jsonify(result), status_code
+
+
+@ace_api_bp.post("/runs/<run_id>/commands")
+def run_commands(run_id: str):
+    payload = request.get_json(force=True, silent=True) or {}
+    dry_run = bool(payload.get("dry_run", False))
+    try:
+        result = _RUN_MANAGER.run_commands(run_id, dry_run=dry_run)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": "workspace_missing", "details": str(exc)}), 404
+    status_code = 200 if result.get("ok") else 500
+    return jsonify(result), status_code
+
+
+@ace_api_bp.post("/runs/<run_id>/tests")
+def run_tests(run_id: str):
+    payload = request.get_json(force=True, silent=True) or {}
+    dry_run = bool(payload.get("dry_run", False))
+    try:
+        result = _RUN_MANAGER.run_tests(run_id, dry_run=dry_run)
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except FileNotFoundError as exc:
+        return jsonify({"ok": False, "error": "workspace_missing", "details": str(exc)}), 404
+    status_code = 200 if result.get("ok") else 500
     return jsonify(result), status_code
 
 
@@ -266,3 +315,33 @@ def replace_machines():
     machines = [MachineProfile.from_dict(item) for item in machines_payload]
     _RUN_MANAGER.machine_registry.replace_all(machines)
     return jsonify({"machines": [m.to_dict() for m in _RUN_MANAGER.machine_registry.all()]})
+
+
+@ace_api_bp.get("/config/router")
+def router_config_index():
+    config, source = load_router_config()
+    return jsonify({"config": config, "source": source})
+
+
+@ace_api_bp.put("/config/router")
+def router_config_update():
+    payload = request.get_json(force=True, silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"error": "invalid_payload", "detail": "Expected JSON object"}), 400
+    config = save_router_config(payload)
+    return jsonify({"config": config})
+
+
+@ace_api_bp.get("/config/budget")
+def budget_config_index():
+    config, source = load_budget_config()
+    return jsonify({"config": config, "source": source})
+
+
+@ace_api_bp.put("/config/budget")
+def budget_config_update():
+    payload = request.get_json(force=True, silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"error": "invalid_payload", "detail": "Expected JSON object"}), 400
+    config = save_budget_config(payload)
+    return jsonify({"config": config})

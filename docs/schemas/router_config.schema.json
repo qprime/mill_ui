@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ACE Router Configuration",
+  "type": "object",
+  "properties": {
+    "task_types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "provider": {"type": "string"},
+          "stream": {"type": "boolean"},
+          "max_tokens": {"type": ["integer", "null"]},
+          "temperature": {"type": ["number", "null"]}
+        },
+        "required": ["provider", "stream"]
+      }
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "codex_cli": {
+          "type": "object",
+          "properties": {
+            "temperature": {"type": "number"},
+            "fallback": {"type": "boolean"}
+          },
+          "required": ["temperature"]
+        },
+        "gpt_api": {
+          "type": "object",
+          "properties": {
+            "model": {"type": "string"},
+            "temperature": {"type": "number"},
+            "max_prompt_tokens": {"type": "integer"},
+            "max_output_tokens": {"type": "integer"}
+          },
+          "required": ["model", "temperature", "max_prompt_tokens", "max_output_tokens"]
+        }
+      },
+      "required": ["codex_cli", "gpt_api"]
+    },
+    "fallback": {
+      "type": "object",
+      "properties": {
+        "attempts": {"type": "integer", "minimum": 0},
+        "order": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["attempts", "order"]
+    }
+  },
+  "required": ["task_types", "providers", "fallback"],
+  "additionalProperties": true
+}
+

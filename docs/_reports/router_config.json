@@ -1,0 +1,55 @@
+{
+  "fallback": {
+    "attempts": 1,
+    "order": [
+      "gpt_api",
+      "codex_cli"
+    ]
+  },
+  "providers": {
+    "codex_cli": {
+      "fallback": true,
+      "temperature": 0.2
+    },
+    "gpt_api": {
+      "max_output_tokens": 16000,
+      "max_prompt_tokens": 500000,
+      "model": "gpt-5",
+      "temperature": 0.2
+    }
+  },
+  "task_types": {
+    "analyze": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "build_large": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "chat": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "patch_small": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "refactor_multi": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "repo_plan": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "report": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "tests": {
+      "provider": "gpt_api",
+      "stream": true
+    }
+  }
+}

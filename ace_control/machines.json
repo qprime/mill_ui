@@ -2,8 +2,8 @@
   {
     "name": "skylink",
     "type": "local",
-    "workspace": "/home/steve/workspaces/cliff_ai",
-    "codex_cmd": "codex run --mode=pro --stdin",
+    "workspace": "/home/squinlan/cliff_ai",
+    "codex_cmd": "/home/squinlan/.vscode-server/extensions/openai.chatgpt-0.4.12-linux-x64/bin/linux-x86_64/codex proto",
     "notes": "primary build box"
   }
 ]

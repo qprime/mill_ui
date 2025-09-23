@@ -8,7 +8,9 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Iterable, List
 
@@ -19,7 +21,8 @@ __all__ = ["api"]
 
 def _systemctl_args(scope: str) -> List[str]:
     if scope == "system":
-        return ["systemctl"]
+        prefix = ["sudo"] if os.geteuid() != 0 else []
+        return prefix + ["systemctl"]
     return ["systemctl", "--user"]
 
 
@@ -31,13 +34,29 @@ def _run_command(args: List[str]) -> int:
 def _copy_unit(service: Service, scope: str) -> Path:
     if service.unit_file is None:
         raise RuntimeError(f"Service '{service.id}' does not define a unit_file")
+    data = service.unit_file.read_text(encoding="utf-8")
     if scope == "system":
         target_dir = Path("/etc/systemd/system")
-    else:
-        target_dir = Path.home() / ".config/systemd/user"
+        target = target_dir / service.unit
+        with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tmp:
+            tmp.write(data)
+            tmp_path = Path(tmp.name)
+        try:
+            subprocess.run(
+                ["sudo", "install", "-d", "-m", "755", str(target_dir)],
+                check=True,
+            )
+            subprocess.run(
+                ["sudo", "install", "-m", "644", str(tmp_path), str(target)],
+                check=True,
+            )
+        finally:
+            tmp_path.unlink(missing_ok=True)
+        return target
+
+    target_dir = Path.home() / ".config/systemd/user"
     target_dir.mkdir(parents=True, exist_ok=True)
     target = target_dir / service.unit
-    data = service.unit_file.read_text(encoding="utf-8")
     target.write_text(data, encoding="utf-8")
     return target
 
@@ -45,6 +64,8 @@ def _copy_unit(service: Service, scope: str) -> Path:
 def _remove_unit(service: Service, scope: str) -> None:
     if scope == "system":
         target = Path("/etc/systemd/system") / service.unit
+        subprocess.run(["sudo", "rm", "-f", str(target)], check=False)
+        return
     else:
         target = Path.home() / ".config/systemd/user" / service.unit
     if target.exists():
@@ -100,6 +121,13 @@ def _uninstall(service: Service, scope: str) -> int:
     return 0
 
 
+def _update(service: Service, scope: str) -> int:
+    rc = _install(service, scope)
+    if rc != 0:
+        return rc
+    return _restart(service, scope)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="services")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -116,6 +144,7 @@ def _parser() -> argparse.ArgumentParser:
         "disable",
         "install",
         "uninstall",
+        "update",
     ]
 
     for name in service_commands:
@@ -159,6 +188,8 @@ def api(argv: List[str] | None = None) -> int:
         return _install(service, scope)
     if args.command == "uninstall":
         return _uninstall(service, scope)
+    if args.command == "update":
+        return _update(service, scope)
 
     return 0
 

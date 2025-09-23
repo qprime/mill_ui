@@ -38,7 +38,18 @@ python run.py services list
 - `python run.py compose_cam <sheet_slug> [--stl]` — generate toolpaths and exports for a sheet layout.
 - `python run.py services <command>` — proxy into `services.cli` for systemd operations.
 - `python run.py tests` — execute curated repo tests via `tools.test_runner`.
+- `python run.py context_bundle --root .` — assemble persona-aware project context bundle.
+- `python run.py watch_context --root .` — watch source and rebuild context bundle on change.
+- `python run.py context_cache --root .` — rebuild deterministic context caches (file tree, deps, symbols, docs, tests).
 - `flask --app interfaces.app --debug run` — exposes the AceControl API surface at `/ace/*` and UI at `/ace/`.
+- `GET/PUT /ace/config/router` — read or update provider routing defaults.
+- `GET/PUT /ace/config/budget` — read or update deterministic context budgets.
+- `POST /ace/runs/<id>/stage` — check and stage the generated patch (logs `stage.log`).
+- `POST /ace/runs/<id>/commands` — execute suggested commands (supports `dry_run`).
+- `POST /ace/runs/<id>/tests` — execute or dry-run suggested tests.
+- Telemetry (NDJSON) is written to `docs/_reports/ace_telemetry.jsonl`; each entry captures run outcomes and follow-up actions.
+- Chat-first UI: `/ace/` defaults to GPT-5 conversational mode with deterministic context; toggle “Context” to promote into full Codex/GPT build workflows.
+- Systemd: unit files now read `%h/.config/ace/env`; create it with `OPENAI_API_KEY=...` and run `python run.py services update ace-control` (or `sudo systemctl daemon-reload && sudo systemctl restart ace-control.service`).
 
 ## 6. Invariants & guardrails
 

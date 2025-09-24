@@ -25,7 +25,7 @@ from .operate_policy import evaluate_command_types
 from .markers import ContextRequest, parse_markers
 from .telemetry import record_run as telemetry_record_run, record_action as telemetry_record_action
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RUNS_ROOT = PROJECT_ROOT / "runs"
 
 
@@ -719,11 +719,10 @@ class RunManager:
 
         messages = [{"role": "system", "content": persona_prompt}]
         if context_system_blocks:
-            messages.append({"role": "system", "content": "Project context:
-
-" + "
-
-".join(context_system_blocks)})
+            messages.append({
+                "role": "system",
+                "content": "Project context:\n\n" + "\n\n".join(context_system_blocks),
+            })
         messages.extend(conversation_messages)
 
         router_client = get_router()
@@ -738,15 +737,10 @@ class RunManager:
             response_text = f"[error] {error_message}"
 
         with log_path.open("a", encoding="utf-8") as handle:
-            handle.write("USER:
-")
-            handle.write(brief.text + "
-
-")
-            handle.write("ASSISTANT:
-")
-            handle.write(response_text + "
-")
+            handle.write("USER:\n")
+            handle.write(brief.text + "\n\n")
+            handle.write("ASSISTANT:\n")
+            handle.write(response_text + "\n")
 
         headline = response_text.splitlines()[0][:160] if response_text else "Chat response"
         conversation_with_reply = conversation_messages + [{"role": "assistant", "content": response_text}]

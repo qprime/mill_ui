@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - dependency optional in tests
     FLASK_AVAILABLE = False
 
-from ace_control import Brief, MachineProfile, MachineRegistry, RunManager, RunStatus
+from skills.ace_control import Brief, MachineProfile, MachineRegistry, RunManager, RunStatus
 from memories.framework import MemoryRegistry
 
 

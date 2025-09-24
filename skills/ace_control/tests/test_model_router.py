@@ -2,15 +2,15 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from ace_control.config_store import save_router_config
-from ace_control.model_router import ModelRouter
+from skills.ace_control.config_store import save_router_config
+from skills.ace_control.model_router import ModelRouter
 
 
 def test_model_router_plan_order():
     with tempfile.TemporaryDirectory() as tmp:
         cache_dir = Path(tmp)
-        with patch("ace_control.config_store._config_dir", return_value=cache_dir), \
-             patch("ace_control.model_router._load_codex_cli_overrides", return_value={}):
+        with patch("skills.ace_control.config_store._config_dir", return_value=cache_dir), \
+             patch("skills.ace_control.model_router._load_codex_cli_overrides", return_value={}):
             custom_config = {
                 "task_types": {
                     "patch_small": {"provider": "gpt_api", "stream": True},

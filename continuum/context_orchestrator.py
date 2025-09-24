@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from ace_control.config_store import load_budget_config
+from skills.ace_control.config_store import load_budget_config
 from continuum.context_cache import (
     CACHE_FILENAMES,
     ContextBudget,

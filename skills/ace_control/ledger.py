@@ -11,7 +11,7 @@ from memories.framework.models import Actor, Memory, MemoryContent, MemoryMetada
 
 from .models import RunRecord, RunStatus, now_ts
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _summary_json(run: RunRecord, run_dir: Path) -> Dict[str, object]:

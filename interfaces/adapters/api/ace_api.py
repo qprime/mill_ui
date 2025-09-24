@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
 
-from ace_control import (
+from skills.ace_control import (
     Brief,
     BriefPlanPreference,
     MachineProfile,
@@ -10,13 +10,13 @@ from ace_control import (
     RunManager,
     RunStatus,
 )
-from ace_control.config_store import (
+from skills.ace_control.config_store import (
     load_budget_config,
     load_router_config,
     save_budget_config,
     save_router_config,
 )
-from ace_control.operate_policy import (
+from skills.ace_control.operate_policy import (
     ALLOWED_VALUES as OPERATE_POLICY_VALUES,
     get_policy as operate_policy_get_map,
     known_types as operate_policy_known_types,

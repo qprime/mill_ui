@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MACHINES_PATH = PROJECT_ROOT / "ace_control" / "machines.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_MACHINES_PATH = PROJECT_ROOT / "skills" / "ace_control" / "machines.json"
 
 
 @dataclass

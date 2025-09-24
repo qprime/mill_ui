@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-POLICY_PATH = PROJECT_ROOT / "ace_control" / "operate_policy.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+POLICY_PATH = PROJECT_ROOT / "skills" / "ace_control" / "operate_policy.json"
 ALLOWED_VALUES = {"accept", "verify", "escalate"}
 DEFAULT_VALUE = "accept"
 DEFAULT_KNOWN_TYPES = (

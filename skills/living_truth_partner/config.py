@@ -49,7 +49,7 @@ class Config:
 
     @staticmethod
     def load() -> Config:
-        root = Path(os.getenv("LTP_ROOT", "living_docs")).resolve()
+        root = Path(os.getenv("LTP_ROOT", "skills/living_truth_partner/living_docs")).resolve()
         docs = root / "docs"
         artifacts = root / "artifacts"
         templates = root / "templates"

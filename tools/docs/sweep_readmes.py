@@ -59,7 +59,7 @@ README_SPECS: Dict[str, ReadmeSpec] = {
         inputs=[
             "`memories/index.jsonl` — append-only memory ledger secured by SHA-256 chain.",
             "`memories/cam_projects/` — project manifests, sheet layouts, and generated CAM artifacts.",
-            "`living_docs/` — LTD source docs, export history, and persona prompts.",
+            "`skills/living_truth_partner/living_docs/` — LTD source docs, export history, and persona prompts.",
             "`services/service_registry.json` — declared systemd units consumed by the services CLI.",
             "`docs/_reports/readme_sweep.json` — machine-readable report emitted by the README sweeper.",
         ],
@@ -249,10 +249,10 @@ README_SPECS: Dict[str, ReadmeSpec] = {
             ("interfaces/templates/base.html.jinja", "Base layout that loads shared assets."),
         ],
     ),
-    "living_docs/README.md": ReadmeSpec(
-        path="living_docs/README.md",
+    "skills/living_truth_partner/living_docs/README.md": ReadmeSpec(
+        path="skills/living_truth_partner/living_docs/README.md",
         title="Living Docs",
-        owner="living_docs/",
+        owner="skills/living_truth_partner/living_docs/",
         what=dedent("""
             Living Docs orchestrates the Living Truth Partner workflow for LTD documents.
             It manages slugs, artifacts, prompts, and exports for AI-guided writing sessions.
@@ -269,9 +269,9 @@ README_SPECS: Dict[str, ReadmeSpec] = {
             "python run.py ltp revise test_document --apply",
         ],
         inputs=[
-            "`living_docs/docs/<slug>.ltd.md` — ground-truth LTD source documents.",
-            "`living_docs/artifacts/<slug>/` — summaries, prompts, history, and exports per document.",
-            "`living_docs/templates/` — Pandoc templates for PDF/DOCX outputs.",
+            "`skills/living_truth_partner/living_docs/docs/<slug>.ltd.md` — ground-truth LTD source documents.",
+            "`skills/living_truth_partner/living_docs/artifacts/<slug>/` — summaries, prompts, history, and exports per document.",
+            "`skills/living_truth_partner/living_docs/templates/` — Pandoc templates for PDF/DOCX outputs.",
             "`skills/living_truth_partner/config.py` — config wiring storage locations for the CLI.",
         ],
         surface=[
@@ -282,22 +282,22 @@ README_SPECS: Dict[str, ReadmeSpec] = {
         ],
         invariants=[
             "Slugs are normalized to lowercase kebab-case; the CLI enforces naming.",
-            "Artifacts live under `living_docs/artifacts/<slug>` and should be committed for audit trails.",
+            "Artifacts live under `skills/living_truth_partner/living_docs/artifacts/<slug>` and should be committed for audit trails.",
             "Audio ingestion (voice capture) requires explicit file paths; recording is optional.",
             "Exports must remain reproducible offline; avoid network lookups in exporters.",
         ],
         extensions=[
             "Add export formats by extending `skills.living_truth_partner.export_doc`.",
             "Introduce additional guardrails in `skills.living_truth_partner.guardrails`.",
-            "Seed new templates under `living_docs/templates/` and reference them in exporters.",
+            "Seed new templates under `skills/living_truth_partner/living_docs/templates/` and reference them in exporters.",
             "Document new CLI verbs here and teach the sweeper how to validate them.",
         ],
         ai_reading_order=[
             ("skills/living_truth_partner/cli.py", "CLI verbs and argparse surface for the workflow."),
             ("skills/living_truth_partner/project_store.py", "Slug normalization and storage layout."),
-            ("living_docs/docs/test_document.ltd.md", "Sample LTD source structure."),
-            ("living_docs/artifacts/test_document/context_summary.json", "Distilled context payload for the sample."),
-            ("living_docs/templates/pdf/default.latex", "Pandoc template used for PDF exports."),
+            ("skills/living_truth_partner/living_docs/docs/test_document.ltd.md", "Sample LTD source structure."),
+            ("skills/living_truth_partner/living_docs/artifacts/test_document/context_summary.json", "Distilled context payload for the sample."),
+            ("skills/living_truth_partner/living_docs/templates/pdf/default.latex", "Pandoc template used for PDF exports."),
         ],
     ),
     "memories/README.md": ReadmeSpec(

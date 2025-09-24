@@ -28,7 +28,7 @@ python run.py services list
 
 - `memories/index.jsonl` — append-only memory ledger secured by SHA-256 chain.
 - `memories/cam_projects/` — project manifests, sheet layouts, and generated CAM artifacts.
-- `living_docs/` — LTD source docs, export history, and persona prompts.
+- `skills/living_truth_partner/living_docs/` — LTD source docs, export history, and persona prompts.
 - `services/service_registry.json` — declared systemd units consumed by the services CLI.
 - `docs/_reports/readme_sweep.json` — machine-readable report emitted by the README sweeper.
 

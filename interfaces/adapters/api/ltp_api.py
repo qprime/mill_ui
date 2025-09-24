@@ -413,7 +413,7 @@ def compose_brief(slug: str):
     sections = data.get("sections") or []
     acceptance = summary.get("acceptance_criteria", [])
     notes = str(data.get("notes", "")).strip()
-    doc_path = f"living_docs/docs/{store.slug}.ltd.md"
+    doc_path = f"skills/living_truth_partner/living_docs/docs/{store.slug}.ltd.md"
     lines = [
         f"Document: {summary.get('title') or store.slug}",
         f"Path: {doc_path}",

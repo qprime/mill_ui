@@ -1,6 +1,6 @@
 # Living Docs
 
-Owner path: living_docs/
+Owner path: skills/living_truth_partner/living_docs/
 
 ## 1. What this is
 
@@ -25,9 +25,9 @@ python run.py ltp revise test_document --apply
 
 ## 4. Inputs & outputs (for AI & humans)
 
-- `living_docs/docs/<slug>.ltd.md` — ground-truth LTD source documents.
-- `living_docs/artifacts/<slug>/` — summaries, prompts, history, and exports per document.
-- `living_docs/templates/` — Pandoc templates for PDF/DOCX outputs.
+- `skills/living_truth_partner/living_docs/docs/<slug>.ltd.md` — ground-truth LTD source documents.
+- `skills/living_truth_partner/living_docs/artifacts/<slug>/` — summaries, prompts, history, and exports per document.
+- `skills/living_truth_partner/living_docs/templates/` — Pandoc templates for PDF/DOCX outputs.
 - `skills/living_truth_partner/config.py` — config wiring storage locations for the CLI.
 
 ## 5. Public surface
@@ -40,7 +40,7 @@ python run.py ltp revise test_document --apply
 ## 6. Invariants & guardrails
 
 - Slugs are normalized to lowercase kebab-case; the CLI enforces naming.
-- Artifacts live under `living_docs/artifacts/<slug>` and should be committed for audit trails.
+- Artifacts live under `skills/living_truth_partner/living_docs/artifacts/<slug>` and should be committed for audit trails.
 - Audio ingestion (voice capture) requires explicit file paths; recording is optional.
 - Exports must remain reproducible offline; avoid network lookups in exporters.
 
@@ -48,13 +48,13 @@ python run.py ltp revise test_document --apply
 
 - Add export formats by extending `skills.living_truth_partner.export_doc`.
 - Introduce additional guardrails in `skills.living_truth_partner.guardrails`.
-- Seed new templates under `living_docs/templates/` and reference them in exporters.
+- Seed new templates under `skills/living_truth_partner/living_docs/templates/` and reference them in exporters.
 - Document new CLI verbs here and teach the sweeper how to validate them.
 
 ## 8. AI reading order
 
 - `skills/living_truth_partner/cli.py` — CLI verbs and argparse surface for the workflow.
 - `skills/living_truth_partner/project_store.py` — Slug normalization and storage layout.
-- `living_docs/docs/test_document.ltd.md` — Sample LTD source structure.
-- `living_docs/artifacts/test_document/context_summary.json` — Distilled context payload for the sample.
-- `living_docs/templates/pdf/default.latex` — Pandoc template used for PDF exports.
+- `skills/living_truth_partner/living_docs/docs/test_document.ltd.md` — Sample LTD source structure.
+- `skills/living_truth_partner/living_docs/artifacts/test_document/context_summary.json` — Distilled context payload for the sample.
+- `skills/living_truth_partner/living_docs/templates/pdf/default.latex` — Pandoc template used for PDF exports.

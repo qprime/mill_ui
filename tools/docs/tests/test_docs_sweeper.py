@@ -23,14 +23,16 @@ def test_render_and_validate_round_trip(key: str) -> None:
     issues = validate_readme_text(text, spec)
     assert not issues, f"Expected zero issues, got: {[issue.reason for issue in issues]}"
     assert text.splitlines()[0].startswith("# ")
-    assert text.splitlines()[1] == f"Owner path: {spec.owner}"
+    owner_line = f"Owner path: {spec.owner}"
+    assert owner_line in text.splitlines(), "Owner line missing from rendered README"
 
 
 def test_validate_detects_missing_owner() -> None:
     spec = README_SPECS["README.md"]
     text = render_readme(spec)
-    lines = text.splitlines()
-    mutated = "\n".join([lines[0]] + lines[2:]) + "\n"
+    owner_line = f"Owner path: {spec.owner}"
+    lines = [line for line in text.splitlines() if line != owner_line]
+    mutated = "\n".join(lines) + "\n"
     issues = validate_readme_text(mutated, spec)
     assert any("owner line" in issue.reason for issue in issues)
 

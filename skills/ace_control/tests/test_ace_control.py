@@ -88,7 +88,7 @@ class AceControlRunManagerTests(unittest.TestCase):
                 return DummyProc(stdout="pushed\n", returncode=0)
             return DummyProc()
 
-        with patch("ace_control.runs.subprocess.run", side_effect=fake_run):
+        with patch("skills.ace_control.runs.subprocess.run", side_effect=fake_run):
             result = self.manager.push_run(record.id)
 
         self.assertTrue(result["ok"])
@@ -106,7 +106,7 @@ class AceControlRunManagerTests(unittest.TestCase):
         def failing_run(cmd, capture_output=False, text=False, cwd=None, **kwargs):
             return DummyProc(stdout="ignored", stderr="boom", returncode=1)
 
-        with patch("ace_control.runs.subprocess.run", side_effect=failing_run):
+        with patch("skills.ace_control.runs.subprocess.run", side_effect=failing_run):
             brief = Brief.from_dict({
                 "mode": "operate",
                 "text": "echo 'hi'",
@@ -153,9 +153,9 @@ class AceControlRunManagerTests(unittest.TestCase):
                 "tests": {},
             }
         }
-        with patch("ace_control.runs.ModelRouter.plan_for", return_value=[plan]):
-            with patch("ace_control.runs.get_router", return_value=dummy_router):
-                with patch("ace_control.runs.assemble_context", return_value=fake_context):
+        with patch("skills.ace_control.runs.ModelRouter.plan_for", return_value=[plan]):
+            with patch("skills.ace_control.runs.get_router", return_value=dummy_router):
+                with patch("skills.ace_control.runs.assemble_context", return_value=fake_context):
                     record = self.manager.start_run(brief)
 
         self.assertEqual(record.status, RunStatus.SUCCEEDED)
@@ -314,7 +314,7 @@ class AceControlAPITests(unittest.TestCase):
                 return DummyProc(stdout=" M sample.py\n")
             return DummyProc()
 
-        with patch("ace_control.runs.subprocess.run", side_effect=fake_run):
+        with patch("skills.ace_control.runs.subprocess.run", side_effect=fake_run):
             resp = self.client.post(f"/ace/runs/{record.id}/stage", json={})
 
         self.assertEqual(resp.status_code, 200)
@@ -352,7 +352,7 @@ class AceControlAPITests(unittest.TestCase):
                 return DummyProc(stdout="abc123\n")
             return DummyProc(stdout="done\n")
 
-        with patch("ace_control.runs.subprocess.run", side_effect=fake_run):
+        with patch("skills.ace_control.runs.subprocess.run", side_effect=fake_run):
             resp = self.client.post(f"/ace/runs/{record.id}/commands", json={"dry_run": True})
 
         self.assertEqual(resp.status_code, 200)
@@ -363,7 +363,7 @@ class AceControlAPITests(unittest.TestCase):
 
     def test_router_config_roundtrip(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            with patch("ace_control.config_store._config_dir", return_value=Path(tmp)):
+            with patch("skills.ace_control.config_store._config_dir", return_value=Path(tmp)):
                 response = self.client.get("/ace/config/router")
                 self.assertEqual(response.status_code, 200)
                 payload = response.get_json()
@@ -385,7 +385,7 @@ class AceControlAPITests(unittest.TestCase):
 
     def test_budget_config_roundtrip(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            with patch("ace_control.config_store._config_dir", return_value=Path(tmp)):
+            with patch("skills.ace_control.config_store._config_dir", return_value=Path(tmp)):
                 response = self.client.get("/ace/config/budget")
                 self.assertEqual(response.status_code, 200)
                 payload = response.get_json()

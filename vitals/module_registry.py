@@ -20,6 +20,7 @@ TOP_LEVEL_MODULES = (
     "services",
     "skills",
     "memories",
+    "tools",
 )
 
 

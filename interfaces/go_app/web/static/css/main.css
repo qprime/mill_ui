@@ -1,0 +1,22 @@
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(14, 165, 233, 0.6);
+  outline-offset: 2px;
+}
+
+.htmx-request .htmx-indicator {
+  display: inline-flex !important;
+}
+
+.htmx-indicator {
+  display: none;
+}

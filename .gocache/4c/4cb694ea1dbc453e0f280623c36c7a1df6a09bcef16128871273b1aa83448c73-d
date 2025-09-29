@@ -1,0 +1,17 @@
+# test log
+getenv TMPDIR
+stat /tmp/TestVersionLatestImage2093587556/001/input
+stat /tmp/TestVersionLatestImage2093587556/001
+open /tmp/TestVersionLatestImage2093587556/001/input/image.png
+open /tmp/TestVersionLatestImage2093587556/001/input/image.json
+stat /tmp/TestVersionLatestImage2093587556/001/input/image.png
+stat /tmp/TestVersionLatestImage2093587556/001/input/image-20250929-185345.png
+open /tmp/TestVersionLatestImage2093587556/001/input/image-20250929-185345.png
+open /tmp/TestVersionLatestImage2093587556/001/input/image.png
+stat /tmp/TestVersionLatestImage2093587556/001/input/image-20250929-185345.png
+open /tmp/TestVersionLatestImage2093587556/001/input/image.json
+open /tmp/TestVersionLatestImage2093587556/001/input/image.json.tmp
+stat /tmp/TestVersionLatestImage2093587556/001/input/image.json
+stat /tmp/TestVersionLatestImage2093587556/001/input/image.png
+open /tmp/TestVersionLatestImage2093587556/001/input/image.json
+open /tmp

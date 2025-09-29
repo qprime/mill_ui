@@ -41,7 +41,6 @@ python run.py services list
 - `python run.py context_bundle --root .` — assemble persona-aware project context bundle.
 - `python run.py watch_context --root .` — watch source and rebuild context bundle on change.
 - `python run.py context_cache --root .` — rebuild deterministic context caches (file tree, deps, symbols, docs, tests).
-  (AceControl and related endpoints have been removed in favor of a stateless chat flow.)
 
 ## 6. Invariants & guardrails
 

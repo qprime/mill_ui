@@ -41,13 +41,6 @@
       "unit": "cliff-cli-archiver.service",
       "unit_file": "services/cliff-cli-archiver.service",
       "scope": "system"
-    },
-    {
-      "id": "ace-control",
-      "description": "AceControl web interface",
-      "unit": "ace-control.service",
-      "unit_file": "services/ace-control.service",
-      "scope": "system"
     }
   ]
 }

@@ -55,7 +55,6 @@ python -m interfaces.app
 
 - `interfaces/app.py` — Flask app factory and TLS runner.
 - `interfaces/app_registry.py` — Central manifest loader wiring modules.
-- (AceControl has been removed.)
 - `interfaces/apps/chat/manifest.py` — Example chat blueprint registration.
 - `interfaces/adapters/api/chat_api.py` — JSON API surface for chat traffic.
 - `interfaces/templates/base.html.jinja` — Base layout that loads shared assets.

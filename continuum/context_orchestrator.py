@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-# Local default budget loading to avoid ACE dependency
+# Local default budget loading to avoid external config dependencies
 def _load_default_budget_config() -> tuple[dict, str]:
     return ({
         "focus_history": 5,

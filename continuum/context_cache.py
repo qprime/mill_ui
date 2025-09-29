@@ -411,7 +411,7 @@ def select_context(
 def main(argv: Optional[List[str]] = None) -> int:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Build deterministic ACE context caches")
+    parser = argparse.ArgumentParser(description="Build deterministic context caches")
     parser.add_argument("--root", default=".")
     parser.add_argument("--show", action="store_true", help="Print written cache paths")
     args = parser.parse_args(argv)

@@ -1,0 +1,10 @@
+# test log
+getenv TMPDIR
+stat /tmp/TestLoadOpenAIKeyFromACE2728675568/001/.config/ace
+stat /tmp/TestLoadOpenAIKeyFromACE2728675568/001/.config
+stat /tmp/TestLoadOpenAIKeyFromACE2728675568/001
+open /tmp/TestLoadOpenAIKeyFromACE2728675568/001/.config/ace/env
+getenv HOME
+getenv HOME
+open /tmp/TestLoadOpenAIKeyFromACE2728675568/001/.config/ace/env
+open /tmp

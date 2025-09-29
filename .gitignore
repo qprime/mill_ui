@@ -10,6 +10,11 @@ project_structure.txt
 memory_tree.txt
 context_dump.txt
 **/code_context.txt
+docs/_reports/deps_graph.json
+docs/_reports/doc_map.json
+docs/_reports/file_tree.json
+docs/_reports/symbol_table.json
+docs/_reports/test_map.json
 
 # System and editor junk
 .DS_Store

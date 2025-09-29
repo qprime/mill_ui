@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import time
 import uuid
+import logging
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Optional, Tuple
@@ -26,6 +27,7 @@ from .markers import ContextRequest, parse_markers
 from .telemetry import record_run as telemetry_record_run, record_action as telemetry_record_action
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+logger = logging.getLogger(__name__)
 RUNS_ROOT = PROJECT_ROOT / "runs"
 
 
@@ -653,6 +655,19 @@ class RunManager:
         primary_plan = plans[0] if plans else None
         provider_name = primary_plan.name if primary_plan else "gpt_api"
         model_name = primary_plan.model if primary_plan and primary_plan.model else "gpt-5"
+        # Allow explicit model override from the brief for chat
+        if brief.model:
+            try:
+                model_name = str(brief.model)
+            except Exception:
+                pass
+        logger.info(
+            "chat run %s using provider=%s model=%s tags=%s",
+            record.id,
+            provider_name,
+            model_name,
+            record.tags,
+        )
 
         prompt_payload: Dict[str, object] = {
             "brief_text": brief.text,

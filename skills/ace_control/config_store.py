@@ -39,10 +39,22 @@ DEFAULT_ROUTER_CONFIG: Dict[str, object] = {
             "max_prompt_tokens": 500000,
             "max_output_tokens": 16000,
         },
+        "gpt_api_mini": {
+            "model": "gpt-5-mini",
+            "temperature": 0.2,
+            "max_prompt_tokens": 120000,
+            "max_output_tokens": 8000,
+        },
+        "gpt_api_nano": {
+            "model": "gpt-5-nano",
+            "temperature": 0.2,
+            "max_prompt_tokens": 60000,
+            "max_output_tokens": 4000,
+        },
     },
     "fallback": {
         "attempts": 1,
-        "order": ["gpt_api", "codex_cli"],
+        "order": ["gpt_api", "gpt_api_mini", "gpt_api_nano", "codex_cli"],
     },
 }
 

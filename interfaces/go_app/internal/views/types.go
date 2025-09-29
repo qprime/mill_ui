@@ -13,6 +13,7 @@ type Run struct {
 	Artifacts     []string
 	Notes         string
 	Tags          []string
+	Conversation  []ChatMessage
 }
 
 type Machine struct {
@@ -35,4 +36,21 @@ type PageData struct {
 	Machines     []Machine
 	Policy       []PolicyEntry
 	ErrorMessage string
+	// Chat configuration
+	SelectedModel string
+	ModelOptions  []ModelOption
+	Thread        string
+	ContinueRunID string
+}
+
+type ChatMessage struct {
+	Role    string
+	Content string
+}
+
+type ModelOption struct {
+	Value    string
+	Label    string
+	Group    string
+	Disabled bool
 }

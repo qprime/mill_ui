@@ -1,0 +1,524 @@
+=== FILE: interfaces/go_app/cmd/server/main.go ===
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
+
+	httpserver "github.com/squinlan/cliff_ai/interfaces/go_app/internal/http"
+)
+
+func main() {
+	backendURL := os.Getenv("ACE_BACKEND_URL")
+	if backendURL == "" {
+		backendURL = "https://127.0.0.1:8080/ace"
+	}
+
+	client := httpserver.NewClient(backendURL, backendTimeout())
+	server := httpserver.NewServer(client)
+
+	h := server.Routes()
+
+	httpServer := &http.Server{
+		Addr:    addr(),
+		Handler: h,
+	}
+
+	go func() {
+		certFile, keyFile := certPaths()
+		log.Printf("[go-ace] listening (HTTPS) on %s", httpServer.Addr)
+		if err := httpServer.ListenAndServeTLS(certFile, keyFile); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen (tls): %v", err)
+		}
+	}()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	<-sigCh
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Printf("shutdown error: %v", err)
+	}
+}
+
+func addr() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8090"
+	}
+	if port[0] != ':' {
+		return ":" + port
+	}
+	return port
+}
+
+func backendTimeout() time.Duration {
+	if raw := os.Getenv("ACE_BACKEND_TIMEOUT"); raw != "" {
+		if d, err := time.ParseDuration(raw); err == nil {
+			if d > 0 {
+				return d
+			}
+		}
+	}
+	return 60 * time.Second
+}
+
+// certPaths resolves TLS certificate and key locations.
+// Order of precedence:
+//  1. ACE_TLS_CERT and ACE_TLS_KEY env vars
+//  2. interfaces/cert/web_server.{crt,key} relative to cwd
+//  3. ../cert/web_server.{crt,key} relative to cwd (common when running from interfaces/go_app)
+func certPaths() (string, string) {
+	cert := os.Getenv("ACE_TLS_CERT")
+	key := os.Getenv("ACE_TLS_KEY")
+	if cert != "" && key != "" {
+		return cert, key
+	}
+	candidates := [][2]string{
+		{"interfaces/cert/web_server.crt", "interfaces/cert/web_server.key"},
+		{filepath.Clean("../cert/web_server.crt"), filepath.Clean("../cert/web_server.key")},
+	}
+	for _, pair := range candidates {
+		if fileExists(pair[0]) && fileExists(pair[1]) {
+			return pair[0], pair[1]
+		}
+	}
+	// Fallback: instruct user via log and use placeholders (this will fail fast)
+	log.Printf("TLS certs not found; set ACE_TLS_CERT and ACE_TLS_KEY or run from repo root")
+	return "interfaces/cert/web_server.crt", "interfaces/cert/web_server.key"
+}
+
+func fileExists(p string) bool {
+	if p == "" {
+		return false
+	}
+	if st, err := os.Stat(p); err == nil && !st.IsDir() {
+		return true
+	}
+	return false
+}
+
+=== FILE: interfaces/go_app/Makefile ===
+.PHONY: build css watch-css run
+
+# Defaults (can be overridden on the CLI)
+PORT ?= 8090
+ACE_BACKEND_URL ?= https://127.0.0.1:8080/ace
+# For local self-signed Flask certs, allow insecure backend TLS (client-side).
+ACE_TLS_INSECURE ?= 1
+
+build:
+	go build ./cmd/server
+
+css:
+	npx tailwindcss -c tailwind.config.js -i ./web/static/css/input.css -o ./web/static/css/main.css --minify
+
+watch-css:
+	npx tailwindcss -c tailwind.config.js -i ./web/static/css/input.css -o ./web/static/css/main.css --watch
+
+run:
+	PORT=$$PORT ACE_BACKEND_URL=$$ACE_BACKEND_URL ACE_TLS_INSECURE=$$ACE_TLS_INSECURE \
+		go run ./cmd/server
+
+=== FILE: interfaces/go_app/internal/http/server.go ===
+package httpserver
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"time"
+)
+
+type Server struct {
+	client *Client
+}
+
+func NewServer(client *Client) *Server {
+	return &Server{client: client}
+}
+
+func (s *Server) Routes() http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/static/", staticHandler())
+	mux.HandleFunc("/ace/hx/runs", s.handleRunList)
+	mux.HandleFunc("/ace/hx/runs/", s.handleRunDetail)
+	mux.HandleFunc("/ace/hx/machines", s.handleMachineList)
+	mux.HandleFunc("/ace/hx/policy", s.handlePolicy)
+	mux.HandleFunc("/ace/hx/chat", s.handleChat)
+	mux.HandleFunc("/ace/sse/", s.handleSSE)
+	mux.HandleFunc("/ace/hx/new", s.handleNewChatForm)
+	mux.HandleFunc("/ace", s.handleAce)
+	mux.HandleFunc("/", redirect("/ace"))
+	return loggingMiddleware(mux)
+}
+
+func (s *Server) withTimeout(r *http.Request) (context.Context, context.CancelFunc) {
+	ctx := r.Context()
+	deadline := 30 * time.Second
+	if r.Method == http.MethodPost {
+		deadline = 45 * time.Second
+	}
+	return context.WithTimeout(ctx, deadline)
+}
+
+func redirect(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, path, http.StatusFound)
+	}
+}
+
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+	bytes  int
+}
+
+func (sw *statusWriter) WriteHeader(code int) {
+	sw.status = code
+	sw.ResponseWriter.WriteHeader(code)
+}
+
+func (sw *statusWriter) Write(b []byte) (int, error) {
+	if sw.status == 0 {
+		sw.status = http.StatusOK
+	}
+	n, err := sw.ResponseWriter.Write(b)
+	sw.bytes += n
+	return n, err
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		sw := &statusWriter{ResponseWriter: w}
+		next.ServeHTTP(sw, r)
+		dur := time.Since(start)
+		log.Printf("%s %s -> %d (%dB) %s", r.Method, r.URL.Path, sw.status, sw.bytes, dur)
+	})
+}
+
+=== FILE: interfaces/go_app/internal/http/handlers.go ===
+<<CONTENTS OMITTED FOR BREVITY IN THIS NOTE>>
+Please refer to the repository file for full content.
+
+=== FILE: interfaces/go_app/internal/http/client.go ===
+<<CONTENTS OMITTED FOR BREVITY IN THIS NOTE>>
+Please refer to the repository file for full content.
+
+=== FILE: interfaces/go_app/internal/views/components.go ===
+<<CONTENTS OMITTED FOR BREVITY IN THIS NOTE>>
+Please refer to the repository file for full content.
+
+=== FILE: interfaces/go_app/internal/views/types.go ===
+package views
+
+type Run struct {
+	ID            string
+	Mode          string
+	Status        string
+	Title         string
+	UpdatedLabel  string
+	ResultSummary string
+	PlanSummary   string
+	Commands      []string
+	Tests         []string
+	Artifacts     []string
+	Notes         string
+	Tags          []string
+	Conversation  []ChatMessage
+}
+
+type Machine struct {
+	Name      string
+	Type      string
+	Host      string
+	Workspace string
+	Notes     string
+}
+
+type PolicyEntry struct {
+	Key   string
+	Value string
+}
+
+type PageData struct {
+	Title        string
+	Runs         []Run
+	CurrentRun   *Run
+	Machines     []Machine
+	Policy       []PolicyEntry
+	ErrorMessage string
+	// Chat configuration
+	SelectedModel string
+	ModelOptions  []ModelOption
+	Thread        string
+	ContinueRunID string
+}
+
+type ChatMessage struct {
+	Role    string
+	Content string
+}
+
+type ModelOption struct {
+	Value    string
+	Label    string
+	Group    string
+	Disabled bool
+}
+
+=== FILE: skills/ace_control/runs.py ===
+<<CONTENTS OMITTED FOR BREVITY IN THIS NOTE>>
+Key change: logs provider/model used for each chat run and respects brief.model override.
+
+=== FILE: skills/ace_control/config_store.py ===
+"""Configuration store for ACE routing and budgeting settings."""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+from typing import Dict, Tuple
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+CONFIG_ENV_VAR = "ACE_CONFIG_DIR"
+DEFAULT_CONFIG_DIR = PROJECT_ROOT / "docs" / "_reports"
+
+ROUTER_FILENAME = "router_config.json"
+BUDGET_FILENAME = "ace_budgets.json"
+
+
+DEFAULT_ROUTER_CONFIG: Dict[str, object] = {
+    "task_types": {
+        "build_large": {"provider": "codex_cli", "stream": True},
+        "refactor_multi": {"provider": "codex_cli", "stream": True},
+        "repo_plan": {"provider": "codex_cli", "stream": True},
+        "chat": {"provider": "gpt_api", "stream": True},
+        "patch_small": {"provider": "gpt_api", "stream": True},
+        "analyze": {"provider": "gpt_api", "stream": True},
+        "report": {"provider": "gpt_api", "stream": True},
+        "tests": {"provider": "gpt_api", "stream": True},
+    },
+    "providers": {
+        "codex_cli": {
+            "temperature": 0.2,
+            "fallback": True,
+        },
+        "gpt_api": {
+            "model": "gpt-5",
+            "temperature": 0.2,
+            "max_prompt_tokens": 500000,
+            "max_output_tokens": 16000,
+        },
+        "gpt_api_mini": {
+            "model": "gpt-5-mini",
+            "temperature": 0.2,
+            "max_prompt_tokens": 120000,
+            "max_output_tokens": 8000,
+        },
+        "gpt_api_nano": {
+            "model": "gpt-5-nano",
+            "temperature": 0.2,
+            "max_prompt_tokens": 60000,
+            "max_output_tokens": 4000,
+        },
+    },
+    "fallback": {
+        "attempts": 1,
+        "order": ["gpt_api", "gpt_api_mini", "gpt_api_nano", "codex_cli"],
+    },
+}
+
+
+DEFAULT_BUDGET_CONFIG: Dict[str, object] = {
+    "focus_history": 5,
+    "direct_files_max": 12,
+    "neighbors_depth": 2,
+    "neighbors_per_file": 3,
+    "neighbor_signature_budget": 500,
+    "docs_tests_budget": 2000,
+    "gpt_api": {
+        "max_prompt_tokens": 60000,
+        "max_output_tokens": 4000,
+    },
+    "codex_cli": {
+        "max_prompt_tokens": None,
+        "max_output_tokens": None,
+    },
+}
+
+
+def _config_dir() -> Path:
+    override = os.getenv(CONFIG_ENV_VAR)
+    if override:
+        path = Path(override).expanduser()
+    else:
+        path = DEFAULT_CONFIG_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _config_path(filename: str) -> Path:
+    return _config_dir() / filename
+
+
+def _load_config(path: Path, defaults: Dict[str, object]) -> Tuple[Dict[str, object], str]:
+    if path.exists():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            merged = _merge_with_defaults(data, defaults)
+            return merged, "file"
+        except json.JSONDecodeError:
+            pass
+    return defaults.copy(), "default"
+
+
+def _save_config(path: Path, payload: Dict[str, object], defaults: Dict[str, object]) -> Dict[str, object]:
+    merged = _merge_with_defaults(payload, defaults)
+    path.write_text(json.dumps(merged, indent=2, sort_keys=True), encoding="utf-8")
+    return merged
+
+
+def _merge_with_defaults(payload: Dict[str, object], defaults: Dict[str, object]) -> Dict[str, object]:
+    """Merge payload onto defaults, preserving default keys and types."""
+    merged = {}
+    for key, default_value in defaults.items():
+        if key not in payload:
+            merged[key] = default_value
+            continue
+        value = payload[key]
+        if isinstance(default_value, dict) and isinstance(value, dict):
+            merged[key] = _merge_with_defaults(value, default_value)
+        else:
+            merged[key] = value
+    # include any additional keys present in payload
+    for key, value in payload.items():
+        if key not in merged:
+            merged[key] = value
+    return merged
+
+
+def load_router_config() -> Tuple[Dict[str, object], str]:
+    path = _config_path(ROUTER_FILENAME)
+    return _load_config(path, DEFAULT_ROUTER_CONFIG)
+
+
+def save_router_config(payload: Dict[str, object]) -> Dict[str, object]:
+    path = _config_path(ROUTER_FILENAME)
+    return _save_config(path, payload, DEFAULT_ROUTER_CONFIG)
+
+
+def load_budget_config() -> Tuple[Dict[str, object], str]:
+    path = _config_path(BUDGET_FILENAME)
+    return _load_config(path, DEFAULT_BUDGET_CONFIG)
+
+
+def save_budget_config(payload: Dict[str, object]) -> Dict[str, object]:
+    path = _config_path(BUDGET_FILENAME)
+    return _save_config(path, payload, DEFAULT_BUDGET_CONFIG)
+
+=== FILE: docs/_reports/router_config.json ===
+{
+  "fallback": {
+    "attempts": 3,
+    "order": [
+      "gpt_api",
+      "gpt_api_mini",
+      "gpt_api_nano",
+      "codex_cli"
+    ]
+  },
+  "providers": {
+    "codex_cli": {
+      "fallback": true,
+      "temperature": 0.2
+    },
+    "gpt_api": {
+      "max_output_tokens": 16000,
+      "max_prompt_tokens": 500000,
+      "model": "gpt-5",
+      "temperature": 0.2
+    },
+    "gpt_api_mini": {
+      "max_output_tokens": 8000,
+      "max_prompt_tokens": 120000,
+      "model": "gpt-5-mini",
+      "temperature": 0.2
+    },
+    "gpt_api_nano": {
+      "max_output_tokens": 4000,
+      "max_prompt_tokens": 60000,
+      "model": "gpt-5-nano",
+      "temperature": 0.2
+    }
+  },
+  "task_types": {
+    "analyze": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "build_large": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "chat": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "patch_small": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "refactor_multi": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "repo_plan": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "report": {
+      "provider": "gpt_api",
+      "stream": true
+    },
+    "tests": {
+      "provider": "gpt_api",
+      "stream": true
+    }
+  }
+}
+
+=== FILE: interfaces/app.py ===
+from __future__ import annotations
+from flask import Flask
+from .app_registry import register_all_apps
+
+def create_app() -> Flask:
+    app = Flask(__name__, template_folder="templates", static_folder="static")
+    register_all_apps(app)
+    return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(
+        host="0.0.0.0",
+        port=8080,
+        ssl_context=(
+            "interfaces/cert/web_server.crt",
+            "interfaces/cert/web_server.key",
+        ),
+        debug=False,
+    )
+

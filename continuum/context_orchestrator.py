@@ -8,7 +8,16 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from skills.ace_control.config_store import load_budget_config
+# Local default budget loading to avoid ACE dependency
+def _load_default_budget_config() -> tuple[dict, str]:
+    return ({
+        "focus_history": 5,
+        "direct_files_max": 12,
+        "neighbors_depth": 2,
+        "neighbors_per_file": 3,
+        "neighbor_signature_budget": 500,
+        "docs_tests_budget": 2000,
+    }, "default")
 from continuum.context_cache import (
     CACHE_FILENAMES,
     ContextBudget,
@@ -81,7 +90,7 @@ def _cache_manifest() -> Dict[str, Dict[str, object]]:
 
 
 def _load_budget() -> ContextBudget:
-    config, _ = load_budget_config()
+    config, _ = _load_default_budget_config()
     return load_budget(config)
 
 

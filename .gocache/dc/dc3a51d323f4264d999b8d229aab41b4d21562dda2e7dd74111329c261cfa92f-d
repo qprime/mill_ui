@@ -1,0 +1,3 @@
+./middleware.go
+./server.go
+./templates.go

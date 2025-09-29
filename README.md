@@ -41,16 +41,7 @@ python run.py services list
 - `python run.py context_bundle --root .` — assemble persona-aware project context bundle.
 - `python run.py watch_context --root .` — watch source and rebuild context bundle on change.
 - `python run.py context_cache --root .` — rebuild deterministic context caches (file tree, deps, symbols, docs, tests).
-- `flask --app interfaces.app --debug run` — exposes the AceControl API surface at `/ace/*` and UI at `/ace/`.
-- `GET/PUT /ace/config/router` — read or update provider routing defaults.
-- `GET/PUT /ace/config/budget` — read or update deterministic context budgets.
-- `POST /ace/runs/<id>/stage` — check and stage the generated patch (logs `stage.log`).
-- `POST /ace/runs/<id>/commands` — execute suggested commands (supports `dry_run`).
-- `POST /ace/runs/<id>/tests` — execute or dry-run suggested tests.
-- Telemetry (NDJSON) is written to `docs/_reports/ace_telemetry.jsonl`; each entry captures run outcomes and follow-up actions.
-- Chat-first UI: `/ace/` defaults to GPT-5 conversational mode with deterministic context. A slim composer at the bottom keeps chat-first interactions fast; promoting to build workflows is still available from run action chips.
-- Chat context includes deterministic project bundles and mirrored file snippets; each run emits `context.json` and `context_documents.json` alongside the chat transcript.
-- Systemd: unit files now read `%h/.config/ace/env`; create it with `OPENAI_API_KEY=...` and run `python run.py services update ace-control` (or `sudo systemctl daemon-reload && sudo systemctl restart ace-control.service`).
+  (AceControl and related endpoints have been removed in favor of a stateless chat flow.)
 
 ## 6. Invariants & guardrails
 

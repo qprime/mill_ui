@@ -1,0 +1,395 @@
+{
+  ".venv_tests/lib/python3.12/site-packages/packaging/markers.py": [
+    "skills/ace_control/tests/test_markers.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/ansi.py": [
+    ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/tests/ansi_test.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/ansitowin32.py": [
+    ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/tests/ansitowin32_test.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/initialise.py": [
+    ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/tests/initialise_test.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/winterm.py": [
+    ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/tests/winterm_test.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/distlib/markers.py": [
+    "skills/ace_control/tests/test_markers.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/packaging/markers.py": [
+    "skills/ace_control/tests/test_markers.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/rich/_ratio.py": [
+    "skills/mill_ui/tests/unit/test_io.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/rich/ansi.py": [
+    ".venv_tests/lib/python3.12/site-packages/pip/_vendor/colorama/tests/ansi_test.py"
+  ],
+  ".venv_tests/lib/python3.12/site-packages/pip/_vendor/tenacity/_asyncio.py": [
+    "skills/mill_ui/tests/unit/test_io.py"
+  ],
+  "continuum/code_context.py": [
+    "continuum/tests/test_code_context.py"
+  ],
+  "continuum/context_cache.py": [
+    "continuum/tests/test_context_cache.py"
+  ],
+  "continuum/diff_tools.py": [
+    "continuum/tests/test_diff_tools.py"
+  ],
+  "continuum/tests/test_code_context.py": [
+    "continuum/tests/test_code_context.py"
+  ],
+  "continuum/tests/test_context_cache.py": [
+    "continuum/tests/test_context_cache.py"
+  ],
+  "continuum/tests/test_diff_tools.py": [
+    "continuum/tests/test_diff_tools.py"
+  ],
+  "cortex/ai_router.py": [
+    "cortex/tests/test_ai_router.py"
+  ],
+  "cortex/client.py": [
+    "cortex/tests/test_client.py",
+    "cortex/tests/test_client_api.py"
+  ],
+  "cortex/personas/personas_manager.py": [
+    "cortex/tests/test_personas_manager.py"
+  ],
+  "cortex/tests/test_ai_router.py": [
+    "cortex/tests/test_ai_router.py"
+  ],
+  "cortex/tests/test_client.py": [
+    "cortex/tests/test_client.py"
+  ],
+  "cortex/tests/test_client_api.py": [
+    "cortex/tests/test_client_api.py"
+  ],
+  "cortex/tests/test_personas_manager.py": [
+    "cortex/tests/test_personas_manager.py"
+  ],
+  "interfaces/adapters/api/ace_api.py": [
+    "skills/ace_control/tests/test_ace_control.py"
+  ],
+  "interfaces/app.py": [
+    "skills/ace_control/tests/test_ace_control.py"
+  ],
+  "memories/framework/guardrails.py": [
+    "skills/living_truth_partner/tests/test_guardrails.py"
+  ],
+  "memories/framework/ids.py": [
+    "memories/tests/test_registry_integrity.py",
+    "memories/tests/test_timeline.py"
+  ],
+  "memories/framework/models.py": [
+    "memories/tests/test_action_lifecycle.py",
+    "memories/tests/test_capsule_builder.py",
+    "memories/tests/test_guardrails_policies.py",
+    "memories/tests/test_registry_integrity.py",
+    "memories/tests/test_timeline.py"
+  ],
+  "memories/framework/profile.py": [
+    "memories/tests/test_profile.py"
+  ],
+  "memories/framework/registry.py": [
+    "memories/tests/test_registry_integrity.py"
+  ],
+  "memories/framework/timeline.py": [
+    "memories/tests/test_timeline.py"
+  ],
+  "memories/framework/utils.py": [
+    "memories/tests/test_action_lifecycle.py",
+    "memories/tests/test_registry_integrity.py",
+    "memories/tests/test_timeline.py"
+  ],
+  "memories/memory_graph.py": [
+    "memories/tests/test_memory_graph.py"
+  ],
+  "memories/tests/test_action_lifecycle.py": [
+    "memories/tests/test_action_lifecycle.py"
+  ],
+  "memories/tests/test_capsule_builder.py": [
+    "memories/tests/test_capsule_builder.py"
+  ],
+  "memories/tests/test_guardrails_policies.py": [
+    "memories/tests/test_guardrails_policies.py"
+  ],
+  "memories/tests/test_memory_graph.py": [
+    "memories/tests/test_memory_graph.py"
+  ],
+  "memories/tests/test_profile.py": [
+    "memories/tests/test_profile.py"
+  ],
+  "memories/tests/test_registry_integrity.py": [
+    "memories/tests/test_registry_integrity.py"
+  ],
+  "memories/tests/test_timeline.py": [
+    "memories/tests/test_timeline.py"
+  ],
+  "skills/ace_control/config_store.py": [
+    "skills/ace_control/tests/test_model_router.py"
+  ],
+  "skills/ace_control/markers.py": [
+    "skills/ace_control/tests/test_markers.py"
+  ],
+  "skills/ace_control/model_router.py": [
+    "skills/ace_control/tests/test_model_router.py"
+  ],
+  "skills/ace_control/tests/test_ace_control.py": [
+    "skills/ace_control/tests/test_ace_control.py"
+  ],
+  "skills/ace_control/tests/test_markers.py": [
+    "skills/ace_control/tests/test_markers.py"
+  ],
+  "skills/ace_control/tests/test_model_router.py": [
+    "skills/ace_control/tests/test_model_router.py"
+  ],
+  "skills/cam_engine/heightmap_io.py": [
+    "skills/mill_ui/tests/unit/test_io.py"
+  ],
+  "skills/living_truth_partner/config.py": [
+    "skills/living_truth_partner/tests/test_guardrails.py",
+    "skills/living_truth_partner/tests/test_persona_builder.py",
+    "skills/living_truth_partner/tests/test_search_index.py"
+  ],
+  "skills/living_truth_partner/guardrails.py": [
+    "skills/living_truth_partner/tests/test_guardrails.py"
+  ],
+  "skills/living_truth_partner/md_index.py": [
+    "skills/living_truth_partner/tests/test_md_index.py"
+  ],
+  "skills/living_truth_partner/persona_builder.py": [
+    "skills/living_truth_partner/tests/test_persona_builder.py"
+  ],
+  "skills/living_truth_partner/project_store.py": [
+    "skills/living_truth_partner/tests/test_guardrails.py",
+    "skills/living_truth_partner/tests/test_persona_builder.py",
+    "skills/living_truth_partner/tests/test_search_index.py"
+  ],
+  "skills/living_truth_partner/search_index.py": [
+    "skills/living_truth_partner/tests/test_search_index.py"
+  ],
+  "skills/living_truth_partner/tests/test_guardrails.py": [
+    "skills/living_truth_partner/tests/test_guardrails.py"
+  ],
+  "skills/living_truth_partner/tests/test_md_index.py": [
+    "skills/living_truth_partner/tests/test_md_index.py"
+  ],
+  "skills/living_truth_partner/tests/test_persona_builder.py": [
+    "skills/living_truth_partner/tests/test_persona_builder.py"
+  ],
+  "skills/living_truth_partner/tests/test_search_index.py": [
+    "skills/living_truth_partner/tests/test_search_index.py"
+  ],
+  "skills/mill_ui/api/cad.py": [
+    "skills/mill_ui/tests/unit/test_hints.py",
+    "skills/mill_ui/tests/unit/test_layout_place.py",
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_svg_export.py"
+  ],
+  "skills/mill_ui/api/cam.py": [
+    "skills/mill_ui/tests/unit/test_hints.py",
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py"
+  ],
+  "skills/mill_ui/api/io.py": [
+    "skills/mill_ui/tests/unit/test_io.py"
+  ],
+  "skills/mill_ui/apps/compose_cam.py": [
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py"
+  ],
+  "skills/mill_ui/cad/export/step.py": [
+    "skills/mill_ui/tests/unit/test_step_export.py"
+  ],
+  "skills/mill_ui/cad/export/svg_dims.py": [
+    "skills/mill_ui/tests/unit/test_svg_dims.py"
+  ],
+  "skills/mill_ui/cad/geom_parse.py": [
+    "skills/mill_ui/tests/unit/test_geom_parse.py"
+  ],
+  "skills/mill_ui/cad/ingest/sanitize.py": [
+    "skills/mill_ui/tests/test_ingest_sanitize.py"
+  ],
+  "skills/mill_ui/cad/layout/panel.py": [
+    "skills/mill_ui/tests/unit/test_cookbook.py",
+    "skills/mill_ui/tests/unit/test_geom_parse.py",
+    "skills/mill_ui/tests/unit/test_hints.py",
+    "skills/mill_ui/tests/unit/test_layout_place.py",
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py",
+    "skills/mill_ui/tests/unit/test_svg_export.py"
+  ],
+  "skills/mill_ui/cad/native/core.py": [
+    "skills/mill_ui/tests/unit/test_step_export.py",
+    "skills/mill_ui/tests/unit/test_step_shared_seams.py"
+  ],
+  "skills/mill_ui/cad/primitives.py": [
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cad/transforms.py": [
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/model/hints.py": [
+    "skills/mill_ui/tests/unit/test_circle_profile_passes.py",
+    "skills/mill_ui/tests/unit/test_hints.py",
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py"
+  ],
+  "skills/mill_ui/cam/model/machine.py": [
+    "skills/mill_ui/tests/test_tolerance_wiring.py",
+    "skills/mill_ui/tests/unit/test_circle_profile_passes.py",
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py",
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py",
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/model/material.py": [
+    "skills/mill_ui/tests/test_tolerance_wiring.py",
+    "skills/mill_ui/tests/unit/test_circle_profile_passes.py",
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py",
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py",
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/model/setup.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/model/stock.py": [
+    "skills/mill_ui/tests/test_tolerance_wiring.py",
+    "skills/mill_ui/tests/unit/test_circle_profile_passes.py",
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py",
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py",
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/model/tool.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py",
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/ops/drill.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/cam/ops/engrave.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/cam/ops/face.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/cam/ops/pocket.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/cam/ops/profile.py": [
+    "memories/tests/test_profile.py",
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/cam/path/strategies.py": [
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/cam/path/toolpath.py": [
+    "skills/mill_ui/tests/unit/test_toolpath.py",
+    "skills/mill_ui/tests/unit/test_toolpath_post.py"
+  ],
+  "skills/mill_ui/cam/planner/passes/profile.py": [
+    "memories/tests/test_profile.py"
+  ],
+  "skills/mill_ui/cam/planner/pipeline.py": [
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py"
+  ],
+  "skills/mill_ui/cam/post/gcode.py": [
+    "skills/mill_ui/tests/unit/test_gcode.py",
+    "skills/mill_ui/tests/unit/test_gcode_smoke.py",
+    "skills/mill_ui/tests/unit/test_toolpath_post.py"
+  ],
+  "skills/mill_ui/core/capabilities.py": [
+    "skills/mill_ui/tests/test_demo_mode.py"
+  ],
+  "skills/mill_ui/core/hashing.py": [
+    "skills/mill_ui/tests/unit/test_hashing.py"
+  ],
+  "skills/mill_ui/core/numeric.py": [
+    "skills/mill_ui/tests/unit/test_numeric.py"
+  ],
+  "skills/mill_ui/recipes/cookbook/examples.py": [
+    "skills/mill_ui/tests/unit/test_cookbook.py"
+  ],
+  "skills/mill_ui/tests/test_config_resolution.py": [
+    "skills/mill_ui/tests/test_config_resolution.py"
+  ],
+  "skills/mill_ui/tests/test_demo_mode.py": [
+    "skills/mill_ui/tests/test_demo_mode.py"
+  ],
+  "skills/mill_ui/tests/test_ingest_sanitize.py": [
+    "skills/mill_ui/tests/test_ingest_sanitize.py"
+  ],
+  "skills/mill_ui/tests/test_no_duplicates.py": [
+    "skills/mill_ui/tests/test_no_duplicates.py"
+  ],
+  "skills/mill_ui/tests/test_tolerance_wiring.py": [
+    "skills/mill_ui/tests/test_tolerance_wiring.py"
+  ],
+  "skills/mill_ui/tests/unit/test_circle_profile_passes.py": [
+    "skills/mill_ui/tests/unit/test_circle_profile_passes.py"
+  ],
+  "skills/mill_ui/tests/unit/test_cookbook.py": [
+    "skills/mill_ui/tests/unit/test_cookbook.py"
+  ],
+  "skills/mill_ui/tests/unit/test_gcode.py": [
+    "skills/mill_ui/tests/unit/test_gcode.py"
+  ],
+  "skills/mill_ui/tests/unit/test_gcode_smoke.py": [
+    "skills/mill_ui/tests/unit/test_gcode_smoke.py"
+  ],
+  "skills/mill_ui/tests/unit/test_geom_parse.py": [
+    "skills/mill_ui/tests/unit/test_geom_parse.py"
+  ],
+  "skills/mill_ui/tests/unit/test_hashing.py": [
+    "skills/mill_ui/tests/unit/test_hashing.py"
+  ],
+  "skills/mill_ui/tests/unit/test_hints.py": [
+    "skills/mill_ui/tests/unit/test_hints.py"
+  ],
+  "skills/mill_ui/tests/unit/test_io.py": [
+    "skills/mill_ui/tests/unit/test_io.py"
+  ],
+  "skills/mill_ui/tests/unit/test_layout_place.py": [
+    "skills/mill_ui/tests/unit/test_layout_place.py"
+  ],
+  "skills/mill_ui/tests/unit/test_models_ops.py": [
+    "skills/mill_ui/tests/unit/test_models_ops.py"
+  ],
+  "skills/mill_ui/tests/unit/test_numeric.py": [
+    "skills/mill_ui/tests/unit/test_numeric.py"
+  ],
+  "skills/mill_ui/tests/unit/test_planner_pipeline.py": [
+    "skills/mill_ui/tests/unit/test_planner_pipeline.py"
+  ],
+  "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py": [
+    "skills/mill_ui/tests/unit/test_shared_seams_gap_mode.py"
+  ],
+  "skills/mill_ui/tests/unit/test_step_export.py": [
+    "skills/mill_ui/tests/unit/test_step_export.py"
+  ],
+  "skills/mill_ui/tests/unit/test_step_shared_seams.py": [
+    "skills/mill_ui/tests/unit/test_step_shared_seams.py"
+  ],
+  "skills/mill_ui/tests/unit/test_strategies.py": [
+    "skills/mill_ui/tests/unit/test_strategies.py"
+  ],
+  "skills/mill_ui/tests/unit/test_svg_dims.py": [
+    "skills/mill_ui/tests/unit/test_svg_dims.py"
+  ],
+  "skills/mill_ui/tests/unit/test_svg_export.py": [
+    "skills/mill_ui/tests/unit/test_svg_export.py"
+  ],
+  "skills/mill_ui/tests/unit/test_toolpath.py": [
+    "skills/mill_ui/tests/unit/test_toolpath.py"
+  ],
+  "skills/mill_ui/tests/unit/test_toolpath_post.py": [
+    "skills/mill_ui/tests/unit/test_toolpath_post.py"
+  ],
+  "tools/docs/sweep_readmes.py": [
+    "tools/docs/tests/test_docs_sweeper.py"
+  ],
+  "tools/docs/tests/test_docs_sweeper.py": [
+    "tools/docs/tests/test_docs_sweeper.py"
+  ]
+}

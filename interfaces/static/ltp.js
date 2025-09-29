@@ -673,36 +673,9 @@
   };
 
   const sendBriefToAce = async () => {
-    if (!state.pendingBrief) return;
-    try {
-      const res = await fetch('/ace/runs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brief: state.pendingBrief, execute: true }),
-      });
-      if (res.status === 202) {
-        const data = await res.json();
-        alert('ACE requested plan confirmation. Opening ACE to review.');
-        window.open('/ace/', '_blank');
-        closeBriefModal();
-        state.pendingBrief = null;
-        state.pendingBriefContext = null;
-        return;
-      }
-      const data = await res.json();
-      if (data.run && data.run.id) {
-        alert(`ACE run ${data.run.id} started.`);
-        window.open(`/ace/?run=${data.run.id}`, '_blank');
-      } else {
-        alert('ACE response recorded. Check ACE for details.');
-        window.open('/ace/', '_blank');
-      }
-      closeBriefModal();
-      state.pendingBrief = null;
-      state.pendingBriefContext = null;
-    } catch (err) {
-      alert('Failed to send brief to ACE');
-    }
+    // ACE interface has been removed. This action is disabled.
+    alert('ACE is disabled in this build. Briefs are not sent to ACE.');
+    return;
   };
 
   const runCoauthor = async () => {

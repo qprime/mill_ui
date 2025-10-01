@@ -11,6 +11,7 @@ import sys
 import textwrap
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+import copy
 
 from skills.mill_ui.core import Config, get_capabilities, load_config
 from skills.mill_ui.core.version import get_build_version, git_sha
@@ -554,6 +555,16 @@ def _apply_grid_layout(
     fit = str(layout.get("fit", "tight")).lower()
     origin = str(layout.get("origin", "center")).lower()
     anchor = str(layout.get("anchor", "center")).lower()
+    pattern_cfg = layout.get("pattern")
+    repeat_pattern = False
+    if isinstance(pattern_cfg, Mapping):
+        repeat_pattern = bool(pattern_cfg.get("repeat", True))
+    elif isinstance(pattern_cfg, bool):
+        repeat_pattern = pattern_cfg
+    elif isinstance(pattern_cfg, str):
+        repeat_pattern = pattern_cfg.strip().lower() in {"repeat", "true", "yes"}
+    else:
+        repeat_pattern = bool(layout.get("repeat"))
 
     inner_w = panel_w - 2.0 * border
     inner_h = panel_h - 2.0 * border
@@ -610,7 +621,15 @@ def _apply_grid_layout(
                 height_a = float(params.get("height_a_mm", params.get("height_a", 0.0)))
                 height_b = float(params.get("height_b_mm", params.get("height_b", 0.0)))
                 gap = float(params.get("gap_mm", params.get("gap", 0.0)))
-                total_height = max(0.0, height_a) + max(0.0, height_b) + max(0.0, gap)
+                include_a = bool(params.get("include_bar_a", True)) and height_a > 0.0
+                include_b = bool(params.get("include_bar_b", True)) and height_b > 0.0
+                total_height = 0.0
+                if include_a:
+                    total_height += max(0.0, height_a)
+                if include_b:
+                    total_height += max(0.0, height_b)
+                if include_a and include_b:
+                    total_height += max(0.0, gap)
                 return max(0.0, length), max(0.0, total_height)
             if template_type == "circlemount":
                 disk = params.get("disk") or {}
@@ -703,6 +722,21 @@ def _apply_grid_layout(
 
     anchor_h, anchor_v = _anchor_components(anchor)
 
+    total_cells = cols * rows
+    if repeat_pattern:
+        base_pattern = [copy.deepcopy(it) for it in items]
+        if base_pattern:
+            repeated: List[Dict[str, Any]] = []
+            while len(repeated) < total_cells:
+                for base in base_pattern:
+                    clone = copy.deepcopy(base)
+                    orig_id = clone.get("id")
+                    if orig_id:
+                        clone["id"] = f"{str(orig_id)}_{len(repeated) + 1}"
+                    repeated.append(clone)
+                    if len(repeated) >= total_cells:
+                        break
+            items[:] = repeated
     idx = 0
     for r in range(rows):
         for c in range(cols):

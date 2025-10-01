@@ -81,6 +81,7 @@ class BarSpec:
     band_overtravel_mm: float
     lip_height_mm: float
     lip_depth_mm: float
+    lip_overtravel_mm: float
 
     def compose(self) -> List[Dict[str, Any]]:
         shapes: List[Dict[str, Any]] = []
@@ -120,11 +121,12 @@ class BarSpec:
             half = 0.5 * self.region.height_mm
             lip_half = 0.5 * self.lip_height_mm
             lip_feature = {"type": "pocket", "depth_mm": self.lip_depth_mm}
+            lip_width = self.region.width_mm + 2.0 * max(0.0, self.lip_overtravel_mm)
             # top lip
             shapes.append(
                 rect_shape(
                     (0.0, half - lip_half),
-                    width_mm=self.region.width_mm,
+                    width_mm=lip_width,
                     height_mm=self.lip_height_mm,
                     feature=copy.deepcopy(lip_feature),
                     shape_id=f"{self.label}:lip:top",
@@ -134,7 +136,7 @@ class BarSpec:
             shapes.append(
                 rect_shape(
                     (0.0, -half + lip_half),
-                    width_mm=self.region.width_mm,
+                    width_mm=lip_width,
                     height_mm=self.lip_height_mm,
                     feature=copy.deepcopy(lip_feature),
                     shape_id=f"{self.label}:lip:bottom",
@@ -163,6 +165,10 @@ class ClampBarConfig:
     lip_a_depth: float
     lip_b_mm: float
     lip_b_depth: float
+    lip_a_overtravel_mm: float
+    lip_b_overtravel_mm: float
+    include_bar_a: bool
+    include_bar_b: bool
 
     @classmethod
     def from_params(cls, params: Dict[str, Any]) -> "ClampBarConfig":
@@ -203,45 +209,95 @@ class ClampBarConfig:
             lip_a_depth=float(params.get("lip_a_depth_mm", 0.0) or 0.0),
             lip_b_mm=float(params.get("lip_b_h_mm", 0.0) or 0.0),
             lip_b_depth=float(params.get("lip_b_depth_mm", 0.0) or 0.0),
+            lip_a_overtravel_mm=float(params.get("lip_a_overtravel_mm", 0.0) or 0.0),
+            lip_b_overtravel_mm=float(params.get("lip_b_overtravel_mm", 0.0) or 0.0),
+            include_bar_a=bool(params.get("include_bar_a", True)),
+            include_bar_b=bool(params.get("include_bar_b", True)),
         )
 
     def compose(self) -> List[Dict[str, Any]]:
-        if self.length_mm <= 0.0 or self.height_a_mm <= 0.0 or self.height_b_mm <= 0.0:
+        include_a = self.include_bar_a and self.height_a_mm > 0.0
+        include_b = self.include_bar_b and self.height_b_mm > 0.0
+
+        if self.length_mm <= 0.0 or (not include_a and not include_b):
             return []
 
-        y_a = -0.5 * (self.height_b_mm + self.gap_mm)
-        y_b = +0.5 * (self.height_a_mm + self.gap_mm)
-
-        bar_a = BarSpec(
-            label="A",
-            region=CenterRegion(width_mm=self.length_mm, height_mm=self.height_a_mm),
-            slot_spec=self.slot_spec,
-            slot_pattern=self.slot_pattern,
-            band_height_mm=self.band_a_mm,
-            band_depth_mm=self.band_a_depth,
-            band_offset_mm=float(self.band_a_offset_mm),
-            band_overtravel_mm=float(self.band_a_overtravel_mm),
-            lip_height_mm=self.lip_a_mm,
-            lip_depth_mm=self.lip_a_depth,
-        )
-        bar_b = BarSpec(
-            label="B",
-            region=CenterRegion(width_mm=self.length_mm, height_mm=self.height_b_mm),
-            slot_spec=self.slot_spec,
-            slot_pattern=self.slot_pattern,
-            band_height_mm=self.band_b_mm,
-            band_depth_mm=self.band_b_depth,
-            band_offset_mm=float(self.band_b_offset_mm),
-            band_overtravel_mm=float(self.band_b_overtravel_mm),
-            lip_height_mm=self.lip_b_mm,
-            lip_depth_mm=self.lip_b_depth,
-        )
-
         shapes: List[Dict[str, Any]] = []
-        for shape in bar_a.compose():
-            shapes.append(_offset_shape(shape, dy=y_a))
-        for shape in bar_b.compose():
-            shapes.append(_offset_shape(shape, dy=y_b))
+
+        def _bar(label: str, height: float, band_h: float, band_depth: float,
+                  band_offset: float, band_overtravel: float, lip_h: float, lip_depth: float,
+                  lip_overtravel: float) -> BarSpec:
+            return BarSpec(
+                label=label,
+                region=CenterRegion(width_mm=self.length_mm, height_mm=height),
+                slot_spec=self.slot_spec,
+                slot_pattern=self.slot_pattern,
+                band_height_mm=band_h,
+                band_depth_mm=band_depth,
+                band_offset_mm=float(band_offset),
+                band_overtravel_mm=float(band_overtravel),
+                lip_height_mm=lip_h,
+                lip_depth_mm=lip_depth,
+                lip_overtravel_mm=float(lip_overtravel),
+            )
+
+        if include_a and include_b:
+            y_a = -0.5 * (self.height_b_mm + self.gap_mm)
+            y_b = +0.5 * (self.height_a_mm + self.gap_mm)
+            for shape in _bar(
+                "A",
+                self.height_a_mm,
+                self.band_a_mm,
+                self.band_a_depth,
+                self.band_a_offset_mm,
+                self.band_a_overtravel_mm,
+                self.lip_a_mm,
+                self.lip_a_depth,
+                self.lip_a_overtravel_mm,
+            ).compose():
+                shapes.append(_offset_shape(shape, dy=y_a))
+            for shape in _bar(
+                "B",
+                self.height_b_mm,
+                self.band_b_mm,
+                self.band_b_depth,
+                self.band_b_offset_mm,
+                self.band_b_overtravel_mm,
+                self.lip_b_mm,
+                self.lip_b_depth,
+                self.lip_b_overtravel_mm,
+            ).compose():
+                shapes.append(_offset_shape(shape, dy=y_b))
+            return shapes
+
+        if include_a:
+            for shape in _bar(
+                "A",
+                self.height_a_mm,
+                self.band_a_mm,
+                self.band_a_depth,
+                self.band_a_offset_mm,
+                self.band_a_overtravel_mm,
+                self.lip_a_mm,
+                self.lip_a_depth,
+                self.lip_a_overtravel_mm,
+            ).compose():
+                shapes.append(shape)
+            return shapes
+
+        # include only B
+        for shape in _bar(
+            "B",
+            self.height_b_mm,
+            self.band_b_mm,
+            self.band_b_depth,
+            self.band_b_offset_mm,
+            self.band_b_overtravel_mm,
+            self.lip_b_mm,
+            self.lip_b_depth,
+            self.lip_b_overtravel_mm,
+        ).compose():
+            shapes.append(shape)
         return shapes
 
 

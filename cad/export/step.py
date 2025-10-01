@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Tuple
+
+import copy
 
 from skills.mill_ui.cad.native import core as native_core
 
@@ -23,6 +25,28 @@ def _sheet_to_dict(spec: SheetSpec) -> Dict[str, float]:
     }
 
 
+def _center_shapes_on_sheet(sheet: SheetSpec, shapes: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Return deep-copied shapes shifted so the sheet centre maps to (0,0)."""
+
+    offset_x = float(sheet.width_mm) * 0.5
+    offset_y = float(sheet.height_mm) * 0.5
+    centered: List[Dict[str, Any]] = []
+
+    for shape in shapes:
+        item = copy.deepcopy(shape)
+        placement = item.get("placement")
+        if isinstance(placement, Mapping):
+            centre = placement.get("center_xy_mm")
+            if isinstance(centre, (list, tuple)) and len(centre) == 2:
+                new_centre = (float(centre[0]) - offset_x, float(centre[1]) - offset_y)
+                updated = dict(placement)
+                updated["center_xy_mm"] = new_centre
+                item["placement"] = updated
+        centered.append(item)
+
+    return centered
+
+
 def build_step_solids(
     sheet: SheetSpec,
     shapes: Iterable[Dict[str, Any]],
@@ -32,9 +56,10 @@ def build_step_solids(
 ) -> Tuple[native_core.Solid, List[native_core.Solid]]:
     """Return the sheet solid and floating parts using the native exporter."""
 
+    centered_shapes = _center_shapes_on_sheet(sheet, shapes)
     model = native_core.build_model(
         _sheet_to_dict(sheet),
-        list(shapes),
+        centered_shapes,
         kerf_mm=kerf_mm,
         include_floating_parts=include_floating_parts,
     )
@@ -54,9 +79,10 @@ def export_stl(
 ) -> List[Path]:
     """Generate ASCII STL files via the native exporter."""
 
+    centered_shapes = _center_shapes_on_sheet(sheet, shapes)
     return native_core.export_stl(
         _sheet_to_dict(sheet),
-        list(shapes),
+        centered_shapes,
         output_path,
         kerf_mm=kerf_mm,
         include_sheet=include_sheet,
@@ -76,9 +102,10 @@ def export_step(
 ) -> None:
     """Export a STEP-like manifest using the native exporter."""
 
+    centered_shapes = _center_shapes_on_sheet(sheet, shapes)
     native_core.export_step(
         _sheet_to_dict(sheet),
-        list(shapes),
+        centered_shapes,
         output_path,
         kerf_mm=kerf_mm,
         include_floating_parts=include_floating_parts,

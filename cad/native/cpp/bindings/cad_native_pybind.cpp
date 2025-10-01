@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <BRepAlgoAPI_Cut.hxx>
+#include <BRep_Builder.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
@@ -14,6 +15,7 @@
 #include <StlAPI_Writer.hxx>
 #include <STEPControl_Writer.hxx>
 #include <IFSelect_ReturnStatus.hxx>
+#include <TopoDS_Compound.hxx>
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
@@ -233,6 +235,9 @@ GeometryResult build_geometry(const SheetSpec &sheet,
   result.sheet = make_box(0.0, 0.0, -sheet.thickness, sheet.width, sheet.height, sheet.thickness);
   result.sheet = fix_shape(result.sheet);
 
+  // Collect pocket cutters to apply to both sheet and parts after we know all parts.
+  std::vector<TopoDS_Shape> pocket_cutters;
+
   for (const auto &shape : shapes) {
     if (shape.shape_kind != ShapeKind::Rect && shape.shape_kind != ShapeKind::Circle) {
       continue;  // unsupported geometry
@@ -292,19 +297,28 @@ GeometryResult build_geometry(const SheetSpec &sheet,
                                        std::max(0.0, shape.width),
                                        std::max(0.0, shape.height),
                                        depth + 1e-6);
-        BRepAlgoAPI_Cut cut(result.sheet, cutter);
-        ensure_cut_done(cut, "rectangular pocket");
-        result.sheet = fix_shape(cut.Shape());
+        pocket_cutters.push_back(cutter);
       } else if (shape.shape_kind == ShapeKind::Circle) {
         const double radius = 0.5 * shape.diameter;
         TopoDS_Shape cutter = make_cylinder(shape.center_x, shape.center_y,
                                             -depth,
                                             std::max(0.0, radius),
                                             depth + 1e-6);
-        BRepAlgoAPI_Cut cut(result.sheet, cutter);
-        ensure_cut_done(cut, "cylindrical pocket");
-        result.sheet = fix_shape(cut.Shape());
+        pocket_cutters.push_back(cutter);
       }
+    }
+  }
+
+  // Apply all pocket cutters to the sheet and any floating parts.
+  for (const auto &cutter : pocket_cutters) {
+    BRepAlgoAPI_Cut cut_sheet(result.sheet, cutter);
+    ensure_cut_done(cut_sheet, "apply pocket to sheet");
+    result.sheet = fix_shape(cut_sheet.Shape());
+
+    for (auto &entry : result.parts) {
+      BRepAlgoAPI_Cut cut_part(entry.second, cutter);
+      ensure_cut_done(cut_part, "apply pocket to part");
+      entry.second = fix_shape(cut_part.Shape());
     }
   }
 
@@ -450,7 +464,19 @@ py::list export_stl_binding(const py::dict &sheet_dict,
 
   py::list outputs;
   if (include_sheet) {
-    write_stl(geometry.sheet, output_path, mesh_tolerance);
+    TopoDS_Shape sheet_shape = geometry.sheet;
+    if (include_parts && !geometry.parts.empty()) {
+      BRep_Builder builder;
+      TopoDS_Compound compound;
+      builder.MakeCompound(compound);
+      builder.Add(compound, geometry.sheet);
+      for (const auto &entry : geometry.parts) {
+        builder.Add(compound, entry.second);
+      }
+      sheet_shape = compound;
+    }
+
+    write_stl(sheet_shape, output_path, mesh_tolerance);
     outputs.append(output_path);
   }
 

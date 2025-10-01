@@ -34,6 +34,7 @@ python apps/compose_cam.py layouts/demo.json --config configs/cam_defaults.json 
 ## 4. Inputs & outputs (for AI & humans)
 
 - `memories/cam_projects/sheet_layouts/<slug>/sheet.json` — sheet layout definitions consumed by compose_cam.
+- Layout blocks support optional `origin` (`center`, `lower_left`, `lower_right`, `upper_left`, `upper_right`) and `anchor` (`center`, `lower_left`, `lower_right`, `upper_left`, `upper_right`) keys to control grid placement.
 - `skills/mill_ui/cam/tools/tool_db.json` — tool library looked up by planners.
 - `skills/mill_ui/compositions/` — template registries that expand layout items.
 - `skills/mill_ui/cad/native/` — native CAD exporter for STL/STEP outputs.

@@ -600,11 +600,18 @@ def _apply_grid_layout(
                     recess = float(params.get("recess_extra_inset_mm", 3.0))
                     aw = float(params.get("aperture_w_mm", 0.0))
                     ah = float(params.get("aperture_h_mm", 0.0))
-                    if aw > 0.0:
-                        ow = max(ow, aw + 2.0 * (lip + recess))
-                    if ah > 0.0:
-                        oh = max(oh, ah + 2.0 * (lip + recess))
+                if aw > 0.0:
+                    ow = max(ow, aw + 2.0 * (lip + recess))
+                if ah > 0.0:
+                    oh = max(oh, ah + 2.0 * (lip + recess))
                 return ow, oh
+            if template_type == "clampbar":
+                length = float(params.get("length_mm", params.get("length", 0.0)))
+                height_a = float(params.get("height_a_mm", params.get("height_a", 0.0)))
+                height_b = float(params.get("height_b_mm", params.get("height_b", 0.0)))
+                gap = float(params.get("gap_mm", params.get("gap", 0.0)))
+                total_height = max(0.0, height_a) + max(0.0, height_b) + max(0.0, gap)
+                return max(0.0, length), max(0.0, total_height)
             if template_type == "circlemount":
                 disk = params.get("disk") or {}
                 if "diameter_mm" in disk:

@@ -69,7 +69,6 @@ class SlotSpec:
             feat["depth_mm"] = float(self.depth)
         return feat
 
-
 @dataclass(frozen=True)
 class BarSpec:
     label: str
@@ -79,6 +78,7 @@ class BarSpec:
     band_height_mm: float
     band_depth_mm: float
     band_offset_mm: float
+    band_overtravel_mm: float
     lip_height_mm: float
     lip_depth_mm: float
 
@@ -105,10 +105,11 @@ class BarSpec:
                 )
             )
         if self.band_height_mm > 0.0 and self.band_depth_mm > 0.0:
+            band_width = self.region.width_mm + 2.0 * max(0.0, self.band_overtravel_mm)
             shapes.append(
                 rect_shape(
                     (0.0, self.band_offset_mm),
-                    width_mm=self.region.width_mm,
+                    width_mm=band_width,
                     height_mm=self.band_height_mm,
                     feature={"type": "pocket", "depth_mm": self.band_depth_mm},
                     shape_id=f"{self.label}:band",
@@ -152,8 +153,10 @@ class ClampBarConfig:
     slot_pattern: SlotPattern
     band_a_mm: float
     band_a_depth: float
+    band_a_overtravel_mm: float
     band_b_mm: float
     band_b_depth: float
+    band_b_overtravel_mm: float
     band_a_offset_mm: float
     band_b_offset_mm: float
     lip_a_mm: float
@@ -190,9 +193,11 @@ class ClampBarConfig:
             slot_pattern=slot_pattern,
             band_a_mm=float(params.get("band_a_h_mm", 0.0) or 0.0),
             band_a_depth=float(params.get("band_a_depth_mm", 0.0) or 0.0),
+            band_a_overtravel_mm=float(params.get("band_a_overtravel_mm", 0.0) or 0.0),
             band_a_offset_mm=float(params.get("band_a_offset_mm", 0.0) or 0.0),
             band_b_mm=float(params.get("band_b_h_mm", 0.0) or 0.0),
             band_b_depth=float(params.get("band_b_depth_mm", 0.0) or 0.0),
+            band_b_overtravel_mm=float(params.get("band_b_overtravel_mm", 0.0) or 0.0),
             band_b_offset_mm=float(params.get("band_b_offset_mm", 0.0) or 0.0),
             lip_a_mm=float(params.get("lip_a_h_mm", 0.0) or 0.0),
             lip_a_depth=float(params.get("lip_a_depth_mm", 0.0) or 0.0),
@@ -215,6 +220,7 @@ class ClampBarConfig:
             band_height_mm=self.band_a_mm,
             band_depth_mm=self.band_a_depth,
             band_offset_mm=float(self.band_a_offset_mm),
+            band_overtravel_mm=float(self.band_a_overtravel_mm),
             lip_height_mm=self.lip_a_mm,
             lip_depth_mm=self.lip_a_depth,
         )
@@ -226,6 +232,7 @@ class ClampBarConfig:
             band_height_mm=self.band_b_mm,
             band_depth_mm=self.band_b_depth,
             band_offset_mm=float(self.band_b_offset_mm),
+            band_overtravel_mm=float(self.band_b_overtravel_mm),
             lip_height_mm=self.lip_b_mm,
             lip_depth_mm=self.lip_b_depth,
         )

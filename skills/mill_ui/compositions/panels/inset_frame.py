@@ -41,14 +41,29 @@ class InsetFrameConfig:
 
     @classmethod
     def from_params(cls, params: Dict[str, Any]) -> "InsetFrameConfig":
+        # Support sizing by outer OR by desired aperture (visible recess) size.
+        lip_inset = float(params.get("lip_inset_mm", 3.0))
+        recess_inset = float(params.get("recess_extra_inset_mm", 3.0))
+
+        outer_w = float(params.get("outer_w_mm", 0.0))
+        outer_h = float(params.get("outer_h_mm", 0.0))
+
+        if outer_w <= 0.0 or outer_h <= 0.0:
+            aperture_w = float(params.get("aperture_w_mm", 0.0))
+            aperture_h = float(params.get("aperture_h_mm", 0.0))
+            if aperture_w > 0.0:
+                outer_w = max(outer_w, aperture_w + 2.0 * (lip_inset + recess_inset))
+            if aperture_h > 0.0:
+                outer_h = max(outer_h, aperture_h + 2.0 * (lip_inset + recess_inset))
+
         return cls(
             outer=CenterRegion(
-                width_mm=float(params.get("outer_w_mm", 0.0)),
-                height_mm=float(params.get("outer_h_mm", 0.0)),
+                width_mm=float(outer_w),
+                height_mm=float(outer_h),
             ),
-            lip_inset_mm=float(params.get("lip_inset_mm", 3.0)),
+            lip_inset_mm=lip_inset,
             lip_depth_mm=float(params.get("lip_depth_mm", 4.0)),
-            recess_inset_mm=float(params.get("recess_extra_inset_mm", 3.0)),
+            recess_inset_mm=recess_inset,
             recess_depth_mm=float(params.get("recess_depth_mm", 10.0)),
         )
 

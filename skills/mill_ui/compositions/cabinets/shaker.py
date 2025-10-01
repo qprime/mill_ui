@@ -116,14 +116,26 @@ class ShakerConfig:
 
     @classmethod
     def from_params(cls, params: Dict[str, Any]) -> "ShakerConfig":
-        outer = Region(
-            width=float(params.get("outer_w", 0.0)),
-            height=float(params.get("outer_h", 0.0)),
-        )
+        # Allow sizing by outer OR inner dimensions. Outer takes precedence when provided.
+        outer_w = float(params.get("outer_w", 0.0))
+        outer_h = float(params.get("outer_h", 0.0))
+        stile_w = float(params.get("stile_w", 0.0))
+        rail_h = float(params.get("rail_h", 0.0))
+
+        if outer_w <= 0.0 or outer_h <= 0.0:
+            inner_w = float(params.get("inner_w", 0.0))
+            inner_h = float(params.get("inner_h", 0.0))
+            # Compute missing outer dimensions from inner + stile/rail if available
+            if inner_w > 0.0:
+                outer_w = max(outer_w, inner_w + 2.0 * max(stile_w, 0.0))
+            if inner_h > 0.0:
+                outer_h = max(outer_h, inner_h + 2.0 * max(rail_h, 0.0))
+
+        outer = Region(width=float(outer_w), height=float(outer_h))
         return cls(
             outer=outer,
-            stile_mm=float(params.get("stile_w", 0.0)),
-            rail_mm=float(params.get("rail_h", 0.0)),
+            stile_mm=stile_w,
+            rail_mm=rail_h,
             panel_recess_mm=float(params.get("panel_recess", 0.0)),
             anchor_recess=AnchorRecess.from_params(params.get("anchor_recess")),
         )

@@ -19,7 +19,10 @@ REGISTRY: Dict[str, type] = {}
 
 def register_template(name: str):
     def deco(cls):
+        # Register with exact key and a lowercase alias so canonicalized
+        # template types (e.g., from ingest) still resolve.
         REGISTRY[name] = cls
+        REGISTRY.setdefault(name.lower(), cls)
         return cls
     return deco
 

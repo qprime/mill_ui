@@ -434,12 +434,13 @@ def main(argv: Sequence[str]) -> int:
         if caps.native_cad:
             sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
             try:
+                # Export both sheet (with pockets/recesses) and floating parts (slugs) so parts aren't missing.
                 stl_outputs = export_stl(
                     sheet_spec,
                     items_resolved,
                     stl_base,
                     kerf_mm=float(hints.get("kerf_width_mm", 0.0)),
-                    include_sheet=False,
+                    include_sheet=True,
                     include_floating_parts=True,
                     mesh_tolerance_mm=max(0.05, float(args.stl_resolution_mm)),
                 )
@@ -547,10 +548,12 @@ def _apply_grid_layout(
             gap_x = float(layout.get("gap_x_mm", 0.0))
             gap_y = float(layout.get("gap_y_mm", 0.0))
 
-    cols = int(layout.get("cols", 1))
-    rows = int(layout.get("rows", 1))
+    cols = max(1, int(layout.get("cols", 1)))
+    rows = max(1, int(layout.get("rows", 1)))
     border = float(layout.get("border_mm", 0.0))
     fit = str(layout.get("fit", "tight")).lower()
+    origin = str(layout.get("origin", "center")).lower()
+    anchor = str(layout.get("anchor", "center")).lower()
 
     inner_w = panel_w - 2.0 * border
     inner_h = panel_h - 2.0 * border
@@ -577,7 +580,31 @@ def _apply_grid_layout(
             template_type = str(it.get("type", "")).lower()
             params = it.get("params") or {}
             if template_type == "shaker":
-                return float(params.get("outer_w", 0.0)), float(params.get("outer_h", 0.0))
+                ow = float(params.get("outer_w", 0.0))
+                oh = float(params.get("outer_h", 0.0))
+                if ow <= 0.0 or oh <= 0.0:
+                    iw = float(params.get("inner_w", 0.0))
+                    ih = float(params.get("inner_h", 0.0))
+                    stile = float(params.get("stile_w", 0.0))
+                    rail = float(params.get("rail_h", 0.0))
+                    if iw > 0.0:
+                        ow = max(ow, iw + 2.0 * max(stile, 0.0))
+                    if ih > 0.0:
+                        oh = max(oh, ih + 2.0 * max(rail, 0.0))
+                return ow, oh
+            if template_type == "insetframe":
+                ow = float(params.get("outer_w_mm", 0.0))
+                oh = float(params.get("outer_h_mm", 0.0))
+                if ow <= 0.0 or oh <= 0.0:
+                    lip = float(params.get("lip_inset_mm", 3.0))
+                    recess = float(params.get("recess_extra_inset_mm", 3.0))
+                    aw = float(params.get("aperture_w_mm", 0.0))
+                    ah = float(params.get("aperture_h_mm", 0.0))
+                    if aw > 0.0:
+                        ow = max(ow, aw + 2.0 * (lip + recess))
+                    if ah > 0.0:
+                        oh = max(oh, ah + 2.0 * (lip + recess))
+                return ow, oh
             if template_type == "circlemount":
                 disk = params.get("disk") or {}
                 if "diameter_mm" in disk:
@@ -601,15 +628,104 @@ def _apply_grid_layout(
         cell_h = (inner_h - (rows - 1) * gap_y) / rows
         if cell_w <= 0.0 or cell_h <= 0.0:
             raise ValueError("Grid + borders/gaps leave no interior area")
+        block_w = cols * cell_w + (cols - 1) * gap_x
+        block_h = rows * cell_h + (rows - 1) * gap_y
+
+    def _origin_offset(origin_name: str) -> Tuple[float, float]:
+        name = origin_name.replace("-", "_").strip()
+        horiz, vert = "center", "center"
+        if name in {"center", "middle", ""}:
+            pass
+        else:
+            parts = name.split("_")
+            for part in parts:
+                part = part.strip()
+                if part in {"left", "right", "center", "middle"}:
+                    horiz = "left" if part == "left" else "right" if part == "right" else "center"
+                if part in {"bottom", "lower", "top", "upper", "center", "middle"}:
+                    if part in {"bottom", "lower"}:
+                        vert = "bottom"
+                    elif part in {"top", "upper"}:
+                        vert = "top"
+                    elif part in {"center", "middle"}:
+                        vert = "center"
+
+        inner_w_span = inner_w
+        inner_h_span = inner_h
+        if horiz == "left":
+            offset_x = border
+        elif horiz == "right":
+            offset_x = panel_w - border - block_w
+        else:  # center
+            offset_x = border + 0.5 * (inner_w_span - block_w)
+
+        if vert == "bottom":
+            offset_y = border
+        elif vert == "top":
+            offset_y = panel_h - border - block_h
+        else:
+            offset_y = border + 0.5 * (inner_h_span - block_h)
+
+        return float(offset_x), float(offset_y)
+
+    base_x, base_y = _origin_offset(origin)
+
+    def _anchor_components(anchor_name: str) -> Tuple[str, str]:
+        name = anchor_name.replace("-", "_").strip()
+        horiz = "center"
+        vert = "center"
+        if name not in {"", "center", "middle"}:
+            parts = name.split("_")
+            for part in parts:
+                part = part.strip()
+                if part in {"left", "right", "center", "middle"}:
+                    if part == "left":
+                        horiz = "left"
+                    elif part == "right":
+                        horiz = "right"
+                    else:
+                        horiz = "center"
+                if part in {"bottom", "lower", "top", "upper", "center", "middle"}:
+                    if part in {"bottom", "lower"}:
+                        vert = "bottom"
+                    elif part in {"top", "upper"}:
+                        vert = "top"
+                    else:
+                        vert = "center"
+        return horiz, vert
+
+    anchor_h, anchor_v = _anchor_components(anchor)
 
     idx = 0
     for r in range(rows):
         for c in range(cols):
             if idx >= len(items):
                 return
-            cx = border + c * (cell_w + gap_x) + 0.5 * cell_w
-            cy = border + r * (cell_h + gap_y) + 0.5 * cell_h
-            items[idx].setdefault("placement", {})["center_xy_mm"] = (cx, cy)
+            cell_left = base_x + c * (cell_w + gap_x)
+            cell_bottom = base_y + r * (cell_h + gap_y)
+            cell_right = cell_left + cell_w
+            cell_top = cell_bottom + cell_h
+
+            item_w, item_h = _size_of_item(items[idx])
+            item_w = float(item_w) if item_w > 0.0 else 0.0
+            item_h = float(item_h) if item_h > 0.0 else 0.0
+
+            if anchor_h == "left" and item_w > 0.0 and item_w <= cell_w:
+                cx = cell_left + 0.5 * item_w
+            elif anchor_h == "right" and item_w > 0.0 and item_w <= cell_w:
+                cx = cell_right - 0.5 * item_w
+            else:
+                cx = cell_left + 0.5 * cell_w
+
+            if anchor_v == "bottom" and item_h > 0.0 and item_h <= cell_h:
+                cy = cell_bottom + 0.5 * item_h
+            elif anchor_v == "top" and item_h > 0.0 and item_h <= cell_h:
+                cy = cell_top - 0.5 * item_h
+            else:
+                cy = cell_bottom + 0.5 * cell_h
+
+            placement = items[idx].setdefault("placement", {})
+            placement["center_xy_mm"] = (cx, cy)
             idx += 1
 
 

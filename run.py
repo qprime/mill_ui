@@ -19,19 +19,18 @@ ENTRYPOINTS = {
     "context_cache": "continuum.context_cache",
     "graph": "continuum.project_graph",
     "generate_image": "skills.image_pipeline.generate_image",
-    "generate_cam": "skills.cam_generator.runner",
-    "cam_v2": "skills.cam_generator_v2.runner",
-    "cam_v3": "skills.cam_generator_v3.run_cam",
+    "generate_image_versioned": "skills.image_pipeline.generate_versioned_image",
+    # CAM v4 (current)
     "cam_engine": "skills.cam_engine.cli",
-    "cam_v4": "skills.cam_engine.cli",
+    # LTP workflow
     "ltp": "skills.living_truth_partner.cli",
+    # Metadata/context tools
     "regen_headers": "continuum.regen_metadata_headers",
     "ast": "continuum.ast_context",
     "metadata": "continuum.metadata",
-    "generate_cabinet": "skills.cabinet_door_cam.generate_door_cam",
+    # Sheet layout CAM
     "compose_cam": "skills.mill_ui.apps.compose_cam",
-    "mill_ts": "skills.mill_ui_ts.cli",
-    "mill_cam": "skills.mill_ui_cam.cli",
+    # Tests/utilities
     "mill_ui_tests": "skills.mill_ui.tests.run_all",
     "ltp_web": "interfaces.app",
     "services": "services.cli",

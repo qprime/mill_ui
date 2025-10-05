@@ -158,3 +158,40 @@ def link_keepdown(paths, safe_z: float, min_clearance: float):
 def fit_arcs(paths, tol_mm: float):
     _require_native()
     return _native.fit_arcs(paths, float(tol_mm))
+
+
+# ---------------------------------------------------------------------------
+# Mandelbrot helpers (native)
+# ---------------------------------------------------------------------------
+
+def mandelbrot_outline_fill(
+    *,
+    width_mm: float,
+    height_mm: float,
+    resolution_x: int,
+    resolution_y: int,
+    iterations: int = 100,
+    escape_radius: float = 2.0,
+    real_min: float = -2.0,
+    real_max: float = 1.0,
+    imag_min: float = -1.25,
+    imag_max: float = 1.25,
+):
+    """Return dict with 'polylines' and 'spans' for a Mandelbrot outline + fill.
+
+    polylines: list[list[tuple[float,float]]] in panel mm coords (origin center)
+    spans:     list[dict{x0,x1,y,h}] horizontal runs for pocket rectangles
+    """
+    _require_native()
+    return _native.mandelbrot_outline_fill(
+        float(width_mm),
+        float(height_mm),
+        int(resolution_x),
+        int(resolution_y),
+        int(iterations),
+        float(escape_radius),
+        float(real_min),
+        float(real_max),
+        float(imag_min),
+        float(imag_max),
+    )

@@ -13,7 +13,9 @@ set(SRC
   geom2d/clipper2_wrap.cpp
   algo/plan_2d.cpp
   algo/post_gcode.cpp
+  algo/mandelbrot.cpp
   bindings/py/cam_native_pybind.cpp
+  bindings/py/mandelbrot_pybind.cpp
 )
 
 add_library(_native MODULE ${SRC})

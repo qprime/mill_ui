@@ -165,6 +165,9 @@ py::dict hole_to_dict(const Hole& hole) {
 
 }  // namespace
 
+// Provide a weak hook to let extra binders add symbols (e.g., mandelbrot)
+extern "C" void millui_native_register_extra(py::module_&);
+
 PYBIND11_MODULE(_native, m) {
   m.doc() = "Native CAM core bindings";
 
@@ -271,4 +274,11 @@ PYBIND11_MODULE(_native, m) {
     Paths fitted = millui::native::fit_arcs(paths, tol_mm);
     return paths_to_flat_list(fitted);
   });
+
+  // Allow optional extra bindings to register more functions (if object linked)
+  try {
+    millui_native_register_extra(m);
+  } catch (...) {
+    // no-op if not linked
+  }
 }

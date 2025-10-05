@@ -36,6 +36,7 @@ python apps/compose_cam.py layouts/demo.json --config configs/cam_defaults.json 
 - `memories/cam_projects/sheet_layouts/<slug>/sheet.json` — sheet layout definitions consumed by compose_cam.
 - Layout blocks support optional `origin` (`center`, `lower_left`, `lower_right`, `upper_left`, `upper_right`) and `anchor` (`center`, `lower_left`, `lower_right`, `upper_left`, `upper_right`) keys to control grid placement.
 - Set `pattern: true` in the layout block to repeat the provided `items` list across the grid (pattern repeats row-major using the same columns/rows/gap settings).
+- Math-art templates live under `skills.mill_ui.compositions.math_art`; e.g. use `type: "MandelbrotOutlineFill"` for a native-accelerated Mandelbrot outline with interior pocketing.
 - `skills/mill_ui/cam/tools/tool_db.json` — tool library looked up by planners.
 - `skills/mill_ui/compositions/` — template registries that expand layout items.
 - `skills/mill_ui/cad/native/` — native CAD exporter for STL/STEP outputs.

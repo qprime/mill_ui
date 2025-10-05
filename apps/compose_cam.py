@@ -290,6 +290,14 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--stl-resolution-mm", type=float, default=0.3, help="Chordal tolerance (mm) for STL meshing")
     parser.add_argument("--step", action="store_true", help="Emit a STEP preview using the native CAD exporter")
     parser.add_argument("--step-filename", type=str, default="panel_preview.step", help="Filename for the STEP preview")
+    # STEP parts inclusion: default include parts; allow disabling via a single flag.
+    parser.add_argument(
+        "--no-step-include-parts",
+        dest="step_include_parts",
+        action="store_false",
+        help="Exclude floating parts (slugs) from the STEP output",
+    )
+    parser.set_defaults(step_include_parts=True)
 
     parser.add_argument("--profile-onion-skin-mm", type=float, help="Leave this thickness (mm) for a final skin pass on profiles")
     parser.add_argument("--tabs-count", type=int, help="Add evenly spaced tabs (count) on profile passes")
@@ -471,7 +479,13 @@ def main(argv: Sequence[str]) -> int:
             sheet_spec = SheetSpec(width_mm=panel_w, height_mm=panel_h, thickness_mm=panel_t)
             step_path = outdir / args.step_filename
             try:
-                export_step(sheet_spec, items_resolved, step_path, kerf_mm=float(hints.get("kerf_width_mm", 0.0)))
+                export_step(
+                    sheet_spec,
+                    items_resolved,
+                    step_path,
+                    kerf_mm=float(hints.get("kerf_width_mm", 0.0)),
+                    include_floating_parts=bool(args.step_include_parts),
+                )
                 made_files.append(str(step_path))
             except Exception as exc:  # pragma: no cover - native exporter errors
                 LOGGER.warning("STEP export failed: %s", exc)

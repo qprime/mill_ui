@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Image Generator UI</title>
+  <style>{{.StyleCSS}}</style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h1>Projects</h1>
+      <div id="project-list"></div>
+      <form id="create-form">
+        <input type="text" id="create-name" placeholder="New project" autocomplete="off"/>
+        <button type="submit">Create</button>
+      </form>
+      <div class="key-status">API Key: {{if .KeyPresent}}detected{{else}}missing{{end}}</div>
+    </aside>
+    <main>
+      <section class="composer">
+        <h2 id="project-title">Select a project</h2>
+        <div class="fields">
+          <label>Subject
+            <input id="subject" type="text" autocomplete="off"/>
+          </label>
+          <label>Persona
+            <select id="persona"></select>
+          </label>
+          <label>Style
+            <select id="style"></select>
+          </label>
+          <label>Size
+            <select id="size">
+              <option value="1024x1024">1024x1024</option>
+              <option value="512x512">512x512</option>
+              <option value="2048x2048">2048x2048</option>
+            </select>
+          </label>
+        </div>
+        <div class="preview">
+          <div class="preview-title">Prompt preview</div>
+          <pre id="prompt-preview"></pre>
+        </div>
+        <div class="actions">
+          <button id="save-btn">Save</button>
+          <button id="generate-btn" class="primary">Generate</button>
+          <span id="status" class="status"></span>
+        </div>
+      </section>
+      <section class="gallery">
+        <h3>Gallery</h3>
+        <div id="gallery" class="gallery-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const initialProjectsRaw = {{toJSON .Projects}};
+    const initialProjects = Array.isArray(initialProjectsRaw) ? [...initialProjectsRaw] : [];
+    let personas = {};
+    let styles = {};
+    let currentProject = null;
+
+    async function loadTaxonomy() {
+      const [pRes, sRes] = await Promise.all([
+        fetch('/image-ui/api/personas'),
+        fetch('/image-ui/api/styles'),
+      ]);
+      personas = await pRes.json();
+      styles = await sRes.json();
+      const personaSelect = document.getElementById('persona');
+      personaSelect.innerHTML = '<option value="">Choose…</option>' + Object.keys(personas).sort().map(name => `<option value="${name}">${name}</option>`).join('');
+      const styleSelect = document.getElementById('style');
+      styleSelect.innerHTML = '<option value="">Choose…</option>' + Object.keys(styles).sort().map(name => `<option value="${name}">${name}</option>`).join('');
+    }
+
+    function renderProjects(projects) {
+      const list = document.getElementById('project-list');
+      list.innerHTML = '';
+      projects.forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.onclick = () => selectProject(name);
+        if (name === currentProject) {
+          btn.classList.add('active');
+        }
+        list.appendChild(btn);
+      });
+    }
+
+    async function selectProject(name) {
+      currentProject = name;
+      document.getElementById('project-title').textContent = name;
+      const res = await fetch(`/image-ui/api/projects/${encodeURIComponent(name)}/input`);
+      if (!res.ok) {
+        alert('Failed to load project configuration');
+        return;
+      }
+      const cfg = await res.json();
+      document.getElementById('subject').value = cfg.subject || '';
+      document.getElementById('persona').value = cfg.persona || '';
+      document.getElementById('style').value = cfg.style || '';
+      document.getElementById('size').value = cfg.size || '1024x1024';
+      updatePreview();
+      loadGallery(name);
+      renderProjects(initialProjects);
+    }
+
+    async function loadProjects() {
+      const res = await fetch('/image-ui/api/projects');
+      if (!res.ok) return;
+      const data = await res.json();
+      initialProjects.splice(0, initialProjects.length, ...data);
+      renderProjects(initialProjects);
+    }
+
+    function updatePreview() {
+      const subject = document.getElementById('subject').value.trim();
+      const personaName = document.getElementById('persona').value;
+      const styleName = document.getElementById('style').value;
+      const preview = document.getElementById('prompt-preview');
+      if (!subject || !personaName || !styleName) {
+        preview.textContent = '';
+        return;
+      }
+      const persona = personas[personaName];
+      const style = styles[styleName];
+      if (!persona || !style) {
+        preview.textContent = '';
+        return;
+      }
+      preview.textContent = `${subject}, in the style of ${persona.genre}. ${persona.prompting_style}. ${style.machinability_prompt}`;
+    }
+
+    async function saveConfig() {
+      if (!currentProject) return;
+      const payload = {
+        subject: document.getElementById('subject').value,
+        persona: document.getElementById('persona').value,
+        style: document.getElementById('style').value,
+        size: document.getElementById('size').value,
+      };
+      const res = await fetch(`/image-ui/api/projects/${encodeURIComponent(currentProject)}/input`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        alert('Failed to save configuration');
+      }
+    }
+
+    async function generate() {
+      if (!currentProject) return;
+      await saveConfig();
+      const btn = document.getElementById('generate-btn');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.textContent = 'Generating…';
+      const res = await fetch('/image-ui/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project: currentProject }),
+      });
+      btn.disabled = false;
+      if (!res.ok) {
+        const text = await res.text();
+        status.textContent = text || 'Generation failed';
+        return;
+      }
+      status.textContent = 'Done';
+      loadGallery(currentProject);
+    }
+
+    async function loadGallery(project) {
+      const res = await fetch(`/image-ui/api/gallery/${encodeURIComponent(project)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const grid = document.getElementById('gallery');
+      grid.innerHTML = '';
+      (data.images || []).forEach(item => {
+        const fig = document.createElement('figure');
+        const img = document.createElement('img');
+        img.src = `/image-ui/files/${encodeURIComponent(project)}/${encodeURIComponent(item.name)}`;
+        img.alt = item.name;
+        img.loading = 'lazy';
+        fig.appendChild(img);
+        const caption = document.createElement('figcaption');
+        const date = item.modified ? new Date(item.modified * 1000).toLocaleString() : '';
+        caption.textContent = `${item.name}${item.latest ? ' (latest)' : ''}\n${date}`;
+        fig.appendChild(caption);
+        grid.appendChild(fig);
+      });
+    }
+
+    document.getElementById('subject').addEventListener('input', updatePreview);
+    document.getElementById('persona').addEventListener('change', updatePreview);
+    document.getElementById('style').addEventListener('change', updatePreview);
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      await saveConfig();
+      document.getElementById('status').textContent = 'Saved';
+    });
+    document.getElementById('generate-btn').addEventListener('click', generate);
+    document.getElementById('create-form').addEventListener('submit', async (evt) => {
+      evt.preventDefault();
+      const input = document.getElementById('create-name');
+      const name = input.value.trim();
+      if (!name) return;
+      const res = await fetch('/image-ui/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (res.ok) {
+        input.value = '';
+        await loadProjects();
+        const data = await res.json();
+        selectProject(data.name || name);
+      } else {
+        alert('Failed to create project');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      renderProjects(initialProjects);
+      await loadTaxonomy();
+      if (initialProjects.length > 0) {
+        selectProject(initialProjects[0]);
+      }
+      loadProjects();
+    });
+  </script>
+</body>
+</html>

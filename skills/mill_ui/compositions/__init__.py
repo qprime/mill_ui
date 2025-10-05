@@ -23,3 +23,7 @@ try:
     from .panels import border as _tmpl_border  
 except Exception:
     pass
+try:
+    from .math_art import mandelbrot_outline as _tmpl_mandelbrot_outline  
+except Exception:
+    pass

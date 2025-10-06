@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, Any, List, Optional, Tuple
 
 from skills.mill_ui.compositions.base import TemplateBase, register_template
+from skills.mill_ui.compositions.panels.border import make_border_for_frame
 
 
 def _rect(center: Tuple[float, float], w: float, h: float,
@@ -196,4 +197,19 @@ class Shaker(TemplateBase):
         cfg = ShakerConfig.from_params(params)
         if cfg.outer.width <= 0.0 or cfg.outer.height <= 0.0:
             return []
-        return cfg.compose(stock_thickness_mm=float(thickness_mm))
+        shapes = cfg.compose(stock_thickness_mm=float(thickness_mm))
+
+        border_cfg = params.get("border")
+        if isinstance(border_cfg, dict) and border_cfg:
+            frame_width_candidates = [v for v in (cfg.stile_mm, cfg.rail_mm) if v > 0.0]
+            frame_width = min(frame_width_candidates) if frame_width_candidates else 0.0
+            border_shapes = make_border_for_frame(
+                outer_w_mm=cfg.outer.width,
+                outer_h_mm=cfg.outer.height,
+                frame_width_mm=frame_width,
+                overrides=border_cfg,
+                sheet_thickness_mm=float(thickness_mm),
+            )
+            shapes.extend(border_shapes)
+
+        return shapes

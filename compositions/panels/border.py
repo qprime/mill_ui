@@ -541,7 +541,64 @@ def make(raw_params: Dict[str, Any], *, sheet_thickness_mm: float) -> List[Shape
     return build_border(params)
 
 
+def make_border_for_frame(
+    *,
+    outer_w_mm: float,
+    outer_h_mm: float,
+    frame_width_mm: float,
+    overrides: Optional[Dict[str, Any]],
+    sheet_thickness_mm: float,
+) -> List[ShapeSpec]:
+    """Generate decorative border shapes for an existing frame template.
+
+    This helper mirrors the standalone Border template but infers sensible
+    defaults (inset/band/mode) from the enclosing frame dimensions so other
+    templates can opt-in to border decorations without juggling offsets.
+    """
+
+    raw: Dict[str, Any] = {} if overrides is None else dict(overrides)
+
+    raw.setdefault("outer_w_mm", float(outer_w_mm))
+    raw.setdefault("outer_h_mm", float(outer_h_mm))
+
+    frame_w = max(0.0, float(frame_width_mm))
+    if frame_w > 0.0:
+        default_inset = frame_w * 0.5
+    else:
+        default_inset = min(float(outer_w_mm), float(outer_h_mm)) * 0.05
+
+    inset_val = raw.get("inset_mm")
+    inset_val = float(inset_val) if inset_val is not None else default_inset
+    inset_val = max(1.0, inset_val)
+    raw["inset_mm"] = inset_val
+
+    band_val = raw.get("band_mm")
+    if band_val is None:
+        if frame_w > 0.0:
+            proposed_band = frame_w * 0.25
+        else:
+            proposed_band = inset_val * 0.3
+        band_val = max(0.0, min(proposed_band, inset_val - 1.0))
+    else:
+        band_val = max(0.0, float(band_val))
+        if band_val >= inset_val:
+            band_val = max(0.0, inset_val - 1.0)
+    raw["band_mm"] = band_val
+
+    raw.setdefault("mode", "double_vine")
+    raw.setdefault("track_depth_mm", 0.6)
+
+    return make(raw, sheet_thickness_mm=sheet_thickness_mm)
+
+
 @register_template("Border")
 class BorderTemplate(TemplateBase):
     def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[ShapeSpec]:
         return make(params, sheet_thickness_mm=thickness_mm)
+
+
+__all__ = [
+    "BorderTemplate",
+    "make",
+    "make_border_for_frame",
+]

@@ -19,3 +19,18 @@ def test_shaker_allows_inner_dimensions():
     assert geom.get("w_mm") == 200.0 + 2.0 * 70.0
     assert geom.get("h_mm") == 300.0 + 2.0 * 70.0
 
+
+def test_shaker_border_when_requested():
+    params = {
+        "outer_w": 500.0,
+        "outer_h": 400.0,
+        "stile_w": 80.0,
+        "rail_h": 70.0,
+        "panel_recess": 6.0,
+        "border": {
+            "mode": "double_vine",
+            "track_width_mm": 2.5,
+        },
+    }
+    shapes = Shaker().expand(params, thickness_mm=18.0)
+    assert any(s.get("id", "").startswith("border:vine") for s in shapes)

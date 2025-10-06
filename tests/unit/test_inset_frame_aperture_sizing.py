@@ -22,3 +22,22 @@ def test_inset_frame_allows_aperture_dimensions():
     assert geom.get("w_mm") == expected_w
     assert geom.get("h_mm") == expected_h
 
+
+def test_inset_frame_border_adds_decorative_shapes():
+    params = {
+        "outer_w_mm": 400.0,
+        "outer_h_mm": 300.0,
+        "lip_inset_mm": 80.0,
+        "recess_extra_inset_mm": 10.0,
+        "lip_depth_mm": 6.0,
+        "recess_depth_mm": 12.0,
+        "border": {
+            "mode": "double_vine",
+            "track_depth_mm": 0.5,
+        },
+    }
+    shapes = InsetFrame().expand(params, thickness_mm=18.0)
+    recess = next(s for s in shapes if s.get("id") == "frame:recess")
+    feature = recess.get("feature") or {}
+    assert feature.get("start_depth_mm") == 6.0
+    assert any(s.get("id", "").startswith("border:vine") for s in shapes)

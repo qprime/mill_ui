@@ -12,6 +12,7 @@ from skills.mill_ui.compositions.base import (
     rect_shape,
     CenterRegion,
 )
+from skills.mill_ui.compositions.panels.border import make_border_for_frame
 
 
 @dataclass(frozen=True)
@@ -88,12 +89,13 @@ class InsetFrameConfig:
             return shapes
 
         shapes.append(
-            PocketLayer(
+            rect_shape(
+                (0.0, 0.0),
                 width_mm=lip_w,
                 height_mm=lip_h,
-                depth_mm=self.lip_depth_mm,
-                label="frame:lip",
-            ).to_shape()
+                feature={"type": "pocket", "depth_mm": self.lip_depth_mm},
+                shape_id="frame:lip",
+            )
         )
 
         recess_w = lip_w - 2.0 * self.recess_inset_mm
@@ -102,12 +104,17 @@ class InsetFrameConfig:
             return shapes
 
         shapes.append(
-            PocketLayer(
+            rect_shape(
+                (0.0, 0.0),
                 width_mm=recess_w,
                 height_mm=recess_h,
-                depth_mm=self.recess_depth_mm,
-                label="frame:recess",
-            ).to_shape()
+                feature={
+                    "type": "pocket",
+                    "depth_mm": self.recess_depth_mm,
+                    "start_depth_mm": self.lip_depth_mm,
+                },
+                shape_id="frame:recess",
+            )
         )
 
         return shapes
@@ -117,4 +124,18 @@ class InsetFrameConfig:
 class InsetFrame(TemplateBase):
     def expand(self, params: Dict[str, Any], thickness_mm: float) -> List[Dict[str, Any]]:
         cfg = InsetFrameConfig.from_params(params)
-        return cfg.compose()
+        shapes = cfg.compose()
+
+        border_cfg = params.get("border")
+        if isinstance(border_cfg, dict) and border_cfg:
+            frame_width = max(0.0, cfg.lip_inset_mm)
+            border_shapes = make_border_for_frame(
+                outer_w_mm=cfg.outer.width_mm,
+                outer_h_mm=cfg.outer.height_mm,
+                frame_width_mm=frame_width,
+                overrides=border_cfg,
+                sheet_thickness_mm=float(thickness_mm),
+            )
+            shapes.extend(border_shapes)
+
+        return shapes

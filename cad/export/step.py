@@ -26,7 +26,12 @@ def _sheet_to_dict(spec: SheetSpec) -> Dict[str, float]:
 
 
 def _center_shapes_on_sheet(sheet: SheetSpec, shapes: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Return deep-copied shapes shifted so the sheet centre maps to (0,0)."""
+    """Return deep-copied shapes shifted so the sheet centre maps to (0,0).
+
+    Notes:
+      - We must translate both placement centers AND embedded polyline geometry points
+        to keep engraves aligned with pockets/profiles after recentring.
+    """
 
     offset_x = float(sheet.width_mm) * 0.5
     offset_y = float(sheet.height_mm) * 0.5
@@ -34,6 +39,8 @@ def _center_shapes_on_sheet(sheet: SheetSpec, shapes: Iterable[Dict[str, Any]]) 
 
     for shape in shapes:
         item = copy.deepcopy(shape)
+
+        # Shift placement center if present
         placement = item.get("placement")
         if isinstance(placement, Mapping):
             centre = placement.get("center_xy_mm")
@@ -42,6 +49,22 @@ def _center_shapes_on_sheet(sheet: SheetSpec, shapes: Iterable[Dict[str, Any]]) 
                 updated = dict(placement)
                 updated["center_xy_mm"] = new_centre
                 item["placement"] = updated
+
+        # Shift polyline geometry points as well so engraves remain aligned
+        shape_type = str(item.get("type") or item.get("shape") or "").lower()
+        if shape_type == "polyline":
+            geom = item.get("geometry") or {}
+            pts = geom.get("points")
+            if isinstance(pts, list):
+                shifted: List[Tuple[float, float]] = []
+                for pt in pts:
+                    if isinstance(pt, (list, tuple)) and len(pt) == 2:
+                        shifted.append((float(pt[0]) - offset_x, float(pt[1]) - offset_y))
+                if shifted:
+                    new_geom = dict(geom)
+                    new_geom["points"] = shifted
+                    item["geometry"] = new_geom
+
         centered.append(item)
 
     return centered

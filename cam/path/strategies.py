@@ -74,6 +74,19 @@ def onion_skin_then_finish(
         moves += _finish_profile_pass(shape, setup, depth_mm=total)
     return moves
 
+def _offset_moves_z(moves: List[dict], offset: float) -> List[dict]:
+    if offset <= 0.0:
+        return moves
+    adjusted: List[dict] = []
+    for mv in moves:
+        clone = dict(mv)
+        if "z" in clone and clone["z"] is not None:
+            z_val = float(clone["z"])
+            if z_val <= 0.0:
+                clone["z"] = z_val - offset
+        adjusted.append(clone)
+    return adjusted
+
 # ---------------------------------------------------------------------------
 # Profiles: tabs on the final pass
 # ---------------------------------------------------------------------------
@@ -233,6 +246,7 @@ def pocket_then_finish_profile(
     stepover_mm: Optional[float] = None,
     step_down_mm: Optional[float] = None,
     cleanup_offset_mm: float = 0.25,
+    start_depth_mm: float = 0.0,
 ) -> List[dict]:
     """
     For internal pockets (e.g., panel recess):
@@ -248,6 +262,12 @@ def pocket_then_finish_profile(
     cy = 0.5 * (miny + maxy)
     w = maxx - minx
     h = maxy - miny
+
+    total = abs(float(total_depth_mm))
+    start = max(0.0, float(start_depth_mm))
+    if total <= start + 1e-9:
+        return []
+    cut_depth = total - start
 
     # Tool and pass parameters
     tool_d = float(getattr(setup.tool, "diameter", 3.0))
@@ -266,7 +286,7 @@ def pocket_then_finish_profile(
         rough = rectangle(w_rough, h_rough)
         rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
         moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
-        moves += pocket_raster(rough, setup, depth=total_depth_mm, stepover=so, stepdown=sd)
+        moves += pocket_raster(rough, setup, depth=cut_depth, stepover=so, stepdown=sd)
 
     # 2) Full-depth finish profile: inside boundary = (W - tool_d) x (H - tool_d)
     w_fin = max(0.0, w - tool_d)
@@ -275,6 +295,6 @@ def pocket_then_finish_profile(
         finish = rectangle(w_fin, h_fin)
         finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
         moves.append(move_comment("BEGIN finish profile pass"))
-        moves += profile_outline(finish, setup, depth=total_depth_mm, step_down=sd)
+        moves += profile_outline(finish, setup, depth=cut_depth, step_down=sd)
 
-    return moves
+    return _offset_moves_z(moves, start)

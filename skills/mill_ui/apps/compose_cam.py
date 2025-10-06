@@ -620,15 +620,15 @@ def _apply_grid_layout(
             if template_type == "insetframe":
                 ow = float(params.get("outer_w_mm", 0.0))
                 oh = float(params.get("outer_h_mm", 0.0))
+                lip = float(params.get("lip_inset_mm", 3.0))
+                recess = float(params.get("recess_extra_inset_mm", 3.0))
+                aw = float(params.get("aperture_w_mm", 0.0))
+                ah = float(params.get("aperture_h_mm", 0.0))
                 if ow <= 0.0 or oh <= 0.0:
-                    lip = float(params.get("lip_inset_mm", 3.0))
-                    recess = float(params.get("recess_extra_inset_mm", 3.0))
-                    aw = float(params.get("aperture_w_mm", 0.0))
-                    ah = float(params.get("aperture_h_mm", 0.0))
-                if aw > 0.0:
-                    ow = max(ow, aw + 2.0 * (lip + recess))
-                if ah > 0.0:
-                    oh = max(oh, ah + 2.0 * (lip + recess))
+                    if aw > 0.0:
+                        ow = max(ow, aw + 2.0 * (lip + recess))
+                    if ah > 0.0:
+                        oh = max(oh, ah + 2.0 * (lip + recess))
                 return ow, oh
             if template_type == "clampbar":
                 length = float(params.get("length_mm", params.get("length", 0.0)))

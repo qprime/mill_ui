@@ -123,6 +123,13 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         f = (it.get("feature") or {})
         depth = _depth_mm(f, sheet_thickness)
 
+        start_depth = 0.0
+        if bucket == "pockets":
+            try:
+                start_depth = max(0.0, float(f.get("start_depth_mm", f.get("start_depth", 0.0))))
+            except (TypeError, ValueError):
+                start_depth = 0.0
+
         rec: Dict[str, Any] = {
             "id": _id(it),
             "shape": t,
@@ -136,6 +143,9 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         side = (f.get("side") or it.get("side"))
         if side and bucket == "profiles":
             rec["side"] = str(side).lower()
+
+        if start_depth > 0.0 and bucket == "pockets":
+            rec["start_depth_mm"] = start_depth
 
         if bucket == "profiles":
             profiles.append(rec)
@@ -157,4 +167,3 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         "engraves": engraves,
         "items_resolved": items_resolved,
     }
-

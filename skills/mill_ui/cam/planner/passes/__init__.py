@@ -147,6 +147,22 @@ def plan_passes(
     merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or tabs_enabled)
 
     profiles = hints.get("profiles", []) or []
+
+    def _tabs_for_record(rec: Mapping[str, Any]) -> Optional[Dict[str, float]]:
+        value = rec.get("tabs") if isinstance(rec, Mapping) else None
+        if isinstance(value, Mapping):
+            custom = _normalize_tabs(value)
+            return custom if custom is not None else tabs_opts
+        if isinstance(value, bool):
+            return tabs_opts if value else None
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"off", "none", "skip", "false"}:
+                return None
+            if lowered in {"on", "true", "force"}:
+                return tabs_opts
+        return tabs_opts
+
     rect_profiles = [rec for rec in profiles if _shape_name(rec) == "rect"]
     circle_profiles = [rec for rec in profiles if _shape_name(rec) == "circle"]
 
@@ -177,7 +193,7 @@ def plan_passes(
                     depth_mm=depth,
                     tool=profile_tool,
                     onion_skin_mm=onion_skin_mm,
-                    tabs_opts=tabs_opts,
+                    tabs_opts=_tabs_for_record(rec),
                 ),
                 increment=1,
             )
@@ -205,7 +221,7 @@ def plan_passes(
                 depth_mm=depth,
                 tool=profile_tool,
                 onion_skin_mm=onion_skin_mm,
-                tabs_opts=tabs_opts,
+                tabs_opts=_tabs_for_record(rec),
             ),
             increment=1,
         )

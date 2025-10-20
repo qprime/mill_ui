@@ -286,7 +286,11 @@ GeometryResult build_geometry(const SheetSpec &sheet,
       continue;
     }
 
-    if ((shape.feature_kind == FeatureKind::Pocket || shape.feature_kind == FeatureKind::Engrave) && shape.depth > 0.0) {
+    const bool pocket_like_profile =
+        (shape.feature_kind == FeatureKind::Profile && !shape.through && shape.depth > 0.0);
+
+    if (((shape.feature_kind == FeatureKind::Pocket || shape.feature_kind == FeatureKind::Engrave) && shape.depth > 0.0) ||
+        pocket_like_profile) {
       const double depth = std::clamp(shape.depth, 0.0, sheet.thickness);
       if (depth <= 0.0) {
         continue;
@@ -438,7 +442,11 @@ py::dict build_model_binding(const py::dict &sheet_dict,
 
   py::list pockets;
   for (const auto &shape : shapes) {
-    if ((shape.feature_kind == FeatureKind::Pocket || shape.feature_kind == FeatureKind::Engrave) && shape.depth > 0.0) {
+    const bool pocket_like_profile =
+        (shape.feature_kind == FeatureKind::Profile && !shape.through && shape.depth > 0.0);
+
+    if (((shape.feature_kind == FeatureKind::Pocket || shape.feature_kind == FeatureKind::Engrave) && shape.depth > 0.0) ||
+        pocket_like_profile) {
       pockets.append(make_pocket_dict(shape));
     }
   }

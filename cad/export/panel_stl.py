@@ -178,6 +178,12 @@ def write_panel_stl(path: Path,
 
         center = _center_xy(item)
 
+        depth_mm = max(0.0, min(thickness, thickness - float(target_z)))
+        is_through_profile = False
+        if feature:
+            depth_flag = str(feature.get("depth", "")).lower()
+            is_through_profile = depth_flag == "through" or depth_mm >= thickness - 1e-6
+
         if shape_type == "rect":
             geom = item.get("geometry") or {}
             size = (
@@ -185,9 +191,13 @@ def write_panel_stl(path: Path,
                 float(geom.get("h_mm", 0.0)),
             )
             if ftype == "profile":
-                _apply_rect(heightmap, x_grid, y_grid, center, size,
-                            mode="max", value=thickness, stock_thickness=thickness,
-                            profile_mask=profile_mask)
+                if not is_through_profile and depth_mm > 1e-6:
+                    _apply_rect(heightmap, x_grid, y_grid, center, size,
+                                mode="min", value=target_z, stock_thickness=thickness)
+                else:
+                    _apply_rect(heightmap, x_grid, y_grid, center, size,
+                                mode="max", value=thickness, stock_thickness=thickness,
+                                profile_mask=profile_mask)
             else:
                 if target_z >= thickness:
                     continue
@@ -197,9 +207,13 @@ def write_panel_stl(path: Path,
             geom = item.get("geometry") or {}
             diameter = float(geom.get("diameter_mm", 0.0))
             if ftype == "profile":
-                _apply_circle(heightmap, x_grid, y_grid, center, diameter,
-                              mode="max", value=thickness, stock_thickness=thickness,
-                              profile_mask=profile_mask)
+                if not is_through_profile and depth_mm > 1e-6:
+                    _apply_circle(heightmap, x_grid, y_grid, center, diameter,
+                                  mode="min", value=target_z, stock_thickness=thickness)
+                else:
+                    _apply_circle(heightmap, x_grid, y_grid, center, diameter,
+                                  mode="max", value=thickness, stock_thickness=thickness,
+                                  profile_mask=profile_mask)
             else:
                 if target_z >= thickness:
                     continue

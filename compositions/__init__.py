@@ -16,6 +16,10 @@ try:
 except Exception:
     pass
 try:
+    from .panels import frame_inset_clamp as _tmpl_frame_inset_clamp  
+except Exception:
+    pass
+try:
     from .shop_accessories import clamp_bar as _tmpl_clamp_bar  
 except Exception:
     pass

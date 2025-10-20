@@ -3,6 +3,120 @@ from __future__ import annotations
 from typing import List, Dict, Any, Tuple, Optional
 from collections import Counter
 
+
+_CANVAS_HEIGHT = 0.0
+_CANVAS_OFFSET_Y = 0.0
+
+_STYLE_ATTRS: Dict[str, Dict[str, str]] = {
+    "panel": {"fill": "none", "stroke": "#888", "stroke-width": "0.7"},
+    "item": {"fill": "none", "stroke": "#444", "stroke-width": "0.5"},
+    "feature-profile": {"fill": "none", "stroke": "#000", "stroke-width": "0.9"},
+    "feature-pocket": {
+        "fill": "none",
+        "stroke": "#0a0",
+        "stroke-width": "0.7",
+        "stroke-dasharray": "3 2",
+    },
+    "feature-anchor": {
+        "fill": "none",
+        "stroke": "#a60",
+        "stroke-width": "0.7",
+        "stroke-dasharray": "2 2",
+    },
+    "feature-engrave": {
+        "fill": "none",
+        "stroke": "#06c",
+        "stroke-width": "0.6",
+        "stroke-dasharray": "1.5 1.5",
+    },
+    "feature-hole": {"fill": "none", "stroke": "#c00", "stroke-width": "0.9"},
+    "shared-edge": {
+        "fill": "none",
+        "stroke": "#06c",
+        "stroke-width": "1.2",
+        "stroke-dasharray": "4 2",
+    },
+    "dim": {"fill": "none", "stroke": "#06c", "stroke-width": "0.7"},
+    "text": {
+        "fill": "#06c",
+        "font-size": "6px",
+        "font-family": "monospace",
+    },
+    "label": {
+        "fill": "#333",
+        "font-size": "6px",
+        "font-family": "monospace",
+    },
+    "legend-bg": {"fill": "#f7f7f7", "stroke": "#aaa"},
+}
+
+
+def _set_canvas_height(h: float, offset_y: float = 0.0) -> None:
+    global _CANVAS_HEIGHT, _CANVAS_OFFSET_Y
+    _CANVAS_HEIGHT = float(h)
+    _CANVAS_OFFSET_Y = float(offset_y)
+
+
+def _flip_y(y: float) -> float:
+    return _CANVAS_OFFSET_Y + _CANVAS_HEIGHT - float(y)
+
+
+def _style_fragment(cls: str) -> str:
+    attrs = _STYLE_ATTRS.get(cls, {})
+    if not attrs:
+        return ""
+    return " " + " ".join(f"{k}=\"{v}\"" for k, v in attrs.items())
+
+
+def _rect(x: float, y: float, w: float, h: float, cls: str = "item") -> str:
+    y_top = _flip_y(y + h)
+    return (
+        f'    <rect class="{cls}" x="{x:.3f}" y="{y_top:.3f}" '
+        f'width="{w:.3f}" height="{h:.3f}"{_style_fragment(cls)} />\n'
+    )
+
+
+def _circ(cx: float, cy: float, r: float, cls: str = "item") -> str:
+    cy_svg = _flip_y(cy)
+    return (
+        f'    <circle class="{cls}" cx="{cx:.3f}" cy="{cy_svg:.3f}" '
+        f'r="{r:.3f}"{_style_fragment(cls)} />\n'
+    )
+
+
+def _line(x1: float, y1: float, x2: float, y2: float, cls: str) -> str:
+    y1_svg = _flip_y(y1)
+    y2_svg = _flip_y(y2)
+    return (
+        f'    <line class="{cls}" x1="{x1:.3f}" y1="{y1_svg:.3f}" '
+        f'x2="{x2:.3f}" y2="{y2_svg:.3f}"{_style_fragment(cls)} />\n'
+    )
+
+
+def _polyline_svg(points: List[Tuple[float, float]], cls: str) -> str:
+    coords = " ".join(f"{x:.3f},{_flip_y(y):.3f}" for (x, y) in points)
+    return f'    <polyline class="{cls}" points="{coords}"{_style_fragment(cls)} />\n'
+
+
+def _text(x: float, y: float, s: str, cls: str = "label") -> str:
+    y_svg = _flip_y(y)
+    return (
+        f'    <text class="{cls}" x="{x:.3f}" y="{y_svg:.3f}"'
+        f'{_style_fragment(cls)}>{s}</text>\n'
+    )
+
+
+def _arrow_head(x: float, y: float, dx: float, dy: float, size: float = 3.0) -> str:
+    y_svg = _flip_y(y)
+    dy_svg = -dy
+    s = size
+    path_d = (
+        f'M {x:.3f} {y_svg:.3f} '
+        f'l { -0.6*dx*s:.3f} { -0.6*dy_svg*s:.3f} '
+        f'M {x:.3f} {y_svg:.3f} l { 0.6*dx*s:.3f} { 0.6*dy_svg*s:.3f}'
+    )
+    return f'    <path class="dim" d="{path_d}"{_style_fragment("dim")} />\n'
+
 # ===== Public API =========================================================
 
 def render_svg_with_dims(
@@ -26,6 +140,8 @@ def render_svg_with_dims(
       - Size labels (W/H, ⌀), depth labels, stile/rail thickness
       - Legend rendered to the RIGHT, outside the panel
     """
+    margin = 16.0
+    _set_canvas_height(panel_h, offset_y=margin)
     body: List[str] = []
     legend_lines: List[str] = []
 
@@ -136,13 +252,12 @@ def render_svg_with_dims(
 
     # assemble final svg with legend to the right
     legend_w, legend_h = _legend_box_size(legend_lines)
-    margin = 16.0
-    svg_w = panel_w + legend_w + margin*2
-    svg_h = panel_h
+    svg_w = panel_w + legend_w + margin * 2
+    svg_h = panel_h + margin * 2
 
     out: List[str] = []
     out.append(_svg_header(svg_w, svg_h))
-    out.append(f'  <g transform="scale(1,-1) translate(0,-{panel_h})">\n')
+    out.append('  <g>\n')
     out.extend(body)
     out.append('  </g>\n')
     legend_x = panel_w + margin
@@ -161,66 +276,63 @@ def _xy(v) -> Tuple[float,float]:
         return float(v[0]), float(v[1])
     return 0.0, 0.0
 
-def _svg_header(w,h):
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">\n'
-        f'    <style>\n'
-        f'      .panel {{ fill:none; stroke:#888; stroke-width:0.7; }}\n'
-        f'      .item  {{ fill:none; stroke:#444; stroke-width:0.5; }}\n'
-        f'      .feature-profile {{ fill:none; stroke:#000; stroke-width:0.9; }}\n'
-        f'      .feature-pocket  {{ fill:none; stroke:#0a0; stroke-width:0.7; stroke-dasharray:3 2; }}\n'
-        f'      .feature-anchor  {{ fill:none; stroke:#a60; stroke-width:0.7; stroke-dasharray:2 2; }}\n'
-        f'      .feature-engrave {{ fill:none; stroke:#06c; stroke-width:0.6; stroke-dasharray:1.5 1.5; }}\n'
-        f'      .feature-hole    {{ fill:none; stroke:#c00; stroke-width:0.9; }}\n'
-        f'      .shared-edge     {{ stroke:#06c; stroke-width:1.2; stroke-dasharray:4 2; }}\n'
-        f'      .dim {{ stroke:#06c; stroke-width:0.7; fill:none; }}\n'
-        f'      .text {{ fill:#06c; font-size:6px; font-family:monospace; }}\n'
-        f'      .label {{ fill:#333; font-size:6px; font-family:monospace; }}\n'
-        f'      .legend-bg {{ fill:#f7f7f7; stroke:#aaa; }}\n'
-        f'    </style>\n'
-    )
+def _svg_header(w: float, h: float) -> str:
+    return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">\n'
 
-def _svg_footer(): return "</svg>\n"
 
-def _rect(x,y,w,h,cls="item"): return f'    <rect class="{cls}" x="{x:.3f}" y="{y:.3f}" width="{w:.3f}" height="{h:.3f}" />\n'
-def _circ(cx,cy,r,cls="item"): return f'    <circle class="{cls}" cx="{cx:.3f}" cy="{cy:.3f}" r="{r:.3f}" />\n'
-def _text(x,y,s,cls="label"):  return f'    <text class="{cls}" x="{x:.3f}" y="{y:.3f}" transform="scale(1,-1) translate(0,{-(2*y):.3f})">{s}</text>\n'
+def _svg_footer() -> str:
+    return "</svg>\n"
 
-def _arrow_head(x,y,dx,dy,size=3.0):
-    s=size
-    return (f'    <path class="dim" d="M {x:.3f} {y:.3f} l { -0.6*dx*s:.3f} { -0.6*dy*s:.3f} M {x:.3f} {y:.3f} l { 0.6*dx*s:.3f} { 0.6*dy*s:.3f}" />\n')
 
-def _dim_linear_h(x_text,y,xa,xb,label):
-    xa,xb=float(xa),float(xb); dx=1.0 if xb>=xa else -1.0
-    return [f'    <line class="dim" x1="{xa:.3f}" y1="{y:.3f}" x2="{xb:.3f}" y2="{y:.3f}" />\n',
-            _arrow_head(xa,y,+dx,0), _arrow_head(xb,y,-dx,0),
-            _text(x_text,y+3,label,cls="text")]
+def _dim_linear_h(x_text: float, y: float, xa: float, xb: float, label: str) -> List[str]:
+    xa, xb = float(xa), float(xb)
+    dx = 1.0 if xb >= xa else -1.0
+    return [
+        _line(xa, y, xb, y, "dim"),
+        _arrow_head(xa, y, +dx, 0),
+        _arrow_head(xb, y, -dx, 0),
+        _text(x_text, y + 3, label, cls="text"),
+    ]
 
-def _dim_linear_v(x,y_text,ya,yb,label):
-    ya,yb=float(ya),float(yb); dy=1.0 if yb>=ya else -1.0
-    return [f'    <line class="dim" x1="{x:.3f}" y1="{ya:.3f}" x2="{x:.3f}" y2="{yb:.3f}" />\n',
-            _arrow_head(x,ya,0,+dy), _arrow_head(x,yb,0,-dy),
-            _text(x+2,y_text+3,label,cls="text")]
 
-def _legend_box_size(lines: List[str]) -> Tuple[float,float]:
-    pad_x,pad_y=3.0,3.0; line_h=8.0
-    est = max((len(s) for s in lines), default=0)*4.0
-    return max(180.0, est+2*pad_x), line_h*max(1,len(lines))+2*pad_y
+def _dim_linear_v(x: float, y_text: float, ya: float, yb: float, label: str) -> List[str]:
+    ya, yb = float(ya), float(yb)
+    dy = 1.0 if yb >= ya else -1.0
+    return [
+        _line(x, ya, x, yb, "dim"),
+        _arrow_head(x, ya, 0, +dy),
+        _arrow_head(x, yb, 0, -dy),
+        _text(x + 2, y_text + 3, label, cls="text"),
+    ]
 
-def _legend_upright(x: float, y_top: float, lines: List[str], legend_w: float, legend_h: float) -> str:
-    out=[]; pad_x,pad_y=3.0,3.0; x_bg=x-pad_x; y_bg=y_top-legend_h+pad_y
+
+def _legend_box_size(lines: List[str]) -> Tuple[float, float]:
+    pad_x, pad_y = 3.0, 3.0
+    line_h = 8.0
+    est = max((len(s) for s in lines), default=0) * 4.0
+    return max(180.0, est + 2 * pad_x), line_h * max(1, len(lines)) + 2 * pad_y
+
+
+def _legend_upright(
+    x: float, y_top: float, lines: List[str], legend_w: float, legend_h: float
+) -> str:
+    out: List[str] = []
+    pad_x, pad_y = 3.0, 3.0
+    x_bg = x - pad_x
+    y_bg = y_top - legend_h + pad_y
     out.append('  <g>\n')
-    out.append(f'    <rect class="legend-bg" x="{x_bg:.1f}" y="{y_bg:.1f}" width="{legend_w:.1f}" height="{legend_h:.1f}" />\n')
-    line_h=8.0
-    for i,t in enumerate(lines):
-        out.append(f'    <text class="label" x="{x:.1f}" y="{y_top-(i*line_h):.1f}">{t}</text>\n')
+    out.append(
+        f'    <rect class="legend-bg" x="{x_bg:.1f}" y="{y_bg:.1f}" '
+        f'width="{legend_w:.1f}" height="{legend_h:.1f}"{_style_fragment("legend-bg")} />\n'
+    )
+    line_h = 8.0
+    for i, text in enumerate(lines):
+        out.append(
+            f'    <text class="label" x="{x:.1f}" y="{y_top - (i * line_h):.1f}"'
+            f'{_style_fragment("label")}>{text}</text>\n'
+        )
     out.append('  </g>\n')
     return "".join(out)
-
-# draw features
-def _polyline_svg(points: List[Tuple[float, float]], cls: str) -> str:
-    coords = " ".join(f"{x:.3f},{y:.3f}" for (x, y) in points)
-    return f'    <polyline class="{cls}" points="{coords}" />\n'
 
 def _draw_polyline(body: List[str], rec: Dict[str, Any], style: str) -> List[Tuple[float, float]]:
     pts = (rec.get("geometry") or {}).get("points") or []
@@ -348,28 +460,12 @@ def _draw_shared_seams(outer_rects: List[Dict[str,Any]], tol: float=0.1) -> List
                 lo=max(min(a1,b1), min(a2,b2)); hi=min(max(a1,b1), max(a2,b2))
                 if hi-lo <= 0: continue
                 if o=="v":
-                    out.append(f'    <line class="shared-edge" x1="{c:.3f}" y1="{lo:.3f}" x2="{c:.3f}" y2="{hi:.3f}" />\n')
+                    out.append(_line(c, lo, c, hi, "shared-edge"))
                     out.append(_text(c+2, (lo+hi)/2, "Shared", cls="text"))
                 else:
-                    out.append(f'    <line class="shared-edge" x1="{lo:.3f}" y1="{c:.3f}" x2="{hi:.3f}" y2="{c:.3f}" />\n')
+                    out.append(_line(lo, c, hi, c, "shared-edge"))
                     out.append(_text((lo+hi)/2, c+2, "Shared", cls="text"))
     return out
-
-# gaps & legend helpers
-def _legend_box_size(lines: List[str]) -> Tuple[float,float]:
-    pad_x,pad_y=3.0,3.0; line_h=8.0
-    est = max((len(s) for s in lines), default=0)*4.0
-    return max(180.0, est+2*pad_x), line_h*max(1,len(lines))+2*pad_y
-
-def _legend_upright(x: float, y_top: float, lines: List[str], legend_w: float, legend_h: float) -> str:
-    out=[]; pad_x,pad_y=3.0,3.0; x_bg=x-pad_x; y_bg=y_top-legend_h+pad_y
-    out.append('  <g>\n')
-    out.append(f'    <rect class="legend-bg" x="{x_bg:.1f}" y="{y_bg:.1f}" width="{legend_w:.1f}" height="{legend_h:.1f}" />\n')
-    line_h=8.0
-    for i,t in enumerate(lines):
-        out.append(f'    <text class="label" x="{x:.1f}" y="{y_top-(i*line_h):.1f}">{t}</text>\n')
-        out.append('  </g>\n')
-    return "".join(out)
 
 def _render_gaps(rects, panel_w, panel_h, tol):
     out=[]

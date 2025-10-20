@@ -144,6 +144,9 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         if side and bucket == "profiles":
             rec["side"] = str(side).lower()
 
+        if bucket == "profiles" and "tabs" in f:
+            rec["tabs"] = f.get("tabs")
+
         if start_depth > 0.0 and bucket == "pockets":
             rec["start_depth_mm"] = start_depth
 

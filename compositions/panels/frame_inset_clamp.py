@@ -32,6 +32,7 @@ class FrameInsetClampConfig:
     relief_inner_w_mm: float
     relief_inner_h_mm: float
     indent_mm: float
+    rabbet_depth_mm: float
     rabbet_step_mm: float
     border_cfg: Optional[Mapping[str, Any]]
 
@@ -41,6 +42,80 @@ class FrameInsetClampConfig:
 
     @classmethod
     def from_params(cls, params: Dict[str, Any]) -> "FrameInsetClampConfig":
+        frame_band = _as_float(params.get("frame_width_mm"))
+        if frame_band > 0.0:
+            return cls._from_modern_params(params, frame_band)
+        return cls._from_legacy_params(params)
+
+    @classmethod
+    def _from_modern_params(cls, params: Dict[str, Any], frame_width_mm: float) -> "FrameInsetClampConfig":
+        outer_w_raw = _as_float(params.get("outer_w_mm"))
+        outer_h_raw = _as_float(params.get("outer_h_mm"))
+        outer_shrink = max(0.0, _as_float(params.get("outer_shrink_mm")))
+
+        aperture_w = _as_float(params.get("aperture_w_mm") or params.get("aperture_width_mm"))
+        aperture_h = _as_float(params.get("aperture_h_mm") or params.get("aperture_height_mm"))
+
+        if outer_w_raw <= 0.0 and aperture_w > 0.0:
+            outer_w_raw = aperture_w + 2.0 * frame_width_mm
+        if outer_h_raw <= 0.0 and aperture_h > 0.0:
+            outer_h_raw = aperture_h + 2.0 * frame_width_mm
+        if outer_w_raw <= 0.0 or outer_h_raw <= 0.0:
+            raise ValueError("FrameInsetClamp requires outer_w_mm and outer_h_mm when using frame_width_mm")
+
+        outer_w = max(0.0, outer_w_raw - 2.0 * outer_shrink)
+        outer_h = max(0.0, outer_h_raw - 2.0 * outer_shrink)
+
+        inner_clearance = _as_float(params.get("inner_clearance_mm"))
+        inner_w = max(0.0, outer_w - 2.0 * frame_width_mm + 2.0 * inner_clearance)
+        inner_h = max(0.0, outer_h - 2.0 * frame_width_mm + 2.0 * inner_clearance)
+
+        inner_w = min(inner_w, max(0.0, outer_w))
+        inner_h = min(inner_h, max(0.0, outer_h))
+
+        rabbet_width = _as_float(params.get("rabbet_width_mm"), frame_width_mm)
+        rabbet_width = max(0.0, min(frame_width_mm, rabbet_width))
+
+        relief_outer_w = max(inner_w, min(outer_w, inner_w + 2.0 * rabbet_width))
+        relief_outer_h = max(inner_h, min(outer_h, inner_h + 2.0 * rabbet_width))
+        relief_inner_w = inner_w
+        relief_inner_h = inner_h
+
+        rabbet_depth = max(0.0, _as_float(params.get("rabbet_depth_mm")))
+        indent_mm = max(0.0, _as_float(params.get("indent_mm") or params.get("indent")))
+
+        tool_diameter = _as_float(
+            params.get("rabbet_tool_diameter_mm")
+            or params.get("tool_diameter_mm")
+            or params.get("kerf_width_mm"),
+            6.35,
+        )
+        default_rabbet_step = max(0.1, 0.5 * tool_diameter)
+        rabbet_step_mm = max(0.1, _as_float(params.get("rabbet_step_mm"), default_rabbet_step))
+
+        aperture_region = CenterRegion(
+            width_mm=relief_outer_w if aperture_w <= 0.0 else aperture_w,
+            height_mm=relief_outer_h if aperture_h <= 0.0 else aperture_h,
+        )
+
+        border_cfg = params.get("border") if isinstance(params.get("border"), Mapping) else None
+
+        return cls(
+            outer=CenterRegion(width_mm=outer_w, height_mm=outer_h),
+            inner=CenterRegion(width_mm=inner_w, height_mm=inner_h),
+            aperture=aperture_region,
+            relief_outer_w_mm=relief_outer_w,
+            relief_outer_h_mm=relief_outer_h,
+            relief_inner_w_mm=relief_inner_w,
+            relief_inner_h_mm=relief_inner_h,
+            indent_mm=indent_mm,
+            rabbet_depth_mm=rabbet_depth,
+            rabbet_step_mm=rabbet_step_mm,
+            border_cfg=border_cfg,
+        )
+
+    @classmethod
+    def _from_legacy_params(cls, params: Dict[str, Any]) -> "FrameInsetClampConfig":
         aperture_w = _as_float(params.get("aperture_w_mm") or params.get("aperture_width_mm"))
         aperture_h = _as_float(params.get("aperture_h_mm") or params.get("aperture_height_mm"))
         if aperture_w <= 0.0 or aperture_h <= 0.0:
@@ -77,7 +152,6 @@ class FrameInsetClampConfig:
         inner_w = max(0.0, aperture_w - 2.0 * extent_mm + 2.0 * inner_clearance)
         inner_h = max(0.0, aperture_h - 2.0 * extent_mm + 2.0 * inner_clearance)
 
-        # Ensure inner fits within outer (leave at least 0.5mm wall if possible)
         min_wall = 0.5
         max_inner_w = max(0.0, outer_w - 2.0 * min_wall)
         max_inner_h = max(0.0, outer_h - 2.0 * min_wall)
@@ -118,6 +192,7 @@ class FrameInsetClampConfig:
             relief_inner_w_mm=relief_inner_w,
             relief_inner_h_mm=relief_inner_h,
             indent_mm=indent_mm,
+            rabbet_depth_mm=0.0,
             rabbet_step_mm=rabbet_step_mm,
             border_cfg=border_cfg,
         )
@@ -149,7 +224,7 @@ class FrameInsetClampConfig:
                 )
             )
 
-        if 0.0 < self.indent_mm < thickness_mm:
+        if self.rabbet_depth_mm > 0.0 or (0.0 < self.indent_mm < thickness_mm):
             shapes.extend(self._compose_rabbet_passes(thickness_mm))
 
         if self.border_cfg and self.frame_width_mm > 0.0:
@@ -165,7 +240,9 @@ class FrameInsetClampConfig:
         return shapes
 
     def _compose_rabbet_passes(self, thickness_mm: float) -> List[Dict[str, Any]]:
-        pocket_depth = max(0.0, thickness_mm - self.indent_mm)
+        pocket_depth = max(0.0, min(thickness_mm, self.rabbet_depth_mm))
+        if pocket_depth <= 0.0 and 0.0 < self.indent_mm < thickness_mm:
+            pocket_depth = max(0.0, thickness_mm - self.indent_mm)
         if pocket_depth <= 0.0:
             return []
 
@@ -200,7 +277,12 @@ class FrameInsetClampConfig:
             if width <= 0.0 or height <= 0.0:
                 continue
 
-            feature = {"type": "profile", "side": "inside", "depth_mm": pocket_depth}
+            feature = {
+                "type": "profile",
+                "side": "inside",
+                "depth_mm": pocket_depth,
+                "tabs": False,
+            }
             rabbet_shapes.append(
                 rect_shape(
                     (0.0, 0.0),

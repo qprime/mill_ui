@@ -27,6 +27,7 @@ from skills.mill_ui.cam.planner.passes import plan_passes
 from skills.mill_ui.cam.post.gcode import write_gcode
 from skills.mill_ui.cam.tools.adapter import load_tool_db
 from skills.mill_ui.compositions import resolve_templates
+from skills.mill_ui.compositions.panels.frame_inset_clamp import FrameInsetClampConfig
 
 os.environ.setdefault("PYTHONHASHSEED", "0")
 random.seed(0)
@@ -630,6 +631,12 @@ def _apply_grid_layout(
                     if ah > 0.0:
                         oh = max(oh, ah + 2.0 * (lip + recess))
                 return ow, oh
+            if template_type == "frameinsetclamp":
+                try:
+                    cfg = FrameInsetClampConfig.from_params(params)
+                except Exception:
+                    return 0.0, 0.0
+                return cfg.outer.width_mm, cfg.outer.height_mm
             if template_type == "clampbar":
                 length = float(params.get("length_mm", params.get("length", 0.0)))
                 height_a = float(params.get("height_a_mm", params.get("height_a", 0.0)))

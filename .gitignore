@@ -137,3 +137,4 @@ image_pipeline/output/
 # Generated living docs
 living_docs/docs/
 living_docs/artifacts/
+skills/mill_ui/cad/native/_cad_native*.so

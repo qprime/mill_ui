@@ -1615,7 +1615,7 @@ def _emit_passes(plan_result: Dict[str, Any], cfg: Dict[str, Any], dirs: Dict[st
         moves = _quantize_moves_z(moves, dz_mm=dz)
 
         out_path = dirs["output"] / f"{p['name']}.{cfg['output']['extension']}"
-        write_gcode(out_path, moves, cfg["machine"], cfg["stock"])
+        write_gcode(out_path, moves, cfg["machine"], cfg["stock"], pass_cfg=pass_cfg)
 
 
 def run_cli() -> None:

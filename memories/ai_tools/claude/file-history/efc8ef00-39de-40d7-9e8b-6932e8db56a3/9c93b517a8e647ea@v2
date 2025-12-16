@@ -1,0 +1,38 @@
+"""
+Token counting utility using tiktoken.
+
+Uses OpenAI's tiktoken library for accurate token counting with cl100k_base encoding
+(used by GPT-4, GPT-3.5-turbo, and text-embedding-ada-002).
+"""
+
+import tiktoken
+
+# Cache the encoding to avoid loading it repeatedly
+_encoding = None
+
+
+def _get_encoding():
+    """Get or create cached encoding."""
+    global _encoding
+    if _encoding is None:
+        _encoding = tiktoken.get_encoding("cl100k_base")
+    return _encoding
+
+
+def estimate_tokens(text: str) -> int:
+    """
+    Count tokens in text using tiktoken.
+
+    Uses cl100k_base encoding (GPT-4, GPT-3.5-turbo).
+
+    Args:
+        text: Text to count tokens for
+
+    Returns:
+        Exact token count
+    """
+    if not text:
+        return 0
+
+    encoding = _get_encoding()
+    return len(encoding.encode(text))

@@ -1,0 +1,13 @@
+[Unit]
+Description=Cliff Backup API Service
+After=network.target
+
+[Service]
+Type=simple
+User=squinlan
+WorkingDirectory=/home/squinlan/cliff_ai/interfaces/sysadmin/backup_api
+ExecStart=/usr/bin/python3 app.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

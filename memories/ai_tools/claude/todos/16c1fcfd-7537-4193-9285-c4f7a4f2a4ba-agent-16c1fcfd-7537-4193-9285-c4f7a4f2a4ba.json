@@ -1,0 +1,62 @@
+[
+  {
+    "content": "Read and review all Cull documentation files",
+    "status": "completed",
+    "activeForm": "Reading and reviewing all Cull documentation files"
+  },
+  {
+    "content": "Read Artifact Engine API spec for comparison",
+    "status": "in_progress",
+    "activeForm": "Reading Artifact Engine API spec"
+  },
+  {
+    "content": "Read Turnstile backend_architecture.md for context",
+    "status": "pending",
+    "activeForm": "Reading Turnstile backend architecture"
+  },
+  {
+    "content": "Identify API mismatches between Cull and Artifact Engine",
+    "status": "pending",
+    "activeForm": "Identifying API mismatches"
+  },
+  {
+    "content": "Create docs/ subdirectory and move .md files",
+    "status": "pending",
+    "activeForm": "Creating docs/ subdirectory"
+  },
+  {
+    "content": "Create README.md with project summary",
+    "status": "pending",
+    "activeForm": "Creating README.md"
+  },
+  {
+    "content": "Create .gitignore for Python development",
+    "status": "pending",
+    "activeForm": "Creating .gitignore"
+  },
+  {
+    "content": "Initialize git repo if not present",
+    "status": "pending",
+    "activeForm": "Initializing git repo"
+  },
+  {
+    "content": "Normalize document headers to use 'Cull:' format",
+    "status": "pending",
+    "activeForm": "Normalizing document headers"
+  },
+  {
+    "content": "Check naming consistency across all docs",
+    "status": "pending",
+    "activeForm": "Checking naming consistency"
+  },
+  {
+    "content": "Cross-reference with Turnstile docs",
+    "status": "pending",
+    "activeForm": "Cross-referencing with Turnstile"
+  },
+  {
+    "content": "Propose adapter code for API mismatches",
+    "status": "pending",
+    "activeForm": "Proposing adapter code"
+  }
+]

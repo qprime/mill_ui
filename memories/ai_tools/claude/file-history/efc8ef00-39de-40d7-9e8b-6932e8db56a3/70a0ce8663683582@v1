@@ -1,0 +1,477 @@
+"""
+SAK Router FastAPI server.
+
+Routes requests to backend services:
+- /sessions/* → Session Manager
+- /assemble → Artifact Assembler
+- /personas/* → Static file serving
+- /chat → Model Gateway (with SSE streaming)
+"""
+
+import json
+import logging
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from sse_starlette.sse import EventSourceResponse
+
+from .config import Config, get_config
+from .gateway import AnthropicGateway, MockGateway, OpenAIGateway
+from .model_registry import ModelRegistry
+from .personas import PersonaLoadError, PersonaNotFoundError, load_persona
+from .proxy import ServiceUnavailableError, check_service_health, proxy_json, proxy_request
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+# Global state
+config: Config | None = None
+model_gateway: OpenAIGateway | AnthropicGateway | MockGateway | None = None
+model_registry: ModelRegistry | None = None
+
+
+def create_model_gateway(cfg: Config):
+    """Create model gateway based on configuration."""
+    if cfg.default_provider == "anthropic":
+        if not cfg.anthropic_api_key:
+            logger.warning("No Anthropic API key - using mock gateway")
+            return MockGateway()
+        return AnthropicGateway(api_key=cfg.anthropic_api_key)
+    else:
+        if not cfg.openai_api_key:
+            logger.warning("No OpenAI API key - using mock gateway")
+            return MockGateway()
+        return OpenAIGateway(
+            api_key=cfg.openai_api_key,
+            default_model=cfg.default_model,
+        )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan - initialize on startup."""
+    global config, model_gateway, model_registry
+
+    config = get_config()
+
+    # Set log level
+    log_level = getattr(logging, config.log_level.upper(), logging.INFO)
+    logging.getLogger().setLevel(log_level)
+
+    # Initialize model gateway
+    model_gateway = create_model_gateway(config)
+
+    # Initialize model registry
+    model_registry = ModelRegistry(
+        openai_api_key=config.openai_api_key,
+        anthropic_api_key=config.anthropic_api_key,
+        cache_file=".model_cache.json",
+    )
+    await model_registry.initialize()
+
+    logger.info(f"SAK Router starting on port {config.port}")
+    logger.info(f"Session Manager URL: {config.session_manager_url}")
+    logger.info(f"Artifact Assembler URL: {config.artifact_assembler_url}")
+    logger.info(f"Default model provider: {config.default_provider}")
+
+    yield
+
+    logger.info("SAK Router shutting down")
+
+
+app = FastAPI(
+    title="SAK Router",
+    description="Routing gateway for backend services",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+
+# -----------------------------------------------------------------------------
+# Error Handling
+# -----------------------------------------------------------------------------
+
+
+def error_response(code: str, message: str, status_code: int = 500) -> JSONResponse:
+    """Create standardized error response."""
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "error": {
+                "code": code,
+                "message": message,
+            }
+        },
+    )
+
+
+# -----------------------------------------------------------------------------
+# Health Check
+# -----------------------------------------------------------------------------
+
+
+@app.get("/health")
+async def health_check() -> dict[str, Any]:
+    """
+    Health check endpoint.
+
+    Checks connectivity to all upstream services.
+    """
+    session_status = await check_service_health(
+        f"{config.session_manager_url}/health"
+    )
+    assembler_status = await check_service_health(
+        f"{config.artifact_assembler_url}/health"
+    )
+
+    # Model gateway is healthy if initialized
+    gateway_status = "healthy" if model_gateway else "unhealthy"
+    if isinstance(model_gateway, MockGateway):
+        gateway_status = "mock"
+
+    return {
+        "status": "healthy",
+        "services": {
+            "session_manager": session_status,
+            "artifact_assembler": assembler_status,
+            "model_gateway": gateway_status,
+        },
+    }
+
+
+# -----------------------------------------------------------------------------
+# Session Routes (Proxy to Session Manager)
+# -----------------------------------------------------------------------------
+
+
+@app.api_route("/sessions", methods=["POST"])
+async def create_session(request: Request):
+    """Create a new session."""
+    url = f"{config.session_manager_url}/sessions"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+@app.api_route("/sessions/{session_id}", methods=["GET", "DELETE"])
+async def session_by_id(session_id: str, request: Request):
+    """Get or delete a session."""
+    url = f"{config.session_manager_url}/sessions/{session_id}"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+@app.get("/sessions/{session_id}/history")
+async def get_session_history(session_id: str, request: Request):
+    """Get session history."""
+    url = f"{config.session_manager_url}/sessions/{session_id}/history"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+@app.post("/sessions/{session_id}/turns")
+async def append_turn(session_id: str, request: Request):
+    """Append a turn to session."""
+    url = f"{config.session_manager_url}/sessions/{session_id}/turns"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+@app.post("/sessions/{session_id}/distill")
+async def trigger_distillation(session_id: str, request: Request):
+    """Trigger session distillation."""
+    url = f"{config.session_manager_url}/sessions/{session_id}/distill"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+# -----------------------------------------------------------------------------
+# Document Assembly (Proxy to Artifact Assembler)
+# -----------------------------------------------------------------------------
+
+
+@app.post("/assemble")
+async def assemble_documents(request: Request):
+    """Assemble documents from Artifact Assembler."""
+    url = f"{config.artifact_assembler_url}/assemble"
+    try:
+        return await proxy_request(request, url)
+    except ServiceUnavailableError as e:
+        return error_response("SERVICE_UNAVAILABLE", str(e), 503)
+
+
+# -----------------------------------------------------------------------------
+# Personas (Static Files)
+# -----------------------------------------------------------------------------
+
+
+@app.get("/personas/{name}")
+async def get_persona(name: str):
+    """
+    Get a persona by name.
+
+    Looks for {name}.json or {name}.md in the personas directory.
+    """
+    try:
+        persona = load_persona(name, config.personas_dir)
+        return persona
+    except PersonaNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": {
+                    "code": "NOT_FOUND",
+                    "message": f"Persona '{name}' not found",
+                }
+            },
+        )
+    except PersonaLoadError as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": {
+                    "code": "LOAD_ERROR",
+                    "message": str(e),
+                }
+            },
+        )
+
+
+# -----------------------------------------------------------------------------
+# Chat (Model Gateway with SSE Streaming)
+# -----------------------------------------------------------------------------
+
+
+@app.post("/chat")
+async def chat(request: Request):
+    """
+    Chat endpoint with SSE streaming.
+
+    Request:
+    {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {"role": "system", "content": "..."},
+            {"role": "user", "content": "..."}
+        ],
+        "stream": true
+    }
+
+    Response: SSE stream with events:
+    - event: chunk, data: {"content": "..."}
+    - event: done, data: {"total_tokens": ...}
+    - event: error, data: {"code": "...", "message": "..."}
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        return error_response("INVALID_REQUEST", "Invalid JSON body", 400)
+
+    model = body.get("model", config.default_model)
+    messages = body.get("messages", [])
+    stream = body.get("stream", True)
+
+    logger.info(f"Chat request using model: {model}")
+
+    if not messages:
+        return error_response("INVALID_REQUEST", "Messages required", 400)
+
+    # Non-streaming: return full response
+    if not stream:
+        try:
+            # Use simple chat for non-streaming
+            user_message = messages[-1].get("content", "") if messages else ""
+            system_content = None
+            for msg in messages:
+                if msg.get("role") == "system":
+                    system_content = msg.get("content")
+                    break
+
+            response = await model_gateway.chat(
+                model=model,
+                message=user_message,
+                context=system_content,
+            )
+            return {"content": response}
+        except Exception as e:
+            logger.error(f"Model call failed: {e}")
+            return error_response("MODEL_FAILED", str(e), 502)
+
+    # Streaming: return SSE
+    async def event_generator() -> AsyncGenerator[dict[str, str], None]:
+        total_tokens = 0
+        try:
+            async for chunk in model_gateway.stream_chat(
+                model=model,
+                messages=messages,
+            ):
+                total_tokens += len(chunk.split())  # Rough token estimate
+                yield {
+                    "event": "chunk",
+                    "data": json.dumps({"content": chunk}),
+                }
+
+            yield {
+                "event": "done",
+                "data": json.dumps({"total_tokens": total_tokens}),
+            }
+
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "code": "MODEL_FAILED",
+                    "message": str(e),
+                }),
+            }
+
+    return EventSourceResponse(event_generator())
+
+
+# -----------------------------------------------------------------------------
+# Model Registry
+# -----------------------------------------------------------------------------
+
+
+@app.get("/models")
+async def list_models(vendor: str | None = None):
+    """
+    List available models across all vendors.
+
+    Query params:
+    - vendor: Filter by vendor ("openai", "anthropic")
+
+    Returns model list with registry status to show data freshness.
+    """
+    models = model_registry.get_models(vendor=vendor)
+    status = model_registry.get_status()
+
+    return {
+        "models": [
+            {
+                "id": m.id,
+                "vendor": m.vendor,
+                "display_name": m.display_name,
+                "created_at": m.created_at,
+                "capabilities": m.capabilities,
+            }
+            for m in models
+        ],
+        "registry_status": status,
+    }
+
+
+@app.get("/models/{model_id}")
+async def get_model_details(model_id: str):
+    """
+    Get details for a specific model.
+
+    Args:
+        model_id: Model identifier (e.g., "gpt-5.2", "claude-sonnet-4-20250514")
+    """
+    model = model_registry.get_model(model_id)
+    if not model:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": {
+                    "code": "MODEL_NOT_FOUND",
+                    "message": f"Model '{model_id}' not found in registry",
+                }
+            },
+        )
+
+    return {
+        "id": model.id,
+        "vendor": model.vendor,
+        "display_name": model.display_name,
+        "created_at": model.created_at,
+        "capabilities": model.capabilities,
+    }
+
+
+@app.post("/models/refresh")
+async def refresh_models(request: Request):
+    """
+    Force refresh models from vendor APIs.
+
+    Body (optional):
+    {
+        "vendor": "openai"  // or "anthropic", or omit for all vendors
+    }
+
+    Returns updated registry status.
+    """
+    try:
+        body = await request.json()
+        vendor = body.get("vendor")
+    except Exception:
+        vendor = None
+
+    try:
+        if vendor:
+            if vendor == "openai":
+                await model_registry._refresh_openai()
+            elif vendor == "anthropic":
+                await model_registry._refresh_anthropic()
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error": {
+                            "code": "INVALID_VENDOR",
+                            "message": f"Unknown vendor: {vendor}",
+                        }
+                    },
+                )
+        else:
+            await model_registry.refresh_all()
+
+        return {
+            "status": "refreshed",
+            "registry_status": model_registry.get_status(),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Model refresh failed: {e}")
+        return error_response("REFRESH_FAILED", str(e), 502)
+
+
+# -----------------------------------------------------------------------------
+# Main Entry Point
+# -----------------------------------------------------------------------------
+
+
+def main():
+    """Run the server."""
+    import uvicorn
+
+    cfg = get_config()
+    uvicorn.run(
+        "src.main:app",
+        host="0.0.0.0",
+        port=cfg.port,
+        reload=False,
+    )
+
+
+if __name__ == "__main__":
+    main()

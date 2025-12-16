@@ -1,0 +1,15 @@
+2025-12-16T13:27:18.927Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-16T13:27:18.927Z [DEBUG] [Query.streamInput] Finished processing 0 messages from input stream
+2025-12-16T13:27:18.927Z [DEBUG] [Query.streamInput] Has bidirectional needs, waiting for inactivity
+2025-12-16T13:27:18.927Z [DEBUG] [Query.waitForInactivity] Waiting for inactivity (timeout: 5000ms)
+2025-12-16T13:27:18.927Z [DEBUG] [Query.waitForInactivity] Still active, checking again in 4999ms
+2025-12-16T13:27:19.818Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-16T13:27:23.926Z [DEBUG] [Query.waitForInactivity] Still active, checking again in 1392ms
+2025-12-16T13:27:25.319Z [DEBUG] [Query.waitForInactivity] Inactivity timeout reached (5001ms elapsed). Closing stdin. If your tools or hooks need more time, set CLAUDE_CODE_STREAM_CLOSE_TIMEOUT to a higher value (current: 5000ms).
+2025-12-16T13:27:25.319Z [DEBUG] [Query] Calling transport.endInput() to close stdin to CLI process
+2025-12-16T13:41:53.131Z [DEBUG] [Query.streamInput] Processing message 1: user
+2025-12-16T14:12:02.308Z [DEBUG] [Query.streamInput] Processing message 2: user
+2025-12-16T14:44:39.983Z [DEBUG] [Query.streamInput] Processing message 3: user
+2025-12-16T16:09:34.434Z [DEBUG] [Query.streamInput] Processing message 4: user
+2025-12-16T16:13:48.071Z [DEBUG] [Query.streamInput] Processing message 5: user
+2025-12-16T16:14:10.909Z [DEBUG] [Query.streamInput] Processing message 6: user

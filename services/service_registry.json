@@ -41,6 +41,13 @@
       "unit": "cliff-cli-archiver.service",
       "unit_file": "services/cliff-cli-archiver.service",
       "scope": "system"
+    },
+    {
+      "id": "backup-api",
+      "description": "Backup API for Cliff memories and tasks db",
+      "unit": "cliff-backup-api.service",
+      "unit_file": "services/cliff-backup-api.service",
+      "scope": "system"
     }
   ]
 }

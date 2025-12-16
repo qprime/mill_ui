@@ -1,0 +1,27 @@
+[
+  {
+    "content": "Review Cull documentation for completeness and consistency",
+    "status": "in_progress",
+    "activeForm": "Reviewing Cull documentation"
+  },
+  {
+    "content": "Compare Cull's expected API vs actual Artifact Engine API",
+    "status": "pending",
+    "activeForm": "Comparing Cull API expectations vs Artifact Engine"
+  },
+  {
+    "content": "Normalize project structure (docs/, README, .gitignore, git init)",
+    "status": "pending",
+    "activeForm": "Normalizing project structure"
+  },
+  {
+    "content": "Fix naming consistency (Cull headers, service name, port)",
+    "status": "pending",
+    "activeForm": "Fixing naming consistency"
+  },
+  {
+    "content": "Cross-reference with Turnstile backend_architecture.md",
+    "status": "pending",
+    "activeForm": "Cross-referencing with Turnstile"
+  }
+]

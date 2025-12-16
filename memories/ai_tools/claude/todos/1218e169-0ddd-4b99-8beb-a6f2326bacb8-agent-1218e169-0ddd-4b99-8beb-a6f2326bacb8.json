@@ -1,0 +1,17 @@
+[
+  {
+    "content": "Analyze Windmill whitepaper content and identify gaps or questions",
+    "status": "completed",
+    "activeForm": "Analyzing Windmill whitepaper content and identifying gaps or questions"
+  },
+  {
+    "content": "Create normalized whitepaper with embedded questions and TBD sections",
+    "status": "in_progress",
+    "activeForm": "Creating normalized whitepaper with embedded questions and TBD sections"
+  },
+  {
+    "content": "Store final whitepaper in artifact-engine",
+    "status": "pending",
+    "activeForm": "Storing final whitepaper in artifact-engine"
+  }
+]

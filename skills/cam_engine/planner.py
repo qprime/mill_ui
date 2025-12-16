@@ -10,6 +10,7 @@ from .border import generate_rect_border_moves
 from .strategy_rough_zslices import plan_rough
 from .strategy_raster_finish import plan_finish
 from .strategy_border_rect import plan_border_rect  # NEW
+from .strategy_profile_rect import plan_profile_rect
 
 __all__ = ["plan"]
 
@@ -82,6 +83,9 @@ def plan(cfg: Dict[str, Any]) -> Dict[str, Any]:
         # NEW: border strategy as a first-class pass using passes.yaml fields
         if strategy == "border_rect":
             moves = plan_border_rect(p, cfg["heightmap"])
+
+        elif strategy == "profile_rect":
+            moves = plan_profile_rect(p, cfg)
 
         elif role == "rough":
             b = band_map.get(name)

@@ -1,0 +1,76 @@
+# Mill UI Refactor: AI-First Compositional Architecture
+
+## Overall Goal
+
+Transform mill_ui into an explicitly AI-agent-first compositional CAD/CAM system. The architecture already supports template-based composition with parameterization, but lacks discoverability, introspection, and documentation that signals this design philosophy. The refactor should make the mental model explicit: **templates are parameterizable UI components for physical objects**, where agents author layouts declaratively similar to building React/SwiftUI interfaces but generating G-code instead of HTML.
+
+Key principles:
+- **Machine-readable schemas** for template discovery and parameter validation
+- **Structured error feedback** enabling agents to self-correct invalid specifications
+- **Explicit compositional patterns** documented with agent-oriented examples
+- **Maintain monolithic deployment** while enforcing internal modularity boundaries
+- **Preserve deterministic execution** and existing CLI/API contracts
+
+---
+
+## Architectural Changes
+
+| Claude | Codex | Change Category | Description |
+|:------:|:-----:|-----------------|-------------|
+| ☐ | ☑ | **Template Metadata System** | Extend `@register_template` decorator to accept machine-readable metadata including description, parameter schema (type, required, constraints, description), example parameter sets, and capability flags. Export registry metadata via CLI command and programmatic API for agent discovery. |
+| ☐ | ☐ | **Formalize Data Contracts** | Introduce strongly-typed models at system boundaries (e.g., `Layout`, `Item`, `FeatureSpec`, `CamHints`, `Move`, `PassPlan`) with `.from_dict()`/`.to_dict()` adapters. Keep internal dicts initially to avoid a big-bang rewrite; migrate incrementally behind adapters. Generate JSON Schema artifacts for the Layout DSL + key intermediates (hints/passes) for external consumption. |
+| ☐ | ☑ | **Structured Validation Framework** | Implement validation result objects returning field-level errors with suggestions instead of raw exceptions. Add template parameter validators as declarative schema constraints. Provide partial success indicators for incremental agent corrections. |
+| ☐ | ☑ | **Agent-Facing Documentation** | Create `docs/ai_agent_guide.md` explaining the mental model (templates as components), composition patterns (primitives → templates → layouts), JSON schema references, and example agent workflows. Include natural language → JSON transformation examples. Document the feature specification DSL as first-class interface. |
+| ☐ | ☑ | **Hexagonal Architecture Refactoring** | Extract orchestration core from 804-line compose_cam into domain layer with explicit ports. Primary port accepts layout specifications and configuration, returns planned operations. Secondary ports for tool database, template resolver, native backend. Move CLI adapter to separate layer. Enables programmatic API usage without CLI dependency. |
+| ☐ | ☐ | **Functional Pipeline Transformation** | Reframe as a pragmatic step: keep mutation localized (builder/accumulator) but make outputs immutable, typed, and replayable (e.g., `PassPlan` records + per-stage result records). Add deterministic ordering and stage-level event emission first; treat full fold-based immutability/parallelization as a later optimization if it proves valuable. |
+| ☐ | ☐ | **Plugin Architecture for Templates** | Replace ad-hoc imports in `compositions/__init__.py` with an explicit `load_templates()` step that supports deterministic module discovery (e.g., `pkgutil.walk_packages` with allow/deny filters) and optional entry-point plugins when packaged. Keep core usable with minimal deps by guarding optional imports. |
+| ☐ | ☑ | **Observability Layer** | Add structured event emission throughout pipeline for template expansion decisions, tool selection rationale, pass planning heuristics, native backend invocations. Enable trace collection without logger pollution. Support debugging of agent-generated layouts. |
+| ☐ | ☐ | **Module Boundary Enforcement** | Define explicit public APIs for cad.* and cam.* namespaces exported only through api/* re-exports. Start with conventions + lightweight tests (or a simple internal checker) to prevent boundary violations; optionally adopt import-linter later if the repo already supports that tooling. |
+| ☐ | ☐ | **Example Gallery & Test Corpus** | Create `examples/agent_generated/` with natural language prompts, generated JSON layouts, and expected intermediate artifacts (resolved items, hints, pass plans, manifests). Avoid committing large binary STL/STEP outputs; generate previews on demand and/or validate via deterministic hashes and summaries for regression stability. |
+| ☐ | ☐ | **Layout DSL v1 + JSON Schema** | Define a versioned Layout DSL (`schema_version`) and ship `schemas/layout_v1.schema.json` for validation/autocomplete. Include a small set of canonical examples covering single items and composed sheets, and document the stable “shape/feature” vocabulary aligned to 3-axis 2.5D capabilities. |
+| ☐ | ☐ | **Canonicalization & Reproducibility** | Implement canonical JSON normalization for layouts and intermediate artifacts (stable key ordering, default injection, numeric normalization rules). Emit stable manifests/hashes so agent edits can be regression-tested and compared without manual debugging. |
+| ☐ | ☐ | **Agent CLI Introspection** | Add CLI subcommands oriented to agents: `list-templates`, `show-template <name>` (metadata + schema), `validate-layout`, `dump-schemas`, and `compose` options like `--dump-intermediates` / `--trace-json`. Keep outputs machine-readable and stable. |
+| ☐ | ☐ | **Migration & Backward Compatibility Plan** | Define an explicit migration plan: legacy layouts/move dicts remain supported via adapters; new typed/model+schema layer becomes the “source of truth”. Document deprecation milestones and ensure `apps/compose_cam.py` behavior/output stays compatible during the transition. |
+
+---
+
+## Review Instructions
+
+### For Each Change:
+1. **Evaluate** whether the change aligns with the AI-first goal
+2. **Assess** impact on maintainability, complexity, and existing contracts
+3. **Consider** implementation effort vs value delivered
+4. **Check** for conflicts with other proposed changes
+5. **Mark** your column with ☑ when satisfied, or edit the description and clear all checks
+
+### Consensus Criteria:
+- Both reviewers have checked the row (☑ in both columns)
+- Description clearly articulates scope, rationale, and approach
+- Change preserves monolithic deployment and deterministic execution
+- Implementation path is tractable without excessive rework
+
+### Iteration Protocol:
+- Each reviewer makes edits in their turn
+- When editing a row description, clear all checkmarks for that row
+- Add new rows if needed to address gaps
+- Remove rows if deemed unnecessary
+- Continue until all rows have dual consensus or explicit documented disagreement
+
+---
+
+## Interactions / Conflicts (Reviewer Notes)
+
+- Template Metadata depends on Template Discovery/Loading; discovery should be explicit before metadata export becomes reliable.
+- Data Contracts and Validation should share one error format (JSON Pointer paths + suggestions) to avoid duplicated “validation languages”.
+- Example Corpus depends on Canonicalization/Reproducibility; do that early to prevent test churn.
+- Hexagonal refactor is easiest once boundary models exist; extract the orchestration core as a pure function/API first, then peel off adapters.
+- Module boundary enforcement should follow (or be introduced alongside) the public API surface definition so it doesn’t lock in accidental dependencies.
+- Full functional/parallel planning is likely lower priority than typed outputs + traces; treat it as an optimization track.
+
+---
+
+## Current Status
+
+**Reviewer**: Codex
+**Turn**: 2
+**Action**: Checked high-value rows (template metadata, validation, docs, hexagonal extraction, observability); rewrote the “typed contracts”, “pipeline immutability”, “template plugins”, “module boundaries”, and “examples” rows for incremental adoption; added rows for a versioned Layout DSL + JSON Schema, canonicalization/reproducibility, agent-oriented CLI introspection, and an explicit migration plan; documented key interactions/conflicts.

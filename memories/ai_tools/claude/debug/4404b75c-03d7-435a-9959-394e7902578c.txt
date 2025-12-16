@@ -1,0 +1,7 @@
+2025-12-16T13:26:39.543Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-16T13:26:39.543Z [DEBUG] [Query.streamInput] this.sdkMcpTransports.size = 0
+2025-12-16T13:26:39.543Z [DEBUG] [Query.streamInput] Finished processing 0 messages from input stream
+2025-12-16T13:26:39.543Z [DEBUG] [Query.streamInput] About to check MCP servers. this.sdkMcpTransports.size = 0
+2025-12-16T13:26:39.543Z [DEBUG] [Query.streamInput] Entering Promise.race to wait for result
+2025-12-16T13:26:40.647Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-16T13:26:40.647Z [DEBUG] [Query.streamInput] this.sdkMcpTransports.size = 1

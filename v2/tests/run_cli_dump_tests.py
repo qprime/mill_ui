@@ -221,6 +221,35 @@ def test_dump_removal_intent_bounds():
         Path(temp_path).unlink()
 
 
+def test_dump_removal_intent_real_template():
+    """Test dump-removal-intent with real template layout (ClampBar)."""
+    print("Running test_dump_removal_intent_real_template...")
+
+    # Path to real template layout
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        print("  ⊘ SKIP: ClampBar layout not found")
+        return None
+
+    removal_json = dump_removal_intent(str(layout_path))
+    removal_data = json.loads(removal_json)
+
+    # ClampBar template should produce multiple regions (profiles + pockets)
+    assert len(removal_data) > 0, f"Expected RemovalIntent regions, got {len(removal_data)}"
+
+    # Verify we got some profile and pocket regions
+    region_ids = [r["region_id"] for r in removal_data]
+    has_profile = any("profile_" in rid for rid in region_ids)
+    has_pocket = any("pocket_" in rid for rid in region_ids)
+
+    assert has_profile, "Expected at least one profile region"
+    assert has_pocket, "Expected at least one pocket region"
+
+    print(f"  ✓ PASS ({len(removal_data)} regions from template)")
+    return True
+
+
 if __name__ == "__main__":
     tests = [
         test_dump_ast_minimal_layout,
@@ -228,6 +257,7 @@ if __name__ == "__main__":
         test_dump_removal_intent_profile,
         test_dump_removal_intent_multiple,
         test_dump_removal_intent_bounds,
+        test_dump_removal_intent_real_template,
     ]
 
     results = []

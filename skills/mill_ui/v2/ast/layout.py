@@ -81,3 +81,17 @@ class LayoutAST:
         """
         from skills.mill_ui.v2.ast.parsers import parse_layout_json
         return parse_layout_json(path)
+
+    def to_json(self, path: str | None = None) -> str:
+        """Emit LayoutAST to canonical JSON.
+
+        Deferred to emitters.py to keep dataclasses pure.
+
+        Args:
+            path: Optional path to write JSON file. If None, returns JSON string.
+
+        Returns:
+            Canonical JSON string
+        """
+        from skills.mill_ui.v2.ast.emitters import emit_layout_json
+        return emit_layout_json(self, path)

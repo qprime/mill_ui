@@ -273,8 +273,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 unchanged; v2 AST semantically equivalent to v1 JSON |
 | **Risk / Rollback** | v2 AST remains read-only; emission failures don't affect v1 |
 | **Blocking Dependencies** | `S2_AST_CORE` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
 
 ---
 
@@ -426,14 +426,15 @@ Every stage follows this structure:
 
 ### Stage Execution Status
 
-**Current Stage**: `S3_AST_EMIT`
-**Completed Stages**: S1 (5e79908), S2 (8c1102d)
-**Blocked Stages**: S3-S11 (awaiting respective dependencies)
+**Current Stage**: `S4_REMOVAL_IR_CORE`
+**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (pending commit)
+**Blocked Stages**: S4-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
 **Progress Tracking**:
 - **S1_TAG_SKELETON**: Completed 2025-12-16, commit 5e79908, tag refactor_v2_S1_TAG_SKELETON
 - **S2_AST_CORE**: Completed 2025-12-16, commits 8c1102d (initial), 718290d (template fix), tag refactor_v2_S2_AST_CORE
+- **S3_AST_EMIT**: Completed 2025-12-16, commit pending, tag refactor_v2_S3_AST_EMIT (pending)
 
 ---
 

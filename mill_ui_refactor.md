@@ -348,7 +348,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete `v2/cli/`; no impact on v1 |
 | **Blocking Dependencies** | `S3_AST_EMIT`, `S5_HINTS_ADAPTER` |
 | **Status** | `done` |
-| **Commits** | _(pending)_ |
+| **Commits** | `77136aa` (tag: `refactor_v2_S7_CLI_DUMP`) |
 
 ---
 

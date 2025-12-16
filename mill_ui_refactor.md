@@ -383,8 +383,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 SVG export unchanged; v2 SVG is additive |
 | **Risk / Rollback** | SVG export is debugging aid; failures don't block G-code |
 | **Blocking Dependencies** | `S5_HINTS_ADAPTER` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | `34977c3` |
 
 ---
 

@@ -292,7 +292,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete `v2/ir/`; no impact on v1 |
 | **Blocking Dependencies** | `S1_TAG_SKELETON` |
 | **Status** | `done` |
-| **Commits** | _(pending)_ |
+| **Commits** | `d84b021` |
 
 ---
 
@@ -427,7 +427,7 @@ Every stage follows this structure:
 ### Stage Execution Status
 
 **Current Stage**: `S5_HINTS_ADAPTER`
-**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (1adc2a9), S4 (pending commit)
+**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (1adc2a9), S4 (d84b021)
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
@@ -435,7 +435,7 @@ Every stage follows this structure:
 - **S1_TAG_SKELETON**: Completed 2025-12-16, commit 5e79908, tag refactor_v2_S1_TAG_SKELETON
 - **S2_AST_CORE**: Completed 2025-12-16, commits 8c1102d (initial), 718290d (template fix), tag refactor_v2_S2_AST_CORE
 - **S3_AST_EMIT**: Completed 2025-12-16, commit 1adc2a9, tag refactor_v2_S3_AST_EMIT
-- **S4_REMOVAL_IR_CORE**: Completed 2025-12-16, commit pending, tag refactor_v2_S4_REMOVAL_IR_CORE (pending)
+- **S4_REMOVAL_IR_CORE**: Completed 2025-12-16, commit d84b021, tag refactor_v2_S4_REMOVAL_IR_CORE
 
 ---
 

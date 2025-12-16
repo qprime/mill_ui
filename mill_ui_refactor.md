@@ -256,7 +256,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete `v2/ast/`; no impact on v1 |
 | **Blocking Dependencies** | `S1_TAG_SKELETON` |
 | **Status** | `done` |
-| **Commits** | `8c1102d` |
+| **Commits** | `8c1102d`, `718290d` (fix for template layouts) |
 
 ---
 
@@ -433,7 +433,7 @@ Every stage follows this structure:
 
 **Progress Tracking**:
 - **S1_TAG_SKELETON**: Completed 2025-12-16, commit 5e79908, tag refactor_v2_S1_TAG_SKELETON
-- **S2_AST_CORE**: Completed 2025-12-16, commit 8c1102d, tag refactor_v2_S2_AST_CORE
+- **S2_AST_CORE**: Completed 2025-12-16, commits 8c1102d (initial), 718290d (template fix), tag refactor_v2_S2_AST_CORE
 
 ---
 

@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "content": "Create compositional PML parser (indentation-based)",
+    "status": "completed",
+    "activeForm": "Creating compositional PML parser"
+  },
+  {
+    "content": "Create compositional PML formatter (AST → canonical PML)",
+    "status": "completed",
+    "activeForm": "Creating compositional PML formatter"
+  },
+  {
+    "content": "Add comprehensive tests for parser and formatter",
+    "status": "completed",
+    "activeForm": "Adding comprehensive tests"
+  },
+  {
+    "content": "Create acceptance test with Stage 12 gold exemplar",
+    "status": "completed",
+    "activeForm": "Creating acceptance test"
+  },
+  {
+    "content": "Run all tests and verify 24-item output",
+    "status": "completed",
+    "activeForm": "Running all tests"
+  },
+  {
+    "content": "Commit Stage 13 with tag",
+    "status": "in_progress",
+    "activeForm": "Committing Stage 13"
+  }
+]

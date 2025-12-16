@@ -309,8 +309,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 hint generation unchanged; adapter is one-way v1→v2 |
 | **Risk / Rollback** | Adapter is pure function; no state changes |
 | **Blocking Dependencies** | `S4_REMOVAL_IR_CORE` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
 
 ---
 

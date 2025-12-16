@@ -178,20 +178,81 @@ def test_parse_nonexistent_file():
         return True
 
 
+def test_parse_real_cnc_clamp_v1():
+    """Test parsing real cnc_clamp_v1 layout."""
+    print("Running test_parse_real_cnc_clamp_v1...")
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        print(f"  ⊘ SKIP: Layout not found at {layout_path}")
+        return None
+
+    ast = LayoutAST.from_json(str(layout_path))
+    assert ast.project == "cnc_clamp_v1"
+    assert ast.sheet.width_mm == 800.0
+    assert len(ast.items) == 1
+    assert ast.items[0].kind == "template"
+    assert ast.items[0].type == "ClampBar"
+    print("  ✓ PASS")
+    return True
+
+
+def test_parse_real_mandelbrot_demo():
+    """Test parsing real mandelbrot_demo layout."""
+    print("Running test_parse_real_mandelbrot_demo...")
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        print(f"  ⊘ SKIP: Layout not found at {layout_path}")
+        return None
+
+    ast = LayoutAST.from_json(str(layout_path))
+    assert ast.project == "mandelbrot_demo"
+    assert ast.sheet.width_mm == 400.0
+    assert len(ast.items) == 1
+    assert ast.items[0].kind == "template"
+    print("  ✓ PASS")
+    return True
+
+
+def test_parse_real_cnc_clamp_part_a():
+    """Test parsing real cnc_clamp-part_a_layout."""
+    print("Running test_parse_real_cnc_clamp_part_a...")
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        print(f"  ⊘ SKIP: Layout not found at {layout_path}")
+        return None
+
+    ast = LayoutAST.from_json(str(layout_path))
+    assert ast.layout["cols"] == 2
+    assert len(ast.items) == 1
+    assert ast.items[0].kind == "template"
+    print("  ✓ PASS")
+    return True
+
+
 if __name__ == "__main__":
     tests = [
         test_parse_minimal_layout,
         test_parse_layout_with_multiple_items,
         test_parse_missing_sheet,
         test_parse_nonexistent_file,
+        test_parse_real_cnc_clamp_v1,
+        test_parse_real_mandelbrot_demo,
+        test_parse_real_cnc_clamp_part_a,
     ]
 
     results = []
     for test in tests:
         try:
-            results.append(test())
+            result = test()
+            if result is not None:  # None means skipped
+                results.append(result)
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
+            import traceback
+            traceback.print_exc()
             results.append(False)
 
     passed = sum(results)

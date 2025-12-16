@@ -43,20 +43,34 @@ class Feature:
 
 @dataclass(frozen=True)
 class Item:
-    """Layout item (shape with placement and feature)."""
+    """Layout item (shape or template).
+
+    For shapes: kind="shape", requires geometry, placement, feature
+    For templates: kind="template", requires params, id is optional
+    """
     kind: str  # "shape" | "template"
     type: str  # Shape type: "Rect", "Circle", etc. or template name
-    geometry: Geometry
-    placement: Placement
-    feature: Feature
-    shape_id: str | None = None  # Optional identifier
+    geometry: Geometry | None = None  # Required for shapes, unused for templates
+    placement: Placement | None = None  # Required for shapes, optional for templates
+    feature: Feature | None = None  # Required for shapes, unused for templates
+    params: dict[str, Any] | None = None  # Required for templates, unused for shapes
+    shape_id: str | None = None  # Optional identifier for shapes
+    id: str | None = None  # Optional identifier for templates
 
 
 @dataclass(frozen=True)
 class LayoutAST:
-    """Canonical layout AST."""
+    """Canonical layout AST.
+
+    Captures both shape-based layouts and template-based layouts (v1 structure).
+    """
     sheet: Sheet
     items: tuple[Item, ...]
+    # Top-level configuration from v1 layouts
+    project: str | None = None
+    kerf_width_mm: float | None = None
+    cam: dict[str, Any] | None = None
+    layout: dict[str, Any] | None = None
     config: dict[str, Any] = field(default_factory=dict)
 
     @staticmethod

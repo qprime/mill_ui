@@ -22,6 +22,8 @@ from skills.mill_ui.v2.ast.layout import (
 def parse_layout_json(path: str) -> LayoutAST:
     """Parse layout JSON file into LayoutAST.
 
+    Supports both shape-based layouts and template-based v1 layouts.
+
     Args:
         path: Path to layout JSON file
 
@@ -53,41 +55,70 @@ def parse_layout_json(path: str) -> LayoutAST:
     items_data = data.get("items", [])
     items = tuple(_parse_item(item_data) for item_data in items_data)
 
-    # Parse config
+    # Parse top-level v1 fields
+    project = data.get("project")
+    kerf_width_mm = data.get("kerf_width_mm")
+    cam = data.get("cam")
+    layout = data.get("layout")
     config = data.get("config", {})
 
-    return LayoutAST(sheet=sheet, items=items, config=config)
+    return LayoutAST(
+        sheet=sheet,
+        items=items,
+        project=project,
+        kerf_width_mm=kerf_width_mm,
+        cam=cam,
+        layout=layout,
+        config=config,
+    )
 
 
 def _parse_item(item_data: dict[str, Any]) -> Item:
-    """Parse single item from JSON."""
+    """Parse single item from JSON.
+
+    Handles both shape items and template items:
+    - Shapes have: geometry, placement, feature
+    - Templates have: params, optional id
+    """
     kind = item_data.get("kind", "shape")
     item_type = item_data["type"]
 
-    # Parse geometry
-    geometry_data = item_data.get("geometry", {})
-    geometry = Geometry(data=geometry_data)
+    if kind == "template":
+        # Template items: require params, optional id
+        params = item_data.get("params")
+        template_id = item_data.get("id")
+        return Item(
+            kind=kind,
+            type=item_type,
+            params=params,
+            id=template_id,
+        )
+    else:
+        # Shape items: require geometry, placement, feature
+        # Parse geometry
+        geometry_data = item_data.get("geometry", {})
+        geometry = Geometry(data=geometry_data)
 
-    # Parse placement
-    placement_data = item_data["placement"]
-    center_xy = placement_data["center_xy_mm"]
-    placement = Placement(center_xy_mm=(float(center_xy[0]), float(center_xy[1])))
+        # Parse placement
+        placement_data = item_data["placement"]
+        center_xy = placement_data["center_xy_mm"]
+        placement = Placement(center_xy_mm=(float(center_xy[0]), float(center_xy[1])))
 
-    # Parse feature
-    feature_data = item_data["feature"]
-    feature = _parse_feature(feature_data)
+        # Parse feature
+        feature_data = item_data["feature"]
+        feature = _parse_feature(feature_data)
 
-    # Optional shape_id
-    shape_id = item_data.get("shape_id", None)
+        # Optional shape_id
+        shape_id = item_data.get("shape_id")
 
-    return Item(
-        kind=kind,
-        type=item_type,
-        geometry=geometry,
-        placement=placement,
-        feature=feature,
-        shape_id=shape_id,
-    )
+        return Item(
+            kind=kind,
+            type=item_type,
+            geometry=geometry,
+            placement=placement,
+            feature=feature,
+            shape_id=shape_id,
+        )
 
 
 def _parse_feature(feature_data: dict[str, Any]) -> Feature:

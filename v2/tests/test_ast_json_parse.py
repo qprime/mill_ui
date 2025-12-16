@@ -203,3 +203,87 @@ def test_parse_preserves_numeric_precision():
         assert ast.items[0].feature.depth_mm == 3.175
     finally:
         Path(temp_path).unlink()
+
+
+def test_parse_cnc_clamp_v1_layout():
+    """Test parsing real cnc_clamp_v1 layout (template-based v1 structure)."""
+    # Path relative to repository root
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        pytest.skip(f"Test layout not found: {layout_path}")
+
+    ast = LayoutAST.from_json(str(layout_path))
+
+    # Verify top-level v1 fields
+    assert ast.project == "cnc_clamp_v1"
+    assert ast.kerf_width_mm == 6.35
+    assert ast.cam is not None
+    assert ast.layout is not None
+
+    # Verify sheet
+    assert ast.sheet.width_mm == 800.0
+    assert ast.sheet.height_mm == 250.0
+    assert ast.sheet.thickness_mm == 19.1
+
+    # Verify items
+    assert len(ast.items) == 1
+    item = ast.items[0]
+    assert item.kind == "template"
+    assert item.type == "ClampBar"
+    assert item.id == "clamp_bar"
+    assert item.params is not None
+    assert "length_mm" in item.params
+    assert item.params["length_mm"] == 200.0
+
+    # Verify template items don't have shape fields
+    assert item.geometry is None
+    assert item.placement is None
+    assert item.feature is None
+
+
+def test_parse_mandelbrot_demo_layout():
+    """Test parsing mandelbrot_demo layout (template-based)."""
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        pytest.skip(f"Test layout not found: {layout_path}")
+
+    ast = LayoutAST.from_json(str(layout_path))
+
+    # Verify project
+    assert ast.project == "mandelbrot_demo"
+    assert ast.kerf_width_mm == 3.175
+
+    # Verify sheet
+    assert ast.sheet.width_mm == 400.0
+    assert ast.sheet.height_mm == 300.0
+    assert ast.sheet.thickness_mm == 18.0
+
+    # Verify template item
+    assert len(ast.items) == 1
+    item = ast.items[0]
+    assert item.kind == "template"
+    assert item.type == "MandelbrotOutlineFill"
+    assert item.params is not None
+
+
+def test_parse_cnc_clamp_part_a_layout():
+    """Test parsing cnc_clamp-part_a_layout (template with cols/rows)."""
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        pytest.skip(f"Test layout not found: {layout_path}")
+
+    ast = LayoutAST.from_json(str(layout_path))
+
+    # Verify layout config
+    assert ast.layout is not None
+    assert ast.layout["cols"] == 2
+    assert ast.layout["rows"] == 2
+
+    # Verify template item
+    assert len(ast.items) == 1
+    item = ast.items[0]
+    assert item.kind == "template"
+    assert item.type == "ClampBar"

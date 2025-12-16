@@ -274,7 +274,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | v2 AST remains read-only; emission failures don't affect v1 |
 | **Blocking Dependencies** | `S2_AST_CORE` |
 | **Status** | `done` |
-| **Commits** | _(pending)_ |
+| **Commits** | `1adc2a9` |
 
 ---
 
@@ -427,14 +427,14 @@ Every stage follows this structure:
 ### Stage Execution Status
 
 **Current Stage**: `S4_REMOVAL_IR_CORE`
-**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (pending commit)
+**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (1adc2a9)
 **Blocked Stages**: S4-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
 **Progress Tracking**:
 - **S1_TAG_SKELETON**: Completed 2025-12-16, commit 5e79908, tag refactor_v2_S1_TAG_SKELETON
 - **S2_AST_CORE**: Completed 2025-12-16, commits 8c1102d (initial), 718290d (template fix), tag refactor_v2_S2_AST_CORE
-- **S3_AST_EMIT**: Completed 2025-12-16, commit pending, tag refactor_v2_S3_AST_EMIT (pending)
+- **S3_AST_EMIT**: Completed 2025-12-16, commit 1adc2a9, tag refactor_v2_S3_AST_EMIT
 
 ---
 

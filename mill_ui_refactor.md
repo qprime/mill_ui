@@ -365,8 +365,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 validation unchanged; v2 validation is stricter but optional |
 | **Risk / Rollback** | Validation is advisory; can be disabled via flag |
 | **Blocking Dependencies** | `S4_REMOVAL_IR_CORE` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | `2222261` |
 
 ---
 

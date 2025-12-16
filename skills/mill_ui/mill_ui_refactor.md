@@ -329,7 +329,8 @@ Every stage follows this structure:
 | **Risk / Rollback** | If G-code differs, adapter is incorrect—block merge until fixed |
 | **Blocking Dependencies** | `S5_HINTS_ADAPTER` |
 | **Status** | `done` |
-| **Commits** | `9ac0ef9` (tag: `refactor_v2_S6_PLANNER_ADAPTER`) |
+| **Commits** | `9ac0ef9` (tag: `refactor_v2_S6_PLANNER_ADAPTER`), `ea4d4e8` (equivalence validation) |
+| **Notes** | Equivalence framework complete; execution blocked by native CAM core (env limitation) |
 
 ---
 

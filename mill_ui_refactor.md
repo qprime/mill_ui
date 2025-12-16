@@ -425,6 +425,25 @@ Every stage follows this structure:
 
 ---
 
+#### Stage 12: Layout Resolution Foundation
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S12_LAYOUT_RESOLUTION` |
+| **Stage Name** | Compositional Layout Resolution Foundation |
+| **Goal** | Enable hierarchical, region-relative composition without explicit XY coordinates |
+| **Scope** | - `v2/ast/compositional.py` (Panel, Frame, Grid, Cell, Inset, ComponentDef, UseComponent, Place, Rect nodes)<br>- `v2/resolution/layout_resolver.py` (resolve_layout pass)<br>- `v2/tests/test_layout_resolution.py` |
+| **Deliverables** | - Compositional AST schema extensions (minimal, explicit)<br>- Layout resolution pass: hierarchical → flat LayoutAST<br>- Children fill parent region by default<br>- Frame works on any closed region<br>- Multiple component instances placeable on one sheet<br>- Output compatible with FlatPML/RemovalIntent pipeline |
+| **Acceptance Tests** | - 4 identical component instances via grid<br>- Each instance: frame + 2×2 grid + pockets<br>- No explicit coordinates required in authored AST<br>- FlatPML output valid and inspectable<br>- All 8 resolution tests pass |
+| **Equivalence Type** | **foundation** (compositional layer; semantic preservation through lowering) |
+| **Back-Compat Guarantee** | Compositional AST is additive; existing flat LayoutAST/Item nodes unchanged |
+| **Risk / Rollback** | Delete `v2/ast/compositional.py` and `v2/resolution/` if needed; FlatPML unaffected |
+| **Blocking Dependencies** | `S2_AST_CORE`, `S11_PML_SYNTAX` (FlatPML for output inspection) |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
+
+---
+
 ### Stage Execution Status
 
 **Current Stage**: `S5_HINTS_ADAPTER`

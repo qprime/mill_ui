@@ -310,7 +310,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | Adapter is pure function; no state changes |
 | **Blocking Dependencies** | `S4_REMOVAL_IR_CORE` |
 | **Status** | `done` |
-| **Commits** | _(pending)_ |
+| **Commits** | `93b2f10` (tag: `refactor_v2_S5_HINTS_ADAPTER`) |
 
 ---
 

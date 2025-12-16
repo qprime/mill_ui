@@ -328,8 +328,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | G-code output byte-for-byte identical to v1 for same inputs via adapter path |
 | **Risk / Rollback** | If G-code differs, adapter is incorrect—block merge until fixed |
 | **Blocking Dependencies** | `S5_HINTS_ADAPTER` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
 
 ---
 

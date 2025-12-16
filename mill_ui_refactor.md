@@ -458,6 +458,25 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | Compositional PML is additive; FlatPML (Stage 11) and Python AST construction unchanged |
 | **Risk / Rollback** | Delete `v2/pml/compositional_*`; Stage 12 Python API unaffected |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION` |
+| **Status** | `done` |
+| **Commits** | `b09cf42` |
+
+---
+
+#### Stage 14: Basic Shape Primitives
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S14_BASIC_SHAPES` |
+| **Stage Name** | Basic Shape Primitives (Circle, RoundedRect, Line) |
+| **Goal** | Expand primitive shape coverage for core 3-axis 2.5D CNC capabilities (geometry + intent, not toolpath strategy) |
+| **Scope** | - `v2/ast/compositional.py` (Circle, RoundedRect, Line nodes)<br>- `v2/resolution/layout_resolver.py` (resolve new shapes to regions/paths)<br>- `v2/pml/compositional_parser.py` (parse new shape syntax)<br>- `v2/pml/compositional_formatter.py` (format new shapes)<br>- `v2/tests/test_basic_shapes.py` |
+| **Deliverables** | - Circle (closed region): `diameter` or `fit` mode (inscribed in current region)<br>- RoundedRect (closed region): `radius` for corners, fills current region by default<br>- Line (open path): simple horizontal/vertical canned forms for engraving<br>- Region-relative positioning (no explicit XY)<br>- Fill-by-default semantics consistent with rect<br>- Parse/format round-trip tests<br>- Resolution correctness tests<br>- Doc update: "Shapes" section in v2/docs |
+| **Acceptance Tests** | - New PML parses and formats canonically<br>- Circle `fit` works inside rect region<br>- RoundedRect fills region with corner radius preserved<br>- Line horizontal/vertical spans region deterministically<br>- Existing Stage 12/13 exemplar still passes unchanged<br>- No changes to strategy/lowering behavior |
+| **Equivalence Type** | **foundation** (geometry primitives; semantic preservation through lowering) |
+| **Back-Compat Guarantee** | New shapes are additive; existing rect/inset/frame/grid nodes unchanged |
+| **Risk / Rollback** | Delete new shape nodes from AST/parser/resolver; existing shapes unaffected |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
 | **Status** | `todo` |
 | **Commits** | _(pending)_ |
 

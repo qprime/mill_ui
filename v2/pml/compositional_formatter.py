@@ -26,6 +26,9 @@ from skills.mill_ui.v2.ast.compositional import (
     UseComponent,
     Place,
     Rect,
+    Circle,
+    RoundedRect,
+    Line,
     CompositionalLayoutAST,
 )
 
@@ -94,6 +97,49 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
         if node.children:
             for child in node.children:
                 lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, Circle):
+        # circle [id] [diameter <value>mm | fit] [feature]
+        parts = ["circle"]
+        if node.id:
+            parts.append(node.id)
+        if node.diameter_mm is not None:
+            parts.append(f"diameter {node.diameter_mm:.2f}mm")
+        else:
+            parts.append("fit")
+        if node.feature:
+            parts.append(_format_feature(node.feature))
+        lines.append(prefix + " ".join(parts))
+
+        # Children (if any)
+        if node.children:
+            for child in node.children:
+                lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, RoundedRect):
+        # rounded_rect [id] radius <value>mm [feature]
+        parts = ["rounded_rect"]
+        if node.id:
+            parts.append(node.id)
+        parts.append(f"radius {node.radius_mm:.2f}mm")
+        if node.feature:
+            parts.append(_format_feature(node.feature))
+        lines.append(prefix + " ".join(parts))
+
+        # Children (if any)
+        if node.children:
+            for child in node.children:
+                lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, Line):
+        # line [id] horizontal|vertical [feature]
+        parts = ["line"]
+        if node.id:
+            parts.append(node.id)
+        parts.append(node.orientation)
+        if node.feature:
+            parts.append(_format_feature(node.feature))
+        lines.append(prefix + " ".join(parts))
 
     elif isinstance(node, Inset):
         # inset <amount>mm

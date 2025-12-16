@@ -162,6 +162,58 @@ class Rect:
     id: str | None = None
 
 
+@dataclass(frozen=True)
+class Circle:
+    """Circle node - creates circular region.
+
+    Circle can either specify explicit diameter or use 'fit' mode to inscribe
+    within current region (largest circle that fits).
+
+    Attributes:
+        diameter_mm: Explicit diameter (None for fit mode)
+        children: Nested layout nodes (e.g., Frame, Grid)
+        feature: Optional CAM feature (profile, pocket, hole)
+        id: Optional identifier
+    """
+    diameter_mm: float | None = None  # None means 'fit' mode
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+
+
+@dataclass(frozen=True)
+class RoundedRect:
+    """Rounded rectangle node - fills current region with rounded corners.
+
+    Attributes:
+        radius_mm: Corner radius in millimeters
+        children: Nested layout nodes (e.g., Frame, Grid)
+        feature: Optional CAM feature (profile, pocket)
+        id: Optional identifier
+    """
+    radius_mm: float
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+
+
+@dataclass(frozen=True)
+class Line:
+    """Line node - creates open path for engraving.
+
+    Simple canned forms: horizontal or vertical line spanning current region.
+    For v1, we use deterministic orientation rather than explicit point lists.
+
+    Attributes:
+        orientation: 'horizontal' or 'vertical'
+        feature: Optional CAM feature (typically engrave)
+        id: Optional identifier
+    """
+    orientation: str  # 'horizontal' or 'vertical'
+    feature: Any = None
+    id: str | None = None
+
+
 # Computed during resolution (not authored)
 @dataclass(frozen=True)
 class ResolvedRegion:

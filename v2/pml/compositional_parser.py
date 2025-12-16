@@ -38,6 +38,9 @@ from skills.mill_ui.v2.ast.compositional import (
     UseComponent,
     Place,
     Rect,
+    Circle,
+    RoundedRect,
+    Line,
     CompositionalLayoutAST,
 )
 from skills.mill_ui.v2.ast.layout import Sheet, Feature
@@ -133,9 +136,10 @@ class CompositionalPMLLexer:
         # Check if it's a keyword
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'inset', 'frame', 'grid', 'cell', 'gap',
+            'rect', 'circle', 'rounded_rect', 'line', 'inset', 'frame', 'grid', 'cell', 'gap',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
+            'diameter', 'radius', 'fit', 'horizontal', 'vertical',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -376,13 +380,19 @@ class CompositionalPMLParser:
         return Panel(children=tuple(children))
 
     def parse_node(self) -> Any:
-        """Parse a layout node (rect, inset, frame, grid, cell, use)."""
+        """Parse a layout node (rect, circle, rounded_rect, line, inset, frame, grid, cell, use)."""
         token = self.peek()
         if token.type != 'keyword':
             raise ParseError(f"Expected layout node keyword, got {token.type}", token.line, token.column)
 
         if token.value == 'rect':
             return self.parse_rect()
+        elif token.value == 'circle':
+            return self.parse_circle()
+        elif token.value == 'rounded_rect':
+            return self.parse_rounded_rect()
+        elif token.value == 'line':
+            return self.parse_line()
         elif token.value == 'inset':
             return self.parse_inset()
         elif token.value == 'frame':
@@ -425,6 +435,107 @@ class CompositionalPMLParser:
             self.expect('dedent')
 
         return Rect(children=tuple(children), feature=feature, id=rect_id)
+
+    def parse_circle(self) -> Circle:
+        """Parse circle:
+        circle [id] [diameter <value>mm | fit] [feature]
+            <children>
+        """
+        self.expect('keyword', 'circle')
+
+        # Parse optional id
+        circle_id = None
+        if self.peek().type == 'identifier':
+            circle_id = self.advance().value
+
+        # Parse optional diameter or fit mode
+        diameter_mm = None
+        if self.peek().type == 'keyword':
+            if self.peek().value == 'diameter':
+                self.advance()  # consume 'diameter'
+                diameter_mm = self.expect('number_with_unit').value
+            elif self.peek().value == 'fit':
+                self.advance()  # consume 'fit'
+                diameter_mm = None  # fit mode
+
+        # Parse optional feature
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        # Parse optional children
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return Circle(diameter_mm=diameter_mm, children=tuple(children), feature=feature, id=circle_id)
+
+    def parse_rounded_rect(self) -> RoundedRect:
+        """Parse rounded_rect:
+        rounded_rect [id] radius <value>mm [feature]
+            <children>
+        """
+        self.expect('keyword', 'rounded_rect')
+
+        # Parse optional id
+        rounded_rect_id = None
+        if self.peek().type == 'identifier':
+            rounded_rect_id = self.advance().value
+
+        # Parse required radius
+        self.expect('keyword', 'radius')
+        radius_mm = self.expect('number_with_unit').value
+
+        # Parse optional feature
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        # Parse optional children
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return RoundedRect(radius_mm=radius_mm, children=tuple(children), feature=feature, id=rounded_rect_id)
+
+    def parse_line(self) -> Line:
+        """Parse line:
+        line [id] horizontal|vertical [feature]
+        """
+        self.expect('keyword', 'line')
+
+        # Parse optional id
+        line_id = None
+        if self.peek().type == 'identifier':
+            line_id = self.advance().value
+
+        # Parse required orientation
+        if self.peek().type == 'keyword' and self.peek().value in ('horizontal', 'vertical'):
+            orientation = self.advance().value
+        else:
+            raise ParseError(f"Expected 'horizontal' or 'vertical', got {self.peek().value}",
+                           self.peek().line, self.peek().column)
+
+        # Parse optional feature
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        return Line(orientation=orientation, feature=feature, id=line_id)
 
     def parse_feature(self) -> Feature:
         """Parse feature: pocket <depth>mm | profile through <side> | ..."""

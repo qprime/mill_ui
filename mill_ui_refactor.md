@@ -477,6 +477,82 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | New shapes are additive; existing rect/inset/frame/grid nodes unchanged |
 | **Risk / Rollback** | Delete new shape nodes from AST/parser/resolver; existing shapes unaffected |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
+| **Status** | `done` |
+| **Commits** | `b7951e6` |
+
+---
+
+#### Stage 15: Split Layout Manager
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S15_SPLIT_LAYOUT` |
+| **Stage Name** | Split Layout Manager (Cabinetry-First Mullions/Rails) |
+| **Goal** | Add `split` as cabinetry-first layout manager to complement grid (mullions/rails for French doors, drawers) |
+| **Scope** | - `v2/ast/compositional.py` (Split node)<br>- `v2/resolution/layout_resolver.py` (region subdivision with rail/mullion bars)<br>- `v2/pml/compositional_parser.py` + formatter<br>- `v2/tests/test_split_layout.py`<br>- `v2/docs/layout_primitives.md` |
+| **Deliverables** | - Split node: `split rows <n> cols <m> rail <mm> mullion <mm>`<br>- Cell subtree applied per pane (like grid)<br>- Deterministic region generation with rail/mullion material reserved<br>- Edge case: zero rail/mullion behaves like grid<br>- Fit+inset interactions correct<br>- Documentation: layout managers vs shapes |
+| **Acceptance Tests** | - French-door pocket example: `frame → split(2×2, rail/mullion) → cell pocket`<br>- 4-pane panel with 50mm rails (horizontal) and 40mm mullions (vertical)<br>- Zero rail/mullion behaves like grid (no material reserved)<br>- Split inside inset region calculates pane sizes correctly<br>- Round-trip: PML → AST → PML preserves rail/mullion dimensions |
+| **Equivalence Type** | **foundation** (layout manager; semantic preservation through lowering) |
+| **Back-Compat Guarantee** | Split is additive; grid, frame, inset unchanged |
+| **Risk / Rollback** | Delete Split node; grid still available for regular subdivision |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
+| **Status** | `todo` |
+| **Commits** | _(pending)_ |
+
+---
+
+#### Stage 16: Polyline Path Primitive
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S16_POLYLINE_PATH` |
+| **Stage Name** | Polyline Path Primitive (Normalized Points) |
+| **Goal** | Add polyline for arbitrary engraving paths using normalized coordinates (0..1) within current region |
+| **Scope** | - `v2/ast/compositional.py` (Polyline node)<br>- `v2/resolution/layout_resolver.py` (map normalized points to region coordinates)<br>- `v2/pml/compositional_parser.py` + formatter<br>- `v2/tests/test_polyline_path.py`<br>- Update `v2/docs/shape_primitives.md` |
+| **Deliverables** | - Polyline node with normalized points (0..1, 0..1)<br>- PML syntax: `polyline <id> points (0.10,0.20) (0.90,0.20) ...`<br>- Resolver maps normalized points to absolute coordinates within region<br>- Emits open path (kind="path") suitable for engrave<br>- Strict validation: points in [0,1], minimum 2 points<br>- Round-trip formatting stable |
+| **Acceptance Tests** | - Polyline inside rect region<br>- Polyline inside rounded_rect region<br>- Polyline inside circle fit region (bounding box mapping)<br>- Polyline with 10 points renders correctly<br>- Error: out-of-range points (x<0, x>1, y<0, y>1)<br>- Error: malformed points syntax<br>- Error: single point (minimum 2 required)<br>- Round-trip preserves point coordinates |
+| **Equivalence Type** | **foundation** (geometry primitive; semantic preservation) |
+| **Back-Compat Guarantee** | Polyline is additive; existing line/circle/rect unchanged |
+| **Risk / Rollback** | Delete Polyline node; basic line still available |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML`, `S14_BASIC_SHAPES` |
+| **Status** | `todo` |
+| **Commits** | _(pending)_ |
+
+---
+
+#### Stage 17: Keepout/Island Semantics
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S17_KEEPOUT_ISLANDS` |
+| **Stage Name** | Keepout/Island Semantics (Region Subtraction) |
+| **Goal** | Add first-class "preserve this area" semantics for pockets with islands (faux raised panels, cutouts) |
+| **Scope** | - `v2/ast/compositional.py` (Keepout node)<br>- `v2/resolution/layout_resolver.py` (compute derived region boundaries: outer minus keepouts)<br>- Lowering: ensure RemovalIntent gets islands/holes info<br>- `v2/pml/compositional_parser.py` + formatter<br>- `v2/tests/test_keepout_islands.py`<br>- Update docs |
+| **Deliverables** | - Keepout node: `keepout { ...children... }` defines preserved subregion(s)<br>- Pocket applied to region with keepouts becomes "pocket-with-islands"<br>- Resolver computes island boundaries relative to parent region<br>- RemovalIntent lowering preserves island information<br>- No change to toolpath strategy yet (strategy respects islands)<br>- Nesting: disallow nested keepouts initially (validate) |
+| **Acceptance Tests** | - Frame field pocket with preserved panel island (faux raised panel base case)<br>- Keepout inside grid cell (each cell can have keepout)<br>- Multiple keepouts in single region<br>- Keepout nesting error: validate and reject nested keepouts<br>- RemovalIntent includes island geometry<br>- Round-trip: keepout boundaries preserved |
+| **Equivalence Type** | **foundation** (region semantics; RemovalIntent extension) |
+| **Back-Compat Guarantee** | Keepout is additive; existing pocket/profile unchanged |
+| **Risk / Rollback** | Delete Keepout node; simple pockets still work |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML`, `S14_BASIC_SHAPES` |
+| **Status** | `todo` |
+| **Commits** | _(pending)_ |
+
+---
+
+#### Stage 18: Edge Treatment Intent
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S18_EDGE_INTENT` |
+| **Stage Name** | Edge Treatment as Intent Hints (Finish Allowance + Fillet/Chamfer Contracts) |
+| **Goal** | Make edge fillet/chamfer/allowance actionable intent (not just metadata) for multi-pass finish operations |
+| **Scope** | - `v2/ast/compositional.py` (refine Edge node semantics)<br>- Lowering: convert edge treatments into RemovalIntent constraints/annotations<br>- `v2/pml/compositional_parser.py` + formatter<br>- `v2/tests/test_edge_intent.py`<br>- Update docs with allowance vs decorative edge semantics |
+| **Deliverables** | - Clear separation:<br>  - Allowance (rough/finish semantics): leave stock for finish pass<br>  - Decorative edge (fillet/chamfer): "finish pass required" hints<br>- Edge node: `edge allowance <rough_mm> <finish_mm>` OR `edge fillet <radius_mm>`<br>- RemovalIntent annotations for edge treatments<br>- No requirement to implement fancy-bit toolpaths yet (intent preserved and inspectable)<br>- Multi-tool scenario still allowed (kerf not global) |
+| **Acceptance Tests** | - Edge allowance influences profile/pocket RemovalIntent (e.g., leave stock for finish)<br>- Profile with fillet hint emits RemovalIntent with fillet annotation<br>- Multi-tool scenario: rough pass + finish pass with different allowances<br>- Allowance semantics compatible with kerf (per-edge, not global)<br>- Round-trip: edge intent preserved in PML |
+| **Equivalence Type** | **foundation** (intent semantics; RemovalIntent extension) |
+| **Back-Compat Guarantee** | Edge is additive; existing profile/pocket unchanged |
+| **Risk / Rollback** | Delete Edge node; basic profile/pocket still work |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
 | **Status** | `todo` |
 | **Commits** | _(pending)_ |
 

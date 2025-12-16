@@ -402,8 +402,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v2 Shaker produces geometrically equivalent panels; G-code motion may differ from v1 |
 | **Risk / Rollback** | If geometry/safety verification fails, template or planner has semantic errors—block until resolved |
 | **Blocking Dependencies** | `S2_AST_CORE`, `S4_REMOVAL_IR_CORE`, `S6_PLANNER_ADAPTER` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | `f954aa5` |
 
 ---
 

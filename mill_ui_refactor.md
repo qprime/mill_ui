@@ -347,8 +347,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 CLI unchanged; v2 CLI is additive |
 | **Risk / Rollback** | Delete `v2/cli/`; no impact on v1 |
 | **Blocking Dependencies** | `S3_AST_EMIT`, `S5_HINTS_ADAPTER` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
 
 ---
 

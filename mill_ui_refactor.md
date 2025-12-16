@@ -420,8 +420,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | JSON remains primary; PML is additive human interface |
 | **Risk / Rollback** | PML is Phase 2; delete `v2/pml/` if needed without affecting core |
 | **Blocking Dependencies** | `S2_AST_CORE`, `S3_AST_EMIT` (LayoutAST must be stable) |
-| **Status** | `todo` (DEFERRED until Stages 1-10 complete) |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | `d704125` |
 
 ---
 

@@ -30,6 +30,9 @@ from skills.mill_ui.v2.ast.compositional import (
     UseComponent,
     Place,
     Rect,
+    Circle,
+    RoundedRect,
+    Line,
     ResolvedRegion,
     CompositionalLayoutAST,
 )
@@ -203,6 +206,77 @@ class LayoutResolver:
             # Resolve children within same region (for nested features)
             for child in node.children:
                 self._resolve_node(child, region, items, params)
+
+        # Circle: create circular region
+        elif isinstance(node, Circle):
+            # Determine diameter: explicit or fit mode
+            if node.diameter_mm is not None:
+                diameter = node.diameter_mm
+            else:
+                # Fit mode: largest circle inscribed in region
+                diameter = min(region.width, region.height)
+
+            circle_item = Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": diameter}),
+                placement=Placement(center_xy_mm=region.center),
+                feature=node.feature,
+                shape_id=node.id,
+            )
+            items.append(circle_item)
+
+            # Resolve children within circular region
+            # For simplicity, children operate in bounding box region
+            for child in node.children:
+                self._resolve_node(child, region, items, params)
+
+        # RoundedRect: fill current region with rounded corners
+        elif isinstance(node, RoundedRect):
+            rounded_rect_item = Item(
+                kind="shape",
+                type="RoundedRect",
+                geometry=Geometry(data={
+                    "w_mm": region.width,
+                    "h_mm": region.height,
+                    "radius_mm": node.radius_mm,
+                }),
+                placement=Placement(center_xy_mm=region.center),
+                feature=node.feature,
+                shape_id=node.id,
+            )
+            items.append(rounded_rect_item)
+
+            # Resolve children within same region
+            for child in node.children:
+                self._resolve_node(child, region, items, params)
+
+        # Line: create open path for engraving
+        elif isinstance(node, Line):
+            # Determine line endpoints based on orientation
+            if node.orientation == "horizontal":
+                # Horizontal line across center of region
+                start_xy = (region.x_min, region.center[1])
+                end_xy = (region.x_max, region.center[1])
+            elif node.orientation == "vertical":
+                # Vertical line down center of region
+                start_xy = (region.center[0], region.y_min)
+                end_xy = (region.center[0], region.y_max)
+            else:
+                raise ValueError(f"Unknown line orientation: {node.orientation}")
+
+            line_item = Item(
+                kind="path",  # Open path, not closed shape
+                type="Line",
+                geometry=Geometry(data={
+                    "start_xy_mm": start_xy,
+                    "end_xy_mm": end_xy,
+                }),
+                placement=Placement(center_xy_mm=region.center),
+                feature=node.feature,
+                shape_id=node.id,
+            )
+            items.append(line_item)
 
         # Legacy Item nodes (from flat LayoutAST): preserve as-is
         elif isinstance(node, Item):

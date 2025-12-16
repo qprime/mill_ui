@@ -1,32 +1,47 @@
 [
   {
-    "content": "Create compositional PML parser (indentation-based)",
+    "content": "Document Stage 14 in refactor doc",
     "status": "completed",
-    "activeForm": "Creating compositional PML parser"
+    "activeForm": "Documenting Stage 14"
   },
   {
-    "content": "Create compositional PML formatter (AST → canonical PML)",
+    "content": "Extend compositional AST with circle, rounded_rect, line nodes",
     "status": "completed",
-    "activeForm": "Creating compositional PML formatter"
+    "activeForm": "Extending compositional AST"
   },
   {
-    "content": "Add comprehensive tests for parser and formatter",
+    "content": "Update layout resolver for new shape primitives",
     "status": "completed",
-    "activeForm": "Adding comprehensive tests"
+    "activeForm": "Updating layout resolver"
   },
   {
-    "content": "Create acceptance test with Stage 12 gold exemplar",
+    "content": "Extend PML parser for new shape syntax",
     "status": "completed",
-    "activeForm": "Creating acceptance test"
+    "activeForm": "Extending PML parser"
   },
   {
-    "content": "Run all tests and verify 24-item output",
+    "content": "Extend PML formatter for new shapes",
     "status": "completed",
-    "activeForm": "Running all tests"
+    "activeForm": "Extending PML formatter"
   },
   {
-    "content": "Commit Stage 13 with tag",
+    "content": "Add comprehensive tests for new primitives",
+    "status": "completed",
+    "activeForm": "Adding tests"
+  },
+  {
+    "content": "Verify Stage 12/13 exemplar still passes",
+    "status": "completed",
+    "activeForm": "Verifying existing tests"
+  },
+  {
+    "content": "Update documentation with shapes section",
+    "status": "completed",
+    "activeForm": "Updating documentation"
+  },
+  {
+    "content": "Commit and tag Stage 14",
     "status": "in_progress",
-    "activeForm": "Committing Stage 13"
+    "activeForm": "Committing Stage 14"
   }
 ]

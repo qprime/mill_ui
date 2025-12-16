@@ -255,8 +255,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | v1 code untouched; v2 only consumes, does not emit |
 | **Risk / Rollback** | Delete `v2/ast/`; no impact on v1 |
 | **Blocking Dependencies** | `S1_TAG_SKELETON` |
-| **Status** | `todo` |
-| **Commits** | _(empty)_ |
+| **Status** | `done` |
+| **Commits** | _(pending)_ |
 
 ---
 
@@ -426,13 +426,14 @@ Every stage follows this structure:
 
 ### Stage Execution Status
 
-**Current Stage**: `S2_AST_CORE`
-**Completed Stages**: S1 (5e79908)
-**Blocked Stages**: S3-S11 (awaiting S2 completion)
+**Current Stage**: `S3_AST_EMIT`
+**Completed Stages**: S1 (5e79908), S2 (pending commit)
+**Blocked Stages**: S3-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
 **Progress Tracking**:
 - **S1_TAG_SKELETON**: Completed 2025-12-16, commit 5e79908, tag refactor_v2_S1_TAG_SKELETON
+- **S2_AST_CORE**: Completed 2025-12-16, commit pending, tag refactor_v2_S2_AST_CORE (pending)
 
 ---
 

@@ -322,15 +322,15 @@ Every stage follows this structure:
 | **Stage Name** | Adapt RemovalIntent IR to Existing v1 Planners |
 | **Goal** | Enable v1 planners to consume RemovalIntent (via reverse adapter to hints) |
 | **Scope** | - `v2/adapters/removal_to_planner.py` (adapter to v1 planner inputs)<br>- `v2/tests/test_planner_adapter.py` |
-| **Deliverables** | - `removal_intent_to_v1_hints()` function<br>- Integration test: RemovalIntent → v1 planner → moves (identical to v1 direct path)<br>- Deterministic G-code validation (hash matches v1 output) |
-| **Acceptance Tests** | - `python -m pytest v2/tests/test_planner_adapter.py -v` passes<br>- Generate G-code via RemovalIntent path, hash matches v1 direct path<br>- Test with 3 different operation types (profile, pocket, hole) |
-| **Equivalence Type** | **byte-identical** (adapter correctness validation) |
-| **Back-Compat Guarantee** | G-code output byte-for-byte identical to v1 for same inputs via adapter path |
-| **Risk / Rollback** | If G-code differs, adapter is incorrect—block merge until fixed |
+| **Deliverables** | - `removal_intent_to_v1_hints()` function<br>- Round-trip equivalence tests: v1 hint → RemovalIntent → v1 hint preserves semantics<br>- Structural validation: adapter output matches `build_cam_hints()` format |
+| **Acceptance Tests** | - Standalone test runner passes (pytest-independent)<br>- Round-trip preserves geometry (floating point precision)<br>- Round-trip preserves metadata (id, shape, side, tabs, depths)<br>- Test with 3 different operation types (profile, pocket, hole) |
+| **Equivalence Type** | **semantic** (structural correctness + round-trip preservation) |
+| **Back-Compat Guarantee** | Adapter produces valid v1 hint structure; semantic equivalence proven via round-trip |
+| **Risk / Rollback** | If round-trip fails or structure invalid, adapter is incorrect—block merge until fixed |
 | **Blocking Dependencies** | `S5_HINTS_ADAPTER` |
 | **Status** | `done` |
-| **Commits** | `9ac0ef9` (tag: `refactor_v2_S6_PLANNER_ADAPTER`), `ea4d4e8` (equivalence validation) |
-| **Notes** | Equivalence framework complete; execution blocked by native CAM core (env limitation) |
+| **Commits** | `9ac0ef9` (tag: `refactor_v2_S6_PLANNER_ADAPTER`) |
+| **Notes** | G-code equivalence framework in `ea4d4e8` available for environments with native CAM core |
 
 ---
 

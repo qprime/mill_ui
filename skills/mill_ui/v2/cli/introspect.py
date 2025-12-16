@@ -23,6 +23,7 @@ from skills.mill_ui.v2.adapters.hints_to_removal import (
     hole_hint_to_removal_intent,
     engrave_hint_to_removal_intent,
 )
+from skills.mill_ui.compositions import resolve_templates
 
 
 def dump_ast(layout_path: str) -> str:
@@ -48,63 +49,103 @@ def dump_removal_intent(layout_path: str) -> str:
         JSON array of RemovalIntent records
 
     Note:
-        This requires building hints from the layout first.
-        For template-based layouts, templates must be resolved.
+        Templates are automatically expanded via resolve_templates().
     """
     # Parse layout
     ast = LayoutAST.from_json(layout_path)
 
-    # For now, only handle shape-based items directly
-    # Template expansion would require resolve_templates()
+    # Convert AST items to dict format for resolve_templates
+    items_as_dicts = []
+    for item in ast.items:
+        item_dict: dict[str, Any] = {
+            "kind": item.kind,
+            "type": item.type,
+        }
+        if item.kind == "template":
+            if item.params:
+                item_dict["params"] = item.params
+            if item.id:
+                item_dict["id"] = item.id
+            if item.placement:
+                item_dict["placement"] = {"center_xy_mm": item.placement.center_xy_mm}
+        else:  # shape
+            if item.geometry:
+                item_dict["geometry"] = item.geometry.data
+            if item.placement:
+                item_dict["placement"] = {"center_xy_mm": item.placement.center_xy_mm}
+            if item.feature:
+                feature_dict: dict[str, Any] = {
+                    "type": item.feature.type,
+                    "depth": item.feature.depth,
+                }
+                if item.feature.side:
+                    feature_dict["side"] = item.feature.side
+                if item.feature.depth_mm is not None:
+                    feature_dict["depth_mm"] = item.feature.depth_mm
+                item_dict["feature"] = feature_dict
+            if item.shape_id:
+                item_dict["id"] = item.shape_id
+
+        items_as_dicts.append(item_dict)
+
+    # Resolve templates to concrete shapes
+    resolved_items = resolve_templates(items_as_dicts, sheet_thickness_mm=ast.sheet.thickness_mm)
+
     removal_intents = []
 
-    for item in ast.items:
-        if item.kind != "shape":
-            # Skip templates - would need template resolution
+    # resolved_items are now dicts (from resolve_templates)
+    for item in resolved_items:
+        if item.get("kind") != "shape":
             continue
 
-        if item.feature is None or item.geometry is None or item.placement is None:
+        feature = item.get("feature")
+        geometry = item.get("geometry")
+        placement = item.get("placement")
+
+        if not feature or not geometry or not placement:
             continue
 
-        # Build hint dict from item
-        # Geometry object has a 'data' field containing the actual geometry dict
-        geometry_data = item.geometry.data if hasattr(item.geometry, "data") else {}
-
+        # Build hint dict from resolved item
         hint: dict[str, Any] = {
-            "id": item.shape_id or "",
-            "shape": item.type,
-            "geometry": geometry_data,
-            "center_xy_mm": item.placement.center_xy_mm if item.placement else (0.0, 0.0),
+            "id": item.get("id", ""),
+            "shape": item.get("type", ""),
+            "geometry": geometry,
+            "center_xy_mm": placement.get("center_xy_mm", (0.0, 0.0)),
             "depth_mm": 0.0,
         }
 
         # Extract depth from feature
-        if item.feature.depth == "through":
+        depth = feature.get("depth")
+        if depth == "through":
             hint["depth_mm"] = ast.sheet.thickness_mm
-        elif item.feature.depth_mm is not None:
-            hint["depth_mm"] = item.feature.depth_mm
+        elif feature.get("depth_mm") is not None:
+            hint["depth_mm"] = feature["depth_mm"]
+        elif isinstance(depth, (int, float)):
+            hint["depth_mm"] = float(depth)
         else:
             hint["depth_mm"] = ast.sheet.thickness_mm
 
         # Extract feature-specific fields
-        if item.feature.type == "profile":
-            if item.feature.side:
-                hint["side"] = item.feature.side
-            if hasattr(item.feature, "tabs") and item.feature.tabs:
-                hint["tabs"] = item.feature.tabs.__dict__ if hasattr(item.feature.tabs, "__dict__") else item.feature.tabs
+        feature_type = feature.get("type", "profile")
+
+        if feature_type == "profile":
+            if feature.get("side"):
+                hint["side"] = feature["side"]
+            if feature.get("tabs"):
+                hint["tabs"] = feature["tabs"]
 
             intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=ast.sheet.thickness_mm)
 
-        elif item.feature.type == "pocket":
-            if hasattr(item.feature, "start_depth_mm") and item.feature.start_depth_mm is not None:
-                hint["start_depth_mm"] = item.feature.start_depth_mm
+        elif feature_type == "pocket":
+            if feature.get("start_depth_mm") is not None:
+                hint["start_depth_mm"] = feature["start_depth_mm"]
 
             intent = pocket_hint_to_removal_intent(hint)
 
-        elif item.feature.type == "hole":
+        elif feature_type == "hole":
             intent = hole_hint_to_removal_intent(hint)
 
-        elif item.feature.type == "engrave":
+        elif feature_type == "engrave":
             intent = engrave_hint_to_removal_intent(hint)
 
         else:

@@ -326,3 +326,25 @@ def test_dump_ast_parses_successfully():
 
     finally:
         Path(temp_path).unlink()
+
+
+def test_dump_removal_intent_real_template():
+    """Test dump-removal-intent with real template layout (ClampBar)."""
+    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+
+    if not layout_path.exists():
+        pytest.skip("ClampBar layout not found")
+
+    removal_json = dump_removal_intent(str(layout_path))
+    removal_data = json.loads(removal_json)
+
+    # ClampBar template should produce multiple regions
+    assert len(removal_data) > 0
+
+    # Verify we got profile and pocket regions
+    region_ids = [r["region_id"] for r in removal_data]
+    has_profile = any("profile_" in rid for rid in region_ids)
+    has_pocket = any("pocket_" in rid for rid in region_ids)
+
+    assert has_profile
+    assert has_pocket

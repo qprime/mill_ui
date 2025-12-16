@@ -440,6 +440,25 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete `v2/ast/compositional.py` and `v2/resolution/` if needed; FlatPML unaffected |
 | **Blocking Dependencies** | `S2_AST_CORE`, `S11_PML_SYNTAX` (FlatPML for output inspection) |
 | **Status** | `done` |
+| **Commits** | `8b6a702` |
+
+---
+
+#### Stage 13: Compositional PML Parser
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S13_COMPOSITIONAL_PML` |
+| **Stage Name** | Compositional PML Parser (Indentation-Based) |
+| **Goal** | Implement human-facing compositional language that compiles to Stage 12 compositional AST |
+| **Scope** | - `v2/pml/compositional_parser.py` (PML → CompositionalAST parser)<br>- `v2/pml/compositional_formatter.py` (CompositionalAST → PML formatter)<br>- `v2/tests/test_compositional_pml.py` |
+| **Deliverables** | - Indentation-based parser supporting: `sheet`, `project`, `component`, `use`, `place`, `panel`, `rect`, `inset`, `frame`, `grid`, `cell`<br>- Feature nodes: `pocket`, `profile`, `engrave`, `hole`, `edge` (as intent labels)<br>- NO arithmetic, NO expressions, NO conditionals<br>- Strict error messages with line/column numbers<br>- Round-trip formatter (CompositionalAST → canonical PML)<br>- CLI integration: `parse-compositional-pml <file.pml>` |
+| **Acceptance Tests** | - Parse Stage 12 gold exemplar PML (4 instances × frame+grid+pockets)<br>- Resolve to 24 items (8 profiles, 16 pockets)<br>- Match exact item counts from Stage 12 Python test<br>- Round-trip: PML → AST → PML produces canonical formatting<br>- Error handling: Invalid indentation, unknown keywords, missing required fields |
+| **Equivalence Type** | **semantic/geometry-equivalent** (same resolved items as Stage 12 Python AST) |
+| **Back-Compat Guarantee** | Compositional PML is additive; FlatPML (Stage 11) and Python AST construction unchanged |
+| **Risk / Rollback** | Delete `v2/pml/compositional_*`; Stage 12 Python API unaffected |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION` |
+| **Status** | `todo` |
 | **Commits** | _(pending)_ |
 
 ---

@@ -43,6 +43,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    Keepout,
     CompositionalLayoutAST,
 )
 from skills.mill_ui.v2.ast.layout import Sheet, Feature
@@ -138,7 +139,7 @@ class CompositionalPMLLexer:
         # Check if it's a keyword
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points',
+            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'keepout', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
@@ -413,6 +414,8 @@ class CompositionalPMLParser:
             return self.parse_line()
         elif token.value == 'polyline':
             return self.parse_polyline()
+        elif token.value == 'keepout':
+            return self.parse_keepout()
         elif token.value == 'inset':
             return self.parse_inset()
         elif token.value == 'frame':
@@ -628,6 +631,32 @@ class CompositionalPMLParser:
         self.expect_line_end()
 
         return Polyline(points=tuple(points), feature=feature, id=polyline_id)
+
+    def parse_keepout(self) -> Keepout:
+        """Parse keepout:
+        keepout [id]
+            <children>
+        """
+        self.expect('keyword', 'keepout')
+
+        # Parse optional id
+        keepout_id = None
+        if self.peek().type == 'identifier':
+            keepout_id = self.advance().value
+
+        self.expect_line_end()
+
+        # Parse indented children
+        children = []
+        if self.peek().type == 'indent':
+            self.advance()  # consume indent
+            while self.peek().type not in ('dedent', 'eof'):
+                children.append(self.parse_node())
+                self.skip_newlines()
+            if self.peek().type == 'dedent':
+                self.advance()  # consume dedent
+
+        return Keepout(children=tuple(children), id=keepout_id)
 
     def parse_feature(self) -> Feature:
         """Parse feature: pocket <depth>mm | profile through <side> | ..."""

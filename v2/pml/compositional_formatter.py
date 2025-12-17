@@ -31,6 +31,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    Keepout,
     CompositionalLayoutAST,
 )
 
@@ -160,6 +161,19 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
             parts.append(_format_feature(node.feature))
 
         lines.append(prefix + " ".join(parts))
+
+    elif isinstance(node, Keepout):
+        # keepout [id]
+        #     <children>
+        parts = ["keepout"]
+        if node.id:
+            parts.append(node.id)
+        lines.append(prefix + " ".join(parts))
+
+        # Children (if any)
+        if node.children:
+            for child in node.children:
+                lines.extend(_format_node(child, indent + 1))
 
     elif isinstance(node, Inset):
         # inset <amount>mm

@@ -282,6 +282,36 @@ class Polyline:
                 raise ValueError(f"Point {i} y-coordinate {y} out of range [0, 1]")
 
 
+@dataclass(frozen=True)
+class Keepout:
+    """Keepout node - marks regions where material should be preserved (islands).
+
+    Keepout defines subregions within a parent shape that should NOT be removed
+    during milling. This creates "islands" or "raised panels" within pockets.
+
+    Keepout must be a child of a shape with a pocket feature. During resolution,
+    the keepout boundaries are computed and added to the RemovalIntent as islands.
+
+    Nesting constraint: Keepouts cannot contain nested keepouts (validated at parse time).
+
+    Attributes:
+        children: Shape nodes defining the island boundaries (e.g., Rect, Circle)
+        id: Optional identifier
+
+    Example:
+        # Faux raised panel - pocket with rectangular island
+        Rect(feature=pocket_feature, children=(
+            Keepout(children=(
+                Inset(amount_mm=10.0, children=(
+                    Rect(id="island"),
+                )),
+            )),
+        ))
+    """
+    children: tuple[Any, ...] = ()
+    id: str | None = None
+
+
 # Computed during resolution (not authored)
 @dataclass(frozen=True)
 class ResolvedRegion:

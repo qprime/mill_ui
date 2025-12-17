@@ -22,6 +22,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Frame,
     Grid,
     Cell,
+    Split,
     ComponentDef,
     UseComponent,
     Place,
@@ -156,6 +157,12 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
     elif isinstance(node, Grid):
         # grid <rows> <cols> gap <gap>mm
         lines.append(f"{prefix}grid {node.rows} {node.cols} gap {node.gap_mm:.2f}mm")
+        for child in node.children:
+            lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, Split):
+        # split <rows> <cols> rail <rail>mm mullion <mullion>mm
+        lines.append(f"{prefix}split {node.rows} {node.cols} rail {node.rail_mm:.2f}mm mullion {node.mullion_mm:.2f}mm")
         for child in node.children:
             lines.extend(_format_node(child, indent + 1))
 

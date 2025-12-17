@@ -34,6 +34,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Frame,
     Grid,
     Cell,
+    Split,
     ComponentDef,
     UseComponent,
     Place,
@@ -136,7 +137,7 @@ class CompositionalPMLLexer:
         # Check if it's a keyword
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'circle', 'rounded_rect', 'line', 'inset', 'frame', 'grid', 'cell', 'gap',
+            'rect', 'circle', 'rounded_rect', 'line', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
@@ -399,6 +400,8 @@ class CompositionalPMLParser:
             return self.parse_frame()
         elif token.value == 'grid':
             return self.parse_grid()
+        elif token.value == 'split':
+            return self.parse_split()
         elif token.value == 'cell':
             return self.parse_cell()
         elif token.value == 'use':
@@ -601,6 +604,26 @@ class CompositionalPMLParser:
         self.expect('dedent')
 
         return Grid(rows=rows, cols=cols, gap_mm=gap_mm, children=tuple(children))
+
+    def parse_split(self) -> Split:
+        """Parse split: split <rows> <cols> rail <rail>mm mullion <mullion>mm"""
+        self.expect('keyword', 'split')
+        rows = self.expect('number').value
+        cols = self.expect('number').value
+        self.expect('keyword', 'rail')
+        rail_mm = self.expect('number_with_unit').value
+        self.expect('keyword', 'mullion')
+        mullion_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+        self.expect('indent')
+
+        children = []
+        while self.peek().type != 'dedent':
+            children.append(self.parse_node())
+            self.skip_newlines()
+        self.expect('dedent')
+
+        return Split(rows=rows, cols=cols, rail_mm=rail_mm, mullion_mm=mullion_mm, children=tuple(children))
 
     def parse_cell(self) -> Cell:
         """Parse cell: cell"""

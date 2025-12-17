@@ -247,6 +247,7 @@ class CompositionalPMLParser:
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.pos = 0
+        self.in_keepout = False  # Track if we're inside a keepout (for nested validation)
 
     def peek(self, offset: int = 0) -> Token:
         """Peek at token at current position + offset."""
@@ -637,7 +638,16 @@ class CompositionalPMLParser:
         keepout [id]
             <children>
         """
+        token = self.peek()
         self.expect('keyword', 'keepout')
+
+        # Validate: disallow nested keepouts
+        if self.in_keepout:
+            raise ParseError(
+                "Nested keepouts are not allowed (keepout inside another keepout)",
+                token.line,
+                token.column
+            )
 
         # Parse optional id
         keepout_id = None
@@ -646,15 +656,24 @@ class CompositionalPMLParser:
 
         self.expect_line_end()
 
-        # Parse indented children
+        # Parse indented children with keepout flag set
         children = []
         if self.peek().type == 'indent':
             self.advance()  # consume indent
-            while self.peek().type not in ('dedent', 'eof'):
-                children.append(self.parse_node())
-                self.skip_newlines()
-            if self.peek().type == 'dedent':
-                self.advance()  # consume dedent
+
+            # Set flag to prevent nested keepouts
+            old_in_keepout = self.in_keepout
+            self.in_keepout = True
+
+            try:
+                while self.peek().type not in ('dedent', 'eof'):
+                    children.append(self.parse_node())
+                    self.skip_newlines()
+                if self.peek().type == 'dedent':
+                    self.advance()  # consume dedent
+            finally:
+                # Restore flag
+                self.in_keepout = old_in_keepout
 
         return Keepout(children=tuple(children), id=keepout_id)
 

@@ -181,16 +181,15 @@ For circular islands, the bounding box encloses the circle.
 - **Multiple keepouts per shape**: Supported
 - **Any shape type for islands**: Rect, Circle, RoundedRect all supported
 - **Composition with layout managers**: Full support (inset, frame, grid, split)
+- **Nested keepout validation**: Parser rejects keepouts inside keepouts with clear error message
 
 ### Limitations
 
-- **Nested keepouts not validated**: Keepouts inside keepouts are allowed but not semantically validated
 - **Profile features**: Keepouts are ignored for profile features (pockets only)
 - **Complex shapes**: Polyline and Line cannot define keepout boundaries (closed shapes only)
 
 ## Future Enhancements (Deferred)
 
-- **Validation**: Detect and reject nested keepouts
 - **Profile integration**: Keepouts affecting profile operations
 - **Toolpath strategy**: Island-aware adaptive clearing strategies
 - **Minimum island size**: Validate island dimensions against tool size
@@ -198,25 +197,25 @@ For circular islands, the bounding box encloses the circle.
 
 ## Integration with RemovalIntent
 
-The island bounds are available in the Item geometry data. Adapter layers (hints_to_removal.py) can use this information when creating RemovalIntent instances:
+Island bounds from keepouts are automatically propagated to RemovalIntent when converting Items using the adapter layer. The `item_to_removal_intent()` function in `hints_to_removal.py` extracts island geometry and populates `RemovalIntent.constraints.islands`:
 
 ```python
-# In adapter layer
-if "islands" in item.geometry.data:
-    island_bounds = [
-        Island(
-            bounds=Bounds2D(
-                x_min=island["x_min"],
-                x_max=island["x_max"],
-                y_min=island["y_min"],
-                y_max=island["y_max"],
-            )
-        )
-        for island in item.geometry.data["islands"]
-    ]
+from skills.mill_ui.v2.adapters.hints_to_removal import item_to_removal_intent
 
-    constraints = Constraints(islands=tuple(island_bounds))
+# Convert Item with keepout islands to RemovalIntent
+removal = item_to_removal_intent(pocket_item, region_id_prefix="pocket")
+
+# Islands are automatically included in constraints
+for island in removal.constraints.islands:
+    print(f"Island bounds: {island.bounds.x_min}, {island.bounds.x_max}, ...")
 ```
+
+The adapter automatically:
+1. Extracts `islands` array from Item geometry data
+2. Converts each island dict to `Island` object with `Bounds2D`
+3. Attaches islands to `Constraints` in the resulting `RemovalIntent`
+
+This ensures downstream toolpath planners receive island information for adaptive clearing strategies.
 
 ## Testing
 
@@ -226,24 +225,29 @@ See `v2/tests/test_keepout_islands.py` for comprehensive acceptance tests coveri
 - Multiple keepouts per region
 - Round-trip preservation
 - Circular and rounded rectangle islands
+- Nested keepout rejection (validation)
+- RemovalIntent island propagation
 
 ## Stage 17 Implementation Notes
 
 **Files**:
 - `v2/ast/compositional.py`: Keepout node definition
 - `v2/resolution/layout_resolver.py`: Island bounds collection logic
-- `v2/pml/compositional_parser.py`: PML syntax parsing
+- `v2/pml/compositional_parser.py`: PML syntax parsing with nested keepout validation
 - `v2/pml/compositional_formatter.py`: Canonical PML formatting
-- `v2/tests/test_keepout_islands.py`: Acceptance tests (7 tests)
+- `v2/adapters/hints_to_removal.py`: Item → RemovalIntent conversion with island propagation
+- `v2/tests/test_keepout_islands.py`: Acceptance tests (8 tests)
 - `v2/tests/run_keepout_tests.py`: Standalone test runner
 
 **Compatibility**:
 - Existing shapes unchanged (Rect, Circle, RoundedRect)
 - Stage 12-16 tests still pass
-- No changes to RemovalIntent or strategy/lowering layers (adapter integration deferred)
+- RemovalIntent IR now supports island constraints
+
+**Validation**:
+- Parser enforces no nested keepouts (raises ParseError)
+- Test coverage for nested keepout rejection
 
 **Next Steps** (future stages):
-- Adapter layer integration: hints_to_removal.py → RemovalIntent with islands
 - Toolpath strategy: island-aware clearing algorithms
-- Validation: nested keepout detection
 - Edge cases: minimum island size, tool clearance validation

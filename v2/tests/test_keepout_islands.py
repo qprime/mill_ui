@@ -198,3 +198,56 @@ rect panel pocket 6.00mm
     assert abs(island["x_max"] - 450.0) < 0.01
     assert abs(island["y_min"] - 50.0) < 0.01
     assert abs(island["y_max"] - 350.0) < 0.01
+
+
+def test_nested_keepout_error():
+    """Test that nested keepouts are rejected with clear error."""
+    pml = """sheet 400.00mm 400.00mm 19.00mm
+
+rect panel pocket 6.00mm
+    keepout
+        inset 50.00mm
+            rect outer_island
+                keepout
+                    rect nested_island
+"""
+
+    try:
+        ast = parse_compositional_pml(pml)
+        assert False, "Should have raised ParseError for nested keepout"
+    except ParseError as e:
+        assert "nested keepout" in str(e).lower()
+
+
+def test_removal_intent_includes_islands():
+    """Test RemovalIntent includes island geometry from keepouts."""
+    from skills.mill_ui.v2.adapters.hints_to_removal import item_to_removal_intent
+
+    pml = """sheet 400.00mm 400.00mm 19.00mm
+
+rect panel pocket 6.00mm
+    keepout
+        inset 50.00mm
+            rect island
+"""
+
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    # Get the pocket item
+    pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
+    assert len(pocket_items) == 1
+    pocket = pocket_items[0]
+
+    # Convert to RemovalIntent
+    removal = item_to_removal_intent(pocket, region_id_prefix="test_pocket")
+
+    # Verify RemovalIntent has islands
+    assert len(removal.constraints.islands) == 1
+
+    # Verify island bounds match expected values (inset by 50mm from 400×400mm)
+    island = removal.constraints.islands[0]
+    assert abs(island.bounds.x_min - 50.0) < 0.01
+    assert abs(island.bounds.x_max - 350.0) < 0.01
+    assert abs(island.bounds.y_min - 50.0) < 0.01
+    assert abs(island.bounds.y_max - 350.0) < 0.01

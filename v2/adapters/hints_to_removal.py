@@ -16,7 +16,9 @@ from skills.mill_ui.v2.ir.removal_intent import (
     Allowance,
     Constraints,
     TabConstraint,
+    Island,
 )
+from skills.mill_ui.v2.ast.layout import Item
 
 
 def profile_hint_to_removal_intent(
@@ -269,3 +271,119 @@ def _tabs_to_constraints(tabs_data: dict[str, Any] | None) -> Constraints:
 
     tab = TabConstraint(count=count, height_mm=height_mm, width_mm=width_mm)
     return Constraints(tabs=tab)
+
+
+def item_to_removal_intent(
+    item: Item,
+    region_id_prefix: str = "item",
+) -> RemovalIntent:
+    """Convert v2 Item with feature to RemovalIntent.
+
+    Args:
+        item: v2 Item with geometry, placement, and feature
+        region_id_prefix: Prefix for generated region_id
+
+    Returns:
+        RemovalIntent for this item's feature operation
+
+    Raises:
+        ValueError: If item lacks necessary attributes (geometry, placement, feature)
+    """
+    if not item.geometry:
+        raise ValueError(f"Item {item.shape_id} has no geometry")
+    if not item.placement:
+        raise ValueError(f"Item {item.shape_id} has no placement")
+    if not item.feature:
+        raise ValueError(f"Item {item.shape_id} has no feature")
+
+    # Build region ID
+    region_id = f"{region_id_prefix}_{item.shape_id}" if item.shape_id else region_id_prefix
+
+    # Extract depth from feature
+    depth_mm = float(item.feature.depth_mm) if item.feature.depth_mm is not None else 0.0
+
+    # Calculate bounds from item geometry and placement
+    cx, cy = item.placement.center_xy_mm
+    bounds = _item_geometry_to_bounds(item.type, item.geometry.data, cx, cy)
+
+    # Handle allowance based on feature type and side
+    allowance = Allowance()
+    if item.feature.type == "profile" and item.feature.side:
+        allowance = _side_to_allowance(item.feature.side)
+
+    # Build constraints with islands if present
+    islands = _extract_islands_from_geometry(item.geometry.data)
+    constraints = Constraints(islands=tuple(islands)) if islands else Constraints()
+
+    # Build RemovalIntent
+    return RemovalIntent(
+        region_id=region_id,
+        bounds=bounds,
+        z_top=0.0,
+        z_bottom=-depth_mm,
+        allowance=allowance,
+        constraints=constraints,
+        metadata={
+            "item_type": item.type,
+            "feature_type": item.feature.type,
+            "shape_id": item.shape_id,
+        },
+    )
+
+
+def _item_geometry_to_bounds(item_type: str, geometry_data: dict[str, Any], cx: float, cy: float) -> Bounds2D:
+    """Calculate 2D bounds from v2 Item geometry."""
+    if item_type == "Rect" or item_type == "RoundedRect":
+        w = float(geometry_data.get("w_mm", 0.0))
+        h = float(geometry_data.get("h_mm", 0.0))
+        half_w, half_h = w / 2.0, h / 2.0
+        return Bounds2D(
+            x_min=cx - half_w,
+            x_max=cx + half_w,
+            y_min=cy - half_h,
+            y_max=cy + half_h,
+        )
+    elif item_type == "Circle":
+        diameter = float(geometry_data.get("diameter_mm", 0.0))
+        radius = diameter / 2.0
+        return Bounds2D(
+            x_min=cx - radius,
+            x_max=cx + radius,
+            y_min=cy - radius,
+            y_max=cy + radius,
+        )
+    else:
+        # Fallback for unsupported shapes
+        return Bounds2D(
+            x_min=cx - 0.5,
+            x_max=cx + 0.5,
+            y_min=cy - 0.5,
+            y_max=cy + 0.5,
+        )
+
+
+def _extract_islands_from_geometry(geometry_data: dict[str, Any]) -> list[Island]:
+    """Extract Island constraints from v2 Item geometry data.
+
+    Looks for 'islands' key in geometry data (added by keepout resolution).
+    Converts island bound dicts to Island objects.
+
+    Args:
+        geometry_data: Item geometry data dict
+
+    Returns:
+        List of Island objects (may be empty)
+    """
+    islands = []
+    island_data = geometry_data.get("islands", [])
+
+    for island_dict in island_data:
+        bounds = Bounds2D(
+            x_min=float(island_dict["x_min"]),
+            x_max=float(island_dict["x_max"]),
+            y_min=float(island_dict["y_min"]),
+            y_max=float(island_dict["y_max"]),
+        )
+        islands.append(Island(bounds=bounds))
+
+    return islands

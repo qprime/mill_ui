@@ -35,6 +35,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    Keepout,
     ResolvedRegion,
     CompositionalLayoutAST,
 )
@@ -54,6 +55,66 @@ class LayoutResolver:
     def __init__(self, ast: CompositionalLayoutAST):
         self.ast = ast
         self.components = ast.components  # Component library
+
+    def _collect_island_bounds(
+        self,
+        children: tuple[Any, ...],
+        region: ResolvedRegion,
+        params: dict[str, Any],
+    ) -> list[dict[str, float]]:
+        """Collect island boundaries from Keepout children.
+
+        Args:
+            children: Child nodes to search for Keepouts
+            region: Current region for resolving keepout shapes
+            params: Component parameter bindings
+
+        Returns:
+            List of island bounds dicts with keys: x_min, x_max, y_min, y_max
+        """
+        islands = []
+
+        for child in children:
+            if isinstance(child, Keepout):
+                # Resolve keepout children to determine island boundaries
+                # Each shape within the keepout defines an island
+                keepout_items = []
+                for keepout_child in child.children:
+                    self._resolve_node(keepout_child, region, keepout_items, params)
+
+                # Extract bounds from resolved keepout items
+                for item in keepout_items:
+                    if item.kind == "shape" and item.geometry:
+                        # Compute bounds from geometry + placement
+                        cx, cy = item.placement.center_xy_mm
+                        if item.type == "Rect":
+                            w = item.geometry.data["w_mm"]
+                            h = item.geometry.data["h_mm"]
+                            islands.append({
+                                "x_min": cx - w / 2,
+                                "x_max": cx + w / 2,
+                                "y_min": cy - h / 2,
+                                "y_max": cy + h / 2,
+                            })
+                        elif item.type == "Circle":
+                            r = item.geometry.data["diameter_mm"] / 2
+                            islands.append({
+                                "x_min": cx - r,
+                                "x_max": cx + r,
+                                "y_min": cy - r,
+                                "y_max": cy + r,
+                            })
+                        elif item.type == "RoundedRect":
+                            w = item.geometry.data["w_mm"]
+                            h = item.geometry.data["h_mm"]
+                            islands.append({
+                                "x_min": cx - w / 2,
+                                "x_max": cx + w / 2,
+                                "y_min": cy - h / 2,
+                                "y_max": cy + h / 2,
+                            })
+
+        return islands
 
     def resolve(self) -> LayoutAST:
         """Resolve compositional AST to flat LayoutAST.
@@ -215,20 +276,33 @@ class LayoutResolver:
 
         # Rect: fill current region with a rectangle shape
         elif isinstance(node, Rect):
+            # Collect island bounds from Keepout children
+            islands = self._collect_island_bounds(node.children, region, params)
+
             # Rect fills the current region
+            geometry_data = {
+                "w_mm": region.width,
+                "h_mm": region.height,
+            }
+
+            # Add islands if present (for pocket features)
+            if islands:
+                geometry_data["islands"] = islands
+
             rect_item = Item(
                 kind="shape",
                 type="Rect",
-                geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+                geometry=Geometry(data=geometry_data),
                 placement=Placement(center_xy_mm=region.center),
                 feature=node.feature,  # May be None or a Feature dataclass
                 shape_id=node.id,
             )
             items.append(rect_item)
 
-            # Resolve children within same region (for nested features)
+            # Resolve non-Keepout children within same region (for nested features)
             for child in node.children:
-                self._resolve_node(child, region, items, params)
+                if not isinstance(child, Keepout):
+                    self._resolve_node(child, region, items, params)
 
         # Circle: create circular region
         elif isinstance(node, Circle):
@@ -239,40 +313,56 @@ class LayoutResolver:
                 # Fit mode: largest circle inscribed in region
                 diameter = min(region.width, region.height)
 
+            # Collect island bounds from Keepout children
+            islands = self._collect_island_bounds(node.children, region, params)
+
+            geometry_data = {"diameter_mm": diameter}
+            if islands:
+                geometry_data["islands"] = islands
+
             circle_item = Item(
                 kind="shape",
                 type="Circle",
-                geometry=Geometry(data={"diameter_mm": diameter}),
+                geometry=Geometry(data=geometry_data),
                 placement=Placement(center_xy_mm=region.center),
                 feature=node.feature,
                 shape_id=node.id,
             )
             items.append(circle_item)
 
-            # Resolve children within circular region
+            # Resolve non-Keepout children within circular region
             # For simplicity, children operate in bounding box region
             for child in node.children:
-                self._resolve_node(child, region, items, params)
+                if not isinstance(child, Keepout):
+                    self._resolve_node(child, region, items, params)
 
         # RoundedRect: fill current region with rounded corners
         elif isinstance(node, RoundedRect):
+            # Collect island bounds from Keepout children
+            islands = self._collect_island_bounds(node.children, region, params)
+
+            geometry_data = {
+                "w_mm": region.width,
+                "h_mm": region.height,
+                "radius_mm": node.radius_mm,
+            }
+            if islands:
+                geometry_data["islands"] = islands
+
             rounded_rect_item = Item(
                 kind="shape",
                 type="RoundedRect",
-                geometry=Geometry(data={
-                    "w_mm": region.width,
-                    "h_mm": region.height,
-                    "radius_mm": node.radius_mm,
-                }),
+                geometry=Geometry(data=geometry_data),
                 placement=Placement(center_xy_mm=region.center),
                 feature=node.feature,
                 shape_id=node.id,
             )
             items.append(rounded_rect_item)
 
-            # Resolve children within same region
+            # Resolve non-Keepout children within same region
             for child in node.children:
-                self._resolve_node(child, region, items, params)
+                if not isinstance(child, Keepout):
+                    self._resolve_node(child, region, items, params)
 
         # Line: create open path for engraving
         elif isinstance(node, Line):
@@ -323,6 +413,13 @@ class LayoutResolver:
                 shape_id=node.id,
             )
             items.append(polyline_item)
+
+        # Keepout: handled as children of shapes (Rect/Circle/RoundedRect)
+        # If encountered standalone, it's a no-op (should be caught during parse/validation)
+        elif isinstance(node, Keepout):
+            # Keepout should only appear as child of a shape with pocket feature
+            # If encountered here, silently skip (validation happens at parse time)
+            pass
 
         # Legacy Item nodes (from flat LayoutAST): preserve as-is
         elif isinstance(node, Item):

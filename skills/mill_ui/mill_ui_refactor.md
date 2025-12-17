@@ -497,8 +497,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | Split is additive; grid, frame, inset unchanged |
 | **Risk / Rollback** | Delete Split node; grid still available for regular subdivision |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
-| **Status** | `todo` |
-| **Commits** | _(pending)_ |
+| **Status** | `done` |
+| **Commits** | `ff54f40` |
 
 ---
 
@@ -561,7 +561,7 @@ Every stage follows this structure:
 
 ### Stage Execution Status
 
-**Current Stage**: `S5_HINTS_ADAPTER`
+**Current Stage**: `S16_POLYLINE_PATH`
 **Completed Stages**: S1 (5e79908), S2 (718290d), S3 (1adc2a9), S4 (d84b021)
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)

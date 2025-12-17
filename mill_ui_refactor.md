@@ -535,8 +535,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | Keepout is additive; existing pocket/profile unchanged |
 | **Risk / Rollback** | Delete Keepout node; simple pockets still work |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML`, `S14_BASIC_SHAPES` |
-| **Status** | `todo` |
-| **Commits** | _(pending)_ |
+| **Status** | `done` |
+| **Commits** | `408ba8a` |
 
 ---
 
@@ -561,8 +561,8 @@ Every stage follows this structure:
 
 ### Stage Execution Status
 
-**Current Stage**: `S17_KEEPOUT_ISLANDS`
-**Completed Stages**: S1-S4, S12-S16
+**Current Stage**: `S18_EDGE_INTENT`
+**Completed Stages**: S1-S4, S12-S17
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
@@ -576,6 +576,7 @@ Every stage follows this structure:
 - **S14_BASIC_SHAPES**: Completed 2025-12-16, commit b7951e6, tag refactor_v2_S14_BASIC_SHAPES
 - **S15_SPLIT_LAYOUT**: Completed 2025-12-16, commit ff54f40, tag refactor_v2_S15_SPLIT_LAYOUT
 - **S16_POLYLINE_PATH**: Completed 2025-12-17, commit e74c6d4, tag refactor_v2_S16_POLYLINE_PATH
+- **S17_KEEPOUT_ISLANDS**: Completed 2025-12-17, commit 408ba8a, tag refactor_v2_S17_KEEPOUT_ISLANDS
 
 ---
 

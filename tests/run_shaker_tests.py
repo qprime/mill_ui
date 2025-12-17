@@ -1,4 +1,4 @@
-"""Standalone test runner for Stage 10 ShakerV2 template tests (without pytest).
+"""Standalone test runner for Stage 10 Shaker template tests (without pytest).
 
 Run from repository root: python3 -m skills.mill_ui.tests.run_shaker_tests
 """
@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from skills.mill_ui.templates import ShakerV2
+from skills.mill_ui.templates import Shaker
 from skills.mill_ui.adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
@@ -18,7 +18,7 @@ from skills.mill_ui.export import render_svg_with_removal_intent
 
 
 def test_shaker_v2_basic_panel():
-    """Test ShakerV2 generates valid AST for basic panel."""
+    """Test Shaker generates valid AST for basic panel."""
     print("Running test_shaker_v2_basic_panel...")
 
     params = {
@@ -29,7 +29,7 @@ def test_shaker_v2_basic_panel():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     assert ast.sheet.thickness_mm == 19.0
     assert ast.sheet.width_mm == 450.0
@@ -55,7 +55,7 @@ def test_shaker_v2_basic_panel():
 
 
 def test_shaker_v2_with_anchors():
-    """Test ShakerV2 with anchor screw recesses."""
+    """Test Shaker with anchor screw recesses."""
     print("Running test_shaker_v2_with_anchors...")
 
     params = {
@@ -72,7 +72,7 @@ def test_shaker_v2_with_anchors():
         },
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     assert len(ast.items) == 6
 
@@ -90,7 +90,7 @@ def test_shaker_v2_with_anchors():
 
 
 def test_shaker_v2_removal_intent_generation():
-    """Test ShakerV2 AST → RemovalIntent conversion."""
+    """Test Shaker AST → RemovalIntent conversion."""
     print("Running test_shaker_v2_removal_intent_generation...")
 
     params = {
@@ -101,7 +101,7 @@ def test_shaker_v2_removal_intent_generation():
         "panel_recess": 4.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     removal_intents = []
 
@@ -145,7 +145,7 @@ def test_shaker_v2_removal_intent_generation():
 
 
 def test_shaker_v2_geometry_verification():
-    """Test ShakerV2 geometry matches specification."""
+    """Test Shaker geometry matches specification."""
     print("Running test_shaker_v2_geometry_verification...")
 
     params = {
@@ -156,7 +156,7 @@ def test_shaker_v2_geometry_verification():
         "panel_recess": 7.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     outer = ast.items[0]
     assert outer.geometry.data["w_mm"] == 500.0
@@ -174,7 +174,7 @@ def test_shaker_v2_geometry_verification():
 
 
 def test_shaker_v2_svg_export():
-    """Test ShakerV2 can be exported to SVG for visual verification."""
+    """Test Shaker can be exported to SVG for visual verification."""
     print("Running test_shaker_v2_svg_export...")
 
     params = {
@@ -185,7 +185,7 @@ def test_shaker_v2_svg_export():
         "panel_recess": 5.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     removal_intents = []
     for item in ast.items:
@@ -233,7 +233,7 @@ def test_shaker_v2_svg_export():
 
 
 def test_shaker_v2_inner_dimensions():
-    """Test ShakerV2 with inner dimensions specified."""
+    """Test Shaker with inner dimensions specified."""
     print("Running test_shaker_v2_inner_dimensions...")
 
     params = {
@@ -244,7 +244,7 @@ def test_shaker_v2_inner_dimensions():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     outer = ast.items[0]
     expected_outer_w = 300.0 + 2 * 50.0
@@ -257,7 +257,7 @@ def test_shaker_v2_inner_dimensions():
 
 
 def test_shaker_v2_no_panel_recess():
-    """Test ShakerV2 without panel recess (frame only)."""
+    """Test Shaker without panel recess (frame only)."""
     print("Running test_shaker_v2_no_panel_recess...")
 
     params = {
@@ -268,7 +268,7 @@ def test_shaker_v2_no_panel_recess():
         "panel_recess": 0.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     assert len(ast.items) == 1
     assert ast.items[0].shape_id == "door:outer"
@@ -278,7 +278,7 @@ def test_shaker_v2_no_panel_recess():
 
 
 def test_shaker_v2_invalid_dimensions():
-    """Test ShakerV2 rejects invalid dimensions."""
+    """Test Shaker rejects invalid dimensions."""
     print("Running test_shaker_v2_invalid_dimensions...")
 
     params = {
@@ -289,7 +289,7 @@ def test_shaker_v2_invalid_dimensions():
     }
 
     try:
-        ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+        Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
         assert False, "Expected ValueError for invalid dimensions"
     except ValueError as e:
         assert "Invalid Shaker dimensions" in str(e)
@@ -299,7 +299,7 @@ def test_shaker_v2_invalid_dimensions():
 
 
 def test_shaker_v2_ast_json_serialization():
-    """Test ShakerV2 AST can be serialized to JSON."""
+    """Test Shaker AST can be serialized to JSON."""
     print("Running test_shaker_v2_ast_json_serialization...")
 
     params = {
@@ -310,7 +310,7 @@ def test_shaker_v2_ast_json_serialization():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     ast_json = ast.to_json()
     ast_dict = json.loads(ast_json)
@@ -344,7 +344,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     sheet_thickness_mm = 19.0
 
     # 2. Expand to AST
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
     assert len(ast.items) == 2, f"Expected 2 AST items (profile + pocket), got {len(ast.items)}"
     print(f"  [1/4] ✓ Generated {len(ast.items)} AST items")
 
@@ -470,6 +470,6 @@ if __name__ == "__main__":
 
     passed = sum(1 for r in results if r)
     total = len(results)
-    print(f"\n{passed}/{total} ShakerV2 template tests passed")
+    print(f"\n{passed}/{total} Shaker template tests passed")
 
     sys.exit(0 if all(results) else 1)

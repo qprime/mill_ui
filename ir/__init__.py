@@ -1,1 +1,1 @@
-# v2/ir - RemovalIntent IR (Intermediate Representation)
+# ir - RemovalIntent IR (Intermediate Representation)

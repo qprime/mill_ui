@@ -1,5 +1,5 @@
-# v2/templates - Template classes using v2 AST/RemovalIntent pipeline
+# templates - Template classes using AST/RemovalIntent pipeline
 
-from .shaker import ShakerV2
+from .shaker import Shaker
 
-__all__ = ["ShakerV2"]
+__all__ = ["Shaker"]

@@ -1,4 +1,4 @@
-# v2/pml - PML surface syntax (Phase 2)
+# pml - PML surface syntax (Phase 2)
 
 from .parser import parse_pml, PMLParseError
 from .formatter import format_pml

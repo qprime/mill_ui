@@ -1,6 +1,6 @@
-"""ShakerV2 template: Production-ready Shaker cabinet door using v2 AST.
+"""Shaker template: Production-ready Shaker cabinet door.
 
-Rebuilds v1 Shaker template functionality using v2's LayoutAST and RemovalIntent pipeline.
+Uses LayoutAST and RemovalIntent pipeline for clean semantic representation.
 """
 
 from __future__ import annotations
@@ -128,8 +128,8 @@ class ShakerConfig:
         return Region(width=inner_w, height=inner_h)
 
 
-class ShakerV2:
-    """Shaker cabinet door template using v2 AST pipeline.
+class Shaker:
+    """Shaker cabinet door template.
 
     Generates LayoutAST with:
     - Outer perimeter profile (through-cut)

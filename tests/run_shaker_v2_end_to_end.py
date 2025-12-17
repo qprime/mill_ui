@@ -6,7 +6,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
-from skills.mill_ui.templates import ShakerV2
+from skills.mill_ui.templates import Shaker
 from skills.mill_ui.adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
@@ -36,7 +36,7 @@ def test_end_to_end_pipeline():
 
     # 2. Expand to AST
     print("\n[1] Expanding params to AST...")
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
     print(f"  ✓ Generated {len(ast.items)} AST items")
 
     # 3. Convert AST to RemovalIntent

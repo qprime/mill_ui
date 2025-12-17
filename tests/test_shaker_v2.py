@@ -1,4 +1,4 @@
-"""Unit tests for ShakerV2 template using v2 AST pipeline.
+"""Unit tests for Shaker template using AST pipeline.
 
 Stage 10 acceptance tests.
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from skills.mill_ui.templates import ShakerV2
+from skills.mill_ui.templates import Shaker
 from skills.mill_ui.adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
@@ -21,7 +21,7 @@ from skills.mill_ui.export import render_svg_with_removal_intent
 
 
 def test_shaker_v2_basic_panel():
-    """Test ShakerV2 generates valid AST for basic panel."""
+    """Test Shaker generates valid AST for basic panel."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -30,7 +30,7 @@ def test_shaker_v2_basic_panel():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Verify AST structure
     assert ast.sheet.thickness_mm == 19.0
@@ -58,7 +58,7 @@ def test_shaker_v2_basic_panel():
 
 
 def test_shaker_v2_with_anchors():
-    """Test ShakerV2 with anchor screw recesses."""
+    """Test Shaker with anchor screw recesses."""
     params = {
         "outer_w": 350.0,
         "outer_h": 500.0,
@@ -73,7 +73,7 @@ def test_shaker_v2_with_anchors():
         },
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Should have: outer profile + panel pocket + 4 anchor holes
     assert len(ast.items) == 6
@@ -91,7 +91,7 @@ def test_shaker_v2_with_anchors():
 
 
 def test_shaker_v2_removal_intent_generation():
-    """Test ShakerV2 AST → RemovalIntent conversion."""
+    """Test Shaker AST → RemovalIntent conversion."""
     params = {
         "outer_w": 300.0,
         "outer_h": 400.0,
@@ -100,7 +100,7 @@ def test_shaker_v2_removal_intent_generation():
         "panel_recess": 4.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Convert AST items to hints, then to RemovalIntent
     removal_intents = []
@@ -147,7 +147,7 @@ def test_shaker_v2_removal_intent_generation():
 
 
 def test_shaker_v2_geometry_verification():
-    """Test ShakerV2 geometry matches specification."""
+    """Test Shaker geometry matches specification."""
     params = {
         "outer_w": 500.0,
         "outer_h": 700.0,
@@ -156,7 +156,7 @@ def test_shaker_v2_geometry_verification():
         "panel_recess": 7.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Verify outer dimensions
     outer = ast.items[0]
@@ -175,7 +175,7 @@ def test_shaker_v2_geometry_verification():
 
 
 def test_shaker_v2_svg_export():
-    """Test ShakerV2 can be exported to SVG for visual verification."""
+    """Test Shaker can be exported to SVG for visual verification."""
     params = {
         "outer_w": 350.0,
         "outer_h": 450.0,
@@ -184,7 +184,7 @@ def test_shaker_v2_svg_export():
         "panel_recess": 5.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Convert to RemovalIntent
     removal_intents = []
@@ -233,7 +233,7 @@ def test_shaker_v2_svg_export():
 
 
 def test_shaker_v2_inner_dimensions():
-    """Test ShakerV2 with inner dimensions specified."""
+    """Test Shaker with inner dimensions specified."""
     params = {
         "inner_w": 300.0,
         "inner_h": 500.0,
@@ -242,7 +242,7 @@ def test_shaker_v2_inner_dimensions():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Outer should be inner + 2*stile/rail
     outer = ast.items[0]
@@ -253,7 +253,7 @@ def test_shaker_v2_inner_dimensions():
 
 
 def test_shaker_v2_no_panel_recess():
-    """Test ShakerV2 without panel recess (frame only)."""
+    """Test Shaker without panel recess (frame only)."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -262,7 +262,7 @@ def test_shaker_v2_no_panel_recess():
         "panel_recess": 0.0,  # No panel recess
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Should only have outer profile, no panel pocket
     assert len(ast.items) == 1
@@ -270,7 +270,7 @@ def test_shaker_v2_no_panel_recess():
 
 
 def test_shaker_v2_invalid_dimensions():
-    """Test ShakerV2 rejects invalid dimensions."""
+    """Test Shaker rejects invalid dimensions."""
     params = {
         "outer_w": 0.0,  # Invalid
         "outer_h": 600.0,
@@ -279,11 +279,11 @@ def test_shaker_v2_invalid_dimensions():
     }
 
     with pytest.raises(ValueError, match="Invalid Shaker dimensions"):
-        ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+        Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
 
 def test_shaker_v2_ast_json_serialization():
-    """Test ShakerV2 AST can be serialized to JSON."""
+    """Test Shaker AST can be serialized to JSON."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -292,7 +292,7 @@ def test_shaker_v2_ast_json_serialization():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Serialize to JSON
     ast_json = ast.to_json()
@@ -329,7 +329,7 @@ def test_shaker_v2_end_to_end_pipeline():
     sheet_thickness_mm = 19.0
 
     # 2. Expand to AST
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
 
     # Verify AST structure
     assert len(ast.items) == 2  # profile + pocket
@@ -482,7 +482,7 @@ def test_shaker_v2_removal_intent_dump():
         "panel_recess": 6.0,
     }
 
-    ast = ShakerV2.expand_to_ast(params, sheet_thickness_mm=19.0)
+    ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
     # Convert to RemovalIntent
     removal_intents = []

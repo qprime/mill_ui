@@ -36,6 +36,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Line,
     Polyline,
     Keepout,
+    Edge,
     ResolvedRegion,
     CompositionalLayoutAST,
 )
@@ -115,6 +116,30 @@ class LayoutResolver:
                             })
 
         return islands
+
+    def _extract_edge_treatment(
+        self,
+        children: tuple[Any, ...],
+    ) -> dict[str, Any] | None:
+        """Extract edge treatment from children (if present).
+
+        Args:
+            children: Child nodes to search for Edge
+
+        Returns:
+            Edge treatment dict or None if no Edge found
+        """
+        for child in children:
+            if isinstance(child, Edge):
+                # Found edge treatment - convert to dict for geometry data
+                return {
+                    "type": child.treatment_type,
+                    "rough_allowance_mm": child.rough_allowance_mm,
+                    "finish_allowance_mm": child.finish_allowance_mm,
+                    "radius_mm": child.radius_mm,
+                    "distance_mm": child.distance_mm,
+                }
+        return None
 
     def resolve(self) -> LayoutAST:
         """Resolve compositional AST to flat LayoutAST.
@@ -279,6 +304,9 @@ class LayoutResolver:
             # Collect island bounds from Keepout children
             islands = self._collect_island_bounds(node.children, region, params)
 
+            # Extract edge treatment from Edge children
+            edge_treatment = self._extract_edge_treatment(node.children)
+
             # Rect fills the current region
             geometry_data = {
                 "w_mm": region.width,
@@ -288,6 +316,10 @@ class LayoutResolver:
             # Add islands if present (for pocket features)
             if islands:
                 geometry_data["islands"] = islands
+
+            # Add edge treatment if present
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
 
             rect_item = Item(
                 kind="shape",
@@ -299,9 +331,9 @@ class LayoutResolver:
             )
             items.append(rect_item)
 
-            # Resolve non-Keepout children within same region (for nested features)
+            # Resolve non-Keepout, non-Edge children within same region (for nested features)
             for child in node.children:
-                if not isinstance(child, Keepout):
+                if not isinstance(child, (Keepout, Edge)):
                     self._resolve_node(child, region, items, params)
 
         # Circle: create circular region
@@ -316,9 +348,14 @@ class LayoutResolver:
             # Collect island bounds from Keepout children
             islands = self._collect_island_bounds(node.children, region, params)
 
+            # Extract edge treatment from Edge children
+            edge_treatment = self._extract_edge_treatment(node.children)
+
             geometry_data = {"diameter_mm": diameter}
             if islands:
                 geometry_data["islands"] = islands
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
 
             circle_item = Item(
                 kind="shape",
@@ -330,16 +367,19 @@ class LayoutResolver:
             )
             items.append(circle_item)
 
-            # Resolve non-Keepout children within circular region
+            # Resolve non-Keepout, non-Edge children within circular region
             # For simplicity, children operate in bounding box region
             for child in node.children:
-                if not isinstance(child, Keepout):
+                if not isinstance(child, (Keepout, Edge)):
                     self._resolve_node(child, region, items, params)
 
         # RoundedRect: fill current region with rounded corners
         elif isinstance(node, RoundedRect):
             # Collect island bounds from Keepout children
             islands = self._collect_island_bounds(node.children, region, params)
+
+            # Extract edge treatment from Edge children
+            edge_treatment = self._extract_edge_treatment(node.children)
 
             geometry_data = {
                 "w_mm": region.width,
@@ -348,6 +388,8 @@ class LayoutResolver:
             }
             if islands:
                 geometry_data["islands"] = islands
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
 
             rounded_rect_item = Item(
                 kind="shape",
@@ -359,9 +401,9 @@ class LayoutResolver:
             )
             items.append(rounded_rect_item)
 
-            # Resolve non-Keepout children within same region
+            # Resolve non-Keepout, non-Edge children within same region
             for child in node.children:
-                if not isinstance(child, Keepout):
+                if not isinstance(child, (Keepout, Edge)):
                     self._resolve_node(child, region, items, params)
 
         # Line: create open path for engraving

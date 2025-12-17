@@ -32,6 +32,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Line,
     Polyline,
     Keepout,
+    Edge,
     CompositionalLayoutAST,
 )
 
@@ -174,6 +175,25 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
         if node.children:
             for child in node.children:
                 lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, Edge):
+        # edge allowance <rough_mm> <finish_mm> [id]
+        # edge fillet <radius_mm> [id]
+        # edge chamfer <distance_mm> [id]
+        parts = ["edge", node.treatment_type]
+
+        if node.treatment_type == "allowance":
+            parts.append(f"{node.rough_allowance_mm:.2f}mm")
+            parts.append(f"{node.finish_allowance_mm:.2f}mm")
+        elif node.treatment_type == "fillet":
+            parts.append(f"{node.radius_mm:.2f}mm")
+        elif node.treatment_type == "chamfer":
+            parts.append(f"{node.distance_mm:.2f}mm")
+
+        if node.id:
+            parts.append(node.id)
+
+        lines.append(prefix + " ".join(parts))
 
     elif isinstance(node, Inset):
         # inset <amount>mm

@@ -312,6 +312,44 @@ class Keepout:
     id: str | None = None
 
 
+@dataclass(frozen=True)
+class Edge:
+    """Edge node - specifies edge treatment intent for profiles/pockets.
+
+    Edge defines either:
+    1. Allowance semantics (rough/finish multi-pass operations)
+    2. Decorative edges (fillet/chamfer hints for specialized toolpaths)
+
+    Edge nodes are children of shapes with features and influence RemovalIntent
+    constraints/annotations for downstream toolpath planning.
+
+    Attributes:
+        treatment_type: "allowance", "fillet", or "chamfer"
+        rough_allowance_mm: Stock to leave for rough pass (allowance type only)
+        finish_allowance_mm: Final allowance after finish pass (allowance type only)
+        radius_mm: Fillet radius (fillet type only)
+        distance_mm: Chamfer distance (chamfer type only)
+        id: Optional identifier
+
+    Examples:
+        # Multi-pass allowance
+        Rect(feature=profile_feature, children=(
+            Edge(treatment_type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.1),
+        ))
+
+        # Decorative fillet
+        Rect(feature=profile_feature, children=(
+            Edge(treatment_type="fillet", radius_mm=3.0),
+        ))
+    """
+    treatment_type: str  # "allowance", "fillet", "chamfer"
+    rough_allowance_mm: float | None = None
+    finish_allowance_mm: float | None = None
+    radius_mm: float | None = None
+    distance_mm: float | None = None
+    id: str | None = None
+
+
 # Computed during resolution (not authored)
 @dataclass(frozen=True)
 class ResolvedRegion:

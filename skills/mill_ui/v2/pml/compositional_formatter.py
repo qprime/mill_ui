@@ -30,6 +30,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Circle,
     RoundedRect,
     Line,
+    Polyline,
     CompositionalLayoutAST,
 )
 
@@ -142,6 +143,24 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
             parts.append(_format_feature(node.feature))
         lines.append(prefix + " ".join(parts))
 
+    elif isinstance(node, Polyline):
+        # polyline [id] points (x,y) (x,y) ... [feature]
+        parts = ["polyline"]
+        if node.id:
+            parts.append(node.id)
+        parts.append("points")
+
+        # Format points as (x,y) tuples
+        point_strs = []
+        for x, y in node.points:
+            point_strs.append(f"({x:.2f},{y:.2f})")
+        parts.extend(point_strs)
+
+        if node.feature:
+            parts.append(_format_feature(node.feature))
+
+        lines.append(prefix + " ".join(parts))
+
     elif isinstance(node, Inset):
         # inset <amount>mm
         lines.append(f"{prefix}inset {node.amount_mm:.2f}mm")
@@ -207,7 +226,11 @@ def _format_feature(feature: Any) -> str:
         return f"pocket {feature.depth_mm:.2f}mm"
     elif feature.type == 'profile':
         return f"profile {feature.depth} {feature.side}"
-    elif feature.type in ('engrave', 'hole', 'edge'):
+    elif feature.type == 'engrave':
+        return f"engrave {feature.depth_mm:.2f}mm"
+    elif feature.type == 'hole':
+        return f"hole {feature.depth_mm:.2f}mm"
+    elif feature.type == 'edge':
         return feature.type
     else:
         return feature.type

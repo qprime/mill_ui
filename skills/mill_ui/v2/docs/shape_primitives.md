@@ -151,6 +151,51 @@ inset 50.00mm
 
 ---
 
+### Polyline (Arbitrary Path)
+
+**Purpose**: Creates arbitrary open paths for engraving using normalized coordinates.
+
+**PML Syntax**:
+```pml
+polyline [id] points (x1,y1) (x2,y2) ... [feature]
+```
+
+**Parameters**:
+- `id` (optional): Shape identifier
+- `points` (required): List of normalized coordinates (0..1, 0..1) relative to current region
+  - (0, 0) = bottom-left of region
+  - (1, 1) = top-right of region
+  - Minimum 2 points required
+- `feature` (optional): CAM feature (typically `engrave`)
+
+**Note**: Polylines do NOT support children (open paths, not regions).
+
+**Examples**:
+```pml
+# Diagonal line across region
+polyline diagonal points (0.0,0.0) (1.0,1.0) engrave 1.00mm
+
+# Zigzag pattern
+polyline zigzag points (0.1,0.1) (0.5,0.9) (0.9,0.1) engrave 1.00mm
+
+# Cross pattern
+polyline cross points (0.25,0.5) (0.75,0.5) (0.5,0.5) (0.5,0.25) (0.5,0.75) engrave 1.00mm
+```
+
+**Resolution**:
+- Normalized coordinates (0..1) are mapped to absolute coordinates within the current region
+- Points are validated to be in range [0, 1] at parse time
+- Polylines are emitted as `kind="path"` (open), not `kind="shape"` (closed)
+- Works inside any layout manager (rect, inset, frame, grid, split, circle, rounded_rect)
+
+**Use Cases**:
+- Decorative engraving patterns
+- Custom alignment marks
+- Arbitrary text or logo outlines (when converted to normalized coordinates)
+- Registration crosses or targets
+
+---
+
 ## Composition Patterns
 
 ### Mixed Shapes in Grid
@@ -259,8 +304,8 @@ line flourish horizontal engrave
 - Future: Support `fit_width`, `fit_height` modes
 
 ### Line Orientations
-- Only `horizontal` and `vertical` supported (v1)
-- Future: Arbitrary angles, polylines with points
+- Line supports `horizontal` and `vertical` (canned orientations)
+- For arbitrary angles and custom paths, use Polyline with normalized coordinates
 
 ### RoundedRect Radius Constraints
 - No automatic clamping if radius > min(width, height) / 2

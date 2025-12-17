@@ -42,6 +42,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Circle,
     RoundedRect,
     Line,
+    Polyline,
     CompositionalLayoutAST,
 )
 from skills.mill_ui.v2.ast.layout import Sheet, Feature
@@ -137,7 +138,7 @@ class CompositionalPMLLexer:
         # Check if it's a keyword
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'circle', 'rounded_rect', 'line', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion',
+            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
@@ -201,14 +202,30 @@ class CompositionalPMLLexer:
                 self.skip_comment()
                 continue
 
-            # Number
-            if char.isdigit():
-                tokens.append(self.lex_number())
+            # Number (including negative numbers)
+            if char.isdigit() or (char == '-' and self.peek(1) and self.peek(1).isdigit()):
+                # Handle negative numbers
+                if char == '-':
+                    start_line = self.line
+                    start_col = self.column
+                    self.advance()  # consume '-'
+                    num_token = self.lex_number()
+                    # Make the value negative
+                    num_token = Token(num_token.type, -num_token.value, start_line, start_col)
+                    tokens.append(num_token)
+                else:
+                    tokens.append(self.lex_number())
                 continue
 
             # Identifier or keyword
             if char.isalpha() or char == '_':
                 tokens.append(self.lex_identifier())
+                continue
+
+            # Punctuation for polyline points: ( ) ,
+            if char in ('(', ')', ','):
+                tokens.append(Token('punctuation', char, self.line, self.column))
+                self.advance()
                 continue
 
             # Unknown character
@@ -394,6 +411,8 @@ class CompositionalPMLParser:
             return self.parse_rounded_rect()
         elif token.value == 'line':
             return self.parse_line()
+        elif token.value == 'polyline':
+            return self.parse_polyline()
         elif token.value == 'inset':
             return self.parse_inset()
         elif token.value == 'frame':
@@ -540,6 +559,76 @@ class CompositionalPMLParser:
 
         return Line(orientation=orientation, feature=feature, id=line_id)
 
+    def parse_polyline(self) -> Polyline:
+        """Parse polyline:
+        polyline [id] points (x,y) (x,y) ... [feature]
+
+        Points are normalized coordinates in [0, 1].
+        """
+        self.expect('keyword', 'polyline')
+
+        # Parse optional id
+        polyline_id = None
+        if self.peek().type == 'identifier':
+            polyline_id = self.advance().value
+
+        # Parse required 'points' keyword
+        self.expect('keyword', 'points')
+
+        # Parse point list: (x,y) (x,y) ...
+        points = []
+        while True:
+            token = self.peek()
+
+            # Check for feature keyword or end of line
+            if token.type == 'keyword' and token.value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+                break
+            if token.type in ('newline', 'eof'):
+                break
+
+            # Expect '(' for point start
+            if token.type != 'punctuation' or token.value != '(':
+                break  # No more points
+            self.advance()  # consume '('
+
+            # Parse x coordinate (number between 0 and 1)
+            x_token = self.expect('number')
+            x = x_token.value
+
+            # Expect comma
+            comma_token = self.peek()
+            if comma_token.type != 'punctuation' or comma_token.value != ',':
+                raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
+                               comma_token.line, comma_token.column)
+            self.advance()  # consume ','
+
+            # Parse y coordinate
+            y_token = self.expect('number')
+            y = y_token.value
+
+            # Expect ')'
+            close_token = self.peek()
+            if close_token.type != 'punctuation' or close_token.value != ')':
+                raise ParseError(f"Expected ')' after point, got {close_token.value}",
+                               close_token.line, close_token.column)
+            self.advance()  # consume ')'
+
+            points.append((x, y))
+
+        if len(points) < 2:
+            token = self.peek()
+            raise ParseError(f"Polyline requires at least 2 points, got {len(points)}",
+                           token.line, token.column)
+
+        # Parse optional feature
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        return Polyline(points=tuple(points), feature=feature, id=polyline_id)
+
     def parse_feature(self) -> Feature:
         """Parse feature: pocket <depth>mm | profile through <side> | ..."""
         feature_type = self.expect('keyword').value
@@ -551,7 +640,13 @@ class CompositionalPMLParser:
             depth = self.expect('keyword', 'through').value
             side = self.expect('keyword').value  # inside, outside, on
             return Feature(type='profile', depth=depth, side=side)
-        elif feature_type in ('engrave', 'hole', 'edge'):
+        elif feature_type == 'engrave':
+            depth = self.expect('number_with_unit').value
+            return Feature(type='engrave', depth=str(depth), depth_mm=depth)
+        elif feature_type == 'hole':
+            depth = self.expect('number_with_unit').value
+            return Feature(type='hole', depth=str(depth), depth_mm=depth)
+        elif feature_type in ('edge',):
             # Simple feature types (extend as needed)
             return Feature(type=feature_type, depth='through')
         else:

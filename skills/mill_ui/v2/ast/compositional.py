@@ -242,6 +242,46 @@ class Line:
     id: str | None = None
 
 
+@dataclass(frozen=True)
+class Polyline:
+    """Polyline node - creates arbitrary open path for engraving.
+
+    Uses normalized coordinates (0..1, 0..1) relative to current region.
+    The resolver maps these to absolute coordinates within the region bounds.
+
+    Use case: Arbitrary engraving paths, decorative patterns, custom shapes.
+
+    Attributes:
+        points: List of (x, y) tuples with normalized coordinates in [0, 1]
+                Minimum 2 points required
+                (0, 0) = bottom-left of region
+                (1, 1) = top-right of region
+        feature: Optional CAM feature (typically engrave)
+        id: Optional identifier
+
+    Example:
+        # Diagonal line from bottom-left to top-right
+        Polyline(points=[(0.0, 0.0), (1.0, 1.0)], feature=engrave_feature)
+
+        # Zigzag pattern
+        Polyline(points=[(0.1, 0.1), (0.9, 0.5), (0.1, 0.9)])
+    """
+    points: tuple[tuple[float, float], ...]
+    feature: Any = None
+    id: str | None = None
+
+    def __post_init__(self):
+        """Validate polyline constraints."""
+        if len(self.points) < 2:
+            raise ValueError(f"Polyline requires at least 2 points, got {len(self.points)}")
+
+        for i, (x, y) in enumerate(self.points):
+            if not (0.0 <= x <= 1.0):
+                raise ValueError(f"Point {i} x-coordinate {x} out of range [0, 1]")
+            if not (0.0 <= y <= 1.0):
+                raise ValueError(f"Point {i} y-coordinate {y} out of range [0, 1]")
+
+
 # Computed during resolution (not authored)
 @dataclass(frozen=True)
 class ResolvedRegion:

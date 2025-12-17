@@ -1,47 +1,27 @@
 [
   {
-    "content": "Document Stage 14 in refactor doc",
+    "content": "Create v2 promotion plan with verification steps",
     "status": "completed",
-    "activeForm": "Documenting Stage 14"
+    "activeForm": "Creating v2 promotion plan with verification steps"
   },
   {
-    "content": "Extend compositional AST with circle, rounded_rect, line nodes",
+    "content": "Execute Step 1: Pre-flight test verification",
     "status": "completed",
-    "activeForm": "Extending compositional AST"
+    "activeForm": "Executing Step 1: Pre-flight test verification"
   },
   {
-    "content": "Update layout resolver for new shape primitives",
+    "content": "Execute Step 2: Create safety tags",
     "status": "completed",
-    "activeForm": "Updating layout resolver"
+    "activeForm": "Executing Step 2: Creating safety tags"
   },
   {
-    "content": "Extend PML parser for new shape syntax",
-    "status": "completed",
-    "activeForm": "Extending PML parser"
-  },
-  {
-    "content": "Extend PML formatter for new shapes",
-    "status": "completed",
-    "activeForm": "Extending PML formatter"
-  },
-  {
-    "content": "Add comprehensive tests for new primitives",
-    "status": "completed",
-    "activeForm": "Adding tests"
-  },
-  {
-    "content": "Verify Stage 12/13 exemplar still passes",
-    "status": "completed",
-    "activeForm": "Verifying existing tests"
-  },
-  {
-    "content": "Update documentation with shapes section",
-    "status": "completed",
-    "activeForm": "Updating documentation"
-  },
-  {
-    "content": "Commit and tag Stage 14",
+    "content": "Execute Step 3: Move v2 directories to top level",
     "status": "in_progress",
-    "activeForm": "Committing Stage 14"
+    "activeForm": "Executing Step 3: Moving v2 directories to top level"
+  },
+  {
+    "content": "Execute Steps 4-10: Remaining promotion steps",
+    "status": "pending",
+    "activeForm": "Executing Steps 4-10: Remaining promotion steps"
   }
 ]

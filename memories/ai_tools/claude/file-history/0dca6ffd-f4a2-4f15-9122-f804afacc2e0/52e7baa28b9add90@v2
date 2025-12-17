@@ -1,0 +1,268 @@
+# mill_ui v1 → Unified Codebase Migration Plan (REVISED - SAFE)
+
+## Critical Findings from Codex Review
+
+**STOP**: The original plan would break the system. Here's what's actually happening:
+
+### What's Still Being Used (DO NOT DELETE)
+
+1. **`cad/` - ACTIVE AND CRITICAL**
+   - Used by `apps/compose_cam.py` (the main entrypoint)
+   - Re-exported via `api/cad.py` as public surface
+   - Provides: primitives, transforms, layout, export (SVG, STEP, STL)
+   - **Status**: KEEP - This is production code
+
+2. **`api/` - PUBLIC FACADE**
+   - `api/__init__.py`, `api/cad.py`, `api/cam.py`, `api/io.py`
+   - Documented in `README.md` as public surface
+   - Re-exports modules for external consumers
+   - **Status**: KEEP - This is the stable API layer
+
+3. **`apps/` - MAIN ENTRYPOINTS**
+   - `apps/compose_cam.py` - The primary CLI application (795 lines)
+   - Documented in README as main entrypoint
+   - **Status**: KEEP - This is how users run the system
+
+4. **`io/` - I/O UTILITIES**
+   - Used by `api/io.py` for save_json/load_json
+   - **Status**: KEEP
+
+5. **`recipes/` - RECIPE LIBRARY**
+   - Used by multiple modules
+   - **Status**: KEEP for now, evaluate later
+
+### What v2 Actually Is
+
+v2 is a **PARALLEL FRONTEND** for PML input, NOT a full replacement:
+- v2 handles: PML parsing → AST → RemovalIntent IR
+- v1 handles: JSON input → CAM hints, CAM planner → toolpath → gcode, CAD export (SVG/STEP/STL)
+- v2 does NOT replace v1's CAM or CAD modules
+- v2 does NOT import from v1's api/apps/cad/io/recipes (verified by grep)
+
+## Revised Migration Strategy
+
+### Phase 1: Safety Tags
+```bash
+git tag v1_v2_pre_migration  # Rollback point
+git tag refactor_v2_complete  # Mark v2 work complete
+```
+
+### Phase 2: Move v2 to Top Level (NO deletions yet)
+```bash
+# Move v2 modules up (keep v1 intact)
+mv v2/adapters ./
+mv v2/ast ./
+mv v2/cli ./
+mv v2/docs ./
+mv v2/export ./
+mv v2/ir ./
+mv v2/pml ./
+mv v2/resolution ./
+mv v2/templates ./
+mv v2/validation ./
+
+# Move tests to new structure (preserve both)
+mkdir -p tests/v2
+mv v2/tests/* tests/v2/
+
+# Remove empty v2 directory
+rmdir v2
+```
+
+### Phase 3: Add v2 Import Compatibility Shim
+
+Create `v2/__init__.py` as a compatibility layer:
+
+```python
+"""Compatibility shim for v2 imports.
+
+v2 modules have been moved to top level. This shim redirects old imports
+to new locations for backward compatibility.
+
+Deprecated: Use 'from skills.mill_ui.pml...' instead of 'from skills.mill_ui.v2.pml...'
+"""
+
+import sys
+from pathlib import Path
+
+# Re-export all moved modules
+from skills.mill_ui import (
+    adapters,
+    ast,
+    cli,
+    export,
+    ir,
+    pml,
+    resolution,
+    validation,
+)
+
+# Make old v2.X imports work
+sys.modules['skills.mill_ui.v2.adapters'] = adapters
+sys.modules['skills.mill_ui.v2.ast'] = ast
+sys.modules['skills.mill_ui.v2.cli'] = cli
+sys.modules['skills.mill_ui.v2.export'] = export
+sys.modules['skills.mill_ui.v2.ir'] = ir
+sys.modules['skills.mill_ui.v2.pml'] = pml
+sys.modules['skills.mill_ui.v2.resolution'] = resolution
+sys.modules['skills.mill_ui.v2.validation'] = validation
+
+__all__ = ['adapters', 'ast', 'cli', 'export', 'ir', 'pml', 'resolution', 'validation']
+```
+
+### Phase 4: Fix v2 Imports (Update to Top-Level)
+
+**Files to update** (all in newly moved modules):
+```bash
+# Find all imports
+rg "from skills\.mill_ui\.v2\." adapters/ ast/ cli/ export/ ir/ pml/ resolution/ validation/ tests/v2/
+
+# Replace:
+# from skills.mill_ui.v2.pml.compositional_parser → from skills.mill_ui.pml.compositional_parser
+# from skills.mill_ui.v2.ir.removal_intent → from skills.mill_ui.ir.removal_intent
+# etc.
+```
+
+Use find-replace or sed:
+```bash
+find adapters ast cli export ir pml resolution validation tests/v2 -name "*.py" -type f -exec sed -i 's/from skills\.mill_ui\.v2\./from skills.mill_ui./g' {} \;
+```
+
+### Phase 5: Test Everything
+
+Run all test suites to verify nothing broke:
+```bash
+# v2 tests (with new paths)
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.v2.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.v2.run_spline_tests
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.v2.run_keepout_tests
+
+# v1 tests (should still work)
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.unit.test_planner_pipeline
+
+# Full pipeline test
+python apps/compose_cam.py --version
+```
+
+### Phase 6: Update Documentation
+
+Update `README.md` to reflect new structure:
+- Public API: `api/*` (unchanged)
+- PML frontend: `pml/`, `ast/`, `resolution/`, `ir/`
+- CAM backend: `cam/` (unchanged)
+- CAD backend: `cad/` (unchanged)
+
+### Phase 7: Commit & Tag
+
+```bash
+git add -A
+git commit -m "[MIGRATION] Flatten v2 to top level, preserve v1 codebase
+
+- Move all v2 modules to top level (no more v2/ directory)
+- Keep v1 codebase intact (apps/, api/, cad/, cam/, io/, recipes/)
+- Add v2 compatibility shim for backward compatibility
+- Fix all imports (skills.mill_ui.v2.X → skills.mill_ui.X)
+- All tests passing (v1 + v2)
+
+IMPORTANT: v1 is NOT obsolete. v2 is PML frontend, v1 is CAM/CAD backend.
+
+Rollback tag: v1_v2_pre_migration
+"
+
+git tag v1_v2_flattened_migration
+```
+
+## Final Structure (After Migration)
+
+```
+mill_ui/
+├── adapters/          # v2 adapters (moved from v2/)
+├── api/               # v1 public API (KEEP - documented entrypoint)
+├── apps/              # v1 CLI apps (KEEP - main entrypoint)
+├── ast/               # v2 AST (moved from v2/)
+├── cad/               # v1 CAD (KEEP - primitives, export, layout)
+├── cam/               # v1 CAM (KEEP - planner, post, ops)
+├── cli/               # v2 CLI (moved from v2/)
+├── compositions/      # v1 templates (KEEP)
+├── core/              # v1 core (KEEP - config, capabilities)
+├── docs/              # v2 docs (moved from v2/)
+├── export/            # v2 export (moved from v2/)
+├── io/                # v1 I/O (KEEP)
+├── ir/                # v2 IR (moved from v2/)
+├── pml/               # v2 PML parser (moved from v2/)
+├── recipes/           # v1 recipes (KEEP for now)
+├── resolution/        # v2 resolution (moved from v2/)
+├── templates/         # v2 templates (moved from v2/)
+├── tests/
+│   ├── v1/            # v1 unit tests (from tests/unit/)
+│   └── v2/            # v2 tests (from v2/tests/)
+├── v2/                # Compatibility shim (new - for old imports)
+├── validation/        # v2 validation (moved from v2/)
+└── __init__.py
+```
+
+## What Changed from Original Plan
+
+### Original Plan Mistakes
+
+1. **Would delete cad/** - WRONG, it's actively used
+2. **Would delete apps/** - WRONG, it's the main CLI
+3. **Would delete api/** - WRONG, it's the public facade
+4. **Would delete io/** - WRONG, still used
+5. **Assumed v2 replaces v1** - WRONG, they're complementary
+
+### Revised Plan Safety
+
+1. **KEEP all v1 code** - It's production, documented, and actively used
+2. **Only MOVE v2 code** - Flatten directory structure, no deletions
+3. **Add compatibility shim** - Old imports keep working
+4. **Fix imports in v2** - Update to new paths
+5. **Test everything** - Both v1 and v2 test suites
+
+## Migration Decision Gates
+
+**Before Phase 2 (moving files)**:
+- [ ] Verify no external consumers depend on `skills.mill_ui.v2.*` imports
+- [ ] Confirm all tests are passing pre-migration
+
+**Before Phase 7 (commit)**:
+- [ ] All v1 tests passing
+- [ ] All v2 tests passing
+- [ ] `apps/compose_cam.py --version` works
+- [ ] No import errors when running test suite
+
+**After Phase 7**:
+- [ ] Can still run: `python apps/compose_cam.py layout.json`
+- [ ] Can still run: `python -m skills.mill_ui.cli.parse_compositional_pml example.pml`
+- [ ] Both v1 and v2 functionality intact
+
+## What to Evaluate Later (NOT in this migration)
+
+These can be addressed in future cleanup, AFTER migration is stable:
+
+1. **Consolidate test structure**: Merge v1/v2 tests into unified suite
+2. **Deprecate v2 shim**: After confirming no external consumers
+3. **Evaluate recipes/**: Check if still needed
+4. **Unify CAD exports**: v1 has STEP/STL, v2 has svg_removal - consolidate?
+
+## Rollback Plan
+
+If anything breaks:
+```bash
+git reset --hard v1_v2_pre_migration
+```
+
+All work is preserved in git history and can be re-attempted with corrections.
+
+## Success Criteria
+
+- [x] All v2 modules moved to top level (no v2/ directory except shim)
+- [ ] All imports updated (skills.mill_ui.v2.X → skills.mill_ui.X)
+- [ ] v2 compatibility shim in place
+- [ ] All v1 tests passing (test_planner_pipeline, etc.)
+- [ ] All v2 tests passing (edge, spline, keepout, etc.)
+- [ ] `apps/compose_cam.py` still works
+- [ ] v2 CLI (`parse_compositional_pml`) still works
+- [ ] No regressions in v1 functionality
+- [ ] No regressions in v2 functionality
+- [ ] Clean, unified `mill_ui/` codebase with both frontends

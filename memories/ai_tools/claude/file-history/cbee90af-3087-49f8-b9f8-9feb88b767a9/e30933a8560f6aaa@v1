@@ -1,0 +1,295 @@
+"""FastAPI application for Artifact Assembler."""
+
+import logging
+import time
+from contextlib import asynccontextmanager
+from typing import Any, Optional
+
+from fastapi import FastAPI, HTTPException, Request, Response
+from pydantic import BaseModel
+
+from src.assembler import Assembler
+from src.config import get_config
+from src.models import utc_now
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Global assembler instance
+assembler: Optional[Assembler] = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle."""
+    global assembler
+    config = get_config()
+    assembler = Assembler(config=config)
+    logger.info(
+        f"Artifact Assembler started with {len(assembler.clients)} engine(s)"
+    )
+    yield
+    if assembler:
+        await assembler.close()
+
+
+app = FastAPI(
+    title="Artifact Assembler",
+    description="Multi-engine document aggregation with token budgeting",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+
+# -----------------------------------------------------------------------------
+# Request/Response Models (Pydantic for validation)
+# -----------------------------------------------------------------------------
+
+
+class ScopeModel(BaseModel):
+    """Search scope."""
+
+    domains: list[str] = []
+    locations: list[str] = []
+    keywords: list[str] = []
+    tags: list[str] = []
+
+
+class AssembleRequestModel(BaseModel):
+    """Request to assemble content."""
+
+    scope: ScopeModel
+    token_budget: Optional[int] = None
+    engines: Optional[list[str]] = None
+
+
+class IncludedArtifactModel(BaseModel):
+    """Artifact included in response."""
+
+    id: str  # artifact_id, named 'id' for SAK Router compatibility
+    engine: str
+    tokens: int
+    title: Optional[str] = None
+
+
+class OverflowArtifactModel(BaseModel):
+    """Artifact that didn't fit."""
+
+    id: str  # artifact_id, named 'id' for SAK Router compatibility
+    engine: str
+    tokens: int
+    title: Optional[str] = None
+    reason: str = "exceeded_budget"
+
+
+class AssembleResponseModel(BaseModel):
+    """Assembly response."""
+
+    context: str  # Named 'context' for SAK Router compatibility (alias for content)
+    token_count: int
+    included: list[IncludedArtifactModel] = []
+    overflow: list[OverflowArtifactModel] = []
+    engines_queried: list[str] = []
+    engines_failed: list[str] = []
+
+
+class EngineStatusModel(BaseModel):
+    """Engine status."""
+
+    name: str
+    url: str
+    enabled: bool
+    status: str
+    last_check: Optional[str] = None
+
+
+class EnginesResponseModel(BaseModel):
+    """Response from /engines."""
+
+    engines: list[EngineStatusModel]
+
+
+class HealthResponseModel(BaseModel):
+    """Health check response."""
+
+    status: str
+    engines: dict[str, str]
+
+
+class ErrorResponseModel(BaseModel):
+    """Error response."""
+
+    error: str
+    message: str
+    engines_failed: Optional[list[str]] = None
+
+
+# -----------------------------------------------------------------------------
+# Middleware
+# -----------------------------------------------------------------------------
+
+
+@app.middleware("http")
+async def add_processing_time(request: Request, call_next):
+    """Add processing time and request ID headers."""
+    start_time = time.monotonic()
+    response = await call_next(request)
+    elapsed_ms = int((time.monotonic() - start_time) * 1000)
+    response.headers["X-Processing-Time-Ms"] = str(elapsed_ms)
+
+    # Echo request ID if provided
+    request_id = request.headers.get("X-Request-ID")
+    if request_id:
+        response.headers["X-Request-ID"] = request_id
+
+    return response
+
+
+# -----------------------------------------------------------------------------
+# Endpoints
+# -----------------------------------------------------------------------------
+
+
+@app.post(
+    "/assemble",
+    response_model=AssembleResponseModel,
+    responses={
+        400: {"model": ErrorResponseModel},
+        503: {"model": ErrorResponseModel},
+    },
+)
+async def assemble_content(
+    request: AssembleRequestModel,
+    response: Response,
+) -> AssembleResponseModel:
+    """
+    Assemble content from configured Artifact Engine instances.
+
+    Queries engines, merges results, and assembles content within token budget.
+    """
+    if assembler is None:
+        raise HTTPException(status_code=500, detail="Assembler not initialized")
+
+    # Convert Pydantic model to dataclass
+    from src.models import AssembleRequest, Scope
+
+    scope = Scope(
+        domains=request.scope.domains,
+        locations=request.scope.locations,
+        keywords=request.scope.keywords,
+        tags=request.scope.tags,
+    )
+    assemble_request = AssembleRequest(
+        scope=scope,
+        token_budget=request.token_budget,
+        engines=request.engines,
+    )
+
+    result = await assembler.assemble(assemble_request)
+
+    # Add engines queried header
+    if result.engines_queried:
+        response.headers["X-Engines-Queried"] = ",".join(result.engines_queried)
+
+    # Check if all engines failed
+    if (
+        result.engines_failed
+        and len(result.engines_failed) == len(result.engines_queried)
+        and len(result.engines_queried) > 0
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "all_engines_failed",
+                "message": "No engines returned results",
+                "engines_failed": result.engines_failed,
+            },
+        )
+
+    return AssembleResponseModel(
+        context=result.content,
+        token_count=result.token_count,
+        included=[
+            IncludedArtifactModel(
+                id=a.artifact_id,
+                engine=a.engine,
+                tokens=a.tokens,
+                title=a.title,
+            )
+            for a in result.included
+        ],
+        overflow=[
+            OverflowArtifactModel(
+                id=a.artifact_id,
+                engine=a.engine,
+                tokens=a.tokens,
+                title=a.title,
+                reason=a.reason,
+            )
+            for a in result.overflow
+        ],
+        engines_queried=result.engines_queried,
+        engines_failed=result.engines_failed,
+    )
+
+
+@app.get("/engines", response_model=EnginesResponseModel)
+async def list_engines() -> EnginesResponseModel:
+    """List configured engines and their status."""
+    if assembler is None:
+        raise HTTPException(status_code=500, detail="Assembler not initialized")
+
+    config = assembler.config
+    health = await assembler.get_all_engine_health()
+
+    engines = []
+    for engine_cfg in config.engines:
+        status = health.get(engine_cfg.name, "unknown")
+        engines.append(
+            EngineStatusModel(
+                name=engine_cfg.name,
+                url=engine_cfg.url,
+                enabled=engine_cfg.enabled,
+                status=status,
+                last_check=utc_now().isoformat() if engine_cfg.enabled else None,
+            )
+        )
+
+    return EnginesResponseModel(engines=engines)
+
+
+@app.get("/health", response_model=HealthResponseModel)
+async def health_check() -> HealthResponseModel:
+    """
+    Health check endpoint.
+
+    Returns healthy if at least one engine is reachable.
+    """
+    if assembler is None:
+        return HealthResponseModel(status="unhealthy", engines={})
+
+    health = await assembler.get_all_engine_health()
+
+    # Determine overall status
+    statuses = list(health.values())
+    healthy_count = sum(1 for s in statuses if s == "healthy")
+    enabled_count = sum(1 for s in statuses if s != "disabled")
+
+    if enabled_count == 0:
+        overall = "unhealthy"  # No engines configured
+    elif healthy_count == enabled_count:
+        overall = "healthy"
+    elif healthy_count > 0:
+        overall = "degraded"
+    else:
+        overall = "unhealthy"
+
+    return HealthResponseModel(status=overall, engines=health)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    config = get_config()
+    uvicorn.run(app, host="0.0.0.0", port=config.port)

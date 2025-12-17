@@ -1,0 +1,191 @@
+# mill_ui v1 → Unified Codebase Migration Plan
+
+## Goal
+Flatten v2 directory to top level, delete obsolete v1 code, keep working CAM modules.
+
+## Current State
+
+### v1 Directories:
+- `api/` - 4 Python files
+- `apps/` - 2 Python files
+- `cam/` - 34 Python files (**KEEP** - actively used)
+- `cad/` - Unknown files
+- `compositions/` - 11 Python files (template resolver)
+- `core/` - 7 Python files (config, utilities)
+- `io/` - Unknown files
+- `recipes/` - Unknown files
+- `tests/` - v1 unit tests
+
+### v2 Directories (to be moved up):
+- `v2/adapters/` → `adapters/`
+- `v2/ast/` → `ast/`
+- `v2/cli/` → `cli/`
+- `v2/docs/` → `docs/`
+- `v2/export/` → `export/`
+- `v2/ir/` → `ir/`
+- `v2/pml/` → `pml/`
+- `v2/resolution/` → `resolution/`
+- `v2/templates/` → `templates/`
+- `v2/tests/` → `tests/` (merge with v1 tests, keep both)
+- `v2/validation/` → `validation/`
+
+## Migration Steps
+
+### Phase 1: Audit v1 Modules
+
+**CAM (KEEP)**:
+- `cam/model/*` - Machine, Material, Stock, Tool, Setup
+- `cam/planner/*` - plan_passes, toolpath generation
+- `cam/post/*` - G-code generation
+- `cam/ops/*` - Boring, drilling operations
+- `cam/native/*` - Native C extensions (if any)
+
+**Compositions (EVALUATE)**:
+- Check if `compositions.resolve_templates` is still needed
+- If yes, keep; if no, delete
+
+**Core (EVALUATE)**:
+- `core/config.py` - Configuration (likely needed)
+- Rest of core/* - Check usage
+
+**Obsolete (DELETE)**:
+- `api/*` - Old API layer (replaced by v2)
+- `apps/*` - Old app entry points (replaced by v2 CLI)
+- `cad/*` - CAD integration (likely obsolete)
+- `io/*` - Old I/O (replaced by v2 PML parser)
+- `recipes/*` - Unknown (likely obsolete)
+- `tests/*` - v1 unit tests (replaced by v2 tests)
+
+### Phase 2: Create Migration Branch
+
+```bash
+git checkout -b migrate_v2_to_main
+git tag v2_pre_migration  # Safety tag
+```
+
+### Phase 3: Move v2 to Top Level
+
+```bash
+# Move each v2 subdirectory up one level
+mv v2/adapters ./
+mv v2/ast ./
+mv v2/cli ./
+mv v2/docs ./
+mv v2/export ./
+mv v2/ir ./
+mv v2/pml ./
+mv v2/resolution ./
+mv v2/templates ./
+mv v2/validation ./
+
+# Merge tests (keep both for now)
+mkdir -p tests_new
+mv v2/tests/* tests_new/
+# Later: review and decide what to keep from tests/
+
+# Remove empty v2 directory
+rmdir v2
+```
+
+### Phase 4: Delete Obsolete v1 Code
+
+```bash
+# Delete confirmed obsolete directories
+rm -rf api/
+rm -rf apps/
+rm -rf cad/  # (verify first)
+rm -rf io/   # (verify first)
+rm -rf recipes/  # (verify first)
+
+# Keep cam/ (actively used)
+# Evaluate compositions/ and core/ based on usage audit
+```
+
+### Phase 5: Fix Imports
+
+All imports need to change from:
+```python
+from skills.mill_ui.v2.pml.compositional_parser import parse_compositional_pml
+```
+
+To:
+```python
+from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
+```
+
+**Files to update**:
+- All `adapters/*.py`
+- All `cli/*.py`
+- All `tests/*.py` (in tests_new/)
+- CAM modules importing from v2 (if any)
+
+### Phase 6: Verify & Test
+
+```bash
+# Run all test suites
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_spline_tests
+PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_keepout_tests
+# ... etc for all test runners
+
+# Verify full pipeline works
+python3 -m skills.mill_ui.cli.parse_compositional_pml example.pml
+```
+
+### Phase 7: Commit & Tag
+
+```bash
+git add -A
+git commit -m "[MIGRATION] Flatten v2 to top level, remove obsolete v1 code
+
+- Move all v2 modules to top level (no more v2/ directory)
+- Keep cam/ (toolpath/gcode generation still from v1)
+- Delete obsolete v1 code: api/, apps/, cad/, io/, recipes/
+- Fix all imports (v2.X → X)
+- All tests passing
+
+v1 code preserved in git history (tag: v1_final)
+v2 code pre-migration preserved (tag: v2_pre_migration)
+"
+
+git tag v1_v2_unified_migration
+```
+
+## Final Structure
+
+```
+mill_ui/
+├── adapters/          # v2 adapters (hints_to_removal, removal_to_planner)
+├── ast/               # v2 AST (compositional, layout)
+├── cam/               # v1 CAM (model, planner, post, ops) - KEPT
+├── cli/               # v2 CLI (parse_compositional_pml, introspect)
+├── core/              # v1 core (config) - if still needed
+├── docs/              # v2 docs (studio_mode_geometry, edge_treatment, etc.)
+├── export/            # v2 export (svg_removal)
+├── ir/                # v2 IR (removal_intent)
+├── pml/               # v2 PML (parser, formatter)
+├── resolution/        # v2 resolution (layout_resolver)
+├── templates/         # v2 templates
+├── tests/             # Merged tests (v2 tests + essential v1 tests)
+├── validation/        # v2 validation (removal_checks)
+└── __init__.py
+```
+
+## Risks & Mitigations
+
+**Risk**: Breaking CAM pipeline
+**Mitigation**: Keep entire `cam/` directory untouched, test end-to-end
+
+**Risk**: Missing dependencies from deleted v1 code
+**Mitigation**: Grep entire codebase for imports from deleted modules first
+
+**Risk**: Import hell
+**Mitigation**: Use global find-replace, run tests after each batch
+
+## Success Criteria
+
+- [ ] All v2 tests pass with new import paths
+- [ ] CAM pipeline still works (PML → RemovalIntent → Toolpath → G-code)
+- [ ] No `v2/` directory remains
+- [ ] Git tags preserve both v1 and v2 history
+- [ ] Clean, single unified `mill_ui/` codebase

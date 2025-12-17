@@ -1,0 +1,25 @@
+"""
+Simple token counting utility.
+
+Uses a rough approximation: ~4 characters per token for English text.
+This matches OpenAI's general guidance for estimation.
+"""
+
+
+def estimate_tokens(text: str) -> int:
+    """
+    Estimate token count for text.
+
+    Uses rough approximation of 4 characters per token.
+
+    Args:
+        text: Text to count tokens for
+
+    Returns:
+        Estimated token count
+    """
+    if not text:
+        return 0
+
+    # Average ~4 chars per token
+    return max(1, len(text) // 4)

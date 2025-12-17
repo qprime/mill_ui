@@ -1,0 +1,51 @@
+2025-12-17T18:55:04.399Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-17T18:55:04.399Z [DEBUG] [Query.streamInput] Finished processing 0 messages from input stream
+2025-12-17T18:55:04.399Z [DEBUG] [Query.streamInput] Has bidirectional needs, waiting for inactivity
+2025-12-17T18:55:04.399Z [DEBUG] [Query.waitForInactivity] Waiting for inactivity (timeout: 5000ms)
+2025-12-17T18:55:04.399Z [DEBUG] [Query.waitForInactivity] Still active, checking again in 4999ms
+2025-12-17T18:55:04.525Z [DEBUG] [Query.streamInput] Starting to process input stream
+2025-12-17T18:55:09.398Z [DEBUG] [Query.waitForInactivity] Still active, checking again in 728ms
+2025-12-17T18:55:10.126Z [DEBUG] [Query.waitForInactivity] Inactivity timeout reached (5000ms elapsed). Closing stdin. If your tools or hooks need more time, set CLAUDE_CODE_STREAM_CLOSE_TIMEOUT to a higher value (current: 5000ms).
+2025-12-17T18:55:10.126Z [DEBUG] [Query] Calling transport.endInput() to close stdin to CLI process
+2025-12-17T18:56:12.818Z [DEBUG] [Query.streamInput] Processing message 1: user
+2025-12-17T18:56:51.836Z [DEBUG] [Query.streamInput] Processing message 2: user
+2025-12-17T19:36:55.697Z [DEBUG] [Query.streamInput] Processing message 3: user
+2025-12-17T19:40:57.353Z [DEBUG] [Query.streamInput] Processing message 4: user
+2025-12-17T19:48:09.196Z [DEBUG] [Query.streamInput] Processing message 5: user
+2025-12-17T20:01:02.121Z [DEBUG] [Query.streamInput] Processing message 6: user
+2025-12-17T20:09:24.401Z [DEBUG] [Query.streamInput] Processing message 7: user
+2025-12-17T20:10:21.025Z [DEBUG] [Query.streamInput] Processing message 8: user
+2025-12-17T20:15:05.084Z [DEBUG] [Query.streamInput] Processing message 9: user
+2025-12-17T20:34:31.122Z [DEBUG] [Query.streamInput] Processing message 10: user
+2025-12-17T20:48:28.761Z [DEBUG] [Query.streamInput] Processing message 11: user
+2025-12-17T21:05:48.539Z [DEBUG] [Query.streamInput] Processing message 12: user
+2025-12-17T21:48:03.506Z [DEBUG] [Query.streamInput] Processing message 13: user
+2025-12-17T22:26:27.575Z [DEBUG] [Query.streamInput] Processing message 14: user
+2025-12-17T22:28:19.868Z [DEBUG] [Query.streamInput] Processing message 15: user
+2025-12-17T22:29:15.782Z [DEBUG] [Query.streamInput] Processing message 16: user
+2025-12-17T22:32:41.825Z [DEBUG] [Query.streamInput] Processing message 17: user
+2025-12-17T22:33:29.577Z [DEBUG] [Query.streamInput] Processing message 18: user
+2025-12-17T22:35:14.818Z [DEBUG] [Query.streamInput] Processing message 19: user
+2025-12-17T22:36:56.086Z [DEBUG] [Query.streamInput] Processing message 20: user
+2025-12-17T22:38:08.701Z [DEBUG] [Query.streamInput] Processing message 21: user
+2025-12-17T22:40:03.435Z [DEBUG] [Query.streamInput] Processing message 22: user
+2025-12-17T22:42:26.243Z [DEBUG] [Query.streamInput] Processing message 23: user
+2025-12-17T22:43:41.411Z [DEBUG] [Query.streamInput] Processing message 24: user
+2025-12-17T22:50:51.646Z [DEBUG] [Query.streamInput] Processing message 25: user
+2025-12-17T23:01:21.247Z [DEBUG] [Query.streamInput] Processing message 26: user
+2025-12-17T23:03:36.307Z [DEBUG] [Query.streamInput] Processing message 27: user
+2025-12-17T23:05:07.847Z [DEBUG] [Query.streamInput] Processing message 28: user
+2025-12-17T23:07:22.395Z [DEBUG] [Query.streamInput] Processing message 29: user
+2025-12-17T23:08:23.014Z [DEBUG] [Query.streamInput] Processing message 30: user
+2025-12-17T23:09:34.491Z [DEBUG] [Query.streamInput] Processing message 31: user
+2025-12-17T23:11:05.314Z [DEBUG] [Query.streamInput] Processing message 32: user
+2025-12-17T23:13:14.336Z [DEBUG] [Query.streamInput] Processing message 33: user
+2025-12-17T23:14:59.212Z [DEBUG] [Query.streamInput] Processing message 34: user
+2025-12-17T23:17:24.115Z [DEBUG] [Query.streamInput] Processing message 35: user
+2025-12-17T23:18:09.552Z [DEBUG] [Query.streamInput] Processing message 36: user
+2025-12-17T23:22:42.857Z [DEBUG] [Query.streamInput] Processing message 37: user
+2025-12-17T23:23:43.784Z [DEBUG] [Query.streamInput] Processing message 38: user
+2025-12-17T23:24:59.560Z [DEBUG] [Query.streamInput] Processing message 39: user
+2025-12-17T23:25:42.499Z [DEBUG] [Query.streamInput] Processing message 40: user
+2025-12-17T23:27:01.455Z [DEBUG] [Query.streamInput] Processing message 41: user
+2025-12-17T23:30:36.987Z [DEBUG] [Query.streamInput] Processing message 42: user

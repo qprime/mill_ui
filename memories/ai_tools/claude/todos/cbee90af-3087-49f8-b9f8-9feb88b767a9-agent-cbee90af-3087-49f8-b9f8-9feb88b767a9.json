@@ -1,0 +1,42 @@
+[
+  {
+    "content": "Create integration-validator service structure",
+    "status": "completed",
+    "activeForm": "Creating integration-validator service structure"
+  },
+  {
+    "content": "Implement core contract tests",
+    "status": "completed",
+    "activeForm": "Implementing core contract tests"
+  },
+  {
+    "content": "Create plugin system and base plugin",
+    "status": "completed",
+    "activeForm": "Creating plugin system and base plugin"
+  },
+  {
+    "content": "Implement DirectPlugin for service-to-service tests",
+    "status": "completed",
+    "activeForm": "Implementing DirectPlugin for service-to-service tests"
+  },
+  {
+    "content": "Implement TurnstilePlugin for UI integration tests",
+    "status": "completed",
+    "activeForm": "Implementing TurnstilePlugin for UI integration tests"
+  },
+  {
+    "content": "Create docker-compose.test.yml",
+    "status": "completed",
+    "activeForm": "Creating docker-compose.test.yml"
+  },
+  {
+    "content": "Test and fix integration-validator",
+    "status": "completed",
+    "activeForm": "Testing and fixing integration-validator"
+  },
+  {
+    "content": "Create GitHub repo for integration-validator",
+    "status": "pending",
+    "activeForm": "Creating GitHub repo for integration-validator"
+  }
+]

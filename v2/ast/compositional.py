@@ -350,6 +350,73 @@ class Edge:
     id: str | None = None
 
 
+@dataclass(frozen=True)
+class SplinePath:
+    """Spline path node - smooth, expressive centerline curves for Studio Mode.
+
+    SplinePath represents smooth curves for decorative, artistic, and expressive CNC work.
+    This is a Studio Mode primitive: tool center follows this path exactly (centerline intent).
+
+    KEY BEHAVIORS:
+    - Always treated as centerline (tool follows path, not boundary)
+    - Immediately lowered to polyline during resolution (no spline math in CAM)
+    - Normalized coordinates (0.0-1.0) relative to current region
+    - Open paths only (closed splines optional in future)
+
+    STUDIO MODE POLICY:
+    - Visual outcome takes precedence over dimensional accuracy
+    - No errors for tight curvature, self-intersection, or tool coupling
+    - Designers iterate via test cuts
+    - Warnings are informational only (never blocking)
+
+    NOT FOR:
+    - Pocket/profile boundaries (use Circle/Rect/RoundedRect)
+    - Fit-critical geometry (use explicit boundary shapes)
+    - Production CAM (use explicit polylines or boundary shapes)
+
+    Attributes:
+        points: Control points as normalized (x, y) tuples (0.0-1.0)
+        feature: CAM feature (typically engrave)
+        tolerance_mm: Sampling tolerance for polyline conversion (default 0.1mm)
+        id: Optional identifier
+
+    Examples:
+        # Decorative wave
+        SplinePath(
+            points=((0.0, 0.5), (0.25, 0.6), (0.5, 0.4), (0.75, 0.6), (1.0, 0.5)),
+            feature=Feature(type="engrave", depth_mm=0.8),
+            id="wave"
+        )
+
+        # High-resolution curve
+        SplinePath(
+            points=((0.1, 0.1), (0.3, 0.2), (0.5, 0.5), (0.7, 0.8), (0.9, 0.9)),
+            feature=Feature(type="engrave", depth_mm=1.0),
+            tolerance_mm=0.05,
+            id="flourish"
+        )
+    """
+    points: tuple[tuple[float, float], ...]  # Normalized (x, y) control points
+    feature: Any = None  # Feature dataclass from layout.py
+    tolerance_mm: float = 0.1  # Sampling tolerance for polyline conversion
+    id: str | None = None
+
+    def __post_init__(self):
+        """Validate spline path."""
+        if len(self.points) < 2:
+            raise ValueError(f"SplinePath requires at least 2 control points, got {len(self.points)}")
+
+        # Validate normalized coordinates
+        for i, (x, y) in enumerate(self.points):
+            if not (0.0 <= x <= 1.0):
+                raise ValueError(f"SplinePath point {i} x-coordinate {x} out of range [0, 1]")
+            if not (0.0 <= y <= 1.0):
+                raise ValueError(f"SplinePath point {i} y-coordinate {y} out of range [0, 1]")
+
+        if self.tolerance_mm <= 0:
+            raise ValueError(f"SplinePath tolerance_mm must be positive, got {self.tolerance_mm}")
+
+
 # Computed during resolution (not authored)
 @dataclass(frozen=True)
 class ResolvedRegion:

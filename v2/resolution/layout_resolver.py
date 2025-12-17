@@ -35,6 +35,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    SplinePath,
     Keepout,
     Edge,
     ResolvedRegion,
@@ -48,6 +49,70 @@ from skills.mill_ui.v2.ast.layout import (
     Placement,
     Feature,
 )
+
+
+def sample_catmull_rom_spline(control_points: list[tuple[float, float]], tolerance_mm: float) -> list[tuple[float, float]]:
+    """Sample Catmull-Rom spline into polyline points.
+
+    Catmull-Rom splines produce smooth curves that pass through all control points.
+    The curve is sampled at adaptive intervals to satisfy the tolerance parameter.
+
+    This is a simplified implementation optimized for Studio Mode:
+    - Uniform parametric sampling (not adaptive curvature-based)
+    - Good enough for decorative/expressive work
+    - Deterministic and predictable
+
+    Args:
+        control_points: List of (x, y) control points
+        tolerance_mm: Target maximum deviation from true curve (lower = more samples)
+
+    Returns:
+        List of (x, y) sampled points forming a smooth polyline
+    """
+    if len(control_points) < 2:
+        return list(control_points)
+
+    # For 2 points, just return them (straight line)
+    if len(control_points) == 2:
+        return list(control_points)
+
+    # Calculate segment count based on tolerance
+    # Simple heuristic: more segments for tighter tolerance
+    segments_per_span = max(10, int(5.0 / max(tolerance_mm, 0.01)))
+
+    sampled_points = []
+
+    # Catmull-Rom requires 4 points for each segment
+    # For endpoints, duplicate first/last points
+    extended = [control_points[0]] + control_points + [control_points[-1]]
+
+    # Sample each span between adjacent control points
+    for i in range(1, len(extended) - 2):
+        p0, p1, p2, p3 = extended[i-1], extended[i], extended[i+1], extended[i+2]
+
+        # Sample this span (from p1 to p2)
+        for t_step in range(segments_per_span):
+            t = t_step / float(segments_per_span)
+
+            # Catmull-Rom basis functions
+            t2 = t * t
+            t3 = t2 * t
+
+            # Catmull-Rom matrix coefficients
+            q0 = -0.5*t3 + t2 - 0.5*t
+            q1 = 1.5*t3 - 2.5*t2 + 1.0
+            q2 = -1.5*t3 + 2.0*t2 + 0.5*t
+            q3 = 0.5*t3 - 0.5*t2
+
+            x = q0*p0[0] + q1*p1[0] + q2*p2[0] + q3*p3[0]
+            y = q0*p0[1] + q1*p1[1] + q2*p2[1] + q3*p3[1]
+
+            sampled_points.append((x, y))
+
+    # Add final control point
+    sampled_points.append(control_points[-1])
+
+    return sampled_points
 
 
 class LayoutResolver:
@@ -455,6 +520,36 @@ class LayoutResolver:
                 shape_id=node.id,
             )
             items.append(polyline_item)
+
+        elif isinstance(node, SplinePath):
+            # SplinePath: Sample spline to polyline, then convert to absolute coordinates
+            # STUDIO MODE: Splines are always lowered to polylines immediately
+            # This keeps CAM math simple and deterministic
+
+            # Step 1: Sample spline in normalized space (0..1)
+            normalized_samples = sample_catmull_rom_spline(list(node.points), node.tolerance_mm)
+
+            # Step 2: Map sampled points to absolute coordinates within region
+            absolute_points = []
+            for norm_x, norm_y in normalized_samples:
+                abs_x = region.x_min + norm_x * region.width
+                abs_y = region.y_min + norm_y * region.height
+                absolute_points.append((abs_x, abs_y))
+
+            # Step 3: Create polyline item (spline is now indistinguishable from polyline)
+            spline_item = Item(
+                kind="path",  # Open path for engraving
+                type="Polyline",  # Lowered to polyline (no spline primitives in CAM layer)
+                geometry=Geometry(data={
+                    "points_mm": absolute_points,
+                    "spline_source": True,  # Metadata: originated from spline
+                    "spline_tolerance_mm": node.tolerance_mm,
+                }),
+                placement=Placement(center_xy_mm=region.center),
+                feature=node.feature,
+                shape_id=node.id,
+            )
+            items.append(spline_item)
 
         # Keepout: handled as children of shapes (Rect/Circle/RoundedRect)
         # If encountered standalone, it's a no-op (should be caught during parse/validation)

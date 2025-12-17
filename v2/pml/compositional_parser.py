@@ -44,6 +44,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Line,
     Polyline,
     Keepout,
+    Edge,
     CompositionalLayoutAST,
 )
 from skills.mill_ui.v2.ast.layout import Sheet, Feature
@@ -143,6 +144,7 @@ class CompositionalPMLLexer:
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
+            'allowance', 'fillet', 'chamfer',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -417,6 +419,8 @@ class CompositionalPMLParser:
             return self.parse_polyline()
         elif token.value == 'keepout':
             return self.parse_keepout()
+        elif token.value == 'edge':
+            return self.parse_edge()
         elif token.value == 'inset':
             return self.parse_inset()
         elif token.value == 'frame':
@@ -676,6 +680,90 @@ class CompositionalPMLParser:
                 self.in_keepout = old_in_keepout
 
         return Keepout(children=tuple(children), id=keepout_id)
+
+    def parse_edge(self) -> Edge:
+        """Parse edge treatment:
+        edge allowance <rough_mm> <finish_mm> [id]
+        edge fillet <radius_mm> [id]
+        edge chamfer <distance_mm> [id]
+        """
+        self.expect('keyword', 'edge')
+
+        # Parse treatment type
+        if self.peek().type != 'keyword':
+            raise ParseError(
+                f"Expected edge treatment type (allowance/fillet/chamfer), got {self.peek().type}",
+                self.peek().line,
+                self.peek().column
+            )
+
+        treatment = self.advance().value
+        if treatment not in ('allowance', 'fillet', 'chamfer'):
+            raise ParseError(
+                f"Invalid edge treatment type '{treatment}' (must be allowance, fillet, or chamfer)",
+                self.peek().line,
+                self.peek().column
+            )
+
+        # Parse treatment-specific parameters
+        rough_allowance_mm = None
+        finish_allowance_mm = None
+        radius_mm = None
+        distance_mm = None
+
+        if treatment == 'allowance':
+            # Parse rough and finish allowance values
+            if self.peek().type not in ('number', 'number_with_unit'):
+                raise ParseError(
+                    f"Expected rough allowance value (mm), got {self.peek().type}",
+                    self.peek().line,
+                    self.peek().column
+                )
+            rough_allowance_mm = float(self.advance().value)
+
+            if self.peek().type not in ('number', 'number_with_unit'):
+                raise ParseError(
+                    f"Expected finish allowance value (mm), got {self.peek().type}",
+                    self.peek().line,
+                    self.peek().column
+                )
+            finish_allowance_mm = float(self.advance().value)
+
+        elif treatment == 'fillet':
+            # Parse fillet radius
+            if self.peek().type not in ('number', 'number_with_unit'):
+                raise ParseError(
+                    f"Expected fillet radius value (mm), got {self.peek().type}",
+                    self.peek().line,
+                    self.peek().column
+                )
+            radius_mm = float(self.advance().value)
+
+        elif treatment == 'chamfer':
+            # Parse chamfer distance
+            if self.peek().type not in ('number', 'number_with_unit'):
+                raise ParseError(
+                    f"Expected chamfer distance value (mm), got {self.peek().type}",
+                    self.peek().line,
+                    self.peek().column
+                )
+            distance_mm = float(self.advance().value)
+
+        # Parse optional id
+        edge_id = None
+        if self.peek().type == 'identifier':
+            edge_id = self.advance().value
+
+        self.expect_line_end()
+
+        return Edge(
+            treatment_type=treatment,
+            rough_allowance_mm=rough_allowance_mm,
+            finish_allowance_mm=finish_allowance_mm,
+            radius_mm=radius_mm,
+            distance_mm=distance_mm,
+            id=edge_id
+        )
 
     def parse_feature(self) -> Feature:
         """Parse feature: pocket <depth>mm | profile through <side> | ..."""

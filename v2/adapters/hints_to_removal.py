@@ -17,6 +17,7 @@ from skills.mill_ui.v2.ir.removal_intent import (
     Constraints,
     TabConstraint,
     Island,
+    EdgeTreatment,
 )
 from skills.mill_ui.v2.ast.layout import Item
 
@@ -311,9 +312,14 @@ def item_to_removal_intent(
     if item.feature.type == "profile" and item.feature.side:
         allowance = _side_to_allowance(item.feature.side)
 
-    # Build constraints with islands if present
+    # Build constraints with islands and edge treatment if present
     islands = _extract_islands_from_geometry(item.geometry.data)
-    constraints = Constraints(islands=tuple(islands)) if islands else Constraints()
+    edge_treatment = _extract_edge_treatment_from_geometry(item.geometry.data)
+
+    constraints = Constraints(
+        islands=tuple(islands) if islands else (),
+        edge_treatment=edge_treatment
+    )
 
     # Build RemovalIntent
     return RemovalIntent(
@@ -387,3 +393,28 @@ def _extract_islands_from_geometry(geometry_data: dict[str, Any]) -> list[Island
         islands.append(Island(bounds=bounds))
 
     return islands
+
+
+def _extract_edge_treatment_from_geometry(geometry_data: dict[str, Any]) -> EdgeTreatment | None:
+    """Extract EdgeTreatment from v2 Item geometry data.
+
+    Looks for 'edge_treatment' key in geometry data (added by edge resolution).
+    Converts edge treatment dict to EdgeTreatment object.
+
+    Args:
+        geometry_data: Item geometry data dict
+
+    Returns:
+        EdgeTreatment object or None if no edge treatment present
+    """
+    edge_data = geometry_data.get("edge_treatment")
+    if not edge_data:
+        return None
+
+    return EdgeTreatment(
+        type=edge_data["type"],
+        radius_mm=edge_data.get("radius_mm"),
+        distance_mm=edge_data.get("distance_mm"),
+        rough_allowance_mm=edge_data.get("rough_allowance_mm"),
+        finish_allowance_mm=edge_data.get("finish_allowance_mm"),
+    )

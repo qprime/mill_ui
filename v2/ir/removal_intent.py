@@ -63,11 +63,28 @@ class Island:
 
 
 @dataclass(frozen=True)
+class EdgeTreatment:
+    """Edge treatment specification for finish operations.
+
+    Describes decorative or functional edge modifications that affect
+    toolpath planning (multi-pass, specialized bits, etc.).
+    """
+    type: str  # "fillet", "chamfer", "allowance"
+    # For fillet/chamfer
+    radius_mm: float | None = None  # Fillet radius
+    distance_mm: float | None = None  # Chamfer distance
+    # For allowance (multi-pass semantics)
+    rough_allowance_mm: float | None = None  # Stock to leave for rough pass
+    finish_allowance_mm: float | None = None  # Final allowance after finish pass
+
+
+@dataclass(frozen=True)
 class Constraints:
     """Constraints on removal operation."""
     tabs: TabConstraint | None = None
     keepouts: tuple[KeepoutRegion, ...] = field(default_factory=tuple)
     islands: tuple[Island, ...] = field(default_factory=tuple)
+    edge_treatment: EdgeTreatment | None = None  # Edge finish/decorative hints
     tolerance_mm: float = 0.1  # Allowable deviation from nominal geometry
     safe_z_mm: float = 5.0  # Safe Z height for rapid moves
 
@@ -123,6 +140,13 @@ class RemovalIntent:
                 } if self.constraints.tabs else None,
                 "keepouts": len(self.constraints.keepouts),
                 "islands": len(self.constraints.islands),
+                "edge_treatment": {
+                    "type": self.constraints.edge_treatment.type,
+                    "radius_mm": self.constraints.edge_treatment.radius_mm,
+                    "distance_mm": self.constraints.edge_treatment.distance_mm,
+                    "rough_allowance_mm": self.constraints.edge_treatment.rough_allowance_mm,
+                    "finish_allowance_mm": self.constraints.edge_treatment.finish_allowance_mm,
+                } if self.constraints.edge_treatment else None,
                 "tolerance_mm": self.constraints.tolerance_mm,
                 "safe_z_mm": self.constraints.safe_z_mm,
             },

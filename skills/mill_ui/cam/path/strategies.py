@@ -4,10 +4,10 @@ from typing import List, Set, Optional, Tuple
 
 import math
 
-from skills.mill_ui.cad.shape import Shape2D
-from skills.mill_ui.cad.primitives import rectangle
-from skills.mill_ui.cad.transforms import Transform2D, place
-from skills.mill_ui.core.types import Vec2
+from skills.mill_ui.cam.shape import Shape2D
+from skills.mill_ui.cam.primitives import rectangle
+from skills.mill_ui.cam.transforms import Transform2D, place
+from skills.mill_ui.cam.types import Vec2
 
 from skills.mill_ui.cam.model.setup import Setup
 from skills.mill_ui.cam.ops.profile import profile_outline

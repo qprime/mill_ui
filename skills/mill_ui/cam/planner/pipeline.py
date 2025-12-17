@@ -2,9 +2,9 @@
 from __future__ import annotations
 from typing import Iterable, Dict, Any, List, Tuple
 
-from skills.mill_ui.core.types import Vec2
-from skills.mill_ui.cad.primitives import rectangle, circle as circle_shape
-from skills.mill_ui.cad.transforms import Transform2D, place
+from skills.mill_ui.cam.types import Vec2
+from skills.mill_ui.cam.primitives import rectangle, circle as circle_shape
+from skills.mill_ui.cam.transforms import Transform2D, place
 from skills.mill_ui.cam.model.tool import Tool
 from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.machine import Machine

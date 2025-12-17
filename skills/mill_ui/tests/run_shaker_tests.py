@@ -394,7 +394,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
 
     # 5. Verify planner integration (if native library available)
     try:
-        from skills.mill_ui.core.config import Config
+        from skills.mill_ui.cam.config import Config
         from skills.mill_ui.cam.model.machine import Machine
         from skills.mill_ui.cam.model.material import Material
         from skills.mill_ui.cam.model.stock import Stock

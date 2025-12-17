@@ -21,7 +21,7 @@ from .tools import (
 )
 
 if TYPE_CHECKING:
-    from skills.mill_ui.core.config import Config
+    from skills.mill_ui.cam.config import Config
     from . import PassAccumulator, PassRecord
 
 

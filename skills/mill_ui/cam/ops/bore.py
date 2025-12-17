@@ -12,8 +12,8 @@ from skills.mill_ui.cam.path.toolpath import (
     move_cut,
     move_retract,
 )
-from skills.mill_ui.cad.primitives import circle as circle_shape
-from skills.mill_ui.core.types import Vec2
+from skills.mill_ui.cam.primitives import circle as circle_shape
+from skills.mill_ui.cam.types import Vec2
 from skills.mill_ui.cam.ops.profile import profile_outline
 
 def _circle_points(cx: float, cy: float, r: float, segments: int = 80) -> List[Tuple[float, float]]:

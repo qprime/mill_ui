@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
-from skills.mill_ui.core.config import Config
+from skills.mill_ui.cam.config import Config
 from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.setup import Setup

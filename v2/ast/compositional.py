@@ -101,6 +101,34 @@ class Cell:
 
 
 @dataclass(frozen=True)
+class Split:
+    """Subdivides current region into panes with rail/mullion bars.
+
+    Similar to Grid but reserves material for the bars themselves.
+    Rails are horizontal bars, mullions are vertical bars.
+    Use case: French doors, drawer faces with decorative mullions.
+
+    Pane sizes account for rail/mullion material:
+    - Pane width = (region_width - (cols-1)*mullion_mm) / cols
+    - Pane height = (region_height - (rows-1)*rail_mm) / rows
+
+    When rail_mm=0 and mullion_mm=0, behaves like Grid.
+
+    Attributes:
+        rows: Number of rows (panes stacked vertically)
+        cols: Number of columns (panes side by side)
+        rail_mm: Horizontal bar width (default 0)
+        mullion_mm: Vertical bar width (default 0)
+        children: Nodes to replicate in each pane (via Cell node)
+    """
+    rows: int
+    cols: int
+    rail_mm: float = 0.0
+    mullion_mm: float = 0.0
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
 class ComponentDef:
     """Reusable component definition (named, parameterized subtree).
 
@@ -280,6 +308,46 @@ class ResolvedRegion:
                 ))
 
         return cells
+
+    def subdivide_split(self, rows: int, cols: int, rail_mm: float, mullion_mm: float) -> list[ResolvedRegion]:
+        """Subdivide region into panes with rail/mullion bars.
+
+        Rails are horizontal bars (between rows), mullions are vertical bars (between cols).
+        Pane sizes account for material reserved by the bars.
+
+        When rail_mm=0 and mullion_mm=0, behaves identically to subdivide_grid(gap=0).
+
+        Args:
+            rows: Number of rows (panes stacked vertically)
+            cols: Number of columns (panes side by side)
+            rail_mm: Horizontal bar width (material reserved between rows)
+            mullion_mm: Vertical bar width (material reserved between columns)
+
+        Returns:
+            List of pane regions (left-to-right, bottom-to-top)
+        """
+        # Calculate pane dimensions accounting for rail/mullion material
+        total_mullion = mullion_mm * (cols - 1) if cols > 1 else 0
+        total_rail = rail_mm * (rows - 1) if rows > 1 else 0
+
+        pane_width = (self.width - total_mullion) / cols
+        pane_height = (self.height - total_rail) / rows
+
+        panes = []
+        for row in range(rows):
+            for col in range(cols):
+                # Offset includes pane sizes + bar material
+                x_offset = col * (pane_width + mullion_mm)
+                y_offset = row * (pane_height + rail_mm)
+
+                panes.append(ResolvedRegion(
+                    x_min=self.x_min + x_offset,
+                    y_min=self.y_min + y_offset,
+                    x_max=self.x_min + x_offset + pane_width,
+                    y_max=self.y_min + y_offset + pane_height,
+                ))
+
+        return panes
 
 
 @dataclass(frozen=True)

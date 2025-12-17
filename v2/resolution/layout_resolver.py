@@ -26,6 +26,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Frame,
     Grid,
     Cell,
+    Split,
     ComponentDef,
     UseComponent,
     Place,
@@ -153,9 +154,30 @@ class LayoutResolver:
                     for child in cell_node.children:
                         self._resolve_node(child, content_region, items, params)
 
-        # Cell: should only appear as Grid child (handled in Grid case)
+        # Split: subdivide region with rail/mullion bars, resolve children in each pane
+        elif isinstance(node, Split):
+            panes = region.subdivide_split(node.rows, node.cols, node.rail_mm, node.mullion_mm)
+
+            # Find Cell children (content to replicate in each pane)
+            cell_content = [child for child in node.children if isinstance(child, Cell)]
+
+            if not cell_content:
+                # No explicit Cell node; treat all children as cell content
+                cell_content = [Cell(children=node.children)]
+
+            # Replicate cell content in each pane
+            for pane_region in panes:
+                for cell_node in cell_content:
+                    # Apply cell inset if specified
+                    content_region = pane_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else pane_region
+
+                    # Resolve cell children in this pane's region
+                    for child in cell_node.children:
+                        self._resolve_node(child, content_region, items, params)
+
+        # Cell: should only appear as Grid/Split child (handled in Grid/Split cases)
         elif isinstance(node, Cell):
-            # If encountered outside Grid, treat as passthrough
+            # If encountered outside Grid/Split, treat as passthrough
             for child in node.children:
                 self._resolve_node(child, region, items, params)
 

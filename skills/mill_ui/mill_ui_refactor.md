@@ -536,7 +536,7 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete Keepout node; simple pockets still work |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML`, `S14_BASIC_SHAPES` |
 | **Status** | `done` |
-| **Commits** | `408ba8a` |
+| **Commits** | `408ba8a` (initial), `cb0e798` (Codex review fixes) |
 
 ---
 
@@ -576,7 +576,7 @@ Every stage follows this structure:
 - **S14_BASIC_SHAPES**: Completed 2025-12-16, commit b7951e6, tag refactor_v2_S14_BASIC_SHAPES
 - **S15_SPLIT_LAYOUT**: Completed 2025-12-16, commit ff54f40, tag refactor_v2_S15_SPLIT_LAYOUT
 - **S16_POLYLINE_PATH**: Completed 2025-12-17, commit e74c6d4, tag refactor_v2_S16_POLYLINE_PATH
-- **S17_KEEPOUT_ISLANDS**: Completed 2025-12-17, commit 408ba8a, tag refactor_v2_S17_KEEPOUT_ISLANDS
+- **S17_KEEPOUT_ISLANDS**: Completed 2025-12-17, commits 408ba8a (initial), cb0e798 (Codex review fixes), tag refactor_v2_S17_KEEPOUT_ISLANDS
 
 ---
 

@@ -31,6 +31,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    SplinePath,
     Keepout,
     Edge,
     CompositionalLayoutAST,
@@ -160,6 +161,30 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
 
         if node.feature:
             parts.append(_format_feature(node.feature))
+
+        lines.append(prefix + " ".join(parts))
+
+    elif isinstance(node, SplinePath):
+        # spline [id] [feature] points (x,y) (x,y) ... [tolerance <value>mm]
+        parts = ["spline"]
+        if node.id:
+            parts.append(node.id)
+
+        # Add feature before points if present
+        if node.feature:
+            parts.append(_format_feature(node.feature))
+
+        parts.append("points")
+
+        # Format control points as (x,y) tuples
+        point_strs = []
+        for x, y in node.points:
+            point_strs.append(f"({x:.2f},{y:.2f})")
+        parts.extend(point_strs)
+
+        # Add tolerance if non-default
+        if node.tolerance_mm != 0.1:
+            parts.append(f"tolerance {node.tolerance_mm:.2f}mm")
 
         lines.append(prefix + " ".join(parts))
 

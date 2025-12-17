@@ -43,6 +43,7 @@ from skills.mill_ui.v2.ast.compositional import (
     RoundedRect,
     Line,
     Polyline,
+    SplinePath,
     Keepout,
     Edge,
     CompositionalLayoutAST,
@@ -140,7 +141,7 @@ class CompositionalPMLLexer:
         # Check if it's a keyword
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'keepout', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points',
+            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'spline', 'keepout', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points', 'tolerance',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
@@ -417,6 +418,8 @@ class CompositionalPMLParser:
             return self.parse_line()
         elif token.value == 'polyline':
             return self.parse_polyline()
+        elif token.value == 'spline':
+            return self.parse_spline()
         elif token.value == 'keepout':
             return self.parse_keepout()
         elif token.value == 'edge':
@@ -636,6 +639,88 @@ class CompositionalPMLParser:
         self.expect_line_end()
 
         return Polyline(points=tuple(points), feature=feature, id=polyline_id)
+
+    def parse_spline(self) -> SplinePath:
+        """Parse spline:
+        spline [id] [feature] points (x,y) (x,y) ... [tolerance <value>mm]
+
+        Points are normalized coordinates in [0, 1].
+        Splines must have at least 2 control points.
+        Optional tolerance parameter controls polyline sampling resolution.
+        """
+        self.expect('keyword', 'spline')
+
+        # Parse optional id
+        spline_id = None
+        if self.peek().type == 'identifier':
+            spline_id = self.advance().value
+
+        # Parse optional feature (before points)
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('engrave', 'pocket', 'profile', 'hole'):
+            feature = self.parse_feature()
+
+        # Parse required 'points' keyword
+        self.expect('keyword', 'points')
+
+        # Parse point list: (x,y) (x,y) ...
+        points = []
+        while True:
+            token = self.peek()
+
+            # Check for tolerance keyword or end of line
+            if token.type == 'keyword' and token.value == 'tolerance':
+                break
+            if token.type in ('newline', 'eof'):
+                break
+
+            # Expect '(' for point start
+            if token.type != 'punctuation' or token.value != '(':
+                break  # No more points
+            self.advance()  # consume '('
+
+            # Parse x coordinate (number between 0 and 1)
+            x_token = self.expect('number')
+            x = x_token.value
+
+            # Expect comma
+            comma_token = self.peek()
+            if comma_token.type != 'punctuation' or comma_token.value != ',':
+                raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
+                               comma_token.line, comma_token.column)
+            self.advance()  # consume ','
+
+            # Parse y coordinate
+            y_token = self.expect('number')
+            y = y_token.value
+
+            # Expect ')'
+            close_token = self.peek()
+            if close_token.type != 'punctuation' or close_token.value != ')':
+                raise ParseError(f"Expected ')' after point, got {close_token.value}",
+                               close_token.line, close_token.column)
+            self.advance()  # consume ')'
+
+            points.append((x, y))
+
+        if len(points) < 2:
+            token = self.peek()
+            raise ParseError(f"SplinePath requires at least 2 control points, got {len(points)}",
+                           token.line, token.column)
+
+        # Parse optional tolerance
+        tolerance_mm = 0.1  # Default sampling tolerance
+        if self.peek().type == 'keyword' and self.peek().value == 'tolerance':
+            self.advance()  # consume 'tolerance'
+            tol_token = self.peek()
+            if tol_token.type not in ('number', 'number_with_unit'):
+                raise ParseError(f"Expected tolerance value (mm), got {tol_token.type}",
+                               tol_token.line, tol_token.column)
+            tolerance_mm = float(self.advance().value)
+
+        self.expect_line_end()
+
+        return SplinePath(points=tuple(points), feature=feature, tolerance_mm=tolerance_mm, id=spline_id)
 
     def parse_keepout(self) -> Keepout:
         """Parse keepout:

@@ -555,14 +555,33 @@ Every stage follows this structure:
 | **Risk / Rollback** | Delete Edge node; basic profile/pocket still work |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
 | **Status** | `done` |
-| **Commits** | `78a80b4` |
+| **Commits** | `78a80b4`, `812c20f` |
+
+---
+
+#### Stage 19: Centerline Spline / Expressive Path Support (Studio Mode)
+
+| Field | Value |
+|-------|-------|
+| **Stage ID** | `S19_CENTERLINE_SPLINES` |
+| **Stage Name** | Centerline Spline / Expressive Path Support (Studio Mode) |
+| **Goal** | Add explicit centerline spline/path support as first-class, permissive primitive for decorative, artistic, and expressive CNC work without reopening debates about offsets, kerf correctness, or production CAM assumptions |
+| **Scope** | - `v2/ast/compositional.py` (SplinePath node)<br>- `v2/resolution/layout_resolver.py` (sample_catmull_rom_spline, immediate lowering to polyline)<br>- `v2/pml/compositional_parser.py` + formatter<br>- `v2/tests/test_spline_paths.py` + `run_spline_tests.py`<br>- `v2/docs/studio_mode_geometry.md` (Studio Mode policy) |
+| **Deliverables** | - **Studio Mode Geometry Policy**:<br>  - Centerline paths valid and expected<br>  - Visual outcome > dimensional accuracy<br>  - No errors for tight curvature/tool coupling<br>  - Warnings informational only<br>- **SplinePath AST node**: Normalized coords (0-1), configurable tolerance, ≥2 control points<br>- **Immediate lowering**: Splines → polylines during resolution (no spline primitives in CAM layer)<br>- **Catmull-Rom sampling**: Deterministic, uniform parametric sampling<br>- **PML syntax**: `spline [id] [feature] points (x,y)... [tolerance <mm>]`<br>- **Integration**: Splines respect regions (inset/frame/grid), support engrave feature |
+| **Acceptance Tests** | 1. ✓ Spline parsing and round-trip preservation<br>2. ✓ Spline lowering to polyline (deterministic sampling)<br>3. ✓ Spline + engrave produces valid RemovalIntent<br>4. ✓ Tool diameter changes do NOT invalidate design (Studio Mode policy)<br>5. ✓ Tolerance parameter affects sampling resolution<br>- All Stage 12-18 tests pass (6/6 edge, 7/7 keepout) |
+| **Equivalence Type** | **foundation** (Studio Mode primitive; additive to existing system) |
+| **Back-Compat Guarantee** | Splines additive; Stages 12-18 unchanged |
+| **Risk / Rollback** | Delete SplinePath node; existing shapes/paths unaffected |
+| **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
+| **Status** | `done` |
+| **Commits** | `499c34b` |
 
 ---
 
 ### Stage Execution Status
 
-**Current Stage**: `S19` (TBD)
-**Completed Stages**: S1-S4, S12-S18
+**Current Stage**: `S20` (TBD)
+**Completed Stages**: S1-S4, S12-S19
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
@@ -577,7 +596,8 @@ Every stage follows this structure:
 - **S15_SPLIT_LAYOUT**: Completed 2025-12-16, commit ff54f40, tag refactor_v2_S15_SPLIT_LAYOUT
 - **S16_POLYLINE_PATH**: Completed 2025-12-17, commit e74c6d4, tag refactor_v2_S16_POLYLINE_PATH
 - **S17_KEEPOUT_ISLANDS**: Completed 2025-12-17, commits 408ba8a (initial), cb0e798 (Codex review fixes), tag refactor_v2_S17_KEEPOUT_ISLANDS
-- **S18_EDGE_INTENT**: Completed 2025-12-17, commit 78a80b4, tag refactor_v2_S18_EDGE_INTENT
+- **S18_EDGE_INTENT**: Completed 2025-12-17, commits 78a80b4 (initial), 812c20f (Codex review fixes), tag refactor_v2_S18_EDGE_INTENT
+- **S19_CENTERLINE_SPLINES**: Completed 2025-12-17, commit 499c34b, tag refactor_v2_S19_CENTERLINE_SPLINES
 
 ---
 

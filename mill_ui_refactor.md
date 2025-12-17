@@ -516,8 +516,8 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | Polyline is additive; existing line/circle/rect unchanged |
 | **Risk / Rollback** | Delete Polyline node; basic line still available |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML`, `S14_BASIC_SHAPES` |
-| **Status** | `todo` |
-| **Commits** | _(pending)_ |
+| **Status** | `done` |
+| **Commits** | `e74c6d4` |
 
 ---
 
@@ -561,8 +561,8 @@ Every stage follows this structure:
 
 ### Stage Execution Status
 
-**Current Stage**: `S16_POLYLINE_PATH`
-**Completed Stages**: S1 (5e79908), S2 (718290d), S3 (1adc2a9), S4 (d84b021)
+**Current Stage**: `S17_KEEPOUT_ISLANDS`
+**Completed Stages**: S1-S4, S12-S16
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
@@ -571,6 +571,11 @@ Every stage follows this structure:
 - **S2_AST_CORE**: Completed 2025-12-16, commits 8c1102d (initial), 718290d (template fix), tag refactor_v2_S2_AST_CORE
 - **S3_AST_EMIT**: Completed 2025-12-16, commit 1adc2a9, tag refactor_v2_S3_AST_EMIT
 - **S4_REMOVAL_IR_CORE**: Completed 2025-12-16, commit d84b021, tag refactor_v2_S4_REMOVAL_IR_CORE
+- **S12_LAYOUT_RESOLUTION**: Completed 2025-12-16, commit 8b6a702, tag refactor_v2_S12_LAYOUT_RESOLUTION
+- **S13_COMPOSITIONAL_PML**: Completed 2025-12-16, commit b09cf42, tag refactor_v2_S13_COMPOSITIONAL_PML
+- **S14_BASIC_SHAPES**: Completed 2025-12-16, commit b7951e6, tag refactor_v2_S14_BASIC_SHAPES
+- **S15_SPLIT_LAYOUT**: Completed 2025-12-16, commit ff54f40, tag refactor_v2_S15_SPLIT_LAYOUT
+- **S16_POLYLINE_PATH**: Completed 2025-12-17, commit e74c6d4, tag refactor_v2_S16_POLYLINE_PATH
 
 ---
 

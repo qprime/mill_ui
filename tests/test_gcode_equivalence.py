@@ -19,7 +19,7 @@ from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.stock import Stock
 from skills.mill_ui.cam.planner.passes import plan_passes
 from skills.mill_ui.cam.post.gcode import write_gcode
-from skills.mill_ui.core import Config
+from skills.mill_ui.cam.config import Config
 from skills.mill_ui.adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,

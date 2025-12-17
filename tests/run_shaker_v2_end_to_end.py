@@ -12,7 +12,7 @@ from skills.mill_ui.adapters.hints_to_removal import (
     pocket_hint_to_removal_intent,
 )
 from skills.mill_ui.adapters.removal_to_planner import removal_intents_to_v1_hints
-from skills.mill_ui.core.config import Config
+from skills.mill_ui.cam.config import Config
 from skills.mill_ui.cam.model.machine import Machine
 from skills.mill_ui.cam.model.material import Material
 from skills.mill_ui.cam.model.stock import Stock

@@ -554,15 +554,15 @@ Every stage follows this structure:
 | **Back-Compat Guarantee** | Edge is additive; existing profile/pocket unchanged |
 | **Risk / Rollback** | Delete Edge node; basic profile/pocket still work |
 | **Blocking Dependencies** | `S12_LAYOUT_RESOLUTION`, `S13_COMPOSITIONAL_PML` |
-| **Status** | `todo` |
-| **Commits** | _(pending)_ |
+| **Status** | `done` |
+| **Commits** | `78a80b4` |
 
 ---
 
 ### Stage Execution Status
 
-**Current Stage**: `S18_EDGE_INTENT`
-**Completed Stages**: S1-S4, S12-S17
+**Current Stage**: `S19` (TBD)
+**Completed Stages**: S1-S4, S12-S18
 **Blocked Stages**: S5-S11 (awaiting respective dependencies)
 **Deferred Stages**: S11 (PML - Phase 2)
 
@@ -577,6 +577,7 @@ Every stage follows this structure:
 - **S15_SPLIT_LAYOUT**: Completed 2025-12-16, commit ff54f40, tag refactor_v2_S15_SPLIT_LAYOUT
 - **S16_POLYLINE_PATH**: Completed 2025-12-17, commit e74c6d4, tag refactor_v2_S16_POLYLINE_PATH
 - **S17_KEEPOUT_ISLANDS**: Completed 2025-12-17, commits 408ba8a (initial), cb0e798 (Codex review fixes), tag refactor_v2_S17_KEEPOUT_ISLANDS
+- **S18_EDGE_INTENT**: Completed 2025-12-17, commit 78a80b4, tag refactor_v2_S18_EDGE_INTENT
 
 ---
 

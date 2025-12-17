@@ -14,7 +14,8 @@ Acceptance tests:
 from skills.mill_ui.v2.pml.compositional_parser import parse_compositional_pml, ParseError
 from skills.mill_ui.v2.pml.compositional_formatter import format_compositional_pml
 from skills.mill_ui.v2.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.v2.ast.compositional import Polyline, Feature
+from skills.mill_ui.v2.ast.compositional import Polyline
+from skills.mill_ui.v2.ast.layout import Feature
 
 
 def test_polyline_inside_rect():
@@ -55,6 +56,7 @@ rounded_rect panel radius 20.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
+    items = flat.items
     polyline_item = [item for item in items if item.type == "Polyline"][0]
     points = polyline_item.geometry.data["points_mm"]
 
@@ -70,7 +72,7 @@ def test_polyline_inside_circle_fit():
     """Test polyline inside circle fit region (bounding box mapping)."""
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
-circle hole fit
+circle boundary fit
     polyline cross points (0.25,0.50) (0.75,0.50) (0.50,0.50) (0.50,0.25) (0.50,0.75) engrave 1.00mm
 """
 

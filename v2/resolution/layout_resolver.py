@@ -34,6 +34,7 @@ from skills.mill_ui.v2.ast.compositional import (
     Circle,
     RoundedRect,
     Line,
+    Polyline,
     ResolvedRegion,
     CompositionalLayoutAST,
 )
@@ -299,6 +300,29 @@ class LayoutResolver:
                 shape_id=node.id,
             )
             items.append(line_item)
+
+        # Polyline: map normalized points to absolute coordinates within region
+        elif isinstance(node, Polyline):
+            # Map normalized points (0..1) to absolute coordinates within region
+            # (0, 0) = bottom-left (region.x_min, region.y_min)
+            # (1, 1) = top-right (region.x_max, region.y_max)
+            absolute_points = []
+            for norm_x, norm_y in node.points:
+                abs_x = region.x_min + norm_x * region.width
+                abs_y = region.y_min + norm_y * region.height
+                absolute_points.append((abs_x, abs_y))
+
+            polyline_item = Item(
+                kind="path",  # Open path for engraving
+                type="Polyline",
+                geometry=Geometry(data={
+                    "points_mm": absolute_points,
+                }),
+                placement=Placement(center_xy_mm=region.center),
+                feature=node.feature,
+                shape_id=node.id,
+            )
+            items.append(polyline_item)
 
         # Legacy Item nodes (from flat LayoutAST): preserve as-is
         elif isinstance(node, Item):

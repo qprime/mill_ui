@@ -182,7 +182,7 @@ def test_pocket_no_center():
     hint = {
         "id": "centered_pocket",
         "shape": "Rect",
-        "geometry": {"w_mm": 20.0, "h_mm": 20.0"},
+        "geometry": {"w_mm": 20.0, "h_mm": 20.0},
         "depth_mm": 3.0,
     }
 

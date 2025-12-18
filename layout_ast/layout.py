@@ -79,7 +79,7 @@ class LayoutAST:
 
         Deferred to parsers.py to keep dataclasses pure.
         """
-        from skills.mill_ui.ast.parsers import parse_layout_json
+        from skills.mill_ui.layout_ast.parsers import parse_layout_json
         return parse_layout_json(path)
 
     def to_json(self, path: str | None = None) -> str:
@@ -93,5 +93,5 @@ class LayoutAST:
         Returns:
             Canonical JSON string
         """
-        from skills.mill_ui.ast.emitters import emit_layout_json
+        from skills.mill_ui.layout_ast.emitters import emit_layout_json
         return emit_layout_json(self, path)

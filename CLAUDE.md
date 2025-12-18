@@ -75,27 +75,33 @@ from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
 intents = ast_to_removal_intents(ast)
 ```
 
-**Why this matters:** Building AST directly gives you maximum control. JSON serialization is just AST.to_json() / from_json().
+**Why this matters:** Building AST directly gives you maximum control. JSON serialization is just `LayoutAST.to_json()` / `LayoutAST.from_json()`.
 
 ### Task 2: Parse Human-Authored PML
 
 **Use case:** User provides PML text, you need to process it.
 
 ```python
-from skills.mill_ui.pml.parser import parse_compositional_pml
+from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
+from skills.mill_ui.resolution.layout_resolver import resolve_layout
 
 pml_source = """
 sheet 450mm 650mm 19mm
 
-component door
-  rect 400mm 600mm profile outside through
-  rect 300mm 500mm pocket 6mm
+# Compositional PML: regions are implicit (no explicit widths/heights on rect).
+# Layout managers (frame/inset/grid/split) subdivide the current region.
+component Door
+    rect door
+        frame 50mm
+            rect panel pocket 6mm
 
-place door at 225mm 325mm
+# Sheet-level placement is currently grid-based and takes `use <Component>` children.
+place grid 1 1 gap 0mm
+    use Door
 """
 
-ast = parse_compositional_pml(pml_source)
-# Same LayoutAST as Task 1, different input format
+comp_ast = parse_compositional_pml(pml_source)
+ast = resolve_layout(comp_ast)  # CompositionalLayoutAST -> flat LayoutAST
 ```
 
 **Why this matters:** PML is concise for humans. You might need to parse it, modify the AST, and re-emit.
@@ -129,17 +135,24 @@ ast = Shaker.expand_to_ast(
 
 ```python
 from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
-from skills.mill_ui.validation.removal_checks import validate_removal_intents
+from skills.mill_ui.validation.removal_checks import (
+    check_overlap,
+    check_depth_feasibility,
+    check_toolability,
+)
 
 intents = ast_to_removal_intents(ast)
 
-# Validate semantics at IR level
-errors = validate_removal_intents(intents, sheet_thickness_mm=19.0)
+# Validate semantics at IR level (no planner required)
+overlap = check_overlap(intents)
+depth_results = [check_depth_feasibility(i, sheet_thickness_mm=19.0) for i in intents]
+toolability_results = [check_toolability(i) for i in intents]
 
-if errors:
-    for error in errors:
-        print(f"Validation error: {error}")
-    # Fix issues before sending to planner
+if overlap.has_issues() or any(r.has_issues() for r in depth_results + toolability_results):
+    print(overlap.summary())
+    for r in depth_results + toolability_results:
+        if r.has_issues():
+            print(r.summary())
 ```
 
 **Why this matters:** Catching errors at IR level is fast. Don't wait for CAM execution to find invalid depths or overlaps.
@@ -152,30 +165,20 @@ if errors:
 
 **Steps:**
 1. AST already supports arbitrary shapes via `Item.type` field (no code change needed)
-2. Add bounds calculation in `adapters/ast_to_removal.py`
+2. Add bounds calculation in `adapters/hints_to_removal.py` (geometry → bounds)
 3. Add tests
 
 **Example:** Adding Ellipse
 
 ```python
-# In adapters/ast_to_removal.py, add to calculate_bounds():
-
-def calculate_bounds(item: Item) -> Bounds2D:
-    # ... existing shapes (Rect, Circle, etc.)
-
-    if item.type == "Ellipse":
-        rx = item.geometry.data["rx_mm"]
-        ry = item.geometry.data["ry_mm"]
-        cx, cy = item.placement.center_xy_mm
-        return Bounds2D(
-            x_min=cx - rx, x_max=cx + rx,
-            y_min=cy - ry, y_max=cy + ry
-        )
+# In adapters/hints_to_removal.py, extend BOTH conversion paths:
+# - `_geometry_to_bounds(shape, geometry, center_xy_mm)` (v1 hint dict path)
+# - `_item_geometry_to_bounds(item_type, geometry_data, cx, cy)` (Item path)
 ```
 
 **Test:**
 ```python
-# In tests/test_shapes.py
+# In tests/test_removal_intent_model.py (or any existing test module under tests/)
 def test_ellipse_bounds():
     item = Item(
         type="Ellipse",
@@ -267,7 +270,7 @@ hints = convert_ast_to_hints_directly(ast)  # DON'T DO THIS
 ```python
 # Always: AST → RemovalIntent → (adapter) → hints
 intents = ast_to_removal_intents(ast)
-hints = [removal_intent_to_hint(i, thickness) for i in intents]
+hints = removal_intents_to_v1_hints(intents)
 ```
 
 **Why:** RemovalIntent is the semantic layer. Skipping it means no validation, no extensibility.
@@ -276,7 +279,7 @@ hints = [removal_intent_to_hint(i, thickness) for i in intents]
 
 ❌ **Wrong:**
 ```python
-item.geometry.data["w_mm"] = 100  # Dataclasses are frozen!
+item.geometry.data["w_mm"] = 100  # Avoid mutating nested dicts (they remain mutable even in frozen dataclasses)
 ```
 
 ✅ **Correct:**
@@ -323,14 +326,14 @@ The system guarantees **semantic equivalence**, not surface syntax preservation.
 
 ❌ **Wrong assumption:**
 ```python
-pml_output = format_to_pml(parse_pml(pml_input))
+pml_output = format_pml(parse_pml(pml_input))
 assert pml_output == pml_input  # MAY FAIL - formatting can differ
 ```
 
 ✅ **Correct:**
 ```python
 ast1 = parse_pml(pml_input)
-ast2 = parse_pml(format_to_pml(ast1))
+ast2 = parse_pml(format_pml(ast1))
 assert ast1 == ast2  # Semantic equivalence guaranteed
 ```
 
@@ -345,7 +348,7 @@ create_file("tests/test_my_new_shape.py", ...)  # New file for small feature
 
 ✅ **Add to existing:**
 ```python
-# Add test case to tests/test_shapes.py
+# Add test case to an existing module (e.g., tests/test_removal_intent_model.py)
 def test_my_new_shape():
     ...
 ```
@@ -368,7 +371,7 @@ def build_layout(...):
 ```python
 ast = build_layout(...)
 intents = ast_to_removal_intents(ast)
-hints = removal_intents_to_hints(intents)
+hints = removal_intents_to_v1_hints(intents)
 gcode = plan_and_generate(hints)
 ```
 
@@ -384,7 +387,7 @@ gcode = plan_and_generate(hints)
 Example:
 ```bash
 # Write test
-edit tests/test_shapes.py
+edit tests/test_removal_intent_model.py
 
 # Run IR tests (fast, no native backend needed)
 PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_edge_tests
@@ -413,16 +416,15 @@ This guide focuses on **how to work with** the architecture, not **why it exists
 
 ## Historical Context
 
-**v1 → v2 migration** (completed Dec 2024):
+**v1 → v2 migration** (current codebase):
 - Introduced RemovalIntent IR as semantic layer
 - Unified PML and JSON inputs through LayoutAST
 - Retained proven CAM planner backend
 - Cleaned up backward compatibility code
 
-**Git tags for reference:**
-- `v1_final` - Last v1 commit
-- `v2_promoted` - Current architecture
-- `v1_v2_artifacts` - Development artifacts (archived)
+**Git tags for reference (run `git tag --list`):**
+- `mill_ui_v1`, `mill_ui_v1_frozen` - v1 snapshots
+- `S8_VALIDATION` … `S14_BASIC_SHAPES` - staged milestones
 
 **Why this matters:** If you see references to "v1 planner" or "v2 architecture", that's historical context. Current system is just "mill_ui" now.
 

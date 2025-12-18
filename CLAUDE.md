@@ -1,214 +1,445 @@
-# CLAUDE.md - Mill UI Skill
+# CLAUDE.md - AI Development Guide
 
-## Project Context
+**Practical guide for AI agents working with mill_ui. For architecture details, see [README.md](README.md).**
 
-Mill UI is a compositional CAD/CAM system designed for AI agent consumption. It generates CNC toolpaths and exports from declarative JSON layouts using parameterizable template components.
+## Quick Orientation
 
-**Owner Path**: `skills/mill_ui/`
-**Primary User**: AI agents (Claude, Codex) generating manufacturing layouts programmatically
-**Architecture**: Monolithic Python package with optional native C++ acceleration
+You're working on a CAM system that generates G-code for CNC routers. The key innovation is **RemovalIntent IR** - a semantic layer that separates *what* to machine from *how* to machine it.
 
-## Mental Model
+**Read [README.md](README.md) first** for architecture, pipeline explanation, and design rationale.
 
-Think of mill_ui as **React for physical objects**:
-- **Templates** (Shaker, FrameInsetClamp, ClampBar) = React components
-- **Parameters** (width_mm, depth_mm, border config) = props
-- **Primitives** (rectangle, circle) = HTML div/span
-- **Layouts** (grid placement, anchor points) = flexbox/grid
-- **Features** (profile, pocket, hole) = semantic attributes/event handlers
-- **Output** = G-code instead of HTML
+This guide covers:
+- Mental models for understanding the codebase
+- Common tasks with code examples
+- Pitfalls to avoid
+- Development workflows
 
-The system transforms declarative specifications into machine-executable toolpaths through a deterministic pipeline.
+## Mental Model: Compiler Analogy
 
-## Current Architecture
+Think of mill_ui as a **compiler with semantic IR**:
 
-**Pipeline**: JSON Layout → Config Resolution → Template Expansion → CAM Hints → Pass Planning → G-code Generation
+```
+Source Code    → Syntax Tree → Intermediate Rep → Optimization → Machine Code
+(PML/JSON)       (LayoutAST)   (RemovalIntent)    (Planner)      (G-code)
+```
 
-**Key Components**:
-- `apps/compose_cam.py` - CLI orchestrator (804 lines, needs refactoring)
-- `compositions/` - Template registry with decorator-based registration
-- `cam/planner/` - Toolpath planning with native backend acceleration
-- `cad/export/` - SVG, STL, STEP exporters
-- `api/` - Public surface re-exports
+**Key insight:** Just as a compiler validates and optimizes at IR level before code generation, mill_ui validates machining operations at RemovalIntent level before toolpath planning.
 
-**Data Flow**: File-based I/O, no persistence layer, deterministic execution enforced via `PYTHONHASHSEED=0`
+This enables:
+- **Fast validation**: Check semantics without expensive geometric computation
+- **Multiple backends**: Different planners can target same IR
+- **Testability**: Verify correctness at IR boundary
 
-## Active Work
+## Reading Order for New Context
 
-**Current Initiative**: AI-first refactoring with staged execution model
+When loading this codebase into a fresh chat:
 
-See [mill_ui_refactor.md](mill_ui_refactor.md) for comprehensive architectural changes. Implementation follows an 11-stage plan with explicit acceptance criteria and rollback mechanisms.
+1. **[README.md](README.md)** - Architecture, pipeline, why RemovalIntent IR matters
+2. **This file (CLAUDE.md)** - Practical development guide
+3. **[templates/shaker.py](templates/shaker.py)** - Concrete template example
+4. **[tests/run_edge_tests.py](tests/run_edge_tests.py)** - Test patterns
 
-**Key Changes**:
-1. RemovalIntent IR as canonical material removal representation
-2. Canonical LayoutAST as single source of truth (JSON/PML → LayoutAST convergence)
-3. Machine-readable template metadata for agent discovery
-4. Structured validation with field-level errors
-5. Agent CLI introspection (dump-ast, dump-removal-intent, convert-layout)
+For deep dives:
+- **[layout_ast/layout.py](layout_ast/layout.py)** - AST dataclass definitions
+- **[ir/removal_intent.py](ir/removal_intent.py)** - RemovalIntent IR spec
+- **[adapters/ast_to_removal.py](adapters/ast_to_removal.py)** - AST → IR conversion
 
-**Phase 2 Features** (deferred): PML surface syntax for human readability
+## Common Tasks
 
-## Foundational Intermediate Representations
+### Task 1: Generate a Layout Programmatically
 
-### RemovalIntent IR
-The canonical representation for material removal operations. When working with CAM operations:
-- **RemovalIntent** captures *what* volume to remove (boundaries, z_top/z_bottom depths, inside/outside/on allowances, tabs/bridges/keepouts/islands)
-- **Legacy operations** (profile, pocket, hole, engrave) are adapters that produce RemovalIntent
-- **Planners** consume RemovalIntent to generate toolpaths
-- Think: "declarative removal specification" vs "imperative toolpath commands"
+**Use case:** AI generates a panel layout from user requirements.
 
-### Canonical Layout AST
-The single source of truth for layout definitions:
-- Both JSON and PML (Phase 2) compile into LayoutAST
-- System guarantees **semantic equivalence with canonical re-emission** (not formatting preservation)
-- Order-preserving for sequences, canonically sorted for collections
-- Enables introspection, validation, and format conversion
+```python
+from skills.mill_ui.layout_ast.layout import (
+    LayoutAST, Sheet, Item, Geometry, Placement, Feature
+)
 
-## Equivalence Philosophy for v2 Templates
+# Build AST directly (skips parsing)
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+    items=(
+        Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 400, "h_mm": 600}),
+            placement=Placement(center_xy_mm=(225, 325)),
+            feature=Feature(type="profile", side="outside", depth="through"),
+            shape_id="door_outer"
+        ),
+    )
+)
 
-**Byte-for-byte G-code equivalence with legacy output is NOT required** for v2 templates (e.g., ShakerPanel v2).
+# Convert to RemovalIntent (semantic validation happens here)
+from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
+intents = ast_to_removal_intents(ast)
+```
 
-The goal is **semantic/geometric equivalence**:
-- Same finished panel geometry (outer dimensions, aperture sizes, rabbet depths)
-- Same decorative intent (border patterns, relief features)
-- Toolpaths may differ in motion planning, ordering, or efficiency
-- New planners and strategies are encouraged
+**Why this matters:** Building AST directly gives you maximum control. JSON serialization is just AST.to_json() / from_json().
 
-**Acceptance is based on**:
-- **RemovalIntent correctness**: Expected region count/types from template expansion
-- **SVG verification**: Design boundary, tool centerlines, tool radius envelopes; no overlap; within stock bounds
-- **Safety invariants**: Respects safe-Z, depth limits, feeds/spindle constraints from tool database
-- **Geometry verification**: Finished dimensions match spec; features present and correct depths
+### Task 2: Parse Human-Authored PML
 
-This philosophy enables improved planners without coupling to legacy motion quirks while keeping acceptance criteria objective and testable.
+**Use case:** User provides PML text, you need to process it.
 
-## Agent Collaboration Protocol
+```python
+from skills.mill_ui.pml.parser import parse_compositional_pml
 
-This codebase is collaboratively maintained by multiple AI agents (Claude, Codex). When working on mill_ui:
+pml_source = """
+sheet 450mm 650mm 19mm
 
-### Before Making Changes
-1. **Read [mill_ui_refactor.md](mill_ui_refactor.md)** to understand planned architectural direction
-2. **Check consensus status** - only implement changes with ☑ from both reviewers
-3. **Review [README.md](README.md)** for current API surface and invariants
-4. **Verify test coverage** - run `python run.py mill_ui_tests` before major changes
+component door
+  rect 400mm 600mm profile outside through
+  rect 300mm 500mm pocket 6mm
 
-### When Adding Templates
-- Use `@register_template(name)` decorator pattern
-- Implement `TemplateBase.expand(params, thickness_mm)` contract
-- Return list of shape dictionaries with `kind`, `type`, `geometry`, `placement`, `feature`
-- Add example usage to `examples/agent_generated/` when complete
-- Document parameter schema in template docstring until metadata system ships
+place door at 225mm 325mm
+"""
 
-### When Modifying Core Architecture
-- Maintain backward compatibility with existing JSON layouts
-- Preserve deterministic execution guarantees
-- Keep native backends optional with graceful degradation
-- Update both README.md and relevant refactor document sections
-- Add regression tests for changed behavior
-- **Understand equivalence requirements** for the work:
-  - **Byte-identical**: Adapter stages (S6) require exact G-code match for correctness validation
-  - **Semantic/geometry-equivalent**: Template stages (S10) require same finished geometry and decorative intent; toolpaths may differ in motion planning, ordering, or efficiency
-  - **Behavioral/safety-equivalent**: Safe toolpaths respecting bounds, depths, feeds/spindle constraints
+ast = parse_compositional_pml(pml_source)
+# Same LayoutAST as Task 1, different input format
+```
 
-### Code Style
-- Use dataclasses for structured data over dicts where possible (migration in progress)
-- Prefer pure functions returning immutable results
-- Keep helpers in `compositions/base.py` for consistency across templates
-- All dimensions in millimeters, no mixed units
-- Configuration precedence: CLI > env > file > defaults
+**Why this matters:** PML is concise for humans. You might need to parse it, modify the AST, and re-emit.
 
-## Key Invariants
+### Task 3: Use a Template
 
-**DO NOT BREAK**:
-- All linear dimensions are millimeters
-- Deterministic output (seeded random, sorted dicts)
-- Native backends are optional (check via `get_capabilities()`)
-- Templates must be idempotent given same params
-- G-code generation fails fast on missing tools
-- File paths use absolute references from cwd
+**Use case:** Generate a standard component (Shaker door, etc.).
 
-**PRESERVE**:
-- Single-process execution model (no microservices)
-- File-based I/O (no database layer)
-- CLI and programmatic API contracts
-- Existing test suite passes
-- RemovalIntent IR as canonical material removal representation
-- Semantic equivalence guarantees (ordering, values, operations)
-- Deterministic G-code output for regression testing
+```python
+from skills.mill_ui.templates import Shaker
+
+ast = Shaker.expand_to_ast(
+    params={
+        "outer_w": 400.0,
+        "outer_h": 600.0,
+        "stile_w": 50.0,
+        "rail_h": 50.0,
+        "panel_recess": 6.0,
+    },
+    sheet_thickness_mm=19.0
+)
+
+# Produces LayoutAST ready for conversion to RemovalIntent
+```
+
+**Why this matters:** Templates are parametric AST generators. Building new templates is a common extension point.
+
+### Task 4: Validate Before Planning
+
+**Use case:** Check if a layout is physically valid before expensive CAM execution.
+
+```python
+from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
+from skills.mill_ui.validation.removal_checks import validate_removal_intents
+
+intents = ast_to_removal_intents(ast)
+
+# Validate semantics at IR level
+errors = validate_removal_intents(intents, sheet_thickness_mm=19.0)
+
+if errors:
+    for error in errors:
+        print(f"Validation error: {error}")
+    # Fix issues before sending to planner
+```
+
+**Why this matters:** Catching errors at IR level is fast. Don't wait for CAM execution to find invalid depths or overlaps.
+
+## Extension Patterns
+
+### Pattern 1: Add a New Shape
+
+**When:** You need to support a geometric primitive not currently in the system (Ellipse, Polygon, etc.).
+
+**Steps:**
+1. AST already supports arbitrary shapes via `Item.type` field (no code change needed)
+2. Add bounds calculation in `adapters/ast_to_removal.py`
+3. Add tests
+
+**Example:** Adding Ellipse
+
+```python
+# In adapters/ast_to_removal.py, add to calculate_bounds():
+
+def calculate_bounds(item: Item) -> Bounds2D:
+    # ... existing shapes (Rect, Circle, etc.)
+
+    if item.type == "Ellipse":
+        rx = item.geometry.data["rx_mm"]
+        ry = item.geometry.data["ry_mm"]
+        cx, cy = item.placement.center_xy_mm
+        return Bounds2D(
+            x_min=cx - rx, x_max=cx + rx,
+            y_min=cy - ry, y_max=cy + ry
+        )
+```
+
+**Test:**
+```python
+# In tests/test_shapes.py
+def test_ellipse_bounds():
+    item = Item(
+        type="Ellipse",
+        geometry=Geometry(data={"rx_mm": 50, "ry_mm": 30}),
+        placement=Placement(center_xy_mm=(200, 150)),
+        feature=Feature(type="profile", side="outside", depth="through")
+    )
+    intent = item_to_removal_intent(item, 19.0)
+    assert intent.bounds == Bounds2D(x_min=150, x_max=250, y_min=120, y_max=180)
+```
+
+### Pattern 2: Create a Template
+
+**When:** You need a reusable parametric component (cabinet door, mounting plate, etc.).
+
+**Steps:**
+1. Create class in `templates/`
+2. Implement `expand_to_ast(params, sheet_thickness_mm) -> LayoutAST`
+3. Register in `templates/__init__.py`
+
+**Example:** Simple mounting plate template
+
+```python
+# templates/mounting_plate.py
+from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+
+class MountingPlate:
+    @staticmethod
+    def expand_to_ast(params: dict, sheet_thickness_mm: float) -> LayoutAST:
+        width = params["width"]
+        height = params["height"]
+        hole_diameter = params["hole_diameter"]
+        hole_offset = params.get("hole_offset", 10.0)
+
+        # Outer profile
+        items = [
+            Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(data={"w_mm": width, "h_mm": height}),
+                placement=Placement(center_xy_mm=(width/2, height/2)),
+                feature=Feature(type="profile", side="outside", depth="through"),
+                shape_id="plate_outer"
+            ),
+        ]
+
+        # Corner holes
+        for i, (x, y) in enumerate([
+            (hole_offset, hole_offset),
+            (width - hole_offset, hole_offset),
+            (hole_offset, height - hole_offset),
+            (width - hole_offset, height - hole_offset),
+        ]):
+            items.append(Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": hole_diameter}),
+                placement=Placement(center_xy_mm=(x, y)),
+                feature=Feature(type="hole", depth="through"),
+                shape_id=f"hole_{i}"
+            ))
+
+        return LayoutAST(
+            sheet=Sheet(width_mm=width + 50, height_mm=height + 50, thickness_mm=sheet_thickness_mm),
+            items=tuple(items)
+        )
+```
+
+**Register:**
+```python
+# templates/__init__.py
+from .shaker import Shaker
+from .mounting_plate import MountingPlate
+
+__all__ = ["Shaker", "MountingPlate"]
+```
+
+## Critical Invariants (Don't Break These)
+
+### 1. Always Go Through RemovalIntent IR
+
+❌ **Wrong:**
+```python
+# Bypassing IR layer
+hints = convert_ast_to_hints_directly(ast)  # DON'T DO THIS
+```
+
+✅ **Correct:**
+```python
+# Always: AST → RemovalIntent → (adapter) → hints
+intents = ast_to_removal_intents(ast)
+hints = [removal_intent_to_hint(i, thickness) for i in intents]
+```
+
+**Why:** RemovalIntent is the semantic layer. Skipping it means no validation, no extensibility.
+
+### 2. Don't Mutate Dataclasses
+
+❌ **Wrong:**
+```python
+item.geometry.data["w_mm"] = 100  # Dataclasses are frozen!
+```
+
+✅ **Correct:**
+```python
+from dataclasses import replace
+new_item = replace(item, geometry=Geometry(data={**item.geometry.data, "w_mm": 100}))
+```
+
+**Why:** Frozen dataclasses prevent accidental mutation. Use `replace()` for modifications.
+
+### 3. Dimensions Are Always Millimeters
+
+All dimensions in the system are millimeters. No conversions needed, no mixed units.
+
+```python
+sheet = Sheet(width_mm=450, height_mm=650, thickness_mm=19)  # All mm
+```
+
+**Why:** Consistency prevents unit conversion bugs. MM is standard for CNC.
+
+### 4. Test at IR Level, Not CAM Level
+
+❌ **Slow feedback:**
+```python
+# Testing by running full CAM pipeline
+gcode = generate_full_pipeline(ast)  # Requires native backend, slow
+assert "G1 X100" in gcode
+```
+
+✅ **Fast feedback:**
+```python
+# Testing at IR level
+intents = ast_to_removal_intents(ast)
+assert intents[0].bounds == Bounds2D(x_min=50, x_max=150, ...)
+```
+
+**Why:** IR tests are fast, portable, focused. Most development happens here.
 
 ## Common Pitfalls
 
-1. **Don't add implicit state** - Pass configuration explicitly through pipeline
-2. **Don't mutate shared structures** - Copy before modifying (see `_offset_items` pattern)
-3. **Don't assume native backend availability** - Always check capabilities first
-4. **Don't break template ID threading** - IDs must be unique per shape for seam merging
-5. **Don't add time estimates** - Focus on actionable steps, let user decide scheduling
-6. **Don't create new files unnecessarily** - Prefer editing existing over creating new
-7. **Don't assume formatting preservation** - System guarantees semantic equivalence via canonical re-emission, not surface syntax preservation
-8. **Don't bypass RemovalIntent IR** - New CAM operations must produce RemovalIntent, not raw hints
-9. **Don't confuse equivalence types** - Adapters require byte-identical G-code (S6); templates require semantic/geometry equivalence (S10)
+### Pitfall 1: Assuming Formatting Preservation
 
-## Extension Points
+The system guarantees **semantic equivalence**, not surface syntax preservation.
 
-**To add a new template**:
-1. Create file under `compositions/{category}/`
-2. Subclass `TemplateBase`, implement `expand()`
-3. Use `@register_template("TemplateName")` decorator
-4. Import in `compositions/__init__.py` (will be auto-discovery in refactor)
-5. Add test in `tests/unit/`
+❌ **Wrong assumption:**
+```python
+pml_output = format_to_pml(parse_pml(pml_input))
+assert pml_output == pml_input  # MAY FAIL - formatting can differ
+```
 
-**To add a CAM operation**:
-1. Create operation in `cam/ops/`
-2. Export through `api/cam.py`
-3. Add planner logic in `cam/planner/passes/`
-4. Update native backend if performance-critical
+✅ **Correct:**
+```python
+ast1 = parse_pml(pml_input)
+ast2 = parse_pml(format_to_pml(ast1))
+assert ast1 == ast2  # Semantic equivalence guaranteed
+```
 
-**To add an export format**:
-1. Create exporter in `cad/export/`
-2. Export through `api/cad.py`
-3. Add CLI flag in `compose_cam.py`
-4. Document in README section 4
+### Pitfall 2: Creating Unnecessary Files
 
-## Testing
+Prefer editing existing files over creating new ones.
 
-**Run all tests**: `python run.py mill_ui_tests`
-**Run specific test**: `python -m pytest tests/unit/test_gcode.py -v`
-**Generate code context**: `python -m tools.context_builder skills.mill_ui --output skills/mill_ui/code_context.txt`
+❌ **File proliferation:**
+```python
+create_file("tests/test_my_new_shape.py", ...)  # New file for small feature
+```
 
-Tests use real file I/O in temp directories, no mocking. Deterministic seeding prevents flaky tests.
+✅ **Add to existing:**
+```python
+# Add test case to tests/test_shapes.py
+def test_my_new_shape():
+    ...
+```
 
-## Reading Order for New Agents
+**Why:** Keeps codebase organized. Related code stays together.
 
-Start here when familiarizing with codebase:
+### Pitfall 3: Mixing Concerns Across Layers
 
-1. [README.md](README.md) - Public API and usage patterns
-2. [mill_ui_refactor.md](mill_ui_refactor.md) - Architectural direction and staged execution plan
-3. `apps/compose_cam.py` - End-to-end orchestration flow
-4. `compositions/base.py` - Template framework design
-5. `api/cam.py` - CAM operations public surface
-6. `cam/planner/passes/__init__.py` - Pass planning pipeline
-7. `v2/ir/removal_intent.py` - Canonical material removal IR (post-S4 implementation)
-8. Example templates: `compositions/panels/frame_inset_clamp.py`, `compositions/cabinets/shaker.py`
+Keep pipeline layers separate. Don't generate G-code in AST building, don't parse PML in the planner.
 
-## Questions & Decisions
+❌ **Layer violation:**
+```python
+def build_layout(...):
+    ast = LayoutAST(...)
+    gcode = generate_gcode(ast)  # WRONG LAYER!
+    return ast
+```
 
-When uncertain about architectural decisions:
+✅ **Clean separation:**
+```python
+ast = build_layout(...)
+intents = ast_to_removal_intents(ast)
+hints = removal_intents_to_hints(intents)
+gcode = plan_and_generate(hints)
+```
 
-**For small changes** - Follow existing patterns, maintain consistency
-**For medium changes** - Propose in [mill_ui_refactor.md](mill_ui_refactor.md) review table
-**For large changes** - Discuss with user before implementing
+## Development Workflow
 
-**Agent coordination** - Use mill_ui_refactor.md as shared design document with explicit consensus tracking
+### Standard Development Loop
 
-## Resources
+1. **Write test at IR level** (fast, focused)
+2. **Implement feature** (AST modification, bounds calculation, etc.)
+3. **Run IR tests** (verify semantics)
+4. **Optional: Run CAM tests** (end-to-end validation if needed)
 
-- **Tool Database**: `cam/tools/tool_db.json`
-- **Example Layouts**: `memories/cam_projects/sheet_layouts/*/input/layout.json`
-- **Layout Schema**: `docs/schemas/layout.schema.json` (outdated, needs refresh)
-- **Native Backends**: Optional, built via scikit-build-core + CMake + pybind11
+Example:
+```bash
+# Write test
+edit tests/test_shapes.py
+
+# Run IR tests (fast, no native backend needed)
+PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_edge_tests
+
+# Run CAM tests if needed (requires native backend)
+PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_gcode_equivalence_tests
+```
+
+### When to Run Full Tests
+
+- **IR tests (always)**: Fast validation of semantics
+- **PML tests (if parsing changes)**: Verify parser correctness
+- **G-code tests (if CAM changes)**: End-to-end validation
+
+**Focus on IR tests for development velocity.**
+
+## Architecture Deep Dives (Reference README)
+
+For detailed explanations of:
+- **Why RemovalIntent IR?** → See README "Why This Architecture"
+- **Design tradeoffs** → See README "Design Tradeoffs"
+- **Extension points** → See README "Extension Points"
+- **Directory structure** → See README "Directory Structure"
+
+This guide focuses on **how to work with** the architecture, not **why it exists** (that's in README).
+
+## Historical Context
+
+**v1 → v2 migration** (completed Dec 2024):
+- Introduced RemovalIntent IR as semantic layer
+- Unified PML and JSON inputs through LayoutAST
+- Retained proven CAM planner backend
+- Cleaned up backward compatibility code
+
+**Git tags for reference:**
+- `v1_final` - Last v1 commit
+- `v2_promoted` - Current architecture
+- `v1_v2_artifacts` - Development artifacts (archived)
+
+**Why this matters:** If you see references to "v1 planner" or "v2 architecture", that's historical context. Current system is just "mill_ui" now.
+
+## When Stuck
+
+**Architecture questions:** Check [README.md](README.md) for design rationale
+**Code examples:** Look at [templates/shaker.py](templates/shaker.py) and test files
+**IR semantics:** Read [ir/removal_intent.py](ir/removal_intent.py) docstrings
+**Test patterns:** Study [tests/run_edge_tests.py](tests/run_edge_tests.py)
+
+**Ask the user if:**
+- Architectural change needed (new feature types, pipeline modifications)
+- Multiple valid approaches exist (choose based on user priorities)
+- Ambiguous requirements (clarify before implementing)
 
 ---
 
-**Last Updated**: 2025-12-16
-**Active Reviewers**: Claude, Codex
-**Status**: Architecture refactor planning phase
+**Last Updated:** 2025-12-17
+**Complementary Doc:** [README.md](README.md) for architecture
+**Status:** Production (current architecture)

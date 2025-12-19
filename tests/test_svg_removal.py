@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
-from skills.mill_ui.ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
-from skills.mill_ui.export import render_svg_with_removal_intent
+from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
+from export import render_svg_with_removal_intent
 
 
 def test_render_svg_minimal_layout():

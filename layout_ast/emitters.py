@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Placement, Geometry, Feature
-from skills.mill_ui.layout_ast.canonicalize import canonicalize_layout
+from layout_ast.layout import LayoutAST, Sheet, Item, Placement, Geometry, Feature
+from layout_ast.canonicalize import canonicalize_layout
 
 
 def emit_layout_json(ast: LayoutAST, path: str | None = None) -> str:

@@ -119,7 +119,7 @@ The planner (`plan_passes`) calls these native functions:
 
 3. Run equivalence tests:
    ```bash
-   python3 -m skills.mill_ui.v2.tests.run_gcode_equivalence_tests
+   PYTHONPATH=. python3 -m v2.tests.run_gcode_equivalence_tests
    ```
 
 ## Expected Results (When Native Core Available)

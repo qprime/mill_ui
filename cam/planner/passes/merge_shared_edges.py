@@ -5,15 +5,15 @@ import math
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Sequence, Tuple, TYPE_CHECKING
 
-from skills.mill_ui.cam.types import Vec2
-from skills.mill_ui.cam.shape import Shape2D
-from skills.mill_ui.cam.ops.profile import profile_outline
+from cam.types import Vec2
+from cam.shape import Shape2D
+from cam.ops.profile import profile_outline
 
 from .profile import ensure_center, rect_shape
 from .tools import ToolSelection, stepdown_for_tool
 
 if TYPE_CHECKING:
-    from skills.mill_ui.cam.config import Config
+    from cam.config import Config
     from . import PassRecord
 
 

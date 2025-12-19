@@ -7,7 +7,7 @@
 - **Review Date**: 2025-12-17
 - **Commits Reviewed**: `e74c6d4` (implementation), `f04b963` (tracking update)
 - **Stage Tag**: `refactor_v2_S16_POLYLINE_PATH`
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_polyline_path_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_polyline_path_tests`
 
 ### Deliverables Verification
 - Polyline AST & resolver: **✓** `Polyline` dataclass with normalized-point validation plus resolver lowering emit `kind="path"` items with absolute `points_mm` (`mill_ui/v2/ast/compositional.py:245`, `mill_ui/v2/resolution/layout_resolver.py:301`).
@@ -16,7 +16,7 @@
 - Documentation: **✓** `v2/docs/shape_primitives.md:150-204` now documents Polyline purpose, syntax, normalized coordinate mapping, and usage guidance.
 
 ### Acceptance Tests Results
-- `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_polyline_path_tests`: **✓ PASS** – nine Stage 16 scenarios run cleanly (rect, rounded_rect, circle fit, inset, 10-point, round-trip, and three validation failures). `pytest` remains unavailable in this environment, so the bespoke runner is the authoritative signal for now.
+- `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_polyline_path_tests`: **✓ PASS** – nine Stage 16 scenarios run cleanly (rect, rounded_rect, circle fit, inset, 10-point, round-trip, and three validation failures). `pytest` remains unavailable in this environment, so the bespoke runner is the authoritative signal for now.
 
 ### Constraint Verification
 - v1 unchanged: **✓** Stage commits touch only v2 code/docs.

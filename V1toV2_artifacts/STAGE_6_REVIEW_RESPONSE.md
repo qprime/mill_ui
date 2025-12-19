@@ -66,7 +66,7 @@ Each test:
 
 3. Framework ready for execution when environment allows:
    ```bash
-   python3 -m skills.mill_ui.v2.tests.run_gcode_equivalence_tests
+   PYTHONPATH=. python3 -m v2.tests.run_gcode_equivalence_tests
    ```
 
 ## Deliverables Verification (Updated)
@@ -127,7 +127,7 @@ skills/mill_ui/v2/tests/EQUIVALENCE_TESTING.md           (new, 201 lines)
 
 ### Hint-Level Round-Trip (7/7 Pass)
 ```
-$ python3 -m skills.mill_ui.v2.tests.run_planner_adapter_tests
+$ PYTHONPATH=. python3 -m v2.tests.run_planner_adapter_tests
 Running test_roundtrip_profile_through_cut...
   ✓ PASS
 Running test_roundtrip_profile_with_tabs...
@@ -148,7 +148,7 @@ Running test_geometry_preservation...
 
 ### G-Code Equivalence (Framework Ready, Execution Blocked)
 ```
-$ python3 -m skills.mill_ui.v2.tests.run_gcode_equivalence_tests
+$ PYTHONPATH=. python3 -m v2.tests.run_gcode_equivalence_tests
 Running test_profile_gcode_equivalence...
   ✗ FAIL: skills.mill_ui.cam.native._native is not available.
          Install the project with a modern C++ toolchain so the native CAM core can be built.

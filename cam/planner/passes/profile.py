@@ -3,17 +3,17 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Tuple
 
-from skills.mill_ui.cam.types import Vec2
-from skills.mill_ui.cam.primitives import rectangle, circle as circle_shape
-from skills.mill_ui.cam.transforms import Transform2D, place
-from skills.mill_ui.cam.shape import Shape2D
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.ops.profile import profile_outline
-from skills.mill_ui.cam.path.strategies import (
+from cam.types import Vec2
+from cam.primitives import rectangle, circle as circle_shape
+from cam.transforms import Transform2D, place
+from cam.shape import Shape2D
+from cam.model.setup import Setup
+from cam.ops.profile import profile_outline
+from cam.path.strategies import (
     onion_skin_then_finish,
     profile_outline_with_tabs,
 )
-from skills.mill_ui.cam.planner.registry import register_strategy
+from cam.planner.registry import register_strategy
 
 from .tools import ToolSelection, stepdown_for_tool
 

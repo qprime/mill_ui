@@ -8,9 +8,9 @@ All dimensions in millimeters. Z-axis: positive up, negative down into material.
 
 from __future__ import annotations
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Item
-from skills.mill_ui.ir.removal_intent import RemovalIntent
-from skills.mill_ui.adapters.hints_to_removal import (
+from layout_ast.layout import LayoutAST, Item
+from ir.removal_intent import RemovalIntent
+from adapters.hints_to_removal import (
     item_to_removal_intent as _item_to_removal_intent,
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,

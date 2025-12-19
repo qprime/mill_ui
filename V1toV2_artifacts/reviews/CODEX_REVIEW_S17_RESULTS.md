@@ -7,7 +7,7 @@
 - **Review Date**: 2025-12-17
 - **Commits Reviewed**: `408ba8a` (implementation), `2899f85` (tracking update)
 - **Stage Tag**: `refactor_v2_S17_KEEPOUT_ISLANDS`
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_keepout_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_keepout_tests`
 
 ### Deliverables Verification
 - Keepout AST + parser/formatter: **✓** `Keepout` node defined (`mill_ui/v2/ast/compositional.py:286`); `parse_keepout` now validates against nesting (`mill_ui/v2/pml/compositional_parser.py:635`), and formatter emits canonical syntax (`mill_ui/v2/pml/compositional_formatter.py:166`).
@@ -16,7 +16,7 @@
 - Documentation: **✓** `v2/docs/keepout_islands.md` covers syntax, grid/split compositions, nested-keepout validation, and RemovalIntent plumbing (`lines 200-260`).
 
 ### Acceptance Tests Results
-- `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_keepout_tests`: **✓ PASS** – 7/7 tests exercised faux raised panels, grid cells, multiple keepouts, round-trip, circle/rounded_rect islands, nested keepout rejection, and RemovalIntent propagation.
+- `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_keepout_tests`: **✓ PASS** – 7/7 tests exercised faux raised panels, grid cells, multiple keepouts, round-trip, circle/rounded_rect islands, nested keepout rejection, and RemovalIntent propagation.
 - Pytest still unavailable, but the standalone runner mirrors the required scenarios.
 
 ### Constraint Verification

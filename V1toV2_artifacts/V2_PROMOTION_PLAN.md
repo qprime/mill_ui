@@ -29,13 +29,13 @@ mill_ui/
 
 ```bash
 # Run all v2 test suites
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_spline_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_keepout_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_compositional_pml_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_resolution_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_gcode_equivalence_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_shaker_v2_end_to_end
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_spline_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_keepout_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_compositional_pml_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_resolution_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_gcode_equivalence_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_shaker_v2_end_to_end
 ```
 
 **Verification**: All tests must pass. If any fail, stop and fix.
@@ -106,8 +106,8 @@ ls -d adapters ast cli docs export ir pml resolution templates validation tests_
 
 ```bash
 # Fix imports in moved modules
-find adapters ast cli export ir pml resolution validation templates tests_v2 -name "*.py" -type f -exec sed -i 's/from skills\.mill_ui\.v2\./from skills.mill_ui./g' {} \;
-find adapters ast cli export ir pml resolution validation templates tests_v2 -name "*.py" -type f -exec sed -i 's/import skills\.mill_ui\.v2\./import skills.mill_ui./g' {} \;
+find adapters ast cli export ir pml resolution validation templates tests_v2 -name "*.py" -type f -exec sed -i 's/from skills\.mill_ui\.v2\./from /g' {} \;
+find adapters ast cli export ir pml resolution validation templates tests_v2 -name "*.py" -type f -exec sed -i 's/import skills\.mill_ui\.v2\./import /g' {} \;
 ```
 
 **Verification**: Check no v2 imports remain
@@ -127,14 +127,14 @@ rg "from skills\.mill_ui\.v2\." adapters/ ast/ cli/ pml/ ir/ resolution/ export/
 
 ```bash
 # Run core v2 test suites with new paths
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests_v2.run_edge_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests_v2.run_spline_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests_v2.run_keepout_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests_v2.run_compositional_pml_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests_v2.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests_v2.run_spline_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests_v2.run_keepout_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests_v2.run_compositional_pml_tests
 
 # Test CLI tools still work
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_pml --help
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.cli.convert_layout --help
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m cli.parse_compositional_pml --help
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m cli.convert_layout --help
 ```
 
 **Verification**: All tests pass, CLI tools show help
@@ -217,16 +217,16 @@ ls -d tests/
 
 ```bash
 # Run all test suites
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_edge_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_spline_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_keepout_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_compositional_pml_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_resolution_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_gcode_equivalence_tests
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.tests.run_shaker_v2_end_to_end
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_spline_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_keepout_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_compositional_pml_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_resolution_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m tests.run_shaker_v2_end_to_end
 
 # Test all CLI tools
-echo "sheet 400mm 400mm 19mm" | PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_pml
+echo "sheet 400mm 400mm 19mm" | PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m cli.parse_compositional_pml
 ```
 
 **Verification**: All tests pass, CLI accepts input

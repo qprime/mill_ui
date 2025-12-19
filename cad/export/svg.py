@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Tuple
-from skills.mill_ui.cad.layout.panel import Panel
-from skills.mill_ui.cad.layout.place import item_size_mm
+from cad.layout.panel import Panel
+from cad.layout.place import item_size_mm
 
 __all__ = ["render_svg_layout"]
 

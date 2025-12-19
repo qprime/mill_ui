@@ -1,8 +1,8 @@
 # path: skills/mill_ui/cam/ops/pocket_region.py
 from __future__ import annotations
 from typing import Dict, Any, List, Tuple, Optional
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.path.toolpath import (
+from cam.model.setup import Setup
+from cam.path.toolpath import (
     move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
 )
 

@@ -9,8 +9,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-from skills.mill_ui.layout_ast.layout import LayoutAST
-from skills.mill_ui.ir.removal_intent import RemovalIntent
+from layout_ast.layout import LayoutAST
+from ir.removal_intent import RemovalIntent
 
 
 def render_svg_with_removal_intent(

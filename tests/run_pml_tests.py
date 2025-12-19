@@ -1,14 +1,14 @@
 """Standalone test runner for Stage 11 PML roundtrip tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_pml_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_pml_tests
 """
 
 import json
 import sys
 from pathlib import Path
 
-from skills.mill_ui.pml import parse_pml, format_pml, PMLParseError
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from pml import parse_pml, format_pml, PMLParseError
+from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
 def test_pml_parse_minimal_layout():

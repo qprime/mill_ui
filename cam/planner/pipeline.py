@@ -2,26 +2,26 @@
 from __future__ import annotations
 from typing import Iterable, Dict, Any, List, Tuple
 
-from skills.mill_ui.cam.types import Vec2
-from skills.mill_ui.cam.primitives import rectangle, circle as circle_shape
-from skills.mill_ui.cam.transforms import Transform2D, place
-from skills.mill_ui.cam.model.tool import Tool
-from skills.mill_ui.cam.model.material import Material
-from skills.mill_ui.cam.model.machine import Machine
-from skills.mill_ui.cam.model.stock import Stock
-from skills.mill_ui.cam.model.setup import Setup
+from cam.types import Vec2
+from cam.primitives import rectangle, circle as circle_shape
+from cam.transforms import Transform2D, place
+from cam.model.tool import Tool
+from cam.model.material import Material
+from cam.model.machine import Machine
+from cam.model.stock import Stock
+from cam.model.setup import Setup
 
-from skills.mill_ui.cam.ops.profile import profile_outline
-from skills.mill_ui.cam.ops.pocket import pocket_raster
-from skills.mill_ui.cam.ops.drill import drill_peck
-from skills.mill_ui.cam.ops.engrave import engrave_lines
-from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
-from skills.mill_ui.cam.ops.pocket_region import pocket_region_rect_raster
+from cam.ops.profile import profile_outline
+from cam.ops.pocket import pocket_raster
+from cam.ops.drill import drill_peck
+from cam.ops.engrave import engrave_lines
+from cam.ops.bore import bore_helical, pocket_circle_concentric
+from cam.ops.pocket_region import pocket_region_rect_raster
 
-from skills.mill_ui.cam.planner.select import (
+from cam.planner.select import (
     pick_for_profile, pick_for_pocket, pick_for_hole, pick_for_engrave, ToolSpec
 )
-from skills.mill_ui.cam.planner.params import stepdown_for, stepover_for
+from cam.planner.params import stepdown_for, stepover_for
 
 def _as_tool(spec: ToolSpec) -> Tool:
     return Tool(

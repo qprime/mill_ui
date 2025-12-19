@@ -8,8 +8,8 @@ def test_basic_split_2x2():
     """Test basic 2×2 split with rail/mullion bars."""
     print("Running test_basic_split_2x2...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 600.00mm 600.00mm 19.00mm
 
@@ -46,8 +46,8 @@ def test_split_zero_rails_behaves_like_grid():
     """Test that split with zero rail/mullion behaves like grid."""
     print("Running test_split_zero_rails_behaves_like_grid...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml_split = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -88,8 +88,8 @@ def test_split_pane_size_calculation():
     """Test correct pane size calculation with various rail/mullion values."""
     print("Running test_split_pane_size_calculation...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 1000.00mm 800.00mm 19.00mm
 
@@ -118,8 +118,8 @@ def test_split_inside_inset():
     """Test split inside inset region calculates correctly."""
     print("Running test_split_inside_inset...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 500.00mm 500.00mm 19.00mm
 
@@ -150,9 +150,9 @@ def test_split_roundtrip_preserves_rail_mullion():
     """Test PML → AST → PML preserves rail/mullion values."""
     print("Running test_split_roundtrip_preserves_rail_mullion...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from pml.compositional_formatter import format_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     original_pml = """sheet 600.00mm 400.00mm 19.00mm
 
@@ -187,8 +187,8 @@ def test_french_door_acceptance():
     """Stage 15 acceptance test: French-door pocket example with split."""
     print("Running test_french_door_acceptance...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 800.00mm 1200.00mm 19.00mm
 
@@ -222,8 +222,8 @@ def test_split_single_row():
     """Test split with single row (only mullions, no rails)."""
     print("Running test_split_single_row...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 600.00mm 200.00mm 19.00mm
 
@@ -252,8 +252,8 @@ def test_split_single_column():
     """Test split with single column (only rails, no mullions)."""
     print("Running test_split_single_column...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 200.00mm 600.00mm 19.00mm
 

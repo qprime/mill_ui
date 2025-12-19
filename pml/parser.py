@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
 class PMLParseError(Exception):

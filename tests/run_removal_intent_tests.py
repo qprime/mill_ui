@@ -1,11 +1,11 @@
 """Standalone test runner for Stage 4 RemovalIntent tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_removal_intent_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_removal_intent_tests
 """
 
 import sys
 
-from skills.mill_ui.ir.removal_intent import (
+from ir.removal_intent import (
     RemovalIntent,
     Bounds2D,
     Allowance,

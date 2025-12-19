@@ -1,14 +1,14 @@
 """Standalone test runner for compositional PML tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_compositional_pml_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_compositional_pml_tests
 """
 
 import sys
 from pathlib import Path
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
+from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:

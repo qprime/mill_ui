@@ -8,9 +8,9 @@ def test_edge_allowance():
     """Test edge allowance influences RemovalIntent."""
     print("Running test_edge_allowance...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -45,9 +45,9 @@ def test_fillet():
     """Test fillet edge treatment."""
     print("Running test_fillet...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -73,9 +73,9 @@ def test_roundtrip():
     """Test PML round-trip preserves edge."""
     print("Running test_roundtrip...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from pml.compositional_formatter import format_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     original_pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -107,9 +107,9 @@ def test_chamfer():
     """Test chamfer edge treatment."""
     print("Running test_chamfer...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -135,9 +135,9 @@ def test_multi_tool_scenario():
     """Test multi-tool scenario: rough pass + finish pass with different allowances."""
     print("Running test_multi_tool_scenario...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -185,10 +185,10 @@ def test_kerf_compatibility():
     """Test allowance semantics compatible with kerf (per-edge, not global)."""
     print("Running test_kerf_compatibility...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
-    from skills.mill_ui.ir.removal_intent import Allowance
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
+    from ir.removal_intent import Allowance
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -213,7 +213,7 @@ rect panel profile through outside
     kerf_offset = tool_kerf_mm / 2.0
 
     # Create a new RemovalIntent with both edge allowance and kerf compensation
-    from skills.mill_ui.ir.removal_intent import RemovalIntent, Constraints, EdgeTreatment
+    from ir.removal_intent import RemovalIntent, Constraints, EdgeTreatment
 
     combined_removal = RemovalIntent(
         region_id=base_removal.region_id,

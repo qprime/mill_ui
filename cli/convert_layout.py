@@ -11,8 +11,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from skills.mill_ui.pml import parse_pml, format_pml, PMLParseError
-from skills.mill_ui.layout_ast.layout import LayoutAST
+from pml import parse_pml, format_pml, PMLParseError
+from layout_ast.layout import LayoutAST
 
 
 def main():

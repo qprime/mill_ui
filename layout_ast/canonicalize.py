@@ -8,7 +8,7 @@ Ensures semantic equivalence through normalization:
 
 from __future__ import annotations
 
-from skills.mill_ui.layout_ast.layout import LayoutAST
+from layout_ast.layout import LayoutAST
 
 
 def canonicalize_layout(ast: LayoutAST) -> LayoutAST:

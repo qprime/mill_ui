@@ -1,6 +1,6 @@
 """Basic test runner for Stage 2 acceptance tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_basic_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_basic_tests
 """
 
 import json
@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 import sys
 
-from skills.mill_ui.layout_ast.layout import LayoutAST
+from layout_ast.layout import LayoutAST
 
 
 def test_parse_minimal_layout():

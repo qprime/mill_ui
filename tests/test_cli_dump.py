@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from skills.mill_ui.cli.introspect import dump_ast, dump_removal_intent
+from cli.introspect import dump_ast, dump_removal_intent
 
 
 def test_dump_ast_minimal_layout():

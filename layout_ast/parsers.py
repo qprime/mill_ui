@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from skills.mill_ui.layout_ast.layout import (
+from layout_ast.layout import (
     LayoutAST,
     Sheet,
     Item,

@@ -4,16 +4,16 @@ from typing import List, Set, Optional, Tuple
 
 import math
 
-from skills.mill_ui.cam.shape import Shape2D
-from skills.mill_ui.cam.primitives import rectangle
-from skills.mill_ui.cam.transforms import Transform2D, place
-from skills.mill_ui.cam.types import Vec2
+from cam.shape import Shape2D
+from cam.primitives import rectangle
+from cam.transforms import Transform2D, place
+from cam.types import Vec2
 
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.ops.profile import profile_outline
-from skills.mill_ui.cam.ops.pocket import pocket_raster
-from skills.mill_ui.cam.planner.params import stepdown_for, stepover_for
-from skills.mill_ui.cam.path.toolpath import (
+from cam.model.setup import Setup
+from cam.ops.profile import profile_outline
+from cam.ops.pocket import pocket_raster
+from cam.planner.params import stepdown_for, stepover_for
+from cam.path.toolpath import (
     move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
 )
 

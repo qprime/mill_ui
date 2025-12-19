@@ -1,5 +1,5 @@
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.native import core as native_core
+from cam.model.setup import Setup
+from cam.native import core as native_core
 
 
 def drill_peck(points, setup: Setup, depth: float, peck: float = 3.0):

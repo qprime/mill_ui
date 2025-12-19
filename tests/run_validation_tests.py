@@ -1,13 +1,13 @@
 """Standalone test runner for Stage 8 RemovalIntent validation tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_validation_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_validation_tests
 """
 
 import sys
 from pathlib import Path
 
-from skills.mill_ui.ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
-from skills.mill_ui.validation import (
+from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
+from validation import (
     ValidationResult,
     check_overlap,
     check_depth_feasibility,

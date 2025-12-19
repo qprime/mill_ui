@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence, Tuple
 
-from skills.mill_ui.cam.model.tool import Tool
+from cam.model.tool import Tool
 
 
 @dataclass(frozen=True)

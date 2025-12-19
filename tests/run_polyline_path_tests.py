@@ -8,8 +8,8 @@ def test_polyline_inside_rect():
     """Test polyline inside rect region maps normalized coordinates correctly."""
     print("Running test_polyline_inside_rect...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 300.00mm 19.00mm
 
@@ -40,8 +40,8 @@ def test_polyline_inside_rounded_rect():
     """Test polyline inside rounded_rect region."""
     print("Running test_polyline_inside_rounded_rect...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 500.00mm 500.00mm 19.00mm
 
@@ -68,8 +68,8 @@ def test_polyline_inside_circle_fit():
     """Test polyline inside circle fit region."""
     print("Running test_polyline_inside_circle_fit...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -95,8 +95,8 @@ def test_polyline_with_10_points():
     """Test polyline with 10 points renders correctly."""
     print("Running test_polyline_with_10_points...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 600.00mm 400.00mm 19.00mm
 
@@ -123,8 +123,8 @@ def test_polyline_error_out_of_range():
     """Test error: coordinates out of range."""
     print("Running test_polyline_error_out_of_range...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -146,8 +146,8 @@ def test_polyline_error_single_point():
     """Test error: minimum 2 points required."""
     print("Running test_polyline_error_single_point...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml, ParseError
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -169,7 +169,7 @@ def test_polyline_error_malformed():
     """Test error: malformed point syntax."""
     print("Running test_polyline_error_malformed...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
+    from pml.compositional_parser import parse_compositional_pml, ParseError
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -190,9 +190,9 @@ def test_polyline_roundtrip():
     """Test round-trip preserves coordinates."""
     print("Running test_polyline_roundtrip...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from pml.compositional_formatter import format_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     original_pml = """sheet 500.00mm 400.00mm 19.00mm
 
@@ -223,8 +223,8 @@ def test_polyline_in_inset_region():
     """Test polyline inside inset region."""
     print("Running test_polyline_in_inset_region...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 600.00mm 400.00mm 19.00mm
 

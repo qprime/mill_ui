@@ -8,8 +8,8 @@ def test_spline_parsing_and_roundtrip():
     """Test spline parses and round-trips in PML."""
     print("Running test_spline_parsing_and_roundtrip...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
+    from pml.compositional_parser import parse_compositional_pml
+    from pml.compositional_formatter import format_compositional_pml
 
     original_pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -47,8 +47,8 @@ def test_spline_lowering_deterministic():
     """Test spline lowers to polyline deterministically."""
     print("Running test_spline_lowering_deterministic...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -95,9 +95,9 @@ def test_spline_engrave_removal_intent():
     """Test spline + engrave produces valid RemovalIntent."""
     print("Running test_spline_engrave_removal_intent...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -137,8 +137,8 @@ def test_tool_diameter_does_not_invalidate():
     """Test changing tool diameter does NOT invalidate design (Studio Mode policy)."""
     print("Running test_tool_diameter_does_not_invalidate...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -176,8 +176,8 @@ def test_tolerance_affects_resolution():
     """Test tolerance parameter affects polyline sampling resolution."""
     print("Running test_tolerance_affects_resolution...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml_coarse = """sheet 400.00mm 400.00mm 19.00mm
 

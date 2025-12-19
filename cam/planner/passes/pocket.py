@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Sequence, TYPE_CHECKING, List
 
-from skills.mill_ui.cam.ops.bore import bore_helical, pocket_circle_concentric
-from skills.mill_ui.cam.ops.drill import drill_peck
-from skills.mill_ui.cam.ops.engrave import engrave_lines
-from skills.mill_ui.cam.ops.pocket_region import pocket_region_rect_raster
-from skills.mill_ui.cam.path.strategies import pocket_then_finish_profile
-from skills.mill_ui.cam.planner.registry import register_strategy
+from cam.ops.bore import bore_helical, pocket_circle_concentric
+from cam.ops.drill import drill_peck
+from cam.ops.engrave import engrave_lines
+from cam.ops.pocket_region import pocket_region_rect_raster
+from cam.path.strategies import pocket_then_finish_profile
+from cam.planner.registry import register_strategy
 
 from .profile import circle_shape_mm, ensure_center, rect_shape
 from .tools import (
@@ -21,7 +21,7 @@ from .tools import (
 )
 
 if TYPE_CHECKING:
-    from skills.mill_ui.cam.config import Config
+    from cam.config import Config
     from . import PassAccumulator, PassRecord
 
 

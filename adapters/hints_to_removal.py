@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from skills.mill_ui.ir.removal_intent import (
+from ir.removal_intent import (
     RemovalIntent,
     Bounds2D,
     Allowance,
@@ -19,7 +19,7 @@ from skills.mill_ui.ir.removal_intent import (
     Island,
     EdgeTreatment,
 )
-from skills.mill_ui.layout_ast.layout import Item
+from layout_ast.layout import Item
 
 
 def profile_hint_to_removal_intent(

@@ -10,9 +10,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.pml import format_pml
+from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.compositional_formatter import format_compositional_pml
+from pml import format_pml
 
 
 def main():
@@ -90,7 +90,7 @@ Examples:
 
         # Resolve if requested
         if args.resolve:
-            from skills.mill_ui.resolution.layout_resolver import resolve_layout
+            from resolution.layout_resolver import resolve_layout
 
             print("Resolving compositional layout...", file=sys.stderr)
             flat_ast = resolve_layout(comp_ast)

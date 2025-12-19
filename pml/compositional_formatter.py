@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from skills.mill_ui.layout_ast.compositional import (
+from layout_ast.compositional import (
     Panel,
     Inset,
     Frame,

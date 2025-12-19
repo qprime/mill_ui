@@ -1,6 +1,6 @@
 """Standalone test runner for Stage 10 Shaker template tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_shaker_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_shaker_tests
 """
 
 import json
@@ -8,13 +8,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-from skills.mill_ui.templates import Shaker
-from skills.mill_ui.adapters.hints_to_removal import (
+from templates import Shaker
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from skills.mill_ui.export import render_svg_with_removal_intent
+from export import render_svg_with_removal_intent
 
 
 def test_shaker_v2_basic_panel():
@@ -349,7 +349,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     print(f"  [1/4] ✓ Generated {len(ast.items)} AST items")
 
     # 3. Convert AST to RemovalIntent
-    from skills.mill_ui.adapters.hints_to_removal import (
+    from adapters.hints_to_removal import (
         profile_hint_to_removal_intent,
         pocket_hint_to_removal_intent,
     )
@@ -382,7 +382,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     print(f"  [2/4] ✓ Generated {len(removal_intents)} RemovalIntent regions")
 
     # 4. Convert to v1 hints
-    from skills.mill_ui.adapters.removal_to_planner import removal_intents_to_v1_hints
+    from adapters.removal_to_planner import removal_intents_to_v1_hints
 
     hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
 
@@ -394,11 +394,11 @@ def test_shaker_v2_end_to_end_pipeline_validation():
 
     # 5. Verify planner integration (if native library available)
     try:
-        from skills.mill_ui.cam.config import Config
-        from skills.mill_ui.cam.model.machine import Machine
-        from skills.mill_ui.cam.model.material import Material
-        from skills.mill_ui.cam.model.stock import Stock
-        from skills.mill_ui.cam.planner.passes import plan_passes
+        from cam.config import Config
+        from cam.model.machine import Machine
+        from cam.model.material import Material
+        from cam.model.stock import Stock
+        from cam.planner.passes import plan_passes
 
         tool_db = [
             {

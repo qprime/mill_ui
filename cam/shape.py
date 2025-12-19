@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from skills.mill_ui.cam.types import Vec2, Bounds
+from cam.types import Vec2, Bounds
 
 @dataclass
 class Shape2D:

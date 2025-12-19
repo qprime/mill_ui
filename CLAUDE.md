@@ -51,7 +51,7 @@ For deep dives:
 **Use case:** AI generates a panel layout from user requirements.
 
 ```python
-from skills.mill_ui.layout_ast.layout import (
+from layout_ast.layout import (
     LayoutAST, Sheet, Item, Geometry, Placement, Feature
 )
 
@@ -71,7 +71,7 @@ ast = LayoutAST(
 )
 
 # Convert to RemovalIntent (semantic validation happens here)
-from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
+from adapters.ast_to_removal import ast_to_removal_intents
 intents = ast_to_removal_intents(ast)
 ```
 
@@ -82,8 +82,8 @@ intents = ast_to_removal_intents(ast)
 **Use case:** User provides PML text, you need to process it.
 
 ```python
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
+from pml.compositional_parser import parse_compositional_pml
+from resolution.layout_resolver import resolve_layout
 
 pml_source = """
 sheet 450mm 650mm 19mm
@@ -111,7 +111,7 @@ ast = resolve_layout(comp_ast)  # CompositionalLayoutAST -> flat LayoutAST
 **Use case:** Generate a standard component (Shaker door, etc.).
 
 ```python
-from skills.mill_ui.templates import Shaker
+from templates import Shaker
 
 ast = Shaker.expand_to_ast(
     params={
@@ -134,8 +134,8 @@ ast = Shaker.expand_to_ast(
 **Use case:** Check if a layout is physically valid before expensive CAM execution.
 
 ```python
-from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
-from skills.mill_ui.validation.removal_checks import (
+from adapters.ast_to_removal import ast_to_removal_intents
+from validation.removal_checks import (
     check_overlap,
     check_depth_feasibility,
     check_toolability,
@@ -203,7 +203,7 @@ def test_ellipse_bounds():
 
 ```python
 # templates/mounting_plate.py
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 class MountingPlate:
     @staticmethod
@@ -390,10 +390,10 @@ Example:
 edit tests/test_removal_intent_model.py
 
 # Run IR tests (fast, no native backend needed)
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_edge_tests
+PYTHONPATH=/path/to/cliff_ai PYTHONPATH=. python3 -m tests.run_edge_tests
 
 # Run CAM tests if needed (requires native backend)
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_gcode_equivalence_tests
+PYTHONPATH=/path/to/cliff_ai PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
 ```
 
 ### When to Run Full Tests

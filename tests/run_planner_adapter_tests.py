@@ -1,16 +1,16 @@
 """Standalone test runner for Stage 6 planner adapter tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_planner_adapter_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_planner_adapter_tests
 """
 
 import sys
 
-from skills.mill_ui.adapters.hints_to_removal import (
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from skills.mill_ui.adapters.removal_to_planner import (
+from adapters.removal_to_planner import (
     removal_intent_to_v1_hint,
     removal_intents_to_v1_hints,
 )

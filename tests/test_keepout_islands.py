@@ -8,11 +8,11 @@ Acceptance tests:
 - Round-trip: keepout boundaries preserved
 """
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.layout_ast.compositional import Keepout
-from skills.mill_ui.layout_ast.layout import Feature
+from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
+from layout_ast.compositional import Keepout
+from layout_ast.layout import Feature
 
 
 def test_simple_pocket_with_island():
@@ -221,7 +221,7 @@ rect panel pocket 6.00mm
 
 def test_removal_intent_includes_islands():
     """Test RemovalIntent includes island geometry from keepouts."""
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 

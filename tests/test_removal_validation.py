@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import pytest
 
-from skills.mill_ui.ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
-from skills.mill_ui.validation import (
+from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
+from validation import (
     ValidationResult,
     check_overlap,
     check_depth_feasibility,

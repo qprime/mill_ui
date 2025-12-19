@@ -1,6 +1,6 @@
 # path: skills/mill_ui/cam/ops/face.py
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+from cam.model.setup import Setup
+from cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
 
 def face_zigzag(width: float, height: float, setup: Setup, step: float = 10.0, depth: float = 0.5):
     moves = []

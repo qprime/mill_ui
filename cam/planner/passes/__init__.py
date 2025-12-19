@@ -4,11 +4,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
-from skills.mill_ui.cam.config import Config
-from skills.mill_ui.cam.model.machine import Machine
-from skills.mill_ui.cam.model.material import Material
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.model.stock import Stock
+from cam.config import Config
+from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.setup import Setup
+from cam.model.stock import Stock
 
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_engrave_passes, plan_hole_passes, plan_pocket_passes

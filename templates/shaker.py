@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
 @dataclass(frozen=True)

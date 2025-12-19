@@ -7,7 +7,7 @@
 - **Review Date**: 2025-12-17
 - **Commits Reviewed**: `78a80b4` (implementation), `812c20f` (acceptance/test/doc updates), `5c48527` (tracking)
 - **Stage Tag**: `refactor_v2_S18_EDGE_INTENT`
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests`
 
 ### Deliverables Verification
 - Edge AST + parser/formatter: **✓** `Edge` node supports `allowance`, `fillet`, and `chamfer` treatments; parser enforces correct parameters; formatter round-trips canonical syntax.

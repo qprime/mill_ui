@@ -1,6 +1,6 @@
 """Standalone test runner for G-code equivalence tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_gcode_equivalence_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
 """
 
 import hashlib
@@ -8,18 +8,18 @@ import sys
 from io import StringIO
 from typing import Any
 
-from skills.mill_ui.cam.model.machine import Machine
-from skills.mill_ui.cam.model.material import Material
-from skills.mill_ui.cam.model.stock import Stock
-from skills.mill_ui.cam.planner.passes import plan_passes
-from skills.mill_ui.cam.post.gcode import write_gcode
-from skills.mill_ui.cam.config import Config
-from skills.mill_ui.adapters.hints_to_removal import (
+from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.stock import Stock
+from cam.planner.passes import plan_passes
+from cam.post.gcode import write_gcode
+from cam.config import Config
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from skills.mill_ui.adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_v1_hints
 
 
 # Minimal tool DB for testing

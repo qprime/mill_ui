@@ -8,9 +8,9 @@ Acceptance tests:
 - Round-trip: PML → AST → PML preserves rail/mullion dimensions
 """
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
+from pml.compositional_parser import parse_compositional_pml
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_basic_split_2x2():

@@ -1,12 +1,12 @@
 """Standalone test runner for layout resolution tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_resolution_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_resolution_tests
 """
 
 import sys
 from pathlib import Path
 
-from skills.mill_ui.layout_ast.compositional import (
+from layout_ast.compositional import (
     Panel,
     Inset,
     Frame,
@@ -18,9 +18,9 @@ from skills.mill_ui.layout_ast.compositional import (
     Rect,
     CompositionalLayoutAST,
 )
-from skills.mill_ui.layout_ast.layout import Sheet, Feature
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.pml import format_pml
+from layout_ast.layout import Sheet, Feature
+from resolution.layout_resolver import resolve_layout
+from pml import format_pml
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:

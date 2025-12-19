@@ -10,7 +10,7 @@
   - `78a80b4` (original implementation)
   - `812c20f` (fixes for missing acceptance tests + documentation)
 - **Stage Tag**: `refactor_v2_S18_EDGE_INTENT` (still points to 78a80b4)
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests`
 
 ### Changes Since Last Review
 
@@ -137,7 +137,7 @@ Updated `v2/docs/edge_treatment.md` with:
 ### Test Results (Re-Run)
 
 ```bash
-$ PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests
+$ PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests
 
 Running test_edge_allowance...
   ✓ PASS
@@ -165,7 +165,7 @@ Running test_kerf_compatibility...
 
 ### Acceptance Tests Results (Updated)
 
-- `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests`: **✓ PASS** – All 6 tests pass (6/6)
+- `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests`: **✓ PASS** – All 6 tests pass (6/6)
 - **Multi-tool scenario**: ✓ Covered by `test_multi_tool_scenario` (validates rough/finish RemovalIntent data)
 - **Kerf compatibility**: ✓ Covered by `test_kerf_compatibility` (validates per-edge allowances coexist with kerf)
 - All 5 acceptance bullets from spec: **✓ VERIFIED**

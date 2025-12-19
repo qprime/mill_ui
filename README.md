@@ -53,7 +53,7 @@ circle anchor:2 at 355mm,545mm diameter 10mm hole 8mm
 
 **Note:** Flat PML doesn't have a standalone CLI parser. Use compositional PML CLI or parse programmatically:
 ```python
-from skills.mill_ui.pml import parse_pml
+from pml import parse_pml
 ast = parse_pml(pml_text)
 ```
 
@@ -76,9 +76,14 @@ rect outer profile through outside
 
 Run the compositional PML parser:
 ```bash
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_pml door.pml
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_pml door.pml --resolve --format pml
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_pml door.pml --resolve --format json
+./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml
+./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format pml
+./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format json
+```
+
+Or use the installed console script:
+```bash
+./venv/bin/mill_ui_parse_pml door.pml --resolve --format pml
 ```
 
 **Key Difference:** Flat PML requires explicit coordinates (`at X,Y`), compositional PML uses layout managers for relative positioning.
@@ -86,8 +91,8 @@ PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.cli.parse_compositional_p
 ### Option 3: Python Template (Programmatic)
 
 ```python
-from skills.mill_ui.templates import Shaker
-from skills.mill_ui.adapters.ast_to_removal import ast_to_removal_intents
+from templates import Shaker
+from adapters.ast_to_removal import ast_to_removal_intents
 
 # Generate LayoutAST
 ast = Shaker.expand_to_ast(
@@ -105,7 +110,7 @@ ast = Shaker.expand_to_ast(
 intents = ast_to_removal_intents(ast)
 
 # Generate CAM plan (requires v1 planner backend)
-from skills.mill_ui.adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_v1_hints
 hints = removal_intents_to_v1_hints(
     intents,
     kerf_width_mm=3.175,  # 1/8" bit typical
@@ -416,23 +421,79 @@ __all__ = ["Shaker"]
 
 ## Development
 
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd mill_ui
+```
+
+2. **(Recommended) Create a virtual environment:**
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies (if any are added later):**
+```bash
+pip install -r requirements.txt
+# Or for development:
+pip install -r requirements-dev.txt
+```
+
+**Note:** This project uses a flat package layout with `PYTHONPATH=.` for running tests and scripts. Currently no external dependencies are required, but using a venv is recommended for future-proofing.
+
 ### Running Tests
 
+**Quick start** - Run all core tests:
+```bash
+./run_tests.sh
+```
+
+**Run specific test suite:**
+```bash
+./run_tests.sh run_pml_tests
+./run_tests.sh run_edge_tests
+./run_tests.sh run_resolution_tests
+```
+
+**Manual test execution:**
 ```bash
 # Core IR tests
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_removal_intent_tests
+PYTHONPATH=. python3 -m tests.run_removal_intent_tests
 
 # PML parser tests
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_pml_tests
+PYTHONPATH=. python3 -m tests.run_pml_tests
 
 # Resolution tests (component placement)
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_resolution_tests
+PYTHONPATH=. python3 -m tests.run_resolution_tests
 
 # G-code equivalence (requires native CAM backend)
-PYTHONPATH=/path/to/cliff_ai python3 -m skills.mill_ui.tests.run_gcode_equivalence_tests
+PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
+```
 
-# Note: test_cli_dump.py will fail due to missing cli/introspect.py
-# Note: test_cli_parse_compositional_pml.py requires pytest (pytest-based, not standalone runner)
+**Note:** Some tests require the native C++ CAM backend. IR-level tests work without it.
+
+### Project Structure
+
+After migration to standalone repository, the structure is:
+```
+mill_ui/
+├── mill_ui/              # Main package
+│   ├── adapters/         # AST ↔ IR ↔ Planner adapters
+│   ├── cam/              # CAM planner backend
+│   ├── cli/              # Command-line tools
+│   ├── ir/               # RemovalIntent IR
+│   ├── layout_ast/       # LayoutAST dataclasses
+│   ├── pml/              # PML parser/formatter
+│   ├── resolution/       # Compositional layout resolver
+│   ├── templates/        # Parametric templates
+│   ├── tests/            # Test suite
+│   └── validation/       # IR validation
+├── setup.py              # Package configuration
+├── run_tests.sh          # Test runner script
+└── README.md             # This file
 ```
 
 ### Validation Strategy

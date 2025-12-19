@@ -13,9 +13,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
+from pml.compositional_parser import parse_compositional_pml
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:

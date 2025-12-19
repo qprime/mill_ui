@@ -10,12 +10,12 @@ from __future__ import annotations
 
 import pytest
 
-from skills.mill_ui.adapters.hints_to_removal import (
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from skills.mill_ui.adapters.removal_to_planner import (
+from adapters.removal_to_planner import (
     removal_intent_to_v1_hint,
     removal_intents_to_v1_hints,
 )

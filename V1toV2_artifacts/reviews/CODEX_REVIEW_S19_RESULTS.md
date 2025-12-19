@@ -7,7 +7,7 @@
 - **Review Date**: 2025-12-17
 - **Commits Reviewed**: `499c34b` (implementation), `5c48527` (tracking update)
 - **Stage Tag**: `refactor_v2_S19_CENTERLINE_SPLINES`
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_spline_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_spline_tests`
 
 ### Deliverables Verification
 - **Studio Mode geometry policy** documented in `v2/docs/studio_mode_geometry.md` (centerline intent, permissive warnings, design-first philosophy). ✓

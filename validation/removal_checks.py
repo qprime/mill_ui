@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from skills.mill_ui.ir.removal_intent import RemovalIntent
-from skills.mill_ui.validation.results import ValidationResult
+from ir.removal_intent import RemovalIntent
+from validation.results import ValidationResult
 
 
 def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:

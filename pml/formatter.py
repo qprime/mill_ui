@@ -5,7 +5,7 @@ Emits canonical PML from LayoutAST.
 
 from __future__ import annotations
 
-from skills.mill_ui.layout_ast.layout import LayoutAST, Item, Feature
+from layout_ast.layout import LayoutAST, Item, Feature
 
 
 def format_pml(ast: LayoutAST) -> str:

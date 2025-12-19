@@ -7,7 +7,7 @@
 - **Review Date**: 2025-12-17
 - **Commits Reviewed**: `ff54f40`
 - **Stage Tag**: `refactor_v2_S15_SPLIT_LAYOUT`
-- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_split_layout_tests`
+- **Tests Executed**: `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_split_layout_tests`
 
 ### Deliverables Verification
 - Split AST + region subdivision: **✓** `Split` dataclass plus `ResolvedRegion.subdivide_split()` implement pane sizing with rail/mullion material reservations and zero-gap parity (`mill_ui/v2/ast/compositional.py:69-350`).
@@ -17,7 +17,7 @@
 - Documentation: **✓** `v2/docs/layout_primitives.md` now documents layout managers vs shapes and adds a detailed Split section with worked examples (`mill_ui/v2/docs/layout_primitives.md:1-143`).
 
 ### Acceptance Tests Results
-- `PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_split_layout_tests`: **✓ PASS** – all 8 Stage 15 acceptance scenarios succeeded (basic 2×2, zero bars, pane math, inset, round-trip, French door, single row/column).
+- `PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_split_layout_tests`: **✓ PASS** – all 8 Stage 15 acceptance scenarios succeeded (basic 2×2, zero bars, pane math, inset, round-trip, French door, single row/column).
 - `python3 -m pytest mill_ui/v2/tests/test_split_layout.py`: **✗ NOT RUN** – `pytest` is not available in this environment; standalone runner above exercises the same cases.
 
 ### Constraint Verification

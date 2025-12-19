@@ -1,6 +1,6 @@
 # path: skills/mill_ui/cam/post/gcode.py
 
-from skills.mill_ui.cam.native import core as native_core
+from cam.native import core as native_core
 
 DEFAULT_HEADER = ['(begin)', 'G90', 'G21', 'G17', 'G94']
 DEFAULT_FOOTER = ['M5', 'M2', '(end)']

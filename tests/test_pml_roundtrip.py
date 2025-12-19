@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import pytest
 
-from skills.mill_ui.pml import parse_pml, format_pml, PMLParseError
+from pml import parse_pml, format_pml, PMLParseError
 
 
 def test_pml_parse_minimal_layout():
@@ -197,7 +197,7 @@ rect panel at 150mm,200mm size 200mm,300mm profile through bad_side
 
 def test_pml_format_minimal_layout():
     """Test formatting minimal LayoutAST to PML."""
-    from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+    from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
@@ -221,7 +221,7 @@ def test_pml_format_minimal_layout():
 
 def test_pml_format_with_metadata():
     """Test formatting LayoutAST with project and kerf metadata."""
-    from skills.mill_ui.layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+    from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=400.0, thickness_mm=19.0),

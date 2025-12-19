@@ -28,7 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from skills.mill_ui.layout_ast.compositional import (
+from layout_ast.compositional import (
     Panel,
     Inset,
     Frame,
@@ -48,7 +48,7 @@ from skills.mill_ui.layout_ast.compositional import (
     Edge,
     CompositionalLayoutAST,
 )
-from skills.mill_ui.layout_ast.layout import Sheet, Feature
+from layout_ast.layout import Sheet, Feature
 
 
 @dataclass

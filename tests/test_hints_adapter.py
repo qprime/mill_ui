@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from skills.mill_ui.adapters.hints_to_removal import (
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,

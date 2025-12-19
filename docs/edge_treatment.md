@@ -66,7 +66,7 @@ Specifies chamfer intent (2.5mm distance).
 Edge treatment automatically propagates to RemovalIntent via `item_to_removal_intent()`:
 
 ```python
-from skills.mill_ui.v2.adapters.hints_to_removal import item_to_removal_intent
+from v2.adapters.hints_to_removal import item_to_removal_intent
 
 # Convert Item with edge treatment to RemovalIntent
 removal = item_to_removal_intent(profile_item)
@@ -122,7 +122,7 @@ finish_allowance = edge.finish_allowance_mm  # 0.1mm
 Edge treatment allowances are **per-edge intent**, distinct from **global kerf compensation**:
 
 ```python
-from skills.mill_ui.v2.ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
+from v2.ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
 
 # Edge treatment: Per-edge finish strategy (multi-pass intent)
 edge_treatment = EdgeTreatment(
@@ -194,7 +194,7 @@ See `v2/tests/test_edge_intent.py` for acceptance tests covering:
 Run tests:
 ```bash
 # Standalone runner (no pytest required)
-PYTHONPATH=/home/squinlan/cliff_ai python3 -m skills.mill_ui.v2.tests.run_edge_tests
+PYTHONPATH=/home/squinlan/cliff_ai PYTHONPATH=. python3 -m v2.tests.run_edge_tests
 
 # Pytest module (if pytest available)
 python3 -m pytest skills.mill_ui/v2/tests/test_edge_intent.py

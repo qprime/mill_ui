@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from skills.mill_ui.layout_ast.compositional import (
+from layout_ast.compositional import (
     Panel,
     Inset,
     Frame,
@@ -19,9 +19,9 @@ from skills.mill_ui.layout_ast.compositional import (
     Rect,
     CompositionalLayoutAST,
 )
-from skills.mill_ui.layout_ast.layout import Sheet, Feature
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.pml import format_pml
+from layout_ast.layout import Sheet, Feature
+from resolution.layout_resolver import resolve_layout
+from pml import format_pml
 
 
 def test_simple_panel_with_rect():

@@ -2,9 +2,9 @@
 from __future__ import annotations
 import math
 from typing import List, Tuple
-from skills.mill_ui.cam.model.setup import Setup
-from skills.mill_ui.cam.native import core as native_core
-from skills.mill_ui.cam.path.toolpath import (
+from cam.model.setup import Setup
+from cam.native import core as native_core
+from cam.path.toolpath import (
     move_comment,
     move_set_rpm,
     move_set_feed,
@@ -12,9 +12,9 @@ from skills.mill_ui.cam.path.toolpath import (
     move_cut,
     move_retract,
 )
-from skills.mill_ui.cam.primitives import circle as circle_shape
-from skills.mill_ui.cam.types import Vec2
-from skills.mill_ui.cam.ops.profile import profile_outline
+from cam.primitives import circle as circle_shape
+from cam.types import Vec2
+from cam.ops.profile import profile_outline
 
 def _circle_points(cx: float, cy: float, r: float, segments: int = 80) -> List[Tuple[float, float]]:
     pts: List[Tuple[float, float]] = []

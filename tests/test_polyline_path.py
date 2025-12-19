@@ -11,11 +11,11 @@ Acceptance tests:
 - Round-trip preserves point coordinates
 """
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.layout_ast.compositional import Polyline
-from skills.mill_ui.layout_ast.layout import Feature
+from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
+from layout_ast.compositional import Polyline
+from layout_ast.layout import Feature
 
 
 def test_polyline_inside_rect():

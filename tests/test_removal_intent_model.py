@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from skills.mill_ui.ir.removal_intent import (
+from ir.removal_intent import (
     RemovalIntent,
     Bounds2D,
     Allowance,

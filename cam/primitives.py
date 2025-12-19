@@ -1,7 +1,7 @@
 
 from typing import List
-from skills.mill_ui.cam.types import Vec2
-from skills.mill_ui.cam.shape import Shape2D
+from cam.types import Vec2
+from cam.shape import Shape2D
 def rectangle(w:float, h:float, origin:Vec2|None=None)->Shape2D:
     ox,oy=(origin.x,origin.y) if origin else (0.0,0.0)
     pts=[Vec2(ox,oy),Vec2(ox+w,oy),Vec2(ox+w,oy+h),Vec2(ox,oy+h),Vec2(ox,oy)]

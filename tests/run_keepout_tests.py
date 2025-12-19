@@ -8,8 +8,8 @@ def test_simple_pocket_with_island():
     """Test basic pocket with keepout island (faux raised panel)."""
     print("Running test_simple_pocket_with_island...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -52,8 +52,8 @@ def test_keepout_inside_grid():
     """Test keepout inside grid cell."""
     print("Running test_keepout_inside_grid...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 600.00mm 400.00mm 19.00mm
 
@@ -85,8 +85,8 @@ def test_multiple_keepouts():
     """Test multiple keepouts in single region."""
     print("Running test_multiple_keepouts...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 500.00mm 500.00mm 19.00mm
 
@@ -122,9 +122,9 @@ def test_keepout_roundtrip():
     """Test PML → AST → PML preserves keepout structure."""
     print("Running test_keepout_roundtrip...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from pml.compositional_formatter import format_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     original_pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -167,8 +167,8 @@ def test_keepout_with_circle():
     """Test keepout with circular island."""
     print("Running test_keepout_with_circle...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -204,7 +204,7 @@ def test_nested_keepout_error():
     """Test that nested keepouts are rejected with clear error."""
     print("Running test_nested_keepout_error...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
+    from pml.compositional_parser import parse_compositional_pml, ParseError
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
@@ -230,9 +230,9 @@ def test_removal_intent_includes_islands():
     """Test RemovalIntent includes island geometry from keepouts."""
     print("Running test_removal_intent_includes_islands...")
 
-    from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-    from skills.mill_ui.resolution.layout_resolver import resolve_layout
-    from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+    from pml.compositional_parser import parse_compositional_pml
+    from resolution.layout_resolver import resolve_layout
+    from adapters.hints_to_removal import item_to_removal_intent
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 

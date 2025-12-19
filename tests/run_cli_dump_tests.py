@@ -1,6 +1,6 @@
 """Standalone test runner for Stage 7 CLI dump tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_cli_dump_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_cli_dump_tests
 """
 
 import json
@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from skills.mill_ui.cli.introspect import dump_ast, dump_removal_intent
+from cli.introspect import dump_ast, dump_removal_intent
 
 
 def approx_equal(a: float, b: float, rel: float = 1e-9) -> bool:

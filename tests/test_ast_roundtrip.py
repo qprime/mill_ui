@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from skills.mill_ui.layout_ast.layout import LayoutAST
+from layout_ast.layout import LayoutAST
 
 
 def test_roundtrip_minimal_shape_layout():

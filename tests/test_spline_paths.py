@@ -14,10 +14,10 @@ Studio Mode Policy:
 - Designers iterate via test cuts
 """
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
+from pml.compositional_parser import parse_compositional_pml
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
+from adapters.hints_to_removal import item_to_removal_intent
 
 
 def test_spline_parsing_and_roundtrip():

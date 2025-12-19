@@ -1,11 +1,11 @@
 """Standalone test runner for Stage 5 hints adapter tests (without pytest).
 
-Run from repository root: python3 -m skills.mill_ui.tests.run_hints_adapter_tests
+Run from repository root: PYTHONPATH=. python3 -m tests.run_hints_adapter_tests
 """
 
 import sys
 
-from skills.mill_ui.adapters.hints_to_removal import (
+from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,

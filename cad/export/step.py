@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Tuple
 
 import copy
 
-from skills.mill_ui.cad.native import core as native_core
+from cad.native import core as native_core
 
 
 @dataclass(frozen=True)

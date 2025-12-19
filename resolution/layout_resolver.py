@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any
 
-from skills.mill_ui.layout_ast.compositional import (
+from layout_ast.compositional import (
     Panel,
     Inset,
     Frame,
@@ -41,7 +41,7 @@ from skills.mill_ui.layout_ast.compositional import (
     ResolvedRegion,
     CompositionalLayoutAST,
 )
-from skills.mill_ui.layout_ast.layout import (
+from layout_ast.layout import (
     LayoutAST,
     Sheet,
     Item,

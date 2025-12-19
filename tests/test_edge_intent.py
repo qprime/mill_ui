@@ -8,11 +8,11 @@ Acceptance tests:
 - Round-trip: edge intent preserved in PML
 """
 
-from skills.mill_ui.pml.compositional_parser import parse_compositional_pml, ParseError
-from skills.mill_ui.pml.compositional_formatter import format_compositional_pml
-from skills.mill_ui.resolution.layout_resolver import resolve_layout
-from skills.mill_ui.adapters.hints_to_removal import item_to_removal_intent
-from skills.mill_ui.layout_ast.compositional import Edge
+from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.compositional_formatter import format_compositional_pml
+from resolution.layout_resolver import resolve_layout
+from adapters.hints_to_removal import item_to_removal_intent
+from layout_ast.compositional import Edge
 
 
 def test_edge_allowance_influences_removal_intent():
@@ -189,7 +189,7 @@ rect panel profile through outside
 
 def test_kerf_compatibility():
     """Test allowance semantics compatible with kerf (per-edge, not global)."""
-    from skills.mill_ui.ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
+    from ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
 

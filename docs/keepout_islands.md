@@ -200,7 +200,7 @@ For circular islands, the bounding box encloses the circle.
 Island bounds from keepouts are automatically propagated to RemovalIntent when converting Items using the adapter layer. The `item_to_removal_intent()` function in `hints_to_removal.py` extracts island geometry and populates `RemovalIntent.constraints.islands`:
 
 ```python
-from skills.mill_ui.v2.adapters.hints_to_removal import item_to_removal_intent
+from v2.adapters.hints_to_removal import item_to_removal_intent
 
 # Convert Item with keepout islands to RemovalIntent
 removal = item_to_removal_intent(pocket_item, region_id_prefix="pocket")

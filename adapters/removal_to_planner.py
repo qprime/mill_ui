@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from skills.mill_ui.ir.removal_intent import RemovalIntent
+from ir.removal_intent import RemovalIntent
 
 
 def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:

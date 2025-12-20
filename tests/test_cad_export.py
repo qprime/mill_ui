@@ -144,12 +144,134 @@ def test_items_to_shape_dicts_polyline():
     assert shape["feature"]["type"] == "engrave"
 
 
-# End-to-end STL export tests will be added when trimesh implementation is complete
-# The tests below would test:
-# - test_stl_export_simple_profile(tmp_path)
-# - test_stl_export_with_pocket(tmp_path)
-# - test_stl_export_with_kerf(tmp_path)
-# - test_stl_export_polyline(tmp_path)
+def test_stl_export_simple_profile(tmp_path):
+    """Test STL export with simple profile."""
+    from cad.export.stl import export_stl
+
+    items = (
+        Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
+            placement=Placement(center_xy_mm=(225.0, 325.0)),
+            feature=Feature(type="profile", side="outside", depth="through"),
+            shape_id="door_outer",
+        ),
+    )
+
+    shapes = items_to_shape_dicts(items)
+    output_path = tmp_path / "simple_profile.stl"
+
+    export_stl(
+        shapes=shapes,
+        sheet_thickness_mm=19.0,
+        output_path=output_path,
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_stl_export_with_pocket(tmp_path):
+    """Test STL export with pocket feature."""
+    from cad.export.stl import export_stl
+
+    items = (
+        Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
+            placement=Placement(center_xy_mm=(225.0, 325.0)),
+            feature=Feature(type="profile", side="outside", depth="through"),
+            shape_id="door_outer",
+        ),
+        Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 300.0, "h_mm": 500.0}),
+            placement=Placement(center_xy_mm=(225.0, 325.0)),
+            feature=Feature(type="pocket", depth=6.0, depth_mm=6.0),
+            shape_id="panel_pocket",
+        ),
+    )
+
+    shapes = items_to_shape_dicts(items)
+    output_path = tmp_path / "with_pocket.stl"
+
+    export_stl(
+        shapes=shapes,
+        sheet_thickness_mm=19.0,
+        output_path=output_path,
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_stl_export_with_kerf(tmp_path):
+    """Test STL export with kerf compensation."""
+    from cad.export.stl import export_stl
+
+    items = (
+        Item(
+            kind="shape",
+            type="Circle",
+            geometry=Geometry(data={"diameter_mm": 50.0}),
+            placement=Placement(center_xy_mm=(100.0, 100.0)),
+            feature=Feature(type="hole", depth="through"),
+            shape_id="hole_1",
+        ),
+    )
+
+    shapes = items_to_shape_dicts(items)
+    output_path = tmp_path / "with_kerf.stl"
+
+    export_stl(
+        shapes=shapes,
+        sheet_thickness_mm=19.0,
+        output_path=output_path,
+        kerf_mm=1.5875,  # 1/16" tool radius
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_stl_export_polyline(tmp_path):
+    """Test STL export with polyline geometry."""
+    from cad.export.stl import export_stl
+
+    items = (
+        Item(
+            kind="shape",
+            type="Polyline",
+            geometry=Geometry(
+                data={
+                    "points": [
+                        (0.0, 0.0),
+                        (100.0, 0.0),
+                        (100.0, 100.0),
+                        (0.0, 100.0),
+                    ]
+                }
+            ),
+            placement=Placement(center_xy_mm=(50.0, 50.0)),
+            feature=Feature(type="engrave", depth=1.0, depth_mm=1.0),
+            shape_id="decorative_line",
+        ),
+    )
+
+    shapes = items_to_shape_dicts(items)
+    output_path = tmp_path / "polyline.stl"
+
+    export_stl(
+        shapes=shapes,
+        sheet_thickness_mm=19.0,
+        output_path=output_path,
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
 
 
 if __name__ == "__main__":
@@ -170,5 +292,21 @@ if __name__ == "__main__":
     test_items_to_shape_dicts_polyline()
     print("✓ Pass")
 
-    print("\n✓ All adapter tests passed!")
-    print("Note: STL export end-to-end tests pending (F003 - trimesh implementation)")
+    # Run STL export tests
+    print("\nTesting STL export (simple profile)...")
+    test_stl_export_simple_profile(Path(tempfile.mkdtemp()))
+    print("✓ Pass")
+
+    print("Testing STL export (with pocket)...")
+    test_stl_export_with_pocket(Path(tempfile.mkdtemp()))
+    print("✓ Pass")
+
+    print("Testing STL export (with kerf)...")
+    test_stl_export_with_kerf(Path(tempfile.mkdtemp()))
+    print("✓ Pass")
+
+    print("Testing STL export (polyline)...")
+    test_stl_export_polyline(Path(tempfile.mkdtemp()))
+    print("✓ Pass")
+
+    print("\n✓ All tests passed!")

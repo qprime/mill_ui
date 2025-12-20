@@ -16,6 +16,7 @@ from pml.compositional_parser import parse_compositional_pml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from adapters.ast_to_cad import items_to_shape_dicts
+from cad.export.stl import export_stl
 
 
 def main():
@@ -122,20 +123,23 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
         output_dir = Path(args.out)
         output_dir.mkdir(parents=True, exist_ok=True)
         basename = input_path.stem
+        output_stl = output_dir / f"{basename}.stl"
 
-        # NOTE: STL export implementation will be added here using trimesh
-        # For now, display what would be exported
-        print(f"✗ STL export not yet implemented", file=sys.stderr)
-        print(f"", file=sys.stderr)
-        print(f"Parsed layout:", file=sys.stderr)
+        # Export to STL
+        print(f"Exporting STL...", file=sys.stderr)
         print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
         print(f"  Shapes: {len(shapes)}", file=sys.stderr)
-        for i, shape in enumerate(shapes):
-            print(f"    [{i}] {shape['type']} - {shape['feature']['type']}", file=sys.stderr)
-        print(f"", file=sys.stderr)
-        print(f"Would export to: {output_dir / basename}.stl", file=sys.stderr)
-        print(f"Implementation pending: F003 (trimesh-based STL export)", file=sys.stderr)
-        sys.exit(1)
+
+        export_stl(
+            shapes=shapes,
+            sheet_thickness_mm=ast.sheet.thickness_mm,
+            output_path=output_stl,
+            kerf_mm=args.kerf or 0.0,
+            quality=args.quality,
+            include_floating_parts=not args.no_floating_parts,
+        )
+
+        print(f"✓ Export complete: {output_stl}", file=sys.stderr)
 
     except PMLParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)

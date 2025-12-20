@@ -216,7 +216,7 @@ The feature was implemented as a simpler full-perimeter cleanup pass instead of 
 
 ## F002: Blueprint Proof Drawing Export (SVG + PDF)
 
-**Status:** 🔵 Design
+**Status:** ✅ Complete (Parts A-E) - Awaiting codex review
 
 **Priority:** High
 
@@ -514,12 +514,12 @@ cairosvg>=2.7.0  # Optional: PDF export for blueprint drawings
 ### Acceptance Criteria
 
 - [x] **Part A**: SVG scaffolding renders semantic layers
-- [ ] **Part B**: Dimension engine places labels on rails without overlap
-- [ ] **Part C**: Title block, legend, notes render correctly
-- [ ] **Part D**: CLI produces SVG/PDF with theme support
-- [ ] **Part E**: Tests validate determinism and correctness
-- [ ] **Integration**: Can run `PYTHONPATH=. python3 -m cli.export_blueprint --input door.pml --theme dark --format both --out out/`
-- [ ] **Output Quality**: Drawing is readable, has key dims, requires no manual adjustment
+- [x] **Part B**: Dimension engine places labels on rails without overlap
+- [x] **Part C**: Title block, legend, notes render correctly
+- [x] **Part D**: CLI produces SVG/PDF with theme support
+- [x] **Part E**: Tests validate determinism and correctness
+- [x] **Integration**: Can run `PYTHONPATH=. python3 -m cli.export_blueprint --input door.pml --theme dark --format both --out out/`
+- [x] **Output Quality**: Drawing is readable, has key dims, requires no manual adjustment
 - [ ] **Codex Review**: Feature reviewed and approved (pending)
 
 ### Definition of Done

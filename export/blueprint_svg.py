@@ -14,6 +14,7 @@ from xml.etree import ElementTree as ET
 
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import RemovalIntent, Bounds2D
+from export.dimensions import place_dimensions_on_rails, render_dimension_line
 
 
 # Theme definitions
@@ -169,7 +170,10 @@ def render_blueprint_svg(
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj)
 
-    # Add minimal notes for now (Part A doesn't have full dimension engine yet)
+    # Render dimensions on rails (Part B)
+    _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj)
+
+    # Add minimal notes for now (Part C will expand this)
     _render_notes_placeholder(notes_group, viewbox_width, viewbox_height, theme_obj)
 
     # Convert to string
@@ -334,6 +338,74 @@ def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     _render_profile(group, item, offset_x, offset_y, theme)
 
 
+def _render_dimensions(
+    group: ET.Element,
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    margin: float,
+    theme: Theme,
+) -> None:
+    """Render dimension lines and labels on rails."""
+    sheet = ast.sheet
+
+    # Get dimensions from placement engine
+    labels = place_dimensions_on_rails(ast, offset_x, offset_y, margin)
+
+    # Render each dimension
+    for label in labels:
+        if label.orientation == "horizontal":
+            # Horizontal dimension line (top rail)
+            line_y = label.y
+            # Calculate line endpoints based on the dimension value
+            # For sheet width: full width
+            # For item width: centered on item
+            if label.value_mm == sheet.width_mm:
+                # Sheet width dimension
+                start_x = offset_x
+                end_x = offset_x + sheet.width_mm
+            else:
+                # Item width dimension - center it on the text position
+                half_width = label.value_mm / 2
+                start_x = label.x - half_width
+                end_x = label.x + half_width
+
+            render_dimension_line(
+                group,
+                start_x,
+                line_y,
+                end_x,
+                line_y,
+                label.text,
+                "horizontal",
+                theme.dimension_stroke,
+            )
+        else:  # vertical
+            # Vertical dimension line (right rail)
+            line_x = label.x
+            # Calculate line endpoints
+            if label.value_mm == sheet.height_mm:
+                # Sheet height dimension
+                start_y = offset_y
+                end_y = offset_y + sheet.height_mm
+            else:
+                # Item height dimension
+                half_height = label.value_mm / 2
+                start_y = label.y - half_height
+                end_y = label.y + half_height
+
+            render_dimension_line(
+                group,
+                line_x,
+                start_y,
+                line_x,
+                end_y,
+                label.text,
+                "vertical",
+                theme.dimension_stroke,
+            )
+
+
 def _render_notes_placeholder(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
     """Render placeholder notes area (full implementation in Part C)."""
     notes_x = 20
@@ -348,4 +420,4 @@ def _render_notes_placeholder(group: ET.Element, viewbox_width: float, viewbox_h
             "class": "notes",
         },
     )
-    text.text = "NOTES: (Dimensions and depth info to be added in Part B/C)"
+    text.text = "NOTES: (Depth info to be added in Part C)"

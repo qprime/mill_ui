@@ -280,6 +280,34 @@ Example: Edge allowance tests verify that `profile outside` produces correct off
 - **Validatable**: Check RemovalIntent for physical impossibilities
 - **Extensible**: Add shapes without understanding planner internals
 
+## Feature Placement Rules
+
+When adding new functionality, use this decision tree:
+
+**Does the feature change the PART DESIGN (what the final piece looks like)?**
+- YES → LayoutAST or RemovalIntent IR
+- NO → Planner/Strategy layer
+
+### LayoutAST: Structural Geometry
+- Shape dimensions, placement, features
+- No tool knowledge, no execution logic
+- Example: `rect 100mm×50mm pocket 6mm`
+
+### RemovalIntent IR: Machining Semantics
+- What volume to remove (bounds, depth, allowance)
+- Constraints affecting *design outcome* (tabs, keepouts, tolerances)
+- No toolpath sequencing or strategy
+- Example: `RemovalIntent(bounds=..., z_bottom=-6mm, allowance=inside)`
+
+### Planner/Strategy: Execution Details
+- *How* to cut (cleanup passes, raster vs contour, stepover)
+- Toolpath ordering, feed/speed strategy
+- Finish quality settings
+- No geometry mutation, no part design changes
+- Example: `pocket_finish_perimeter=True` (F001 cleanup pass)
+
+**Rule of thumb:** If a feature changes *how a part is cut* but not *what the part is*, it belongs in the planner.
+
 ## Directory Structure
 
 ```

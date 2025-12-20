@@ -1,8 +1,8 @@
 """CLI tool for converting between layout formats: PML ↔ JSON.
 
 Usage:
-    python -m skills.mill_ui.cli.convert_layout --from pml --to json input.pml output.json
-    python -m skills.mill_ui.cli.convert_layout --from json --to pml input.json output.pml
+    python -m cli.convert_layout --from pml --to json input.pml output.json
+    python -m cli.convert_layout --from json --to pml input.json output.pml
 """
 
 from __future__ import annotations
@@ -23,13 +23,13 @@ def main():
         epilog="""
 Examples:
   # Convert PML to JSON
-  python -m skills.mill_ui.cli.convert_layout --from pml --to json input.pml output.json
+  python -m cli.convert_layout --from pml --to json input.pml output.json
 
   # Convert JSON to PML
-  python -m skills.mill_ui.cli.convert_layout --from json --to pml input.json output.pml
+  python -m cli.convert_layout --from json --to pml input.json output.pml
 
   # Read from stdin, write to stdout
-  python -m skills.mill_ui.cli.convert_layout --from pml --to json < input.pml > output.json
+  python -m cli.convert_layout --from pml --to json < input.pml > output.json
         """,
     )
 

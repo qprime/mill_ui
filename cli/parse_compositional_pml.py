@@ -1,7 +1,7 @@
 """CLI tool for parsing and validating compositional PML files.
 
 Usage:
-    python -m skills.mill_ui.cli.parse_compositional_pml input.pml [--output output.pml] [--resolve] [--format {pml|json}]
+    python -m cli.parse_compositional_pml input.pml [--output output.pml] [--resolve] [--format {pml|json}]
 """
 
 from __future__ import annotations
@@ -23,19 +23,19 @@ def main():
         epilog="""
 Examples:
   # Validate and reformat a compositional PML file
-  python -m skills.mill_ui.cli.parse_compositional_pml input.pml
+  python -m cli.parse_compositional_pml input.pml
 
   # Parse and output canonical PML
-  python -m skills.mill_ui.cli.parse_compositional_pml input.pml --output output.pml
+  python -m cli.parse_compositional_pml input.pml --output output.pml
 
   # Parse, resolve layout, and output flat PML
-  python -m skills.mill_ui.cli.parse_compositional_pml input.pml --resolve --format pml
+  python -m cli.parse_compositional_pml input.pml --resolve --format pml
 
   # Parse, resolve layout, and output JSON
-  python -m skills.mill_ui.cli.parse_compositional_pml input.pml --resolve --format json
+  python -m cli.parse_compositional_pml input.pml --resolve --format json
 
   # Read from stdin, write to stdout
-  python -m skills.mill_ui.cli.parse_compositional_pml --format pml < input.pml > output.pml
+  python -m cli.parse_compositional_pml --format pml < input.pml > output.pml
         """,
     )
 

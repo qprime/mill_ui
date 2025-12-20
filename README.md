@@ -56,6 +56,10 @@ circle anchor:2 at 355mm,545mm diameter 10mm hole 8mm
 from pml import parse_pml
 ast = parse_pml(pml_text)
 ```
+If you want a CLI flow for flat PML, use the format converter:
+```bash
+PYTHONPATH=. python3 -m cli.convert_layout --from pml --to json input.pml output.json
+```
 
 ### Option 2: Compositional PML (Hierarchical Layout)
 
@@ -76,14 +80,9 @@ rect outer profile through outside
 
 Run the compositional PML parser:
 ```bash
-./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml
-./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format pml
-./venv/bin/PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format json
-```
-
-Or use the installed console script:
-```bash
-./venv/bin/mill_ui_parse_pml door.pml --resolve --format pml
+PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml
+PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format pml
+PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format json
 ```
 
 **Key Difference:** Flat PML requires explicit coordinates (`at X,Y`), compositional PML uses layout managers for relative positioning.
@@ -109,7 +108,7 @@ ast = Shaker.expand_to_ast(
 # Convert to RemovalIntent IR (canonical AST → IR adapter)
 intents = ast_to_removal_intents(ast)
 
-# Generate CAM plan (requires v1 planner backend)
+# Generate planner hints (consumed by CAM planner backend)
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 hints = removal_intents_to_v1_hints(
     intents,
@@ -238,18 +237,18 @@ All three compile to the same LayoutAST, ensuring semantic equivalence.
 
 ### 4. CAM Backend Integration
 
-mill_ui retains the v1 CAM planner (proven, stable) as the backend:
+mill_ui uses the existing CAM planner backend (in `cam/`), which consumes a hint-structured input:
 
 ```
 Current Implementation:
 1. LayoutAST.Item → intermediate hint dict (manual conversion)
 2. hint dict → RemovalIntent (via profile_hint_to_removal_intent/pocket_hint_to_removal_intent)
-3. RemovalIntent → v1 planner hints (via removal_intent_to_v1_hint)
-4. v1 hints → CAM planner → G-code
+3. RemovalIntent → planner hints (via removal_intent_to_v1_hint)
+4. planner hints → CAM planner → G-code
 ```
 
 The `adapters/` module bridges RemovalIntent to the planner's hint format. This allows:
-- Incremental migration (v1 planner works, no need to replace it)
+- Incremental migration (planner backend works, no need to replace it)
 - IR validation before planner execution
 - Future: Multiple planner backends targeting the same IR
 
@@ -289,12 +288,12 @@ mill_ui/
 │   ├── ast_to_removal.py       # LayoutAST → RemovalIntent (canonical)
 │   │   └── ast_to_removal_intents()    # Main entry point
 │   │   └── item_to_removal_intent()    # Per-item conversion
-│   ├── hints_to_removal.py     # Item/v1 hints → RemovalIntent
+│   ├── hints_to_removal.py     # Item/legacy hint dicts → RemovalIntent
 │   │   └── profile_hint_to_removal_intent()
 │   │   └── pocket_hint_to_removal_intent()
 │   │   └── hole_hint_to_removal_intent()
 │   │   └── engrave_hint_to_removal_intent()
-│   └── removal_to_planner.py   # RemovalIntent → v1 planner hints
+│   └── removal_to_planner.py   # RemovalIntent → planner hint dicts
 ├── layout_ast/         # LayoutAST dataclasses and parsers
 │   ├── layout.py               # Core AST types (Sheet, Item, Feature)
 │   ├── compositional.py        # Compositional layout extensions
@@ -326,7 +325,7 @@ mill_ui/
 ├── export/             # Debugging visualizations
 │   └── svg_removal.py          # Render LayoutAST + RemovalIntent as SVG overlay
 ├── tests/              # Comprehensive test suite
-├── cam/                # CAM planner backend (retained v1)
+├── cam/                # CAM planner backend
 │   ├── planner/                # Pass planning, toolpath generation
 │   ├── ops/                    # Operations (profile, pocket, drill)
 │   ├── path/                   # Path strategies
@@ -341,8 +340,8 @@ mill_ui/
 │   └── transforms.py           # Geometric transformations
 └── cad/
     └── export/         # CAD export formats (mixed status)
-        ├── step.py     # STEP export (imports missing skills.mill_ui.cad.native - broken)
-        ├── svg.py      # SVG export (imports missing skills.mill_ui.cad.layout.* - broken)
+        ├── step.py     # STEP export (imports missing cad.native - broken)
+        ├── svg.py      # SVG export (imports missing cad.layout.* - broken)
         ├── stl.py      # STL stub (1 line, non-functional)
         ├── svg_dims.py # SVG dimensioned drawings (496 lines, may be functional)
         └── panel_stl.py # Panel STL export (251 lines, may be functional)
@@ -444,6 +443,41 @@ pip install -r requirements-dev.txt
 
 **Note:** This project uses a flat package layout with `PYTHONPATH=.` for running tests and scripts. Currently no external dependencies are required, but using a venv is recommended for future-proofing.
 
+### Building the Native CAM Backend
+
+The CAM planner includes a native C++ backend for performance-critical operations (pocket raster, profile outline). To build it:
+
+**Prerequisites:**
+- CMake 3.10+
+- C++17 compiler
+- pybind11 (installed via pip)
+
+**Build steps:**
+
+```bash
+# 1. Create and activate virtual environment (if not already done)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 2. Install pybind11
+pip install pybind11
+
+# 3. Configure and build the native extension
+cmake -S cam/native/cpp -B build/native_cam \
+  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+cmake --build build/native_cam
+
+# 4. Copy the compiled extension to cam/native/
+cp build/native_cam/python/_native.*.so cam/native/
+```
+
+**Verify the build:**
+```bash
+PYTHONPATH=. python3 -c "from cam.native import core; print('Native backend available')"
+```
+
+**Note:** The native backend is **optional** for development. IR-level tests work without it, but end-to-end G-code generation requires the compiled extension.
+
 ### Running Tests
 
 **Quick start** - Run all core tests:
@@ -477,24 +511,7 @@ PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
 
 ### Project Structure
 
-After migration to standalone repository, the structure is:
-```
-mill_ui/
-├── mill_ui/              # Main package
-│   ├── adapters/         # AST ↔ IR ↔ Planner adapters
-│   ├── cam/              # CAM planner backend
-│   ├── cli/              # Command-line tools
-│   ├── ir/               # RemovalIntent IR
-│   ├── layout_ast/       # LayoutAST dataclasses
-│   ├── pml/              # PML parser/formatter
-│   ├── resolution/       # Compositional layout resolver
-│   ├── templates/        # Parametric templates
-│   ├── tests/            # Test suite
-│   └── validation/       # IR validation
-├── setup.py              # Package configuration
-├── run_tests.sh          # Test runner script
-└── README.md             # This file
-```
+This repository currently uses a flat package layout (top-level `adapters/`, `pml/`, `cam/`, etc.) and is typically run with `PYTHONPATH=.`.
 
 ### Validation Strategy
 
@@ -507,7 +524,7 @@ Most development happens at **IR level** - fast, no native dependencies, high si
 
 ## Design Tradeoffs
 
-### Why Keep v1 CAM Planner?
+### Why Keep the Existing CAM Planner?
 The planner works correctly and handles complex cases (tab insertion, seam merging, multi-depth passes). Replacing it would be:
 - High risk (G-code generation is safety-critical)
 - Low value (planner quality is good)
@@ -560,7 +577,7 @@ The IR foundation supports all of these without architectural changes.
 
 ## Known Issues
 
-1. **cad/export/step.py, svg.py**: Import paths reference non-existent modules (`skills.mill_ui.cad.native`, `skills.mill_ui.cad.layout.*`). Needs refactoring before use. `stl.py` is a 1-line stub. `svg_dims.py` and `panel_stl.py` may be functional but undocumented.
+1. **cad/export/step.py, svg.py**: Import paths reference non-existent modules (`cad.native`, `cad.layout.*`). Needs refactoring before use. `stl.py` is a 1-line stub. `svg_dims.py` and `panel_stl.py` may be functional but undocumented.
 2. **cli/introspect.py**: Referenced in `test_cli_dump.py` (line 14) but not implemented. Tests will fail on import.
 3. **Limited validation**: IR-level validation covers overlap/depth/toolability but not full geometry-level collision detection.
 4. **frame behavior**: `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles. Use `inset` if you want manual profile control.

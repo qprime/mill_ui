@@ -356,8 +356,6 @@ def _render_dimensions(
 
 def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
     """Render title block with metadata."""
-    from datetime import datetime
-
     x = 20
     y = 20
     line_height = 14
@@ -376,26 +374,13 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
     )
     title.text = "BLUEPRINT PROOF DRAWING"
 
-    # Timestamp
-    timestamp = ET.SubElement(
-        group,
-        "text",
-        {
-            "x": str(x),
-            "y": str(y + line_height),
-            "class": "notes",
-            "font-size": "9px",
-        },
-    )
-    timestamp.text = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-
-    # Units
+    # Units (no timestamp for determinism)
     units = ET.SubElement(
         group,
         "text",
         {
             "x": str(x),
-            "y": str(y + line_height * 2),
+            "y": str(y + line_height),
             "class": "notes",
             "font-size": "9px",
         },
@@ -422,29 +407,46 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
     )
     legend_title.text = "LEGEND"
 
+    # Layer specifications: (label, stroke_color, stroke_width, dash_pattern, fill_color)
+    # Note: dash_pattern=None means no dashing, fill_color=None means no fill
     layers = [
-        ("Profile Cuts", theme.profile_stroke, "2", "none"),
-        ("Pocket Regions", theme.pocket_stroke, "1.5", None),
-        ("Holes", theme.hole_stroke, "1.5", "none"),
-        ("Engraves", theme.engrave_stroke, "1", theme.engrave_dash),
-        ("Dimensions", theme.dimension_stroke, "1", "none"),
+        ("Profile Cuts", theme.profile_stroke, "2", None, None),
+        ("Pocket Regions", theme.pocket_stroke, "1.5", None, theme.pocket_fill),
+        ("Holes", theme.hole_stroke, "1.5", None, None),
+        ("Engraves", theme.engrave_stroke, "1", theme.engrave_dash, None),
+        ("Dimensions", theme.dimension_stroke, "1", None, None),
     ]
 
-    for i, (label, stroke, width, dash) in enumerate(layers):
+    for i, (label, stroke, width, dash, fill) in enumerate(layers):
         y_pos = y + (i + 1) * line_height + 5
 
-        # Color swatch (line sample)
-        swatch_attrs = {
-            "x1": str(x),
-            "y1": str(y_pos - 3),
-            "x2": str(x + swatch_size * 1.5),
-            "y2": str(y_pos - 3),
-            "stroke": stroke,
-            "stroke-width": width,
-        }
-        if dash:
-            swatch_attrs["stroke-dasharray"] = dash
-        ET.SubElement(group, "line", swatch_attrs)
+        # Color swatch (line or rect depending on fill)
+        if fill:
+            # Pocket regions: show filled rectangle with opacity
+            rect_attrs = {
+                "x": str(x),
+                "y": str(y_pos - 6),
+                "width": str(swatch_size * 1.5),
+                "height": "8",
+                "stroke": stroke,
+                "stroke-width": width,
+                "fill": fill,
+                "fill-opacity": "0.2",
+            }
+            ET.SubElement(group, "rect", rect_attrs)
+        else:
+            # Other layers: line sample
+            swatch_attrs = {
+                "x1": str(x),
+                "y1": str(y_pos - 3),
+                "x2": str(x + swatch_size * 1.5),
+                "y2": str(y_pos - 3),
+                "stroke": stroke,
+                "stroke-width": width,
+            }
+            if dash is not None:
+                swatch_attrs["stroke-dasharray"] = dash
+            ET.SubElement(group, "line", swatch_attrs)
 
         # Label
         label_elem = ET.SubElement(
@@ -468,7 +470,7 @@ def _render_notes(
 ) -> None:
     """Render notes block with depth info and feature counts."""
     x = 20
-    y = viewbox_height - 100
+    y = viewbox_height - 120  # Add padding to avoid collision with sheet edge
     line_height = 12
 
     # Title
@@ -549,10 +551,10 @@ def _render_notes(
 
 
 def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent] | None) -> list[str]:
-    """Collect depth information from features."""
+    """Collect depth information from features (non-through depths only)."""
     depth_lines = []
 
-    # Collect from AST items
+    # Collect from AST items (exclude "through" profiles, include non-through pockets/holes/engraves)
     depths_by_type: dict[str, set[str]] = {}
     for item in ast.items:
         if item.feature is None:
@@ -560,6 +562,10 @@ def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent]
 
         ftype = item.feature.type
         depth = item.feature.depth
+
+        # Skip "through" profiles (they're obvious from the drawing)
+        if depth == "through" and ftype == "profile":
+            continue
 
         if depth == "through":
             depth_str = "through"

@@ -1,295 +1,487 @@
 """Dimension placement engine for blueprint SVG drawings.
 
-Implements deterministic rail-based dimension placement with collision avoidance.
+Implements deterministic rail-based dimension placement with simple collision avoidance.
+
+Part B scope:
+- Top + right rails (in the reserved margin area)
+- Arrowheads + extension lines
+- Stacking to avoid overlapping dimensions on the same rail
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Literal
 from xml.etree import ElementTree as ET
 
-from layout_ast.layout import LayoutAST, Item
-from ir.removal_intent import RemovalIntent, Bounds2D
+from layout_ast.layout import Item, LayoutAST
+from ir.removal_intent import Bounds2D
+
+Orientation = Literal["horizontal", "vertical"]
 
 
 @dataclass(frozen=True)
-class DimensionLabel:
-    """A dimension label with position and text."""
-    value_mm: float
+class DimensionRequest:
+    """A requested dimension in absolute SVG coordinates (mm)."""
+
+    orientation: Orientation
+    a: float  # x for horizontal, y for vertical
+    b: float  # x for horizontal, y for vertical
+    anchor: float  # y for horizontal, x for vertical (where extension lines originate)
     text: str
-    x: float
-    y: float
-    orientation: str  # "horizontal" or "vertical"
 
 
 @dataclass(frozen=True)
-class BBox:
-    """Bounding box for collision detection."""
-    x_min: float
-    x_max: float
-    y_min: float
-    y_max: float
+class PlacedDimension:
+    """A dimension request placed on a rail with an assigned stacking level."""
 
-    def overlaps(self, other: BBox) -> bool:
-        """Check if this bbox overlaps with another."""
-        return not (
-            self.x_max < other.x_min
-            or self.x_min > other.x_max
-            or self.y_max < other.y_min
-            or self.y_min > other.y_max
-        )
+    orientation: Orientation
+    a: float
+    b: float
+    anchor: float
+    rail: float  # y for horizontal (top rail), x for vertical (right rail)
+    text: str
 
 
-def compute_bounding_boxes(ast: LayoutAST, intents: Sequence[RemovalIntent] | None = None) -> dict[str, Bounds2D]:
-    """Compute bounding boxes for all items in layout.
+class _IntervalAllocator:
+    """Allocates non-overlapping intervals across stacked levels."""
+
+    def __init__(self) -> None:
+        self._levels: list[list[tuple[float, float]]] = []
+
+    def allocate(self, start: float, end: float, padding: float) -> int:
+        start, end = (start, end) if start <= end else (end, start)
+        for level_index, intervals in enumerate(self._levels):
+            if not any(_overlaps(start, end, other_start, other_end, padding) for other_start, other_end in intervals):
+                intervals.append((start, end))
+                return level_index
+
+        self._levels.append([(start, end)])
+        return len(self._levels) - 1
+
+
+def collect_dimension_requests(
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    *,
+    include_features: set[str] | None = None,
+) -> list[DimensionRequest]:
+    """Collect dimension requests from layout (stage 1: what to dimension).
+
+    Returns deterministically ordered list of dimension requests.
+    """
+    include_features = include_features or {"profile"}
+    return _collect_dimension_requests(ast, offset_x, offset_y, include_features=include_features)
+
+
+def place_on_rails(
+    requests: list[DimensionRequest],
+    sheet_width_mm: float,
+    offset_x: float,
+    offset_y: float,
+    *,
+    margin: float = 100.0,
+) -> list[PlacedDimension]:
+    """Place dimension requests on rails with collision avoidance (stage 2: where to place).
 
     Args:
-        ast: LayoutAST containing shapes
-        intents: Optional RemovalIntent list (for validation)
+        requests: Dimension requests to place
+        sheet_width_mm: Sheet width for right rail calculation
+        offset_x: SVG X offset for sheet origin
+        offset_y: SVG Y offset for sheet origin
+        margin: Reserved margin for dimensions (rails must stay within this)
 
     Returns:
-        Dictionary mapping shape_id to Bounds2D
+        List of placed dimensions with assigned rail positions and stack levels.
     """
-    boxes = {}
+    top_allocator = _IntervalAllocator()
+    right_allocator = _IntervalAllocator()
 
-    for item in ast.items:
-        if item.kind != "shape" or item.geometry is None or item.placement is None:
-            continue
+    base_offset = min(20.0, margin * 0.4)
+    stack_gap = 14.0
 
-        shape_id = item.shape_id or f"item_{id(item)}"
-        bounds = _compute_item_bounds(item)
-        if bounds:
-            boxes[shape_id] = bounds
+    placed: list[PlacedDimension] = []
 
-    return boxes
+    for request in requests:
+        a, b = (request.a, request.b) if request.a <= request.b else (request.b, request.a)
 
+        if request.orientation == "horizontal":
+            level = top_allocator.allocate(a, b, padding=8.0)
+            rail_y = offset_y - base_offset - (level * stack_gap)
 
-def _compute_item_bounds(item: Item) -> Bounds2D | None:
-    """Compute bounds for a single item."""
-    if item.geometry is None or item.placement is None:
-        return None
+            # Guard: clamp to margin boundary
+            min_rail_y = offset_y - margin
+            if rail_y < min_rail_y:
+                rail_y = min_rail_y  # Clamp to margin edge
 
-    cx, cy = item.placement.center_xy_mm
-    shape_type = item.type
+            placed.append(
+                PlacedDimension(
+                    orientation="horizontal",
+                    a=a,
+                    b=b,
+                    anchor=request.anchor,
+                    rail=rail_y,
+                    text=request.text,
+                )
+            )
+        else:
+            level = right_allocator.allocate(a, b, padding=8.0)
+            rail_x = (offset_x + sheet_width_mm) + base_offset + (level * stack_gap)
 
-    if shape_type == "Rect":
-        w = item.geometry.data.get("w_mm", 0)
-        h = item.geometry.data.get("h_mm", 0)
-        return Bounds2D(
-            x_min=cx - w / 2,
-            x_max=cx + w / 2,
-            y_min=cy - h / 2,
-            y_max=cy + h / 2,
-        )
-    elif shape_type == "Circle":
-        r = item.geometry.data.get("radius_mm") or item.geometry.data.get("diameter_mm", 0) / 2
-        return Bounds2D(
-            x_min=cx - r,
-            x_max=cx + r,
-            y_min=cy - r,
-            y_max=cy + r,
-        )
-    elif shape_type == "RoundedRect":
-        w = item.geometry.data.get("w_mm", 0)
-        h = item.geometry.data.get("h_mm", 0)
-        return Bounds2D(
-            x_min=cx - w / 2,
-            x_max=cx + w / 2,
-            y_min=cy - h / 2,
-            y_max=cy + h / 2,
-        )
+            # Guard: clamp to margin boundary
+            max_rail_x = offset_x + sheet_width_mm + margin
+            if rail_x > max_rail_x:
+                rail_x = max_rail_x  # Clamp to margin edge
 
-    return None
+            placed.append(
+                PlacedDimension(
+                    orientation="vertical",
+                    a=a,
+                    b=b,
+                    anchor=request.anchor,
+                    rail=rail_x,
+                    text=request.text,
+                )
+            )
+
+    return placed
 
 
 def place_dimensions_on_rails(
     ast: LayoutAST,
     offset_x: float,
     offset_y: float,
+    *,
     margin: float = 100.0,
-) -> list[DimensionLabel]:
-    """Place dimensions on outer rails (top and right).
+    include_features: set[str] | None = None,
+) -> list[PlacedDimension]:
+    """Convenience function: collect + place dimensions in one call.
 
-    Args:
-        ast: LayoutAST with sheet and items
-        offset_x: X offset for sheet position
-        offset_y: Y offset for sheet position
-        margin: Margin size for rail placement
-
-    Returns:
-        List of DimensionLabel objects with deterministic placement
+    For most use cases, prefer this over calling collect_dimension_requests()
+    and place_on_rails() separately.
     """
-    dimensions = []
-    sheet = ast.sheet
-
-    # Top rail: Sheet width
-    dimensions.append(
-        DimensionLabel(
-            value_mm=sheet.width_mm,
-            text=f"{sheet.width_mm:.1f}mm",
-            x=offset_x + sheet.width_mm / 2,
-            y=offset_y - 40,  # Above sheet
-            orientation="horizontal",
-        )
-    )
-
-    # Right rail: Sheet height
-    dimensions.append(
-        DimensionLabel(
-            value_mm=sheet.height_mm,
-            text=f"{sheet.height_mm:.1f}mm",
-            x=offset_x + sheet.width_mm + 40,  # Right of sheet
-            y=offset_y + sheet.height_mm / 2,
-            orientation="vertical",
-        )
-    )
-
-    # Add dimensions for each profile/pocket item
-    item_bounds = compute_bounding_boxes(ast)
-    for shape_id, bounds in item_bounds.items():
-        w = bounds.x_max - bounds.x_min
-        h = bounds.y_max - bounds.y_min
-
-        # Item width on top rail (stacked if needed)
-        dimensions.append(
-            DimensionLabel(
-                value_mm=w,
-                text=f"{w:.1f}mm",
-                x=offset_x + (bounds.x_min + bounds.x_max) / 2,
-                y=offset_y - 20,  # Below sheet dimension
-                orientation="horizontal",
-            )
-        )
-
-        # Item height on right rail (stacked if needed)
-        dimensions.append(
-            DimensionLabel(
-                value_mm=h,
-                text=f"{h:.1f}mm",
-                x=offset_x + sheet.width_mm + 20,  # Left of sheet dimension
-                y=offset_y + (bounds.y_min + bounds.y_max) / 2,
-                orientation="vertical",
-            )
-        )
-
-    return dimensions
+    requests = collect_dimension_requests(ast, offset_x, offset_y, include_features=include_features)
+    return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin)
 
 
-def render_dimension_line(
-    parent: ET.Element,
-    start_x: float,
-    start_y: float,
-    end_x: float,
-    end_y: float,
-    text: str,
-    orientation: str,
-    theme_color: str,
-) -> None:
-    """Render a dimension line with arrowheads and text.
-
-    Args:
-        parent: Parent SVG element
-        start_x, start_y: Start point
-        end_x, end_y: End point
-        text: Dimension text
-        orientation: "horizontal" or "vertical"
-        theme_color: Color for dimension lines and text
-    """
-    # Dimension line
-    ET.SubElement(
-        parent,
-        "line",
-        {
-            "x1": str(start_x),
-            "y1": str(start_y),
-            "x2": str(end_x),
-            "y2": str(end_y),
-            "stroke": theme_color,
-            "stroke-width": "1",
-        },
-    )
-
-    # Arrowheads (simple triangles)
-    arrow_size = 3
-
-    if orientation == "horizontal":
-        # Left arrow
-        _add_arrow(parent, start_x, start_y, "left", arrow_size, theme_color)
-        # Right arrow
-        _add_arrow(parent, end_x, end_y, "right", arrow_size, theme_color)
-    else:  # vertical
-        # Top arrow
-        _add_arrow(parent, start_x, start_y, "up", arrow_size, theme_color)
-        # Bottom arrow
-        _add_arrow(parent, end_x, end_y, "down", arrow_size, theme_color)
-
-    # Text label
-    text_x = (start_x + end_x) / 2
-    text_y = (start_y + end_y) / 2
-
-    if orientation == "horizontal":
-        text_y -= 5  # Above the line
+def render_placed_dimension(parent: ET.Element, dim: PlacedDimension, stroke_color: str) -> None:
+    """Render a placed dimension (extension lines + arrows + label)."""
+    if dim.orientation == "horizontal":
+        _render_horizontal(parent, dim, stroke_color)
     else:
-        text_x += 10  # Right of the line
+        _render_vertical(parent, dim, stroke_color)
 
+
+def _render_horizontal(parent: ET.Element, dim: PlacedDimension, stroke_color: str) -> None:
+    x1, x2 = dim.a, dim.b
+    y_anchor = dim.anchor
+    y_dim = dim.rail
+
+    # Extension lines
+    _line(parent, x1, y_anchor, x1, y_dim, stroke_color)
+    _line(parent, x2, y_anchor, x2, y_dim, stroke_color)
+
+    # Dimension line
+    _line(parent, x1, y_dim, x2, y_dim, stroke_color)
+    _arrow(parent, x1, y_dim, "left", stroke_color)
+    _arrow(parent, x2, y_dim, "right", stroke_color)
+
+    # Label
     ET.SubElement(
         parent,
         "text",
         {
-            "x": str(text_x),
-            "y": str(text_y),
+            "x": str((x1 + x2) / 2.0),
+            "y": str(y_dim - 5.0),
             "class": "dimension-text",
             "text-anchor": "middle",
             "dominant-baseline": "middle",
         },
-    ).text = text
+    ).text = dim.text
 
 
-def _add_arrow(parent: ET.Element, x: float, y: float, direction: str, size: float, color: str) -> None:
-    """Add an arrowhead triangle."""
+def _render_vertical(parent: ET.Element, dim: PlacedDimension, stroke_color: str) -> None:
+    y1, y2 = dim.a, dim.b
+    x_anchor = dim.anchor
+    x_dim = dim.rail
+
+    # Extension lines
+    _line(parent, x_anchor, y1, x_dim, y1, stroke_color)
+    _line(parent, x_anchor, y2, x_dim, y2, stroke_color)
+
+    # Dimension line
+    _line(parent, x_dim, y1, x_dim, y2, stroke_color)
+    _arrow(parent, x_dim, y1, "up", stroke_color)
+    _arrow(parent, x_dim, y2, "down", stroke_color)
+
+    # Label
+    ET.SubElement(
+        parent,
+        "text",
+        {
+            "x": str(x_dim + 10.0),
+            "y": str((y1 + y2) / 2.0),
+            "class": "dimension-text",
+            "text-anchor": "middle",
+            "dominant-baseline": "middle",
+        },
+    ).text = dim.text
+
+
+def _collect_dimension_requests(
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    *,
+    include_features: set[str],
+) -> list[DimensionRequest]:
+    """Internal: Collect dimension requests in deterministic order.
+
+    Ordering guarantee:
+    1. Sheet dimensions (width, then height) always first
+    2. Shape items sorted by (feature.type, shape_id, type) for stability
+    3. Hole spacing requests sorted by coordinate groups
+    """
+    sheet = ast.sheet
+
+    requests: list[DimensionRequest] = []
+
+    # Sheet overall width/height (deterministic: always first).
+    requests.append(
+        DimensionRequest(
+            orientation="horizontal",
+            a=offset_x,
+            b=offset_x + sheet.width_mm,
+            anchor=offset_y,
+            text=_fmt_mm(sheet.width_mm),
+        )
+    )
+    requests.append(
+        DimensionRequest(
+            orientation="vertical",
+            a=offset_y,
+            b=offset_y + sheet.height_mm,
+            anchor=offset_x + sheet.width_mm,
+            text=_fmt_mm(sheet.height_mm),
+        )
+    )
+
+    # Item outline dims (profiles by default; pockets optional).
+    shape_items: list[Item] = [
+        item
+        for item in ast.items
+        if item.kind == "shape"
+        and item.feature is not None
+        and item.feature.type in include_features
+        and item.geometry is not None
+        and item.placement is not None
+        and item.shape_id is not None
+    ]
+
+    # Deterministic sort: (feature.type, shape_id, type)
+    shape_items.sort(key=lambda i: (i.feature.type, i.shape_id or "", i.type))
+
+    for item in shape_items:
+        bounds = _item_bounds_in_svg(item, offset_x, offset_y)
+        if bounds is None:
+            continue
+
+        w = bounds.x_max - bounds.x_min
+        h = bounds.y_max - bounds.y_min
+
+        if item.type in ("Rect", "RoundedRect"):
+            requests.append(
+                DimensionRequest(
+                    orientation="horizontal",
+                    a=bounds.x_min,
+                    b=bounds.x_max,
+                    anchor=bounds.y_min,
+                    text=_fmt_mm(w),
+                )
+            )
+            requests.append(
+                DimensionRequest(
+                    orientation="vertical",
+                    a=bounds.y_min,
+                    b=bounds.y_max,
+                    anchor=bounds.x_max,
+                    text=_fmt_mm(h),
+                )
+            )
+        elif item.type == "Circle":
+            diameter = w
+            requests.append(
+                DimensionRequest(
+                    orientation="horizontal",
+                    a=bounds.x_min,
+                    b=bounds.x_max,
+                    anchor=bounds.y_min,
+                    text=f"⌀{_fmt_mm_value(diameter)}mm",
+                )
+            )
+
+    # Hole center spacing (simple patterns: group by approx y/x, dimension adjacent spacing).
+    hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y)
+    requests.extend(_hole_spacing_requests(hole_centers))
+
+    return requests
+
+
+def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float) -> list[tuple[float, float]]:
+    holes: list[tuple[float, float]] = []
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None or item.feature.type != "hole":
+            continue
+        if item.placement is None:
+            continue
+        cx, cy = item.placement.center_xy_mm
+        holes.append((offset_x + float(cx), offset_y + float(cy)))
+    return holes
+
+
+def _hole_spacing_requests(centers: list[tuple[float, float]]) -> list[DimensionRequest]:
+    if len(centers) < 2:
+        return []
+
+    requests: list[DimensionRequest] = []
+
+    # Group by approximate y for horizontal spacing.
+    by_y: dict[float, list[tuple[float, float]]] = {}
+    for x, y in centers:
+        key = round(y, 1)
+        by_y.setdefault(key, []).append((x, y))
+
+    for _, pts in sorted(by_y.items(), key=lambda kv: kv[0]):
+        if len(pts) < 2:
+            continue
+        pts_sorted = sorted(pts, key=lambda p: p[0])
+        y_anchor = sum(p[1] for p in pts_sorted) / len(pts_sorted)
+        for (x1, _), (x2, _) in zip(pts_sorted, pts_sorted[1:]):
+            dx = abs(x2 - x1)
+            if dx < 1e-6:
+                continue
+            requests.append(
+                DimensionRequest(
+                    orientation="horizontal",
+                    a=x1,
+                    b=x2,
+                    anchor=y_anchor,
+                    text=_fmt_mm(dx),
+                )
+            )
+
+    # Group by approximate x for vertical spacing.
+    by_x: dict[float, list[tuple[float, float]]] = {}
+    for x, y in centers:
+        key = round(x, 1)
+        by_x.setdefault(key, []).append((x, y))
+
+    for _, pts in sorted(by_x.items(), key=lambda kv: kv[0]):
+        if len(pts) < 2:
+            continue
+        pts_sorted = sorted(pts, key=lambda p: p[1])
+        x_anchor = sum(p[0] for p in pts_sorted) / len(pts_sorted)
+        for (_, y1), (_, y2) in zip(pts_sorted, pts_sorted[1:]):
+            dy = abs(y2 - y1)
+            if dy < 1e-6:
+                continue
+            requests.append(
+                DimensionRequest(
+                    orientation="vertical",
+                    a=y1,
+                    b=y2,
+                    anchor=x_anchor,
+                    text=_fmt_mm(dy),
+                )
+            )
+
+    return requests
+
+
+def _item_bounds_in_svg(item: Item, offset_x: float, offset_y: float) -> Bounds2D | None:
+    bounds = _item_bounds(item)
+    if bounds is None:
+        return None
+    return Bounds2D(
+        x_min=bounds.x_min + offset_x,
+        x_max=bounds.x_max + offset_x,
+        y_min=bounds.y_min + offset_y,
+        y_max=bounds.y_max + offset_y,
+    )
+
+
+def _item_bounds(item: Item) -> Bounds2D | None:
+    if item.geometry is None or item.placement is None:
+        return None
+
+    cx, cy = item.placement.center_xy_mm
+    shape_type = item.type
+
+    if shape_type in ("Rect", "RoundedRect"):
+        w = float(item.geometry.data.get("w_mm", 0.0))
+        h = float(item.geometry.data.get("h_mm", 0.0))
+        return Bounds2D(x_min=cx - w / 2.0, x_max=cx + w / 2.0, y_min=cy - h / 2.0, y_max=cy + h / 2.0)
+
+    if shape_type == "Circle":
+        diameter = item.geometry.data.get("diameter_mm")
+        radius = item.geometry.data.get("radius_mm")
+        r = float(radius) if radius is not None else float(diameter or 0.0) / 2.0
+        return Bounds2D(x_min=cx - r, x_max=cx + r, y_min=cy - r, y_max=cy + r)
+
+    return None
+
+
+def _line(parent: ET.Element, x1: float, y1: float, x2: float, y2: float, stroke_color: str) -> None:
+    ET.SubElement(
+        parent,
+        "line",
+        {
+            "x1": str(x1),
+            "y1": str(y1),
+            "x2": str(x2),
+            "y2": str(y2),
+            "stroke": stroke_color,
+            "stroke-width": "1",
+        },
+    )
+
+
+def _arrow(parent: ET.Element, x: float, y: float, direction: str, color: str) -> None:
+    size = 3.0
     if direction == "left":
         points = f"{x},{y} {x+size},{y-size} {x+size},{y+size}"
     elif direction == "right":
         points = f"{x},{y} {x-size},{y-size} {x-size},{y+size}"
     elif direction == "up":
         points = f"{x},{y} {x-size},{y+size} {x+size},{y+size}"
-    else:  # down
+    elif direction == "down":
         points = f"{x},{y} {x-size},{y-size} {x+size},{y-size}"
+    else:
+        return
 
-    ET.SubElement(
-        parent,
-        "polygon",
-        {
-            "points": points,
-            "fill": color,
-        },
-    )
+    ET.SubElement(parent, "polygon", {"points": points, "fill": color})
 
 
-def avoid_label_collisions(labels: list[DimensionLabel], text_height: float = 12, padding: float = 4) -> list[DimensionLabel]:
-    """Adjust label positions to avoid overlaps (simple stacking).
+def _fmt_mm(value_mm: float) -> str:
+    return f"{_fmt_mm_value(value_mm)}mm"
 
-    Args:
-        labels: List of DimensionLabel objects
-        text_height: Estimated text height in mm
-        padding: Padding between labels
 
-    Returns:
-        Adjusted list of DimensionLabel objects
-    """
-    # Simple approach: group by orientation and adjust Y (horizontal) or X (vertical) offsets
-    # For v1, we'll just stack labels on the same rail
+def _fmt_mm_value(value_mm: float) -> str:
+    return f"{float(value_mm):.1f}"
 
-    horizontal_labels = [l for l in labels if l.orientation == "horizontal"]
-    vertical_labels = [l for l in labels if l.orientation == "vertical"]
 
-    # Sort horizontal labels by X position
-    horizontal_labels.sort(key=lambda l: l.x)
+def _overlaps(a1: float, a2: float, b1: float, b2: float, padding: float) -> bool:
+    a1, a2 = (a1, a2) if a1 <= a2 else (a2, a1)
+    b1, b2 = (b1, b2) if b1 <= b2 else (b2, b1)
+    return not (a2 < (b1 - padding) or a1 > (b2 + padding))
 
-    # Sort vertical labels by Y position
-    vertical_labels.sort(key=lambda l: l.y)
 
-    # For now, return as-is (collision avoidance is minimal in v1)
-    # Future: implement proper bbox-based collision detection and stacking
-    return labels
+__all__ = [
+    "collect_dimension_requests",
+    "place_on_rails",
+    "place_dimensions_on_rails",
+    "render_placed_dimension",
+    "DimensionRequest",
+    "PlacedDimension",
+]

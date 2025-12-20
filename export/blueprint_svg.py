@@ -14,7 +14,7 @@ from xml.etree import ElementTree as ET
 
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import RemovalIntent, Bounds2D
-from export.dimensions import place_dimensions_on_rails, render_dimension_line
+from export.dimensions import place_dimensions_on_rails, render_placed_dimension
 
 
 # Theme definitions
@@ -46,7 +46,7 @@ DARK_THEME = Theme(
     profile_stroke="#e8e8e8",
     profile_width="2",
     pocket_stroke="#6496c8",
-    pocket_fill="rgba(100,150,200,0.2)",
+    pocket_fill="#6496c8",  # Use fill-opacity instead of rgba for PDF compatibility
     pocket_width="1.5",
     hole_stroke="#e8e8e8",
     hole_fill="none",
@@ -173,8 +173,10 @@ def render_blueprint_svg(
     # Render dimensions on rails (Part B)
     _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj)
 
-    # Add minimal notes for now (Part C will expand this)
-    _render_notes_placeholder(notes_group, viewbox_width, viewbox_height, theme_obj)
+    # Render title block, legend, and notes (Part C)
+    _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)
+    _render_legend(legend_group, viewbox_width, theme_obj)
+    _render_notes(notes_group, layout_ast, removal_intents, viewbox_height, theme_obj)
 
     # Convert to string
     ET.indent(svg, space="  ")
@@ -186,7 +188,7 @@ def _generate_stylesheet(theme: Theme) -> str:
     return f"""
         .sheet-outline {{ stroke: {theme.construction_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .profile-cuts {{ stroke: {theme.profile_stroke}; stroke-width: {theme.profile_width}; fill: none; }}
-        .pocket-regions {{ stroke: {theme.pocket_stroke}; stroke-width: {theme.pocket_width}; fill: {theme.pocket_fill}; }}
+        .pocket-regions {{ stroke: {theme.pocket_stroke}; stroke-width: {theme.pocket_width}; fill: {theme.pocket_fill}; fill-opacity: 0.2; }}
         .holes {{ stroke: {theme.hole_stroke}; stroke-width: 1.5; fill: {theme.hole_fill}; }}
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
@@ -347,77 +349,246 @@ def _render_dimensions(
     theme: Theme,
 ) -> None:
     """Render dimension lines and labels on rails."""
-    sheet = ast.sheet
-
-    # Get dimensions from placement engine
-    labels = place_dimensions_on_rails(ast, offset_x, offset_y, margin)
-
-    # Render each dimension
-    for label in labels:
-        if label.orientation == "horizontal":
-            # Horizontal dimension line (top rail)
-            line_y = label.y
-            # Calculate line endpoints based on the dimension value
-            # For sheet width: full width
-            # For item width: centered on item
-            if label.value_mm == sheet.width_mm:
-                # Sheet width dimension
-                start_x = offset_x
-                end_x = offset_x + sheet.width_mm
-            else:
-                # Item width dimension - center it on the text position
-                half_width = label.value_mm / 2
-                start_x = label.x - half_width
-                end_x = label.x + half_width
-
-            render_dimension_line(
-                group,
-                start_x,
-                line_y,
-                end_x,
-                line_y,
-                label.text,
-                "horizontal",
-                theme.dimension_stroke,
-            )
-        else:  # vertical
-            # Vertical dimension line (right rail)
-            line_x = label.x
-            # Calculate line endpoints
-            if label.value_mm == sheet.height_mm:
-                # Sheet height dimension
-                start_y = offset_y
-                end_y = offset_y + sheet.height_mm
-            else:
-                # Item height dimension
-                half_height = label.value_mm / 2
-                start_y = label.y - half_height
-                end_y = label.y + half_height
-
-            render_dimension_line(
-                group,
-                line_x,
-                start_y,
-                line_x,
-                end_y,
-                label.text,
-                "vertical",
-                theme.dimension_stroke,
-            )
+    dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile"})
+    for dim in dims:
+        render_placed_dimension(group, dim, theme.dimension_stroke)
 
 
-def _render_notes_placeholder(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
-    """Render placeholder notes area (full implementation in Part C)."""
-    notes_x = 20
-    notes_y = viewbox_height - 60
+def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
+    """Render title block with metadata."""
+    from datetime import datetime
 
-    text = ET.SubElement(
+    x = 20
+    y = 20
+    line_height = 14
+
+    # Title
+    title = ET.SubElement(
         group,
         "text",
         {
-            "x": str(notes_x),
-            "y": str(notes_y),
+            "x": str(x),
+            "y": str(y),
+            "class": "notes",
+            "font-weight": "bold",
+            "font-size": "14px",
+        },
+    )
+    title.text = "BLUEPRINT PROOF DRAWING"
+
+    # Timestamp
+    timestamp = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(x),
+            "y": str(y + line_height),
+            "class": "notes",
+            "font-size": "9px",
+        },
+    )
+    timestamp.text = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+    # Units
+    units = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(x),
+            "y": str(y + line_height * 2),
+            "class": "notes",
+            "font-size": "9px",
+        },
+    )
+    units.text = "Units: millimeters (mm)"
+
+
+def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> None:
+    """Render legend showing layer meanings."""
+    x = viewbox_width - 180
+    y = 20
+    line_height = 16
+    swatch_size = 10
+
+    legend_title = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(x),
+            "y": str(y),
+            "class": "legend",
+            "font-weight": "bold",
+        },
+    )
+    legend_title.text = "LEGEND"
+
+    layers = [
+        ("Profile Cuts", theme.profile_stroke, "2", "none"),
+        ("Pocket Regions", theme.pocket_stroke, "1.5", None),
+        ("Holes", theme.hole_stroke, "1.5", "none"),
+        ("Engraves", theme.engrave_stroke, "1", theme.engrave_dash),
+        ("Dimensions", theme.dimension_stroke, "1", "none"),
+    ]
+
+    for i, (label, stroke, width, dash) in enumerate(layers):
+        y_pos = y + (i + 1) * line_height + 5
+
+        # Color swatch (line sample)
+        swatch_attrs = {
+            "x1": str(x),
+            "y1": str(y_pos - 3),
+            "x2": str(x + swatch_size * 1.5),
+            "y2": str(y_pos - 3),
+            "stroke": stroke,
+            "stroke-width": width,
+        }
+        if dash:
+            swatch_attrs["stroke-dasharray"] = dash
+        ET.SubElement(group, "line", swatch_attrs)
+
+        # Label
+        label_elem = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(x + swatch_size * 2),
+                "y": str(y_pos),
+                "class": "legend",
+            },
+        )
+        label_elem.text = label
+
+
+def _render_notes(
+    group: ET.Element,
+    ast: LayoutAST,
+    removal_intents: Sequence[RemovalIntent] | None,
+    viewbox_height: float,
+    theme: Theme,
+) -> None:
+    """Render notes block with depth info and feature counts."""
+    x = 20
+    y = viewbox_height - 100
+    line_height = 12
+
+    # Title
+    notes_title = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(x),
+            "y": str(y),
+            "class": "notes",
+            "font-weight": "bold",
+        },
+    )
+    notes_title.text = "NOTES"
+
+    # Collect depth information
+    depths_info = _collect_depth_info(ast, removal_intents)
+
+    # Feature counts
+    feature_counts = _count_features(ast)
+
+    line_num = 1
+
+    # Sheet info
+    sheet_info = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(x),
+            "y": str(y + line_num * line_height),
             "class": "notes",
         },
     )
-    text.text = "NOTES: (Depth info to be added in Part C)"
+    sheet_info.text = f"Sheet: {ast.sheet.width_mm:.1f} × {ast.sheet.height_mm:.1f} × {ast.sheet.thickness_mm:.1f}mm"
+    line_num += 1
+
+    # Feature counts
+    if feature_counts:
+        counts_text = ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in feature_counts.items())
+        features_info = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(x),
+                "y": str(y + line_num * line_height),
+                "class": "notes",
+            },
+        )
+        features_info.text = f"Features: {counts_text}"
+        line_num += 1
+
+    # Depth information
+    if depths_info:
+        depths_title = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(x),
+                "y": str(y + line_num * line_height),
+                "class": "notes",
+            },
+        )
+        depths_title.text = "Depths:"
+        line_num += 1
+
+        for depth_line in depths_info:
+            depth_elem = ET.SubElement(
+                group,
+                "text",
+                {
+                    "x": str(x + 10),
+                    "y": str(y + line_num * line_height),
+                    "class": "notes",
+                },
+            )
+            depth_elem.text = f"• {depth_line}"
+            line_num += 1
+
+
+def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent] | None) -> list[str]:
+    """Collect depth information from features."""
+    depth_lines = []
+
+    # Collect from AST items
+    depths_by_type: dict[str, set[str]] = {}
+    for item in ast.items:
+        if item.feature is None:
+            continue
+
+        ftype = item.feature.type
+        depth = item.feature.depth
+
+        if depth == "through":
+            depth_str = "through"
+        elif isinstance(depth, (int, float)):
+            depth_str = f"{float(depth):.1f}mm"
+        else:
+            depth_str = str(depth)
+
+        if ftype not in depths_by_type:
+            depths_by_type[ftype] = set()
+        depths_by_type[ftype].add(depth_str)
+
+    # Format output
+    for ftype in sorted(depths_by_type.keys()):
+        depths = sorted(depths_by_type[ftype])
+        if len(depths) == 1:
+            depth_lines.append(f"{ftype}: {depths[0]}")
+        else:
+            depth_lines.append(f"{ftype}: {', '.join(depths)}")
+
+    return depth_lines
+
+
+def _count_features(ast: LayoutAST) -> dict[str, int]:
+    """Count features by type."""
+    counts: dict[str, int] = {}
+    for item in ast.items:
+        if item.feature is None:
+            continue
+        ftype = item.feature.type
+        counts[ftype] = counts.get(ftype, 0) + 1
+    return counts

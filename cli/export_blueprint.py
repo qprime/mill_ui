@@ -94,17 +94,24 @@ Output file naming:
                 comp_ast = parse_compositional_pml(input_text)
                 ast = resolve_layout(comp_ast)
             else:
-                ast = parse_pml(input_text)
+                # Try flat PML first, then compositional if it fails
+                try:
+                    ast = parse_pml(input_text)
+                except PMLParseError as e:
+                    # Check if it might be compositional PML
+                    if any(keyword in input_text for keyword in ["component", "frame", "inset", "grid", "split"]):
+                        print(f"Hint: This looks like compositional PML. Try adding --compositional flag", file=sys.stderr)
+                    raise
         else:
             print(f"Error: Unsupported input format: {input_suffix}", file=sys.stderr)
             print("Supported formats: .pml, .txt, .json", file=sys.stderr)
             sys.exit(1)
 
-        # Convert to RemovalIntent (for validation, not used in rendering yet)
+        # Convert to RemovalIntent (for validation and depth info in rendering)
         removal_intents = ast_to_removal_intents(ast)
 
         # Render blueprint SVG
-        svg_string = render_blueprint_svg(ast, theme=args.theme)
+        svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=args.theme)
 
         # Prepare output directory and basename
         output_dir = Path(args.out)
@@ -134,6 +141,10 @@ Output file naming:
         print(f"PML Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
+        # Check if it's a compositional parse error
+        if e.__class__.__name__ == "ParseError" and "compositional_parser" in str(type(e).__module__):
+            print(f"Compositional PML Parse Error: {e}", file=sys.stderr)
+            sys.exit(1)
         print(f"Error: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc(file=sys.stderr)

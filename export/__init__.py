@@ -1,5 +1,5 @@
-# export - SVG rendering and visualization tools
+# export - Blueprint SVG rendering and visualization tools
 
-from .svg_removal import render_svg_with_removal_intent
+from .blueprint_svg import render_blueprint_svg, DARK_THEME, PRINT_THEME, THEMES
 
-__all__ = ["render_svg_with_removal_intent"]
+__all__ = ["render_blueprint_svg", "DARK_THEME", "PRINT_THEME", "THEMES"]

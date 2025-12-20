@@ -94,6 +94,10 @@ def place_on_rails(
 
     Returns:
         List of placed dimensions with assigned rail positions and stack levels.
+
+    Note:
+        If dimension stacking exceeds available margin, dimensions are clamped to margin boundary.
+        This prevents overflow but may cause visual overlap. Consider increasing margin if needed.
     """
     top_allocator = _IntervalAllocator()
     right_allocator = _IntervalAllocator()
@@ -113,7 +117,7 @@ def place_on_rails(
             # Guard: clamp to margin boundary
             min_rail_y = offset_y - margin
             if rail_y < min_rail_y:
-                rail_y = min_rail_y  # Clamp to margin edge
+                rail_y = min_rail_y  # Clamp to margin edge (may cause overlap)
 
             placed.append(
                 PlacedDimension(
@@ -132,7 +136,7 @@ def place_on_rails(
             # Guard: clamp to margin boundary
             max_rail_x = offset_x + sheet_width_mm + margin
             if rail_x > max_rail_x:
-                rail_x = max_rail_x  # Clamp to margin edge
+                rail_x = max_rail_x  # Clamp to margin edge (may cause overlap)
 
             placed.append(
                 PlacedDimension(

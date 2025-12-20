@@ -83,13 +83,16 @@ Output file naming:
         if not input_path.exists():
             print(f"Error: Input file not found: {args.input}", file=sys.stderr)
             sys.exit(1)
+        if not input_path.is_file():
+            print(f"Error: Input path is not a file: {args.input}", file=sys.stderr)
+            sys.exit(1)
 
         # Parse input to LayoutAST
         input_suffix = input_path.suffix.lower()
         if input_suffix == ".json":
             ast = LayoutAST.from_json(str(input_path))
         elif input_suffix == ".pml" or input_suffix == ".txt":
-            input_text = input_path.read_text()
+            input_text = input_path.read_text(encoding="utf-8")
             if args.compositional:
                 comp_ast = parse_compositional_pml(input_text)
                 ast = resolve_layout(comp_ast)
@@ -121,7 +124,7 @@ Output file naming:
         # Export SVG
         if args.format in ("svg", "both"):
             svg_path = output_dir / f"{basename}.blueprint.{args.theme}.svg"
-            svg_path.write_text(svg_string)
+            svg_path.write_text(svg_string, encoding="utf-8")
             print(f"✓ SVG exported: {svg_path}")
 
         # Export PDF

@@ -266,16 +266,21 @@ def test_golden_file_simple_profile():
     svg_normalized = _normalize_svg(svg)
 
     if golden_path.exists():
-        golden_svg = golden_path.read_text()
+        golden_svg = golden_path.read_text(encoding="utf-8")
         golden_normalized = _normalize_svg(golden_svg)
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
+        print("  ✓ PASS")
     else:
-        # Generate golden file if it doesn't exist
-        GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
-        golden_path.write_text(svg)
-        print(f"  ⚠ Generated golden file: {golden_path}")
+        # Fail if golden file is missing in CI/automated environments
+        import os
+        if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
+            raise AssertionError(f"Golden file missing in CI: {golden_path}")
 
-    print("  ✓ PASS")
+        # Generate golden file if it doesn't exist (dev mode only)
+        GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
+        golden_path.write_text(svg, encoding="utf-8")
+        print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
+        print("  ⚠ WARN (golden file was missing)")
 
 
 def test_golden_file_shaker_door():
@@ -299,15 +304,21 @@ def test_golden_file_shaker_door():
     svg_normalized = _normalize_svg(svg)
 
     if golden_path.exists():
-        golden_svg = golden_path.read_text()
+        golden_svg = golden_path.read_text(encoding="utf-8")
         golden_normalized = _normalize_svg(golden_svg)
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
+        print("  ✓ PASS")
     else:
-        GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
-        golden_path.write_text(svg)
-        print(f"  ⚠ Generated golden file: {golden_path}")
+        # Fail if golden file is missing in CI/automated environments
+        import os
+        if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
+            raise AssertionError(f"Golden file missing in CI: {golden_path}")
 
-    print("  ✓ PASS")
+        # Generate golden file if it doesn't exist (dev mode only)
+        GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
+        golden_path.write_text(svg, encoding="utf-8")
+        print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
+        print("  ⚠ WARN (golden file was missing)")
 
 
 def test_label_placement_no_overlap():

@@ -29,6 +29,7 @@ class Config:
     min_overlap_ratio: float = 0.55
     min_overlap_mm: float = 1.0
     cleanup_offset_mm: float = 0.25
+    pocket_finish_perimeter: bool = True
 
     def as_dict(self) -> dict[str, Any]:
         """Return a JSON-serialisable representation of this config."""
@@ -44,6 +45,7 @@ class Config:
             "min_overlap_ratio": float(self.min_overlap_ratio),
             "min_overlap_mm": float(self.min_overlap_mm),
             "cleanup_offset_mm": float(self.cleanup_offset_mm),
+            "pocket_finish_perimeter": bool(self.pocket_finish_perimeter),
         }
 
     def with_overrides(self, overrides: Mapping[str, Any]) -> Config:
@@ -124,6 +126,7 @@ _ENV_SUFFIXES = {
     "min_overlap_ratio": "MIN_OVERLAP_RATIO",
     "min_overlap_mm": "MIN_OVERLAP_MM",
     "cleanup_offset_mm": "CLEANUP_OFFSET_MM",
+    "pocket_finish_perimeter": "POCKET_FINISH_PERIMETER",
 }
 
 
@@ -182,6 +185,17 @@ def _z_reference(value: Any) -> Literal["top", "bottom"]:
     return "top" if text == "top" else "bottom"
 
 
+def _normalise_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"true", "1", "yes", "on"}:
+        return True
+    if text in {"false", "0", "no", "off"}:
+        return False
+    raise ValueError(f"Cannot convert {value!r} to boolean")
+
+
 _NORMALISERS = {
     "tool_db_path": _normalise_path,
     "project_root": _normalise_path,
@@ -193,6 +207,7 @@ _NORMALISERS = {
     "min_overlap_ratio": _ratio_float,
     "min_overlap_mm": _non_negative_float,
     "cleanup_offset_mm": _non_negative_float,
+    "pocket_finish_perimeter": _normalise_bool,
 }
 
 

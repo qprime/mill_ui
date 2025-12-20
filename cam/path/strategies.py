@@ -247,11 +247,22 @@ def pocket_then_finish_profile(
     step_down_mm: Optional[float] = None,
     cleanup_offset_mm: float = 0.25,
     start_depth_mm: float = 0.0,
+    finish_perimeter: bool = True,
 ) -> List[dict]:
     """
     For internal pockets (e.g., panel recess):
       1) Raster pocket on a shrunken boundary that leaves cleanup_offset at the true wall.
-      2) Full-depth profile on the true inside boundary to clean the wall.
+      2) Full-depth profile on the true inside boundary to clean the wall (if finish_perimeter=True).
+
+    Args:
+        shape: Shape2D representing the pocket boundary
+        setup: Setup with tool and machine parameters
+        total_depth_mm: Total depth to cut (positive value)
+        stepover_mm: Distance between raster passes (default: 40% of tool diameter)
+        step_down_mm: Depth per layer (default: 0.5 × tool diameter, capped at 3mm)
+        cleanup_offset_mm: Margin to leave for finish pass (default: 0.25mm)
+        start_depth_mm: Starting depth offset (for multi-level pockets, default: 0.0)
+        finish_perimeter: If True, add finish profile pass on perimeter (default: True)
     """
     # Compute true bounds and center
     xs = [p.x for p in shape.points]
@@ -277,24 +288,31 @@ def pocket_then_finish_profile(
 
     moves: List[dict] = []
 
-    # 1) Rough pocket: shrink by (tool_radius + cleanup_offset)
-    #    This keeps the outermost raster tool-center at: boundary - (tool_r + cleanup_offset)
-    shrink = tool_r + float(cleanup_offset_mm)
-    w_rough = max(0.0, w - 2.0 * shrink)
-    h_rough = max(0.0, h - 2.0 * shrink)
-    if w_rough > 0.0 and h_rough > 0.0:
-        rough = rectangle(w_rough, h_rough)
-        rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
-        moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
-        moves += pocket_raster(rough, setup, depth=cut_depth, stepover=so, stepdown=sd)
+    # 1) Rough pocket: shrink by (tool_radius + cleanup_offset) if finish pass enabled,
+    #    otherwise cut to final boundary
+    if finish_perimeter:
+        shrink = tool_r + float(cleanup_offset_mm)
+        w_rough = max(0.0, w - 2.0 * shrink)
+        h_rough = max(0.0, h - 2.0 * shrink)
+        if w_rough > 0.0 and h_rough > 0.0:
+            rough = rectangle(w_rough, h_rough)
+            rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
+            moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
+            moves += pocket_raster(rough, setup, depth=cut_depth, stepover=so, stepdown=sd)
+    else:
+        # No finish pass - cut full pocket with raster only
+        moves.append(move_comment(f"BEGIN pocket (no finish) sd={sd:.3f} so={so:.3f}"))
+        moves += pocket_raster(shape, setup, depth=cut_depth, stepover=so, stepdown=sd)
 
     # 2) Full-depth finish profile: inside boundary = (W - tool_d) x (H - tool_d)
-    w_fin = max(0.0, w - tool_d)
-    h_fin = max(0.0, h - tool_d)
-    if w_fin > 0.0 and h_fin > 0.0:
-        finish = rectangle(w_fin, h_fin)
-        finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
-        moves.append(move_comment("BEGIN finish profile pass"))
-        moves += profile_outline(finish, setup, depth=cut_depth, step_down=sd)
+    #    Only if finish_perimeter is enabled
+    if finish_perimeter:
+        w_fin = max(0.0, w - tool_d)
+        h_fin = max(0.0, h - tool_d)
+        if w_fin > 0.0 and h_fin > 0.0:
+            finish = rectangle(w_fin, h_fin)
+            finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
+            moves.append(move_comment("BEGIN finish profile pass"))
+            moves += profile_outline(finish, setup, depth=cut_depth, step_down=sd)
 
     return _offset_moves_z(moves, start)

@@ -83,6 +83,7 @@ def plan_pocket_passes(
                     step_down_mm=step_down,
                     cleanup_offset_mm=config.cleanup_offset_mm,
                     start_depth_mm=start_depth,
+                    finish_perimeter=config.pocket_finish_perimeter,
                 ),
                 increment=1,
             )

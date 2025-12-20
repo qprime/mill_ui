@@ -1,6 +1,7 @@
-"""Tests for CAD export (STL/STEP) via native backend.
+"""Tests for STL export adapter layer (AST → shape dicts).
 
-Tests both the adapter layer (AST → shape dicts) and end-to-end export.
+Tests the conversion from LayoutAST Items to shape dicts for CAD export.
+End-to-end STL export tests will be added when trimesh implementation is complete.
 """
 
 from __future__ import annotations
@@ -143,178 +144,16 @@ def test_items_to_shape_dicts_polyline():
     assert shape["feature"]["type"] == "engrave"
 
 
-def test_stl_export_simple_profile(tmp_path: Path):
-    """Test STL export for a simple profile cut."""
-    # Skip if native backend not available
-    try:
-        from cad.export.step import export_stl, SheetSpec
-    except ImportError:
-        import pytest
-        pytest.skip("Native CAD backend not available")
-
-    # Create simple layout: rect profile
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", side="outside", depth="through"),
-                shape_id="outer",
-            ),
-        ),
-    )
-
-    shapes = items_to_shape_dicts(ast.items)
-    sheet = SheetSpec(
-        width_mm=ast.sheet.width_mm,
-        height_mm=ast.sheet.height_mm,
-        thickness_mm=ast.sheet.thickness_mm,
-    )
-
-    output_path = tmp_path / "test.stl"
-    stl_files = export_stl(sheet, shapes, output_path)
-
-    # Verify files were created
-    assert len(stl_files) >= 1
-    for stl_file in stl_files:
-        assert Path(stl_file).exists()
-        assert Path(stl_file).stat().st_size > 0
-
-
-def test_step_export_simple_profile(tmp_path: Path):
-    """Test STEP export for a simple profile cut."""
-    # Skip if native backend not available
-    try:
-        from cad.export.step import export_step, SheetSpec
-    except ImportError:
-        import pytest
-        pytest.skip("Native CAD backend not available")
-
-    # Create simple layout: rect profile
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", side="outside", depth="through"),
-                shape_id="outer",
-            ),
-        ),
-    )
-
-    shapes = items_to_shape_dicts(ast.items)
-    sheet = SheetSpec(
-        width_mm=ast.sheet.width_mm,
-        height_mm=ast.sheet.height_mm,
-        thickness_mm=ast.sheet.thickness_mm,
-    )
-
-    output_path = tmp_path / "test.step"
-    export_step(sheet, shapes, output_path)
-
-    # Verify file was created
-    assert output_path.exists()
-    assert output_path.stat().st_size > 0
-
-
-def test_stl_export_with_pocket(tmp_path: Path):
-    """Test STL export with pocket feature."""
-    # Skip if native backend not available
-    try:
-        from cad.export.step import export_stl, SheetSpec
-    except ImportError:
-        import pytest
-        pytest.skip("Native CAD backend not available")
-
-    # Create layout with profile and pocket
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", side="outside", depth="through"),
-                shape_id="outer",
-            ),
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 300.0, "h_mm": 500.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="pocket", depth=6.0, depth_mm=6.0),
-                shape_id="pocket",
-            ),
-        ),
-    )
-
-    shapes = items_to_shape_dicts(ast.items)
-    sheet = SheetSpec(
-        width_mm=ast.sheet.width_mm,
-        height_mm=ast.sheet.height_mm,
-        thickness_mm=ast.sheet.thickness_mm,
-    )
-
-    output_path = tmp_path / "test_pocket.stl"
-    stl_files = export_stl(sheet, shapes, output_path)
-
-    # Verify files were created
-    assert len(stl_files) >= 1
-    for stl_file in stl_files:
-        assert Path(stl_file).exists()
-        assert Path(stl_file).stat().st_size > 0
-
-
-def test_stl_export_with_kerf(tmp_path: Path):
-    """Test STL export with kerf compensation."""
-    # Skip if native backend not available
-    try:
-        from cad.export.step import export_stl, SheetSpec
-    except ImportError:
-        import pytest
-        pytest.skip("Native CAD backend not available")
-
-    # Create simple layout
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", side="outside", depth="through"),
-                shape_id="outer",
-            ),
-        ),
-    )
-
-    shapes = items_to_shape_dicts(ast.items)
-    sheet = SheetSpec(
-        width_mm=ast.sheet.width_mm,
-        height_mm=ast.sheet.height_mm,
-        thickness_mm=ast.sheet.thickness_mm,
-    )
-
-    output_path = tmp_path / "test_kerf.stl"
-    stl_files = export_stl(sheet, shapes, output_path, kerf_mm=3.175)
-
-    # Verify files were created
-    assert len(stl_files) >= 1
-    for stl_file in stl_files:
-        assert Path(stl_file).exists()
-        assert Path(stl_file).stat().st_size > 0
+# End-to-end STL export tests will be added when trimesh implementation is complete
+# The tests below would test:
+# - test_stl_export_simple_profile(tmp_path)
+# - test_stl_export_with_pocket(tmp_path)
+# - test_stl_export_with_kerf(tmp_path)
+# - test_stl_export_polyline(tmp_path)
 
 
 if __name__ == "__main__":
-    # Run basic adapter tests (no native backend required)
+    # Run basic adapter tests (no backend required)
     print("Testing items_to_shape_dicts (basic)...")
     test_items_to_shape_dicts_basic()
     print("✓ Pass")
@@ -331,32 +170,5 @@ if __name__ == "__main__":
     test_items_to_shape_dicts_polyline()
     print("✓ Pass")
 
-    # Run end-to-end tests (require native backend)
-    try:
-        from cad.export.step import export_stl, export_step, SheetSpec
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-
-            print("Testing STL export (simple profile)...")
-            test_stl_export_simple_profile(tmp_path)
-            print("✓ Pass")
-
-            print("Testing STEP export (simple profile)...")
-            test_step_export_simple_profile(tmp_path)
-            print("✓ Pass")
-
-            print("Testing STL export (with pocket)...")
-            test_stl_export_with_pocket(tmp_path)
-            print("✓ Pass")
-
-            print("Testing STL export (with kerf)...")
-            test_stl_export_with_kerf(tmp_path)
-            print("✓ Pass")
-
-        print("\n✓ All tests passed!")
-
-    except ImportError:
-        print("\n⚠ Native backend tests skipped (backend not available)")
-        print("✓ Adapter tests passed!")
+    print("\n✓ All adapter tests passed!")
+    print("Note: STL export end-to-end tests pending (F003 - trimesh implementation)")

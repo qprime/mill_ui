@@ -3,3 +3,6 @@
 
 pytest>=7.0
 pytest-cov
+
+# Optional: PDF export for blueprint drawings
+cairosvg>=2.7.0

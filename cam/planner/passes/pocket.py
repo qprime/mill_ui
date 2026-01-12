@@ -215,6 +215,100 @@ def plan_engrave_passes(
         )
 
 
+def plan_corner_cleanup_passes(
+    hints: Mapping[str, Any],
+    *,
+    accumulator: "PassAccumulator",
+    tool_db: Sequence[Mapping[str, Any]],
+) -> None:
+    """Plan corner cleanup passes for rectangular pockets.
+
+    Generates small circular pockets at each corner to remove material
+    left by larger tools with radiused corners.
+
+    Args:
+        hints: Hints dict containing "corner_cleanups" list
+        accumulator: PassAccumulator for grouping operations by tool
+        tool_db: Available tools
+    """
+    corner_cleanups = hints.get("corner_cleanups", []) or []
+
+    for entry in corner_cleanups:
+        corner_tool_diameter = float(entry.get("corner_tool_diameter_mm", 0.0))
+        if corner_tool_diameter <= 0.0:
+            continue
+
+        # Find tool matching the specified diameter
+        tool = None
+        for t in tool_db:
+            if abs(float(t.get("diameter", 0.0)) - corner_tool_diameter) < 0.01:
+                tool = ToolSelection(
+                    diameter=float(t.get("diameter", corner_tool_diameter)),
+                    kind=t.get("kind", "flat"),
+                    name=t.get("name", "corner_tool"),
+                    rpm=float(t.get("rpm", 18000)),
+                    feed_xy=float(t.get("feed_xy", 1000)),
+                    feed_z=float(t.get("feed_z", 300)),
+                    depth_per_pass=float(t.get("depth_per_pass", 3.0)),
+                    stepover_percent=float(t.get("stepover_percent", 40)),
+                )
+                break
+
+        if tool is None:
+            raise ValueError(
+                f"Corner cleanup tool with diameter {corner_tool_diameter}mm not found in tool_db. "
+                f"Available tools: {[t.get('diameter') for t in tool_db]}"
+            )
+
+        record = accumulator.get_record("corner_cleanup", tool)
+        setup = record.setup
+
+        depth = float(entry.get("depth_mm", 0.0))
+        start_depth = float(entry.get("start_depth_mm", 0.0))
+        if depth <= start_depth:
+            continue
+        effective_depth = depth - start_depth
+
+        corners = entry.get("corners", [])
+        if not corners:
+            continue
+
+        step_over = stepover_for_tool(tool)
+        step_down = stepdown_for_tool(tool)
+
+        # Generate small circular pocket at each corner
+        # The diameter should be just enough to clear the radiused corner
+        # Calculate from parent pocket's primary tool radius
+        geometry = entry.get("geometry", {})
+        # We don't have primary tool info here, so use a heuristic:
+        # Corner pocket diameter = 2x corner tool diameter (conservative)
+        corner_pocket_diameter = 2.0 * corner_tool_diameter
+
+        for corner_xy in corners:
+            moves = pocket_circle_concentric(
+                corner_xy,
+                corner_pocket_diameter,
+                setup,
+                depth=effective_depth,
+                stepover_mm=step_over,
+                stepdown_mm=step_down,
+                finish=True,
+            )
+            # Offset moves if start_depth is non-zero
+            if start_depth > 0.0:
+                adjusted_moves: List[dict] = []
+                for mv in moves:
+                    clone = dict(mv)
+                    if "z" in clone and clone["z"] is not None:
+                        z_val = float(clone["z"])
+                        if z_val <= 0.0:
+                            clone["z"] = z_val - start_depth
+                    adjusted_moves.append(clone)
+                moves = adjusted_moves
+
+            record.add_moves(moves, increment=1)
+
+
 register_strategy("pocket", "rect_raster", pocket_then_finish_profile)
 register_strategy("pocket", "circle_concentric", pocket_circle_concentric)
 register_strategy("pocket", "region_rect_raster", pocket_region_rect_raster)
@@ -224,4 +318,5 @@ __all__ = [
     "plan_engrave_passes",
     "plan_hole_passes",
     "plan_pocket_passes",
+    "plan_corner_cleanup_passes",
 ]

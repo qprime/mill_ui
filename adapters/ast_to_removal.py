@@ -111,7 +111,9 @@ def item_to_removal_intent(
         return profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
 
     elif item.feature.type == "pocket":
-        # Pockets may have start_depth_mm in future
+        # Add corner cleanup metadata if specified
+        if item.feature.corner_cleanup_tool_diameter_mm is not None:
+            hint["corner_cleanup_tool_diameter_mm"] = item.feature.corner_cleanup_tool_diameter_mm
         return pocket_hint_to_removal_intent(hint)
 
     elif item.feature.type == "hole":

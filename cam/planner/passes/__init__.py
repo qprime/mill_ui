@@ -11,7 +11,7 @@ from cam.model.setup import Setup
 from cam.model.stock import Stock
 
 from .merge_shared_edges import merge_rect_profiles
-from .pocket import plan_engrave_passes, plan_hole_passes, plan_pocket_passes
+from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
 from .profile import circle_shape_mm, ensure_center, profile_moves_with_options, rect_shape
 from .summary import summarise_passes
 from .tools import ToolSelection, pass_key, pick_tool_for_profile, tool_identity
@@ -135,6 +135,7 @@ def plan_passes(
     plan_pocket_passes(hints, accumulator=accumulator, tool_db=tool_db, config=config)
     plan_hole_passes(hints, accumulator=accumulator, tool_db=tool_db)
     plan_engrave_passes(hints, accumulator=accumulator, tool_db=tool_db)
+    plan_corner_cleanup_passes(hints, accumulator=accumulator, tool_db=tool_db)
 
     kerf_mm = float(hints.get("kerf_width_mm", 0.0))
 

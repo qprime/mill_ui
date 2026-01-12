@@ -39,6 +39,7 @@ class Feature:
     depth: str | float  # "through" or numeric depth_mm
     side: str | None = None  # "inside" | "outside" | "on" for profiles
     depth_mm: float | None = None  # Alternative to depth for numeric values
+    corner_cleanup_tool_diameter_mm: float | None = None  # Tool diameter for corner cleanup (pockets only)
 
 
 @dataclass(frozen=True)

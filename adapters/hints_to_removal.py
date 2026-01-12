@@ -99,6 +99,17 @@ def pocket_hint_to_removal_intent(
     # Pockets typically have no special allowance (cut exactly to boundary)
     allowance = Allowance()
 
+    # Build metadata
+    metadata = {
+        "hint_type": "pocket",
+        "shape": hint.get("shape"),
+        "original_id": hint_id,
+    }
+
+    # Add corner cleanup metadata if present
+    if "corner_cleanup_tool_diameter_mm" in hint:
+        metadata["corner_cleanup_tool_diameter_mm"] = float(hint["corner_cleanup_tool_diameter_mm"])
+
     # Build RemovalIntent
     return RemovalIntent(
         region_id=region_id,
@@ -107,11 +118,7 @@ def pocket_hint_to_removal_intent(
         z_bottom=-(start_depth_mm + depth_mm),  # Bottom depth
         allowance=allowance,
         constraints=Constraints(),
-        metadata={
-            "hint_type": "pocket",
-            "shape": hint.get("shape"),
-            "original_id": hint_id,
-        },
+        metadata=metadata,
     )
 
 

@@ -1,10 +1,7 @@
 # Core dependencies for mill_ui
-# Currently no external dependencies required
 
-# Uncomment and add dependencies as needed:
-# numpy>=1.24.0
-# scipy>=1.10.0
-# matplotlib>=3.7.0
+# STL export (3D mesh generation for recipes)
+trimesh>=4.0.0
 
 # Development dependencies (optional)
 # Install with: pip install -r requirements-dev.txt

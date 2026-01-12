@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Recipe output tests.
 
-Auto-discovers PML files in docs/recipes/*/, generates G-code output,
+Auto-discovers PML files in docs/recipes/*/, generates outputs (G-code, STL, SVG),
 and compares against committed artifacts. Tracks metrics for performance
 and quality regression detection.
 
 Usage:
     pytest tests/test_recipes.py                    # Verify outputs match
     pytest tests/test_recipes.py --regen_recipes    # Regenerate artifacts
+    python3 tests/test_recipes.py                   # Standalone mode (regenerates all)
 """
 
 from __future__ import annotations
@@ -36,6 +37,20 @@ from cam.model.material import Material
 from cam.model.machine import Machine
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
+
+# Optional imports for STL/SVG generation
+try:
+    from adapters.ast_to_cad import items_to_shape_dicts
+    from cad.export.stl import export_stl
+    STL_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    STL_AVAILABLE = False
+
+try:
+    from export.blueprint_svg import render_blueprint_svg
+    SVG_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    SVG_AVAILABLE = False
 
 
 # Standard tool database for recipes
@@ -89,11 +104,14 @@ def discover_recipe_pml_files() -> list[Path]:
     return sorted(pml_files)
 
 
-def generate_gcode_from_pml(pml_path: Path) -> tuple[dict[str, str], dict[str, Any]]:
-    """Generate G-code from PML file.
+def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
+    """Generate all outputs (G-code, STL, SVG) from PML file.
 
     Returns:
-        (gcode_dict, metrics_dict) where gcode_dict maps pass_name -> gcode_string
+        (ast, gcode_dict, metrics_dict) where:
+        - ast: LayoutAST for STL/SVG generation
+        - gcode_dict: maps pass_name -> gcode_string
+        - metrics_dict: timing and complexity metrics
     """
     # Parse PML - try compositional first, fall back to flat
     parse_start = time.perf_counter()
@@ -216,11 +234,17 @@ def generate_gcode_from_pml(pml_path: Path) -> tuple[dict[str, str], dict[str, A
         },
     }
 
-    return gcode_dict, metrics
+    return ast, gcode_dict, metrics
 
 
-def write_outputs(output_dir: Path, gcode_dict: dict[str, str], metrics: dict[str, Any]):
-    """Write G-code files and metrics to output directory."""
+def write_outputs(
+    output_dir: Path,
+    recipe_name: str,
+    ast: Any,
+    gcode_dict: dict[str, str],
+    metrics: dict[str, Any]
+):
+    """Write all output files (G-code, STL, SVG, metrics) to output directory."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Write G-code files
@@ -228,6 +252,33 @@ def write_outputs(output_dir: Path, gcode_dict: dict[str, str], metrics: dict[st
         output_path = output_dir / f"{pass_name}.nc"
         with open(output_path, "w") as f:
             f.write(gcode)
+
+    # Write STL file
+    if STL_AVAILABLE:
+        try:
+            shapes = items_to_shape_dicts(ast.items)
+            stl_path = output_dir / f"{recipe_name}.stl"
+            export_stl(
+                shapes=shapes,
+                sheet_thickness_mm=ast.sheet.thickness_mm,
+                output_path=stl_path,
+            )
+        except Exception as e:
+            print(f"  Warning: STL generation failed: {e}")
+    else:
+        print(f"  Warning: STL generation skipped (trimesh not available)")
+
+    # Write SVG blueprint (light theme)
+    if SVG_AVAILABLE:
+        try:
+            svg_string = render_blueprint_svg(ast, theme="light")
+            svg_path = output_dir / f"{recipe_name}.blueprint.light.svg"
+            with open(svg_path, "w", encoding="utf-8") as f:
+                f.write(svg_string)
+        except Exception as e:
+            print(f"  Warning: SVG generation failed: {e}")
+    else:
+        print(f"  Warning: SVG generation skipped (module not available)")
 
     # Write metrics
     metrics_path = output_dir / "metrics.json"
@@ -292,19 +343,20 @@ if PYTEST_AVAILABLE:
 
 
 def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
-    """Test that recipe generates expected G-code output."""
+    """Test that recipe generates expected outputs (G-code, STL, SVG)."""
     # Generate outputs
-    gcode_dict, metrics = generate_gcode_from_pml(pml_path)
+    ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
 
-    # Determine output directory (same directory as PML file)
+    # Determine output directory and recipe name
     output_dir = pml_path.parent / "output"
+    recipe_name = pml_path.stem  # e.g., "simple_cutout_with_tabs"
 
     if regenerate:
         # Regenerate mode: write outputs and pass
-        write_outputs(output_dir, gcode_dict, metrics)
+        write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics)
         print(f"\n✓ Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
-        print(f"  Files: {len(gcode_dict)} G-code files + metrics.json")
+        print(f"  Files: {len(gcode_dict)} G-code + STL + SVG + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
     else:
         # Verify mode: compare against committed artifacts
@@ -338,11 +390,13 @@ if __name__ == "__main__":
     for pml_path in pml_files:
         print(f"Processing: {pml_path.relative_to(Path.cwd())}")
         try:
-            gcode_dict, metrics = generate_gcode_from_pml(pml_path)
+            ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
             output_dir = pml_path.parent / "output"
-            write_outputs(output_dir, gcode_dict, metrics)
+            recipe_name = pml_path.stem
 
-            print(f"  ✓ Generated {len(gcode_dict)} pass(es)")
+            write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics)
+
+            print(f"  ✓ Generated {len(gcode_dict)} G-code pass(es) + STL + SVG")
             print(f"  ✓ Total time: {metrics['timing']['total_ms']:.1f}ms")
             print(f"  ✓ Output: {output_dir}\n")
         except Exception as e:

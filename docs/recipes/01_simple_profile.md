@@ -169,36 +169,47 @@ Expected: All checks pass (no output if clean).
 ### Step 4: Generate G-code
 
 ```python
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
+	from adapters.removal_to_planner import removal_intents_to_v1_hints
+	from cam.config import Config
+	from cam.planner.passes import plan_passes
+	from cam.post.gcode import write_gcode
+	from cam.model.stock import Stock
+	from cam.model.material import Material
+	from cam.model.machine import Machine
 
-# Create setup
-tool = Tool(name="6mm_endmill", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
-stock = Stock(width=450, height=650, thickness=19)
-material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+	# Convert IR to planner hints
+	hints = removal_intents_to_v1_hints(
+	    intents,
+	    kerf_width_mm=3.175,  # 1/8" bit typical
+	    min_channel_width_mm=6.0
+	)
 
-# Convert IR to planner hints
-hints = removal_intents_to_v1_hints(
-    intents,
-    kerf_width_mm=3.175,  # 1/8" bit typical
-    min_channel_width_mm=6.0
-)
+	tool_db = [
+	    {"name": "6mm_endmill", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+	]
+	config = Config(safe_z_mm=5.0)
+	material = Material(name="MDF")
+	machine = Machine()
+	stock = Stock(width=450, height=650, thickness=19)
 
-# Generate G-code
-config = Config()
-gcode = plan_all_passes(hints, setup, config)
+	passes, _summary = plan_passes(
+	    hints,
+	    config=config,
+	    tool_db=tool_db,
+	    material=material,
+	    machine=machine,
+	    stock=stock,
+	)
 
-# Save
-with open("simple_profile.nc", "w") as f:
-    f.write(gcode)
+	gcode = "\n".join(
+	    write_gcode(p["moves"], safe_z=config.safe_z_mm)
+	    for p in passes
+	    if p.get("moves")
+	)
+
+	# Save
+	with open("simple_profile.nc", "w") as f:
+	    f.write(gcode)
 
 print(f"Generated {len(gcode.splitlines())} lines of G-code")
 ```
@@ -338,17 +349,16 @@ Look for overlapping x/y ranges.
 #!/usr/bin/env python3
 """Complete pipeline: PML → LayoutAST → RemovalIntent → G-code"""
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
-from adapters.ast_to_removal import ast_to_removal_intents
-from validation.removal_checks import check_overlap, check_depth_feasibility
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
+	from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+	from adapters.ast_to_removal import ast_to_removal_intents
+	from validation.removal_checks import check_overlap, check_depth_feasibility
+	from adapters.removal_to_planner import removal_intents_to_v1_hints
+	from cam.config import Config
+	from cam.planner.passes import plan_passes
+	from cam.post.gcode import write_gcode
+	from cam.model.stock import Stock
+	from cam.model.material import Material
+	from cam.model.machine import Machine
 
 # 1. Create LayoutAST
 ast = LayoutAST(
@@ -376,18 +386,31 @@ for intent in intents:
     depth_check = check_depth_feasibility(intent, sheet_thickness_mm=19.0)
     assert not depth_check.has_issues(), depth_check.summary()
 
-print("✓ Validation passed")
+	print("✓ Validation passed")
 
-# 4. Generate G-code
-tool = Tool(name="6mm_endmill", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
-stock = Stock(width=450, height=650, thickness=19)
-material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+	# 4. Generate G-code
+	hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+	tool_db = [
+	    {"name": "6mm_endmill", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+	]
+	config = Config(safe_z_mm=5.0)
+	material = Material(name="MDF")
+	machine = Machine()
+	stock = Stock(width=450, height=650, thickness=19)
 
-hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-config = Config()
-gcode = plan_all_passes(hints, setup, config)
+	passes, _summary = plan_passes(
+	    hints,
+	    config=config,
+	    tool_db=tool_db,
+	    material=material,
+	    machine=machine,
+	    stock=stock,
+	)
+	gcode = "\n".join(
+	    write_gcode(p["moves"], safe_z=config.safe_z_mm)
+	    for p in passes
+	    if p.get("moves")
+	)
 
 # 5. Save
 with open("simple_profile.nc", "w") as f:

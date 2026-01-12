@@ -13,18 +13,24 @@ Practical examples showing complete workflows from design to G-code.
   - Reference outputs: [SVG](03_shaker_door_template/shaker_door.blueprint.light.svg) | [STL](03_shaker_door_template/shaker_door.stl) | [G-code](03_shaker_door_template/shaker_door.nc)
 
 ### Advanced Patterns
-- [04_custom_template.md](04_custom_template.md) - Creating your own parametric template
-- [05_validation_workflow.md](05_validation_workflow.md) - Validating designs at IR level
-- [06_multiple_depths.md](06_multiple_depths.md) - Features at different depths
+- [04_custom_template.md](04_custom_template.md) - Creating your own template class (Python)
+- [05_validation_workflow.md](05_validation_workflow.md) - Validating designs at IR level (fast feedback)
+- [06_multiple_depths.md](06_multiple_depths.md) - Profile + pocket + holes in one part
 
 ### Integration Examples
-- [07_json_generation.md](07_json_generation.md) - Generating LayoutAST from JSON (AI-friendly)
-- [08_svg_visualization.md](08_svg_visualization.md) - Debugging with SVG export
-- [09_config_tuning.md](09_config_tuning.md) - Tuning feeds, speeds, and finish quality
+- [07_json_generation.md](07_json_generation.md) - Generating `LayoutAST` from JSON (AI-friendly)
+- [08_svg_visualization.md](08_svg_visualization.md) - Debugging with blueprint SVG export
+- [09_config_tuning.md](09_config_tuning.md) - Tuning planner config (safe Z, pocket finish, tolerances)
+
+### Layout Recipes
+- [10_hole_patterns_grid.md](10_hole_patterns_grid.md) - Hole arrays with compositional `grid`
+- [11_keepout_islands.md](11_keepout_islands.md) - Pockets with keepout islands (IR semantics)
+- [12_edge_treatment_intent.md](12_edge_treatment_intent.md) - Edge intent annotations (allowance/fillet/chamfer)
+- [13_split_layout_french_door.md](13_split_layout_french_door.md) - Paned doors with `split` (rails/mullions)
 
 ## Reference Outputs
 
-Each basic workflow recipe includes complete reference outputs:
+Recipes 01–03 include complete reference outputs:
 - **SVG Blueprint**: 2D visualization with dimensions and feature annotations
 - **STL Model**: 3D mesh for visual validation (open in FreeCAD, MeshLab, or online viewers)
 - **G-code**: Machine-ready toolpath (verify in CAMotics or similar simulators)

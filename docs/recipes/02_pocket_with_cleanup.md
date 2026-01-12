@@ -87,9 +87,8 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
+from cam.planner.passes import plan_passes
+from cam.post.gcode import write_gcode
 from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
@@ -112,19 +111,31 @@ ast = LayoutAST(
 # Convert to IR
 intents = ast_to_removal_intents(ast)
 
-# Setup
-tool = Tool(name="6mm_flat", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
-stock = Stock(width=200, height=150, thickness=19)
-material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
-
 # Config with finish enabled (DEFAULT)
 config = Config(pocket_finish_perimeter=True)  # This is the default
 
 # Generate
 hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-gcode_with_finish = plan_all_passes(hints, setup, config)
+
+tool_db = [
+    {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+]
+material = Material(name="MDF")
+machine = Machine()
+stock = Stock(width=200, height=150, thickness=19)
+
+def plan_gcode(cfg: Config) -> str:
+    passes, _summary = plan_passes(
+        hints,
+        config=cfg,
+        tool_db=tool_db,
+        material=material,
+        machine=machine,
+        stock=stock,
+    )
+    return "\n".join(write_gcode(p["moves"], safe_z=cfg.safe_z_mm) for p in passes if p.get("moves"))
+
+gcode_with_finish = plan_gcode(config)
 
 # Save
 with open("pocket_with_finish.nc", "w") as f:
@@ -141,7 +152,7 @@ print(f"WITH FINISH: {len(gcode_with_finish.splitlines())} lines")
 # Config with finish DISABLED
 config_no_finish = Config(pocket_finish_perimeter=False)
 
-gcode_no_finish = plan_all_passes(hints, setup, config_no_finish)
+gcode_no_finish = plan_gcode(config_no_finish)
 
 with open("pocket_no_finish.nc", "w") as f:
     f.write(gcode_no_finish)
@@ -420,9 +431,8 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
+from cam.planner.passes import plan_passes
+from cam.post.gcode import write_gcode
 from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
@@ -444,20 +454,32 @@ ast = LayoutAST(
 
 intents = ast_to_removal_intents(ast)
 
-# Setup
-tool = Tool(name="6mm_flat", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
 stock = Stock(width=200, height=150, thickness=19)
 material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+machine = Machine()
 hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
 
 # Generate both versions
 config_finish = Config(pocket_finish_perimeter=True)
 config_no_finish = Config(pocket_finish_perimeter=False)
 
-gcode_with = plan_all_passes(hints, setup, config_finish)
-gcode_without = plan_all_passes(hints, setup, config_no_finish)
+tool_db = [
+    {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+]
+
+def plan_gcode(cfg: Config) -> str:
+    passes, _summary = plan_passes(
+        hints,
+        config=cfg,
+        tool_db=tool_db,
+        material=material,
+        machine=machine,
+        stock=stock,
+    )
+    return "\n".join(write_gcode(p["moves"], safe_z=cfg.safe_z_mm) for p in passes if p.get("moves"))
+
+gcode_with = plan_gcode(config_finish)
+gcode_without = plan_gcode(config_no_finish)
 
 # Save and report
 with open("pocket_with_finish.nc", "w") as f:

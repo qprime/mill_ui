@@ -164,15 +164,14 @@ print(json.dumps(json.loads(json_output), indent=2))
 ### Step 3: Generate G-code
 
 ```python
-from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
+	from adapters.ast_to_removal import ast_to_removal_intents
+	from adapters.removal_to_planner import removal_intents_to_v1_hints
+	from cam.config import Config
+	from cam.planner.passes import plan_passes
+	from cam.post.gcode import write_gcode
+	from cam.model.stock import Stock
+	from cam.model.material import Material
+	from cam.model.machine import Machine
 
 # Convert to IR
 intents = ast_to_removal_intents(ast)
@@ -181,19 +180,31 @@ print(f"Generated {len(intents)} removal intents:")
 for intent in intents:
     print(f"  {intent.region_id}: {intent.z_top}mm to {intent.z_bottom}mm, allowance={intent.allowance}")
 
-# Setup
-tool = Tool(name="6mm_endmill", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
-stock = Stock(width=450, height=650, thickness=19)
-material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+	# Config (pocket finish enabled by default)
+	config = Config(pocket_finish_perimeter=True)
 
-# Config (pocket finish enabled by default)
-config = Config(pocket_finish_perimeter=True)
+	# Generate
+	hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+	tool_db = [
+	    {"name": "6mm_endmill", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+	]
+	material = Material(name="MDF")
+	machine = Machine()
+	stock = Stock(width=450, height=650, thickness=19)
 
-# Generate
-hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-gcode = plan_all_passes(hints, setup, config)
+	passes, _summary = plan_passes(
+	    hints,
+	    config=config,
+	    tool_db=tool_db,
+	    material=material,
+	    machine=machine,
+	    stock=stock,
+	)
+	gcode = "\n".join(
+	    write_gcode(p["moves"], safe_z=config.safe_z_mm)
+	    for p in passes
+	    if p.get("moves")
+	)
 
 # Save
 with open("shaker_door.nc", "w") as f:
@@ -501,16 +512,15 @@ tool = Tool(name="6mm_carbide", diameter=6.0, rpm=18000, feed_xy=1200, feed_z=20
 #!/usr/bin/env python3
 """Complete Shaker door generation: Template → G-code"""
 
-from templates import Shaker
-from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.config import Config
-from cam.planner.plan import plan_all_passes
-from cam.model.setup import Setup
-from cam.model.tool import Tool
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
+	from templates import Shaker
+	from adapters.ast_to_removal import ast_to_removal_intents
+	from adapters.removal_to_planner import removal_intents_to_v1_hints
+	from cam.config import Config
+	from cam.planner.passes import plan_passes
+	from cam.post.gcode import write_gcode
+	from cam.model.stock import Stock
+	from cam.model.material import Material
+	from cam.model.machine import Machine
 
 # 1. Define door parameters
 params = {
@@ -529,19 +539,31 @@ print(f"✓ Generated LayoutAST: {len(ast.items)} items")
 intents = ast_to_removal_intents(ast)
 print(f"✓ Converted to IR: {len(intents)} removal intents")
 
-# 4. Setup tooling
-tool = Tool(name="6mm_endmill", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
-stock = Stock(width=450, height=650, thickness=19)
-material = Material(name="MDF")
-machine = Machine(name="grbl_router")
-setup = Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+	stock = Stock(width=450, height=650, thickness=19)
+	material = Material(name="MDF")
+	machine = Machine()
+	tool_db = [
+	    {"name": "6mm_endmill", "diameter": 6.0, "kind": "flat", "rpm": 18000, "feed_xy": 2000, "feed_z": 300}
+	]
 
 # 5. Configure (pocket finish enabled by default)
 config = Config(pocket_finish_perimeter=True)
 
-# 6. Generate G-code
-hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-gcode = plan_all_passes(hints, setup, config)
+	# 6. Generate G-code
+	hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+	passes, _summary = plan_passes(
+	    hints,
+	    config=config,
+	    tool_db=tool_db,
+	    material=material,
+	    machine=machine,
+	    stock=stock,
+	)
+	gcode = "\n".join(
+	    write_gcode(p["moves"], safe_z=config.safe_z_mm)
+	    for p in passes
+	    if p.get("moves")
+	)
 
 # 7. Save output
 with open("shaker_door.nc", "w") as f:

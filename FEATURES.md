@@ -181,6 +181,213 @@ The feature was implemented as a simpler full-perimeter cleanup pass instead of 
 
 ---
 
+## F004: Profile Cuts with Holding Tabs
+
+**Status:** 🟢 Reviewed (Production)
+
+**Priority:** High
+
+**Architecture Layer:** Full Stack (PML → AST → IR → Planner)
+
+### Problem Statement
+
+When cutting out parts with profile cuts, the cut piece can shift or fall once the cut completes, causing:
+- Damage to the part
+- Safety hazards
+- Poor cut quality on the final segments
+
+Tabs solve this by leaving small uncut sections (holding bridges) that keep the part secured to the stock sheet during cutting. After cutting, tabs can be broken off and sanded smooth.
+
+### Design
+
+**Pipeline Location:**
+```
+PML → LayoutAST (Feature.tab_*) → RemovalIntent (Constraints.tabs) → Planner → G-code
+```
+
+**Syntax:**
+```pml
+rect <id> at <x>mm,<y>mm size <w>mm,<h>mm profile through outside tabs <count> height <height>mm [width <width>mm]
+```
+
+**Required parameters:**
+- `tabs <count>`: Number of tabs (positive integer)
+- `height <height>mm>`: Tab height in millimeters (how much material to leave uncut)
+
+**Optional parameter:**
+- `width <width>mm>`: Tab width along the perimeter (defaults to 2× tool diameter, minimum 6mm)
+
+### Implementation
+
+**Architecture layers modified:**
+
+1. **AST Layer** ([layout_ast/layout.py:43-46](layout_ast/layout.py#L43-L46))
+   - Extended `Feature` dataclass with `tab_count`, `tab_height_mm`, `tab_width_mm` fields
+
+2. **PML Parser** ([pml/parser.py:275-319](pml/parser.py#L275-L319))
+   - Added parsing for `tabs <count> height <height>mm [width <width>mm]` syntax
+   - Index-based parsing handles optional components
+
+3. **PML Formatter** ([pml/formatter.py:124-128](pml/formatter.py#L124-L128))
+   - Emits tab specifications in canonical PML format
+
+4. **AST Adapter** ([adapters/ast_to_removal.py:111-117](adapters/ast_to_removal.py#L111-L117))
+   - Converts Feature tabs to RemovalIntent TabConstraint via hint dict
+
+5. **Planner** ([cam/path/strategies.py:117-235](cam/path/strategies.py#L117-L235))
+   - Already implemented: `profile_outline_with_tabs()` generates G-code with Z lifts
+
+### Test Coverage
+
+**Test file:** [tests/test_tabs.py](tests/test_tabs.py)
+
+8 comprehensive tests covering:
+- PML parsing with/without explicit width
+- Inside/outside profile tabs
+- AST construction with tabs
+- RemovalIntent conversion
+- Full pipeline (PML → AST → IR)
+- PML roundtrip preservation
+
+**Test results:** ✅ 8/8 passing
+
+### Files Modified
+
+**Modified (5 files):**
+- `layout_ast/layout.py` - Feature dataclass extension
+- `pml/parser.py` - Tab syntax parsing
+- `pml/formatter.py` - Tab formatting
+- `adapters/ast_to_removal.py` - AST → IR conversion
+- `adapters/hints_to_removal.py` - Optional width handling fix
+
+**Created (4 files):**
+- `tests/test_tabs.py` - Comprehensive test suite
+- `docs/recipes/15_profile_with_tabs/README.md` - Complete documentation
+- `docs/recipes/15_profile_with_tabs/example.py` - Python examples
+- `docs/recipes/15_profile_with_tabs/simple_cutout_with_tabs.pml` - PML example
+
+### Usage Guidelines
+
+**Tab count recommendations:**
+| Part Size | Recommended Tabs | Reason |
+|-----------|------------------|--------|
+| < 200mm | 3 tabs | Minimal holding for small parts |
+| 200-400mm | 4 tabs | Standard holding |
+| > 400mm | 6+ tabs | Secure holding for large parts |
+
+**Tab height recommendations:**
+| Material Thickness | Recommended Height | Notes |
+|--------------------|-------------------|-------|
+| 12-19mm (1/2"-3/4") | 2-4mm | Standard: 3mm |
+| 6-12mm (1/4"-1/2") | 1-3mm | Thinner material needs shorter tabs |
+| > 19mm (> 3/4") | 4-6mm | Proportional to thickness |
+
+**Rule of thumb:** Tab height should be 15-25% of material thickness.
+
+### Limitations
+
+**What works:**
+- ✅ Profile cuts (inside, outside, on)
+- ✅ Through-cuts and partial depth profiles
+- ✅ Any shape (Rect, Circle, etc.)
+- ✅ Optional width (uses planner default)
+
+**What doesn't work:**
+- ❌ Cannot combine with onion-skin roughing (`onion_skin_mm > 0`)
+- ❌ Tabs on pockets (use profiles instead)
+- ❌ Tabs on holes (not applicable)
+
+### Acceptance Criteria
+
+- [x] PML syntax parsing with required and optional parameters
+- [x] AST construction with tab fields
+- [x] RemovalIntent conversion with TabConstraint
+- [x] Full pipeline integration (parse → format → parse roundtrip)
+- [x] Comprehensive test coverage (8/8 tests passing)
+- [x] Recipe documentation with examples and guidelines
+- [x] PML syntax spec updated
+- [x] All existing tests still pass (no regressions)
+
+### Implementation Notes
+
+**Implementation Date:** 2026-01-12
+
+**Commit:** `4adeeb5b5841ea072575731f81a9e8622d0dc22a`
+
+**Key Design Decisions:**
+
+1. **Layered architecture approach:**
+   - Tab infrastructure already existed at IR/planner layers (TabConstraint, profile_outline_with_tabs)
+   - Only needed to add user-facing syntax through the stack
+   - Clean separation of concerns maintained
+
+2. **Optional width parameter:**
+   - Used `None` to represent "not specified" rather than numeric default
+   - Allows planner to apply its own logic: `max(tool_diameter × 2, 6mm)`
+   - Fixed `adapters/hints_to_removal.py` to handle None properly
+
+3. **Verbose syntax (Option A):**
+   - Explicit `tabs <count> height <height>mm width <width>mm`
+   - More readable than compact alternatives
+   - Consistent with existing PML style
+
+4. **Validation strategy:**
+   - Planner enforces tabs + onion-skin conflict ([cam/planner/passes/profile.py:77](cam/planner/passes/profile.py#L77))
+   - Parser validates positive integers and dimensions
+   - Tab count must be positive, height/width must be positive if specified
+
+**Tab Distribution:**
+Tabs are evenly distributed around the perimeter by the planner:
+- 4 tabs on rectangle: one per side (centered)
+- 6 tabs on rectangle: typically 2 on long sides, 1 on short sides
+- Planner calculates optimal spacing based on perimeter length
+
+**Tab Geometry:**
+During cutting:
+- Tool plunges to bottom depth as normal
+- At tab positions, tool lifts to `z_bottom + tab_height_mm`
+- Tool traverses across tab width at lifted height
+- Tool plunges back to full depth after tab
+
+### Example Usage
+
+**Simple cutout with tabs:**
+```pml
+sheet 600mm 400mm 19mm
+
+rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 height 3mm width 12mm
+```
+
+**Multiple parts with different tab configurations:**
+```pml
+sheet 800mm 600mm 19mm
+
+# Small part: 3 tabs
+rect small at 200mm,150mm size 150mm,100mm profile through outside tabs 3 height 2mm width 8mm
+
+# Medium part: 4 tabs
+rect medium at 200mm,400mm size 250mm,150mm profile through outside tabs 4 height 3mm width 12mm
+
+# Large part: 6 tabs
+rect large at 550mm,300mm size 400mm,250mm profile through outside tabs 6 height 4mm width 15mm
+```
+
+**Default width behavior:**
+```pml
+sheet 600mm 400mm 19mm
+
+# Width omitted - planner uses max(tool_diameter × 2, 6mm)
+rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 height 3mm
+```
+
+### Documentation
+
+- **Recipe:** [docs/recipes/15_profile_with_tabs/README.md](docs/recipes/15_profile_with_tabs/README.md)
+- **Examples:** [docs/recipes/15_profile_with_tabs/example.py](docs/recipes/15_profile_with_tabs/example.py)
+- **PML Example:** [docs/recipes/15_profile_with_tabs/simple_cutout_with_tabs.pml](docs/recipes/15_profile_with_tabs/simple_cutout_with_tabs.pml)
+
+---
+
 ## Feature Template (for future features)
 
 ```markdown

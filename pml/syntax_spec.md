@@ -88,27 +88,40 @@ roundedrect panel at 100mm,100mm size 80mm,60mm radius 5mm pocket 4mm
 #### Profile (cut outline)
 
 ```
-profile through [inside|outside|on]
-profile <depth>mm [inside|outside|on]
+profile through [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
+profile <depth>mm [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
 ```
+
+**Optional tabs** (holding bridges during cutting):
+- `tabs <count>`: Number of tabs (positive integer)
+- `height <height>mm`: Tab height (material left uncut)
+- `width <width>mm`: Tab width along boundary (optional, defaults to 2× tool diameter, minimum 6mm)
 
 Example:
 ```pml
 profile through outside
 profile 10mm inside
+profile through outside tabs 4 height 3mm width 12mm
+profile 6mm inside tabs 6 height 2mm
 ```
 
 #### Pocket (recessed area)
 
 ```
-pocket <depth>mm
-pocket through
+pocket <depth>mm [corner_cleanup <diameter>mm]
+pocket through [corner_cleanup <diameter>mm]
 ```
+
+**Optional corner_cleanup** (multi-tool workflow for square corners):
+- `corner_cleanup <diameter>mm`: Tool diameter for corner finishing pass
+- Enables two-tool strategy: large tool for roughing, small tool specified here for corners
+- Small tool must be smaller than primary tool to reach into corners
 
 Example:
 ```pml
 pocket 5mm
 pocket through
+pocket 6mm corner_cleanup 3.175mm
 ```
 
 #### Hole (circular bore)

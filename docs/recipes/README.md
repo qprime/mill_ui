@@ -28,6 +28,10 @@ Practical examples showing complete workflows from design to G-code.
 - [12_edge_treatment_intent.md](12_edge_treatment_intent.md) - Edge intent annotations (allowance/fillet/chamfer)
 - [13_split_layout_french_door.md](13_split_layout_french_door.md) - Paned doors with `split` (rails/mullions)
 
+### CNC Workflow Recipes
+- [14_corner_cleanup_multi_tool.md](14_corner_cleanup_multi_tool.md) - Multi-tool corner cleanup for rectangular pockets
+- [15_profile_with_tabs.md](15_profile_with_tabs.md) - Holding tabs for profile cuts (prevents part movement)
+
 ## Reference Outputs
 
 Recipes 01–03 include complete reference outputs:

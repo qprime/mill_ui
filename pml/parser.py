@@ -229,8 +229,8 @@ class _PMLParser:
         Supported formats:
         - profile through [inside|outside|on]
         - profile <depth>mm [inside|outside|on]
-        - pocket <depth>mm
-        - pocket through
+        - pocket <depth>mm [corner_cleanup <diameter>mm]
+        - pocket through [corner_cleanup <diameter>mm]
         - hole <depth>mm
         - hole through
         - engrave <depth>mm
@@ -262,6 +262,16 @@ class _PMLParser:
             if side not in ("inside", "outside", "on"):
                 raise PMLParseError(f"Invalid profile side: {side}. Must be inside, outside, or on", self.line_num)
 
+        # Parse optional corner_cleanup for pockets
+        corner_cleanup_tool_diameter_mm = None
+        if feature_type == "pocket" and len(parts) >= 4:
+            if parts[2] == "corner_cleanup":
+                if not parts[3].endswith("mm"):
+                    raise PMLParseError(f"Invalid corner_cleanup diameter: {parts[3]}. Must end with 'mm'", self.line_num)
+                corner_cleanup_tool_diameter_mm = float(parts[3][:-2])
+            else:
+                raise PMLParseError(f"Unexpected token after pocket depth: {parts[2]}. Expected 'corner_cleanup'", self.line_num)
+
         # Validate feature type
         if feature_type not in ("profile", "pocket", "hole", "engrave"):
             raise PMLParseError(f"Unknown feature type: {feature_type}", self.line_num)
@@ -271,4 +281,5 @@ class _PMLParser:
             depth=depth,
             side=side,
             depth_mm=depth_mm,
+            corner_cleanup_tool_diameter_mm=corner_cleanup_tool_diameter_mm,
         )

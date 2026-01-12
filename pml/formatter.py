@@ -114,8 +114,15 @@ def _format_feature(feature: Feature) -> str:
         if not depth_str.endswith("mm") and depth_str != "through":
             depth_str = f"{depth_str}mm"
 
+    # Build feature string
+    result = f"{feature_type} {depth_str}"
+
     # Add optional side for profiles
     if feature_type == "profile" and feature.side:
-        return f"{feature_type} {depth_str} {feature.side}"
-    else:
-        return f"{feature_type} {depth_str}"
+        result = f"{result} {feature.side}"
+
+    # Add optional corner_cleanup for pockets
+    if feature_type == "pocket" and feature.corner_cleanup_tool_diameter_mm is not None:
+        result = f"{result} corner_cleanup {feature.corner_cleanup_tool_diameter_mm:.2f}mm"
+
+    return result

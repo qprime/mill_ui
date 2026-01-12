@@ -227,8 +227,8 @@ class _PMLParser:
         """Parse feature specification from string.
 
         Supported formats:
-        - profile through [inside|outside|on]
-        - profile <depth>mm [inside|outside|on]
+        - profile through [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
+        - profile <depth>mm [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
         - pocket <depth>mm [corner_cleanup <diameter>mm]
         - pocket through [corner_cleanup <diameter>mm]
         - hole <depth>mm
@@ -257,20 +257,66 @@ class _PMLParser:
 
         # Parse optional side for profiles
         side = None
+        idx = 2  # Start parsing after feature_type and depth
         if feature_type == "profile" and len(parts) >= 3:
-            side = parts[2]
-            if side not in ("inside", "outside", "on"):
-                raise PMLParseError(f"Invalid profile side: {side}. Must be inside, outside, or on", self.line_num)
+            if parts[2] in ("inside", "outside", "on"):
+                side = parts[2]
+                idx = 3  # Move past side for subsequent parsing
 
         # Parse optional corner_cleanup for pockets
         corner_cleanup_tool_diameter_mm = None
-        if feature_type == "pocket" and len(parts) >= 4:
-            if parts[2] == "corner_cleanup":
-                if not parts[3].endswith("mm"):
-                    raise PMLParseError(f"Invalid corner_cleanup diameter: {parts[3]}. Must end with 'mm'", self.line_num)
-                corner_cleanup_tool_diameter_mm = float(parts[3][:-2])
-            else:
-                raise PMLParseError(f"Unexpected token after pocket depth: {parts[2]}. Expected 'corner_cleanup'", self.line_num)
+        if feature_type == "pocket" and idx < len(parts):
+            if parts[idx] == "corner_cleanup":
+                if idx + 1 >= len(parts) or not parts[idx + 1].endswith("mm"):
+                    raise PMLParseError(f"Invalid corner_cleanup diameter. Expected 'corner_cleanup <diameter>mm'", self.line_num)
+                corner_cleanup_tool_diameter_mm = float(parts[idx + 1][:-2])
+                idx += 2
+
+        # Parse optional tabs for profiles
+        tab_count = None
+        tab_height_mm = None
+        tab_width_mm = None
+        if feature_type == "profile" and idx < len(parts):
+            if parts[idx] == "tabs":
+                # Parse: tabs <count> height <height>mm [width <width>mm]
+                if idx + 3 >= len(parts):  # Need at least: tabs <count> height <height>mm
+                    raise PMLParseError(f"Invalid tabs syntax. Expected 'tabs <count> height <height>mm [width <width>mm]'", self.line_num)
+
+                # Parse count
+                try:
+                    tab_count = int(parts[idx + 1])
+                    if tab_count <= 0:
+                        raise ValueError()
+                except ValueError:
+                    raise PMLParseError(f"Invalid tab count: {parts[idx + 1]}. Must be a positive integer", self.line_num)
+
+                # Parse height keyword
+                if parts[idx + 2] != "height":
+                    raise PMLParseError(f"Expected 'height' after tab count, got: {parts[idx + 2]}", self.line_num)
+
+                # Parse height value
+                if not parts[idx + 3].endswith("mm"):
+                    raise PMLParseError(f"Invalid tab height: {parts[idx + 3]}. Must end with 'mm'", self.line_num)
+                try:
+                    tab_height_mm = float(parts[idx + 3][:-2])
+                    if tab_height_mm <= 0:
+                        raise ValueError()
+                except ValueError:
+                    raise PMLParseError(f"Invalid tab height: {parts[idx + 3]}. Must be a positive number", self.line_num)
+
+                idx += 4
+
+                # Parse optional width
+                if idx < len(parts) and parts[idx] == "width":
+                    if idx + 1 >= len(parts) or not parts[idx + 1].endswith("mm"):
+                        raise PMLParseError(f"Invalid tab width. Expected 'width <width>mm'", self.line_num)
+                    try:
+                        tab_width_mm = float(parts[idx + 1][:-2])
+                        if tab_width_mm <= 0:
+                            raise ValueError()
+                    except ValueError:
+                        raise PMLParseError(f"Invalid tab width: {parts[idx + 1]}. Must be a positive number", self.line_num)
+                    idx += 2
 
         # Validate feature type
         if feature_type not in ("profile", "pocket", "hole", "engrave"):
@@ -282,4 +328,7 @@ class _PMLParser:
             side=side,
             depth_mm=depth_mm,
             corner_cleanup_tool_diameter_mm=corner_cleanup_tool_diameter_mm,
+            tab_count=tab_count,
+            tab_height_mm=tab_height_mm,
+            tab_width_mm=tab_width_mm,
         )

@@ -40,6 +40,10 @@ class Feature:
     side: str | None = None  # "inside" | "outside" | "on" for profiles
     depth_mm: float | None = None  # Alternative to depth for numeric values
     corner_cleanup_tool_diameter_mm: float | None = None  # Tool diameter for corner cleanup (pockets only)
+    # Tab specification for profiles (holding bridges during cutting)
+    tab_count: int | None = None  # Number of tabs to generate
+    tab_height_mm: float | None = None  # Tab height extending up from cut depth
+    tab_width_mm: float | None = None  # Tab width along boundary (optional, defaults to 2× tool diameter)
 
 
 @dataclass(frozen=True)

@@ -275,7 +275,10 @@ def _tabs_to_constraints(tabs_data: dict[str, Any] | None) -> Constraints:
 
     count = int(tabs_data.get("count", 0))
     height_mm = float(tabs_data.get("height", tabs_data.get("height_mm", 3.0)))
-    width_mm = float(tabs_data.get("width_mm", tabs_data.get("width", 10.0)))
+
+    # Handle optional width_mm (can be None)
+    width_value = tabs_data.get("width_mm", tabs_data.get("width"))
+    width_mm = float(width_value) if width_value is not None else None
 
     tab = TabConstraint(count=count, height_mm=height_mm, width_mm=width_mm)
     return Constraints(tabs=tab)

@@ -121,6 +121,12 @@ def _format_feature(feature: Feature) -> str:
     if feature_type == "profile" and feature.side:
         result = f"{result} {feature.side}"
 
+    # Add optional tabs for profiles
+    if feature_type == "profile" and feature.tab_count is not None and feature.tab_height_mm is not None:
+        result = f"{result} tabs {feature.tab_count} height {feature.tab_height_mm:.2f}mm"
+        if feature.tab_width_mm is not None:
+            result = f"{result} width {feature.tab_width_mm:.2f}mm"
+
     # Add optional corner_cleanup for pockets
     if feature_type == "pocket" and feature.corner_cleanup_tool_diameter_mm is not None:
         result = f"{result} corner_cleanup {feature.corner_cleanup_tool_diameter_mm:.2f}mm"

@@ -108,6 +108,13 @@ def item_to_removal_intent(
     if item.feature.type == "profile":
         if item.feature.side:
             hint["side"] = item.feature.side
+        # Add tabs if specified
+        if item.feature.tab_count is not None and item.feature.tab_height_mm is not None:
+            hint["tabs"] = {
+                "count": item.feature.tab_count,
+                "height_mm": item.feature.tab_height_mm,
+                "width_mm": item.feature.tab_width_mm,
+            }
         return profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
 
     elif item.feature.type == "pocket":

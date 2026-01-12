@@ -1,6 +1,6 @@
-# Golden Trace Tests
+# Recipe Output Tests
 
-Golden trace tests automatically verify that recipe PML files generate expected G-code output. This provides:
+Recipe output tests automatically verify that recipe PML files generate expected G-code output. This provides:
 
 - **Regression detection**: Immediately see if code changes affect output
 - **Performance tracking**: Monitor generation time and complexity metrics
@@ -12,25 +12,25 @@ Golden trace tests automatically verify that recipe PML files generate expected 
 
 **With pytest (recommended):**
 ```bash
-# Verify all recipes match golden traces
-pytest tests/test_recipe_golden_traces.py
+# Verify all recipes match recipe outputs
+pytest tests/test_recipes.py
 
 # Verify specific recipe
-pytest tests/test_recipe_golden_traces.py::test_recipe_golden_trace[shaker_corner_cleanup.pml]
+pytest tests/test_recipes.py::test_recipe_output[shaker_corner_cleanup.pml]
 
-# Regenerate all golden traces
-pytest tests/test_recipe_golden_traces.py --update-golden
+# Regenerate all recipe outputs
+pytest tests/test_recipes.py --regen_recipes
 ```
 
 **Standalone mode (no pytest required):**
 ```bash
-# Regenerate all golden traces
-python3 tests/test_recipe_golden_traces.py
+# Regenerate all recipe outputs
+python3 tests/test_recipes.py
 ```
 
 ### Adding New Recipes
 
-Golden trace tests automatically discover all `.pml` files in `docs/recipes/*/`:
+Recipe output tests automatically discover all `.pml` files in `docs/recipes/*/`:
 
 1. Create your recipe PML file:
    ```
@@ -39,17 +39,17 @@ Golden trace tests automatically discover all `.pml` files in `docs/recipes/*/`:
    └── example.pml
    ```
 
-2. Generate initial golden traces:
+2. Generate initial recipe outputs:
    ```bash
-   pytest tests/test_recipe_golden_traces.py --update-golden
+   pytest tests/test_recipes.py --regen_recipes
    # or
-   python3 tests/test_recipe_golden_traces.py
+   python3 tests/test_recipes.py
    ```
 
 3. Commit the artifacts:
    ```bash
    git add docs/recipes/15_my_recipe/output/
-   git commit -m "Add golden traces for recipe 15"
+   git commit -m "Add recipe outputs for recipe 15"
    ```
 
 The test will now automatically include your recipe.
@@ -117,29 +117,29 @@ docs/recipes/14_corner_cleanup_multi_tool/
 
 ```bash
 # Run tests to see if output changed
-pytest tests/test_recipe_golden_traces.py
+pytest tests/test_recipes.py
 
 # If changes are expected/correct, regenerate
-pytest tests/test_recipe_golden_traces.py --update-golden
+pytest tests/test_recipes.py --regen_recipes
 
 # Review the diff
 git diff docs/recipes/*/output/
 
 # Commit if good
 git add docs/recipes/*/output/
-git commit -m "Update golden traces after planner optimization"
+git commit -m "Update recipe outputs after planner optimization"
 ```
 
 ### Detecting Performance Regressions
 
 ```bash
 # Before your changes
-pytest tests/test_recipe_golden_traces.py --update-golden
+pytest tests/test_recipes.py --regen_recipes
 git add docs/recipes/*/output/metrics.json
 git commit -m "Baseline metrics before optimization"
 
 # After your changes
-pytest tests/test_recipe_golden_traces.py --update-golden
+pytest tests/test_recipes.py --regen_recipes
 
 # Compare metrics
 git diff docs/recipes/*/output/metrics.json
@@ -156,7 +156,7 @@ Look for changes in:
 After optimizing the planner, check if output improved:
 
 ```bash
-pytest tests/test_recipe_golden_traces.py --update-golden
+pytest tests/test_recipes.py --regen_recipes
 git diff docs/recipes/*/output/
 ```
 
@@ -182,17 +182,17 @@ Look for:
 ## Troubleshooting
 
 **Test fails with "Missing expected file":**
-- You need to generate initial golden traces: `pytest --update-golden`
+- You need to generate initial recipe outputs: `pytest --regen_recipes`
 
 **Test fails with "differs: N lines changed":**
 - Your code changed the output. Review with `git diff docs/recipes/*/output/`
-- If expected: `pytest --update-golden` to accept changes
+- If expected: `pytest --regen_recipes` to accept changes
 - If unexpected: investigate why output changed
 
 **"No module named pytest":**
-- Use standalone mode: `python3 tests/test_recipe_golden_traces.py`
+- Use standalone mode: `python3 tests/test_recipes.py`
 - Or install pytest: `pip install pytest`
 
 **Recipe not discovered:**
 - Ensure `.pml` file is in `docs/recipes/*/` (subdirectory required)
-- Check `python3 -c "from tests.test_recipe_golden_traces import discover_recipe_pml_files; print(discover_recipe_pml_files())"`
+- Check `python3 -c "from tests.test_recipe_outputs import discover_recipe_pml_files; print(discover_recipe_pml_files())"`

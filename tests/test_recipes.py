@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Golden trace tests for recipe examples.
+"""Recipe output tests.
 
 Auto-discovers PML files in docs/recipes/*/, generates G-code output,
 and compares against committed artifacts. Tracks metrics for performance
 and quality regression detection.
 
 Usage:
-    pytest tests/test_recipe_golden_traces.py                    # Verify outputs match
-    pytest tests/test_recipe_golden_traces.py --update-golden    # Regenerate artifacts
+    pytest tests/test_recipes.py                    # Verify outputs match
+    pytest tests/test_recipes.py --regen_recipes    # Regenerate artifacts
 """
 
 from __future__ import annotations
@@ -68,14 +68,14 @@ RECIPE_TOOL_DB = [
 
 
 def pytest_addoption(parser):
-    """Add --update-golden flag to pytest."""
+    """Add --regen_recipes flag to pytest."""
     if not PYTEST_AVAILABLE:
         return
     parser.addoption(
-        "--update-golden",
+        "--regen_recipes",
         action="store_true",
         default=False,
-        help="Regenerate golden trace artifacts instead of comparing",
+        help="Regenerate recipe artifacts instead of comparing",
     )
 
 
@@ -286,12 +286,12 @@ def compare_outputs(
 
 if PYTEST_AVAILABLE:
     @pytest.mark.parametrize("pml_path", discover_recipe_pml_files())
-    def test_recipe_golden_trace(pml_path: Path, request):
+    def test_recipe_output(pml_path: Path, request):
         """Test that recipe generates expected G-code output."""
-        _test_recipe_golden_trace_impl(pml_path, request.config.getoption("--update-golden"))
+        _test_recipe_output_impl(pml_path, request.config.getoption("--regen_recipes"))
 
 
-def _test_recipe_golden_trace_impl(pml_path: Path, update_golden: bool = False):
+def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
     """Test that recipe generates expected G-code output."""
     # Generate outputs
     gcode_dict, metrics = generate_gcode_from_pml(pml_path)
@@ -299,10 +299,10 @@ def _test_recipe_golden_trace_impl(pml_path: Path, update_golden: bool = False):
     # Determine output directory (same directory as PML file)
     output_dir = pml_path.parent / "output"
 
-    if update_golden:
+    if regenerate:
         # Regenerate mode: write outputs and pass
         write_outputs(output_dir, gcode_dict, metrics)
-        print(f"\n✓ Regenerated golden traces for {pml_path.name}")
+        print(f"\n✓ Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
         print(f"  Files: {len(gcode_dict)} G-code files + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
@@ -314,13 +314,13 @@ def _test_recipe_golden_trace_impl(pml_path: Path, update_golden: bool = False):
             diff_summary = "\n  ".join(diffs)
             if PYTEST_AVAILABLE:
                 pytest.fail(
-                    f"Golden trace mismatch for {pml_path.name}:\n  {diff_summary}\n\n"
-                    f"To update golden traces, run:\n"
-                    f"  pytest tests/test_recipe_golden_traces.py --update-golden"
+                    f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}\n\n"
+                    f"To update recipe outputs, run:\n"
+                    f"  pytest tests/test_recipe_outputs.py --regen_recipes"
                 )
             else:
                 raise AssertionError(
-                    f"Golden trace mismatch for {pml_path.name}:\n  {diff_summary}"
+                    f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
                 )
 
         # Also write metrics even in verify mode (for tracking changes)

@@ -1,16 +1,16 @@
 {
   "timing": {
-    "parse_ms": 0.09,
-    "ir_ms": 0.01,
+    "parse_ms": 0.12,
+    "ir_ms": 0.02,
     "hints_ms": 0.0,
-    "plan_ms": 1.95,
-    "gcode_ms": 3.56,
-    "total_ms": 5.62
+    "plan_ms": 3.53,
+    "gcode_ms": 7.34,
+    "total_ms": 11.02
   },
   "complexity": {
-    "total_moves": 1566,
+    "total_moves": 3308,
     "rapid_moves": 0,
-    "cut_moves": 1566,
+    "cut_moves": 3308,
     "rapid_ratio": 0.0
   },
   "fidelity": {
@@ -19,7 +19,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 9.525,
-        "move_count": 1314
+        "move_count": 3056
       },
       {
         "name": "profile",
@@ -29,15 +29,15 @@
     ]
   },
   "output_size": {
-    "total_bytes": 28155,
-    "total_lines": 1574,
+    "total_bytes": 59822,
+    "total_lines": 3304,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 23734,
-        "lines": 1320
+        "bytes": 55449,
+        "lines": 3050
       },
       "profile-3.17mm": {
-        "bytes": 4421,
+        "bytes": 4373,
         "lines": 254
       }
     }

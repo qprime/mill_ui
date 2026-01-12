@@ -1,16 +1,16 @@
 {
   "timing": {
-    "parse_ms": 0.12,
-    "ir_ms": 0.01,
-    "hints_ms": 0.01,
-    "plan_ms": 3.1,
-    "gcode_ms": 7.86,
-    "total_ms": 11.1
+    "parse_ms": 0.11,
+    "ir_ms": 0.02,
+    "hints_ms": 0.0,
+    "plan_ms": 2.82,
+    "gcode_ms": 5.92,
+    "total_ms": 8.88
   },
   "complexity": {
-    "total_moves": 3366,
+    "total_moves": 2218,
     "rapid_moves": 0,
-    "cut_moves": 3366,
+    "cut_moves": 2218,
     "rapid_ratio": 0.0
   },
   "fidelity": {
@@ -19,12 +19,12 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 9.525,
-        "move_count": 1314
+        "move_count": 234
       },
       {
-        "name": "corner_cleanup",
+        "name": "bore",
         "tool_diameter_mm": 3.175,
-        "move_count": 1800
+        "move_count": 1732
       },
       {
         "name": "profile",
@@ -34,19 +34,19 @@
     ]
   },
   "output_size": {
-    "total_bytes": 75532,
-    "total_lines": 3368,
+    "total_bytes": 60800,
+    "total_lines": 2232,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 23734,
-        "lines": 1320
+        "bytes": 4246,
+        "lines": 240
       },
-      "corner_cleanup-3.17mm": {
-        "bytes": 47377,
-        "lines": 1794
+      "bore-3.17mm": {
+        "bytes": 52181,
+        "lines": 1738
       },
       "profile-3.17mm": {
-        "bytes": 4421,
+        "bytes": 4373,
         "lines": 254
       }
     }

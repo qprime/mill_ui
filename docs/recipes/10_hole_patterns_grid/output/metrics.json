@@ -1,0 +1,36 @@
+{
+  "timing": {
+    "parse_ms": 0.19,
+    "ir_ms": 0.09,
+    "hints_ms": 0.01,
+    "plan_ms": 44.59,
+    "gcode_ms": 91.52,
+    "total_ms": 136.4
+  },
+  "complexity": {
+    "total_moves": 31648,
+    "rapid_moves": 0,
+    "cut_moves": 31648,
+    "rapid_ratio": 0.0
+  },
+  "fidelity": {
+    "tool_changes": 1,
+    "passes": [
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 31648
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 983297,
+    "total_lines": 31594,
+    "files": {
+      "bore-3.17mm": {
+        "bytes": 983297,
+        "lines": 31594
+      }
+    }
+  }
+}

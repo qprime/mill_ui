@@ -66,13 +66,25 @@ def collect_dimension_requests(
     offset_y: float,
     *,
     include_features: set[str] | None = None,
+    deduplicate: bool = True,
 ) -> list[DimensionRequest]:
     """Collect dimension requests from layout (stage 1: what to dimension).
 
-    Returns deterministically ordered list of dimension requests.
+    Args:
+        ast: Layout AST with sheet and items
+        offset_x: SVG X offset for sheet origin
+        offset_y: SVG Y offset for sheet origin
+        include_features: Feature types to dimension (default: {"profile"})
+        deduplicate: If True (default), only show one dimension per unique size.
+            Set to False to dimension every shape individually.
+
+    Returns:
+        Deterministically ordered list of dimension requests.
     """
     include_features = include_features or {"profile"}
-    return _collect_dimension_requests(ast, offset_x, offset_y, include_features=include_features)
+    return _collect_dimension_requests(
+        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
+    )
 
 
 def place_on_rails(
@@ -159,13 +171,25 @@ def place_dimensions_on_rails(
     *,
     margin: float = 100.0,
     include_features: set[str] | None = None,
+    deduplicate: bool = True,
 ) -> list[PlacedDimension]:
     """Convenience function: collect + place dimensions in one call.
+
+    Args:
+        ast: Layout AST with sheet and items
+        offset_x: SVG X offset for sheet origin
+        offset_y: SVG Y offset for sheet origin
+        margin: Reserved margin for dimensions
+        include_features: Feature types to dimension (default: {"profile"})
+        deduplicate: If True (default), only show one dimension per unique size.
+            Set to False to dimension every shape individually.
 
     For most use cases, prefer this over calling collect_dimension_requests()
     and place_on_rails() separately.
     """
-    requests = collect_dimension_requests(ast, offset_x, offset_y, include_features=include_features)
+    requests = collect_dimension_requests(
+        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
+    )
     return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin)
 
 
@@ -241,6 +265,7 @@ def _collect_dimension_requests(
     offset_y: float,
     *,
     include_features: set[str],
+    deduplicate: bool = True,
 ) -> list[DimensionRequest]:
     """Internal: Collect dimension requests in deterministic order.
 
@@ -250,8 +275,6 @@ def _collect_dimension_requests(
 
     Note: Sheet dimensions are NOT included - they're shown in NOTES section.
     """
-    sheet = ast.sheet
-
     requests: list[DimensionRequest] = []
 
     # Note: Sheet dimensions removed - they're shown in NOTES section instead
@@ -269,8 +292,12 @@ def _collect_dimension_requests(
         and item.shape_id is not None
     ]
 
-    # Deterministic sort: (feature.type, shape_id, type)
+    # Deterministic sort: (feature.type, shape_id, type) - first item per size group wins
     shape_items.sort(key=lambda i: (i.feature.type, i.shape_id or "", i.type))
+
+    # Track which (feature_type, shape_type, w, h) combos we've already dimensioned
+    # Only used when deduplicate=True
+    dimensioned_sizes: set[tuple[str, str, int, int]] = set()
 
     for item in shape_items:
         bounds = _item_bounds_in_svg(item, offset_x, offset_y)
@@ -279,6 +306,13 @@ def _collect_dimension_requests(
 
         w = bounds.x_max - bounds.x_min
         h = bounds.y_max - bounds.y_min
+
+        if deduplicate:
+            # Create a size key for deduplication (round to nearest mm)
+            size_key = (item.feature.type, item.type, round(w), round(h))
+            if size_key in dimensioned_sizes:
+                continue  # Skip - already have dimensions for this size
+            dimensioned_sizes.add(size_key)
 
         if item.type in ("Rect", "RoundedRect"):
             requests.append(
@@ -313,7 +347,7 @@ def _collect_dimension_requests(
 
     # Hole center spacing (simple patterns: group by approx y/x, dimension adjacent spacing).
     hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y)
-    requests.extend(_hole_spacing_requests(hole_centers))
+    requests.extend(_hole_spacing_requests(hole_centers, deduplicate=deduplicate))
 
     return requests
 
@@ -330,11 +364,29 @@ def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float) -> li
     return holes
 
 
-def _hole_spacing_requests(centers: list[tuple[float, float]]) -> list[DimensionRequest]:
+def _hole_spacing_requests(
+    centers: list[tuple[float, float]],
+    *,
+    deduplicate: bool = True,
+) -> list[DimensionRequest]:
+    """Generate hole spacing dimension requests.
+
+    Args:
+        centers: List of (x, y) hole center coordinates
+        deduplicate: If True (default), only shows one representative dimension
+            per unique spacing value to avoid cluttering the drawing.
+
+    Returns:
+        List of dimension requests for hole spacing.
+    """
     if len(centers) < 2:
         return []
 
     requests: list[DimensionRequest] = []
+
+    # Track unique spacing values we've already dimensioned (only used when deduplicate=True)
+    seen_h_spacings: set[int] = set()  # rounded to nearest mm
+    seen_v_spacings: set[int] = set()
 
     # Group by approximate y for horizontal spacing.
     by_y: dict[float, list[tuple[float, float]]] = {}
@@ -351,6 +403,11 @@ def _hole_spacing_requests(centers: list[tuple[float, float]]) -> list[Dimension
             dx = abs(x2 - x1)
             if dx < 1e-6:
                 continue
+            if deduplicate:
+                spacing_key = round(dx)
+                if spacing_key in seen_h_spacings:
+                    continue  # Skip - already have this spacing dimensioned
+                seen_h_spacings.add(spacing_key)
             requests.append(
                 DimensionRequest(
                     orientation="horizontal",
@@ -376,6 +433,11 @@ def _hole_spacing_requests(centers: list[tuple[float, float]]) -> list[Dimension
             dy = abs(y2 - y1)
             if dy < 1e-6:
                 continue
+            if deduplicate:
+                spacing_key = round(dy)
+                if spacing_key in seen_v_spacings:
+                    continue  # Skip - already have this spacing dimensioned
+                seen_v_spacings.add(spacing_key)
             requests.append(
                 DimensionRequest(
                     orientation="vertical",

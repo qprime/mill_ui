@@ -70,24 +70,12 @@
     <polygon points="190.0,80.0 193.0,77.0 193.0,83.0" fill="#5ab9ea" />
     <polygon points="310.0,80.0 307.0,77.0 307.0,83.0" fill="#5ab9ea" />
     <text x="250.0" y="75.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">120.0mm</text>
-    <line x1="190.0" y1="260.0" x2="190.0" y2="60.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="310.0" y1="260.0" x2="310.0" y2="60.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="190.0" y1="60.0" x2="310.0" y2="60.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="190.0,60.0 193.0,57.0 193.0,63.0" fill="#5ab9ea" />
-    <polygon points="310.0,60.0 307.0,57.0 307.0,63.0" fill="#5ab9ea" />
-    <text x="250.0" y="55.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">120.0mm</text>
     <line x1="190.0" y1="180.0" x2="420.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="190.0" y1="260.0" x2="420.0" y2="260.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="420.0" y1="180.0" x2="420.0" y2="260.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="420.0,180.0 417.0,183.0 423.0,183.0" fill="#5ab9ea" />
     <polygon points="420.0,260.0 417.0,257.0 423.0,257.0" fill="#5ab9ea" />
     <text x="425.0" y="220.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 425.0 220.0)">80.0mm</text>
-    <line x1="310.0" y1="180.0" x2="440.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="310.0" y1="260.0" x2="440.0" y2="260.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="440.0" y1="180.0" x2="440.0" y2="260.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="440.0,180.0 437.0,183.0 443.0,183.0" fill="#5ab9ea" />
-    <polygon points="440.0,260.0 437.0,257.0 443.0,257.0" fill="#5ab9ea" />
-    <text x="445.0" y="220.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 445.0 220.0)">80.0mm</text>
     <line x1="160.0" y1="220.0" x2="180.0" y2="220.0" stroke="#ff9500" stroke-width="1" />
     <path d="M 160.0,220.0 L 163.0,217.0 L 163.0,223.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
     <path d="M 180.0,220.0 L 177.0,217.0 L 177.0,223.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />

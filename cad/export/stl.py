@@ -23,8 +23,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from shapely.geometry import Polygon, Point
+    from shapely.geometry import Polygon, Point, MultiPolygon
     from shapely import affinity
+    from shapely.ops import unary_union
 except ImportError:
     raise ImportError(
         "shapely is required for STL export. Install with: pip install shapely"
@@ -122,17 +123,30 @@ def apply_kerf_offset(poly: Polygon, kerf_mm: float, feature_type: str, side: st
         return poly
 
 
-def extrude_polygon_to_mesh(poly: Polygon, height_mm: float) -> trimesh.Trimesh:
-    """Extrude 2D polygon to 3D mesh.
+def extrude_polygon_to_mesh(poly: Polygon | MultiPolygon, height_mm: float) -> trimesh.Trimesh:
+    """Extrude 2D polygon (or MultiPolygon) to 3D mesh.
 
     Args:
-        poly: Shapely polygon
+        poly: Shapely Polygon or MultiPolygon
         height_mm: Extrusion height in mm
 
     Returns:
-        Trimesh object
+        Trimesh object (concatenated if MultiPolygon)
     """
-    # Extrude to 3D
+    # Handle MultiPolygon by extruding each polygon and concatenating
+    if isinstance(poly, MultiPolygon):
+        meshes = []
+        for geom in poly.geoms:
+            mesh = trimesh.creation.extrude_polygon(geom, height=height_mm)
+            if not mesh.is_watertight:
+                trimesh.repair.fix_normals(mesh)
+                trimesh.repair.fill_holes(mesh)
+            meshes.append(mesh)
+        if len(meshes) == 1:
+            return meshes[0]
+        return trimesh.util.concatenate(meshes)
+
+    # Single polygon
     mesh = trimesh.creation.extrude_polygon(poly, height=height_mm)
 
     # Ensure mesh is watertight for boolean operations
@@ -171,7 +185,22 @@ def export_stl(
     quality_map = {"low": 16, "medium": 32, "high": 64}
     circle_resolution = quality_map.get(quality, 32)
 
-    # Create stock material (starting box)
+    # Separate shapes by feature type for proper processing order
+    # Profile outside shapes define part boundaries (process first)
+    # Other shapes are subtractive operations
+    profile_outside_shapes = []
+    subtractive_shapes = []
+
+    for shape in shapes:
+        feature = shape["feature"]
+        feature_type = feature["type"]
+        side = feature.get("side")
+
+        if feature_type == "profile" and side == "outside":
+            profile_outside_shapes.append(shape)
+        else:
+            subtractive_shapes.append(shape)
+
     # Determine bounding box from all shapes
     all_x = []
     all_y = []
@@ -189,22 +218,88 @@ def export_stl(
 
     # Add margin for visualization
     margin = 10.0  # mm
-    min_x -= margin
-    min_y -= margin
-    max_x += margin
-    max_y += margin
+    stock_min_x = min_x - margin
+    stock_min_y = min_y - margin
+    stock_max_x = max_x + margin
+    stock_max_y = max_y + margin
 
-    width = max_x - min_x
-    height = max_y - min_y
+    width = stock_max_x - stock_min_x
+    height = stock_max_y - stock_min_y
 
-    # Create stock box (translate to origin for trimesh)
+    # Create stock box
     stock = trimesh.creation.box(extents=[width, height, sheet_thickness_mm])
-    stock.apply_translation([min_x + width/2, min_y + height/2, sheet_thickness_mm/2])
+    stock.apply_translation([stock_min_x + width/2, stock_min_y + height/2, sheet_thickness_mm/2])
 
     # Process features
     floating_parts = []
 
-    for shape in shapes:
+    # First pass: Handle profile outside shapes (define part boundaries)
+    # For "profile outside", we keep the shapes and remove everything outside them
+    # Multiple profile outside shapes are unioned together first
+    if profile_outside_shapes:
+        # Collect all profile outside polygons
+        part_polygons = []
+        profile_depth_mm = sheet_thickness_mm  # Default to through-cut
+
+        for shape in profile_outside_shapes:
+            feature = shape["feature"]
+
+            # Convert to polygon and apply kerf
+            poly = shape_dict_to_polygon(shape)
+            side = feature.get("side")
+            poly_kerf = apply_kerf_offset(poly, kerf_mm, "profile", side)
+            part_polygons.append(poly_kerf)
+
+            # Track depth (use minimum if multiple depths specified)
+            depth_value = feature["depth"]
+            if depth_value == "through":
+                depth_mm = sheet_thickness_mm
+            else:
+                depth_mm = feature.get("depth_mm", depth_value)
+            profile_depth_mm = min(profile_depth_mm, depth_mm)
+
+        # Union all profile outside polygons into single MultiPolygon or Polygon
+        combined_poly = unary_union(part_polygons)
+
+        # Extrude the combined polygon to create part boundaries mesh
+        part_mesh = extrude_polygon_to_mesh(combined_poly, profile_depth_mm)
+        part_mesh.apply_translation([0, 0, 0])
+
+        # Perform boolean intersection (keep only material inside profile boundaries)
+        try:
+            if not stock.is_watertight:
+                trimesh.repair.fix_normals(stock)
+                trimesh.repair.fill_holes(stock)
+
+            if not part_mesh.is_watertight:
+                trimesh.repair.fix_normals(part_mesh)
+                trimesh.repair.fill_holes(part_mesh)
+
+            result = None
+            last_error = None
+            for engine in ["manifold", "blender"]:
+                try:
+                    # Intersection: keep only material inside the profile boundaries
+                    result = stock.intersection(part_mesh, engine=engine)
+                    break
+                except Exception as e:
+                    last_error = e
+                    continue
+
+            if result is None:
+                print(f"Warning: Boolean intersection failed for profile outside shapes: {last_error}")
+            elif isinstance(result, list):
+                if len(result) > 0:
+                    # Combine all parts (they're all valid parts from the intersection)
+                    stock = trimesh.util.concatenate(result)
+            else:
+                stock = result
+
+        except Exception as e:
+            print(f"Warning: Boolean intersection failed for profile outside shapes: {e}")
+
+    # Second pass: Handle subtractive shapes (pockets, holes, inside profiles, etc.)
+    for shape in subtractive_shapes:
         feature = shape["feature"]
         feature_type = feature["type"]
 
@@ -224,8 +319,8 @@ def export_stl(
         feature_mesh = extrude_polygon_to_mesh(poly_kerf, depth_mm)
 
         # Position feature mesh at correct Z level
-        if feature_type == "profile" and depth_value == "through":
-            # Through profile: cuts all the way through
+        if feature_type == "profile":
+            # Inside or on-line profile: cuts through (subtractive)
             feature_mesh.apply_translation([0, 0, 0])
         elif feature_type == "pocket":
             # Pocket: cuts from top surface down

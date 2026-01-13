@@ -37,18 +37,30 @@
     <polygon points="460.0,140 457.0,143.0 463.0,143.0" fill="#5ab9ea" />
     <polygon points="460.0,340.0 457.0,337.0 463.0,337.0" fill="#5ab9ea" />
     <text x="465.0" y="240.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 465.0 240.0)">200.0mm</text>
-    <line x1="180.0" y1="170.0" x2="180.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="400.0" y1="170.0" x2="400.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="180.0" y1="100.0" x2="400.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="180.0,100.0 183.0,97.0 183.0,103.0" fill="#5ab9ea" />
-    <polygon points="400.0,100.0 397.0,97.0 397.0,103.0" fill="#5ab9ea" />
-    <text x="290.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">220.0mm</text>
-    <line x1="400.0" y1="170.0" x2="480.0" y2="170.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="400.0" y1="310.0" x2="480.0" y2="310.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="480.0" y1="170.0" x2="480.0" y2="310.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="480.0,170.0 477.0,173.0 483.0,173.0" fill="#5ab9ea" />
-    <polygon points="480.0,310.0 477.0,307.0 483.0,307.0" fill="#5ab9ea" />
-    <text x="485.0" y="240.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 485.0 240.0)">140.0mm</text>
+    <line x1="200.0" y1="190.0" x2="200.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="380.0" y1="190.0" x2="380.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="200.0" y1="100.0" x2="380.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="200.0,100.0 203.0,97.0 203.0,103.0" fill="#5ab9ea" />
+    <polygon points="380.0,100.0 377.0,97.0 377.0,103.0" fill="#5ab9ea" />
+    <text x="290.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">180.0mm</text>
+    <line x1="380.0" y1="190.0" x2="480.0" y2="190.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="380.0" y1="290.0" x2="480.0" y2="290.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="480.0" y1="190.0" x2="480.0" y2="290.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="480.0,190.0 477.0,193.0 483.0,193.0" fill="#5ab9ea" />
+    <polygon points="480.0,290.0 477.0,287.0 483.0,287.0" fill="#5ab9ea" />
+    <text x="485.0" y="240.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 485.0 240.0)">100.0mm</text>
+    <line x1="180.0" y1="170.0" x2="180.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="400.0" y1="170.0" x2="400.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="180.0" y1="80.0" x2="400.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="180.0,80.0 183.0,77.0 183.0,83.0" fill="#5ab9ea" />
+    <polygon points="400.0,80.0 397.0,77.0 397.0,83.0" fill="#5ab9ea" />
+    <text x="290.0" y="75.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">220.0mm</text>
+    <line x1="400.0" y1="170.0" x2="500.0" y2="170.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="400.0" y1="310.0" x2="500.0" y2="310.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="500.0" y1="170.0" x2="500.0" y2="310.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="500.0,170.0 497.0,173.0 503.0,173.0" fill="#5ab9ea" />
+    <polygon points="500.0,310.0 497.0,307.0 503.0,307.0" fill="#5ab9ea" />
+    <text x="505.0" y="240.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 505.0 240.0)">140.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="360.0" class="notes" font-weight="bold">NOTES</text>
@@ -62,16 +74,16 @@
     <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="420.0" y="20" class="legend" font-weight="bold">LEGEND</text>
-    <line x1="420.0" y1="38" x2="435.0" y2="38" stroke="#e8e8e8" stroke-width="2" />
-    <text x="440.0" y="41" class="legend">Profile Cuts</text>
-    <rect x="420.0" y="51" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="440.0" y="57" class="legend">Pocket Regions</text>
-    <line x1="420.0" y1="70" x2="435.0" y2="70" stroke="#e8e8e8" stroke-width="1.5" />
-    <text x="440.0" y="73" class="legend">Holes</text>
-    <line x1="420.0" y1="86" x2="435.0" y2="86" stroke="#888888" stroke-width="1" stroke-dasharray="4,4" />
-    <text x="440.0" y="89" class="legend">Engraves</text>
-    <line x1="420.0" y1="102" x2="435.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
-    <text x="440.0" y="105" class="legend">Dimensions</text>
+    <text x="448.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="448.0" y1="38" x2="463.0" y2="38" stroke="#333333" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="468.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="448.0" y1="54" x2="463.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="468.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="448.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="468.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="448.0" y1="86" x2="463.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="468.0" y="89" class="legend">Holes</text>
+    <line x1="448.0" y1="102" x2="463.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="468.0" y="105" class="legend">Dimensions</text>
   </g>
 </svg>

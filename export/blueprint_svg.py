@@ -349,7 +349,7 @@ def _render_dimensions(
     theme: Theme,
 ) -> None:
     """Render dimension lines and labels on rails."""
-    dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile"})
+    dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"})
     for dim in dims:
         render_placed_dimension(group, dim, theme.dimension_stroke)
 
@@ -390,7 +390,7 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
 
 def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> None:
     """Render legend showing layer meanings."""
-    x = viewbox_width - 160  # Moved closer to right edge with increased margin
+    x = viewbox_width - 132  # Positioned near right edge with margin space
     y = 20
     line_height = 16
     swatch_size = 10
@@ -410,10 +410,10 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
     # Layer specifications: (label, stroke_color, stroke_width, dash_pattern, fill_color)
     # Note: dash_pattern=None means no dashing, fill_color=None means no fill
     layers = [
+        ("Sheet Outline", theme.construction_stroke, "1", theme.construction_dash, None),
         ("Profile Cuts", theme.profile_stroke, "2", None, None),
         ("Pocket Regions", theme.pocket_stroke, "1.5", None, theme.pocket_fill),
         ("Holes", theme.hole_stroke, "1.5", None, None),
-        ("Engraves", theme.engrave_stroke, "1", theme.engrave_dash, None),
         ("Dimensions", theme.dimension_stroke, "1", None, None),
     ]
 

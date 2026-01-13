@@ -58,16 +58,16 @@
     <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="570.0" y="20" class="legend" font-weight="bold">LEGEND</text>
-    <line x1="570.0" y1="38" x2="585.0" y2="38" stroke="#e8e8e8" stroke-width="2" />
-    <text x="590.0" y="41" class="legend">Profile Cuts</text>
-    <rect x="570.0" y="51" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="590.0" y="57" class="legend">Pocket Regions</text>
-    <line x1="570.0" y1="70" x2="585.0" y2="70" stroke="#e8e8e8" stroke-width="1.5" />
-    <text x="590.0" y="73" class="legend">Holes</text>
-    <line x1="570.0" y1="86" x2="585.0" y2="86" stroke="#888888" stroke-width="1" stroke-dasharray="4,4" />
-    <text x="590.0" y="89" class="legend">Engraves</text>
-    <line x1="570.0" y1="102" x2="585.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
-    <text x="590.0" y="105" class="legend">Dimensions</text>
+    <text x="598.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="598.0" y1="38" x2="613.0" y2="38" stroke="#333333" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="618.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="598.0" y1="54" x2="613.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="618.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="598.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="618.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="598.0" y1="86" x2="613.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="618.0" y="89" class="legend">Holes</text>
+    <line x1="598.0" y1="102" x2="613.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="618.0" y="105" class="legend">Dimensions</text>
   </g>
 </svg>

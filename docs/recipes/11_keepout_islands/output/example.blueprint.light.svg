@@ -35,6 +35,18 @@
     <polygon points="560.0,140 557.0,143.0 563.0,143.0" fill="#5ab9ea" />
     <polygon points="560.0,540.0 557.0,537.0 563.0,537.0" fill="#5ab9ea" />
     <text x="565.0" y="340.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 565.0 340.0)">400.0mm</text>
+    <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="140.0" x2="540.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="100.0" x2="540.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,100.0 143.0,97.0 143.0,103.0" fill="#5ab9ea" />
+    <polygon points="540.0,100.0 537.0,97.0 537.0,103.0" fill="#5ab9ea" />
+    <text x="340.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">400.0mm</text>
+    <line x1="540.0" y1="140.0" x2="580.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="540.0" x2="580.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="580.0" y1="140.0" x2="580.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="580.0,140.0 577.0,143.0 583.0,143.0" fill="#5ab9ea" />
+    <polygon points="580.0,540.0 577.0,537.0 583.0,537.0" fill="#5ab9ea" />
+    <text x="585.0" y="340.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 585.0 340.0)">400.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="560.0" class="notes" font-weight="bold">NOTES</text>
@@ -48,16 +60,16 @@
     <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="520.0" y="20" class="legend" font-weight="bold">LEGEND</text>
-    <line x1="520.0" y1="38" x2="535.0" y2="38" stroke="#e8e8e8" stroke-width="2" />
-    <text x="540.0" y="41" class="legend">Profile Cuts</text>
-    <rect x="520.0" y="51" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="540.0" y="57" class="legend">Pocket Regions</text>
-    <line x1="520.0" y1="70" x2="535.0" y2="70" stroke="#e8e8e8" stroke-width="1.5" />
-    <text x="540.0" y="73" class="legend">Holes</text>
-    <line x1="520.0" y1="86" x2="535.0" y2="86" stroke="#888888" stroke-width="1" stroke-dasharray="4,4" />
-    <text x="540.0" y="89" class="legend">Engraves</text>
-    <line x1="520.0" y1="102" x2="535.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
-    <text x="540.0" y="105" class="legend">Dimensions</text>
+    <text x="548.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="548.0" y1="38" x2="563.0" y2="38" stroke="#333333" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="568.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="548.0" y1="54" x2="563.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="568.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="548.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="568.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="548.0" y1="86" x2="563.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="568.0" y="89" class="legend">Holes</text>
+    <line x1="548.0" y1="102" x2="563.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="568.0" y="105" class="legend">Dimensions</text>
   </g>
 </svg>

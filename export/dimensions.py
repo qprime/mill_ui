@@ -245,33 +245,17 @@ def _collect_dimension_requests(
     """Internal: Collect dimension requests in deterministic order.
 
     Ordering guarantee:
-    1. Sheet dimensions (width, then height) always first
-    2. Shape items sorted by (feature.type, shape_id, type) for stability
-    3. Hole spacing requests sorted by coordinate groups
+    1. Shape items sorted by (feature.type, shape_id, type) for stability
+    2. Hole spacing requests sorted by coordinate groups
+
+    Note: Sheet dimensions are NOT included - they're shown in NOTES section.
     """
     sheet = ast.sheet
 
     requests: list[DimensionRequest] = []
 
-    # Sheet overall width/height (deterministic: always first).
-    requests.append(
-        DimensionRequest(
-            orientation="horizontal",
-            a=offset_x,
-            b=offset_x + sheet.width_mm,
-            anchor=offset_y,
-            text=_fmt_mm(sheet.width_mm),
-        )
-    )
-    requests.append(
-        DimensionRequest(
-            orientation="vertical",
-            a=offset_y,
-            b=offset_y + sheet.height_mm,
-            anchor=offset_x + sheet.width_mm,
-            text=_fmt_mm(sheet.height_mm),
-        )
-    )
+    # Note: Sheet dimensions removed - they're shown in NOTES section instead
+    # This reduces visual clutter since sheet size is already documented
 
     # Item outline dims (profiles by default; pockets optional).
     shape_items: list[Item] = [

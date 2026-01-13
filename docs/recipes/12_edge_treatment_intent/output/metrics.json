@@ -4,8 +4,8 @@
     "ir_ms": 0.01,
     "hints_ms": 0.0,
     "plan_ms": 0.64,
-    "gcode_ms": 1.24,
-    "total_ms": 1.99
+    "gcode_ms": 1.23,
+    "total_ms": 1.98
   },
   "complexity": {
     "total_moves": 524,

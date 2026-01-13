@@ -23,30 +23,18 @@
   <g id="HOLES" class="holes" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="140" y1="140" x2="140" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="590.0" y1="140" x2="590.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140" y1="120.0" x2="590.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
-    <polygon points="590.0,120.0 587.0,117.0 587.0,123.0" fill="#5ab9ea" />
-    <text x="365.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">450.0mm</text>
-    <line x1="590.0" y1="140" x2="610.0" y2="140" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="590.0" y1="790.0" x2="610.0" y2="790.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="610.0" y1="140" x2="610.0" y2="790.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="610.0,140 607.0,143.0 613.0,143.0" fill="#5ab9ea" />
-    <polygon points="610.0,790.0 607.0,787.0 613.0,787.0" fill="#5ab9ea" />
-    <text x="615.0" y="465.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 615.0 465.0)">650.0mm</text>
-    <line x1="265.0" y1="390.0" x2="265.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="465.0" y1="390.0" x2="465.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="265.0" y1="100.0" x2="465.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="265.0,100.0 268.0,97.0 268.0,103.0" fill="#5ab9ea" />
-    <polygon points="465.0,100.0 462.0,97.0 462.0,103.0" fill="#5ab9ea" />
-    <text x="365.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">200.0mm</text>
-    <line x1="465.0" y1="390.0" x2="630.0" y2="390.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="465.0" y1="540.0" x2="630.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="630.0" y1="390.0" x2="630.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="630.0,390.0 627.0,393.0 633.0,393.0" fill="#5ab9ea" />
-    <polygon points="630.0,540.0 627.0,537.0 633.0,537.0" fill="#5ab9ea" />
-    <text x="635.0" y="465.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 635.0 465.0)">150.0mm</text>
+    <line x1="265.0" y1="390.0" x2="265.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="465.0" y1="390.0" x2="465.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="265.0" y1="120.0" x2="465.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="265.0,120.0 268.0,117.0 268.0,123.0" fill="#5ab9ea" />
+    <polygon points="465.0,120.0 462.0,117.0 462.0,123.0" fill="#5ab9ea" />
+    <text x="365.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">200.0mm</text>
+    <line x1="465.0" y1="390.0" x2="610.0" y2="390.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="465.0" y1="540.0" x2="610.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="610.0" y1="390.0" x2="610.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="610.0,390.0 607.0,393.0 613.0,393.0" fill="#5ab9ea" />
+    <polygon points="610.0,540.0 607.0,537.0 613.0,537.0" fill="#5ab9ea" />
+    <text x="615.0" y="465.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 615.0 465.0)">150.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="810.0" class="notes" font-weight="bold">NOTES</text>

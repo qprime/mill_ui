@@ -52,7 +52,7 @@ DARK_THEME = Theme(
     hole_fill="none",
     engrave_stroke="#888888",
     engrave_dash="4,4",
-    construction_stroke="#333333",
+    construction_stroke="#6b8e7f",  # Greenish-gray for better visibility
     construction_dash="2,2",
     dimension_stroke="#5ab9ea",
     dimension_text="#5ab9ea",
@@ -489,6 +489,9 @@ def _render_notes(
     # Collect depth information
     depths_info = _collect_depth_info(ast, removal_intents)
 
+    # Collect hole diameter information
+    hole_diameters = _collect_hole_diameters(ast)
+
     # Feature counts
     feature_counts = _count_features(ast)
 
@@ -549,6 +552,33 @@ def _render_notes(
             depth_elem.text = f"• {depth_line}"
             line_num += 1
 
+    # Hole diameter information
+    if hole_diameters:
+        hole_title = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(x),
+                "y": str(y + line_num * line_height),
+                "class": "notes",
+            },
+        )
+        hole_title.text = "Hole Diameters:"
+        line_num += 1
+
+        for diameter_line in hole_diameters:
+            diameter_elem = ET.SubElement(
+                group,
+                "text",
+                {
+                    "x": str(x + 10),
+                    "y": str(y + line_num * line_height),
+                    "class": "notes",
+                },
+            )
+            diameter_elem.text = f"• {diameter_line}"
+            line_num += 1
+
 
 def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent] | None) -> list[str]:
     """Collect depth information from features (non-through depths only)."""
@@ -598,3 +628,42 @@ def _count_features(ast: LayoutAST) -> dict[str, int]:
         ftype = item.feature.type
         counts[ftype] = counts.get(ftype, 0) + 1
     return counts
+
+
+def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
+    """Collect hole diameter specifications from circle shapes with hole features.
+
+    Returns:
+        List of formatted diameter strings (e.g., "10.0mm", "⌀8.0mm")
+    """
+    diameters: set[float] = set()
+
+    for item in ast.items:
+        # Only process circles with hole features
+        if item.kind != "shape" or item.type != "Circle":
+            continue
+        if item.feature is None or item.feature.type != "hole":
+            continue
+        if item.geometry is None:
+            continue
+
+        # Extract diameter (prefer diameter_mm, fall back to radius_mm * 2)
+        data = item.geometry.data
+        diameter = data.get("diameter_mm")
+        if diameter is not None:
+            diameters.add(float(diameter))
+        else:
+            radius = data.get("radius_mm")
+            if radius is not None:
+                diameters.add(float(radius) * 2.0)
+
+    # Format output (sorted for consistency)
+    if not diameters:
+        return []
+
+    sorted_diameters = sorted(diameters)
+    if len(sorted_diameters) == 1:
+        return [f"⌀{sorted_diameters[0]:.1f}mm"]
+    else:
+        # Multiple diameters: show each unique size
+        return [f"⌀{d:.1f}mm" for d in sorted_diameters]

@@ -5,7 +5,7 @@
     "hints_ms": 0.0,
     "plan_ms": 0.34,
     "gcode_ms": 0.61,
-    "total_ms": 1.09
+    "total_ms": 1.08
   },
   "complexity": {
     "total_moves": 252,

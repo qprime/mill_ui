@@ -467,11 +467,136 @@ def _overlaps(a1: float, a2: float, b1: float, b2: float, padding: float) -> boo
     return not (a2 < (b1 - padding) or a1 > (b2 + padding))
 
 
+def render_gap_dimension(
+    parent: ET.Element,
+    start: float,
+    end: float,
+    orientation: Literal["horizontal", "vertical"],
+    position: float,
+    label: str,
+    color: str,
+) -> None:
+    """Render a gap dimension with double-headed arrows.
+
+    Args:
+        parent: SVG group element to add to
+        start: Start coordinate (x for horizontal, y for vertical)
+        end: End coordinate (x for horizontal, y for vertical)
+        orientation: "horizontal" or "vertical"
+        position: Position perpendicular to orientation (y for horizontal, x for vertical)
+        label: Text label to display
+        color: Stroke and fill color
+    """
+    if orientation == "horizontal":
+        _render_horizontal_gap_arrow(parent, start, end, position, label, color)
+    else:
+        _render_vertical_gap_arrow(parent, start, end, position, label, color)
+
+
+def _render_horizontal_gap_arrow(
+    parent: ET.Element, x1: float, x2: float, y: float, label: str, color: str
+) -> None:
+    """Render horizontal gap dimension: <----->"""
+    mid_x = (x1 + x2) / 2.0
+    arrow_size = 3.0
+
+    # Main line
+    _line(parent, x1, y, x2, y, color)
+
+    # Left arrowhead pointing left
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": f"M {x1},{y} L {x1 + arrow_size},{y - arrow_size} L {x1 + arrow_size},{y + arrow_size} Z",
+            "class": "gap-dimensions",
+            "stroke": "none",
+            "fill": color,
+        },
+    )
+
+    # Right arrowhead pointing right
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": f"M {x2},{y} L {x2 - arrow_size},{y - arrow_size} L {x2 - arrow_size},{y + arrow_size} Z",
+            "class": "gap-dimensions",
+            "stroke": "none",
+            "fill": color,
+        },
+    )
+
+    # Label centered above the line
+    ET.SubElement(
+        parent,
+        "text",
+        {
+            "x": str(mid_x),
+            "y": str(y - 4.0),
+            "class": "gap-text",
+            "text-anchor": "middle",
+            "fill": color,
+        },
+    ).text = label
+
+
+def _render_vertical_gap_arrow(
+    parent: ET.Element, y1: float, y2: float, x: float, label: str, color: str
+) -> None:
+    """Render vertical gap dimension with arrows pointing up/down"""
+    mid_y = (y1 + y2) / 2.0
+    arrow_size = 3.0
+
+    # Main line
+    _line(parent, x, y1, x, y2, color)
+
+    # Top arrowhead pointing up
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": f"M {x},{y1} L {x - arrow_size},{y1 + arrow_size} L {x + arrow_size},{y1 + arrow_size} Z",
+            "class": "gap-dimensions",
+            "stroke": "none",
+            "fill": color,
+        },
+    )
+
+    # Bottom arrowhead pointing down
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": f"M {x},{y2} L {x - arrow_size},{y2 - arrow_size} L {x + arrow_size},{y2 - arrow_size} Z",
+            "class": "gap-dimensions",
+            "stroke": "none",
+            "fill": color,
+        },
+    )
+
+    # Label (rotated 90 degrees) positioned to the left of the line
+    ET.SubElement(
+        parent,
+        "text",
+        {
+            "x": str(x - 6.0),
+            "y": str(mid_y),
+            "class": "gap-text",
+            "text-anchor": "middle",
+            "dominant-baseline": "middle",
+            "transform": f"rotate(-90 {x - 6.0} {mid_y})",
+            "fill": color,
+        },
+    ).text = label
+
+
 __all__ = [
     "collect_dimension_requests",
     "place_on_rails",
     "place_dimensions_on_rails",
     "render_placed_dimension",
+    "render_gap_dimension",
     "DimensionRequest",
     "PlacedDimension",
 ]

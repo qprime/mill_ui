@@ -268,11 +268,13 @@ def write_outputs(
     else:
         print(f"  Warning: STL generation skipped (trimesh not available)")
 
-    # Write SVG blueprint (light theme)
+    # Write SVG blueprint (dark theme)
     if SVG_AVAILABLE:
         try:
-            svg_string = render_blueprint_svg(ast, theme="light")
-            svg_path = output_dir / f"{recipe_name}.blueprint.light.svg"
+            svg_string = render_blueprint_svg(ast, theme="dark")
+            # Use the recipe directory name (e.g., "13_split_layout_french_door") as the SVG name
+            recipe_dir_name = pml_path.parent.name
+            svg_path = output_dir / f"{recipe_dir_name}.svg"
             with open(svg_path, "w", encoding="utf-8") as f:
                 f.write(svg_string)
         except Exception as e:

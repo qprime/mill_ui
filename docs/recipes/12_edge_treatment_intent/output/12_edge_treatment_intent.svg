@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580.0 480.0" width="580.0mm" height="480.0mm">
+  <style>
+        .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
+        .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
+        .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
+        .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
+        .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
+        .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+        .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
+        .gap-text { fill: #ff9500; font-family: monospace; font-size: 8px; }
+        .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+    </style>
+  <rect x="0" y="0" width="580.0" height="480.0" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="140" y="140" width="300.0" height="200.0" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts" />
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="140.0" y="140.0" width="300.0" height="200.0" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths" />
+  <g id="HOLES" class="holes" />
+  <g id="CONSTRUCTION" class="construction" />
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="140.0" y1="140.0" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="440.0" y1="140.0" x2="440.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="120.0" x2="440.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
+    <polygon points="440.0,120.0 437.0,117.0 437.0,123.0" fill="#5ab9ea" />
+    <text x="290.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">300.0mm</text>
+    <line x1="440.0" y1="140.0" x2="460.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="440.0" y1="340.0" x2="460.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="460.0" y1="140.0" x2="460.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="460.0,140.0 457.0,143.0 463.0,143.0" fill="#5ab9ea" />
+    <polygon points="460.0,340.0 457.0,337.0 463.0,337.0" fill="#5ab9ea" />
+    <text x="465.0" y="240.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 465.0 240.0)">200.0mm</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20" y="360.0" class="notes" font-weight="bold">NOTES</text>
+    <text x="20" y="372.0" class="notes">Sheet: 300.0 × 200.0 × 19.0mm</text>
+    <text x="20" y="384.0" class="notes">Features: 1 pocket</text>
+    <text x="20" y="396.0" class="notes">Depths:</text>
+    <text x="30" y="408.0" class="notes">• pocket: 4.0</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>
+    <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="448.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="448.0" y1="38" x2="463.0" y2="38" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="468.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="448.0" y1="54" x2="463.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="468.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="448.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="468.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="448.0" y1="86" x2="463.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="468.0" y="89" class="legend">Holes</text>
+    <line x1="448.0" y1="102" x2="463.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="468.0" y="105" class="legend">Dimensions</text>
+  </g>
+</svg>

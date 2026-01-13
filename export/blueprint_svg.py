@@ -14,7 +14,7 @@ from xml.etree import ElementTree as ET
 
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import RemovalIntent, Bounds2D
-from export.dimensions import place_dimensions_on_rails, render_placed_dimension
+from export.dimensions import place_dimensions_on_rails, render_placed_dimension, render_gap_dimension
 
 
 # Theme definitions
@@ -36,6 +36,8 @@ class Theme:
     construction_dash: str
     dimension_stroke: str
     dimension_text: str
+    gap_stroke: str  # Color for gap/spacing dimensions (braces)
+    gap_text: str
     notes_text: str
     legend_text: str
 
@@ -56,6 +58,8 @@ DARK_THEME = Theme(
     construction_dash="2,2",
     dimension_stroke="#5ab9ea",
     dimension_text="#5ab9ea",
+    gap_stroke="#ff9500",  # Amber/orange for spacing/gap dimensions
+    gap_text="#ff9500",
     notes_text="#cccccc",
     legend_text="#cccccc",
 )
@@ -76,6 +80,8 @@ PRINT_THEME = Theme(
     construction_dash="2,2",
     dimension_stroke="#333333",
     dimension_text="#333333",
+    gap_stroke="#cc6600",  # Darker orange for print theme
+    gap_text="#cc6600",
     notes_text="#000000",
     legend_text="#000000",
 )
@@ -194,6 +200,8 @@ def _generate_stylesheet(theme: Theme) -> str:
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
         .dimension-text {{ fill: {theme.dimension_text}; font-family: monospace; font-size: 8px; }}
+        .gap-dimensions {{ stroke: {theme.gap_stroke}; stroke-width: 1; fill: none; }}
+        .gap-text {{ fill: {theme.gap_text}; font-family: monospace; font-size: 8px; }}
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
     """
@@ -349,10 +357,195 @@ def _render_dimensions(
     theme: Theme,
 ) -> None:
     """Render dimension lines and labels on rails."""
+    # Standard feature dimensions (blue)
     dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"})
     for dim in dims:
         render_placed_dimension(group, dim, theme.dimension_stroke)
 
+    # Gap dimensions (amber/orange braces)
+    _render_gap_dimensions(group, ast, offset_x, offset_y, theme)
+
+
+def _render_gap_dimensions(
+    group: ET.Element,
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    theme: Theme,
+) -> None:
+    """Render gap/spacing dimensions with double-headed arrows.
+
+    Detects and shows:
+    1. Border/inset: gap between profile edge and first pocket
+    2. Mullion spacing: horizontal gaps between adjacent pockets
+    3. Rail spacing: vertical gaps between adjacent pockets
+    """
+    # Find profile bounds
+    profile_items = [
+        item for item in ast.items
+        if item.kind == "shape"
+        and item.feature is not None
+        and item.feature.type == "profile"
+        and item.geometry is not None
+        and item.placement is not None
+    ]
+
+    if not profile_items:
+        return
+
+    # Get main profile (largest area, typically the outer boundary)
+    main_profile = None
+    max_area = 0.0
+    for item in profile_items:
+        if item.type in ("Rect", "RoundedRect"):
+            w = float(item.geometry.data.get("w_mm", 0))
+            h = float(item.geometry.data.get("h_mm", 0))
+            area = w * h
+            if area > max_area:
+                max_area = area
+                main_profile = item
+
+    if main_profile is None:
+        return
+
+    # Get main profile bounds
+    cx, cy = main_profile.placement.center_xy_mm
+    w = float(main_profile.geometry.data.get("w_mm", 0))
+    h = float(main_profile.geometry.data.get("h_mm", 0))
+
+    profile_x_min = cx - w / 2.0
+    profile_x_max = cx + w / 2.0
+    profile_y_min = cy - h / 2.0
+    profile_y_max = cy + h / 2.0
+
+    # Get pockets to detect internal gaps
+    pocket_items = [
+        item for item in ast.items
+        if item.kind == "shape"
+        and item.feature is not None
+        and item.feature.type == "pocket"
+        and item.geometry is not None
+        and item.placement is not None
+        and item.type in ("Rect", "RoundedRect")
+    ]
+
+    if not pocket_items:
+        return
+
+    # Build pocket bounds list
+    pocket_bounds = []
+    for pocket in pocket_items:
+        pcx, pcy = pocket.placement.center_xy_mm
+        pw = float(pocket.geometry.data.get("w_mm", 0))
+        ph = float(pocket.geometry.data.get("h_mm", 0))
+        pocket_bounds.append({
+            "cx": pcx,
+            "cy": pcy,
+            "x_min": pcx - pw / 2.0,
+            "x_max": pcx + pw / 2.0,
+            "y_min": pcy - ph / 2.0,
+            "y_max": pcy + ph / 2.0,
+            "w": pw,
+            "h": ph,
+        })
+
+    # 1. Border/inset dimensions
+    min_left_gap = min(pb["x_min"] - profile_x_min for pb in pocket_bounds)
+    min_top_gap = min(pb["y_min"] - profile_y_min for pb in pocket_bounds)
+
+    if min_left_gap > 5.0:
+        # Horizontal arrow in left border showing inset
+        y_center = (profile_y_min + profile_y_max) / 2.0
+        render_gap_dimension(
+            group,
+            offset_x + profile_x_min,
+            offset_x + profile_x_min + min_left_gap,
+            "horizontal",
+            offset_y + y_center,
+            f"{min_left_gap:.0f}mm",
+            theme.gap_stroke,
+        )
+
+    if min_top_gap > 5.0:
+        # Vertical arrow in top border showing inset
+        x_center = (profile_x_min + profile_x_max) / 2.0
+        render_gap_dimension(
+            group,
+            offset_y + profile_y_min,
+            offset_y + profile_y_min + min_top_gap,
+            "vertical",
+            offset_x + x_center,
+            f"{min_top_gap:.0f}mm",
+            theme.gap_stroke,
+        )
+
+    # 2. Detect horizontal gaps (mullions) - sort pockets by x position
+    sorted_by_x = sorted(pocket_bounds, key=lambda p: p["x_min"])
+    horizontal_gaps = []
+    for i in range(len(sorted_by_x) - 1):
+        curr = sorted_by_x[i]
+        next_pocket = sorted_by_x[i + 1]
+        gap = next_pocket["x_min"] - curr["x_max"]
+        if gap > 5.0:  # Significant gap
+            # Check if pockets are vertically aligned (same row)
+            y_overlap = not (curr["y_max"] < next_pocket["y_min"] or curr["y_min"] > next_pocket["y_max"])
+            if y_overlap:
+                horizontal_gaps.append({
+                    "start": curr["x_max"],
+                    "end": next_pocket["x_min"],
+                    "y": (max(curr["y_min"], next_pocket["y_min"]) + min(curr["y_max"], next_pocket["y_max"])) / 2.0,
+                    "gap": gap,
+                })
+
+    # 3. Detect vertical gaps (rails) - sort pockets by y position
+    sorted_by_y = sorted(pocket_bounds, key=lambda p: p["y_min"])
+    vertical_gaps = []
+    for i in range(len(sorted_by_y) - 1):
+        curr = sorted_by_y[i]
+        next_pocket = sorted_by_y[i + 1]
+        gap = next_pocket["y_min"] - curr["y_max"]
+        if gap > 5.0:  # Significant gap
+            # Check if pockets are horizontally aligned (same column)
+            x_overlap = not (curr["x_max"] < next_pocket["x_min"] or curr["x_min"] > next_pocket["x_max"])
+            if x_overlap:
+                vertical_gaps.append({
+                    "start": curr["y_max"],
+                    "end": next_pocket["y_min"],
+                    "x": (max(curr["x_min"], next_pocket["x_min"]) + min(curr["x_max"], next_pocket["x_max"])) / 2.0,
+                    "gap": gap,
+                })
+
+    # Render unique horizontal gaps (mullions)
+    seen_h_gaps = set()
+    for hgap in horizontal_gaps:
+        key = (round(hgap["start"], 1), round(hgap["end"], 1), round(hgap["gap"], 1))
+        if key not in seen_h_gaps:
+            seen_h_gaps.add(key)
+            render_gap_dimension(
+                group,
+                offset_x + hgap["start"],
+                offset_x + hgap["end"],
+                "vertical",  # Mullion is vertical, but we're measuring horizontal gap
+                offset_x + (hgap["start"] + hgap["end"]) / 2.0,
+                f"{hgap['gap']:.0f}mm",
+                theme.gap_stroke,
+            )
+
+    # Render unique vertical gaps (rails)
+    seen_v_gaps = set()
+    for vgap in vertical_gaps:
+        key = (round(vgap["start"], 1), round(vgap["end"], 1), round(vgap["gap"], 1))
+        if key not in seen_v_gaps:
+            seen_v_gaps.add(key)
+            render_gap_dimension(
+                group,
+                offset_y + vgap["start"],
+                offset_y + vgap["end"],
+                "horizontal",  # Rail is horizontal, but we're measuring vertical gap
+                offset_y + (vgap["start"] + vgap["end"]) / 2.0,
+                f"{vgap['gap']:.0f}mm",
+                theme.gap_stroke,
+            )
 
 def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
     """Render title block with metadata."""

@@ -105,7 +105,7 @@ def render_blueprint_svg(
     sheet = layout_ast.sheet
 
     # Create SVG root with viewBox matching sheet dimensions + margin for dimensions
-    margin = 100  # mm margin for dimension rails
+    margin = 140  # mm margin for dimension rails, title, legend, and notes
     viewbox_width = sheet.width_mm + 2 * margin
     viewbox_height = sheet.height_mm + 2 * margin
 
@@ -390,7 +390,7 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
 
 def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> None:
     """Render legend showing layer meanings."""
-    x = viewbox_width - 180
+    x = viewbox_width - 160  # Moved closer to right edge with increased margin
     y = 20
     line_height = 16
     swatch_size = 10

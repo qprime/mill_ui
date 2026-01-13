@@ -103,7 +103,7 @@ def place_on_rails(
     right_allocator = _IntervalAllocator()
 
     base_offset = min(20.0, margin * 0.4)
-    stack_gap = 14.0
+    stack_gap = 20.0  # Increased for rotated text readability
 
     placed: list[PlacedDimension] = []
 
@@ -111,7 +111,7 @@ def place_on_rails(
         a, b = (request.a, request.b) if request.a <= request.b else (request.b, request.a)
 
         if request.orientation == "horizontal":
-            level = top_allocator.allocate(a, b, padding=8.0)
+            level = top_allocator.allocate(a, b, padding=15.0)  # Increased padding for text width
             rail_y = offset_y - base_offset - (level * stack_gap)
 
             # Guard: clamp to margin boundary
@@ -130,7 +130,7 @@ def place_on_rails(
                 )
             )
         else:
-            level = right_allocator.allocate(a, b, padding=8.0)
+            level = right_allocator.allocate(a, b, padding=40.0)  # Much larger padding for rotated text height
             rail_x = (offset_x + sheet_width_mm) + base_offset + (level * stack_gap)
 
             # Guard: clamp to margin boundary

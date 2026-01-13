@@ -375,12 +375,14 @@ def _render_gap_dimensions(
 ) -> None:
     """Render gap/spacing dimensions with double-headed arrows.
 
-    Detects and shows:
-    1. Border/inset: gap between profile edge and first pocket
-    2. Mullion spacing: horizontal gaps between adjacent pockets
-    3. Rail spacing: vertical gaps between adjacent pockets
+    Groups each profile with its contained pockets, then shows:
+    1. Border/inset: gap between profile edge and contained pocket
+    2. Mullion spacing: horizontal gaps between adjacent pockets within same profile
+    3. Rail spacing: vertical gaps between adjacent pockets within same profile
+
+    Only renders one representative dimension per unique gap value to avoid clutter.
     """
-    # Find profile bounds
+    # Collect all profiles
     profile_items = [
         item for item in ast.items
         if item.kind == "shape"
@@ -388,37 +390,13 @@ def _render_gap_dimensions(
         and item.feature.type == "profile"
         and item.geometry is not None
         and item.placement is not None
+        and item.type in ("Rect", "RoundedRect")
     ]
 
     if not profile_items:
         return
 
-    # Get main profile (largest area, typically the outer boundary)
-    main_profile = None
-    max_area = 0.0
-    for item in profile_items:
-        if item.type in ("Rect", "RoundedRect"):
-            w = float(item.geometry.data.get("w_mm", 0))
-            h = float(item.geometry.data.get("h_mm", 0))
-            area = w * h
-            if area > max_area:
-                max_area = area
-                main_profile = item
-
-    if main_profile is None:
-        return
-
-    # Get main profile bounds
-    cx, cy = main_profile.placement.center_xy_mm
-    w = float(main_profile.geometry.data.get("w_mm", 0))
-    h = float(main_profile.geometry.data.get("h_mm", 0))
-
-    profile_x_min = cx - w / 2.0
-    profile_x_max = cx + w / 2.0
-    profile_y_min = cy - h / 2.0
-    profile_y_max = cy + h / 2.0
-
-    # Get pockets to detect internal gaps
+    # Collect all pockets
     pocket_items = [
         item for item in ast.items
         if item.kind == "shape"
@@ -432,120 +410,139 @@ def _render_gap_dimensions(
     if not pocket_items:
         return
 
-    # Build pocket bounds list
-    pocket_bounds = []
-    for pocket in pocket_items:
-        pcx, pcy = pocket.placement.center_xy_mm
-        pw = float(pocket.geometry.data.get("w_mm", 0))
-        ph = float(pocket.geometry.data.get("h_mm", 0))
-        pocket_bounds.append({
-            "cx": pcx,
-            "cy": pcy,
-            "x_min": pcx - pw / 2.0,
-            "x_max": pcx + pw / 2.0,
-            "y_min": pcy - ph / 2.0,
-            "y_max": pcy + ph / 2.0,
-            "w": pw,
-            "h": ph,
-        })
+    # Build profile bounds list
+    def get_bounds(item: Item) -> dict:
+        cx, cy = item.placement.center_xy_mm
+        w = float(item.geometry.data.get("w_mm", 0))
+        h = float(item.geometry.data.get("h_mm", 0))
+        return {
+            "cx": cx,
+            "cy": cy,
+            "x_min": cx - w / 2.0,
+            "x_max": cx + w / 2.0,
+            "y_min": cy - h / 2.0,
+            "y_max": cy + h / 2.0,
+            "w": w,
+            "h": h,
+        }
 
-    # 1. Border/inset dimensions
-    min_left_gap = min(pb["x_min"] - profile_x_min for pb in pocket_bounds)
-    min_top_gap = min(pb["y_min"] - profile_y_min for pb in pocket_bounds)
-
-    if min_left_gap > 5.0:
-        # Horizontal arrow in left border showing inset
-        y_center = (profile_y_min + profile_y_max) / 2.0
-        render_gap_dimension(
-            group,
-            offset_x + profile_x_min,
-            offset_x + profile_x_min + min_left_gap,
-            "horizontal",
-            offset_y + y_center,
-            f"{min_left_gap:.0f}mm",
-            theme.gap_stroke,
+    def contains(profile_bounds: dict, pocket_bounds: dict) -> bool:
+        """Check if profile fully contains the pocket."""
+        return (
+            profile_bounds["x_min"] <= pocket_bounds["x_min"]
+            and profile_bounds["x_max"] >= pocket_bounds["x_max"]
+            and profile_bounds["y_min"] <= pocket_bounds["y_min"]
+            and profile_bounds["y_max"] >= pocket_bounds["y_max"]
         )
 
-    if min_top_gap > 5.0:
-        # Vertical arrow in top border showing inset
-        x_center = (profile_x_min + profile_x_max) / 2.0
-        render_gap_dimension(
-            group,
-            offset_y + profile_y_min,
-            offset_y + profile_y_min + min_top_gap,
-            "vertical",
-            offset_x + x_center,
-            f"{min_top_gap:.0f}mm",
-            theme.gap_stroke,
-        )
+    # Group pockets by their containing profile
+    profile_pocket_groups: list[tuple[dict, list[dict]]] = []
+    pocket_bounds_list = [get_bounds(p) for p in pocket_items]
+    assigned_pockets: set[int] = set()
 
-    # 2. Detect horizontal gaps (mullions) - sort pockets by x position
-    sorted_by_x = sorted(pocket_bounds, key=lambda p: p["x_min"])
-    horizontal_gaps = []
-    for i in range(len(sorted_by_x) - 1):
-        curr = sorted_by_x[i]
-        next_pocket = sorted_by_x[i + 1]
-        gap = next_pocket["x_min"] - curr["x_max"]
-        if gap > 5.0:  # Significant gap
-            # Check if pockets are vertically aligned (same row)
-            y_overlap = not (curr["y_max"] < next_pocket["y_min"] or curr["y_min"] > next_pocket["y_max"])
-            if y_overlap:
-                horizontal_gaps.append({
-                    "start": curr["x_max"],
-                    "end": next_pocket["x_min"],
-                    "y": (max(curr["y_min"], next_pocket["y_min"]) + min(curr["y_max"], next_pocket["y_max"])) / 2.0,
-                    "gap": gap,
-                })
+    for profile in profile_items:
+        pb = get_bounds(profile)
+        contained_pockets = []
+        for i, pocket_b in enumerate(pocket_bounds_list):
+            if i not in assigned_pockets and contains(pb, pocket_b):
+                contained_pockets.append(pocket_b)
+                assigned_pockets.add(i)
+        if contained_pockets:
+            profile_pocket_groups.append((pb, contained_pockets))
 
-    # 3. Detect vertical gaps (rails) - sort pockets by y position
-    sorted_by_y = sorted(pocket_bounds, key=lambda p: p["y_min"])
-    vertical_gaps = []
-    for i in range(len(sorted_by_y) - 1):
-        curr = sorted_by_y[i]
-        next_pocket = sorted_by_y[i + 1]
-        gap = next_pocket["y_min"] - curr["y_max"]
-        if gap > 5.0:  # Significant gap
-            # Check if pockets are horizontally aligned (same column)
-            x_overlap = not (curr["x_max"] < next_pocket["x_min"] or curr["x_min"] > next_pocket["x_max"])
-            if x_overlap:
-                vertical_gaps.append({
-                    "start": curr["y_max"],
-                    "end": next_pocket["y_min"],
-                    "x": (max(curr["x_min"], next_pocket["x_min"]) + min(curr["x_max"], next_pocket["x_max"])) / 2.0,
-                    "gap": gap,
-                })
+    if not profile_pocket_groups:
+        return
 
-    # Render unique horizontal gaps (mullions)
-    seen_h_gaps = set()
-    for hgap in horizontal_gaps:
-        key = (round(hgap["start"], 1), round(hgap["end"], 1), round(hgap["gap"], 1))
-        if key not in seen_h_gaps:
-            seen_h_gaps.add(key)
+    # Track unique gap values we've rendered (to show only one per unique value)
+    rendered_h_gaps: set[int] = set()  # rounded gap values
+    rendered_v_gaps: set[int] = set()
+
+    # Process each profile-pocket group
+    for profile_bounds, pockets in profile_pocket_groups:
+        if not pockets:
+            continue
+
+        # 1. Border/inset dimensions (left and top)
+        left_gap = min(p["x_min"] - profile_bounds["x_min"] for p in pockets)
+        top_gap = min(p["y_min"] - profile_bounds["y_min"] for p in pockets)
+
+        left_gap_key = round(left_gap)
+        if left_gap > 5.0 and left_gap_key not in rendered_h_gaps:
+            rendered_h_gaps.add(left_gap_key)
+            y_center = (profile_bounds["y_min"] + profile_bounds["y_max"]) / 2.0
             render_gap_dimension(
                 group,
-                offset_x + hgap["start"],
-                offset_x + hgap["end"],
-                "vertical",  # Mullion is vertical, but we're measuring horizontal gap
-                offset_x + (hgap["start"] + hgap["end"]) / 2.0,
-                f"{hgap['gap']:.0f}mm",
+                offset_x + profile_bounds["x_min"],
+                offset_x + profile_bounds["x_min"] + left_gap,
+                "horizontal",
+                offset_y + y_center,
+                f"{left_gap:.0f}mm",
                 theme.gap_stroke,
             )
 
-    # Render unique vertical gaps (rails)
-    seen_v_gaps = set()
-    for vgap in vertical_gaps:
-        key = (round(vgap["start"], 1), round(vgap["end"], 1), round(vgap["gap"], 1))
-        if key not in seen_v_gaps:
-            seen_v_gaps.add(key)
+        top_gap_key = round(top_gap)
+        if top_gap > 5.0 and top_gap_key not in rendered_v_gaps:
+            rendered_v_gaps.add(top_gap_key)
+            x_center = (profile_bounds["x_min"] + profile_bounds["x_max"]) / 2.0
             render_gap_dimension(
                 group,
-                offset_y + vgap["start"],
-                offset_y + vgap["end"],
-                "horizontal",  # Rail is horizontal, but we're measuring vertical gap
-                offset_y + (vgap["start"] + vgap["end"]) / 2.0,
-                f"{vgap['gap']:.0f}mm",
+                offset_y + profile_bounds["y_min"],
+                offset_y + profile_bounds["y_min"] + top_gap,
+                "vertical",
+                offset_x + x_center,
+                f"{top_gap:.0f}mm",
                 theme.gap_stroke,
             )
+
+        # Only look for mullion/rail gaps if there are multiple pockets in this profile
+        if len(pockets) < 2:
+            continue
+
+        # 2. Horizontal gaps (mullions) between pockets in same row
+        sorted_by_x = sorted(pockets, key=lambda p: p["x_min"])
+        for i in range(len(sorted_by_x) - 1):
+            curr = sorted_by_x[i]
+            next_p = sorted_by_x[i + 1]
+            gap = next_p["x_min"] - curr["x_max"]
+            gap_key = round(gap)
+            if gap > 5.0 and gap_key not in rendered_h_gaps:
+                # Check vertical overlap (same row)
+                y_overlap = not (curr["y_max"] < next_p["y_min"] or curr["y_min"] > next_p["y_max"])
+                if y_overlap:
+                    rendered_h_gaps.add(gap_key)
+                    y_pos = (max(curr["y_min"], next_p["y_min"]) + min(curr["y_max"], next_p["y_max"])) / 2.0
+                    render_gap_dimension(
+                        group,
+                        offset_x + curr["x_max"],
+                        offset_x + next_p["x_min"],
+                        "horizontal",
+                        offset_y + y_pos,
+                        f"{gap:.0f}mm",
+                        theme.gap_stroke,
+                    )
+
+        # 3. Vertical gaps (rails) between pockets in same column
+        sorted_by_y = sorted(pockets, key=lambda p: p["y_min"])
+        for i in range(len(sorted_by_y) - 1):
+            curr = sorted_by_y[i]
+            next_p = sorted_by_y[i + 1]
+            gap = next_p["y_min"] - curr["y_max"]
+            gap_key = round(gap)
+            if gap > 5.0 and gap_key not in rendered_v_gaps:
+                # Check horizontal overlap (same column)
+                x_overlap = not (curr["x_max"] < next_p["x_min"] or curr["x_min"] > next_p["x_max"])
+                if x_overlap:
+                    rendered_v_gaps.add(gap_key)
+                    x_pos = (max(curr["x_min"], next_p["x_min"]) + min(curr["x_max"], next_p["x_max"])) / 2.0
+                    render_gap_dimension(
+                        group,
+                        offset_y + curr["y_max"],
+                        offset_y + next_p["y_min"],
+                        "vertical",
+                        offset_x + x_pos,
+                        f"{gap:.0f}mm",
+                        theme.gap_stroke,
+                    )
 
 def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
     """Render title block with metadata."""

@@ -7,7 +7,7 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #333333; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 12px; }
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
     </style>
@@ -39,7 +39,7 @@
     <line x1="620.0" y1="100" x2="620.0" y2="800.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="620.0,100 617.0,103.0 623.0,103.0" fill="#5ab9ea" />
     <polygon points="620.0,800.0 617.0,797.0 623.0,797.0" fill="#5ab9ea" />
-    <text x="630.0" y="450.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">700.0mm</text>
+    <text x="625.0" y="450.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 625.0 450.0)">700.0mm</text>
     <line x1="100.0" y1="100.0" x2="100.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="600.0" y1="100.0" x2="600.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="100.0" y1="66.0" x2="600.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
@@ -51,7 +51,7 @@
     <line x1="634.0" y1="100.0" x2="634.0" y2="800.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="634.0,100.0 631.0,103.0 637.0,103.0" fill="#5ab9ea" />
     <polygon points="634.0,800.0 631.0,797.0 637.0,797.0" fill="#5ab9ea" />
-    <text x="644.0" y="450.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">700.0mm</text>
+    <text x="639.0" y="450.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 639.0 450.0)">700.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="780.0" class="notes" font-weight="bold">NOTES</text>

@@ -7,7 +7,7 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #333333; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 12px; }
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
     </style>
@@ -49,7 +49,7 @@
     <line x1="340.0" y1="100" x2="340.0" y2="260.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="340.0,100 337.0,103.0 343.0,103.0" fill="#5ab9ea" />
     <polygon points="340.0,260.0 337.0,257.0 343.0,257.0" fill="#5ab9ea" />
-    <text x="350.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">160.0mm</text>
+    <text x="345.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 345.0 180.0)">160.0mm</text>
     <line x1="120.0" y1="120.0" x2="120.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="300.0" y1="120.0" x2="300.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="120.0" y1="66.0" x2="300.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
@@ -61,7 +61,7 @@
     <line x1="354.0" y1="120.0" x2="354.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="354.0,120.0 351.0,123.0 357.0,123.0" fill="#5ab9ea" />
     <polygon points="354.0,240.0 351.0,237.0 357.0,237.0" fill="#5ab9ea" />
-    <text x="364.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">120.0mm</text>
+    <text x="359.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 359.0 180.0)">120.0mm</text>
     <line x1="150.0" y1="140.0" x2="150.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="270.0" y1="140.0" x2="270.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="150.0" y1="52.0" x2="270.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />
@@ -79,13 +79,13 @@
     <line x1="368.0" y1="140.0" x2="368.0" y2="220.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="368.0,140.0 365.0,143.0 371.0,143.0" fill="#5ab9ea" />
     <polygon points="368.0,220.0 365.0,217.0 371.0,217.0" fill="#5ab9ea" />
-    <text x="378.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">80.0mm</text>
+    <text x="373.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 373.0 180.0)">80.0mm</text>
     <line x1="270.0" y1="140.0" x2="382.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="270.0" y1="220.0" x2="382.0" y2="220.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="382.0" y1="140.0" x2="382.0" y2="220.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="382.0,140.0 379.0,143.0 385.0,143.0" fill="#5ab9ea" />
     <polygon points="382.0,220.0 379.0,217.0 385.0,217.0" fill="#5ab9ea" />
-    <text x="392.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">80.0mm</text>
+    <text x="387.0" y="180.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 387.0 180.0)">80.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="240.0" class="notes" font-weight="bold">NOTES</text>

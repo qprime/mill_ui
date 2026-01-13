@@ -193,7 +193,7 @@ def _generate_stylesheet(theme: Theme) -> str:
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
-        .dimension-text {{ fill: {theme.dimension_text}; font-family: monospace; font-size: 12px; }}
+        .dimension-text {{ fill: {theme.dimension_text}; font-family: monospace; font-size: 8px; }}
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
     """

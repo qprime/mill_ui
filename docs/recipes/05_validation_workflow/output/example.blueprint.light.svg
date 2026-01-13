@@ -7,7 +7,7 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #333333; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 12px; }
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
     </style>
@@ -43,7 +43,7 @@
     <line x1="320.0" y1="100" x2="320.0" y2="250.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="320.0,100 317.0,103.0 323.0,103.0" fill="#5ab9ea" />
     <polygon points="320.0,250.0 317.0,247.0 323.0,247.0" fill="#5ab9ea" />
-    <text x="330.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">150.0mm</text>
+    <text x="325.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 325.0 175.0)">150.0mm</text>
     <line x1="110.0" y1="110.0" x2="110.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="290.0" y1="110.0" x2="290.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="110.0" y1="66.0" x2="290.0" y2="66.0" stroke="#5ab9ea" stroke-width="1" />
@@ -55,7 +55,7 @@
     <line x1="334.0" y1="110.0" x2="334.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="334.0,110.0 331.0,113.0 337.0,113.0" fill="#5ab9ea" />
     <polygon points="334.0,240.0 331.0,237.0 337.0,237.0" fill="#5ab9ea" />
-    <text x="344.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">130.0mm</text>
+    <text x="339.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 339.0 175.0)">130.0mm</text>
     <line x1="140.0" y1="140.0" x2="140.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="260.0" y1="140.0" x2="260.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="140.0" y1="52.0" x2="260.0" y2="52.0" stroke="#5ab9ea" stroke-width="1" />

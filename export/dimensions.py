@@ -219,16 +219,18 @@ def _render_vertical(parent: ET.Element, dim: PlacedDimension, stroke_color: str
     _arrow(parent, x_dim, y1, "up", stroke_color)
     _arrow(parent, x_dim, y2, "down", stroke_color)
 
-    # Label
+    # Label (rotated 90 degrees for vertical dimensions)
+    mid_y = (y1 + y2) / 2.0
     ET.SubElement(
         parent,
         "text",
         {
-            "x": str(x_dim + 10.0),
-            "y": str((y1 + y2) / 2.0),
+            "x": str(x_dim + 5.0),
+            "y": str(mid_y),
             "class": "dimension-text",
             "text-anchor": "middle",
             "dominant-baseline": "middle",
+            "transform": f"rotate(-90 {x_dim + 5.0} {mid_y})",
         },
     ).text = dim.text
 

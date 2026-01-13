@@ -7,7 +7,7 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #333333; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 12px; }
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
     </style>
@@ -34,7 +34,7 @@
     <line x1="320.0" y1="100" x2="320.0" y2="250.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="320.0,100 317.0,103.0 323.0,103.0" fill="#5ab9ea" />
     <polygon points="320.0,250.0 317.0,247.0 323.0,247.0" fill="#5ab9ea" />
-    <text x="330.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">150.0mm</text>
+    <text x="325.0" y="175.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 325.0 175.0)">150.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="230.0" class="notes" font-weight="bold">NOTES</text>

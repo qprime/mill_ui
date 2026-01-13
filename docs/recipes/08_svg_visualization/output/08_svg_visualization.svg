@@ -7,9 +7,9 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+        .dimension-text { fill: #888888; font-family: monospace; font-size: 6px; }
         .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
-        .gap-text { fill: #ff9500; font-family: monospace; font-size: 8px; }
+        .gap-text { fill: #888888; font-family: monospace; font-size: 6px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
     </style>
@@ -54,11 +54,11 @@
     <line x1="180.0" y1="240.0" x2="200.0" y2="240.0" stroke="#ff9500" stroke-width="1" />
     <path d="M 180.0,240.0 L 183.0,237.0 L 183.0,243.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
     <path d="M 200.0,240.0 L 197.0,237.0 L 197.0,243.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="190.0" y="236.0" class="gap-text" text-anchor="middle" fill="#ff9500">20mm</text>
+    <text x="190.0" y="236.0" class="gap-text" text-anchor="middle">20mm</text>
     <line x1="290.0" y1="170.0" x2="290.0" y2="190.0" stroke="#ff9500" stroke-width="1" />
     <path d="M 290.0,170.0 L 287.0,173.0 L 293.0,173.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
     <path d="M 290.0,190.0 L 287.0,187.0 L 293.0,187.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="284.0" y="180.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 284.0 180.0)" fill="#ff9500">20mm</text>
+    <text x="284.0" y="180.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 284.0 180.0)">20mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="360.0" class="notes" font-weight="bold">NOTES</text>

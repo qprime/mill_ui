@@ -199,9 +199,9 @@ def _generate_stylesheet(theme: Theme) -> str:
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
-        .dimension-text {{ fill: {theme.dimension_text}; font-family: monospace; font-size: 8px; }}
+        .dimension-text {{ fill: #888888; font-family: monospace; font-size: 6px; }}
         .gap-dimensions {{ stroke: {theme.gap_stroke}; stroke-width: 1; fill: none; }}
-        .gap-text {{ fill: {theme.gap_text}; font-family: monospace; font-size: 8px; }}
+        .gap-text {{ fill: #888888; font-family: monospace; font-size: 6px; }}
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
     """
@@ -357,7 +357,7 @@ def _render_dimensions(
     theme: Theme,
 ) -> None:
     """Render dimension lines and labels on rails."""
-    # Standard feature dimensions (blue)
+    # Standard feature dimensions (blue lines, gray text via CSS)
     dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"})
     for dim in dims:
         render_placed_dimension(group, dim, theme.dimension_stroke)

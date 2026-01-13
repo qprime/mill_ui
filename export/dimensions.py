@@ -536,7 +536,6 @@ def _render_horizontal_gap_arrow(
             "y": str(y - 4.0),
             "class": "gap-text",
             "text-anchor": "middle",
-            "fill": color,
         },
     ).text = label
 
@@ -586,7 +585,6 @@ def _render_vertical_gap_arrow(
             "text-anchor": "middle",
             "dominant-baseline": "middle",
             "transform": f"rotate(-90 {x - 6.0} {mid_y})",
-            "fill": color,
         },
     ).text = label
 

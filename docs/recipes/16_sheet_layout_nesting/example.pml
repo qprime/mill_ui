@@ -24,22 +24,22 @@ sheet 1245mm 1232mm 19mm
 
 # Door 1 (bottom-left): x_center = 10 + 228.5 = 238.5
 rect door1_panel at 238.5mm,308.5mm size 343mm,483mm pocket 6mm
-rect door1 at 238.5mm,308.5mm size 457mm,597mm profile through outside
+rect door1 at 238.5mm,308.5mm size 457mm,597mm profile through outside tabs 6 height 3mm width 12mm
 
 # Door 2 (bottom-right): x_center = 10 + 457 + 6 + 228.5 = 701.5
 rect door2_panel at 701.5mm,308.5mm size 343mm,483mm pocket 6mm
-rect door2 at 701.5mm,308.5mm size 457mm,597mm profile through outside
+rect door2 at 701.5mm,308.5mm size 457mm,597mm profile through outside tabs 6 height 3mm width 12mm
 
 # === ROW 2 (top): Two cabinet doors ===
 # y_center = 10 + 597 + 6 + 298.5 = 911.5
 
 # Door 3 (top-left)
 rect door3_panel at 238.5mm,911.5mm size 343mm,483mm pocket 6mm
-rect door3 at 238.5mm,911.5mm size 457mm,597mm profile through outside
+rect door3 at 238.5mm,911.5mm size 457mm,597mm profile through outside tabs 6 height 3mm width 12mm
 
 # Door 4 (top-right)
 rect door4_panel at 701.5mm,911.5mm size 343mm,483mm pocket 6mm
-rect door4 at 701.5mm,911.5mm size 457mm,597mm profile through outside
+rect door4 at 701.5mm,911.5mm size 457mm,597mm profile through outside tabs 6 height 3mm width 12mm
 
 # === DRAWER FRONTS in right waste strip ===
 # Right waste strip: x from 930 to 1235 (305mm wide, enough for 254mm drawers)
@@ -49,22 +49,22 @@ rect door4 at 701.5mm,911.5mm size 457mm,597mm profile through outside
 
 # Drawer column (7 drawers stacked)
 rect drawer1_panel at 1063mm,86mm size 178mm,76mm pocket 4mm
-rect drawer1 at 1063mm,86mm size 254mm,152mm profile through outside
+rect drawer1 at 1063mm,86mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer2_panel at 1063mm,244mm size 178mm,76mm pocket 4mm
-rect drawer2 at 1063mm,244mm size 254mm,152mm profile through outside
+rect drawer2 at 1063mm,244mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer3_panel at 1063mm,402mm size 178mm,76mm pocket 4mm
-rect drawer3 at 1063mm,402mm size 254mm,152mm profile through outside
+rect drawer3 at 1063mm,402mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer4_panel at 1063mm,560mm size 178mm,76mm pocket 4mm
-rect drawer4 at 1063mm,560mm size 254mm,152mm profile through outside
+rect drawer4 at 1063mm,560mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer5_panel at 1063mm,718mm size 178mm,76mm pocket 4mm
-rect drawer5 at 1063mm,718mm size 254mm,152mm profile through outside
+rect drawer5 at 1063mm,718mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer6_panel at 1063mm,876mm size 178mm,76mm pocket 4mm
-rect drawer6 at 1063mm,876mm size 254mm,152mm profile through outside
+rect drawer6 at 1063mm,876mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm
 
 rect drawer7_panel at 1063mm,1034mm size 178mm,76mm pocket 4mm
-rect drawer7 at 1063mm,1034mm size 254mm,152mm profile through outside
+rect drawer7 at 1063mm,1034mm size 254mm,152mm profile through outside tabs 4 height 3mm width 10mm

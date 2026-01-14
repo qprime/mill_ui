@@ -214,7 +214,7 @@ rect outer                     # Just the outer bounds (no profile feature)
 
 **Note:** `frame` auto-generates an outer profile, so using `rect outer profile through outside` + `frame` would create two profiles. Use either `rect outer` + `frame`, or `rect outer profile` + `inset`.
 
-### 3. PML: Two Dialects
+### 3. PML: Three Dialects
 
 **Flat PML**: Explicit absolute positioning
 ```pml
@@ -228,12 +228,23 @@ rect outer profile through outside
         rect inner pocket 6mm
 ```
 
+**Nest PML**: Block-based nesting job specification (see [Nesting](#nesting) below)
+```pml
+nest maxrects
+    sheet 1232mm 1245mm 19mm
+    kerf 6.35mm
+    parts
+        door 457mm 597mm x20
+            template Shaker
+                stile_w 57mm
+```
+
 **JSON**: Direct LayoutAST serialization for AI/programmatic generation
 - Verbose but explicit
 - 1:1 mapping to AST dataclasses
 - Skip parsing, go straight to AST
 
-All three compile to the same LayoutAST, ensuring semantic equivalence.
+Flat, Compositional, and JSON all compile to the same LayoutAST, ensuring semantic equivalence. Nest PML is a higher-level format that runs bin-packing algorithms and outputs standard PML files.
 
 ### 4. CAM Backend Integration
 
@@ -308,6 +319,75 @@ When adding new functionality, use this decision tree:
 
 **Rule of thumb:** If a feature changes *how a part is cut* but not *what the part is*, it belongs in the planner.
 
+## Nesting
+
+mill_ui includes a nesting module for bin-packing parts onto sheets. This is useful for production runs where you need to cut many parts from material sheets with minimal waste.
+
+### .nest.pml Format
+
+The `.nest.pml` format specifies nesting jobs in a block-based syntax:
+
+```pml
+nest maxrects
+    sheet 1232mm 1245mm 19mm
+    kerf 6.35mm
+    margin 10mm
+
+    parts
+        large_door 457mm 597mm x20
+            template Shaker
+                stile_w 57mm
+                rail_h 57mm
+                panel_recess 6mm
+
+        small_door 305mm 203mm x15
+
+        tall_door 457mm 914mm x2
+            template Shaker
+                stile_w 57mm
+                rail_h 57mm
+                panel_recess 6mm
+```
+
+### Algorithms
+
+- **`guillotine`**: Simple, fast guillotine cutting. Good for uniform parts.
+- **`maxrects`**: Higher utilization with free rectangle tracking. Better for mixed sizes.
+
+### Usage
+
+**CLI tool:**
+```bash
+PYTHONPATH=. python3 tools/nest.py cabinet_job.nest.pml -o output/
+```
+
+**Programmatic:**
+```python
+from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from nesting import nest_and_generate
+
+source = open("cabinet_job.nest.pml").read()
+job = parse_nest_pml(source)
+params = nest_job_to_api_params(job)
+result = nest_and_generate(**params, output_format="ast")
+
+# result["output"] is a list of LayoutAST, one per sheet
+```
+
+### Output
+
+Nesting produces:
+- One `.pml` file per sheet with explicit part placements
+- `manifest.json` with utilization metrics
+- Optionally: G-code, SVG blueprints (when run through the full recipe pipeline)
+
+### Recipes
+
+- **Recipe 17**: [docs/recipes/17_nesting_guillotine/](docs/recipes/17_nesting_guillotine/) - Guillotine algorithm example
+- **Recipe 18**: [docs/recipes/18_nesting_maxrects/](docs/recipes/18_nesting_maxrects/) - MaxRects algorithm example
+
+Both recipes demonstrate the complete workflow: `.nest.pml` → nesting → `.pml` layouts → CAM → G-code.
+
 ## Directory Structure
 
 ```
@@ -332,7 +412,8 @@ mill_ui/
 │   ├── parser.py               # Flat PML parser (explicit positioning)
 │   ├── formatter.py            # Flat PML formatter
 │   ├── compositional_parser.py # Compositional PML parser (layout managers)
-│   └── compositional_formatter.py  # Compositional PML formatter
+│   ├── compositional_formatter.py  # Compositional PML formatter
+│   └── nest_parser.py          # Nest PML parser (.nest.pml format)
 ├── cli/                # Command-line tools
 │   ├── parse_compositional_pml.py  # PML parser CLI
 │   └── convert_layout.py           # JSON ↔ AST converter
@@ -347,6 +428,18 @@ mill_ui/
 │   └── removal_intent.py       # Core IR dataclass (includes Bounds2D, Allowance, Constraints)
 ├── templates/          # Parametric templates
 │   └── shaker.py               # Shaker cabinet door (only template currently implemented)
+├── nesting/            # Bin-packing/nesting module
+│   ├── __init__.py             # Public API exports
+│   ├── api.py                  # High-level nest_parts(), nest_and_generate()
+│   ├── types.py                # PartSpec, SheetSpec, NestingResult dataclasses
+│   ├── guillotine.py           # Guillotine bin-packing algorithm
+│   ├── maxrects.py             # MaxRects bin-packing algorithm
+│   ├── sheet_packer.py         # Multi-sheet packing orchestration
+│   ├── template_expander.py    # Expand templates (Shaker) to Items
+│   ├── layout_generator.py     # Convert nesting results to LayoutAST/PML
+│   └── validation.py           # Nesting-specific validation (overlaps, bounds)
+├── tools/              # CLI tools
+│   └── nest.py                 # Nesting CLI (reads .nest.pml, outputs .pml)
 ├── validation/         # IR validation (overlaps, constraints)
 │   ├── removal_checks.py       # Overlap, depth, toolability checks
 │   └── results.py              # ValidationResult dataclass
@@ -531,11 +624,17 @@ PYTHONPATH=. python3 -m tests.run_pml_tests
 # Resolution tests (component placement)
 PYTHONPATH=. python3 -m tests.run_resolution_tests
 
+# Nesting tests
+PYTHONPATH=. python3 -m tests.test_nest_parser
+PYTHONPATH=. python3 -m tests.test_maxrects
+PYTHONPATH=. python3 -m tests.test_guillotine
+PYTHONPATH=. python3 -m tests.test_nesting_api
+
 # G-code equivalence (requires native CAM backend)
 PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
 ```
 
-**Note:** Some tests require the native C++ CAM backend. IR-level tests work without it.
+**Note:** Some tests require the native C++ CAM backend. IR-level and nesting tests work without it.
 
 ### Project Structure
 
@@ -560,11 +659,12 @@ The planner works correctly and handles complex cases (tab insertion, seam mergi
 
 Instead: Invest in better *input* (RemovalIntent IR) and let proven planner do its job.
 
-### Why Two PML Dialects (Flat + Compositional)?
+### Why Three PML Dialects?
 - **Flat PML**: Simple, explicit, good for direct manual authoring
 - **Compositional PML**: Powerful, relative positioning, good for complex layouts with reusable components
+- **Nest PML**: Production-oriented, specifies parts + quantities for bin-packing
 
-Both compile to identical flat LayoutAST after resolution, so tools work with either format.
+Flat and Compositional compile to identical flat LayoutAST. Nest PML runs algorithms and outputs Flat PML files.
 
 ### Why Not Use Standard Formats (STEP, SVG, DXF)?
 Standard CAD formats describe *geometry*, not *manufacturing intent*:

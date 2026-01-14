@@ -1,0 +1,548 @@
+"""Tests for nesting data structures (Phase 1).
+
+Run from repository root: PYTHONPATH=. python3 -m tests.test_nesting_types
+"""
+
+import json
+import sys
+from nesting.types import (
+    PartSpec,
+    SheetSpec,
+    NestedPart,
+    SheetLayout,
+    NestingResult,
+)
+
+
+def test_part_spec_basic():
+    """Create a simple part spec."""
+    print("Running test_part_spec_basic...")
+    part = PartSpec(name="door", width_mm=457, height_mm=597, quantity=4)
+    assert part.name == "door"
+    assert part.width_mm == 457
+    assert part.height_mm == 597
+    assert part.quantity == 4
+    assert part.template is None
+    assert part.allow_rotation is True
+    print("  PASSED")
+
+
+def test_part_spec_with_template():
+    """Create part spec with template."""
+    print("Running test_part_spec_with_template...")
+    params = {"stile_w": 57, "rail_h": 57, "panel_recess": 6}
+    part = PartSpec(
+        name="shaker_door",
+        width_mm=457,
+        height_mm=597,
+        quantity=20,
+        template="Shaker",
+        template_params=params,
+    )
+    assert part.template == "Shaker"
+    assert part.template_params == params
+    print("  PASSED")
+
+
+def test_part_spec_area():
+    """Test area properties."""
+    print("Running test_part_spec_area...")
+    part = PartSpec(name="panel", width_mm=100, height_mm=200, quantity=5)
+    assert part.area_mm2 == 20000
+    assert part.total_area_mm2 == 100000
+    print("  PASSED")
+
+
+def test_part_spec_validation():
+    """Test validation of invalid inputs."""
+    print("Running test_part_spec_validation...")
+
+    # Negative width
+    try:
+        PartSpec(name="bad", width_mm=-100, height_mm=100)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "width_mm must be positive" in str(e)
+
+    # Zero height
+    try:
+        PartSpec(name="bad", width_mm=100, height_mm=0)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "height_mm must be positive" in str(e)
+
+    # Negative quantity
+    try:
+        PartSpec(name="bad", width_mm=100, height_mm=100, quantity=-1)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "quantity must be non-negative" in str(e)
+
+    # Zero quantity should be allowed
+    part = PartSpec(name="maybe", width_mm=100, height_mm=100, quantity=0)
+    assert part.quantity == 0
+
+    print("  PASSED")
+
+
+def test_part_spec_immutable():
+    """Dataclass is frozen."""
+    print("Running test_part_spec_immutable...")
+    part = PartSpec(name="door", width_mm=100, height_mm=100)
+    try:
+        part.width_mm = 200
+        assert False, "Should have raised AttributeError"
+    except AttributeError:
+        pass
+    print("  PASSED")
+
+
+def test_part_spec_json_roundtrip():
+    """Serialize and deserialize via dict."""
+    print("Running test_part_spec_json_roundtrip...")
+    original = PartSpec(
+        name="test",
+        width_mm=457,
+        height_mm=597,
+        quantity=10,
+        template="Shaker",
+        template_params={"stile_w": 57},
+        allow_rotation=False,
+    )
+    data = original.to_dict()
+    restored = PartSpec.from_dict(data)
+    assert restored == original
+    print("  PASSED")
+
+
+def test_sheet_spec_basic():
+    """Create standard 4x8 sheet."""
+    print("Running test_sheet_spec_basic...")
+    import warnings
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        sheet = SheetSpec(width_mm=1220, height_mm=2440, thickness_mm=19)
+        # Should warn about kerf_mm default
+        assert len(w) == 1
+        assert "kerf_mm not specified" in str(w[0].message)
+
+    assert sheet.width_mm == 1220
+    assert sheet.height_mm == 2440
+    assert sheet.thickness_mm == 19
+    assert sheet.margin_mm == 10.0  # default
+    assert sheet.kerf_mm == 6.35  # default (1/4" endmill)
+    assert sheet.gap_margin_mm == 0.0  # default
+    assert sheet.gap_mm == 6.35  # kerf + gap_margin
+    print("  PASSED")
+
+
+def test_sheet_spec_usable_area():
+    """Test usable area calculation."""
+    print("Running test_sheet_spec_usable_area...")
+    sheet = SheetSpec(
+        width_mm=1000,
+        height_mm=2000,
+        thickness_mm=19,
+        margin_mm=10,
+    )
+    # Usable: (1000 - 2*10) x (2000 - 2*10) = 980 x 1980
+    assert sheet.usable_width_mm == 980
+    assert sheet.usable_height_mm == 1980
+    assert sheet.usable_area_mm2 == 980 * 1980
+    print("  PASSED")
+
+
+def test_sheet_spec_validation():
+    """Test validation of invalid inputs."""
+    print("Running test_sheet_spec_validation...")
+
+    try:
+        SheetSpec(width_mm=1000, height_mm=2000, thickness_mm=-1)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "thickness_mm must be positive" in str(e)
+
+    try:
+        SheetSpec(width_mm=1000, height_mm=2000, thickness_mm=19, margin_mm=-5)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "margin_mm must be non-negative" in str(e)
+
+    # Margins that consume entire sheet
+    try:
+        SheetSpec(width_mm=100, height_mm=100, thickness_mm=19, margin_mm=60)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "no usable area" in str(e).lower()
+
+    print("  PASSED")
+
+
+def test_sheet_spec_json_roundtrip():
+    """Serialize and deserialize via dict."""
+    print("Running test_sheet_spec_json_roundtrip...")
+    original = SheetSpec(
+        width_mm=1245,
+        height_mm=1232,
+        thickness_mm=19,
+        margin_mm=10,
+        kerf_mm=6,
+    )
+    data = original.to_dict()
+    restored = SheetSpec.from_dict(data)
+    assert restored == original
+    print("  PASSED")
+
+
+def test_nested_part_basic():
+    """Create a placement."""
+    print("Running test_nested_part_basic...")
+    part = PartSpec(name="door", width_mm=457, height_mm=597)
+    placement = NestedPart(part_spec=part, x_mm=238.5, y_mm=308.5)
+    assert placement.part_spec == part
+    assert placement.x_mm == 238.5
+    assert placement.y_mm == 308.5
+    assert placement.rotated is False
+    assert placement.instance_id == 0
+    print("  PASSED")
+
+
+def test_nested_part_bounds_no_rotation():
+    """Test bounds calculation without rotation."""
+    print("Running test_nested_part_bounds_no_rotation...")
+    part = PartSpec(name="door", width_mm=100, height_mm=200)
+    placement = NestedPart(part_spec=part, x_mm=100, y_mm=150)
+    # Center at (100, 150), size 100x200
+    assert placement.left_mm == 50
+    assert placement.right_mm == 150
+    assert placement.bottom_mm == 50
+    assert placement.top_mm == 250
+    assert placement.bounds == (50, 50, 150, 250)
+    print("  PASSED")
+
+
+def test_nested_part_bounds_with_rotation():
+    """Test bounds calculation with 90-degree rotation."""
+    print("Running test_nested_part_bounds_with_rotation...")
+    part = PartSpec(name="door", width_mm=100, height_mm=200)
+    placement = NestedPart(part_spec=part, x_mm=150, y_mm=100, rotated=True)
+    # Rotated: effective size is 200x100
+    assert placement.effective_width_mm == 200
+    assert placement.effective_height_mm == 100
+    assert placement.left_mm == 50
+    assert placement.right_mm == 250
+    assert placement.bottom_mm == 50
+    assert placement.top_mm == 150
+    print("  PASSED")
+
+
+def test_nested_part_json_roundtrip():
+    """Serialize and deserialize via dict."""
+    print("Running test_nested_part_json_roundtrip...")
+    part = PartSpec(name="door", width_mm=457, height_mm=597, quantity=4)
+    original = NestedPart(
+        part_spec=part,
+        x_mm=238.5,
+        y_mm=308.5,
+        rotated=True,
+        instance_id=2,
+    )
+    data = original.to_dict()
+    restored = NestedPart.from_dict(data)
+    assert restored.part_spec == original.part_spec
+    assert restored.x_mm == original.x_mm
+    assert restored.y_mm == original.y_mm
+    assert restored.rotated == original.rotated
+    assert restored.instance_id == original.instance_id
+    print("  PASSED")
+
+
+def test_sheet_layout_empty():
+    """Sheet with no placements."""
+    print("Running test_sheet_layout_empty...")
+    sheet = SheetSpec(width_mm=1000, height_mm=2000, thickness_mm=19)
+    layout = SheetLayout(sheet_spec=sheet, placements=())
+    assert layout.part_count == 0
+    assert layout.parts_area_mm2 == 0
+    assert layout.utilization == 0.0
+    print("  PASSED")
+
+
+def test_sheet_layout_single_part():
+    """Sheet with one part."""
+    print("Running test_sheet_layout_single_part...")
+    sheet = SheetSpec(
+        width_mm=1000,
+        height_mm=1000,
+        thickness_mm=19,
+        margin_mm=0,  # No margin for easy calculation
+    )
+    part = PartSpec(name="square", width_mm=500, height_mm=500)
+    placement = NestedPart(part_spec=part, x_mm=250, y_mm=250)
+    layout = SheetLayout(sheet_spec=sheet, placements=(placement,))
+
+    assert layout.part_count == 1
+    assert layout.parts_area_mm2 == 250_000  # 500x500
+    assert layout.utilization == 0.25  # 250k / 1M
+    print("  PASSED")
+
+
+def test_sheet_layout_multiple_parts():
+    """Sheet with multiple parts."""
+    print("Running test_sheet_layout_multiple_parts...")
+    sheet = SheetSpec(
+        width_mm=1000,
+        height_mm=1000,
+        thickness_mm=19,
+        margin_mm=0,
+    )
+    part1 = PartSpec(name="a", width_mm=400, height_mm=400)
+    part2 = PartSpec(name="b", width_mm=300, height_mm=300)
+    layout = SheetLayout(
+        sheet_spec=sheet,
+        placements=(
+            NestedPart(part_spec=part1, x_mm=200, y_mm=200),
+            NestedPart(part_spec=part2, x_mm=650, y_mm=150),
+        ),
+    )
+
+    assert layout.part_count == 2
+    assert layout.parts_area_mm2 == 160_000 + 90_000  # 400^2 + 300^2
+    assert layout.utilization == 0.25  # 250k / 1M
+    print("  PASSED")
+
+
+def test_sheet_layout_json_roundtrip():
+    """Serialize and deserialize via dict."""
+    print("Running test_sheet_layout_json_roundtrip...")
+    sheet = SheetSpec(width_mm=1245, height_mm=1232, thickness_mm=19)
+    part = PartSpec(name="door", width_mm=457, height_mm=597)
+    layout = SheetLayout(
+        sheet_spec=sheet,
+        placements=(
+            NestedPart(part_spec=part, x_mm=238.5, y_mm=308.5, instance_id=0),
+            NestedPart(part_spec=part, x_mm=701.5, y_mm=308.5, instance_id=1),
+        ),
+        sheet_index=0,
+    )
+    data = layout.to_dict()
+    restored = SheetLayout.from_dict(data)
+    assert restored.sheet_spec == layout.sheet_spec
+    assert len(restored.placements) == len(layout.placements)
+    assert restored.sheet_index == layout.sheet_index
+    print("  PASSED")
+
+
+def test_nesting_result_empty():
+    """Result with no sheets."""
+    print("Running test_nesting_result_empty...")
+    result = NestingResult(sheets=())
+    assert result.total_sheets == 0
+    assert result.total_parts == 0
+    assert result.overall_utilization == 0.0
+    print("  PASSED")
+
+
+def test_nesting_result_single_sheet():
+    """Result with one sheet."""
+    print("Running test_nesting_result_single_sheet...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=0)
+    part = PartSpec(name="panel", width_mm=500, height_mm=500)
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(NestedPart(part_spec=part, x_mm=250, y_mm=250),),
+        sheet_index=0,
+    )
+    result = NestingResult(sheets=(layout,))
+
+    assert result.total_sheets == 1
+    assert result.total_parts == 1
+    assert result.overall_utilization == 0.25
+    print("  PASSED")
+
+
+def test_nesting_result_multiple_sheets():
+    """Result with multiple sheets."""
+    print("Running test_nesting_result_multiple_sheets...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=0)
+    part = PartSpec(name="panel", width_mm=500, height_mm=500)
+
+    sheet1 = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=part, x_mm=250, y_mm=250, instance_id=0),
+            NestedPart(part_spec=part, x_mm=750, y_mm=250, instance_id=1),
+        ),
+        sheet_index=0,
+    )
+    sheet2 = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(NestedPart(part_spec=part, x_mm=250, y_mm=250, instance_id=2),),
+        sheet_index=1,
+    )
+
+    result = NestingResult(sheets=(sheet1, sheet2))
+
+    assert result.total_sheets == 2
+    assert result.total_parts == 3
+    assert result.total_parts_area_mm2 == 750_000
+    assert result.total_sheet_area_mm2 == 2_000_000
+    assert result.overall_utilization == 0.375
+    assert result.waste_area_mm2 == 1_250_000
+    print("  PASSED")
+
+
+def test_nesting_result_unplaced_parts():
+    """Result with parts that couldn't be placed."""
+    print("Running test_nesting_result_unplaced_parts...")
+    big_part = PartSpec(name="too_big", width_mm=5000, height_mm=5000)
+    result = NestingResult(sheets=(), unplaced_parts=(big_part,))
+
+    assert result.total_sheets == 0
+    assert len(result.unplaced_parts) == 1
+    assert result.unplaced_parts[0].name == "too_big"
+    print("  PASSED")
+
+
+def test_nesting_result_json_roundtrip():
+    """Full JSON serialization roundtrip."""
+    print("Running test_nesting_result_json_roundtrip...")
+    sheet_spec = SheetSpec(width_mm=1245, height_mm=1232, thickness_mm=19)
+    part = PartSpec(name="door", width_mm=457, height_mm=597, quantity=4)
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=part, x_mm=238.5, y_mm=308.5, instance_id=0),
+            NestedPart(part_spec=part, x_mm=701.5, y_mm=308.5, instance_id=1),
+        ),
+        sheet_index=0,
+    )
+    unplaced = PartSpec(name="huge", width_mm=9999, height_mm=9999)
+    result = NestingResult(sheets=(layout,), unplaced_parts=(unplaced,))
+
+    # JSON roundtrip
+    json_str = result.to_json()
+    restored = NestingResult.from_json(json_str)
+
+    assert restored.total_sheets == result.total_sheets
+    assert restored.total_parts == result.total_parts
+    assert len(restored.unplaced_parts) == 1
+    assert restored.unplaced_parts[0].name == "huge"
+    print("  PASSED")
+
+
+def test_recipe16_like_layout():
+    """Simulate Recipe 16: 4 doors + 7 drawers on half-sheet."""
+    print("Running test_recipe16_like_layout...")
+    sheet_spec = SheetSpec(
+        width_mm=1245,
+        height_mm=1232,
+        thickness_mm=19,
+        margin_mm=10,
+        kerf_mm=6,
+    )
+
+    door = PartSpec(name="cabinet_door", width_mm=457, height_mm=597, quantity=4)
+    drawer = PartSpec(name="drawer_front", width_mm=254, height_mm=152, quantity=7)
+
+    # Manually place like Recipe 16
+    placements = []
+    # Door positions (2x2 grid)
+    door_positions = [
+        (238.5, 308.5),
+        (701.5, 308.5),
+        (238.5, 911.5),
+        (701.5, 911.5),
+    ]
+    for i, (x, y) in enumerate(door_positions):
+        placements.append(NestedPart(part_spec=door, x_mm=x, y_mm=y, instance_id=i))
+
+    # Drawer positions (vertical stack)
+    drawer_y_positions = [86, 244, 402, 560, 718, 876, 1034]
+    for i, y in enumerate(drawer_y_positions):
+        placements.append(
+            NestedPart(part_spec=drawer, x_mm=1063, y_mm=y, instance_id=i)
+        )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=tuple(placements),
+        sheet_index=0,
+    )
+
+    # Verify counts
+    assert layout.part_count == 11  # 4 doors + 7 drawers
+
+    # Calculate expected area
+    door_area = 4 * 457 * 597  # 1,091,316
+    drawer_area = 7 * 254 * 152  # 270,256
+    expected_area = door_area + drawer_area  # 1,361,572
+
+    assert layout.parts_area_mm2 == expected_area
+
+    # Utilization should be >90%
+    assert layout.utilization > 0.90
+    assert layout.utilization < 0.95
+
+    # Wrap in result
+    result = NestingResult(sheets=(layout,))
+    assert result.total_sheets == 1
+    assert result.overall_utilization_percent > 90
+    print("  PASSED")
+
+
+def run_all_tests():
+    """Run all tests."""
+    print("=" * 60)
+    print("Phase 1: Nesting Data Structures Tests")
+    print("=" * 60)
+
+    tests = [
+        test_part_spec_basic,
+        test_part_spec_with_template,
+        test_part_spec_area,
+        test_part_spec_validation,
+        test_part_spec_immutable,
+        test_part_spec_json_roundtrip,
+        test_sheet_spec_basic,
+        test_sheet_spec_usable_area,
+        test_sheet_spec_validation,
+        test_sheet_spec_json_roundtrip,
+        test_nested_part_basic,
+        test_nested_part_bounds_no_rotation,
+        test_nested_part_bounds_with_rotation,
+        test_nested_part_json_roundtrip,
+        test_sheet_layout_empty,
+        test_sheet_layout_single_part,
+        test_sheet_layout_multiple_parts,
+        test_sheet_layout_json_roundtrip,
+        test_nesting_result_empty,
+        test_nesting_result_single_sheet,
+        test_nesting_result_multiple_sheets,
+        test_nesting_result_unplaced_parts,
+        test_nesting_result_json_roundtrip,
+        test_recipe16_like_layout,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            test()
+            passed += 1
+        except Exception as e:
+            print(f"  FAILED: {e}")
+            failed += 1
+
+    print()
+    print("=" * 60)
+    print(f"Results: {passed} passed, {failed} failed")
+    print("=" * 60)
+
+    return failed == 0
+
+
+if __name__ == "__main__":
+    success = run_all_tests()
+    sys.exit(0 if success else 1)

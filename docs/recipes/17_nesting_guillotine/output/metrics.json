@@ -1,0 +1,120 @@
+{
+  "source": "cabinet_job.nest.pml",
+  "algorithm": "guillotine",
+  "nesting": {
+    "total_sheets": 6,
+    "utilization": 0.8105679037291484,
+    "utilization_percent": "81.1%",
+    "nesting_time_ms": 0.64
+  },
+  "sheets": [
+    {
+      "name": "sheet_1",
+      "pml_file": "sheet_1.pml",
+      "items": 9,
+      "intents": 9,
+      "passes": 2,
+      "moves": 3772,
+      "timing_ms": {
+        "ir": 0.05,
+        "hints": 0.01,
+        "plan": 4.86,
+        "gcode": 8.58
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    },
+    {
+      "name": "sheet_2",
+      "pml_file": "sheet_2.pml",
+      "items": 10,
+      "intents": 10,
+      "passes": 2,
+      "moves": 6878,
+      "timing_ms": {
+        "ir": 0.05,
+        "hints": 0.01,
+        "plan": 8.48,
+        "gcode": 15.54
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    },
+    {
+      "name": "sheet_3",
+      "pml_file": "sheet_3.pml",
+      "items": 10,
+      "intents": 10,
+      "passes": 2,
+      "moves": 6878,
+      "timing_ms": {
+        "ir": 0.04,
+        "hints": 0.01,
+        "plan": 7.75,
+        "gcode": 15.43
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    },
+    {
+      "name": "sheet_4",
+      "pml_file": "sheet_4.pml",
+      "items": 10,
+      "intents": 10,
+      "passes": 2,
+      "moves": 6878,
+      "timing_ms": {
+        "ir": 0.04,
+        "hints": 0.01,
+        "plan": 7.38,
+        "gcode": 15.49
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    },
+    {
+      "name": "sheet_5",
+      "pml_file": "sheet_5.pml",
+      "items": 10,
+      "intents": 10,
+      "passes": 2,
+      "moves": 6878,
+      "timing_ms": {
+        "ir": 0.04,
+        "hints": 0.01,
+        "plan": 7.5,
+        "gcode": 15.4
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    },
+    {
+      "name": "sheet_6",
+      "pml_file": "sheet_6.pml",
+      "items": 10,
+      "intents": 10,
+      "passes": 2,
+      "moves": 6878,
+      "timing_ms": {
+        "ir": 0.04,
+        "hints": 0.01,
+        "plan": 7.4,
+        "gcode": 15.8
+      },
+      "gcode_files": [
+        "pocket-6.35mm",
+        "profile-6.35mm"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1512.0 1525.0" width="1512.0mm" height="1525.0mm">
+  <style>
+        .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
+        .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
+        .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
+        .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
+        .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
+        .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
+        .dimension-text { fill: #888888; font-family: monospace; font-size: 6px; }
+        .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
+        .gap-text { fill: #888888; font-family: monospace; font-size: 6px; }
+        .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+    </style>
+  <rect x="0" y="0" width="1512.0" height="1525.0" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="140" y="140" width="1232.0" height="1245.0" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <rect x="150.0" y="150.0" width="457.0" height="597.0" />
+    <rect x="613.35" y="150.0" width="597.0" height="457.0" />
+    <rect x="150.0" y="753.3499999999999" width="457.0" height="597.0" />
+    <rect x="613.35" y="613.35" width="457.0" height="597.0" />
+    <rect x="1076.7" y="613.35" width="203.0" height="305.0" />
+    <rect x="1076.7" y="924.7" width="203.0" height="305.0" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="207.0" y="207.0" width="343.0" height="483.0" />
+    <rect x="670.35" y="207.0" width="483.0" height="343.0" />
+    <rect x="207.0" y="810.3499999999999" width="343.0" height="483.0" />
+    <rect x="670.35" y="670.35" width="343.0" height="483.0" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths" />
+  <g id="HOLES" class="holes" />
+  <g id="CONSTRUCTION" class="construction" />
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="207.0" y1="810.35" x2="207.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="550.0" y1="810.35" x2="550.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="207.0" y1="120.0" x2="550.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="207.0,120.0 210.0,117.0 210.0,123.0" fill="#5ab9ea" />
+    <polygon points="550.0,120.0 547.0,117.0 547.0,123.0" fill="#5ab9ea" />
+    <text x="378.5" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">343.0mm</text>
+    <line x1="550.0" y1="810.35" x2="1392.0" y2="810.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="550.0" y1="1293.35" x2="1392.0" y2="1293.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1392.0" y1="810.35" x2="1392.0" y2="1293.35" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1392.0,810.35 1389.0,813.35 1395.0,813.35" fill="#5ab9ea" />
+    <polygon points="1392.0,1293.35 1389.0,1290.35 1395.0,1290.35" fill="#5ab9ea" />
+    <text x="1397.0" y="1051.85" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1397.0 1051.85)">483.0mm</text>
+    <line x1="670.35" y1="207.0" x2="670.35" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1153.35" y1="207.0" x2="1153.35" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="670.35" y1="120.0" x2="1153.35" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="670.35,120.0 673.35,117.0 673.35,123.0" fill="#5ab9ea" />
+    <polygon points="1153.35,120.0 1150.35,117.0 1150.35,123.0" fill="#5ab9ea" />
+    <text x="911.8499999999999" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">483.0mm</text>
+    <line x1="1153.35" y1="207.0" x2="1392.0" y2="207.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1153.35" y1="550.0" x2="1392.0" y2="550.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1392.0" y1="207.0" x2="1392.0" y2="550.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1392.0,207.0 1389.0,210.0 1395.0,210.0" fill="#5ab9ea" />
+    <polygon points="1392.0,550.0 1389.0,547.0 1395.0,547.0" fill="#5ab9ea" />
+    <text x="1397.0" y="378.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1397.0 378.5)">343.0mm</text>
+    <line x1="150.0" y1="753.35" x2="150.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="607.0" y1="753.35" x2="607.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="150.0" y1="100.0" x2="607.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="150.0,100.0 153.0,97.0 153.0,103.0" fill="#5ab9ea" />
+    <polygon points="607.0,100.0 604.0,97.0 604.0,103.0" fill="#5ab9ea" />
+    <text x="378.5" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">457.0mm</text>
+    <line x1="607.0" y1="753.35" x2="1412.0" y2="753.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="607.0" y1="1350.35" x2="1412.0" y2="1350.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1412.0" y1="753.35" x2="1412.0" y2="1350.35" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1412.0,753.35 1409.0,756.35 1415.0,756.35" fill="#5ab9ea" />
+    <polygon points="1412.0,1350.35 1409.0,1347.35 1415.0,1347.35" fill="#5ab9ea" />
+    <text x="1417.0" y="1051.85" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1417.0 1051.85)">597.0mm</text>
+    <line x1="613.35" y1="150.0" x2="613.35" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1210.35" y1="150.0" x2="1210.35" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="613.35" y1="80.0" x2="1210.35" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="613.35,80.0 616.35,77.0 616.35,83.0" fill="#5ab9ea" />
+    <polygon points="1210.35,80.0 1207.35,77.0 1207.35,83.0" fill="#5ab9ea" />
+    <text x="911.8499999999999" y="75.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">597.0mm</text>
+    <line x1="1210.35" y1="150.0" x2="1412.0" y2="150.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1210.35" y1="607.0" x2="1412.0" y2="607.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1412.0" y1="150.0" x2="1412.0" y2="607.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1412.0,150.0 1409.0,153.0 1415.0,153.0" fill="#5ab9ea" />
+    <polygon points="1412.0,607.0 1409.0,604.0 1415.0,604.0" fill="#5ab9ea" />
+    <text x="1417.0" y="378.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1417.0 378.5)">457.0mm</text>
+    <line x1="1076.7" y1="613.35" x2="1076.7" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1279.7" y1="613.35" x2="1279.7" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1076.7" y1="100.0" x2="1279.7" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1076.7,100.0 1079.7,97.0 1079.7,103.0" fill="#5ab9ea" />
+    <polygon points="1279.7,100.0 1276.7,97.0 1276.7,103.0" fill="#5ab9ea" />
+    <text x="1178.2" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">203.0mm</text>
+    <line x1="1279.7" y1="613.35" x2="1432.0" y2="613.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1279.7" y1="918.35" x2="1432.0" y2="918.35" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1432.0" y1="613.35" x2="1432.0" y2="918.35" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1432.0,613.35 1429.0,616.35 1435.0,616.35" fill="#5ab9ea" />
+    <polygon points="1432.0,918.35 1429.0,915.35 1435.0,915.35" fill="#5ab9ea" />
+    <text x="1437.0" y="765.85" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1437.0 765.85)">305.0mm</text>
+    <line x1="150.0" y1="448.5" x2="207.0" y2="448.5" stroke="#ff9500" stroke-width="1" />
+    <path d="M 150.0,448.5 L 153.0,445.5 L 153.0,451.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 207.0,448.5 L 204.0,445.5 L 204.0,451.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="178.5" y="444.5" class="gap-text" text-anchor="middle">57mm</text>
+    <line x1="378.5" y1="150.0" x2="378.5" y2="207.0" stroke="#ff9500" stroke-width="1" />
+    <path d="M 378.5,150.0 L 375.5,153.0 L 381.5,153.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 378.5,207.0 L 375.5,204.0 L 381.5,204.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="372.5" y="178.5" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 372.5 178.5)">57mm</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20" y="1405.0" class="notes" font-weight="bold">NOTES</text>
+    <text x="20" y="1417.0" class="notes">Sheet: 1232.0 × 1245.0 × 19.0mm</text>
+    <text x="20" y="1429.0" class="notes">Features: 6 profiles, 4 pockets</text>
+    <text x="20" y="1441.0" class="notes">Depths:</text>
+    <text x="30" y="1453.0" class="notes">• pocket: 6.0</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>
+    <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="1380.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="1380.0" y1="38" x2="1395.0" y2="38" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="1400.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="1380.0" y1="54" x2="1395.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="1400.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="1380.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="1400.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="1380.0" y1="86" x2="1395.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="1400.0" y="89" class="legend">Holes</text>
+    <line x1="1380.0" y1="102" x2="1395.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1400.0" y="105" class="legend">Dimensions</text>
+  </g>
+</svg>

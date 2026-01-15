@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 7 CLI dump tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_cli_dump_tests
-"""
 
 import json
 import sys
@@ -12,12 +8,10 @@ from cli.introspect import dump_ast, dump_removal_intent
 
 
 def approx_equal(a: float, b: float, rel: float = 1e-9) -> bool:
-    """Check if two floats are approximately equal."""
     return abs(a - b) <= rel * max(abs(a), abs(b), 1.0)
 
 
 def test_dump_ast_minimal_layout():
-    """Test dump-ast with minimal shape layout."""
     print("Running test_dump_ast_minimal_layout...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
@@ -54,7 +48,6 @@ def test_dump_ast_minimal_layout():
 
 
 def test_dump_ast_deterministic():
-    """Test that dump-ast produces deterministic output."""
     print("Running test_dump_ast_deterministic...")
     layout_data = {
         "sheet": {"width_mm": 100.0, "height_mm": 100.0, "thickness_mm": 19.0},
@@ -87,7 +80,6 @@ def test_dump_ast_deterministic():
 
 
 def test_dump_removal_intent_profile():
-    """Test dump-removal-intent with profile operation."""
     print("Running test_dump_removal_intent_profile...")
     layout_data = {
         "sheet": {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 19.1},
@@ -130,7 +122,6 @@ def test_dump_removal_intent_profile():
 
 
 def test_dump_removal_intent_multiple():
-    """Test dump-removal-intent with multiple operations."""
     print("Running test_dump_removal_intent_multiple...")
     layout_data = {
         "sheet": {"width_mm": 400.0, "height_mm": 300.0, "thickness_mm": 19.0},
@@ -184,7 +175,6 @@ def test_dump_removal_intent_multiple():
 
 
 def test_dump_removal_intent_bounds():
-    """Test that bounds are correctly calculated."""
     print("Running test_dump_removal_intent_bounds...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 200.0, "thickness_mm": 12.0},
@@ -222,10 +212,9 @@ def test_dump_removal_intent_bounds():
 
 
 def test_dump_removal_intent_real_template():
-    """Test dump-removal-intent with real template layout (ClampBar)."""
     print("Running test_dump_removal_intent_real_template...")
 
-    # Path to real template layout
+
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
 
     if not layout_path.exists():
@@ -235,10 +224,10 @@ def test_dump_removal_intent_real_template():
     removal_json = dump_removal_intent(str(layout_path))
     removal_data = json.loads(removal_json)
 
-    # ClampBar template should produce multiple regions (profiles + pockets)
+
     assert len(removal_data) > 0, f"Expected RemovalIntent regions, got {len(removal_data)}"
 
-    # Verify we got some profile and pocket regions
+
     region_ids = [r["region_id"] for r in removal_data]
     has_profile = any("profile_" in rid for rid in region_ids)
     has_pocket = any("pocket_" in rid for rid in region_ids)

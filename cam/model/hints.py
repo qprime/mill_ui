@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/model/hints.py
+
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -39,7 +39,6 @@ def _depth_mm(feature: Dict[str, Any], sheet_thickness: float) -> float:
     return float(feature.get("depth", sheet_thickness))
 
 def _classify(item: Dict[str, Any], sheet_thickness: float) -> str:
-    """Return bucket: 'profiles' | 'pockets' | 'holes' | 'engraves'."""
     f = (item.get("feature") or {})
     ftype = (f.get("type") or f.get("kind") or "profile").lower()
     t = (item.get("type") or "").lower()
@@ -52,7 +51,6 @@ def _classify(item: Dict[str, Any], sheet_thickness: float) -> str:
     return "profiles"
 
 def _expand_door(item: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Expand a 'door' item into cuttable shapes (outer profile + panel pocket)."""
     out: List[Dict[str, Any]] = []
     params = item.get("params") or {}
     center = _xy(item.get("placement"))
@@ -61,7 +59,7 @@ def _expand_door(item: Dict[str, Any]) -> List[Dict[str, Any]]:
     stile_w = float(params.get("stile_w", 0.0))
     rail_h  = float(params.get("rail_h", 0.0))
     panel_recess = float(params.get("panel_recess", 0.0))
-    # Outer perimeter
+
     out.append({
         "id": _id(item) or (item.get("id") or ""),
         "type": "Rect",
@@ -69,7 +67,7 @@ def _expand_door(item: Dict[str, Any]) -> List[Dict[str, Any]]:
         "placement": {"center_xy_mm": center},
         "feature": {"type": "profile", "depth": "through", "side": "outside"},
     })
-    # Panel pocket if any
+
     if panel_recess > 0 and outer_w > 2 * stile_w and outer_h > 2 * rail_h:
         in_w = max(0.0, outer_w - 2 * stile_w)
         in_h = max(0.0, outer_h - 2 * rail_h)
@@ -84,37 +82,22 @@ def _expand_door(item: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: float,
                     kerf_width_mm: float = 3.175, min_channel_width: float = 6.0) -> Dict[str, Any]:
-    """
-    Build a CAM hint structure from resolved items (with placements).
-
-    Buckets:
-      - profiles: Rect/Circle/Polyline perimeters (and Region outer as profile)
-      - pockets:  pockets and Region (outer + holes) for clearing
-      - holes:    drilling/boring
-      - engraves: shallow-line engraves
-
-    Notes:
-      - We include kerf_width_mm in the returned hints so the planner can pick a
-        kerf-appropriate profile tool and reason about shared seams deterministically.
-      - Internal features (pockets/holes) remain independent; only adjacent perimeter
-        profiles are eligible for shared-edge merging in the planner.
-    """
     profiles: List[Dict[str, Any]] = []
     pockets:  List[Dict[str, Any]] = []
     holes:    List[Dict[str, Any]] = []
     engraves: List[Dict[str, Any]] = []
 
-    # 1) Expand high-level items into concrete cuttable shapes
+
     expanded: List[Dict[str, Any]] = []
     for it in items_resolved:
         kind = (it.get("kind") or "").lower()
         if kind == "door":
-            # Outer rectangle profile (+ optional panel pocket)
+
             expanded.extend(_expand_door(it))
         else:
             expanded.append(it)
 
-    # 2) Classify and normalize records
+
     for it in expanded:
         bucket = _classify(it, sheet_thickness)
         t = (it.get("type") or it.get("shape") or "").strip()
@@ -139,7 +122,7 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         if center is not None:
             rec["center_xy_mm"] = (float(center[0]), float(center[1]))
 
-        # Preserve side for profile ops if present (inside/outside/on)
+
         side = (f.get("side") or it.get("side"))
         if side and bucket == "profiles":
             rec["side"] = str(side).lower()
@@ -159,10 +142,10 @@ def build_cam_hints(*, items_resolved: List[Dict[str, Any]], sheet_thickness: fl
         elif bucket == "engraves":
             engraves.append(rec)
 
-    # 3) Return hints (now includes kerf_width_mm)
+
     return {
         "units": "mm",
-        "kerf_width_mm": float(kerf_width_mm),             # <-- key addition
+        "kerf_width_mm": float(kerf_width_mm),
         "min_channel_width_mm": float(min_channel_width),
         "profiles": profiles,
         "pockets": pockets,

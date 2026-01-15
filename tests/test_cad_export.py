@@ -1,8 +1,3 @@
-"""Tests for STL export adapter layer (AST → shape dicts).
-
-Tests the conversion from LayoutAST Items to shape dicts for CAD export.
-End-to-end STL export tests will be added when trimesh implementation is complete.
-"""
 
 from __future__ import annotations
 
@@ -21,7 +16,6 @@ from adapters.ast_to_cad import items_to_shape_dicts
 
 
 def test_items_to_shape_dicts_basic():
-    """Test basic conversion of Items to shape dicts."""
     items = (
         Item(
             kind="shape",
@@ -45,7 +39,7 @@ def test_items_to_shape_dicts_basic():
 
     assert len(shapes) == 2
 
-    # Check rect shape
+
     rect = shapes[0]
     assert rect["type"] == "Rect"
     assert rect["geometry"] == {"w_mm": 400.0, "h_mm": 600.0}
@@ -55,7 +49,7 @@ def test_items_to_shape_dicts_basic():
     assert rect["feature"]["depth"] == "through"
     assert rect["id"] == "door_outer"
 
-    # Check circle shape
+
     circle = shapes[1]
     assert circle["type"] == "Circle"
     assert circle["geometry"] == {"diameter_mm": 50.0}
@@ -66,7 +60,6 @@ def test_items_to_shape_dicts_basic():
 
 
 def test_items_to_shape_dicts_pocket():
-    """Test conversion with pocket feature."""
     items = (
         Item(
             kind="shape",
@@ -88,7 +81,6 @@ def test_items_to_shape_dicts_pocket():
 
 
 def test_items_to_shape_dicts_skips_templates():
-    """Test that template items are skipped."""
     items = (
         Item(
             kind="shape",
@@ -107,13 +99,12 @@ def test_items_to_shape_dicts_skips_templates():
 
     shapes = items_to_shape_dicts(items)
 
-    # Should only return the shape, not the template
+
     assert len(shapes) == 1
     assert shapes[0]["type"] == "Rect"
 
 
 def test_items_to_shape_dicts_polyline():
-    """Test conversion with polyline geometry."""
     items = (
         Item(
             kind="shape",
@@ -145,7 +136,6 @@ def test_items_to_shape_dicts_polyline():
 
 
 def test_stl_export_simple_profile(tmp_path):
-    """Test STL export with simple profile."""
     from cad.export.stl import export_stl
 
     items = (
@@ -173,7 +163,6 @@ def test_stl_export_simple_profile(tmp_path):
 
 
 def test_stl_export_with_pocket(tmp_path):
-    """Test STL export with pocket feature."""
     from cad.export.stl import export_stl
 
     items = (
@@ -209,7 +198,6 @@ def test_stl_export_with_pocket(tmp_path):
 
 
 def test_stl_export_with_kerf(tmp_path):
-    """Test STL export with kerf compensation."""
     from cad.export.stl import export_stl
 
     items = (
@@ -230,7 +218,7 @@ def test_stl_export_with_kerf(tmp_path):
         shapes=shapes,
         sheet_thickness_mm=19.0,
         output_path=output_path,
-        kerf_mm=1.5875,  # 1/16" tool radius
+        kerf_mm=1.5875,
     )
 
     assert output_path.exists()
@@ -238,7 +226,6 @@ def test_stl_export_with_kerf(tmp_path):
 
 
 def test_stl_export_polyline(tmp_path):
-    """Test STL export with polyline geometry."""
     from cad.export.stl import export_stl
 
     items = (
@@ -275,7 +262,7 @@ def test_stl_export_polyline(tmp_path):
 
 
 if __name__ == "__main__":
-    # Run basic adapter tests (no backend required)
+
     print("Testing items_to_shape_dicts (basic)...")
     test_items_to_shape_dicts_basic()
     print("✓ Pass")
@@ -292,7 +279,7 @@ if __name__ == "__main__":
     test_items_to_shape_dicts_polyline()
     print("✓ Pass")
 
-    # Run STL export tests
+
     print("\nTesting STL export (simple profile)...")
     test_stl_export_simple_profile(Path(tempfile.mkdtemp()))
     print("✓ Pass")

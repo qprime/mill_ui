@@ -1,4 +1,3 @@
-"""Validation functions for RemovalIntent records."""
 
 from __future__ import annotations
 
@@ -9,14 +8,6 @@ from validation.results import ValidationResult
 
 
 def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
-    """Check for overlapping RemovalIntent regions.
-
-    Args:
-        intents: List of RemovalIntent records to check
-
-    Returns:
-        ValidationResult with overlap errors detected
-    """
     result = ValidationResult()
 
     for i, intent_a in enumerate(intents):
@@ -32,18 +23,9 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
 
 
 def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) -> ValidationResult:
-    """Check if depth constraints are feasible.
-
-    Args:
-        intent: RemovalIntent to validate
-        sheet_thickness_mm: Material thickness
-
-    Returns:
-        ValidationResult with depth errors/suggestions
-    """
     result = ValidationResult()
 
-    # Check z_top >= z_bottom
+
     if intent.z_top < intent.z_bottom:
         result.add_error(
             f"Invalid depth: z_top ({intent.z_top}) < z_bottom ({intent.z_bottom})",
@@ -56,7 +38,7 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
             region_id=intent.region_id,
         )
 
-    # Check if cutting deeper than material thickness
+
     depth = intent.depth_mm()
     if abs(intent.z_bottom) > sheet_thickness_mm:
         result.add_warning(
@@ -66,7 +48,7 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
             sheet_thickness_mm=sheet_thickness_mm,
         )
 
-    # Suggest if depth is very shallow (< 0.5mm)
+
     if 0 < depth < 0.5:
         result.add_suggestion(
             f"Very shallow cut detected ({depth:.2f}mm) - verify this is intentional",
@@ -78,25 +60,16 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
 
 
 def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any]] | None = None) -> ValidationResult:
-    """Check if region can be machined with available tools.
-
-    Args:
-        intent: RemovalIntent to validate
-        available_tools: Optional list of tool specifications (diameter_mm, flutes, etc.)
-
-    Returns:
-        ValidationResult with toolability warnings/suggestions
-    """
     result = ValidationResult()
 
-    # Get bounds for all checks
+
     bounds = intent.bounds
     width = bounds.x_max - bounds.x_min
     height = bounds.y_max - bounds.y_min
 
-    # If no tools specified, just do basic checks
+
     if not available_tools:
-        # Check for very small features that may be hard to mill
+
         if width < 1.0 or height < 1.0:
             result.add_warning(
                 f"Very small feature detected: {width:.2f}mm x {height:.2f}mm - may require micro tooling",
@@ -107,7 +80,7 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
         return result
 
-    # With tools specified, check if any tool can reach the feature
+
     min_feature_size = min(width, height)
 
     suitable_tools = [
@@ -131,11 +104,10 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
 
 def _regions_overlap(a: RemovalIntent, b: RemovalIntent) -> bool:
-    """Check if two RemovalIntent regions overlap in XYZ space."""
-    # Check Z overlap
+
     z_overlap = not (a.z_top <= b.z_bottom or b.z_top <= a.z_bottom)
 
-    # Check XY overlap (2D bounding box)
+
     x_overlap = not (a.bounds.x_max <= b.bounds.x_min or b.bounds.x_max <= a.bounds.x_min)
     y_overlap = not (a.bounds.y_max <= b.bounds.y_min or b.bounds.y_max <= a.bounds.y_min)
 

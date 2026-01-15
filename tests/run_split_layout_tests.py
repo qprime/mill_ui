@@ -1,11 +1,9 @@
-"""Standalone test runner for Split layout manager tests (without pytest)."""
 
 import sys
 import traceback
 
 
 def test_basic_split_2x2():
-    """Test basic 2×2 split with rail/mullion bars."""
     print("Running test_basic_split_2x2...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -32,8 +30,7 @@ rect outer profile through outside
     assert len(profile_items) == 2, f"Expected 2 profiles, got {len(profile_items)}"
     assert len(pocket_items) == 4, f"Expected 4 pockets (2×2 panes), got {len(pocket_items)}"
 
-    # Pane width: (500 - 1*40) / 2 = 230mm
-    # Pane height: (500 - 1*50) / 2 = 225mm
+
     first_pocket = pocket_items[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 230.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 225.0) < 0.01
@@ -43,7 +40,6 @@ rect outer profile through outside
 
 
 def test_split_zero_rails_behaves_like_grid():
-    """Test that split with zero rail/mullion behaves like grid."""
     print("Running test_split_zero_rails_behaves_like_grid...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -85,7 +81,6 @@ grid 2 2 gap 0.00mm
 
 
 def test_split_pane_size_calculation():
-    """Test correct pane size calculation with various rail/mullion values."""
     print("Running test_split_pane_size_calculation...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -104,8 +99,7 @@ split 3 4 rail 30.00mm mullion 20.00mm
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 12, f"Expected 12 pockets (3×4 panes), got {len(pockets)}"
 
-    # Pane width: (1000 - 60) / 4 = 235mm
-    # Pane height: (800 - 60) / 3 ≈ 246.67mm
+
     first_pocket = pockets[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 235.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 246.67) < 0.01
@@ -115,7 +109,6 @@ split 3 4 rail 30.00mm mullion 20.00mm
 
 
 def test_split_inside_inset():
-    """Test split inside inset region calculates correctly."""
     print("Running test_split_inside_inset...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -132,9 +125,7 @@ inset 50.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    # Inset region: 400mm × 400mm
-    # Pane width: (400 - 30) / 2 = 185mm
-    # Pane height: (400 - 40) / 2 = 180mm
+
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 4
 
@@ -147,7 +138,6 @@ inset 50.00mm
 
 
 def test_split_roundtrip_preserves_rail_mullion():
-    """Test PML → AST → PML preserves rail/mullion values."""
     print("Running test_split_roundtrip_preserves_rail_mullion...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -184,7 +174,6 @@ split 2 3 rail 45.00mm mullion 35.00mm
 
 
 def test_french_door_acceptance():
-    """Stage 15 acceptance test: French-door pocket example with split."""
     print("Running test_french_door_acceptance...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -208,8 +197,7 @@ rect door_outer profile through outside
     assert len(profile_items) == 2
     assert len(pocket_items) == 4
 
-    # Pane width: (680 - 40) / 2 = 320mm
-    # Pane height: (1080 - 50) / 2 = 515mm
+
     first_pane = pocket_items[0]
     assert abs(first_pane.geometry.data["w_mm"] - 320.0) < 0.01
     assert abs(first_pane.geometry.data["h_mm"] - 515.0) < 0.01
@@ -219,7 +207,6 @@ rect door_outer profile through outside
 
 
 def test_split_single_row():
-    """Test split with single row (only mullions, no rails)."""
     print("Running test_split_single_row...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -238,8 +225,7 @@ split 1 3 rail 0.00mm mullion 30.00mm
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 3
 
-    # Pane width: (600 - 60) / 3 = 180mm
-    # Pane height: 200mm (full height)
+
     first_pocket = pockets[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 180.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 200.0) < 0.01
@@ -249,7 +235,6 @@ split 1 3 rail 0.00mm mullion 30.00mm
 
 
 def test_split_single_column():
-    """Test split with single column (only rails, no mullions)."""
     print("Running test_split_single_column...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -268,8 +253,7 @@ split 3 1 rail 40.00mm mullion 0.00mm
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 3
 
-    # Pane width: 200mm (full width)
-    # Pane height: (600 - 80) / 3 ≈ 173.33mm
+
     first_pocket = pockets[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 200.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 173.33) < 0.01

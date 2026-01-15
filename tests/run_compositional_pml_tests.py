@@ -1,7 +1,3 @@
-"""Standalone test runner for compositional PML tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_compositional_pml_tests
-"""
 
 import sys
 from pathlib import Path
@@ -12,12 +8,10 @@ from resolution.layout_resolver import resolve_layout
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
-    """Check if two floats are approximately equal."""
     return abs(a - b) < tolerance
 
 
 def test_simple_rect():
-    """Test parsing simple rect."""
     print("Running test_simple_rect...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -37,7 +31,6 @@ rect outer profile through outside
 
 
 def test_rect_with_inset():
-    """Test parsing rect with inset."""
     print("Running test_rect_with_inset...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -58,7 +51,6 @@ inset 25.00mm
 
 
 def test_frame_with_pocket():
-    """Test parsing frame with inner pocket."""
     print("Running test_frame_with_pocket...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -85,7 +77,6 @@ rect outer profile through outside
 
 
 def test_grid_with_pockets():
-    """Test parsing grid with pockets."""
     print("Running test_grid_with_pockets...")
 
     pml = """sheet 400.00mm 400.00mm 19.00mm
@@ -109,7 +100,6 @@ grid 2 2 gap 10.00mm
 
 
 def test_component_definition_and_use():
-    """Test component definition with use."""
     print("Running test_component_definition_and_use...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -132,7 +122,6 @@ use SimplePanel
 
 
 def test_place_with_components():
-    """Test place with grid layout."""
     print("Running test_place_with_components...")
 
     pml = """sheet 1000.00mm 1000.00mm 19.00mm
@@ -159,7 +148,6 @@ place grid 2 2 gap 50.00mm
 
 
 def test_acceptance_stage12_gold_exemplar():
-    """Stage 13 acceptance test: Parse Stage 12 gold exemplar."""
     print("Running test_acceptance_stage12_gold_exemplar...")
 
     pml = """sheet 1200.00mm 1200.00mm 19.00mm
@@ -189,10 +177,10 @@ place grid 2 2 gap 100.00mm
 
     flat = resolve_layout(ast)
 
-    # Acceptance criteria: 24 items total
+
     assert len(flat.items) == 24, f"Expected 24 items, got {len(flat.items)}"
 
-    # Count feature types
+
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
@@ -213,7 +201,6 @@ place grid 2 2 gap 100.00mm
 
 
 def test_roundtrip_preserves_semantics():
-    """Test that PML → AST → PML → AST preserves semantics."""
     print("Running test_roundtrip_preserves_semantics...")
 
     original_pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -246,10 +233,9 @@ place grid 2 2 gap 20.00mm
 
 
 def test_error_handling_invalid_indentation():
-    """Test error handling for invalid indentation."""
     print("Running test_error_handling_invalid_indentation...")
 
-    # Invalid: dedent to level that doesn't match any previous indent
+
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -257,8 +243,8 @@ rect outer profile through outside
         rect inner pocket 6.00mm
   rect bad pocket 5.00mm
 """
-    # The last line has 2-space indent, but we came from 8-space (4+4)
-    # Dedenting to 2 doesn't match any level in stack [0, 4, 8]
+
+
     try:
         parse_compositional_pml(pml)
         assert False, "Expected ParseError"
@@ -272,7 +258,6 @@ rect outer profile through outside
 
 
 def test_formatter_produces_canonical_output():
-    """Test that formatter produces deterministic canonical output."""
     print("Running test_formatter_produces_canonical_output...")
 
     pml = """sheet 1200.00mm 1200.00mm 19.00mm
@@ -300,7 +285,7 @@ place grid 2 2 gap 100.00mm
     assert "project test_canonical" in formatted
     assert "component Panel" in formatted
 
-    # Verify formatting is stable
+
     ast2 = parse_compositional_pml(formatted)
     formatted2 = format_compositional_pml(ast2)
     assert formatted == formatted2

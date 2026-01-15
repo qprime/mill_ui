@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/ops/pocket.py
+
 from __future__ import annotations
 from cam.shape import Shape2D
 from cam.model.setup import Setup
@@ -13,7 +13,6 @@ def pocket_raster(
     stepover: float,
     stepdown: float | None = None,
 ):
-    """Raster pocket generation delegated to the native core."""
     return native_core.pocket_raster(
         shape,
         setup,

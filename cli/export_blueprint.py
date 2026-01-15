@@ -1,10 +1,3 @@
-"""CLI tool for exporting blueprint proof drawings (SVG/PDF).
-
-Usage:
-    python -m cli.export_blueprint --input door.pml --theme dark --format svg --out out/
-    python -m cli.export_blueprint --input door.json --theme print --format pdf --out out/
-    python -m cli.export_blueprint --input door.pml --theme dark --format both --out out/
-"""
 
 from __future__ import annotations
 
@@ -21,19 +14,18 @@ from export.blueprint_svg import render_blueprint_svg, THEMES
 
 
 def main():
-    """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Export blueprint proof drawings (SVG/PDF)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Export SVG with dark theme
+
   python -m cli.export_blueprint --input door.pml --theme dark --format svg --out out/
 
-  # Export PDF with print theme
+
   python -m cli.export_blueprint --input door.json --theme print --format pdf --out out/
 
-  # Export both SVG and PDF
+
   python -m cli.export_blueprint --input door.pml --theme dark --format both --out out/
 
 Output file naming:
@@ -78,7 +70,7 @@ Output file naming:
     args = parser.parse_args()
 
     try:
-        # Validate input file exists
+
         input_path = Path(args.input)
         if not input_path.exists():
             print(f"Error: Input file not found: {args.input}", file=sys.stderr)
@@ -87,7 +79,7 @@ Output file naming:
             print(f"Error: Input path is not a file: {args.input}", file=sys.stderr)
             sys.exit(1)
 
-        # Parse input to LayoutAST
+
         input_suffix = input_path.suffix.lower()
         if input_suffix == ".json":
             ast = LayoutAST.from_json(str(input_path))
@@ -97,11 +89,11 @@ Output file naming:
                 comp_ast = parse_compositional_pml(input_text)
                 ast = resolve_layout(comp_ast)
             else:
-                # Try flat PML first, then compositional if it fails
+
                 try:
                     ast = parse_pml(input_text)
                 except PMLParseError as e:
-                    # Check if it might be compositional PML
+
                     if any(keyword in input_text for keyword in ["component", "frame", "inset", "grid", "split"]):
                         print(f"Hint: This looks like compositional PML. Try adding --compositional flag", file=sys.stderr)
                     raise
@@ -110,24 +102,24 @@ Output file naming:
             print("Supported formats: .pml, .txt, .json", file=sys.stderr)
             sys.exit(1)
 
-        # Convert to RemovalIntent (for validation and depth info in rendering)
+
         removal_intents = ast_to_removal_intents(ast)
 
-        # Render blueprint SVG
+
         svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=args.theme)
 
-        # Prepare output directory and basename
+
         output_dir = Path(args.out)
         output_dir.mkdir(parents=True, exist_ok=True)
         basename = input_path.stem
 
-        # Export SVG
+
         if args.format in ("svg", "both"):
             svg_path = output_dir / f"{basename}.blueprint.{args.theme}.svg"
             svg_path.write_text(svg_string, encoding="utf-8")
             print(f"✓ SVG exported: {svg_path}")
 
-        # Export PDF
+
         if args.format in ("pdf", "both"):
             pdf_path = output_dir / f"{basename}.blueprint.{args.theme}.pdf"
             try:
@@ -144,7 +136,7 @@ Output file naming:
         print(f"PML Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        # Check if it's a compositional parse error
+
         if e.__class__.__name__ == "ParseError" and "compositional_parser" in str(type(e).__module__):
             print(f"Compositional PML Parse Error: {e}", file=sys.stderr)
             sys.exit(1)

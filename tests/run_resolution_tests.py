@@ -1,7 +1,3 @@
-"""Standalone test runner for layout resolution tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_resolution_tests
-"""
 
 import sys
 from pathlib import Path
@@ -24,12 +20,10 @@ from pml import format_pml
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
-    """Check if two floats are approximately equal."""
     return abs(a - b) < tolerance
 
 
 def test_simple_panel_with_rect():
-    """Test basic panel with single rect fills region."""
     print("Running test_simple_panel_with_rect...")
 
     ast = CompositionalLayoutAST(
@@ -59,7 +53,6 @@ def test_simple_panel_with_rect():
 
 
 def test_panel_with_inset():
-    """Test inset shrinks region before placing children."""
     print("Running test_panel_with_inset...")
 
     ast = CompositionalLayoutAST(
@@ -92,7 +85,6 @@ def test_panel_with_inset():
 
 
 def test_frame_creates_profile_and_inner_region():
-    """Test frame creates outer profile and places children in inner region."""
     print("Running test_frame_creates_profile_and_inner_region...")
 
     ast = CompositionalLayoutAST(
@@ -143,7 +135,6 @@ def test_frame_creates_profile_and_inner_region():
 
 
 def test_grid_subdivides_region():
-    """Test grid subdivides region into cells."""
     print("Running test_grid_subdivides_region...")
 
     ast = CompositionalLayoutAST(
@@ -183,7 +174,6 @@ def test_grid_subdivides_region():
 
 
 def test_component_definition_and_use():
-    """Test component definition with parameter substitution."""
     print("Running test_component_definition_and_use...")
 
     simple_panel = ComponentDef(
@@ -219,7 +209,6 @@ def test_component_definition_and_use():
 
 
 def test_place_grid_with_components():
-    """Test Place+Grid for multi-instance sheet layout."""
     print("Running test_place_grid_with_components...")
 
     shaker_panel = ComponentDef(
@@ -270,7 +259,6 @@ def test_place_grid_with_components():
 
 
 def test_acceptance_4_instances_frame_grid_pocket():
-    """Acceptance test: 4 identical instances via grid, each with frame+grid+pocket."""
     print("Running test_acceptance_4_instances_frame_grid_pocket...")
 
     grid_panel = ComponentDef(
@@ -345,7 +333,6 @@ def test_acceptance_4_instances_frame_grid_pocket():
 
 
 def test_grid_with_no_explicit_cell():
-    """Test grid without explicit Cell node treats children as cell content."""
     print("Running test_grid_with_no_explicit_cell...")
 
     ast = CompositionalLayoutAST(

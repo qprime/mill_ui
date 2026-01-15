@@ -1,14 +1,9 @@
-"""Tests for nesting API (Phase 7).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.test_nesting_api
-"""
 
 import sys
 from nesting.api import nest_parts, nest_and_generate
 
 
 def test_basic_nesting_api():
-    """Basic API usage."""
     print("Running test_basic_nesting_api...")
     parts = [
         {"name": "panel", "width_mm": 400, "height_mm": 300, "quantity": 4},
@@ -29,7 +24,6 @@ def test_basic_nesting_api():
 
 
 def test_api_with_template():
-    """API with Shaker template."""
     print("Running test_api_with_template...")
     parts = [
         {
@@ -58,7 +52,6 @@ def test_api_with_template():
 
 
 def test_api_validation():
-    """API returns validation results."""
     print("Running test_api_validation...")
     parts = [
         {"name": "panel", "width_mm": 200, "height_mm": 200, "quantity": 1},
@@ -79,7 +72,6 @@ def test_api_validation():
 
 
 def test_api_no_validation():
-    """API can skip validation."""
     print("Running test_api_no_validation...")
     parts = [
         {"name": "panel", "width_mm": 200, "height_mm": 200, "quantity": 1},
@@ -98,7 +90,6 @@ def test_api_no_validation():
 
 
 def test_api_unplaced_parts():
-    """API reports unplaced parts."""
     print("Running test_api_unplaced_parts...")
     parts = [
         {"name": "huge", "width_mm": 2000, "height_mm": 2000, "quantity": 1},
@@ -118,7 +109,6 @@ def test_api_unplaced_parts():
 
 
 def test_api_max_sheets():
-    """API respects max_sheets."""
     print("Running test_api_max_sheets...")
     parts = [
         {"name": "panel", "width_mm": 400, "height_mm": 400, "quantity": 10},
@@ -138,7 +128,6 @@ def test_api_max_sheets():
 
 
 def test_nest_and_generate_ast():
-    """Generate LayoutAST output."""
     print("Running test_nest_and_generate_ast...")
     parts = [
         {"name": "panel", "width_mm": 300, "height_mm": 300, "quantity": 2},
@@ -153,9 +142,9 @@ def test_nest_and_generate_ast():
     )
 
     assert result["output_format"] == "ast"
-    assert len(result["output"]) >= 1  # At least one AST
+    assert len(result["output"]) >= 1
 
-    # Verify it's a LayoutAST
+
     ast = result["output"][0]
     assert hasattr(ast, "sheet")
     assert hasattr(ast, "items")
@@ -164,7 +153,6 @@ def test_nest_and_generate_ast():
 
 
 def test_nest_and_generate_pml():
-    """Generate PML output."""
     print("Running test_nest_and_generate_pml...")
     parts = [
         {"name": "panel", "width_mm": 300, "height_mm": 300, "quantity": 2},
@@ -181,7 +169,7 @@ def test_nest_and_generate_pml():
     assert result["output_format"] == "pml"
     assert len(result["output"]) >= 1
 
-    # Verify it's PML string
+
     pml = result["output"][0]
     assert isinstance(pml, str)
     assert "sheet" in pml
@@ -191,7 +179,6 @@ def test_nest_and_generate_pml():
 
 
 def test_user_example():
-    """User's example: 20 + 15 + 2 panels."""
     print("Running test_user_example...")
     parts = [
         {"name": "large_door", "width_mm": 457, "height_mm": 597, "quantity": 20},
@@ -201,8 +188,8 @@ def test_user_example():
 
     result = nest_parts(
         parts=parts,
-        sheet_width_mm=1220,  # 4' sheet
-        sheet_height_mm=2440,  # 8' sheet
+        sheet_width_mm=1220,
+        sheet_height_mm=2440,
         sheet_thickness_mm=19,
         margin_mm=10,
         kerf_mm=6,
@@ -212,15 +199,14 @@ def test_user_example():
     print(f"  Total parts placed: {result['total_parts']}")
     print(f"  Utilization: {result['utilization_percent']:.1f}%")
 
-    # All 37 parts should fit
-    assert result["total_parts"] >= 35  # Allow small variance
+
+    assert result["total_parts"] >= 35
     assert result["total_sheets"] >= 3
 
     print("  PASSED")
 
 
 def test_invalid_output_format():
-    """Invalid output_format raises ValueError."""
     print("Running test_invalid_output_format...")
     parts = [{"name": "panel", "width_mm": 100, "height_mm": 100}]
 
@@ -242,7 +228,6 @@ def test_invalid_output_format():
 
 
 def run_all_tests():
-    """Run all tests."""
     print("=" * 60)
     print("Phase 7: Nesting API Tests")
     print("=" * 60)

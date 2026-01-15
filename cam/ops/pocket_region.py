@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/ops/pocket_region.py
+
 from __future__ import annotations
 from typing import Dict, Any, List, Tuple, Optional
 from cam.model.setup import Setup
@@ -21,7 +21,7 @@ def _interval_subtract(base: List[Tuple[float, float]], cut: Tuple[float, float]
     if a > b: a, b = b, a
     out: List[Tuple[float, float]] = []
     for (x0, x1) in base:
-        if x1 <= a or x0 >= b:             # no overlap
+        if x1 <= a or x0 >= b:
             out.append((x0, x1)); continue
         if x0 < a: out.append((x0, max(x0, a)))
         if x1 > b: out.append((min(x1, b), x1))
@@ -43,9 +43,6 @@ def pocket_region_rect_raster(
     stepover_mm: float,
     stepdown_mm: float = 3.0,
 ) -> List[dict]:
-    """
-    Layered raster for a rectangular Region with rectangular holes (islands).
-    """
     geom = region.get("geometry") or {}
     outer = geom.get("outer") or {}
     holes = geom.get("holes") or []
@@ -75,7 +72,7 @@ def pocket_region_rect_raster(
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
 
-    # Z layers
+
     z_levels = []
     z = 0.0
     while z > z_target + 1e-9:

@@ -1,4 +1,3 @@
-"""Shared configuration helper utilities for the CAM pipeline."""
 from __future__ import annotations
 
 from dataclasses import dataclass, fields, replace
@@ -17,7 +16,6 @@ _DEFAULT_PROJECT_ROOT = (_REPO_ROOT / "memories" / "cam_projects" / "sheet_layou
 
 @dataclass(frozen=True)
 class Config:
-    """Unified configuration for CLI, environment variables, and defaults."""
 
     tool_db_path: Path | None = _DEFAULT_TOOL_DB_PATH
     project_root: Path | None = _DEFAULT_PROJECT_ROOT
@@ -32,7 +30,6 @@ class Config:
     pocket_finish_perimeter: bool = True
 
     def as_dict(self) -> dict[str, Any]:
-        """Return a JSON-serialisable representation of this config."""
 
         return {
             "tool_db_path": str(self.tool_db_path) if self.tool_db_path else None,
@@ -49,7 +46,6 @@ class Config:
         }
 
     def with_overrides(self, overrides: Mapping[str, Any]) -> Config:
-        """Return a copy with ``overrides`` applied after validation."""
 
         if not overrides:
             return self
@@ -68,7 +64,7 @@ class Config:
             normaliser = _NORMALISERS[key]
             try:
                 updates[key] = normaliser(raw_value)
-            except ValueError as exc:  # pragma: no cover - defensive validation path
+            except ValueError as exc:
                 raise ValueError(f"Invalid value for {key}: {raw_value!r}") from exc
         if not updates:
             return self
@@ -82,7 +78,6 @@ class Config:
         environ: Mapping[str, str] | None = None,
         base: Config | None = None,
     ) -> Config:
-        """Create a config by overlaying recognised environment variables."""
 
         env = environ or os.environ
         overrides = {
@@ -99,7 +94,6 @@ class Config:
         *,
         base: Config | None = None,
     ) -> Config:
-        """Create a config by overlaying parsed CLI arguments."""
 
         data = _namespace_to_mapping(args)
         overrides = {key: data[key] for key in _CONFIG_FIELD_NAMES if key in data and data[key] is not None}
@@ -137,7 +131,7 @@ def _namespace_to_mapping(args: Mapping[str, Any] | object | None) -> Mapping[st
         return args
     try:
         return dict(vars(args))
-    except TypeError:  # pragma: no cover - not expected, defensive fallback
+    except TypeError:
         return {}
 
 
@@ -225,7 +219,6 @@ def _extract_overrides(data: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def find_config_file(search_paths: Sequence[Path | str] | None = None) -> Path | None:
-    """Return the first existing config.json in ``search_paths`` if present."""
 
     roots: list[Path] = []
     if search_paths:
@@ -261,7 +254,6 @@ def load_config(
     search_paths: Sequence[Path | str] | None = None,
     prefix: str = "CAM_",
 ) -> Config:
-    """Load the ``Config`` using precedence: CLI > env > file > defaults."""
 
     base = Config()
 

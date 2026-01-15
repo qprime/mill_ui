@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/planner/pipeline.py
+
 from __future__ import annotations
 from typing import Iterable, Dict, Any, List, Tuple
 
@@ -27,7 +27,7 @@ def _as_tool(spec: ToolSpec) -> Tool:
     return Tool(
         name=spec.name,
         diameter=spec.diameter,
-        kind=spec.kind,  # type: ignore[arg-type]
+        kind=spec.kind,
         rpm=spec.rpm,
         feed_xy=spec.feed_xy,
         feed_z=spec.feed_z,
@@ -57,9 +57,7 @@ def _pick_setup(spec: ToolSpec, *, stock: Stock, material: Material, machine: Ma
         safe_z=safe_z,
     )
 
-# -----------------------------
-# Offsets for profile side
-# -----------------------------
+
 def _offset_rect_shape(w: float, h: float, center: Tuple[float, float], offset: float):
     w2 = w + 2.0 * offset
     h2 = h + 2.0 * offset
@@ -82,14 +80,11 @@ def hints_to_moves(
     stock: Stock,
     safe_z: float = 5.0,
 ) -> List[Dict[str, Any]]:
-    """
-    Convert CAM hints (profiles/pockets/holes/engraves) to a flat list of moves.
-    """
     moves: List[Dict[str, Any]] = []
 
     min_channel = float(hints.get("min_channel_width_mm", 6.0))
 
-    # --- Pockets first (clear material)
+
     for rec in hints.get("pockets", []):
         geom = rec.get("geometry") or {}
         shape_name = rec.get("shape")
@@ -104,7 +99,7 @@ def hints_to_moves(
             shape = _rect_shape(w, h, _ensure_center(rec))
             moves += pocket_raster(shape, setup, depth=depth, stepover=step_over)
         elif shape_name == "Circle":
-            # Use concentric rings for round pockets
+
             d = float(geom.get("diameter_mm", 0.0))
             cx, cy = _ensure_center(rec)
             out = pocket_circle_concentric(
@@ -114,11 +109,11 @@ def hints_to_moves(
             if out:
                 moves += out
             else:
-                # Fallback: raster over bbox if circle is too small
+
                 shape = _circle_shape(d, (cx, cy))
                 moves += pocket_raster(shape, setup, depth=depth, stepover=step_over)
         elif shape_name == "Region":
-            # Rect outer + Rect holes
+
             moves += pocket_region_rect_raster(
                 rec, setup,
                 default_center_xy=_ensure_center(rec),
@@ -128,7 +123,7 @@ def hints_to_moves(
         else:
             continue
 
-    # --- Holes (policy: drill → bore → circle-pocket)
+
     for rec in hints.get("holes", []):
         geom = rec.get("geometry") or {}
         if rec.get("shape") != "Circle":
@@ -151,10 +146,10 @@ def hints_to_moves(
             sd = stepdown_for(tool_diameter=t.diameter, cap_mm=3.0)
             moves += pocket_circle_concentric((x, y), D, setup, depth=depth, stepover_mm=so, stepdown_mm=sd, finish=True)
 
-    # --- Profiles (finish perimeters last) with side offset
+
     for rec in hints.get("profiles", []):
         geom = rec.get("geometry") or {}
-        side = str(rec.get("side", "on")).lower()  # 'inside' | 'outside' | 'on'
+        side = str(rec.get("side", "on")).lower()
         t = pick_for_profile(tool_db)
         setup = _pick_setup(t, stock=stock, material=material, machine=machine, safe_z=safe_z)
         tool_r = 0.5 * float(t.diameter)
@@ -181,7 +176,7 @@ def hints_to_moves(
         depth = float(rec.get("depth_mm", 0.0))
         moves += profile_outline(shape, setup, depth=depth, step_down=step_down)
 
-    # --- Engraves
+
     for rec in hints.get("engraves", []):
         geom = rec.get("geometry") or {}
         lines = []

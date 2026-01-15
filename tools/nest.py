@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""Nest CLI: Run nesting from .nest.pml files and output PML layouts.
-
-Usage:
-    PYTHONPATH=. python3 tools/nest.py input.nest.pml -o output_dir/
-
-This tool:
-1. Parses the .nest.pml specification
-2. Runs the nesting algorithm (maxrects or guillotine)
-3. Outputs one .pml file per sheet with explicit placements
-4. Outputs a manifest.json with nesting summary
-"""
 
 from __future__ import annotations
 
@@ -52,7 +41,7 @@ def main():
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Read and parse input
+
     if args.verbose:
         print(f"Reading {input_path}...")
 
@@ -75,7 +64,7 @@ def main():
             template_info = f" (template: {part.template})" if part.template else ""
             print(f"  - {part.quantity}x {part.name}: {part.width_mm}mm x {part.height_mm}mm{template_info}")
 
-    # Run nesting
+
     if args.verbose:
         print("\nRunning nesting...")
 
@@ -93,7 +82,7 @@ def main():
         print(f"  Utilization: {result['utilization'] * 100:.1f}%")
         print(f"  Nesting time: {nest_time * 1000:.1f}ms")
 
-    # Also run validation
+
     validation_params = nest_job_to_api_params(job)
     validation_params["validate"] = True
     validation_result = nest_parts(**validation_params)
@@ -109,7 +98,7 @@ def main():
         for warning in validation["warnings"]:
             print(f"  WARNING: {warning['message']}")
 
-    # Output PML files
+
     if args.verbose:
         print("\nWriting output files...")
 
@@ -120,10 +109,10 @@ def main():
         sheet_name = f"{args.prefix}_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml"
 
-        # Format AST as PML
+
         pml_content = format_pml(ast)
 
-        # Add header comment
+
         header = f"# {sheet_name}.pml\n"
         header += f"# Generated from {input_path.name}\n"
         header += f"# Algorithm: {job.algorithm}\n"
@@ -136,7 +125,7 @@ def main():
         if args.verbose:
             print(f"  {pml_path.name}: {len(ast.items)} items")
 
-    # Write manifest
+
     manifest = {
         "source": input_path.name,
         "algorithm": job.algorithm,

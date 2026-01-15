@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/tools/adapter.py
+
 from __future__ import annotations
 from typing import List, Dict, Any
 import json
@@ -32,7 +32,7 @@ def load_tool_db(json_path: str, material: str = "MDF") -> List[Dict[str, Any]]:
             "depth_per_pass": float(fs.get("depth_per_pass_mm", 3.0)),
             "stepover_percent": float(fs.get("step_over_percent", 40)),
             "flutes": int(t.get("flutes", 2)),
-            # carry flute direction/spiral if present: 'upcut', 'downcut', 'compression'
+
             "rotation": t.get("rotation"),
         })
     return tools_out

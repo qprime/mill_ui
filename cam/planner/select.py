@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/planner/select.py
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Optional, Literal
@@ -28,23 +28,19 @@ def _to_toolspecs(tool_db: Iterable[dict]) -> list[ToolSpec]:
     return sorted(out, key=lambda x: x.diameter)
 
 def pick_for_profile(tool_db: Iterable[dict]) -> ToolSpec:
-    """Profiles prefer largest tool (fastest perimeter time)."""
     tools = _to_toolspecs(tool_db)
     return tools[-1]
 
 def pick_for_pocket(tool_db: Iterable[dict], *, min_channel_width_mm: float) -> ToolSpec:
-    """Pocketing must fit channels → pick the largest tool ≤ channel width."""
     tools = _to_toolspecs(tool_db)
     feasible = [t for t in tools if t.diameter <= float(min_channel_width_mm)]
     return feasible[-1] if feasible else tools[0]
 
 def pick_for_hole(tool_db: Iterable[dict], *, hole_diameter_mm: float) -> ToolSpec:
-    """Drilling/boring: pick the largest tool ≤ hole diameter."""
     tools = _to_toolspecs(tool_db)
     feasible = [t for t in tools if t.diameter <= float(hole_diameter_mm)]
     return feasible[-1] if feasible else tools[0]
 
 def pick_for_engrave(tool_db: Iterable[dict]) -> ToolSpec:
-    """Engrave defaults to the smallest available flat/V bit."""
     tools = _to_toolspecs(tool_db)
     return tools[0]

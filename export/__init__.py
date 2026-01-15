@@ -1,4 +1,4 @@
-# export - Blueprint SVG rendering and visualization tools
+
 
 from .blueprint_svg import render_blueprint_svg, DARK_THEME, PRINT_THEME, THEMES
 from .blueprint_pdf import svg_to_pdf

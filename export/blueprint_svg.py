@@ -1,10 +1,3 @@
-"""Blueprint-style SVG proof drawing export.
-
-Generates deterministic, intent-derived inspection drawings from LayoutAST/RemovalIntent.
-Focuses on validation before machining, not toolpath visualization.
-
-All dimensions in millimeters.
-"""
 
 from __future__ import annotations
 
@@ -17,10 +10,8 @@ from ir.removal_intent import RemovalIntent, Bounds2D
 from export.dimensions import place_dimensions_on_rails, render_placed_dimension, render_gap_dimension
 
 
-# Theme definitions
 @dataclass(frozen=True)
 class Theme:
-    """Visual theme for blueprint rendering."""
     background: str
     foreground: str
     profile_stroke: str
@@ -36,7 +27,7 @@ class Theme:
     construction_dash: str
     dimension_stroke: str
     dimension_text: str
-    gap_stroke: str  # Color for gap/spacing dimensions (braces)
+    gap_stroke: str
     gap_text: str
     notes_text: str
     legend_text: str
@@ -48,17 +39,17 @@ DARK_THEME = Theme(
     profile_stroke="#e8e8e8",
     profile_width="2",
     pocket_stroke="#6496c8",
-    pocket_fill="#6496c8",  # Use fill-opacity instead of rgba for PDF compatibility
+    pocket_fill="#6496c8",
     pocket_width="1.5",
     hole_stroke="#e8e8e8",
     hole_fill="none",
     engrave_stroke="#888888",
     engrave_dash="4,4",
-    construction_stroke="#6b8e7f",  # Greenish-gray for better visibility
+    construction_stroke="#6b8e7f",
     construction_dash="2,2",
     dimension_stroke="#5ab9ea",
     dimension_text="#5ab9ea",
-    gap_stroke="#ff9500",  # Amber/orange for spacing/gap dimensions
+    gap_stroke="#ff9500",
     gap_text="#ff9500",
     notes_text="#cccccc",
     legend_text="#cccccc",
@@ -80,7 +71,7 @@ PRINT_THEME = Theme(
     construction_dash="2,2",
     dimension_stroke="#333333",
     dimension_text="#333333",
-    gap_stroke="#cc6600",  # Darker orange for print theme
+    gap_stroke="#cc6600",
     gap_text="#cc6600",
     notes_text="#000000",
     legend_text="#000000",
@@ -97,21 +88,11 @@ def render_blueprint_svg(
     removal_intents: Sequence[RemovalIntent] | None = None,
     theme: str = "dark",
 ) -> str:
-    """Render blueprint-style SVG from LayoutAST and RemovalIntent.
-
-    Args:
-        layout_ast: Layout AST with sheet and items
-        removal_intents: Optional RemovalIntent list (for depth info, bounds validation)
-        theme: "dark" (default) or "print"
-
-    Returns:
-        SVG string with semantic layer groups
-    """
     theme_obj = THEMES.get(theme, DARK_THEME)
     sheet = layout_ast.sheet
 
-    # Create SVG root with viewBox matching sheet dimensions + margin for dimensions
-    margin = 140  # mm margin for dimension rails, title, legend, and notes
+
+    margin = 140
     viewbox_width = sheet.width_mm + 2 * margin
     viewbox_height = sheet.height_mm + 2 * margin
 
@@ -125,11 +106,11 @@ def render_blueprint_svg(
         },
     )
 
-    # Add style definitions
+
     style = ET.SubElement(svg, "style")
     style.text = _generate_stylesheet(theme_obj)
 
-    # Background rectangle
+
     ET.SubElement(
         svg,
         "rect",
@@ -142,11 +123,11 @@ def render_blueprint_svg(
         },
     )
 
-    # Offset for margin
+
     offset_x = margin
     offset_y = margin
 
-    # Create semantic layer groups
+
     sheet_group = ET.SubElement(svg, "g", {"id": "SHEET_OUTLINE", "class": "sheet-outline"})
     profile_group = ET.SubElement(svg, "g", {"id": "PROFILE_CUTS", "class": "profile-cuts"})
     pocket_group = ET.SubElement(svg, "g", {"id": "POCKET_REGIONS", "class": "pocket-regions"})
@@ -158,13 +139,13 @@ def render_blueprint_svg(
     title_group = ET.SubElement(svg, "g", {"id": "TITLE_BLOCK", "class": "title-block"})
     legend_group = ET.SubElement(svg, "g", {"id": "LEGEND", "class": "legend"})
 
-    # Render sheet boundary
+
     _render_sheet_boundary(sheet_group, sheet, offset_x, offset_y, theme_obj)
 
-    # Render items by feature type
+
     for item in layout_ast.items:
         if item.kind != "shape" or item.feature is None:
-            continue  # Skip templates or items without features
+            continue
 
         feature_type = item.feature.type
         if feature_type == "profile":
@@ -176,21 +157,20 @@ def render_blueprint_svg(
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj)
 
-    # Render dimensions on rails (Part B)
+
     _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj)
 
-    # Render title block, legend, and notes (Part C)
+
     _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)
     _render_legend(legend_group, viewbox_width, theme_obj)
     _render_notes(notes_group, layout_ast, removal_intents, viewbox_height, theme_obj)
 
-    # Convert to string
+
     ET.indent(svg, space="  ")
     return ET.tostring(svg, encoding="unicode")
 
 
 def _generate_stylesheet(theme: Theme) -> str:
-    """Generate CSS stylesheet for SVG."""
     return f"""
         .sheet-outline {{ stroke: {theme.construction_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .profile-cuts {{ stroke: {theme.profile_stroke}; stroke-width: {theme.profile_width}; fill: none; }}
@@ -199,16 +179,15 @@ def _generate_stylesheet(theme: Theme) -> str:
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
-        .dimension-text {{ fill: #888888; font-family: monospace; font-size: 6px; }}
+        .dimension-text {{ fill:
         .gap-dimensions {{ stroke: {theme.gap_stroke}; stroke-width: 1; fill: none; }}
-        .gap-text {{ fill: #888888; font-family: monospace; font-size: 6px; }}
+        .gap-text {{ fill:
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
     """
 
 
 def _render_sheet_boundary(group: ET.Element, sheet: Sheet, offset_x: float, offset_y: float, theme: Theme) -> None:
-    """Render sheet outline."""
     ET.SubElement(
         group,
         "rect",
@@ -222,7 +201,6 @@ def _render_sheet_boundary(group: ET.Element, sheet: Sheet, offset_x: float, off
 
 
 def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    """Render profile cut shape."""
     if item.geometry is None or item.placement is None:
         return
 
@@ -258,7 +236,6 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
 
 
 def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    """Render pocket region."""
     if item.geometry is None or item.placement is None:
         return
 
@@ -294,7 +271,6 @@ def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: flo
 
 
 def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    """Render hole with center mark."""
     if item.geometry is None or item.placement is None:
         return
 
@@ -302,11 +278,11 @@ def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float
     abs_cx = offset_x + cx
     abs_cy = offset_y + cy
 
-    # Get diameter
+
     d = item.geometry.data.get("diameter_mm", item.geometry.data.get("radius_mm", 5) * 2)
     r = d / 2
 
-    # Circle outline
+
     ET.SubElement(
         group,
         "circle",
@@ -317,7 +293,7 @@ def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float
         },
     )
 
-    # Center mark (cross)
+
     mark_size = 3
     ET.SubElement(
         group,
@@ -342,9 +318,8 @@ def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float
 
 
 def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    """Render engrave path (simplified for Part A)."""
-    # For now, render engraves similar to profiles but with dashed style
-    # TODO: Handle polylines, splines in later parts
+
+
     _render_profile(group, item, offset_x, offset_y, theme)
 
 
@@ -356,13 +331,12 @@ def _render_dimensions(
     margin: float,
     theme: Theme,
 ) -> None:
-    """Render dimension lines and labels on rails."""
-    # Standard feature dimensions (blue lines, gray text via CSS)
+
     dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"})
     for dim in dims:
         render_placed_dimension(group, dim, theme.dimension_stroke)
 
-    # Gap dimensions (amber/orange braces)
+
     _render_gap_dimensions(group, ast, offset_x, offset_y, theme)
 
 
@@ -373,16 +347,7 @@ def _render_gap_dimensions(
     offset_y: float,
     theme: Theme,
 ) -> None:
-    """Render gap/spacing dimensions with double-headed arrows.
 
-    Groups each profile with its contained pockets, then shows:
-    1. Border/inset: gap between profile edge and contained pocket
-    2. Mullion spacing: horizontal gaps between adjacent pockets within same profile
-    3. Rail spacing: vertical gaps between adjacent pockets within same profile
-
-    Only renders one representative dimension per unique gap value to avoid clutter.
-    """
-    # Collect all profiles
     profile_items = [
         item for item in ast.items
         if item.kind == "shape"
@@ -396,7 +361,7 @@ def _render_gap_dimensions(
     if not profile_items:
         return
 
-    # Collect all pockets
+
     pocket_items = [
         item for item in ast.items
         if item.kind == "shape"
@@ -410,7 +375,7 @@ def _render_gap_dimensions(
     if not pocket_items:
         return
 
-    # Build profile bounds list
+
     def get_bounds(item: Item) -> dict:
         cx, cy = item.placement.center_xy_mm
         w = float(item.geometry.data.get("w_mm", 0))
@@ -427,7 +392,6 @@ def _render_gap_dimensions(
         }
 
     def contains(profile_bounds: dict, pocket_bounds: dict) -> bool:
-        """Check if profile fully contains the pocket."""
         return (
             profile_bounds["x_min"] <= pocket_bounds["x_min"]
             and profile_bounds["x_max"] >= pocket_bounds["x_max"]
@@ -435,7 +399,7 @@ def _render_gap_dimensions(
             and profile_bounds["y_max"] >= pocket_bounds["y_max"]
         )
 
-    # Group pockets by their containing profile
+
     profile_pocket_groups: list[tuple[dict, list[dict]]] = []
     pocket_bounds_list = [get_bounds(p) for p in pocket_items]
     assigned_pockets: set[int] = set()
@@ -453,16 +417,16 @@ def _render_gap_dimensions(
     if not profile_pocket_groups:
         return
 
-    # Track unique gap values we've rendered (to show only one per unique value)
-    rendered_h_gaps: set[int] = set()  # rounded gap values
+
+    rendered_h_gaps: set[int] = set()
     rendered_v_gaps: set[int] = set()
 
-    # Process each profile-pocket group
+
     for profile_bounds, pockets in profile_pocket_groups:
         if not pockets:
             continue
 
-        # 1. Border/inset dimensions (left and top)
+
         left_gap = min(p["x_min"] - profile_bounds["x_min"] for p in pockets)
         top_gap = min(p["y_min"] - profile_bounds["y_min"] for p in pockets)
 
@@ -494,11 +458,11 @@ def _render_gap_dimensions(
                 theme.gap_stroke,
             )
 
-        # Only look for mullion/rail gaps if there are multiple pockets in this profile
+
         if len(pockets) < 2:
             continue
 
-        # 2. Horizontal gaps (mullions) between pockets in same row
+
         sorted_by_x = sorted(pockets, key=lambda p: p["x_min"])
         for i in range(len(sorted_by_x) - 1):
             curr = sorted_by_x[i]
@@ -506,7 +470,7 @@ def _render_gap_dimensions(
             gap = next_p["x_min"] - curr["x_max"]
             gap_key = round(gap)
             if gap > 5.0 and gap_key not in rendered_h_gaps:
-                # Check vertical overlap (same row)
+
                 y_overlap = not (curr["y_max"] < next_p["y_min"] or curr["y_min"] > next_p["y_max"])
                 if y_overlap:
                     rendered_h_gaps.add(gap_key)
@@ -521,7 +485,7 @@ def _render_gap_dimensions(
                         theme.gap_stroke,
                     )
 
-        # 3. Vertical gaps (rails) between pockets in same column
+
         sorted_by_y = sorted(pockets, key=lambda p: p["y_min"])
         for i in range(len(sorted_by_y) - 1):
             curr = sorted_by_y[i]
@@ -529,7 +493,7 @@ def _render_gap_dimensions(
             gap = next_p["y_min"] - curr["y_max"]
             gap_key = round(gap)
             if gap > 5.0 and gap_key not in rendered_v_gaps:
-                # Check horizontal overlap (same column)
+
                 x_overlap = not (curr["x_max"] < next_p["x_min"] or curr["x_min"] > next_p["x_max"])
                 if x_overlap:
                     rendered_v_gaps.add(gap_key)
@@ -545,12 +509,11 @@ def _render_gap_dimensions(
                     )
 
 def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height: float, theme: Theme) -> None:
-    """Render title block with metadata."""
     x = 20
     y = 20
     line_height = 14
 
-    # Title
+
     title = ET.SubElement(
         group,
         "text",
@@ -564,7 +527,7 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
     )
     title.text = "BLUEPRINT PROOF DRAWING"
 
-    # Units (no timestamp for determinism)
+
     units = ET.SubElement(
         group,
         "text",
@@ -579,8 +542,7 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
 
 
 def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> None:
-    """Render legend showing layer meanings."""
-    x = viewbox_width - 132  # Positioned near right edge with margin space
+    x = viewbox_width - 132
     y = 20
     line_height = 16
     swatch_size = 10
@@ -597,8 +559,7 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
     )
     legend_title.text = "LEGEND"
 
-    # Layer specifications: (label, stroke_color, stroke_width, dash_pattern, fill_color)
-    # Note: dash_pattern=None means no dashing, fill_color=None means no fill
+
     layers = [
         ("Sheet Outline", theme.construction_stroke, "1", theme.construction_dash, None),
         ("Profile Cuts", theme.profile_stroke, "2", None, None),
@@ -610,9 +571,9 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
     for i, (label, stroke, width, dash, fill) in enumerate(layers):
         y_pos = y + (i + 1) * line_height + 5
 
-        # Color swatch (line or rect depending on fill)
+
         if fill:
-            # Pocket regions: show filled rectangle with opacity
+
             rect_attrs = {
                 "x": str(x),
                 "y": str(y_pos - 6),
@@ -625,7 +586,7 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
             }
             ET.SubElement(group, "rect", rect_attrs)
         else:
-            # Other layers: line sample
+
             swatch_attrs = {
                 "x1": str(x),
                 "y1": str(y_pos - 3),
@@ -638,7 +599,7 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
                 swatch_attrs["stroke-dasharray"] = dash
             ET.SubElement(group, "line", swatch_attrs)
 
-        # Label
+
         label_elem = ET.SubElement(
             group,
             "text",
@@ -658,12 +619,11 @@ def _render_notes(
     viewbox_height: float,
     theme: Theme,
 ) -> None:
-    """Render notes block with depth info and feature counts."""
     x = 20
-    y = viewbox_height - 120  # Add padding to avoid collision with sheet edge
+    y = viewbox_height - 120
     line_height = 12
 
-    # Title
+
     notes_title = ET.SubElement(
         group,
         "text",
@@ -676,18 +636,18 @@ def _render_notes(
     )
     notes_title.text = "NOTES"
 
-    # Collect depth information
+
     depths_info = _collect_depth_info(ast, removal_intents)
 
-    # Collect hole diameter information
+
     hole_diameters = _collect_hole_diameters(ast)
 
-    # Feature counts
+
     feature_counts = _count_features(ast)
 
     line_num = 1
 
-    # Sheet info
+
     sheet_info = ET.SubElement(
         group,
         "text",
@@ -700,7 +660,7 @@ def _render_notes(
     sheet_info.text = f"Sheet: {ast.sheet.width_mm:.1f} × {ast.sheet.height_mm:.1f} × {ast.sheet.thickness_mm:.1f}mm"
     line_num += 1
 
-    # Feature counts
+
     if feature_counts:
         counts_text = ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in feature_counts.items())
         features_info = ET.SubElement(
@@ -715,7 +675,7 @@ def _render_notes(
         features_info.text = f"Features: {counts_text}"
         line_num += 1
 
-    # Depth information
+
     if depths_info:
         depths_title = ET.SubElement(
             group,
@@ -742,7 +702,7 @@ def _render_notes(
             depth_elem.text = f"• {depth_line}"
             line_num += 1
 
-    # Hole diameter information
+
     if hole_diameters:
         hole_title = ET.SubElement(
             group,
@@ -771,10 +731,9 @@ def _render_notes(
 
 
 def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent] | None) -> list[str]:
-    """Collect depth information from features (non-through depths only)."""
     depth_lines = []
 
-    # Collect from AST items (exclude "through" profiles, include non-through pockets/holes/engraves)
+
     depths_by_type: dict[str, set[str]] = {}
     for item in ast.items:
         if item.feature is None:
@@ -783,7 +742,7 @@ def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent]
         ftype = item.feature.type
         depth = item.feature.depth
 
-        # Skip "through" profiles (they're obvious from the drawing)
+
         if depth == "through" and ftype == "profile":
             continue
 
@@ -798,7 +757,7 @@ def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent]
             depths_by_type[ftype] = set()
         depths_by_type[ftype].add(depth_str)
 
-    # Format output
+
     for ftype in sorted(depths_by_type.keys()):
         depths = sorted(depths_by_type[ftype])
         if len(depths) == 1:
@@ -810,7 +769,6 @@ def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent]
 
 
 def _count_features(ast: LayoutAST) -> dict[str, int]:
-    """Count features by type."""
     counts: dict[str, int] = {}
     for item in ast.items:
         if item.feature is None:
@@ -821,15 +779,10 @@ def _count_features(ast: LayoutAST) -> dict[str, int]:
 
 
 def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
-    """Collect hole diameter specifications from circle shapes with hole features.
-
-    Returns:
-        List of formatted diameter strings (e.g., "10.0mm", "⌀8.0mm")
-    """
     diameters: set[float] = set()
 
     for item in ast.items:
-        # Only process circles with hole features
+
         if item.kind != "shape" or item.type != "Circle":
             continue
         if item.feature is None or item.feature.type != "hole":
@@ -837,7 +790,7 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
         if item.geometry is None:
             continue
 
-        # Extract diameter (prefer diameter_mm, fall back to radius_mm * 2)
+
         data = item.geometry.data
         diameter = data.get("diameter_mm")
         if diameter is not None:
@@ -847,7 +800,7 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
             if radius is not None:
                 diameters.add(float(radius) * 2.0)
 
-    # Format output (sorted for consistency)
+
     if not diameters:
         return []
 
@@ -855,5 +808,5 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
     if len(sorted_diameters) == 1:
         return [f"⌀{sorted_diameters[0]:.1f}mm"]
     else:
-        # Multiple diameters: show each unique size
+
         return [f"⌀{d:.1f}mm" for d in sorted_diameters]

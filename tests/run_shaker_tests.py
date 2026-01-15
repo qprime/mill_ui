@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 10 Shaker template tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_shaker_tests
-"""
 
 import json
 import sys
@@ -18,7 +14,6 @@ from export import render_svg_with_removal_intent
 
 
 def test_shaker_v2_basic_panel():
-    """Test Shaker generates valid AST for basic panel."""
     print("Running test_shaker_v2_basic_panel...")
 
     params = {
@@ -55,7 +50,6 @@ def test_shaker_v2_basic_panel():
 
 
 def test_shaker_v2_with_anchors():
-    """Test Shaker with anchor screw recesses."""
     print("Running test_shaker_v2_with_anchors...")
 
     params = {
@@ -90,7 +84,6 @@ def test_shaker_v2_with_anchors():
 
 
 def test_shaker_v2_removal_intent_generation():
-    """Test Shaker AST → RemovalIntent conversion."""
     print("Running test_shaker_v2_removal_intent_generation...")
 
     params = {
@@ -145,7 +138,6 @@ def test_shaker_v2_removal_intent_generation():
 
 
 def test_shaker_v2_geometry_verification():
-    """Test Shaker geometry matches specification."""
     print("Running test_shaker_v2_geometry_verification...")
 
     params = {
@@ -174,7 +166,6 @@ def test_shaker_v2_geometry_verification():
 
 
 def test_shaker_v2_svg_export():
-    """Test Shaker can be exported to SVG for visual verification."""
     print("Running test_shaker_v2_svg_export...")
 
     params = {
@@ -233,7 +224,6 @@ def test_shaker_v2_svg_export():
 
 
 def test_shaker_v2_inner_dimensions():
-    """Test Shaker with inner dimensions specified."""
     print("Running test_shaker_v2_inner_dimensions...")
 
     params = {
@@ -257,7 +247,6 @@ def test_shaker_v2_inner_dimensions():
 
 
 def test_shaker_v2_no_panel_recess():
-    """Test Shaker without panel recess (frame only)."""
     print("Running test_shaker_v2_no_panel_recess...")
 
     params = {
@@ -278,7 +267,6 @@ def test_shaker_v2_no_panel_recess():
 
 
 def test_shaker_v2_invalid_dimensions():
-    """Test Shaker rejects invalid dimensions."""
     print("Running test_shaker_v2_invalid_dimensions...")
 
     params = {
@@ -299,7 +287,6 @@ def test_shaker_v2_invalid_dimensions():
 
 
 def test_shaker_v2_ast_json_serialization():
-    """Test Shaker AST can be serialized to JSON."""
     print("Running test_shaker_v2_ast_json_serialization...")
 
     params = {
@@ -325,15 +312,9 @@ def test_shaker_v2_ast_json_serialization():
 
 
 def test_shaker_v2_end_to_end_pipeline_validation():
-    """Test complete pipeline: params → AST → RemovalIntent → planner hints.
-
-    This is the flagship Stage 10 validation test demonstrating the full v2 pipeline.
-    Validates pipeline up to planner integration. G-code generation requires native
-    C++ library which may not be available in all environments.
-    """
     print("Running test_shaker_v2_end_to_end_pipeline_validation...")
 
-    # 1. Start with template parameters
+
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -343,12 +324,12 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     }
     sheet_thickness_mm = 19.0
 
-    # 2. Expand to AST
+
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
     assert len(ast.items) == 2, f"Expected 2 AST items (profile + pocket), got {len(ast.items)}"
     print(f"  [1/4] ✓ Generated {len(ast.items)} AST items")
 
-    # 3. Convert AST to RemovalIntent
+
     from adapters.hints_to_removal import (
         profile_hint_to_removal_intent,
         pocket_hint_to_removal_intent,
@@ -381,7 +362,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     assert len(removal_intents) == 2, f"Expected 2 RemovalIntent regions, got {len(removal_intents)}"
     print(f"  [2/4] ✓ Generated {len(removal_intents)} RemovalIntent regions")
 
-    # 4. Convert to v1 hints
+
     from adapters.removal_to_planner import removal_intents_to_v1_hints
 
     hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
@@ -392,7 +373,7 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     assert len(hints["pockets"]) == 1, f"Expected 1 pocket hint, got {len(hints['pockets'])}"
     print(f"  [3/4] ✓ Converted to v1 planner hints ({len(hints['profiles'])} profiles, {len(hints['pockets'])} pockets)")
 
-    # 5. Verify planner integration (if native library available)
+
     try:
         from cam.config import Config
         from cam.model.machine import Machine

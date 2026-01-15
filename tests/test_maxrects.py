@@ -1,7 +1,3 @@
-"""Tests for MaxRects bin-packing algorithm.
-
-Run from repository root: PYTHONPATH=. python3 -m tests.test_maxrects
-"""
 
 import sys
 from nesting.maxrects import maxrects_pack, MaxRectsHeuristic
@@ -9,7 +5,6 @@ from nesting.api import nest_parts, nest_and_generate
 
 
 def test_maxrects_basic():
-    """Basic MaxRects packing."""
     print("Running test_maxrects_basic...")
     parts = [
         (100, 100, False, "p1"),
@@ -26,14 +21,13 @@ def test_maxrects_basic():
     )
 
     assert len(placements) == 4
-    # Verify all parts have unique positions
+
     positions = [(p.x, p.y) for p in placements]
     assert len(set(positions)) == 4
     print("  PASSED")
 
 
 def test_maxrects_with_gap():
-    """MaxRects with gap between parts."""
     print("Running test_maxrects_with_gap...")
     parts = [
         (100, 100, False, "p1"),
@@ -48,7 +42,7 @@ def test_maxrects_with_gap():
     )
 
     assert len(placements) == 2
-    # Parts + gap should not exceed bin dimensions
+
     for p in placements:
         assert p.x + 100 + 10 <= 250 or p.x == placements[-1].x
         assert p.y + 100 + 10 <= 150 or p.y == placements[-1].y
@@ -56,12 +50,11 @@ def test_maxrects_with_gap():
 
 
 def test_maxrects_rotation():
-    """MaxRects with rotation enabled."""
     print("Running test_maxrects_rotation...")
-    # Part is 200x100, bin is 150x250
-    # Won't fit normally, but will fit rotated
+
+
     parts = [
-        (200, 100, True, "p1"),  # allow_rotation=True
+        (200, 100, True, "p1"),
     ]
 
     placements = maxrects_pack(
@@ -77,12 +70,11 @@ def test_maxrects_rotation():
 
 
 def test_maxrects_no_rotation():
-    """MaxRects with rotation disabled."""
     print("Running test_maxrects_no_rotation...")
-    # Part is 200x100, bin is 150x250
-    # Won't fit without rotation, and rotation is disabled
+
+
     parts = [
-        (200, 100, False, "p1"),  # allow_rotation=False
+        (200, 100, False, "p1"),
     ]
 
     placements = maxrects_pack(
@@ -97,7 +89,6 @@ def test_maxrects_no_rotation():
 
 
 def test_maxrects_heuristics():
-    """Test different heuristics produce results."""
     print("Running test_maxrects_heuristics...")
     parts = [
         (100, 150, True, "p1"),
@@ -119,7 +110,6 @@ def test_maxrects_heuristics():
 
 
 def test_maxrects_contact_point():
-    """Contact Point heuristic places parts without overlap."""
     print("Running test_maxrects_contact_point...")
     parts = [
         (50, 50, False, "p1"),
@@ -137,12 +127,12 @@ def test_maxrects_contact_point():
     )
 
     assert len(placements) == 4
-    # Verify no overlaps between placements
+
     for i, p1 in enumerate(placements):
         for j, p2 in enumerate(placements):
             if i >= j:
                 continue
-            # Check that rectangles don't overlap
+
             x1_max = p1.x + 50
             x2_max = p2.x + 50
             y1_max = p1.y + 50
@@ -153,7 +143,6 @@ def test_maxrects_contact_point():
 
 
 def test_maxrects_api_integration():
-    """Test MaxRects through the nesting API."""
     print("Running test_maxrects_api_integration...")
     parts = [
         {"name": "panel", "width_mm": 400, "height_mm": 300, "quantity": 4},
@@ -173,7 +162,6 @@ def test_maxrects_api_integration():
 
 
 def test_maxrects_vs_guillotine():
-    """Compare MaxRects vs Guillotine utilization."""
     print("Running test_maxrects_vs_guillotine...")
     parts = [
         {"name": "large_door", "width_mm": 457, "height_mm": 597, "quantity": 20},
@@ -204,15 +192,14 @@ def test_maxrects_vs_guillotine():
     print(f"  Guillotine: {guillotine_result['total_sheets']} sheets, {guillotine_result['utilization_percent']:.1f}%")
     print(f"  MaxRects:   {maxrects_result['total_sheets']} sheets, {maxrects_result['utilization_percent']:.1f}%")
 
-    # MaxRects should achieve at least as good utilization
-    assert maxrects_result["utilization_percent"] >= guillotine_result["utilization_percent"] - 5  # Allow small variance
-    # MaxRects should use fewer or equal sheets
+
+    assert maxrects_result["utilization_percent"] >= guillotine_result["utilization_percent"] - 5
+
     assert maxrects_result["total_sheets"] <= guillotine_result["total_sheets"]
     print("  PASSED")
 
 
 def test_maxrects_generate_ast():
-    """Generate LayoutAST with MaxRects."""
     print("Running test_maxrects_generate_ast...")
     parts = [
         {"name": "panel", "width_mm": 300, "height_mm": 300, "quantity": 2},
@@ -237,7 +224,6 @@ def test_maxrects_generate_ast():
 
 
 def test_maxrects_invalid_algorithm():
-    """Invalid algorithm raises ValueError."""
     print("Running test_maxrects_invalid_algorithm...")
     parts = [{"name": "panel", "width_mm": 100, "height_mm": 100}]
 
@@ -257,7 +243,6 @@ def test_maxrects_invalid_algorithm():
 
 
 def run_all_tests():
-    """Run all tests."""
     print("=" * 60)
     print("MaxRects Algorithm Tests")
     print("=" * 60)

@@ -1,4 +1,3 @@
-"""Pocketing and drilling strategy helpers."""
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence, TYPE_CHECKING, List
@@ -221,16 +220,6 @@ def plan_corner_cleanup_passes(
     accumulator: "PassAccumulator",
     tool_db: Sequence[Mapping[str, Any]],
 ) -> None:
-    """Plan corner cleanup passes for rectangular pockets.
-
-    Generates small circular pockets at each corner to remove material
-    left by larger tools with radiused corners.
-
-    Args:
-        hints: Hints dict containing "corner_cleanups" list
-        accumulator: PassAccumulator for grouping operations by tool
-        tool_db: Available tools
-    """
     corner_cleanups = hints.get("corner_cleanups", []) or []
 
     for entry in corner_cleanups:
@@ -238,7 +227,7 @@ def plan_corner_cleanup_passes(
         if corner_tool_diameter <= 0.0:
             continue
 
-        # Find tool matching the specified diameter
+
         tool = None
         for t in tool_db:
             if abs(float(t.get("diameter", 0.0)) - corner_tool_diameter) < 0.01:
@@ -276,12 +265,10 @@ def plan_corner_cleanup_passes(
         step_over = stepover_for_tool(tool)
         step_down = stepdown_for_tool(tool)
 
-        # Generate small circular pocket at each corner
-        # The diameter should be just enough to clear the radiused corner
-        # Calculate from parent pocket's primary tool radius
+
         geometry = entry.get("geometry", {})
-        # We don't have primary tool info here, so use a heuristic:
-        # Corner pocket diameter = 2x corner tool diameter (conservative)
+
+
         corner_pocket_diameter = 2.0 * corner_tool_diameter
 
         for corner_xy in corners:
@@ -294,7 +281,7 @@ def plan_corner_cleanup_passes(
                 stepdown_mm=step_down,
                 finish=True,
             )
-            # Offset moves if start_depth is non-zero
+
             if start_depth > 0.0:
                 adjusted_moves: List[dict] = []
                 for mv in moves:

@@ -1,9 +1,3 @@
-"""CLI tool for converting between layout formats: PML ↔ JSON.
-
-Usage:
-    python -m cli.convert_layout --from pml --to json input.pml output.json
-    python -m cli.convert_layout --from json --to pml input.json output.pml
-"""
 
 from __future__ import annotations
 
@@ -16,19 +10,18 @@ from layout_ast.layout import LayoutAST
 
 
 def main():
-    """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Convert between layout formats (PML ↔ JSON)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Convert PML to JSON
+
   python -m cli.convert_layout --from pml --to json input.pml output.json
 
-  # Convert JSON to PML
+
   python -m cli.convert_layout --from json --to pml input.json output.pml
 
-  # Read from stdin, write to stdout
+
   python -m cli.convert_layout --from pml --to json < input.pml > output.json
         """,
     )
@@ -61,7 +54,7 @@ Examples:
     args = parser.parse_args()
 
     try:
-        # Read input
+
         if args.input_file:
             input_path = Path(args.input_file)
             if not input_path.exists():
@@ -71,11 +64,11 @@ Examples:
         else:
             input_text = sys.stdin.read()
 
-        # Parse to AST
+
         if args.input_format == "pml":
             ast = parse_pml(input_text)
         elif args.input_format == "json":
-            # For JSON input, we need a file path (LayoutAST.from_json expects path)
+
             if not args.input_file:
                 print("Error: JSON input requires a file path (stdin not supported for JSON)", file=sys.stderr)
                 sys.exit(1)
@@ -84,7 +77,7 @@ Examples:
             print(f"Error: Unknown input format: {args.input_format}", file=sys.stderr)
             sys.exit(1)
 
-        # Convert to output format
+
         if args.output_format == "json":
             output_text = ast.to_json()
         elif args.output_format == "pml":
@@ -93,7 +86,7 @@ Examples:
             print(f"Error: Unknown output format: {args.output_format}", file=sys.stderr)
             sys.exit(1)
 
-        # Write output
+
         if args.output_file:
             output_path = Path(args.output_file)
             output_path.write_text(output_text)

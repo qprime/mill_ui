@@ -1,4 +1,3 @@
-"""Tool selection helpers for CAM planning passes."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,7 +8,6 @@ from cam.model.tool import Tool
 
 @dataclass(frozen=True)
 class ToolSelection:
-    """Normalized tool description drawn from the tool database."""
 
     name: str
     diameter: float
@@ -25,7 +23,7 @@ class ToolSelection:
         return Tool(
             name=self.name,
             diameter=self.diameter,
-            kind=self.kind,  # type: ignore[arg-type]
+            kind=self.kind,
             rpm=self.rpm,
             feed_xy=self.feed_xy,
             feed_z=self.feed_z,
@@ -75,7 +73,6 @@ def pick_tool_for_pocket(
     required_width_mm: float | None,
     cleanup_offset_mm: float,
 ) -> ToolSelection:
-    """Return the preferred pocketing tool for the given channel width."""
 
     candidates = _flat_tools(tool_db)
     if not candidates:
@@ -105,7 +102,6 @@ def pick_tool_for_profile(
     *,
     kerf_mm: float | None,
 ) -> ToolSelection:
-    """Profiles prefer the tool closest to kerf when provided."""
 
     candidates = _flat_tools(tool_db)
     if not candidates:

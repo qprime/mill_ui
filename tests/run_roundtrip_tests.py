@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 3 round-trip tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_roundtrip_tests
-"""
 
 import hashlib
 import json
@@ -13,7 +9,6 @@ from layout_ast.layout import LayoutAST
 
 
 def test_roundtrip_minimal_shape_layout():
-    """Test round-trip for minimal shape-based layout."""
     print("Running test_roundtrip_minimal_shape_layout...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
@@ -33,16 +28,16 @@ def test_roundtrip_minimal_shape_layout():
         temp_path = f.name
 
     try:
-        # Parse
+
         ast = LayoutAST.from_json(temp_path)
 
-        # Emit
+
         json_str = ast.to_json()
 
-        # Parse emitted JSON
+
         emitted_data = json.loads(json_str)
 
-        # Verify semantic equivalence
+
         assert emitted_data["sheet"]["width_mm"] == layout_data["sheet"]["width_mm"]
         assert len(emitted_data["items"]) == len(layout_data["items"])
         assert emitted_data["items"][0]["kind"] == layout_data["items"][0]["kind"]
@@ -54,7 +49,6 @@ def test_roundtrip_minimal_shape_layout():
 
 
 def test_roundtrip_cnc_clamp_v1():
-    """Test round-trip for real cnc_clamp_v1 layout."""
     print("Running test_roundtrip_cnc_clamp_v1...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
 
@@ -62,13 +56,13 @@ def test_roundtrip_cnc_clamp_v1():
         print(f"  ⊘ SKIP: Layout not found")
         return None
 
-    # Parse original
+
     ast = LayoutAST.from_json(str(layout_path))
 
-    # Emit to JSON
+
     json_str = ast.to_json()
 
-    # Parse emitted JSON into new AST
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write(json_str)
         temp_path = f.name
@@ -76,7 +70,7 @@ def test_roundtrip_cnc_clamp_v1():
     try:
         ast2 = LayoutAST.from_json(temp_path)
 
-        # Verify semantic equivalence
+
         assert ast2.project == ast.project
         assert ast2.kerf_width_mm == ast.kerf_width_mm
         assert ast2.sheet.width_mm == ast.sheet.width_mm
@@ -91,7 +85,6 @@ def test_roundtrip_cnc_clamp_v1():
 
 
 def test_roundtrip_mandelbrot_demo():
-    """Test round-trip for mandelbrot_demo layout."""
     print("Running test_roundtrip_mandelbrot_demo...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
 
@@ -113,7 +106,6 @@ def test_roundtrip_mandelbrot_demo():
 
 
 def test_roundtrip_cnc_clamp_part_a():
-    """Test round-trip for cnc_clamp-part_a_layout."""
     print("Running test_roundtrip_cnc_clamp_part_a...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
 
@@ -134,7 +126,6 @@ def test_roundtrip_cnc_clamp_part_a():
 
 
 def test_deterministic_emission():
-    """Test that emitted JSON is deterministic."""
     print("Running test_deterministic_emission...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
@@ -156,15 +147,15 @@ def test_deterministic_emission():
     try:
         ast = LayoutAST.from_json(temp_path)
 
-        # Emit multiple times
+
         json_str1 = ast.to_json()
         json_str2 = ast.to_json()
         json_str3 = ast.to_json()
 
-        # Verify identical
+
         assert json_str1 == json_str2 == json_str3
 
-        # Verify hash stability
+
         hash1 = hashlib.sha256(json_str1.encode()).hexdigest()
         hash2 = hashlib.sha256(json_str2.encode()).hexdigest()
         assert hash1 == hash2

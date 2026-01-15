@@ -1,12 +1,3 @@
-"""Dimension placement engine for blueprint SVG drawings.
-
-Implements deterministic rail-based dimension placement with simple collision avoidance.
-
-Part B scope:
-- Top + right rails (in the reserved margin area)
-- Arrowheads + extension lines
-- Stacking to avoid overlapping dimensions on the same rail
-"""
 
 from __future__ import annotations
 
@@ -22,29 +13,26 @@ Orientation = Literal["horizontal", "vertical"]
 
 @dataclass(frozen=True)
 class DimensionRequest:
-    """A requested dimension in absolute SVG coordinates (mm)."""
-
-    orientation: Orientation
-    a: float  # x for horizontal, y for vertical
-    b: float  # x for horizontal, y for vertical
-    anchor: float  # y for horizontal, x for vertical (where extension lines originate)
-    text: str
-
-
-@dataclass(frozen=True)
-class PlacedDimension:
-    """A dimension request placed on a rail with an assigned stacking level."""
 
     orientation: Orientation
     a: float
     b: float
     anchor: float
-    rail: float  # y for horizontal (top rail), x for vertical (right rail)
+    text: str
+
+
+@dataclass(frozen=True)
+class PlacedDimension:
+
+    orientation: Orientation
+    a: float
+    b: float
+    anchor: float
+    rail: float
     text: str
 
 
 class _IntervalAllocator:
-    """Allocates non-overlapping intervals across stacked levels."""
 
     def __init__(self) -> None:
         self._levels: list[list[tuple[float, float]]] = []
@@ -68,19 +56,6 @@ def collect_dimension_requests(
     include_features: set[str] | None = None,
     deduplicate: bool = True,
 ) -> list[DimensionRequest]:
-    """Collect dimension requests from layout (stage 1: what to dimension).
-
-    Args:
-        ast: Layout AST with sheet and items
-        offset_x: SVG X offset for sheet origin
-        offset_y: SVG Y offset for sheet origin
-        include_features: Feature types to dimension (default: {"profile"})
-        deduplicate: If True (default), only show one dimension per unique size.
-            Set to False to dimension every shape individually.
-
-    Returns:
-        Deterministically ordered list of dimension requests.
-    """
     include_features = include_features or {"profile"}
     return _collect_dimension_requests(
         ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
@@ -95,27 +70,11 @@ def place_on_rails(
     *,
     margin: float = 100.0,
 ) -> list[PlacedDimension]:
-    """Place dimension requests on rails with collision avoidance (stage 2: where to place).
-
-    Args:
-        requests: Dimension requests to place
-        sheet_width_mm: Sheet width for right rail calculation
-        offset_x: SVG X offset for sheet origin
-        offset_y: SVG Y offset for sheet origin
-        margin: Reserved margin for dimensions (rails must stay within this)
-
-    Returns:
-        List of placed dimensions with assigned rail positions and stack levels.
-
-    Note:
-        If dimension stacking exceeds available margin, dimensions are clamped to margin boundary.
-        This prevents overflow but may cause visual overlap. Consider increasing margin if needed.
-    """
     top_allocator = _IntervalAllocator()
     right_allocator = _IntervalAllocator()
 
     base_offset = min(20.0, margin * 0.4)
-    stack_gap = 20.0  # Increased for rotated text readability
+    stack_gap = 20.0
 
     placed: list[PlacedDimension] = []
 
@@ -123,13 +82,13 @@ def place_on_rails(
         a, b = (request.a, request.b) if request.a <= request.b else (request.b, request.a)
 
         if request.orientation == "horizontal":
-            level = top_allocator.allocate(a, b, padding=15.0)  # Increased padding for text width
+            level = top_allocator.allocate(a, b, padding=15.0)
             rail_y = offset_y - base_offset - (level * stack_gap)
 
-            # Guard: clamp to margin boundary
+
             min_rail_y = offset_y - margin
             if rail_y < min_rail_y:
-                rail_y = min_rail_y  # Clamp to margin edge (may cause overlap)
+                rail_y = min_rail_y
 
             placed.append(
                 PlacedDimension(
@@ -142,13 +101,13 @@ def place_on_rails(
                 )
             )
         else:
-            level = right_allocator.allocate(a, b, padding=40.0)  # Much larger padding for rotated text height
+            level = right_allocator.allocate(a, b, padding=40.0)
             rail_x = (offset_x + sheet_width_mm) + base_offset + (level * stack_gap)
 
-            # Guard: clamp to margin boundary
+
             max_rail_x = offset_x + sheet_width_mm + margin
             if rail_x > max_rail_x:
-                rail_x = max_rail_x  # Clamp to margin edge (may cause overlap)
+                rail_x = max_rail_x
 
             placed.append(
                 PlacedDimension(
@@ -173,20 +132,6 @@ def place_dimensions_on_rails(
     include_features: set[str] | None = None,
     deduplicate: bool = True,
 ) -> list[PlacedDimension]:
-    """Convenience function: collect + place dimensions in one call.
-
-    Args:
-        ast: Layout AST with sheet and items
-        offset_x: SVG X offset for sheet origin
-        offset_y: SVG Y offset for sheet origin
-        margin: Reserved margin for dimensions
-        include_features: Feature types to dimension (default: {"profile"})
-        deduplicate: If True (default), only show one dimension per unique size.
-            Set to False to dimension every shape individually.
-
-    For most use cases, prefer this over calling collect_dimension_requests()
-    and place_on_rails() separately.
-    """
     requests = collect_dimension_requests(
         ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
     )
@@ -194,7 +139,6 @@ def place_dimensions_on_rails(
 
 
 def render_placed_dimension(parent: ET.Element, dim: PlacedDimension, stroke_color: str) -> None:
-    """Render a placed dimension (extension lines + arrows + label)."""
     if dim.orientation == "horizontal":
         _render_horizontal(parent, dim, stroke_color)
     else:
@@ -206,16 +150,16 @@ def _render_horizontal(parent: ET.Element, dim: PlacedDimension, stroke_color: s
     y_anchor = dim.anchor
     y_dim = dim.rail
 
-    # Extension lines
+
     _line(parent, x1, y_anchor, x1, y_dim, stroke_color)
     _line(parent, x2, y_anchor, x2, y_dim, stroke_color)
 
-    # Dimension line
+
     _line(parent, x1, y_dim, x2, y_dim, stroke_color)
     _arrow(parent, x1, y_dim, "left", stroke_color)
     _arrow(parent, x2, y_dim, "right", stroke_color)
 
-    # Label
+
     ET.SubElement(
         parent,
         "text",
@@ -234,16 +178,16 @@ def _render_vertical(parent: ET.Element, dim: PlacedDimension, stroke_color: str
     x_anchor = dim.anchor
     x_dim = dim.rail
 
-    # Extension lines
+
     _line(parent, x_anchor, y1, x_dim, y1, stroke_color)
     _line(parent, x_anchor, y2, x_dim, y2, stroke_color)
 
-    # Dimension line
+
     _line(parent, x_dim, y1, x_dim, y2, stroke_color)
     _arrow(parent, x_dim, y1, "up", stroke_color)
     _arrow(parent, x_dim, y2, "down", stroke_color)
 
-    # Label (rotated 90 degrees for vertical dimensions)
+
     mid_y = (y1 + y2) / 2.0
     ET.SubElement(
         parent,
@@ -267,20 +211,9 @@ def _collect_dimension_requests(
     include_features: set[str],
     deduplicate: bool = True,
 ) -> list[DimensionRequest]:
-    """Internal: Collect dimension requests in deterministic order.
-
-    Ordering guarantee:
-    1. Shape items sorted by (feature.type, shape_id, type) for stability
-    2. Hole spacing requests sorted by coordinate groups
-
-    Note: Sheet dimensions are NOT included - they're shown in NOTES section.
-    """
     requests: list[DimensionRequest] = []
 
-    # Note: Sheet dimensions removed - they're shown in NOTES section instead
-    # This reduces visual clutter since sheet size is already documented
 
-    # Item outline dims (profiles by default; pockets optional).
     shape_items: list[Item] = [
         item
         for item in ast.items
@@ -292,11 +225,10 @@ def _collect_dimension_requests(
         and item.shape_id is not None
     ]
 
-    # Deterministic sort: (feature.type, shape_id, type) - first item per size group wins
+
     shape_items.sort(key=lambda i: (i.feature.type, i.shape_id or "", i.type))
 
-    # Track which (feature_type, shape_type, w, h) combos we've already dimensioned
-    # Only used when deduplicate=True
+
     dimensioned_sizes: set[tuple[str, str, int, int]] = set()
 
     for item in shape_items:
@@ -308,10 +240,10 @@ def _collect_dimension_requests(
         h = bounds.y_max - bounds.y_min
 
         if deduplicate:
-            # Create a size key for deduplication (round to nearest mm)
+
             size_key = (item.feature.type, item.type, round(w), round(h))
             if size_key in dimensioned_sizes:
-                continue  # Skip - already have dimensions for this size
+                continue
             dimensioned_sizes.add(size_key)
 
         if item.type in ("Rect", "RoundedRect"):
@@ -345,7 +277,7 @@ def _collect_dimension_requests(
                 )
             )
 
-    # Hole center spacing (simple patterns: group by approx y/x, dimension adjacent spacing).
+
     hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y)
     requests.extend(_hole_spacing_requests(hole_centers, deduplicate=deduplicate))
 
@@ -369,26 +301,16 @@ def _hole_spacing_requests(
     *,
     deduplicate: bool = True,
 ) -> list[DimensionRequest]:
-    """Generate hole spacing dimension requests.
-
-    Args:
-        centers: List of (x, y) hole center coordinates
-        deduplicate: If True (default), only shows one representative dimension
-            per unique spacing value to avoid cluttering the drawing.
-
-    Returns:
-        List of dimension requests for hole spacing.
-    """
     if len(centers) < 2:
         return []
 
     requests: list[DimensionRequest] = []
 
-    # Track unique spacing values we've already dimensioned (only used when deduplicate=True)
-    seen_h_spacings: set[int] = set()  # rounded to nearest mm
+
+    seen_h_spacings: set[int] = set()
     seen_v_spacings: set[int] = set()
 
-    # Group by approximate y for horizontal spacing.
+
     by_y: dict[float, list[tuple[float, float]]] = {}
     for x, y in centers:
         key = round(y, 1)
@@ -406,7 +328,7 @@ def _hole_spacing_requests(
             if deduplicate:
                 spacing_key = round(dx)
                 if spacing_key in seen_h_spacings:
-                    continue  # Skip - already have this spacing dimensioned
+                    continue
                 seen_h_spacings.add(spacing_key)
             requests.append(
                 DimensionRequest(
@@ -418,7 +340,7 @@ def _hole_spacing_requests(
                 )
             )
 
-    # Group by approximate x for vertical spacing.
+
     by_x: dict[float, list[tuple[float, float]]] = {}
     for x, y in centers:
         key = round(x, 1)
@@ -436,7 +358,7 @@ def _hole_spacing_requests(
             if deduplicate:
                 spacing_key = round(dy)
                 if spacing_key in seen_v_spacings:
-                    continue  # Skip - already have this spacing dimensioned
+                    continue
                 seen_v_spacings.add(spacing_key)
             requests.append(
                 DimensionRequest(
@@ -538,17 +460,6 @@ def render_gap_dimension(
     label: str,
     color: str,
 ) -> None:
-    """Render a gap dimension with double-headed arrows.
-
-    Args:
-        parent: SVG group element to add to
-        start: Start coordinate (x for horizontal, y for vertical)
-        end: End coordinate (x for horizontal, y for vertical)
-        orientation: "horizontal" or "vertical"
-        position: Position perpendicular to orientation (y for horizontal, x for vertical)
-        label: Text label to display
-        color: Stroke and fill color
-    """
     if orientation == "horizontal":
         _render_horizontal_gap_arrow(parent, start, end, position, label, color)
     else:
@@ -558,14 +469,13 @@ def render_gap_dimension(
 def _render_horizontal_gap_arrow(
     parent: ET.Element, x1: float, x2: float, y: float, label: str, color: str
 ) -> None:
-    """Render horizontal gap dimension: <----->"""
     mid_x = (x1 + x2) / 2.0
     arrow_size = 3.0
 
-    # Main line
+
     _line(parent, x1, y, x2, y, color)
 
-    # Left arrowhead pointing left
+
     ET.SubElement(
         parent,
         "path",
@@ -577,7 +487,7 @@ def _render_horizontal_gap_arrow(
         },
     )
 
-    # Right arrowhead pointing right
+
     ET.SubElement(
         parent,
         "path",
@@ -589,7 +499,7 @@ def _render_horizontal_gap_arrow(
         },
     )
 
-    # Label centered above the line
+
     ET.SubElement(
         parent,
         "text",
@@ -605,14 +515,13 @@ def _render_horizontal_gap_arrow(
 def _render_vertical_gap_arrow(
     parent: ET.Element, y1: float, y2: float, x: float, label: str, color: str
 ) -> None:
-    """Render vertical gap dimension with arrows pointing up/down"""
     mid_y = (y1 + y2) / 2.0
     arrow_size = 3.0
 
-    # Main line
+
     _line(parent, x, y1, x, y2, color)
 
-    # Top arrowhead pointing up
+
     ET.SubElement(
         parent,
         "path",
@@ -624,7 +533,7 @@ def _render_vertical_gap_arrow(
         },
     )
 
-    # Bottom arrowhead pointing down
+
     ET.SubElement(
         parent,
         "path",
@@ -636,7 +545,7 @@ def _render_vertical_gap_arrow(
         },
     )
 
-    # Label (rotated 90 degrees) positioned to the left of the line
+
     ET.SubElement(
         parent,
         "text",

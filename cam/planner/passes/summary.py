@@ -1,4 +1,3 @@
-"""Summary helpers for planned passes."""
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, Mapping, Sequence

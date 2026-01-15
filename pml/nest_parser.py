@@ -1,23 +1,3 @@
-"""Nest PML parser: block-based nesting job syntax → NestJob.
-
-This parser handles the nesting job specification format:
-
-    nest maxrects
-        sheet 1232mm 1245mm 19mm
-        kerf 6.35mm
-        margin 10mm
-
-        parts
-            large_door 457mm 597mm x20
-                template Shaker
-                    stile_w 57mm
-                    rail_h 57mm
-                    panel_recess 6mm
-
-            small_door 305mm 203mm x15
-
-The output is a NestJob dataclass that can be passed to the nesting API.
-"""
 
 from __future__ import annotations
 
@@ -28,7 +8,6 @@ from typing import Any
 
 @dataclass
 class NestPart:
-    """A part specification in a nesting job."""
     name: str
     width_mm: float
     height_mm: float
@@ -39,7 +18,6 @@ class NestPart:
 
 @dataclass
 class NestJob:
-    """A complete nesting job specification."""
     algorithm: str
     sheet_width_mm: float
     sheet_height_mm: float
@@ -50,7 +28,6 @@ class NestJob:
 
 
 class NestParseError(Exception):
-    """Error during nest PML parsing."""
     def __init__(self, message: str, line: int = 0):
         self.message = message
         self.line = line
@@ -58,20 +35,9 @@ class NestParseError(Exception):
 
 
 def parse_nest_pml(source: str) -> NestJob:
-    """Parse nest PML source into a NestJob.
-
-    Args:
-        source: Nest PML source text
-
-    Returns:
-        NestJob with parsed specification
-
-    Raises:
-        NestParseError: If parsing fails
-    """
     lines = source.split('\n')
 
-    # State
+
     algorithm: str | None = None
     sheet_width: float | None = None
     sheet_height: float | None = None
@@ -80,24 +46,24 @@ def parse_nest_pml(source: str) -> NestJob:
     margin_mm: float = 10.0
     parts: list[NestPart] = []
 
-    # Current part being parsed
+
     current_part: NestPart | None = None
     in_template: bool = False
     in_parts_block: bool = False
 
-    # Track indentation
+
     base_indent = 0
 
     for line_num, line in enumerate(lines, 1):
-        # Skip empty lines and comments
+
         stripped = line.strip()
         if not stripped or stripped.startswith('#'):
             continue
 
-        # Calculate indentation
+
         indent = len(line) - len(line.lstrip())
 
-        # Parse nest directive (top level)
+
         if stripped.startswith('nest '):
             match = re.match(r'nest\s+(\w+)', stripped)
             if match:
@@ -107,11 +73,11 @@ def parse_nest_pml(source: str) -> NestJob:
             else:
                 raise NestParseError(f"Invalid nest directive: {stripped}", line_num)
 
-        # Inside nest block
+
         if algorithm is None:
             raise NestParseError("Expected 'nest <algorithm>' directive", line_num)
 
-        # Parse sheet directive
+
         if stripped.startswith('sheet '):
             match = re.match(r'sheet\s+([\d.]+)mm\s+([\d.]+)mm\s+([\d.]+)mm', stripped)
             if match:
@@ -122,7 +88,7 @@ def parse_nest_pml(source: str) -> NestJob:
             else:
                 raise NestParseError(f"Invalid sheet directive: {stripped}", line_num)
 
-        # Parse kerf directive
+
         if stripped.startswith('kerf '):
             match = re.match(r'kerf\s+([\d.]+)mm', stripped)
             if match:
@@ -131,7 +97,7 @@ def parse_nest_pml(source: str) -> NestJob:
             else:
                 raise NestParseError(f"Invalid kerf directive: {stripped}", line_num)
 
-        # Parse margin directive
+
         if stripped.startswith('margin '):
             match = re.match(r'margin\s+([\d.]+)mm', stripped)
             if match:
@@ -140,19 +106,18 @@ def parse_nest_pml(source: str) -> NestJob:
             else:
                 raise NestParseError(f"Invalid margin directive: {stripped}", line_num)
 
-        # Parse parts block
+
         if stripped == 'parts':
             in_parts_block = True
             continue
 
-        # Inside parts block
+
         if in_parts_block:
-            # Check if this is a new part definition FIRST
-            # Format: name width height [xN]
-            # This must be checked before template params since both can match similar patterns
+
+
             part_match = re.match(r'(\w+)\s+([\d.]+)mm\s+([\d.]+)mm(?:\s+x(\d+))?$', stripped)
             if part_match:
-                # Save previous part if any
+
                 if current_part is not None:
                     parts.append(current_part)
 
@@ -170,7 +135,7 @@ def parse_nest_pml(source: str) -> NestJob:
                 in_template = False
                 continue
 
-            # Check if this is a template block
+
             if stripped.startswith('template '):
                 if current_part is None:
                     raise NestParseError("Template outside of part definition", line_num)
@@ -182,10 +147,10 @@ def parse_nest_pml(source: str) -> NestJob:
                 else:
                     raise NestParseError(f"Invalid template directive: {stripped}", line_num)
 
-            # Check if this is a template parameter
+
             if in_template and current_part is not None:
-                # Template params are indented under template
-                # Format: param_name value[mm] (single value, not two dimensions)
+
+
                 match = re.match(r'(\w+)\s+([\d.]+)(?:mm)?$', stripped)
                 if match:
                     param_name = match.group(1)
@@ -193,14 +158,14 @@ def parse_nest_pml(source: str) -> NestJob:
                     current_part.template_params[param_name] = param_value
                     continue
 
-            # If we get here and it's not a template param, might be leaving template
+
             in_template = False
 
-    # Don't forget the last part
+
     if current_part is not None:
         parts.append(current_part)
 
-    # Validate required fields
+
     if algorithm is None:
         raise NestParseError("Missing 'nest <algorithm>' directive")
     if sheet_width is None or sheet_height is None or sheet_thickness is None:
@@ -220,14 +185,6 @@ def parse_nest_pml(source: str) -> NestJob:
 
 
 def nest_job_to_api_params(job: NestJob) -> dict[str, Any]:
-    """Convert NestJob to parameters for nest_and_generate API.
-
-    Args:
-        job: Parsed nesting job
-
-    Returns:
-        Dictionary suitable for nest_and_generate(**params)
-    """
     parts = []
     for part in job.parts:
         part_dict: dict[str, Any] = {

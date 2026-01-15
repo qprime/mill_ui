@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/ops/profile.py
+
 from cam.shape import Shape2D
 from cam.model.setup import Setup
 from cam.native import core as native_core

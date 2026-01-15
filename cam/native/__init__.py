@@ -1,8 +1,3 @@
-"""Native CAM bindings facade.
-
-This package houses the native CAM core. Public code should import from
-``skills.mill_ui.cam.native.core`` rather than this module directly.
-"""
 
 from pathlib import Path
 from pkgutil import extend_path

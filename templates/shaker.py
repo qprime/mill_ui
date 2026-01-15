@@ -1,7 +1,3 @@
-"""Shaker template: Production-ready Shaker cabinet door.
-
-Uses LayoutAST and RemovalIntent pipeline for clean semantic representation.
-"""
 
 from __future__ import annotations
 
@@ -13,7 +9,6 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 
 @dataclass(frozen=True)
 class Region:
-    """Simple centered rectangle helper for panel and anchor math."""
 
     width: float
     height: float
@@ -27,19 +22,17 @@ class Region:
         return self.height * 0.5
 
     def anchor_centers(self, offsets: AnchorOffsets) -> list[tuple[float, float]]:
-        """Calculate 4-corner anchor positions with offsets."""
         hx, hy = self.half_width, self.half_height
         return [
-            (-hx + offsets.left, +hy - offsets.top),  # top-left
-            (+hx - offsets.right, +hy - offsets.top),  # top-right
-            (-hx + offsets.left, -hy + offsets.bottom),  # bottom-left
-            (+hx - offsets.right, -hy + offsets.bottom),  # bottom-right
+            (-hx + offsets.left, +hy - offsets.top),
+            (+hx - offsets.right, +hy - offsets.top),
+            (-hx + offsets.left, -hy + offsets.bottom),
+            (+hx - offsets.right, -hy + offsets.bottom),
         ]
 
 
 @dataclass(frozen=True)
 class AnchorOffsets:
-    """Offsets from corners for anchor placement."""
 
     left: float = 0.0
     right: float = 0.0
@@ -58,7 +51,6 @@ class AnchorOffsets:
 
 @dataclass(frozen=True)
 class AnchorRecess:
-    """Configuration for anchor screw recesses."""
 
     diameter_mm: float
     extra_depth_mm: float
@@ -76,14 +68,12 @@ class AnchorRecess:
         return cls(diameter_mm=diameter, extra_depth_mm=extra_depth, offsets=offsets)
 
     def depth_mm(self, panel_recess_mm: float, stock_thickness_mm: float) -> float:
-        """Calculate anchor recess depth."""
         requested = panel_recess_mm + self.extra_depth_mm
         return min(stock_thickness_mm, requested)
 
 
 @dataclass(frozen=True)
 class ShakerConfig:
-    """Shaker panel configuration derived from parameters."""
 
     outer: Region
     stile_mm: float
@@ -93,8 +83,7 @@ class ShakerConfig:
 
     @classmethod
     def from_params(cls, params: dict[str, Any]) -> ShakerConfig:
-        """Parse Shaker parameters into configuration."""
-        # Allow sizing by outer OR inner dimensions
+
         outer_w = float(params.get("outer_w", 0.0))
         outer_h = float(params.get("outer_h", 0.0))
         stile_w = float(params.get("stile_w", 0.0))
@@ -118,7 +107,6 @@ class ShakerConfig:
         )
 
     def panel_region(self) -> Region | None:
-        """Calculate inner panel region dimensions."""
         if self.panel_recess_mm <= 0.0:
             return None
         inner_w = self.outer.width - 2.0 * self.stile_mm
@@ -129,38 +117,22 @@ class ShakerConfig:
 
 
 class Shaker:
-    """Shaker cabinet door template.
-
-    Generates LayoutAST with:
-    - Outer perimeter profile (through-cut)
-    - Optional panel recess pocket
-    - Optional anchor screw recesses (4 corners)
-    """
 
     @staticmethod
     def expand_to_ast(params: dict[str, Any], sheet_thickness_mm: float) -> LayoutAST:
-        """Expand Shaker template parameters to LayoutAST.
-
-        Args:
-            params: Shaker configuration (outer_w, outer_h, stile_w, rail_h, panel_recess, anchor_recess)
-            sheet_thickness_mm: Material thickness
-
-        Returns:
-            LayoutAST with Shaker panel shapes
-        """
         cfg = ShakerConfig.from_params(params)
 
         if cfg.outer.width <= 0.0 or cfg.outer.height <= 0.0:
             raise ValueError(f"Invalid Shaker dimensions: {cfg.outer.width} x {cfg.outer.height}")
 
-        # Calculate sheet size (outer dimensions + margin)
-        margin = 25.0  # 25mm margin on all sides
+
+        margin = 25.0
         sheet_width = cfg.outer.width + 2 * margin
         sheet_height = cfg.outer.height + 2 * margin
 
         items: list[Item] = []
 
-        # 1) Outer perimeter profile
+
         items.append(
             Item(
                 kind="shape",
@@ -172,7 +144,7 @@ class Shaker:
             )
         )
 
-        # 2) Optional panel recess pocket
+
         panel = cfg.panel_region()
         if panel:
             items.append(
@@ -186,12 +158,12 @@ class Shaker:
                 )
             )
 
-        # 3) Optional anchor recesses (4 corners)
+
         if cfg.anchor_recess:
             reference_region = panel or cfg.outer
             anchor_depth = cfg.anchor_recess.depth_mm(cfg.panel_recess_mm, sheet_thickness_mm)
 
-            # Calculate anchor centers relative to sheet center
+
             sheet_center_x = sheet_width / 2
             sheet_center_y = sheet_height / 2
 

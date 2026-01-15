@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 11 PML roundtrip tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_pml_tests
-"""
 
 import json
 import sys
@@ -12,7 +8,6 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 
 
 def test_pml_parse_minimal_layout():
-    """Test parsing minimal valid PML layout."""
     print("Running test_pml_parse_minimal_layout...")
 
     pml = """
@@ -44,7 +39,6 @@ rect outer at 225mm,325mm size 400mm,600mm profile through outside
 
 
 def test_pml_parse_with_metadata():
-    """Test parsing PML with project and kerf metadata."""
     print("Running test_pml_parse_with_metadata...")
 
     pml = """
@@ -67,7 +61,6 @@ rect panel at 150mm,200mm size 200mm,300mm pocket 5mm
 
 
 def test_pml_parse_multiple_shapes():
-    """Test parsing PML with multiple shapes."""
     print("Running test_pml_parse_multiple_shapes...")
 
     pml = """
@@ -83,20 +76,20 @@ circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
 
     assert len(ast.items) == 4
 
-    # Verify outer profile
+
     outer = ast.items[0]
     assert outer.shape_id == "door:outer"
     assert outer.type == "Rect"
     assert outer.feature.type == "profile"
 
-    # Verify panel pocket
+
     panel = ast.items[1]
     assert panel.shape_id == "door:panel"
     assert panel.type == "Rect"
     assert panel.feature.type == "pocket"
     assert panel.feature.depth_mm == 6.0
 
-    # Verify anchor holes
+
     anchor1 = ast.items[2]
     assert anchor1.shape_id == "door:anchor:1"
     assert anchor1.type == "Circle"
@@ -108,7 +101,6 @@ circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
 
 
 def test_pml_parse_circle_diameter_vs_radius():
-    """Test parsing circles with both diameter and radius syntax."""
     print("Running test_pml_parse_circle_diameter_vs_radius...")
 
     pml = """
@@ -122,12 +114,12 @@ circle hole2 at 150mm,150mm radius 8mm hole 12mm
 
     assert len(ast.items) == 2
 
-    # Diameter syntax
+
     hole1 = ast.items[0]
     assert "diameter_mm" in hole1.geometry.data
     assert hole1.geometry.data["diameter_mm"] == 20.0
 
-    # Radius syntax
+
     hole2 = ast.items[1]
     assert "radius_mm" in hole2.geometry.data
     assert hole2.geometry.data["radius_mm"] == 8.0
@@ -137,7 +129,6 @@ circle hole2 at 150mm,150mm radius 8mm hole 12mm
 
 
 def test_pml_parse_roundedrect():
-    """Test parsing RoundedRect shape."""
     print("Running test_pml_parse_roundedrect...")
 
     pml = """
@@ -162,18 +153,16 @@ roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
 
 
 def test_pml_parse_comments_and_blank_lines():
-    """Test that comments and blank lines are ignored."""
     print("Running test_pml_parse_comments_and_blank_lines...")
 
     pml = """
-# This is a comment
+
 sheet 300mm 400mm 19mm
 
-# Another comment
 
 rect panel at 150mm,200mm size 200mm,300mm profile through inside
 
-# Final comment
+
 """
 
     ast = parse_pml(pml)
@@ -186,7 +175,6 @@ rect panel at 150mm,200mm size 200mm,300mm profile through inside
 
 
 def test_pml_parse_error_missing_sheet():
-    """Test error when sheet declaration is missing."""
     print("Running test_pml_parse_error_missing_sheet...")
 
     pml = """
@@ -204,10 +192,9 @@ rect panel at 150mm,200mm size 200mm,300mm profile through inside
 
 
 def test_pml_parse_error_invalid_sheet_syntax():
-    """Test error on invalid sheet syntax."""
     print("Running test_pml_parse_error_invalid_sheet_syntax...")
 
-    pml = "sheet 300 400 19"  # Missing 'mm' suffix
+    pml = "sheet 300 400 19"
 
     try:
         parse_pml(pml)
@@ -220,7 +207,6 @@ def test_pml_parse_error_invalid_sheet_syntax():
 
 
 def test_pml_parse_error_invalid_feature():
-    """Test error on invalid feature type."""
     print("Running test_pml_parse_error_invalid_feature...")
 
     pml = """
@@ -239,7 +225,6 @@ rect panel at 150mm,200mm size 200mm,300mm invalid_feature 5mm
 
 
 def test_pml_format_minimal_layout():
-    """Test formatting minimal LayoutAST to PML."""
     print("Running test_pml_format_minimal_layout...")
 
     ast = LayoutAST(
@@ -266,7 +251,6 @@ def test_pml_format_minimal_layout():
 
 
 def test_pml_format_with_metadata():
-    """Test formatting LayoutAST with project and kerf metadata."""
     print("Running test_pml_format_with_metadata...")
 
     ast = LayoutAST(
@@ -295,11 +279,10 @@ def test_pml_format_with_metadata():
 
 
 def test_pml_roundtrip_semantic_equivalence():
-    """Test PML → AST → PML preserves semantics (not formatting)."""
     print("Running test_pml_roundtrip_semantic_equivalence...")
 
     original_pml = """
-# Comment (will be lost)
+
 project shaker_door
 
 sheet 450mm 650mm 19mm
@@ -308,16 +291,16 @@ rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
 rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
 """
 
-    # Parse original
+
     ast1 = parse_pml(original_pml)
 
-    # Format to canonical PML
+
     canonical_pml = format_pml(ast1)
 
-    # Parse canonical
+
     ast2 = parse_pml(canonical_pml)
 
-    # Verify semantic equivalence (not formatting equivalence)
+
     assert ast1.sheet.width_mm == ast2.sheet.width_mm
     assert ast1.sheet.height_mm == ast2.sheet.height_mm
     assert ast1.sheet.thickness_mm == ast2.sheet.thickness_mm
@@ -337,7 +320,6 @@ rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
 
 
 def test_pml_to_json_to_ast_semantic_equivalence():
-    """Test PML → AST → JSON → AST preserves semantics."""
     print("Running test_pml_to_json_to_ast_semantic_equivalence...")
 
     pml = """
@@ -351,14 +333,14 @@ rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
 circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
 """
 
-    # PML → AST
+
     ast1 = parse_pml(pml)
 
-    # AST → JSON
+
     json_str = ast1.to_json()
     json_dict = json.loads(json_str)
 
-    # Verify JSON structure
+
     assert "sheet" in json_dict
     assert "items" in json_dict
     assert json_dict["sheet"]["thickness_mm"] == 19.0
@@ -366,7 +348,7 @@ circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
     assert json_dict.get("project") == "test_panel"
     assert json_dict.get("kerf_width_mm") == 0.15
 
-    # Verify semantic preservation
+
     assert ast1.sheet.thickness_mm == 19.0
     assert len(ast1.items) == 3
     assert ast1.project == "test_panel"
@@ -377,7 +359,6 @@ circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
 
 
 def test_pml_canonical_formatting():
-    """Test that PML formatter produces canonical formatting."""
     print("Running test_pml_canonical_formatting...")
 
     pml_input = """
@@ -388,7 +369,7 @@ rect test at 100.1mm,200.2mm size 50.5mm,60.6mm pocket 5.123mm
     ast = parse_pml(pml_input)
     canonical_pml = format_pml(ast)
 
-    # Verify 2 decimal place precision
+
     assert "450.12mm" in canonical_pml
     assert "650.46mm" in canonical_pml
     assert "19.79mm" in canonical_pml

@@ -1,4 +1,3 @@
-"""Tests for parse-compositional-pml CLI tool."""
 
 import subprocess
 import sys
@@ -7,7 +6,6 @@ from pathlib import Path
 
 
 def test_cli_parse_and_format():
-    """Test CLI can parse and reformat compositional PML."""
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -20,7 +18,7 @@ rect outer profile through outside
         input_file = f.name
 
     try:
-        # Test basic parse and format
+
         result = subprocess.run(
             [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", input_file],
             capture_output=True,
@@ -36,7 +34,6 @@ rect outer profile through outside
 
 
 def test_cli_resolve_to_flat_pml():
-    """Test CLI can resolve compositional PML to flat PML."""
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -49,7 +46,7 @@ rect outer profile through outside
         input_file = f.name
 
     try:
-        # Test resolve to flat PML
+
         result = subprocess.run(
             [
                 sys.executable,
@@ -68,7 +65,7 @@ rect outer profile through outside
         assert "✓ Parse successful" in result.stderr
         assert "✓ Resolved to" in result.stderr
         assert "sheet 400.00mm 600.00mm 19.00mm" in result.stdout
-        # Flat PML should have explicit positions
+
         assert "at " in result.stdout
 
     finally:
@@ -76,7 +73,6 @@ rect outer profile through outside
 
 
 def test_cli_resolve_to_json():
-    """Test CLI can resolve compositional PML to JSON."""
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -89,7 +85,7 @@ rect outer profile through outside
         input_file = f.name
 
     try:
-        # Test resolve to JSON
+
         result = subprocess.run(
             [
                 sys.executable,
@@ -115,7 +111,6 @@ rect outer profile through outside
 
 
 def test_cli_error_on_missing_file():
-    """Test CLI reports error for missing input file."""
     result = subprocess.run(
         [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", "/nonexistent/file.pml"],
         capture_output=True,
@@ -127,7 +122,6 @@ def test_cli_error_on_missing_file():
 
 
 def test_cli_error_on_invalid_pml():
-    """Test CLI reports parse error for invalid PML."""
     pml = "invalid pml syntax"
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
@@ -149,7 +143,6 @@ def test_cli_error_on_invalid_pml():
 
 
 def test_cli_gold_exemplar():
-    """Test CLI with Stage 12 gold exemplar."""
     pml = """sheet 1200.00mm 1200.00mm 19.00mm
 
 project acceptance_test_grid_panels
@@ -173,7 +166,7 @@ place grid 2 2 gap 100.00mm
         input_file = f.name
 
     try:
-        # Test resolution produces 24 items
+
         result = subprocess.run(
             [
                 sys.executable,

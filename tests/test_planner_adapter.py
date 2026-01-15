@@ -1,10 +1,3 @@
-"""Integration tests for RemovalIntent → v1 planner adapter.
-
-Tests round-trip conversion:
-  v1 hint → RemovalIntent → v1 hint (should be semantically equivalent)
-
-Stage 6 acceptance tests.
-"""
 
 from __future__ import annotations
 
@@ -22,7 +15,6 @@ from adapters.removal_to_planner import (
 
 
 def test_roundtrip_profile_through_cut():
-    """Test round-trip conversion for profile through-cut."""
     original_hint = {
         "id": "rect_outline",
         "shape": "Rect",
@@ -32,13 +24,13 @@ def test_roundtrip_profile_through_cut():
         "side": "outside",
     }
 
-    # v1 → RemovalIntent
+
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=19.1)
 
-    # RemovalIntent → v1
+
     reconstructed_hint = removal_intent_to_v1_hint(intent)
 
-    # Verify semantic equivalence
+
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == original_hint["shape"]
     assert reconstructed_hint["geometry"]["w_mm"] == pytest.approx(original_hint["geometry"]["w_mm"])
@@ -50,7 +42,6 @@ def test_roundtrip_profile_through_cut():
 
 
 def test_roundtrip_profile_with_tabs():
-    """Test round-trip conversion for profile with tabs."""
     original_hint = {
         "id": "panel_outline",
         "shape": "Rect",
@@ -73,7 +64,6 @@ def test_roundtrip_profile_with_tabs():
 
 
 def test_roundtrip_profile_inside_cut():
-    """Test round-trip conversion for profile inside cut."""
     original_hint = {
         "id": "aperture",
         "shape": "Rect",
@@ -91,7 +81,6 @@ def test_roundtrip_profile_inside_cut():
 
 
 def test_roundtrip_pocket_basic():
-    """Test round-trip conversion for basic pocket."""
     original_hint = {
         "id": "pocket_1",
         "shape": "Rect",
@@ -108,12 +97,11 @@ def test_roundtrip_pocket_basic():
     assert reconstructed_hint["geometry"]["w_mm"] == pytest.approx(original_hint["geometry"]["w_mm"])
     assert reconstructed_hint["geometry"]["h_mm"] == pytest.approx(original_hint["geometry"]["h_mm"])
     assert reconstructed_hint["depth_mm"] == pytest.approx(original_hint["depth_mm"])
-    # Basic pocket should not have start_depth_mm
+
     assert "start_depth_mm" not in reconstructed_hint
 
 
 def test_roundtrip_pocket_with_start_depth():
-    """Test round-trip conversion for pocket with start depth."""
     original_hint = {
         "id": "stepped_pocket",
         "shape": "Rect",
@@ -132,7 +120,6 @@ def test_roundtrip_pocket_with_start_depth():
 
 
 def test_roundtrip_hole_circle():
-    """Test round-trip conversion for hole (circle)."""
     original_hint = {
         "id": "mounting_hole",
         "shape": "Circle",
@@ -153,7 +140,6 @@ def test_roundtrip_hole_circle():
 
 
 def test_batch_conversion_to_hints_structure():
-    """Test converting multiple RemovalIntents to v1 hints structure."""
     profile_hint = {
         "id": "outer",
         "shape": "Rect",
@@ -179,16 +165,16 @@ def test_batch_conversion_to_hints_structure():
         "depth_mm": 12.0,
     }
 
-    # Convert to RemovalIntent
+
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=12.0)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)
 
-    # Batch convert back to v1 hints structure
+
     intents = [profile_intent, pocket_intent, hole_intent]
     hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175)
 
-    # Verify structure
+
     assert hints["units"] == "mm"
     assert hints["kerf_width_mm"] == pytest.approx(3.175)
     assert len(hints["profiles"]) == 1
@@ -196,21 +182,20 @@ def test_batch_conversion_to_hints_structure():
     assert len(hints["holes"]) == 1
     assert len(hints["engraves"]) == 0
 
-    # Verify profile
+
     assert hints["profiles"][0]["id"] == "outer"
     assert hints["profiles"][0]["side"] == "outside"
 
-    # Verify pocket
+
     assert hints["pockets"][0]["id"] == "inner_pocket"
     assert hints["pockets"][0]["depth_mm"] == pytest.approx(5.0)
 
-    # Verify hole
+
     assert hints["holes"][0]["id"] == "mount"
     assert hints["holes"][0]["geometry"]["diameter_mm"] == pytest.approx(6.0)
 
 
 def test_geometry_preservation_rect():
-    """Test that rectangular geometry is preserved through round-trip."""
     hint = {
         "id": "test_rect",
         "shape": "Rect",
@@ -222,7 +207,7 @@ def test_geometry_preservation_rect():
     intent = pocket_hint_to_removal_intent(hint)
     reconstructed = removal_intent_to_v1_hint(intent)
 
-    # Geometry should be preserved to floating point precision
+
     assert reconstructed["geometry"]["w_mm"] == pytest.approx(hint["geometry"]["w_mm"], rel=1e-9)
     assert reconstructed["geometry"]["h_mm"] == pytest.approx(hint["geometry"]["h_mm"], rel=1e-9)
     assert reconstructed["center_xy_mm"][0] == pytest.approx(hint["center_xy_mm"][0], rel=1e-9)
@@ -230,7 +215,6 @@ def test_geometry_preservation_rect():
 
 
 def test_geometry_preservation_circle():
-    """Test that circular geometry is preserved through round-trip."""
     hint = {
         "id": "test_circle",
         "shape": "Circle",
@@ -248,7 +232,6 @@ def test_geometry_preservation_circle():
 
 
 def test_depth_preservation():
-    """Test that depth values are preserved through round-trip."""
     hint = {
         "id": "deep_pocket",
         "shape": "Rect",
@@ -261,13 +244,12 @@ def test_depth_preservation():
     intent = pocket_hint_to_removal_intent(hint)
     reconstructed = removal_intent_to_v1_hint(intent)
 
-    # Depth should be exact (within floating point error)
+
     assert reconstructed["depth_mm"] == pytest.approx(hint["depth_mm"], rel=1e-9)
     assert reconstructed["start_depth_mm"] == pytest.approx(hint["start_depth_mm"], rel=1e-9)
 
 
 def test_metadata_fields_preserved():
-    """Test that important metadata is preserved."""
     hint = {
         "id": "custom_id_123",
         "shape": "Rect",

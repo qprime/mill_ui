@@ -1,5 +1,4 @@
-# path: skills/mill_ui/cad/export/panel_stl.py
-"""Generate simple heightfield STL previews for sheet layouts."""
+
 
 from __future__ import annotations
 
@@ -152,7 +151,6 @@ def write_panel_stl(path: Path,
                     thickness_mm: float,
                     items: Iterable[Mapping[str, Any]],
                     resolution_mm: float = 1.5) -> Path:
-    """Generate a binary STL preview for a sheet layout."""
 
     width = max(float(width_mm), 1.0)
     height = max(float(height_mm), 1.0)

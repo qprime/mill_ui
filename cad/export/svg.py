@@ -24,14 +24,11 @@ def _circle_svg(cx: float, cy: float, r: float, cls: str) -> str:
     return f'    <circle class="{cls}" cx="{cx:.3f}" cy="{cy:.3f}" r="{r:.3f}" />\n'
 
 def render_svg_layout(panel: Panel, placements: List[Dict[str, Any]]) -> str:
-    """Render a simple debug SVG for a panel + placed items.
-    For unknown items, draws the item's bounding box sized by item_size_mm.
-    """
     w, h = panel.width, panel.height
     out = _svg_header(w, h)
-    # panel border
+
     out += _rect_svg(0.0, 0.0, w, h, "panel")
-    # items
+
     for pl in placements:
         item = pl.get("item", {})
         cx, cy = pl.get("center_xy_mm", (0.0, 0.0))
@@ -47,7 +44,7 @@ def render_svg_layout(panel: Panel, placements: List[Dict[str, Any]]) -> str:
                 d = float(g.get("diameter_mm", 0.0))
                 out += _circle_svg(cx, cy, d/2.0, "item")
                 continue
-        # fallback to bounding box of item size
+
         iw, ih = item_size_mm(item)
         out += _rect_svg(cx - iw/2, cy - ih/2, iw, ih, "item")
     out += _svg_footer()

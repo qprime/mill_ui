@@ -1,8 +1,3 @@
-"""Tests for tab functionality in profiles.
-
-Tests PML parsing, AST construction, and RemovalIntent conversion for tabs.
-Run from repository root: PYTHONPATH=. python3 -m tests.test_tabs
-"""
 
 from pml import parse_pml
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
@@ -11,7 +6,6 @@ from ir.removal_intent import TabConstraint
 
 
 def test_pml_parse_profile_with_tabs():
-    """Test parsing profile with tabs from PML."""
     print("Running test_pml_parse_profile_with_tabs...")
 
     pml = """
@@ -25,12 +19,12 @@ rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 heigh
     assert len(ast.items) == 1
     item = ast.items[0]
 
-    # Verify basic feature
+
     assert item.feature.type == "profile"
     assert item.feature.depth == "through"
     assert item.feature.side == "outside"
 
-    # Verify tabs
+
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm == 10.0
@@ -40,7 +34,6 @@ rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 heigh
 
 
 def test_pml_parse_profile_with_tabs_no_width():
-    """Test parsing profile with tabs without explicit width."""
     print("Running test_pml_parse_profile_with_tabs_no_width...")
 
     pml = """
@@ -53,17 +46,16 @@ rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 heigh
 
     item = ast.items[0]
 
-    # Verify tabs
+
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
-    assert item.feature.tab_width_mm is None  # Should be None, will default in planner
+    assert item.feature.tab_width_mm is None
 
     print("  ✓ PASS")
     return True
 
 
 def test_pml_parse_profile_with_tabs_inside():
-    """Test parsing inside profile with tabs."""
     print("Running test_pml_parse_profile_with_tabs_inside...")
 
     pml = """
@@ -76,7 +68,7 @@ rect pocket_outline at 225mm,325mm size 300mm,500mm profile 6mm inside tabs 6 he
 
     item = ast.items[0]
 
-    # Verify feature with side and tabs
+
     assert item.feature.type == "profile"
     assert item.feature.depth_mm == 6.0
     assert item.feature.side == "inside"
@@ -89,7 +81,6 @@ rect pocket_outline at 225mm,325mm size 300mm,500mm profile 6mm inside tabs 6 he
 
 
 def test_ast_construction_with_tabs():
-    """Test direct AST construction with tabs."""
     print("Running test_ast_construction_with_tabs...")
 
     ast = LayoutAST(
@@ -123,7 +114,6 @@ def test_ast_construction_with_tabs():
 
 
 def test_ast_to_removal_intent_with_tabs():
-    """Test conversion from AST to RemovalIntent with tabs."""
     print("Running test_ast_to_removal_intent_with_tabs...")
 
     item = Item(
@@ -144,12 +134,12 @@ def test_ast_to_removal_intent_with_tabs():
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
 
-    # Verify RemovalIntent basic fields
+
     assert intent.depth_mm() == 19.0
     assert intent.metadata["hint_type"] == "profile"
     assert intent.metadata["side"] == "outside"
 
-    # Verify tabs constraint
+
     assert intent.constraints.tabs is not None
     assert isinstance(intent.constraints.tabs, TabConstraint)
     assert intent.constraints.tabs.count == 4
@@ -161,7 +151,6 @@ def test_ast_to_removal_intent_with_tabs():
 
 
 def test_ast_to_removal_intent_with_tabs_no_width():
-    """Test conversion with tabs but no explicit width."""
     print("Running test_ast_to_removal_intent_with_tabs_no_width...")
 
     item = Item(
@@ -175,25 +164,24 @@ def test_ast_to_removal_intent_with_tabs_no_width():
             side="outside",
             tab_count=4,
             tab_height_mm=3.0,
-            tab_width_mm=None,  # Width not specified
+            tab_width_mm=None,
         ),
         shape_id="cutout"
     )
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
 
-    # Verify tabs constraint
+
     assert intent.constraints.tabs is not None
     assert intent.constraints.tabs.count == 4
     assert intent.constraints.tabs.height_mm == 3.0
-    assert intent.constraints.tabs.width_mm is None  # Should pass through as None
+    assert intent.constraints.tabs.width_mm is None
 
     print("  ✓ PASS")
     return True
 
 
 def test_full_pipeline_pml_to_removal_intent():
-    """Test full pipeline from PML to RemovalIntent with tabs."""
     print("Running test_full_pipeline_pml_to_removal_intent...")
 
     pml = """
@@ -206,10 +194,10 @@ rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
     ast = parse_pml(pml)
     intents = ast_to_removal_intents(ast)
 
-    # Should have 2 intents: profile with tabs, pocket without
+
     assert len(intents) == 2
 
-    # Check profile intent with tabs
+
     profile_intent = intents[0]
     assert profile_intent.metadata["hint_type"] == "profile"
     assert profile_intent.constraints.tabs is not None
@@ -217,7 +205,7 @@ rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
     assert profile_intent.constraints.tabs.height_mm == 3.0
     assert profile_intent.constraints.tabs.width_mm == 10.0
 
-    # Check pocket intent without tabs
+
     pocket_intent = intents[1]
     assert pocket_intent.metadata["hint_type"] == "pocket"
     assert pocket_intent.constraints.tabs is None
@@ -227,7 +215,6 @@ rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
 
 
 def test_pml_roundtrip_with_tabs():
-    """Test PML parse → format roundtrip preserves tabs."""
     print("Running test_pml_roundtrip_with_tabs...")
 
     from pml import format_pml
@@ -241,7 +228,7 @@ rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 heigh
     pml_out = format_pml(ast)
     ast2 = parse_pml(pml_out)
 
-    # Verify tabs preserved through roundtrip
+
     item1 = ast.items[0]
     item2 = ast2.items[0]
 
@@ -254,7 +241,6 @@ rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 heigh
 
 
 def run_all_tests():
-    """Run all tab tests."""
     tests = [
         test_pml_parse_profile_with_tabs,
         test_pml_parse_profile_with_tabs_no_width,

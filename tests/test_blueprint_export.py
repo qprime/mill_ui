@@ -1,7 +1,3 @@
-"""Test suite for F002: Blueprint Proof Drawing Export.
-
-Tests blueprint-style SVG/PDF export for pre-machining validation.
-"""
 
 import tempfile
 from pathlib import Path
@@ -12,12 +8,11 @@ from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
 from export.blueprint_svg import render_blueprint_svg
 from templates import Shaker
 
-# Golden file directory
+
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
 
 def test_svg_output_deterministic():
-    """Test that same input produces same SVG output (deterministic)."""
     print("Running test_svg_output_deterministic...")
 
     ast = LayoutAST(
@@ -34,17 +29,16 @@ def test_svg_output_deterministic():
         ),
     )
 
-    # Render twice
+
     svg1 = render_blueprint_svg(ast, theme="dark")
     svg2 = render_blueprint_svg(ast, theme="dark")
 
-    # Should be identical (no timestamps or randomness)
+
     assert svg1 == svg2, "SVG output should be deterministic"
     print("  ✓ PASS")
 
 
 def test_required_layers_exist():
-    """Test that all semantic layers are present in SVG."""
     print("Running test_required_layers_exist...")
 
     ast = LayoutAST(
@@ -63,7 +57,7 @@ def test_required_layers_exist():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # Check all required semantic layers exist
+
     required_layers = [
         'id="SHEET_OUTLINE"',
         'id="PROFILE_CUTS"',
@@ -84,10 +78,9 @@ def test_required_layers_exist():
 
 
 def test_shaker_dimensions():
-    """Test that Shaker template produces expected geometry (no dimensions yet in Part A)."""
     print("Running test_shaker_dimensions...")
 
-    # Generate shaker door
+
     ast = Shaker.expand_to_ast(
         params={
             "outer_w": 400.0,
@@ -101,16 +94,15 @@ def test_shaker_dimensions():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # Check for expected geometry (profile and pocket rectangles)
+
     assert "PROFILE_CUTS" in svg
     assert "POCKET_REGIONS" in svg
-    # Part A doesn't have dimensions yet, so just verify structure
+
 
     print("  ✓ PASS")
 
 
 def test_theme_toggle():
-    """Test that theme toggle changes CSS but not geometry."""
     print("Running test_theme_toggle...")
 
     ast = LayoutAST(
@@ -130,11 +122,11 @@ def test_theme_toggle():
     svg_dark = render_blueprint_svg(ast, theme="dark")
     svg_print = render_blueprint_svg(ast, theme="print")
 
-    # Check theme-specific colors
+
     assert "#1a1a1a" in svg_dark, "Dark theme should have dark background"
     assert "#ffffff" in svg_print, "Print theme should have white background"
 
-    # Extract geometry (rect elements) - should be identical
+
     def extract_rects(svg):
         import re
         return re.findall(r'<rect[^>]*width="[^"]*"[^>]*height="[^"]*"[^>]*/>', svg)
@@ -142,14 +134,13 @@ def test_theme_toggle():
     dark_rects = extract_rects(svg_dark)
     print_rects = extract_rects(svg_print)
 
-    # Geometry should be the same (same number of rectangles)
+
     assert len(dark_rects) == len(print_rects), "Themes should not change geometry count"
 
     print("  ✓ PASS")
 
 
 def test_multiple_feature_types():
-    """Test SVG with multiple feature types (profile, pocket, hole)."""
     print("Running test_multiple_feature_types...")
 
     ast = LayoutAST(
@@ -184,20 +175,19 @@ def test_multiple_feature_types():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # Check that different feature types are rendered
+
     assert 'class="profile-cuts"' in svg
     assert 'class="pocket-regions"' in svg
     assert 'class="holes"' in svg
 
-    # Should have multiple shape elements
-    assert svg.count("<rect") >= 3  # Sheet + profile + pocket
-    assert svg.count("<circle") >= 1  # Hole
+
+    assert svg.count("<rect") >= 3
+    assert svg.count("<circle") >= 1
 
     print("  ✓ PASS")
 
 
 def test_viewbox_dimensions():
-    """Test that SVG viewBox includes margin for dimensions."""
     print("Running test_viewbox_dimensions...")
 
     ast = LayoutAST(
@@ -207,15 +197,13 @@ def test_viewbox_dimensions():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # ViewBox should be sheet + 100mm margin on all sides (changed from old 10mm)
-    # 250 + 2*100 = 450, 180 + 2*100 = 380
+
     assert 'viewBox="0 0 450 380"' in svg or 'viewBox="0 0 450.0 380.0"' in svg
 
     print("  ✓ PASS")
 
 
 def test_rounded_rect_rendering():
-    """Test SVG rendering with RoundedRect shape."""
     print("Running test_rounded_rect_rendering...")
 
     ast = LayoutAST(
@@ -234,7 +222,7 @@ def test_rounded_rect_rendering():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # RoundedRect rendering not implemented in Part A yet, so just check it doesn't crash
+
     assert "<svg" in svg
     assert 'id="PROFILE_CUTS"' in svg
 
@@ -242,7 +230,6 @@ def test_rounded_rect_rendering():
 
 
 def test_golden_file_simple_profile():
-    """Test SVG output matches golden file for simple profile cut."""
     print("Running test_golden_file_simple_profile...")
 
     ast = LayoutAST(
@@ -262,7 +249,7 @@ def test_golden_file_simple_profile():
     svg = render_blueprint_svg(ast, theme="dark")
     golden_path = GOLDEN_DIR / "simple_profile_dark.svg"
 
-    # Normalize SVG for comparison (strip whitespace variations)
+
     svg_normalized = _normalize_svg(svg)
 
     if golden_path.exists():
@@ -271,12 +258,12 @@ def test_golden_file_simple_profile():
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
         print("  ✓ PASS")
     else:
-        # Fail if golden file is missing in CI/automated environments
+
         import os
         if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
             raise AssertionError(f"Golden file missing in CI: {golden_path}")
 
-        # Generate golden file if it doesn't exist (dev mode only)
+
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
         print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
@@ -284,7 +271,6 @@ def test_golden_file_simple_profile():
 
 
 def test_golden_file_shaker_door():
-    """Test SVG output matches golden file for Shaker door template."""
     print("Running test_golden_file_shaker_door...")
 
     ast = Shaker.expand_to_ast(
@@ -309,12 +295,12 @@ def test_golden_file_shaker_door():
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
         print("  ✓ PASS")
     else:
-        # Fail if golden file is missing in CI/automated environments
+
         import os
         if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
             raise AssertionError(f"Golden file missing in CI: {golden_path}")
 
-        # Generate golden file if it doesn't exist (dev mode only)
+
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
         print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
@@ -322,10 +308,9 @@ def test_golden_file_shaker_door():
 
 
 def test_label_placement_no_overlap():
-    """Test that dimension labels don't overlap with collision avoidance."""
     print("Running test_label_placement_no_overlap...")
 
-    # Create layout with multiple overlapping dimension candidates
+
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=12.0),
         items=(
@@ -350,21 +335,19 @@ def test_label_placement_no_overlap():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    # Check that multiple dimension lines exist (collision avoidance should stack them)
-    # Count dimension-text elements
+
     text_count = svg.count('class="dimension-text"')
     assert text_count >= 4, f"Expected at least 4 dimension labels, found {text_count}"
 
-    # Check that dimensions are present in SVG
+
     assert 'id="DIMENSIONS"' in svg
-    assert "<line" in svg  # Dimension lines
-    assert "<polygon" in svg  # Arrowheads
+    assert "<line" in svg
+    assert "<polygon" in svg
 
     print("  ✓ PASS")
 
 
 def test_pdf_export():
-    """Test PDF export works if cairosvg installed, or skips gracefully."""
     print("Running test_pdf_export...")
 
     ast = LayoutAST(
@@ -390,7 +373,7 @@ def test_pdf_export():
             pdf_path = Path(tmpdir) / "test.pdf"
             svg_to_pdf(svg, pdf_path)
 
-            # Verify PDF was created
+
             assert pdf_path.exists(), "PDF file was not created"
             assert pdf_path.stat().st_size > 0, "PDF file is empty"
 
@@ -401,12 +384,11 @@ def test_pdf_export():
 
 
 def _normalize_svg(svg_text: str) -> str:
-    """Normalize SVG for comparison by removing insignificant whitespace."""
-    # Remove extra whitespace between tags
+
     normalized = re.sub(r'>\s+<', '><', svg_text)
-    # Remove leading/trailing whitespace on each line
+
     normalized = '\n'.join(line.strip() for line in normalized.split('\n'))
-    # Remove empty lines
+
     normalized = '\n'.join(line for line in normalized.split('\n') if line)
     return normalized
 

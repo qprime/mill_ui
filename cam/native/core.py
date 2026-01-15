@@ -1,36 +1,24 @@
-"""Thin Python shims for the native CAM core.
-
-The helpers defined here map the existing Python data structures into the POD
-facade exposed by ``skills.mill_ui.cam.native._native``.  Public modules never
-import the extension directly; they go through these wrappers so the native
-engine remains the single source of truth for toolpath generation.
-"""
 from __future__ import annotations
 
 from typing import Iterable, List, Optional, Sequence, Tuple
 
-try:  # pragma: no cover - optional native module
-    from . import _native  # type: ignore[attr-defined]
-except Exception:  # pragma: no cover - surface a clear error when accessed
-    _native = None  # type: ignore[assignment]
+try:
+    from . import _native
+except Exception:
+    _native = None
 
 
 def is_native_available() -> bool:
-    """Return True when the compiled pybind11 extension imported successfully."""
     return _native is not None
 
 
 def _require_native() -> None:
-    if _native is None:  # pragma: no cover - defensive guard
+    if _native is None:
         raise RuntimeError(
             "skills.mill_ui.cam.native._native is not available. Install the project "
             "with a modern C++ toolchain so the native CAM core can be built."
         )
 
-
-# ---------------------------------------------------------------------------
-# Shared conversions
-# ---------------------------------------------------------------------------
 
 def _poly_from_shape(shape) -> List[Tuple[float, float]]:
     return [(float(pt.x), float(pt.y)) for pt in getattr(shape, "points", [])]
@@ -57,10 +45,6 @@ def _holes_from_points(points: Iterable[Tuple[float, float]], depth_mm: float, t
         })
     return holes
 
-
-# ---------------------------------------------------------------------------
-# Native-backed planners
-# ---------------------------------------------------------------------------
 
 def pocket_raster(shape, setup, *, depth_mm: float, stepover_mm: float, stepdown_mm: Optional[float]) -> List[dict]:
     _require_native()
@@ -95,7 +79,6 @@ def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup, *, dep
 
 def post_gcode(moves: Sequence[dict], *, unit: str = "mm", prec: int = 3, safe_z: float = 5.0,
                header: Optional[Sequence[str]] = None, footer: Optional[Sequence[str]] = None) -> str:
-    """Emit G-code via the native backend."""
     _require_native()
     cfg = {
         "unit": unit,
@@ -108,10 +91,6 @@ def post_gcode(moves: Sequence[dict], *, unit: str = "mm", prec: int = 3, safe_z
         cfg["footer"] = list(footer)
     return _native.post_gcode(list(moves), cfg)
 
-
-# ---------------------------------------------------------------------------
-# Passthrough helpers exposed for completeness (not yet wired internally)
-# ---------------------------------------------------------------------------
 
 def load_step(path: str):
     _require_native()
@@ -160,10 +139,6 @@ def fit_arcs(paths, tol_mm: float):
     return _native.fit_arcs(paths, float(tol_mm))
 
 
-# ---------------------------------------------------------------------------
-# Mandelbrot helpers (native)
-# ---------------------------------------------------------------------------
-
 def mandelbrot_outline_fill(
     *,
     width_mm: float,
@@ -177,11 +152,6 @@ def mandelbrot_outline_fill(
     imag_min: float = -1.25,
     imag_max: float = 1.25,
 ):
-    """Return dict with 'polylines' and 'spans' for a Mandelbrot outline + fill.
-
-    polylines: list[list[tuple[float,float]]] in panel mm coords (origin center)
-    spans:     list[dict{x0,x1,y,h}] horizontal runs for pocket rectangles
-    """
     _require_native()
     return _native.mandelbrot_outline_fill(
         float(width_mm),

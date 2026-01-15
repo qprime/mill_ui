@@ -4,6 +4,6 @@ from cam.types import Vec2, Bounds
 
 @dataclass
 class Shape2D:
-    points: List[Vec2]   # closed polyline
+    points: List[Vec2]
     def bounds(self) -> Bounds:
         return Bounds.from_points(self.points)

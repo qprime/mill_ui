@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 6 planner adapter tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_planner_adapter_tests
-"""
 
 import sys
 
@@ -17,12 +13,10 @@ from adapters.removal_to_planner import (
 
 
 def approx_equal(a: float, b: float, rel: float = 1e-9) -> bool:
-    """Check if two floats are approximately equal."""
     return abs(a - b) <= rel * max(abs(a), abs(b), 1.0)
 
 
 def test_roundtrip_profile_through_cut():
-    """Test round-trip conversion for profile through-cut."""
     print("Running test_roundtrip_profile_through_cut...")
     original_hint = {
         "id": "rect_outline",
@@ -50,7 +44,6 @@ def test_roundtrip_profile_through_cut():
 
 
 def test_roundtrip_profile_with_tabs():
-    """Test round-trip conversion for profile with tabs."""
     print("Running test_roundtrip_profile_with_tabs...")
     original_hint = {
         "id": "panel_outline",
@@ -77,7 +70,6 @@ def test_roundtrip_profile_with_tabs():
 
 
 def test_roundtrip_pocket_basic():
-    """Test round-trip conversion for basic pocket."""
     print("Running test_roundtrip_pocket_basic...")
     original_hint = {
         "id": "pocket_1",
@@ -102,7 +94,6 @@ def test_roundtrip_pocket_basic():
 
 
 def test_roundtrip_pocket_with_start_depth():
-    """Test round-trip conversion for pocket with start depth."""
     print("Running test_roundtrip_pocket_with_start_depth...")
     original_hint = {
         "id": "stepped_pocket",
@@ -125,7 +116,6 @@ def test_roundtrip_pocket_with_start_depth():
 
 
 def test_roundtrip_hole_circle():
-    """Test round-trip conversion for hole (circle)."""
     print("Running test_roundtrip_hole_circle...")
     original_hint = {
         "id": "mounting_hole",
@@ -150,7 +140,6 @@ def test_roundtrip_hole_circle():
 
 
 def test_batch_conversion():
-    """Test converting multiple RemovalIntents to v1 hints structure."""
     print("Running test_batch_conversion...")
     profile_hint = {
         "id": "outer",
@@ -203,7 +192,6 @@ def test_batch_conversion():
 
 
 def test_geometry_preservation():
-    """Test that geometry is preserved through round-trip."""
     print("Running test_geometry_preservation...")
     hint = {
         "id": "test_rect",

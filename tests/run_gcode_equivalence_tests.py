@@ -1,7 +1,3 @@
-"""Standalone test runner for G-code equivalence tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
-"""
 
 import hashlib
 import sys
@@ -22,7 +18,6 @@ from adapters.hints_to_removal import (
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 
 
-# Minimal tool DB for testing
 TOOL_DB = [
     {
         "name": "1_8_endmill",
@@ -44,7 +39,6 @@ TOOL_DB = [
 
 
 def _hash_gcode(gcode: str) -> str:
-    """Compute SHA256 hash of G-code string."""
     return hashlib.sha256(gcode.encode("utf-8")).hexdigest()
 
 
@@ -54,7 +48,6 @@ def _generate_gcode_from_hints(
     material: Material,
     machine: Machine,
 ) -> str:
-    """Generate G-code from hints via planner."""
     passes, _ = plan_passes(
         hints,
         config=Config(),
@@ -65,7 +58,7 @@ def _generate_gcode_from_hints(
         safe_z=6.0,
     )
 
-    # Concatenate all G-code from all passes
+
     gcode_parts = []
     for pass_record in passes:
         output = StringIO()
@@ -80,7 +73,6 @@ def _generate_gcode_from_hints(
 
 
 def test_profile_gcode_equivalence():
-    """Test G-code equivalence for profile operation (outside cut)."""
     print("Running test_profile_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
@@ -96,7 +88,7 @@ def test_profile_gcode_equivalence():
         "side": "outside",
     }
 
-    # Path 1: v1 direct (baseline)
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -109,7 +101,7 @@ def test_profile_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1 (via adapters)
+
     intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
@@ -123,7 +115,6 @@ def test_profile_gcode_equivalence():
 
 
 def test_pocket_gcode_equivalence():
-    """Test G-code equivalence for pocket operation."""
     print("Running test_pocket_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
@@ -138,7 +129,7 @@ def test_pocket_gcode_equivalence():
         "depth_mm": 8.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -151,7 +142,7 @@ def test_pocket_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     intent = pocket_hint_to_removal_intent(pocket_hint)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
@@ -165,7 +156,6 @@ def test_pocket_gcode_equivalence():
 
 
 def test_hole_gcode_equivalence():
-    """Test G-code equivalence for hole operation (drilling)."""
     print("Running test_hole_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
@@ -180,7 +170,7 @@ def test_hole_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -193,7 +183,7 @@ def test_hole_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     intent = hole_hint_to_removal_intent(hole_hint)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
@@ -207,7 +197,6 @@ def test_hole_gcode_equivalence():
 
 
 def test_mixed_operations_gcode_equivalence():
-    """Test G-code equivalence for mixed operations (profile + pocket + hole)."""
     print("Running test_mixed_operations_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=400.0, height=300.0, thickness=sheet_thickness)
@@ -237,7 +226,7 @@ def test_mixed_operations_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -250,7 +239,7 @@ def test_mixed_operations_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)

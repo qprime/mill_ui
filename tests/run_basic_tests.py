@@ -1,7 +1,3 @@
-"""Basic test runner for Stage 2 acceptance tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_basic_tests
-"""
 
 import json
 import tempfile
@@ -12,7 +8,6 @@ from layout_ast.layout import LayoutAST
 
 
 def test_parse_minimal_layout():
-    """Test parsing minimal valid layout."""
     print("Running test_parse_minimal_layout...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
@@ -34,12 +29,12 @@ def test_parse_minimal_layout():
     try:
         ast = LayoutAST.from_json(temp_path)
 
-        # Verify sheet
+
         assert ast.sheet.width_mm == 200.0
         assert ast.sheet.height_mm == 100.0
         assert ast.sheet.thickness_mm == 12.0
 
-        # Verify items
+
         assert len(ast.items) == 1
         item = ast.items[0]
         assert item.kind == "shape"
@@ -50,7 +45,7 @@ def test_parse_minimal_layout():
         assert item.feature.type == "profile"
         assert item.feature.depth == "through"
 
-        # Verify config (empty by default)
+
         assert ast.config == {}
 
         print("  ✓ PASS")
@@ -60,7 +55,6 @@ def test_parse_minimal_layout():
 
 
 def test_parse_layout_with_multiple_items():
-    """Test parsing layout with multiple items."""
     print("Running test_parse_layout_with_multiple_items...")
     layout_data = {
         "sheet": {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 18.0},
@@ -99,22 +93,22 @@ def test_parse_layout_with_multiple_items():
     try:
         ast = LayoutAST.from_json(temp_path)
 
-        # Verify sheet
+
         assert ast.sheet.width_mm == 300.0
         assert ast.sheet.height_mm == 200.0
         assert ast.sheet.thickness_mm == 18.0
 
-        # Verify item count
+
         assert len(ast.items) == 3
 
-        # Verify first item (profile with side)
+
         item0 = ast.items[0]
         assert item0.type == "Rect"
         assert item0.feature.type == "profile"
         assert item0.feature.side == "outside"
         assert item0.shape_id == "rect1"
 
-        # Verify second item (hole with depth_mm)
+
         item1 = ast.items[1]
         assert item1.type == "Circle"
         assert item1.geometry.data["diameter_mm"] == 20.0
@@ -122,14 +116,14 @@ def test_parse_layout_with_multiple_items():
         assert item1.feature.depth_mm == 10.0
         assert item1.shape_id == "hole1"
 
-        # Verify third item (pocket, no shape_id)
+
         item2 = ast.items[2]
         assert item2.type == "Rect"
         assert item2.feature.type == "pocket"
         assert item2.feature.depth_mm == 5.0
         assert item2.shape_id is None
 
-        # Verify config
+
         assert ast.config["material"] == "MDF"
         assert ast.config["tool_db"] == "default"
 
@@ -140,7 +134,6 @@ def test_parse_layout_with_multiple_items():
 
 
 def test_parse_missing_sheet():
-    """Test that missing sheet field raises ValueError."""
     print("Running test_parse_missing_sheet...")
     layout_data = {
         "items": [],
@@ -167,7 +160,6 @@ def test_parse_missing_sheet():
 
 
 def test_parse_nonexistent_file():
-    """Test that nonexistent file raises FileNotFoundError."""
     print("Running test_parse_nonexistent_file...")
     try:
         LayoutAST.from_json("/nonexistent/path/layout.json")
@@ -179,7 +171,6 @@ def test_parse_nonexistent_file():
 
 
 def test_parse_real_cnc_clamp_v1():
-    """Test parsing real cnc_clamp_v1 layout."""
     print("Running test_parse_real_cnc_clamp_v1...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
 
@@ -198,7 +189,6 @@ def test_parse_real_cnc_clamp_v1():
 
 
 def test_parse_real_mandelbrot_demo():
-    """Test parsing real mandelbrot_demo layout."""
     print("Running test_parse_real_mandelbrot_demo...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
 
@@ -216,7 +206,6 @@ def test_parse_real_mandelbrot_demo():
 
 
 def test_parse_real_cnc_clamp_part_a():
-    """Test parsing real cnc_clamp-part_a_layout."""
     print("Running test_parse_real_cnc_clamp_part_a...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
 
@@ -247,7 +236,7 @@ if __name__ == "__main__":
     for test in tests:
         try:
             result = test()
-            if result is not None:  # None means skipped
+            if result is not None:
                 results.append(result)
         except Exception as e:
             print(f"  ✗ FAIL: {e}")

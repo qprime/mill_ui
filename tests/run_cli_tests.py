@@ -1,4 +1,3 @@
-"""Standalone test runner for CLI tools (without pytest)."""
 
 import subprocess
 import sys
@@ -7,7 +6,6 @@ from pathlib import Path
 
 
 def test_cli_parse_and_format():
-    """Test CLI can parse and reformat compositional PML."""
     print("Running test_cli_parse_and_format...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -40,7 +38,6 @@ rect outer profile through outside
 
 
 def test_cli_resolve_to_flat_pml():
-    """Test CLI can resolve compositional PML to flat PML."""
     print("Running test_cli_resolve_to_flat_pml...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -73,7 +70,7 @@ rect outer profile through outside
         assert "✓ Parse successful" in result.stderr
         assert "✓ Resolved to" in result.stderr
         assert "sheet 400.00mm 600.00mm 19.00mm" in result.stdout
-        assert "at " in result.stdout  # Flat PML has explicit positions
+        assert "at " in result.stdout
 
         print("  ✓ PASS")
         return True
@@ -83,7 +80,6 @@ rect outer profile through outside
 
 
 def test_cli_resolve_to_json():
-    """Test CLI can resolve compositional PML to JSON."""
     print("Running test_cli_resolve_to_json...")
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
@@ -126,7 +122,6 @@ rect outer profile through outside
 
 
 def test_cli_error_on_missing_file():
-    """Test CLI reports error for missing input file."""
     print("Running test_cli_error_on_missing_file...")
 
     result = subprocess.run(
@@ -143,7 +138,6 @@ def test_cli_error_on_missing_file():
 
 
 def test_cli_error_on_invalid_pml():
-    """Test CLI reports parse error for invalid PML."""
     print("Running test_cli_error_on_invalid_pml...")
 
     pml = "invalid pml syntax"
@@ -170,7 +164,6 @@ def test_cli_error_on_invalid_pml():
 
 
 def test_cli_gold_exemplar():
-    """Test CLI with Stage 12 gold exemplar (24 items)."""
     print("Running test_cli_gold_exemplar...")
 
     pml = """sheet 1200.00mm 1200.00mm 19.00mm

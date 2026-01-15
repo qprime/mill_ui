@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 8 RemovalIntent validation tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_validation_tests
-"""
 
 import sys
 from pathlib import Path
@@ -16,7 +12,6 @@ from validation import (
 
 
 def test_validation_result_basic():
-    """Test ValidationResult basic operations."""
     print("Running test_validation_result_basic...")
     result = ValidationResult()
 
@@ -36,7 +31,6 @@ def test_validation_result_basic():
 
 
 def test_validation_result_multiple_issue_types():
-    """Test ValidationResult with errors, warnings, and suggestions."""
     print("Running test_validation_result_multiple_issue_types...")
     result = ValidationResult()
 
@@ -59,7 +53,6 @@ def test_validation_result_multiple_issue_types():
 
 
 def test_check_overlap_no_overlap():
-    """Test check_overlap with non-overlapping regions."""
     print("Running test_check_overlap_no_overlap...")
     intent_a = RemovalIntent(
         region_id="pocket_a",
@@ -90,7 +83,6 @@ def test_check_overlap_no_overlap():
 
 
 def test_check_overlap_xy_overlap():
-    """Test check_overlap with XY overlapping regions at same Z."""
     print("Running test_check_overlap_xy_overlap...")
     intent_a = RemovalIntent(
         region_id="pocket_a",
@@ -123,7 +115,6 @@ def test_check_overlap_xy_overlap():
 
 
 def test_check_overlap_different_z_levels():
-    """Test check_overlap with overlapping XY but different Z levels."""
     print("Running test_check_overlap_different_z_levels...")
     intent_a = RemovalIntent(
         region_id="pocket_shallow",
@@ -153,7 +144,6 @@ def test_check_overlap_different_z_levels():
 
 
 def test_check_depth_feasibility_valid():
-    """Test check_depth_feasibility with valid depth constraints."""
     print("Running test_check_depth_feasibility_valid...")
     intent = RemovalIntent(
         region_id="pocket_valid",
@@ -174,10 +164,9 @@ def test_check_depth_feasibility_valid():
 
 
 def test_check_depth_feasibility_inverted_z():
-    """Test that RemovalIntent itself rejects inverted Z values."""
     print("Running test_check_depth_feasibility_inverted_z...")
 
-    # RemovalIntent.__post_init__ should reject inverted Z values
+
     try:
         intent = RemovalIntent(
             region_id="pocket_inverted",
@@ -197,7 +186,6 @@ def test_check_depth_feasibility_inverted_z():
 
 
 def test_check_depth_feasibility_too_deep():
-    """Test check_depth_feasibility cutting deeper than material (warning)."""
     print("Running test_check_depth_feasibility_too_deep...")
     intent = RemovalIntent(
         region_id="pocket_deep",
@@ -210,7 +198,7 @@ def test_check_depth_feasibility_too_deep():
     )
 
     result = check_depth_feasibility(intent, sheet_thickness_mm=12.0)
-    assert result.is_valid()  # Warning, not error
+    assert result.is_valid()
     assert len(result.warnings) == 1
     assert "deeper than material thickness" in result.warnings[0].message
 
@@ -219,7 +207,6 @@ def test_check_depth_feasibility_too_deep():
 
 
 def test_check_depth_feasibility_very_shallow():
-    """Test check_depth_feasibility with very shallow cut (suggestion)."""
     print("Running test_check_depth_feasibility_very_shallow...")
     intent = RemovalIntent(
         region_id="engrave_shallow",
@@ -241,7 +228,6 @@ def test_check_depth_feasibility_very_shallow():
 
 
 def test_check_toolability_no_tools():
-    """Test check_toolability with no tools specified (basic checks only)."""
     print("Running test_check_toolability_no_tools...")
     intent = RemovalIntent(
         region_id="pocket_normal",
@@ -262,7 +248,6 @@ def test_check_toolability_no_tools():
 
 
 def test_check_toolability_very_small_feature():
-    """Test check_toolability with very small feature (warning)."""
     print("Running test_check_toolability_very_small_feature...")
     intent = RemovalIntent(
         region_id="hole_tiny",
@@ -275,7 +260,7 @@ def test_check_toolability_very_small_feature():
     )
 
     result = check_toolability(intent, available_tools=None)
-    assert result.is_valid()  # Warning, not error
+    assert result.is_valid()
     assert len(result.warnings) == 1
     assert "Very small feature" in result.warnings[0].message
 
@@ -284,7 +269,6 @@ def test_check_toolability_very_small_feature():
 
 
 def test_check_toolability_with_suitable_tools():
-    """Test check_toolability with suitable tools available."""
     print("Running test_check_toolability_with_suitable_tools...")
     intent = RemovalIntent(
         region_id="pocket_normal",
@@ -310,7 +294,6 @@ def test_check_toolability_with_suitable_tools():
 
 
 def test_check_toolability_no_suitable_tools():
-    """Test check_toolability with no suitable tools (error)."""
     print("Running test_check_toolability_no_suitable_tools...")
     intent = RemovalIntent(
         region_id="pocket_tiny",
@@ -337,7 +320,6 @@ def test_check_toolability_no_suitable_tools():
 
 
 def test_check_toolability_limited_tools():
-    """Test check_toolability with limited tool options (suggestion)."""
     print("Running test_check_toolability_limited_tools...")
     intent = RemovalIntent(
         region_id="pocket_small",

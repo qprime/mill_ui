@@ -1,13 +1,3 @@
-"""Recipe: Profile cuts with holding tabs.
-
-Demonstrates how to add tabs to profile cuts to hold material in place during cutting.
-Tabs are small bridges of uncut material that keep the part secured to the stock.
-
-Key Concepts:
-- Tab specification in profiles (tab_count, tab_height_mm, tab_width_mm)
-- Tabs work with both through-cuts and partial depth profiles
-- Width is optional (defaults to 2× tool diameter, minimum 6mm)
-"""
 
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -15,10 +5,9 @@ from pml import parse_pml, format_pml
 
 
 def example_simple_cutout_with_tabs():
-    """Simple rectangular cutout with 4 tabs."""
     print("\n=== Example 1: Simple Cutout with Tabs ===\n")
 
-    # Build AST directly
+
     ast = LayoutAST(
         sheet=Sheet(width_mm=600, height_mm=400, thickness_mm=19),
         items=(
@@ -40,7 +29,7 @@ def example_simple_cutout_with_tabs():
         )
     )
 
-    # Convert to RemovalIntent
+
     intents = ast_to_removal_intents(ast)
     intent = intents[0]
 
@@ -53,25 +42,24 @@ def example_simple_cutout_with_tabs():
         print(f"    Height: {intent.constraints.tabs.height_mm:.1f}mm")
         print(f"    Width: {intent.constraints.tabs.width_mm:.1f}mm")
 
-    # Emit as PML
+
     pml = format_pml(ast)
     print(f"\nPML output:\n{pml}")
 
 
 def example_multiple_tabs():
-    """Demonstrate different tab configurations."""
     print("\n=== Example 2: Multiple Tab Configurations ===\n")
 
     pml = """
 sheet 800mm 600mm 19mm
 
-# Small part with 3 tabs (minimal holding)
+
 rect small at 200mm,150mm size 150mm,100mm profile through outside tabs 3 height 2mm width 8mm
 
-# Medium part with 4 tabs (standard)
+
 rect medium at 200mm,400mm size 250mm,150mm profile through outside tabs 4 height 3mm width 12mm
 
-# Large part with 6 tabs (secure holding)
+
 rect large at 550mm,300mm size 400mm,250mm profile through outside tabs 6 height 4mm width 15mm
 """
 
@@ -87,13 +75,12 @@ rect large at 550mm,300mm size 400mm,250mm profile through outside tabs 6 height
 
 
 def example_tabs_with_optional_width():
-    """Demonstrate tabs with default width (determined by tool diameter)."""
     print("\n=== Example 3: Tabs with Default Width ===\n")
 
     pml = """
 sheet 600mm 400mm 19mm
 
-# Tabs without explicit width - planner will use 2× tool diameter (min 6mm)
+
 rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 height 3mm
 """
 
@@ -109,13 +96,12 @@ rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 heigh
 
 
 def example_inside_profile_with_tabs():
-    """Demonstrate tabs on inside profiles (unusual but supported)."""
     print("\n=== Example 4: Inside Profile with Tabs ===\n")
 
     pml = """
 sheet 600mm 400mm 19mm
 
-# Inside profile for a pocket outline with tabs
+
 rect pocket_outline at 300mm,200mm size 300mm,200mm profile 6mm inside tabs 4 height 2mm width 10mm
 """
 

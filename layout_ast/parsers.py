@@ -1,7 +1,3 @@
-"""JSON parser for LayoutAST.
-
-Parses v1 JSON layout files into canonical LayoutAST structures.
-"""
 
 from __future__ import annotations
 
@@ -20,20 +16,6 @@ from layout_ast.layout import (
 
 
 def parse_layout_json(path: str) -> LayoutAST:
-    """Parse layout JSON file into LayoutAST.
-
-    Supports both shape-based layouts and template-based v1 layouts.
-
-    Args:
-        path: Path to layout JSON file
-
-    Returns:
-        Parsed LayoutAST instance
-
-    Raises:
-        FileNotFoundError: If path does not exist
-        ValueError: If JSON is malformed or missing required fields
-    """
     path_obj = Path(path)
     if not path_obj.exists():
         raise FileNotFoundError(f"Layout file not found: {path}")
@@ -41,7 +23,7 @@ def parse_layout_json(path: str) -> LayoutAST:
     with path_obj.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    # Parse sheet
+
     if "sheet" not in data:
         raise ValueError("Layout JSON missing required 'sheet' field")
     sheet_data = data["sheet"]
@@ -51,11 +33,11 @@ def parse_layout_json(path: str) -> LayoutAST:
         thickness_mm=float(sheet_data["thickness_mm"]),
     )
 
-    # Parse items
+
     items_data = data.get("items", [])
     items = tuple(_parse_item(item_data) for item_data in items_data)
 
-    # Parse top-level v1 fields
+
     project = data.get("project")
     kerf_width_mm = data.get("kerf_width_mm")
     cam = data.get("cam")
@@ -74,17 +56,11 @@ def parse_layout_json(path: str) -> LayoutAST:
 
 
 def _parse_item(item_data: dict[str, Any]) -> Item:
-    """Parse single item from JSON.
-
-    Handles both shape items and template items:
-    - Shapes have: geometry, placement, feature
-    - Templates have: params, optional id
-    """
     kind = item_data.get("kind", "shape")
     item_type = item_data["type"]
 
     if kind == "template":
-        # Template items: require params, optional id
+
         params = item_data.get("params")
         template_id = item_data.get("id")
         return Item(
@@ -94,21 +70,21 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
             id=template_id,
         )
     else:
-        # Shape items: require geometry, placement, feature
-        # Parse geometry
+
+
         geometry_data = item_data.get("geometry", {})
         geometry = Geometry(data=geometry_data)
 
-        # Parse placement
+
         placement_data = item_data["placement"]
         center_xy = placement_data["center_xy_mm"]
         placement = Placement(center_xy_mm=(float(center_xy[0]), float(center_xy[1])))
 
-        # Parse feature
+
         feature_data = item_data["feature"]
         feature = _parse_feature(feature_data)
 
-        # Optional shape_id
+
         shape_id = item_data.get("shape_id")
 
         return Item(
@@ -122,7 +98,6 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
 
 
 def _parse_feature(feature_data: dict[str, Any]) -> Feature:
-    """Parse feature from JSON."""
     feature_type = feature_data["type"]
     depth = feature_data.get("depth")
     depth_mm = feature_data.get("depth_mm")

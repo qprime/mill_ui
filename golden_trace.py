@@ -1,4 +1,3 @@
-"""Golden end-to-end trace for ground truth report."""
 
 from pathlib import Path
 from pml.compositional_parser import parse_compositional_pml
@@ -13,22 +12,22 @@ from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
 import json
 
-# Load input
+
 pml_text = Path('golden_trace_input.pml').read_text()
 
-# Step 1: Parse compositional PML
+
 comp_ast = parse_compositional_pml(pml_text)
 
-# Step 2: Resolve layout
+
 flat_ast = resolve_layout(comp_ast)
 
-# Step 3: Convert to RemovalIntent
+
 intents = ast_to_removal_intents(flat_ast)
 
-# Step 4: Convert to planner hints
+
 hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
 
-# Step 5: Plan passes
+
 tool_db = [
     {
         "name": "1_8_endmill",
@@ -68,7 +67,7 @@ for i, pass_dict in enumerate(passes):
     print(f'  Move count: {len(pass_dict["moves"])}')
     print(f'  Filename: {pass_dict["filename"]}')
 
-# Step 6: Generate G-code for first pass
+
 if passes:
     print('\n=== STEP 6: G-code Sample (first pass, first 30 lines) ===')
     first_pass = passes[0]

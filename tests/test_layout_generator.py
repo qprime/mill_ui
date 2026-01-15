@@ -1,7 +1,3 @@
-"""Tests for LayoutAST generation (Phase 5).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.test_layout_generator
-"""
 
 import sys
 from nesting.types import PartSpec, SheetSpec, NestedPart, SheetLayout, NestingResult
@@ -13,7 +9,6 @@ from nesting.layout_generator import (
 
 
 def test_simple_sheet_to_ast():
-    """Convert simple sheet layout to AST."""
     print("Running test_simple_sheet_to_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=400, height_mm=300)
@@ -22,12 +17,12 @@ def test_simple_sheet_to_ast():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     ast = sheet_layout_to_ast(layout)
 
-    # Verify sheet
+
     assert ast.sheet.width_mm == 1000
     assert ast.sheet.height_mm == 1000
     assert ast.sheet.thickness_mm == 19
 
-    # Verify items
+
     assert len(ast.items) >= 1
     item = ast.items[0]
     assert item.type == "Rect"
@@ -37,7 +32,6 @@ def test_simple_sheet_to_ast():
 
 
 def test_multiple_placements_to_ast():
-    """Multiple placements generate multiple items."""
     print("Running test_multiple_placements_to_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
@@ -51,10 +45,10 @@ def test_multiple_placements_to_ast():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=placements)
     ast = sheet_layout_to_ast(layout)
 
-    # Should have 3 items (one per placement)
+
     assert len(ast.items) == 3
 
-    # Verify positions
+
     positions = {item.placement.center_xy_mm for item in ast.items}
     assert (200, 200) in positions
     assert (600, 200) in positions
@@ -64,7 +58,6 @@ def test_multiple_placements_to_ast():
 
 
 def test_shaker_placement_to_ast():
-    """Shaker template generates multiple items per placement."""
     print("Running test_shaker_placement_to_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(
@@ -79,10 +72,10 @@ def test_shaker_placement_to_ast():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     ast = sheet_layout_to_ast(layout)
 
-    # Shaker produces at least outer + panel
+
     assert len(ast.items) >= 2
 
-    # Find profile and pocket
+
     profiles = [i for i in ast.items if i.feature.type == "profile"]
     pockets = [i for i in ast.items if i.feature.type == "pocket"]
 
@@ -93,7 +86,6 @@ def test_shaker_placement_to_ast():
 
 
 def test_rotated_placement_to_ast():
-    """Rotated placement has swapped dimensions."""
     print("Running test_rotated_placement_to_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=200, height_mm=400)
@@ -103,15 +95,14 @@ def test_rotated_placement_to_ast():
     ast = sheet_layout_to_ast(layout)
 
     item = ast.items[0]
-    # Dimensions should be swapped
-    assert item.geometry.data["w_mm"] == 400  # Was height
-    assert item.geometry.data["h_mm"] == 200  # Was width
+
+    assert item.geometry.data["w_mm"] == 400
+    assert item.geometry.data["h_mm"] == 200
 
     print("  PASSED")
 
 
 def test_kerf_preserved_in_ast():
-    """Kerf width is preserved in AST."""
     print("Running test_kerf_preserved_in_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, kerf_mm=6)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
@@ -126,7 +117,6 @@ def test_kerf_preserved_in_ast():
 
 
 def test_nesting_result_to_asts():
-    """Convert multi-sheet result to multiple ASTs."""
     print("Running test_nesting_result_to_asts...")
     sheet_spec = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=400, height_mm=400)
@@ -152,7 +142,6 @@ def test_nesting_result_to_asts():
 
 
 def test_sheet_to_pml_simple():
-    """Generate PML from simple sheet layout."""
     print("Running test_sheet_to_pml_simple...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10)
     part = PartSpec(name="panel", width_mm=400, height_mm=300)
@@ -161,7 +150,7 @@ def test_sheet_to_pml_simple():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
     pml = sheet_layout_to_pml(layout)
 
-    # Check PML structure
+
     assert "sheet 1000mm 1000mm 19mm" in pml
     assert "rect panel_0" in pml
     assert "500mm,500mm" in pml
@@ -172,11 +161,6 @@ def test_sheet_to_pml_simple():
 
 
 def test_sheet_to_pml_shaker():
-    """PML output is bounding box only, even for template parts.
-
-    Template expansion happens in sheet_layout_to_ast(), not in PML output.
-    The PML output is for debug visualization only.
-    """
     print("Running test_sheet_to_pml_shaker...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(
@@ -191,19 +175,18 @@ def test_sheet_to_pml_shaker():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
     pml = sheet_layout_to_pml(layout)
 
-    # PML shows bounding box rect, not template internals
+
     assert "door_0" in pml
     assert "400mm,600mm" in pml or "size 400" in pml
     assert "profile through outside" in pml
 
-    # Template details are NOT in PML (use sheet_layout_to_ast for that)
+
     assert "pocket" not in pml
 
     print("  PASSED")
 
 
 def test_sheet_to_pml_rotated():
-    """Rotated placement shows in PML comments."""
     print("Running test_sheet_to_pml_rotated...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=200, height_mm=400)
@@ -212,17 +195,16 @@ def test_sheet_to_pml_rotated():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     pml = sheet_layout_to_pml(layout)
 
-    # Should note rotation
+
     assert "rotated" in pml.lower()
 
-    # Dimensions should be swapped in rect statement
-    assert "400mm,200mm" in pml  # width x height after rotation
+
+    assert "400mm,200mm" in pml
 
     print("  PASSED")
 
 
 def test_empty_sheet_to_ast():
-    """Empty sheet produces valid but empty AST."""
     print("Running test_empty_sheet_to_ast...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     layout = SheetLayout(sheet_spec=sheet_spec, placements=())
@@ -236,7 +218,6 @@ def test_empty_sheet_to_ast():
 
 
 def test_unique_shape_ids():
-    """All items have unique shape IDs."""
     print("Running test_unique_shape_ids...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
@@ -250,14 +231,13 @@ def test_unique_shape_ids():
     ast = sheet_layout_to_ast(layout)
 
     shape_ids = [item.shape_id for item in ast.items]
-    # All should be unique
+
     assert len(shape_ids) == len(set(shape_ids))
 
     print("  PASSED")
 
 
 def run_all_tests():
-    """Run all tests."""
     print("=" * 60)
     print("Phase 5: LayoutAST Generation Tests")
     print("=" * 60)

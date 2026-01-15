@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 5 hints adapter tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_hints_adapter_tests
-"""
 
 import sys
 
@@ -13,7 +9,6 @@ from adapters.hints_to_removal import (
 
 
 def test_profile_through_cut():
-    """Test profile hint with through-cut."""
     print("Running test_profile_through_cut...")
     hint = {
         "id": "rect_outline",
@@ -35,7 +30,6 @@ def test_profile_through_cut():
 
 
 def test_profile_with_tabs():
-    """Test profile hint with tabs."""
     print("Running test_profile_with_tabs...")
     hint = {
         "id": "panel_outline",
@@ -57,7 +51,6 @@ def test_profile_with_tabs():
 
 
 def test_pocket_basic():
-    """Test pocket hint."""
     print("Running test_pocket_basic...")
     hint = {
         "id": "pocket_1",
@@ -78,7 +71,6 @@ def test_pocket_basic():
 
 
 def test_pocket_with_start_depth():
-    """Test pocket with start depth."""
     print("Running test_pocket_with_start_depth...")
     hint = {
         "id": "stepped_pocket",
@@ -99,7 +91,6 @@ def test_pocket_with_start_depth():
 
 
 def test_hole_circle():
-    """Test hole hint (circle)."""
     print("Running test_hole_circle...")
     hint = {
         "id": "mounting_hole",
@@ -120,7 +111,6 @@ def test_hole_circle():
 
 
 def test_bounds_calculation():
-    """Test bounds calculation."""
     print("Running test_bounds_calculation...")
     hint = {
         "shape": "Rect",
@@ -140,7 +130,6 @@ def test_bounds_calculation():
 
 
 def test_metadata_preservation():
-    """Test metadata preservation."""
     print("Running test_metadata_preservation...")
     hint = {
         "id": "custom_shape",

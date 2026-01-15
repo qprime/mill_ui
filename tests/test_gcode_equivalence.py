@@ -1,9 +1,3 @@
-"""G-code equivalence tests: v1 direct path vs. v2 adapter path.
-
-Validates that RemovalIntent IR produces byte-identical G-code to v1 hints.
-
-Stage 6 byte-identical equivalence requirement.
-"""
 
 from __future__ import annotations
 
@@ -28,7 +22,6 @@ from adapters.hints_to_removal import (
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 
 
-# Minimal tool DB for testing
 TOOL_DB = [
     {
         "name": "1_8_endmill",
@@ -50,7 +43,6 @@ TOOL_DB = [
 
 
 def _hash_gcode(gcode: str) -> str:
-    """Compute SHA256 hash of G-code string."""
     return hashlib.sha256(gcode.encode("utf-8")).hexdigest()
 
 
@@ -60,7 +52,6 @@ def _generate_gcode_from_hints(
     material: Material,
     machine: Machine,
 ) -> str:
-    """Generate G-code from hints via planner."""
     passes, _ = plan_passes(
         hints,
         config=Config(),
@@ -71,7 +62,7 @@ def _generate_gcode_from_hints(
         safe_z=6.0,
     )
 
-    # Concatenate all G-code from all passes
+
     gcode_parts = []
     for pass_record in passes:
         output = StringIO()
@@ -86,14 +77,13 @@ def _generate_gcode_from_hints(
 
 
 def test_profile_gcode_equivalence():
-    """Test G-code equivalence for profile operation (outside cut)."""
-    # Sheet setup
+
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
-    # Create profile hint (v1 format)
+
     profile_hint = {
         "id": "outer_rect",
         "shape": "Rect",
@@ -103,7 +93,7 @@ def test_profile_gcode_equivalence():
         "side": "outside",
     }
 
-    # Path 1: v1 direct (baseline)
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -116,25 +106,24 @@ def test_profile_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1 (via adapters)
+
     intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
-    # Verify byte-identical G-code
+
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
 
 def test_pocket_gcode_equivalence():
-    """Test G-code equivalence for pocket operation."""
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
-    # Create pocket hint (v1 format)
+
     pocket_hint = {
         "id": "center_pocket",
         "shape": "Rect",
@@ -143,7 +132,7 @@ def test_pocket_gcode_equivalence():
         "depth_mm": 8.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -156,25 +145,24 @@ def test_pocket_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     intent = pocket_hint_to_removal_intent(pocket_hint)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
-    # Verify byte-identical G-code
+
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
 
 def test_hole_gcode_equivalence():
-    """Test G-code equivalence for hole operation (drilling)."""
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
-    # Create hole hint (v1 format)
+
     hole_hint = {
         "id": "mount_hole",
         "shape": "Circle",
@@ -183,7 +171,7 @@ def test_hole_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -196,25 +184,24 @@ def test_hole_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     intent = hole_hint_to_removal_intent(hole_hint)
     hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
-    # Verify byte-identical G-code
+
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
 
 def test_mixed_operations_gcode_equivalence():
-    """Test G-code equivalence for mixed operations (profile + pocket + hole)."""
     sheet_thickness = 19.0
     stock = Stock(width=400.0, height=300.0, thickness=sheet_thickness)
     material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
-    # Create multiple hints (v1 format)
+
     profile_hint = {
         "id": "outer",
         "shape": "Rect",
@@ -238,7 +225,7 @@ def test_mixed_operations_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-    # Path 1: v1 direct
+
     hints_v1 = {
         "units": "mm",
         "kerf_width_mm": 3.175,
@@ -251,7 +238,7 @@ def test_mixed_operations_gcode_equivalence():
     gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-    # Path 2: v1 → RemovalIntent → v1
+
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)
@@ -262,6 +249,6 @@ def test_mixed_operations_gcode_equivalence():
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
-    # Verify byte-identical G-code
+
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"

@@ -1,11 +1,9 @@
-"""Standalone test runner for Keepout/Island tests (without pytest)."""
 
 import sys
 import traceback
 
 
 def test_simple_pocket_with_island():
-    """Test basic pocket with keepout island (faux raised panel)."""
     print("Running test_simple_pocket_with_island...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -22,22 +20,20 @@ rect panel pocket 6.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    # Should have one rect with pocket feature
-    # (keepout children are not emitted as separate items - they define island bounds)
+
     items = flat.items
     assert len(items) == 1, f"Expected 1 item (panel), got {len(items)}"
 
-    # The item should be the panel with pocket feature
+
     panel = items[0]
     assert panel.feature.type == "pocket"
 
-    # Panel should have island information in geometry
+
     assert "islands" in panel.geometry.data, "Expected islands in geometry data"
     islands = panel.geometry.data["islands"]
     assert len(islands) == 1, f"Expected 1 island, got {len(islands)}"
 
-    # Island should be inset by 50mm from 400×400mm panel
-    # So island bounds: 50 to 350 in both X and Y
+
     island = islands[0]
     assert abs(island["x_min"] - 50.0) < 0.01
     assert abs(island["x_max"] - 350.0) < 0.01
@@ -49,7 +45,6 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_inside_grid():
-    """Test keepout inside grid cell."""
     print("Running test_keepout_inside_grid...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -68,11 +63,11 @@ grid 2 2 gap 10.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    # Should have 4 pocket rects (2×2 grid)
+
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pocket_items) == 4, f"Expected 4 pocket items, got {len(pocket_items)}"
 
-    # Each pocket should have an island
+
     for pocket in pocket_items:
         assert "islands" in pocket.geometry.data
         assert len(pocket.geometry.data["islands"]) == 1
@@ -82,7 +77,6 @@ grid 2 2 gap 10.00mm
 
 
 def test_multiple_keepouts():
-    """Test multiple keepouts in single region."""
     print("Running test_multiple_keepouts...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -103,13 +97,13 @@ rect panel pocket 6.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    # Find the panel
+
     panel_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(panel_items) == 1
 
     panel = panel_items[0]
 
-    # Panel should have 2 islands
+
     assert "islands" in panel.geometry.data
     islands = panel.geometry.data["islands"]
     assert len(islands) == 2, f"Expected 2 islands, got {len(islands)}"
@@ -119,7 +113,6 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_roundtrip():
-    """Test PML → AST → PML preserves keepout structure."""
     print("Running test_keepout_roundtrip...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -134,16 +127,16 @@ rect panel pocket 6.00mm
             rect island
 """
 
-    # Parse → Format → Parse
+
     ast1 = parse_compositional_pml(original_pml)
     formatted_pml = format_compositional_pml(ast1)
     ast2 = parse_compositional_pml(formatted_pml)
 
-    # Resolve both and compare
+
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
-    # Both should have same island configuration
+
     pocket1 = [item for item in flat1.items if item.feature and item.feature.type == "pocket"][0]
     pocket2 = [item for item in flat2.items if item.feature and item.feature.type == "pocket"][0]
 
@@ -152,7 +145,7 @@ rect panel pocket 6.00mm
 
     assert len(islands1) == len(islands2) == 1
 
-    # Compare island bounds
+
     for island1, island2 in zip(islands1, islands2):
         assert abs(island1["x_min"] - island2["x_min"]) < 0.01
         assert abs(island1["x_max"] - island2["x_max"]) < 0.01
@@ -164,7 +157,6 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_with_circle():
-    """Test keepout with circular island."""
     print("Running test_keepout_with_circle...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -188,8 +180,7 @@ rect panel pocket 6.00mm
     islands = pocket.geometry.data["islands"]
     assert len(islands) == 1
 
-    # Circle with diameter 100mm centered at (200,200)
-    # Bounding box: (150, 250) in both dimensions
+
     island = islands[0]
     assert abs(island["x_min"] - 150.0) < 0.01
     assert abs(island["x_max"] - 250.0) < 0.01
@@ -201,7 +192,6 @@ rect panel pocket 6.00mm
 
 
 def test_nested_keepout_error():
-    """Test that nested keepouts are rejected with clear error."""
     print("Running test_nested_keepout_error...")
 
     from pml.compositional_parser import parse_compositional_pml, ParseError
@@ -227,7 +217,6 @@ rect panel pocket 6.00mm
 
 
 def test_removal_intent_includes_islands():
-    """Test RemovalIntent includes island geometry from keepouts."""
     print("Running test_removal_intent_includes_islands...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -245,18 +234,18 @@ rect panel pocket 6.00mm
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    # Get the pocket item
+
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pocket_items) == 1, f"Expected 1 pocket item, got {len(pocket_items)}"
     pocket = pocket_items[0]
 
-    # Convert to RemovalIntent
+
     removal = item_to_removal_intent(pocket, region_id_prefix="test_pocket")
 
-    # Verify RemovalIntent has islands
+
     assert len(removal.constraints.islands) == 1, f"Expected 1 island in RemovalIntent, got {len(removal.constraints.islands)}"
 
-    # Verify island bounds match expected values (inset by 50mm from 400×400mm)
+
     island = removal.constraints.islands[0]
     assert abs(island.bounds.x_min - 50.0) < 0.01
     assert abs(island.bounds.x_max - 350.0) < 0.01

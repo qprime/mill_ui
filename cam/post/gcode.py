@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cam/post/gcode.py
+
 
 from cam.native import core as native_core
 

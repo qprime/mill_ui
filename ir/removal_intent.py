@@ -1,7 +1,3 @@
-"""RemovalIntent IR: Canonical representation for material removal operations.
-
-All dimensions in millimeters. Z-axis: positive up, negative down into material.
-"""
 
 from __future__ import annotations
 
@@ -11,17 +7,12 @@ from typing import Any
 
 @dataclass(frozen=True)
 class Bounds2D:
-    """2D bounding box in XY plane.
-
-    Represents the planar extent of a removal region.
-    """
     x_min: float
     x_max: float
     y_min: float
     y_max: float
 
     def __post_init__(self):
-        """Validate bounds."""
         if self.x_max < self.x_min:
             raise ValueError(f"x_max ({self.x_max}) < x_min ({self.x_min})")
         if self.y_max < self.y_min:
@@ -30,91 +21,70 @@ class Bounds2D:
 
 @dataclass(frozen=True)
 class Allowance:
-    """Material allowance specification for removal operations.
-
-    Defines how much material to leave or remove beyond nominal boundaries.
-    """
-    inside: float = 0.0  # Material to leave inside boundary (negative = remove more)
-    outside: float = 0.0  # Material to leave outside boundary (negative = remove more)
-    on: float = 0.0  # Material to leave on boundary (for 'on' side profiles)
-    kerf_compensation: float = 0.0  # Tool kerf compensation (typically kerf_width_mm / 2)
+    inside: float = 0.0
+    outside: float = 0.0
+    on: float = 0.0
+    kerf_compensation: float = 0.0
 
 
 @dataclass(frozen=True)
 class TabConstraint:
-    """Tab (holding bridge) specification."""
-    count: int  # Number of tabs
-    height_mm: float  # Tab height (extends up from z_bottom)
-    width_mm: float  # Tab width along boundary
+    count: int
+    height_mm: float
+    width_mm: float
 
 
 @dataclass(frozen=True)
 class KeepoutRegion:
-    """Region where toolpath must not enter."""
     bounds: Bounds2D
-    reason: str = "keepout"  # Descriptive reason (e.g., "clamp zone", "fixture")
+    reason: str = "keepout"
 
 
 @dataclass(frozen=True)
 class Island:
-    """Material island within removal region (material to preserve)."""
     bounds: Bounds2D
     label: str | None = None
 
 
 @dataclass(frozen=True)
 class EdgeTreatment:
-    """Edge treatment specification for finish operations.
+    type: str
 
-    Describes decorative or functional edge modifications that affect
-    toolpath planning (multi-pass, specialized bits, etc.).
-    """
-    type: str  # "fillet", "chamfer", "allowance"
-    # For fillet/chamfer
-    radius_mm: float | None = None  # Fillet radius
-    distance_mm: float | None = None  # Chamfer distance
-    # For allowance (multi-pass semantics)
-    rough_allowance_mm: float | None = None  # Stock to leave for rough pass
-    finish_allowance_mm: float | None = None  # Final allowance after finish pass
+    radius_mm: float | None = None
+    distance_mm: float | None = None
+
+    rough_allowance_mm: float | None = None
+    finish_allowance_mm: float | None = None
 
 
 @dataclass(frozen=True)
 class Constraints:
-    """Constraints on removal operation."""
     tabs: TabConstraint | None = None
     keepouts: tuple[KeepoutRegion, ...] = field(default_factory=tuple)
     islands: tuple[Island, ...] = field(default_factory=tuple)
-    edge_treatment: EdgeTreatment | None = None  # Edge finish/decorative hints
-    tolerance_mm: float = 0.1  # Allowable deviation from nominal geometry
-    safe_z_mm: float = 5.0  # Safe Z height for rapid moves
+    edge_treatment: EdgeTreatment | None = None
+    tolerance_mm: float = 0.1
+    safe_z_mm: float = 5.0
 
 
 @dataclass(frozen=True)
 class RemovalIntent:
-    """Canonical specification for material removal.
-
-    Represents *what* volume to remove, independent of *how* (toolpath strategy).
-    This is the fundamental IR for CAM operations.
-    """
-    region_id: str  # Unique identifier for this removal region
-    bounds: Bounds2D  # Planar extent of removal
-    z_top: float  # Top Z coordinate (typically 0.0 for stock surface)
-    z_bottom: float  # Bottom Z coordinate (negative for removal depth)
-    allowance: Allowance = field(default_factory=Allowance)  # Material allowance
-    constraints: Constraints = field(default_factory=Constraints)  # Operational constraints
-    metadata: dict[str, Any] = field(default_factory=dict)  # Optional metadata (shape_id, feature type, etc.)
+    region_id: str
+    bounds: Bounds2D
+    z_top: float
+    z_bottom: float
+    allowance: Allowance = field(default_factory=Allowance)
+    constraints: Constraints = field(default_factory=Constraints)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
-        """Validate removal intent."""
         if self.z_bottom > self.z_top:
             raise ValueError(f"z_bottom ({self.z_bottom}) > z_top ({self.z_top})")
 
     def depth_mm(self) -> float:
-        """Calculate removal depth."""
         return self.z_top - self.z_bottom
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize to dictionary for inspection/testing."""
         return {
             "region_id": self.region_id,
             "bounds": {

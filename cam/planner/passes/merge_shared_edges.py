@@ -1,4 +1,3 @@
-"""Shared-edge seam detection and exterior offset handling."""
 from __future__ import annotations
 
 import math
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class _Edge:
-    orient: str  # "v" or "h"
+    orient: str
     coord: float
     a: float
     b: float

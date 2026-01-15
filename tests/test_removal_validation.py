@@ -1,7 +1,3 @@
-"""Unit tests for RemovalIntent validation layer.
-
-Stage 8 acceptance tests.
-"""
 
 from __future__ import annotations
 
@@ -17,7 +13,6 @@ from validation import (
 
 
 def test_validation_result_basic():
-    """Test ValidationResult basic operations."""
     result = ValidationResult()
 
     assert result.is_valid()
@@ -33,7 +28,6 @@ def test_validation_result_basic():
 
 
 def test_validation_result_multiple_issue_types():
-    """Test ValidationResult with errors, warnings, and suggestions."""
     result = ValidationResult()
 
     result.add_error("Error 1")
@@ -52,7 +46,6 @@ def test_validation_result_multiple_issue_types():
 
 
 def test_check_overlap_no_overlap():
-    """Test check_overlap with non-overlapping regions."""
     intent_a = RemovalIntent(
         region_id="pocket_a",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -79,7 +72,6 @@ def test_check_overlap_no_overlap():
 
 
 def test_check_overlap_xy_overlap():
-    """Test check_overlap with XY overlapping regions at same Z."""
     intent_a = RemovalIntent(
         region_id="pocket_a",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -92,7 +84,7 @@ def test_check_overlap_xy_overlap():
 
     intent_b = RemovalIntent(
         region_id="pocket_b",
-        bounds=Bounds2D(x_min=5.0, x_max=15.0, y_min=5.0, y_max=15.0),  # Overlaps with pocket_a
+        bounds=Bounds2D(x_min=5.0, x_max=15.0, y_min=5.0, y_max=15.0),
         z_top=0.0,
         z_bottom=-5.0,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
@@ -108,7 +100,6 @@ def test_check_overlap_xy_overlap():
 
 
 def test_check_overlap_different_z_levels():
-    """Test check_overlap with overlapping XY but different Z levels."""
     intent_a = RemovalIntent(
         region_id="pocket_shallow",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -121,8 +112,8 @@ def test_check_overlap_different_z_levels():
 
     intent_b = RemovalIntent(
         region_id="pocket_deep",
-        bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),  # Same XY
-        z_top=-4.0,  # Below pocket_shallow
+        bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
+        z_top=-4.0,
         z_bottom=-8.0,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
         constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
@@ -130,11 +121,10 @@ def test_check_overlap_different_z_levels():
     )
 
     result = check_overlap([intent_a, intent_b])
-    assert result.is_valid()  # Different Z levels, so no overlap
+    assert result.is_valid()
 
 
 def test_check_depth_feasibility_valid():
-    """Test check_depth_feasibility with valid depth constraints."""
     intent = RemovalIntent(
         region_id="pocket_valid",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -151,13 +141,12 @@ def test_check_depth_feasibility_valid():
 
 
 def test_check_depth_feasibility_inverted_z():
-    """Test that RemovalIntent itself rejects inverted Z values."""
-    # RemovalIntent.__post_init__ should reject inverted Z values
+
     with pytest.raises(ValueError, match="z_bottom.*z_top"):
         intent = RemovalIntent(
             region_id="pocket_inverted",
             bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
-            z_top=-6.0,  # Below z_bottom (invalid)
+            z_top=-6.0,
             z_bottom=0.0,
             allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
             constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
@@ -166,30 +155,28 @@ def test_check_depth_feasibility_inverted_z():
 
 
 def test_check_depth_feasibility_too_deep():
-    """Test check_depth_feasibility cutting deeper than material (warning)."""
     intent = RemovalIntent(
         region_id="pocket_deep",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
-        z_bottom=-15.0,  # Deeper than 12mm material
+        z_bottom=-15.0,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
         constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
         metadata={},
     )
 
     result = check_depth_feasibility(intent, sheet_thickness_mm=12.0)
-    assert result.is_valid()  # Warning, not error
+    assert result.is_valid()
     assert len(result.warnings) == 1
     assert "deeper than material thickness" in result.warnings[0].message
 
 
 def test_check_depth_feasibility_very_shallow():
-    """Test check_depth_feasibility with very shallow cut (suggestion)."""
     intent = RemovalIntent(
         region_id="engrave_shallow",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
-        z_bottom=-0.2,  # Very shallow
+        z_bottom=-0.2,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
         constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
         metadata={},
@@ -202,7 +189,6 @@ def test_check_depth_feasibility_very_shallow():
 
 
 def test_check_toolability_no_tools():
-    """Test check_toolability with no tools specified (basic checks only)."""
     intent = RemovalIntent(
         region_id="pocket_normal",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -219,10 +205,9 @@ def test_check_toolability_no_tools():
 
 
 def test_check_toolability_very_small_feature():
-    """Test check_toolability with very small feature (warning)."""
     intent = RemovalIntent(
         region_id="hole_tiny",
-        bounds=Bounds2D(x_min=0.0, x_max=0.5, y_min=0.0, y_max=0.5),  # 0.5mm x 0.5mm
+        bounds=Bounds2D(x_min=0.0, x_max=0.5, y_min=0.0, y_max=0.5),
         z_top=0.0,
         z_bottom=-5.0,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
@@ -231,13 +216,12 @@ def test_check_toolability_very_small_feature():
     )
 
     result = check_toolability(intent, available_tools=None)
-    assert result.is_valid()  # Warning, not error
+    assert result.is_valid()
     assert len(result.warnings) == 1
     assert "Very small feature" in result.warnings[0].message
 
 
 def test_check_toolability_with_suitable_tools():
-    """Test check_toolability with suitable tools available."""
     intent = RemovalIntent(
         region_id="pocket_normal",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
@@ -249,8 +233,8 @@ def test_check_toolability_with_suitable_tools():
     )
 
     tools = [
-        {"diameter_mm": 3.175, "flutes": 2},  # 1/8" endmill
-        {"diameter_mm": 6.35, "flutes": 2},   # 1/4" endmill
+        {"diameter_mm": 3.175, "flutes": 2},
+        {"diameter_mm": 6.35, "flutes": 2},
     ]
 
     result = check_toolability(intent, available_tools=tools)
@@ -259,10 +243,9 @@ def test_check_toolability_with_suitable_tools():
 
 
 def test_check_toolability_no_suitable_tools():
-    """Test check_toolability with no suitable tools (error)."""
     intent = RemovalIntent(
         region_id="pocket_tiny",
-        bounds=Bounds2D(x_min=0.0, x_max=1.5, y_min=0.0, y_max=1.5),  # 1.5mm x 1.5mm
+        bounds=Bounds2D(x_min=0.0, x_max=1.5, y_min=0.0, y_max=1.5),
         z_top=0.0,
         z_bottom=-5.0,
         allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
@@ -271,8 +254,8 @@ def test_check_toolability_no_suitable_tools():
     )
 
     tools = [
-        {"diameter_mm": 3.175, "flutes": 2},  # Too large for 1.5mm feature
-        {"diameter_mm": 6.35, "flutes": 2},   # Too large
+        {"diameter_mm": 3.175, "flutes": 2},
+        {"diameter_mm": 6.35, "flutes": 2},
     ]
 
     result = check_toolability(intent, available_tools=tools)
@@ -282,7 +265,6 @@ def test_check_toolability_no_suitable_tools():
 
 
 def test_check_toolability_limited_tools():
-    """Test check_toolability with limited tool options (suggestion)."""
     intent = RemovalIntent(
         region_id="pocket_small",
         bounds=Bounds2D(x_min=0.0, x_max=4.0, y_min=0.0, y_max=4.0),
@@ -294,10 +276,10 @@ def test_check_toolability_limited_tools():
     )
 
     tools = [
-        {"diameter_mm": 1.5, "flutes": 2},    # Suitable
-        {"diameter_mm": 3.175, "flutes": 2},  # Suitable
-        {"diameter_mm": 6.35, "flutes": 2},   # Too large
-        {"diameter_mm": 12.7, "flutes": 4},   # Too large
+        {"diameter_mm": 1.5, "flutes": 2},
+        {"diameter_mm": 3.175, "flutes": 2},
+        {"diameter_mm": 6.35, "flutes": 2},
+        {"diameter_mm": 12.7, "flutes": 4},
     ]
 
     result = check_toolability(intent, available_tools=tools)

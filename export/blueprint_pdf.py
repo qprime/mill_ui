@@ -1,7 +1,3 @@
-"""PDF export for blueprint drawings.
-
-Converts blueprint SVG to PDF using CairoSVG (optional dependency).
-"""
 
 from __future__ import annotations
 
@@ -9,16 +5,6 @@ from pathlib import Path
 
 
 def svg_to_pdf(svg_string: str, output_path: str | Path) -> None:
-    """Convert SVG string to PDF file.
-
-    Args:
-        svg_string: SVG content as string
-        output_path: Path to output PDF file
-
-    Raises:
-        ImportError: If cairosvg is not installed
-        OSError: If file write fails
-    """
     try:
         import cairosvg
     except ImportError as e:

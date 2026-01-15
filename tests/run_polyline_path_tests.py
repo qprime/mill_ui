@@ -1,11 +1,9 @@
-"""Standalone test runner for Polyline path tests (without pytest)."""
 
 import sys
 import traceback
 
 
 def test_polyline_inside_rect():
-    """Test polyline inside rect region maps normalized coordinates correctly."""
     print("Running test_polyline_inside_rect...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -37,7 +35,6 @@ rect canvas
 
 
 def test_polyline_inside_rounded_rect():
-    """Test polyline inside rounded_rect region."""
     print("Running test_polyline_inside_rounded_rect...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -65,7 +62,6 @@ rounded_rect panel radius 20.00mm
 
 
 def test_polyline_inside_circle_fit():
-    """Test polyline inside circle fit region."""
     print("Running test_polyline_inside_circle_fit...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -92,7 +88,6 @@ circle boundary fit
 
 
 def test_polyline_with_10_points():
-    """Test polyline with 10 points renders correctly."""
     print("Running test_polyline_with_10_points...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -120,7 +115,6 @@ polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.
 
 
 def test_polyline_error_out_of_range():
-    """Test error: coordinates out of range."""
     print("Running test_polyline_error_out_of_range...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -143,7 +137,6 @@ polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
 
 
 def test_polyline_error_single_point():
-    """Test error: minimum 2 points required."""
     print("Running test_polyline_error_single_point...")
 
     from pml.compositional_parser import parse_compositional_pml, ParseError
@@ -166,7 +159,6 @@ polyline bad points (0.5,0.5) engrave 1.00mm
 
 
 def test_polyline_error_malformed():
-    """Test error: malformed point syntax."""
     print("Running test_polyline_error_malformed...")
 
     from pml.compositional_parser import parse_compositional_pml, ParseError
@@ -187,7 +179,6 @@ polyline bad points (0.5 0.5) (1.0,1.0) engrave 1.00mm
 
 
 def test_polyline_roundtrip():
-    """Test round-trip preserves coordinates."""
     print("Running test_polyline_roundtrip...")
 
     from pml.compositional_parser import parse_compositional_pml
@@ -220,7 +211,6 @@ polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
 
 
 def test_polyline_in_inset_region():
-    """Test polyline inside inset region."""
     print("Running test_polyline_in_inset_region...")
 
     from pml.compositional_parser import parse_compositional_pml

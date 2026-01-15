@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""Recipe output tests.
-
-Auto-discovers PML files in docs/recipes/*/, generates outputs (G-code, STL, SVG),
-and compares against committed artifacts. Tracks metrics for performance
-and quality regression detection.
-
-Usage:
-    pytest tests/test_recipes.py                    # Verify outputs match
-    pytest tests/test_recipes.py --regen_recipes    # Regenerate artifacts
-    python3 tests/test_recipes.py                   # Standalone mode (regenerates all)
-"""
 
 from __future__ import annotations
 
@@ -38,7 +27,7 @@ from cam.model.machine import Machine
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
 
-# Optional imports for STL/SVG generation
+
 try:
     from adapters.ast_to_cad import items_to_shape_dicts
     from cad.export.stl import export_stl
@@ -53,7 +42,6 @@ except (ImportError, ModuleNotFoundError):
     SVG_AVAILABLE = False
 
 
-# Standard tool database for recipes
 RECIPE_TOOL_DB = [
     {
         "name": "1_8_endmill",
@@ -83,7 +71,6 @@ RECIPE_TOOL_DB = [
 
 
 def pytest_addoption(parser):
-    """Add --regen_recipes flag to pytest."""
     if not PYTEST_AVAILABLE:
         return
     parser.addoption(
@@ -95,7 +82,6 @@ def pytest_addoption(parser):
 
 
 def discover_recipe_pml_files() -> list[Path]:
-    """Auto-discover all PML files in docs/recipes/*/."""
     recipes_dir = Path(__file__).parent.parent / "docs" / "recipes"
     if not recipes_dir.exists():
         return []
@@ -105,40 +91,32 @@ def discover_recipe_pml_files() -> list[Path]:
 
 
 def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
-    """Generate all outputs (G-code, STL, SVG) from PML file.
 
-    Returns:
-        (ast, gcode_dict, metrics_dict) where:
-        - ast: LayoutAST for STL/SVG generation
-        - gcode_dict: maps pass_name -> gcode_string
-        - metrics_dict: timing and complexity metrics
-    """
-    # Parse PML - try compositional first, fall back to flat
     parse_start = time.perf_counter()
     with open(pml_path, "r") as f:
         pml_source = f.read()
 
     try:
-        # Try compositional parser first
+
         comp_ast = parse_compositional_pml(pml_source)
         ast = resolve_layout(comp_ast)
     except ParseError:
-        # Fall back to flat parser
+
         ast = parse_pml(pml_source)
 
     parse_time = time.perf_counter() - parse_start
 
-    # Convert to RemovalIntent IR
+
     ir_start = time.perf_counter()
     intents = ast_to_removal_intents(ast)
     ir_time = time.perf_counter() - ir_start
 
-    # Convert to planner hints
+
     hints_start = time.perf_counter()
     hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
     hints_time = time.perf_counter() - hints_start
 
-    # Plan passes
+
     stock = Stock(
         width=ast.sheet.width_mm,
         height=ast.sheet.height_mm,
@@ -159,7 +137,7 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
     )
     plan_time = time.perf_counter() - plan_start
 
-    # Generate G-code for each pass
+
     gcode_start = time.perf_counter()
     gcode_dict = {}
     total_moves = 0
@@ -167,19 +145,19 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
     total_cut_moves = 0
 
     for pass_dict in passes:
-        # Generate G-code using basic write_gcode API
+
         setup = pass_dict["setup"]
         gcode = write_gcode(
             pass_dict["moves"],
             safe_z=setup.safe_z,
         )
 
-        # Generate pass name from tool and operation
+
         tool_diameter = setup.tool.diameter
         pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
         gcode_dict[pass_name] = gcode
 
-        # Count move types
+
         moves = pass_dict["moves"]
         total_moves += len(moves)
         for move in moves:
@@ -190,7 +168,7 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
 
     gcode_time = time.perf_counter() - gcode_start
 
-    # Compute metrics
+
     total_time = parse_time + ir_time + hints_time + plan_time + gcode_time
     total_gcode_size = sum(len(gc) for gc in gcode_dict.values())
     total_gcode_lines = sum(gc.count('\n') for gc in gcode_dict.values())
@@ -244,16 +222,15 @@ def write_outputs(
     gcode_dict: dict[str, str],
     metrics: dict[str, Any]
 ):
-    """Write all output files (G-code, STL, SVG, metrics) to output directory."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Write G-code files
+
     for pass_name, gcode in gcode_dict.items():
         output_path = output_dir / f"{pass_name}.nc"
         with open(output_path, "w") as f:
             f.write(gcode)
 
-    # Write STL file
+
     if STL_AVAILABLE:
         try:
             shapes = items_to_shape_dicts(ast.items)
@@ -268,11 +245,11 @@ def write_outputs(
     else:
         print(f"  Warning: STL generation skipped (trimesh not available)")
 
-    # Write SVG blueprint (dark theme)
+
     if SVG_AVAILABLE:
         try:
             svg_string = render_blueprint_svg(ast, theme="dark")
-            # Use the recipe directory name (e.g., "13_split_layout_french_door") as the SVG name
+
             recipe_dir_name = pml_path.parent.name
             svg_path = output_dir / f"{recipe_dir_name}.svg"
             with open(svg_path, "w", encoding="utf-8") as f:
@@ -282,7 +259,7 @@ def write_outputs(
     else:
         print(f"  Warning: SVG generation skipped (module not available)")
 
-    # Write metrics
+
     metrics_path = output_dir / "metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
@@ -293,17 +270,12 @@ def compare_outputs(
     gcode_dict: dict[str, str],
     metrics: dict[str, Any],
 ) -> tuple[bool, list[str]]:
-    """Compare generated outputs against committed artifacts.
-
-    Returns:
-        (all_match, diff_messages)
-    """
     if not output_dir.exists():
         return False, [f"Output directory does not exist: {output_dir}"]
 
     diffs = []
 
-    # Compare G-code files
+
     for pass_name, generated_gcode in gcode_dict.items():
         expected_path = output_dir / f"{pass_name}.nc"
         if not expected_path.exists():
@@ -314,7 +286,7 @@ def compare_outputs(
             expected_gcode = f.read()
 
         if generated_gcode != expected_gcode:
-            # Count differing lines for summary
+
             gen_lines = generated_gcode.split('\n')
             exp_lines = expected_gcode.split('\n')
             diff_count = sum(1 for g, e in zip(gen_lines, exp_lines) if g != e)
@@ -324,7 +296,7 @@ def compare_outputs(
                 f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
             )
 
-    # Check for extra files in output directory
+
     expected_files = {f"{name}.nc" for name in gcode_dict.keys()}
     expected_files.add("metrics.json")
     actual_files = {f.name for f in output_dir.glob("*.nc")}
@@ -340,28 +312,26 @@ def compare_outputs(
 if PYTEST_AVAILABLE:
     @pytest.mark.parametrize("pml_path", discover_recipe_pml_files())
     def test_recipe_output(pml_path: Path, request):
-        """Test that recipe generates expected G-code output."""
         _test_recipe_output_impl(pml_path, request.config.getoption("--regen_recipes"))
 
 
 def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
-    """Test that recipe generates expected outputs (G-code, STL, SVG)."""
-    # Generate outputs
+
     ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
 
-    # Determine output directory and recipe name
+
     output_dir = pml_path.parent / "output"
-    recipe_name = pml_path.stem  # e.g., "simple_cutout_with_tabs"
+    recipe_name = pml_path.stem
 
     if regenerate:
-        # Regenerate mode: write outputs and pass
+
         write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics)
         print(f"\n✓ Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
         print(f"  Files: {len(gcode_dict)} G-code + STL + SVG + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
     else:
-        # Verify mode: compare against committed artifacts
+
         all_match, diffs = compare_outputs(output_dir, gcode_dict, metrics)
 
         if not all_match:
@@ -377,7 +347,7 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
                     f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
                 )
 
-        # Also write metrics even in verify mode (for tracking changes)
+
         metrics_path = output_dir / "metrics.json"
         with open(metrics_path, "w") as f:
             json.dump(metrics, f, indent=2)

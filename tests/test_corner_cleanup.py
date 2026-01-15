@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""Tests for corner cleanup feature.
-
-Tests the complete pipeline:
-- AST with corner_cleanup_tool_diameter_mm
-- Conversion to RemovalIntent IR
-- Generation of corner cleanup hints
-- Planner creates separate pass with correct tool
-"""
 
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -19,8 +11,7 @@ from cam.model.machine import Machine
 
 
 def test_corner_cleanup_basic():
-    """Test basic corner cleanup workflow."""
-    # Create AST with corner cleanup
+
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
         items=(
@@ -32,31 +23,31 @@ def test_corner_cleanup_basic():
                 feature=Feature(
                     type="pocket",
                     depth=6.0,
-                    corner_cleanup_tool_diameter_mm=3.175  # 1/8" tool for corners
+                    corner_cleanup_tool_diameter_mm=3.175
                 ),
                 shape_id="panel"
             ),
         )
     )
 
-    # Convert to RemovalIntent
+
     intents = ast_to_removal_intents(ast)
     assert len(intents) == 1
     assert intents[0].metadata.get("corner_cleanup_tool_diameter_mm") == 3.175
 
-    # Convert to hints
+
     hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
     assert "corner_cleanups" in hints
     assert len(hints["corner_cleanups"]) == 1
 
     corner_cleanup = hints["corner_cleanups"][0]
     assert corner_cleanup["corner_tool_diameter_mm"] == 3.175
-    assert len(corner_cleanup["corners"]) == 4  # 4 corners
+    assert len(corner_cleanup["corners"]) == 4
 
-    # Verify corner positions
+
     corners = corner_cleanup["corners"]
-    # Expected corners for 100x80mm pocket centered at (100, 75):
-    # SW: (50, 35), SE: (150, 35), NE: (150, 115), NW: (50, 115)
+
+
     assert (50.0, 35.0) in corners
     assert (150.0, 35.0) in corners
     assert (150.0, 115.0) in corners
@@ -64,7 +55,6 @@ def test_corner_cleanup_basic():
 
 
 def test_corner_cleanup_planner():
-    """Test that planner creates separate pass for corner cleanup."""
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
         items=(
@@ -87,7 +77,7 @@ def test_corner_cleanup_planner():
     intents = ast_to_removal_intents(ast)
     hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
 
-    # Tool database with two tools
+
     tool_db = [
         {"name": "1/8_endmill", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},
         {"name": "3/8_endmill", "diameter": 9.525, "kind": "flat", "rpm": 12000, "feed_xy": 1200, "feed_z": 400},
@@ -98,7 +88,7 @@ def test_corner_cleanup_planner():
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
-    # Plan passes
+
     passes, summary = plan_passes(
         hints,
         config=config,
@@ -108,10 +98,10 @@ def test_corner_cleanup_planner():
         stock=stock,
     )
 
-    # Should have 2 passes: pocket (larger tool) + corner_cleanup (smaller tool)
+
     assert len(passes) == 2
 
-    # Find pocket and corner_cleanup passes
+
     pocket_pass = None
     corner_pass = None
     for p in passes:
@@ -123,23 +113,22 @@ def test_corner_cleanup_planner():
     assert pocket_pass is not None, "Missing pocket pass"
     assert corner_pass is not None, "Missing corner_cleanup pass"
 
-    # Verify pocket uses a tool (could be either, depending on min_channel_width)
+
     pocket_tool_diameter = pocket_pass["tool"]["diameter"]
-    # Tool selection is based on min_channel_width and pocket dimensions
-    # Just verify it's one of the available tools
+
+
     assert pocket_tool_diameter in [3.175, 9.525]
 
-    # Verify corner cleanup uses specified tool
+
     corner_tool_diameter = corner_pass["tool"]["diameter"]
     assert corner_tool_diameter == 3.175
 
-    # Verify both passes have moves
+
     assert len(pocket_pass["moves"]) > 0
     assert len(corner_pass["moves"]) > 0
 
 
 def test_corner_cleanup_tool_not_found():
-    """Test error when corner cleanup tool is not in tool_db."""
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
         items=(
@@ -152,7 +141,7 @@ def test_corner_cleanup_tool_not_found():
                     type="pocket",
                     depth=6.0,
                     depth_mm=6.0,
-                    corner_cleanup_tool_diameter_mm=2.0  # Tool not in DB
+                    corner_cleanup_tool_diameter_mm=2.0
                 ),
                 shape_id="panel"
             ),
@@ -171,7 +160,7 @@ def test_corner_cleanup_tool_not_found():
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
-    # Should raise error about missing tool
+
     try:
         passes, summary = plan_passes(
             hints,
@@ -187,13 +176,12 @@ def test_corner_cleanup_tool_not_found():
 
 
 def test_corner_cleanup_non_rect_error():
-    """Test error when corner cleanup specified for non-rectangular pocket."""
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
         items=(
             Item(
                 kind="shape",
-                type="Circle",  # Non-rectangular
+                type="Circle",
                 geometry=Geometry(data={"diameter_mm": 80}),
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
@@ -209,7 +197,7 @@ def test_corner_cleanup_non_rect_error():
 
     intents = ast_to_removal_intents(ast)
 
-    # Should raise error when converting to hints
+
     try:
         hints = removal_intents_to_v1_hints(intents)
         assert False, "Expected ValueError for non-rectangular pocket"
@@ -218,7 +206,6 @@ def test_corner_cleanup_non_rect_error():
 
 
 def test_corner_cleanup_without_flag():
-    """Test that pocket without corner cleanup doesn't generate corner cleanup pass."""
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
         items=(
@@ -231,7 +218,7 @@ def test_corner_cleanup_without_flag():
                     type="pocket",
                     depth=6.0,
                     depth_mm=6.0,
-                    # No corner_cleanup_tool_diameter_mm specified
+
                 ),
                 shape_id="panel"
             ),
@@ -241,7 +228,7 @@ def test_corner_cleanup_without_flag():
     intents = ast_to_removal_intents(ast)
     hints = removal_intents_to_v1_hints(intents)
 
-    # Should not have corner_cleanups
+
     assert len(hints.get("corner_cleanups", [])) == 0
 
     tool_db = [
@@ -262,7 +249,7 @@ def test_corner_cleanup_without_flag():
         stock=stock,
     )
 
-    # Should only have pocket pass, no corner cleanup
+
     assert len(passes) == 1
     assert passes[0].get("op") == "pocket"
 

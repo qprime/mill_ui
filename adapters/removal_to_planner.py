@@ -1,10 +1,3 @@
-"""Adapter: RemovalIntent IR → v1 planner hints.
-
-Reverse adapter enabling v1 planners to consume RemovalIntent IR.
-Used for equivalence validation (v2 path should produce identical G-code to v1 path).
-
-All dimensions in millimeters. Z-axis: positive up, negative down into material.
-"""
 
 from __future__ import annotations
 
@@ -14,42 +7,34 @@ from ir.removal_intent import RemovalIntent
 
 
 def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
-    """Convert single RemovalIntent to v1 hint format.
 
-    Args:
-        intent: RemovalIntent to convert
-
-    Returns:
-        v1 hint dict compatible with build_cam_hints() output format
-    """
-    # Extract metadata to determine hint type
     hint_type = intent.metadata.get("hint_type", "pocket")
     shape = intent.metadata.get("shape", "Rect")
 
-    # Calculate depth from z_top/z_bottom
+
     depth_mm = intent.depth_mm()
 
-    # Calculate center from bounds
+
     cx = (intent.bounds.x_min + intent.bounds.x_max) / 2.0
     cy = (intent.bounds.y_min + intent.bounds.y_max) / 2.0
 
-    # Build geometry dict based on shape
+
     geometry: dict[str, Any] = {}
     if shape.lower() in ("rect", "rectangle"):
         w_mm = intent.bounds.x_max - intent.bounds.x_min
         h_mm = intent.bounds.y_max - intent.bounds.y_min
         geometry = {"w_mm": w_mm, "h_mm": h_mm}
     elif shape.lower() == "circle":
-        # Calculate diameter from bounds (assumes square bounds for circle)
+
         diameter_mm = intent.bounds.x_max - intent.bounds.x_min
         geometry = {"diameter_mm": diameter_mm}
     else:
-        # Default to rect geometry for unknown shapes
+
         w_mm = intent.bounds.x_max - intent.bounds.x_min
         h_mm = intent.bounds.y_max - intent.bounds.y_min
         geometry = {"w_mm": w_mm, "h_mm": h_mm}
 
-    # Build base hint record
+
     hint: dict[str, Any] = {
         "id": intent.metadata.get("original_id", intent.region_id),
         "shape": shape,
@@ -58,13 +43,13 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
         "depth_mm": depth_mm,
     }
 
-    # Add hint-type-specific fields
+
     if hint_type == "profile":
-        # Profile-specific: side, tabs
+
         side = intent.metadata.get("side", "outside")
         hint["side"] = side
 
-        # Add tabs if present
+
         if intent.constraints.tabs is not None:
             tabs = intent.constraints.tabs
             hint["tabs"] = {
@@ -74,47 +59,33 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
             }
 
     elif hint_type == "pocket":
-        # Pocket-specific: start_depth_mm if z_top != 0
+
         if intent.z_top != 0.0:
             hint["start_depth_mm"] = abs(intent.z_top)
 
-        # Pass through corner cleanup metadata if present
+
         if "corner_cleanup_tool_diameter_mm" in intent.metadata:
             hint["corner_cleanup_tool_diameter_mm"] = intent.metadata["corner_cleanup_tool_diameter_mm"]
 
-    # hole and engrave types have no special fields beyond base hint
 
     return hint
 
 
 def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, Any]) -> dict[str, Any]:
-    """Generate corner cleanup hint from pocket intent.
-
-    Args:
-        intent: RemovalIntent for the pocket
-        pocket_hint: Already-converted pocket hint
-
-    Returns:
-        Corner cleanup hint dict with all 4 corner positions and geometry
-
-    Raises:
-        ValueError: If corner cleanup is specified for non-rectangular pocket
-        ValueError: If corner_cleanup_tool_diameter_mm is invalid
-    """
     corner_tool_diameter = intent.metadata["corner_cleanup_tool_diameter_mm"]
     shape = intent.metadata.get("shape", "Rect")
 
-    # Validate corner tool diameter
+
     if corner_tool_diameter <= 0.0:
         raise ValueError(
             f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}"
         )
 
-    # Only support rectangular pockets for now
+
     if shape.lower() not in ("rect", "rectangle"):
         raise ValueError(f"Corner cleanup only supported for rectangular pockets, got: {shape}")
 
-    # Extract pocket geometry
+
     geometry = pocket_hint["geometry"]
     w_mm = geometry["w_mm"]
     h_mm = geometry["h_mm"]
@@ -122,24 +93,23 @@ def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, 
     depth_mm = pocket_hint["depth_mm"]
     start_depth_mm = pocket_hint.get("start_depth_mm", 0.0)
 
-    # Calculate corner positions (absolute coordinates)
-    # Corners are at the inside corners of the pocket
+
     half_w = w_mm / 2.0
     half_h = h_mm / 2.0
 
     corners = [
-        (cx - half_w, cy - half_h),  # SW
-        (cx + half_w, cy - half_h),  # SE
-        (cx + half_w, cy + half_h),  # NE
-        (cx - half_w, cy + half_h),  # NW
+        (cx - half_w, cy - half_h),
+        (cx + half_w, cy - half_h),
+        (cx + half_w, cy + half_h),
+        (cx - half_w, cy + half_h),
     ]
 
     return {
         "id": f"{pocket_hint['id']}_corners",
         "pocket_id": pocket_hint["id"],
-        "shape": "Rect",  # Parent pocket shape
-        "geometry": geometry,  # Parent pocket geometry
-        "center_xy_mm": (cx, cy),  # Parent pocket center
+        "shape": "Rect",
+        "geometry": geometry,
+        "center_xy_mm": (cx, cy),
         "corners": corners,
         "corner_tool_diameter_mm": corner_tool_diameter,
         "depth_mm": depth_mm,
@@ -152,25 +122,6 @@ def removal_intents_to_v1_hints(
     kerf_width_mm: float = 3.175,
     min_channel_width_mm: float = 6.0,
 ) -> dict[str, Any]:
-    """Convert list of RemovalIntent to v1 hints structure.
-
-    Args:
-        intents: List of RemovalIntent to convert
-        kerf_width_mm: Kerf width for profiles (default 3.175mm = 1/8")
-        min_channel_width_mm: Minimum channel width (default 6mm)
-
-    Returns:
-        v1 hints dict compatible with plan_passes() input:
-        {
-            "units": "mm",
-            "kerf_width_mm": float,
-            "min_channel_width_mm": float,
-            "profiles": [...],
-            "pockets": [...],
-            "holes": [...],
-            "engraves": [...]
-        }
-    """
     profiles: list[dict[str, Any]] = []
     pockets: list[dict[str, Any]] = []
     holes: list[dict[str, Any]] = []
@@ -185,7 +136,7 @@ def removal_intents_to_v1_hints(
             profiles.append(hint)
         elif hint_type == "pocket":
             pockets.append(hint)
-            # Generate corner cleanup hints if corner_cleanup_tool_diameter_mm is specified
+
             if "corner_cleanup_tool_diameter_mm" in intent.metadata:
                 corner_cleanups.append(_generate_corner_cleanup_hint(intent, hint))
         elif hint_type == "hole":
@@ -193,7 +144,7 @@ def removal_intents_to_v1_hints(
         elif hint_type == "engrave":
             engraves.append(hint)
         else:
-            # Default unknown types to pockets
+
             pockets.append(hint)
 
     return {

@@ -1,7 +1,3 @@
-"""Unit tests for v1 hints → v2 RemovalIntent adapter.
-
-Stage 5 acceptance tests.
-"""
 
 from __future__ import annotations
 
@@ -16,13 +12,12 @@ from adapters.hints_to_removal import (
 
 
 def test_profile_hint_through_cut():
-    """Test converting profile hint with depth='through' to RemovalIntent."""
     hint = {
         "id": "rect_outline",
         "shape": "Rect",
         "geometry": {"w_mm": 100.0, "h_mm": 50.0},
         "center_xy_mm": (150.0, 75.0),
-        "depth_mm": 19.1,  # Sheet thickness
+        "depth_mm": 19.1,
         "side": "outside",
     }
 
@@ -32,16 +27,15 @@ def test_profile_hint_through_cut():
     assert intent.z_top == 0.0
     assert intent.z_bottom == -19.1
     assert intent.depth_mm() == 19.1
-    assert intent.bounds.x_min == 100.0  # 150 - 50
-    assert intent.bounds.x_max == 200.0  # 150 + 50
-    assert intent.bounds.y_min == 50.0   # 75 - 25
-    assert intent.bounds.y_max == 100.0  # 75 + 25
+    assert intent.bounds.x_min == 100.0
+    assert intent.bounds.x_max == 200.0
+    assert intent.bounds.y_min == 50.0
+    assert intent.bounds.y_max == 100.0
     assert intent.metadata["hint_type"] == "profile"
     assert intent.metadata["side"] == "outside"
 
 
 def test_profile_hint_with_tabs():
-    """Test converting profile hint with tabs to RemovalIntent."""
     hint = {
         "id": "panel_outline",
         "shape": "Rect",
@@ -63,7 +57,6 @@ def test_profile_hint_with_tabs():
 
 
 def test_profile_hint_inside_cut():
-    """Test converting profile hint with side='inside'."""
     hint = {
         "id": "aperture",
         "shape": "Rect",
@@ -80,7 +73,6 @@ def test_profile_hint_inside_cut():
 
 
 def test_pocket_hint_basic():
-    """Test converting pocket hint to RemovalIntent."""
     hint = {
         "id": "pocket_1",
         "shape": "Rect",
@@ -95,13 +87,12 @@ def test_pocket_hint_basic():
     assert intent.z_top == 0.0
     assert intent.z_bottom == -5.0
     assert intent.depth_mm() == 5.0
-    assert intent.bounds.x_min == 60.0  # 100 - 40
-    assert intent.bounds.x_max == 140.0  # 100 + 40
+    assert intent.bounds.x_min == 60.0
+    assert intent.bounds.x_max == 140.0
     assert intent.metadata["hint_type"] == "pocket"
 
 
 def test_pocket_hint_with_start_depth():
-    """Test converting pocket hint with start_depth_mm."""
     hint = {
         "id": "stepped_pocket",
         "shape": "Rect",
@@ -114,13 +105,12 @@ def test_pocket_hint_with_start_depth():
     intent = pocket_hint_to_removal_intent(hint)
 
     assert intent.region_id == "pocket_stepped_pocket"
-    assert intent.z_top == -2.0  # Start at 2mm below surface
-    assert intent.z_bottom == -10.0  # End at 2+8=10mm below surface
+    assert intent.z_top == -2.0
+    assert intent.z_bottom == -10.0
     assert intent.depth_mm() == 8.0
 
 
 def test_hole_hint_circle():
-    """Test converting hole hint (circle) to RemovalIntent."""
     hint = {
         "id": "mounting_hole",
         "shape": "Circle",
@@ -135,22 +125,21 @@ def test_hole_hint_circle():
     assert intent.z_top == 0.0
     assert intent.z_bottom == -12.0
     assert intent.depth_mm() == 12.0
-    # Bounds for 10mm diameter circle at (50, 50)
-    assert intent.bounds.x_min == 45.0  # 50 - 5
-    assert intent.bounds.x_max == 55.0  # 50 + 5
+
+    assert intent.bounds.x_min == 45.0
+    assert intent.bounds.x_max == 55.0
     assert intent.bounds.y_min == 45.0
     assert intent.bounds.y_max == 55.0
     assert intent.metadata["hint_type"] == "hole"
 
 
 def test_engrave_hint():
-    """Test converting engrave hint to RemovalIntent."""
     hint = {
         "id": "text_engrave",
         "shape": "Polyline",
         "geometry": {"points": [(0, 0), (10, 0), (10, 10)]},
         "center_xy_mm": (25.0, 25.0),
-        "depth_mm": 0.5,  # Shallow engrave
+        "depth_mm": 0.5,
     }
 
     intent = engrave_hint_to_removal_intent(hint)
@@ -163,7 +152,6 @@ def test_engrave_hint():
 
 
 def test_profile_no_id():
-    """Test profile hint without id generates default region_id."""
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -174,11 +162,10 @@ def test_profile_no_id():
 
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
 
-    assert intent.region_id == "profile"  # No ID suffix
+    assert intent.region_id == "profile"
 
 
 def test_pocket_no_center():
-    """Test pocket hint without center_xy_mm uses (0,0)."""
     hint = {
         "id": "centered_pocket",
         "shape": "Rect",
@@ -195,7 +182,6 @@ def test_pocket_no_center():
 
 
 def test_bounds_calculation_rect():
-    """Test bounds calculation for rectangle geometry."""
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 100.0, "h_mm": 60.0},
@@ -205,14 +191,13 @@ def test_bounds_calculation_rect():
 
     intent = pocket_hint_to_removal_intent(hint)
 
-    assert intent.bounds.x_min == 150.0  # 200 - 50
-    assert intent.bounds.x_max == 250.0  # 200 + 50
-    assert intent.bounds.y_min == 120.0  # 150 - 30
-    assert intent.bounds.y_max == 180.0  # 150 + 30
+    assert intent.bounds.x_min == 150.0
+    assert intent.bounds.x_max == 250.0
+    assert intent.bounds.y_min == 120.0
+    assert intent.bounds.y_max == 180.0
 
 
 def test_bounds_calculation_circle():
-    """Test bounds calculation for circle geometry."""
     hint = {
         "shape": "Circle",
         "geometry": {"diameter_mm": 40.0},
@@ -222,14 +207,13 @@ def test_bounds_calculation_circle():
 
     intent = hole_hint_to_removal_intent(hint)
 
-    assert intent.bounds.x_min == 80.0  # 100 - 20
-    assert intent.bounds.x_max == 120.0  # 100 + 20
+    assert intent.bounds.x_min == 80.0
+    assert intent.bounds.x_max == 120.0
     assert intent.bounds.y_min == 80.0
     assert intent.bounds.y_max == 120.0
 
 
 def test_side_to_allowance_outside():
-    """Test that side='outside' creates correct allowance."""
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -243,7 +227,6 @@ def test_side_to_allowance_outside():
 
 
 def test_side_to_allowance_on():
-    """Test that side='on' creates correct allowance."""
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -257,7 +240,6 @@ def test_side_to_allowance_on():
 
 
 def test_metadata_preservation():
-    """Test that metadata preserves original hint information."""
     hint = {
         "id": "custom_shape",
         "shape": "Rect",

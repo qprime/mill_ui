@@ -1,9 +1,8 @@
-"""Standalone runner for Stage 10 end-to-end pipeline test."""
 
 import sys
 from pathlib import Path
 
-# Add project root to path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
 from templates import Shaker
@@ -21,10 +20,9 @@ from cam.post.gcode import write_gcode
 
 
 def test_end_to_end_pipeline():
-    """Test complete pipeline: params → AST → RemovalIntent → planner → G-code."""
     print("Running end-to-end pipeline test...")
 
-    # 1. Start with template parameters
+
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -34,12 +32,12 @@ def test_end_to_end_pipeline():
     }
     sheet_thickness_mm = 19.0
 
-    # 2. Expand to AST
+
     print("\n[1] Expanding params to AST...")
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
     print(f"  ✓ Generated {len(ast.items)} AST items")
 
-    # 3. Convert AST to RemovalIntent
+
     print("\n[2] Converting AST to RemovalIntent...")
     removal_intents = []
     for item in ast.items:
@@ -71,12 +69,12 @@ def test_end_to_end_pipeline():
         depth = intent.depth_mm()
         print(f"    - {hint_type}: depth={depth:.1f}mm, bounds={intent.bounds}")
 
-    # 4. Convert to v1 hints
+
     print("\n[3] Converting RemovalIntent to v1 planner hints...")
     hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
     print(f"  ✓ Generated hints: {len(hints['profiles'])} profiles, {len(hints['pockets'])} pockets")
 
-    # 5. Plan passes
+
     print("\n[4] Planning CAM passes...")
     tool_db = [
         {
@@ -112,7 +110,7 @@ def test_end_to_end_pipeline():
     for pass_dict in passes:
         print(f"    - {pass_dict['op']}: {len(pass_dict['moves'])} moves, tool={pass_dict['tool']['name']}")
 
-    # 6. Verify safety
+
     print("\n[5] Verifying safety constraints...")
     unsafe_count = 0
     for pass_dict in passes:
@@ -129,7 +127,7 @@ def test_end_to_end_pipeline():
     else:
         print("  ✓ All retracts respect safe-Z")
 
-    # 7. Generate G-code
+
     print("\n[6] Generating G-code...")
     all_gcode_lines = []
     for pass_dict in passes:
@@ -150,7 +148,7 @@ def test_end_to_end_pipeline():
 
     print(f"  ✓ Generated {len(all_gcode_lines)} G-code lines")
 
-    # 8. Verify G-code safety
+
     print("\n[7] Verifying G-code safety...")
     unsafe_z_count = 0
     for line in all_gcode_lines:
@@ -172,7 +170,7 @@ def test_end_to_end_pipeline():
     else:
         print("  ✓ All Z-depths respect stock thickness")
 
-    # Success!
+
     print("\n" + "="*60)
     print("✅ END-TO-END PIPELINE VALIDATION COMPLETE")
     print("="*60)

@@ -1,8 +1,3 @@
-"""CLI tool for parsing and validating compositional PML files.
-
-Usage:
-    python -m cli.parse_compositional_pml input.pml [--output output.pml] [--resolve] [--format {pml|json}]
-"""
 
 from __future__ import annotations
 
@@ -16,25 +11,24 @@ from pml import format_pml
 
 
 def main():
-    """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Parse and validate compositional PML files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Validate and reformat a compositional PML file
+
   python -m cli.parse_compositional_pml input.pml
 
-  # Parse and output canonical PML
+
   python -m cli.parse_compositional_pml input.pml --output output.pml
 
-  # Parse, resolve layout, and output flat PML
+
   python -m cli.parse_compositional_pml input.pml --resolve --format pml
 
-  # Parse, resolve layout, and output JSON
+
   python -m cli.parse_compositional_pml input.pml --resolve --format json
 
-  # Read from stdin, write to stdout
+
   python -m cli.parse_compositional_pml --format pml < input.pml > output.pml
         """,
     )
@@ -66,13 +60,13 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validation: --resolve is required for pml/json formats
+
     if args.output_format in ("pml", "json") and not args.resolve:
         print(f"Error: --format {args.output_format} requires --resolve", file=sys.stderr)
         sys.exit(1)
 
     try:
-        # Read input
+
         if args.input_file:
             input_path = Path(args.input_file)
             if not input_path.exists():
@@ -84,11 +78,11 @@ Examples:
             input_text = sys.stdin.read()
             print("Parsing compositional PML from stdin...", file=sys.stderr)
 
-        # Parse compositional PML
+
         comp_ast = parse_compositional_pml(input_text)
         print(f"✓ Parse successful", file=sys.stderr)
 
-        # Resolve if requested
+
         if args.resolve:
             from resolution.layout_resolver import resolve_layout
 
@@ -96,24 +90,24 @@ Examples:
             flat_ast = resolve_layout(comp_ast)
             print(f"✓ Resolved to {len(flat_ast.items)} flat items", file=sys.stderr)
 
-        # Generate output based on format
+
         if args.output_format == "compositional":
-            # Canonical compositional PML
+
             output_text = format_compositional_pml(comp_ast)
             output_desc = "canonical compositional PML"
         elif args.output_format == "pml":
-            # Flat PML (requires resolution)
+
             output_text = format_pml(flat_ast)
             output_desc = "flat PML"
         elif args.output_format == "json":
-            # Flat JSON (requires resolution)
+
             output_text = flat_ast.to_json()
             output_desc = "flat JSON"
         else:
             print(f"Error: Unknown output format: {args.output_format}", file=sys.stderr)
             sys.exit(1)
 
-        # Write output
+
         if args.output_file:
             output_path = Path(args.output_file)
             output_path.write_text(output_text)

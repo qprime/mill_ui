@@ -1,4 +1,4 @@
-# path: skills/mill_ui/cad/export/svg_dims.py
+
 from __future__ import annotations
 from typing import List, Dict, Any, Tuple, Optional
 from collections import Counter
@@ -117,7 +117,6 @@ def _arrow_head(x: float, y: float, dx: float, dy: float, size: float = 3.0) -> 
     )
     return f'    <path class="dim" d="{path_d}"{_style_fragment("dim")} />\n'
 
-# ===== Public API =========================================================
 
 def render_svg_with_dims(
     panel_w: float,
@@ -132,23 +131,15 @@ def render_svg_with_dims(
     tol_mm: float = 0.25,
     circle_label_threshold: int = 8,
 ) -> str:
-    """
-    Drafting-like SVG of 2.5D sheet work:
-      - Panel outline, placed items
-      - All CAM features: profiles, pockets, regions, anchors, holes
-      - Shared seams (merged edges) drawn once, labeled 'Shared'
-      - Size labels (W/H, ⌀), depth labels, stile/rail thickness
-      - Legend rendered to the RIGHT, outside the panel
-    """
     margin = 16.0
     _set_canvas_height(panel_h, offset_y=margin)
     body: List[str] = []
     legend_lines: List[str] = []
 
-    # Panel
+
     body.append(_rect(0, 0, panel_w, panel_h, cls="panel"))
 
-    # Placed outer items and size labels
+
     rects_bb: List[Tuple[float,float,float,float]] = []
     for pl in placements or []:
         it = pl.get("item", {})
@@ -175,20 +166,20 @@ def render_svg_with_dims(
             if show_sizes and w>0 and h>0:
                 body.append(_box_labels(minx,miny,w,h))
 
-    # Features
+
     circle_diams: List[float] = []
     outer_rects: List[Dict[str,Any]] = []
     inner_rects: List[Dict[str,Any]] = []
     engrave_depths: List[float] = []
 
     if hints:
-        # profiles
+
         for rec in (hints.get("profiles") or []):
             _draw_rect_or_circle(body, rec, "feature-profile")
             _label_depth_if_any(body, rec)
             _size_label_if_rect(body, rec)
             if _is_rect(rec): outer_rects.append(rec)
-        # pockets
+
         for rec in (hints.get("pockets") or []):
             t = str(rec.get("shape","")).lower()
             if t=="region":
@@ -204,13 +195,13 @@ def render_svg_with_dims(
                 _label_depth_if_any(body, rec)
                 d=float((rec.get("geometry") or {}).get("diameter_mm",0.0))
                 if d>0: circle_diams.append(round(d,1))
-        # holes
+
         for rec in (hints.get("holes") or []):
             _draw_rect_or_circle(body, rec, "feature-hole")
             _label_depth_if_any(body, rec)
             d=float((rec.get("geometry") or {}).get("diameter_mm",0.0))
             if d>0: circle_diams.append(round(d,1))
-        # engraves
+
         for rec in (hints.get("engraves") or []):
             pts = _draw_polyline(body, rec, "feature-engrave")
             depth = rec.get("depth_mm")
@@ -219,13 +210,13 @@ def render_svg_with_dims(
                 if pts:
                     body.append(_text(pts[0][0], pts[0][1] + 6, f"d={float(depth):.1f}mm"))
 
-        # stile/rail labels (outer vs inner rect match)
+
         _label_stile_rail(body, outer_rects, inner_rects)
 
-        # shared seams (from outer rects only, tolerance-based)
+
         body.extend(_draw_shared_seams(outer_rects, tol=tol_mm))
 
-    # circle labeling vs legend grouping
+
     if hints and circle_diams:
         if len(circle_diams) <= circle_label_threshold:
             _label_circle_diams_per_feature(body, hints)
@@ -233,14 +224,14 @@ def render_svg_with_dims(
             counts = Counter(circle_diams)
             legend_lines.append("Anchors and holes: " + ", ".join(f"⌀ {k:.1f} mm × {v}" for k,v in sorted(counts.items())))
 
-    # global dims and gaps
+
     if show_sizes:
         body.extend(_dim_linear_h(0, panel_h+10, 0, panel_w, f"W {panel_w:.1f} mm"))
         body.extend(_dim_linear_v(panel_w+10, 0, 0, panel_h, f"H {panel_h:.1f} mm"))
     if rects_bb:
         body.extend(_render_gaps(rects_bb, panel_w, panel_h, tol=tol_mm))
 
-    # legend lines
+
     legend_lines.insert(0, f"Sheet {panel_t:.1f} mm")
     if show_depths and hints:
         depths = sorted({float(p.get("depth_mm",0.0)) for p in (hints.get("pockets") or []) if "depth_mm" in p})
@@ -250,7 +241,7 @@ def render_svg_with_dims(
         if engrave_set:
             legend_lines.append("Engrave depths: " + ", ".join(f"{d:.1f} mm" for d in engrave_set))
 
-    # assemble final svg with legend to the right
+
     legend_w, legend_h = _legend_box_size(legend_lines)
     svg_w = panel_w + legend_w + margin * 2
     svg_h = panel_h + margin * 2
@@ -266,7 +257,6 @@ def render_svg_with_dims(
     out.append(_svg_footer())
     return "".join(out)
 
-# ===== helpers ============================================================
 
 def _is_rect(rec: Dict[str, Any]) -> bool:
     return str(rec.get("shape","")).lower() == "rect"
@@ -409,7 +399,7 @@ def _label_circle_diams_per_feature(body: List[str], hints: Dict[str, Any]):
             if d<=0: continue
             body.append(_text(cx - d*0.5, cy + 6, f"⌀={d:.1f}mm"))
 
-# stile/rail
+
 def _label_stile_rail(body: List[str], outers: List[Dict[str,Any]], inners: List[Dict[str,Any]], tol: float=0.5):
     imap: Dict[Tuple[int,int], List[Tuple[float,float]]] = {}
     def _k(cx,cy): return (int(round(cx*1000)), int(round(cy*1000)))
@@ -427,10 +417,10 @@ def _label_stile_rail(body: List[str], outers: List[Dict[str,Any]], inners: List
         body.append(_text(cx - w_out/2 + 4, cy, f"Stile={stile:.1f}mm"))
         body.append(_text(cx, cy + h_out/2 - 6, f"Rail={rail:.1f}mm"))
 
-# shared seams (from profile rects)
+
 def _draw_shared_seams(outer_rects: List[Dict[str,Any]], tol: float=0.1) -> List[str]:
     out: List[str] = []
-    # Build list of edges
+
     edges = []
     for rec in outer_rects:
         cx,cy=_xy(rec.get("center_xy_mm")); g=rec.get("geometry") or {}
@@ -443,12 +433,12 @@ def _draw_shared_seams(outer_rects: List[Dict[str,Any]], tol: float=0.1) -> List
             ("h", miny, minx, maxx, rid),
             ("h", maxy, minx, maxx, rid),
         ]
-    # Index by rounded coord
+
     def K(o,c): return (o, int(round(c/tol)))
     buckets: Dict[Tuple[str,int], List[Tuple[str,float,float,float,str]]] = {}
     for e in edges:
         buckets.setdefault(K(e[0],e[1]), []).append(e)
-    # draw seams where two rects share same coord with overlap
+
     for key, lst in buckets.items():
         if len(lst) < 2: continue
         n=len(lst)

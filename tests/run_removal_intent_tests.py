@@ -1,7 +1,3 @@
-"""Standalone test runner for Stage 4 RemovalIntent tests (without pytest).
-
-Run from repository root: PYTHONPATH=. python3 -m tests.run_removal_intent_tests
-"""
 
 import sys
 
@@ -17,7 +13,6 @@ from ir.removal_intent import (
 
 
 def test_bounds2d_valid():
-    """Test valid Bounds2D construction."""
     print("Running test_bounds2d_valid...")
     bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
     assert bounds.x_min == 0.0
@@ -27,7 +22,6 @@ def test_bounds2d_valid():
 
 
 def test_bounds2d_invalid():
-    """Test invalid bounds raise ValueError."""
     print("Running test_bounds2d_invalid...")
     try:
         Bounds2D(x_min=100.0, x_max=0.0, y_min=0.0, y_max=50.0)
@@ -39,7 +33,6 @@ def test_bounds2d_invalid():
 
 
 def test_removal_intent_minimal():
-    """Test minimal RemovalIntent."""
     print("Running test_removal_intent_minimal...")
     bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
     intent = RemovalIntent(
@@ -55,7 +48,6 @@ def test_removal_intent_minimal():
 
 
 def test_removal_intent_with_tabs():
-    """Test RemovalIntent with tabs."""
     print("Running test_removal_intent_with_tabs...")
     bounds = Bounds2D(x_min=0.0, x_max=200.0, y_min=0.0, y_max=100.0)
     tab = TabConstraint(count=4, height_mm=3.0, width_mm=10.0)
@@ -77,7 +69,6 @@ def test_removal_intent_with_tabs():
 
 
 def test_removal_intent_to_dict():
-    """Test serialization to dict."""
     print("Running test_removal_intent_to_dict...")
     bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
     allowance = Allowance(outside=-0.5)
@@ -106,7 +97,6 @@ def test_removal_intent_to_dict():
 
 
 def test_removal_intent_invalid_depth():
-    """Test invalid depth raises ValueError."""
     print("Running test_removal_intent_invalid_depth...")
     bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
 
@@ -115,7 +105,7 @@ def test_removal_intent_invalid_depth():
             region_id="invalid",
             bounds=bounds,
             z_top=-10.0,
-            z_bottom=0.0,  # Invalid: bottom above top
+            z_bottom=0.0,
         )
         print("  ✗ FAIL: Expected ValueError")
         return False
@@ -125,7 +115,6 @@ def test_removal_intent_invalid_depth():
 
 
 def test_allowance_and_constraints():
-    """Test Allowance and Constraints construction."""
     print("Running test_allowance_and_constraints...")
     allowance = Allowance(inside=0.5, outside=-0.2, kerf_compensation=3.175)
     assert allowance.inside == 0.5

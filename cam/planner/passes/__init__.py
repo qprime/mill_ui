@@ -1,4 +1,3 @@
-"""High-level CAM pass planning built from modular helpers."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -19,7 +18,6 @@ from .tools import ToolSelection, pass_key, pick_tool_for_profile, tool_identity
 
 @dataclass
 class PassRecord:
-    """Mutable representation of a single NC file to be emitted."""
 
     op: str
     tool_dict: Dict[str, Any]
@@ -47,7 +45,6 @@ class PassRecord:
 
 
 class PassAccumulator:
-    """Create or reuse passes grouped by operation/tool identity."""
 
     def __init__(
         self,
@@ -121,7 +118,6 @@ def plan_passes(
     prime_spindle: bool = False,
     profile_opts: Optional[Mapping[str, Any]] = None,
 ) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    """Plan CAM passes for the provided hints using the configured tolerances."""
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(

@@ -1,7 +1,3 @@
-"""PML (Panel Machining Language) parser: PML → LayoutAST.
-
-Parses human-readable PML syntax into canonical LayoutAST.
-"""
 
 from __future__ import annotations
 
@@ -12,7 +8,6 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 
 
 class PMLParseError(Exception):
-    """Raised when PML syntax is invalid."""
     def __init__(self, message: str, line_num: int | None = None):
         if line_num is not None:
             super().__init__(f"Line {line_num}: {message}")
@@ -22,45 +17,32 @@ class PMLParseError(Exception):
 
 
 def parse_pml(text: str) -> LayoutAST:
-    """Parse PML text into LayoutAST.
-
-    Args:
-        text: PML source text
-
-    Returns:
-        Parsed LayoutAST
-
-    Raises:
-        PMLParseError: If syntax is invalid
-    """
     parser = _PMLParser(text)
     return parser.parse()
 
 
 class _PMLParser:
-    """Internal PML parser implementation."""
 
     def __init__(self, text: str):
         self.lines = text.splitlines()
         self.line_num = 0
 
-        # Parsing state
+
         self.sheet: Sheet | None = None
         self.items: list[Item] = []
         self.project: str | None = None
         self.kerf_width_mm: float | None = None
 
     def parse(self) -> LayoutAST:
-        """Parse all lines into LayoutAST."""
         for line_num, line in enumerate(self.lines, start=1):
             self.line_num = line_num
             line = line.strip()
 
-            # Skip blank lines and comments
+
             if not line or line.startswith("#"):
                 continue
 
-            # Parse line by keyword
+
             if line.startswith("sheet "):
                 self._parse_sheet(line)
             elif line.startswith("project "):
@@ -78,7 +60,7 @@ class _PMLParser:
             else:
                 raise PMLParseError(f"Unknown declaration: {line.split()[0]}", self.line_num)
 
-        # Validate required fields
+
         if self.sheet is None:
             raise PMLParseError("Missing required 'sheet' declaration")
 
@@ -90,7 +72,6 @@ class _PMLParser:
         )
 
     def _parse_sheet(self, line: str) -> None:
-        """Parse: sheet <width>mm <height>mm <thickness>mm"""
         if self.sheet is not None:
             raise PMLParseError("Duplicate 'sheet' declaration", self.line_num)
 
@@ -106,7 +87,6 @@ class _PMLParser:
         )
 
     def _parse_project(self, line: str) -> None:
-        """Parse: project <name>"""
         if self.project is not None:
             raise PMLParseError("Duplicate 'project' declaration", self.line_num)
 
@@ -117,7 +97,6 @@ class _PMLParser:
         self.project = match.group(1).strip()
 
     def _parse_kerf(self, line: str) -> None:
-        """Parse: kerf <width>mm"""
         if self.kerf_width_mm is not None:
             raise PMLParseError("Duplicate 'kerf' declaration", self.line_num)
 
@@ -128,8 +107,7 @@ class _PMLParser:
         self.kerf_width_mm = float(match.group(1))
 
     def _parse_rect(self, line: str) -> None:
-        """Parse: rect <id> at <x>mm,<y>mm size <w>mm,<h>mm <feature>"""
-        # Pattern: rect ID at Xmm,Ymm size Wmm,Hmm FEATURE
+
         match = re.match(
             r"rect\s+(\S+)\s+at\s+([\d.]+)mm,([\d.]+)mm\s+size\s+([\d.]+)mm,([\d.]+)mm\s+(.+)",
             line
@@ -153,8 +131,7 @@ class _PMLParser:
         ))
 
     def _parse_circle(self, line: str) -> None:
-        """Parse: circle <id> at <x>mm,<y>mm {diameter|radius} <d>mm <feature>"""
-        # Try diameter syntax first
+
         match = re.match(
             r"circle\s+(\S+)\s+at\s+([\d.]+)mm,([\d.]+)mm\s+diameter\s+([\d.]+)mm\s+(.+)",
             line
@@ -163,7 +140,7 @@ class _PMLParser:
             shape_id, x, y, diameter, feature_str = match.groups()
             geometry = Geometry(data={"diameter_mm": float(diameter)})
         else:
-            # Try radius syntax
+
             match = re.match(
                 r"circle\s+(\S+)\s+at\s+([\d.]+)mm,([\d.]+)mm\s+radius\s+([\d.]+)mm\s+(.+)",
                 line
@@ -188,7 +165,6 @@ class _PMLParser:
         ))
 
     def _parse_roundedrect(self, line: str) -> None:
-        """Parse: roundedrect <id> at <x>mm,<y>mm size <w>mm,<h>mm radius <r>mm <feature>"""
         match = re.match(
             r"roundedrect\s+(\S+)\s+at\s+([\d.]+)mm,([\d.]+)mm\s+size\s+([\d.]+)mm,([\d.]+)mm\s+radius\s+([\d.]+)mm\s+(.+)",
             line
@@ -216,25 +192,9 @@ class _PMLParser:
         ))
 
     def _parse_template(self, line: str) -> None:
-        """Parse: template <TemplateName> <id> params { ... }
-
-        NOTE: Multi-line template parsing is simplified for Phase 2.
-        Currently expects single-line param dict syntax.
-        """
         raise PMLParseError("Template syntax not yet implemented (Phase 2 feature)", self.line_num)
 
     def _parse_feature(self, feature_str: str) -> Feature:
-        """Parse feature specification from string.
-
-        Supported formats:
-        - profile through [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
-        - profile <depth>mm [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
-        - pocket <depth>mm [corner_cleanup <diameter>mm]
-        - pocket through [corner_cleanup <diameter>mm]
-        - hole <depth>mm
-        - hole through
-        - engrave <depth>mm
-        """
         feature_str = feature_str.strip()
         parts = feature_str.split()
 
@@ -244,7 +204,7 @@ class _PMLParser:
         feature_type = parts[0]
         depth_str = parts[1]
 
-        # Parse depth
+
         if depth_str == "through":
             depth = "through"
             depth_mm = None
@@ -255,15 +215,15 @@ class _PMLParser:
         else:
             raise PMLParseError(f"Invalid depth syntax: {depth_str}", self.line_num)
 
-        # Parse optional side for profiles
+
         side = None
-        idx = 2  # Start parsing after feature_type and depth
+        idx = 2
         if feature_type == "profile" and len(parts) >= 3:
             if parts[2] in ("inside", "outside", "on"):
                 side = parts[2]
-                idx = 3  # Move past side for subsequent parsing
+                idx = 3
 
-        # Parse optional corner_cleanup for pockets
+
         corner_cleanup_tool_diameter_mm = None
         if feature_type == "pocket" and idx < len(parts):
             if parts[idx] == "corner_cleanup":
@@ -272,17 +232,17 @@ class _PMLParser:
                 corner_cleanup_tool_diameter_mm = float(parts[idx + 1][:-2])
                 idx += 2
 
-        # Parse optional tabs for profiles
+
         tab_count = None
         tab_height_mm = None
         tab_width_mm = None
         if feature_type == "profile" and idx < len(parts):
             if parts[idx] == "tabs":
-                # Parse: tabs <count> height <height>mm [width <width>mm]
-                if idx + 3 >= len(parts):  # Need at least: tabs <count> height <height>mm
+
+                if idx + 3 >= len(parts):
                     raise PMLParseError(f"Invalid tabs syntax. Expected 'tabs <count> height <height>mm [width <width>mm]'", self.line_num)
 
-                # Parse count
+
                 try:
                     tab_count = int(parts[idx + 1])
                     if tab_count <= 0:
@@ -290,11 +250,11 @@ class _PMLParser:
                 except ValueError:
                     raise PMLParseError(f"Invalid tab count: {parts[idx + 1]}. Must be a positive integer", self.line_num)
 
-                # Parse height keyword
+
                 if parts[idx + 2] != "height":
                     raise PMLParseError(f"Expected 'height' after tab count, got: {parts[idx + 2]}", self.line_num)
 
-                # Parse height value
+
                 if not parts[idx + 3].endswith("mm"):
                     raise PMLParseError(f"Invalid tab height: {parts[idx + 3]}. Must end with 'mm'", self.line_num)
                 try:
@@ -306,7 +266,7 @@ class _PMLParser:
 
                 idx += 4
 
-                # Parse optional width
+
                 if idx < len(parts) and parts[idx] == "width":
                     if idx + 1 >= len(parts) or not parts[idx + 1].endswith("mm"):
                         raise PMLParseError(f"Invalid tab width. Expected 'width <width>mm'", self.line_num)
@@ -318,7 +278,7 @@ class _PMLParser:
                         raise PMLParseError(f"Invalid tab width: {parts[idx + 1]}. Must be a positive number", self.line_num)
                     idx += 2
 
-        # Validate feature type
+
         if feature_type not in ("profile", "pocket", "hole", "engrave"):
             raise PMLParseError(f"Unknown feature type: {feature_type}", self.line_num)
 

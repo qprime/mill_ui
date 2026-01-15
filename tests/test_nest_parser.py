@@ -1,14 +1,9 @@
-"""Tests for nest PML parser.
-
-Run from repository root: PYTHONPATH=. python3 -m tests.test_nest_parser
-"""
 
 import sys
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
 
 
 def test_basic_nest_parsing():
-    """Parse basic nest PML with all required fields."""
     print("Running test_basic_nest_parsing...")
 
     source = """
@@ -39,7 +34,6 @@ nest maxrects
 
 
 def test_guillotine_algorithm():
-    """Parse nest PML with guillotine algorithm."""
     print("Running test_guillotine_algorithm...")
 
     source = """
@@ -56,7 +50,7 @@ nest guillotine
     assert job.sheet_width_mm == 1200.0
     assert job.sheet_height_mm == 2400.0
     assert job.sheet_thickness_mm == 18.0
-    # Defaults when not specified
+
     assert job.kerf_mm == 6.35
     assert job.margin_mm == 10.0
 
@@ -64,7 +58,6 @@ nest guillotine
 
 
 def test_multiple_parts():
-    """Parse nest PML with multiple parts."""
     print("Running test_multiple_parts...")
 
     source = """
@@ -93,7 +86,6 @@ nest maxrects
 
 
 def test_part_with_template():
-    """Parse nest PML with template specification."""
     print("Running test_part_with_template...")
 
     source = """
@@ -122,7 +114,6 @@ nest maxrects
 
 
 def test_mixed_parts_with_and_without_template():
-    """Parse nest PML with mix of templated and simple parts."""
     print("Running test_mixed_parts_with_and_without_template...")
 
     source = """
@@ -151,17 +142,17 @@ nest maxrects
 
     assert len(job.parts) == 3
 
-    # First part has template
+
     assert job.parts[0].name == "large_door"
     assert job.parts[0].template == "Shaker"
     assert job.parts[0].template_params["stile_w"] == 57.0
 
-    # Second part has no template
+
     assert job.parts[1].name == "small_door"
     assert job.parts[1].template is None
     assert job.parts[1].template_params == {}
 
-    # Third part has template
+
     assert job.parts[2].name == "tall_door"
     assert job.parts[2].template == "Shaker"
 
@@ -169,17 +160,16 @@ nest maxrects
 
 
 def test_comments_ignored():
-    """Comments are ignored in nest PML."""
     print("Running test_comments_ignored...")
 
     source = """
-# This is a comment
+
 nest maxrects
-    # Another comment
+
     sheet 1000mm 2000mm 19mm
 
     parts
-        # Part comment
+
         panel 400mm 600mm x4
     """
 
@@ -192,7 +182,6 @@ nest maxrects
 
 
 def test_quantity_default():
-    """Parts without quantity default to 1."""
     print("Running test_quantity_default...")
 
     source = """
@@ -211,7 +200,6 @@ nest maxrects
 
 
 def test_nest_job_to_api_params():
-    """Convert NestJob to API params dict."""
     print("Running test_nest_job_to_api_params...")
 
     source = """
@@ -251,7 +239,6 @@ nest maxrects
 
 
 def test_error_missing_nest_directive():
-    """Error on missing nest directive."""
     print("Running test_error_missing_nest_directive...")
 
     source = """
@@ -271,7 +258,6 @@ def test_error_missing_nest_directive():
 
 
 def test_error_missing_sheet():
-    """Error on missing sheet directive."""
     print("Running test_error_missing_sheet...")
 
     source = """
@@ -291,7 +277,6 @@ nest maxrects
 
 
 def test_error_no_parts():
-    """Error on empty parts list."""
     print("Running test_error_no_parts...")
 
     source = """
@@ -311,7 +296,6 @@ nest maxrects
 
 
 def run_all_tests():
-    """Run all tests."""
     print("=" * 60)
     print("Nest PML Parser Tests")
     print("=" * 60)

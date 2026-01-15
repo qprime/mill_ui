@@ -1,7 +1,3 @@
-"""Unit tests for Shaker template using AST pipeline.
-
-Stage 10 acceptance tests.
-"""
 
 from __future__ import annotations
 
@@ -21,7 +17,6 @@ from export import render_svg_with_removal_intent
 
 
 def test_shaker_v2_basic_panel():
-    """Test Shaker generates valid AST for basic panel."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -32,15 +27,15 @@ def test_shaker_v2_basic_panel():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Verify AST structure
-    assert ast.sheet.thickness_mm == 19.0
-    assert ast.sheet.width_mm == 450.0  # 400 + 2*25 margin
-    assert ast.sheet.height_mm == 650.0  # 600 + 2*25 margin
 
-    # Should have: outer profile + panel pocket
+    assert ast.sheet.thickness_mm == 19.0
+    assert ast.sheet.width_mm == 450.0
+    assert ast.sheet.height_mm == 650.0
+
+
     assert len(ast.items) == 2
 
-    # Verify outer profile
+
     outer = ast.items[0]
     assert outer.kind == "shape"
     assert outer.type == "Rect"
@@ -48,7 +43,7 @@ def test_shaker_v2_basic_panel():
     assert outer.feature.type == "profile"
     assert outer.feature.depth == "through"
 
-    # Verify panel pocket
+
     panel = ast.items[1]
     assert panel.kind == "shape"
     assert panel.type == "Rect"
@@ -58,7 +53,6 @@ def test_shaker_v2_basic_panel():
 
 
 def test_shaker_v2_with_anchors():
-    """Test Shaker with anchor screw recesses."""
     params = {
         "outer_w": 350.0,
         "outer_h": 500.0,
@@ -75,10 +69,10 @@ def test_shaker_v2_with_anchors():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Should have: outer profile + panel pocket + 4 anchor holes
+
     assert len(ast.items) == 6
 
-    # Verify anchor holes
+
     anchors = [item for item in ast.items if item.shape_id and "anchor" in item.shape_id]
     assert len(anchors) == 4
 
@@ -86,12 +80,11 @@ def test_shaker_v2_with_anchors():
         assert anchor.type == "Circle"
         assert anchor.geometry.data["diameter_mm"] == 10.0
         assert anchor.feature.type == "hole"
-        # Anchor depth = panel_recess + extra_depth = 5 + 3 = 8mm
+
         assert anchor.feature.depth_mm == 8.0
 
 
 def test_shaker_v2_removal_intent_generation():
-    """Test Shaker AST → RemovalIntent conversion."""
     params = {
         "outer_w": 300.0,
         "outer_h": 400.0,
@@ -102,14 +95,14 @@ def test_shaker_v2_removal_intent_generation():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Convert AST items to hints, then to RemovalIntent
+
     removal_intents = []
 
     for item in ast.items:
         if item.kind != "shape" or not item.feature or not item.geometry or not item.placement:
             continue
 
-        # Build hint from AST item
+
         hint = {
             "id": item.shape_id or "",
             "shape": item.type,
@@ -118,7 +111,7 @@ def test_shaker_v2_removal_intent_generation():
             "depth_mm": item.feature.depth_mm or ast.sheet.thickness_mm,
         }
 
-        # Convert to RemovalIntent based on feature type
+
         if item.feature.type == "profile":
             if item.feature.side:
                 hint["side"] = item.feature.side
@@ -132,22 +125,21 @@ def test_shaker_v2_removal_intent_generation():
 
         removal_intents.append(intent)
 
-    # Verify RemovalIntent regions
-    assert len(removal_intents) == 2  # profile + pocket
 
-    # Verify profile region
+    assert len(removal_intents) == 2
+
+
     profile_regions = [r for r in removal_intents if "profile" in r.region_id]
     assert len(profile_regions) == 1
-    assert profile_regions[0].z_bottom == -19.0  # Through-cut
+    assert profile_regions[0].z_bottom == -19.0
 
-    # Verify pocket region
+
     pocket_regions = [r for r in removal_intents if "pocket" in r.region_id]
     assert len(pocket_regions) == 1
     assert pocket_regions[0].depth_mm() == 4.0
 
 
 def test_shaker_v2_geometry_verification():
-    """Test Shaker geometry matches specification."""
     params = {
         "outer_w": 500.0,
         "outer_h": 700.0,
@@ -158,24 +150,23 @@ def test_shaker_v2_geometry_verification():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Verify outer dimensions
+
     outer = ast.items[0]
     assert outer.geometry.data["w_mm"] == 500.0
     assert outer.geometry.data["h_mm"] == 700.0
 
-    # Verify panel dimensions (inner = outer - 2*stile/rail)
+
     panel = ast.items[1]
-    expected_panel_w = 500.0 - 2 * 60.0  # 380mm
-    expected_panel_h = 700.0 - 2 * 60.0  # 580mm
+    expected_panel_w = 500.0 - 2 * 60.0
+    expected_panel_h = 700.0 - 2 * 60.0
     assert panel.geometry.data["w_mm"] == expected_panel_w
     assert panel.geometry.data["h_mm"] == expected_panel_h
 
-    # Verify panel depth
+
     assert panel.feature.depth_mm == 7.0
 
 
 def test_shaker_v2_svg_export():
-    """Test Shaker can be exported to SVG for visual verification."""
     params = {
         "outer_w": 350.0,
         "outer_h": 450.0,
@@ -186,7 +177,7 @@ def test_shaker_v2_svg_export():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Convert to RemovalIntent
+
     removal_intents = []
     for item in ast.items:
         if item.kind != "shape" or not item.feature or not item.geometry or not item.placement:
@@ -211,14 +202,14 @@ def test_shaker_v2_svg_export():
 
         removal_intents.append(intent)
 
-    # Render SVG
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".svg", delete=False) as f:
         temp_path = f.name
 
     try:
         render_svg_with_removal_intent(ast, removal_intents, temp_path)
 
-        # Verify SVG exists and has content
+
         svg_path = Path(temp_path)
         assert svg_path.exists()
         assert svg_path.stat().st_size > 0
@@ -233,7 +224,6 @@ def test_shaker_v2_svg_export():
 
 
 def test_shaker_v2_inner_dimensions():
-    """Test Shaker with inner dimensions specified."""
     params = {
         "inner_w": 300.0,
         "inner_h": 500.0,
@@ -244,35 +234,33 @@ def test_shaker_v2_inner_dimensions():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Outer should be inner + 2*stile/rail
+
     outer = ast.items[0]
-    expected_outer_w = 300.0 + 2 * 50.0  # 400mm
-    expected_outer_h = 500.0 + 2 * 50.0  # 600mm
+    expected_outer_w = 300.0 + 2 * 50.0
+    expected_outer_h = 500.0 + 2 * 50.0
     assert outer.geometry.data["w_mm"] == expected_outer_w
     assert outer.geometry.data["h_mm"] == expected_outer_h
 
 
 def test_shaker_v2_no_panel_recess():
-    """Test Shaker without panel recess (frame only)."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
         "stile_w": 50.0,
         "rail_h": 50.0,
-        "panel_recess": 0.0,  # No panel recess
+        "panel_recess": 0.0,
     }
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Should only have outer profile, no panel pocket
+
     assert len(ast.items) == 1
     assert ast.items[0].shape_id == "door:outer"
 
 
 def test_shaker_v2_invalid_dimensions():
-    """Test Shaker rejects invalid dimensions."""
     params = {
-        "outer_w": 0.0,  # Invalid
+        "outer_w": 0.0,
         "outer_h": 600.0,
         "stile_w": 50.0,
         "rail_h": 50.0,
@@ -283,7 +271,6 @@ def test_shaker_v2_invalid_dimensions():
 
 
 def test_shaker_v2_ast_json_serialization():
-    """Test Shaker AST can be serialized to JSON."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -294,11 +281,11 @@ def test_shaker_v2_ast_json_serialization():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Serialize to JSON
+
     ast_json = ast.to_json()
     ast_dict = json.loads(ast_json)
 
-    # Verify JSON structure
+
     assert "sheet" in ast_dict
     assert "items" in ast_dict
     assert ast_dict["sheet"]["thickness_mm"] == 19.0
@@ -306,10 +293,6 @@ def test_shaker_v2_ast_json_serialization():
 
 
 def test_shaker_v2_end_to_end_pipeline():
-    """Test complete pipeline: params → AST → RemovalIntent → planner → G-code.
-
-    This is the flagship Stage 10 validation test demonstrating the full v2 pipeline.
-    """
     from cam.config import Config
     from cam.model.machine import Machine
     from cam.model.material import Material
@@ -318,7 +301,7 @@ def test_shaker_v2_end_to_end_pipeline():
     from cam.post.gcode import write_gcode
     from adapters.removal_to_planner import removal_intents_to_v1_hints
 
-    # 1. Start with template parameters (could come from natural language)
+
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -328,14 +311,14 @@ def test_shaker_v2_end_to_end_pipeline():
     }
     sheet_thickness_mm = 19.0
 
-    # 2. Expand to AST
+
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=sheet_thickness_mm)
 
-    # Verify AST structure
-    assert len(ast.items) == 2  # profile + pocket
+
+    assert len(ast.items) == 2
     assert ast.sheet.thickness_mm == sheet_thickness_mm
 
-    # 3. Convert AST items to RemovalIntent
+
     removal_intents = []
     for item in ast.items:
         if item.kind != "shape" or not item.feature or not item.geometry or not item.placement:
@@ -360,23 +343,23 @@ def test_shaker_v2_end_to_end_pipeline():
 
         removal_intents.append(intent)
 
-    # Verify RemovalIntent count and types
+
     assert len(removal_intents) == 2
     profile_intents = [r for r in removal_intents if r.metadata.get("hint_type") == "profile"]
     pocket_intents = [r for r in removal_intents if r.metadata.get("hint_type") == "pocket"]
     assert len(profile_intents) == 1
     assert len(pocket_intents) == 1
 
-    # 4. Convert RemovalIntent to v1 hints
+
     hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
 
-    # Verify hints structure
+
     assert "profiles" in hints
     assert "pockets" in hints
     assert len(hints["profiles"]) == 1
     assert len(hints["pockets"]) == 1
 
-    # 5. Plan passes using v1 planner
+
     tool_db = [
         {
             "name": "1/8\" End Mill",
@@ -409,25 +392,25 @@ def test_shaker_v2_end_to_end_pipeline():
         safe_z=5.0,
     )
 
-    # Verify passes were generated
+
     assert len(passes) > 0
     assert summary is not None
 
-    # Safety verification
+
     for pass_dict in passes:
         assert "setup" in pass_dict
         setup = pass_dict["setup"]
         assert setup.safe_z == 5.0
         assert setup.stock.thickness_mm == sheet_thickness_mm
 
-        # Verify moves respect safe-Z
+
         for move in pass_dict["moves"]:
             if "z" in move:
-                # Retract moves should be at safe-Z or above
+
                 if move.get("kind") == "retract" or move.get("retract"):
                     assert move["z"] >= setup.safe_z, f"Unsafe retract: {move['z']} < {setup.safe_z}"
 
-    # 6. Generate G-code from passes
+
     all_gcode_lines = []
     for pass_dict in passes:
         moves = pass_dict["moves"]
@@ -439,32 +422,32 @@ def test_shaker_v2_end_to_end_pipeline():
             unit="mm",
             prec=3,
             safe_z=5.0,
-            header=["G90", "G21"],  # Absolute positioning, mm units
-            footer=["M5", "M2"],     # Stop spindle, end program
+            header=["G90", "G21"],
+            footer=["M5", "M2"],
         )
 
         all_gcode_lines.extend(gcode.split("\n"))
 
-    # Verify G-code was generated
+
     assert len(all_gcode_lines) > 0
 
-    # Verify G-code safety
+
     for line in all_gcode_lines:
         line = line.strip()
-        # Check for Z moves
+
         if line.startswith("G") and "Z" in line:
-            # Parse Z value (basic check - real validation would be more sophisticated)
+
             parts = line.split()
             for part in parts:
                 if part.startswith("Z"):
                     try:
                         z_val = float(part[1:])
-                        # Ensure we never go deeper than stock thickness (negative Z)
+
                         assert z_val >= -sheet_thickness_mm - 1.0, f"Unsafe Z depth: {z_val} deeper than stock {sheet_thickness_mm}mm"
                     except ValueError:
-                        pass  # Non-numeric Z, skip
+                        pass
 
-    # Test completed successfully - full pipeline validated
+
     print(f"\n✓ End-to-end pipeline validated:")
     print(f"  - AST items: {len(ast.items)}")
     print(f"  - RemovalIntent regions: {len(removal_intents)}")
@@ -473,7 +456,6 @@ def test_shaker_v2_end_to_end_pipeline():
 
 
 def test_shaker_v2_removal_intent_dump():
-    """Test RemovalIntent dump with region counts verification."""
     params = {
         "outer_w": 400.0,
         "outer_h": 600.0,
@@ -484,7 +466,7 @@ def test_shaker_v2_removal_intent_dump():
 
     ast = Shaker.expand_to_ast(params, sheet_thickness_mm=19.0)
 
-    # Convert to RemovalIntent
+
     removal_intents = []
     for item in ast.items:
         if item.kind != "shape" or not item.feature or not item.geometry or not item.placement:
@@ -509,7 +491,7 @@ def test_shaker_v2_removal_intent_dump():
 
         removal_intents.append(intent)
 
-    # Verify region counts and types
+
     region_counts = {
         "profile": 0,
         "pocket": 0,
@@ -522,13 +504,13 @@ def test_shaker_v2_removal_intent_dump():
         if hint_type in region_counts:
             region_counts[hint_type] += 1
 
-    # Expected: 1 outer profile + 1 panel pocket
+
     assert region_counts["profile"] == 1, f"Expected 1 profile, got {region_counts['profile']}"
     assert region_counts["pocket"] == 1, f"Expected 1 pocket, got {region_counts['pocket']}"
     assert region_counts["hole"] == 0
     assert region_counts["engrave"] == 0
 
-    # Verify depths
+
     for intent in removal_intents:
         depth = intent.depth_mm()
         assert depth > 0.0, f"RemovalIntent depth must be positive, got {depth}"

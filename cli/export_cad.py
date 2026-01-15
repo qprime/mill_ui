@@ -1,9 +1,3 @@
-"""CLI tool for exporting STL models for visual validation.
-
-Usage:
-    python -m cli.export_cad --input door.pml --out out/
-    python -m cli.export_cad --input door.json --kerf 3.175 --out out/
-"""
 
 from __future__ import annotations
 
@@ -20,19 +14,18 @@ from cad.export.stl import export_stl
 
 
 def main():
-    """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Export STL models for visual validation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Basic export
+
   python -m cli.export_cad --input door.pml --out out/
 
-  # With kerf compensation
+
   python -m cli.export_cad --input door.pml --kerf 3.175 --out out/
 
-  # High quality mesh (more circle segments)
+
   python -m cli.export_cad --input door.pml --quality high --out out/
 
 Output file naming:
@@ -84,7 +77,7 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
     args = parser.parse_args()
 
     try:
-        # Validate input file exists
+
         input_path = Path(args.input)
         if not input_path.exists():
             print(f"Error: Input file not found: {args.input}", file=sys.stderr)
@@ -93,7 +86,7 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
             print(f"Error: Input path is not a file: {args.input}", file=sys.stderr)
             sys.exit(1)
 
-        # Parse input to LayoutAST
+
         input_suffix = input_path.suffix.lower()
         if input_suffix == ".json":
             ast = LayoutAST.from_json(str(input_path))
@@ -103,11 +96,11 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
                 comp_ast = parse_compositional_pml(input_text)
                 ast = resolve_layout(comp_ast)
             else:
-                # Try flat PML first, then compositional if it fails
+
                 try:
                     ast = parse_pml(input_text)
                 except PMLParseError as e:
-                    # Check if it might be compositional PML
+
                     if any(keyword in input_text for keyword in ["component", "frame", "inset", "grid", "split"]):
                         print(f"Hint: This looks like compositional PML. Try adding --compositional flag", file=sys.stderr)
                     raise
@@ -116,16 +109,16 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
             print("Supported formats: .pml, .txt, .json", file=sys.stderr)
             sys.exit(1)
 
-        # Convert to shape dicts
+
         shapes = items_to_shape_dicts(ast.items)
 
-        # Prepare output directory and basename
+
         output_dir = Path(args.out)
         output_dir.mkdir(parents=True, exist_ok=True)
         basename = input_path.stem
         output_stl = output_dir / f"{basename}.stl"
 
-        # Export to STL
+
         print(f"Exporting STL...", file=sys.stderr)
         print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
         print(f"  Shapes: {len(shapes)}", file=sys.stderr)
@@ -145,7 +138,7 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
         print(f"PML Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        # Check if it's a compositional parse error
+
         if e.__class__.__name__ == "ParseError" and "compositional_parser" in str(type(e).__module__):
             print(f"Compositional PML Parse Error: {e}", file=sys.stderr)
             sys.exit(1)

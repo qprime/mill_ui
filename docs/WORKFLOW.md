@@ -3,28 +3,35 @@
 ## Complete Pipeline Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           INPUT FORMATS                                      │
-├─────────────────┬─────────────────────┬──────────────────────────────────────┤
-│  Flat PML       │  Compositional PML  │  JSON / Python Templates             │
-│  (explicit xy)  │  (layout managers)  │  (programmatic)                      │
-└────────┬────────┴──────────┬──────────┴──────────────┬───────────────────────┘
-         │                   │                         │
-         │ pml.parser        │ pml.compositional_parser│ layout_ast.parsers
-         │ parse_pml()       │ parse_compositional_pml()│ LayoutAST.from_json()
-         │                   │                         │ Template.expand_to_ast()
-         ▼                   ▼                         │
-    ┌────────────────────────────────────────┐         │
-    │   CompositionalLayoutAST               │         │
-    │   (hierarchical, relative positioning) │         │
-    └────────────────┬───────────────────────┘         │
-                     │                                 │
-                     │ resolution.layout_resolver      │
-                     │ resolve_layout()                │
-                     ▼                                 │
-         ┌───────────────────────────────────┐         │
-         │       LayoutAST (FLAT)            │◄────────┘
-         │  Canonical semantic structure     │
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                               INPUT FORMATS                                          │
+├────────────────┬──────────────────┬─────────────────────┬────────────────────────────┤
+│  Flat PML      │ Compositional PML│ JSON/Python Template│  Nest PML (.nest.pml)      │
+│  (explicit xy) │ (layout managers)│ (programmatic)      │  (bin-packing jobs)        │
+└───────┬────────┴────────┬─────────┴─────────┬───────────┴────────────┬───────────────┘
+        │                 │                   │                        │
+        │ pml.parser      │ pml.comp_parser   │ layout_ast.parsers     │ pml.nest_parser
+        │ parse_pml()     │ parse_comp_pml()  │ LayoutAST.from_json()  │ parse_nest_pml()
+        │                 │                   │ Template.expand_to_ast()│
+        ▼                 ▼                   │                        ▼
+    ┌────────────────────────────────────────┐         │      ┌─────────────────────────┐
+    │   CompositionalLayoutAST               │         │      │       NestJob           │
+    │   (hierarchical, relative positioning) │         │      │   (parts, quantities,   │
+    └────────────────┬───────────────────────┘         │      │    sheet, algorithm)    │
+                     │                                 │      └───────────┬─────────────┘
+                     │ resolution.layout_resolver      │                  │
+                     │ resolve_layout()                │                  │ nesting.api
+                     ▼                                 │                  │ nest_and_generate()
+                                                       │                  │
+                                                       │      ┌───────────▼─────────────┐
+                                                       │      │    Nesting Algorithms   │
+                                                       │      │  • guillotine (fast)    │
+                                                       │      │  • maxrects (better)    │
+                                                       │      └───────────┬─────────────┘
+                                                       │                  │
+         ┌───────────────────────────────────┐         │                  │
+         │       LayoutAST (FLAT)            │◄────────┴──────────────────┘
+         │  Canonical semantic structure     │   (multiple LayoutASTs from nesting)
          │  - Sheet (dimensions)             │
          │  - Items (shapes, features)       │
          │  - Placement (absolute xy)        │
@@ -168,14 +175,17 @@
 - **Compositional PML**: Relative positioning with layout managers (`inset 50mm`, `frame 50mm`)
 - **JSON**: Direct AST serialization
 - **Python Templates**: Programmatic generation (`Shaker.expand_to_ast()`)
+- **Nest PML**: Bin-packing job specification (`.nest.pml` files)
 
 **Outputs:**
 - `CompositionalLayoutAST` (if using compositional PML)
 - `LayoutAST` (flat, canonical form)
+- `NestJob` (if using nest PML, then processed through nesting algorithms)
 
 **Key Files:**
 - `pml/parser.py` - Flat PML parser
 - `pml/compositional_parser.py` - Compositional PML parser
+- `pml/nest_parser.py` - Nest PML parser for `.nest.pml` files
 - `layout_ast/parsers.py` - JSON parser
 - `templates/*.py` - Template generators
 
@@ -195,6 +205,47 @@
 
 **Key Files:**
 - `resolution/layout_resolver.py`
+
+---
+
+### Stage 2B: Nesting (Alternative Path)
+**Purpose:** Optimize part placement for production runs
+
+**Process:**
+- Parse `.nest.pml` files specifying parts, quantities, and sheet specifications
+- Run bin-packing algorithm (guillotine or maxrects)
+- Expand templates (e.g., Shaker) to full geometry
+- Generate one `LayoutAST` per sheet
+
+**Inputs:** `NestJob` from nest PML parser
+**Outputs:** `list[LayoutAST]` (one per sheet)
+
+**Algorithms:**
+- **Guillotine**: Fast, simple guillotine cuts. Best for uniform parts.
+- **MaxRects**: Higher utilization with free rectangle tracking. Best for mixed sizes.
+
+**Key Files:**
+- `nesting/api.py` - High-level `nest_parts()` and `nest_and_generate()` functions
+- `nesting/guillotine.py` - Guillotine bin-packing algorithm
+- `nesting/maxrects.py` - MaxRects bin-packing algorithm
+- `nesting/sheet_packer.py` - Multi-sheet packing orchestration
+- `nesting/template_expander.py` - Expand templates to Items
+- `nesting/layout_generator.py` - Convert nesting results to LayoutAST/PML
+- `nesting/validation.py` - Nesting-specific validation
+
+**Example Usage:**
+```bash
+# CLI tool
+PYTHONPATH=. python3 tools/nest.py cabinet_job.nest.pml -o output/
+
+# Programmatic
+from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from nesting import nest_and_generate
+
+job = parse_nest_pml(open("job.nest.pml").read())
+result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
+# result["output"] is list[LayoutAST], one per sheet
+```
 
 ---
 
@@ -302,6 +353,7 @@
 | **Compositional PML** | Complex layouts, reusable components | Parametric designs, grid layouts |
 | **JSON** | Programmatic generation | AI/tool output, data-driven designs |
 | **Python Templates** | Standardized components | Shaker doors, mounting plates, etc. |
+| **Nest PML** | Production runs, multi-sheet jobs | Cutting many parts from stock sheets |
 
 ### ✅ When to Export CAD vs G-code?
 
@@ -365,8 +417,20 @@
 ### Input Processing
 - `pml/parser.py` - Flat PML → LayoutAST
 - `pml/compositional_parser.py` - Compositional PML → CompositionalLayoutAST
+- `pml/nest_parser.py` - Nest PML → NestJob
 - `resolution/layout_resolver.py` - CompositionalLayoutAST → LayoutAST
 - `templates/shaker.py` - Parametric template example
+
+### Nesting Module
+- `nesting/api.py` - High-level nesting API
+- `nesting/types.py` - Nesting data structures (PartSpec, SheetSpec, NestingResult)
+- `nesting/guillotine.py` - Guillotine bin-packing algorithm
+- `nesting/maxrects.py` - MaxRects bin-packing algorithm
+- `nesting/sheet_packer.py` - Multi-sheet packing
+- `nesting/template_expander.py` - Template expansion for nested parts
+- `nesting/layout_generator.py` - NestingResult → LayoutAST/PML
+- `nesting/validation.py` - Nesting validation
+- `tools/nest.py` - CLI tool for nesting
 
 ### Core Pipeline
 - `adapters/ast_to_removal.py` - LayoutAST → RemovalIntent (canonical)
@@ -393,6 +457,8 @@
 - All core pipeline stages working
 - Native backend compiled and tested
 - Pocket cleanup pass (F001) implemented
+- Nesting module with guillotine and maxrects algorithms
+- Profile cuts with holding tabs (F004)
 
 ### 🟡 Partially Working
 - STL export (panel_stl.py functional, undocumented)
@@ -431,4 +497,4 @@
 
 ---
 
-Last Updated: 2025-12-19
+Last Updated: 2026-01-15

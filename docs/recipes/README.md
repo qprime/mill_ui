@@ -32,6 +32,11 @@ Practical examples showing complete workflows from design to G-code.
 - [14_corner_cleanup_multi_tool.md](14_corner_cleanup_multi_tool.md) - Multi-tool corner cleanup for rectangular pockets
 - [15_profile_with_tabs.md](15_profile_with_tabs.md) - Holding tabs for profile cuts (prevents part movement)
 
+### Sheet Nesting Recipes
+- [16_sheet_layout_nesting/](16_sheet_layout_nesting/) - Basic sheet nesting concepts
+- [17_nesting_guillotine/](17_nesting_guillotine/) - Guillotine bin-packing algorithm (fast, simple)
+- [18_nesting_maxrects/](18_nesting_maxrects/) - MaxRects bin-packing algorithm (better utilization)
+
 ## Reference Outputs
 
 Many recipes include complete reference outputs in their `output/` subdirectories:

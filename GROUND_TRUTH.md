@@ -2,7 +2,7 @@
 
 **Purpose:** Factual documentation of how the system actually works today, extracted from source code.
 
-**Date:** 2025-12-19
+**Date:** 2026-01-15
 
 **Scope:** Complete pipeline from PML input to G-code output, data models, coordinate systems, validation coverage, and test infrastructure.
 
@@ -18,7 +18,8 @@
 6. [Golden End-to-End Trace](#6-golden-end-to-end-trace)
 7. [Duplicate or Legacy Paths](#7-duplicate-or-legacy-paths)
 8. [Test Coverage Map](#8-test-coverage-map)
-9. [Summary for Developers](#summary-for-developers)
+9. [Nesting Module](#9-nesting-module)
+10. [Summary for Developers](#summary-for-developers)
 
 ---
 
@@ -670,6 +671,166 @@ from cli.introspect import dump_ast, dump_removal_intent
 **Impact:** Tests will fail on import. This module is documented in README but not implemented.
 
 **Status:** Module does not exist, tests cannot run.
+
+---
+
+## 9. Nesting Module
+
+The nesting module provides bin-packing functionality for optimizing part placement on stock sheets.
+
+### 9.1 nesting/types.py - Nesting Data Structures
+
+**PartSpec** ([nesting/types.py:14-62](nesting/types.py#L14-L62)):
+```python
+@dataclass(frozen=True)
+class PartSpec:
+    """Specification for a part to be nested."""
+    name: str                           # Human-readable identifier
+    width_mm: float                     # Bounding box width
+    height_mm: float                    # Bounding box height
+    quantity: int = 1                   # How many to cut
+    template: str | None = None         # Optional template name ("Shaker")
+    template_params: dict[str, Any] | None = None  # Template parameters
+    allow_rotation: bool = True         # Can rotate 90°?
+```
+
+**SheetSpec** ([nesting/types.py:69-164](nesting/types.py#L69-L164)):
+```python
+@dataclass(frozen=True)
+class SheetSpec:
+    """Specification for stock sheets."""
+    width_mm: float                     # Sheet width
+    height_mm: float                    # Sheet height
+    thickness_mm: float                 # Material thickness
+    margin_mm: float = 10.0             # No-cut zone on edges
+    kerf_mm: float | None = None        # Cutter diameter (default: 6.35mm)
+    gap_margin_mm: float = 0.0          # Extra margin beyond kerf
+```
+
+**NestedPart** ([nesting/types.py:167-248](nesting/types.py#L167-L248)):
+```python
+@dataclass(frozen=True)
+class NestedPart:
+    """A part placed on a sheet during nesting."""
+    part_spec: PartSpec                 # Which part
+    x_mm: float                         # Center X position
+    y_mm: float                         # Center Y position
+    rotated: bool = False               # 90° rotation applied?
+    instance_id: int = 0                # Which instance (0..quantity-1)
+```
+
+**SheetLayout** ([nesting/types.py:251-305](nesting/types.py#L251-L305)):
+```python
+@dataclass(frozen=True)
+class SheetLayout:
+    """Complete layout for one sheet."""
+    sheet_spec: SheetSpec
+    placements: tuple[NestedPart, ...]
+    sheet_index: int = 0                # 0-based sheet number
+```
+
+**NestingResult** ([nesting/types.py:308-386](nesting/types.py#L308-L386)):
+```python
+@dataclass(frozen=True)
+class NestingResult:
+    """Complete nesting solution across multiple sheets."""
+    sheets: tuple[SheetLayout, ...]
+    unplaced_parts: tuple[PartSpec, ...] = ()  # Parts that didn't fit
+```
+
+### 9.2 pml/nest_parser.py - Nest PML Parser
+
+**NestPart** ([pml/nest_parser.py:29-37](pml/nest_parser.py#L29-L37)):
+```python
+@dataclass
+class NestPart:
+    """A part specification in a nesting job."""
+    name: str
+    width_mm: float
+    height_mm: float
+    quantity: int = 1
+    template: str | None = None
+    template_params: dict[str, float] = field(default_factory=dict)
+```
+
+**NestJob** ([pml/nest_parser.py:40-49](pml/nest_parser.py#L40-L49)):
+```python
+@dataclass
+class NestJob:
+    """A complete nesting job specification."""
+    algorithm: str                      # "guillotine" or "maxrects"
+    sheet_width_mm: float
+    sheet_height_mm: float
+    sheet_thickness_mm: float
+    kerf_mm: float = 6.35
+    margin_mm: float = 10.0
+    parts: list[NestPart] = field(default_factory=list)
+```
+
+### 9.3 Nesting Execution Path
+
+**Step 1: Parse .nest.pml**
+- **Entry function**: `parse_nest_pml(source: str)` in [pml/nest_parser.py:60](pml/nest_parser.py#L60)
+- **Input**: Nest PML text string
+- **Output**: `NestJob` dataclass
+
+**Step 2: Convert to API Parameters**
+- **Entry function**: `nest_job_to_api_params(job: NestJob)` in [pml/nest_parser.py:222](pml/nest_parser.py#L222)
+- **Input**: `NestJob`
+- **Output**: Dictionary for `nest_and_generate()`
+
+**Step 3: Run Nesting Algorithm**
+- **Entry function**: `nest_and_generate(**params)` in [nesting/api.py:137](nesting/api.py#L137)
+- **Algorithms**: `"guillotine"` (fast) or `"maxrects"` (better utilization)
+- **Output**: `dict` with `output` (list of `LayoutAST`), utilization metrics
+
+**Step 4: Process Through CAM Pipeline**
+- Each `LayoutAST` from nesting follows the standard execution path:
+- `LayoutAST → RemovalIntent → Planner Hints → CAM → G-code`
+
+### 9.4 Nesting API Functions
+
+**nest_parts()** ([nesting/api.py:42-134](nesting/api.py#L42-L134)):
+```python
+def nest_parts(
+    parts: list[dict[str, Any]],
+    sheet_width_mm: float,
+    sheet_height_mm: float,
+    sheet_thickness_mm: float,
+    margin_mm: float = 10.0,
+    kerf_mm: float | None = None,
+    gap_margin_mm: float = 0.0,
+    max_sheets: int | None = None,
+    validate: bool = True,
+    algorithm: str = "maxrects",
+) -> dict[str, Any]:
+    """Main API for nesting parts onto sheets."""
+```
+
+**nest_and_generate()** ([nesting/api.py:137-206](nesting/api.py#L137-L206)):
+```python
+def nest_and_generate(
+    parts: list[dict[str, Any]],
+    sheet_width_mm: float,
+    sheet_height_mm: float,
+    sheet_thickness_mm: float,
+    margin_mm: float = 10.0,
+    kerf_mm: float | None = None,
+    gap_margin_mm: float = 0.0,
+    output_format: str = "ast",  # "ast" or "pml"
+    algorithm: str = "maxrects",
+) -> dict[str, Any]:
+    """Nest parts and generate output ready for CAM."""
+```
+
+### 9.5 Nesting Validation
+
+From [nesting/validation.py](nesting/validation.py):
+
+1. **Overlap detection**: Checks all placements for bounding box overlap
+2. **Bounds checking**: Ensures placements stay within sheet margins
+3. **Kerf gap verification**: Validates spacing between adjacent parts
+4. **Low utilization warning**: Warns if utilization < 50%
 
 ---
 

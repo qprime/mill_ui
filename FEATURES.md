@@ -388,6 +388,126 @@ rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 heigh
 
 ---
 
+## F005: Sheet Nesting (Bin-Packing)
+
+**Status:** 🟢 Reviewed (Production)
+
+**Priority:** High
+
+**Architecture Layer:** Pre-Pipeline (generates LayoutAST from part specifications)
+
+### Problem Statement
+
+Production runs require cutting many parts from stock sheets. Manual layout is:
+- Time-consuming for large quantities
+- Suboptimal material utilization
+- Error-prone when placing many parts
+
+Sheet nesting solves this by automatically placing parts on sheets to minimize waste.
+
+### Design
+
+**Pipeline Location:**
+```
+.nest.pml → NestJob → Nesting Algorithm → list[LayoutAST] → standard CAM pipeline
+```
+
+**Syntax:**
+```pml
+nest maxrects
+    sheet 1232mm 1245mm 19mm
+    kerf 6.35mm
+    margin 10mm
+
+    parts
+        door 457mm 597mm x20
+            template Shaker
+                stile_w 57mm
+                rail_h 57mm
+                panel_recess 6mm
+
+        panel 305mm 203mm x15
+```
+
+### Implementation
+
+**Algorithms:**
+- **Guillotine** ([nesting/guillotine.py](nesting/guillotine.py)): Fast, simple guillotine cuts
+- **MaxRects** ([nesting/maxrects.py](nesting/maxrects.py)): Better utilization with free rectangle tracking
+
+**Data Structures:** ([nesting/types.py](nesting/types.py))
+- `PartSpec`: Part dimensions, quantity, optional template
+- `SheetSpec`: Sheet dimensions, margins, kerf
+- `NestedPart`: Placed part with position and rotation
+- `SheetLayout`: All placements on one sheet
+- `NestingResult`: Complete multi-sheet solution
+
+**API Functions:** ([nesting/api.py](nesting/api.py))
+- `nest_parts()`: Low-level nesting API returning result dict
+- `nest_and_generate()`: High-level API returning LayoutAST or PML
+
+**Parser:** ([pml/nest_parser.py](pml/nest_parser.py))
+- `parse_nest_pml()`: Parse `.nest.pml` files to `NestJob`
+- `nest_job_to_api_params()`: Convert `NestJob` to API parameters
+
+**CLI Tool:** ([tools/nest.py](tools/nest.py))
+```bash
+PYTHONPATH=. python3 tools/nest.py job.nest.pml -o output/
+```
+
+### Test Coverage
+
+**Test files:**
+- `tests/test_nest_parser.py` - Parser tests
+- `tests/test_guillotine.py` - Guillotine algorithm tests
+- `tests/test_maxrects.py` - MaxRects algorithm tests
+- `tests/test_nesting_api.py` - API integration tests
+
+**Test results:** ✅ All passing
+
+### Acceptance Criteria
+
+- [x] Parse `.nest.pml` format with parts, quantities, templates
+- [x] Guillotine algorithm implemented and tested
+- [x] MaxRects algorithm implemented and tested
+- [x] Multi-sheet support when parts don't fit on one sheet
+- [x] Template expansion (Shaker template supported)
+- [x] Generate LayoutAST or PML output
+- [x] Validation (overlaps, bounds, kerf gaps)
+- [x] CLI tool for command-line usage
+- [x] Comprehensive test coverage
+- [x] Recipe documentation (Recipes 16, 17, 18)
+
+### Implementation Notes
+
+**Implementation Date:** 2026-01-13
+
+**Key Design Decisions:**
+
+1. **Two algorithms available:**
+   - Guillotine: ~62% utilization, fast
+   - MaxRects: ~83% utilization, slower but better for production
+
+2. **Template integration:**
+   - Parts can specify templates (e.g., "Shaker")
+   - Templates expanded to full Items during LayoutAST generation
+
+3. **Center-based coordinates:**
+   - Matches LayoutAST convention
+   - Simplifies rotation handling
+
+4. **Validation layer:**
+   - Checks overlaps, bounds, kerf gaps
+   - Warns on low utilization (<50%)
+
+### Documentation
+
+- **Recipe 16:** [docs/recipes/16_sheet_layout_nesting/](docs/recipes/16_sheet_layout_nesting/) - Basic nesting
+- **Recipe 17:** [docs/recipes/17_nesting_guillotine/](docs/recipes/17_nesting_guillotine/) - Guillotine algorithm
+- **Recipe 18:** [docs/recipes/18_nesting_maxrects/](docs/recipes/18_nesting_maxrects/) - MaxRects algorithm
+
+---
+
 ## Feature Template (for future features)
 
 ```markdown
@@ -1003,4 +1123,4 @@ Holes (through) → Visible as cylinders through material
 
 ---
 
-**Last Updated:** 2025-12-19
+**Last Updated:** 2026-01-15

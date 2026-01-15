@@ -492,6 +492,6 @@ This guide focuses on **how to work with** the architecture, not **why it exists
 
 ---
 
-**Last Updated:** 2025-12-17
+**Last Updated:** 2026-01-15
 **Complementary Doc:** [README.md](README.md) for architecture
 **Status:** Production (current architecture)

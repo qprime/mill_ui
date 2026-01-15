@@ -1,0 +1,18 @@
+[Unit]
+Description=mill_ui MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=squinlan
+WorkingDirectory=/home/squinlan/Code/mill_ui
+Environment="PYTHONPATH=/home/squinlan/Code/mill_ui"
+Environment="MILL_UI_OUTPUT_DIR=/home/squinlan/cliff_ai/memories/cam_projects/mill_ui"
+ExecStart=/home/squinlan/Code/mill_ui/venv/bin/python -m mill_mcp.server
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

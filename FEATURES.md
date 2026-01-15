@@ -409,7 +409,7 @@ Sheet nesting solves this by automatically placing parts on sheets to minimize w
 
 **Pipeline Location:**
 ```
-.nest.pml → NestJob → Nesting Algorithm → list[LayoutAST] → standard CAM pipeline
+.nest → NestJob → Nesting Algorithm → list[LayoutAST] → standard CAM pipeline
 ```
 
 **Syntax:**
@@ -447,12 +447,12 @@ nest maxrects
 - `nest_and_generate()`: High-level API returning LayoutAST or PML
 
 **Parser:** ([pml/nest_parser.py](pml/nest_parser.py))
-- `parse_nest_pml()`: Parse `.nest.pml` files to `NestJob`
+- `parse_nest_pml()`: Parse `.nest` files to `NestJob`
 - `nest_job_to_api_params()`: Convert `NestJob` to API parameters
 
 **CLI Tool:** ([tools/nest.py](tools/nest.py))
 ```bash
-PYTHONPATH=. python3 tools/nest.py job.nest.pml -o output/
+PYTHONPATH=. python3 tools/nest.py job.nest -o output/
 ```
 
 ### Test Coverage
@@ -467,7 +467,7 @@ PYTHONPATH=. python3 tools/nest.py job.nest.pml -o output/
 
 ### Acceptance Criteria
 
-- [x] Parse `.nest.pml` format with parts, quantities, templates
+- [x] Parse `.nest` format with parts, quantities, templates
 - [x] Guillotine algorithm implemented and tested
 - [x] MaxRects algorithm implemented and tested
 - [x] Multi-sheet support when parts don't fit on one sheet

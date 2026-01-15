@@ -45,7 +45,7 @@ For deep dives:
 - **[adapters/ast_to_removal.py](adapters/ast_to_removal.py)** - AST → IR conversion
 
 For nesting:
-- **[pml/nest_parser.py](pml/nest_parser.py)** - `.nest.pml` parser
+- **[pml/nest_parser.py](pml/nest_parser.py)** - `.nest` parser
 - **[nesting/api.py](nesting/api.py)** - High-level nesting API
 - **[docs/recipes/18_nesting_maxrects/](docs/recipes/18_nesting_maxrects/)** - Complete nesting example
 
@@ -266,14 +266,14 @@ __all__ = ["Shaker", "MountingPlate"]
 **When:** You have multiple parts to cut from sheet material and want to minimize waste.
 
 **Steps:**
-1. Create a `.nest.pml` file specifying parts, quantities, and sheet size
+1. Create a `.nest` file specifying parts, quantities, and sheet size
 2. Run nesting to generate PML layouts
 3. Process generated PML through the CAM pipeline
 
 **Example:**
 
 ```pml
-# job.nest.pml
+# job.nest
 nest maxrects
     sheet 1232mm 1245mm 19mm
     kerf 6.35mm
@@ -295,7 +295,7 @@ from nesting import nest_and_generate
 from pml.formatter import format_pml
 
 # Parse and run nesting
-job = parse_nest_pml(open("job.nest.pml").read())
+job = parse_nest_pml(open("job.nest").read())
 result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 
 # result["output"] is list[LayoutAST], one per sheet
@@ -304,7 +304,7 @@ for i, ast in enumerate(result["output"]):
     open(f"sheet_{i+1}.pml", "w").write(pml_text)
 ```
 
-**Why this matters:** Nesting is essential for production efficiency. The `.nest.pml` format keeps job specifications readable while the algorithms optimize material usage.
+**Why this matters:** Nesting is essential for production efficiency. The `.nest` format keeps job specifications readable while the algorithms optimize material usage.
 
 ## Critical Invariants (Don't Break These)
 

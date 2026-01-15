@@ -1,5 +1,5 @@
 {
-  "source": "cabinet_job.nest.pml",
+  "source": "cabinet_job.nest",
   "algorithm": "maxrects",
   "nesting": {
     "total_sheets": 6,

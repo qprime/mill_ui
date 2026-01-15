@@ -48,7 +48,7 @@ def main():
     print("=" * 60)
 
 
-    nest_pml_path = recipe_dir / "cabinet_job.nest.pml"
+    nest_pml_path = recipe_dir / "cabinet_job.nest"
     print(f"\nReading {nest_pml_path.name}...")
 
     source = nest_pml_path.read_text()
@@ -108,7 +108,7 @@ def main():
 
 
         header = f"# {sheet_name}.pml\n"
-        header += f"# Generated from cabinet_job.nest.pml\n"
+        header += f"# Generated from cabinet_job.nest\n"
         header += f"# Algorithm: {job.algorithm}\n"
         header += f"# Items: {len(ast.items)}\n"
         header += "\n"
@@ -120,7 +120,7 @@ def main():
     print("\n--- CAM Processing ---")
 
     metrics = {
-        "source": "cabinet_job.nest.pml",
+        "source": "cabinet_job.nest",
         "algorithm": job.algorithm,
         "nesting": {
             "total_sheets": result["total_sheets"],

@@ -1,5 +1,5 @@
 # sheet_4.pml
-# Generated from cabinet_job.nest.pml
+# Generated from cabinet_job.nest
 # Algorithm: maxrects
 # Items: 10
 

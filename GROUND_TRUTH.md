@@ -769,7 +769,7 @@ class NestJob:
 
 ### 9.3 Nesting Execution Path
 
-**Step 1: Parse .nest.pml**
+**Step 1: Parse .nest**
 - **Entry function**: `parse_nest_pml(source: str)` in [pml/nest_parser.py:60](pml/nest_parser.py#L60)
 - **Input**: Nest PML text string
 - **Output**: `NestJob` dataclass

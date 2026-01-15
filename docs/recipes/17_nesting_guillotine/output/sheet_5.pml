@@ -1,5 +1,5 @@
 # sheet_5.pml
-# Generated from cabinet_job.nest.pml
+# Generated from cabinet_job.nest
 # Algorithm: guillotine
 # Items: 10
 

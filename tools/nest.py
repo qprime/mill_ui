@@ -16,9 +16,9 @@ from nesting.layout_generator import sheet_layout_to_ast
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run nesting from .nest.pml and output PML layouts"
+        description="Run nesting from .nest file and output PML layouts"
     )
-    parser.add_argument("input", help="Input .nest.pml file")
+    parser.add_argument("input", help="Input .nest file")
     parser.add_argument(
         "-o", "--output",
         default=".",

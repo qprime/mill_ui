@@ -6,7 +6,7 @@
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                               INPUT FORMATS                                          │
 ├────────────────┬──────────────────┬─────────────────────┬────────────────────────────┤
-│  Flat PML      │ Compositional PML│ JSON/Python Template│  Nest PML (.nest.pml)      │
+│  Flat PML      │ Compositional PML│ JSON/Python Template│  Nest PML (.nest)      │
 │  (explicit xy) │ (layout managers)│ (programmatic)      │  (bin-packing jobs)        │
 └───────┬────────┴────────┬─────────┴─────────┬───────────┴────────────┬───────────────┘
         │                 │                   │                        │
@@ -175,7 +175,7 @@
 - **Compositional PML**: Relative positioning with layout managers (`inset 50mm`, `frame 50mm`)
 - **JSON**: Direct AST serialization
 - **Python Templates**: Programmatic generation (`Shaker.expand_to_ast()`)
-- **Nest PML**: Bin-packing job specification (`.nest.pml` files)
+- **Nest PML**: Bin-packing job specification (`.nest` files)
 
 **Outputs:**
 - `CompositionalLayoutAST` (if using compositional PML)
@@ -185,7 +185,7 @@
 **Key Files:**
 - `pml/parser.py` - Flat PML parser
 - `pml/compositional_parser.py` - Compositional PML parser
-- `pml/nest_parser.py` - Nest PML parser for `.nest.pml` files
+- `pml/nest_parser.py` - Nest PML parser for `.nest` files
 - `layout_ast/parsers.py` - JSON parser
 - `templates/*.py` - Template generators
 
@@ -212,7 +212,7 @@
 **Purpose:** Optimize part placement for production runs
 
 **Process:**
-- Parse `.nest.pml` files specifying parts, quantities, and sheet specifications
+- Parse `.nest` files specifying parts, quantities, and sheet specifications
 - Run bin-packing algorithm (guillotine or maxrects)
 - Expand templates (e.g., Shaker) to full geometry
 - Generate one `LayoutAST` per sheet
@@ -236,13 +236,13 @@
 **Example Usage:**
 ```bash
 # CLI tool
-PYTHONPATH=. python3 tools/nest.py cabinet_job.nest.pml -o output/
+PYTHONPATH=. python3 tools/nest.py cabinet_job.nest -o output/
 
 # Programmatic
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
 from nesting import nest_and_generate
 
-job = parse_nest_pml(open("job.nest.pml").read())
+job = parse_nest_pml(open("job.nest").read())
 result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 # result["output"] is list[LayoutAST], one per sheet
 ```

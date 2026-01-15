@@ -323,9 +323,9 @@ When adding new functionality, use this decision tree:
 
 mill_ui includes a nesting module for bin-packing parts onto sheets. This is useful for production runs where you need to cut many parts from material sheets with minimal waste.
 
-### .nest.pml Format
+### .nest Format
 
-The `.nest.pml` format specifies nesting jobs in a block-based syntax:
+The `.nest` format specifies nesting jobs in a block-based syntax:
 
 ```pml
 nest maxrects
@@ -358,7 +358,7 @@ nest maxrects
 
 **CLI tool:**
 ```bash
-PYTHONPATH=. python3 tools/nest.py cabinet_job.nest.pml -o output/
+PYTHONPATH=. python3 tools/nest.py cabinet_job.nest -o output/
 ```
 
 **Programmatic:**
@@ -366,7 +366,7 @@ PYTHONPATH=. python3 tools/nest.py cabinet_job.nest.pml -o output/
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
 from nesting import nest_and_generate
 
-source = open("cabinet_job.nest.pml").read()
+source = open("cabinet_job.nest").read()
 job = parse_nest_pml(source)
 params = nest_job_to_api_params(job)
 result = nest_and_generate(**params, output_format="ast")
@@ -386,7 +386,7 @@ Nesting produces:
 - **Recipe 17**: [docs/recipes/17_nesting_guillotine/](docs/recipes/17_nesting_guillotine/) - Guillotine algorithm example
 - **Recipe 18**: [docs/recipes/18_nesting_maxrects/](docs/recipes/18_nesting_maxrects/) - MaxRects algorithm example
 
-Both recipes demonstrate the complete workflow: `.nest.pml` → nesting → `.pml` layouts → CAM → G-code.
+Both recipes demonstrate the complete workflow: `.nest` → nesting → `.pml` layouts → CAM → G-code.
 
 ## Directory Structure
 
@@ -413,7 +413,7 @@ mill_ui/
 │   ├── formatter.py            # Flat PML formatter
 │   ├── compositional_parser.py # Compositional PML parser (layout managers)
 │   ├── compositional_formatter.py  # Compositional PML formatter
-│   └── nest_parser.py          # Nest PML parser (.nest.pml format)
+│   └── nest_parser.py          # Nest PML parser (.nest format)
 ├── cli/                # Command-line tools
 │   ├── parse_compositional_pml.py  # PML parser CLI
 │   └── convert_layout.py           # JSON ↔ AST converter
@@ -439,7 +439,7 @@ mill_ui/
 │   ├── layout_generator.py     # Convert nesting results to LayoutAST/PML
 │   └── validation.py           # Nesting-specific validation (overlaps, bounds)
 ├── tools/              # CLI tools
-│   └── nest.py                 # Nesting CLI (reads .nest.pml, outputs .pml)
+│   └── nest.py                 # Nesting CLI (reads .nest, outputs .pml)
 ├── validation/         # IR validation (overlaps, constraints)
 │   ├── removal_checks.py       # Overlap, depth, toolability checks
 │   └── results.py              # ValidationResult dataclass

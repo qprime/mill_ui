@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -25,7 +26,7 @@ from layout_ast.layout import LayoutAST
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 from adapters.ast_to_cad import items_to_shape_dicts
-from validation.removal_checks import check_overlap, check_depth_feasibility, check_toolability
+from validation.removal_checks import check_overlap, check_depth_feasibility
 from nesting import nest_and_generate
 from cam.config import Config
 from cam.model.stock import Stock
@@ -35,7 +36,31 @@ from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
 from cad.export.stl import export_stl
 from export.blueprint_svg import render_blueprint_svg
-from templates import Shaker
+
+
+def _sanitize_job_name(name: str) -> str:
+    """Sanitize job name to prevent path traversal.
+
+    Only allows alphanumeric, underscore, and hyphen characters.
+    """
+    sanitized = re.sub(r"[^a-zA-Z0-9_-]", "_", name)
+    # Ensure non-empty
+    return sanitized or "job"
+
+
+def _safe_job_dir(output_dir: Path, job_name: str, timestamp: str) -> Path:
+    """Create job directory, ensuring it stays under output_dir."""
+    safe_name = _sanitize_job_name(job_name)
+    job_dir = output_dir / f"{safe_name}_{timestamp}"
+
+    # Verify resolved path is under output_dir
+    output_resolved = output_dir.resolve()
+    job_resolved = job_dir.resolve()
+    if not str(job_resolved).startswith(str(output_resolved)):
+        raise ValueError(f"Job directory would escape output directory: {job_name}")
+
+    job_dir.mkdir(parents=True, exist_ok=True)
+    return job_dir
 
 
 # Create the MCP server
@@ -73,10 +98,10 @@ def _run_cam_pipeline(
 
     Returns dict with output paths and metrics.
     """
-    # Create job subdirectory with timestamp
+    # Create job subdirectory with timestamp (sanitized)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    job_dir = output_dir / f"{job_name}_{timestamp}"
-    job_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = _sanitize_job_name(job_name)
+    job_dir = _safe_job_dir(output_dir, job_name, timestamp)
 
     results: dict[str, Any] = {
         "job_name": job_name,
@@ -94,7 +119,7 @@ def _run_cam_pipeline(
     }
 
     # Save PML record
-    pml_path = job_dir / f"{job_name}.pml"
+    pml_path = job_dir / f"{safe_name}.pml"
     pml_content = format_pml(ast)
     pml_path.write_text(pml_content)
     results["outputs"]["pml"] = str(pml_path)
@@ -114,13 +139,15 @@ def _run_cam_pipeline(
     for intent in intents:
         depth_result = check_depth_feasibility(intent, ast.sheet.thickness_mm)
         if depth_result.has_issues():
+            for error in depth_result.errors:
+                results["errors"].append(error.message)
             for warning in depth_result.warnings:
                 results["warnings"].append(warning.message)
 
     # Generate SVG blueprint
     try:
         svg_string = render_blueprint_svg(ast, intents, theme="dark")
-        svg_path = job_dir / f"{job_name}.svg"
+        svg_path = job_dir / f"{safe_name}.svg"
         svg_path.write_text(svg_string, encoding="utf-8")
         results["outputs"]["svg"] = str(svg_path)
     except Exception as e:
@@ -129,7 +156,7 @@ def _run_cam_pipeline(
     # Generate STL
     try:
         shapes = items_to_shape_dicts(ast.items)
-        stl_path = job_dir / f"{job_name}.stl"
+        stl_path = job_dir / f"{safe_name}.stl"
         export_stl(
             shapes=shapes,
             sheet_thickness_mm=ast.sheet.thickness_mm,
@@ -182,7 +209,7 @@ def _run_cam_pipeline(
 
         tool_diameter = pass_dict["setup"].tool.diameter
         pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
-        gcode_path = job_dir / f"{job_name}-{pass_name}.nc"
+        gcode_path = job_dir / f"{safe_name}-{pass_name}.nc"
         gcode_path.write_text(gcode)
 
         results["outputs"]["gcode"].append({

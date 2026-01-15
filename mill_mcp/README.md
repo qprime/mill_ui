@@ -42,15 +42,6 @@ Add to `~/.claude/mcp.json`:
 }
 ```
 
-### 3. (Optional) Install as systemd service
-
-```bash
-sudo cp mill_mcp/systemd/mill-ui-mcp.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable mill-ui-mcp
-sudo systemctl start mill-ui-mcp
-```
-
 ## Output Directory
 
 By default, outputs go to:

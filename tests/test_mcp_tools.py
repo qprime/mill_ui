@@ -223,3 +223,199 @@ class TestGetSyntaxSpec:
         result = get_syntax_spec("invalid")
 
         assert "Unknown format" in result
+
+
+# =============================================================================
+# CAM Validation Tool Tests
+# =============================================================================
+
+
+class TestValidateCamRecipe:
+    """Tests for validate_cam_recipe tool."""
+
+    def test_valid_recipe(self):
+        """Test validating a valid recipe directory."""
+        from mill_mcp.server import validate_cam_recipe
+
+        # Use a known recipe
+        recipe_path = "docs/recipes/01_simple_profile"
+        if not Path(recipe_path).exists():
+            pytest.skip("Recipe not found")
+
+        result_json = validate_cam_recipe(recipe_path)
+        result = json.loads(result_json)
+
+        assert "error" not in result
+        assert "verdict" in result
+        assert result["verdict"] in ("pass", "warn", "fail")
+        assert "metrics" in result
+        assert "invariants" in result
+
+    def test_nonexistent_recipe(self):
+        """Test error handling for nonexistent recipe."""
+        from mill_mcp.server import validate_cam_recipe
+
+        result_json = validate_cam_recipe("/nonexistent/path")
+        result = json.loads(result_json)
+
+        assert "error" in result
+        assert "not found" in result["error"]
+
+    def test_golden_not_found_error(self):
+        """Test error when golden_path provided but file doesn't exist."""
+        from mill_mcp.server import validate_cam_recipe
+
+        recipe_path = "docs/recipes/01_simple_profile"
+        if not Path(recipe_path).exists():
+            pytest.skip("Recipe not found")
+
+        result_json = validate_cam_recipe(
+            recipe_path,
+            golden_path="/nonexistent/golden.json"
+        )
+        result = json.loads(result_json)
+
+        assert "error" in result
+        assert "Golden file not found" in result["error"]
+
+    def test_with_golden_regression(self):
+        """Test validation with golden baseline."""
+        from mill_mcp.server import validate_cam_recipe
+
+        recipe_path = "docs/recipes/01_simple_profile"
+        golden_path = "tests/golden/01_simple_profile/metrics.json"
+
+        if not Path(recipe_path).exists():
+            pytest.skip("Recipe not found")
+        if not Path(golden_path).exists():
+            pytest.skip("Golden baseline not found")
+
+        result_json = validate_cam_recipe(
+            recipe_path,
+            golden_path=golden_path
+        )
+        result = json.loads(result_json)
+
+        assert "error" not in result
+        assert result["regressions"]["compared"] is True
+
+
+class TestValidateCamArtifacts:
+    """Tests for validate_cam_artifacts tool."""
+
+    def test_svg_validation(self):
+        """Test validating an SVG file."""
+        from mill_mcp.server import validate_cam_artifacts
+
+        svg_path = "docs/recipes/01_simple_profile/output/01_simple_profile.svg"
+        if not Path(svg_path).exists():
+            pytest.skip("SVG not found")
+
+        result_json = validate_cam_artifacts(svg_path=svg_path)
+        result = json.loads(result_json)
+
+        assert "error" not in result
+        assert "verdict" in result
+        assert "svg" in result["metrics"]
+
+    def test_stl_validation(self):
+        """Test validating an STL file."""
+        from mill_mcp.server import validate_cam_artifacts
+
+        stl_path = "docs/recipes/01_simple_profile/output/example.stl"
+        if not Path(stl_path).exists():
+            pytest.skip("STL not found")
+
+        result_json = validate_cam_artifacts(stl_path=stl_path)
+        result = json.loads(result_json)
+
+        assert "error" not in result
+        assert "verdict" in result
+        assert "stl" in result["metrics"]
+
+    def test_no_artifacts_error(self):
+        """Test error when no artifacts provided."""
+        from mill_mcp.server import validate_cam_artifacts
+
+        result_json = validate_cam_artifacts()
+        result = json.loads(result_json)
+
+        assert "error" in result
+        assert "At least one artifact" in result["error"]
+
+    def test_file_not_found(self):
+        """Test error for nonexistent file."""
+        from mill_mcp.server import validate_cam_artifacts
+
+        result_json = validate_cam_artifacts(svg_path="/nonexistent/file.svg")
+        result = json.loads(result_json)
+
+        assert "error" in result
+        assert "not found" in result["error"]
+
+
+class TestListGoldenBaselines:
+    """Tests for list_golden_baselines tool."""
+
+    def test_list_baselines(self):
+        """Test listing golden baselines."""
+        from mill_mcp.server import list_golden_baselines
+
+        result_json = list_golden_baselines()
+        result = json.loads(result_json)
+
+        # Should have baselines or indicate store doesn't exist
+        assert "baselines" in result
+        assert "total" in result
+        assert "store_path" in result
+
+    def test_nonexistent_store(self):
+        """Test handling of nonexistent store."""
+        from mill_mcp.server import list_golden_baselines
+
+        result_json = list_golden_baselines(store_path="/nonexistent/store")
+        result = json.loads(result_json)
+
+        assert result["total"] == 0
+        assert "message" in result or len(result["baselines"]) == 0
+
+
+class TestGetGoldenMetrics:
+    """Tests for get_golden_metrics tool."""
+
+    def test_get_metrics(self):
+        """Test getting golden metrics for a recipe."""
+        from mill_mcp.server import get_golden_metrics
+
+        # Check if golden store exists
+        if not Path("tests/golden").exists():
+            pytest.skip("Golden store not found")
+
+        result_json = get_golden_metrics("01_simple_profile")
+        result = json.loads(result_json)
+
+        # Either returns metrics or an error (if recipe doesn't have golden)
+        if "error" not in result:
+            assert isinstance(result, dict)
+
+    def test_nonexistent_recipe(self):
+        """Test error for nonexistent recipe."""
+        from mill_mcp.server import get_golden_metrics
+
+        result_json = get_golden_metrics("nonexistent_recipe")
+        result = json.loads(result_json)
+
+        assert "error" in result
+
+    def test_nonexistent_store(self):
+        """Test error for nonexistent store."""
+        from mill_mcp.server import get_golden_metrics
+
+        result_json = get_golden_metrics(
+            "01_simple_profile",
+            store_path="/nonexistent/store"
+        )
+        result = json.loads(result_json)
+
+        assert "error" in result
+        assert "not found" in result["error"]

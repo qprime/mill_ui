@@ -44,6 +44,11 @@ For deep dives:
 - **[ir/removal_intent.py](ir/removal_intent.py)** - RemovalIntent IR spec
 - **[adapters/ast_to_removal.py](adapters/ast_to_removal.py)** - AST → IR conversion
 
+For CAM validation:
+- **[validation/runner.py](validation/runner.py)** - Main validation entry points
+- **[validation/invariants/](validation/invariants/)** - Structural checks (SVG, STL, G-code)
+- **[docs/cam_validation_plan.md](docs/cam_validation_plan.md)** - Complete validation architecture
+
 For nesting:
 - **[pml/nest_parser.py](pml/nest_parser.py)** - `.nest` parser
 - **[nesting/api.py](nesting/api.py)** - High-level nesting API
@@ -134,7 +139,7 @@ ast = Shaker.expand_to_ast(
 
 **Why this matters:** Templates are parametric AST generators. Building new templates is a common extension point.
 
-### Task 4: Validate Before Planning
+### Task 4: Validate Before Planning (IR Level)
 
 **Use case:** Check if a layout is physically valid before expensive CAM execution.
 
@@ -161,6 +166,65 @@ if overlap.has_issues() or any(r.has_issues() for r in depth_results + toolabili
 ```
 
 **Why this matters:** Catching errors at IR level is fast. Don't wait for CAM execution to find invalid depths or overlaps.
+
+### Task 5: Validate CAM Artifacts (Post-Generation)
+
+**Use case:** Validate generated SVG, STL, and G-code against structural invariants and regression baselines.
+
+```python
+from validation.runner import validate_recipe, ValidationOptions
+
+# Validate a recipe directory with all checks
+options = ValidationOptions(
+    extract_metrics=True,
+    check_invariants=True,
+    check_assertions=True,
+    check_regressions=True,
+)
+
+result = validate_recipe(
+    "docs/recipes/01_simple_profile",
+    golden_metrics=golden_metrics,  # Optional: from tests/golden/<recipe>/metrics.json
+    options=options,
+)
+
+# Inspect results
+print(f"Verdict: {result.verdict}")  # pass, warn, or fail
+print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
+print(f"Assertions: {result.assertions.passed}/{result.assertions.total}")
+```
+
+**CLI alternative:**
+```bash
+# Quick validation with summary output
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+
+# With golden baseline comparison
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile \
+    --golden tests/golden/01_simple_profile/metrics.json
+```
+
+**Why this matters:** CAM artifact validation catches structural issues (non-watertight STL, unsafe G-code rapids, etc.) and metric regressions without manual inspection.
+
+### Task 6: Extract Metrics for Comparison
+
+**Use case:** Extract stable metrics from CAM artifacts for deterministic comparison.
+
+```python
+from validation.metrics import extract_svg_metrics, extract_stl_metrics, extract_gcode_metrics
+
+# Extract from files
+svg_metrics = extract_svg_metrics("output/drawing.svg")
+stl_metrics = extract_stl_metrics("output/model.stl")
+gcode_metrics = extract_gcode_metrics("output/toolpath.nc")
+
+# Access specific values
+print(f"SVG layers: {svg_metrics.to_dict()['layers']['count']}")
+print(f"STL watertight: {stl_metrics.to_dict()['mesh']['is_watertight']}")
+print(f"G-code depth: {gcode_metrics.to_dict()['z_profile']['max_plunge_z_mm']}")
+```
+
+**Why this matters:** Metrics are deterministic and comparable across runs, enabling regression testing without byte-level file comparison.
 
 ## Extension Patterns
 
@@ -305,6 +369,106 @@ for i, ast in enumerate(result["output"]):
 ```
 
 **Why this matters:** Nesting is essential for production efficiency. The `.nest` format keeps job specifications readable while the algorithms optimize material usage.
+
+### Pattern 4: Add a New Validation Invariant
+
+**When:** You need to add a new structural check for CAM artifacts (e.g., a new G-code safety check).
+
+**Steps:**
+1. Add invariant ID and check function in the appropriate `validation/invariants/*_invariants.py`
+2. Add to `*_INVARIANT_IDS` list for documentation
+3. Add tests
+
+**Example:** Adding a G-code spindle speed limit check
+
+```python
+# In validation/invariants/gcode_invariants.py
+
+# 1. Add to invariant IDs
+GCODE_INVARIANT_IDS = [
+    # ... existing IDs ...
+    "GCODE_SPINDLE_SPEED_LIMIT",
+]
+
+# 2. Add check function
+def _check_spindle_speed_limit(
+    gcode_content: str,
+    max_speed: float = 24000.0,
+) -> InvariantResult:
+    """Check spindle speed doesn't exceed limit."""
+    # Parse S values from M3/M4 lines
+    speeds = []
+    for line in gcode_content.splitlines():
+        if ("M3" in line or "M4" in line) and "S" in line:
+            match = re.search(r"S([\d.]+)", line)
+            if match:
+                speeds.append(float(match.group(1)))
+
+    violations = [s for s in speeds if s > max_speed]
+
+    return InvariantResult(
+        id="GCODE_SPINDLE_SPEED_LIMIT",
+        category="safety",
+        artifact="gcode",
+        description=f"Spindle speed must not exceed {max_speed} RPM",
+        status=Verdict.FAIL if violations else Verdict.PASS,
+        details={
+            "max_allowed": max_speed,
+            "violations": violations,
+        }
+    )
+
+# 3. Call from check_gcode_invariants()
+def check_gcode_invariants(gcode_path: str, ...) -> list[InvariantResult]:
+    # ... existing checks ...
+    results.append(_check_spindle_speed_limit(content, max_speed=config.max_spindle_speed))
+    return results
+```
+
+**Test:**
+```python
+# In tests/test_gcode_invariants.py
+def test_spindle_speed_limit_violation():
+    gcode = "M3 S30000\nG1 X100"
+    results = check_gcode_invariants_from_content(gcode, max_spindle_speed=24000)
+    limit_check = next(r for r in results if r.id == "GCODE_SPINDLE_SPEED_LIMIT")
+    assert limit_check.status == Verdict.FAIL
+```
+
+**Why this matters:** The invariant system is the primary way to catch structural issues. Adding invariants for new safety or quality rules is a common extension.
+
+### Pattern 5: Add a New Metric
+
+**When:** You need to extract a new measurement from CAM artifacts (e.g., a new G-code operation count).
+
+**Steps:**
+1. Add field to the appropriate `*Metrics` dataclass in `validation/metrics/*_metrics.py`
+2. Extract the value in the `extract_*_metrics()` function
+3. Add tests
+
+**Example:** Adding arc count to G-code metrics
+
+```python
+# In validation/metrics/gcode_metrics.py
+
+@dataclass
+class GCodeMetrics:
+    # ... existing fields ...
+    arc_count: int = 0  # New field
+
+def extract_gcode_metrics(gcode_path: str, config: GCodeConfig = None) -> GCodeMetrics:
+    # ... existing extraction ...
+
+    # Count arc moves
+    arc_count = sum(1 for line in lines if line.startswith(("G2", "G3")))
+
+    return GCodeMetrics(
+        # ... existing values ...
+        arc_count=arc_count,
+    )
+```
+
+**Why this matters:** Metrics enable regression testing. Adding new metrics allows catching regressions in previously unmeasured aspects.
 
 ## Critical Invariants (Don't Break These)
 
@@ -484,6 +648,7 @@ This guide focuses on **how to work with** the architecture, not **why it exists
 **Code examples:** Look at [templates/shaker.py](templates/shaker.py) and test files
 **IR semantics:** Read [ir/removal_intent.py](ir/removal_intent.py) docstrings
 **Test patterns:** Study [tests/run_edge_tests.py](tests/run_edge_tests.py)
+**Validation system:** Read [docs/cam_validation_plan.md](docs/cam_validation_plan.md) for schemas and invariants
 
 **Ask the user if:**
 - Architectural change needed (new feature types, pipeline modifications)
@@ -492,6 +657,6 @@ This guide focuses on **how to work with** the architecture, not **why it exists
 
 ---
 
-**Last Updated:** 2026-01-15
+**Last Updated:** 2026-01-16
 **Complementary Doc:** [README.md](README.md) for architecture
 **Status:** Production (current architecture)

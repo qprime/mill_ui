@@ -1,0 +1,151 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-17T01:38:42.537428+00:00",
+  "updated_at": "2026-01-17T01:38:44.404482+00:00",
+  "entries": {
+    "01_simple_profile": {
+      "recipe_name": "01_simple_profile",
+      "source_file": "docs/recipes/01_simple_profile/example.pml",
+      "created_at": "2026-01-17T01:38:42.767863+00:00",
+      "updated_at": "2026-01-17T01:38:42.767863+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "02_pocket_with_cleanup": {
+      "recipe_name": "02_pocket_with_cleanup",
+      "source_file": "docs/recipes/02_pocket_with_cleanup/example.pml",
+      "created_at": "2026-01-17T01:38:42.772940+00:00",
+      "updated_at": "2026-01-17T01:38:42.772940+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "03_shaker_door_template": {
+      "recipe_name": "03_shaker_door_template",
+      "source_file": "docs/recipes/03_shaker_door_template/example.pml",
+      "created_at": "2026-01-17T01:38:42.791976+00:00",
+      "updated_at": "2026-01-17T01:38:42.791976+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "04_custom_template": {
+      "recipe_name": "04_custom_template",
+      "source_file": "docs/recipes/04_custom_template/example.pml",
+      "created_at": "2026-01-17T01:38:42.849160+00:00",
+      "updated_at": "2026-01-17T01:38:42.849160+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "05_validation_workflow": {
+      "recipe_name": "05_validation_workflow",
+      "source_file": "docs/recipes/05_validation_workflow/example.pml",
+      "created_at": "2026-01-17T01:38:42.881843+00:00",
+      "updated_at": "2026-01-17T01:38:42.881843+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "06_multiple_depths": {
+      "recipe_name": "06_multiple_depths",
+      "source_file": "docs/recipes/06_multiple_depths/example.pml",
+      "created_at": "2026-01-17T01:38:42.937862+00:00",
+      "updated_at": "2026-01-17T01:38:42.937862+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "07_json_generation": {
+      "recipe_name": "07_json_generation",
+      "source_file": "docs/recipes/07_json_generation/example.pml",
+      "created_at": "2026-01-17T01:38:42.946257+00:00",
+      "updated_at": "2026-01-17T01:38:42.946257+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "08_svg_visualization": {
+      "recipe_name": "08_svg_visualization",
+      "source_file": "docs/recipes/08_svg_visualization/example.pml",
+      "created_at": "2026-01-17T01:38:42.954391+00:00",
+      "updated_at": "2026-01-17T01:38:42.954391+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "09_config_tuning": {
+      "recipe_name": "09_config_tuning",
+      "source_file": "docs/recipes/09_config_tuning/example.pml",
+      "created_at": "2026-01-17T01:38:42.959191+00:00",
+      "updated_at": "2026-01-17T01:38:42.959191+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "10_hole_patterns_grid": {
+      "recipe_name": "10_hole_patterns_grid",
+      "source_file": "docs/recipes/10_hole_patterns_grid/example.pml",
+      "created_at": "2026-01-17T01:38:43.356934+00:00",
+      "updated_at": "2026-01-17T01:38:43.356934+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "11_keepout_islands": {
+      "recipe_name": "11_keepout_islands",
+      "source_file": "docs/recipes/11_keepout_islands/example.pml",
+      "created_at": "2026-01-17T01:38:43.370344+00:00",
+      "updated_at": "2026-01-17T01:38:43.370344+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "12_edge_treatment_intent": {
+      "recipe_name": "12_edge_treatment_intent",
+      "source_file": "docs/recipes/12_edge_treatment_intent/example.pml",
+      "created_at": "2026-01-17T01:38:43.378407+00:00",
+      "updated_at": "2026-01-17T01:38:43.378407+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "13_split_layout_french_door": {
+      "recipe_name": "13_split_layout_french_door",
+      "source_file": "docs/recipes/13_split_layout_french_door/example.pml",
+      "created_at": "2026-01-17T01:38:43.414769+00:00",
+      "updated_at": "2026-01-17T01:38:43.414769+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "14_corner_cleanup_multi_tool": {
+      "recipe_name": "14_corner_cleanup_multi_tool",
+      "source_file": "docs/recipes/14_corner_cleanup_multi_tool/example.pml",
+      "created_at": "2026-01-17T01:38:43.454384+00:00",
+      "updated_at": "2026-01-17T01:38:43.454384+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "15_profile_with_tabs": {
+      "recipe_name": "15_profile_with_tabs",
+      "source_file": "",
+      "created_at": "2026-01-17T01:38:43.459550+00:00",
+      "updated_at": "2026-01-17T01:38:43.459550+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "16_sheet_layout_nesting": {
+      "recipe_name": "16_sheet_layout_nesting",
+      "source_file": "docs/recipes/16_sheet_layout_nesting/example.pml",
+      "created_at": "2026-01-17T01:38:43.557700+00:00",
+      "updated_at": "2026-01-17T01:38:43.557700+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "17_nesting_guillotine": {
+      "recipe_name": "17_nesting_guillotine",
+      "source_file": "",
+      "created_at": "2026-01-17T01:38:43.936155+00:00",
+      "updated_at": "2026-01-17T01:38:43.936155+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "18_nesting_maxrects": {
+      "recipe_name": "18_nesting_maxrects",
+      "source_file": "",
+      "created_at": "2026-01-17T01:38:44.404480+00:00",
+      "updated_at": "2026-01-17T01:38:44.404480+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    }
+  }
+}

@@ -50,6 +50,34 @@ These outputs are automatically generated and serve as:
 - Visual examples for documentation
 - Test fixtures for regression testing
 
+## Validating Recipes
+
+All 18 recipes have golden baselines in `tests/golden/` for regression testing.
+
+**Quick validation:**
+```bash
+# Validate a single recipe
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+
+# Validate with golden baseline comparison
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile \
+    --golden tests/golden/01_simple_profile/metrics.json
+```
+
+**Run all recipe regression tests:**
+```bash
+python -m tests.test_regression
+```
+
+**Update golden after intentional changes:**
+```bash
+python -m cli.generate_golden --recipe docs/recipes/01_simple_profile --update
+```
+
+See [05_validation_workflow/](05_validation_workflow/) for comprehensive validation examples.
+
+## Regenerating Outputs
+
 To regenerate all outputs:
 ```bash
 # Standalone mode (regenerates all recipes)

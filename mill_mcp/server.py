@@ -27,6 +27,8 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_v1_hints
 from adapters.ast_to_cad import items_to_shape_dicts
 from validation.removal_checks import check_overlap, check_depth_feasibility
+from validation.runner import validate_recipe, validate, ValidationInput, ValidationOptions
+from validation.regression import GoldenStore, ComparisonConfig
 from nesting import nest_and_generate
 from cam.config import Config
 from cam.model.stock import Stock
@@ -489,6 +491,229 @@ def get_syntax_spec(format: str = "all") -> str:
         return f"Unknown format: {format}. Use 'pml', 'nest', or 'all'."
 
     return "".join(result_parts)
+
+
+# =============================================================================
+# CAM Validation Tools
+# =============================================================================
+
+
+@mcp.tool()
+def validate_cam_recipe(
+    recipe_path: str,
+    golden_path: str | None = None,
+    check_invariants: bool = True,
+    check_assertions: bool = True,
+    tolerance_percent: float = 0.1,
+) -> str:
+    """Validate CAM artifacts (SVG, STL, G-code) for a recipe directory.
+
+    Args:
+        recipe_path: Path to recipe directory with output/ subdirectory
+        golden_path: Optional path to golden baseline metrics.json for regression
+        check_invariants: Run structural invariant checks (default: True)
+        check_assertions: Run intent assertions from PML (default: True)
+        tolerance_percent: Default tolerance for numeric comparison (default: 0.1%)
+
+    Returns JSON with:
+        - verdict: "pass", "warn", or "fail"
+        - metrics: Extracted metrics from SVG, STL, G-code
+        - invariants: Structural check results
+        - assertions: Intent assertion results (if PML present)
+        - regressions: Golden baseline comparison (if golden_path provided)
+    """
+    try:
+        recipe_dir = Path(recipe_path)
+        if not recipe_dir.exists():
+            return json.dumps({"error": f"Recipe directory not found: {recipe_path}"})
+        if not recipe_dir.is_dir():
+            return json.dumps({"error": f"Not a directory: {recipe_path}"})
+
+        # Load golden metrics if provided
+        golden_metrics = None
+        golden_file = None
+        if golden_path:
+            golden_path_obj = Path(golden_path)
+            if not golden_path_obj.exists():
+                return json.dumps({"error": f"Golden file not found: {golden_path}"})
+            with open(golden_path_obj) as f:
+                golden_metrics = json.load(f)
+            golden_file = str(golden_path_obj)
+
+        # Parse PML if present and assertions requested (like CLI does)
+        ast = None
+        if check_assertions:
+            for pml_name in ["example.pml", "source.pml"]:
+                pml_path = recipe_dir / pml_name
+                if pml_path.exists():
+                    try:
+                        from pml.parser import parse_pml as parse_pml_v1
+                        pml_content = pml_path.read_text()
+                        ast = parse_pml_v1(pml_content)
+                    except Exception:
+                        # If PML parsing fails, continue without assertions
+                        pass
+                    break
+
+        # Build options
+        options = ValidationOptions(
+            extract_metrics=True,
+            check_invariants=check_invariants,
+            check_assertions=check_assertions and ast is not None,
+            check_regressions=golden_metrics is not None,
+        )
+
+        comparison_config = ComparisonConfig(
+            default_tolerance_percent=tolerance_percent,
+        )
+
+        # Run validation
+        result = validate_recipe(
+            recipe_dir,
+            ast=ast,
+            golden_metrics=golden_metrics,
+            golden_file=golden_file,
+            comparison_config=comparison_config,
+            options=options,
+        )
+
+        # Unwrap validation_result for cleaner MCP API
+        # (tests and spec expect top-level verdict/metrics, not wrapped)
+        full_result = result.to_dict()
+        return json.dumps(full_result.get("validation_result", full_result), indent=2, default=str)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def validate_cam_artifacts(
+    svg_path: str | None = None,
+    stl_path: str | None = None,
+    gcode_paths: list[str] | None = None,
+    check_invariants: bool = True,
+) -> str:
+    """Validate specific CAM artifacts (SVG, STL, G-code files).
+
+    Args:
+        svg_path: Optional path to SVG file
+        stl_path: Optional path to STL file
+        gcode_paths: Optional list of G-code file paths
+        check_invariants: Run structural invariant checks (default: True)
+
+    Returns JSON with:
+        - verdict: "pass", "warn", or "fail"
+        - metrics: Extracted metrics from provided artifacts
+        - invariants: Structural check results
+    """
+    try:
+        if not svg_path and not stl_path and not gcode_paths:
+            return json.dumps({"error": "At least one artifact path required"})
+
+        # Verify files exist
+        if svg_path and not Path(svg_path).exists():
+            return json.dumps({"error": f"SVG file not found: {svg_path}"})
+        if stl_path and not Path(stl_path).exists():
+            return json.dumps({"error": f"STL file not found: {stl_path}"})
+        for gcode_path in (gcode_paths or []):
+            if not Path(gcode_path).exists():
+                return json.dumps({"error": f"G-code file not found: {gcode_path}"})
+
+        # Build inputs
+        inputs = ValidationInput(
+            svg_path=svg_path,
+            stl_path=stl_path,
+            gcode_paths=gcode_paths or [],
+        )
+
+        options = ValidationOptions(
+            extract_metrics=True,
+            check_invariants=check_invariants,
+            check_assertions=False,  # No PML
+            check_regressions=False,  # No golden
+        )
+
+        result = validate(inputs, options)
+
+        # Unwrap validation_result for cleaner MCP API
+        full_result = result.to_dict()
+        return json.dumps(full_result.get("validation_result", full_result), indent=2, default=str)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def list_golden_baselines(store_path: str = "tests/golden") -> str:
+    """List available golden baselines for regression testing.
+
+    Args:
+        store_path: Path to golden store directory (default: tests/golden)
+
+    Returns JSON with:
+        - baselines: List of available baseline names
+        - total: Total count
+        - store_path: Path to the golden store
+    """
+    try:
+        store = GoldenStore(store_path)
+        if not store.exists():
+            return json.dumps({
+                "baselines": [],
+                "total": 0,
+                "store_path": store_path,
+                "message": "Golden store not found",
+            })
+
+        entries = store.list_entries()
+        index = store.load_index()
+
+        baselines = []
+        for name in sorted(entries):
+            entry = index.entries.get(name)
+            baselines.append({
+                "name": name,
+                "source_file": entry.source_file if entry else None,
+                "updated_at": entry.updated_at if entry else None,
+                "metrics_path": str(store.get_metrics_path(name)),
+            })
+
+        return json.dumps({
+            "baselines": baselines,
+            "total": len(baselines),
+            "store_path": store_path,
+        }, indent=2)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def get_golden_metrics(recipe_name: str, store_path: str = "tests/golden") -> str:
+    """Get golden baseline metrics for a specific recipe.
+
+    Args:
+        recipe_name: Name of the recipe (e.g., "01_simple_profile")
+        store_path: Path to golden store directory (default: tests/golden)
+
+    Returns JSON with the golden metrics for the recipe.
+    """
+    try:
+        store = GoldenStore(store_path)
+        if not store.exists():
+            return json.dumps({"error": f"Golden store not found: {store_path}"})
+
+        if not store.has_entry(recipe_name):
+            return json.dumps({"error": f"No golden baseline for: {recipe_name}"})
+
+        metrics = store.load_metrics(recipe_name)
+        if metrics is None:
+            return json.dumps({"error": f"Failed to load metrics for: {recipe_name}"})
+
+        return json.dumps(metrics, indent=2, default=str)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
 
 
 def main():

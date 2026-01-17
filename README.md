@@ -649,6 +649,168 @@ This repository currently uses a flat package layout (top-level `adapters/`, `pm
 
 Most development happens at **IR level** - fast, no native dependencies, high signal.
 
+## CAM Validation Infrastructure
+
+mill_ui includes a comprehensive validation system for CAM artifacts (SVG blueprints, STL meshes, G-code). This enables deterministic regression testing without byte-level file comparisons.
+
+### Architecture
+
+```
+Artifacts (SVG/STL/G-code) → Metric Extractors → Invariant Checks → Regression Compare → Verdict
+                                    ↓                    ↓                  ↓
+                              Stable metrics      Structural rules     Golden baseline
+```
+
+### Quick Start
+
+**Validate a recipe:**
+```bash
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+```
+
+**Validate with golden baseline:**
+```bash
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile \
+    --golden tests/golden/01_simple_profile/metrics.json
+```
+
+**Extract metrics only:**
+```bash
+python -m cli.validate_cam --svg output/drawing.svg --metrics-only
+```
+
+### What Gets Validated
+
+**SVG Metrics:**
+- Document dimensions, viewBox, layer structure
+- Path counts (total, closed, open), circle/rect/line counts
+- Layer-by-layer element breakdown
+
+**STL Metrics:**
+- Mesh topology (vertex/face counts, watertight, manifold)
+- Bounding dimensions, volume, surface area
+- Z-bounds for sheet thickness validation
+
+**G-code Metrics:**
+- Motion analysis (G0/G1 counts, distances, feed rates)
+- Z-profile (safe height, cutting depths)
+- Tool usage (tool numbers, spindle speeds)
+
+### Invariant Checks
+
+Built-in structural rules that catch common errors:
+
+| Category | Example Checks |
+|----------|----------------|
+| SVG | Valid XML, positive dimensions, closed profiles/pockets, bounds within viewBox |
+| STL | Watertight mesh, manifold edges, positive volume, Z within sheet thickness |
+| G-code | Safe Z on rapids, spindle before cut, max stepdown, XY within bounds |
+
+### Regression Testing
+
+Compare current metrics against golden baselines:
+
+```bash
+# Generate golden baselines
+python -m cli.generate_golden --all-recipes docs/recipes
+
+# Run regression tests
+python -m tests.test_regression
+```
+
+**Comparison modes:**
+- **Numeric**: Tolerance-based (0.01% for positions, 0.1% for volumes)
+- **Exact**: Counts, booleans (layer count, watertight flag)
+- **Structural**: Set comparison (layer names, tool list)
+
+### CLI Reference
+
+**`cli/validate_cam.py`** - Validate CAM artifacts:
+```
+--recipe DIR         Recipe directory with output/ structure
+--svg FILE           SVG file to validate
+--stl FILE           STL file to validate
+--gcode FILE...      G-code file(s) to validate
+--pml FILE           PML source for intent assertions
+--golden FILE        Golden metrics for regression comparison
+--tolerance N        Default tolerance percent (default: 0.1)
+--sheet-thickness N  Sheet thickness in mm for STL Z-bounds check
+--metrics-only       Extract metrics only, skip all checks
+--no-assertions      Skip intent assertions
+--no-regressions     Skip regression comparison
+--summary            Human-readable output
+--compact            Single-line JSON output
+--output FILE        Write JSON to file
+--quiet              Suppress status messages
+
+Exit codes: 0=PASS, 1=WARN, 2=FAIL
+```
+
+**`cli/generate_golden.py`** - Manage golden baselines:
+```
+--recipe DIR       Generate for single recipe
+--all-recipes DIR  Generate for all recipes
+--list             List existing baselines
+--update           Overwrite existing baselines
+--force            Generate even if invariants fail
+--dry-run          Preview without writing
+```
+
+### Programmatic Usage
+
+```python
+from validation.runner import validate_recipe, ValidationOptions
+
+options = ValidationOptions(
+    extract_metrics=True,
+    check_invariants=True,
+    check_assertions=True,
+    check_regressions=True,
+)
+
+result = validate_recipe(
+    "docs/recipes/01_simple_profile",
+    golden_metrics=golden_metrics,
+    options=options,
+)
+
+print(f"Verdict: {result.verdict}")  # pass, warn, or fail
+print(f"Metrics: {result.metrics}")
+print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
+```
+
+### Files
+
+```
+validation/
+├── core.py              # CAMValidationResult, Verdict
+├── runner.py            # validate(), validate_recipe()
+├── metrics/
+│   ├── svg_metrics.py   # SVG metric extraction
+│   ├── stl_metrics.py   # STL metric extraction
+│   └── gcode_metrics.py # G-code metric extraction
+├── invariants/
+│   ├── svg_invariants.py   # SVG structural checks
+│   ├── stl_invariants.py   # STL topology checks
+│   └── gcode_invariants.py # G-code motion checks
+├── assertions/
+│   └── intent_assertions.py # PML/AST-derived assertions
+└── regression/
+    ├── comparator.py    # Metric delta comparison
+    └── golden_store.py  # Golden baseline management
+
+cli/
+├── validate_cam.py      # Validation CLI
+└── generate_golden.py   # Golden generation CLI
+
+tests/
+├── test_regression.py   # Regression comparator tests
+├── test_cli_validate_cam.py # CLI tests
+└── golden/              # Golden baselines for all 18 recipes
+```
+
+For detailed architecture and schemas, see [docs/cam_validation_plan.md](docs/cam_validation_plan.md).
+
 ## Design Tradeoffs
 
 ### Why Keep the Existing CAM Planner?

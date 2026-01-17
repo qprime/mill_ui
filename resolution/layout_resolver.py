@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any
+from typing import Any, Callable
 
 from layout_ast.compositional import (
     Panel,
@@ -33,6 +33,12 @@ from layout_ast.layout import (
     Placement,
     Feature,
 )
+from core.constants import DepthMode
+from core.geometry import compute_shape_bounds_dict
+
+
+# Type alias for node handlers
+NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
 
 
 def sample_catmull_rom_spline(control_points: list[tuple[float, float]], tolerance_mm: float) -> list[tuple[float, float]]:
@@ -105,34 +111,13 @@ class LayoutResolver:
 
                 for item in keepout_items:
                     if item.kind == "shape" and item.geometry:
-
-                        cx, cy = item.placement.center_xy_mm
-                        if item.type == "Rect":
-                            w = item.geometry.data["w_mm"]
-                            h = item.geometry.data["h_mm"]
-                            islands.append({
-                                "x_min": cx - w / 2,
-                                "x_max": cx + w / 2,
-                                "y_min": cy - h / 2,
-                                "y_max": cy + h / 2,
-                            })
-                        elif item.type == "Circle":
-                            r = item.geometry.data["diameter_mm"] / 2
-                            islands.append({
-                                "x_min": cx - r,
-                                "x_max": cx + r,
-                                "y_min": cy - r,
-                                "y_max": cy + r,
-                            })
-                        elif item.type == "RoundedRect":
-                            w = item.geometry.data["w_mm"]
-                            h = item.geometry.data["h_mm"]
-                            islands.append({
-                                "x_min": cx - w / 2,
-                                "x_max": cx + w / 2,
-                                "y_min": cy - h / 2,
-                                "y_max": cy + h / 2,
-                            })
+                        # Use unified bounds calculation
+                        bounds_dict = compute_shape_bounds_dict(
+                            item.type,
+                            item.geometry.data,
+                            item.placement.center_xy_mm,
+                        )
+                        islands.append(bounds_dict)
 
         return islands
 
@@ -151,6 +136,350 @@ class LayoutResolver:
                     "distance_mm": child.distance_mm,
                 }
         return None
+
+    # =========================================================================
+    # Node Handlers - Each handles one node type from the AST
+    # =========================================================================
+
+    def _handle_panel(
+        self,
+        node: Panel,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        for child in node.children:
+            self._resolve_node(child, region, items, params)
+
+    def _handle_inset(
+        self,
+        node: Inset,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        inset_region = region.inset(node.amount_mm)
+        for child in node.children:
+            self._resolve_node(child, inset_region, items, params)
+
+    def _handle_frame(
+        self,
+        node: Frame,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        outer_rect = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+            placement=Placement(center_xy_mm=region.center),
+            feature=Feature(
+                type="profile",
+                depth=node.profile_depth,
+                side=node.profile_side,
+                depth_mm=None if DepthMode.is_through(node.profile_depth) else float(node.profile_depth),
+            ),
+        )
+        items.append(outer_rect)
+
+        inner_region = region.inset(node.width_mm)
+        for child in node.children:
+            self._resolve_node(child, inner_region, items, params)
+
+    def _handle_grid(
+        self,
+        node: Grid,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        cells = region.subdivide_grid(node.rows, node.cols, node.gap_mm)
+
+        cell_content = [child for child in node.children if isinstance(child, Cell)]
+
+        if not cell_content:
+            cell_content = [Cell(children=node.children)]
+
+        for cell_region in cells:
+            for cell_node in cell_content:
+                content_region = cell_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else cell_region
+
+                for child in cell_node.children:
+                    self._resolve_node(child, content_region, items, params)
+
+    def _handle_split(
+        self,
+        node: Split,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        panes = region.subdivide_split(node.rows, node.cols, node.rail_mm, node.mullion_mm)
+
+        cell_content = [child for child in node.children if isinstance(child, Cell)]
+
+        if not cell_content:
+            cell_content = [Cell(children=node.children)]
+
+        for pane_region in panes:
+            for cell_node in cell_content:
+                content_region = pane_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else pane_region
+
+                for child in cell_node.children:
+                    self._resolve_node(child, content_region, items, params)
+
+    def _handle_cell(
+        self,
+        node: Cell,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        for child in node.children:
+            self._resolve_node(child, region, items, params)
+
+    def _handle_use_component(
+        self,
+        node: UseComponent,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        if node.component_name not in self.components:
+            raise ValueError(f"Unknown component: {node.component_name}")
+
+        comp_def = self.components[node.component_name]
+
+        resolved_params = {**comp_def.params, **node.args}
+
+        self._resolve_node(comp_def.body, region, items, resolved_params)
+
+    def _handle_place(
+        self,
+        node: Place,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        if isinstance(node.layout, Grid):
+            cells = region.subdivide_grid(node.layout.rows, node.layout.cols, node.layout.gap_mm)
+
+            for idx, child in enumerate(node.children):
+                if idx < len(cells):
+                    self._resolve_node(child, cells[idx], items, params)
+        else:
+            for child in node.children:
+                self._resolve_node(child, region, items, params)
+
+    def _handle_rect(
+        self,
+        node: Rect,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        islands = self._collect_island_bounds(node.children, region, params)
+
+        edge_treatment = self._extract_edge_treatment(node.children)
+
+        geometry_data = {
+            "w_mm": region.width,
+            "h_mm": region.height,
+        }
+
+        if islands:
+            geometry_data["islands"] = islands
+
+        if edge_treatment:
+            geometry_data["edge_treatment"] = edge_treatment
+
+        rect_item = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data=geometry_data),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(rect_item)
+
+        for child in node.children:
+            if not isinstance(child, (Keepout, Edge)):
+                self._resolve_node(child, region, items, params)
+
+    def _handle_circle(
+        self,
+        node: Circle,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        if node.diameter_mm is not None:
+            diameter = node.diameter_mm
+        else:
+            diameter = min(region.width, region.height)
+
+        islands = self._collect_island_bounds(node.children, region, params)
+
+        edge_treatment = self._extract_edge_treatment(node.children)
+
+        geometry_data = {"diameter_mm": diameter}
+        if islands:
+            geometry_data["islands"] = islands
+        if edge_treatment:
+            geometry_data["edge_treatment"] = edge_treatment
+
+        circle_item = Item(
+            kind="shape",
+            type="Circle",
+            geometry=Geometry(data=geometry_data),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(circle_item)
+
+        for child in node.children:
+            if not isinstance(child, (Keepout, Edge)):
+                self._resolve_node(child, region, items, params)
+
+    def _handle_rounded_rect(
+        self,
+        node: RoundedRect,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        islands = self._collect_island_bounds(node.children, region, params)
+
+        edge_treatment = self._extract_edge_treatment(node.children)
+
+        geometry_data = {
+            "w_mm": region.width,
+            "h_mm": region.height,
+            "radius_mm": node.radius_mm,
+        }
+        if islands:
+            geometry_data["islands"] = islands
+        if edge_treatment:
+            geometry_data["edge_treatment"] = edge_treatment
+
+        rounded_rect_item = Item(
+            kind="shape",
+            type="RoundedRect",
+            geometry=Geometry(data=geometry_data),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(rounded_rect_item)
+
+        for child in node.children:
+            if not isinstance(child, (Keepout, Edge)):
+                self._resolve_node(child, region, items, params)
+
+    def _handle_line(
+        self,
+        node: Line,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        if node.orientation == "horizontal":
+            start_xy = (region.x_min, region.center[1])
+            end_xy = (region.x_max, region.center[1])
+        elif node.orientation == "vertical":
+            start_xy = (region.center[0], region.y_min)
+            end_xy = (region.center[0], region.y_max)
+        else:
+            raise ValueError(f"Unknown line orientation: {node.orientation}")
+
+        line_item = Item(
+            kind="path",
+            type="Line",
+            geometry=Geometry(data={
+                "start_xy_mm": start_xy,
+                "end_xy_mm": end_xy,
+            }),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(line_item)
+
+    def _handle_polyline(
+        self,
+        node: Polyline,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        absolute_points = []
+        for norm_x, norm_y in node.points:
+            abs_x = region.x_min + norm_x * region.width
+            abs_y = region.y_min + norm_y * region.height
+            absolute_points.append((abs_x, abs_y))
+
+        polyline_item = Item(
+            kind="path",
+            type="Polyline",
+            geometry=Geometry(data={
+                "points_mm": absolute_points,
+            }),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(polyline_item)
+
+    def _handle_spline_path(
+        self,
+        node: SplinePath,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        normalized_samples = sample_catmull_rom_spline(list(node.points), node.tolerance_mm)
+
+        absolute_points = []
+        for norm_x, norm_y in normalized_samples:
+            abs_x = region.x_min + norm_x * region.width
+            abs_y = region.y_min + norm_y * region.height
+            absolute_points.append((abs_x, abs_y))
+
+        spline_item = Item(
+            kind="path",
+            type="Polyline",
+            geometry=Geometry(data={
+                "points_mm": absolute_points,
+                "spline_source": True,
+                "spline_tolerance_mm": node.tolerance_mm,
+            }),
+            placement=Placement(center_xy_mm=region.center),
+            feature=node.feature,
+            shape_id=node.id,
+        )
+        items.append(spline_item)
+
+    def _handle_keepout(
+        self,
+        node: Keepout,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        # Keepout nodes are processed by _collect_island_bounds, not here
+        pass
+
+    def _handle_item(
+        self,
+        node: Item,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        items.append(node)
 
     def resolve(self) -> LayoutAST:
 
@@ -171,6 +500,33 @@ class LayoutResolver:
             project=self.ast.project,
         )
 
+    # Handler map: maps node type to handler method
+    # Initialized in __init__ to allow self references
+    _NODE_HANDLERS: dict[type, NodeHandler] | None = None
+
+    def _get_handler_map(self) -> dict[type, NodeHandler]:
+        """Return the handler map, initializing lazily if needed."""
+        if LayoutResolver._NODE_HANDLERS is None:
+            LayoutResolver._NODE_HANDLERS = {
+                Panel: LayoutResolver._handle_panel,
+                Inset: LayoutResolver._handle_inset,
+                Frame: LayoutResolver._handle_frame,
+                Grid: LayoutResolver._handle_grid,
+                Split: LayoutResolver._handle_split,
+                Cell: LayoutResolver._handle_cell,
+                UseComponent: LayoutResolver._handle_use_component,
+                Place: LayoutResolver._handle_place,
+                Rect: LayoutResolver._handle_rect,
+                Circle: LayoutResolver._handle_circle,
+                RoundedRect: LayoutResolver._handle_rounded_rect,
+                Line: LayoutResolver._handle_line,
+                Polyline: LayoutResolver._handle_polyline,
+                SplinePath: LayoutResolver._handle_spline_path,
+                Keepout: LayoutResolver._handle_keepout,
+                Item: LayoutResolver._handle_item,
+            }
+        return LayoutResolver._NODE_HANDLERS
+
     def _resolve_node(
         self,
         node: Any,
@@ -178,316 +534,16 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        """Dispatch to the appropriate handler based on node type."""
         if node is None:
             return
 
-
-        if isinstance(node, Panel):
-            for child in node.children:
-                self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, Inset):
-            inset_region = region.inset(node.amount_mm)
-            for child in node.children:
-                self._resolve_node(child, inset_region, items, params)
-
-
-        elif isinstance(node, Frame):
-
-
-            outer_rect = Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
-                placement=Placement(center_xy_mm=region.center),
-                feature=Feature(
-                    type="profile",
-                    depth=node.profile_depth,
-                    side=node.profile_side,
-                    depth_mm=None if node.profile_depth == "through" else float(node.profile_depth),
-                ),
-            )
-            items.append(outer_rect)
-
-
-            inner_region = region.inset(node.width_mm)
-            for child in node.children:
-                self._resolve_node(child, inner_region, items, params)
-
-
-        elif isinstance(node, Grid):
-            cells = region.subdivide_grid(node.rows, node.cols, node.gap_mm)
-
-
-            cell_content = [child for child in node.children if isinstance(child, Cell)]
-
-            if not cell_content:
-
-                cell_content = [Cell(children=node.children)]
-
-
-            for cell_region in cells:
-                for cell_node in cell_content:
-
-                    content_region = cell_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else cell_region
-
-
-                    for child in cell_node.children:
-                        self._resolve_node(child, content_region, items, params)
-
-
-        elif isinstance(node, Split):
-            panes = region.subdivide_split(node.rows, node.cols, node.rail_mm, node.mullion_mm)
-
-
-            cell_content = [child for child in node.children if isinstance(child, Cell)]
-
-            if not cell_content:
-
-                cell_content = [Cell(children=node.children)]
-
-
-            for pane_region in panes:
-                for cell_node in cell_content:
-
-                    content_region = pane_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else pane_region
-
-
-                    for child in cell_node.children:
-                        self._resolve_node(child, content_region, items, params)
-
-
-        elif isinstance(node, Cell):
-
-            for child in node.children:
-                self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, UseComponent):
-            if node.component_name not in self.components:
-                raise ValueError(f"Unknown component: {node.component_name}")
-
-            comp_def = self.components[node.component_name]
-
-
-            resolved_params = {**comp_def.params, **node.args}
-
-
-            self._resolve_node(comp_def.body, region, items, resolved_params)
-
-
-        elif isinstance(node, Place):
-
-
-            if isinstance(node.layout, Grid):
-
-                cells = region.subdivide_grid(node.layout.rows, node.layout.cols, node.layout.gap_mm)
-
-
-                for idx, child in enumerate(node.children):
-                    if idx < len(cells):
-                        self._resolve_node(child, cells[idx], items, params)
-            else:
-
-                for child in node.children:
-                    self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, Rect):
-
-            islands = self._collect_island_bounds(node.children, region, params)
-
-
-            edge_treatment = self._extract_edge_treatment(node.children)
-
-
-            geometry_data = {
-                "w_mm": region.width,
-                "h_mm": region.height,
-            }
-
-
-            if islands:
-                geometry_data["islands"] = islands
-
-
-            if edge_treatment:
-                geometry_data["edge_treatment"] = edge_treatment
-
-            rect_item = Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data=geometry_data),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(rect_item)
-
-
-            for child in node.children:
-                if not isinstance(child, (Keepout, Edge)):
-                    self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, Circle):
-
-            if node.diameter_mm is not None:
-                diameter = node.diameter_mm
-            else:
-
-                diameter = min(region.width, region.height)
-
-
-            islands = self._collect_island_bounds(node.children, region, params)
-
-
-            edge_treatment = self._extract_edge_treatment(node.children)
-
-            geometry_data = {"diameter_mm": diameter}
-            if islands:
-                geometry_data["islands"] = islands
-            if edge_treatment:
-                geometry_data["edge_treatment"] = edge_treatment
-
-            circle_item = Item(
-                kind="shape",
-                type="Circle",
-                geometry=Geometry(data=geometry_data),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(circle_item)
-
-
-            for child in node.children:
-                if not isinstance(child, (Keepout, Edge)):
-                    self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, RoundedRect):
-
-            islands = self._collect_island_bounds(node.children, region, params)
-
-
-            edge_treatment = self._extract_edge_treatment(node.children)
-
-            geometry_data = {
-                "w_mm": region.width,
-                "h_mm": region.height,
-                "radius_mm": node.radius_mm,
-            }
-            if islands:
-                geometry_data["islands"] = islands
-            if edge_treatment:
-                geometry_data["edge_treatment"] = edge_treatment
-
-            rounded_rect_item = Item(
-                kind="shape",
-                type="RoundedRect",
-                geometry=Geometry(data=geometry_data),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(rounded_rect_item)
-
-
-            for child in node.children:
-                if not isinstance(child, (Keepout, Edge)):
-                    self._resolve_node(child, region, items, params)
-
-
-        elif isinstance(node, Line):
-
-            if node.orientation == "horizontal":
-
-                start_xy = (region.x_min, region.center[1])
-                end_xy = (region.x_max, region.center[1])
-            elif node.orientation == "vertical":
-
-                start_xy = (region.center[0], region.y_min)
-                end_xy = (region.center[0], region.y_max)
-            else:
-                raise ValueError(f"Unknown line orientation: {node.orientation}")
-
-            line_item = Item(
-                kind="path",
-                type="Line",
-                geometry=Geometry(data={
-                    "start_xy_mm": start_xy,
-                    "end_xy_mm": end_xy,
-                }),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(line_item)
-
-
-        elif isinstance(node, Polyline):
-
-
-            absolute_points = []
-            for norm_x, norm_y in node.points:
-                abs_x = region.x_min + norm_x * region.width
-                abs_y = region.y_min + norm_y * region.height
-                absolute_points.append((abs_x, abs_y))
-
-            polyline_item = Item(
-                kind="path",
-                type="Polyline",
-                geometry=Geometry(data={
-                    "points_mm": absolute_points,
-                }),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(polyline_item)
-
-        elif isinstance(node, SplinePath):
-
-
-            normalized_samples = sample_catmull_rom_spline(list(node.points), node.tolerance_mm)
-
-
-            absolute_points = []
-            for norm_x, norm_y in normalized_samples:
-                abs_x = region.x_min + norm_x * region.width
-                abs_y = region.y_min + norm_y * region.height
-                absolute_points.append((abs_x, abs_y))
-
-
-            spline_item = Item(
-                kind="path",
-                type="Polyline",
-                geometry=Geometry(data={
-                    "points_mm": absolute_points,
-                    "spline_source": True,
-                    "spline_tolerance_mm": node.tolerance_mm,
-                }),
-                placement=Placement(center_xy_mm=region.center),
-                feature=node.feature,
-                shape_id=node.id,
-            )
-            items.append(spline_item)
-
-
-        elif isinstance(node, Keepout):
-
-
-            pass
-
-
-        elif isinstance(node, Item):
-            items.append(node)
-
-
-        else:
-            pass
+        handler_map = self._get_handler_map()
+        node_type = type(node)
+
+        if node_type in handler_map:
+            handler_map[node_type](self, node, region, items, params)
+        # Unknown node types are silently ignored (preserves original behavior)
 
 
 def resolve_layout(ast: CompositionalLayoutAST) -> LayoutAST:

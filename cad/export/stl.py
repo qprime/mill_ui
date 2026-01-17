@@ -6,6 +6,8 @@ import trimesh
 from pathlib import Path
 from typing import Any
 
+from core.constants import DepthMode
+
 try:
     from shapely.geometry import Polygon, Point, MultiPolygon
     from shapely import affinity
@@ -188,7 +190,7 @@ def export_stl(
 
 
             depth_value = feature["depth"]
-            if depth_value == "through":
+            if DepthMode.is_through(depth_value):
                 depth_mm = sheet_thickness_mm
             else:
                 depth_mm = feature.get("depth_mm", depth_value)
@@ -246,7 +248,7 @@ def export_stl(
 
 
         depth_value = feature["depth"]
-        if depth_value == "through":
+        if DepthMode.is_through(depth_value):
             depth_mm = sheet_thickness_mm
         else:
             depth_mm = feature.get("depth_mm", depth_value)

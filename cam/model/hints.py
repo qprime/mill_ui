@@ -2,6 +2,8 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
+from core.constants import DepthMode
+
 __all__ = ["build_cam_hints"]
 
 def _id(it: Dict[str, Any]) -> str:
@@ -32,7 +34,7 @@ def _depth_mm(feature: Dict[str, Any], sheet_thickness: float) -> float:
     ftype = (feature or {}).get("type", feature.get("kind", "profile")).lower()
     if ftype in ("pocket", "engrave"):
         return float(feature.get("depth_mm", 0.0))
-    if feature.get("depth") == "through":
+    if DepthMode.is_through(feature.get("depth")):
         return float(sheet_thickness)
     if "depth_mm" in feature:
         return float(feature["depth_mm"])

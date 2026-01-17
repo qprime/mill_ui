@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Sequence
 from xml.etree import ElementTree as ET
 
+from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import RemovalIntent, Bounds2D
 from export.dimensions import place_dimensions_on_rails, render_placed_dimension, render_gap_dimension
@@ -743,11 +744,11 @@ def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent]
         depth = item.feature.depth
 
 
-        if depth == "through" and ftype == "profile":
+        if DepthMode.is_through(depth) and ftype == "profile":
             continue
 
-        if depth == "through":
-            depth_str = "through"
+        if DepthMode.is_through(depth):
+            depth_str = DepthMode.THROUGH
         elif isinstance(depth, (int, float)):
             depth_str = f"{float(depth):.1f}mm"
         else:

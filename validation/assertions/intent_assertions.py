@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Feature
 from validation.core import AssertionResult, Verdict
 
@@ -161,7 +162,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
             ))
 
         # Through cut assertion
-        if feature.depth == "through":
+        if DepthMode.is_through(feature.depth):
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
                 source=source,
@@ -237,7 +238,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
             ))
 
         # Through cut assertion for through holes
-        if feature.depth == "through":
+        if DepthMode.is_through(feature.depth):
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
                 source=source,
@@ -258,7 +259,7 @@ def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
     if feature.depth_mm is not None:
         return feature.depth_mm
 
-    if feature.depth == "through":
+    if DepthMode.is_through(feature.depth):
         return sheet_thickness_mm
 
     if isinstance(feature.depth, (int, float)):

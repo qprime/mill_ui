@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Feature
 
 
@@ -78,14 +79,14 @@ def _format_feature(feature: Feature) -> str:
     feature_type = feature.type
 
 
-    if feature.depth == "through":
-        depth_str = "through"
+    if DepthMode.is_through(feature.depth):
+        depth_str = DepthMode.THROUGH
     elif feature.depth_mm is not None:
         depth_str = f"{feature.depth_mm:.2f}mm"
     else:
 
         depth_str = str(feature.depth)
-        if not depth_str.endswith("mm") and depth_str != "through":
+        if not depth_str.endswith("mm") and not DepthMode.is_through(depth_str):
             depth_str = f"{depth_str}mm"
 
 

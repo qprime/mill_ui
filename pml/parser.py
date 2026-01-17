@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
@@ -205,8 +206,8 @@ class _PMLParser:
         depth_str = parts[1]
 
 
-        if depth_str == "through":
-            depth = "through"
+        if DepthMode.is_through(depth_str):
+            depth = DepthMode.THROUGH
             depth_mm = None
         elif depth_str.endswith("mm"):
             depth_val = float(depth_str[:-2])

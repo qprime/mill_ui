@@ -7,6 +7,7 @@ from typing import Iterable, Mapping, Any, Tuple, List, Optional
 
 import numpy as np
 
+from core.constants import DepthMode
 from skills.cam_engine.heightfield_solid import triangulate_heightfield
 from skills.cam_engine.stl_writer import write_binary_stl
 
@@ -28,7 +29,7 @@ def _feature_target_z(feature: Mapping[str, Any] | None, thickness_mm: float) ->
     ftype = str(feature.get("type") or "").lower()
 
     depth = 0.0
-    if str(feature.get("depth", "")).lower() == "through":
+    if DepthMode.is_through(str(feature.get("depth", "")).lower()):
         depth = float(thickness_mm)
     elif "depth_mm" in feature:
         try:
@@ -180,7 +181,7 @@ def write_panel_stl(path: Path,
         is_through_profile = False
         if feature:
             depth_flag = str(feature.get("depth", "")).lower()
-            is_through_profile = depth_flag == "through" or depth_mm >= thickness - 1e-6
+            is_through_profile = DepthMode.is_through(depth_flag) or depth_mm >= thickness - 1e-6
 
         if shape_type == "rect":
             geom = item.get("geometry") or {}

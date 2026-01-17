@@ -3,9 +3,9 @@
     "parse_ms": 0.09,
     "ir_ms": 0.01,
     "hints_ms": 0.0,
-    "plan_ms": 0.64,
-    "gcode_ms": 1.17,
-    "total_ms": 1.92
+    "plan_ms": 0.62,
+    "gcode_ms": 1.22,
+    "total_ms": 1.95
   },
   "complexity": {
     "total_moves": 516,

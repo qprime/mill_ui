@@ -13,6 +13,16 @@ from ir.removal_intent import (
     EdgeTreatment,
 )
 from layout_ast.layout import Item
+from core.constants import (
+    HintKeys,
+    GeometryKeys,
+    TabKeys,
+    MetadataKeys,
+    FeatureType,
+    ShapeType,
+    Side,
+)
+from core.geometry import compute_shape_bounds
 
 
 def profile_hint_to_removal_intent(
@@ -21,21 +31,25 @@ def profile_hint_to_removal_intent(
     region_id_prefix: str = "profile",
 ) -> RemovalIntent:
 
-    hint_id = hint.get("id", "")
+    hint_id = hint.get(HintKeys.ID, "")
     region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
 
 
-    depth_mm = float(hint.get("depth_mm", sheet_thickness_mm))
+    depth_mm = float(hint.get(HintKeys.DEPTH_MM, sheet_thickness_mm))
 
 
-    bounds = _geometry_to_bounds(hint.get("shape", ""), hint.get("geometry", {}), hint.get("center_xy_mm"))
+    bounds = _geometry_to_bounds(
+        hint.get(HintKeys.SHAPE, ""),
+        hint.get(HintKeys.GEOMETRY, {}),
+        hint.get(HintKeys.CENTER_XY_MM),
+    )
 
 
-    side = hint.get("side", "outside").lower()
+    side = hint.get(HintKeys.SIDE, Side.OUTSIDE).lower()
     allowance = _side_to_allowance(side)
 
 
-    tabs_data = hint.get("tabs")
+    tabs_data = hint.get(HintKeys.TABS)
     constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
 
 
@@ -47,10 +61,10 @@ def profile_hint_to_removal_intent(
         allowance=allowance,
         constraints=constraints,
         metadata={
-            "hint_type": "profile",
-            "shape": hint.get("shape"),
-            "side": side,
-            "original_id": hint_id,
+            MetadataKeys.HINT_TYPE: FeatureType.PROFILE,
+            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+            HintKeys.SIDE: side,
+            MetadataKeys.ORIGINAL_ID: hint_id,
         },
     )
 
@@ -60,29 +74,33 @@ def pocket_hint_to_removal_intent(
     region_id_prefix: str = "pocket",
 ) -> RemovalIntent:
 
-    hint_id = hint.get("id", "")
+    hint_id = hint.get(HintKeys.ID, "")
     region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
 
 
-    depth_mm = float(hint.get("depth_mm", 0.0))
-    start_depth_mm = float(hint.get("start_depth_mm", 0.0))
+    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
+    start_depth_mm = float(hint.get(HintKeys.START_DEPTH_MM, 0.0))
 
 
-    bounds = _geometry_to_bounds(hint.get("shape", ""), hint.get("geometry", {}), hint.get("center_xy_mm"))
+    bounds = _geometry_to_bounds(
+        hint.get(HintKeys.SHAPE, ""),
+        hint.get(HintKeys.GEOMETRY, {}),
+        hint.get(HintKeys.CENTER_XY_MM),
+    )
 
 
     allowance = Allowance()
 
 
     metadata = {
-        "hint_type": "pocket",
-        "shape": hint.get("shape"),
-        "original_id": hint_id,
+        MetadataKeys.HINT_TYPE: FeatureType.POCKET,
+        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+        MetadataKeys.ORIGINAL_ID: hint_id,
     }
 
 
-    if "corner_cleanup_tool_diameter_mm" in hint:
-        metadata["corner_cleanup_tool_diameter_mm"] = float(hint["corner_cleanup_tool_diameter_mm"])
+    if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in hint:
+        metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = float(hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM])
 
 
     return RemovalIntent(
@@ -101,14 +119,18 @@ def hole_hint_to_removal_intent(
     region_id_prefix: str = "hole",
 ) -> RemovalIntent:
 
-    hint_id = hint.get("id", "")
+    hint_id = hint.get(HintKeys.ID, "")
     region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
 
 
-    depth_mm = float(hint.get("depth_mm", 0.0))
+    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
 
 
-    bounds = _geometry_to_bounds(hint.get("shape", ""), hint.get("geometry", {}), hint.get("center_xy_mm"))
+    bounds = _geometry_to_bounds(
+        hint.get(HintKeys.SHAPE, ""),
+        hint.get(HintKeys.GEOMETRY, {}),
+        hint.get(HintKeys.CENTER_XY_MM),
+    )
 
 
     allowance = Allowance()
@@ -122,9 +144,9 @@ def hole_hint_to_removal_intent(
         allowance=allowance,
         constraints=Constraints(),
         metadata={
-            "hint_type": "hole",
-            "shape": hint.get("shape"),
-            "original_id": hint_id,
+            MetadataKeys.HINT_TYPE: FeatureType.HOLE,
+            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+            MetadataKeys.ORIGINAL_ID: hint_id,
         },
     )
 
@@ -134,14 +156,18 @@ def engrave_hint_to_removal_intent(
     region_id_prefix: str = "engrave",
 ) -> RemovalIntent:
 
-    hint_id = hint.get("id", "")
+    hint_id = hint.get(HintKeys.ID, "")
     region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
 
 
-    depth_mm = float(hint.get("depth_mm", 0.0))
+    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
 
 
-    bounds = _geometry_to_bounds(hint.get("shape", ""), hint.get("geometry", {}), hint.get("center_xy_mm"))
+    bounds = _geometry_to_bounds(
+        hint.get(HintKeys.SHAPE, ""),
+        hint.get(HintKeys.GEOMETRY, {}),
+        hint.get(HintKeys.CENTER_XY_MM),
+    )
 
 
     allowance = Allowance()
@@ -155,64 +181,28 @@ def engrave_hint_to_removal_intent(
         allowance=allowance,
         constraints=Constraints(),
         metadata={
-            "hint_type": "engrave",
-            "shape": hint.get("shape"),
-            "original_id": hint_id,
+            MetadataKeys.HINT_TYPE: FeatureType.ENGRAVE,
+            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+            MetadataKeys.ORIGINAL_ID: hint_id,
         },
     )
 
 
 def _geometry_to_bounds(shape: str, geometry: dict[str, Any], center_xy: tuple[float, float] | list[float] | None) -> Bounds2D:
-    if center_xy is None:
-        center_xy = (0.0, 0.0)
-    elif isinstance(center_xy, list):
-        center_xy = (float(center_xy[0]), float(center_xy[1]))
-
-    cx, cy = float(center_xy[0]), float(center_xy[1])
-
-    shape_lower = shape.lower()
-
-    if shape_lower in ("rect", "rectangle"):
-        w = float(geometry.get("w_mm", 0.0))
-        h = float(geometry.get("h_mm", 0.0))
-        half_w, half_h = w / 2.0, h / 2.0
-        return Bounds2D(
-            x_min=cx - half_w,
-            x_max=cx + half_w,
-            y_min=cy - half_h,
-            y_max=cy + half_h,
-        )
-
-    elif shape_lower == "circle":
-        diameter = float(geometry.get("diameter_mm", 0.0))
-        radius = diameter / 2.0
-        return Bounds2D(
-            x_min=cx - radius,
-            x_max=cx + radius,
-            y_min=cy - radius,
-            y_max=cy + radius,
-        )
-
-    else:
-
-        return Bounds2D(
-            x_min=cx - 0.5,
-            x_max=cx + 0.5,
-            y_min=cy - 0.5,
-            y_max=cy + 0.5,
-        )
+    """Convert v1 hint geometry to bounds. Delegates to unified compute_shape_bounds()."""
+    return compute_shape_bounds(shape, geometry, center_xy)
 
 
 def _side_to_allowance(side: str) -> Allowance:
     side_lower = side.lower()
 
-    if side_lower == "outside":
+    if side_lower == Side.OUTSIDE:
 
         return Allowance(outside=0.0)
-    elif side_lower == "inside":
+    elif side_lower == Side.INSIDE:
 
         return Allowance(inside=0.0)
-    elif side_lower == "on":
+    elif side_lower == Side.ON:
 
         return Allowance(on=0.0)
     else:
@@ -224,11 +214,11 @@ def _tabs_to_constraints(tabs_data: dict[str, Any] | None) -> Constraints:
     if not tabs_data:
         return Constraints()
 
-    count = int(tabs_data.get("count", 0))
-    height_mm = float(tabs_data.get("height", tabs_data.get("height_mm", 3.0)))
+    count = int(tabs_data.get(TabKeys.COUNT, 0))
+    height_mm = float(tabs_data.get(TabKeys.HEIGHT, tabs_data.get(TabKeys.HEIGHT_MM, 3.0)))
 
 
-    width_value = tabs_data.get("width_mm", tabs_data.get("width"))
+    width_value = tabs_data.get(TabKeys.WIDTH_MM, tabs_data.get(TabKeys.WIDTH))
     width_mm = float(width_value) if width_value is not None else None
 
     tab = TabConstraint(count=count, height_mm=height_mm, width_mm=width_mm)
@@ -258,7 +248,7 @@ def item_to_removal_intent(
 
 
     allowance = Allowance()
-    if item.feature.type == "profile" and item.feature.side:
+    if item.feature.type == FeatureType.PROFILE and item.feature.side:
         allowance = _side_to_allowance(item.feature.side)
 
 
@@ -279,53 +269,28 @@ def item_to_removal_intent(
         allowance=allowance,
         constraints=constraints,
         metadata={
-            "item_type": item.type,
-            "feature_type": item.feature.type,
-            "shape_id": item.shape_id,
+            MetadataKeys.ITEM_TYPE: item.type,
+            MetadataKeys.FEATURE_TYPE: item.feature.type,
+            MetadataKeys.SHAPE_ID: item.shape_id,
         },
     )
 
 
 def _item_geometry_to_bounds(item_type: str, geometry_data: dict[str, Any], cx: float, cy: float) -> Bounds2D:
-    if item_type == "Rect" or item_type == "RoundedRect":
-        w = float(geometry_data.get("w_mm", 0.0))
-        h = float(geometry_data.get("h_mm", 0.0))
-        half_w, half_h = w / 2.0, h / 2.0
-        return Bounds2D(
-            x_min=cx - half_w,
-            x_max=cx + half_w,
-            y_min=cy - half_h,
-            y_max=cy + half_h,
-        )
-    elif item_type == "Circle":
-        diameter = float(geometry_data.get("diameter_mm", 0.0))
-        radius = diameter / 2.0
-        return Bounds2D(
-            x_min=cx - radius,
-            x_max=cx + radius,
-            y_min=cy - radius,
-            y_max=cy + radius,
-        )
-    else:
-
-        return Bounds2D(
-            x_min=cx - 0.5,
-            x_max=cx + 0.5,
-            y_min=cy - 0.5,
-            y_max=cy + 0.5,
-        )
+    """Convert Item geometry to bounds. Delegates to unified compute_shape_bounds()."""
+    return compute_shape_bounds(item_type, geometry_data, (cx, cy))
 
 
 def _extract_islands_from_geometry(geometry_data: dict[str, Any]) -> list[Island]:
     islands = []
-    island_data = geometry_data.get("islands", [])
+    island_data = geometry_data.get(GeometryKeys.ISLANDS, [])
 
     for island_dict in island_data:
         bounds = Bounds2D(
-            x_min=float(island_dict["x_min"]),
-            x_max=float(island_dict["x_max"]),
-            y_min=float(island_dict["y_min"]),
-            y_max=float(island_dict["y_max"]),
+            x_min=float(island_dict[GeometryKeys.X_MIN]),
+            x_max=float(island_dict[GeometryKeys.X_MAX]),
+            y_min=float(island_dict[GeometryKeys.Y_MIN]),
+            y_max=float(island_dict[GeometryKeys.Y_MAX]),
         )
         islands.append(Island(bounds=bounds))
 
@@ -333,14 +298,14 @@ def _extract_islands_from_geometry(geometry_data: dict[str, Any]) -> list[Island
 
 
 def _extract_edge_treatment_from_geometry(geometry_data: dict[str, Any]) -> EdgeTreatment | None:
-    edge_data = geometry_data.get("edge_treatment")
+    edge_data = geometry_data.get(GeometryKeys.EDGE_TREATMENT)
     if not edge_data:
         return None
 
     return EdgeTreatment(
-        type=edge_data["type"],
-        radius_mm=edge_data.get("radius_mm"),
-        distance_mm=edge_data.get("distance_mm"),
-        rough_allowance_mm=edge_data.get("rough_allowance_mm"),
-        finish_allowance_mm=edge_data.get("finish_allowance_mm"),
+        type=edge_data[GeometryKeys.TYPE],
+        radius_mm=edge_data.get(GeometryKeys.RADIUS_MM),
+        distance_mm=edge_data.get(GeometryKeys.DISTANCE_MM),
+        rough_allowance_mm=edge_data.get(GeometryKeys.ROUGH_ALLOWANCE_MM),
+        finish_allowance_mm=edge_data.get(GeometryKeys.FINISH_ALLOWANCE_MM),
     )

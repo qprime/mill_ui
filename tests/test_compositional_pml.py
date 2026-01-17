@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-import pytest
+import sys
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
 from pml.compositional_formatter import format_compositional_pml
@@ -17,7 +17,15 @@ from layout_ast.compositional import (
 from layout_ast.layout import Feature
 
 
+def approx_eq(a, b, rel=1e-6):
+    """Check if two values are approximately equal."""
+    if abs(b) < 1e-9:
+        return abs(a - b) < 1e-9
+    return abs(a - b) / abs(b) < rel
+
+
 def test_simple_rect():
+    print("Running test_simple_rect...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -34,9 +42,12 @@ rect outer profile through outside
     assert isinstance(rect, Rect)
     assert rect.id == "outer"
     assert rect.feature.type == "profile"
+    print("  PASS")
+    return True
 
 
 def test_rect_with_inset():
+    print("Running test_rect_with_inset...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 inset 25.00mm
@@ -50,9 +61,12 @@ inset 25.00mm
 
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
+    print("  PASS")
+    return True
 
 
 def test_frame_with_pocket():
+    print("Running test_frame_with_pocket...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -78,9 +92,12 @@ rect outer profile through outside
 
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
+    print("  PASS")
+    return True
 
 
 def test_grid_with_pockets():
+    print("Running test_grid_with_pockets...")
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
 grid 2 2 gap 10.00mm
@@ -96,11 +113,14 @@ grid 2 2 gap 10.00mm
     for item in flat.items:
         assert item.feature.type == "pocket"
 
-        assert item.geometry.data["w_mm"] == pytest.approx(195.0)
-        assert item.geometry.data["h_mm"] == pytest.approx(195.0)
+        assert approx_eq(item.geometry.data["w_mm"], 195.0)
+        assert approx_eq(item.geometry.data["h_mm"], 195.0)
+    print("  PASS")
+    return True
 
 
 def test_component_definition_and_use():
+    print("Running test_component_definition_and_use...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 component SimplePanel
@@ -118,9 +138,12 @@ use SimplePanel
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
     assert flat.items[0].shape_id == "panel"
+    print("  PASS")
+    return True
 
 
 def test_place_with_components():
+    print("Running test_place_with_components...")
     pml = """sheet 1000.00mm 1000.00mm 19.00mm
 
 component Panel
@@ -141,10 +164,13 @@ place grid 2 2 gap 50.00mm
 
     first = flat.items[0]
 
-    assert first.geometry.data["w_mm"] == pytest.approx(475.0)
+    assert approx_eq(first.geometry.data["w_mm"], 475.0)
+    print("  PASS")
+    return True
 
 
 def test_acceptance_stage12_gold_exemplar():
+    print("Running test_acceptance_stage12_gold_exemplar...")
     pml = """sheet 1200.00mm 1200.00mm 19.00mm
 
 project acceptance_test_grid_panels
@@ -197,16 +223,19 @@ place grid 2 2 gap 100.00mm
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "panel_outer"
-    assert first_outer.geometry.data["w_mm"] == pytest.approx(550.0)
-    assert first_outer.geometry.data["h_mm"] == pytest.approx(550.0)
+    assert approx_eq(first_outer.geometry.data["w_mm"], 550.0)
+    assert approx_eq(first_outer.geometry.data["h_mm"], 550.0)
 
 
     first_pocket = pocket_items[0]
-    assert first_pocket.geometry.data["w_mm"] == pytest.approx(230.0)
-    assert first_pocket.geometry.data["h_mm"] == pytest.approx(230.0)
+    assert approx_eq(first_pocket.geometry.data["w_mm"], 230.0)
+    assert approx_eq(first_pocket.geometry.data["h_mm"], 230.0)
+    print("  PASS")
+    return True
 
 
 def test_roundtrip_preserves_semantics():
+    print("Running test_roundtrip_preserves_semantics...")
     original_pml = """sheet 400.00mm 600.00mm 19.00mm
 
 project test_roundtrip
@@ -242,9 +271,12 @@ place grid 2 2 gap 20.00mm
     types1 = [item.feature.type if item.feature else None for item in flat1.items]
     types2 = [item.feature.type if item.feature else None for item in flat2.items]
     assert types1 == types2
+    print("  PASS")
+    return True
 
 
 def test_error_handling_invalid_indentation():
+    print("Running test_error_handling_invalid_indentation...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -252,36 +284,66 @@ rect outer profile through outside
     rect inner pocket 6.00mm
 """
 
-    with pytest.raises(ParseError) as exc_info:
+    try:
         parse_compositional_pml(pml)
-
-    assert "indentation" in str(exc_info.value).lower()
-    assert exc_info.value.line > 0
+        print("  FAIL: Expected ParseError")
+        return False
+    except ParseError as exc_info:
+        if "indentation" in str(exc_info).lower():
+            if exc_info.line > 0:
+                pass
+            else:
+                print(f"  FAIL: Line number should be > 0")
+                return False
+        else:
+            print(f"  FAIL: Error should mention 'indentation': {exc_info}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_error_handling_unknown_keyword():
+    print("Running test_error_handling_unknown_keyword...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 unknown_node 123
 """
-    with pytest.raises(ParseError) as exc_info:
+    try:
         parse_compositional_pml(pml)
-
-    assert exc_info.value.line == 3
+        print("  FAIL: Expected ParseError")
+        return False
+    except ParseError as exc_info:
+        if exc_info.line == 3:
+            pass
+        else:
+            print(f"  FAIL: Expected line 3, got {exc_info.line}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_error_handling_missing_unit():
+    print("Running test_error_handling_missing_unit...")
     pml = """sheet 400 600 19
 
 rect outer profile through outside
 """
-    with pytest.raises(ParseError) as exc_info:
+    try:
         parse_compositional_pml(pml)
-
-    assert "expected" in str(exc_info.value).lower()
+        print("  FAIL: Expected ParseError")
+        return False
+    except ParseError as exc_info:
+        if "expected" in str(exc_info).lower():
+            pass
+        else:
+            print(f"  FAIL: Error should mention 'expected': {exc_info}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_formatter_produces_canonical_output():
+    print("Running test_formatter_produces_canonical_output...")
     pml = """sheet 1200.00mm 1200.00mm 19.00mm
 
 project test_canonical
@@ -313,9 +375,12 @@ place grid 2 2 gap 100.00mm
     ast2 = parse_compositional_pml(formatted)
     formatted2 = format_compositional_pml(ast2)
     assert formatted == formatted2
+    print("  PASS")
+    return True
 
 
 def test_grid_without_explicit_cell():
+    print("Running test_grid_without_explicit_cell...")
     pml = """sheet 400.00mm 400.00mm 19.00mm
 
 grid 2 2 gap 0.00mm
@@ -326,9 +391,12 @@ grid 2 2 gap 0.00mm
 
 
     assert len(flat.items) == 4
+    print("  PASS")
+    return True
 
 
 def test_project_optional():
+    print("Running test_project_optional...")
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 rect outer profile through outside
@@ -338,3 +406,38 @@ rect outer profile through outside
 
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_simple_rect,
+        test_rect_with_inset,
+        test_frame_with_pocket,
+        test_grid_with_pockets,
+        test_component_definition_and_use,
+        test_place_with_components,
+        test_acceptance_stage12_gold_exemplar,
+        test_roundtrip_preserves_semantics,
+        test_error_handling_invalid_indentation,
+        test_error_handling_unknown_keyword,
+        test_error_handling_missing_unit,
+        test_formatter_produces_canonical_output,
+        test_grid_without_explicit_cell,
+        test_project_optional,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            failed += 1
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(0 if failed == 0 else 1)

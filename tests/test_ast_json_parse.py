@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from layout_ast.layout import LayoutAST
 
 
 def test_parse_minimal_layout():
+    print("Running test_parse_minimal_layout...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [
@@ -51,9 +51,12 @@ def test_parse_minimal_layout():
         assert ast.config == {}
     finally:
         Path(temp_path).unlink()
+    print("  PASS")
+    return True
 
 
 def test_parse_layout_with_multiple_items():
+    print("Running test_parse_layout_with_multiple_items...")
     layout_data = {
         "sheet": {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 18.0},
         "items": [
@@ -126,9 +129,12 @@ def test_parse_layout_with_multiple_items():
         assert ast.config["tool_db"] == "default"
     finally:
         Path(temp_path).unlink()
+    print("  PASS")
+    return True
 
 
 def test_parse_empty_items():
+    print("Running test_parse_empty_items...")
     layout_data = {
         "sheet": {"width_mm": 100.0, "height_mm": 100.0, "thickness_mm": 6.0},
         "items": [],
@@ -144,9 +150,12 @@ def test_parse_empty_items():
         assert ast.sheet.width_mm == 100.0
     finally:
         Path(temp_path).unlink()
+    print("  PASS")
+    return True
 
 
 def test_parse_missing_sheet():
+    print("Running test_parse_missing_sheet...")
     layout_data = {
         "items": [],
     }
@@ -156,18 +165,40 @@ def test_parse_missing_sheet():
         temp_path = f.name
 
     try:
-        with pytest.raises(ValueError, match="missing required 'sheet' field"):
+        try:
             LayoutAST.from_json(temp_path)
+            print("  FAIL: Expected ValueError")
+            return False
+        except ValueError as e:
+            if "missing required 'sheet' field" in str(e):
+                pass
+            else:
+                print(f"  FAIL: Wrong error message: {e}")
+                return False
     finally:
         Path(temp_path).unlink()
+    print("  PASS")
+    return True
 
 
 def test_parse_nonexistent_file():
-    with pytest.raises(FileNotFoundError, match="Layout file not found"):
+    print("Running test_parse_nonexistent_file...")
+    try:
         LayoutAST.from_json("/nonexistent/path/layout.json")
+        print("  FAIL: Expected FileNotFoundError")
+        return False
+    except FileNotFoundError as e:
+        if "Layout file not found" in str(e):
+            pass
+        else:
+            print(f"  FAIL: Wrong error message: {e}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_parse_preserves_numeric_precision():
+    print("Running test_parse_preserves_numeric_precision...")
     layout_data = {
         "sheet": {"width_mm": 203.2, "height_mm": 101.6, "thickness_mm": 12.7},
         "items": [
@@ -193,14 +224,18 @@ def test_parse_preserves_numeric_precision():
         assert ast.items[0].feature.depth_mm == 3.175
     finally:
         Path(temp_path).unlink()
+    print("  PASS")
+    return True
 
 
 def test_parse_cnc_clamp_v1_layout():
+    print("Running test_parse_cnc_clamp_v1_layout...")
 
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
 
     if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
+        print(f"  SKIP: Test layout not found: {layout_path}")
+        return True
 
     ast = LayoutAST.from_json(str(layout_path))
 
@@ -229,13 +264,17 @@ def test_parse_cnc_clamp_v1_layout():
     assert item.geometry is None
     assert item.placement is None
     assert item.feature is None
+    print("  PASS")
+    return True
 
 
 def test_parse_mandelbrot_demo_layout():
+    print("Running test_parse_mandelbrot_demo_layout...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
 
     if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
+        print(f"  SKIP: Test layout not found: {layout_path}")
+        return True
 
     ast = LayoutAST.from_json(str(layout_path))
 
@@ -254,13 +293,17 @@ def test_parse_mandelbrot_demo_layout():
     assert item.kind == "template"
     assert item.type == "MandelbrotOutlineFill"
     assert item.params is not None
+    print("  PASS")
+    return True
 
 
 def test_parse_cnc_clamp_part_a_layout():
+    print("Running test_parse_cnc_clamp_part_a_layout...")
     layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
 
     if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
+        print(f"  SKIP: Test layout not found: {layout_path}")
+        return True
 
     ast = LayoutAST.from_json(str(layout_path))
 
@@ -274,3 +317,33 @@ def test_parse_cnc_clamp_part_a_layout():
     item = ast.items[0]
     assert item.kind == "template"
     assert item.type == "ClampBar"
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_parse_minimal_layout,
+        test_parse_layout_with_multiple_items,
+        test_parse_empty_items,
+        test_parse_missing_sheet,
+        test_parse_nonexistent_file,
+        test_parse_preserves_numeric_precision,
+        test_parse_cnc_clamp_v1_layout,
+        test_parse_mandelbrot_demo_layout,
+        test_parse_cnc_clamp_part_a_layout,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            failed += 1
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(0 if failed == 0 else 1)

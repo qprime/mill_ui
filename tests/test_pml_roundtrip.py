@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import json
-import pytest
+import sys
 
 from pml import parse_pml, format_pml, PMLParseError
 
 
 def test_pml_parse_minimal_layout():
+    print("Running test_pml_parse_minimal_layout...")
     pml = """
 sheet 450mm 650mm 19mm
 
@@ -31,9 +32,12 @@ rect outer at 225mm,325mm size 400mm,600mm profile through outside
     assert item.feature.type == "profile"
     assert item.feature.depth == "through"
     assert item.feature.side == "outside"
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_with_metadata():
+    print("Running test_pml_parse_with_metadata...")
     pml = """
 project test_panel
 kerf 0.15mm
@@ -48,9 +52,12 @@ rect panel at 150mm,200mm size 200mm,300mm pocket 5mm
     assert ast.project == "test_panel"
     assert ast.kerf_width_mm == 0.15
     assert ast.sheet.width_mm == 300.0
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_multiple_shapes():
+    print("Running test_pml_parse_multiple_shapes...")
     pml = """
 sheet 450mm 650mm 19mm
 
@@ -83,9 +90,12 @@ circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
     assert anchor1.type == "Circle"
     assert anchor1.feature.type == "hole"
     assert anchor1.feature.depth_mm == 8.0
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_circle_diameter_vs_radius():
+    print("Running test_pml_parse_circle_diameter_vs_radius...")
     pml = """
 sheet 200mm 200mm 19mm
 
@@ -106,9 +116,12 @@ circle hole2 at 150mm,150mm radius 8mm hole 12mm
     hole2 = ast.items[1]
     assert "radius_mm" in hole2.geometry.data
     assert hole2.geometry.data["radius_mm"] == 8.0
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_roundedrect():
+    print("Running test_pml_parse_roundedrect...")
     pml = """
 sheet 300mm 300mm 19mm
 
@@ -125,9 +138,12 @@ roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
     assert item.geometry.data["h_mm"] == 150.0
     assert item.geometry.data["corner_radius_mm"] == 10.0
     assert item.feature.type == "pocket"
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_comments_and_blank_lines():
+    print("Running test_pml_parse_comments_and_blank_lines...")
     pml = """
 
 sheet 300mm 400mm 19mm
@@ -142,45 +158,92 @@ rect panel at 150mm,200mm size 200mm,300mm profile through inside
 
     assert len(ast.items) == 1
     assert ast.sheet.width_mm == 300.0
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_error_missing_sheet():
+    print("Running test_pml_parse_error_missing_sheet...")
     pml = """
 rect panel at 150mm,200mm size 200mm,300mm profile through inside
 """
 
-    with pytest.raises(PMLParseError, match="Missing required 'sheet' declaration"):
+    try:
         parse_pml(pml)
+        print("  FAIL: Expected PMLParseError")
+        return False
+    except PMLParseError as e:
+        if "Missing required 'sheet' declaration" in str(e):
+            pass
+        else:
+            print(f"  FAIL: Wrong error message: {e}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_error_invalid_sheet_syntax():
+    print("Running test_pml_parse_error_invalid_sheet_syntax...")
     pml = "sheet 300 400 19"
 
-    with pytest.raises(PMLParseError, match="Invalid sheet syntax"):
+    try:
         parse_pml(pml)
+        print("  FAIL: Expected PMLParseError")
+        return False
+    except PMLParseError as e:
+        if "Invalid sheet syntax" in str(e):
+            pass
+        else:
+            print(f"  FAIL: Wrong error message: {e}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_error_invalid_feature():
+    print("Running test_pml_parse_error_invalid_feature...")
     pml = """
 sheet 300mm 400mm 19mm
 rect panel at 150mm,200mm size 200mm,300mm invalid_feature 5mm
 """
 
-    with pytest.raises(PMLParseError, match="Unknown feature type"):
+    try:
         parse_pml(pml)
+        print("  FAIL: Expected PMLParseError")
+        return False
+    except PMLParseError as e:
+        if "Unknown feature type" in str(e):
+            pass
+        else:
+            print(f"  FAIL: Wrong error message: {e}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_pml_parse_error_invalid_profile_side():
+    print("Running test_pml_parse_error_invalid_profile_side...")
     pml = """
 sheet 300mm 400mm 19mm
 rect panel at 150mm,200mm size 200mm,300mm profile through bad_side
 """
 
-    with pytest.raises(PMLParseError, match="Invalid profile side"):
+    try:
         parse_pml(pml)
+        print("  FAIL: Expected PMLParseError")
+        return False
+    except PMLParseError as e:
+        if "Invalid profile side" in str(e):
+            pass
+        else:
+            print(f"  FAIL: Wrong error message: {e}")
+            return False
+    print("  PASS")
+    return True
 
 
 def test_pml_format_minimal_layout():
+    print("Running test_pml_format_minimal_layout...")
     from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
     ast = LayoutAST(
@@ -201,9 +264,12 @@ def test_pml_format_minimal_layout():
 
     assert "sheet 450.00mm 650.00mm 19.00mm" in pml
     assert "rect outer at 225.00mm,325.00mm size 400.00mm,600.00mm profile through outside" in pml
+    print("  PASS")
+    return True
 
 
 def test_pml_format_with_metadata():
+    print("Running test_pml_format_with_metadata...")
     from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
     ast = LayoutAST(
@@ -226,9 +292,12 @@ def test_pml_format_with_metadata():
 
     assert "project test_panel" in pml
     assert "kerf 0.15mm" in pml
+    print("  PASS")
+    return True
 
 
 def test_pml_roundtrip_semantic_equivalence():
+    print("Running test_pml_roundtrip_semantic_equivalence...")
     original_pml = """
 
 project shaker_door
@@ -262,9 +331,12 @@ rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
         assert item1.placement.center_xy_mm == item2.placement.center_xy_mm
         assert item1.feature.type == item2.feature.type
         assert item1.feature.depth == item2.feature.depth
+    print("  PASS")
+    return True
 
 
 def test_pml_to_json_to_ast_semantic_equivalence():
+    print("Running test_pml_to_json_to_ast_semantic_equivalence...")
     pml = """
 project test_panel
 kerf 0.15mm
@@ -296,9 +368,12 @@ circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
     assert len(ast1.items) == 3
     assert ast1.project == "test_panel"
     assert ast1.kerf_width_mm == 0.15
+    print("  PASS")
+    return True
 
 
 def test_pml_canonical_formatting():
+    print("Running test_pml_canonical_formatting...")
     pml_input = """
 sheet 450.123mm 650.456mm 19.789mm
 rect test at 100.1mm,200.2mm size 50.5mm,60.6mm pocket 5.123mm
@@ -314,3 +389,39 @@ rect test at 100.1mm,200.2mm size 50.5mm,60.6mm pocket 5.123mm
     assert "100.10mm" in canonical_pml
     assert "200.20mm" in canonical_pml
     assert "5.12mm" in canonical_pml
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_pml_parse_minimal_layout,
+        test_pml_parse_with_metadata,
+        test_pml_parse_multiple_shapes,
+        test_pml_parse_circle_diameter_vs_radius,
+        test_pml_parse_roundedrect,
+        test_pml_parse_comments_and_blank_lines,
+        test_pml_parse_error_missing_sheet,
+        test_pml_parse_error_invalid_sheet_syntax,
+        test_pml_parse_error_invalid_feature,
+        test_pml_parse_error_invalid_profile_side,
+        test_pml_format_minimal_layout,
+        test_pml_format_with_metadata,
+        test_pml_roundtrip_semantic_equivalence,
+        test_pml_to_json_to_ast_semantic_equivalence,
+        test_pml_canonical_formatting,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            failed += 1
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(0 if failed == 0 else 1)

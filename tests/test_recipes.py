@@ -3,17 +3,11 @@
 from __future__ import annotations
 
 import json
+import sys
 import time
 from io import StringIO
 from pathlib import Path
 from typing import Any
-
-try:
-    import pytest
-    PYTEST_AVAILABLE = True
-except ImportError:
-    PYTEST_AVAILABLE = False
-    pytest = None
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
 from pml.parser import parse_pml
@@ -68,17 +62,6 @@ RECIPE_TOOL_DB = [
         "feed_z": 250,
     },
 ]
-
-
-def pytest_addoption(parser):
-    if not PYTEST_AVAILABLE:
-        return
-    parser.addoption(
-        "--regen_recipes",
-        action="store_true",
-        default=False,
-        help="Regenerate recipe artifacts instead of comparing",
-    )
 
 
 def discover_recipe_pml_files() -> list[Path]:
@@ -220,7 +203,8 @@ def write_outputs(
     recipe_name: str,
     ast: Any,
     gcode_dict: dict[str, str],
-    metrics: dict[str, Any]
+    metrics: dict[str, Any],
+    pml_path: Path,
 ):
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -309,12 +293,6 @@ def compare_outputs(
     return len(diffs) == 0, diffs
 
 
-if PYTEST_AVAILABLE:
-    @pytest.mark.parametrize("pml_path", discover_recipe_pml_files())
-    def test_recipe_output(pml_path: Path, request):
-        _test_recipe_output_impl(pml_path, request.config.getoption("--regen_recipes"))
-
-
 def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
 
     ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
@@ -325,8 +303,8 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
 
     if regenerate:
 
-        write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics)
-        print(f"\n✓ Regenerated recipe outputs for {pml_path.name}")
+        write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
+        print(f"\n  Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
         print(f"  Files: {len(gcode_dict)} G-code + STL + SVG + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
@@ -336,16 +314,9 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
 
         if not all_match:
             diff_summary = "\n  ".join(diffs)
-            if PYTEST_AVAILABLE:
-                pytest.fail(
-                    f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}\n\n"
-                    f"To update recipe outputs, run:\n"
-                    f"  pytest tests/test_recipe_outputs.py --regen_recipes"
-                )
-            else:
-                raise AssertionError(
-                    f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
-                )
+            raise AssertionError(
+                f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
+            )
 
 
         metrics_path = output_dir / "metrics.json"
@@ -353,27 +324,84 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
             json.dump(metrics, f, indent=2)
 
 
+def test_recipe_outputs():
+    """Test all recipe PML files produce expected outputs."""
+    print("Running test_recipe_outputs...")
+    pml_files = discover_recipe_pml_files()
+
+    if not pml_files:
+        print("  SKIP: No recipe PML files found")
+        return True
+
+    all_passed = True
+    for pml_path in pml_files:
+        try:
+            _test_recipe_output_impl(pml_path, regenerate=False)
+            print(f"  {pml_path.name}: OK")
+        except AssertionError as e:
+            print(f"  {pml_path.name}: FAIL - {e}")
+            all_passed = False
+        except Exception as e:
+            print(f"  {pml_path.name}: ERROR - {e}")
+            all_passed = False
+
+    if all_passed:
+        print("  PASS")
+        return True
+    else:
+        return False
+
+
 if __name__ == "__main__":
     """Standalone runner for quick testing."""
-    print("Discovering recipe PML files...")
-    pml_files = discover_recipe_pml_files()
-    print(f"Found {len(pml_files)} recipe(s):\n")
+    import argparse
 
-    for pml_path in pml_files:
-        print(f"Processing: {pml_path.relative_to(Path.cwd())}")
-        try:
-            ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
-            output_dir = pml_path.parent / "output"
-            recipe_name = pml_path.stem
+    parser = argparse.ArgumentParser(description="Test recipe outputs")
+    parser.add_argument(
+        "--regen_recipes",
+        action="store_true",
+        help="Regenerate recipe artifacts instead of comparing",
+    )
+    args = parser.parse_args()
 
-            write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics)
+    if args.regen_recipes:
+        print("Discovering recipe PML files...")
+        pml_files = discover_recipe_pml_files()
+        print(f"Found {len(pml_files)} recipe(s):\n")
 
-            print(f"  ✓ Generated {len(gcode_dict)} G-code pass(es) + STL + SVG")
-            print(f"  ✓ Total time: {metrics['timing']['total_ms']:.1f}ms")
-            print(f"  ✓ Output: {output_dir}\n")
-        except Exception as e:
-            print(f"  ✗ FAILED: {e}\n")
-            import traceback
-            traceback.print_exc()
+        for pml_path in pml_files:
+            print(f"Processing: {pml_path.relative_to(Path.cwd())}")
+            try:
+                ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
+                output_dir = pml_path.parent / "output"
+                recipe_name = pml_path.stem
 
-    print("Done!")
+                write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
+
+                print(f"  Generated {len(gcode_dict)} G-code pass(es) + STL + SVG")
+                print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
+                print(f"  Output: {output_dir}\n")
+            except Exception as e:
+                print(f"  FAILED: {e}\n")
+                import traceback
+                traceback.print_exc()
+
+        print("Done!")
+    else:
+        tests = [
+            test_recipe_outputs,
+        ]
+
+        passed = 0
+        failed = 0
+
+        for test in tests:
+            try:
+                if test():
+                    passed += 1
+            except Exception as e:
+                print(f"  FAIL: {e}")
+                failed += 1
+
+        print(f"\n{passed} passed, {failed} failed")
+        sys.exit(0 if failed == 0 else 1)

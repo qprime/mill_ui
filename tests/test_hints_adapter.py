@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-import pytest
+import sys
 
 from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
@@ -12,6 +12,7 @@ from adapters.hints_to_removal import (
 
 
 def test_profile_hint_through_cut():
+    print("Running test_profile_hint_through_cut...")
     hint = {
         "id": "rect_outline",
         "shape": "Rect",
@@ -34,8 +35,12 @@ def test_profile_hint_through_cut():
     assert intent.metadata["hint_type"] == "profile"
     assert intent.metadata["side"] == "outside"
 
+    print("  PASS")
+    return True
+
 
 def test_profile_hint_with_tabs():
+    print("Running test_profile_hint_with_tabs...")
     hint = {
         "id": "panel_outline",
         "shape": "Rect",
@@ -55,8 +60,12 @@ def test_profile_hint_with_tabs():
     assert intent.constraints.tabs.height_mm == 3.0
     assert intent.constraints.tabs.width_mm == 10.0
 
+    print("  PASS")
+    return True
+
 
 def test_profile_hint_inside_cut():
+    print("Running test_profile_hint_inside_cut...")
     hint = {
         "id": "aperture",
         "shape": "Rect",
@@ -71,8 +80,12 @@ def test_profile_hint_inside_cut():
     assert intent.metadata["side"] == "inside"
     assert intent.allowance.inside == 0.0
 
+    print("  PASS")
+    return True
+
 
 def test_pocket_hint_basic():
+    print("Running test_pocket_hint_basic...")
     hint = {
         "id": "pocket_1",
         "shape": "Rect",
@@ -91,8 +104,12 @@ def test_pocket_hint_basic():
     assert intent.bounds.x_max == 140.0
     assert intent.metadata["hint_type"] == "pocket"
 
+    print("  PASS")
+    return True
+
 
 def test_pocket_hint_with_start_depth():
+    print("Running test_pocket_hint_with_start_depth...")
     hint = {
         "id": "stepped_pocket",
         "shape": "Rect",
@@ -109,8 +126,12 @@ def test_pocket_hint_with_start_depth():
     assert intent.z_bottom == -10.0
     assert intent.depth_mm() == 8.0
 
+    print("  PASS")
+    return True
+
 
 def test_hole_hint_circle():
+    print("Running test_hole_hint_circle...")
     hint = {
         "id": "mounting_hole",
         "shape": "Circle",
@@ -132,8 +153,12 @@ def test_hole_hint_circle():
     assert intent.bounds.y_max == 55.0
     assert intent.metadata["hint_type"] == "hole"
 
+    print("  PASS")
+    return True
+
 
 def test_engrave_hint():
+    print("Running test_engrave_hint...")
     hint = {
         "id": "text_engrave",
         "shape": "Polyline",
@@ -150,8 +175,12 @@ def test_engrave_hint():
     assert intent.depth_mm() == 0.5
     assert intent.metadata["hint_type"] == "engrave"
 
+    print("  PASS")
+    return True
+
 
 def test_profile_no_id():
+    print("Running test_profile_no_id...")
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -164,8 +193,12 @@ def test_profile_no_id():
 
     assert intent.region_id == "profile"
 
+    print("  PASS")
+    return True
+
 
 def test_pocket_no_center():
+    print("Running test_pocket_no_center...")
     hint = {
         "id": "centered_pocket",
         "shape": "Rect",
@@ -180,8 +213,12 @@ def test_pocket_no_center():
     assert intent.bounds.y_min == -10.0
     assert intent.bounds.y_max == 10.0
 
+    print("  PASS")
+    return True
+
 
 def test_bounds_calculation_rect():
+    print("Running test_bounds_calculation_rect...")
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 100.0, "h_mm": 60.0},
@@ -196,8 +233,12 @@ def test_bounds_calculation_rect():
     assert intent.bounds.y_min == 120.0
     assert intent.bounds.y_max == 180.0
 
+    print("  PASS")
+    return True
+
 
 def test_bounds_calculation_circle():
+    print("Running test_bounds_calculation_circle...")
     hint = {
         "shape": "Circle",
         "geometry": {"diameter_mm": 40.0},
@@ -212,8 +253,12 @@ def test_bounds_calculation_circle():
     assert intent.bounds.y_min == 80.0
     assert intent.bounds.y_max == 120.0
 
+    print("  PASS")
+    return True
+
 
 def test_side_to_allowance_outside():
+    print("Running test_side_to_allowance_outside...")
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -225,8 +270,12 @@ def test_side_to_allowance_outside():
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
     assert intent.allowance.outside == 0.0
 
+    print("  PASS")
+    return True
+
 
 def test_side_to_allowance_on():
+    print("Running test_side_to_allowance_on...")
     hint = {
         "shape": "Rect",
         "geometry": {"w_mm": 50.0, "h_mm": 50.0},
@@ -238,8 +287,12 @@ def test_side_to_allowance_on():
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
     assert intent.allowance.on == 0.0
 
+    print("  PASS")
+    return True
+
 
 def test_metadata_preservation():
+    print("Running test_metadata_preservation...")
     hint = {
         "id": "custom_shape",
         "shape": "Rect",
@@ -255,3 +308,41 @@ def test_metadata_preservation():
     assert intent.metadata["shape"] == "Rect"
     assert intent.metadata["side"] == "inside"
     assert intent.metadata["original_id"] == "custom_shape"
+
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_profile_hint_through_cut,
+        test_profile_hint_with_tabs,
+        test_profile_hint_inside_cut,
+        test_pocket_hint_basic,
+        test_pocket_hint_with_start_depth,
+        test_hole_hint_circle,
+        test_engrave_hint,
+        test_profile_no_id,
+        test_pocket_no_center,
+        test_bounds_calculation_rect,
+        test_bounds_calculation_circle,
+        test_side_to_allowance_outside,
+        test_side_to_allowance_on,
+        test_metadata_preservation,
+    ]
+
+    results = []
+    for test in tests:
+        try:
+            results.append(test())
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            import traceback
+            traceback.print_exc()
+            results.append(False)
+
+    passed = sum(1 for r in results if r)
+    total = len(results)
+    print(f"\n{passed}/{total} hints adapter tests passed")
+
+    sys.exit(0 if all(results) else 1)

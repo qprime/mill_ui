@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-import pytest
+import sys
 
 from layout_ast.compositional import (
     Panel,
@@ -20,7 +20,15 @@ from resolution.layout_resolver import resolve_layout
 from pml import format_pml
 
 
+def approx_eq(a, b, rel=1e-6):
+    """Check if two values are approximately equal."""
+    if abs(b) < 1e-9:
+        return abs(a - b) < 1e-9
+    return abs(a - b) / abs(b) < rel
+
+
 def test_simple_panel_with_rect():
+    print("Running test_simple_panel_with_rect...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
         root=Panel(
@@ -42,9 +50,12 @@ def test_simple_panel_with_rect():
     assert item.geometry.data["h_mm"] == 600.0
     assert item.placement.center_xy_mm == (200.0, 300.0)
     assert item.feature.type == "profile"
+    print("  PASS")
+    return True
 
 
 def test_panel_with_inset():
+    print("Running test_panel_with_inset...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
         root=Panel(
@@ -71,9 +82,12 @@ def test_panel_with_inset():
     assert item.geometry.data["h_mm"] == 550.0
 
     assert item.placement.center_xy_mm == (200.0, 300.0)
+    print("  PASS")
+    return True
 
 
 def test_frame_creates_profile_and_inner_region():
+    print("Running test_frame_creates_profile_and_inner_region...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
         root=Panel(
@@ -120,9 +134,12 @@ def test_frame_creates_profile_and_inner_region():
     assert inner.feature.type == "pocket"
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
+    print("  PASS")
+    return True
 
 
 def test_grid_subdivides_region():
+    print("Running test_grid_subdivides_region...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
         root=Panel(
@@ -154,11 +171,14 @@ def test_grid_subdivides_region():
 
     for item in flat.items:
         assert item.feature.type == "pocket"
-        assert item.geometry.data["w_mm"] == pytest.approx(195.0)
-        assert item.geometry.data["h_mm"] == pytest.approx(195.0)
+        assert approx_eq(item.geometry.data["w_mm"], 195.0)
+        assert approx_eq(item.geometry.data["h_mm"], 195.0)
+    print("  PASS")
+    return True
 
 
 def test_component_definition_and_use():
+    print("Running test_component_definition_and_use...")
 
     simple_panel = ComponentDef(
         name="SimplePanel",
@@ -187,9 +207,12 @@ def test_component_definition_and_use():
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.shape_id == "panel"
+    print("  PASS")
+    return True
 
 
 def test_place_grid_with_components():
+    print("Running test_place_grid_with_components...")
 
     shaker_panel = ComponentDef(
         name="ShakerPanel",
@@ -233,11 +256,14 @@ def test_place_grid_with_components():
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "outer"
-    assert first_outer.geometry.data["w_mm"] == pytest.approx(475.0)
-    assert first_outer.geometry.data["h_mm"] == pytest.approx(475.0)
+    assert approx_eq(first_outer.geometry.data["w_mm"], 475.0)
+    assert approx_eq(first_outer.geometry.data["h_mm"], 475.0)
+    print("  PASS")
+    return True
 
 
 def test_acceptance_4_instances_frame_grid_pocket():
+    print("Running test_acceptance_4_instances_frame_grid_pocket...")
 
     grid_panel = ComponentDef(
         name="GridPanel",
@@ -314,9 +340,12 @@ def test_acceptance_4_instances_frame_grid_pocket():
 
     print("\n=== Acceptance Test FlatPML Output ===")
     print(pml_output[:1000])
+    print("  PASS")
+    return True
 
 
 def test_grid_with_no_explicit_cell():
+    print("Running test_grid_with_no_explicit_cell...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
         root=Panel(
@@ -339,3 +368,32 @@ def test_grid_with_no_explicit_cell():
 
 
     assert len(flat.items) == 4
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_simple_panel_with_rect,
+        test_panel_with_inset,
+        test_frame_creates_profile_and_inner_region,
+        test_grid_subdivides_region,
+        test_component_definition_and_use,
+        test_place_grid_with_components,
+        test_acceptance_4_instances_frame_grid_pocket,
+        test_grid_with_no_explicit_cell,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            failed += 1
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(0 if failed == 0 else 1)

@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 import hashlib
+import sys
 from io import StringIO
 from typing import Any
-
-import pytest
 
 from cam.model.hints import build_cam_hints
 from cam.model.machine import Machine
@@ -77,6 +76,7 @@ def _generate_gcode_from_hints(
 
 
 def test_profile_gcode_equivalence():
+    print("Running test_profile_gcode_equivalence...")
 
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
@@ -115,9 +115,12 @@ def test_profile_gcode_equivalence():
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
+    print("  PASS")
+    return True
 
 
 def test_pocket_gcode_equivalence():
+    print("Running test_pocket_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     material = Material(name="MDF")
@@ -154,9 +157,12 @@ def test_pocket_gcode_equivalence():
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
+    print("  PASS")
+    return True
 
 
 def test_hole_gcode_equivalence():
+    print("Running test_hole_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     material = Material(name="MDF")
@@ -193,9 +199,12 @@ def test_hole_gcode_equivalence():
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
+    print("  PASS")
+    return True
 
 
 def test_mixed_operations_gcode_equivalence():
+    print("Running test_mixed_operations_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=400.0, height=300.0, thickness=sheet_thickness)
     material = Material(name="MDF")
@@ -252,3 +261,28 @@ def test_mixed_operations_gcode_equivalence():
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
+    print("  PASS")
+    return True
+
+
+if __name__ == "__main__":
+    tests = [
+        test_profile_gcode_equivalence,
+        test_pocket_gcode_equivalence,
+        test_hole_gcode_equivalence,
+        test_mixed_operations_gcode_equivalence,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            failed += 1
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(0 if failed == 0 else 1)

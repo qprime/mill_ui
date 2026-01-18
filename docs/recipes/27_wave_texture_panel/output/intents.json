@@ -1,0 +1,189 @@
+[
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 300.0,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 19.0,
+    "metadata": {
+      "hint_type": "profile",
+      "original_id": "generated_profile_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_profile_outer",
+    "z_bottom": -19.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 41.552914270615126,
+      "y_min": 18.447085729384874
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "wave_0_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_wave_0_0",
+    "z_bottom": -2.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 101.55291427061512,
+      "y_min": 78.44708572938488
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "wave_1_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_wave_1_0",
+    "z_bottom": -2.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 161.55291427061513,
+      "y_min": 138.44708572938487
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "wave_2_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_wave_2_0",
+    "z_bottom": -2.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 221.55291427061513,
+      "y_min": 198.44708572938487
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "wave_3_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_wave_3_0",
+    "z_bottom": -2.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 300.0,
+      "x_min": 0.0,
+      "y_max": 281.55291427061513,
+      "y_min": 258.44708572938487
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "wave_4_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_wave_4_0",
+    "z_bottom": -2.0,
+    "z_top": -0.0
+  }
+]

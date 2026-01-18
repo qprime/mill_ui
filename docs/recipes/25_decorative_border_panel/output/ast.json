@@ -1,0 +1,214 @@
+{
+  "items": [
+    {
+      "feature": {
+        "depth": "through",
+        "side": "outside",
+        "type": "profile"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            350.0,
+            0.0
+          ],
+          [
+            350.0,
+            450.0
+          ],
+          [
+            0.0,
+            450.0
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          175.0,
+          225.0
+        ]
+      },
+      "shape_id": "generated_profile_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "holes": [
+          [
+            [
+              332.0,
+              18.0
+            ],
+            [
+              18.0,
+              18.0
+            ],
+            [
+              18.0,
+              432.0
+            ],
+            [
+              332.0,
+              432.0
+            ]
+          ]
+        ],
+        "points": [
+          [
+            15.0,
+            435.0
+          ],
+          [
+            15.0,
+            15.0
+          ],
+          [
+            335.0,
+            15.0
+          ],
+          [
+            335.0,
+            435.0
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          175.0,
+          225.0
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "holes": [
+          [
+            [
+              317.0,
+              33.0
+            ],
+            [
+              33.0,
+              33.0
+            ],
+            [
+              33.0,
+              417.0
+            ],
+            [
+              317.0,
+              417.0
+            ]
+          ]
+        ],
+        "points": [
+          [
+            30.0,
+            420.0
+          ],
+          [
+            30.0,
+            30.0
+          ],
+          [
+            320.0,
+            30.0
+          ],
+          [
+            320.0,
+            420.0
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          175.0,
+          225.0
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "holes": [
+          [
+            [
+              302.0,
+              48.0
+            ],
+            [
+              48.0,
+              48.0
+            ],
+            [
+              48.0,
+              402.0
+            ],
+            [
+              302.0,
+              402.0
+            ]
+          ]
+        ],
+        "points": [
+          [
+            45.0,
+            405.0
+          ],
+          [
+            45.0,
+            45.0
+          ],
+          [
+            305.0,
+            45.0
+          ],
+          [
+            305.0,
+            405.0
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          175.0,
+          225.0
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    }
+  ],
+  "project": "recipe_25_decorative_border_panel",
+  "sheet": {
+    "height_mm": 450,
+    "thickness_mm": 19.0,
+    "width_mm": 350
+  }
+}

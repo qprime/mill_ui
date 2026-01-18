@@ -1,0 +1,922 @@
+{
+  "items": [
+    {
+      "feature": {
+        "depth": "through",
+        "side": "outside",
+        "type": "profile"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            250.0,
+            0.0
+          ],
+          [
+            250.0,
+            600.0
+          ],
+          [
+            0.0,
+            600.0
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          300.0
+        ]
+      },
+      "shape_id": "generated_profile_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            35.07692307692308
+          ],
+          [
+            250.0,
+            35.07692307692308
+          ],
+          [
+            250.0,
+            47.07692307692308
+          ],
+          [
+            0.0,
+            47.07692307692308
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          41.07692307692308
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            35.07692307692308
+          ],
+          [
+            250.0,
+            35.07692307692308
+          ],
+          [
+            250.0,
+            47.07692307692308
+          ],
+          [
+            0.0,
+            47.07692307692308
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          41.07692307692308
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            82.15384615384616
+          ],
+          [
+            250.0,
+            82.15384615384616
+          ],
+          [
+            250.0,
+            94.15384615384616
+          ],
+          [
+            0.0,
+            94.15384615384616
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          88.15384615384615
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            82.15384615384616
+          ],
+          [
+            250.0,
+            82.15384615384616
+          ],
+          [
+            250.0,
+            94.15384615384616
+          ],
+          [
+            0.0,
+            94.15384615384616
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          88.15384615384616
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            129.23076923076923
+          ],
+          [
+            250.0,
+            129.23076923076923
+          ],
+          [
+            250.0,
+            141.23076923076923
+          ],
+          [
+            0.0,
+            141.23076923076923
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          135.23076923076923
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            129.23076923076923
+          ],
+          [
+            250.0,
+            129.23076923076923
+          ],
+          [
+            250.0,
+            141.23076923076923
+          ],
+          [
+            0.0,
+            141.23076923076923
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          135.23076923076923
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            176.30769230769232
+          ],
+          [
+            250.0,
+            176.30769230769232
+          ],
+          [
+            250.0,
+            188.30769230769232
+          ],
+          [
+            0.0,
+            188.30769230769232
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          182.3076923076923
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            176.30769230769232
+          ],
+          [
+            250.0,
+            176.30769230769232
+          ],
+          [
+            250.0,
+            188.30769230769232
+          ],
+          [
+            0.0,
+            188.30769230769232
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          182.30769230769232
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            223.38461538461542
+          ],
+          [
+            250.0,
+            223.38461538461542
+          ],
+          [
+            250.0,
+            235.38461538461542
+          ],
+          [
+            0.0,
+            235.38461538461542
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          229.3846153846154
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            223.38461538461542
+          ],
+          [
+            250.0,
+            223.38461538461542
+          ],
+          [
+            250.0,
+            235.38461538461542
+          ],
+          [
+            0.0,
+            235.38461538461542
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          229.38461538461542
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            270.46153846153845
+          ],
+          [
+            250.0,
+            270.46153846153845
+          ],
+          [
+            250.0,
+            282.46153846153845
+          ],
+          [
+            0.0,
+            282.46153846153845
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          276.46153846153845
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            270.46153846153845
+          ],
+          [
+            250.0,
+            270.46153846153845
+          ],
+          [
+            250.0,
+            282.46153846153845
+          ],
+          [
+            0.0,
+            282.46153846153845
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          276.46153846153845
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            317.53846153846155
+          ],
+          [
+            250.0,
+            317.53846153846155
+          ],
+          [
+            250.0,
+            329.53846153846155
+          ],
+          [
+            0.0,
+            329.53846153846155
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          323.53846153846155
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            317.53846153846155
+          ],
+          [
+            250.0,
+            317.53846153846155
+          ],
+          [
+            250.0,
+            329.53846153846155
+          ],
+          [
+            0.0,
+            329.53846153846155
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          323.53846153846155
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            364.61538461538464
+          ],
+          [
+            250.0,
+            364.61538461538464
+          ],
+          [
+            250.0,
+            376.61538461538464
+          ],
+          [
+            0.0,
+            376.61538461538464
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          370.6153846153846
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            364.61538461538464
+          ],
+          [
+            250.0,
+            364.61538461538464
+          ],
+          [
+            250.0,
+            376.61538461538464
+          ],
+          [
+            0.0,
+            376.61538461538464
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          370.61538461538464
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            411.69230769230774
+          ],
+          [
+            250.0,
+            411.69230769230774
+          ],
+          [
+            250.0,
+            423.69230769230774
+          ],
+          [
+            0.0,
+            423.69230769230774
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          417.69230769230774
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            411.69230769230774
+          ],
+          [
+            250.0,
+            411.69230769230774
+          ],
+          [
+            250.0,
+            423.69230769230774
+          ],
+          [
+            0.0,
+            423.69230769230774
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          417.69230769230774
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            458.76923076923083
+          ],
+          [
+            250.0,
+            458.76923076923083
+          ],
+          [
+            250.0,
+            470.76923076923083
+          ],
+          [
+            0.0,
+            470.76923076923083
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          464.7692307692308
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            458.76923076923083
+          ],
+          [
+            250.0,
+            458.76923076923083
+          ],
+          [
+            250.0,
+            470.76923076923083
+          ],
+          [
+            0.0,
+            470.76923076923083
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          464.76923076923083
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            505.8461538461539
+          ],
+          [
+            250.0,
+            505.8461538461539
+          ],
+          [
+            250.0,
+            517.8461538461539
+          ],
+          [
+            0.0,
+            517.8461538461539
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          511.846153846154
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            505.8461538461539
+          ],
+          [
+            250.0,
+            505.8461538461539
+          ],
+          [
+            250.0,
+            517.8461538461539
+          ],
+          [
+            0.0,
+            517.8461538461539
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          511.8461538461539
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "8.0",
+        "depth_mm": 8.0,
+        "type": "pocket"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            552.9230769230769
+          ],
+          [
+            250.0,
+            552.9230769230769
+          ],
+          [
+            250.0,
+            564.9230769230769
+          ],
+          [
+            0.0,
+            564.9230769230769
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          558.9230769230769
+        ]
+      },
+      "shape_id": "generated_pocket_flat",
+      "type": "Polygon"
+    },
+    {
+      "feature": {
+        "depth": "2.0",
+        "depth_mm": 2.0,
+        "side": "outside",
+        "type": "chamfer"
+      },
+      "geometry": {
+        "points": [
+          [
+            0.0,
+            552.9230769230769
+          ],
+          [
+            250.0,
+            552.9230769230769
+          ],
+          [
+            250.0,
+            564.9230769230769
+          ],
+          [
+            0.0,
+            564.9230769230769
+          ]
+        ]
+      },
+      "kind": "shape",
+      "placement": {
+        "center_xy_mm": [
+          125.0,
+          558.9230769230769
+        ]
+      },
+      "shape_id": "generated_chamfer_outer",
+      "type": "Polygon"
+    }
+  ],
+  "project": "recipe_26_faux_shutter_panel",
+  "sheet": {
+    "height_mm": 600,
+    "thickness_mm": 19.0,
+    "width_mm": 250
+  }
+}

@@ -1,0 +1,838 @@
+[
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 600.0,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 19.0,
+    "metadata": {
+      "hint_type": "profile",
+      "original_id": "generated_profile_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_profile_outer",
+    "z_bottom": -19.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 47.07692307692308,
+      "y_min": 35.07692307692308
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 47.07692307692308,
+      "y_min": 35.07692307692308
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 94.15384615384616,
+      "y_min": 82.15384615384616
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 94.15384615384616,
+      "y_min": 82.15384615384616
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 141.23076923076923,
+      "y_min": 129.23076923076923
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 141.23076923076923,
+      "y_min": 129.23076923076923
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 188.30769230769232,
+      "y_min": 176.30769230769232
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 188.30769230769232,
+      "y_min": 176.30769230769232
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 235.38461538461542,
+      "y_min": 223.38461538461542
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 235.38461538461542,
+      "y_min": 223.38461538461542
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 282.46153846153845,
+      "y_min": 270.46153846153845
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 282.46153846153845,
+      "y_min": 270.46153846153845
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 329.53846153846155,
+      "y_min": 317.53846153846155
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 329.53846153846155,
+      "y_min": 317.53846153846155
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 376.61538461538464,
+      "y_min": 364.61538461538464
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 376.61538461538464,
+      "y_min": 364.61538461538464
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 423.69230769230774,
+      "y_min": 411.69230769230774
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 423.69230769230774,
+      "y_min": 411.69230769230774
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 470.76923076923083,
+      "y_min": 458.76923076923083
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 470.76923076923083,
+      "y_min": 458.76923076923083
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 517.8461538461539,
+      "y_min": 505.8461538461539
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 517.8461538461539,
+      "y_min": 505.8461538461539
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 564.9230769230769,
+      "y_min": 552.9230769230769
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 8.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "generated_pocket_flat",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_generated_pocket_flat",
+    "z_bottom": -8.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.0,
+      "x_min": 0.0,
+      "y_max": 564.9230769230769,
+      "y_min": 552.9230769230769
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 2.0,
+    "metadata": {
+      "chamfer": {
+        "angle_deg": 26.56505117707799,
+        "width_mm": 4.0
+      },
+      "hint_type": "profile",
+      "original_id": "generated_chamfer_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_chamfer_outer",
+    "z_bottom": -2.0,
+    "z_top": 0.0
+  }
+]

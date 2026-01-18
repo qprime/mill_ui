@@ -1,0 +1,1460 @@
+[
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 19.0,
+    "metadata": {
+      "hint_type": "profile",
+      "original_id": "generated_profile_outer",
+      "shape": "Polygon",
+      "side": "outside"
+    },
+    "region_id": "profile_generated_profile_outer",
+    "z_bottom": -19.0,
+    "z_top": 0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 397.1715728752538,
+      "y_max": 2.828427124746213,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-400_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-400_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 361.8162338159264,
+      "y_max": 38.18376618407361,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-364_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-364_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 326.46089475659903,
+      "y_max": 73.53910524340097,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-329_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-329_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 291.10555569727165,
+      "y_max": 108.89444430272833,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-293_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-293_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 255.75021663794428,
+      "y_max": 144.24978336205572,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-258_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-258_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 220.39487757861684,
+      "y_max": 179.60512242138316,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-223_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-223_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 185.03953851928952,
+      "y_max": 214.96046148071048,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-187_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-187_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 149.6841994599622,
+      "y_max": 250.3158005400378,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-152_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-152_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 114.32886040063477,
+      "y_max": 285.67113959936523,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-117_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-117_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 78.97352134130736,
+      "y_max": 321.02647865869267,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-81_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-81_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 43.61818228198001,
+      "y_max": 356.38181771802,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-46_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-46_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 8.262843222652654,
+      "y_max": 391.7371567773473,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_-11_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_-11_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 378.5643584128177,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 21.435641587182317
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_24_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_24_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 343.20901935349025,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 56.790980646509716
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_59_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_59_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 307.8536802941629,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 92.14631970583707
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_94_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_94_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 272.4983412348356,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 127.50165876516444
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_130_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_130_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 237.14300217550817,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 162.85699782449183
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_165_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_165_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 201.78766311618077,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 198.21233688381923
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_201_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_201_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 166.43232405685336,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 233.5676759431466
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_236_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_236_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 131.07698499752607,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 268.92301500247396
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_271_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_271_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 95.72164593819865,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 304.27835406180134
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_307_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_307_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 60.36630687887126,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 339.6336931211287
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_342_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_342_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 25.01096781954394,
+      "x_min": 0.0,
+      "y_max": 400.0,
+      "y_min": 374.98903218045604
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_pos_377_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_pos_377_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 2.828427124746213,
+      "x_min": 0.0,
+      "y_max": 2.828427124746213,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_0_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_0_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 38.18376618407361,
+      "x_min": 0.0,
+      "y_max": 38.18376618407361,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_35_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_35_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 73.53910524340097,
+      "x_min": 0.0,
+      "y_max": 73.53910524340097,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_70_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_70_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 108.89444430272832,
+      "x_min": 0.0,
+      "y_max": 108.89444430272833,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_106_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_106_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 144.24978336205572,
+      "x_min": 0.0,
+      "y_max": 144.24978336205572,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_141_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_141_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 179.60512242138316,
+      "x_min": 0.0,
+      "y_max": 179.60512242138316,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_176_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_176_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 214.96046148071048,
+      "x_min": 0.0,
+      "y_max": 214.96046148071048,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_212_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_212_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 250.3158005400378,
+      "x_min": 0.0,
+      "y_max": 250.3158005400378,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_247_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_247_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 285.67113959936523,
+      "x_min": 0.0,
+      "y_max": 285.67113959936523,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_282_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_282_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 321.0264786586926,
+      "x_min": 0.0,
+      "y_max": 321.02647865869267,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_318_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_318_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 356.38181771802,
+      "x_min": 0.0,
+      "y_max": 356.38181771802,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_353_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_353_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 391.73715677734737,
+      "x_min": 0.0,
+      "y_max": 391.7371567773473,
+      "y_min": 0.0
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_388_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_388_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 21.435641587182317,
+      "y_max": 400.0,
+      "y_min": 21.435641587182317
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_424_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_424_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 56.79098064650973,
+      "y_max": 400.0,
+      "y_min": 56.790980646509716
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_459_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_459_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 92.14631970583707,
+      "y_max": 400.0,
+      "y_min": 92.14631970583707
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_494_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_494_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 127.5016587651644,
+      "y_max": 400.0,
+      "y_min": 127.5016587651644
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_530_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_530_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 162.85699782449183,
+      "y_max": 400.0,
+      "y_min": 162.85699782449183
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_565_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_565_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 198.21233688381926,
+      "y_max": 400.0,
+      "y_min": 198.21233688381926
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_601_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_601_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 233.5676759431467,
+      "y_max": 400.0,
+      "y_min": 233.5676759431467
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_636_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_636_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 268.92301500247413,
+      "y_max": 400.0,
+      "y_min": 268.92301500247413
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_671_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_671_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 304.27835406180156,
+      "y_max": 400.0,
+      "y_min": 304.27835406180156
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_707_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_707_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 339.633693121129,
+      "y_max": 400.0,
+      "y_min": 339.633693121129
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_742_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_742_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  },
+  {
+    "allowance": {
+      "inside": 0.0,
+      "kerf_compensation": 0.0,
+      "on": 0.0,
+      "outside": 0.0
+    },
+    "bounds": {
+      "x_max": 400.0,
+      "x_min": 374.98903218045643,
+      "y_max": 400.0,
+      "y_min": 374.98903218045643
+    },
+    "constraints": {
+      "edge_treatment": null,
+      "islands": 0,
+      "keepouts": 0,
+      "safe_z_mm": 5.0,
+      "tabs": null,
+      "tolerance_mm": 0.1
+    },
+    "depth_mm": 3.0,
+    "metadata": {
+      "hint_type": "pocket",
+      "original_id": "diag_neg_777_0",
+      "shape": "Polygon"
+    },
+    "region_id": "pocket_diag_neg_777_0",
+    "z_bottom": -3.0,
+    "z_top": -0.0
+  }
+]

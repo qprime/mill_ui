@@ -214,6 +214,58 @@ rect outer                     # Just the outer bounds (no profile feature)
 
 **Note:** `frame` auto-generates an outer profile, so using `rect outer profile through outside` + `frame` would create two profiles. Use either `rect outer` + `frame`, or `rect outer profile` + `inset`.
 
+### 2.6 Domain/Generator System (Math-Based Composition)
+
+For programmatic design generation, mill_ui provides a **domain/generator layer** that separates *where* to machine from *what* to machine:
+
+**Domains** are bounded 2D regions (polygons with optional holes) that support algebraic operations:
+- `inset(distance)` - Contract boundary inward
+- `offset(distance)` - Expand boundary outward
+- `subtract(other)` - Remove overlapping region (creates holes)
+- `intersect(other)` - Keep only overlapping region
+
+**Generators** are deterministic functions that produce LayoutAST Items within a domain:
+- **Area generators**: `flat_pocket_generator`, `wave_generator`, `grid_generator`
+- **Loop generators**: `profile_generator`, `bead_generator`
+- **SVG generators**: `svg_stamp_generator` (from SVG path data)
+
+**Pipeline:**
+```
+Domain Composition → Generators → LayoutAST → RemovalIntent → G-code
+```
+
+**Example (Shaker door):**
+```python
+from domains import Domain
+from generators import profile_generator, flat_pocket_generator, ProfileParams, FlatPocketParams
+
+# Create domains
+outer = Domain.from_rectangle(400, 600, center=(200, 300))
+panel = outer.inset(50).domains[0]  # Frame is 50mm wide
+
+# Generate items
+profile_items = profile_generator(outer, ProfileParams(side="outside", depth="through"))
+pocket_items = flat_pocket_generator(panel, FlatPocketParams(depth_mm=6.0))
+
+# Combine into LayoutAST, then convert to IR as usual
+```
+
+**Why this matters:**
+- **Hundreds of SKUs from few primitives** - A wave pattern works on any domain shape
+- **Exact-size flexibility** - Domains are computed, not drawn
+- **Zero design cost** - Swap generators without changing structure
+- **Deterministic** - Same domain + params = same output
+
+**Files:**
+- `domains/domain.py` - Domain and MultiDomain dataclasses
+- `domains/transforms.py` - Coordinate transforms (local ↔ sheet space)
+- `generators/base.py` - Generator protocol and parameter classes
+- `generators/area/` - Area generators (flat, wave, grid)
+- `generators/loop/` - Loop generators (profile, bead)
+- `generators/svg/` - SVG path parsing and stamping
+
+**See also:** [docs/domain_generator_design.md](docs/domain_generator_design.md) for the complete architecture specification.
+
 ### 3. PML: Three Dialects
 
 **Flat PML**: Explicit absolute positioning
@@ -426,6 +478,24 @@ mill_ui/
 │       └── Spline path sampling (Catmull-Rom curves)
 ├── ir/                 # RemovalIntent IR
 │   └── removal_intent.py       # Core IR dataclass (includes Bounds2D, Allowance, Constraints)
+├── domains/            # Domain/Generator system - math-based 2D composition
+│   ├── __init__.py             # Public exports (Domain, MultiDomain, transforms)
+│   ├── domain.py               # Domain dataclass, operations (inset, offset, subtract, intersect)
+│   └── transforms.py           # Coordinate transforms (local ↔ sheet space)
+├── generators/         # Generators that produce LayoutAST Items from Domains
+│   ├── __init__.py             # Public exports (all generators, params)
+│   ├── base.py                 # Generator protocol, parameter dataclasses
+│   ├── area/                   # Area generators (fill regions)
+│   │   ├── flat.py             # Flat pocket generator
+│   │   ├── wave.py             # Wave pattern generator
+│   │   └── grid.py             # Grid pattern generator
+│   ├── loop/                   # Loop generators (follow boundaries)
+│   │   ├── profile.py          # Profile cut generator
+│   │   └── bead.py             # Bead/groove generator
+│   └── svg/                    # SVG path parsing and generators
+│       ├── parser.py           # SVG path command parser
+│       ├── curves.py           # Bezier/arc curve flattening
+│       └── stamp.py            # SVG stamp generator
 ├── templates/          # Parametric templates
 │   └── shaker.py               # Shaker cabinet door (only template currently implemented)
 ├── nesting/            # Bin-packing/nesting module

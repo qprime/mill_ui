@@ -1119,4 +1119,149 @@ python -m cli.export_cad --input frame_design.pml --compositional --out preview/
 
 ---
 
-**Last Updated:** 2026-01-15
+## F006: Domain/Generator System (Math-Based Composition)
+
+**Status:** 🟢 Reviewed (Production)
+
+**Priority:** High
+
+**Architecture Layer:** Design Composition (pre-AST, generates LayoutAST Items)
+
+### Problem Statement
+
+Templates like Shaker work well for common designs but create structural problems at scale:
+- **Template explosion**: Each new style requires a new template
+- **Redraw labor**: Size variations require manual parameter adjustment
+- **Style-specific geometry**: Similar operations reimplemented per template
+- **SKU rigidity**: Adding a new SKU means adding code, not composing primitives
+
+### Solution: Math-Based Composition
+
+**Domains** are bounded 2D regions that define *where* operations may occur. They support algebraic operations:
+- `inset(distance)` - Contract boundary inward
+- `offset(distance)` - Expand boundary outward
+- `subtract(other)` - Remove overlapping region (creates holes)
+- `intersect(other)` - Keep only overlapping region
+
+**Generators** are deterministic functions that define *what* geometry to produce within a domain:
+- **Area generators**: flat pocket, wave pattern, grid pattern
+- **Loop generators**: profile cut, bead/groove
+- **SVG generators**: Parse SVG paths and stamp as engravings
+
+This separation enables hundreds of SKUs from few primitives.
+
+### Implementation
+
+**Files Created:**
+
+1. **domains/** - Domain type and operations
+   - `domains/domain.py` - Domain and MultiDomain dataclasses (~450 lines)
+   - `domains/transforms.py` - Coordinate transforms (~200 lines)
+   - `domains/__init__.py` - Public exports
+
+2. **generators/** - Generator implementations
+   - `generators/base.py` - Protocol, parameter classes (~400 lines)
+   - `generators/area/flat.py` - Flat pocket generator
+   - `generators/area/wave.py` - Wave pattern generator
+   - `generators/area/grid.py` - Grid pattern generator
+   - `generators/loop/profile.py` - Profile cut generator
+   - `generators/loop/bead.py` - Bead/groove generator
+   - `generators/svg/` - SVG path parsing and stamping (~800 lines)
+
+3. **Tests**
+   - `tests/test_domain.py` - Domain operations tests
+   - `tests/test_transforms.py` - Coordinate transform tests
+   - `tests/test_generators.py` - Generator tests
+   - `tests/test_stage5_generators.py` - Wave, Grid, Bead tests
+   - `tests/test_svg_parser.py` - SVG parsing tests
+   - `tests/test_performance.py` - Performance benchmarks
+
+4. **Documentation**
+   - `docs/domain_generator_design.md` - Full architecture specification
+   - `docs/examples/domain_generator_example.py` - Integration examples
+
+### Usage Example
+
+```python
+from domains import Domain
+from generators import profile_generator, flat_pocket_generator, ProfileParams, FlatPocketParams
+from layout_ast.layout import LayoutAST, Sheet
+
+# Create domains
+outer = Domain.from_rectangle(400, 600, center=(200, 300))
+panel = outer.inset(50).domains[0]  # Frame is 50mm wide
+
+# Generate items
+profile_items = profile_generator(outer, ProfileParams(side="outside", depth="through"))
+pocket_items = flat_pocket_generator(panel, FlatPocketParams(depth_mm=6.0))
+
+# Build LayoutAST
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19.0),
+    items=tuple(profile_items + pocket_items),
+)
+
+# Convert to RemovalIntent IR as usual
+from adapters.ast_to_removal import ast_to_removal_intents
+intents = ast_to_removal_intents(ast)
+```
+
+### Test Coverage
+
+- Domain operations: 40+ tests (inset, offset, subtract, intersect, edge cases)
+- Coordinate transforms: 34 tests (rotation, translation, round-trip)
+- Generators: 35+ tests (flat pocket, profile, wave, grid, bead)
+- SVG parsing: 50+ tests (path commands, curves, edge cases)
+- Performance: 15+ benchmarks with thresholds
+
+### Performance
+
+| Operation | Threshold | Actual |
+|-----------|-----------|--------|
+| Rectangle construction | < 1ms | ~0.07ms |
+| Polygon (100 vertices) | < 10ms | ~0.12ms |
+| Inset operation | < 5ms | ~0.08ms |
+| Flat pocket generator | < 5ms | ~0.01ms |
+| Wave generator | < 100ms | ~56ms |
+| Full pipeline (Domain → AST → IR) | < 200ms | ~0.18ms |
+
+### Dependencies
+
+- `shapely` - Polygon boolean operations and offsets
+
+### Acceptance Criteria
+
+- [x] Domain type with inset, offset, subtract, intersect operations
+- [x] MultiDomain for handling split/empty results
+- [x] Coordinate transforms (local ↔ sheet space)
+- [x] FlatPocket generator
+- [x] Profile generator with loop selection
+- [x] Wave pattern generator
+- [x] Grid pattern generator
+- [x] Bead/groove generator
+- [x] SVG path parsing with curve flattening
+- [x] SVG stamp generator
+- [x] All generators output valid LayoutAST Items
+- [x] Determinism verified (same inputs → same outputs)
+- [x] Performance benchmarks established
+- [x] Integration example demonstrating full pipeline
+- [x] Documentation updated (CLAUDE.md, README.md, FEATURES.md)
+
+### Design Decisions
+
+1. **Polygonal domains only** - Curves lowered to polylines early for tractable algebra
+2. **Typed generator params** - Validation at generator entry, not flat dicts
+3. **Domain-local coordinates** - Patterns computed locally, transformed to sheet space
+4. **Generator-owned depth** - Domains are 2D only; depth is a machining decision
+5. **Explicit loop selection** - No implicit guessing for which boundaries to operate on
+6. **Loud failures** - Manufacturing pipeline must not silently degrade
+
+### Documentation
+
+- **Architecture spec:** [docs/domain_generator_design.md](docs/domain_generator_design.md)
+- **Integration example:** [docs/examples/domain_generator_example.py](docs/examples/domain_generator_example.py)
+- **Recipe:** [docs/recipes/19_domain_generator_basics/](docs/recipes/19_domain_generator_basics/)
+
+---
+
+**Last Updated:** 2026-01-17

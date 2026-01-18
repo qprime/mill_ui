@@ -191,6 +191,66 @@
 
 ---
 
+### Stage 1B: Domain/Generator Composition (Alternative Input Path)
+**Purpose:** Programmatically generate complex designs using math-based composition
+
+**Process:**
+- Create Domain instances from parameters or polygon vertices
+- Apply domain operations (inset, offset, subtract, intersect)
+- Invoke generators on domains to produce LayoutAST Items
+- Combine Items into LayoutAST
+
+**Pipeline:**
+```
+Domain Composition → Generators → LayoutAST → (standard pipeline continues)
+```
+
+**Inputs:**
+- Domain dimensions and positions (programmatic)
+- Generator parameters (typed dataclasses)
+
+**Outputs:**
+- `list[Item]` from each generator
+- Combined into `LayoutAST`
+
+**Key Functions:**
+```python
+from domains import Domain
+from generators import profile_generator, flat_pocket_generator, ProfileParams, FlatPocketParams
+
+# Create domains
+outer = Domain.from_rectangle(400, 600, center=(200, 300))
+panel = outer.inset(50).domains[0]
+
+# Generate items
+profile_items = profile_generator(outer, ProfileParams(side="outside", depth="through"))
+pocket_items = flat_pocket_generator(panel, FlatPocketParams(depth_mm=6.0))
+
+# Build AST
+from layout_ast.layout import LayoutAST, Sheet
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19.0),
+    items=tuple(profile_items + pocket_items),
+)
+```
+
+**Available Generators:**
+- **Area generators**: `flat_pocket_generator`, `wave_generator`, `grid_generator`
+- **Loop generators**: `profile_generator`, `bead_generator`
+- **SVG generators**: `svg_stamp_generator`
+
+**Key Files:**
+- `domains/domain.py` - Domain and MultiDomain types
+- `domains/transforms.py` - Coordinate transforms
+- `generators/base.py` - Generator protocol, parameter classes
+- `generators/area/` - Area generator implementations
+- `generators/loop/` - Loop generator implementations
+- `generators/svg/` - SVG parsing and stamping
+
+**See:** [docs/domain_generator_design.md](domain_generator_design.md) for complete architecture.
+
+---
+
 ### Stage 2: Layout Resolution
 **Purpose:** Flatten hierarchical layouts into absolute positioning
 
@@ -354,6 +414,7 @@ result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 | **JSON** | Programmatic generation | AI/tool output, data-driven designs |
 | **Python Templates** | Standardized components | Shaker doors, mounting plates, etc. |
 | **Nest PML** | Production runs, multi-sheet jobs | Cutting many parts from stock sheets |
+| **Domain/Generator** | Complex programmatic designs | Decorative patterns, custom shapes, SKU variation |
 
 ### ✅ When to Export CAD vs G-code?
 
@@ -497,4 +558,4 @@ result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 
 ---
 
-Last Updated: 2026-01-15
+Last Updated: 2026-01-17

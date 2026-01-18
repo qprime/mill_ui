@@ -18,6 +18,7 @@ from adapters.hints_to_removal import (
 from core.constants import (
     HintKeys,
     TabKeys,
+    MetadataKeys,
     FeatureType,
     DepthMode,
 )
@@ -105,6 +106,39 @@ def item_to_removal_intent(
 
     elif item.feature.type == FeatureType.ENGRAVE:
         return engrave_hint_to_removal_intent(hint)
+
+    elif item.feature.type == FeatureType.BEVEL:
+        # Bevel (raised panel border) - emit as pocket with bevel metadata
+        # CAM planner can interpret metadata for V-bit or ball-nose toolpaths
+        bevel_metadata = {
+            MetadataKeys.BEVEL: {
+                MetadataKeys.WIDTH_MM: item.feature.bevel_width_mm,
+                MetadataKeys.ANGLE_DEG: item.feature.bevel_angle_deg,
+                MetadataKeys.INNER_DEPTH_MM: item.feature.bevel_inner_depth_mm,
+            }
+        }
+        intent = pocket_hint_to_removal_intent(hint)
+        # Merge bevel metadata into the intent
+        merged_metadata = {**intent.metadata, **bevel_metadata}
+        from dataclasses import replace
+        return replace(intent, metadata=merged_metadata)
+
+    elif item.feature.type == FeatureType.CHAMFER:
+        # Chamfer - emit as profile with chamfer metadata
+        # CAM planner can interpret metadata for chamfer mill toolpaths
+        if item.feature.side:
+            hint[HintKeys.SIDE] = item.feature.side
+        chamfer_metadata = {
+            MetadataKeys.CHAMFER: {
+                MetadataKeys.WIDTH_MM: item.feature.chamfer_width_mm,
+                MetadataKeys.ANGLE_DEG: item.feature.chamfer_angle_deg,
+            }
+        }
+        intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
+        # Merge chamfer metadata into the intent
+        merged_metadata = {**intent.metadata, **chamfer_metadata}
+        from dataclasses import replace
+        return replace(intent, metadata=merged_metadata)
 
     else:
         raise ValueError(f"Unknown feature type: {item.feature.type}")

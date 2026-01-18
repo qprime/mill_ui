@@ -138,6 +138,187 @@ def test_rounded_rect_bounds():
     return True
 
 
+def test_polygon_bounds():
+    """Test bounds calculation for Polygon shape."""
+    print("Running test_polygon_bounds...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Polygon",
+        geometry_data={
+            "points": [[10, 20], [100, 20], [100, 80], [10, 80]]
+        },
+        center_xy=(0.0, 0.0),  # Should be ignored for Polygon
+    )
+
+    assert bounds.x_min == 10.0
+    assert bounds.x_max == 100.0
+    assert bounds.y_min == 20.0
+    assert bounds.y_max == 80.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_polygon_empty_points_fallback():
+    """Test that Polygon with no points returns 1x1mm fallback box."""
+    print("Running test_polygon_empty_points_fallback...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Polygon",
+        geometry_data={},  # No points
+        center_xy=(100.0, 200.0),
+    )
+
+    # Fallback is 1x1mm centered at the point
+    assert bounds.x_min == 99.5
+    assert bounds.x_max == 100.5
+    assert bounds.y_min == 199.5
+    assert bounds.y_max == 200.5
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_polyline_bounds():
+    """Test bounds calculation for Polyline shape."""
+    print("Running test_polyline_bounds...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Polyline",
+        geometry_data={
+            "points": [[0, 0], [50, 100], [100, 50], [150, 75]]
+        },
+        center_xy=(0.0, 0.0),  # Should be ignored for Polyline
+    )
+
+    assert bounds.x_min == 0.0
+    assert bounds.x_max == 150.0
+    assert bounds.y_min == 0.0
+    assert bounds.y_max == 100.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_polyline_case_insensitive():
+    """Test that polyline shape comparison is case-insensitive."""
+    print("Running test_polyline_case_insensitive...")
+
+    from core.geometry import compute_shape_bounds
+
+    for shape in ["polyline", "POLYLINE", "Polyline"]:
+        bounds = compute_shape_bounds(
+            shape_type=shape,
+            geometry_data={"points": [[10, 20], [30, 40]]},
+            center_xy=(0.0, 0.0),
+        )
+        assert bounds.x_min == 10.0
+        assert bounds.x_max == 30.0
+        assert bounds.y_min == 20.0
+        assert bounds.y_max == 40.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_line_bounds():
+    """Test bounds calculation for Line shape."""
+    print("Running test_line_bounds...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Line",
+        geometry_data={
+            "start": [10, 20],
+            "end": [100, 80],
+        },
+        center_xy=(0.0, 0.0),  # Should be ignored for Line
+    )
+
+    assert bounds.x_min == 10.0
+    assert bounds.x_max == 100.0
+    assert bounds.y_min == 20.0
+    assert bounds.y_max == 80.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_line_case_insensitive():
+    """Test that line shape comparison is case-insensitive."""
+    print("Running test_line_case_insensitive...")
+
+    from core.geometry import compute_shape_bounds
+
+    for shape in ["line", "LINE", "Line"]:
+        bounds = compute_shape_bounds(
+            shape_type=shape,
+            geometry_data={"start": [0, 0], "end": [50, 100]},
+            center_xy=(0.0, 0.0),
+        )
+        assert bounds.x_min == 0.0
+        assert bounds.x_max == 50.0
+        assert bounds.y_min == 0.0
+        assert bounds.y_max == 100.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_line_reversed_coords():
+    """Test Line bounds when start > end (reversed coordinates)."""
+    print("Running test_line_reversed_coords...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Line",
+        geometry_data={
+            "start": [100, 80],  # Larger values
+            "end": [10, 20],     # Smaller values
+        },
+        center_xy=(0.0, 0.0),
+    )
+
+    # min/max should still be correct
+    assert bounds.x_min == 10.0
+    assert bounds.x_max == 100.0
+    assert bounds.y_min == 20.0
+    assert bounds.y_max == 80.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_line_empty_fallback():
+    """Test that Line with no points returns 1x1mm fallback box."""
+    print("Running test_line_empty_fallback...")
+
+    from core.geometry import compute_shape_bounds
+
+    bounds = compute_shape_bounds(
+        shape_type="Line",
+        geometry_data={},  # No start/end
+        center_xy=(50.0, 75.0),
+    )
+
+    # Fallback is 1x1mm centered at the point
+    assert bounds.x_min == 49.5
+    assert bounds.x_max == 50.5
+    assert bounds.y_min == 74.5
+    assert bounds.y_max == 75.5
+
+    print("  ✓ PASS")
+    return True
+
+
 def test_unknown_shape_fallback():
     """Test that unknown shapes return a 1x1mm fallback box."""
     print("Running test_unknown_shape_fallback...")
@@ -145,7 +326,7 @@ def test_unknown_shape_fallback():
     from core.geometry import compute_shape_bounds
 
     bounds = compute_shape_bounds(
-        shape_type="Polygon",  # Unknown shape type
+        shape_type="UnknownFutureShape",  # Unknown shape type
         geometry_data={},
         center_xy=(100.0, 200.0),
     )
@@ -256,6 +437,14 @@ def run_tests():
         test_circle_bounds,
         test_circle_case_insensitive,
         test_rounded_rect_bounds,
+        test_polygon_bounds,
+        test_polygon_empty_points_fallback,
+        test_polyline_bounds,
+        test_polyline_case_insensitive,
+        test_line_bounds,
+        test_line_case_insensitive,
+        test_line_reversed_coords,
+        test_line_empty_fallback,
         test_unknown_shape_fallback,
         test_none_center_defaults_to_origin,
         test_list_center_accepted,

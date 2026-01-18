@@ -37,6 +37,13 @@ Practical examples showing complete workflows from design to G-code.
 - [17_nesting_guillotine/](17_nesting_guillotine/) - Guillotine bin-packing algorithm (fast, simple)
 - [18_nesting_maxrects/](18_nesting_maxrects/) - MaxRects bin-packing algorithm (better utilization)
 
+### Domain/Generator Recipes
+- [19_domain_generator_basics/](19_domain_generator_basics/) - Domain/generator system basics
+  - Creating domains from rectangles and polygons
+  - Domain operations (inset, offset, subtract)
+  - Using generators (profile, pocket, wave, grid, bead)
+  - Full pipeline: Domain → Generator → AST → IR
+
 ## Reference Outputs
 
 Many recipes include complete reference outputs in their `output/` subdirectories:

@@ -44,6 +44,10 @@ class GeometryKeys:
     ISLANDS = "islands"
     EDGE_TREATMENT = "edge_treatment"
 
+    # Polygon geometry keys
+    POINTS = "points"
+    HOLES = "holes"
+
     # Bounds keys (used in island data)
     X_MIN = "x_min"
     X_MAX = "x_max"
@@ -76,6 +80,13 @@ class MetadataKeys:
     FEATURE_TYPE = "feature_type"
     SHAPE_ID = "shape_id"
 
+    # Stage 9: Bevel/chamfer metadata keys
+    BEVEL = "bevel"
+    CHAMFER = "chamfer"
+    WIDTH_MM = "width_mm"
+    ANGLE_DEG = "angle_deg"
+    INNER_DEPTH_MM = "inner_depth_mm"
+
 
 class FeatureType:
     """Feature type values for machining operations."""
@@ -85,6 +96,11 @@ class FeatureType:
     HOLE = "hole"
     ENGRAVE = "engrave"
 
+    # Stage 9: Advanced feature types
+    # These emit as pocket/profile in IR with metadata for CAM interpretation
+    BEVEL = "bevel"
+    CHAMFER = "chamfer"
+
 
 class ShapeType:
     """Shape type values for geometry primitives."""
@@ -93,11 +109,17 @@ class ShapeType:
     RECTANGLE = "Rectangle"  # Alias for Rect
     CIRCLE = "Circle"
     ROUNDED_RECT = "RoundedRect"
+    POLYGON = "Polygon"
+    LINE = "Line"
+    POLYLINE = "Polyline"
 
     # Lowercase variants (used in some comparisons)
     RECT_LOWER = "rect"
     RECTANGLE_LOWER = "rectangle"
     CIRCLE_LOWER = "circle"
+    POLYGON_LOWER = "polygon"
+    LINE_LOWER = "line"
+    POLYLINE_LOWER = "polyline"
 
     @classmethod
     def is_rect(cls, shape: str) -> bool:
@@ -108,6 +130,21 @@ class ShapeType:
     def is_circle(cls, shape: str) -> bool:
         """Check if shape is a circle type (case-insensitive)."""
         return shape.lower() == cls.CIRCLE_LOWER
+
+    @classmethod
+    def is_polygon(cls, shape: str) -> bool:
+        """Check if shape is a polygon type (case-insensitive)."""
+        return shape.lower() == cls.POLYGON_LOWER
+
+    @classmethod
+    def is_line(cls, shape: str) -> bool:
+        """Check if shape is a line type (case-insensitive)."""
+        return shape.lower() == cls.LINE_LOWER
+
+    @classmethod
+    def is_polyline(cls, shape: str) -> bool:
+        """Check if shape is a polyline type (case-insensitive)."""
+        return shape.lower() == cls.POLYLINE_LOWER
 
 
 class Side:

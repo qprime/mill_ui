@@ -30,6 +30,27 @@ This enables:
 - **Multiple backends**: Different planners can target same IR
 - **Testability**: Verify correctness at IR boundary
 
+### Domain/Generator Layer
+
+For complex designs, mill_ui provides a **math-based composition layer** above the AST:
+
+```
+Domain Composition → Generators → LayoutAST → RemovalIntent → G-code
+(regions/algebra)    (patterns)   (items)     (semantics)     (output)
+```
+
+**Domains** are bounded 2D regions with algebraic operations:
+- `inset(distance)` - Contract boundary inward
+- `offset(distance)` - Expand boundary outward
+- `subtract(other)` - Remove overlapping region
+- `intersect(other)` - Keep only overlapping region
+
+**Generators** are deterministic functions that produce LayoutAST Items from Domains:
+- **Area generators**: Fill regions (flat pocket, wave pattern, grid)
+- **Loop generators**: Follow boundaries (profile cut, bead, groove)
+
+**Key insight:** Domains define *where*, generators define *what*. This separation enables hundreds of SKUs from few primitives.
+
 ## Reading Order for New Context
 
 When loading this codebase into a fresh chat:
@@ -43,6 +64,12 @@ For deep dives:
 - **[layout_ast/layout.py](layout_ast/layout.py)** - AST dataclass definitions
 - **[ir/removal_intent.py](ir/removal_intent.py)** - RemovalIntent IR spec
 - **[adapters/ast_to_removal.py](adapters/ast_to_removal.py)** - AST → IR conversion
+
+For domain/generator system:
+- **[domains/](domains/)** - Domain type and operations (inset, subtract, intersect)
+- **[generators/](generators/)** - Generators that produce LayoutAST Items from Domains
+- **[docs/domain_generator_design.md](docs/domain_generator_design.md)** - Full architecture spec
+- **[docs/examples/domain_generator_example.py](docs/examples/domain_generator_example.py)** - Integration examples
 
 For CAM validation:
 - **[validation/runner.py](validation/runner.py)** - Main validation entry points
@@ -225,6 +252,61 @@ print(f"G-code depth: {gcode_metrics.to_dict()['z_profile']['max_plunge_z_mm']}"
 ```
 
 **Why this matters:** Metrics are deterministic and comparable across runs, enabling regression testing without byte-level file comparison.
+
+### Task 7: Create a Design with Domains and Generators
+
+**Use case:** Build complex panel designs using composable domain operations and generators.
+
+```python
+from domains import Domain
+from generators import (
+    flat_pocket_generator,
+    profile_generator,
+    wave_generator,
+    FlatPocketParams,
+    ProfileParams,
+    WaveParams,
+)
+from layout_ast.layout import LayoutAST, Sheet
+
+# Create outer domain from door dimensions
+outer_domain = Domain.from_rectangle(
+    width_mm=400.0,
+    height_mm=600.0,
+    center=(200.0, 300.0),
+)
+
+# Create panel domain by insetting (frame = 50mm)
+panel_result = outer_domain.inset(50.0)
+panel_domain = panel_result.domains[0]  # MultiDomain returns tuple of domains
+
+# Generate profile cut for outer edge
+profile_items = profile_generator(
+    outer_domain,
+    ProfileParams(side="outside", depth="through"),
+)
+
+# Generate pocket for panel recess
+pocket_items = flat_pocket_generator(
+    panel_domain,
+    FlatPocketParams(depth_mm=6.0),
+)
+
+# Build LayoutAST
+all_items = profile_items + pocket_items
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19.0),
+    items=tuple(all_items),
+)
+
+# Convert to RemovalIntent IR
+from adapters.ast_to_removal import ast_to_removal_intents
+intents = ast_to_removal_intents(ast)
+```
+
+**Why this matters:** Domains and generators enable hundreds of SKUs from few primitives. A wave pattern generator works on any domain. Combining domains and generators creates variety without new code.
+
+**See also:** [docs/examples/domain_generator_example.py](docs/examples/domain_generator_example.py) for complete examples.
 
 ## Extension Patterns
 
@@ -470,6 +552,120 @@ def extract_gcode_metrics(gcode_path: str, config: GCodeConfig = None) -> GCodeM
 
 **Why this matters:** Metrics enable regression testing. Adding new metrics allows catching regressions in previously unmeasured aspects.
 
+### Pattern 6: Create a New Generator
+
+**When:** You need a new pattern or operation type (e.g., spiral pattern, zigzag fill).
+
+**Steps:**
+1. Create a parameter dataclass in `generators/base.py`
+2. Implement the generator function in `generators/area/` or `generators/loop/`
+3. Export from `generators/__init__.py`
+4. Add tests
+
+**Example:** Creating a simple circle pattern generator
+
+```python
+# 1. In generators/base.py - add parameter class
+@dataclass(frozen=True)
+class CirclePatternParams(BaseParams):
+    """Parameters for circle pattern generator."""
+    circle_diameter_mm: float
+    spacing_mm: float
+    depth_mm: float
+
+    def __post_init__(self):
+        if self.circle_diameter_mm <= 0:
+            raise ValueError(f"circle_diameter_mm must be positive, got {self.circle_diameter_mm}")
+        if self.spacing_mm <= 0:
+            raise ValueError(f"spacing_mm must be positive, got {self.spacing_mm}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"depth_mm must be positive, got {self.depth_mm}")
+
+# 2. In generators/area/circles.py - implement generator
+from domains import Domain
+from domains.transforms import local_to_sheet
+from layout_ast.layout import Item, Geometry, Placement, Feature
+from generators.base import CirclePatternParams, generate_shape_id
+
+def circle_pattern_generator(
+    domain: Domain,
+    params: CirclePatternParams,
+    *,
+    allow_empty: bool = False,
+) -> list[Item]:
+    """Generate a grid of circles within the domain."""
+    items = []
+    bounds = domain.bounds
+    spacing = params.spacing_mm + params.circle_diameter_mm
+
+    y = bounds.y_min + spacing / 2
+    row = 0
+    while y < bounds.y_max:
+        x = bounds.x_min + spacing / 2
+        col = 0
+        while x < bounds.x_max:
+            # Check if circle center is inside domain
+            if domain.contains_point((x, y)):
+                items.append(Item(
+                    kind="shape",
+                    type="Circle",
+                    geometry=Geometry(data={"diameter_mm": params.circle_diameter_mm}),
+                    placement=Placement(center_xy_mm=(x, y)),
+                    feature=Feature(type="pocket", depth=params.depth_mm),
+                    shape_id=generate_shape_id("circle", f"r{row}c{col}"),
+                ))
+            x += spacing
+            col += 1
+        y += spacing
+        row += 1
+
+    if not items and not allow_empty:
+        raise ValueError("Domain too small for circle pattern")
+
+    return items
+
+# 3. In generators/__init__.py - export
+from generators.area.circles import circle_pattern_generator
+from generators.base import CirclePatternParams
+```
+
+**Why this matters:** Generators are the composable units of the domain system. New generators extend capability without modifying existing code.
+
+### Pattern 7: Add a New Domain Operation
+
+**When:** You need a new algebraic operation on domains (e.g., union, convex hull).
+
+**Steps:**
+1. Add method to `Domain` class in `domains/domain.py`
+2. Use Shapely for the underlying geometry operation
+3. Return `MultiDomain` for consistency with existing operations
+4. Add tests
+
+**Example:** Adding union operation
+
+```python
+# In domains/domain.py, add to Domain class:
+
+def union(self, other: "Domain") -> "MultiDomain":
+    """Combine this domain with another domain.
+
+    Args:
+        other: Domain to union with
+
+    Returns:
+        MultiDomain containing the combined region(s)
+    """
+    from shapely.ops import unary_union
+    result = unary_union([self._polygon, other._polygon])
+    return MultiDomain._from_shapely(
+        result,
+        local_origin=self.local_origin,
+        local_rotation=self.local_rotation,
+    )
+```
+
+**Why this matters:** Domain operations are the algebraic building blocks. New operations enable new design patterns.
+
 ## Critical Invariants (Don't Break These)
 
 ### 1. Always Go Through RemovalIntent IR
@@ -657,6 +853,6 @@ This guide focuses on **how to work with** the architecture, not **why it exists
 
 ---
 
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-17
 **Complementary Doc:** [README.md](README.md) for architecture
 **Status:** Production (current architecture)

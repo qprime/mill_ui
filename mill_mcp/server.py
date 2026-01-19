@@ -493,6 +493,121 @@ def get_syntax_spec(format: str = "all") -> str:
     return "".join(result_parts)
 
 
+@mcp.tool()
+def get_docs(
+    name: str | None = None,
+    section: str | None = None,
+    list_only: bool = False,
+) -> str:
+    """Browse and retrieve markdown documentation from the project.
+
+    Args:
+        name: Specific .md filename without extension (e.g., "README", "CLAUDE")
+        section: Folder path to scope search (e.g., "docs", "mill_mcp", "." for root)
+        list_only: If True, list matching files instead of returning content
+
+    Usage patterns:
+        get_docs(list_only=True)                    - List all .md files in project
+        get_docs(section="docs", list_only=True)   - List .md files in docs/ folder
+        get_docs(name="README")                     - Content of README.md (searches project)
+        get_docs(name="README", section="mill_mcp") - Content of mill_mcp/README.md
+        get_docs(section="docs")                    - Content of all .md files in docs/
+        get_docs()                                  - All .md content in entire project
+
+    Returns JSON with either file list or file contents.
+    """
+    project_root = Path(__file__).parent.parent
+
+    EXCLUDED_DIRS = {".git", ".venv", "venv", ".pytest_cache", "__pycache__", "node_modules"}
+    LAZY_DIRS = {"docs/dev_docs", "docs/recipes"}
+
+    def is_excluded(p: Path) -> bool:
+        rel_parts = p.relative_to(project_root).parts[:-1]
+        if any(part.startswith(".") or part in EXCLUDED_DIRS for part in rel_parts):
+            return True
+        rel_path = str(p.parent.relative_to(project_root))
+        return any(rel_path == lazy or rel_path.startswith(lazy + "/") for lazy in LAZY_DIRS)
+
+    def find_md_files(folder: Path, recursive: bool) -> list[Path]:
+        if recursive:
+            return sorted(p for p in folder.rglob("*.md") if not is_excluded(p))
+        else:
+            return sorted(folder.glob("*.md"))
+
+    def relative_path(p: Path) -> str:
+        return str(p.relative_to(project_root))
+
+    try:
+        if name is not None:
+            target_name = name if name.endswith(".md") else f"{name}.md"
+            if section is not None:
+                search_dir = project_root / section
+                if not search_dir.exists():
+                    return json.dumps({"error": f"Section not found: {section}"})
+                target_path = search_dir / target_name
+                if not target_path.exists():
+                    return json.dumps({"error": f"File not found: {section}/{target_name}"})
+                matches = [target_path]
+            else:
+                matches = [p for p in project_root.rglob(target_name) if not is_excluded(p)]
+                if not matches:
+                    return json.dumps({"error": f"File not found: {target_name}"})
+
+            if list_only:
+                return json.dumps({
+                    "files": [relative_path(m) for m in matches],
+                    "total": len(matches),
+                })
+
+            contents = {}
+            for m in matches:
+                contents[relative_path(m)] = m.read_text()
+            return json.dumps({"files": contents}, indent=2)
+
+        if section is not None:
+            search_dir = project_root / section
+            if not search_dir.exists():
+                return json.dumps({"error": f"Section not found: {section}"})
+            matches = find_md_files(search_dir, recursive=False)
+
+            if list_only:
+                return json.dumps({
+                    "section": section,
+                    "files": [relative_path(m) for m in matches],
+                    "total": len(matches),
+                })
+
+            contents = {}
+            for m in matches:
+                contents[relative_path(m)] = m.read_text()
+            return json.dumps({"files": contents}, indent=2)
+
+        matches = find_md_files(project_root, recursive=True)
+
+        if list_only:
+            sections: dict[str, list[str]] = {}
+            for m in matches:
+                rel = relative_path(m)
+                folder = str(m.parent.relative_to(project_root))
+                if folder == ".":
+                    folder = "."
+                if folder not in sections:
+                    sections[folder] = []
+                sections[folder].append(rel)
+            return json.dumps({
+                "sections": sections,
+                "total": len(matches),
+            }, indent=2)
+
+        contents = {}
+        for m in matches:
+            contents[relative_path(m)] = m.read_text()
+        return json.dumps({"files": contents}, indent=2)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
 # =============================================================================
 # CAM Validation Tools
 # =============================================================================

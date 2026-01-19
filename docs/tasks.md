@@ -20,6 +20,7 @@ Load this document when you need code examples for standard operations.
 | [Extract Metrics](#task-6-extract-metrics) | Get stable metrics for comparison |
 | [Create Design with Domains](#task-7-create-design-with-domains) | Build complex designs using domain algebra |
 | [Run Nesting](#task-8-run-nesting) | Optimize part placement on sheets |
+| [Run Tests](#task-9-run-tests) | Verify changes with IR and CAM tests |
 
 ---
 
@@ -250,3 +251,22 @@ python -m cli.nest job.nest -o output/ --export-stl --export-svg
 ```
 
 **Key point:** See `docs/recipes/18_nesting_maxrects/` for complete example.
+
+---
+
+## Task 9: Run Tests
+
+**Use case:** Verify changes with appropriate test level.
+
+```bash
+# IR-level tests (fast, no native backend required)
+python -m tests.run_edge_tests
+
+# CAM/G-code equivalence tests (requires native backend)
+python -m tests.run_gcode_equivalence_tests
+
+# Recipe validation tests
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+```
+
+**Key point:** Prefer IR tests for development velocity. Run CAM tests only when planner behavior changes.

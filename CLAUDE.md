@@ -30,7 +30,7 @@ Add `--compositional` for frame/inset/grid syntax.
 
 ## Code Style
 
-- No inline comments (docstrings OK for public APIs)
+- No comments—code should be self-documenting through clear naming
 - All dimensions in millimeters
 - Frozen dataclasses—use `replace()` to modify
 - Test at IR level, not CAM level
@@ -40,7 +40,7 @@ Add `--compositional` for frame/inset/grid syntax.
 - Bypass RemovalIntent IR layer
 - Mutate frozen dataclasses
 - Create new files when editing existing ones works
-- Add inline `# comments` to code
+- Add comments to code
 
 ## File Orientation
 
@@ -62,12 +62,19 @@ Load these when the task requires them:
 
 | Doc | When to load |
 |-----|--------------|
-| [docs/tasks.md](docs/tasks.md) | Common operations with code examples |
+| [docs/tasks.md](docs/tasks.md) | Common operations, code examples, running tests |
 | [docs/patterns.md](docs/patterns.md) | Adding new shapes, templates, generators, validators |
 | [docs/invariants.md](docs/invariants.md) | Before modifying core behavior |
 | [README.md](README.md) | Architecture and design rationale |
+| [GROUND_TRUTH.md](GROUND_TRUTH.md) | Normative requirements and contracts |
 | [docs/domain_generator.md](docs/domain_generator.md) | Domain/generator API reference |
 | [docs/cam_validation_plan.md](docs/cam_validation_plan.md) | Validation system architecture |
+| [docs/compositional_layout.md](docs/compositional_layout.md) | Frame/inset/grid/split syntax |
+| [docs/shape_primitives.md](docs/shape_primitives.md) | Supported shape types and parameters |
+| [docs/layout_primitives.md](docs/layout_primitives.md) | Layout manager properties |
+| [pml/syntax_spec.md](pml/syntax_spec.md) | PML language syntax |
+| [pml/nest_syntax_spec.md](pml/nest_syntax_spec.md) | Nesting job syntax |
+| [docs/recipes/](docs/recipes/) | Worked examples (01-30) |
 
 ## Token Efficiency
 

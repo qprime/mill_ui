@@ -112,8 +112,8 @@ spline decorative engrave 0.8mm points (0.1,0.1) (0.3,0.2) (0.5,0.5) (0.7,0.8) (
 
 
     assert removal.region_id == "test_spline_decorative", f"Region ID mismatch: {removal.region_id}"
-    assert removal.z_top == 0.0
-    assert abs(removal.z_bottom - (-0.8)) < 0.01, f"Z bottom mismatch: {removal.z_bottom}"
+    assert removal.depth_profile.z_top == 0.0
+    assert abs(removal.depth_profile.z_bottom - (-0.8)) < 0.01, f"Z bottom mismatch: {removal.depth_profile.z_bottom}"
 
 
     assert removal.bounds.x_min >= 0.0, f"x_min out of range: {removal.bounds.x_min}"

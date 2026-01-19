@@ -77,6 +77,8 @@ from generators.base import (
     BeadParams,
     RaisedPanelParams,
     ChamferParams,
+    LinePatternParams,
+    ConcentricBorderParams,
     # Type aliases
     LoopSelection,
     # Utilities
@@ -90,7 +92,12 @@ from generators.area import (
     wave_generator,
     grid_generator,
     raised_panel_generator,
+    line_pattern_generator,
+    concentric_border_generator,
 )
+
+# Utilities
+from generators.utils import shapely_to_item, iter_polygons
 
 # Loop generators
 from generators.loop import profile_generator, bead_generator, chamfer_generator
@@ -117,12 +124,16 @@ __all__ = [
     "BeadParams",
     "RaisedPanelParams",
     "ChamferParams",
+    "LinePatternParams",
+    "ConcentricBorderParams",
     "SVGPathParams",
     # Generators
     "flat_pocket_generator",
     "wave_generator",
     "grid_generator",
     "raised_panel_generator",
+    "line_pattern_generator",
+    "concentric_border_generator",
     "profile_generator",
     "bead_generator",
     "chamfer_generator",
@@ -133,4 +144,6 @@ __all__ = [
     # Utilities
     "generate_shape_id",
     "validate_domain_for_generation",
+    "shapely_to_item",
+    "iter_polygons",
 ]

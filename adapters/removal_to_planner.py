@@ -16,11 +16,9 @@ from core.constants import (
 
 
 def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
-
+    """Convert RemovalIntent to v1 hint dict format."""
     hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
     shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
-
-
     depth_mm = intent.depth_mm()
 
 
@@ -37,6 +35,14 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
 
         diameter_mm = intent.bounds.x_max - intent.bounds.x_min
         geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
+    elif ShapeType.is_polyline(shape):
+
+        if GeometryKeys.POINTS in intent.metadata:
+            geometry = {GeometryKeys.POINTS: intent.metadata[GeometryKeys.POINTS]}
+        else:
+            w_mm = intent.bounds.x_max - intent.bounds.x_min
+            h_mm = intent.bounds.y_max - intent.bounds.y_min
+            geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
     else:
 
         w_mm = intent.bounds.x_max - intent.bounds.x_min
@@ -69,8 +75,8 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
 
     elif hint_type == FeatureType.POCKET:
 
-        if intent.z_top != 0.0:
-            hint[HintKeys.START_DEPTH_MM] = abs(intent.z_top)
+        if intent.depth_profile.z_top != 0.0:
+            hint[HintKeys.START_DEPTH_MM] = abs(intent.depth_profile.z_top)
 
 
         if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
@@ -152,8 +158,17 @@ def removal_intents_to_v1_hints(
             holes.append(hint)
         elif hint_type == FeatureType.ENGRAVE:
             engraves.append(hint)
+        elif hint_type == FeatureType.WAVE:
+            engraves.append(hint)
+        elif hint_type == FeatureType.BEVEL:
+            pockets.append(hint)
+        elif hint_type == FeatureType.CHAMFER:
+            side = intent.metadata.get(HintKeys.SIDE, "outside")
+            if side in ("inside", "outside"):
+                profiles.append(hint)
+            else:
+                engraves.append(hint)
         else:
-
             pockets.append(hint)
 
     return {

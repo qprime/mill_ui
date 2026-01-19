@@ -108,8 +108,9 @@ def test_dump_removal_intent_profile():
 
         intent = removal_data[0]
         assert intent["region_id"] == "profile_outer_rect"
-        assert intent["z_top"] == 0.0
-        assert intent["z_bottom"] == -19.1
+        # Access z values via depth_profile (Stage 10 schema)
+        assert intent["depth_profile"]["z_top"] == 0.0
+        assert intent["depth_profile"]["z_bottom"] == -19.1
         assert approx_equal(intent["depth_mm"], 19.1)
         assert "bounds" in intent
         assert approx_equal(intent["bounds"]["x_min"], 50.0)
@@ -259,8 +260,13 @@ if __name__ == "__main__":
             traceback.print_exc()
             results.append(False)
 
-    passed = sum(results)
-    total = len(results)
-    print(f"\n{passed}/{total} CLI dump tests passed")
+    # Filter out None (skipped tests) for counting
+    actual_results = [r for r in results if r is not None]
+    passed = sum(1 for r in actual_results if r)
+    total = len(actual_results)
+    skipped = len(results) - len(actual_results)
 
-    sys.exit(0 if all(results) else 1)
+    skip_msg = f" ({skipped} skipped)" if skipped > 0 else ""
+    print(f"\n{passed}/{total} CLI dump tests passed{skip_msg}")
+
+    sys.exit(0 if all(r for r in actual_results) else 1)

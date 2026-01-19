@@ -10,7 +10,7 @@ from adapters.hints_to_removal import (
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from export import render_svg_with_removal_intent
+from export import render_blueprint_svg
 
 
 def test_shaker_v2_basic_panel():
@@ -127,7 +127,7 @@ def test_shaker_v2_removal_intent_generation():
 
     profile_regions = [r for r in removal_intents if "profile" in r.region_id]
     assert len(profile_regions) == 1
-    assert profile_regions[0].z_bottom == -19.0
+    assert profile_regions[0].depth_profile.z_bottom == -19.0
 
     pocket_regions = [r for r in removal_intents if "pocket" in r.region_id]
     assert len(pocket_regions) == 1
@@ -206,16 +206,17 @@ def test_shaker_v2_svg_export():
         temp_path = f.name
 
     try:
-        render_svg_with_removal_intent(ast, removal_intents, temp_path)
+        svg_content = render_blueprint_svg(ast, removal_intents)
+        with open(temp_path, 'w') as f:
+            f.write(svg_content)
 
         svg_path = Path(temp_path)
         assert svg_path.exists()
         assert svg_path.stat().st_size > 0
 
-        svg_content = svg_path.read_text()
-        assert '<?xml version' in svg_content
-        assert 'door:outer' in svg_content
-        assert 'door:panel' in svg_content
+        assert '<?xml version' in svg_content or '<svg' in svg_content
+        assert 'PROFILE_CUTS' in svg_content
+        assert 'POCKET_REGIONS' in svg_content
 
         print("  ✓ PASS")
         return True

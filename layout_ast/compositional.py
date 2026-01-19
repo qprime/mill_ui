@@ -152,6 +152,222 @@ class SplinePath:
             raise ValueError(f"SplinePath tolerance_mm must be positive, got {self.tolerance_mm}")
 
 
+# =============================================================================
+# Generator AST Nodes (Stage 12: PML Generator Syntax)
+# =============================================================================
+
+
+@dataclass(frozen=True)
+class ProfileGen:
+    """Profile cut generator node.
+
+    Attributes:
+        side: Cut position - "outside", "inside", or "on"
+        depth: "through" or depth in mm
+    """
+    side: str  # "outside", "inside", "on"
+    depth: str | float  # "through" or numeric depth
+
+
+@dataclass(frozen=True)
+class PocketGen:
+    """Flat pocket generator node.
+
+    Attributes:
+        depth_mm: Depth of the pocket in mm
+    """
+    depth_mm: float
+
+
+@dataclass(frozen=True)
+class RaisedPanelGen:
+    """Raised panel generator node.
+
+    Attributes:
+        border_width_mm: Width of the angled border
+        border_depth_mm: Depth at outer edge of border
+        field_depth_mm: Depth of center field
+    """
+    border_width_mm: float
+    border_depth_mm: float
+    field_depth_mm: float
+
+
+@dataclass(frozen=True)
+class ChamferGen:
+    """Chamfer generator node.
+
+    Attributes:
+        width_mm: Horizontal width of chamfer
+        depth_mm: Vertical depth of chamfer
+    """
+    width_mm: float
+    depth_mm: float
+
+
+@dataclass(frozen=True)
+class WaveGen:
+    """Wave pattern generator node.
+
+    Attributes:
+        wave_count: Number of waves
+        amplitude_mm: Amplitude of waves
+        wavelength_mm: Wavelength of waves
+        groove_width_mm: Width of groove
+        depth_mm: Depth of grooves
+    """
+    wave_count: int
+    amplitude_mm: float
+    wavelength_mm: float
+    groove_width_mm: float
+    depth_mm: float
+
+
+@dataclass(frozen=True)
+class SplitHorizontal:
+    """Split domain horizontally into n rows.
+
+    Attributes:
+        n: Number of rows
+        gap_mm: Gap between rows
+        children: Content for each cell
+    """
+    n: int
+    gap_mm: float = 0.0
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
+class SplitVertical:
+    """Split domain vertically into n columns.
+
+    Attributes:
+        n: Number of columns
+        gap_mm: Gap between columns
+        children: Content for each cell
+    """
+    n: int
+    gap_mm: float = 0.0
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
+class SplitGrid:
+    """Split domain into a rows x cols grid.
+
+    Attributes:
+        rows: Number of rows
+        cols: Number of columns
+        gap_mm: Gap between cells
+        children: Content for each cell
+    """
+    rows: int
+    cols: int
+    gap_mm: float = 0.0
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
+class LinesGen:
+    """Line pattern generator node.
+
+    Attributes:
+        angle_deg: Angle of lines (0=horizontal, 90=vertical, 45=diagonal)
+        spacing_mm: Distance between line centers
+        line_width_mm: Width of each line groove
+        depth_mm: Depth of grooves
+    """
+    angle_deg: float
+    spacing_mm: float
+    line_width_mm: float
+    depth_mm: float
+
+
+@dataclass(frozen=True)
+class ConcentricBorderGen:
+    """Concentric border generator node.
+
+    Attributes:
+        insets_mm: Tuple of inset distances for each border ring
+        groove_width_mm: Width of each groove
+        depth_mm: Depth of grooves
+    """
+    insets_mm: tuple[float, ...]
+    groove_width_mm: float
+    depth_mm: float
+
+
+@dataclass(frozen=True)
+class SplitHorizontalGaps:
+    """Split domain horizontally and apply children to gap regions.
+
+    Used for louvers, shelf dados, and other patterns where the gaps
+    between slats are the machined regions.
+
+    Attributes:
+        n: Number of slats (gaps = n - 1, but we treat this as n gaps)
+        gap_mm: Height of each gap region
+        children: Content applied to each gap
+    """
+    n: int
+    gap_mm: float
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
+class AtPosition:
+    """Position a child at explicit coordinates with explicit size.
+
+    Attributes:
+        x_mm: X position (center of child)
+        y_mm: Y position (center of child)
+        width_mm: Width of the region (optional, uses parent width if None)
+        height_mm: Height of the region (optional, uses parent height if None)
+        child: The node to position
+    """
+    x_mm: float
+    y_mm: float
+    width_mm: float | None = None
+    height_mm: float | None = None
+    child: Any = None
+
+
+@dataclass(frozen=True)
+class Subtract:
+    """Subtract inner region from outer region.
+
+    The outer region is defined by the current region context.
+    The inner region is defined by the first child.
+    Remaining children are applied to the resulting ring domain.
+
+    Attributes:
+        inner_inset_mm: Inset from current region for inner boundary
+        children: Operations to apply to the resulting ring
+    """
+    inner_inset_mm: float
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
+class Arch:
+    """Arch shape primitive (rectangle with semicircular top).
+
+    Attributes:
+        width_mm: Width of the arch
+        height_mm: Total height including arch
+        radius_mm: Radius of the arch curve
+        children: Child nodes
+        feature: Feature for this shape
+        id: Shape ID
+    """
+    width_mm: float
+    height_mm: float
+    radius_mm: float
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+
+
 @dataclass(frozen=True)
 class ResolvedRegion:
     x_min: float

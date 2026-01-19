@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680.0 680.0" width="680.0mm" height="680.0mm">
+  <style>
+        .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
+        .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
+        .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
+        .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
+        .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
+        .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
+        .dimension-text { fill:
+        .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
+        .gap-text { fill:
+        .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+    </style>
+  <rect x="0" y="0" width="680.0" height="680.0" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="140" y="140" width="400.0" height="400.0" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <rect x="140.0" y="140.0" width="400.0" height="400.0" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <path d="M 531.737 140.000 L 526.080 140.000 L 540.000 153.920 L 540.000 148.263 Z" fill-rule="evenodd" />
+    <path d="M 496.382 140.000 L 490.725 140.000 L 540.000 189.275 L 540.000 183.618 Z" fill-rule="evenodd" />
+    <path d="M 461.026 140.000 L 455.370 140.000 L 540.000 224.630 L 540.000 218.974 Z" fill-rule="evenodd" />
+    <path d="M 425.671 140.000 L 420.014 140.000 L 540.000 259.986 L 540.000 254.329 Z" fill-rule="evenodd" />
+    <path d="M 390.316 140.000 L 384.659 140.000 L 540.000 295.341 L 540.000 289.684 Z" fill-rule="evenodd" />
+    <path d="M 354.960 140.000 L 349.304 140.000 L 540.000 330.696 L 540.000 325.040 Z" fill-rule="evenodd" />
+    <path d="M 319.605 140.000 L 313.948 140.000 L 540.000 366.052 L 540.000 360.395 Z" fill-rule="evenodd" />
+    <path d="M 284.250 140.000 L 278.593 140.000 L 540.000 401.407 L 540.000 395.750 Z" fill-rule="evenodd" />
+    <path d="M 248.894 140.000 L 243.238 140.000 L 540.000 436.762 L 540.000 431.106 Z" fill-rule="evenodd" />
+    <path d="M 213.539 140.000 L 207.882 140.000 L 540.000 472.118 L 540.000 466.461 Z" fill-rule="evenodd" />
+    <path d="M 178.184 140.000 L 172.527 140.000 L 540.000 507.473 L 540.000 501.816 Z" fill-rule="evenodd" />
+    <path d="M 142.828 140.000 L 140.000 140.000 L 140.000 142.828 L 537.172 540.000 L 540.000 540.000 L 540.000 537.172 Z" fill-rule="evenodd" />
+    <path d="M 140.000 172.527 L 140.000 178.184 L 501.816 540.000 L 507.473 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 207.882 L 140.000 213.539 L 466.461 540.000 L 472.118 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 243.238 L 140.000 248.894 L 431.106 540.000 L 436.762 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 278.593 L 140.000 284.250 L 395.750 540.000 L 401.407 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 313.948 L 140.000 319.605 L 360.395 540.000 L 366.052 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 349.304 L 140.000 354.960 L 325.040 540.000 L 330.696 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 384.659 L 140.000 390.316 L 289.684 540.000 L 295.341 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 420.014 L 140.000 425.671 L 254.329 540.000 L 259.986 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 455.370 L 140.000 461.026 L 218.974 540.000 L 224.630 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 490.725 L 140.000 496.382 L 183.618 540.000 L 189.275 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 526.080 L 140.000 531.737 L 148.263 540.000 L 153.920 540.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 148.263 L 140.000 153.920 L 153.920 140.000 L 148.263 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 183.618 L 140.000 189.275 L 189.275 140.000 L 183.618 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 218.974 L 140.000 224.630 L 224.630 140.000 L 218.974 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 254.329 L 140.000 259.986 L 259.986 140.000 L 254.329 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 289.684 L 140.000 295.341 L 295.341 140.000 L 289.684 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 325.040 L 140.000 330.696 L 330.696 140.000 L 325.040 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 360.395 L 140.000 366.052 L 366.052 140.000 L 360.395 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 395.750 L 140.000 401.407 L 401.407 140.000 L 395.750 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 431.106 L 140.000 436.762 L 436.762 140.000 L 431.106 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 466.461 L 140.000 472.118 L 472.118 140.000 L 466.461 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 501.816 L 140.000 507.473 L 507.473 140.000 L 501.816 140.000 Z" fill-rule="evenodd" />
+    <path d="M 140.000 537.172 L 140.000 540.000 L 142.828 540.000 L 540.000 142.828 L 540.000 140.000 L 537.172 140.000 Z" fill-rule="evenodd" />
+    <path d="M 172.527 540.000 L 178.184 540.000 L 540.000 178.184 L 540.000 172.527 Z" fill-rule="evenodd" />
+    <path d="M 207.882 540.000 L 213.539 540.000 L 540.000 213.539 L 540.000 207.882 Z" fill-rule="evenodd" />
+    <path d="M 243.238 540.000 L 248.894 540.000 L 540.000 248.894 L 540.000 243.238 Z" fill-rule="evenodd" />
+    <path d="M 278.593 540.000 L 284.250 540.000 L 540.000 284.250 L 540.000 278.593 Z" fill-rule="evenodd" />
+    <path d="M 313.948 540.000 L 319.605 540.000 L 540.000 319.605 L 540.000 313.948 Z" fill-rule="evenodd" />
+    <path d="M 349.304 540.000 L 354.960 540.000 L 540.000 354.960 L 540.000 349.304 Z" fill-rule="evenodd" />
+    <path d="M 384.659 540.000 L 390.316 540.000 L 540.000 390.316 L 540.000 384.659 Z" fill-rule="evenodd" />
+    <path d="M 420.014 540.000 L 425.671 540.000 L 540.000 425.671 L 540.000 420.014 Z" fill-rule="evenodd" />
+    <path d="M 455.370 540.000 L 461.026 540.000 L 540.000 461.026 L 540.000 455.370 Z" fill-rule="evenodd" />
+    <path d="M 490.725 540.000 L 496.382 540.000 L 540.000 496.382 L 540.000 490.725 Z" fill-rule="evenodd" />
+    <path d="M 526.080 540.000 L 531.737 540.000 L 540.000 531.737 L 540.000 526.080 Z" fill-rule="evenodd" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths" />
+  <g id="HOLES" class="holes" />
+  <g id="CONSTRUCTION" class="construction" />
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="140.0" y1="140.0" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="140.0" x2="540.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="120.0" x2="540.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
+    <polygon points="540.0,120.0 537.0,117.0 537.0,123.0" fill="#5ab9ea" />
+    <text x="340.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">400.0mm</text>
+    <line x1="540.0" y1="140.0" x2="560.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="540.0" x2="560.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="560.0" y1="140.0" x2="560.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="560.0,140.0 557.0,143.0 563.0,143.0" fill="#5ab9ea" />
+    <polygon points="560.0,540.0 557.0,537.0 563.0,537.0" fill="#5ab9ea" />
+    <text x="565.0" y="340.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 565.0 340.0)">400.0mm</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20" y="560.0" class="notes" font-weight="bold">NOTES</text>
+    <text x="20" y="572.0" class="notes">Sheet: 400.0 × 400.0 × 19.0mm</text>
+    <text x="20" y="584.0" class="notes">Features: 1 profile, 46 pockets</text>
+    <text x="20" y="596.0" class="notes">Depths:</text>
+    <text x="30" y="608.0" class="notes">• pocket: 3.0</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>
+    <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="548.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="548.0" y1="38" x2="563.0" y2="38" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="568.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="548.0" y1="54" x2="563.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="568.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="548.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="568.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="548.0" y1="86" x2="563.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="568.0" y="89" class="legend">Holes</text>
+    <line x1="548.0" y1="102" x2="563.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="568.0" y="105" class="legend">Dimensions</text>
+  </g>
+</svg>

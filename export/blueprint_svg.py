@@ -201,6 +201,31 @@ def _render_sheet_boundary(group: ET.Element, sheet: Sheet, offset_x: float, off
     )
 
 
+def _polygon_to_path(
+    points: list,
+    holes: list,
+    offset_x: float,
+    offset_y: float,
+) -> str:
+    if not points:
+        return ""
+
+    def ring_to_path(ring: list) -> str:
+        if not ring:
+            return ""
+        parts = [f"M {ring[0][0] + offset_x:.3f} {ring[0][1] + offset_y:.3f}"]
+        for x, y in ring[1:]:
+            parts.append(f"L {x + offset_x:.3f} {y + offset_y:.3f}")
+        parts.append("Z")
+        return " ".join(parts)
+
+    segments = [ring_to_path(points)]
+    for hole in holes or []:
+        if hole:
+            segments.append(ring_to_path(hole))
+    return " ".join(segments)
+
+
 def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
     if item.geometry is None or item.placement is None:
         return
@@ -234,6 +259,17 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
                 "r": str(r),
             },
         )
+    elif shape_type == "Polygon":
+        points = item.geometry.data.get("points", [])
+        holes = item.geometry.data.get("holes", [])
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y)
+        if path_d:
+            ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
+    elif shape_type == "Polyline":
+        points = item.geometry.data.get("points", [])
+        if points:
+            points_str = " ".join(f"{x + offset_x},{y + offset_y}" for x, y in points)
+            ET.SubElement(group, "polyline", {"points": points_str})
 
 
 def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
@@ -269,6 +305,12 @@ def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: flo
                 "r": str(r),
             },
         )
+    elif shape_type == "Polygon":
+        points = item.geometry.data.get("points", [])
+        holes = item.geometry.data.get("holes", [])
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y)
+        if path_d:
+            ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
 
 
 def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:

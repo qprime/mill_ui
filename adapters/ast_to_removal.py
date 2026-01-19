@@ -108,37 +108,144 @@ def item_to_removal_intent(
         return engrave_hint_to_removal_intent(hint)
 
     elif item.feature.type == FeatureType.BEVEL:
-        # Bevel (raised panel border) - emit as pocket with bevel metadata
-        # CAM planner can interpret metadata for V-bit or ball-nose toolpaths
-        bevel_metadata = {
-            MetadataKeys.BEVEL: {
-                MetadataKeys.WIDTH_MM: item.feature.bevel_width_mm,
-                MetadataKeys.ANGLE_DEG: item.feature.bevel_angle_deg,
-                MetadataKeys.INNER_DEPTH_MM: item.feature.bevel_inner_depth_mm,
-            }
-        }
-        intent = pocket_hint_to_removal_intent(hint)
-        # Merge bevel metadata into the intent
-        merged_metadata = {**intent.metadata, **bevel_metadata}
-        from dataclasses import replace
-        return replace(intent, metadata=merged_metadata)
+        # Bevel (raised panel border) - store bevel parameters in metadata
+        # CAM backend chooses machining strategy (chamfer mill, ball nose ramp, etc.)
+        from ir.removal_intent import DepthProfile, Allowance, Constraints
+        from adapters.hints_to_removal import _geometry_to_bounds
+        import math
+
+        bevel_width = item.feature.bevel_width_mm or 0.0
+        bevel_angle = item.feature.bevel_angle_deg or 45.0
+        inner_depth = item.feature.bevel_inner_depth_mm or 0.0
+
+        # Calculate depth from bevel width and angle for bounds/depth_mm
+        if bevel_angle > 0 and bevel_angle < 90:
+            calculated_depth = bevel_width * math.tan(math.radians(bevel_angle))
+        else:
+            calculated_depth = inner_depth if inner_depth > 0 else bevel_width
+
+        bounds = _geometry_to_bounds(
+            hint[HintKeys.SHAPE],
+            hint[HintKeys.GEOMETRY],
+            hint[HintKeys.CENTER_XY_MM],
+        )
+
+        # Use constant depth profile - bevel details go in metadata
+        depth_profile = DepthProfile.constant(
+            z_top=0.0,
+            z_bottom=-calculated_depth,
+        )
+
+        return RemovalIntent(
+            region_id=f"bevel_{hint[HintKeys.ID]}",
+            bounds=bounds,
+            depth_profile=depth_profile,
+            allowance=Allowance(),
+            constraints=Constraints(),
+            metadata={
+                MetadataKeys.HINT_TYPE: FeatureType.BEVEL,
+                MetadataKeys.ITEM_TYPE: item.type,
+                MetadataKeys.FEATURE_TYPE: item.feature.type,
+                MetadataKeys.SHAPE_ID: item.shape_id,
+                MetadataKeys.BEVEL: {
+                    MetadataKeys.WIDTH_MM: bevel_width,
+                    MetadataKeys.ANGLE_DEG: bevel_angle,
+                    MetadataKeys.INNER_DEPTH_MM: inner_depth,
+                },
+            },
+        )
 
     elif item.feature.type == FeatureType.CHAMFER:
-        # Chamfer - emit as profile with chamfer metadata
-        # CAM planner can interpret metadata for chamfer mill toolpaths
-        if item.feature.side:
-            hint[HintKeys.SIDE] = item.feature.side
-        chamfer_metadata = {
-            MetadataKeys.CHAMFER: {
-                MetadataKeys.WIDTH_MM: item.feature.chamfer_width_mm,
-                MetadataKeys.ANGLE_DEG: item.feature.chamfer_angle_deg,
-            }
+        # Chamfer - store chamfer parameters in metadata
+        # CAM backend chooses machining strategy (chamfer mill, V-bit, etc.)
+        from ir.removal_intent import DepthProfile, Allowance, Constraints
+        from adapters.hints_to_removal import _geometry_to_bounds
+        import math
+
+        chamfer_width = item.feature.chamfer_width_mm or 0.0
+        chamfer_angle = item.feature.chamfer_angle_deg or 45.0
+        side = item.feature.side or "outside"
+
+        # Calculate depth from chamfer width and angle for bounds/depth_mm
+        if chamfer_angle > 0 and chamfer_angle < 90:
+            calculated_depth = chamfer_width * math.tan(math.radians(chamfer_angle))
+        else:
+            calculated_depth = chamfer_width
+
+        bounds = _geometry_to_bounds(
+            hint[HintKeys.SHAPE],
+            hint[HintKeys.GEOMETRY],
+            hint[HintKeys.CENTER_XY_MM],
+        )
+
+        # Use constant depth profile - chamfer details go in metadata
+        depth_profile = DepthProfile.constant(
+            z_top=0.0,
+            z_bottom=-calculated_depth,
+        )
+
+        return RemovalIntent(
+            region_id=f"chamfer_{hint[HintKeys.ID]}",
+            bounds=bounds,
+            depth_profile=depth_profile,
+            allowance=Allowance(),
+            constraints=Constraints(),
+            metadata={
+                MetadataKeys.HINT_TYPE: FeatureType.CHAMFER,
+                MetadataKeys.ITEM_TYPE: item.type,
+                MetadataKeys.FEATURE_TYPE: item.feature.type,
+                MetadataKeys.SHAPE_ID: item.shape_id,
+                HintKeys.SIDE: side,
+                MetadataKeys.CHAMFER: {
+                    MetadataKeys.WIDTH_MM: chamfer_width,
+                    MetadataKeys.ANGLE_DEG: chamfer_angle,
+                },
+            },
+        )
+
+    elif item.feature.type == FeatureType.WAVE:
+        # Wave pattern - store wave parameters in metadata
+        # CAM backend generates parallel groove toolpaths following wave shape
+        from ir.removal_intent import DepthProfile, Allowance, Constraints
+        from adapters.hints_to_removal import _geometry_to_bounds
+
+        bounds = _geometry_to_bounds(
+            hint[HintKeys.SHAPE],
+            hint[HintKeys.GEOMETRY],
+            hint[HintKeys.CENTER_XY_MM],
+        )
+
+        depth_mm = item.feature.depth_mm or 0.0
+
+        # Use constant depth profile - wave details go in metadata
+        depth_profile = DepthProfile.constant(
+            z_top=0.0,
+            z_bottom=-depth_mm,
+        )
+
+        # Extract wave parameters from geometry data (set by layout_resolver)
+        geometry_data = item.geometry.data if item.geometry else {}
+        wave_metadata = {
+            "wave_count": geometry_data.get("wave_count"),
+            "amplitude_mm": geometry_data.get("wave_amplitude_mm"),
+            "wavelength_mm": geometry_data.get("wave_wavelength_mm"),
+            "groove_width_mm": geometry_data.get("wave_groove_width_mm"),
         }
-        intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
-        # Merge chamfer metadata into the intent
-        merged_metadata = {**intent.metadata, **chamfer_metadata}
-        from dataclasses import replace
-        return replace(intent, metadata=merged_metadata)
+
+        return RemovalIntent(
+            region_id=f"wave_{hint[HintKeys.ID]}",
+            bounds=bounds,
+            depth_profile=depth_profile,
+            allowance=Allowance(),
+            constraints=Constraints(),
+            metadata={
+                MetadataKeys.HINT_TYPE: FeatureType.WAVE,
+                MetadataKeys.ITEM_TYPE: item.type,
+                MetadataKeys.FEATURE_TYPE: item.feature.type,
+                MetadataKeys.SHAPE_ID: item.shape_id,
+                "wave": wave_metadata,
+            },
+        )
 
     else:
         raise ValueError(f"Unknown feature type: {item.feature.type}")

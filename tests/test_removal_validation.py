@@ -3,13 +3,33 @@ from __future__ import annotations
 
 import sys
 
-from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
+from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints, DepthProfile
 from validation import (
     ValidationResult,
     check_overlap,
     check_depth_feasibility,
     check_toolability,
 )
+
+
+def _make_intent(
+    region_id: str,
+    bounds: Bounds2D,
+    z_top: float = 0.0,
+    z_bottom: float = -5.0,
+    allowance: Allowance = None,
+    constraints: Constraints = None,
+    metadata: dict = None,
+) -> RemovalIntent:
+    """Helper to create RemovalIntent with DepthProfile."""
+    return RemovalIntent(
+        region_id=region_id,
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=z_top, z_bottom=z_bottom),
+        allowance=allowance or Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
+        constraints=constraints or Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
+        metadata=metadata or {},
+    )
 
 
 def test_validation_result_basic():
@@ -53,24 +73,14 @@ def test_validation_result_multiple_issue_types():
 
 def test_check_overlap_no_overlap():
     print("Running test_check_overlap_no_overlap...")
-    intent_a = RemovalIntent(
+    intent_a = _make_intent(
         region_id="pocket_a",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
-    intent_b = RemovalIntent(
+    intent_b = _make_intent(
         region_id="pocket_b",
         bounds=Bounds2D(x_min=20.0, x_max=30.0, y_min=0.0, y_max=10.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_overlap([intent_a, intent_b])
@@ -82,24 +92,14 @@ def test_check_overlap_no_overlap():
 
 def test_check_overlap_xy_overlap():
     print("Running test_check_overlap_xy_overlap...")
-    intent_a = RemovalIntent(
+    intent_a = _make_intent(
         region_id="pocket_a",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
-    intent_b = RemovalIntent(
+    intent_b = _make_intent(
         region_id="pocket_b",
         bounds=Bounds2D(x_min=5.0, x_max=15.0, y_min=5.0, y_max=15.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_overlap([intent_a, intent_b])
@@ -113,24 +113,18 @@ def test_check_overlap_xy_overlap():
 
 def test_check_overlap_different_z_levels():
     print("Running test_check_overlap_different_z_levels...")
-    intent_a = RemovalIntent(
+    intent_a = _make_intent(
         region_id="pocket_shallow",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
         z_bottom=-3.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
-    intent_b = RemovalIntent(
+    intent_b = _make_intent(
         region_id="pocket_deep",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=-4.0,
         z_bottom=-8.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_overlap([intent_a, intent_b])
@@ -141,14 +135,11 @@ def test_check_overlap_different_z_levels():
 
 def test_check_depth_feasibility_valid():
     print("Running test_check_depth_feasibility_valid...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_valid",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
         z_bottom=-6.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_depth_feasibility(intent, sheet_thickness_mm=12.0)
@@ -161,38 +152,29 @@ def test_check_depth_feasibility_valid():
 def test_check_depth_feasibility_inverted_z():
     print("Running test_check_depth_feasibility_inverted_z...")
 
+    # DepthProfile now validates z_bottom > z_top
     try:
-        intent = RemovalIntent(
+        _make_intent(
             region_id="pocket_inverted",
             bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
             z_top=-6.0,
             z_bottom=0.0,
-            allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-            constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-            metadata={},
         )
-        print("  FAIL: Expected ValueError")
-        return False
+        assert False, "Expected ValueError for inverted Z values"
     except ValueError as e:
-        if "z_bottom" in str(e) and "z_top" in str(e):
-            pass
-        else:
-            print(f"  FAIL: Wrong error message: {e}")
-            return False
+        assert "z_bottom" in str(e) and "z_top" in str(e)
+
     print("  PASS")
     return True
 
 
 def test_check_depth_feasibility_too_deep():
     print("Running test_check_depth_feasibility_too_deep...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_deep",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
         z_bottom=-15.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_depth_feasibility(intent, sheet_thickness_mm=12.0)
@@ -205,14 +187,11 @@ def test_check_depth_feasibility_too_deep():
 
 def test_check_depth_feasibility_very_shallow():
     print("Running test_check_depth_feasibility_very_shallow...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="engrave_shallow",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
         z_top=0.0,
         z_bottom=-0.2,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_depth_feasibility(intent, sheet_thickness_mm=12.0)
@@ -225,14 +204,9 @@ def test_check_depth_feasibility_very_shallow():
 
 def test_check_toolability_no_tools():
     print("Running test_check_toolability_no_tools...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_normal",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_toolability(intent, available_tools=None)
@@ -244,14 +218,9 @@ def test_check_toolability_no_tools():
 
 def test_check_toolability_very_small_feature():
     print("Running test_check_toolability_very_small_feature...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="hole_tiny",
         bounds=Bounds2D(x_min=0.0, x_max=0.5, y_min=0.0, y_max=0.5),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     result = check_toolability(intent, available_tools=None)
@@ -264,14 +233,9 @@ def test_check_toolability_very_small_feature():
 
 def test_check_toolability_with_suitable_tools():
     print("Running test_check_toolability_with_suitable_tools...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_normal",
         bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     tools = [
@@ -288,14 +252,9 @@ def test_check_toolability_with_suitable_tools():
 
 def test_check_toolability_no_suitable_tools():
     print("Running test_check_toolability_no_suitable_tools...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_tiny",
         bounds=Bounds2D(x_min=0.0, x_max=1.5, y_min=0.0, y_max=1.5),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     tools = [
@@ -313,14 +272,9 @@ def test_check_toolability_no_suitable_tools():
 
 def test_check_toolability_limited_tools():
     print("Running test_check_toolability_limited_tools...")
-    intent = RemovalIntent(
+    intent = _make_intent(
         region_id="pocket_small",
         bounds=Bounds2D(x_min=0.0, x_max=4.0, y_min=0.0, y_max=4.0),
-        z_top=0.0,
-        z_bottom=-5.0,
-        allowance=Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata={},
     )
 
     tools = [
@@ -365,6 +319,8 @@ if __name__ == "__main__":
                 passed += 1
         except Exception as e:
             print(f"  FAIL: {e}")
+            import traceback
+            traceback.print_exc()
             failed += 1
 
     print(f"\n{passed} passed, {failed} failed")

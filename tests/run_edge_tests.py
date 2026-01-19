@@ -200,13 +200,12 @@ rect panel profile through outside
     kerf_offset = tool_kerf_mm / 2.0
 
 
-    from ir.removal_intent import RemovalIntent, Constraints, EdgeTreatment
+    from ir.removal_intent import RemovalIntent, Constraints, EdgeTreatment, DepthProfile
 
     combined_removal = RemovalIntent(
         region_id=base_removal.region_id,
         bounds=base_removal.bounds,
-        z_top=base_removal.z_top,
-        z_bottom=base_removal.z_bottom,
+        depth_profile=DepthProfile.constant(z_top=base_removal.depth_profile.z_top, z_bottom=base_removal.depth_profile.z_bottom),
         allowance=Allowance(outside=0.0, kerf_compensation=kerf_offset),
         constraints=Constraints(
             edge_treatment=EdgeTreatment(

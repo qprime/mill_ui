@@ -9,6 +9,7 @@ from ir.removal_intent import (
     TabConstraint,
     KeepoutRegion,
     Island,
+    DepthProfile,
 )
 
 
@@ -38,8 +39,7 @@ def test_removal_intent_minimal():
     intent = RemovalIntent(
         region_id="profile_1",
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-10.0,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-10.0),
     )
     assert intent.region_id == "profile_1"
     assert intent.depth_mm() == 10.0
@@ -56,8 +56,7 @@ def test_removal_intent_with_tabs():
     intent = RemovalIntent(
         region_id="profile_with_tabs",
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-19.1,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-19.1),
         constraints=constraints,
     )
 
@@ -78,8 +77,7 @@ def test_removal_intent_to_dict():
     intent = RemovalIntent(
         region_id="profile_1",
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-12.0,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-12.0),
         allowance=allowance,
         constraints=constraints,
         metadata={"shape_id": "rect_1"},
@@ -88,7 +86,7 @@ def test_removal_intent_to_dict():
     data = intent.to_dict()
 
     assert data["region_id"] == "profile_1"
-    assert data["depth_mm"] == 12.0
+    assert data["depth_profile"]["depth_mm"] == 12.0
     assert data["allowance"]["outside"] == -0.5
     assert data["constraints"]["tabs"]["count"] == 4
     assert data["metadata"]["shape_id"] == "rect_1"
@@ -104,8 +102,7 @@ def test_removal_intent_invalid_depth():
         RemovalIntent(
             region_id="invalid",
             bounds=bounds,
-            z_top=-10.0,
-            z_bottom=0.0,
+            depth_profile=DepthProfile.constant(z_top=-10.0, z_bottom=0.0),
         )
         print("  ✗ FAIL: Expected ValueError")
         return False

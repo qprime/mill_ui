@@ -48,11 +48,30 @@ def shape_dict_to_polygon(shape: dict[str, Any]) -> Polygon:
     elif shape_type == "Polyline":
         points = geometry["points"]
 
-
         coords = list(points)
         if coords[0] != coords[-1]:
             coords.append(coords[0])
         return Polygon(coords)
+
+    elif shape_type == "Polygon":
+        points = geometry.get("points", [])
+        holes = geometry.get("holes", [])
+
+        if not points:
+            raise ValueError("Polygon shape has no points")
+
+        outer_coords = [(p[0], p[1]) for p in points]
+        if outer_coords[0] != outer_coords[-1]:
+            outer_coords.append(outer_coords[0])
+
+        hole_coords = []
+        for hole in holes:
+            hole_ring = [(p[0], p[1]) for p in hole]
+            if hole_ring[0] != hole_ring[-1]:
+                hole_ring.append(hole_ring[0])
+            hole_coords.append(hole_ring)
+
+        return Polygon(outer_coords, holes=hole_coords if hole_coords else None)
 
     else:
         raise ValueError(f"Unsupported shape type: {shape_type}")
@@ -135,6 +154,10 @@ def export_stl(
         feature = shape["feature"]
         feature_type = feature["type"]
         side = feature.get("side")
+        shape_type = shape.get("type", "")
+
+        if shape_type == "Polyline" and feature_type == "engrave":
+            continue
 
         if feature_type == "profile" and side == "outside":
             profile_outside_shapes.append(shape)
@@ -144,7 +167,8 @@ def export_stl(
 
     all_x = []
     all_y = []
-    for shape in shapes:
+    all_shapes = profile_outside_shapes + subtractive_shapes
+    for shape in all_shapes:
         poly = shape_dict_to_polygon(shape)
         bounds = poly.bounds
         all_x.extend([bounds[0], bounds[2]])

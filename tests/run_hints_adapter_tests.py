@@ -22,8 +22,8 @@ def test_profile_through_cut():
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=19.1)
 
     assert intent.region_id == "profile_rect_outline"
-    assert intent.z_top == 0.0
-    assert intent.z_bottom == -19.1
+    assert intent.depth_profile.z_top == 0.0
+    assert intent.depth_profile.z_bottom == -19.1
     assert intent.depth_mm() == 19.1
     print("  ✓ PASS")
     return True
@@ -63,8 +63,8 @@ def test_pocket_basic():
     intent = pocket_hint_to_removal_intent(hint)
 
     assert intent.region_id == "pocket_pocket_1"
-    assert intent.z_top == 0.0
-    assert intent.z_bottom == -5.0
+    assert intent.depth_profile.z_top == 0.0
+    assert intent.depth_profile.z_bottom == -5.0
     assert intent.depth_mm() == 5.0
     print("  ✓ PASS")
     return True
@@ -83,8 +83,8 @@ def test_pocket_with_start_depth():
 
     intent = pocket_hint_to_removal_intent(hint)
 
-    assert intent.z_top == -2.0
-    assert intent.z_bottom == -10.0
+    assert intent.depth_profile.z_top == -2.0
+    assert intent.depth_profile.z_bottom == -10.0
     assert intent.depth_mm() == 8.0
     print("  ✓ PASS")
     return True

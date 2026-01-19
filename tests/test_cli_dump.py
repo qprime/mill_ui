@@ -123,8 +123,9 @@ def test_dump_removal_intent_profile():
 
         intent = removal_data[0]
         assert intent["region_id"] == "profile_outer_rect"
-        assert intent["z_top"] == 0.0
-        assert intent["z_bottom"] == -19.1
+        # Access z values via depth_profile (Stage 10 schema)
+        assert intent["depth_profile"]["z_top"] == 0.0
+        assert intent["depth_profile"]["z_bottom"] == -19.1
         assert approx_eq(intent["depth_mm"], 19.1)
         assert "bounds" in intent
         assert approx_eq(intent["bounds"]["x_min"], 50.0)

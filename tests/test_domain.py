@@ -1135,6 +1135,558 @@ def test_split_total_area_preserved():
 
 
 # =============================================================================
+# Stage 11: Local-Coordinate Split Operations Tests
+# =============================================================================
+
+def test_split_horizontal_local_coords_default_false():
+    """Test that local_coords=False (default) preserves existing behavior."""
+    domain = Domain.from_rectangle(100, 300, center=(50, 150))
+
+    # Default behavior
+    result_default = domain.split_horizontal(3)
+    # Explicit local_coords=False
+    result_explicit = domain.split_horizontal(3, local_coords=False)
+
+    assert len(result_default) == len(result_explicit)
+    for d1, d2 in zip(result_default, result_explicit):
+        assert approx_equal(d1.area_mm2, d2.area_mm2)
+        assert bounds_approx_equal(d1.bounds, d2.bounds)
+
+
+def test_split_vertical_local_coords_default_false():
+    """Test that local_coords=False (default) preserves existing behavior."""
+    domain = Domain.from_rectangle(300, 100, center=(150, 50))
+
+    result_default = domain.split_vertical(3)
+    result_explicit = domain.split_vertical(3, local_coords=False)
+
+    assert len(result_default) == len(result_explicit)
+    for d1, d2 in zip(result_default, result_explicit):
+        assert approx_equal(d1.area_mm2, d2.area_mm2)
+
+
+def test_split_grid_local_coords_default_false():
+    """Test that local_coords=False (default) preserves existing behavior."""
+    domain = Domain.from_rectangle(200, 300, center=(100, 150))
+
+    result_default = domain.split_grid(2, 3)
+    result_explicit = domain.split_grid(2, 3, local_coords=False)
+
+    assert len(result_default) == len(result_explicit)
+    for d1, d2 in zip(result_default, result_explicit):
+        assert approx_equal(d1.area_mm2, d2.area_mm2)
+
+
+def test_split_horizontal_local_coords_unrotated():
+    """Test local_coords=True on unrotated domain is same as local_coords=False."""
+    domain = Domain.from_rectangle(100, 300, center=(50, 150))
+    # No rotation, so local_coords should have no effect
+
+    result_false = domain.split_horizontal(3, local_coords=False)
+    result_true = domain.split_horizontal(3, local_coords=True)
+
+    assert len(result_false) == len(result_true)
+    for d1, d2 in zip(result_false, result_true):
+        assert approx_equal(d1.area_mm2, d2.area_mm2)
+
+
+def test_split_horizontal_local_coords_rotated_90deg():
+    """Test local_coords=True on 90-degree rotated domain.
+
+    A 100x300 rectangle rotated 90 degrees becomes 300x100 in sheet space.
+    Horizontal split in local coords should split along the original (local) Y axis,
+    which is now the sheet X axis after rotation.
+    """
+    # 100mm wide x 300mm tall, rotated 90 degrees CCW
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=300,
+        center=(150, 50),
+        rotation_rad=math.pi / 2,  # 90 degrees
+    )
+
+    # In local coordinates, this is still 100 wide x 300 tall
+    # Horizontal split in local coords splits along local Y
+    result = domain.split_horizontal(3, local_coords=True)
+
+    assert len(result) == 3
+    # Total area should be preserved
+    total_area = sum(d.area_mm2 for d in result)
+    assert approx_equal(total_area, 100 * 300, tolerance=1.0)
+
+    # Each piece should have 1/3 of the area
+    for d in result:
+        assert approx_equal(d.area_mm2, 10000.0, tolerance=1.0)  # 100*100
+
+
+def test_split_vertical_local_coords_rotated_90deg():
+    """Test local_coords=True on 90-degree rotated domain for vertical split."""
+    # 300mm wide x 100mm tall, rotated 90 degrees CCW
+    domain = Domain.from_rectangle(
+        width_mm=300,
+        height_mm=100,
+        center=(50, 150),
+        rotation_rad=math.pi / 2,  # 90 degrees
+    )
+
+    result = domain.split_vertical(3, local_coords=True)
+
+    assert len(result) == 3
+    total_area = sum(d.area_mm2 for d in result)
+    assert approx_equal(total_area, 300 * 100, tolerance=1.0)
+
+
+def test_split_grid_local_coords_rotated_45deg():
+    """Test local_coords=True on 45-degree rotated domain for grid split.
+
+    A square rotated 45 degrees should split into a grid aligned with
+    the domain's diagonal axes when using local_coords=True.
+    """
+    # 200mm x 200mm square, rotated 45 degrees
+    domain = Domain.from_rectangle(
+        width_mm=200,
+        height_mm=200,
+        center=(100, 100),
+        rotation_rad=math.pi / 4,  # 45 degrees
+    )
+
+    result = domain.split_grid(2, 2, local_coords=True)
+
+    assert len(result) == 4
+    # Total area should be preserved
+    total_area = sum(d.area_mm2 for d in result)
+    assert approx_equal(total_area, 200 * 200, tolerance=1.0)
+
+    # Each cell should be approximately 1/4 of the area
+    for d in result:
+        assert approx_equal(d.area_mm2, 10000.0, tolerance=1.0)  # 100*100
+
+
+def test_split_horizontal_local_coords_preserves_rotation():
+    """Test that local_coords splits preserve the original rotation."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=300,
+        center=(150, 150),
+        rotation_rad=math.pi / 6,  # 30 degrees
+    )
+
+    result = domain.split_horizontal(3, local_coords=True)
+
+    # All resulting domains should have the same rotation as the parent
+    for d in result:
+        assert approx_equal(d.local_rotation_rad, math.pi / 6)
+
+
+def test_split_horizontal_local_coords_with_gap_rotated():
+    """Test local_coords=True with gaps on a rotated domain."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=300,
+        center=(150, 150),
+        rotation_rad=math.pi / 4,  # 45 degrees
+    )
+
+    # Split with 30mm gaps
+    result = domain.split_horizontal(3, gap_mm=30, local_coords=True)
+
+    assert len(result) == 3
+    # Total area should be original minus gap areas
+    # Gap area = 2 gaps * 30mm * 100mm = 6000 mm²
+    total_area = sum(d.area_mm2 for d in result)
+    expected_area = 100 * 300 - 2 * 30 * 100
+    assert approx_equal(total_area, expected_area, tolerance=1.0)
+
+
+def test_split_vertical_local_coords_with_gap_rotated():
+    """Test local_coords=True vertical split with gaps on a rotated domain."""
+    domain = Domain.from_rectangle(
+        width_mm=200,
+        height_mm=100,
+        center=(100, 100),
+        rotation_rad=math.pi / 3,  # 60 degrees
+    )
+
+    result = domain.split_vertical(2, gap_mm=20, local_coords=True)
+
+    assert len(result) == 2
+    # Total area should be original minus gap area
+    total_area = sum(d.area_mm2 for d in result)
+    expected_area = 200 * 100 - 20 * 100
+    assert approx_equal(total_area, expected_area, tolerance=1.0)
+
+
+def test_local_coords_vs_sheet_coords_different_for_rotated():
+    """Test that local_coords=True produces different results than False for rotated domains."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=200,
+        center=(100, 100),
+        rotation_rad=math.pi / 4,  # 45 degrees
+    )
+
+    result_sheet = domain.split_horizontal(2, local_coords=False)
+    result_local = domain.split_horizontal(2, local_coords=True)
+
+    # Both should have 2 domains
+    assert len(result_sheet) == 2
+    assert len(result_local) == 2
+
+    # Both should have same total area
+    sheet_area = sum(d.area_mm2 for d in result_sheet)
+    local_area = sum(d.area_mm2 for d in result_local)
+    assert approx_equal(sheet_area, local_area, tolerance=1.0)
+
+    # But the individual domains should have different shapes
+    # (sheet splits along sheet Y, local splits along local Y which is rotated)
+    # Verify centroids are different
+    sheet_centroid_0 = result_sheet[0].centroid
+    local_centroid_0 = result_local[0].centroid
+
+    # The centroids should differ due to different split orientations
+    # For a 45-degree rotation, the difference should be noticeable
+    centroid_diff = math.sqrt(
+        (sheet_centroid_0[0] - local_centroid_0[0])**2 +
+        (sheet_centroid_0[1] - local_centroid_0[1])**2
+    )
+    # With a 45-degree rotated 100x200 rectangle split in half,
+    # the centroids will be in notably different positions
+    assert centroid_diff > 1.0, "Local and sheet splits should produce different geometry for rotated domains"
+
+
+def test_transform_point_roundtrip():
+    """Test that point transforms are reversible."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=100,
+        center=(200, 150),
+        rotation_rad=math.pi / 6,  # 30 degrees
+    )
+
+    test_point = (250, 200)
+
+    # Transform to local and back
+    local_point = domain._transform_point_to_local(test_point)
+    back_to_sheet = domain._transform_point_to_sheet(local_point)
+
+    assert point_approx_equal(back_to_sheet, test_point, tolerance=0.001)
+
+
+def test_to_local_domain_and_back():
+    """Test that domain can be transformed to local space and back."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=200,
+        center=(150, 100),
+        rotation_rad=math.pi / 4,  # 45 degrees
+    )
+    original_area = domain.area_mm2
+
+    # Transform to local space
+    local_domain = domain._to_local_domain()
+
+    # Local domain should have same area
+    assert approx_equal(local_domain.area_mm2, original_area)
+
+    # Local domain should be axis-aligned (rotation = 0)
+    assert approx_equal(local_domain.local_rotation_rad, 0.0)
+
+    # Local domain's origin should be at (0, 0)
+    assert point_approx_equal(local_domain.local_origin, (0.0, 0.0))
+
+    # Transform back to sheet coordinates
+    back_to_sheet = domain._from_local_domain(local_domain)
+
+    # Should have same area
+    assert approx_equal(back_to_sheet.area_mm2, original_area)
+
+    # Should have same rotation as original
+    assert approx_equal(back_to_sheet.local_rotation_rad, domain.local_rotation_rad)
+
+    # Centroid should be approximately the same
+    assert point_approx_equal(back_to_sheet.centroid, domain.centroid, tolerance=0.1)
+
+
+# =============================================================================
+# Stage 13: Domain Factory Methods and Utilities
+# =============================================================================
+
+def test_from_arch_basic():
+    """Test creating an arch-topped domain."""
+    arch = Domain.from_arch(
+        width_mm=500,
+        height_mm=800,
+        arch_radius_mm=250,  # Full semicircle
+    )
+
+    # Should have valid geometry
+    assert arch.area_mm2 > 0
+    assert len(arch.outer_boundary) > 4  # More than a rectangle due to arc
+
+    # Bounds should match input dimensions
+    assert approx_equal(arch.bounds.width, 500.0)
+    assert approx_equal(arch.bounds.height, 800.0)
+
+
+def test_from_arch_with_center():
+    """Test arch with custom center position."""
+    arch = Domain.from_arch(
+        width_mm=500,
+        height_mm=800,
+        arch_radius_mm=250,
+        center=(250, 400),
+    )
+
+    # Centroid should be near the specified center
+    assert approx_equal(arch.bounds.x_min, 0.0, tolerance=1.0)
+    assert approx_equal(arch.bounds.x_max, 500.0, tolerance=1.0)
+
+
+def test_from_arch_partial_radius():
+    """Test arch with radius smaller than half width."""
+    arch = Domain.from_arch(
+        width_mm=400,
+        height_mm=600,
+        arch_radius_mm=150,  # Less than half width
+    )
+
+    assert arch.area_mm2 > 0
+    # Height should still be 600
+    assert approx_equal(arch.bounds.height, 600.0)
+
+
+def test_from_arch_validation():
+    """Test arch constructor validation."""
+    # Radius too large (> half width)
+    try:
+        Domain.from_arch(width_mm=200, height_mm=400, arch_radius_mm=150)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "radius" in str(e).lower()
+
+    # Radius larger than height
+    try:
+        Domain.from_arch(width_mm=200, height_mm=50, arch_radius_mm=100)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "radius" in str(e).lower()
+
+    # Invalid dimensions
+    try:
+        Domain.from_arch(width_mm=-100, height_mm=400, arch_radius_mm=50)
+        assert False, "Should have raised ValueError"
+    except ValueError:
+        pass
+
+
+def test_from_arch_matches_recipe_30_dimensions():
+    """Test arch matches Recipe 30 cathedral arch door dimensions."""
+    DOOR_WIDTH = 500
+    DOOR_HEIGHT = 800
+    ARCH_RADIUS = 250
+
+    arch = Domain.from_arch(DOOR_WIDTH, DOOR_HEIGHT, ARCH_RADIUS)
+
+    assert approx_equal(arch.bounds.width, DOOR_WIDTH)
+    assert approx_equal(arch.bounds.height, DOOR_HEIGHT)
+    assert arch.area_mm2 > 0
+
+
+def test_from_arch_can_be_inset():
+    """Test that arch domain supports inset operation."""
+    arch = Domain.from_arch(500, 800, 250)
+    inset_result = arch.inset(60)
+
+    assert not inset_result.is_empty
+    assert len(inset_result) == 1
+    assert inset_result[0].area_mm2 < arch.area_mm2
+
+
+def test_split_horizontal_with_gaps_basic():
+    """Test split_horizontal_with_gaps returns cells and gaps separately."""
+    domain = Domain.from_rectangle(200, 600, center=(100, 300))
+    cells, gaps = domain.split_horizontal_with_gaps(3, gap_mm=20)
+
+    assert len(cells) == 3
+    assert len(gaps) == 2  # n-1 gaps
+
+    # Each cell should be (600 - 2*20) / 3 = 186.67mm tall
+    for cell in cells:
+        assert approx_equal(cell.bounds.height, 186.67, tolerance=0.5)
+        assert approx_equal(cell.bounds.width, 200.0)
+
+    # Each gap should be 20mm tall
+    for gap in gaps:
+        assert approx_equal(gap.bounds.height, 20.0)
+        assert approx_equal(gap.bounds.width, 200.0)
+
+
+def test_split_horizontal_with_gaps_ordering():
+    """Test that cells and gaps are ordered bottom to top."""
+    domain = Domain.from_rectangle(100, 300, center=(50, 150))
+    cells, gaps = domain.split_horizontal_with_gaps(3, gap_mm=10)
+
+    # Cells should be ordered bottom to top
+    assert cells[0].bounds.y_min < cells[1].bounds.y_min
+    assert cells[1].bounds.y_min < cells[2].bounds.y_min
+
+    # Gaps should be ordered bottom to top
+    assert gaps[0].bounds.y_min < gaps[1].bounds.y_min
+
+    # First gap should be between first and second cell
+    assert gaps[0].bounds.y_min >= cells[0].bounds.y_max - 0.1
+    assert gaps[0].bounds.y_max <= cells[1].bounds.y_min + 0.1
+
+
+def test_split_horizontal_with_gaps_area_preservation():
+    """Test that cells + gaps cover the full domain area."""
+    domain = Domain.from_rectangle(100, 300, center=(50, 150))
+    cells, gaps = domain.split_horizontal_with_gaps(3, gap_mm=10)
+
+    cells_area = sum(c.area_mm2 for c in cells)
+    gaps_area = sum(g.area_mm2 for g in gaps)
+    total_area = cells_area + gaps_area
+
+    assert approx_equal(total_area, domain.area_mm2)
+
+
+def test_split_horizontal_with_gaps_single_row():
+    """Test that n=1 returns single cell and no gaps."""
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    cells, gaps = domain.split_horizontal_with_gaps(1, gap_mm=10)
+
+    assert len(cells) == 1
+    assert len(gaps) == 0
+    assert approx_equal(cells[0].area_mm2, domain.area_mm2)
+
+
+def test_split_horizontal_with_gaps_validation():
+    """Test validation of split_horizontal_with_gaps."""
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+
+    # n < 1
+    try:
+        domain.split_horizontal_with_gaps(0, gap_mm=10)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "n must be >= 1" in str(e)
+
+    # gap <= 0
+    try:
+        domain.split_horizontal_with_gaps(3, gap_mm=0)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "positive" in str(e).lower()
+
+    # gap too large
+    try:
+        domain.split_horizontal_with_gaps(5, gap_mm=30)  # 4 gaps * 30 = 120 > 100
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "exceeds" in str(e).lower()
+
+
+def test_split_horizontal_with_gaps_local_coords():
+    """Test split_horizontal_with_gaps with local_coords on rotated domain."""
+    domain = Domain.from_rectangle(
+        width_mm=100,
+        height_mm=300,
+        center=(150, 150),
+        rotation_rad=math.pi / 4,  # 45 degrees
+    )
+
+    cells, gaps = domain.split_horizontal_with_gaps(3, gap_mm=30, local_coords=True)
+
+    assert len(cells) == 3
+    assert len(gaps) == 2
+
+    # Total area should be preserved
+    total_area = sum(c.area_mm2 for c in cells) + sum(g.area_mm2 for g in gaps)
+    assert approx_equal(total_area, domain.area_mm2)
+
+    # All domains should preserve rotation
+    for cell in cells:
+        assert approx_equal(cell.local_rotation_rad, math.pi / 4)
+    for gap in gaps:
+        assert approx_equal(gap.local_rotation_rad, math.pi / 4)
+
+
+# =============================================================================
+# Stage 13: arc_points Utility Tests
+# =============================================================================
+
+def test_arc_points_basic():
+    """Test basic arc_points generation."""
+    from core.geometry import arc_points
+
+    # Half circle from 0 to 180 degrees
+    points = arc_points(center=(100, 100), radius=50, start_deg=0, end_deg=180, segments=4)
+
+    assert len(points) == 5  # segments + 1
+
+    # First point should be at (150, 100)  - radius to the right
+    assert approx_equal(points[0][0], 150.0)
+    assert approx_equal(points[0][1], 100.0)
+
+    # Last point should be at (50, 100) - radius to the left
+    assert approx_equal(points[-1][0], 50.0)
+    assert approx_equal(points[-1][1], 100.0)
+
+
+def test_arc_points_full_circle():
+    """Test arc_points for full circle."""
+    from core.geometry import arc_points
+
+    points = arc_points(center=(0, 0), radius=10, start_deg=0, end_deg=360, segments=8)
+
+    assert len(points) == 9
+
+    # First and last points should be the same (closed circle)
+    assert approx_equal(points[0][0], points[-1][0])
+    assert approx_equal(points[0][1], points[-1][1])
+
+
+def test_arc_points_quarter_circle():
+    """Test arc_points for quarter circle."""
+    from core.geometry import arc_points
+
+    points = arc_points(center=(0, 0), radius=100, start_deg=0, end_deg=90, segments=2)
+
+    assert len(points) == 3
+
+    # 0 degrees: (100, 0)
+    assert approx_equal(points[0][0], 100.0)
+    assert approx_equal(points[0][1], 0.0)
+
+    # 45 degrees: (70.7, 70.7)
+    assert approx_equal(points[1][0], 70.71, tolerance=0.1)
+    assert approx_equal(points[1][1], 70.71, tolerance=0.1)
+
+    # 90 degrees: (0, 100)
+    assert approx_equal(points[2][0], 0.0, tolerance=0.1)
+    assert approx_equal(points[2][1], 100.0)
+
+
+def test_arc_points_validation():
+    """Test arc_points validation."""
+    from core.geometry import arc_points
+
+    # segments < 1
+    try:
+        arc_points((0, 0), 10, 0, 90, segments=0)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "segments" in str(e).lower()
+
+    # negative radius
+    try:
+        arc_points((0, 0), -10, 0, 90, segments=4)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "radius" in str(e).lower()
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 

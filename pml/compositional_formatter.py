@@ -22,6 +22,15 @@ from layout_ast.compositional import (
     Keepout,
     Edge,
     CompositionalLayoutAST,
+    # Stage 12 generator nodes
+    ProfileGen,
+    PocketGen,
+    RaisedPanelGen,
+    ChamferGen,
+    WaveGen,
+    SplitHorizontal,
+    SplitVertical,
+    SplitGrid,
 )
 
 
@@ -233,6 +242,51 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
     elif isinstance(node, UseComponent):
 
         lines.append(f"{prefix}use {node.component_name}")
+
+    # =========================================================================
+    # Stage 12 Generator Nodes
+    # =========================================================================
+
+    elif isinstance(node, ProfileGen):
+        depth_str = "through" if node.depth == "through" else f"{node.depth:.2f}mm"
+        lines.append(f"{prefix}profile {node.side} {depth_str}")
+
+    elif isinstance(node, PocketGen):
+        lines.append(f"{prefix}pocket {node.depth_mm:.2f}mm")
+
+    elif isinstance(node, RaisedPanelGen):
+        lines.append(
+            f"{prefix}raised_panel border {node.border_width_mm:.2f}mm "
+            f"border_depth {node.border_depth_mm:.2f}mm "
+            f"field_depth {node.field_depth_mm:.2f}mm"
+        )
+
+    elif isinstance(node, ChamferGen):
+        lines.append(f"{prefix}chamfer {node.width_mm:.2f}mm {node.depth_mm:.2f}mm")
+
+    elif isinstance(node, WaveGen):
+        lines.append(
+            f"{prefix}wave count {node.wave_count} "
+            f"amplitude {node.amplitude_mm:.2f}mm "
+            f"wavelength {node.wavelength_mm:.2f}mm "
+            f"groove {node.groove_width_mm:.2f}mm "
+            f"depth {node.depth_mm:.2f}mm"
+        )
+
+    elif isinstance(node, SplitHorizontal):
+        lines.append(f"{prefix}split_horizontal {node.n} gap {node.gap_mm:.2f}mm")
+        for child in node.children:
+            lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, SplitVertical):
+        lines.append(f"{prefix}split_vertical {node.n} gap {node.gap_mm:.2f}mm")
+        for child in node.children:
+            lines.extend(_format_node(child, indent + 1))
+
+    elif isinstance(node, SplitGrid):
+        lines.append(f"{prefix}split_grid {node.rows} {node.cols} gap {node.gap_mm:.2f}mm")
+        for child in node.children:
+            lines.extend(_format_node(child, indent + 1))
 
     else:
 

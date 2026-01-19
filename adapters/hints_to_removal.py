@@ -11,6 +11,7 @@ from ir.removal_intent import (
     TabConstraint,
     Island,
     EdgeTreatment,
+    DepthProfile,
 )
 from layout_ast.layout import Item
 from core.constants import (
@@ -56,8 +57,7 @@ def profile_hint_to_removal_intent(
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-depth_mm,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=constraints,
         metadata={
@@ -106,8 +106,10 @@ def pocket_hint_to_removal_intent(
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
-        z_top=-start_depth_mm,
-        z_bottom=-(start_depth_mm + depth_mm),
+        depth_profile=DepthProfile.constant(
+            z_top=-start_depth_mm,
+            z_bottom=-(start_depth_mm + depth_mm),
+        ),
         allowance=allowance,
         constraints=Constraints(),
         metadata=metadata,
@@ -139,8 +141,7 @@ def hole_hint_to_removal_intent(
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-depth_mm,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=Constraints(),
         metadata={
@@ -172,19 +173,23 @@ def engrave_hint_to_removal_intent(
 
     allowance = Allowance()
 
+    metadata = {
+        MetadataKeys.HINT_TYPE: FeatureType.ENGRAVE,
+        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+        MetadataKeys.ORIGINAL_ID: hint_id,
+    }
+
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+    if GeometryKeys.POINTS in geometry:
+        metadata[GeometryKeys.POINTS] = geometry[GeometryKeys.POINTS]
 
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-depth_mm,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=Constraints(),
-        metadata={
-            MetadataKeys.HINT_TYPE: FeatureType.ENGRAVE,
-            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
-            MetadataKeys.ORIGINAL_ID: hint_id,
-        },
+        metadata=metadata,
     )
 
 
@@ -264,8 +269,7 @@ def item_to_removal_intent(
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
-        z_top=0.0,
-        z_bottom=-depth_mm,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=constraints,
         metadata={

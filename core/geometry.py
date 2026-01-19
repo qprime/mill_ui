@@ -4,7 +4,7 @@ This module provides unified geometry calculations used across the codebase,
 consolidating duplicate implementations into a single source of truth.
 
 Usage:
-    from core.geometry import compute_shape_bounds
+    from core.geometry import compute_shape_bounds, arc_points
     from ir.removal_intent import Bounds2D
 
     bounds = compute_shape_bounds(
@@ -12,10 +12,20 @@ Usage:
         geometry_data={"w_mm": 100, "h_mm": 50},
         center_xy=(200, 150),
     )
+
+    # Generate points along an arc
+    points = arc_points(
+        center=(100, 100),
+        radius=50,
+        start_deg=0,
+        end_deg=180,
+        segments=20,
+    )
 """
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from ir.removal_intent import Bounds2D
@@ -181,3 +191,50 @@ def compute_shape_bounds_dict(
         GeometryKeys.Y_MIN: bounds.y_min,
         GeometryKeys.Y_MAX: bounds.y_max,
     }
+
+
+def arc_points(
+    center: tuple[float, float],
+    radius: float,
+    start_deg: float,
+    end_deg: float,
+    segments: int = 20,
+) -> list[tuple[float, float]]:
+    """Generate points along a circular arc.
+
+    Creates a list of points sampling a circular arc from start_deg to end_deg.
+    The arc proceeds counter-clockwise when end_deg > start_deg.
+
+    Args:
+        center: Center point (x, y) of the arc
+        radius: Radius of the arc in mm
+        start_deg: Starting angle in degrees (0 = positive X-axis)
+        end_deg: Ending angle in degrees
+        segments: Number of line segments to approximate the arc
+
+    Returns:
+        List of (x, y) points along the arc, including both endpoints.
+        Returns segments + 1 points.
+
+    Example:
+        # Half circle from right to left (0° to 180°)
+        points = arc_points((100, 100), 50, 0, 180, segments=20)
+        # Returns 21 points from (150, 100) to (50, 100)
+    """
+    if segments < 1:
+        raise ValueError(f"segments must be >= 1, got {segments}")
+    if radius < 0:
+        raise ValueError(f"radius must be non-negative, got {radius}")
+
+    cx, cy = center
+    points = []
+
+    for i in range(segments + 1):
+        t = i / segments
+        angle_deg = start_deg + t * (end_deg - start_deg)
+        angle_rad = math.radians(angle_deg)
+        x = cx + radius * math.cos(angle_rad)
+        y = cy + radius * math.sin(angle_rad)
+        points.append((x, y))
+
+    return points

@@ -92,8 +92,8 @@ spline decorative engrave 0.8mm points (0.1,0.1) (0.3,0.2) (0.5,0.5) (0.7,0.8) (
 
 
     assert removal.region_id == "test_spline_decorative"
-    assert removal.z_top == 0.0
-    assert abs(removal.z_bottom - (-0.8)) < 0.01
+    assert removal.depth_profile.z_top == 0.0
+    assert abs(removal.depth_profile.z_bottom - (-0.8)) < 0.01
 
 
     assert removal.bounds.x_min >= 0.0

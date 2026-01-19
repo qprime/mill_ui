@@ -481,6 +481,77 @@ class BeadParams(BaseParams):
             )
 
 
+@dataclass(frozen=True)
+class LinePatternParams(BaseParams):
+    """Parameters for line pattern area generator.
+
+    Creates parallel line grooves across a domain at arbitrary angles.
+    Lines are clipped to the domain boundary.
+
+    Attributes:
+        angle_deg: Angle of lines in degrees (0=horizontal, 90=vertical, 45=diagonal)
+        spacing_mm: Distance between line centers in mm
+        line_width_mm: Width of each groove in mm (typically tool diameter)
+        depth_mm: Depth of grooves in mm (positive value)
+    """
+
+    angle_deg: float = 0.0
+    spacing_mm: float = 25.0
+    line_width_mm: float = 4.0
+    depth_mm: float = 3.0
+
+    def validate(self) -> None:
+        if self.spacing_mm <= 0:
+            raise ValueError(
+                f"LinePatternParams: spacing_mm must be positive, got {self.spacing_mm}"
+            )
+        if self.line_width_mm <= 0:
+            raise ValueError(
+                f"LinePatternParams: line_width_mm must be positive, got {self.line_width_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"LinePatternParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+
+@dataclass(frozen=True)
+class ConcentricBorderParams(BaseParams):
+    """Parameters for concentric border generator.
+
+    Creates nested contour-following borders (inset loops) as groove patterns.
+    Each border is a groove at the specified inset distance from the domain edge.
+
+    Attributes:
+        insets_mm: Tuple of inset distances from domain boundary (e.g., (15.0, 30.0, 45.0))
+        groove_width_mm: Width of each groove in mm (typically tool diameter)
+        depth_mm: Depth of grooves in mm (positive value)
+    """
+
+    insets_mm: tuple[float, ...]
+    groove_width_mm: float = 3.0
+    depth_mm: float = 2.0
+
+    def validate(self) -> None:
+        if not self.insets_mm:
+            raise ValueError(
+                "ConcentricBorderParams: insets_mm must contain at least one value"
+            )
+        for i, inset in enumerate(self.insets_mm):
+            if inset <= 0:
+                raise ValueError(
+                    f"ConcentricBorderParams: insets_mm[{i}] must be positive, got {inset}"
+                )
+        if self.groove_width_mm <= 0:
+            raise ValueError(
+                f"ConcentricBorderParams: groove_width_mm must be positive, got {self.groove_width_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"ConcentricBorderParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+
 # =============================================================================
 # Generator Utilities
 # =============================================================================
@@ -548,6 +619,8 @@ __all__ = [
     "BeadParams",
     "RaisedPanelParams",
     "ChamferParams",
+    "LinePatternParams",
+    "ConcentricBorderParams",
     # Type aliases
     "LoopSelection",
     # Utilities

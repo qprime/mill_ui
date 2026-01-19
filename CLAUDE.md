@@ -14,6 +14,20 @@ This guide covers:
 - Pitfalls to avoid
 - Development workflows
 
+## Code Style
+
+**No inline comments.** Code should be self-documenting through clear naming and structure. Docstrings are acceptable for public APIs, but inline `# comments` should not be added to new code. If you add comments, they will need to be removed.
+
+## Token Efficiency
+
+**Keep responses concise.** Let the user request more detail if needed.
+
+When making changes:
+- **Use system reminders**: File contents in `<system-reminder>` tags are already in context. Don't re-read them.
+- **Execute directly**: On clear directives ("revert X", "change Y to Z"), edit directly rather than exploring first.
+- **Minimize tool calls**: For simple changes: edit → test → done.
+- **Skip redundant verification**: Don't `git diff` or re-read files to confirm what you just changed.
+
 ## Mental Model: Compiler Analogy
 
 Think of mill_ui as a **compiler with semantic IR**:

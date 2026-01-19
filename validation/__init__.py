@@ -8,7 +8,12 @@
 
 # IR-level validation (existing, for RemovalIntent checks)
 from .results import ValidationResult
-from .removal_checks import check_overlap, check_depth_feasibility, check_toolability
+from .removal_checks import (
+    check_overlap,
+    check_depth_feasibility,
+    check_toolability,
+    check_depth_profile,
+)
 
 # CAM validation types (new infrastructure)
 from .core import (
@@ -33,6 +38,7 @@ __all__ = [
     "check_overlap",
     "check_depth_feasibility",
     "check_toolability",
+    "check_depth_profile",
     # CAM validation types
     "Verdict",
     "InvariantResult",

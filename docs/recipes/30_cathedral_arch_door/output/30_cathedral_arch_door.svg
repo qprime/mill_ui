@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780.0 1080.0" width="780.0mm" height="1080.0mm">
+  <style>
+        .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
+        .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
+        .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
+        .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
+        .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
+        .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
+        .dimension-text { fill:
+        .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
+        .gap-text { fill:
+        .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+    </style>
+  <rect x="0" y="0" width="780.0" height="1080.0" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="140" y="140" width="500.0" height="800.0" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 140.000 140.000 L 640.000 140.000 L 640.000 690.000 L 640.000 690.000 L 639.229 709.615 L 636.922 729.109 L 633.092 748.361 L 627.764 767.254 L 620.970 785.671 L 612.752 803.498 L 603.160 820.625 L 592.254 836.946 L 580.101 852.362 L 566.777 866.777 L 552.362 880.101 L 536.946 892.254 L 520.625 903.160 L 503.498 912.752 L 485.671 920.970 L 467.254 927.764 L 448.361 933.092 L 429.109 936.922 L 409.615 939.229 L 390.000 940.000 L 370.385 939.229 L 350.891 936.922 L 331.639 933.092 L 312.746 927.764 L 294.329 920.970 L 276.502 912.752 L 259.375 903.160 L 243.054 892.254 L 227.638 880.101 L 213.223 866.777 L 199.899 852.362 L 187.746 836.946 L 176.840 820.625 L 167.248 803.498 L 159.030 785.671 L 152.236 767.254 L 146.908 748.361 L 143.078 729.109 L 140.771 709.615 L 140.000 690.000 L 140.000 690.000 Z" fill-rule="evenodd" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <path d="M 225.000 225.000 L 555.000 225.000 L 555.000 688.331 L 554.426 702.941 L 552.904 715.801 L 550.377 728.503 L 546.862 740.968 L 542.380 753.118 L 536.958 764.879 L 530.630 776.178 L 523.435 786.946 L 515.417 797.116 L 506.626 806.626 L 497.116 815.417 L 486.946 823.435 L 476.178 830.630 L 464.879 836.958 L 453.118 842.380 L 440.968 846.862 L 428.503 850.377 L 415.801 852.904 L 402.941 854.426 L 390.000 854.934 L 377.059 854.426 L 364.199 852.904 L 351.497 850.377 L 339.032 846.862 L 326.882 842.380 L 315.121 836.958 L 303.822 830.630 L 293.054 823.435 L 282.884 815.417 L 273.374 806.626 L 264.583 797.116 L 256.565 786.946 L 249.370 776.178 L 243.042 764.879 L 237.620 753.118 L 233.138 740.968 L 229.623 728.503 L 227.096 715.801 L 225.574 702.941 L 225.000 688.331 Z" fill-rule="evenodd" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths" />
+  <g id="HOLES" class="holes" />
+  <g id="CONSTRUCTION" class="construction" />
+  <g id="DIMENSIONS" class="dimensions" />
+  <g id="NOTES" class="notes">
+    <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>
+    <text x="20" y="972.0" class="notes">Sheet: 500.0 × 800.0 × 19.0mm</text>
+    <text x="20" y="984.0" class="notes">Features: 1 profile, 1 bevel, 1 pocket</text>
+    <text x="20" y="996.0" class="notes">Depths:</text>
+    <text x="30" y="1008.0" class="notes">• bevel: 6.0</text>
+    <text x="30" y="1020.0" class="notes">• pocket: 2.0</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>
+    <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="648.0" y="20" class="legend" font-weight="bold">LEGEND</text>
+    <line x1="648.0" y1="38" x2="663.0" y2="38" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="668.0" y="41" class="legend">Sheet Outline</text>
+    <line x1="648.0" y1="54" x2="663.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
+    <text x="668.0" y="57" class="legend">Profile Cuts</text>
+    <rect x="648.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="668.0" y="73" class="legend">Pocket Regions</text>
+    <line x1="648.0" y1="86" x2="663.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="668.0" y="89" class="legend">Holes</text>
+    <line x1="648.0" y1="102" x2="663.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
+    <text x="668.0" y="105" class="legend">Dimensions</text>
+  </g>
+</svg>

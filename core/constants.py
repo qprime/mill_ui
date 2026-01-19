@@ -101,6 +101,9 @@ class FeatureType:
     BEVEL = "bevel"
     CHAMFER = "chamfer"
 
+    # Stage 12: Generator feature types
+    WAVE = "wave"
+
 
 class ShapeType:
     """Shape type values for geometry primitives."""

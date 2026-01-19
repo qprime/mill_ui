@@ -24,6 +24,22 @@ from layout_ast.compositional import (
     Edge,
     ResolvedRegion,
     CompositionalLayoutAST,
+    # Generator AST nodes (Stage 12)
+    ProfileGen,
+    PocketGen,
+    RaisedPanelGen,
+    ChamferGen,
+    WaveGen,
+    SplitHorizontal,
+    SplitVertical,
+    SplitGrid,
+    LinesGen,
+    ConcentricBorderGen,
+    # Stage 14 additions
+    SplitHorizontalGaps,
+    AtPosition,
+    Subtract,
+    Arch,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -35,6 +51,14 @@ from layout_ast.layout import (
 )
 from core.constants import DepthMode
 from core.geometry import compute_shape_bounds_dict
+
+# Import generators and Domain for Stage 12 integration
+from domains import Domain
+from generators.area.raised_panel import raised_panel_generator
+from generators.area.wave import wave_generator
+from generators.area.line_pattern import line_pattern_generator
+from generators.area.concentric_border import concentric_border_generator
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams
 
 
 # Type alias for node handlers
@@ -91,6 +115,13 @@ class LayoutResolver:
     def __init__(self, ast: CompositionalLayoutAST):
         self.ast = ast
         self.components = ast.components
+        self._shape_counter = 0
+
+    def _next_shape_id(self, prefix: str) -> str:
+        """Generate a deterministic shape ID using a counter."""
+        shape_id = f"{prefix}_{self._shape_counter}"
+        self._shape_counter += 1
+        return shape_id
 
     def _collect_island_bounds(
         self,
@@ -481,6 +512,614 @@ class LayoutResolver:
     ) -> None:
         items.append(node)
 
+    # =========================================================================
+    # Generator Handlers (Stage 12: PML Generator Syntax)
+    # =========================================================================
+    #
+    # KNOWN LIMITATION: Generator handlers emit Rect geometry and operate on
+    # axis-aligned ResolvedRegion. Generators nested under circle/rounded_rect
+    # shapes will NOT be clipped to the parent shape boundary. The parent
+    # shape's profile cut handles the actual boundary in the final output.
+    # This is by design - the compositional system uses rectangular regions
+    # for layout calculations, and non-rectangular clipping would require
+    # passing shape context through the resolution process.
+    # =========================================================================
+
+    def _handle_profile_gen(
+        self,
+        node: ProfileGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle ProfileGen: Generate profile cut item for region boundary."""
+        depth_value = node.depth
+        depth_mm = None if depth_value == "through" else float(depth_value)
+
+        profile_item = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+            placement=Placement(center_xy_mm=region.center),
+            feature=Feature(
+                type="profile",
+                depth=str(depth_value) if depth_value == "through" else str(depth_value),
+                side=node.side,
+                depth_mm=depth_mm,
+            ),
+            shape_id=self._next_shape_id("generated_profile"),
+        )
+        items.append(profile_item)
+
+    def _handle_pocket_gen(
+        self,
+        node: PocketGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle PocketGen: Generate flat pocket item for region."""
+        pocket_item = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+            placement=Placement(center_xy_mm=region.center),
+            feature=Feature(
+                type="pocket",
+                depth=str(node.depth_mm),
+                depth_mm=node.depth_mm,
+            ),
+            shape_id=self._next_shape_id("generated_pocket"),
+        )
+        items.append(pocket_item)
+
+    def _handle_raised_panel_gen(
+        self,
+        node: RaisedPanelGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle RaisedPanelGen: Generate raised panel items for region.
+
+        Creates proper bevel and field items using the raised_panel_generator,
+        which emits correct 'bevel' feature type for the border and 'pocket'
+        for the field, preserving the angled border intent for CAM processing.
+        """
+        # Create a Domain from the ResolvedRegion
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        # Create parameters for the generator
+        generator_params = RaisedPanelParams(
+            border_width_mm=node.border_width_mm,
+            border_depth_mm=node.border_depth_mm,
+            field_depth_mm=node.field_depth_mm,
+        )
+
+        # Call the actual generator - it will produce proper bevel/pocket items
+        shape_id_prefix = self._next_shape_id("raised_panel")
+        try:
+            generated_items = raised_panel_generator(
+                domain,
+                generator_params,
+                allow_empty=True,  # Handle too-small regions gracefully
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            # Region too small for raised panel - skip silently
+            pass
+
+    def _handle_chamfer_gen(
+        self,
+        node: ChamferGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle ChamferGen: Generate chamfer item for region boundary.
+
+        The chamfer is represented with proper chamfer metadata on the Feature,
+        which ast_to_removal.py uses to compute the chamfer angle and create
+        appropriate RemovalIntent metadata for CAM processing.
+        """
+        import math
+        # Calculate chamfer angle from width and depth
+        chamfer_angle = math.degrees(math.atan2(node.depth_mm, node.width_mm))
+
+        chamfer_item = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={
+                "w_mm": region.width,
+                "h_mm": region.height,
+            }),
+            placement=Placement(center_xy_mm=region.center),
+            feature=Feature(
+                type="chamfer",
+                depth=str(node.depth_mm),
+                depth_mm=node.depth_mm,
+                chamfer_width_mm=node.width_mm,
+                chamfer_angle_deg=chamfer_angle,
+            ),
+            shape_id=self._next_shape_id("generated_chamfer"),
+        )
+        items.append(chamfer_item)
+
+    def _handle_wave_gen(
+        self,
+        node: WaveGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle WaveGen: Generate wave pattern items for region.
+
+        Calls the wave_generator to produce actual engrave polylines,
+        which correctly map to the engraves bucket in v1 hint export.
+        """
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = WaveParams(
+            amplitude_mm=node.amplitude_mm,
+            wavelength_mm=node.wavelength_mm,
+            depth_mm=node.depth_mm,
+            tool_width_mm=node.groove_width_mm,
+            wave_count=node.wave_count,
+        )
+
+        shape_id_prefix = self._next_shape_id("wave")
+        try:
+            generated_items = wave_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_lines_gen(
+        self,
+        node: LinesGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle LinesGen: Generate line pattern items for region.
+
+        Calls the line_pattern_generator to produce parallel groove lines
+        at the specified angle.
+        """
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = LinePatternParams(
+            angle_deg=node.angle_deg,
+            spacing_mm=node.spacing_mm,
+            line_width_mm=node.line_width_mm,
+            depth_mm=node.depth_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("lines")
+        try:
+            generated_items = line_pattern_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_concentric_border_gen(
+        self,
+        node: ConcentricBorderGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle ConcentricBorderGen: Generate concentric border items for region.
+
+        Calls the concentric_border_generator to produce nested ring grooves
+        at the specified inset distances.
+        """
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = ConcentricBorderParams(
+            insets_mm=node.insets_mm,
+            groove_width_mm=node.groove_width_mm,
+            depth_mm=node.depth_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("border")
+        try:
+            generated_items = concentric_border_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_split_horizontal(
+        self,
+        node: SplitHorizontal,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle SplitHorizontal: Split region into n rows and apply children to each."""
+        n = node.n
+        gap_mm = node.gap_mm
+
+        # Validate inputs
+        if n < 1:
+            raise ValueError(f"split_horizontal: n must be at least 1, got {n}")
+        if gap_mm < 0:
+            raise ValueError(f"split_horizontal: gap cannot be negative, got {gap_mm}mm")
+
+        # Calculate cell height
+        total_gap = gap_mm * (n - 1)
+        available_height = region.height - total_gap
+        if available_height <= 0:
+            raise ValueError(
+                f"split_horizontal: gap {gap_mm}mm × {n-1} = {total_gap}mm exceeds "
+                f"region height {region.height}mm"
+            )
+        cell_height = available_height / n
+
+        # Create sub-regions from bottom to top
+        for i in range(n):
+            y_min = region.y_min + i * (cell_height + gap_mm)
+            y_max = y_min + cell_height
+            cell_region = ResolvedRegion(
+                x_min=region.x_min,
+                y_min=y_min,
+                x_max=region.x_max,
+                y_max=y_max,
+            )
+
+            # Apply children to this cell
+            for child in node.children:
+                self._resolve_node(child, cell_region, items, params)
+
+    def _handle_split_vertical(
+        self,
+        node: SplitVertical,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle SplitVertical: Split region into n columns and apply children to each."""
+        n = node.n
+        gap_mm = node.gap_mm
+
+        # Validate inputs
+        if n < 1:
+            raise ValueError(f"split_vertical: n must be at least 1, got {n}")
+        if gap_mm < 0:
+            raise ValueError(f"split_vertical: gap cannot be negative, got {gap_mm}mm")
+
+        # Calculate cell width
+        total_gap = gap_mm * (n - 1)
+        available_width = region.width - total_gap
+        if available_width <= 0:
+            raise ValueError(
+                f"split_vertical: gap {gap_mm}mm × {n-1} = {total_gap}mm exceeds "
+                f"region width {region.width}mm"
+            )
+        cell_width = available_width / n
+
+        # Create sub-regions from left to right
+        for i in range(n):
+            x_min = region.x_min + i * (cell_width + gap_mm)
+            x_max = x_min + cell_width
+            cell_region = ResolvedRegion(
+                x_min=x_min,
+                y_min=region.y_min,
+                x_max=x_max,
+                y_max=region.y_max,
+            )
+
+            # Apply children to this cell
+            for child in node.children:
+                self._resolve_node(child, cell_region, items, params)
+
+    def _handle_split_grid(
+        self,
+        node: SplitGrid,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle SplitGrid: Split region into rows x cols grid and apply children to each."""
+        rows = node.rows
+        cols = node.cols
+        gap_mm = node.gap_mm
+
+        # Validate inputs
+        if rows < 1:
+            raise ValueError(f"split_grid: rows must be at least 1, got {rows}")
+        if cols < 1:
+            raise ValueError(f"split_grid: cols must be at least 1, got {cols}")
+        if gap_mm < 0:
+            raise ValueError(f"split_grid: gap cannot be negative, got {gap_mm}mm")
+
+        # Calculate cell dimensions
+        total_h_gap = gap_mm * (cols - 1)
+        total_v_gap = gap_mm * (rows - 1)
+        available_width = region.width - total_h_gap
+        available_height = region.height - total_v_gap
+
+        if available_width <= 0:
+            raise ValueError(
+                f"split_grid: horizontal gap {gap_mm}mm × {cols-1} = {total_h_gap}mm exceeds "
+                f"region width {region.width}mm"
+            )
+        if available_height <= 0:
+            raise ValueError(
+                f"split_grid: vertical gap {gap_mm}mm × {rows-1} = {total_v_gap}mm exceeds "
+                f"region height {region.height}mm"
+            )
+
+        cell_width = available_width / cols
+        cell_height = available_height / rows
+
+        # Create sub-regions (row-major from bottom-left)
+        for row in range(rows):
+            for col in range(cols):
+                x_min = region.x_min + col * (cell_width + gap_mm)
+                y_min = region.y_min + row * (cell_height + gap_mm)
+                cell_region = ResolvedRegion(
+                    x_min=x_min,
+                    y_min=y_min,
+                    x_max=x_min + cell_width,
+                    y_max=y_min + cell_height,
+                )
+
+                # Apply children to this cell
+                for child in node.children:
+                    self._resolve_node(child, cell_region, items, params)
+
+    # =========================================================================
+    # Stage 14 Handlers: Additional PML features for remaining recipes
+    # =========================================================================
+
+    def _handle_split_horizontal_gaps(
+        self,
+        node: SplitHorizontalGaps,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle SplitHorizontalGaps: Apply children to gap regions between n+1 slats."""
+        n = node.n
+        gap_mm = node.gap_mm
+
+        if n < 1:
+            raise ValueError(f"split_horizontal_gaps: n must be at least 1, got {n}")
+        if gap_mm <= 0:
+            raise ValueError(f"split_horizontal_gaps: gap must be positive, got {gap_mm}mm")
+
+        total_gap_space = n * gap_mm
+        if total_gap_space >= region.height:
+            raise ValueError(
+                f"split_horizontal_gaps: {n} gaps × {gap_mm}mm = {total_gap_space}mm "
+                f"exceeds region height {region.height}mm"
+            )
+
+        remaining_height = region.height - total_gap_space
+        slat_height = remaining_height / (n + 1)
+
+        for i in range(n):
+            gap_y_min = region.y_min + (i + 1) * slat_height + i * gap_mm
+            gap_y_max = gap_y_min + gap_mm
+
+            gap_region = ResolvedRegion(
+                x_min=region.x_min,
+                y_min=gap_y_min,
+                x_max=region.x_max,
+                y_max=gap_y_max,
+            )
+
+            for child in node.children:
+                self._resolve_node(child, gap_region, items, params)
+
+    def _handle_at_position(
+        self,
+        node: AtPosition,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle AtPosition: Position child at explicit coordinates with explicit size."""
+        if node.child is None:
+            return
+
+        width = node.width_mm if node.width_mm is not None else region.width
+        height = node.height_mm if node.height_mm is not None else region.height
+
+        child_region = ResolvedRegion(
+            x_min=node.x_mm - width / 2,
+            y_min=node.y_mm - height / 2,
+            x_max=node.x_mm + width / 2,
+            y_max=node.y_mm + height / 2,
+        )
+
+        self._resolve_node(node.child, child_region, items, params)
+
+    def _handle_subtract(
+        self,
+        node: Subtract,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle Subtract: Create ring domain by subtracting inner from outer.
+
+        Uses the Domain.subtract() operation to create a proper ring,
+        then applies children to the resulting polygon domain.
+        """
+        inner_inset = node.inner_inset_mm
+
+        outer = Domain.from_rectangle(region.width, region.height, center=region.center)
+        inner = outer.inset(inner_inset).domains[0]
+        ring_domains = outer.subtract(inner)
+
+        for ring_domain in ring_domains:
+            ring_bounds = ring_domain.bounds
+            ring_region = ResolvedRegion(
+                x_min=ring_bounds.x_min,
+                y_min=ring_bounds.y_min,
+                x_max=ring_bounds.x_max,
+                y_max=ring_bounds.y_max,
+            )
+
+            polygon_points = list(ring_domain.outer_boundary)
+            holes = [list(hole) for hole in ring_domain.inner_boundaries]
+
+            for child in node.children:
+                if isinstance(child, PocketGen):
+                    pocket_item = Item(
+                        kind="shape",
+                        type="Polygon",
+                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
+                        placement=Placement(center_xy_mm=ring_region.center),
+                        feature=Feature(
+                            type="pocket",
+                            depth=str(child.depth_mm),
+                            depth_mm=child.depth_mm,
+                        ),
+                        shape_id=self._next_shape_id("subtract_pocket"),
+                    )
+                    items.append(pocket_item)
+                elif isinstance(child, ChamferGen):
+                    import math
+                    chamfer_angle = math.degrees(math.atan2(child.depth_mm, child.width_mm))
+                    chamfer_item = Item(
+                        kind="shape",
+                        type="Polygon",
+                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
+                        placement=Placement(center_xy_mm=ring_region.center),
+                        feature=Feature(
+                            type="chamfer",
+                            depth=str(child.depth_mm),
+                            depth_mm=child.depth_mm,
+                            chamfer_width_mm=child.width_mm,
+                            chamfer_angle_deg=chamfer_angle,
+                        ),
+                        shape_id=self._next_shape_id("subtract_chamfer"),
+                    )
+                    items.append(chamfer_item)
+                else:
+                    self._resolve_node(child, ring_region, items, params)
+
+    def _handle_arch(
+        self,
+        node: Arch,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle Arch: Create arch shape using Domain.from_arch().
+
+        Creates the arch polygon geometry and processes children
+        within the arch's bounding region.
+        """
+        arch_domain = Domain.from_arch(node.width_mm, node.height_mm, node.radius_mm)
+
+        arch_region = ResolvedRegion(
+            x_min=0,
+            y_min=0,
+            x_max=node.width_mm,
+            y_max=node.height_mm,
+        )
+
+        if node.feature is not None:
+            polygon_points = list(arch_domain.outer_boundary)
+            arch_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": polygon_points, "holes": []}),
+                placement=Placement(center_xy_mm=arch_region.center),
+                feature=node.feature,
+                shape_id=node.id or self._next_shape_id("arch"),
+            )
+            items.append(arch_item)
+
+        for child in node.children:
+            if isinstance(child, ProfileGen):
+                polygon_points = list(arch_domain.outer_boundary)
+                depth_value = child.depth
+                depth_mm = None if depth_value == "through" else float(depth_value)
+                profile_item = Item(
+                    kind="shape",
+                    type="Polygon",
+                    geometry=Geometry(data={"points": polygon_points, "holes": []}),
+                    placement=Placement(center_xy_mm=arch_region.center),
+                    feature=Feature(
+                        type="profile",
+                        depth=str(depth_value),
+                        side=child.side,
+                        depth_mm=depth_mm,
+                    ),
+                    shape_id=self._next_shape_id("arch_profile"),
+                )
+                items.append(profile_item)
+            elif isinstance(child, Frame):
+                inset_domain = arch_domain.inset(child.width_mm).domains[0]
+                inset_bounds = inset_domain.bounds
+                inset_region = ResolvedRegion(
+                    x_min=inset_bounds.x_min,
+                    y_min=inset_bounds.y_min,
+                    x_max=inset_bounds.x_max,
+                    y_max=inset_bounds.y_max,
+                )
+
+                for frame_child in child.children:
+                    if isinstance(frame_child, RaisedPanelGen):
+                        generator_params = RaisedPanelParams(
+                            border_width_mm=frame_child.border_width_mm,
+                            border_depth_mm=frame_child.border_depth_mm,
+                            field_depth_mm=frame_child.field_depth_mm,
+                        )
+                        shape_id_prefix = self._next_shape_id("arch_raised_panel")
+                        try:
+                            from generators.area.raised_panel import raised_panel_generator
+                            generated_items = raised_panel_generator(
+                                inset_domain,
+                                generator_params,
+                                allow_empty=True,
+                                shape_id_prefix=shape_id_prefix,
+                            )
+                            items.extend(generated_items)
+                        except ValueError:
+                            pass
+                    else:
+                        self._resolve_node(frame_child, inset_region, items, params)
+            else:
+                self._resolve_node(child, arch_region, items, params)
+
     def resolve(self) -> LayoutAST:
 
         sheet_region = ResolvedRegion(
@@ -524,6 +1163,23 @@ class LayoutResolver:
                 SplinePath: LayoutResolver._handle_spline_path,
                 Keepout: LayoutResolver._handle_keepout,
                 Item: LayoutResolver._handle_item,
+                # Generator handlers (Stage 12)
+                ProfileGen: LayoutResolver._handle_profile_gen,
+                PocketGen: LayoutResolver._handle_pocket_gen,
+                RaisedPanelGen: LayoutResolver._handle_raised_panel_gen,
+                ChamferGen: LayoutResolver._handle_chamfer_gen,
+                WaveGen: LayoutResolver._handle_wave_gen,
+                SplitHorizontal: LayoutResolver._handle_split_horizontal,
+                SplitVertical: LayoutResolver._handle_split_vertical,
+                SplitGrid: LayoutResolver._handle_split_grid,
+                # Stage 13 generator handlers
+                LinesGen: LayoutResolver._handle_lines_gen,
+                ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
+                # Stage 14 handlers
+                SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
+                AtPosition: LayoutResolver._handle_at_position,
+                Subtract: LayoutResolver._handle_subtract,
+                Arch: LayoutResolver._handle_arch,
             }
         return LayoutResolver._NODE_HANDLERS
 

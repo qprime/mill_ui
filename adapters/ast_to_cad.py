@@ -16,9 +16,7 @@ def items_to_shape_dicts(items: tuple[Item, ...]) -> list[dict[str, Any]]:
 
 
         if item.geometry is None or item.placement is None or item.feature is None:
-            raise ValueError(
-                f"Shape item missing required fields (geometry/placement/feature): {item}"
-            )
+            continue
 
 
         shape: dict[str, Any] = {

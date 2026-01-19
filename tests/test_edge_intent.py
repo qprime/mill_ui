@@ -4,6 +4,7 @@ from pml.compositional_formatter import format_compositional_pml
 from resolution.layout_resolver import resolve_layout
 from adapters.hints_to_removal import item_to_removal_intent
 from layout_ast.compositional import Edge
+from ir.removal_intent import DepthProfile
 
 
 def test_edge_allowance_influences_removal_intent():
@@ -195,8 +196,7 @@ rect panel profile through outside
     combined_removal = RemovalIntent(
         region_id=base_removal.region_id,
         bounds=base_removal.bounds,
-        z_top=base_removal.z_top,
-        z_bottom=base_removal.z_bottom,
+        depth_profile=DepthProfile.constant(z_top=base_removal.depth_profile.z_top, z_bottom=base_removal.depth_profile.z_bottom),
         allowance=Allowance(outside=0.0, kerf_compensation=kerf_offset),
         constraints=Constraints(
             edge_treatment=EdgeTreatment(

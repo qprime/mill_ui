@@ -942,6 +942,293 @@ def test_six_panel_door():
 
 
 # =============================================================================
+# Stage 13: Line Pattern Generator Tests
+# =============================================================================
+
+def test_line_pattern_params_valid():
+    """Test valid LinePatternParams construction."""
+    from generators import LinePatternParams
+    params = LinePatternParams(angle_deg=45, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+    params.validate()  # Should not raise
+
+    params_default = LinePatternParams()
+    params_default.validate()
+
+
+def test_line_pattern_params_invalid():
+    """Test LinePatternParams validation."""
+    from generators import LinePatternParams
+
+    # Invalid spacing
+    params = LinePatternParams(spacing_mm=0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "spacing" in str(e).lower()
+
+    # Invalid line width
+    params = LinePatternParams(line_width_mm=-1)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "line_width" in str(e).lower()
+
+
+def test_line_pattern_horizontal():
+    """Test horizontal line pattern (0 degrees)."""
+    from generators import line_pattern_generator, LinePatternParams
+
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+
+    items = line_pattern_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        assert item.feature.type == "pocket"
+        assert item.feature.depth_mm == 2.0
+
+
+def test_line_pattern_diagonal():
+    """Test diagonal line pattern (45 degrees)."""
+    from generators import line_pattern_generator, LinePatternParams
+
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = LinePatternParams(angle_deg=45, spacing_mm=25.0, line_width_mm=4.0, depth_mm=3.0)
+
+    items = line_pattern_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        assert item.type == "Polygon"
+
+
+def test_line_pattern_vertical():
+    """Test vertical line pattern (90 degrees)."""
+    from generators import line_pattern_generator, LinePatternParams
+
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = LinePatternParams(angle_deg=90, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+
+    items = line_pattern_generator(domain, params)
+
+    assert len(items) > 0
+
+
+def test_line_pattern_allow_empty():
+    """Test line pattern with tiny domain returns empty with allow_empty."""
+    from generators import line_pattern_generator, LinePatternParams
+
+    # Domain smaller than min_area_mm2 threshold (1.0)
+    domain = Domain.from_rectangle(0.5, 0.5, center=(0.25, 0.25))
+    params = LinePatternParams(spacing_mm=50.0, line_width_mm=3.0, depth_mm=2.0)
+
+    items = line_pattern_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_line_pattern_local_coords_unrotated():
+    """Test local_coords=True on unrotated domain matches sheet coords."""
+    from generators import line_pattern_generator, LinePatternParams
+
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+
+    items_sheet = line_pattern_generator(domain, params, local_coords=False)
+    items_local = line_pattern_generator(domain, params, local_coords=True)
+
+    assert len(items_sheet) == len(items_local)
+
+
+def test_line_pattern_local_coords_rotated():
+    """Test local_coords=True respects domain rotation."""
+    import math
+    from generators import line_pattern_generator, LinePatternParams
+
+    domain = Domain.from_rectangle(
+        100, 100, center=(50, 50), rotation_rad=math.pi / 4
+    )
+    params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+
+    items_sheet = line_pattern_generator(domain, params, local_coords=False)
+    items_local = line_pattern_generator(domain, params, local_coords=True)
+
+    assert len(items_sheet) > 0
+    assert len(items_local) > 0
+
+    sheet_centroid = items_sheet[0].geometry.data["points"][0]
+    local_centroid = items_local[0].geometry.data["points"][0]
+    assert sheet_centroid != local_centroid
+
+
+# =============================================================================
+# Stage 13: Concentric Border Generator Tests
+# =============================================================================
+
+def test_concentric_border_params_valid():
+    """Test valid ConcentricBorderParams construction."""
+    from generators import ConcentricBorderParams
+    params = ConcentricBorderParams(insets_mm=(10.0, 20.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
+    params.validate()  # Should not raise
+
+
+def test_concentric_border_params_invalid():
+    """Test ConcentricBorderParams validation."""
+    from generators import ConcentricBorderParams
+
+    # Empty insets
+    params = ConcentricBorderParams(insets_mm=(), groove_width_mm=3.0, depth_mm=2.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "insets" in str(e).lower()
+
+    # Negative inset
+    params = ConcentricBorderParams(insets_mm=(-5.0,), groove_width_mm=3.0, depth_mm=2.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "positive" in str(e).lower()
+
+
+def test_concentric_border_simple():
+    """Test concentric border on simple rectangle."""
+    from generators import concentric_border_generator, ConcentricBorderParams
+
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = ConcentricBorderParams(insets_mm=(15.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
+
+    items = concentric_border_generator(domain, params)
+
+    assert len(items) >= 2  # At least 2 ring polygons
+    for item in items:
+        assert item.feature.type == "pocket"
+        assert item.feature.depth_mm == 2.0
+
+
+def test_concentric_border_single_inset():
+    """Test concentric border with single inset."""
+    from generators import concentric_border_generator, ConcentricBorderParams
+
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=3.0, depth_mm=2.0)
+
+    items = concentric_border_generator(domain, params)
+
+    assert len(items) >= 1
+
+
+def test_concentric_border_matches_recipe_25_pattern():
+    """Test that concentric border matches Recipe 25 pattern."""
+    from generators import concentric_border_generator, ConcentricBorderParams
+
+    # Match Recipe 25 parameters
+    PANEL_WIDTH = 350
+    PANEL_HEIGHT = 450
+    GROOVE_DEPTH = 2.0
+    GROOVE_WIDTH = 3.0
+    INSETS = (15.0, 30.0, 45.0)
+
+    domain = Domain.from_rectangle(PANEL_WIDTH, PANEL_HEIGHT, center=(175, 225))
+    params = ConcentricBorderParams(
+        insets_mm=INSETS,
+        groove_width_mm=GROOVE_WIDTH,
+        depth_mm=GROOVE_DEPTH,
+    )
+
+    items = concentric_border_generator(domain, params)
+
+    # Should produce 3 rings
+    assert len(items) == 3
+    for item in items:
+        assert item.feature.depth_mm == GROOVE_DEPTH
+
+
+def test_concentric_border_allow_empty():
+    """Test concentric border returns empty when inset exceeds domain."""
+    from generators import concentric_border_generator, ConcentricBorderParams
+
+    domain = Domain.from_rectangle(50, 50, center=(25, 25))
+    params = ConcentricBorderParams(insets_mm=(100.0,), groove_width_mm=3.0, depth_mm=2.0)
+
+    items = concentric_border_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_concentric_border_skips_overflow_ring():
+    """Test that rings are skipped when groove width overflows available space."""
+    from generators import concentric_border_generator, ConcentricBorderParams
+
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = ConcentricBorderParams(
+        insets_mm=(10.0, 40.0),
+        groove_width_mm=20.0,
+        depth_mm=2.0,
+    )
+
+    items = concentric_border_generator(domain, params)
+
+    assert len(items) == 1
+
+
+# =============================================================================
+# Stage 13: Utility Tests
+# =============================================================================
+
+def test_shapely_to_item():
+    """Test shapely_to_item utility."""
+    from generators.utils import shapely_to_item
+    from shapely.geometry import Polygon
+
+    poly = Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
+    item = shapely_to_item(poly, "pocket", 5.0, "test_001")
+
+    assert item.type == "Polygon"
+    assert item.feature.type == "pocket"
+    assert item.feature.depth_mm == 5.0
+    assert item.shape_id == "test_001"
+    assert len(item.geometry.data["points"]) == 4
+
+
+def test_shapely_to_item_with_hole():
+    """Test shapely_to_item with polygon containing holes."""
+    from generators.utils import shapely_to_item
+    from shapely.geometry import Polygon
+
+    outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
+    hole = [(30, 30), (70, 30), (70, 70), (30, 70)]
+    poly = Polygon(outer, [hole])
+
+    item = shapely_to_item(poly, "pocket", 3.0, "with_hole")
+
+    assert "holes" in item.geometry.data
+    assert len(item.geometry.data["holes"]) == 1
+
+
+def test_iter_polygons():
+    """Test iter_polygons utility."""
+    from generators.utils import iter_polygons
+    from shapely.geometry import Polygon, MultiPolygon
+
+    # Single polygon
+    single = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
+    result = iter_polygons(single)
+    assert len(result) == 1
+
+    # MultiPolygon
+    mp = MultiPolygon([
+        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        Polygon([(2, 0), (3, 0), (3, 1), (2, 1)]),
+    ])
+    result = iter_polygons(mp)
+    assert len(result) == 2
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 

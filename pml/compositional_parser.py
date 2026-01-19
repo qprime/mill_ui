@@ -23,6 +23,22 @@ from layout_ast.compositional import (
     Keepout,
     Edge,
     CompositionalLayoutAST,
+    # Generator AST nodes (Stage 12)
+    ProfileGen,
+    PocketGen,
+    RaisedPanelGen,
+    ChamferGen,
+    WaveGen,
+    SplitHorizontal,
+    SplitVertical,
+    SplitGrid,
+    LinesGen,
+    ConcentricBorderGen,
+    # Stage 14 additions
+    SplitHorizontalGaps,
+    AtPosition,
+    Subtract,
+    Arch,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -113,6 +129,16 @@ class CompositionalPMLLexer:
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
             'allowance', 'fillet', 'chamfer',
+            # Generator keywords (Stage 12)
+            'raised_panel', 'border', 'border_depth', 'field_depth',
+            'wave', 'count', 'amplitude', 'wavelength', 'groove', 'depth',
+            'split_horizontal', 'split_vertical', 'split_grid',
+            # Stage 13 generator keywords
+            'lines', 'angle', 'spacing', 'width',
+            'concentric_border', 'insets',
+            # Stage 14 keywords
+            'split_horizontal_gaps', 'at', 'subtract', 'inner',
+            'arch', 'height',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -381,17 +407,61 @@ class CompositionalPMLParser:
             return self.parse_cell()
         elif token.value == 'use':
             return self.parse_use_component()
+        # Generator keywords (Stage 12)
+        elif token.value == 'profile':
+            return self.parse_profile_gen()
+        elif token.value == 'pocket':
+            return self.parse_pocket_gen()
+        elif token.value == 'raised_panel':
+            return self.parse_raised_panel_gen()
+        elif token.value == 'chamfer':
+            return self.parse_chamfer_gen()
+        elif token.value == 'wave':
+            return self.parse_wave_gen()
+        elif token.value == 'split_horizontal':
+            return self.parse_split_horizontal()
+        elif token.value == 'split_vertical':
+            return self.parse_split_vertical()
+        elif token.value == 'split_grid':
+            return self.parse_split_grid_gen()
+        elif token.value == 'lines':
+            return self.parse_lines_gen()
+        elif token.value == 'concentric_border':
+            return self.parse_concentric_border_gen()
+        # Stage 14 keywords
+        elif token.value == 'split_horizontal_gaps':
+            return self.parse_split_horizontal_gaps()
+        elif token.value == 'at':
+            return self.parse_at_position()
+        elif token.value == 'subtract':
+            return self.parse_subtract()
+        elif token.value == 'arch':
+            return self.parse_arch()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
+
+    def _is_valid_id_token(self, token: Token) -> bool:
+        """Check if token can be used as a shape ID (identifier or non-feature keyword)."""
+        if token.type == 'identifier':
+            return True
+        if token.type == 'keyword':
+            feature_keywords = ('pocket', 'profile', 'engrave', 'hole', 'edge')
+            return token.value not in feature_keywords
+        return False
 
     def parse_rect(self) -> Rect:
         self.expect('keyword', 'rect')
 
-
         rect_id = None
-        if self.peek().type == 'identifier':
-            rect_id = self.advance().value
-
+        token = self.peek()
+        if self._is_valid_id_token(token) and token.value not in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            if token.type in ('identifier', 'keyword'):
+                next_token = self.peek(1)
+                if next_token.type in ('newline', 'eof', 'keyword'):
+                    if next_token.type == 'keyword' and next_token.value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+                        rect_id = self.advance().value
+                    elif next_token.type in ('newline', 'eof'):
+                        rect_id = self.advance().value
 
         feature = None
         if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
@@ -570,14 +640,16 @@ class CompositionalPMLParser:
 
 
         spline_id = None
-        if self.peek().type == 'identifier':
+        feature_keywords = ('engrave', 'pocket', 'profile', 'hole', 'edge')
+        token = self.peek()
+        if token.type == 'identifier':
+            spline_id = self.advance().value
+        elif token.type == 'keyword' and token.value not in feature_keywords and token.value != 'points':
             spline_id = self.advance().value
 
-
         feature = None
-        if self.peek().type == 'keyword' and self.peek().value in ('engrave', 'pocket', 'profile', 'hole'):
+        if self.peek().type == 'keyword' and self.peek().value in feature_keywords:
             feature = self.parse_feature()
-
 
         self.expect('keyword', 'points')
 
@@ -857,6 +929,375 @@ class CompositionalPMLParser:
         self.expect('dedent')
 
         return Cell(children=tuple(children))
+
+    # =========================================================================
+    # Generator Parsers (Stage 12: PML Generator Syntax)
+    # =========================================================================
+
+    def parse_profile_gen(self) -> ProfileGen:
+        """Parse: profile <side> <depth>
+
+        Examples:
+            profile outside through
+            profile inside 10mm
+        """
+        self.expect('keyword', 'profile')
+
+        # Parse side: outside, inside, or on
+        side_token = self.peek()
+        if side_token.type != 'keyword' or side_token.value not in ('outside', 'inside', 'on'):
+            raise ParseError(
+                f"Expected profile side (outside/inside/on), got {side_token.value}",
+                side_token.line, side_token.column
+            )
+        side = self.advance().value
+
+        # Parse depth: "through" or numeric with unit
+        depth_token = self.peek()
+        if depth_token.type == 'keyword' and depth_token.value == 'through':
+            self.advance()
+            depth = "through"
+        elif depth_token.type == 'number_with_unit':
+            depth = self.advance().value
+        else:
+            raise ParseError(
+                f"Expected 'through' or depth in mm, got {depth_token.value}",
+                depth_token.line, depth_token.column
+            )
+
+        self.expect_line_end()
+        return ProfileGen(side=side, depth=depth)
+
+    def parse_pocket_gen(self) -> PocketGen:
+        """Parse: pocket <depth>
+
+        Example:
+            pocket 6mm
+        """
+        self.expect('keyword', 'pocket')
+        depth_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return PocketGen(depth_mm=depth_mm)
+
+    def parse_raised_panel_gen(self) -> RaisedPanelGen:
+        """Parse: raised_panel border <width> border_depth <depth> field_depth <depth>
+
+        Example:
+            raised_panel border 25mm border_depth 6mm field_depth 2mm
+        """
+        self.expect('keyword', 'raised_panel')
+        self.expect('keyword', 'border')
+        border_width = self.expect('number_with_unit').value
+        self.expect('keyword', 'border_depth')
+        border_depth = self.expect('number_with_unit').value
+        self.expect('keyword', 'field_depth')
+        field_depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return RaisedPanelGen(
+            border_width_mm=border_width,
+            border_depth_mm=border_depth,
+            field_depth_mm=field_depth,
+        )
+
+    def parse_chamfer_gen(self) -> ChamferGen:
+        """Parse: chamfer <width> <depth>
+
+        Example:
+            chamfer 5mm 3mm
+        """
+        self.expect('keyword', 'chamfer')
+        width = self.expect('number_with_unit').value
+        depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return ChamferGen(width_mm=width, depth_mm=depth)
+
+    def parse_wave_gen(self) -> WaveGen:
+        """Parse: wave count <n> amplitude <mm> wavelength <mm> groove <mm> depth <mm>
+
+        Example:
+            wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm
+        """
+        self.expect('keyword', 'wave')
+        self.expect('keyword', 'count')
+        wave_count = self.expect('number').value
+        self.expect('keyword', 'amplitude')
+        amplitude = self.expect('number_with_unit').value
+        self.expect('keyword', 'wavelength')
+        wavelength = self.expect('number_with_unit').value
+        self.expect('keyword', 'groove')
+        groove = self.expect('number_with_unit').value
+        self.expect('keyword', 'depth')
+        depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return WaveGen(
+            wave_count=int(wave_count),
+            amplitude_mm=amplitude,
+            wavelength_mm=wavelength,
+            groove_width_mm=groove,
+            depth_mm=depth,
+        )
+
+    def parse_split_horizontal(self) -> SplitHorizontal:
+        """Parse: split_horizontal <n> gap <mm>
+
+        Example:
+            split_horizontal 3 gap 20mm
+                pocket 6mm
+        """
+        self.expect('keyword', 'split_horizontal')
+        n = self.expect('number').value
+        self.expect('keyword', 'gap')
+        gap_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return SplitHorizontal(n=int(n), gap_mm=gap_mm, children=tuple(children))
+
+    def parse_split_vertical(self) -> SplitVertical:
+        """Parse: split_vertical <n> gap <mm>
+
+        Example:
+            split_vertical 2 gap 20mm
+                pocket 6mm
+        """
+        self.expect('keyword', 'split_vertical')
+        n = self.expect('number').value
+        self.expect('keyword', 'gap')
+        gap_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return SplitVertical(n=int(n), gap_mm=gap_mm, children=tuple(children))
+
+    def parse_split_grid_gen(self) -> SplitGrid:
+        """Parse: split_grid <rows> <cols> gap <mm>
+
+        Example:
+            split_grid 2 2 gap 35mm
+                raised_panel border 25mm border_depth 6mm field_depth 2mm
+        """
+        self.expect('keyword', 'split_grid')
+        rows = self.expect('number').value
+        cols = self.expect('number').value
+        self.expect('keyword', 'gap')
+        gap_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return SplitGrid(rows=int(rows), cols=int(cols), gap_mm=gap_mm, children=tuple(children))
+
+    def parse_lines_gen(self) -> LinesGen:
+        """Parse: lines angle <deg> spacing <mm> width <mm> depth <mm>
+
+        Example:
+            lines angle 45 spacing 25mm width 4mm depth 3mm
+        """
+        self.expect('keyword', 'lines')
+        self.expect('keyword', 'angle')
+        angle = self.expect('number').value
+        self.expect('keyword', 'spacing')
+        spacing = self.expect('number_with_unit').value
+        self.expect('keyword', 'width')
+        width = self.expect('number_with_unit').value
+        self.expect('keyword', 'depth')
+        depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return LinesGen(
+            angle_deg=float(angle),
+            spacing_mm=spacing,
+            line_width_mm=width,
+            depth_mm=depth,
+        )
+
+    def parse_concentric_border_gen(self) -> ConcentricBorderGen:
+        """Parse: concentric_border insets <mm> <mm> ... groove <mm> depth <mm>
+
+        Example:
+            concentric_border insets 15mm 30mm 45mm groove 3mm depth 2mm
+        """
+        self.expect('keyword', 'concentric_border')
+        self.expect('keyword', 'insets')
+
+        insets = []
+        while self.peek().type == 'number_with_unit':
+            insets.append(self.advance().value)
+
+        if not insets:
+            raise ParseError(
+                "concentric_border requires at least one inset value",
+                self.peek().line, self.peek().column
+            )
+
+        self.expect('keyword', 'groove')
+        groove = self.expect('number_with_unit').value
+        self.expect('keyword', 'depth')
+        depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return ConcentricBorderGen(
+            insets_mm=tuple(insets),
+            groove_width_mm=groove,
+            depth_mm=depth,
+        )
+
+    # =========================================================================
+    # Stage 14 Parsers: Additional PML features for remaining recipes
+    # =========================================================================
+
+    def parse_split_horizontal_gaps(self) -> SplitHorizontalGaps:
+        """Parse: split_horizontal_gaps <n> gap <mm>
+
+        Splits region into n+1 segments, applies children to the n gaps.
+        Used for louver/dado patterns where gaps are machined.
+
+        Example:
+            split_horizontal_gaps 12 gap 12mm
+                pocket 8mm
+                chamfer 4mm 2mm
+        """
+        self.expect('keyword', 'split_horizontal_gaps')
+        n = self.expect('number').value
+        self.expect('keyword', 'gap')
+        gap_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return SplitHorizontalGaps(n=int(n), gap_mm=gap_mm, children=tuple(children))
+
+    def parse_at_position(self) -> AtPosition:
+        """Parse: at <x>mm <y>mm [width <w>mm height <h>mm]
+
+        Positions the child at explicit coordinates within the current region.
+        Optional width/height specify the region size (uses parent size if omitted).
+
+        Examples:
+            at 300mm 150mm width 600mm height 19mm
+                pocket 10mm
+
+            at 300mm 150mm
+                pocket 10mm
+        """
+        self.expect('keyword', 'at')
+        x_mm = self.expect('number_with_unit').value
+        y_mm = self.expect('number_with_unit').value
+
+        width_mm = None
+        height_mm = None
+        if self.peek().type == 'keyword' and self.peek().value == 'width':
+            self.advance()
+            width_mm = self.expect('number_with_unit').value
+            self.expect('keyword', 'height')
+            height_mm = self.expect('number_with_unit').value
+
+        self.expect_line_end()
+
+        child = None
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            child = self.parse_node()
+            self.skip_newlines()
+            self.expect('dedent')
+
+        return AtPosition(x_mm=x_mm, y_mm=y_mm, width_mm=width_mm, height_mm=height_mm, child=child)
+
+    def parse_subtract(self) -> Subtract:
+        """Parse: subtract inner <mm>
+
+        Creates a ring by subtracting inner region from outer.
+        Children are applied to the resulting ring domain.
+
+        Example:
+            subtract inner 50mm
+                pocket 5mm
+        """
+        self.expect('keyword', 'subtract')
+        self.expect('keyword', 'inner')
+        inner_inset_mm = self.expect('number_with_unit').value
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return Subtract(inner_inset_mm=inner_inset_mm, children=tuple(children))
+
+    def parse_arch(self) -> Arch:
+        """Parse: arch [id] width <mm> height <mm> radius <mm> [feature]
+
+        Creates an arch shape (rectangle with semicircular top).
+
+        Example:
+            arch door width 500mm height 800mm radius 250mm
+                profile outside through
+                frame 60mm
+                    raised_panel border 25mm border_depth 6mm field_depth 2mm
+        """
+        self.expect('keyword', 'arch')
+
+        arch_id = None
+        if self.peek().type == 'identifier':
+            arch_id = self.advance().value
+
+        self.expect('keyword', 'width')
+        width_mm = self.expect('number_with_unit').value
+        self.expect('keyword', 'height')
+        height_mm = self.expect('number_with_unit').value
+        self.expect('keyword', 'radius')
+        radius_mm = self.expect('number_with_unit').value
+
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return Arch(
+            width_mm=width_mm,
+            height_mm=height_mm,
+            radius_mm=radius_mm,
+            children=tuple(children),
+            feature=feature,
+            id=arch_id,
+        )
 
 
 def parse_compositional_pml(text: str) -> CompositionalLayoutAST:

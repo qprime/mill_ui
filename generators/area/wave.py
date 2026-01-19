@@ -208,6 +208,12 @@ def wave_generator(
     local_y_min, local_y_max = local_bounds["y_min"], local_bounds["y_max"]
     local_x_min, local_x_max = local_bounds["x_min"], local_bounds["x_max"]
 
+    domain_width = local_x_max - local_x_min
+    if params.wave_count is not None and params.wave_count > 0:
+        effective_wavelength = domain_width / params.wave_count
+    else:
+        effective_wavelength = params.wavelength_mm
+
     # Expand bounds slightly to ensure full coverage
     coverage_y_min = local_y_min - params.amplitude_mm
     coverage_y_max = local_y_max + params.amplitude_mm
@@ -221,10 +227,10 @@ def wave_generator(
         # Generate wave in local coordinates
         local_wave = _generate_wave_line(
             y_offset=y,
-            x_min=local_x_min - params.wavelength_mm,  # Extend to ensure phase coverage
-            x_max=local_x_max + params.wavelength_mm,
+            x_min=local_x_min - effective_wavelength,  # Extend to ensure phase coverage
+            x_max=local_x_max + effective_wavelength,
             amplitude=params.amplitude_mm,
-            wavelength=params.wavelength_mm,
+            wavelength=effective_wavelength,
             phase=params.phase_rad,
         )
 

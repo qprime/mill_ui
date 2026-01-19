@@ -1,0 +1,36 @@
+{
+  "timing": {
+    "parse_ms": 0.54,
+    "ir_ms": 0.03,
+    "hints_ms": 0.01,
+    "plan_ms": 2.69,
+    "gcode_ms": 6.11,
+    "total_ms": 9.38
+  },
+  "complexity": {
+    "total_moves": 2672,
+    "rapid_moves": 0,
+    "cut_moves": 2672,
+    "rapid_ratio": 0.0
+  },
+  "fidelity": {
+    "tool_changes": 1,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 9.525,
+        "move_count": 2672
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 48167,
+    "total_lines": 2678,
+    "files": {
+      "pocket-9.53mm": {
+        "bytes": 48167,
+        "lines": 2678
+      }
+    }
+  }
+}

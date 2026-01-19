@@ -406,8 +406,7 @@ def convert_to_ir(ast: LayoutAST) -> list:
         print(f"\n  Intent {i}:")
         print(f"    ID: {intent.region_id}")
         print(f"    Bounds: {intent.bounds}")
-        if hasattr(intent, 'z_bottom'):
-            print(f"    Depth: z_bottom={intent.z_bottom}")
+        print(f"    Depth: z_bottom={intent.depth_profile.z_bottom}")
 
     return intents
 

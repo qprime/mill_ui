@@ -335,35 +335,117 @@ class Domain:
         return self._geometry_to_multidomain(result)
 
     # =========================================================================
-    # Split Operations (Stage 9)
+    # Coordinate Transform Helpers (Stage 11)
     # =========================================================================
-    #
-    # NOTE: Split operations use sheet-space (axis-aligned) coordinates.
-    # For domains with local_rotation != 0, splits are still aligned to the
-    # sheet X/Y axes, not the domain's local axes. This matches the common
-    # case where cabinet doors are axis-aligned on the sheet.
-    #
-    # Future enhancement: Add local_coords parameter to split in domain-local
-    # space for rotated panels (see Stage 10+ in domain_generator_design.md).
+
+    def _transform_point_to_local(self, point: Point2D) -> Point2D:
+        """Transform a point from sheet coordinates to local coordinates.
+
+        Local coordinates are centered at local_origin and rotated by
+        -local_rotation_rad (inverse of the domain's rotation).
+        """
+        ox, oy = self.local_origin
+        px, py = point
+
+        # Translate to origin
+        dx, dy = px - ox, py - oy
+
+        # Rotate by negative angle (inverse rotation)
+        if self.local_rotation_rad != 0:
+            cos_r = math.cos(-self.local_rotation_rad)
+            sin_r = math.sin(-self.local_rotation_rad)
+            lx = dx * cos_r - dy * sin_r
+            ly = dx * sin_r + dy * cos_r
+        else:
+            lx, ly = dx, dy
+
+        return (lx, ly)
+
+    def _transform_point_to_sheet(self, local_point: Point2D) -> Point2D:
+        """Transform a point from local coordinates to sheet coordinates.
+
+        Applies the domain's rotation and then translates to local_origin.
+        """
+        ox, oy = self.local_origin
+        lx, ly = local_point
+
+        # Rotate by positive angle
+        if self.local_rotation_rad != 0:
+            cos_r = math.cos(self.local_rotation_rad)
+            sin_r = math.sin(self.local_rotation_rad)
+            dx = lx * cos_r - ly * sin_r
+            dy = lx * sin_r + ly * cos_r
+        else:
+            dx, dy = lx, ly
+
+        # Translate from origin
+        return (ox + dx, oy + dy)
+
+    def _transform_boundary_to_local(self, boundary: Boundary) -> Boundary:
+        """Transform a boundary from sheet to local coordinates."""
+        return tuple(self._transform_point_to_local(p) for p in boundary)
+
+    def _transform_boundary_to_sheet(self, boundary: Boundary) -> Boundary:
+        """Transform a boundary from local to sheet coordinates."""
+        return tuple(self._transform_point_to_sheet(p) for p in boundary)
+
+    def _to_local_domain(self) -> Domain:
+        """Create a new Domain in local coordinate space.
+
+        The returned domain has its geometry transformed such that the
+        local_origin becomes (0, 0) and local_rotation becomes 0.
+        """
+        local_outer = self._transform_boundary_to_local(self.outer_boundary)
+        local_inners = tuple(
+            self._transform_boundary_to_local(inner)
+            for inner in self.inner_boundaries
+        )
+
+        return Domain(
+            outer_boundary=local_outer,
+            inner_boundaries=local_inners,
+            local_origin=(0.0, 0.0),
+            local_rotation_rad=0.0,
+        )
+
+    def _from_local_domain(self, local_domain: Domain) -> Domain:
+        """Transform a local-space domain back to sheet coordinates.
+
+        Uses this domain's local_origin and local_rotation_rad.
+        """
+        sheet_outer = self._transform_boundary_to_sheet(local_domain.outer_boundary)
+        sheet_inners = tuple(
+            self._transform_boundary_to_sheet(inner)
+            for inner in local_domain.inner_boundaries
+        )
+
+        return Domain(
+            outer_boundary=sheet_outer,
+            inner_boundaries=sheet_inners,
+            local_origin=self.local_origin,
+            local_rotation_rad=self.local_rotation_rad,
+        )
+
+    # =========================================================================
+    # Split Operations (Stage 9 + Stage 11 local_coords)
     # =========================================================================
 
     def split_horizontal(
         self,
         n: int,
         gap_mm: float = 0.0,
+        local_coords: bool = False,
     ) -> MultiDomain:
         """Divide domain into n stacked rows (horizontal splits).
 
         Creates n equal-height domains stacked vertically, with optional
         gaps between them. Domains are ordered from bottom to top.
 
-        Note: Splits are performed in sheet-space coordinates. For rotated
-        domains, splits are still axis-aligned to sheet X/Y, not to the
-        domain's local axes.
-
         Args:
             n: Number of rows to create (must be >= 1)
             gap_mm: Gap between rows in mm (for rails/dividers)
+            local_coords: If True, split along domain's local Y axis.
+                          If False (default), split along sheet Y axis.
 
         Returns:
             MultiDomain containing n domains ordered bottom to top
@@ -377,11 +459,27 @@ class Domain:
             >>> len(panels)
             3
             >>> # Each panel is 200mm wide, (600 - 2*20) / 3 = 186.67mm tall
+
+            # For rotated domains, use local_coords=True:
+            >>> rotated = Domain.from_rectangle(200, 600, center=(100, 300), rotation_rad=math.pi/4)
+            >>> panels = rotated.split_horizontal(3, local_coords=True)
+            >>> # Splits align to the domain's rotated local Y axis
         """
         if n < 1:
             raise ValueError(f"split_horizontal: n must be >= 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_horizontal: gap_mm must be non-negative, got {gap_mm}")
+
+        # If local_coords and domain is rotated, transform to local space, split, transform back
+        if local_coords and self.local_rotation_rad != 0:
+            local_domain = self._to_local_domain()
+            local_result = local_domain.split_horizontal(n, gap_mm, local_coords=False)
+            # Transform each result back to sheet coordinates
+            domains = []
+            for d in local_result:
+                sheet_domain = self._from_local_domain(d)
+                domains.append(sheet_domain)
+            return MultiDomain(domains=tuple(domains))
 
         bounds = self.bounds
         total_gap = gap_mm * (n - 1)
@@ -430,6 +528,7 @@ class Domain:
         self,
         n: int,
         gap_mm: float = 0.0,
+        local_coords: bool = False,
     ) -> MultiDomain:
         """Divide domain into n side-by-side columns (vertical splits).
 
@@ -439,6 +538,8 @@ class Domain:
         Args:
             n: Number of columns to create (must be >= 1)
             gap_mm: Gap between columns in mm (for rails/dividers)
+            local_coords: If True, split along domain's local X axis.
+                          If False (default), split along sheet X axis.
 
         Returns:
             MultiDomain containing n domains ordered left to right
@@ -452,11 +553,27 @@ class Domain:
             >>> len(panels)
             2
             >>> # Each panel is (400 - 20) / 2 = 190mm wide, 300mm tall
+
+            # For rotated domains, use local_coords=True:
+            >>> rotated = Domain.from_rectangle(400, 300, center=(200, 150), rotation_rad=math.pi/4)
+            >>> panels = rotated.split_vertical(2, local_coords=True)
+            >>> # Splits align to the domain's rotated local X axis
         """
         if n < 1:
             raise ValueError(f"split_vertical: n must be >= 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_vertical: gap_mm must be non-negative, got {gap_mm}")
+
+        # If local_coords and domain is rotated, transform to local space, split, transform back
+        if local_coords and self.local_rotation_rad != 0:
+            local_domain = self._to_local_domain()
+            local_result = local_domain.split_vertical(n, gap_mm, local_coords=False)
+            # Transform each result back to sheet coordinates
+            domains = []
+            for d in local_result:
+                sheet_domain = self._from_local_domain(d)
+                domains.append(sheet_domain)
+            return MultiDomain(domains=tuple(domains))
 
         bounds = self.bounds
         total_gap = gap_mm * (n - 1)
@@ -505,6 +622,7 @@ class Domain:
         rows: int,
         cols: int,
         gap_mm: float = 0.0,
+        local_coords: bool = False,
     ) -> MultiDomain:
         """Divide domain into a rows × cols grid.
 
@@ -516,6 +634,8 @@ class Domain:
             rows: Number of rows (must be >= 1)
             cols: Number of columns (must be >= 1)
             gap_mm: Gap between cells in mm (for rails/dividers)
+            local_coords: If True, split along domain's local X/Y axes.
+                          If False (default), split along sheet X/Y axes.
 
         Returns:
             MultiDomain containing rows * cols domains ordered left-to-right,
@@ -530,6 +650,11 @@ class Domain:
             >>> len(panels)
             6
             >>> # 3 rows, 2 cols = 6-panel door layout
+
+            # For rotated domains, use local_coords=True:
+            >>> rotated = Domain.from_rectangle(400, 600, center=(200, 300), rotation_rad=math.pi/4)
+            >>> panels = rotated.split_grid(2, 2, local_coords=True)
+            >>> # Grid aligns to the domain's rotated local axes
         """
         if rows < 1:
             raise ValueError(f"split_grid: rows must be >= 1, got {rows}")
@@ -537,6 +662,17 @@ class Domain:
             raise ValueError(f"split_grid: cols must be >= 1, got {cols}")
         if gap_mm < 0:
             raise ValueError(f"split_grid: gap_mm must be non-negative, got {gap_mm}")
+
+        # If local_coords and domain is rotated, transform to local space, split, transform back
+        if local_coords and self.local_rotation_rad != 0:
+            local_domain = self._to_local_domain()
+            local_result = local_domain.split_grid(rows, cols, gap_mm, local_coords=False)
+            # Transform each result back to sheet coordinates
+            domains = []
+            for d in local_result:
+                sheet_domain = self._from_local_domain(d)
+                domains.append(sheet_domain)
+            return MultiDomain(domains=tuple(domains))
 
         bounds = self.bounds
         total_h_gap = gap_mm * (cols - 1)
@@ -587,6 +723,127 @@ class Domain:
                     domains.append(domain_with_origin)
 
         return MultiDomain(domains=tuple(domains))
+
+    def split_horizontal_with_gaps(
+        self,
+        n: int,
+        gap_mm: float,
+        local_coords: bool = False,
+    ) -> tuple[MultiDomain, MultiDomain]:
+        """Divide domain into n rows and separately return cells and gaps.
+
+        Like split_horizontal, but also returns the gap regions as a separate
+        MultiDomain. This is useful when you need to apply different operations
+        to the cells vs. the gaps (e.g., panels vs. rails).
+
+        Args:
+            n: Number of rows to create (must be >= 2 for gaps to exist)
+            gap_mm: Gap between rows in mm (must be positive)
+            local_coords: If True, split along domain's local Y axis.
+                          If False (default), split along sheet Y axis.
+
+        Returns:
+            Tuple of (cells, gaps):
+            - cells: MultiDomain containing n cell domains ordered bottom to top
+            - gaps: MultiDomain containing n-1 gap domains ordered bottom to top
+
+        Raises:
+            ValueError: If n < 1 or gaps don't fit within domain height
+
+        Example:
+            >>> domain = Domain.from_rectangle(200, 600, center=(100, 300))
+            >>> cells, gaps = domain.split_horizontal_with_gaps(3, gap_mm=20)
+            >>> len(cells)
+            3
+            >>> len(gaps)
+            2
+        """
+        if n < 1:
+            raise ValueError(f"split_horizontal_with_gaps: n must be >= 1, got {n}")
+        if gap_mm <= 0:
+            raise ValueError(f"split_horizontal_with_gaps: gap_mm must be positive, got {gap_mm}")
+
+        # If local_coords and domain is rotated, transform to local space, split, transform back
+        if local_coords and self.local_rotation_rad != 0:
+            local_domain = self._to_local_domain()
+            local_cells, local_gaps = local_domain.split_horizontal_with_gaps(n, gap_mm, local_coords=False)
+            # Transform each result back to sheet coordinates
+            cells = []
+            for d in local_cells:
+                cells.append(self._from_local_domain(d))
+            gaps = []
+            for d in local_gaps:
+                gaps.append(self._from_local_domain(d))
+            return MultiDomain(domains=tuple(cells)), MultiDomain(domains=tuple(gaps))
+
+        bounds = self.bounds
+        total_gap = gap_mm * (n - 1)
+
+        if total_gap >= bounds.height:
+            raise ValueError(
+                f"split_horizontal_with_gaps: total gap {total_gap}mm exceeds domain height {bounds.height}mm"
+            )
+
+        # Calculate cell height
+        available_height = bounds.height - total_gap
+        cell_height = available_height / n
+
+        cells = []
+        gaps = []
+
+        for i in range(n):
+            # Calculate cell y position (bottom to top)
+            y_min = bounds.y_min + i * (cell_height + gap_mm)
+            y_max = y_min + cell_height
+            cell_center = (
+                (bounds.x_min + bounds.x_max) / 2,
+                (y_min + y_max) / 2,
+            )
+
+            # Create rectangular cell and intersect with domain
+            cell = Domain.from_rectangle(
+                width_mm=bounds.width,
+                height_mm=cell_height,
+                center=cell_center,
+            )
+            cell_intersection = self.intersect(cell)
+
+            # Add all resulting cell domains
+            for d in cell_intersection:
+                domain_with_origin = Domain(
+                    outer_boundary=d.outer_boundary,
+                    inner_boundaries=d.inner_boundaries,
+                    local_origin=self.local_origin,
+                    local_rotation_rad=self.local_rotation_rad,
+                )
+                cells.append(domain_with_origin)
+
+            # Create gap region (except after last cell)
+            if i < n - 1:
+                gap_y_min = y_max
+                gap_y_max = gap_y_min + gap_mm
+                gap_center = (
+                    (bounds.x_min + bounds.x_max) / 2,
+                    (gap_y_min + gap_y_max) / 2,
+                )
+
+                gap_domain = Domain.from_rectangle(
+                    width_mm=bounds.width,
+                    height_mm=gap_mm,
+                    center=gap_center,
+                )
+                gap_intersection = self.intersect(gap_domain)
+
+                for d in gap_intersection:
+                    domain_with_origin = Domain(
+                        outer_boundary=d.outer_boundary,
+                        inner_boundaries=d.inner_boundaries,
+                        local_origin=self.local_origin,
+                        local_rotation_rad=self.local_rotation_rad,
+                    )
+                    gaps.append(domain_with_origin)
+
+        return MultiDomain(domains=tuple(cells)), MultiDomain(domains=tuple(gaps))
 
     def _geometry_to_multidomain(self, geom) -> MultiDomain:
         """Convert a Shapely geometry result to MultiDomain.
@@ -701,6 +958,102 @@ class Domain:
             inner_boundaries=(),
             local_origin=center,
             local_rotation_rad=rotation_rad,
+        )
+
+    @classmethod
+    def from_arch(
+        cls,
+        width_mm: float,
+        height_mm: float,
+        arch_radius_mm: float,
+        center: Point2D | None = None,
+        arc_segments: int = 40,
+    ) -> Domain:
+        """Create a rectangular domain with an arched top.
+
+        The arch is a semicircular arc centered at the top of the rectangle.
+        The total height includes the arch. The rectangular portion extends
+        from y=0 to y=(height - arch_radius), and the arch spans from there
+        to y=height at the apex.
+
+        Args:
+            width_mm: Width of the shape in mm
+            height_mm: Total height of the shape in mm (including arch)
+            arch_radius_mm: Radius of the arch in mm (typically width/2 for full arch)
+            center: Optional center point. If None, shape is positioned with
+                bottom-left at origin (0, 0)
+            arc_segments: Number of line segments to approximate the arc
+
+        Returns:
+            A Domain representing the arch-topped rectangle
+
+        Raises:
+            ValueError: If dimensions are invalid or arch doesn't fit
+
+        Example:
+            >>> arch = Domain.from_arch(500, 800, 250)  # Full semicircle arch
+            >>> arch.bounds.height
+            800.0
+        """
+        if width_mm <= 0:
+            raise ValueError(f"Width must be positive, got {width_mm}")
+        if height_mm <= 0:
+            raise ValueError(f"Height must be positive, got {height_mm}")
+        if arch_radius_mm <= 0:
+            raise ValueError(f"Arch radius must be positive, got {arch_radius_mm}")
+        if arch_radius_mm > width_mm / 2:
+            raise ValueError(
+                f"Arch radius ({arch_radius_mm}) cannot exceed half width ({width_mm / 2})"
+            )
+        if arch_radius_mm > height_mm:
+            raise ValueError(
+                f"Arch radius ({arch_radius_mm}) cannot exceed height ({height_mm})"
+            )
+        if arc_segments < 4:
+            raise ValueError(f"arc_segments must be >= 4, got {arc_segments}")
+
+        # Build the outline
+        # Start at bottom-left, go clockwise
+        points: list[Point2D] = []
+
+        # Bottom edge
+        points.append((0.0, 0.0))
+        points.append((width_mm, 0.0))
+
+        # Right edge up to arch start
+        arch_start_y = height_mm - arch_radius_mm
+        points.append((width_mm, arch_start_y))
+
+        # Arch (from right to left, 0° to 180°)
+        arch_center_x = width_mm / 2
+        arch_center_y = arch_start_y
+
+        for i in range(arc_segments + 1):
+            angle = math.pi * i / arc_segments  # 0 to pi
+            x = arch_center_x + arch_radius_mm * math.cos(angle)
+            y = arch_center_y + arch_radius_mm * math.sin(angle)
+            points.append((x, y))
+
+        # Left edge from arch end to bottom
+        points.append((0.0, arch_start_y))
+
+        # Apply center offset if specified
+        if center is not None:
+            cx, cy = center
+            # Current center is at (width/2, height/2)
+            offset_x = cx - width_mm / 2
+            offset_y = cy - height_mm / 2
+            points = [(x + offset_x, y + offset_y) for x, y in points]
+            local_origin = center
+        else:
+            # Center at geometric center
+            local_origin = (width_mm / 2, height_mm / 2)
+
+        return cls(
+            outer_boundary=tuple(points),
+            inner_boundaries=(),
+            local_origin=local_origin,
+            local_rotation_rad=0.0,
         )
 
     @classmethod

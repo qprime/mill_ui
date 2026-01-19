@@ -1,0 +1,252 @@
+# Common Tasks
+
+<!-- spec-style -->
+
+**As-Of:** 2026-01-19
+
+Load this document when you need code examples for standard operations.
+
+---
+
+## Task Index
+
+| Task | Use case |
+|------|----------|
+| [Generate Layout Programmatically](#task-1-generate-layout-programmatically) | AI generates panel layout from requirements |
+| [Parse Human-Authored PML](#task-2-parse-human-authored-pml) | Process user-provided PML text |
+| [Use a Template](#task-3-use-a-template) | Generate standard components (Shaker door, etc.) |
+| [Validate at IR Level](#task-4-validate-at-ir-level) | Check layout validity before CAM execution |
+| [Validate CAM Artifacts](#task-5-validate-cam-artifacts) | Check generated SVG/STL/G-code |
+| [Extract Metrics](#task-6-extract-metrics) | Get stable metrics for comparison |
+| [Create Design with Domains](#task-7-create-design-with-domains) | Build complex designs using domain algebra |
+| [Run Nesting](#task-8-run-nesting) | Optimize part placement on sheets |
+
+---
+
+## Task 1: Generate Layout Programmatically
+
+**Use case:** AI generates a panel layout from user requirements.
+
+```python
+from layout_ast.layout import (
+    LayoutAST, Sheet, Item, Geometry, Placement, Feature
+)
+
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+    items=(
+        Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 400, "h_mm": 600}),
+            placement=Placement(center_xy_mm=(225, 325)),
+            feature=Feature(type="profile", side="outside", depth="through"),
+            shape_id="door_outer"
+        ),
+    )
+)
+
+from adapters.ast_to_removal import ast_to_removal_intents
+intents = ast_to_removal_intents(ast)
+```
+
+**Key point:** Building AST directly gives maximum control. Serialize with `LayoutAST.to_json()` / `LayoutAST.from_json()`.
+
+---
+
+## Task 2: Parse Human-Authored PML
+
+**Use case:** Process user-provided PML text.
+
+```python
+from pml.compositional_parser import parse_compositional_pml
+from resolution.layout_resolver import resolve_layout
+
+pml_source = """
+sheet 450mm 650mm 19mm
+
+component Door
+    rect door
+        frame 50mm
+            rect panel pocket 6mm
+
+place grid 1 1 gap 0mm
+    use Door
+"""
+
+comp_ast = parse_compositional_pml(pml_source)
+ast = resolve_layout(comp_ast)
+```
+
+**Key point:** `resolve_layout` converts CompositionalLayoutAST to flat LayoutAST.
+
+---
+
+## Task 3: Use a Template
+
+**Use case:** Generate standard components.
+
+```python
+from templates import Shaker
+
+ast = Shaker.expand_to_ast(
+    params={
+        "outer_w": 400.0,
+        "outer_h": 600.0,
+        "stile_w": 50.0,
+        "rail_h": 50.0,
+        "panel_recess": 6.0,
+    },
+    sheet_thickness_mm=19.0
+)
+```
+
+**Key point:** Templates are parametric AST generators. See `templates/` for available templates.
+
+---
+
+## Task 4: Validate at IR Level
+
+**Use case:** Check layout validity before expensive CAM execution.
+
+```python
+from adapters.ast_to_removal import ast_to_removal_intents
+from validation.removal_checks import (
+    check_overlap,
+    check_depth_feasibility,
+    check_toolability,
+)
+
+intents = ast_to_removal_intents(ast)
+
+overlap = check_overlap(intents)
+depth_results = [check_depth_feasibility(i, sheet_thickness_mm=19.0) for i in intents]
+toolability_results = [check_toolability(i) for i in intents]
+
+if overlap.has_issues() or any(r.has_issues() for r in depth_results + toolability_results):
+    print(overlap.summary())
+```
+
+**Key point:** IR validation is fast. Catch errors before CAM execution.
+
+---
+
+## Task 5: Validate CAM Artifacts
+
+**Use case:** Validate generated SVG, STL, G-code against invariants.
+
+```python
+from validation.runner import validate_recipe, ValidationOptions
+
+options = ValidationOptions(
+    extract_metrics=True,
+    check_invariants=True,
+    check_assertions=True,
+    check_regressions=True,
+)
+
+result = validate_recipe(
+    "docs/recipes/01_simple_profile",
+    golden_metrics=golden_metrics,
+    options=options,
+)
+
+print(f"Verdict: {result.verdict}")
+print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
+```
+
+**CLI alternative:**
+```bash
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+```
+
+**Key point:** See `docs/cam_validation_plan.md` for full validation architecture.
+
+---
+
+## Task 6: Extract Metrics
+
+**Use case:** Get stable metrics for deterministic comparison.
+
+```python
+from validation.metrics import extract_svg_metrics, extract_stl_metrics, extract_gcode_metrics
+
+svg_metrics = extract_svg_metrics("output/drawing.svg")
+stl_metrics = extract_stl_metrics("output/model.stl")
+gcode_metrics = extract_gcode_metrics("output/toolpath.nc")
+
+print(f"SVG layers: {svg_metrics.to_dict()['layers']['count']}")
+print(f"STL watertight: {stl_metrics.to_dict()['mesh']['is_watertight']}")
+print(f"G-code depth: {gcode_metrics.to_dict()['z_profile']['max_plunge_z_mm']}")
+```
+
+**Key point:** Metrics enable regression testing without byte-level comparison.
+
+---
+
+## Task 7: Create Design with Domains
+
+**Use case:** Build complex designs using domain algebra and generators.
+
+```python
+from domains import Domain
+from generators import (
+    flat_pocket_generator,
+    profile_generator,
+    FlatPocketParams,
+    ProfileParams,
+)
+from layout_ast.layout import LayoutAST, Sheet
+
+outer_domain = Domain.from_rectangle(
+    width_mm=400.0,
+    height_mm=600.0,
+    center=(200.0, 300.0),
+)
+
+panel_result = outer_domain.inset(50.0)
+panel_domain = panel_result.domains[0]
+
+profile_items = profile_generator(
+    outer_domain,
+    ProfileParams(side="outside", depth="through"),
+)
+
+pocket_items = flat_pocket_generator(
+    panel_domain,
+    FlatPocketParams(depth_mm=6.0),
+)
+
+ast = LayoutAST(
+    sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19.0),
+    items=tuple(profile_items + pocket_items),
+)
+```
+
+**Key point:** Domains define *where*, generators define *what*. See `docs/domain_generator.md`.
+
+---
+
+## Task 8: Run Nesting
+
+**Use case:** Optimize part placement on sheet material.
+
+```python
+from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from nesting import nest_and_generate
+from pml.formatter import format_pml
+
+job = parse_nest_pml(open("job.nest").read())
+result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
+
+for i, ast in enumerate(result["output"]):
+    pml_text = format_pml(ast)
+    open(f"sheet_{i+1}.pml", "w").write(pml_text)
+```
+
+**CLI alternative:**
+```bash
+python -m cli.nest job.nest -o output/ --export-stl --export-svg
+```
+
+**Key point:** See `docs/recipes/18_nesting_maxrects/` for complete example.

@@ -2,6 +2,40 @@
 
 **Practical guide for AI agents working with mill_ui. For architecture details, see [README.md](README.md).**
 
+## Project Directory
+
+**User projects go here:** `/home/squinlan/cliff_ai/memories/cam_projects/mill_ui`
+
+This is distinct from `docs/recipes/` which contains documented examples for the codebase. When the user asks to create a project or save work, use the project directory above.
+
+## Quick Commands
+
+Common CLI operations (run from mill_ui root with venv activated):
+
+```bash
+# Convert PML to JSON
+python -m cli.convert_layout --from pml --to json input.pml output.json
+
+# Export STL (3D model for visualization)
+python -m cli.export_cad --input layout.pml --out output/ --kerf 6.35 --quality high
+
+# Export SVG blueprint
+python -m cli.export_blueprint --input layout.pml --out output/ --theme dark
+
+# Validate CAM outputs
+python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+
+# Run nesting from .nest file
+python -m cli.nest job.nest -o output/ -v
+
+# Nesting with automatic STL/SVG export
+python -m cli.nest job.nest -o output/ --export-stl --export-svg
+```
+
+For compositional PML (frame/inset/grid syntax), add `--compositional` flag to export commands.
+
+**Input formats:** `.pml`, `.json`, `.nest`
+
 ## Quick Orientation
 
 You're working on a CAM system that generates G-code for CNC routers. The key innovation is **RemovalIntent IR** - a semantic layer that separates *what* to machine from *how* to machine it.
@@ -17,6 +51,20 @@ This guide covers:
 ## Code Style
 
 **No inline comments.** Code should be self-documenting through clear naming and structure. Docstrings are acceptable for public APIs, but inline `# comments` should not be added to new code. If you add comments, they will need to be removed.
+
+## Documentation Style
+
+When writing or rewriting documentation files marked with `<!-- spec-style -->`, follow the rules in [docs/SPEC_STYLE.md](docs/SPEC_STYLE.md).
+
+Use spec-style for:
+- Contract documents (GROUND_TRUTH.md)
+- API specifications
+- Data model definitions
+
+Do NOT use spec-style for:
+- Tutorials and guides (README.md, recipes)
+- Feature trackers (FEATURES.md)
+- This file (CLAUDE.md)
 
 ## Token Efficiency
 

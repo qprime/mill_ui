@@ -32,6 +32,7 @@ class Theme:
     gap_text: str
     notes_text: str
     legend_text: str
+    label_text: str
 
 
 DARK_THEME = Theme(
@@ -54,6 +55,7 @@ DARK_THEME = Theme(
     gap_text="#ff9500",
     notes_text="#cccccc",
     legend_text="#cccccc",
+    label_text="#ffcc00",
 )
 
 PRINT_THEME = Theme(
@@ -76,6 +78,7 @@ PRINT_THEME = Theme(
     gap_text="#cc6600",
     notes_text="#000000",
     legend_text="#000000",
+    label_text="#333333",
 )
 
 THEMES = {
@@ -134,6 +137,7 @@ def render_blueprint_svg(
     pocket_group = ET.SubElement(svg, "g", {"id": "POCKET_REGIONS", "class": "pocket-regions"})
     engrave_group = ET.SubElement(svg, "g", {"id": "ENGRAVE_PATHS", "class": "engrave-paths"})
     hole_group = ET.SubElement(svg, "g", {"id": "HOLES", "class": "holes"})
+    label_group = ET.SubElement(svg, "g", {"id": "LABELS", "class": "labels"})
     construction_group = ET.SubElement(svg, "g", {"id": "CONSTRUCTION", "class": "construction"})
     dimension_group = ET.SubElement(svg, "g", {"id": "DIMENSIONS", "class": "dimensions"})
     notes_group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
@@ -157,6 +161,9 @@ def render_blueprint_svg(
             _render_hole(hole_group, item, offset_x, offset_y, theme_obj)
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj)
+
+        if item.shape_id and item.placement:
+            _render_label(label_group, item, offset_x, offset_y)
 
 
     _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj)
@@ -185,6 +192,7 @@ def _generate_stylesheet(theme: Theme) -> str:
         .gap-text {{ fill:
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
+        .part-label {{ fill: {theme.label_text}; font-family: monospace; font-size: 8px; font-weight: bold; }}
     """
 
 
@@ -361,9 +369,26 @@ def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float
 
 
 def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-
-
     _render_profile(group, item, offset_x, offset_y, theme)
+
+
+def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: float) -> None:
+    if not item.shape_id or item.placement is None:
+        return
+
+    cx, cy = item.placement.center_xy_mm
+    label = ET.SubElement(
+        group,
+        "text",
+        {
+            "x": str(offset_x + cx),
+            "y": str(offset_y + cy),
+            "class": "part-label",
+            "text-anchor": "middle",
+            "dominant-baseline": "middle",
+        },
+    )
+    label.text = item.shape_id
 
 
 def _render_dimensions(
@@ -681,12 +706,9 @@ def _render_notes(
 
 
     depths_info = _collect_depth_info(ast, removal_intents)
-
-
     hole_diameters = _collect_hole_diameters(ast)
-
-
     feature_counts = _count_features(ast)
+    part_inventory = _collect_part_inventory(ast)
 
     line_num = 1
 
@@ -772,6 +794,32 @@ def _render_notes(
             diameter_elem.text = f"• {diameter_line}"
             line_num += 1
 
+    if part_inventory:
+        parts_title = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(x),
+                "y": str(y + line_num * line_height),
+                "class": "notes",
+            },
+        )
+        parts_title.text = f"Parts ({len(part_inventory)}):"
+        line_num += 1
+
+        for part_id in part_inventory:
+            part_elem = ET.SubElement(
+                group,
+                "text",
+                {
+                    "x": str(x + 10),
+                    "y": str(y + line_num * line_height),
+                    "class": "notes",
+                },
+            )
+            part_elem.text = f"• {part_id}"
+            line_num += 1
+
 
 def _collect_depth_info(ast: LayoutAST, removal_intents: Sequence[RemovalIntent] | None) -> list[str]:
     depth_lines = []
@@ -825,14 +873,12 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
     diameters: set[float] = set()
 
     for item in ast.items:
-
         if item.kind != "shape" or item.type != "Circle":
             continue
         if item.feature is None or item.feature.type != "hole":
             continue
         if item.geometry is None:
             continue
-
 
         data = item.geometry.data
         diameter = data.get("diameter_mm")
@@ -843,7 +889,6 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
             if radius is not None:
                 diameters.add(float(radius) * 2.0)
 
-
     if not diameters:
         return []
 
@@ -851,5 +896,18 @@ def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
     if len(sorted_diameters) == 1:
         return [f"⌀{sorted_diameters[0]:.1f}mm"]
     else:
-
         return [f"⌀{d:.1f}mm" for d in sorted_diameters]
+
+
+def _collect_part_inventory(ast: LayoutAST) -> list[str]:
+    parts: list[str] = []
+
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None:
+            continue
+        if not item.shape_id:
+            continue
+
+        parts.append(item.shape_id)
+
+    return sorted(set(parts))

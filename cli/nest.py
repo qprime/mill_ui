@@ -11,12 +11,70 @@ from pathlib import Path
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
 from pml.formatter import format_pml
 from nesting import nest_and_generate, nest_parts
-from nesting.layout_generator import sheet_layout_to_ast
+
+
+def run_export_stl(pml_path: Path, output_dir: Path, kerf_mm: float, quality: str) -> Path:
+    from pml import parse_pml
+    from layout_ast.layout import LayoutAST
+    from adapters.ast_to_cad import items_to_shape_dicts
+    from cad.export.stl import export_stl
+
+    pml_text = pml_path.read_text(encoding="utf-8")
+    ast = parse_pml(pml_text)
+    shapes = items_to_shape_dicts(ast.items)
+
+    stl_path = output_dir / f"{pml_path.stem}.stl"
+    export_stl(
+        shapes=shapes,
+        sheet_thickness_mm=ast.sheet.thickness_mm,
+        output_path=stl_path,
+        kerf_mm=kerf_mm,
+        quality=quality,
+        include_floating_parts=True,
+    )
+    return stl_path
+
+
+def run_export_svg(pml_path: Path, output_dir: Path, theme: str) -> Path:
+    from pml import parse_pml
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from export.blueprint_svg import render_blueprint_svg
+
+    pml_text = pml_path.read_text(encoding="utf-8")
+    ast = parse_pml(pml_text)
+    removal_intents = ast_to_removal_intents(ast)
+
+    svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=theme)
+
+    svg_path = output_dir / f"{pml_path.stem}.blueprint.{theme}.svg"
+    svg_path.write_text(svg_string, encoding="utf-8")
+    return svg_path
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run nesting from .nest file and output PML layouts"
+        description="Run nesting from .nest file and output PML layouts",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+
+  python -m cli.nest job.nest -o output/
+
+
+  python -m cli.nest job.nest -o output/ --export-stl --export-svg
+
+
+  python -m cli.nest job.nest -o output/ --export-stl --kerf 6.35 --quality high
+
+
+  python -m cli.nest job.nest -o output/ --export-svg --theme print
+
+Output files:
+  PML:  {prefix}_{N}.pml (one per sheet)
+  STL:  {prefix}_{N}.stl (if --export-stl)
+  SVG:  {prefix}_{N}.blueprint.{theme}.svg (if --export-svg)
+  JSON: manifest.json (nesting summary)
+        """,
     )
     parser.add_argument("input", help="Input .nest file")
     parser.add_argument(
@@ -35,12 +93,44 @@ def main():
         help="Verbose output"
     )
 
+    export_group = parser.add_argument_group("export options")
+    export_group.add_argument(
+        "--export-stl",
+        action="store_true",
+        help="Export STL models for each sheet"
+    )
+    export_group.add_argument(
+        "--export-svg",
+        action="store_true",
+        help="Export SVG blueprints for each sheet"
+    )
+    export_group.add_argument(
+        "--kerf",
+        "-k",
+        type=float,
+        default=0.0,
+        help="Kerf compensation in mm for STL export (default: 0)"
+    )
+    export_group.add_argument(
+        "--quality",
+        "-q",
+        default="medium",
+        choices=["low", "medium", "high"],
+        help="STL mesh quality - low=16, medium=32, high=64 segments (default: medium)"
+    )
+    export_group.add_argument(
+        "--theme",
+        "-t",
+        default="dark",
+        choices=["dark", "light", "print"],
+        help="SVG blueprint theme (default: dark)"
+    )
+
     args = parser.parse_args()
 
     input_path = Path(args.input)
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
-
 
     if args.verbose:
         print(f"Reading {input_path}...")
@@ -64,7 +154,6 @@ def main():
             template_info = f" (template: {part.template})" if part.template else ""
             print(f"  - {part.quantity}x {part.name}: {part.width_mm}mm x {part.height_mm}mm{template_info}")
 
-
     if args.verbose:
         print("\nRunning nesting...")
 
@@ -82,7 +171,6 @@ def main():
         print(f"  Utilization: {result['utilization'] * 100:.1f}%")
         print(f"  Nesting time: {nest_time * 1000:.1f}ms")
 
-
     validation_params = nest_job_to_api_params(job)
     validation_params["validate"] = True
     validation_result = nest_parts(**validation_params)
@@ -98,20 +186,19 @@ def main():
         for warning in validation["warnings"]:
             print(f"  WARNING: {warning['message']}")
 
-
     if args.verbose:
         print("\nWriting output files...")
 
     asts = result["output"]
     output_files = []
+    stl_files = []
+    svg_files = []
 
     for sheet_idx, ast in enumerate(asts):
         sheet_name = f"{args.prefix}_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml"
 
-
         pml_content = format_pml(ast)
-
 
         header = f"# {sheet_name}.pml\n"
         header += f"# Generated from {input_path.name}\n"
@@ -125,6 +212,17 @@ def main():
         if args.verbose:
             print(f"  {pml_path.name}: {len(ast.items)} items")
 
+        if args.export_stl:
+            stl_path = run_export_stl(pml_path, output_dir, args.kerf, args.quality)
+            stl_files.append(stl_path.name)
+            if args.verbose:
+                print(f"  {stl_path.name}")
+
+        if args.export_svg:
+            svg_path = run_export_svg(pml_path, output_dir, args.theme)
+            svg_files.append(svg_path.name)
+            if args.verbose:
+                print(f"  {svg_path.name}")
 
     manifest = {
         "source": input_path.name,
@@ -142,8 +240,15 @@ def main():
             "utilization_percent": f"{result['utilization'] * 100:.1f}%",
             "nesting_time_ms": round(nest_time * 1000, 2),
         },
-        "output_files": [f"{name}.pml" for name in output_files],
+        "output_files": {
+            "pml": [f"{name}.pml" for name in output_files],
+        },
     }
+
+    if stl_files:
+        manifest["output_files"]["stl"] = stl_files
+    if svg_files:
+        manifest["output_files"]["svg"] = svg_files
 
     manifest_path = output_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2))
@@ -152,6 +257,10 @@ def main():
         print(f"  {manifest_path.name}")
 
     print(f"\nGenerated {len(output_files)} PML files in {output_dir}/")
+    if stl_files:
+        print(f"Generated {len(stl_files)} STL files")
+    if svg_files:
+        print(f"Generated {len(svg_files)} SVG blueprints")
     print(f"Utilization: {result['utilization'] * 100:.1f}%")
 
 

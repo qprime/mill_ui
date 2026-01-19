@@ -1,268 +1,242 @@
-# Compositional Layout System (Stage 12)
+<!-- spec-style -->
+# Compositional Layout System
 
-## Overview
+As-Of Date: 2026-01-19
+Document Type: Layout System Specification
 
-The compositional layout system enables hierarchical, region-relative layout specification without explicit XY coordinates. It's designed to match the mental model of UI frameworks (React, QML) for physical manufacturing.
+---
 
-**Key principles:**
-- **Region-relative**: Children operate within their parent's computed region
-- **No coordinates required**: Layout managers (frame, grid) compute positions
-- **Declarative composition**: Rectangles within rectangles, layouts within regions
-- **Reusable components**: Parameterized subtrees for design reuse
-- **Sheet composition**: Multiple instances on one sheet via deterministic placement
+## Purpose
 
-## Architecture
+The compositional layout system enables hierarchical, region-relative layout specification.
+Children operate within their parent's computed region.
+Layout managers compute positions; explicit XY coordinates are not required.
+
+---
+
+## Non-Goals
+
+- Absolute coordinate authoring at compositional level
+- Constraint solving or algebra expressions
+- Direct RemovalIntent generation (separate layer)
+
+---
+
+## Terminology
+
+| Term | Definition |
+|------|------------|
+| Region | Computed rectangular bounds (x_min, y_min, x_max, y_max) |
+| Layout Manager | Node that subdivides current region (Inset, Frame, Grid, Split) |
+| Component | Reusable parameterized subtree |
+| Resolution | Transform from compositional AST to flat LayoutAST |
+
+---
+
+## Pipeline Position
 
 ```
-Compositional AST → Layout Resolution → Flat LayoutAST → RemovalIntent → G-code
-     (authored)         (computed)         (positioned)      (operations)
+CompositionalLayoutAST → resolve_layout() → LayoutAST (flat) → RemovalIntent → G-code
 ```
 
-**Regions are computed, never authored.** The layout resolution pass propagates region context through the tree and calculates absolute positions.
+Regions are computed during resolution, never authored.
+
+---
 
 ## Compositional Nodes
 
 ### Panel
-Root workpiece/stock region. Establishes initial region from sheet bounds.
 
-```python
-Panel(
-    children=(...)  # Nested layout nodes
-    id="panel1"     # Optional identifier
-)
-```
+Root workpiece region. Establishes initial region from sheet bounds.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| children | tuple | Nested layout nodes |
+| id | str (optional) | Identifier |
 
 ### Inset
+
 Shrinks current region inward by amount on all sides.
 
-```python
-Inset(
-    amount_mm=25,   # Shrink by 25mm on each edge
-    children=(...)  # Operate within inset region
-)
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| amount_mm | float | Shrink distance per edge |
+| children | tuple | Nodes within inset region |
 
-**Use case:** Margins, safety zones, workholding clearance
+Use case: Margins, safety zones, workholding clearance.
 
 ### Frame
-Creates profile at boundary and produces inner field region.
 
-```python
-Frame(
-    width_mm=50,            # Frame width (edge to inner field)
-    children=(...),         # Nodes within inner field
-    profile_depth="through", # Default depth
-    profile_side="outside"   # Default side
-)
-```
+Creates profile at boundary, produces inner field region for children.
 
-**Properties:**
+| Field | Type | Description |
+|-------|------|-------------|
+| width_mm | float | Frame width (edge to inner field) |
+| children | tuple | Nodes within inner field |
+| profile_depth | str | Default: "through" |
+| profile_side | str | Default: "outside" |
+
+Properties:
 - Works on ANY closed region (rect, circle, irregular)
 - Automatically creates outer profile
-- Children operate in inner region (shrunk by frame width)
+- Children operate in region shrunk by frame width
 
-**Use case:** Shaker panels, decorative frames, structural borders
+Use case: Shaker panels, decorative frames, structural borders.
 
 ### Grid
+
 Subdivides current region into rows × cols cells.
 
-```python
-Grid(
-    rows=2,
-    cols=3,
-    gap_mm=10,      # Spacing between cells
-    children=(...)  # Cell content (via Cell node)
-)
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| rows | int | Row count |
+| cols | int | Column count |
+| gap_mm | float | Spacing between cells |
+| children | tuple | Cell content |
 
-**Gap semantics:**
+Gap semantics:
 - Gap is spacing BETWEEN cells, not inset from edges
-- Total available space is divided after accounting for gaps
 - Cell size = (region_size - gaps) / count
 
-**Use case:** Multi-panel layouts, paned doors, grid patterns
+Use case: Multi-panel layouts, paned doors, grid patterns.
 
 ### Cell
-Content template for grid cells. Each Cell subtree is replicated once per grid cell.
 
-```python
-Grid(
-    rows=2, cols=2,
-    children=(
-        Cell(
-            inset_mm=5,     # Optional per-cell inset
-            children=(...)  # Content for each cell
-        ),
-    )
-)
-```
+Content template for grid cells. Replicated once per grid cell.
 
-**Note:** If Grid has no explicit Cell children, all direct children are treated as cell content.
+| Field | Type | Description |
+|-------|------|-------------|
+| inset_mm | float (optional) | Per-cell inset |
+| children | tuple | Content for each cell |
+
+If Grid has no explicit Cell children, direct children are treated as cell content.
+
+### Split
+
+Subdivides region into panes with rail/mullion bars (material reserved between panes).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| rows | int | Row count |
+| cols | int | Column count |
+| rail_mm | float | Horizontal bar width |
+| mullion_mm | float | Vertical bar width |
+| children | tuple | Pane content |
+
+Pane size calculation:
+- `pane_width = (region_width - (cols-1)*mullion_mm) / cols`
+- `pane_height = (region_height - (rows-1)*rail_mm) / rows`
+
+Difference from Grid: Rails/mullions reserve material; Grid gaps are empty space.
 
 ### Rect
+
 Rectangle that fills current region by default.
 
-```python
-Rect(
-    children=(...),  # Nested layout nodes
-    feature=Feature(type="pocket", depth_mm=5.0),
-    id="panel"
-)
-```
-
-**Unlike legacy Item nodes**, compositional Rect participates in region hierarchy.
+| Field | Type | Description |
+|-------|------|-------------|
+| children | tuple (optional) | Nested layout nodes |
+| feature | Feature (optional) | CAM feature |
+| id | str (optional) | Identifier |
 
 ### ComponentDef
-Reusable component definition (named, parameterized subtree).
 
-```python
-ComponentDef(
-    name="ShakerPanel",
-    params={"frame_width": 50.0, "recess_depth": 6.0},
-    body=Rect(
-        children=(
-            Frame(width_mm=50, ...),
-        ),
-        feature=...
-    )
-)
-```
+Reusable component definition.
 
-**Components are region-relative:** They operate within the current region when instantiated, not at absolute coordinates.
+| Field | Type | Description |
+|-------|------|-------------|
+| name | str | Component name |
+| params | dict | Default parameters |
+| body | Node | Component body |
+
+Components are region-relative: operate within current region when instantiated.
 
 ### UseComponent
+
 Component instantiation with parameter substitution.
 
-```python
-UseComponent(
-    component_name="ShakerPanel",
-    args={"frame_width": 60.0, "recess_depth": 8.0}
-)
-```
-
-**Parameter binding:** Component params provide defaults; args override.
+| Field | Type | Description |
+|-------|------|-------------|
+| component_name | str | Component to instantiate |
+| args | dict | Parameter overrides |
 
 ### Place
+
 Sheet-level multi-instance placement.
 
-```python
-Place(
-    layout=Grid(rows=2, cols=2, gap_mm=100),
-    children=(
-        UseComponent(component_name="ShakerPanel"),
-        UseComponent(component_name="ShakerPanel"),
-        UseComponent(component_name="ShakerPanel"),
-        UseComponent(component_name="ShakerPanel"),
-    )
-)
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| layout | Grid | Placement grid |
+| children | tuple | Components to place |
 
-**Deterministic layout first:** Simple grid-based placement. Irregular nesting optimization deferred to later stages.
+---
 
-## Layout Resolution
+## Resolution Process
 
-The `resolve_layout()` pass transforms compositional AST to flat LayoutAST:
+1. Start from Panel: initial region = full sheet bounds
+2. Propagate region context: each node receives parent's region
+3. Apply layout managers: Inset shrinks, Frame creates profile + shrinks, Grid/Split subdivide
+4. Replicate content: Cell and Place repeat subtrees
+5. Expand components: UseComponent → expanded body with param substitution
+6. Output flat shapes: absolute-positioned Item nodes
 
-1. **Start from Panel**: Initial region = full sheet bounds
-2. **Propagate region context**: Each node receives parent's region
-3. **Apply layout managers**:
-   - `Inset`: Shrink region
-   - `Frame`: Create profile, shrink for children
-   - `Grid`: Subdivide into cells
-4. **Replicate content**: Cell and Place repeat subtrees
-5. **Expand components**: UseComponent → expanded body with param substitution
-6. **Output flat shapes**: Absolute-positioned Item nodes
+### Invariants
 
-**Invariants:**
 - Children fill parent region by default
 - Layout is order-independent
 - Regions never overlap (deterministic subdivision)
 - Output compatible with existing RemovalIntent pipeline
 
-## Example: 4 Shaker Panels on One Sheet
-
-```python
-# Define reusable component
-shaker = ComponentDef(
-    name="ShakerPanel",
-    params={},
-    body=Rect(
-        children=(
-            Frame(
-                width_mm=50,
-                children=(
-                    Rect(feature=Feature(type="pocket", depth_mm=6.0)),
-                ),
-            ),
-        ),
-        feature=Feature(type="profile", depth="through", side="outside"),
-    )
-)
-
-# Compose sheet layout
-ast = CompositionalLayoutAST(
-    sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19),
-    components={"ShakerPanel": shaker},
-    root=Place(
-        layout=Grid(rows=2, cols=2, gap_mm=100),
-        children=(
-            UseComponent(component_name="ShakerPanel"),
-            UseComponent(component_name="ShakerPanel"),
-            UseComponent(component_name="ShakerPanel"),
-            UseComponent(component_name="ShakerPanel"),
-        ),
-    ),
-)
-
-# Resolve to flat layout
-flat = resolve_layout(ast)
-
-# Output FlatPML for inspection
-pml = format_pml(flat)
-```
-
-**Result:** 4 identical Shaker panels placed in 2×2 grid with 100mm gap, each with frame + inner pocket.
+---
 
 ## Coordinate System
 
-**Sheet coordinates:**
-- Origin (0, 0) at bottom-left
-- +X right, +Y up
-- All regions specified as (x_min, y_min, x_max, y_max)
+| Property | Value |
+|----------|-------|
+| Origin | Bottom-left (0, 0) |
+| +X | Right |
+| +Y | Up |
+| Region format | (x_min, y_min, x_max, y_max) |
+| Region center | ((x_min + x_max) / 2, (y_min + y_max) / 2) |
 
-**Region center:** `((x_min + x_max) / 2, (y_min + y_max) / 2)`
+---
 
-## Integration with Existing Pipeline
+## Output Format
 
-**Compositional nodes are pre-lowering:**
-
-```
-CompositionalLayoutAST → [resolve_layout] → LayoutAST (flat) → [existing pipeline]
-```
-
-After resolution, the flat LayoutAST contains:
+After resolution, flat LayoutAST contains:
 - Absolute-positioned Item nodes (kind="shape")
 - Geometry with w_mm, h_mm
 - Placement with center_xy_mm
 - Feature specifications (profile, pocket, hole)
 
-**This output is compatible with:**
-- FlatPML formatter (Stage 11)
-- RemovalIntent lowering (Stage 4-6)
-- Existing planner/strategy layers
+Compatible with: FlatPML formatter, RemovalIntent lowering, existing planner/strategy layers.
 
-## What NOT to Do
+---
 
-- ❌ Do not author ResolvedRegion nodes (they're computed)
-- ❌ Do not use absolute XY coordinates in compositional AST
-- ❌ Do not add algebra/expressions (use layout managers + params)
-- ❌ Do not treat compositional nodes as RemovalIntent (separate layers)
+## Constraints
 
-## Future Extensions
+MUST NOT:
+- Author ResolvedRegion nodes (computed only)
+- Use absolute XY coordinates in compositional AST
+- Add algebra/expressions (use layout managers + params)
+- Treat compositional nodes as RemovalIntent
 
-**Deferred to later stages:**
-- `Split` layout manager (cabinetry-style division with rails/mullions)
+---
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| layout_ast/compositional.py | Compositional node definitions |
+| resolution/layout_resolver.py | Resolution logic |
+| pml/compositional_parser.py | PML parsing |
+| pml/compositional_formatter.py | PML formatting |
+
+---
+
+## Future Extensions (Deferred)
+
 - Irregular nesting optimization for Place
 - Circular/polar grids
 - Advanced component parameter binding (expressions, constraints)
-- Edge treatments as compositional nodes (fillet, chamfer)
+- Edge treatments as compositional nodes

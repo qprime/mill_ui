@@ -1,951 +1,317 @@
+<!-- spec-style -->
 # mill_ui
 
-**Semantic CAM pipeline for CNC routing with clean separation between intent and execution.**
+As-Of Date: 2026-01-19
+Document Type: System Specification
+Authority: This document is authoritative for architecture and usage described herein.
 
-## What This Is
+---
 
-mill_ui is a Computer-Aided Manufacturing (CAM) system for CNC routers that generates G-code from high-level layout descriptions. Unlike traditional CAM systems that tightly couple geometry to machining strategy, mill_ui uses a semantic intermediate representation (RemovalIntent IR) to separate *what* material to remove from *how* to remove it.
+## Purpose
 
-**Pipeline:** `PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code`
+mill_ui transforms PML input into G-code output through a deterministic pipeline.
+The system separates *what* to machine (RemovalIntent IR) from *how* to machine it (CAM planner).
 
-This architecture enables:
-- **Extensibility**: Add new shapes, features, or machining strategies independently
-- **Testability**: Validate semantics before geometric computation
-- **AI-friendliness**: Both human-authored (PML) and AI-generated (JSON) inputs
-- **Composability**: Hierarchical layouts with parametric templates
+---
 
-## Why This Architecture
+## Non-Goals
 
-### The Problem
-Traditional CAM systems directly translate geometry (rectangles, circles, polylines) into toolpaths. This creates tight coupling:
-- Adding a new shape requires understanding machining details
-- Validating designs requires executing the planner
-- Alternative machining strategies mean duplicating geometry logic
+The system does NOT:
+- Perform unit conversion internally (all values are millimeters).
+- Provide general-purpose CAD editing.
+- Support full 3D toolpaths (2.5D only).
+- Replace the CAM planner backend.
 
-### The Solution: RemovalIntent IR
-mill_ui inserts a semantic layer between geometry and machining:
+---
+
+## Terminology
+
+- **PML**: Plaintext language for specifying layouts and operations.
+- **LayoutAST**: Flat AST with absolute coordinates. Canonical layout representation.
+- **CompositionalLayoutAST**: Hierarchical AST with relative positioning.
+- **RemovalIntent**: IR representing what volume to remove, independent of toolpath strategy.
+- **Domain**: Bounded 2D region supporting algebraic operations (inset, offset, subtract).
+- **Generator**: Deterministic function producing LayoutAST Items from a Domain.
+
+---
+
+## Canonical Pipeline
 
 ```
-Traditional:  Rectangle(w, h) → immediate toolpath generation → G-code
-mill_ui:      Rectangle(w, h) → RemovalIntent(bounds, depth, allowances) → toolpath → G-code
+PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code
 ```
 
-**RemovalIntent** describes *what* to remove (3D region, depth, tolerances, constraints) without specifying *how*. The CAM planner then chooses strategies (pocket raster, profile offset, drilling) based on tool selection and material properties.
+| Stage | Entry Point | Input | Output |
+|-------|-------------|-------|--------|
+| 1. Parse Compositional PML | `pml/compositional_parser.py:parse_compositional_pml()` | PML text | CompositionalLayoutAST |
+| 2. Resolve Layout | `resolution/layout_resolver.py:resolve_layout()` | CompositionalLayoutAST | LayoutAST |
+| 3. AST → IR | `adapters/ast_to_removal.py:ast_to_removal_intents()` | LayoutAST | list[RemovalIntent] |
+| 4. IR → Planner Hints | `adapters/removal_to_planner.py:removal_intents_to_v1_hints()` | list[RemovalIntent] | hints dict |
+| 5. Plan Passes | `cam/planner/passes/__init__.py:plan_passes()` | hints dict | (pass_records, summary) |
+| 6. Generate G-code | `cam/post/gcode.py:write_gcode()` | moves | G-code string |
 
-## Quick Start: Shaker Cabinet Door
+---
 
-Here's a complete example showing the pipeline in action.
+## Input Formats
 
-### Option 1: Flat PML (Explicit Positioning)
+### Flat PML
 
-**Flat PML** uses absolute coordinates for direct shape placement:
+Explicit absolute positioning.
 
 ```pml
 sheet 450mm 650mm 19mm
-
-rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
-rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
-circle anchor:1 at 95mm,545mm diameter 10mm hole 8mm
-circle anchor:2 at 355mm,545mm diameter 10mm hole 8mm
+rect door at 225mm,325mm size 400mm,600mm profile through outside
 ```
 
-**Syntax:** `<shape> <id> at <x>mm,<y>mm size <w>mm,<h>mm <feature>`
+### Compositional PML
 
-**Note:** Flat PML doesn't have a standalone CLI parser. Use compositional PML CLI or parse programmatically:
-```python
-from pml import parse_pml
-ast = parse_pml(pml_text)
-```
-If you want a CLI flow for flat PML, use the format converter:
-```bash
-PYTHONPATH=. python3 -m cli.convert_layout --from pml --to json input.pml output.json
-```
-
-### Option 2: Compositional PML (Hierarchical Layout)
-
-**Compositional PML** uses relative positioning with layout managers:
+Relative positioning with layout managers.
 
 ```pml
-sheet 400.00mm 600.00mm 19.00mm
-
-rect outer profile through outside
-    inset 50.00mm
-        rect inner pocket 6.00mm
-```
-
-**Layout Managers:**
-- `frame <width>mm` - Inset border around parent region (auto-generates outer profile)
-- `inset <amount>mm` - Uniform inset on all sides
-- `place grid <rows> <cols> gap <gap>mm` - Grid-based component placement (requires `use <component>` children)
-
-Run the compositional PML parser:
-```bash
-PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml
-PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format pml
-PYTHONPATH=. python3 -m cli.parse_compositional_pml door.pml --resolve --format json
-```
-
-**Key Difference:** Flat PML requires explicit coordinates (`at X,Y`), compositional PML uses layout managers for relative positioning.
-
-### Option 3: Python Template (Programmatic)
-
-```python
-from templates import Shaker
-from adapters.ast_to_removal import ast_to_removal_intents
-
-# Generate LayoutAST
-ast = Shaker.expand_to_ast(
-    params={
-        "outer_w": 400.0,
-        "outer_h": 600.0,
-        "stile_w": 50.0,
-        "rail_h": 50.0,
-        "panel_recess": 6.0,
-    },
-    sheet_thickness_mm=19.0
-)
-
-# Convert to RemovalIntent IR (canonical AST → IR adapter)
-intents = ast_to_removal_intents(ast)
-
-# Generate planner hints (consumed by CAM planner backend)
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-hints = removal_intents_to_v1_hints(
-    intents,
-    kerf_width_mm=3.175,  # 1/8" bit typical
-    min_channel_width_mm=6.0
-)
-# ... pass hints to planner
-```
-
-### What This Produces
-
-**LayoutAST** (semantic structure):
-- Sheet: 450×650×19mm
-- Item 1: Rectangle, profile feature (outside, through-cut)
-- Item 2: Rectangle, pocket feature (6mm depth)
-
-**RemovalIntent IR** (machining semantics):
-- Intent 1: Remove region (bounds, z_top=0mm, z_bottom=-19mm, allowance=outside)
-- Intent 2: Remove region (bounds, z_top=0mm, z_bottom=-6mm, allowance=inside)
-
-**CAM Plan** (execution strategy):
-- Pass 1: Profile outside perimeter with 6mm end mill, multiple depths
-- Pass 2: Pocket interior with raster strategy, 6mm depth
-
-## Core Concepts
-
-### 1. RemovalIntent IR
-
-The key innovation. A `RemovalIntent` describes a volumetric removal operation:
-
-```python
-@dataclass(frozen=True)
-class RemovalIntent:
-    region_id: str              # Unique identifier
-    bounds: Bounds2D            # XY bounding box
-    z_top: float                # Top of material removal (mm)
-    z_bottom: float             # Bottom of material removal (mm)
-    allowance: Allowance        # Inside/outside/on the geometry
-    constraints: Constraints    # Tabs, keepouts, islands, tolerances
-    metadata: dict              # Source tracking, debugging info
-```
-
-**Why this matters:**
-- Validates geometry before expensive path planning
-- Enables collision detection at IR level
-- Allows multiple planners to share the same IR
-- Testable without CAM backend
-
-### 2. LayoutAST
-
-Compositional abstract syntax tree for panel layouts:
-
-```python
-@dataclass(frozen=True)
-class LayoutAST:
-    sheet: Sheet                    # Material dimensions
-    items: tuple[Item, ...]         # Shapes, features, placements
-```
-
-**Items** can be:
-- **Shapes**: Rectangle, Circle, RoundedRect, Line, SplinePath
-- **Features**: Profile (inside/outside/on), Pocket, Hole, Engrave
-- **Placement**: Absolute positioning (center_xy_mm)
-
-**Compositional semantics** allow hierarchical layouts (see CompositionalLayoutAST below).
-
-### 2.5 CompositionalLayoutAST (Hierarchical Layouts)
-
-For complex layouts, mill_ui provides compositional AST types that enable relative positioning:
-
-**Layout Managers:**
-- `Panel` - Root panel node
-- `Frame` - Border/frame with inset (auto-generates outer profile)
-- `Inset` - Uniform inset on all sides
-- `Grid` - Grid layout (rows/cols/gap)
-- `Split` - Region subdivision with rails (horizontal bars) and mullions (vertical bars)
-
-**Component System:**
-- `ComponentDef` - Define reusable components with parameters
-- `UseComponent` - Instantiate components (currently no args, just `use <name>`)
-- `Place` - Grid-based component placement (`place grid <rows> <cols>` with `use <component>` children)
-
-**Resolution:**
-Compositional AST → Flat LayoutAST via `resolution/layout_resolver.py`, which computes absolute positions from relative layout constraints.
-
-**Files:**
-- `layout_ast/compositional.py` - Compositional AST types
-- `resolution/layout_resolver.py` - Resolver that flattens hierarchical layouts
-
-**Example with `inset` (manual profile control):**
-```pml
-rect outer profile through outside
-    inset 50.00mm              # Inset 50mm from outer bounds
-        rect inner pocket 6mm   # Inner pocket automatically positioned
-```
-
-**Example with `frame` (auto-generates profile):**
-```pml
-rect outer                     # Just the outer bounds (no profile feature)
-    frame 50.00mm              # Frame auto-generates outer profile + insets region
-        rect inner pocket 6mm   # Inner pocket automatically positioned
-```
-
-**Note:** `frame` auto-generates an outer profile, so using `rect outer profile through outside` + `frame` would create two profiles. Use either `rect outer` + `frame`, or `rect outer profile` + `inset`.
-
-### 2.6 Domain/Generator System (Math-Based Composition)
-
-For programmatic design generation, mill_ui provides a **domain/generator layer** that separates *where* to machine from *what* to machine:
-
-**Domains** are bounded 2D regions (polygons with optional holes) that support algebraic operations:
-- `inset(distance)` - Contract boundary inward
-- `offset(distance)` - Expand boundary outward
-- `subtract(other)` - Remove overlapping region (creates holes)
-- `intersect(other)` - Keep only overlapping region
-
-**Generators** are deterministic functions that produce LayoutAST Items within a domain:
-- **Area generators**: `flat_pocket_generator`, `wave_generator`, `grid_generator`
-- **Loop generators**: `profile_generator`, `bead_generator`
-- **SVG generators**: `svg_stamp_generator` (from SVG path data)
-
-**Pipeline:**
-```
-Domain Composition → Generators → LayoutAST → RemovalIntent → G-code
-```
-
-**Example (Shaker door):**
-```python
-from domains import Domain
-from generators import profile_generator, flat_pocket_generator, ProfileParams, FlatPocketParams
-
-# Create domains
-outer = Domain.from_rectangle(400, 600, center=(200, 300))
-panel = outer.inset(50).domains[0]  # Frame is 50mm wide
-
-# Generate items
-profile_items = profile_generator(outer, ProfileParams(side="outside", depth="through"))
-pocket_items = flat_pocket_generator(panel, FlatPocketParams(depth_mm=6.0))
-
-# Combine into LayoutAST, then convert to IR as usual
-```
-
-**Why this matters:**
-- **Hundreds of SKUs from few primitives** - A wave pattern works on any domain shape
-- **Exact-size flexibility** - Domains are computed, not drawn
-- **Zero design cost** - Swap generators without changing structure
-- **Deterministic** - Same domain + params = same output
-
-**Files:**
-- `domains/domain.py` - Domain and MultiDomain dataclasses
-- `domains/transforms.py` - Coordinate transforms (local ↔ sheet space)
-- `generators/base.py` - Generator protocol and parameter classes
-- `generators/area/` - Area generators (flat, wave, grid)
-- `generators/loop/` - Loop generators (profile, bead)
-- `generators/svg/` - SVG path parsing and stamping
-
-**See also:** [docs/domain_generator_design.md](docs/domain_generator_design.md) for the complete architecture specification.
-
-### 3. PML: Three Dialects
-
-**Flat PML**: Explicit absolute positioning
-```pml
-rect outer at 225mm,325mm size 400mm,600mm profile through outside
-```
-
-**Compositional PML**: Relative positioning with layout managers
-```pml
+sheet 400mm 600mm 19mm
 rect outer profile through outside
     inset 50mm
         rect inner pocket 6mm
 ```
 
-**Nest PML**: Block-based nesting job specification (see [Nesting](#nesting) below)
+### JSON
+
+Direct LayoutAST serialization.
+Use `LayoutAST.to_json()` and `LayoutAST.from_json()`.
+
+### Nest PML
+
+Block-based nesting job specification.
+
 ```pml
 nest maxrects
     sheet 1232mm 1245mm 19mm
     kerf 6.35mm
     parts
         door 457mm 597mm x20
-            template Shaker
-                stile_w 57mm
 ```
 
-**JSON**: Direct LayoutAST serialization for AI/programmatic generation
-- Verbose but explicit
-- 1:1 mapping to AST dataclasses
-- Skip parsing, go straight to AST
+---
 
-Flat, Compositional, and JSON all compile to the same LayoutAST, ensuring semantic equivalence. Nest PML is a higher-level format that runs bin-packing algorithms and outputs standard PML files.
+## CLI Commands
 
-### 4. CAM Backend Integration
+| Command | Description |
+|---------|-------------|
+| `python -m cli.convert_layout --from pml --to json input.pml output.json` | Convert PML to JSON |
+| `python -m cli.export_cad --input layout.pml --out output/ --kerf 6.35` | Export STL |
+| `python -m cli.export_blueprint --input layout.pml --out output/ --theme dark` | Export SVG blueprint |
+| `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
+| `python -m cli.nest job.nest -o output/ --export-stl --export-svg` | Run nesting |
+| `python -m cli.parse_compositional_pml door.pml --resolve --format pml` | Parse compositional PML |
 
-mill_ui uses the existing CAM planner backend (in `cam/`), which consumes a hint-structured input:
+---
 
+## Data Models
+
+### LayoutAST (layout_ast/layout.py)
+
+| Dataclass | Fields |
+|-----------|--------|
+| Sheet | width_mm, height_mm, thickness_mm |
+| Placement | center_xy_mm: tuple[float, float] |
+| Geometry | data: dict[str, Any] |
+| Feature | type, depth, side, depth_mm, tab_count, tab_height_mm, tab_width_mm |
+| Item | kind, type, geometry, placement, feature, params, shape_id, id |
+| LayoutAST | sheet, items, config fields |
+
+### RemovalIntent IR (ir/removal_intent.py)
+
+| Dataclass | Fields |
+|-----------|--------|
+| Bounds2D | x_min, x_max, y_min, y_max |
+| RemovalIntent | region_id, bounds, z_top, z_bottom, allowance, constraints, metadata |
+
+**Invariants:**
+- Bounds2D: x_max >= x_min AND y_max >= y_min MUST hold.
+- RemovalIntent: z_bottom <= z_top MUST hold.
+
+---
+
+## Coordinate Conventions
+
+- All internal values MUST be millimeters.
+- XY: center-based coordinates. Stock origin is lower-left.
+- Z: Positive away from material, negative into material.
+- z_top typically 0.0 at stock surface.
+- z_bottom MUST be negative for material removal.
+
+---
+
+## Shapes and Features
+
+### Supported Shapes
+
+Rectangle, Circle, RoundedRect, Line, SplinePath.
+
+### Supported Features
+
+| Feature | Description |
+|---------|-------------|
+| profile | Through-cut or partial depth. Side: inside, outside, on. |
+| pocket | Partial-depth depression. |
+| hole | Through-hole (subtractive). |
+| engrave | Surface carving. |
+
+### Tabs (Profile Feature)
+
+```pml
+rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 height 3mm width 12mm
 ```
-Current Implementation:
-1. LayoutAST.Item → intermediate hint dict (manual conversion)
-2. hint dict → RemovalIntent (via profile_hint_to_removal_intent/pocket_hint_to_removal_intent)
-3. RemovalIntent → planner hints (via removal_intent_to_v1_hint)
-4. planner hints → CAM planner → G-code
-```
 
-The `adapters/` module bridges RemovalIntent to the planner's hint format. This allows:
-- Incremental migration (planner backend works, no need to replace it)
-- IR validation before planner execution
-- Future: Multiple planner backends targeting the same IR
+Required: `tabs <count> height <height>mm`. Optional: `width <width>mm`.
 
-**Note:** The canonical AST → IR adapter is now available in `adapters/ast_to_removal.py` as `ast_to_removal_intents()`.
+---
 
-## Architecture Principles
+## Layout Managers (Compositional PML)
 
-### 1. Separation of Concerns
-- **Parsing** (PML/JSON → AST): Syntax and structure
-- **Resolution** (Compositional AST → Flat AST): Layout computation
-- **Semantics** (AST → IR): What to remove, constraints
-- **Planning** (IR → CAM): How to remove (toolpaths, strategies)
-- **Execution** (CAM → G-code): Machine-specific output
+| Manager | Description |
+|---------|-------------|
+| frame \<width\>mm | Inset border, auto-generates outer profile. |
+| inset \<amount\>mm | Uniform inset on all sides. |
+| place grid \<rows\> \<cols\> gap \<gap\>mm | Grid-based component placement. |
 
-### 2. Semantic Before Geometric
-Validate intent (overlaps, invalid depths, constraint violations) before computing expensive geometry (offsets, pockets, toolpaths).
+---
 
-### 3. Test at IR Boundary
-Most tests validate AST → IR transformation. This catches errors early without requiring:
-- Full CAM planner execution
-- Native C++ backends
-- G-code parsing
+## Domain/Generator System
 
-Example: Edge allowance tests verify that `profile outside` produces correct offset allowances in RemovalIntent.
+Domains define *where* to machine. Generators define *what* to produce.
 
-### 4. AI-Friendly Primitives
-- **Composable**: Small, orthogonal operations (rect, profile, pocket)
-- **Declarative**: Describe *what*, not *how*
-- **Validatable**: Check RemovalIntent for physical impossibilities
-- **Extensible**: Add shapes without understanding planner internals
+### Domain Operations
 
-## Feature Placement Rules
+| Operation | Description |
+|-----------|-------------|
+| inset(distance) | Contract boundary inward. |
+| offset(distance) | Expand boundary outward. |
+| subtract(other) | Remove overlapping region. |
+| intersect(other) | Keep only overlapping region. |
 
-When adding new functionality, use this decision tree:
+### Generators
 
-**Does the feature change the PART DESIGN (what the final piece looks like)?**
-- YES → LayoutAST or RemovalIntent IR
-- NO → Planner/Strategy layer
+| Type | Examples |
+|------|----------|
+| Area | flat_pocket_generator, wave_generator, grid_generator |
+| Loop | profile_generator, bead_generator |
+| SVG | svg_stamp_generator |
 
-### LayoutAST: Structural Geometry
-- Shape dimensions, placement, features
-- No tool knowledge, no execution logic
-- Example: `rect 100mm×50mm pocket 6mm`
-
-### RemovalIntent IR: Machining Semantics
-- What volume to remove (bounds, depth, allowance)
-- Constraints affecting *design outcome* (tabs, keepouts, tolerances)
-- No toolpath sequencing or strategy
-- Example: `RemovalIntent(bounds=..., z_bottom=-6mm, allowance=inside)`
-
-### Planner/Strategy: Execution Details
-- *How* to cut (cleanup passes, raster vs contour, stepover)
-- Toolpath ordering, feed/speed strategy
-- Finish quality settings
-- No geometry mutation, no part design changes
-- Example: `pocket_finish_perimeter=True` (F001 cleanup pass)
-
-**Rule of thumb:** If a feature changes *how a part is cut* but not *what the part is*, it belongs in the planner.
+---
 
 ## Nesting
 
-mill_ui includes a nesting module for bin-packing parts onto sheets. This is useful for production runs where you need to cut many parts from material sheets with minimal waste.
-
-### .nest Format
-
-The `.nest` format specifies nesting jobs in a block-based syntax:
-
-```pml
-nest maxrects
-    sheet 1232mm 1245mm 19mm
-    kerf 6.35mm
-    margin 10mm
-
-    parts
-        large_door 457mm 597mm x20
-            template Shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
-
-        small_door 305mm 203mm x15
-
-        tall_door 457mm 914mm x2
-            template Shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
-```
-
 ### Algorithms
 
-- **`guillotine`**: Simple, fast guillotine cutting. Good for uniform parts.
-- **`maxrects`**: Higher utilization with free rectangle tracking. Better for mixed sizes.
-
-### Usage
-
-**CLI tool:**
-```bash
-PYTHONPATH=. python3 tools/nest.py cabinet_job.nest -o output/
-```
-
-**Programmatic:**
-```python
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
-from nesting import nest_and_generate
-
-source = open("cabinet_job.nest").read()
-job = parse_nest_pml(source)
-params = nest_job_to_api_params(job)
-result = nest_and_generate(**params, output_format="ast")
-
-# result["output"] is a list of LayoutAST, one per sheet
-```
+| Algorithm | Characteristics |
+|-----------|-----------------|
+| guillotine | Fast, simple guillotine cuts. ~62% utilization. |
+| maxrects | Better utilization with free rectangle tracking. ~83% utilization. |
 
 ### Output
 
-Nesting produces:
-- One `.pml` file per sheet with explicit part placements
-- `manifest.json` with utilization metrics
-- Optionally: G-code, SVG blueprints (when run through the full recipe pipeline)
+- One `.pml` file per sheet with explicit part placements.
+- `manifest.json` with utilization metrics.
 
-### Recipes
+---
 
-- **Recipe 17**: [docs/recipes/17_nesting_guillotine/](docs/recipes/17_nesting_guillotine/) - Guillotine algorithm example
-- **Recipe 18**: [docs/recipes/18_nesting_maxrects/](docs/recipes/18_nesting_maxrects/) - MaxRects algorithm example
+## Validation
 
-Both recipes demonstrate the complete workflow: `.nest` → nesting → `.pml` layouts → CAM → G-code.
+### IR-Level Validation
+
+| Check | Description |
+|-------|-------------|
+| check_overlap() | 3D bounding-box intersection. |
+| check_depth_feasibility() | z_top >= z_bottom, warns on depth vs thickness. |
+| check_toolability() | Feature size vs tool diameter. |
+
+### CAM Artifact Validation
+
+| Artifact | Metrics |
+|----------|---------|
+| SVG | Dimensions, layers, path counts, element breakdown. |
+| STL | Vertex/face counts, watertight, manifold, volume. |
+| G-code | Motion counts, distances, Z-profile, feeds, tools. |
+
+---
 
 ## Directory Structure
 
 ```
 mill_ui/
 ├── adapters/           # RemovalIntent ↔ planner adapters
-│   ├── ast_to_removal.py       # LayoutAST → RemovalIntent (canonical)
-│   │   └── ast_to_removal_intents()    # Main entry point
-│   │   └── item_to_removal_intent()    # Per-item conversion
-│   ├── hints_to_removal.py     # Item/legacy hint dicts → RemovalIntent
-│   │   └── profile_hint_to_removal_intent()
-│   │   └── pocket_hint_to_removal_intent()
-│   │   └── hole_hint_to_removal_intent()
-│   │   └── engrave_hint_to_removal_intent()
-│   └── removal_to_planner.py   # RemovalIntent → planner hint dicts
 ├── layout_ast/         # LayoutAST dataclasses and parsers
-│   ├── layout.py               # Core AST types (Sheet, Item, Feature)
-│   ├── compositional.py        # Compositional layout extensions
-│   ├── parsers.py              # JSON parser
-│   ├── emitters.py             # JSON emitter
-│   └── canonicalize.py         # AST canonicalization
 ├── pml/                # PML parser and formatter
-│   ├── parser.py               # Flat PML parser (explicit positioning)
-│   ├── formatter.py            # Flat PML formatter
-│   ├── compositional_parser.py # Compositional PML parser (layout managers)
-│   ├── compositional_formatter.py  # Compositional PML formatter
-│   └── nest_parser.py          # Nest PML parser (.nest format)
 ├── cli/                # Command-line tools
-│   ├── parse_compositional_pml.py  # PML parser CLI
-│   └── convert_layout.py           # JSON ↔ AST converter
-│   # Note: cli/introspect.py (dump-ast, dump-removal-intent) not implemented
-│   #       Tests import it (test_cli_dump.py) and will fail until created
 ├── resolution/         # Compositional → Flat layout resolution
-│   └── layout_resolver.py      # Resolves hierarchical AST to flat LayoutAST
-│       ├── Handles frame, inset, grid layout managers
-│       ├── Component expansion with parameter substitution
-│       └── Spline path sampling (Catmull-Rom curves)
 ├── ir/                 # RemovalIntent IR
-│   └── removal_intent.py       # Core IR dataclass (includes Bounds2D, Allowance, Constraints)
-├── domains/            # Domain/Generator system - math-based 2D composition
-│   ├── __init__.py             # Public exports (Domain, MultiDomain, transforms)
-│   ├── domain.py               # Domain dataclass, operations (inset, offset, subtract, intersect)
-│   └── transforms.py           # Coordinate transforms (local ↔ sheet space)
-├── generators/         # Generators that produce LayoutAST Items from Domains
-│   ├── __init__.py             # Public exports (all generators, params)
-│   ├── base.py                 # Generator protocol, parameter dataclasses
-│   ├── area/                   # Area generators (fill regions)
-│   │   ├── flat.py             # Flat pocket generator
-│   │   ├── wave.py             # Wave pattern generator
-│   │   └── grid.py             # Grid pattern generator
-│   ├── loop/                   # Loop generators (follow boundaries)
-│   │   ├── profile.py          # Profile cut generator
-│   │   └── bead.py             # Bead/groove generator
-│   └── svg/                    # SVG path parsing and generators
-│       ├── parser.py           # SVG path command parser
-│       ├── curves.py           # Bezier/arc curve flattening
-│       └── stamp.py            # SVG stamp generator
-├── templates/          # Parametric templates
-│   └── shaker.py               # Shaker cabinet door (only template currently implemented)
-├── nesting/            # Bin-packing/nesting module
-│   ├── __init__.py             # Public API exports
-│   ├── api.py                  # High-level nest_parts(), nest_and_generate()
-│   ├── types.py                # PartSpec, SheetSpec, NestingResult dataclasses
-│   ├── guillotine.py           # Guillotine bin-packing algorithm
-│   ├── maxrects.py             # MaxRects bin-packing algorithm
-│   ├── sheet_packer.py         # Multi-sheet packing orchestration
-│   ├── template_expander.py    # Expand templates (Shaker) to Items
-│   ├── layout_generator.py     # Convert nesting results to LayoutAST/PML
-│   └── validation.py           # Nesting-specific validation (overlaps, bounds)
-├── tools/              # CLI tools
-│   └── nest.py                 # Nesting CLI (reads .nest, outputs .pml)
-├── validation/         # IR validation (overlaps, constraints)
-│   ├── removal_checks.py       # Overlap, depth, toolability checks
-│   └── results.py              # ValidationResult dataclass
-├── export/             # Debugging visualizations
-│   └── svg_removal.py          # Render LayoutAST + RemovalIntent as SVG overlay
-├── tests/              # Comprehensive test suite
+├── domains/            # Domain type and operations
+├── generators/         # Generators producing Items from Domains
+├── templates/          # Parametric templates (Shaker)
+├── nesting/            # Bin-packing module
+├── validation/         # IR and CAM validation
+├── export/             # Blueprint SVG, debugging visualizations
 ├── cam/                # CAM planner backend
-│   ├── planner/                # Pass planning, toolpath generation
-│   ├── ops/                    # Operations (profile, pocket, drill)
-│   ├── path/                   # Path strategies
-│   ├── post/                   # G-code generation
-│   ├── native/                 # C++ native backend (OCCT-based)
-│   │   ├── core.py             # Python interface to native backend
-│   │   └── cpp/                # Full OCCT C++ implementation with pybind11
-│   ├── types.py                # Vec2, Bounds, Transform2D
-│   ├── config.py               # Config management
-│   ├── shape.py                # Shape2D polyline
-│   ├── primitives.py           # rectangle, circle helpers
-│   └── transforms.py           # Geometric transformations
-└── cad/
-    └── export/         # CAD export formats (mixed status)
-        ├── step.py     # STEP export (imports missing cad.native - broken)
-        ├── svg.py      # SVG export (imports missing cad.layout.* - broken)
-        ├── stl.py      # STL stub (1 line, non-functional)
-        ├── svg_dims.py # SVG dimensioned drawings (496 lines, may be functional)
-        └── panel_stl.py # Panel STL export (251 lines, may be functional)
-        # Note: step.py and svg.py require fixing import paths before use
+├── cad/export/         # CAD export (STL, SVG dims)
+└── tests/              # Test suite
 ```
+
+---
 
 ## Extension Points
 
-### Adding a New Shape
-
-1. **Add AST geometry type** in `layout_ast/layout.py`:
-   ```python
-   # Already exists: Rect, Circle, RoundedRect, Line, SplinePath
-   ```
-
-2. **Add RemovalIntent conversion** in `adapters/hints_to_removal.py`:
-   ```python
-   def _item_geometry_to_bounds(item_type: str, geometry_data: dict, cx: float, cy: float) -> Bounds2D:
-       if item_type == "NewShape":
-           # ... compute bounds from geometry_data
-   ```
-
-3. **Add tests** in `tests/`:
-   ```python
-   def test_new_shape_to_removal_intent():
-       item = Item(kind="shape", type="NewShape", ...)
-       intent = item_to_removal_intent(item, 19.0)
-       assert intent.bounds == expected_bounds
-   ```
-
-### Adding a New Feature
-
-Example: Chamfer edges
-
-1. **Add feature type** in `layout_ast/layout.py`:
-   ```python
-   @dataclass(frozen=True)
-   class Feature:
-       type: str  # "profile", "pocket", "hole", "engrave", "chamfer"
-       # ... existing fields
-       chamfer_angle_deg: float | None = None
-   ```
-
-2. **Convert to RemovalIntent** in `adapters/hints_to_removal.py`
-3. **Add planner support** (or use existing profile with angle metadata)
-
-### Creating a Template
-
-Templates expand parameters to LayoutAST. Example from `templates/shaker.py`:
-
-```python
-class Shaker:
-    @staticmethod
-    def expand_to_ast(params: dict, sheet_thickness_mm: float) -> LayoutAST:
-        # Parse params
-        outer_w = params["outer_w"]
-        outer_h = params["outer_h"]
-        panel_recess = params.get("panel_recess", 0.0)
-
-        # Build items
-        items = [
-            Item(type="Rect", geometry=..., feature=Feature(type="profile", ...)),
-            Item(type="Rect", geometry=..., feature=Feature(type="pocket", ...)),
-        ]
-
-        return LayoutAST(sheet=Sheet(...), items=tuple(items))
-```
-
-Register in `templates/__init__.py`:
-```python
-from .shaker import Shaker
-__all__ = ["Shaker"]
-```
-
-**Note:** Currently only the Shaker template is implemented. The template framework is designed for extensibility, but other templates need to be created.
-
-## Development
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd mill_ui
-```
-
-2. **(Recommended) Create a virtual environment:**
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install dependencies (if any are added later):**
-```bash
-pip install -r requirements.txt
-# Or for development:
-pip install -r requirements-dev.txt
-```
-
-**Note:** This project uses a flat package layout with `PYTHONPATH=.` for running tests and scripts. Currently no external dependencies are required, but using a venv is recommended for future-proofing.
-
-### Building the Native CAM Backend
-
-The CAM planner includes a native C++ backend for performance-critical operations (pocket raster, profile outline). To build it:
-
-**Prerequisites:**
-- CMake 3.10+
-- C++17 compiler
-- pybind11 (installed via pip)
-
-**Build steps:**
-
-```bash
-# 1. Create and activate virtual environment (if not already done)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# 2. Install pybind11
-pip install pybind11
-
-# 3. Configure and build the native extension
-cmake -S cam/native/cpp -B build/native_cam \
-  -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
-cmake --build build/native_cam
-
-# 4. Copy the compiled extension to cam/native/
-cp build/native_cam/python/_native.*.so cam/native/
-```
-
-**Verify the build:**
-```bash
-PYTHONPATH=. python3 -c "from cam.native import core; print('Native backend available')"
-```
-
-**Note:** The native backend is **optional** for development. IR-level tests work without it, but end-to-end G-code generation requires the compiled extension.
-
-### Running Tests
-
-**Quick start** - Run all core tests:
-```bash
-./run_tests.sh
-```
-
-**Run specific test suite:**
-```bash
-./run_tests.sh run_pml_tests
-./run_tests.sh run_edge_tests
-./run_tests.sh run_resolution_tests
-```
-
-**Manual test execution:**
-```bash
-# Core IR tests
-PYTHONPATH=. python3 -m tests.run_removal_intent_tests
-
-# PML parser tests
-PYTHONPATH=. python3 -m tests.run_pml_tests
-
-# Resolution tests (component placement)
-PYTHONPATH=. python3 -m tests.run_resolution_tests
-
-# Nesting tests
-PYTHONPATH=. python3 -m tests.test_nest_parser
-PYTHONPATH=. python3 -m tests.test_maxrects
-PYTHONPATH=. python3 -m tests.test_guillotine
-PYTHONPATH=. python3 -m tests.test_nesting_api
-
-# G-code equivalence (requires native CAM backend)
-PYTHONPATH=. python3 -m tests.run_gcode_equivalence_tests
-```
-
-**Note:** Some tests require the native C++ CAM backend. IR-level and nesting tests work without it.
-
-### Project Structure
-
-This repository currently uses a flat package layout (top-level `adapters/`, `pml/`, `cam/`, etc.) and is typically run with `PYTHONPATH=.`.
-
-### Validation Strategy
-
-1. **AST level**: Parse PML/JSON, validate structure
-2. **IR level**: Convert to RemovalIntent, check bounds/depths/constraints
-3. **CAM level**: Generate toolpaths, verify G-code output
-4. **Equivalence**: Ensure new pipeline produces identical G-code to legacy path
-
-Most development happens at **IR level** - fast, no native dependencies, high signal.
-
-## CAM Validation Infrastructure
-
-mill_ui includes a comprehensive validation system for CAM artifacts (SVG blueprints, STL meshes, G-code). This enables deterministic regression testing without byte-level file comparisons.
-
-### Architecture
-
-```
-Artifacts (SVG/STL/G-code) → Metric Extractors → Invariant Checks → Regression Compare → Verdict
-                                    ↓                    ↓                  ↓
-                              Stable metrics      Structural rules     Golden baseline
-```
-
-### Quick Start
-
-**Validate a recipe:**
-```bash
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-```
-
-**Validate with golden baseline:**
-```bash
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile \
-    --golden tests/golden/01_simple_profile/metrics.json
-```
-
-**Extract metrics only:**
-```bash
-python -m cli.validate_cam --svg output/drawing.svg --metrics-only
-```
-
-### What Gets Validated
-
-**SVG Metrics:**
-- Document dimensions, viewBox, layer structure
-- Path counts (total, closed, open), circle/rect/line counts
-- Layer-by-layer element breakdown
-
-**STL Metrics:**
-- Mesh topology (vertex/face counts, watertight, manifold)
-- Bounding dimensions, volume, surface area
-- Z-bounds for sheet thickness validation
-
-**G-code Metrics:**
-- Motion analysis (G0/G1 counts, distances, feed rates)
-- Z-profile (safe height, cutting depths)
-- Tool usage (tool numbers, spindle speeds)
-
-### Invariant Checks
-
-Built-in structural rules that catch common errors:
-
-| Category | Example Checks |
-|----------|----------------|
-| SVG | Valid XML, positive dimensions, closed profiles/pockets, bounds within viewBox |
-| STL | Watertight mesh, manifold edges, positive volume, Z within sheet thickness |
-| G-code | Safe Z on rapids, spindle before cut, max stepdown, XY within bounds |
-
-### Regression Testing
-
-Compare current metrics against golden baselines:
-
-```bash
-# Generate golden baselines
-python -m cli.generate_golden --all-recipes docs/recipes
-
-# Run regression tests
-python -m tests.test_regression
-```
-
-**Comparison modes:**
-- **Numeric**: Tolerance-based (0.01% for positions, 0.1% for volumes)
-- **Exact**: Counts, booleans (layer count, watertight flag)
-- **Structural**: Set comparison (layer names, tool list)
-
-### CLI Reference
-
-**`cli/validate_cam.py`** - Validate CAM artifacts:
-```
---recipe DIR         Recipe directory with output/ structure
---svg FILE           SVG file to validate
---stl FILE           STL file to validate
---gcode FILE...      G-code file(s) to validate
---pml FILE           PML source for intent assertions
---golden FILE        Golden metrics for regression comparison
---tolerance N        Default tolerance percent (default: 0.1)
---sheet-thickness N  Sheet thickness in mm for STL Z-bounds check
---metrics-only       Extract metrics only, skip all checks
---no-assertions      Skip intent assertions
---no-regressions     Skip regression comparison
---summary            Human-readable output
---compact            Single-line JSON output
---output FILE        Write JSON to file
---quiet              Suppress status messages
-
-Exit codes: 0=PASS, 1=WARN, 2=FAIL
-```
-
-**`cli/generate_golden.py`** - Manage golden baselines:
-```
---recipe DIR       Generate for single recipe
---all-recipes DIR  Generate for all recipes
---list             List existing baselines
---update           Overwrite existing baselines
---force            Generate even if invariants fail
---dry-run          Preview without writing
-```
-
-### Programmatic Usage
-
-```python
-from validation.runner import validate_recipe, ValidationOptions
-
-options = ValidationOptions(
-    extract_metrics=True,
-    check_invariants=True,
-    check_assertions=True,
-    check_regressions=True,
-)
-
-result = validate_recipe(
-    "docs/recipes/01_simple_profile",
-    golden_metrics=golden_metrics,
-    options=options,
-)
-
-print(f"Verdict: {result.verdict}")  # pass, warn, or fail
-print(f"Metrics: {result.metrics}")
-print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
-```
-
-### Files
-
-```
-validation/
-├── core.py              # CAMValidationResult, Verdict
-├── runner.py            # validate(), validate_recipe()
-├── metrics/
-│   ├── svg_metrics.py   # SVG metric extraction
-│   ├── stl_metrics.py   # STL metric extraction
-│   └── gcode_metrics.py # G-code metric extraction
-├── invariants/
-│   ├── svg_invariants.py   # SVG structural checks
-│   ├── stl_invariants.py   # STL topology checks
-│   └── gcode_invariants.py # G-code motion checks
-├── assertions/
-│   └── intent_assertions.py # PML/AST-derived assertions
-└── regression/
-    ├── comparator.py    # Metric delta comparison
-    └── golden_store.py  # Golden baseline management
-
-cli/
-├── validate_cam.py      # Validation CLI
-└── generate_golden.py   # Golden generation CLI
-
-tests/
-├── test_regression.py   # Regression comparator tests
-├── test_cli_validate_cam.py # CLI tests
-└── golden/              # Golden baselines for all 18 recipes
-```
-
-For detailed architecture and schemas, see [docs/cam_validation_plan.md](docs/cam_validation_plan.md).
-
-## Design Tradeoffs
-
-### Why Keep the Existing CAM Planner?
-The planner works correctly and handles complex cases (tab insertion, seam merging, multi-depth passes). Replacing it would be:
-- High risk (G-code generation is safety-critical)
-- Low value (planner quality is good)
-- Large effort (pocket raster, profile offset, tool selection)
-
-Instead: Invest in better *input* (RemovalIntent IR) and let proven planner do its job.
-
-### Why Three PML Dialects?
-- **Flat PML**: Simple, explicit, good for direct manual authoring
-- **Compositional PML**: Powerful, relative positioning, good for complex layouts with reusable components
-- **Nest PML**: Production-oriented, specifies parts + quantities for bin-packing
-
-Flat and Compositional compile to identical flat LayoutAST. Nest PML runs algorithms and outputs Flat PML files.
-
-### Why Not Use Standard Formats (STEP, SVG, DXF)?
-Standard CAD formats describe *geometry*, not *manufacturing intent*:
-- STEP: 3D solid model (no concept of "profile outside" vs "pocket 6mm deep")
-- SVG: 2D curves (no depth, no features, no constraints)
-- DXF: 2D geometry (better, but still no semantics)
-
-RemovalIntent explicitly encodes *what to machine*, not just *what shape*.
-
-Future: Import STEP/DXF → infer intent → generate RemovalIntent.
-
-## Current Limitations
-
-1. **Native CAM backend optional**: Some tests require C++ planner (not required for IR validation)
-2. **2.5D only**: No full 3D toolpaths (acceptable for sheet-based CNC routing)
-3. **Single tool per pass**: No automatic tool changes mid-operation
-4. **Limited shape library**: Rectangle, Circle, RoundedRect, Line, SplinePath (extensible)
-5. **Single template**: Only Shaker template implemented, framework ready for more
-6. **CAD export partially broken**: step.py and svg.py have broken imports; svg_dims.py and panel_stl.py may work
-7. **CLI introspection incomplete**: dump-ast/dump-removal-intent referenced in tests but not implemented
-
-These are acceptable tradeoffs for the target domain (panel-based CNC routing).
-
-## What's Next
-
-Potential extensions (not roadmap, just possibilities):
-
-- **More shapes**: Polygon, Bezier curves, imported SVG paths
-- **More templates**: Dovetail boxes, finger joints, grid patterns
-- **Advanced features**: Chamfers, fillets at IR level
-- **Simulation**: RemovalIntent → 3D volumetric preview
-- **Alternative planners**: Adaptive toolpaths, trochoidal milling
-- **Multi-material**: Different RemovalIntent per material layer
-- **CAD export**: Fix import paths, enable RemovalIntent → STEP solid model (inverse operation)
-- **CLI introspection**: Implement dump-ast, dump-removal-intent commands
-
-The IR foundation supports all of these without architectural changes.
+| Extension | Location |
+|-----------|----------|
+| Add new shape | `adapters/hints_to_removal.py:_item_geometry_to_bounds()` |
+| Add new feature | `layout_ast/layout.py:Feature`, `adapters/hints_to_removal.py` |
+| Add new template | `templates/__init__.py`, implement `expand_to_ast()` |
+| Add IR validation | `validation/removal_checks.py` |
+| Add planner strategy | `cam/planner/passes/` |
+| Add generator | `generators/area/` or `generators/loop/` |
+| Add domain operation | `domains/domain.py:Domain` class |
+
+---
 
 ## Known Issues
 
-1. **cad/export/step.py, svg.py**: Import paths reference non-existent modules (`cad.native`, `cad.layout.*`). Needs refactoring before use. `stl.py` is a 1-line stub. `svg_dims.py` and `panel_stl.py` may be functional but undocumented.
-2. **cli/introspect.py**: Referenced in `test_cli_dump.py` (line 14) but not implemented. Tests will fail on import.
-3. **Limited validation**: IR-level validation covers overlap/depth/toolability but not full geometry-level collision detection.
-4. **frame behavior**: `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles. Use `inset` if you want manual profile control.
+1. `cad/export/step.py`, `svg.py`: Import paths reference non-existent modules.
+2. `cli/introspect.py`: Referenced in tests but not implemented.
+3. `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles.
 
-## License
+---
 
-(Add license here)
+## Building the Native Backend
 
-## Contributing
+Prerequisites: CMake 3.10+, C++17 compiler, pybind11.
 
-(Add contribution guidelines here)
+```bash
+python3 -m venv venv && source venv/bin/activate
+pip install pybind11
+cmake -S cam/native/cpp -B build/native_cam -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+cmake --build build/native_cam
+cp build/native_cam/python/_native.*.so cam/native/
+```
+
+The native backend is optional. IR-level tests work without it.
+
+---
+
+## Running Tests
+
+```bash
+./run_tests.sh                              # All core tests
+./run_tests.sh run_pml_tests                # PML parser tests
+./run_tests.sh run_edge_tests               # Edge case tests
+PYTHONPATH=. python3 -m tests.run_removal_intent_tests  # IR tests
+```
+
+---
+
+## AI Instructions
+
+When modifying this repository:
+- Treat this document as authoritative for described behaviors.
+- Preserve all stated invariants.
+- Do not infer unspecified behavior.
+- If a change affects the canonical pipeline stages, update this document in the same commit.

@@ -334,6 +334,36 @@ arch door width 500mm height 800mm radius 250mm
         raised_panel border 25mm border_depth 6mm field_depth 2mm
 ```
 
+#### Polygon
+
+```
+polygon [id] points (<x>mm,<y>mm) (<x>mm,<y>mm) (<x>mm,<y>mm) ... [feature]
+    <children>
+```
+
+Creates an arbitrary polygon shape from explicit coordinate points. Minimum 3 points required.
+
+Example:
+```pml
+polygon wedge points (0mm,0mm) (100mm,0mm) (50mm,80mm)
+    pocket 6mm
+```
+
+#### Triangle
+
+```
+triangle [id] base <mm> height <mm> [feature]
+    <children>
+```
+
+Creates a triangular shape centered in the current region. The triangle has its base at the bottom and apex at the top.
+
+Example:
+```pml
+triangle corner base 100mm height 80mm
+    pocket 4mm
+```
+
 ### Template Invocation (Phase 2)
 
 ```

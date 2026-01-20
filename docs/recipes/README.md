@@ -34,6 +34,7 @@ Worked examples demonstrating mill_ui capabilities.
 | 28 | Diamond Lattice Panel | `28_diamond_lattice_panel/` |
 | 29 | Picture Frame Panel | `29_picture_frame_panel/` |
 | 30 | Cathedral Arch Door | `30_cathedral_arch_door/` |
+| 31 | X-Panel Door | `31_x_panel_door/` |
 
 ## Structure
 

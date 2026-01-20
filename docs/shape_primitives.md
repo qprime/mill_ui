@@ -106,6 +106,48 @@ Resolution:
 - Points validated to be in range [0, 1] at parse time
 - Emitted as kind="path" (open)
 
+### Polygon
+
+Arbitrary closed polygon with explicit absolute coordinates.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | str (optional) | Shape identifier |
+| points | list | Absolute coordinates in mm |
+| feature | Feature (optional) | CAM feature |
+| children | tuple (optional) | Nested layout nodes |
+
+PML: `polygon [id] points (x1mm,y1mm) (x2mm,y2mm) (x3mm,y3mm) ... [feature]`
+
+Coordinate system:
+- Points are absolute (in mm), not normalized
+- Minimum 3 points required
+
+Resolution:
+- Bounds computed from min/max of all points
+- Emitted as kind="shape", type="Polygon"
+- Children operate within bounding box of polygon
+
+### Triangle
+
+Triangular region with parametric base and height, centered in current region.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | str (optional) | Shape identifier |
+| base_mm | float | Width of triangle base |
+| height_mm | float | Height from base to apex |
+| feature | Feature (optional) | CAM feature |
+| children | tuple (optional) | Nested layout nodes |
+
+PML: `triangle [id] base <value>mm height <value>mm [feature]`
+
+Resolution:
+- Triangle centered in current region
+- Base at bottom, apex at top
+- Emitted as kind="shape", type="Polygon" with 3 points
+- Children operate within bounding box of triangle
+
 ---
 
 ## Features
@@ -147,7 +189,7 @@ Resolution:
 
 | File | Purpose |
 |------|---------|
-| layout_ast/compositional.py | Circle, RoundedRect, Line, Polyline nodes |
+| layout_ast/compositional.py | Circle, RoundedRect, Line, Polyline, Polygon, Triangle nodes |
 | resolution/layout_resolver.py | Shape resolution logic |
 | pml/compositional_parser.py | PML syntax parsing |
 | pml/compositional_formatter.py | Canonical PML formatting |

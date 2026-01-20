@@ -1,0 +1,208 @@
+[
+  {
+    "region_id": "profile_generated_profile_0",
+    "bounds": {
+      "x_min": 0.0,
+      "x_max": 400.0,
+      "y_min": 0.0,
+      "y_max": 600.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": 0.0,
+      "z_bottom": -19.0,
+      "depth_mm": 19.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "profile",
+      "shape": "Rect",
+      "side": "outside",
+      "original_id": "generated_profile_0"
+    }
+  },
+  {
+    "region_id": "profile",
+    "bounds": {
+      "x_min": 0.0,
+      "x_max": 400.0,
+      "y_min": 0.0,
+      "y_max": 600.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": 0.0,
+      "z_bottom": -19.0,
+      "depth_mm": 19.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "profile",
+      "shape": "Rect",
+      "side": "outside",
+      "original_id": ""
+    }
+  },
+  {
+    "region_id": "pocket_polygon_pocket_1",
+    "bounds": {
+      "x_min": 25.0,
+      "x_max": 275.0,
+      "y_min": 275.0,
+      "y_max": 475.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": -0.0,
+      "z_bottom": -6.0,
+      "depth_mm": 6.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "pocket",
+      "shape": "Polygon",
+      "original_id": "polygon_pocket_1"
+    }
+  },
+  {
+    "region_id": "pocket_polygon_pocket_2",
+    "bounds": {
+      "x_min": 25.0,
+      "x_max": 275.0,
+      "y_min": 25.0,
+      "y_max": 225.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": -0.0,
+      "z_bottom": -6.0,
+      "depth_mm": 6.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "pocket",
+      "shape": "Polygon",
+      "original_id": "polygon_pocket_2"
+    }
+  },
+  {
+    "region_id": "pocket_polygon_pocket_3",
+    "bounds": {
+      "x_min": 25.0,
+      "x_max": 125.0,
+      "y_min": 25.0,
+      "y_max": 475.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": -0.0,
+      "z_bottom": -6.0,
+      "depth_mm": 6.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "pocket",
+      "shape": "Polygon",
+      "original_id": "polygon_pocket_3"
+    }
+  },
+  {
+    "region_id": "pocket_polygon_pocket_4",
+    "bounds": {
+      "x_min": 175.0,
+      "x_max": 275.0,
+      "y_min": 25.0,
+      "y_max": 475.0
+    },
+    "depth_profile": {
+      "mode": "constant",
+      "z_top": -0.0,
+      "z_bottom": -6.0,
+      "depth_mm": 6.0
+    },
+    "allowance": {
+      "inside": 0.0,
+      "outside": 0.0,
+      "on": 0.0,
+      "kerf_compensation": 0.0
+    },
+    "constraints": {
+      "tabs": null,
+      "keepouts": 0,
+      "islands": 0,
+      "edge_treatment": null,
+      "tolerance_mm": 0.1,
+      "safe_z_mm": 5.0
+    },
+    "metadata": {
+      "hint_type": "pocket",
+      "shape": "Polygon",
+      "original_id": "polygon_pocket_4"
+    }
+  }
+]

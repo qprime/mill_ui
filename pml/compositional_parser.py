@@ -39,6 +39,9 @@ from layout_ast.compositional import (
     AtPosition,
     Subtract,
     Arch,
+    # Stage 15 additions (polygon/triangle)
+    Polygon,
+    Triangle,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -139,6 +142,8 @@ class CompositionalPMLLexer:
             # Stage 14 keywords
             'split_horizontal_gaps', 'at', 'subtract', 'inner',
             'arch', 'height',
+            # Stage 15 keywords (polygon/triangle)
+            'polygon', 'triangle', 'base',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -437,6 +442,11 @@ class CompositionalPMLParser:
             return self.parse_subtract()
         elif token.value == 'arch':
             return self.parse_arch()
+        # Stage 15 keywords (polygon/triangle)
+        elif token.value == 'polygon':
+            return self.parse_polygon()
+        elif token.value == 'triangle':
+            return self.parse_triangle()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
 
@@ -1297,6 +1307,103 @@ class CompositionalPMLParser:
             children=tuple(children),
             feature=feature,
             id=arch_id,
+        )
+
+    def parse_polygon(self) -> Polygon:
+        self.expect('keyword', 'polygon')
+
+        polygon_id = None
+        if self.peek().type == 'identifier':
+            polygon_id = self.advance().value
+
+        self.expect('keyword', 'points')
+
+        points = []
+        while True:
+            token = self.peek()
+
+            if token.type == 'keyword' and token.value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+                break
+            if token.type in ('newline', 'eof'):
+                break
+
+            if token.type != 'punctuation' or token.value != '(':
+                break
+            self.advance()
+
+            x_token = self.expect('number_with_unit')
+            x = x_token.value
+
+            comma_token = self.peek()
+            if comma_token.type != 'punctuation' or comma_token.value != ',':
+                raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
+                               comma_token.line, comma_token.column)
+            self.advance()
+
+            y_token = self.expect('number_with_unit')
+            y = y_token.value
+
+            close_token = self.peek()
+            if close_token.type != 'punctuation' or close_token.value != ')':
+                raise ParseError(f"Expected ')' after point, got {close_token.value}",
+                               close_token.line, close_token.column)
+            self.advance()
+
+            points.append((x, y))
+
+        if len(points) < 3:
+            token = self.peek()
+            raise ParseError(f"Polygon requires at least 3 points, got {len(points)}",
+                           token.line, token.column)
+
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return Polygon(points=tuple(points), children=tuple(children), feature=feature, id=polygon_id)
+
+    def parse_triangle(self) -> Triangle:
+        self.expect('keyword', 'triangle')
+
+        triangle_id = None
+        if self.peek().type == 'identifier':
+            triangle_id = self.advance().value
+
+        self.expect('keyword', 'base')
+        base_mm = self.expect('number_with_unit').value
+        self.expect('keyword', 'height')
+        height_mm = self.expect('number_with_unit').value
+
+        feature = None
+        if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+            feature = self.parse_feature()
+
+        self.expect_line_end()
+
+        children = []
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent':
+                children.append(self.parse_node())
+                self.skip_newlines()
+            self.expect('dedent')
+
+        return Triangle(
+            base_mm=base_mm,
+            height_mm=height_mm,
+            children=tuple(children),
+            feature=feature,
+            id=triangle_id,
         )
 
 

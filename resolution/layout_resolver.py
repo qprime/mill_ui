@@ -40,6 +40,9 @@ from layout_ast.compositional import (
     AtPosition,
     Subtract,
     Arch,
+    # Stage 15 additions (polygon/triangle)
+    Polygon,
+    Triangle,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -1120,6 +1123,144 @@ class LayoutResolver:
             else:
                 self._resolve_node(child, arch_region, items, params)
 
+    def _handle_polygon(
+        self,
+        node: Polygon,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        points = list(node.points)
+
+        xs = [p[0] for p in points]
+        ys = [p[1] for p in points]
+        bounds_center = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+
+        if node.feature is not None:
+            polygon_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": points, "holes": []}),
+                placement=Placement(center_xy_mm=bounds_center),
+                feature=node.feature,
+                shape_id=node.id or self._next_shape_id("polygon"),
+            )
+            items.append(polygon_item)
+
+        polygon_region = ResolvedRegion(
+            x_min=min(xs),
+            y_min=min(ys),
+            x_max=max(xs),
+            y_max=max(ys),
+        )
+
+        for child in node.children:
+            if isinstance(child, ProfileGen):
+                depth_value = child.depth
+                depth_mm = None if depth_value == "through" else float(depth_value)
+                profile_item = Item(
+                    kind="shape",
+                    type="Polygon",
+                    geometry=Geometry(data={"points": points, "holes": []}),
+                    placement=Placement(center_xy_mm=bounds_center),
+                    feature=Feature(
+                        type="profile",
+                        depth=str(depth_value),
+                        side=child.side,
+                        depth_mm=depth_mm,
+                    ),
+                    shape_id=self._next_shape_id("polygon_profile"),
+                )
+                items.append(profile_item)
+            elif isinstance(child, PocketGen):
+                pocket_item = Item(
+                    kind="shape",
+                    type="Polygon",
+                    geometry=Geometry(data={"points": points, "holes": []}),
+                    placement=Placement(center_xy_mm=bounds_center),
+                    feature=Feature(
+                        type="pocket",
+                        depth=str(child.depth_mm),
+                        depth_mm=child.depth_mm,
+                    ),
+                    shape_id=self._next_shape_id("polygon_pocket"),
+                )
+                items.append(pocket_item)
+            else:
+                self._resolve_node(child, polygon_region, items, params)
+
+    def _handle_triangle(
+        self,
+        node: Triangle,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        cx, cy = region.center
+        half_base = node.base_mm / 2
+        half_height = node.height_mm / 2
+
+        points = [
+            (cx - half_base, cy - half_height),
+            (cx + half_base, cy - half_height),
+            (cx, cy + half_height),
+        ]
+
+        triangle_center = (cx, cy - half_height + node.height_mm / 3)
+
+        if node.feature is not None:
+            triangle_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": points, "holes": []}),
+                placement=Placement(center_xy_mm=triangle_center),
+                feature=node.feature,
+                shape_id=node.id or self._next_shape_id("triangle"),
+            )
+            items.append(triangle_item)
+
+        triangle_region = ResolvedRegion(
+            x_min=cx - half_base,
+            y_min=cy - half_height,
+            x_max=cx + half_base,
+            y_max=cy + half_height,
+        )
+
+        for child in node.children:
+            if isinstance(child, ProfileGen):
+                depth_value = child.depth
+                depth_mm = None if depth_value == "through" else float(depth_value)
+                profile_item = Item(
+                    kind="shape",
+                    type="Polygon",
+                    geometry=Geometry(data={"points": points, "holes": []}),
+                    placement=Placement(center_xy_mm=triangle_center),
+                    feature=Feature(
+                        type="profile",
+                        depth=str(depth_value),
+                        side=child.side,
+                        depth_mm=depth_mm,
+                    ),
+                    shape_id=self._next_shape_id("triangle_profile"),
+                )
+                items.append(profile_item)
+            elif isinstance(child, PocketGen):
+                pocket_item = Item(
+                    kind="shape",
+                    type="Polygon",
+                    geometry=Geometry(data={"points": points, "holes": []}),
+                    placement=Placement(center_xy_mm=triangle_center),
+                    feature=Feature(
+                        type="pocket",
+                        depth=str(child.depth_mm),
+                        depth_mm=child.depth_mm,
+                    ),
+                    shape_id=self._next_shape_id("triangle_pocket"),
+                )
+                items.append(pocket_item)
+            else:
+                self._resolve_node(child, triangle_region, items, params)
+
     def resolve(self) -> LayoutAST:
 
         sheet_region = ResolvedRegion(
@@ -1180,6 +1321,9 @@ class LayoutResolver:
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,
                 Arch: LayoutResolver._handle_arch,
+                # Stage 15 handlers (polygon/triangle)
+                Polygon: LayoutResolver._handle_polygon,
+                Triangle: LayoutResolver._handle_triangle,
             }
         return LayoutResolver._NODE_HANDLERS
 

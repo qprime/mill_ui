@@ -350,19 +350,30 @@ class Subtract:
 
 @dataclass(frozen=True)
 class Arch:
-    """Arch shape primitive (rectangle with semicircular top).
-
-    Attributes:
-        width_mm: Width of the arch
-        height_mm: Total height including arch
-        radius_mm: Radius of the arch curve
-        children: Child nodes
-        feature: Feature for this shape
-        id: Shape ID
-    """
     width_mm: float
     height_mm: float
     radius_mm: float
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+
+
+@dataclass(frozen=True)
+class Polygon:
+    points: tuple[tuple[float, float], ...]
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+
+    def __post_init__(self):
+        if len(self.points) < 3:
+            raise ValueError(f"Polygon requires at least 3 points, got {len(self.points)}")
+
+
+@dataclass(frozen=True)
+class Triangle:
+    base_mm: float
+    height_mm: float
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None

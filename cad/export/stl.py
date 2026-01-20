@@ -73,6 +73,63 @@ def shape_dict_to_polygon(shape: dict[str, Any]) -> Polygon:
 
         return Polygon(outer_coords, holes=hole_coords if hole_coords else None)
 
+    elif shape_type == "RoundedRect":
+        w = geometry["w_mm"]
+        h = geometry["h_mm"]
+        radius_tl = geometry.get("radius_tl_mm", geometry.get("radius_mm", 0))
+        radius_tr = geometry.get("radius_tr_mm", geometry.get("radius_mm", 0))
+        radius_br = geometry.get("radius_br_mm", geometry.get("radius_mm", 0))
+        radius_bl = geometry.get("radius_bl_mm", geometry.get("radius_mm", 0))
+
+        half_w = w / 2
+        half_h = h / 2
+
+        coords = []
+        arc_resolution = 8
+
+        if radius_bl > 0:
+            for i in range(arc_resolution + 1):
+                angle = np.pi + (np.pi / 2) * (i / arc_resolution)
+                coords.append((
+                    -half_w + radius_bl + radius_bl * np.cos(angle),
+                    -half_h + radius_bl + radius_bl * np.sin(angle)
+                ))
+        else:
+            coords.append((-half_w, -half_h))
+
+        if radius_br > 0:
+            for i in range(arc_resolution + 1):
+                angle = 3 * np.pi / 2 + (np.pi / 2) * (i / arc_resolution)
+                coords.append((
+                    half_w - radius_br + radius_br * np.cos(angle),
+                    -half_h + radius_br + radius_br * np.sin(angle)
+                ))
+        else:
+            coords.append((half_w, -half_h))
+
+        if radius_tr > 0:
+            for i in range(arc_resolution + 1):
+                angle = 0 + (np.pi / 2) * (i / arc_resolution)
+                coords.append((
+                    half_w - radius_tr + radius_tr * np.cos(angle),
+                    half_h - radius_tr + radius_tr * np.sin(angle)
+                ))
+        else:
+            coords.append((half_w, half_h))
+
+        if radius_tl > 0:
+            for i in range(arc_resolution + 1):
+                angle = np.pi / 2 + (np.pi / 2) * (i / arc_resolution)
+                coords.append((
+                    -half_w + radius_tl + radius_tl * np.cos(angle),
+                    half_h - radius_tl + radius_tl * np.sin(angle)
+                ))
+        else:
+            coords.append((-half_w, half_h))
+
+        poly = Polygon(coords)
+        return affinity.translate(poly, xoff=cx, yoff=cy)
+
     else:
         raise ValueError(f"Unsupported shape type: {shape_type}")
 

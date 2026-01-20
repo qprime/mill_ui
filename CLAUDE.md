@@ -35,8 +35,25 @@ Add `--compositional` for frame/inset/grid syntax.
 - Frozen dataclasses—use `replace()` to modify
 - Test at IR level, not CAM level
 
+## Capabilities
+
+Check before implementing — these already exist:
+
+| Capability | Entry Point |
+|------------|-------------|
+| Parse PML | `pml/compositional_parser.py` |
+| Generate G-code | `cam/planner/passes/__init__.py` |
+| Export blueprint (SVG/PDF) | `cli/export_blueprint.py` |
+| Export 3D preview (STL) | `cli/export_cad.py` |
+| Validate at IR level | `validation/removal_checks.py` |
+| Nest parts on sheets | `cli/nest.py` |
+| Domain/generator composition | `domains/`, `generators/` |
+| Shaker door template | `templates/shaker.py` |
+| Profile with tabs | `pml/parser.py` |
+
 ## Don't
 
+- Implement functionality without checking Capabilities table first
 - Bypass RemovalIntent IR layer
 - Mutate frozen dataclasses
 - Create new files when editing existing ones works

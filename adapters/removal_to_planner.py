@@ -32,7 +32,10 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
         h_mm = intent.bounds.y_max - intent.bounds.y_min
         geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
     elif ShapeType.is_circle(shape):
-        diameter_mm = intent.bounds.x_max - intent.bounds.x_min
+        if GeometryKeys.DIAMETER_MM in intent.metadata:
+            diameter_mm = intent.metadata[GeometryKeys.DIAMETER_MM]
+        else:
+            diameter_mm = intent.bounds.x_max - intent.bounds.x_min
         geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
     elif ShapeType.is_polygon(shape):
         if GeometryKeys.POINTS in intent.metadata:

@@ -150,6 +150,16 @@ def hole_hint_to_removal_intent(
 
     allowance = Allowance()
 
+    metadata = {
+        MetadataKeys.HINT_TYPE: FeatureType.HOLE,
+        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+        MetadataKeys.ORIGINAL_ID: hint_id,
+    }
+
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+    shape = hint.get(HintKeys.SHAPE, "")
+    if ShapeType.is_circle(shape) and GeometryKeys.DIAMETER_MM in geometry:
+        metadata[GeometryKeys.DIAMETER_MM] = geometry[GeometryKeys.DIAMETER_MM]
 
     return RemovalIntent(
         region_id=region_id,
@@ -157,11 +167,7 @@ def hole_hint_to_removal_intent(
         depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=Constraints(),
-        metadata={
-            MetadataKeys.HINT_TYPE: FeatureType.HOLE,
-            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
-            MetadataKeys.ORIGINAL_ID: hint_id,
-        },
+        metadata=metadata,
     )
 
 

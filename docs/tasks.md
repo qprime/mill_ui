@@ -21,6 +21,7 @@ Load this document when you need code examples for standard operations.
 | [Create Design with Domains](#task-7-create-design-with-domains) | Build complex designs using domain algebra |
 | [Run Nesting](#task-8-run-nesting) | Optimize part placement on sheets |
 | [Run Tests](#task-9-run-tests) | Verify changes with IR and CAM tests |
+| [Generate G-code](#task-10-generate-g-code) | Export CNC-ready G-code from PML |
 
 ---
 
@@ -270,3 +271,58 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 ```
 
 **Key point:** Prefer IR tests for development velocity. Run CAM tests only when planner behavior changes.
+
+---
+
+## Task 10: Generate G-code
+
+**Use case:** Export CNC-ready G-code from PML layouts.
+
+**CLI (regenerate all recipe outputs):**
+```bash
+python tests/test_recipes.py --regen_recipes
+```
+
+**Programmatic:**
+```python
+from pml.compositional_parser import parse_compositional_pml
+from resolution.layout_resolver import resolve_layout
+from adapters.ast_to_removal import ast_to_removal_intents
+from adapters.removal_to_planner import removal_intents_to_v1_hints
+from cam.planner.passes import plan_passes
+from cam.post.gcode import write_gcode
+from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.stock import Stock
+from cam.config import Config
+
+pml = """
+sheet 300mm 200mm 19mm
+rounded_rect table_top radius 20mm corners tl tr profile through outside
+"""
+
+comp_ast = parse_compositional_pml(pml)
+ast = resolve_layout(comp_ast)
+intents = ast_to_removal_intents(ast)
+hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175)
+
+tool_db = [{"name": "1/8 endmill", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300}]
+stock = Stock(width=ast.sheet.width_mm, height=ast.sheet.height_mm, thickness=ast.sheet.thickness_mm)
+
+passes, summary = plan_passes(
+    hints,
+    config=Config(),
+    tool_db=tool_db,
+    material=Material(name="MDF"),
+    machine=Machine(name="default_grbl"),
+    stock=stock,
+)
+
+for p in passes:
+    gcode = write_gcode(p["moves"], unit="mm", prec=3, safe_z=5.0)
+    open(p["filename"], "w").write(gcode)
+```
+
+**Supported shapes:** Rect, Circle, Polygon, RoundedRect (including selective corner rounding).
+
+**Key point:** The planner handles tool compensation automatically based on the `side` parameter (inside/outside/on).

@@ -8,8 +8,6 @@
 
 CAM system that generates G-code for CNC routers. Converts panel layouts (PML/JSON) through a semantic IR layer (RemovalIntent) to toolpaths.
 
-**User projects:** `/home/squinlan/cliff_ai/memories/cam_projects/mill_ui`
-
 ## Mental Model
 
 Compiler-style pipeline: `PML/JSON → LayoutAST → RemovalIntent IR → Planner → G-code`
@@ -19,14 +17,14 @@ RemovalIntent is the semantic layer—validates *what* to machine before *how* t
 ## Quick Commands
 
 ```bash
-python -m cli.convert_layout --from pml --to json input.pml output.json
-python -m cli.export_cad --input layout.pml --out output/ --kerf 6.35 --quality high
-python -m cli.export_blueprint --input layout.pml --out output/ --theme dark
+python -m cli.export_cad --project my_table --input layout.pml --kerf 6.35
+python -m cli.export_blueprint --project my_table --input layout.pml --theme dark
+python -m cli.nest --project my_table job.nest -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-python -m cli.nest job.nest -o output/ -v
+python tests/test_recipes.py --regen_recipes
 ```
 
-Add `--compositional` for frame/inset/grid syntax.
+Use `--project <name>` to work with user project files. Add `--compositional` for frame/inset/grid syntax.
 
 ## Code Style
 
@@ -42,7 +40,7 @@ Check before implementing — these already exist:
 | Capability | Entry Point |
 |------------|-------------|
 | Parse PML | `pml/compositional_parser.py` |
-| Generate G-code | `cam/planner/passes/__init__.py` |
+| Generate G-code | `tests/test_recipes.py --regen_recipes` |
 | Export blueprint (SVG/PDF) | `cli/export_blueprint.py` |
 | Export 3D preview (STL) | `cli/export_cad.py` |
 | Validate at IR level | `validation/removal_checks.py` |
@@ -50,6 +48,7 @@ Check before implementing — these already exist:
 | Domain/generator composition | `domains/`, `generators/` |
 | Shaker door template | `templates/shaker.py` |
 | Profile with tabs | `pml/parser.py` |
+| Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 
 ## Don't
 

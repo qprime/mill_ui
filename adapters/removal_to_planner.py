@@ -32,11 +32,25 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
         h_mm = intent.bounds.y_max - intent.bounds.y_min
         geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
     elif ShapeType.is_circle(shape):
-
         diameter_mm = intent.bounds.x_max - intent.bounds.x_min
         geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
+    elif ShapeType.is_polygon(shape):
+        if GeometryKeys.POINTS in intent.metadata:
+            geometry = {GeometryKeys.POINTS: intent.metadata[GeometryKeys.POINTS]}
+        else:
+            w_mm = intent.bounds.x_max - intent.bounds.x_min
+            h_mm = intent.bounds.y_max - intent.bounds.y_min
+            geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
+    elif shape == ShapeType.ROUNDED_RECT:
+        w_mm = intent.bounds.x_max - intent.bounds.x_min
+        h_mm = intent.bounds.y_max - intent.bounds.y_min
+        geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
+        if GeometryKeys.RADIUS_MM in intent.metadata:
+            geometry[GeometryKeys.RADIUS_MM] = intent.metadata[GeometryKeys.RADIUS_MM]
+        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
+            if key in intent.metadata:
+                geometry[key] = intent.metadata[key]
     elif ShapeType.is_polyline(shape):
-
         if GeometryKeys.POINTS in intent.metadata:
             geometry = {GeometryKeys.POINTS: intent.metadata[GeometryKeys.POINTS]}
         else:
@@ -44,7 +58,6 @@ def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
             h_mm = intent.bounds.y_max - intent.bounds.y_min
             geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
     else:
-
         w_mm = intent.bounds.x_max - intent.bounds.x_min
         h_mm = intent.bounds.y_max - intent.bounds.y_min
         geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}

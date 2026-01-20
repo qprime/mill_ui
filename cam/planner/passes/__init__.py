@@ -11,7 +11,16 @@ from cam.model.stock import Stock
 
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
-from .profile import circle_shape_mm, ensure_center, profile_moves_with_options, rect_shape
+from .profile import (
+    circle_shape_mm,
+    ensure_center,
+    offset_polygon_shape,
+    offset_rounded_rect_shape,
+    polygon_shape,
+    profile_moves_with_options,
+    rect_shape,
+    rounded_rect_shape,
+)
 from .summary import summarise_passes
 from .tools import ToolSelection, pass_key, pick_tool_for_profile, tool_identity
 
@@ -162,6 +171,8 @@ def plan_passes(
 
     rect_profiles = [rec for rec in profiles if _shape_name(rec) == "rect"]
     circle_profiles = [rec for rec in profiles if _shape_name(rec) == "circle"]
+    polygon_profiles = [rec for rec in profiles if _shape_name(rec) == "polygon"]
+    rounded_rect_profiles = [rec for rec in profiles if _shape_name(rec) == "roundedrect"]
 
     merged_seams = 0
     if merge_enabled and rect_profiles:
@@ -210,6 +221,77 @@ def plan_passes(
         if radius <= 0.0:
             continue
         shape = circle_shape_mm(radius * 2.0, ensure_center(rec))
+        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+        record.add_moves(
+            profile_moves_with_options(
+                shape,
+                setup=record.setup,
+                depth_mm=depth,
+                tool=profile_tool,
+                onion_skin_mm=onion_skin_mm,
+                tabs_opts=_tabs_for_record(rec),
+            ),
+            increment=1,
+        )
+
+    for rec in polygon_profiles:
+        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        record = accumulator.get_record("profile", profile_tool)
+        geom = rec.get("geometry") or {}
+        points = geom.get("points", [])
+        if not points:
+            continue
+        side = str(rec.get("side", "on")).lower()
+        tool_radius = 0.5 * profile_tool.diameter
+        offset = 0.0
+        if side == "outside":
+            offset = tool_radius
+        elif side == "inside":
+            offset = -tool_radius
+        if offset != 0.0:
+            shape = offset_polygon_shape(points, ensure_center(rec), offset)
+        else:
+            shape = polygon_shape(points, ensure_center(rec))
+        if shape is None:
+            continue
+        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+        record.add_moves(
+            profile_moves_with_options(
+                shape,
+                setup=record.setup,
+                depth_mm=depth,
+                tool=profile_tool,
+                onion_skin_mm=onion_skin_mm,
+                tabs_opts=_tabs_for_record(rec),
+            ),
+            increment=1,
+        )
+
+    for rec in rounded_rect_profiles:
+        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        record = accumulator.get_record("profile", profile_tool)
+        geom = rec.get("geometry") or {}
+        width = float(geom.get("w_mm", 0.0))
+        height = float(geom.get("h_mm", 0.0))
+        radii = {
+            'tl': float(geom.get('radius_tl_mm', geom.get('radius_mm', 0.0))),
+            'tr': float(geom.get('radius_tr_mm', geom.get('radius_mm', 0.0))),
+            'br': float(geom.get('radius_br_mm', geom.get('radius_mm', 0.0))),
+            'bl': float(geom.get('radius_bl_mm', geom.get('radius_mm', 0.0))),
+        }
+        side = str(rec.get("side", "on")).lower()
+        tool_radius = 0.5 * profile_tool.diameter
+        offset = 0.0
+        if side == "outside":
+            offset = tool_radius
+        elif side == "inside":
+            offset = -tool_radius
+        if offset != 0.0:
+            shape = offset_rounded_rect_shape(width, height, radii, ensure_center(rec), offset)
+        else:
+            shape = rounded_rect_shape(width, height, radii, ensure_center(rec))
+        if shape is None:
+            continue
         depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(

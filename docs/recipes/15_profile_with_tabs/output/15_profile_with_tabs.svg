@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="880.0" height="680.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -23,6 +24,9 @@
   <g id="POCKET_REGIONS" class="pocket-regions" />
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="440.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">cutout</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="240.0" y1="215.0" x2="240.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -42,6 +46,8 @@
     <text x="20" y="560.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="572.0" class="notes">Sheet: 600.0 × 400.0 × 19.0mm</text>
     <text x="20" y="584.0" class="notes">Features: 1 profile</text>
+    <text x="20" y="596.0" class="notes">Parts (1):</text>
+    <text x="30" y="608.0" class="notes">• cutout</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="1525.0" height="1512.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -45,6 +46,30 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1_panel</text>
+    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1</text>
+    <text x="841.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2_panel</text>
+    <text x="841.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2</text>
+    <text x="378.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3_panel</text>
+    <text x="378.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3</text>
+    <text x="841.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4_panel</text>
+    <text x="841.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4</text>
+    <text x="1203.0" y="226.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1_panel</text>
+    <text x="1203.0" y="226.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1</text>
+    <text x="1203.0" y="384.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2_panel</text>
+    <text x="1203.0" y="384.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2</text>
+    <text x="1203.0" y="542.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3_panel</text>
+    <text x="1203.0" y="542.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3</text>
+    <text x="1203.0" y="700.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4_panel</text>
+    <text x="1203.0" y="700.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4</text>
+    <text x="1203.0" y="858.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5_panel</text>
+    <text x="1203.0" y="858.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5</text>
+    <text x="1203.0" y="1016.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6_panel</text>
+    <text x="1203.0" y="1016.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6</text>
+    <text x="1203.0" y="1174.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7_panel</text>
+    <text x="1203.0" y="1174.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="207.0" y1="207.0" x2="207.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -118,6 +143,29 @@
     <text x="20" y="1416.0" class="notes">Features: 11 pockets, 11 profiles</text>
     <text x="20" y="1428.0" class="notes">Depths:</text>
     <text x="30" y="1440.0" class="notes">• pocket: 4.0, 6.0</text>
+    <text x="20" y="1452.0" class="notes">Parts (22):</text>
+    <text x="30" y="1464.0" class="notes">• door1</text>
+    <text x="30" y="1476.0" class="notes">• door1_panel</text>
+    <text x="30" y="1488.0" class="notes">• door2</text>
+    <text x="30" y="1500.0" class="notes">• door2_panel</text>
+    <text x="30" y="1512.0" class="notes">• door3</text>
+    <text x="30" y="1524.0" class="notes">• door3_panel</text>
+    <text x="30" y="1536.0" class="notes">• door4</text>
+    <text x="30" y="1548.0" class="notes">• door4_panel</text>
+    <text x="30" y="1560.0" class="notes">• drawer1</text>
+    <text x="30" y="1572.0" class="notes">• drawer1_panel</text>
+    <text x="30" y="1584.0" class="notes">• drawer2</text>
+    <text x="30" y="1596.0" class="notes">• drawer2_panel</text>
+    <text x="30" y="1608.0" class="notes">• drawer3</text>
+    <text x="30" y="1620.0" class="notes">• drawer3_panel</text>
+    <text x="30" y="1632.0" class="notes">• drawer4</text>
+    <text x="30" y="1644.0" class="notes">• drawer4_panel</text>
+    <text x="30" y="1656.0" class="notes">• drawer5</text>
+    <text x="30" y="1668.0" class="notes">• drawer5_panel</text>
+    <text x="30" y="1680.0" class="notes">• drawer6</text>
+    <text x="30" y="1692.0" class="notes">• drawer6_panel</text>
+    <text x="30" y="1704.0" class="notes">• drawer7</text>
+    <text x="30" y="1716.0" class="notes">• drawer7_panel</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

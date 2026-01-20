@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="780.0" height="1080.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -25,8 +26,50 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="390.0" y="540.0" class="part-label" text-anchor="middle" dominant-baseline="middle">arch_profile_0</text>
+    <text x="390.00000000000017" y="520.9169360237175" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_arch_raised_panel_1_border</text>
+    <text x="390.0" y="523.3278821886618" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_arch_raised_panel_1_field</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
-  <g id="DIMENSIONS" class="dimensions" />
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="225.0" y1="225.0" x2="225.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="555.0" y1="225.0" x2="555.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="225.0" y1="120.0" x2="555.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="225.0,120.0 228.0,117.0 228.0,123.0" fill="#5ab9ea" />
+    <polygon points="555.0,120.0 552.0,117.0 552.0,123.0" fill="#5ab9ea" />
+    <text x="390.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">330.0mm</text>
+    <line x1="555.0" y1="225.0" x2="660.0" y2="225.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="555.0" y1="854.9344175187452" x2="660.0" y2="854.9344175187452" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="660.0" y1="225.0" x2="660.0" y2="854.9344175187452" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="660.0,225.0 657.0,228.0 663.0,228.0" fill="#5ab9ea" />
+    <polygon points="660.0,854.9344175187452 657.0,851.9344175187452 663.0,851.9344175187452" fill="#5ab9ea" />
+    <text x="665.0" y="539.9672087593726" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 539.9672087593726)">629.9mm</text>
+    <line x1="555.0" y1="225.0" x2="680.0" y2="225.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="555.0" y1="688.3308143894334" x2="680.0" y2="688.3308143894334" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="680.0" y1="225.0" x2="680.0" y2="688.3308143894334" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="680.0,225.0 677.0,228.0 683.0,228.0" fill="#5ab9ea" />
+    <polygon points="680.0,688.3308143894334 677.0,685.3308143894334 683.0,685.3308143894334" fill="#5ab9ea" />
+    <text x="685.0" y="456.6654071947167" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 685.0 456.6654071947167)">463.3mm</text>
+    <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="640.0" y1="140.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="100.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,100.0 143.0,97.0 143.0,103.0" fill="#5ab9ea" />
+    <polygon points="640.0,100.0 637.0,97.0 637.0,103.0" fill="#5ab9ea" />
+    <text x="390.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">500.0mm</text>
+    <line x1="640.0" y1="140.0" x2="700.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="640.0" y1="940.0" x2="700.0" y2="940.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="700.0" y1="140.0" x2="700.0" y2="940.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="700.0,140.0 697.0,143.0 703.0,143.0" fill="#5ab9ea" />
+    <polygon points="700.0,940.0 697.0,937.0 703.0,937.0" fill="#5ab9ea" />
+    <text x="705.0" y="540.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 705.0 540.0)">800.0mm</text>
+    <line x1="640.0" y1="140.0" x2="720.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="640.0" y1="690.0" x2="720.0" y2="690.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="720.0" y1="140.0" x2="720.0" y2="690.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="720.0,140.0 717.0,143.0 723.0,143.0" fill="#5ab9ea" />
+    <polygon points="720.0,690.0 717.0,687.0 723.0,687.0" fill="#5ab9ea" />
+    <text x="725.0" y="415.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 725.0 415.0)">550.0mm</text>
+  </g>
   <g id="NOTES" class="notes">
     <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="972.0" class="notes">Sheet: 500.0 × 800.0 × 19.0mm</text>
@@ -34,6 +77,10 @@
     <text x="20" y="996.0" class="notes">Depths:</text>
     <text x="30" y="1008.0" class="notes">• bevel: 6.0</text>
     <text x="30" y="1020.0" class="notes">• pocket: 2.0</text>
+    <text x="20" y="1032.0" class="notes">Parts (3):</text>
+    <text x="30" y="1044.0" class="notes">• arch_profile_0</text>
+    <text x="30" y="1056.0" class="notes">• generated_arch_raised_panel_1_border</text>
+    <text x="30" y="1068.0" class="notes">• generated_arch_raised_panel_1_field</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

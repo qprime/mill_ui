@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="580.0" height="580.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -182,6 +183,167 @@
     <polyline points="391.25,438.76120467488715 395.0,438.0 398.75,438.76120467488715" />
   </g>
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="290.0" y="290.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
+    <text x="185.0" y="141.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_000</text>
+    <text x="245.0" y="141.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_001</text>
+    <text x="305.0" y="141.52394525479136" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_002</text>
+    <text x="365.0" y="141.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_003</text>
+    <text x="425.0" y="141.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_004</text>
+    <text x="185.0" y="144.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_005</text>
+    <text x="245.0" y="144.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_006</text>
+    <text x="305.0" y="144.52394525479136" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_007</text>
+    <text x="365.0" y="144.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_008</text>
+    <text x="425.0" y="144.52394525479133" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_009</text>
+    <text x="185.0" y="146.1819135601798" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_010</text>
+    <text x="245.0" y="146.1819135601798" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_011</text>
+    <text x="305.0" y="146.1819135601798" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_012</text>
+    <text x="365.0" y="146.1819135601798" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_013</text>
+    <text x="425.0" y="146.1819135601798" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_014</text>
+    <text x="185.0" y="147.58593276902872" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_015</text>
+    <text x="245.0" y="147.58593276902872" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_016</text>
+    <text x="305.0" y="147.58593276902872" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_017</text>
+    <text x="365.0" y="147.58593276902872" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_018</text>
+    <text x="425.0" y="147.58593276902872" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_019</text>
+    <text x="141.875" y="143.08658283817454" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_020</text>
+    <text x="185.0" y="148.8745205703597" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_021</text>
+    <text x="245.0" y="148.8745205703597" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_022</text>
+    <text x="305.0" y="148.8745205703597" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_023</text>
+    <text x="365.0" y="148.8745205703597" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_024</text>
+    <text x="423.125" y="149.64465605976076" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_025</text>
+    <text x="143.75" y="144.36736595482787" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_026</text>
+    <text x="185.0" y="150.1905838961712" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_027</text>
+    <text x="245.0" y="150.1905838961712" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_028</text>
+    <text x="305.0" y="150.1905838961712" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_029</text>
+    <text x="365.0" y="150.1905838961712" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_030</text>
+    <text x="421.25" y="151.57959025324928" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_031</text>
+    <text x="290.0" y="151.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_032</text>
+    <text x="290.0" y="154.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_033</text>
+    <text x="290.0" y="157.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_034</text>
+    <text x="290.0" y="160.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_035</text>
+    <text x="290.0" y="163.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_036</text>
+    <text x="290.0" y="166.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_037</text>
+    <text x="290.0" y="169.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_038</text>
+    <text x="290.0" y="172.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_039</text>
+    <text x="290.0" y="175.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_040</text>
+    <text x="290.0" y="178.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_041</text>
+    <text x="290.0" y="181.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_042</text>
+    <text x="290.0" y="184.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_043</text>
+    <text x="290.0" y="187.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_044</text>
+    <text x="290.0" y="190.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_045</text>
+    <text x="290.0" y="193.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_046</text>
+    <text x="290.0" y="196.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_047</text>
+    <text x="290.0" y="199.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_048</text>
+    <text x="290.0" y="202.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_049</text>
+    <text x="290.0" y="205.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_050</text>
+    <text x="290.0" y="208.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_051</text>
+    <text x="290.0" y="211.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_052</text>
+    <text x="290.0" y="214.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_053</text>
+    <text x="290.0" y="217.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_054</text>
+    <text x="290.0" y="220.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_055</text>
+    <text x="290.0" y="223.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_056</text>
+    <text x="290.0" y="226.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_057</text>
+    <text x="290.0" y="229.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_058</text>
+    <text x="290.0" y="232.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_059</text>
+    <text x="290.0" y="235.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_060</text>
+    <text x="290.0" y="238.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_061</text>
+    <text x="290.0" y="241.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_062</text>
+    <text x="290.0" y="244.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_063</text>
+    <text x="290.0" y="247.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_064</text>
+    <text x="290.0" y="250.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_065</text>
+    <text x="290.0" y="253.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_066</text>
+    <text x="290.0" y="256.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_067</text>
+    <text x="290.0" y="259.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_068</text>
+    <text x="290.0" y="262.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_069</text>
+    <text x="290.0" y="265.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_070</text>
+    <text x="290.0" y="268.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_071</text>
+    <text x="290.0" y="271.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_072</text>
+    <text x="290.0" y="274.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_073</text>
+    <text x="290.0" y="277.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_074</text>
+    <text x="290.0" y="280.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_075</text>
+    <text x="290.0" y="283.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_076</text>
+    <text x="290.0" y="286.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_077</text>
+    <text x="290.0" y="289.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_078</text>
+    <text x="290.0" y="292.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_079</text>
+    <text x="290.0" y="295.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_080</text>
+    <text x="290.0" y="298.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_081</text>
+    <text x="290.0" y="301.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_082</text>
+    <text x="290.0" y="304.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_083</text>
+    <text x="290.0" y="307.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_084</text>
+    <text x="290.0" y="310.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_085</text>
+    <text x="290.0" y="313.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_086</text>
+    <text x="290.0" y="316.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_087</text>
+    <text x="290.0" y="319.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_088</text>
+    <text x="290.0" y="322.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_089</text>
+    <text x="290.0" y="325.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_090</text>
+    <text x="290.0" y="328.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_091</text>
+    <text x="290.0" y="331.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_092</text>
+    <text x="290.0" y="334.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_093</text>
+    <text x="290.0" y="337.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_094</text>
+    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_095</text>
+    <text x="290.0" y="343.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_096</text>
+    <text x="290.0" y="346.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_097</text>
+    <text x="290.0" y="349.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_098</text>
+    <text x="290.0" y="352.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_099</text>
+    <text x="290.0" y="355.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_100</text>
+    <text x="290.0" y="358.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_101</text>
+    <text x="290.0" y="361.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_102</text>
+    <text x="290.0" y="364.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_103</text>
+    <text x="290.0" y="367.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_104</text>
+    <text x="290.0" y="370.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_105</text>
+    <text x="290.0" y="373.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_106</text>
+    <text x="290.0" y="376.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_107</text>
+    <text x="290.0" y="379.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_108</text>
+    <text x="290.0" y="382.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_109</text>
+    <text x="290.0" y="385.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_110</text>
+    <text x="290.0" y="388.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_111</text>
+    <text x="290.0" y="391.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_112</text>
+    <text x="290.0" y="394.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_113</text>
+    <text x="290.0" y="397.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_114</text>
+    <text x="290.0" y="400.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_115</text>
+    <text x="290.0" y="403.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_116</text>
+    <text x="290.0" y="406.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_117</text>
+    <text x="290.0" y="409.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_118</text>
+    <text x="290.0" y="412.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_119</text>
+    <text x="290.0" y="415.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_120</text>
+    <text x="290.0" y="418.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_121</text>
+    <text x="290.0" y="421.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_122</text>
+    <text x="290.0" y="424.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_123</text>
+    <text x="290.0" y="427.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_124</text>
+    <text x="290.0" y="430.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_125</text>
+    <text x="156.875" y="428.35534394023927" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_126</text>
+    <text x="215.0" y="429.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_127</text>
+    <text x="275.0" y="429.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_128</text>
+    <text x="335.0" y="429.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_129</text>
+    <text x="395.0" y="429.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_130</text>
+    <text x="438.125" y="434.91341716182546" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_131</text>
+    <text x="156.875" y="431.35534394023927" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_132</text>
+    <text x="215.0" y="432.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_133</text>
+    <text x="275.0" y="432.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_134</text>
+    <text x="335.0" y="432.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_135</text>
+    <text x="395.0" y="432.12547942964034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_136</text>
+    <text x="438.125" y="437.91341716182546" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_137</text>
+    <text x="155.0" y="433.4140672309713" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_138</text>
+    <text x="215.0" y="433.4140672309713" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_139</text>
+    <text x="275.0" y="433.4140672309713" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_140</text>
+    <text x="335.0" y="433.4140672309713" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_141</text>
+    <text x="395.0" y="433.4140672309713" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_142</text>
+    <text x="155.0" y="434.8180864398202" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_143</text>
+    <text x="215.0" y="434.8180864398202" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_144</text>
+    <text x="275.0" y="434.8180864398202" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_145</text>
+    <text x="335.0" y="434.8180864398202" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_146</text>
+    <text x="395.0" y="434.8180864398202" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_147</text>
+    <text x="155.0" y="436.47605474520867" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_148</text>
+    <text x="215.0" y="436.47605474520867" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_149</text>
+    <text x="275.0" y="436.47605474520867" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_150</text>
+    <text x="335.0" y="436.47605474520867" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_151</text>
+    <text x="395.0" y="436.47605474520867" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_152</text>
+    <text x="155.0" y="438.5074697832581" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_153</text>
+    <text x="215.0" y="438.5074697832581" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_154</text>
+    <text x="275.0" y="438.5074697832581" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_155</text>
+    <text x="335.0" y="438.5074697832581" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_156</text>
+    <text x="395.0" y="438.5074697832581" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_wave_1_157</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="140.0" y1="140.0" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -203,6 +365,166 @@
     <text x="20" y="484.0" class="notes">Features: 1 profile, 158 engraves</text>
     <text x="20" y="496.0" class="notes">Depths:</text>
     <text x="30" y="508.0" class="notes">• engrave: 2.0</text>
+    <text x="20" y="520.0" class="notes">Parts (159):</text>
+    <text x="30" y="532.0" class="notes">• generated_profile_0</text>
+    <text x="30" y="544.0" class="notes">• generated_wave_1_000</text>
+    <text x="30" y="556.0" class="notes">• generated_wave_1_001</text>
+    <text x="30" y="568.0" class="notes">• generated_wave_1_002</text>
+    <text x="30" y="580.0" class="notes">• generated_wave_1_003</text>
+    <text x="30" y="592.0" class="notes">• generated_wave_1_004</text>
+    <text x="30" y="604.0" class="notes">• generated_wave_1_005</text>
+    <text x="30" y="616.0" class="notes">• generated_wave_1_006</text>
+    <text x="30" y="628.0" class="notes">• generated_wave_1_007</text>
+    <text x="30" y="640.0" class="notes">• generated_wave_1_008</text>
+    <text x="30" y="652.0" class="notes">• generated_wave_1_009</text>
+    <text x="30" y="664.0" class="notes">• generated_wave_1_010</text>
+    <text x="30" y="676.0" class="notes">• generated_wave_1_011</text>
+    <text x="30" y="688.0" class="notes">• generated_wave_1_012</text>
+    <text x="30" y="700.0" class="notes">• generated_wave_1_013</text>
+    <text x="30" y="712.0" class="notes">• generated_wave_1_014</text>
+    <text x="30" y="724.0" class="notes">• generated_wave_1_015</text>
+    <text x="30" y="736.0" class="notes">• generated_wave_1_016</text>
+    <text x="30" y="748.0" class="notes">• generated_wave_1_017</text>
+    <text x="30" y="760.0" class="notes">• generated_wave_1_018</text>
+    <text x="30" y="772.0" class="notes">• generated_wave_1_019</text>
+    <text x="30" y="784.0" class="notes">• generated_wave_1_020</text>
+    <text x="30" y="796.0" class="notes">• generated_wave_1_021</text>
+    <text x="30" y="808.0" class="notes">• generated_wave_1_022</text>
+    <text x="30" y="820.0" class="notes">• generated_wave_1_023</text>
+    <text x="30" y="832.0" class="notes">• generated_wave_1_024</text>
+    <text x="30" y="844.0" class="notes">• generated_wave_1_025</text>
+    <text x="30" y="856.0" class="notes">• generated_wave_1_026</text>
+    <text x="30" y="868.0" class="notes">• generated_wave_1_027</text>
+    <text x="30" y="880.0" class="notes">• generated_wave_1_028</text>
+    <text x="30" y="892.0" class="notes">• generated_wave_1_029</text>
+    <text x="30" y="904.0" class="notes">• generated_wave_1_030</text>
+    <text x="30" y="916.0" class="notes">• generated_wave_1_031</text>
+    <text x="30" y="928.0" class="notes">• generated_wave_1_032</text>
+    <text x="30" y="940.0" class="notes">• generated_wave_1_033</text>
+    <text x="30" y="952.0" class="notes">• generated_wave_1_034</text>
+    <text x="30" y="964.0" class="notes">• generated_wave_1_035</text>
+    <text x="30" y="976.0" class="notes">• generated_wave_1_036</text>
+    <text x="30" y="988.0" class="notes">• generated_wave_1_037</text>
+    <text x="30" y="1000.0" class="notes">• generated_wave_1_038</text>
+    <text x="30" y="1012.0" class="notes">• generated_wave_1_039</text>
+    <text x="30" y="1024.0" class="notes">• generated_wave_1_040</text>
+    <text x="30" y="1036.0" class="notes">• generated_wave_1_041</text>
+    <text x="30" y="1048.0" class="notes">• generated_wave_1_042</text>
+    <text x="30" y="1060.0" class="notes">• generated_wave_1_043</text>
+    <text x="30" y="1072.0" class="notes">• generated_wave_1_044</text>
+    <text x="30" y="1084.0" class="notes">• generated_wave_1_045</text>
+    <text x="30" y="1096.0" class="notes">• generated_wave_1_046</text>
+    <text x="30" y="1108.0" class="notes">• generated_wave_1_047</text>
+    <text x="30" y="1120.0" class="notes">• generated_wave_1_048</text>
+    <text x="30" y="1132.0" class="notes">• generated_wave_1_049</text>
+    <text x="30" y="1144.0" class="notes">• generated_wave_1_050</text>
+    <text x="30" y="1156.0" class="notes">• generated_wave_1_051</text>
+    <text x="30" y="1168.0" class="notes">• generated_wave_1_052</text>
+    <text x="30" y="1180.0" class="notes">• generated_wave_1_053</text>
+    <text x="30" y="1192.0" class="notes">• generated_wave_1_054</text>
+    <text x="30" y="1204.0" class="notes">• generated_wave_1_055</text>
+    <text x="30" y="1216.0" class="notes">• generated_wave_1_056</text>
+    <text x="30" y="1228.0" class="notes">• generated_wave_1_057</text>
+    <text x="30" y="1240.0" class="notes">• generated_wave_1_058</text>
+    <text x="30" y="1252.0" class="notes">• generated_wave_1_059</text>
+    <text x="30" y="1264.0" class="notes">• generated_wave_1_060</text>
+    <text x="30" y="1276.0" class="notes">• generated_wave_1_061</text>
+    <text x="30" y="1288.0" class="notes">• generated_wave_1_062</text>
+    <text x="30" y="1300.0" class="notes">• generated_wave_1_063</text>
+    <text x="30" y="1312.0" class="notes">• generated_wave_1_064</text>
+    <text x="30" y="1324.0" class="notes">• generated_wave_1_065</text>
+    <text x="30" y="1336.0" class="notes">• generated_wave_1_066</text>
+    <text x="30" y="1348.0" class="notes">• generated_wave_1_067</text>
+    <text x="30" y="1360.0" class="notes">• generated_wave_1_068</text>
+    <text x="30" y="1372.0" class="notes">• generated_wave_1_069</text>
+    <text x="30" y="1384.0" class="notes">• generated_wave_1_070</text>
+    <text x="30" y="1396.0" class="notes">• generated_wave_1_071</text>
+    <text x="30" y="1408.0" class="notes">• generated_wave_1_072</text>
+    <text x="30" y="1420.0" class="notes">• generated_wave_1_073</text>
+    <text x="30" y="1432.0" class="notes">• generated_wave_1_074</text>
+    <text x="30" y="1444.0" class="notes">• generated_wave_1_075</text>
+    <text x="30" y="1456.0" class="notes">• generated_wave_1_076</text>
+    <text x="30" y="1468.0" class="notes">• generated_wave_1_077</text>
+    <text x="30" y="1480.0" class="notes">• generated_wave_1_078</text>
+    <text x="30" y="1492.0" class="notes">• generated_wave_1_079</text>
+    <text x="30" y="1504.0" class="notes">• generated_wave_1_080</text>
+    <text x="30" y="1516.0" class="notes">• generated_wave_1_081</text>
+    <text x="30" y="1528.0" class="notes">• generated_wave_1_082</text>
+    <text x="30" y="1540.0" class="notes">• generated_wave_1_083</text>
+    <text x="30" y="1552.0" class="notes">• generated_wave_1_084</text>
+    <text x="30" y="1564.0" class="notes">• generated_wave_1_085</text>
+    <text x="30" y="1576.0" class="notes">• generated_wave_1_086</text>
+    <text x="30" y="1588.0" class="notes">• generated_wave_1_087</text>
+    <text x="30" y="1600.0" class="notes">• generated_wave_1_088</text>
+    <text x="30" y="1612.0" class="notes">• generated_wave_1_089</text>
+    <text x="30" y="1624.0" class="notes">• generated_wave_1_090</text>
+    <text x="30" y="1636.0" class="notes">• generated_wave_1_091</text>
+    <text x="30" y="1648.0" class="notes">• generated_wave_1_092</text>
+    <text x="30" y="1660.0" class="notes">• generated_wave_1_093</text>
+    <text x="30" y="1672.0" class="notes">• generated_wave_1_094</text>
+    <text x="30" y="1684.0" class="notes">• generated_wave_1_095</text>
+    <text x="30" y="1696.0" class="notes">• generated_wave_1_096</text>
+    <text x="30" y="1708.0" class="notes">• generated_wave_1_097</text>
+    <text x="30" y="1720.0" class="notes">• generated_wave_1_098</text>
+    <text x="30" y="1732.0" class="notes">• generated_wave_1_099</text>
+    <text x="30" y="1744.0" class="notes">• generated_wave_1_100</text>
+    <text x="30" y="1756.0" class="notes">• generated_wave_1_101</text>
+    <text x="30" y="1768.0" class="notes">• generated_wave_1_102</text>
+    <text x="30" y="1780.0" class="notes">• generated_wave_1_103</text>
+    <text x="30" y="1792.0" class="notes">• generated_wave_1_104</text>
+    <text x="30" y="1804.0" class="notes">• generated_wave_1_105</text>
+    <text x="30" y="1816.0" class="notes">• generated_wave_1_106</text>
+    <text x="30" y="1828.0" class="notes">• generated_wave_1_107</text>
+    <text x="30" y="1840.0" class="notes">• generated_wave_1_108</text>
+    <text x="30" y="1852.0" class="notes">• generated_wave_1_109</text>
+    <text x="30" y="1864.0" class="notes">• generated_wave_1_110</text>
+    <text x="30" y="1876.0" class="notes">• generated_wave_1_111</text>
+    <text x="30" y="1888.0" class="notes">• generated_wave_1_112</text>
+    <text x="30" y="1900.0" class="notes">• generated_wave_1_113</text>
+    <text x="30" y="1912.0" class="notes">• generated_wave_1_114</text>
+    <text x="30" y="1924.0" class="notes">• generated_wave_1_115</text>
+    <text x="30" y="1936.0" class="notes">• generated_wave_1_116</text>
+    <text x="30" y="1948.0" class="notes">• generated_wave_1_117</text>
+    <text x="30" y="1960.0" class="notes">• generated_wave_1_118</text>
+    <text x="30" y="1972.0" class="notes">• generated_wave_1_119</text>
+    <text x="30" y="1984.0" class="notes">• generated_wave_1_120</text>
+    <text x="30" y="1996.0" class="notes">• generated_wave_1_121</text>
+    <text x="30" y="2008.0" class="notes">• generated_wave_1_122</text>
+    <text x="30" y="2020.0" class="notes">• generated_wave_1_123</text>
+    <text x="30" y="2032.0" class="notes">• generated_wave_1_124</text>
+    <text x="30" y="2044.0" class="notes">• generated_wave_1_125</text>
+    <text x="30" y="2056.0" class="notes">• generated_wave_1_126</text>
+    <text x="30" y="2068.0" class="notes">• generated_wave_1_127</text>
+    <text x="30" y="2080.0" class="notes">• generated_wave_1_128</text>
+    <text x="30" y="2092.0" class="notes">• generated_wave_1_129</text>
+    <text x="30" y="2104.0" class="notes">• generated_wave_1_130</text>
+    <text x="30" y="2116.0" class="notes">• generated_wave_1_131</text>
+    <text x="30" y="2128.0" class="notes">• generated_wave_1_132</text>
+    <text x="30" y="2140.0" class="notes">• generated_wave_1_133</text>
+    <text x="30" y="2152.0" class="notes">• generated_wave_1_134</text>
+    <text x="30" y="2164.0" class="notes">• generated_wave_1_135</text>
+    <text x="30" y="2176.0" class="notes">• generated_wave_1_136</text>
+    <text x="30" y="2188.0" class="notes">• generated_wave_1_137</text>
+    <text x="30" y="2200.0" class="notes">• generated_wave_1_138</text>
+    <text x="30" y="2212.0" class="notes">• generated_wave_1_139</text>
+    <text x="30" y="2224.0" class="notes">• generated_wave_1_140</text>
+    <text x="30" y="2236.0" class="notes">• generated_wave_1_141</text>
+    <text x="30" y="2248.0" class="notes">• generated_wave_1_142</text>
+    <text x="30" y="2260.0" class="notes">• generated_wave_1_143</text>
+    <text x="30" y="2272.0" class="notes">• generated_wave_1_144</text>
+    <text x="30" y="2284.0" class="notes">• generated_wave_1_145</text>
+    <text x="30" y="2296.0" class="notes">• generated_wave_1_146</text>
+    <text x="30" y="2308.0" class="notes">• generated_wave_1_147</text>
+    <text x="30" y="2320.0" class="notes">• generated_wave_1_148</text>
+    <text x="30" y="2332.0" class="notes">• generated_wave_1_149</text>
+    <text x="30" y="2344.0" class="notes">• generated_wave_1_150</text>
+    <text x="30" y="2356.0" class="notes">• generated_wave_1_151</text>
+    <text x="30" y="2368.0" class="notes">• generated_wave_1_152</text>
+    <text x="30" y="2380.0" class="notes">• generated_wave_1_153</text>
+    <text x="30" y="2392.0" class="notes">• generated_wave_1_154</text>
+    <text x="30" y="2404.0" class="notes">• generated_wave_1_155</text>
+    <text x="30" y="2416.0" class="notes">• generated_wave_1_156</text>
+    <text x="30" y="2428.0" class="notes">• generated_wave_1_157</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

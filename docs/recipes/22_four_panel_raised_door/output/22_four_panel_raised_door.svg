@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="780.0" height="980.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -29,20 +30,43 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="390.0" y="490.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
+    <text x="288.75" y="338.75" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_1_border</text>
+    <text x="288.75" y="338.75" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_1_field</text>
+    <text x="491.25" y="338.75" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_2_border</text>
+    <text x="491.25" y="338.75" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_2_field</text>
+    <text x="288.75" y="641.25" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_3_border</text>
+    <text x="288.75" y="641.25" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_3_field</text>
+    <text x="491.25" y="641.25" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_4_border</text>
+    <text x="491.25" y="641.25" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_raised_panel_4_field</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="140.0" y1="140.0" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="640.0" y1="140.0" x2="640.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="120.0" x2="640.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
-    <polygon points="640.0,120.0 637.0,117.0 637.0,123.0" fill="#5ab9ea" />
-    <text x="390.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">500.0mm</text>
-    <line x1="640.0" y1="140.0" x2="660.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="640.0" y1="840.0" x2="660.0" y2="840.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="660.0" y1="140.0" x2="660.0" y2="840.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="660.0,140.0 657.0,143.0 663.0,143.0" fill="#5ab9ea" />
-    <polygon points="660.0,840.0 657.0,837.0 663.0,837.0" fill="#5ab9ea" />
-    <text x="665.0" y="490.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 490.0)">700.0mm</text>
+    <line x1="230.0" y1="230.0" x2="230.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="347.5" y1="230.0" x2="347.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="230.0" y1="120.0" x2="347.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="230.0,120.0 233.0,117.0 233.0,123.0" fill="#5ab9ea" />
+    <polygon points="347.5,120.0 344.5,117.0 344.5,123.0" fill="#5ab9ea" />
+    <text x="288.75" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">117.5mm</text>
+    <line x1="347.5" y1="230.0" x2="660.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="347.5" y1="447.5" x2="660.0" y2="447.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="660.0" y1="230.0" x2="660.0" y2="447.5" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="660.0,230.0 657.0,233.0 663.0,233.0" fill="#5ab9ea" />
+    <polygon points="660.0,447.5 657.0,444.5 663.0,444.5" fill="#5ab9ea" />
+    <text x="665.0" y="338.75" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 338.75)">217.5mm</text>
+    <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="640.0" y1="140.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="100.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,100.0 143.0,97.0 143.0,103.0" fill="#5ab9ea" />
+    <polygon points="640.0,100.0 637.0,97.0 637.0,103.0" fill="#5ab9ea" />
+    <text x="390.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">500.0mm</text>
+    <line x1="640.0" y1="140.0" x2="680.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="640.0" y1="840.0" x2="680.0" y2="840.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="680.0" y1="140.0" x2="680.0" y2="840.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="680.0,140.0 677.0,143.0 683.0,143.0" fill="#5ab9ea" />
+    <polygon points="680.0,840.0 677.0,837.0 683.0,837.0" fill="#5ab9ea" />
+    <text x="685.0" y="490.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 685.0 490.0)">700.0mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="860.0" class="notes" font-weight="bold">NOTES</text>
@@ -51,6 +75,16 @@
     <text x="20" y="896.0" class="notes">Depths:</text>
     <text x="30" y="908.0" class="notes">• bevel: 6.0</text>
     <text x="30" y="920.0" class="notes">• pocket: 2.0</text>
+    <text x="20" y="932.0" class="notes">Parts (9):</text>
+    <text x="30" y="944.0" class="notes">• generated_profile_0</text>
+    <text x="30" y="956.0" class="notes">• generated_raised_panel_1_border</text>
+    <text x="30" y="968.0" class="notes">• generated_raised_panel_1_field</text>
+    <text x="30" y="980.0" class="notes">• generated_raised_panel_2_border</text>
+    <text x="30" y="992.0" class="notes">• generated_raised_panel_2_field</text>
+    <text x="30" y="1004.0" class="notes">• generated_raised_panel_3_border</text>
+    <text x="30" y="1016.0" class="notes">• generated_raised_panel_3_field</text>
+    <text x="30" y="1028.0" class="notes">• generated_raised_panel_4_border</text>
+    <text x="30" y="1040.0" class="notes">• generated_raised_panel_4_field</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

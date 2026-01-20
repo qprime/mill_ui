@@ -54,18 +54,31 @@ def profile_hint_to_removal_intent(
     constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
 
 
+    metadata = {
+        MetadataKeys.HINT_TYPE: FeatureType.PROFILE,
+        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
+        HintKeys.SIDE: side,
+        MetadataKeys.ORIGINAL_ID: hint_id,
+    }
+
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+    shape = hint.get(HintKeys.SHAPE, "")
+    if ShapeType.is_polygon(shape) and GeometryKeys.POINTS in geometry:
+        metadata[GeometryKeys.POINTS] = geometry[GeometryKeys.POINTS]
+    elif shape == ShapeType.ROUNDED_RECT:
+        if GeometryKeys.RADIUS_MM in geometry:
+            metadata[GeometryKeys.RADIUS_MM] = geometry[GeometryKeys.RADIUS_MM]
+        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
+            if key in geometry:
+                metadata[key] = geometry[key]
+
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
         depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
         allowance=allowance,
         constraints=constraints,
-        metadata={
-            MetadataKeys.HINT_TYPE: FeatureType.PROFILE,
-            HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
-            HintKeys.SIDE: side,
-            MetadataKeys.ORIGINAL_ID: hint_id,
-        },
+        metadata=metadata,
     )
 
 

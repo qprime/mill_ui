@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="480.0" height="430.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -31,6 +32,12 @@
     <circle cx="300.0" cy="180.0" r="3.0" />
     <line x1="297.0" y1="180.0" x2="303.0" y2="180.0" />
     <line x1="300.0" y1="177.0" x2="300.0" y2="183.0" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">outer</text>
+    <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">recess</text>
+    <text x="180.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:1</text>
+    <text x="300.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:2</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -82,6 +89,11 @@
     <text x="30" y="370.0" class="notes">• pocket: 6.0</text>
     <text x="20" y="382.0" class="notes">Hole Diameters:</text>
     <text x="30" y="394.0" class="notes">• ⌀6.0mm</text>
+    <text x="20" y="406.0" class="notes">Parts (4):</text>
+    <text x="30" y="418.0" class="notes">• mount:1</text>
+    <text x="30" y="430.0" class="notes">• mount:2</text>
+    <text x="30" y="442.0" class="notes">• outer</text>
+    <text x="30" y="454.0" class="notes">• recess</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

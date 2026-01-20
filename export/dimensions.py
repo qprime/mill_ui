@@ -265,6 +265,26 @@ def _collect_dimension_requests(
                     text=_fmt_mm(h),
                 )
             )
+        elif item.type == "Polygon":
+            requests.append(
+                DimensionRequest(
+                    orientation="horizontal",
+                    a=bounds.x_min,
+                    b=bounds.x_max,
+                    anchor=bounds.y_min,
+                    text=_fmt_mm(w),
+                )
+            )
+            requests.append(
+                DimensionRequest(
+                    orientation="vertical",
+                    a=bounds.y_min,
+                    b=bounds.y_max,
+                    anchor=bounds.x_max,
+                    text=_fmt_mm(h),
+                )
+            )
+            requests.extend(_polygon_edge_requests(item, offset_x, offset_y, deduplicate=deduplicate))
         elif item.type == "Circle":
             diameter = w
             requests.append(
@@ -403,7 +423,89 @@ def _item_bounds(item: Item) -> Bounds2D | None:
         r = float(radius) if radius is not None else float(diameter or 0.0) / 2.0
         return Bounds2D(x_min=cx - r, x_max=cx + r, y_min=cy - r, y_max=cy + r)
 
+    if shape_type == "Polygon":
+        points = item.geometry.data.get("points", [])
+        if not points:
+            return None
+        xs = [p[0] for p in points]
+        ys = [p[1] for p in points]
+        return Bounds2D(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
+
     return None
+
+
+def _polygon_edge_requests(
+    item: Item,
+    offset_x: float,
+    offset_y: float,
+    *,
+    deduplicate: bool = True,
+) -> list[DimensionRequest]:
+    if item.geometry is None:
+        return []
+
+    points = item.geometry.data.get("points", [])
+    if len(points) < 3:
+        return []
+
+    requests: list[DimensionRequest] = []
+    seen_lengths: set[int] = set()
+
+    bounds = _item_bounds(item)
+    if bounds is None:
+        return []
+
+    overall_w = bounds.x_max - bounds.x_min
+    overall_h = bounds.y_max - bounds.y_min
+
+    for i in range(len(points)):
+        p1 = points[i]
+        p2 = points[(i + 1) % len(points)]
+
+        x1, y1 = float(p1[0]), float(p1[1])
+        x2, y2 = float(p2[0]), float(p2[1])
+
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+
+        is_horizontal = dy < 0.1 and dx > 0.1
+        is_vertical = dx < 0.1 and dy > 0.1
+
+        if not (is_horizontal or is_vertical):
+            continue
+
+        length = dx if is_horizontal else dy
+
+        if abs(length - overall_w) < 1.0 or abs(length - overall_h) < 1.0:
+            continue
+
+        length_key = round(length)
+        if deduplicate and length_key in seen_lengths:
+            continue
+        seen_lengths.add(length_key)
+
+        if is_horizontal:
+            requests.append(
+                DimensionRequest(
+                    orientation="horizontal",
+                    a=offset_x + min(x1, x2),
+                    b=offset_x + max(x1, x2),
+                    anchor=offset_y + y1,
+                    text=_fmt_mm(length),
+                )
+            )
+        else:
+            requests.append(
+                DimensionRequest(
+                    orientation="vertical",
+                    a=offset_y + min(y1, y2),
+                    b=offset_y + max(y1, y2),
+                    anchor=offset_x + x1,
+                    text=_fmt_mm(length),
+                )
+            )
+
+    return requests
 
 
 def _line(parent: ET.Element, x1: float, y1: float, x2: float, y2: float, stroke_color: str) -> None:

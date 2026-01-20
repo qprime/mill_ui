@@ -1183,17 +1183,20 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        points = list(node.points)
+        abs_points = list(node.points)
 
-        xs = [p[0] for p in points]
-        ys = [p[1] for p in points]
-        bounds_center = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+        xs = [p[0] for p in abs_points]
+        ys = [p[1] for p in abs_points]
+        cx, cy = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+        bounds_center = (cx, cy)
+
+        rel_points = [(p[0] - cx, p[1] - cy) for p in abs_points]
 
         if node.feature is not None:
             polygon_item = Item(
                 kind="shape",
                 type="Polygon",
-                geometry=Geometry(data={"points": points, "holes": []}),
+                geometry=Geometry(data={"points": rel_points, "holes": []}),
                 placement=Placement(center_xy_mm=bounds_center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("polygon"),
@@ -1214,7 +1217,7 @@ class LayoutResolver:
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": points, "holes": []}),
+                    geometry=Geometry(data={"points": rel_points, "holes": []}),
                     placement=Placement(center_xy_mm=bounds_center),
                     feature=Feature(
                         type="profile",
@@ -1229,7 +1232,7 @@ class LayoutResolver:
                 pocket_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": points, "holes": []}),
+                    geometry=Geometry(data={"points": rel_points, "holes": []}),
                     placement=Placement(center_xy_mm=bounds_center),
                     feature=Feature(
                         type="pocket",

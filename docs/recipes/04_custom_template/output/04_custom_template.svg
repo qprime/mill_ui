@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="580.0" height="460.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -37,6 +38,14 @@
     <circle cx="410.0" cy="290.0" r="3.0" />
     <line x1="407.0" y1="290.0" x2="413.0" y2="290.0" />
     <line x1="410.0" y1="287.0" x2="410.0" y2="293.0" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="290.0" y="230.0" class="part-label" text-anchor="middle" dominant-baseline="middle">panel:outer</text>
+    <text x="290.0" y="230.0" class="part-label" text-anchor="middle" dominant-baseline="middle">panel:recess</text>
+    <text x="170.0" y="170.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:1</text>
+    <text x="410.0" y="170.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:2</text>
+    <text x="170.0" y="290.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:3</text>
+    <text x="410.0" y="290.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:4</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -94,6 +103,13 @@
     <text x="30" y="400.0" class="notes">• pocket: 3.0</text>
     <text x="20" y="412.0" class="notes">Hole Diameters:</text>
     <text x="30" y="424.0" class="notes">• ⌀6.0mm</text>
+    <text x="20" y="436.0" class="notes">Parts (6):</text>
+    <text x="30" y="448.0" class="notes">• hole:1</text>
+    <text x="30" y="460.0" class="notes">• hole:2</text>
+    <text x="30" y="472.0" class="notes">• hole:3</text>
+    <text x="30" y="484.0" class="notes">• hole:4</text>
+    <text x="30" y="496.0" class="notes">• panel:outer</text>
+    <text x="30" y="508.0" class="notes">• panel:recess</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

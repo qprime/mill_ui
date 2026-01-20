@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="580.0" height="980.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -118,6 +119,7 @@
     <line x1="354.5" y1="804.0625" x2="360.5" y2="804.0625" />
     <line x1="357.5" y1="801.0625" x2="357.5" y2="807.0625" />
   </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="222.5" y1="175.9375" x2="222.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />

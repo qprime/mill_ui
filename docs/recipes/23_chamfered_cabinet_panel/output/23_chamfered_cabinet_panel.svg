@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="580.0" height="680.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -25,6 +26,11 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
+    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_1</text>
+    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_2</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="140.0" y1="140.0" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -59,6 +65,10 @@
     <text x="20" y="596.0" class="notes">Depths:</text>
     <text x="30" y="608.0" class="notes">• chamfer: 3.0</text>
     <text x="30" y="620.0" class="notes">• pocket: 6.0</text>
+    <text x="20" y="632.0" class="notes">Parts (3):</text>
+    <text x="30" y="644.0" class="notes">• generated_chamfer_2</text>
+    <text x="30" y="656.0" class="notes">• generated_pocket_1</text>
+    <text x="30" y="668.0" class="notes">• generated_profile_0</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

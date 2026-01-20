@@ -47,10 +47,9 @@ def compute_shape_bounds(
         geometry_data: Dictionary containing shape-specific dimensions
             - For Rect/RoundedRect: {"w_mm": float, "h_mm": float}
             - For Circle: {"diameter_mm": float}
-            - For Polygon/Polyline: {"points": [[x, y], ...]} (absolute coordinates)
+            - For Polygon/Polyline: {"points": [[x, y], ...]} (relative to center_xy)
             - For Line: {"start": [x, y], "end": [x, y]} (absolute coordinates)
         center_xy: Center point (x, y) in mm. Defaults to (0, 0) if None.
-            Note: Polygon, Polyline, and Line use absolute points, so center_xy is ignored.
 
     Returns:
         Bounds2D with x_min, x_max, y_min, y_max
@@ -58,8 +57,8 @@ def compute_shape_bounds(
     Supported shapes:
         - Rect, Rectangle, RoundedRect: Uses w_mm and h_mm centered at center_xy
         - Circle: Uses diameter_mm centered at center_xy
-        - Polygon: Uses points array (absolute coordinates, center_xy ignored)
-        - Polyline: Uses points array (absolute coordinates, center_xy ignored)
+        - Polygon: Uses points array (relative to center_xy)
+        - Polyline: Uses points array (relative to center_xy)
         - Line: Uses start/end points (absolute coordinates, center_xy ignored)
 
     Unknown shapes return a 1x1 mm box centered at the given point.
@@ -95,12 +94,12 @@ def compute_shape_bounds(
             y_max=cy + radius,
         )
 
-    # Polygon - compute bounds from points (ignores center_xy, points are absolute)
+    # Polygon - compute bounds from points (relative to center_xy)
     if ShapeType.is_polygon(shape_type):
         points = geometry_data.get(GeometryKeys.POINTS, [])
         if points:
-            xs = [float(p[0]) for p in points]
-            ys = [float(p[1]) for p in points]
+            xs = [float(p[0]) + cx for p in points]
+            ys = [float(p[1]) + cy for p in points]
             return Bounds2D(
                 x_min=min(xs),
                 x_max=max(xs),
@@ -115,12 +114,12 @@ def compute_shape_bounds(
             y_max=cy + 0.5,
         )
 
-    # Polyline - compute bounds from points (same as Polygon)
+    # Polyline - compute bounds from points (relative to center_xy)
     if ShapeType.is_polyline(shape_type):
         points = geometry_data.get(GeometryKeys.POINTS, [])
         if points:
-            xs = [float(p[0]) for p in points]
-            ys = [float(p[1]) for p in points]
+            xs = [float(p[0]) + cx for p in points]
+            ys = [float(p[1]) + cy for p in points]
             return Bounds2D(
                 x_min=min(xs),
                 x_max=max(xs),

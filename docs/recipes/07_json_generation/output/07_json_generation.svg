@@ -12,6 +12,7 @@
         .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="580.0" height="480.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -25,6 +26,10 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="290.0" y="240.0" class="part-label" text-anchor="middle" dominant-baseline="middle">outer</text>
+    <text x="290.0" y="240.0" class="part-label" text-anchor="middle" dominant-baseline="middle">recess</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="200.0" y1="190.0" x2="200.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -66,6 +71,9 @@
     <text x="20" y="384.0" class="notes">Features: 1 profile, 1 pocket</text>
     <text x="20" y="396.0" class="notes">Depths:</text>
     <text x="30" y="408.0" class="notes">• pocket: 6.0</text>
+    <text x="20" y="420.0" class="notes">Parts (2):</text>
+    <text x="30" y="432.0" class="notes">• outer</text>
+    <text x="30" y="444.0" class="notes">• recess</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

@@ -91,10 +91,19 @@ Load these when the task requires them:
 | [pml/nest_syntax_spec.md](pml/nest_syntax_spec.md) | Nesting job syntax |
 | [docs/recipes/](docs/recipes/) | Worked examples (01-30) |
 
-## Token Efficiency
+## Working Style
 
+**Investigate before asking.** When uncertain about how something works or whether a capability exists:
+1. Search the codebase (grep for keywords, check relevant directories)
+2. Read the actual implementation
+3. Check docs/tasks.md and docs/patterns.md for examples
+4. Reason from file/folder structure
+
+Only ask the user when multiple valid approaches exist and the choice affects their workflow.
+
+**Token efficiency:**
 - File contents in `<system-reminder>` tags are already in context—don't re-read
-- On clear directives, execute directly rather than exploring first
+- On clear directives with known implementation paths, execute directly
 - Minimize tool calls: edit → test → done
 
 ## When Stuck
@@ -102,4 +111,4 @@ Load these when the task requires them:
 - **Architecture:** [README.md](README.md)
 - **Examples:** [docs/tasks.md](docs/tasks.md)
 - **Extending:** [docs/patterns.md](docs/patterns.md)
-- **Ask the user** if multiple valid approaches exist or requirements are unclear
+- **Ask the user** only after investigating—and only if the choice genuinely requires their input

@@ -1,114 +1,56 @@
-# mill_ui Recipes
+# Recipes
 
-Practical examples showing complete workflows from design to G-code.
+Worked examples demonstrating mill_ui capabilities.
 
-## Recipe Index
+| # | Name | Folder |
+|---|------|--------|
+| 01 | Simple Profile Cut | `01_simple_profile/` |
+| 02 | Pocket with Cleanup | `02_pocket_with_cleanup/` |
+| 03 | Shaker Door Template | `03_shaker_door_template/` |
+| 04 | Custom Template | `04_custom_template/` |
+| 05 | Validation Workflow | `05_validation_workflow/` |
+| 06 | Multiple Depths | `06_multiple_depths/` |
+| 07 | JSON Generation | `07_json_generation/` |
+| 08 | SVG Visualization | `08_svg_visualization/` |
+| 09 | Config Tuning | `09_config_tuning/` |
+| 10 | Hole Patterns (Grid) | `10_hole_patterns_grid/` |
+| 11 | Keepout Islands | `11_keepout_islands/` |
+| 12 | Edge Treatment Intent | `12_edge_treatment_intent/` |
+| 13 | Split Layout (French Door) | `13_split_layout_french_door/` |
+| 14 | Corner Cleanup (Multi-Tool) | `14_corner_cleanup_multi_tool/` |
+| 15 | Profile with Tabs | `15_profile_with_tabs/` |
+| 16 | Sheet Layout Nesting | `16_sheet_layout_nesting/` |
+| 17 | Nesting (Guillotine) | `17_nesting_guillotine/` |
+| 18 | Nesting (MaxRects) | `18_nesting_maxrects/` |
+| 19 | Domain/Generator Basics | `19_domain_generator_basics/` |
+| 20 | Multi-Panel Doors | `20_multi_panel_doors/` |
+| 21 | Simple Shaker Door | `21_simple_shaker_door/` |
+| 22 | Four-Panel Raised Door | `22_four_panel_raised_door/` |
+| 23 | Chamfered Cabinet Panel | `23_chamfered_cabinet_panel/` |
+| 24 | Shelf Dados Side Panel | `24_shelf_dados_side/` |
+| 25 | Decorative Border Panel | `25_decorative_border_panel/` |
+| 26 | Faux Shutter Panel | `26_faux_shutter_panel/` |
+| 27 | Wave Texture Panel | `27_wave_texture_panel/` |
+| 28 | Diamond Lattice Panel | `28_diamond_lattice_panel/` |
+| 29 | Picture Frame Panel | `29_picture_frame_panel/` |
+| 30 | Cathedral Arch Door | `30_cathedral_arch_door/` |
 
-### Basic Workflows
-- [01_simple_profile.md](01_simple_profile.md) - Cut a simple rectangle outline
-  - Reference outputs: [SVG](01_simple_profile/simple_profile.blueprint.light.svg) | [STL](01_simple_profile/simple_profile.stl) | [G-code](01_simple_profile/simple_profile.nc)
-- [02_pocket_with_cleanup.md](02_pocket_with_cleanup.md) - Pocket with finish pass (F001 feature)
-  - Reference outputs: [SVG](02_pocket_with_cleanup/pocket_with_cleanup.blueprint.light.svg) | [STL](02_pocket_with_cleanup/pocket_with_cleanup.stl) | [G-code](02_pocket_with_cleanup/pocket_with_cleanup.nc)
-- [03_shaker_door_template.md](03_shaker_door_template.md) - Using the Shaker template
-  - Reference outputs: [SVG](03_shaker_door_template/shaker_door.blueprint.light.svg) | [STL](03_shaker_door_template/shaker_door.stl) | [G-code](03_shaker_door_template/shaker_door.nc)
+## Structure
 
-### Advanced Patterns
-- [04_custom_template.md](04_custom_template.md) - Creating your own template class (Python)
-- [05_validation_workflow.md](05_validation_workflow.md) - Validating designs at IR level (fast feedback)
-- [06_multiple_depths.md](06_multiple_depths.md) - Profile + pocket + holes in one part
+Each recipe folder contains:
+- `README.md` — Description and key concepts
+- `example.pml` or `input.pml` — PML source
+- `output/` — Generated artifacts (SVG, STL, G-code)
 
-### Integration Examples
-- [07_json_generation.md](07_json_generation.md) - Generating `LayoutAST` from JSON (AI-friendly)
-- [08_svg_visualization.md](08_svg_visualization.md) - Debugging with blueprint SVG export
-- [09_config_tuning.md](09_config_tuning.md) - Tuning planner config (safe Z, pocket finish, tolerances)
+## Usage
 
-### Layout Recipes
-- [10_hole_patterns_grid.md](10_hole_patterns_grid.md) - Hole arrays with compositional `grid`
-- [11_keepout_islands.md](11_keepout_islands.md) - Pockets with keepout islands (IR semantics)
-- [12_edge_treatment_intent.md](12_edge_treatment_intent.md) - Edge intent annotations (allowance/fillet/chamfer)
-- [13_split_layout_french_door.md](13_split_layout_french_door.md) - Paned doors with `split` (rails/mullions)
-
-### CNC Workflow Recipes
-- [14_corner_cleanup_multi_tool.md](14_corner_cleanup_multi_tool.md) - Multi-tool corner cleanup for rectangular pockets
-- [15_profile_with_tabs.md](15_profile_with_tabs.md) - Holding tabs for profile cuts (prevents part movement)
-
-### Sheet Nesting Recipes
-- [16_sheet_layout_nesting/](16_sheet_layout_nesting/) - Basic sheet nesting concepts
-- [17_nesting_guillotine/](17_nesting_guillotine/) - Guillotine bin-packing algorithm (fast, simple)
-- [18_nesting_maxrects/](18_nesting_maxrects/) - MaxRects bin-packing algorithm (better utilization)
-
-### Domain/Generator Recipes
-- [19_domain_generator_basics/](19_domain_generator_basics/) - Domain/generator system basics
-  - Creating domains from rectangles and polygons
-  - Domain operations (inset, offset, subtract)
-  - Using generators (profile, pocket, wave, grid, bead)
-  - Full pipeline: Domain → Generator → AST → IR
-
-## Reference Outputs
-
-Many recipes include complete reference outputs in their `output/` subdirectories:
-- **SVG Blueprint**: 2D visualization with dimensions and feature annotations
-- **STL Model**: 3D mesh for visual validation (open in FreeCAD, MeshLab, or online viewers)
-- **G-code**: Machine-ready toolpath (verify in CAMotics or similar simulators)
-- **metrics.json**: Performance metrics (timing, complexity, tool usage)
-
-These outputs are automatically generated and serve as:
-- Expected results for recipe verification
-- Visual examples for documentation
-- Test fixtures for regression testing
-
-## Validating Recipes
-
-All 18 recipes have golden baselines in `tests/golden/` for regression testing.
-
-**Quick validation:**
 ```bash
-# Validate a single recipe
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-
-# Validate with golden baseline comparison
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile \
-    --golden tests/golden/01_simple_profile/metrics.json
 ```
 
-**Run all recipe regression tests:**
-```bash
-python -m tests.test_regression
+## MCP Access
+
 ```
-
-**Update golden after intentional changes:**
-```bash
-python -m cli.generate_golden --recipe docs/recipes/01_simple_profile --update
+get_docs(name="README", section="docs/recipes")           # This index
+get_docs(name="README", section="docs/recipes/21_simple_shaker_door")  # Specific recipe
 ```
-
-See [05_validation_workflow/](05_validation_workflow/) for comprehensive validation examples.
-
-## Regenerating Outputs
-
-To regenerate all outputs:
-```bash
-# Standalone mode (regenerates all recipes)
-PYTHONPATH=. python3 tests/test_recipes.py
-
-# Or via pytest
-pytest tests/test_recipes.py --regen_recipes
-```
-
-## Recipe Format
-
-Each recipe includes:
-- **Goal**: What you're trying to accomplish
-- **Input**: PML/JSON/Python code
-- **Process**: Step-by-step commands
-- **Output**: Expected results and verification steps (with links to reference outputs)
-- **Variations**: Common modifications to the pattern
-
-## For AI Agents
-
-These recipes demonstrate:
-- Complete input → output workflows
-- Error handling and validation
-- Common patterns and idioms
-- Configuration options and their effects
-
-Use these as reference implementations when helping users with similar tasks.

@@ -148,6 +148,192 @@ Example:
 engrave 0.5mm
 ```
 
+### Generators (Surface Patterns)
+
+Generators create patterns within a shape's bounds. They are specified as children of a shape declaration using indentation.
+
+#### Wave Pattern
+
+```
+wave count <n> amplitude <mm> wavelength <mm> groove <mm> depth <mm>
+```
+
+Creates parallel sinusoidal grooves across the surface.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm
+```
+
+#### Line Pattern
+
+```
+lines angle <degrees> spacing <mm> width <mm> depth <mm>
+```
+
+Creates parallel line grooves at specified angle. Use multiple `lines` declarations for crosshatch/lattice patterns.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    lines angle 45 spacing 25mm width 4mm depth 3mm
+    lines angle -45 spacing 25mm width 4mm depth 3mm
+```
+
+#### Raised Panel
+
+```
+raised_panel border <mm> border_depth <mm> field_depth <mm>
+```
+
+Creates a raised panel with beveled border and recessed field.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    raised_panel border 25mm border_depth 6mm field_depth 2mm
+```
+
+#### Concentric Border
+
+```
+concentric_border insets <mm> <mm> ... groove <mm> depth <mm>
+```
+
+Creates concentric rectangular grooves at specified inset distances.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    concentric_border insets 15mm 30mm 45mm groove 3mm depth 2mm
+```
+
+#### Split Grid
+
+```
+split_grid <rows> <cols> gap <mm>
+    <generator>
+```
+
+Divides the shape into a grid and applies a generator to each cell.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    split_grid 2 2 gap 35mm
+        raised_panel border 25mm border_depth 6mm field_depth 2mm
+```
+
+#### Split Horizontal / Split Vertical
+
+```
+split_horizontal <n> gap <mm>
+    <children>
+
+split_vertical <n> gap <mm>
+    <children>
+```
+
+Divides region into n equal segments with gaps between. Children applied to each segment.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    split_horizontal 3 gap 20mm
+        pocket 6mm
+```
+
+#### Split Horizontal Gaps
+
+```
+split_horizontal_gaps <n> gap <mm>
+    <children>
+```
+
+Splits region into n+1 segments, applies children to the n gaps (not segments). Used for louver/dado patterns where gaps are machined.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    split_horizontal_gaps 12 gap 12mm
+        pocket 8mm
+        chamfer 4mm 2mm
+```
+
+#### Chamfer
+
+```
+chamfer <width>mm <depth>mm
+```
+
+Creates a chamfered edge at specified width and depth.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    chamfer 5mm 3mm
+```
+
+#### Subtract (Ring/Donut)
+
+```
+subtract inner <mm>
+    <children>
+```
+
+Creates a ring by subtracting inner region from outer. Children applied to the resulting ring domain.
+
+Example:
+```pml
+rect frame
+    subtract inner 50mm
+        pocket 5mm
+```
+
+#### At Position
+
+```
+at <x>mm <y>mm [width <w>mm height <h>mm]
+    <child>
+```
+
+Positions child at explicit coordinates within current region. Optional width/height specify region size.
+
+Example:
+```pml
+rect panel
+    at 300mm 150mm width 600mm height 19mm
+        pocket 10mm
+```
+
+### Shapes
+
+#### Arch
+
+```
+arch [id] width <mm> height <mm> radius <mm> [feature]
+    <children>
+```
+
+Creates an arch shape (rectangle with semicircular top).
+
+Example:
+```pml
+arch door width 500mm height 800mm radius 250mm
+    profile outside through
+    frame 60mm
+        raised_panel border 25mm border_depth 6mm field_depth 2mm
+```
+
 ### Template Invocation (Phase 2)
 
 ```

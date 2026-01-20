@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pml import parse_pml, format_pml, PMLParseError
 from layout_ast.layout import LayoutAST
+from cli.project import add_project_arg, resolve_input_path, get_project_dir
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
         epilog="""
 Examples:
 
-  python -m cli.convert_layout --from pml --to json input.pml output.json
+  python -m cli.convert_layout --project my_table --from pml --to json input.pml output.json
 
 
   python -m cli.convert_layout --from json --to pml input.json output.pml
@@ -26,6 +27,7 @@ Examples:
         """,
     )
 
+    add_project_arg(parser)
     parser.add_argument(
         "--from",
         dest="input_format",
@@ -56,9 +58,9 @@ Examples:
     try:
 
         if args.input_file:
-            input_path = Path(args.input_file)
+            input_path = resolve_input_path(args.project, args.input_file)
             if not input_path.exists():
-                print(f"Error: Input file not found: {args.input_file}", file=sys.stderr)
+                print(f"Error: Input file not found: {input_path}", file=sys.stderr)
                 sys.exit(1)
             input_text = input_path.read_text()
         else:
@@ -72,7 +74,7 @@ Examples:
             if not args.input_file:
                 print("Error: JSON input requires a file path (stdin not supported for JSON)", file=sys.stderr)
                 sys.exit(1)
-            ast = LayoutAST.from_json(args.input_file)
+            ast = LayoutAST.from_json(str(input_path))
         else:
             print(f"Error: Unknown input format: {args.input_format}", file=sys.stderr)
             sys.exit(1)
@@ -88,9 +90,12 @@ Examples:
 
 
         if args.output_file:
-            output_path = Path(args.output_file)
+            if args.project and not Path(args.output_file).is_absolute():
+                output_path = get_project_dir(args.project) / args.output_file
+            else:
+                output_path = Path(args.output_file)
             output_path.write_text(output_text)
-            print(f"Converted {args.input_format} → {args.output_format}: {args.output_file}", file=sys.stderr)
+            print(f"Converted {args.input_format} → {args.output_format}: {output_path}", file=sys.stderr)
         else:
             print(output_text, end="")
 

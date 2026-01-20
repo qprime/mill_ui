@@ -11,6 +11,7 @@ from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from adapters.ast_to_removal import ast_to_removal_intents
 from export.blueprint_svg import render_blueprint_svg, THEMES
+from cli.project import add_project_arg, resolve_input_path, resolve_output_dir
 
 
 def main():
@@ -20,13 +21,13 @@ def main():
         epilog="""
 Examples:
 
-  python -m cli.export_blueprint --input door.pml --theme dark --format svg --out out/
+  python -m cli.export_blueprint --project my_table --input door.pml --theme dark
 
 
-  python -m cli.export_blueprint --input door.json --theme print --format pdf --out out/
+  python -m cli.export_blueprint --input /full/path/door.pml --out out/
 
 
-  python -m cli.export_blueprint --input door.pml --theme dark --format both --out out/
+  python -m cli.export_blueprint --project my_table --input door.pml --format both
 
 Output file naming:
   {basename}.blueprint.{theme}.{format}
@@ -34,6 +35,7 @@ Output file naming:
         """,
     )
 
+    add_project_arg(parser)
     parser.add_argument(
         "--input",
         "-i",
@@ -71,12 +73,12 @@ Output file naming:
 
     try:
 
-        input_path = Path(args.input)
+        input_path = resolve_input_path(args.project, args.input)
         if not input_path.exists():
-            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+            print(f"Error: Input file not found: {input_path}", file=sys.stderr)
             sys.exit(1)
         if not input_path.is_file():
-            print(f"Error: Input path is not a file: {args.input}", file=sys.stderr)
+            print(f"Error: Input path is not a file: {input_path}", file=sys.stderr)
             sys.exit(1)
 
 
@@ -109,7 +111,7 @@ Output file naming:
         svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=args.theme)
 
 
-        output_dir = Path(args.out)
+        output_dir = resolve_output_dir(args.project, args.out if args.out != "." else None)
         output_dir.mkdir(parents=True, exist_ok=True)
         basename = input_path.stem
 

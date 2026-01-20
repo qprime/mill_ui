@@ -11,6 +11,7 @@ from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from adapters.ast_to_cad import items_to_shape_dicts
 from cad.export.stl import export_stl
+from cli.project import add_project_arg, resolve_input_path, resolve_output_dir
 
 
 def main():
@@ -20,13 +21,13 @@ def main():
         epilog="""
 Examples:
 
-  python -m cli.export_cad --input door.pml --out out/
+  python -m cli.export_cad --project my_table --input door.pml
 
 
-  python -m cli.export_cad --input door.pml --kerf 3.175 --out out/
+  python -m cli.export_cad --input /full/path/door.pml --kerf 3.175 --out out/
 
 
-  python -m cli.export_cad --input door.pml --quality high --out out/
+  python -m cli.export_cad --project my_table --input door.pml --quality high
 
 Output file naming:
   STL: {basename}.stl (plus {basename}_part_N.stl for floating parts)
@@ -36,6 +37,7 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
         """,
     )
 
+    add_project_arg(parser)
     parser.add_argument(
         "--input",
         "-i",
@@ -78,12 +80,12 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
 
     try:
 
-        input_path = Path(args.input)
+        input_path = resolve_input_path(args.project, args.input)
         if not input_path.exists():
-            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+            print(f"Error: Input file not found: {input_path}", file=sys.stderr)
             sys.exit(1)
         if not input_path.is_file():
-            print(f"Error: Input path is not a file: {args.input}", file=sys.stderr)
+            print(f"Error: Input path is not a file: {input_path}", file=sys.stderr)
             sys.exit(1)
 
 
@@ -113,7 +115,7 @@ FreeCAD, MeshLab, Windows 3D Viewer, or online viewers for validation.
         shapes = items_to_shape_dicts(ast.items)
 
 
-        output_dir = Path(args.out)
+        output_dir = resolve_output_dir(args.project, args.out if args.out != "." else None)
         output_dir.mkdir(parents=True, exist_ok=True)
         basename = input_path.stem
         output_stl = output_dir / f"{basename}.stl"

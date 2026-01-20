@@ -11,6 +11,7 @@ from pathlib import Path
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
 from pml.formatter import format_pml
 from nesting import nest_and_generate, nest_parts
+from cli.project import add_project_arg, resolve_input_path, resolve_output_dir
 
 
 def run_export_stl(pml_path: Path, output_dir: Path, kerf_mm: float, quality: str) -> Path:
@@ -58,13 +59,13 @@ def main():
         epilog="""
 Examples:
 
-  python -m cli.nest job.nest -o output/
+  python -m cli.nest --project my_table job.nest
 
 
   python -m cli.nest job.nest -o output/ --export-stl --export-svg
 
 
-  python -m cli.nest job.nest -o output/ --export-stl --kerf 6.35 --quality high
+  python -m cli.nest --project my_table job.nest --export-stl --kerf 6.35
 
 
   python -m cli.nest job.nest -o output/ --export-svg --theme print
@@ -76,11 +77,12 @@ Output files:
   JSON: manifest.json (nesting summary)
         """,
     )
+    add_project_arg(parser)
     parser.add_argument("input", help="Input .nest file")
     parser.add_argument(
         "-o", "--output",
-        default=".",
-        help="Output directory (default: current directory)"
+        default=None,
+        help="Output directory (default: project/output or current directory)"
     )
     parser.add_argument(
         "--prefix",
@@ -128,8 +130,8 @@ Output files:
 
     args = parser.parse_args()
 
-    input_path = Path(args.input)
-    output_dir = Path(args.output)
+    input_path = resolve_input_path(args.project, args.input)
+    output_dir = resolve_output_dir(args.project, args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.verbose:

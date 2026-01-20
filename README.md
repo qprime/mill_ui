@@ -1,9 +1,14 @@
 <!-- spec-style -->
 # mill_ui
 
-As-Of Date: 2026-01-19
-Document Type: System Specification
-Authority: This document is authoritative for architecture and usage described herein.
+**As-Of:** 2026-01-19
+**Document Type:** System Specification
+**Authority:** This document is authoritative for architecture and behavior described herein.
+
+**Specification Rules:**
+- Statements containing MUST / MUST NOT / SHOULD / MAY are normative.
+- If a behavior is not specified, do not assume it.
+- If any requirement is ambiguous, ask before changing code.
 
 ---
 
@@ -18,20 +23,25 @@ The system separates *what* to machine (RemovalIntent IR) from *how* to machine 
 
 The system does NOT:
 - Perform unit conversion internally (all values are millimeters).
-- Provide general-purpose CAD editing.
-- Support full 3D toolpaths (2.5D only).
-- Replace the CAM planner backend.
+- Infer missing geometry or feature parameters.
+- Provide exact geometric collision detection at IR level.
+- Validate feeds/speeds against material/tool compatibility.
+- Perform fixture/clamp interference analysis beyond explicit keepouts.
 
 ---
 
 ## Terminology
 
-- **PML**: Plaintext language for specifying layouts and operations.
-- **LayoutAST**: Flat AST with absolute coordinates. Canonical layout representation.
-- **CompositionalLayoutAST**: Hierarchical AST with relative positioning.
-- **RemovalIntent**: IR representing what volume to remove, independent of toolpath strategy.
-- **Domain**: Bounded 2D region supporting algebraic operations (inset, offset, subtract).
-- **Generator**: Deterministic function producing LayoutAST Items from a Domain.
+| Term | Definition |
+|------|------------|
+| PML | Plaintext language for specifying layouts and operations. |
+| LayoutAST | Flat AST with absolute coordinates. Canonical layout representation. |
+| CompositionalLayoutAST | Hierarchical AST with relative positioning. |
+| RemovalIntent | IR representing what volume to remove, independent of toolpath strategy. |
+| Planner Hints | v1-compatible dict structures consumed by the planner pass generator. |
+| Domain | Bounded 2D region supporting algebraic operations (inset, offset, subtract). |
+| Generator | Deterministic function producing LayoutAST Items from a Domain. |
+| Safe Z | Z height used for rapid (G0) moves to avoid collisions with stock. |
 
 ---
 
@@ -119,6 +129,8 @@ nest maxrects
 | Item | kind, type, geometry, placement, feature, params, shape_id, id |
 | LayoutAST | sheet, items, config fields |
 
+**Rule:** No separate classes for Rect/Circle/etc. Shape identity is `Item.type`. Parameters live in `Geometry.data`.
+
 ### RemovalIntent IR (ir/removal_intent.py)
 
 | Dataclass | Fields |
@@ -132,6 +144,35 @@ nest maxrects
 
 ---
 
+## Planner Hint Schema
+
+Planner hints MUST follow this top-level schema:
+
+```json
+{
+    "units": "mm",
+    "kerf_width_mm": float,
+    "min_channel_width_mm": float,
+    "profiles": [<profile hint dict>],
+    "pockets": [<pocket hint dict>],
+    "holes": [<hole hint dict>],
+    "engraves": [<engrave hint dict>]
+}
+```
+
+**Profile hint required keys:** id, shape, geometry, center_xy_mm, depth_mm, side
+**Profile hint optional keys:** tabs
+
+**Pocket hint required keys:** id, shape, geometry, center_xy_mm, depth_mm
+**Pocket hint optional keys:** start_depth_mm (only if z_top != 0)
+
+**Planner consumption:**
+- Profiles: reads geometry, center_xy_mm, depth_mm, side, tabs
+- Pockets: reads shape, geometry, depth_mm, start_depth_mm
+- Holes: reads geometry.diameter_mm, center_xy_mm, depth_mm
+
+---
+
 ## Coordinate Conventions
 
 - All internal values MUST be millimeters.
@@ -139,6 +180,7 @@ nest maxrects
 - Z: Positive away from material, negative into material.
 - z_top typically 0.0 at stock surface.
 - z_bottom MUST be negative for material removal.
+- Compositional AST uses normalized coordinates (0.0–1.0) relative to parent region. MUST be resolved to absolute coordinates during layout resolution.
 
 ---
 
@@ -218,13 +260,25 @@ Domains define *where* to machine. Generators define *what* to produce.
 
 ## Validation
 
-### IR-Level Validation
+### IR-Level Validation (Implemented)
 
 | Check | Description |
 |-------|-------------|
 | check_overlap() | 3D bounding-box intersection. |
 | check_depth_feasibility() | z_top >= z_bottom, warns on depth vs thickness. |
 | check_toolability() | Feature size vs tool diameter. |
+
+### IR-Level Validation (Not Implemented)
+
+The system MUST NOT claim these validations exist at IR level:
+- Exact geometry intersection testing
+- Pocket-corner reachability vs tool diameter
+- Stepdown suitability vs material/tool
+- Feed/speed validation
+- Fixture/clamp interference beyond keepouts
+- Tab placement feasibility
+- Toolpath continuity optimization
+- Exact kerf compensation validation
 
 ### CAM Artifact Validation
 
@@ -273,11 +327,32 @@ mill_ui/
 
 ---
 
+## Test Coverage
+
+| Function | Coverage |
+|----------|----------|
+| parse_compositional_pml() | Well tested |
+| resolve_layout() | Well tested |
+| ast_to_removal_intents() | No direct tests |
+| item_to_removal_intent() | Tested |
+| removal_intents_to_v1_hints() | Well tested |
+| IR validation functions | Tested |
+| plan_passes() | Tested |
+| write_gcode() | Tested |
+
+---
+
 ## Known Issues
 
 1. `cad/export/step.py`, `svg.py`: Import paths reference non-existent modules.
 2. `cli/introspect.py`: Referenced in tests but not implemented.
 3. `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles.
+4. `ast_to_removal_intents()` has no direct tests.
+
+**Recommended actions:**
+1. Implement cli/introspect.py or remove test dependency.
+2. Add direct tests for ast_to_removal_intents().
+3. Fix CAD export import errors.
 
 ---
 
@@ -308,10 +383,20 @@ PYTHONPATH=. python3 -m tests.run_removal_intent_tests  # IR tests
 
 ---
 
+## Duplicate or Legacy Paths
+
+- `adapters/ast_to_removal.py` is the canonical AST→IR adapter.
+- `adapters/hints_to_removal.py` contains converters used both by canonical path (via intermediate hint dict) and legacy v1 hint workflows.
+
+This duplication is intentional and supports incremental migration.
+
+---
+
 ## AI Instructions
 
 When modifying this repository:
 - Treat this document as authoritative for described behaviors.
-- Preserve all stated invariants.
+- Preserve all stated invariants (units, coordinate conventions, IR semantics).
+- Do not remove v1 hint compatibility unless the planner interface changes.
 - Do not infer unspecified behavior.
 - If a change affects the canonical pipeline stages, update this document in the same commit.

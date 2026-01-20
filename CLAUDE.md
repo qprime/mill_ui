@@ -65,8 +65,7 @@ Load these when the task requires them:
 | [docs/tasks.md](docs/tasks.md) | Common operations, code examples, running tests |
 | [docs/patterns.md](docs/patterns.md) | Adding new shapes, templates, generators, validators |
 | [docs/invariants.md](docs/invariants.md) | Before modifying core behavior |
-| [README.md](README.md) | Architecture and design rationale |
-| [GROUND_TRUTH.md](GROUND_TRUTH.md) | Normative requirements and contracts |
+| [README.md](README.md) | Architecture, contracts, and normative requirements |
 | [docs/domain_generator.md](docs/domain_generator.md) | Domain/generator API reference |
 | [docs/cam_validation_plan.md](docs/cam_validation_plan.md) | Validation system architecture |
 | [docs/compositional_layout.md](docs/compositional_layout.md) | Frame/inset/grid/split syntax |

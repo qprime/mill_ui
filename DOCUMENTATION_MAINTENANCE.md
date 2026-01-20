@@ -29,9 +29,8 @@ Define maintenance obligations for documentation files in this repository.
 
 | Document | Update When |
 |----------|-------------|
-| README.md | Pipeline changes, new core features, directory structure changes |
+| README.md | Pipeline changes, data model changes, validation changes, directory structure |
 | CLAUDE.md | Workflow changes, extension pattern changes, new pitfalls |
-| GROUND_TRUTH.md | Data model changes, pipeline boundary shifts, validation changes |
 
 ### Tier 2: Technical Specifications
 
@@ -61,35 +60,20 @@ Define maintenance obligations for documentation files in this repository.
 
 ---
 
-## Archival Documentation (Read-Only)
-
-These documents MUST NOT be updated except for factual errors.
-
-| Document | Purpose |
-|----------|---------|
-| V1toV2_artifacts/README.md | V1→V2 migration overview |
-| V1toV2_artifacts/mill_ui_refactor.md | Original refactor design |
-| V1toV2_artifacts/V2_PROMOTION_PLAN.md | V2 promotion strategy |
-| V1toV2_artifacts/reviews/*.md | Codex review artifacts |
-
----
-
 ## Synchronization Rules
 
 ### When Adding a New Feature
 
 1. FEATURES.md - Add feature entry with status.
-2. README.md - Add to feature list if user-visible.
+2. README.md - Update if user-visible, data models, or pipeline change.
 3. CLAUDE.md - Add task example if common workflow.
-4. GROUND_TRUTH.md - Update if data models or pipeline change.
-5. Spec docs - Update relevant docs/*.md if semantics change.
+4. Spec docs - Update relevant docs/*.md if semantics change.
 
 ### When Changing Core Data Models
 
-1. GROUND_TRUTH.md - Update data model section.
-2. README.md - Update Core Concepts section.
-3. CLAUDE.md - Update relevant task examples.
-4. docs/WORKFLOW.md - Update if pipeline stages change.
+1. README.md - Update data model and terminology sections.
+2. CLAUDE.md - Update relevant task examples.
+3. docs/WORKFLOW.md - Update if pipeline stages change.
 
 ### When Modifying PML Syntax
 
@@ -104,8 +88,7 @@ These documents MUST NOT be updated except for factual errors.
 Before merging a PR, verify:
 
 - [ ] FEATURES.md updated if new feature added.
-- [ ] README.md updated if user-facing change.
-- [ ] GROUND_TRUTH.md updated if data models/pipeline changed.
+- [ ] README.md updated if user-facing, data models, or pipeline changed.
 - [ ] Spec docs updated if semantics changed.
 - [ ] CLAUDE.md updated if patterns/pitfalls affected.
 - [ ] Recipes still work if breaking change.
@@ -120,7 +103,7 @@ Before merging a PR, verify:
 |--------|---------|
 | validate_doc_examples.py | Extract and validate code blocks. |
 | check_doc_links.py | Check markdown links and file:line references. |
-| verify_ground_truth_refs.py | Validate GROUND_TRUTH.md line references. |
+| verify_readme_refs.py | Validate README.md line references. |
 | detect_stale_docs.py | Detect source changes without doc updates. |
 | validate_pml_examples.py | Test PML code blocks with parsers. |
 
@@ -133,7 +116,7 @@ Runs on PRs touching core source or documentation files.
 PRs MUST fail if:
 - Code examples don't work.
 - Links are broken.
-- GROUND_TRUTH.md references invalid lines.
+- README.md references invalid lines.
 
 ### Pre-Commit Hook
 
@@ -147,16 +130,12 @@ ln -s ../../scripts/pre-commit-docs-check.sh .git/hooks/pre-commit
 
 ```
 README.md
-  ├─ References: CLAUDE.md, templates/shaker.py, tests/, docs/recipes/
-  └─ Referenced by: CLAUDE.md
+  ├─ References: CLAUDE.md, templates/shaker.py, tests/, docs/recipes/, all core source files
+  └─ Referenced by: CLAUDE.md, developer reference
 
 CLAUDE.md
   ├─ References: README.md, layout_ast/layout.py, ir/removal_intent.py
   └─ Referenced by: AI agent context
-
-GROUND_TRUTH.md
-  ├─ References: All core source files with line numbers
-  └─ Referenced by: Developer reference
 
 FEATURES.md
   ├─ References: Implementation files for each feature
@@ -171,10 +150,8 @@ docs/WORKFLOW.md
 
 ## Quick Reference
 
-**Always update:** FEATURES.md, README.md, GROUND_TRUTH.md (when relevant).
+**Always update:** FEATURES.md, README.md (when relevant).
 
 **Update when relevant:** CLAUDE.md, pml/syntax_spec.md, docs/WORKFLOW.md, docs/*.md.
-
-**Never update:** V1toV2_artifacts/*.
 
 **Verify before release:** docs/recipes/*.md.

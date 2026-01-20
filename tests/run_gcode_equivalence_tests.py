@@ -1,7 +1,6 @@
 
 import hashlib
 import sys
-from io import StringIO
 from typing import Any
 
 from cam.model.machine import Machine
@@ -58,16 +57,13 @@ def _generate_gcode_from_hints(
         safe_z=6.0,
     )
 
-
     gcode_parts = []
-    for pass_record in passes:
-        output = StringIO()
-        write_gcode(
-            moves=pass_record.moves,
-            setup=pass_record.setup,
-            output=output,
+    for pass_dict in passes:
+        gcode = write_gcode(
+            pass_dict["moves"],
+            safe_z=pass_dict["setup"].safe_z,
         )
-        gcode_parts.append(output.getvalue())
+        gcode_parts.append(gcode)
 
     return "\n".join(gcode_parts)
 

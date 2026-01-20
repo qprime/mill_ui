@@ -224,6 +224,20 @@ class WaveGen:
 
 
 @dataclass(frozen=True)
+class XPanelGen:
+    """X-panel generator node.
+
+    Creates 4 triangular pockets forming an X pattern.
+
+    Attributes:
+        bar_width_mm: Width of the X bars (raised material between pockets)
+        depth_mm: Depth of the triangular pockets
+    """
+    bar_width_mm: float
+    depth_mm: float
+
+
+@dataclass(frozen=True)
 class SplitHorizontal:
     """Split domain horizontally into n rows.
 

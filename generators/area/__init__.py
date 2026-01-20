@@ -22,6 +22,7 @@ from generators.area.grid import grid_generator
 from generators.area.raised_panel import raised_panel_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.concentric_border import concentric_border_generator
+from generators.area.x_panel import x_panel_generator
 
 __all__ = [
     "flat_pocket_generator",
@@ -30,4 +31,5 @@ __all__ = [
     "raised_panel_generator",
     "line_pattern_generator",
     "concentric_border_generator",
+    "x_panel_generator",
 ]

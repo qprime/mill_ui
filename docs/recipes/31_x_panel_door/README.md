@@ -1,22 +1,23 @@
 # Recipe 31: X-Panel Door
 
-**Status:** Draft
-**Difficulty:** Intermediate
-**Demonstrates:** Polygon shape primitive, triangular pockets, X-pattern design
+**Status:** Complete
+**Difficulty:** Easy
+**Demonstrates:** x_panel generator, parametric X-pattern design
 
 ## Overview
 
-This recipe builds an X-panel cabinet door using four triangular pockets that meet
-at the center, creating raised diagonal bars forming an X pattern. This is a classic
-decorative door style often seen in farmhouse and traditional cabinetry.
+This recipe builds an X-panel cabinet door using the `x_panel` generator, which
+automatically creates four triangular pockets forming raised diagonal bars in an
+X pattern. This is a classic decorative door style often seen in farmhouse and
+traditional cabinetry.
 
 ## Design
 
 - 400mm x 600mm door blank, 19mm thick
 - 50mm frame width around the perimeter
 - Inner panel area: 300mm x 500mm (after frame inset)
-- Four triangular pockets (6mm deep) with 25mm inset from panel edges
-- Triangles inset from center by 25mm to create ~50mm wide X bars
+- x_panel generator with 50mm bar width creates uniform X bars
+- Four triangular pockets (6mm deep) automatically computed
 - The remaining material forms the raised X pattern crossing the panel
 
 ## Output
@@ -40,5 +41,9 @@ svg = render_blueprint_svg(flat)
 
 ## Variant: Adjusting X Proportions
 
-The X bars width is controlled by the pocket depth and the triangle vertices.
-For wider bars, adjust the triangle points to leave more material between them.
+The X bars width is controlled by the `bar_width` parameter:
+
+```pml
+x_panel bar_width 30mm depth 6mm   # Narrower bars
+x_panel bar_width 75mm depth 6mm   # Wider bars
+```

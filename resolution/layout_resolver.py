@@ -43,6 +43,8 @@ from layout_ast.compositional import (
     # Stage 15 additions (polygon/triangle)
     Polygon,
     Triangle,
+    # Stage 16 additions (x_panel generator)
+    XPanelGen,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -61,7 +63,8 @@ from generators.area.raised_panel import raised_panel_generator
 from generators.area.wave import wave_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.concentric_border import concentric_border_generator
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams
+from generators.area.x_panel import x_panel_generator
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams
 
 
 # Type alias for node handlers
@@ -652,6 +655,42 @@ class LayoutResolver:
             shape_id=self._next_shape_id("generated_chamfer"),
         )
         items.append(chamfer_item)
+
+    def _handle_x_panel_gen(
+        self,
+        node: XPanelGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle XPanelGen: Generate X-panel items for region.
+
+        Creates 4 triangular pockets forming an X pattern using the
+        x_panel_generator, which computes the correct geometry based
+        on bar width and region dimensions.
+        """
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = XPanelParams(
+            bar_width_mm=node.bar_width_mm,
+            depth_mm=node.depth_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("x_panel")
+        try:
+            generated_items = x_panel_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
 
     def _handle_wave_gen(
         self,
@@ -1324,6 +1363,8 @@ class LayoutResolver:
                 # Stage 15 handlers (polygon/triangle)
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,
+                # Stage 16 handlers (x_panel generator)
+                XPanelGen: LayoutResolver._handle_x_panel_gen,
             }
         return LayoutResolver._NODE_HANDLERS
 

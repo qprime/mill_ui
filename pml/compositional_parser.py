@@ -42,6 +42,8 @@ from layout_ast.compositional import (
     # Stage 15 additions (polygon/triangle)
     Polygon,
     Triangle,
+    # Stage 16 additions (x_panel generator)
+    XPanelGen,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -144,6 +146,8 @@ class CompositionalPMLLexer:
             'arch', 'height',
             # Stage 15 keywords (polygon/triangle)
             'polygon', 'triangle', 'base',
+            # Stage 16 keywords (x_panel generator)
+            'x_panel', 'bar_width',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -447,6 +451,9 @@ class CompositionalPMLParser:
             return self.parse_polygon()
         elif token.value == 'triangle':
             return self.parse_triangle()
+        # Stage 16 keywords (x_panel generator)
+        elif token.value == 'x_panel':
+            return self.parse_x_panel_gen()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
 
@@ -1046,6 +1053,20 @@ class CompositionalPMLParser:
             groove_width_mm=groove,
             depth_mm=depth,
         )
+
+    def parse_x_panel_gen(self) -> XPanelGen:
+        """Parse: x_panel bar_width <mm> depth <mm>
+
+        Example:
+            x_panel bar_width 50mm depth 6mm
+        """
+        self.expect('keyword', 'x_panel')
+        self.expect('keyword', 'bar_width')
+        bar_width = self.expect('number_with_unit').value
+        self.expect('keyword', 'depth')
+        depth = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return XPanelGen(bar_width_mm=bar_width, depth_mm=depth)
 
     def parse_split_horizontal(self) -> SplitHorizontal:
         """Parse: split_horizontal <n> gap <mm>

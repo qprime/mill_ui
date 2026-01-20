@@ -552,6 +552,33 @@ class ConcentricBorderParams(BaseParams):
             )
 
 
+@dataclass(frozen=True)
+class XPanelParams(BaseParams):
+    """Parameters for X-panel area generator.
+
+    Creates 4 triangular pockets forming an X pattern, commonly used in
+    farmhouse and traditional cabinet doors. The raised X bars are formed
+    by the material left between the triangular pockets.
+
+    Attributes:
+        bar_width_mm: Width of the X bars (raised material between pockets) in mm
+        depth_mm: Depth of the triangular pockets in mm (positive value)
+    """
+
+    bar_width_mm: float
+    depth_mm: float
+
+    def validate(self) -> None:
+        if self.bar_width_mm <= 0:
+            raise ValueError(
+                f"XPanelParams: bar_width_mm must be positive, got {self.bar_width_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"XPanelParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+
 # =============================================================================
 # Generator Utilities
 # =============================================================================
@@ -621,6 +648,7 @@ __all__ = [
     "ChamferParams",
     "LinePatternParams",
     "ConcentricBorderParams",
+    "XPanelParams",
     # Type aliases
     "LoopSelection",
     # Utilities

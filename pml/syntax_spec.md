@@ -198,6 +198,22 @@ rect panel
     raised_panel border 25mm border_depth 6mm field_depth 2mm
 ```
 
+#### X-Panel
+
+```
+x_panel bar_width <mm> depth <mm>
+```
+
+Creates 4 triangular pockets forming an X pattern. The bar_width controls the width of the raised X bars between the pockets.
+
+Example:
+```pml
+rect panel
+    profile outside through
+    frame 50mm
+        x_panel bar_width 50mm depth 6mm
+```
+
 #### Concentric Border
 
 ```

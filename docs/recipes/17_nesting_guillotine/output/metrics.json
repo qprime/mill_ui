@@ -5,7 +5,7 @@
     "total_sheets": 6,
     "utilization": 0.8105679037291484,
     "utilization_percent": "81.1%",
-    "nesting_time_ms": 0.64
+    "nesting_time_ms": 0.71
   },
   "sheets": [
     {
@@ -16,10 +16,10 @@
       "passes": 2,
       "moves": 3772,
       "timing_ms": {
-        "ir": 0.05,
-        "hints": 0.01,
-        "plan": 4.86,
-        "gcode": 8.58
+        "ir": 0.07,
+        "hints": 0.02,
+        "plan": 5.0,
+        "gcode": 8.57
       },
       "gcode_files": [
         "pocket-6.35mm",
@@ -34,10 +34,10 @@
       "passes": 2,
       "moves": 6878,
       "timing_ms": {
-        "ir": 0.05,
+        "ir": 0.06,
         "hints": 0.01,
-        "plan": 8.48,
-        "gcode": 15.54
+        "plan": 8.2,
+        "gcode": 15.63
       },
       "gcode_files": [
         "pocket-6.35mm",
@@ -52,10 +52,10 @@
       "passes": 2,
       "moves": 6878,
       "timing_ms": {
-        "ir": 0.04,
+        "ir": 0.06,
         "hints": 0.01,
-        "plan": 7.75,
-        "gcode": 15.43
+        "plan": 7.69,
+        "gcode": 15.39
       },
       "gcode_files": [
         "pocket-6.35mm",
@@ -70,10 +70,10 @@
       "passes": 2,
       "moves": 6878,
       "timing_ms": {
-        "ir": 0.04,
+        "ir": 0.05,
         "hints": 0.01,
-        "plan": 7.38,
-        "gcode": 15.49
+        "plan": 7.41,
+        "gcode": 15.53
       },
       "gcode_files": [
         "pocket-6.35mm",
@@ -88,10 +88,10 @@
       "passes": 2,
       "moves": 6878,
       "timing_ms": {
-        "ir": 0.04,
+        "ir": 0.05,
         "hints": 0.01,
-        "plan": 7.5,
-        "gcode": 15.4
+        "plan": 7.53,
+        "gcode": 15.43
       },
       "gcode_files": [
         "pocket-6.35mm",
@@ -106,10 +106,10 @@
       "passes": 2,
       "moves": 6878,
       "timing_ms": {
-        "ir": 0.04,
+        "ir": 0.06,
         "hints": 0.01,
-        "plan": 7.4,
-        "gcode": 15.8
+        "plan": 7.35,
+        "gcode": 15.54
       },
       "gcode_files": [
         "pocket-6.35mm",

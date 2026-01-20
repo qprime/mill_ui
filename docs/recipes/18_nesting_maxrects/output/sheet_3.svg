@@ -7,11 +7,12 @@
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
         .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #888888; font-family: monospace; font-size: 6px; }
+        .dimension-text { fill:
         .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
-        .gap-text { fill: #888888; font-family: monospace; font-size: 6px; }
+        .gap-text { fill:
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
     </style>
   <rect x="0" y="0" width="1512.0" height="1525.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -33,6 +34,18 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
+  <g id="LABELS" class="labels">
+    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_4_door:outer</text>
+    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_4_door:panel</text>
+    <text x="911.85" y="378.5" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_5_door:outer</text>
+    <text x="911.85" y="378.5" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_5_door:panel</text>
+    <text x="378.5" y="1051.85" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_6_door:outer</text>
+    <text x="378.5" y="1051.85" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_6_door:panel</text>
+    <text x="841.85" y="911.85" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_7_door:outer</text>
+    <text x="841.85" y="911.85" class="part-label" text-anchor="middle" dominant-baseline="middle">large_door_7_door:panel</text>
+    <text x="1178.2" y="765.85" class="part-label" text-anchor="middle" dominant-baseline="middle">small_door_8_rect</text>
+    <text x="1178.2" y="1077.2" class="part-label" text-anchor="middle" dominant-baseline="middle">small_door_9_rect</text>
+  </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="207.0" y1="207.0" x2="207.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -110,6 +123,17 @@
     <text x="20" y="1429.0" class="notes">Features: 6 profiles, 4 pockets</text>
     <text x="20" y="1441.0" class="notes">Depths:</text>
     <text x="30" y="1453.0" class="notes">• pocket: 6.0</text>
+    <text x="20" y="1465.0" class="notes">Parts (10):</text>
+    <text x="30" y="1477.0" class="notes">• large_door_4_door:outer</text>
+    <text x="30" y="1489.0" class="notes">• large_door_4_door:panel</text>
+    <text x="30" y="1501.0" class="notes">• large_door_5_door:outer</text>
+    <text x="30" y="1513.0" class="notes">• large_door_5_door:panel</text>
+    <text x="30" y="1525.0" class="notes">• large_door_6_door:outer</text>
+    <text x="30" y="1537.0" class="notes">• large_door_6_door:panel</text>
+    <text x="30" y="1549.0" class="notes">• large_door_7_door:outer</text>
+    <text x="30" y="1561.0" class="notes">• large_door_7_door:panel</text>
+    <text x="30" y="1573.0" class="notes">• small_door_8_rect</text>
+    <text x="30" y="1585.0" class="notes">• small_door_9_rect</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

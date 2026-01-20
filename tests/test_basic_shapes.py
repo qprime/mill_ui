@@ -311,6 +311,100 @@ line divider horizontal engrave
     return True
 
 
+def test_rounded_rect_selective_corners():
+    print("Running test_rounded_rect_selective_corners...")
+
+    pml = """sheet 686.00mm 864.00mm 19.00mm
+
+rounded_rect table_half radius 12.70mm corners tl bl profile through outside
+"""
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 1
+    item = flat.items[0]
+    assert item.type == "RoundedRect"
+    assert item.shape_id == "table_half"
+
+    assert item.geometry.data["radius_tl_mm"] == 12.7
+    assert item.geometry.data["radius_tr_mm"] == 0.0
+    assert item.geometry.data["radius_bl_mm"] == 12.7
+    assert item.geometry.data["radius_br_mm"] == 0.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_rounded_rect_all_corners_explicit():
+    print("Running test_rounded_rect_all_corners_explicit...")
+
+    pml = """sheet 400.00mm 600.00mm 19.00mm
+
+rounded_rect panel radius 10.00mm corners tl tr bl br pocket 3.00mm
+"""
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 1
+    item = flat.items[0]
+    assert item.geometry.data["radius_tl_mm"] == 10.0
+    assert item.geometry.data["radius_tr_mm"] == 10.0
+    assert item.geometry.data["radius_bl_mm"] == 10.0
+    assert item.geometry.data["radius_br_mm"] == 10.0
+    assert item.geometry.data["radius_mm"] == 10.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_rounded_rect_single_corner():
+    print("Running test_rounded_rect_single_corner...")
+
+    pml = """sheet 400.00mm 600.00mm 19.00mm
+
+rounded_rect corner_piece radius 25.00mm corners tr profile through outside
+"""
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 1
+    item = flat.items[0]
+    assert item.geometry.data["radius_tl_mm"] == 0.0
+    assert item.geometry.data["radius_tr_mm"] == 25.0
+    assert item.geometry.data["radius_bl_mm"] == 0.0
+    assert item.geometry.data["radius_br_mm"] == 0.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_rounded_rect_corners_round_trip():
+    print("Running test_rounded_rect_corners_round_trip...")
+
+    original_pml = """sheet 686.00mm 864.00mm 19.00mm
+
+rounded_rect table_half radius 12.70mm corners tl bl profile through outside
+"""
+
+    ast1 = parse_compositional_pml(original_pml)
+    formatted = format_compositional_pml(ast1)
+    ast2 = parse_compositional_pml(formatted)
+
+    flat1 = resolve_layout(ast1)
+    flat2 = resolve_layout(ast2)
+
+    assert len(flat1.items) == len(flat2.items)
+    assert flat1.items[0].geometry.data["radius_tl_mm"] == flat2.items[0].geometry.data["radius_tl_mm"]
+    assert flat1.items[0].geometry.data["radius_tr_mm"] == flat2.items[0].geometry.data["radius_tr_mm"]
+    assert flat1.items[0].geometry.data["radius_bl_mm"] == flat2.items[0].geometry.data["radius_bl_mm"]
+    assert flat1.items[0].geometry.data["radius_br_mm"] == flat2.items[0].geometry.data["radius_br_mm"]
+
+    assert "corners tl bl" in formatted
+
+    print("  ✓ PASS")
+    return True
+
+
 def test_acceptance_canonical_formatting():
     print("Running test_acceptance_canonical_formatting...")
 
@@ -347,6 +441,10 @@ if __name__ == "__main__":
         test_circle_fit_in_rect_region,
         test_rounded_rect_fills_region,
         test_rounded_rect_with_inset,
+        test_rounded_rect_selective_corners,
+        test_rounded_rect_all_corners_explicit,
+        test_rounded_rect_single_corner,
+        test_rounded_rect_corners_round_trip,
         test_line_horizontal,
         test_line_vertical,
         test_line_in_inset_region,

@@ -148,6 +148,8 @@ class CompositionalPMLLexer:
             'polygon', 'triangle', 'base',
             # Stage 16 keywords (x_panel generator)
             'x_panel', 'bar_width',
+            # Stage 17 keywords (selective corner rounding)
+            'corners', 'tl', 'tr', 'bl', 'br',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -536,22 +538,32 @@ class CompositionalPMLParser:
     def parse_rounded_rect(self) -> RoundedRect:
         self.expect('keyword', 'rounded_rect')
 
-
         rounded_rect_id = None
         if self.peek().type == 'identifier':
             rounded_rect_id = self.advance().value
 
-
         self.expect('keyword', 'radius')
         radius_mm = self.expect('number_with_unit').value
 
+        corners = None
+        if self.peek().type == 'keyword' and self.peek().value == 'corners':
+            self.advance()
+            corner_set = set()
+            valid_corners = {'tl', 'tr', 'bl', 'br'}
+            while self.peek().type == 'keyword' and self.peek().value in valid_corners:
+                corner_set.add(self.advance().value)
+            if not corner_set:
+                raise ParseError(
+                    "corners keyword requires at least one corner (tl, tr, bl, br)",
+                    self.peek().line, self.peek().column
+                )
+            corners = frozenset(corner_set)
 
         feature = None
         if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
             feature = self.parse_feature()
 
         self.expect_line_end()
-
 
         children = []
         if self.peek().type == 'indent':
@@ -561,7 +573,7 @@ class CompositionalPMLParser:
                 self.skip_newlines()
             self.expect('dedent')
 
-        return RoundedRect(radius_mm=radius_mm, children=tuple(children), feature=feature, id=rounded_rect_id)
+        return RoundedRect(radius_mm=radius_mm, children=tuple(children), feature=feature, id=rounded_rect_id, corners=corners)
 
     def parse_line(self) -> Line:
         self.expect('keyword', 'line')

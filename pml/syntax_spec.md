@@ -75,12 +75,20 @@ circle hole2 at 150mm,50mm radius 6mm hole through
 #### RoundedRect
 
 ```
-roundedrect <id> at <x>mm,<y>mm size <w>mm,<h>mm radius <r>mm <feature>
+roundedrect <id> at <x>mm,<y>mm size <w>mm,<h>mm radius <r>mm [corners <corner>...] <feature>
 ```
+
+**Optional selective corners:**
+- `corners tl tr bl br`: Specify which corners to round (any combination)
+- `tl` = top-left, `tr` = top-right, `bl` = bottom-left, `br` = bottom-right
+- Omitted corners get radius 0 (square)
+- If `corners` keyword is omitted, all four corners are rounded
 
 Example:
 ```pml
 roundedrect panel at 100mm,100mm size 80mm,60mm radius 5mm pocket 4mm
+roundedrect table_half at 343mm,432mm size 686mm,864mm radius 12.7mm corners tl bl profile through outside
+roundedrect corner at 50mm,50mm size 100mm,100mm radius 25mm corners tr pocket 3mm
 ```
 
 ### Features

@@ -56,12 +56,31 @@ Rectangle with rounded corners filling current region.
 |-------|------|-------------|
 | id | str (optional) | Shape identifier |
 | radius_mm | float | Corner radius |
+| corners | frozenset (optional) | Which corners to round (tl, tr, bl, br) |
 | feature | Feature (optional) | CAM feature |
 | children | tuple (optional) | Nested layout nodes |
 
-PML: `rounded_rect [id] radius <value>mm [feature]`
+PML: `rounded_rect [id] radius <value>mm [corners tl tr bl br] [feature]`
 
-Resolution: Fills current region with specified corner radius.
+**Selective Corner Rounding:**
+
+The optional `corners` keyword specifies which corners receive rounding. Omitted corners get radius 0 (square).
+
+```pml
+# All corners rounded (default behavior, corners keyword omitted)
+rounded_rect radius 12.7mm profile through outside
+
+# Only left side rounded (table top half with straight joint edge)
+rounded_rect table_half radius 12.7mm corners tl bl profile through outside
+
+# Single corner rounded (corner piece)
+rounded_rect corner radius 25mm corners tr profile through outside
+```
+
+Resolution:
+- Fills current region with specified corner radii
+- Geometry includes per-corner radii: `radius_tl_mm`, `radius_tr_mm`, `radius_bl_mm`, `radius_br_mm`
+- When all corners equal, `radius_mm` is also set for backward compatibility
 
 ### Line
 
@@ -180,6 +199,7 @@ Resolution:
 | Circle fit mode | Uses bounding box min dimension; non-square regions leave unused space |
 | Line orientations | Only horizontal/vertical; use Polyline for arbitrary angles |
 | RoundedRect radius | No automatic clamping if radius > min(width, height) / 2 |
+| RoundedRect corners | Corner identifiers are position-based (tl=top-left assumes Y+ is up) |
 | Line/Polyline children | Not supported (open paths are not regions) |
 | Circle children | Use bounding box, not circular clipping |
 

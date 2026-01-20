@@ -392,11 +392,25 @@ class LayoutResolver:
 
         edge_treatment = self._extract_edge_treatment(node.children)
 
+        all_corners = {'tl', 'tr', 'bl', 'br'}
+        if node.corners is not None:
+            radius_tl = node.radius_mm if 'tl' in node.corners else 0.0
+            radius_tr = node.radius_mm if 'tr' in node.corners else 0.0
+            radius_bl = node.radius_mm if 'bl' in node.corners else 0.0
+            radius_br = node.radius_mm if 'br' in node.corners else 0.0
+        else:
+            radius_tl = radius_tr = radius_bl = radius_br = node.radius_mm
+
         geometry_data = {
             "w_mm": region.width,
             "h_mm": region.height,
-            "radius_mm": node.radius_mm,
+            "radius_tl_mm": radius_tl,
+            "radius_tr_mm": radius_tr,
+            "radius_bl_mm": radius_bl,
+            "radius_br_mm": radius_br,
         }
+        if radius_tl == radius_tr == radius_bl == radius_br:
+            geometry_data["radius_mm"] = radius_tl
         if islands:
             geometry_data["islands"] = islands
         if edge_treatment:

@@ -108,7 +108,9 @@ PML: `circle <id> [diameter <size>mm | fit] [feature]`
 
 Rectangle with rounded corners.
 
-PML: `rounded_rect <id> radius <radius>mm [feature]`
+PML: `rounded_rect <id> radius <radius>mm [corners tl tr bl br] [feature]`
+
+The optional `corners` keyword specifies which corners to round. Omitted corners get radius 0 (square).
 
 ### Line
 

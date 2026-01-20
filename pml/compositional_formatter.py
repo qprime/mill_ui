@@ -106,6 +106,11 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
         if node.id:
             parts.append(node.id)
         parts.append(f"radius {node.radius_mm:.2f}mm")
+        if node.corners is not None:
+            corner_order = ['tl', 'tr', 'bl', 'br']
+            sorted_corners = [c for c in corner_order if c in node.corners]
+            parts.append("corners")
+            parts.extend(sorted_corners)
         if node.feature:
             parts.append(_format_feature(node.feature))
         lines.append(prefix + " ".join(parts))

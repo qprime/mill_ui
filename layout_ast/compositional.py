@@ -88,6 +88,7 @@ class RoundedRect:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    corners: frozenset[str] | None = None
 
 
 @dataclass(frozen=True)

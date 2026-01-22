@@ -34,22 +34,9 @@ class NestingValidationResult:
         return "\n".join(lines)
 
 
-def _placements_overlap(p1: NestedPart, p2: NestedPart, gap: float = 0.0, epsilon: float = 0.01) -> bool:
-
+def _placements_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -> bool:
     l1, b1, r1, t1 = p1.bounds
     l2, b2, r2, t2 = p2.bounds
-
-
-    l1 -= gap / 2
-    b1 -= gap / 2
-    r1 += gap / 2
-    t1 += gap / 2
-
-    l2 -= gap / 2
-    b2 -= gap / 2
-    r2 += gap / 2
-    t2 += gap / 2
-
 
     overlap_x = not (r1 <= l2 + epsilon or r2 <= l1 + epsilon)
     overlap_y = not (t1 <= b2 + epsilon or t2 <= b1 + epsilon)
@@ -85,9 +72,9 @@ def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
     placements = list(layout.placements)
     for i, p1 in enumerate(placements):
         for p2 in placements[i + 1:]:
-            if _placements_overlap(p1, p2, gap=spec.gap_mm):
+            if _placements_overlap(p1, p2):
                 result.add_error(
-                    f"Placements overlap or violate part gap: "
+                    f"Part geometries overlap: "
                     f"{p1.part_spec.name}_{p1.instance_id} and {p2.part_spec.name}_{p2.instance_id}",
                     part1=f"{p1.part_spec.name}_{p1.instance_id}",
                     part2=f"{p2.part_spec.name}_{p2.instance_id}",

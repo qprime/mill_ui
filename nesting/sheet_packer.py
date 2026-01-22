@@ -28,15 +28,12 @@ def _expand_parts(parts: list[PartSpec]) -> list[tuple[PartSpec, int]]:
 def _part_fits_on_sheet(part: PartSpec, sheet: SheetSpec) -> bool:
     usable_w = sheet.usable_width_mm
     usable_h = sheet.usable_height_mm
-    gap = sheet.gap_mm
 
-
-    if part.width_mm + gap <= usable_w and part.height_mm + gap <= usable_h:
+    if part.width_mm <= usable_w and part.height_mm <= usable_h:
         return True
 
-
     if part.allow_rotation:
-        if part.height_mm + gap <= usable_w and part.width_mm + gap <= usable_h:
+        if part.height_mm <= usable_w and part.width_mm <= usable_h:
             return True
 
     return False
@@ -118,7 +115,7 @@ def pack_sheets(
             parts_input=pack_input,
             bin_width=sheet_spec.usable_width_mm,
             bin_height=sheet_spec.usable_height_mm,
-            gap=sheet_spec.gap_mm,
+            gap=0.0,
             algorithm=algorithm,
         )
 

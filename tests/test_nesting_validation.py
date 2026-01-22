@@ -65,11 +65,10 @@ def test_overlapping_error():
     print("  PASSED")
 
 
-def test_kerf_violation_error():
-    print("Running test_kerf_violation_error...")
+def test_touching_parts_allowed():
+    print("Running test_touching_parts_allowed...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=10)
     part = PartSpec(name="panel", width_mm=100, height_mm=100)
-
 
     layout = SheetLayout(
         sheet_spec=sheet_spec,
@@ -80,8 +79,26 @@ def test_kerf_violation_error():
     )
 
     result = validate_sheet_layout(layout)
+    assert result.is_valid, f"Touching parts should be allowed (kerf overlap): {result.summary()}"
+    print("  PASSED")
+
+
+def test_geometry_overlap_error():
+    print("Running test_geometry_overlap_error...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=10)
+    part = PartSpec(name="panel", width_mm=100, height_mm=100)
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=part, x_mm=100, y_mm=100, instance_id=0),
+            NestedPart(part_spec=part, x_mm=150, y_mm=100, instance_id=1),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
     assert not result.is_valid
-    assert any("kerf" in e["message"].lower() or "overlap" in e["message"].lower() for e in result.errors)
+    assert any("overlap" in e["message"].lower() for e in result.errors)
     print("  PASSED")
 
 
@@ -184,7 +201,8 @@ def run_all_tests():
         test_valid_layout_passes,
         test_out_of_bounds_error,
         test_overlapping_error,
-        test_kerf_violation_error,
+        test_touching_parts_allowed,
+        test_geometry_overlap_error,
         test_low_utilization_warning,
         test_unplaced_parts_warning,
         test_multiple_sheets_validated,

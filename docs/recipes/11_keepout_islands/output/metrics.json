@@ -1,11 +1,11 @@
 {
   "timing": {
     "parse_ms": 0.13,
-    "ir_ms": 0.02,
+    "ir_ms": 0.01,
     "hints_ms": 0.0,
     "plan_ms": 1.26,
-    "gcode_ms": 2.49,
-    "total_ms": 3.89
+    "gcode_ms": 2.55,
+    "total_ms": 3.95
   },
   "complexity": {
     "total_moves": 1054,
@@ -24,12 +24,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 18752,
-    "total_lines": 1060,
+    "total_bytes": 18782,
+    "total_lines": 1064,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 18752,
-        "lines": 1060
+        "bytes": 18782,
+        "lines": 1064
       }
     }
   }

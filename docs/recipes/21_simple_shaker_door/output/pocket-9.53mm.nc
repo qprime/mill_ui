@@ -3,9 +3,12 @@ G90
 G21
 G17
 G94
+G54
+G0 Z6.000
+M3 S10000
+G4 P5
 (BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810)
 (pocket_raster so=3.810 sd=3.000 depth=6.000)
-M3 S10000
 F700.0
 G0 X55.012 Y55.012 Z6.000
 G1 Z-3.000 F250.0
@@ -1299,6 +1302,7 @@ G1 X55.012 Y542.692 F700.0
 G0 Z6.000
 (BEGIN finish profile pass)
 (profile_outline)
+M3 S10000
 G0 X54.762 Y54.762 Z6.000
 G1 Z-3.000 F250.0
 F700.0

@@ -259,7 +259,12 @@ python -m cli.nest job.nest -o output/ --export-stl --export-svg
 
 **Use case:** Verify changes with appropriate test level.
 
+**Activate venv first:** `source .venv/bin/activate`
+
 ```bash
+# All core tests (PML, Edge, Resolution, Removal Intent)
+./run_tests.sh
+
 # IR-level tests (fast, no native backend required)
 python -m tests.run_edge_tests
 
@@ -280,7 +285,8 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 
 **CLI (regenerate all recipe outputs):**
 ```bash
-python tests/test_recipes.py --regen_recipes
+source .venv/bin/activate
+python -m tests.test_recipes --regen_recipes
 ```
 
 **Programmatic:**

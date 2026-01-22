@@ -133,6 +133,7 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         gcode = write_gcode(
             pass_dict["moves"],
             safe_z=setup.safe_z,
+            machine=machine,
         )
 
 

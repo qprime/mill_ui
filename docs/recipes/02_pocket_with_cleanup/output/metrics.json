@@ -3,8 +3,8 @@
     "parse_ms": 0.09,
     "ir_ms": 0.02,
     "hints_ms": 0.01,
-    "plan_ms": 0.38,
-    "gcode_ms": 0.52,
+    "plan_ms": 0.37,
+    "gcode_ms": 0.53,
     "total_ms": 1.01
   },
   "complexity": {
@@ -24,12 +24,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 3894,
-    "total_lines": 220,
+    "total_bytes": 3924,
+    "total_lines": 224,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 3894,
-        "lines": 220
+        "bytes": 3924,
+        "lines": 224
       }
     }
   }

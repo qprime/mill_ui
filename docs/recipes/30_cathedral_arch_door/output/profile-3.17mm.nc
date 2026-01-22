@@ -3,8 +3,11 @@ G90
 G21
 G17
 G94
-(profile_outline)
+G54
+G0 Z6.000
 M3 S14000
+G4 P5
+(profile_outline)
 F900.0
 G0 X501.123 Y801.123 Z6.000
 G1 Z-1.587 F300.0

@@ -3,8 +3,11 @@ G90
 G21
 G17
 G94
-(pocket_circle_concentric D=6.350 tool=3.175 so=1.270)
+G54
+G0 Z6.000
 M3 S14000
+G4 P5
+(pocket_circle_concentric D=6.350 tool=3.175 so=1.270)
 F900.0
 G0 X75.794 Y75.000 Z6.000
 G1 Z-3.000 F300.0
@@ -383,6 +386,7 @@ G1 X76.584 Y74.889 F900.0
 G1 X76.588 Y75.000 F900.0
 G0 Z6.000
 (profile_outline)
+M3 S14000
 G0 X76.588 Y75.000 Z6.000
 G1 Z-6.000 F300.0
 F900.0

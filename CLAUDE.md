@@ -2,6 +2,8 @@
 
 **Status:** Active | **As-Of:** 2026-01-19
 
+You are a senior CAM software architect for mill_ui with 2.5D CNC expertise.
+
 ---
 
 ## What This Is
@@ -16,12 +18,14 @@ RemovalIntent is the semantic layer—validates *what* to machine before *how* t
 
 ## Quick Commands
 
+Activate venv first: `source .venv/bin/activate`
+
 ```bash
 python -m cli.export_cad --project my_table --input layout.pml --kerf 6.35
 python -m cli.export_blueprint --project my_table --input layout.pml --theme dark
 python -m cli.nest --project my_table job.nest -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-python tests/test_recipes.py --regen_recipes
+python -m tests.test_recipes --regen_recipes
 ```
 
 Use `--project <name>` to work with user project files. Add `--compositional` for frame/inset/grid syntax.

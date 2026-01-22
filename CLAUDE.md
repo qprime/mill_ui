@@ -51,7 +51,7 @@ Check before implementing — these already exist:
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |
 | Shaker door template | `templates/shaker.py` |
-| Profile with tabs | `pml/parser.py` |
+| Profile with tabs | `pml/compositional_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 
 ## Don't

@@ -429,9 +429,10 @@ kerf 0.2mm
 
 ## Whitespace
 
-- Indentation is insignificant (but recommended for readability)
+- Indentation is significant for nested structures (layout managers, generators, children)
 - Blank lines are ignored
-- Each declaration is a single logical line
+- Top-level declarations are single logical lines
+- Child nodes must be indented under their parent
 
 ## Canonical Formatting
 

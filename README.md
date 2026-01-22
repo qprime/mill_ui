@@ -1,7 +1,7 @@
 <!-- spec-style -->
 # mill_ui
 
-**As-Of:** 2026-01-19
+**As-Of:** 2026-01-22
 **Document Type:** System Specification
 **Authority:** This document is authoritative for architecture and behavior described herein.
 

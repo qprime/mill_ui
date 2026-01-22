@@ -1,7 +1,7 @@
 <!-- spec-style -->
 # Compositional Layout System
 
-As-Of Date: 2026-01-19
+As-Of Date: 2026-01-22
 Document Type: Layout System Specification
 
 ---
@@ -217,9 +217,10 @@ Compatible with: FlatPML formatter, RemovalIntent lowering, existing planner/str
 
 MUST NOT:
 - Author ResolvedRegion nodes (computed only)
-- Use absolute XY coordinates in compositional AST
 - Add algebra/expressions (use layout managers + params)
 - Treat compositional nodes as RemovalIntent
+
+Note: Shapes may use inline `at X,Y size W,H` for absolute positioning when needed (e.g., nesting output, legacy compatibility). Layout managers remain the preferred approach for new designs.
 
 ---
 

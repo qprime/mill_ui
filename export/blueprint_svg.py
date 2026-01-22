@@ -306,7 +306,7 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "Polyline":
-        points = item.geometry.data.get("points", [])
+        points = item.geometry.data.get("points_mm", [])
         if points:
             points_str = " ".join(f"{x + offset_x},{y + offset_y}" for x, y in points)
             ET.SubElement(group, "polyline", {"points": points_str})

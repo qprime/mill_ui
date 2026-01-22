@@ -13,10 +13,13 @@ from layout_ast.compositional import (
     UseComponent,
     Place,
     Rect,
+    RoundedRect,
+    Triangle,
+    ProfileGen,
     CompositionalLayoutAST,
 )
 from layout_ast.layout import Sheet, Feature
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import resolve_layout, LayoutResolver, ResolutionAssertionError
 from pml import format_pml
 
 
@@ -372,6 +375,205 @@ def test_grid_with_no_explicit_cell():
     return True
 
 
+def test_rounded_rect_profile_inherits_geometry():
+    """Test that ProfileGen inside RoundedRect produces RoundedRect profile item."""
+    print("Running test_rounded_rect_profile_inherits_geometry...")
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(
+            children=(
+                RoundedRect(
+                    radius_mm=25.0,
+                    children=(
+                        ProfileGen(side="outside", depth="through"),
+                    ),
+                    id="panel",
+                ),
+            )
+        ),
+    )
+
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 2
+
+    shape_item = flat.items[0]
+    assert shape_item.shape_id == "panel"
+    assert shape_item.type == "RoundedRect"
+    assert shape_item.geometry.data["radius_mm"] == 25.0
+
+    profile_item = flat.items[1]
+    assert profile_item.type == "RoundedRect"
+    assert profile_item.feature.type == "profile"
+    assert profile_item.geometry.data["radius_mm"] == 25.0
+    assert profile_item.geometry.data["w_mm"] == 400.0
+    assert profile_item.geometry.data["h_mm"] == 600.0
+
+    print("  PASS")
+    return True
+
+
+def test_rounded_rect_selective_corners_profile_inherits():
+    """Test that ProfileGen inside RoundedRect with selective corners preserves corner radii."""
+    print("Running test_rounded_rect_selective_corners_profile_inherits...")
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(
+            children=(
+                RoundedRect(
+                    radius_mm=25.4,
+                    corners=frozenset({"bl", "br"}),
+                    children=(
+                        ProfileGen(side="outside", depth="through"),
+                    ),
+                    id="panel",
+                ),
+            )
+        ),
+    )
+
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 2
+
+    shape_item = flat.items[0]
+    assert shape_item.type == "RoundedRect"
+    assert shape_item.geometry.data["radius_tl_mm"] == 0.0
+    assert shape_item.geometry.data["radius_tr_mm"] == 0.0
+    assert shape_item.geometry.data["radius_bl_mm"] == 25.4
+    assert shape_item.geometry.data["radius_br_mm"] == 25.4
+
+    profile_item = flat.items[1]
+    assert profile_item.type == "RoundedRect"
+    assert profile_item.feature.type == "profile"
+    assert profile_item.geometry.data["radius_tl_mm"] == 0.0
+    assert profile_item.geometry.data["radius_tr_mm"] == 0.0
+    assert profile_item.geometry.data["radius_bl_mm"] == 25.4
+    assert profile_item.geometry.data["radius_br_mm"] == 25.4
+
+    print("  PASS")
+    return True
+
+
+def test_rect_profile_stays_rect():
+    """Test that ProfileGen inside Rect still produces Rect profile item (backward compatibility)."""
+    print("Running test_rect_profile_stays_rect...")
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(
+            children=(
+                Rect(
+                    children=(
+                        ProfileGen(side="outside", depth="through"),
+                    ),
+                    id="panel",
+                ),
+            )
+        ),
+    )
+
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 2
+
+    shape_item = flat.items[0]
+    assert shape_item.shape_id == "panel"
+    assert shape_item.type == "Rect"
+
+    profile_item = flat.items[1]
+    assert profile_item.type == "Rect"
+    assert profile_item.feature.type == "profile"
+    assert "radius_mm" not in profile_item.geometry.data
+
+    print("  PASS")
+    return True
+
+
+def test_validation_mode_passes_for_correct_resolution():
+    """Test that validation mode passes when resolution is correct."""
+    print("Running test_validation_mode_passes_for_correct_resolution...")
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(
+            children=(
+                RoundedRect(
+                    radius_mm=25.0,
+                    corners=frozenset({"bl", "br"}),
+                    children=(
+                        ProfileGen(side="outside", depth="through"),
+                    ),
+                    id="panel",
+                ),
+            )
+        ),
+    )
+
+    flat = resolve_layout(ast, validate=True)
+
+    assert len(flat.items) == 2
+    assert flat.items[1].type == "RoundedRect"
+    print("  PASS")
+    return True
+
+
+def test_validation_assertion_catches_type_mismatch():
+    """Test that validation assertions catch shape context type mismatches."""
+    print("Running test_validation_assertion_catches_type_mismatch...")
+    from layout_ast.layout import Item, Geometry, Placement
+
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(children=()),
+    )
+    resolver = LayoutResolver(ast, validate=True)
+
+    bad_item = Item(
+        kind="shape",
+        type="Rect",
+        geometry=Geometry(data={"w_mm": 400, "h_mm": 600}),
+        placement=Placement(center_xy_mm=(200, 300)),
+        feature=Feature(type="profile", depth="through", side="outside"),
+        shape_id="test",
+    )
+
+    try:
+        resolver._assert_shape_context("RoundedRect", bad_item, "test")
+        assert False, "Should have raised ResolutionAssertionError"
+    except ResolutionAssertionError as e:
+        assert "RoundedRect" in str(e)
+        assert "Rect" in str(e)
+
+    print("  PASS")
+    return True
+
+
+def test_validation_assertion_catches_geometry_mismatch():
+    """Test that validation assertions catch geometry mismatches."""
+    print("Running test_validation_assertion_catches_geometry_mismatch...")
+
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(children=()),
+    )
+    resolver = LayoutResolver(ast, validate=True)
+
+    parent_geom = {"radius_bl_mm": 25.4, "radius_br_mm": 25.4}
+    child_geom = {"radius_bl_mm": 0.0, "radius_br_mm": 25.4}
+
+    try:
+        resolver._assert_geometry_preserved(
+            parent_geom, child_geom, ["radius_bl_mm", "radius_br_mm"], "test"
+        )
+        assert False, "Should have raised ResolutionAssertionError"
+    except ResolutionAssertionError as e:
+        assert "radius_bl_mm" in str(e)
+        assert "25.4" in str(e)
+        assert "0.0" in str(e)
+
+    print("  PASS")
+    return True
+
+
 if __name__ == "__main__":
     tests = [
         test_simple_panel_with_rect,
@@ -382,6 +584,12 @@ if __name__ == "__main__":
         test_place_grid_with_components,
         test_acceptance_4_instances_frame_grid_pocket,
         test_grid_with_no_explicit_cell,
+        test_rounded_rect_profile_inherits_geometry,
+        test_rounded_rect_selective_corners_profile_inherits,
+        test_rect_profile_stays_rect,
+        test_validation_mode_passes_for_correct_resolution,
+        test_validation_assertion_catches_type_mismatch,
+        test_validation_assertion_catches_geometry_mismatch,
     ]
 
     passed = 0

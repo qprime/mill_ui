@@ -138,7 +138,7 @@ def test_line_horizontal():
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
-line decoration horizontal engrave
+line decoration horizontal engrave 1.50mm
 """
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
@@ -152,6 +152,7 @@ line decoration horizontal engrave
     assert item.geometry.data["start_xy_mm"] == (0.0, 300.0)
     assert item.geometry.data["end_xy_mm"] == (400.0, 300.0)
     assert item.feature.type == "engrave"
+    assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
     return True
@@ -162,7 +163,7 @@ def test_line_vertical():
 
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
-line divider vertical engrave
+line divider vertical engrave 1.50mm
 """
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
@@ -174,6 +175,7 @@ line divider vertical engrave
 
     assert item.geometry.data["start_xy_mm"] == (200.0, 0.0)
     assert item.geometry.data["end_xy_mm"] == (200.0, 600.0)
+    assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
     return True
@@ -185,7 +187,7 @@ def test_line_in_inset_region():
     pml = """sheet 400.00mm 600.00mm 19.00mm
 
 inset 50.00mm
-    line flourish horizontal engrave
+    line flourish horizontal engrave 1.50mm
 """
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
@@ -197,6 +199,7 @@ inset 50.00mm
 
     assert item.geometry.data["start_xy_mm"] == (50.0, 300.0)
     assert item.geometry.data["end_xy_mm"] == (350.0, 300.0)
+    assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
     return True
@@ -255,7 +258,7 @@ def test_round_trip_line():
 
     original_pml = """sheet 400.00mm 600.00mm 19.00mm
 
-line decoration vertical engrave
+line decoration vertical engrave 1.50mm
 """
 
     ast1 = parse_compositional_pml(original_pml)
@@ -268,6 +271,7 @@ line decoration vertical engrave
     assert len(flat1.items) == len(flat2.items)
     assert flat1.items[0].geometry.data["start_xy_mm"] == flat2.items[0].geometry.data["start_xy_mm"]
     assert flat1.items[0].geometry.data["end_xy_mm"] == flat2.items[0].geometry.data["end_xy_mm"]
+    assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
     print("  ✓ PASS")
     return True
@@ -288,7 +292,7 @@ rect outer profile through outside
 
 rounded_rect badge radius 8.00mm profile through outside
 
-line divider horizontal engrave
+line divider horizontal engrave 1.50mm
 """
 
     ast = parse_compositional_pml(pml)
@@ -306,6 +310,7 @@ line divider horizontal engrave
     assert len(rects) == 2
     assert len(rounded_rects) == 1
     assert len(lines) == 1
+    assert lines[0].feature.depth_mm == 1.5
 
     print("  ✓ PASS")
     return True
@@ -416,7 +421,7 @@ circle badge diameter 120.00mm pocket 3.00mm
 
 rounded_rect panel radius 12.00mm profile through outside
 
-line decoration horizontal engrave
+line decoration horizontal engrave 1.50mm
 """
 
     ast = parse_compositional_pml(pml)
@@ -428,7 +433,69 @@ line decoration horizontal engrave
     assert formatted1 == formatted2
     assert "circle badge diameter 120.00mm pocket 3.00mm" in formatted1
     assert "rounded_rect panel radius 12.00mm profile through outside" in formatted1
-    assert "line decoration horizontal engrave" in formatted1
+    assert "line decoration horizontal engrave 1.50mm" in formatted1
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_rounded_rect_with_profile_child_inherits_geometry():
+    """Test that profile generator inside rounded_rect produces RoundedRect profile."""
+    print("Running test_rounded_rect_with_profile_child_inherits_geometry...")
+
+    pml = """sheet 584.00mm 584.00mm 19.00mm
+
+rounded_rect panel radius 25.40mm corners bl br
+    profile outside through
+"""
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 2
+
+    shape_item = flat.items[0]
+    assert shape_item.type == "RoundedRect"
+    assert shape_item.shape_id == "panel"
+    assert shape_item.geometry.data["radius_bl_mm"] == 25.4
+    assert shape_item.geometry.data["radius_br_mm"] == 25.4
+    assert shape_item.geometry.data["radius_tl_mm"] == 0.0
+    assert shape_item.geometry.data["radius_tr_mm"] == 0.0
+
+    profile_item = flat.items[1]
+    assert profile_item.type == "RoundedRect"
+    assert profile_item.feature.type == "profile"
+    assert profile_item.feature.side == "outside"
+    assert profile_item.geometry.data["radius_bl_mm"] == 25.4
+    assert profile_item.geometry.data["radius_br_mm"] == 25.4
+    assert profile_item.geometry.data["radius_tl_mm"] == 0.0
+    assert profile_item.geometry.data["radius_tr_mm"] == 0.0
+
+    print("  ✓ PASS")
+    return True
+
+
+def test_rect_with_profile_child_stays_rect():
+    """Test backward compatibility: profile inside rect stays rect."""
+    print("Running test_rect_with_profile_child_stays_rect...")
+
+    pml = """sheet 400.00mm 600.00mm 19.00mm
+
+rect panel
+    profile outside through
+"""
+    ast = parse_compositional_pml(pml)
+    flat = resolve_layout(ast)
+
+    assert len(flat.items) == 2
+
+    shape_item = flat.items[0]
+    assert shape_item.type == "Rect"
+
+    profile_item = flat.items[1]
+    assert profile_item.type == "Rect"
+    assert profile_item.feature.type == "profile"
+    assert "radius_mm" not in profile_item.geometry.data
+    assert "radius_bl_mm" not in profile_item.geometry.data
 
     print("  ✓ PASS")
     return True
@@ -453,6 +520,8 @@ if __name__ == "__main__":
         test_round_trip_line,
         test_mixed_shapes_composition,
         test_acceptance_canonical_formatting,
+        test_rounded_rect_with_profile_child_inherits_geometry,
+        test_rect_with_profile_child_stays_rect,
     ]
 
     results = []

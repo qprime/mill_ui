@@ -2,8 +2,8 @@
   "timing": {
     "ir_ms": 0.03,
     "hints_ms": 0.01,
-    "plan_ms": 0.35,
-    "gcode_ms": 0.63,
+    "plan_ms": 0.36,
+    "gcode_ms": 0.62,
     "svg_ms": 0.34,
     "stl_ms": 0.0,
     "total_ms": 1.94,

@@ -192,6 +192,131 @@ def test_valid_nesting_result():
     print("  PASSED")
 
 
+def test_triangle_rectangle_no_overlap():
+    print("Running test_triangle_rectangle_no_overlap...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    rect = PartSpec(name="rect", width_mm=100, height_mm=100)
+    triangle = PartSpec(
+        name="triangle",
+        width_mm=100,
+        height_mm=100,
+        geometry_points=((-50, -50), (50, -50), (0, 50)),
+    )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=rect, x_mm=200, y_mm=200, instance_id=0),
+            NestedPart(part_spec=triangle, x_mm=400, y_mm=200, instance_id=0),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert result.is_valid, result.summary()
+    print("  PASSED")
+
+
+def test_triangle_rectangle_overlap():
+    print("Running test_triangle_rectangle_overlap...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    rect = PartSpec(name="rect", width_mm=100, height_mm=100)
+    triangle = PartSpec(
+        name="triangle",
+        width_mm=100,
+        height_mm=100,
+        geometry_points=((-50, -50), (50, -50), (0, 50)),
+    )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=rect, x_mm=200, y_mm=200, instance_id=0),
+            NestedPart(part_spec=triangle, x_mm=220, y_mm=200, instance_id=0),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert not result.is_valid
+    assert any("overlap" in e["message"].lower() for e in result.errors)
+    print("  PASSED")
+
+
+def test_triangles_bounding_box_overlap_but_no_geometry_overlap():
+    print("Running test_triangles_bounding_box_overlap_but_no_geometry_overlap...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    triangle_up = PartSpec(
+        name="tri_up",
+        width_mm=100,
+        height_mm=100,
+        geometry_points=((-50, -50), (50, -50), (0, 50)),
+    )
+    triangle_down = PartSpec(
+        name="tri_down",
+        width_mm=100,
+        height_mm=100,
+        geometry_points=((-50, 50), (50, 50), (0, -50)),
+    )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=triangle_up, x_mm=200, y_mm=200, instance_id=0),
+            NestedPart(part_spec=triangle_down, x_mm=250, y_mm=200, instance_id=0),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert result.is_valid, f"Triangles should not overlap (interleaved): {result.summary()}"
+    print("  PASSED")
+
+
+def test_polygon_overlap_with_location():
+    print("Running test_polygon_overlap_with_location...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    rect = PartSpec(name="rect", width_mm=100, height_mm=100)
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=rect, x_mm=200, y_mm=200, instance_id=0),
+            NestedPart(part_spec=rect, x_mm=250, y_mm=200, instance_id=1),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert not result.is_valid
+    assert len(result.errors) == 1
+    assert result.errors[0].get("overlap_location") is not None
+    loc = result.errors[0]["overlap_location"]
+    assert 200 <= loc[0] <= 250
+    assert 150 <= loc[1] <= 250
+    print("  PASSED")
+
+
+def test_rotated_polygon_overlap():
+    print("Running test_rotated_polygon_overlap...")
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    triangle = PartSpec(
+        name="triangle",
+        width_mm=100,
+        height_mm=100,
+        geometry_points=((-50, -50), (50, -50), (0, 50)),
+    )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=triangle, x_mm=200, y_mm=200, instance_id=0, rotated=False),
+            NestedPart(part_spec=triangle, x_mm=200, y_mm=200, instance_id=1, rotated=True),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert not result.is_valid
+    assert any("overlap" in e["message"].lower() for e in result.errors)
+    print("  PASSED")
+
+
 def run_all_tests():
     print("=" * 60)
     print("Phase 6: Nesting Validation Tests")
@@ -207,6 +332,11 @@ def run_all_tests():
         test_unplaced_parts_warning,
         test_multiple_sheets_validated,
         test_valid_nesting_result,
+        test_triangle_rectangle_no_overlap,
+        test_triangle_rectangle_overlap,
+        test_triangles_bounding_box_overlap_but_no_geometry_overlap,
+        test_polygon_overlap_with_location,
+        test_rotated_polygon_overlap,
     ]
 
     passed = 0

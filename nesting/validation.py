@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from shapely.geometry import Polygon
+
 from .types import SheetLayout, NestingResult, NestedPart
 
 
@@ -34,7 +36,7 @@ class NestingValidationResult:
         return "\n".join(lines)
 
 
-def _placements_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -> bool:
+def _bounds_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -> bool:
     l1, b1, r1, t1 = p1.bounds
     l2, b2, r2, t2 = p2.bounds
 
@@ -42,6 +44,40 @@ def _placements_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -
     overlap_y = not (t1 <= b2 + epsilon or t2 <= b1 + epsilon)
 
     return overlap_x and overlap_y
+
+
+def _get_overlap_location(
+    p1: NestedPart, p2: NestedPart
+) -> tuple[float, float] | None:
+    poly1 = Polygon(p1.get_geometry_points())
+    poly2 = Polygon(p2.get_geometry_points())
+
+    if not poly1.is_valid or not poly2.is_valid:
+        return None
+
+    intersection = poly1.intersection(poly2)
+    if intersection.is_empty:
+        return None
+
+    centroid = intersection.centroid
+    return (round(centroid.x, 2), round(centroid.y, 2))
+
+
+def _geometries_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -> bool:
+    if not _bounds_overlap(p1, p2, epsilon):
+        return False
+
+    poly1 = Polygon(p1.get_geometry_points())
+    poly2 = Polygon(p2.get_geometry_points())
+
+    if not poly1.is_valid or not poly2.is_valid:
+        return _bounds_overlap(p1, p2, epsilon)
+
+    intersection = poly1.intersection(poly2)
+    if intersection.is_empty:
+        return False
+
+    return intersection.area > epsilon * epsilon
 
 
 def _placement_in_bounds(p: NestedPart, sheet_width: float, sheet_height: float, margin: float) -> bool:
@@ -72,12 +108,15 @@ def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
     placements = list(layout.placements)
     for i, p1 in enumerate(placements):
         for p2 in placements[i + 1:]:
-            if _placements_overlap(p1, p2):
+            if _geometries_overlap(p1, p2):
+                overlap_loc = _get_overlap_location(p1, p2)
+                loc_str = f" at ({overlap_loc[0]}, {overlap_loc[1]})mm" if overlap_loc else ""
                 result.add_error(
                     f"Part geometries overlap: "
-                    f"{p1.part_spec.name}_{p1.instance_id} and {p2.part_spec.name}_{p2.instance_id}",
+                    f"{p1.part_spec.name}_{p1.instance_id} and {p2.part_spec.name}_{p2.instance_id}{loc_str}",
                     part1=f"{p1.part_spec.name}_{p1.instance_id}",
                     part2=f"{p2.part_spec.name}_{p2.instance_id}",
+                    overlap_location=overlap_loc,
                 )
 
 

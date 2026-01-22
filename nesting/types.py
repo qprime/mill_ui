@@ -16,6 +16,7 @@ class PartSpec:
     template: str | None = None
     template_params: dict[str, Any] | None = None
     allow_rotation: bool = True
+    geometry_points: tuple[tuple[float, float], ...] | None = None
 
     def __post_init__(self) -> None:
         if self.width_mm <= 0:
@@ -34,10 +35,18 @@ class PartSpec:
         return self.area_mm2 * self.quantity
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        if d.get("geometry_points"):
+            d["geometry_points"] = [list(p) for p in d["geometry_points"]]
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> PartSpec:
+        data = dict(data)
+        if data.get("geometry_points"):
+            data["geometry_points"] = tuple(
+                tuple(p) for p in data["geometry_points"]
+            )
         return cls(**data)
 
 
@@ -164,6 +173,25 @@ class NestedPart:
     @property
     def bounds(self) -> tuple[float, float, float, float]:
         return (self.left_mm, self.bottom_mm, self.right_mm, self.top_mm)
+
+    def get_geometry_points(self) -> tuple[tuple[float, float], ...]:
+        if self.part_spec.geometry_points:
+            points = []
+            for px, py in self.part_spec.geometry_points:
+                if self.rotated:
+                    rx, ry = -py, px
+                else:
+                    rx, ry = px, py
+                points.append((self.x_mm + rx, self.y_mm + ry))
+            return tuple(points)
+        half_w = self.effective_width_mm / 2
+        half_h = self.effective_height_mm / 2
+        return (
+            (self.x_mm - half_w, self.y_mm - half_h),
+            (self.x_mm + half_w, self.y_mm - half_h),
+            (self.x_mm + half_w, self.y_mm + half_h),
+            (self.x_mm - half_w, self.y_mm + half_h),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {

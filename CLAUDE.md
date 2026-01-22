@@ -62,6 +62,29 @@ Check before implementing — these already exist:
 - Mutate frozen dataclasses
 - Create new files when editing existing ones works
 - Add comments to code
+- Add generators without corresponding PML syntax
+- Create projects that require Python build scripts instead of PML/nest files
+
+## PML-First Principle
+
+All machining features must be expressible in PML. Python-level generators are implementation details—incomplete without corresponding PML syntax.
+
+**Feature completeness checklist:**
+1. Generator implementation in `generators/`
+2. AST node in `layout_ast/compositional.py`
+3. Parser support in `pml/compositional_parser.py`
+4. Syntax documented in `pml/syntax_spec.md`
+5. Recipe demonstrating usage in `docs/recipes/`
+
+**Projects must use declarative input:**
+- Single-sheet layouts: `.pml` files
+- Multi-part nesting: `.nest` files (bin-packing only—defines part bounding boxes and quantities)
+- No Python build scripts—if you need one, the PML syntax is incomplete
+
+**PML vs .nest:**
+- `.pml` = full geometry + machining features (shapes, generators, frames, profiles, pockets)
+- `.nest` = bin-packing optimization (part sizes, quantities, sheet dimensions, algorithm choice)
+- `.nest` references templates for part content; templates should be PML with parameters (not Python)
 
 ## File Orientation
 

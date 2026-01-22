@@ -21,13 +21,14 @@ RemovalIntent is the semantic layer—validates *what* to machine before *how* t
 Activate venv first: `source .venv/bin/activate`
 
 ```bash
+python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml
 python -m cli.nest --project my_table job.nest -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
 
-The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. Use `--project <name>` to work with user project files. The parser supports both absolute positioning (`at X,Y size W,H`) and compositional syntax (frame/inset/grid).
+The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. With just `--project`, it processes all `.pml` files in the project directory. Use `--input` to specify a single file.
 
 Options: `--kerf`, `--theme`, `--quality`, `--no-svg`, `--no-stl`, `--no-clean`
 

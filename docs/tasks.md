@@ -286,8 +286,11 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 **CLI (unified command - generates G-code, SVG, STL):**
 ```bash
 source .venv/bin/activate
+python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml
 ```
+
+With just `--project`, processes all `.pml` files in the project directory. Use `--input` to specify a single file.
 
 **Options:**
 - `--kerf 6.35` — Tool kerf in mm (default: 6.35)

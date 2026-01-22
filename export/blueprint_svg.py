@@ -162,7 +162,7 @@ def render_blueprint_svg(
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj)
 
-        if item.shape_id and item.placement:
+        if item.shape_id and item.placement and not item.shape_id.startswith("generated_"):
             _render_label(label_group, item, offset_x, offset_y)
 
 
@@ -267,10 +267,29 @@ def _polygon_to_path(
 
 
 def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    if item.geometry is None or item.placement is None:
+    if item.geometry is None:
         return
 
     shape_type = item.type
+
+    if shape_type == "Line":
+        start = item.geometry.data.get("start", [0, 0])
+        end = item.geometry.data.get("end", [0, 0])
+        ET.SubElement(
+            group,
+            "line",
+            {
+                "x1": str(offset_x + start[0]),
+                "y1": str(offset_y + start[1]),
+                "x2": str(offset_x + end[0]),
+                "y2": str(offset_y + end[1]),
+            },
+        )
+        return
+
+    if item.placement is None:
+        return
+
     cx, cy = item.placement.center_xy_mm
 
     if shape_type == "Rect":
@@ -960,6 +979,8 @@ def _collect_part_inventory(ast: LayoutAST) -> list[str]:
         if item.kind != "shape" or item.feature is None:
             continue
         if not item.shape_id:
+            continue
+        if item.shape_id.startswith("generated_"):
             continue
 
         parts.append(item.shape_id)

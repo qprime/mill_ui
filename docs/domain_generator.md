@@ -104,6 +104,7 @@ Fill 2D regions with machining operations.
 | `raised_panel_generator` | `RaisedPanelParams` | Traditional raised panel bevel |
 | `line_pattern_generator` | `LinePatternParams` | Parallel lines at any angle |
 | `concentric_border_generator` | `ConcentricBorderParams` | Nested contour-following grooves |
+| `hole_grid_generator` | `HoleGridParams` | Regular pattern of holes (pegboard, ventilation) |
 
 ### Loop Generators
 
@@ -231,6 +232,24 @@ ConcentricBorderParams(
 )
 ```
 
+### HoleGridParams
+
+```python
+HoleGridParams(
+    spacing_mm: float,              # Center-to-center distance between holes
+    diameter_mm: float,             # Hole diameter
+    depth_mm: "through" | float,    # Hole depth or "through"
+    pattern: "rectangular" | "hexagonal" | "offset" = "rectangular",
+    inset_mm: float = 0.0,          # Additional inset from domain boundary
+    align: "center" | "corner" = "center",  # Grid alignment within domain
+)
+```
+
+**Pattern options:**
+- `"rectangular"` - Standard grid aligned to X/Y axes
+- `"hexagonal"` - Honeycomb pattern (rows offset by spacing/2, row spacing × √3/2)
+- `"offset"` - Like rectangular but alternating rows offset by spacing/2
+
 ### SVGPathParams
 
 ```python
@@ -288,6 +307,39 @@ items.extend(bead_generator(frame, BeadParams(
     offset_mm=15.0,
     loop_selection="inner_only",  # Bead around panel opening
 )))
+```
+
+### Pegboard Panel
+
+```python
+from generators import hole_grid_generator, HoleGridParams
+
+panel = Domain.from_rectangle(600, 400, center=(300, 200))
+inner = panel.inset(25).domains[0]  # Keep holes away from edges
+
+items = []
+items.extend(profile_generator(panel, ProfileParams(side="outside", depth="through")))
+items.extend(hole_grid_generator(inner, HoleGridParams(
+    spacing_mm=25.0,
+    diameter_mm=6.35,  # 1/4" holes
+    depth_mm="through",
+    pattern="rectangular",
+)))
+```
+
+### Ventilation Panel with Keepout
+
+```python
+panel = Domain.from_rectangle(400, 300, center=(200, 150))
+motor_mount = Domain.from_rectangle(80, 80, center=(200, 150))
+vent_region = panel.subtract(motor_mount).domains[0]
+
+items = hole_grid_generator(vent_region, HoleGridParams(
+    spacing_mm=15.0,
+    diameter_mm=8.0,
+    depth_mm="through",
+    pattern="hexagonal",  # Honeycomb for max airflow
+))
 ```
 
 ### Custom Polygon

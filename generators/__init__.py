@@ -80,6 +80,7 @@ from generators.base import (
     LinePatternParams,
     ConcentricBorderParams,
     XPanelParams,
+    HoleGridParams,
     # Type aliases
     LoopSelection,
     # Utilities
@@ -96,6 +97,7 @@ from generators.area import (
     line_pattern_generator,
     concentric_border_generator,
     x_panel_generator,
+    hole_grid_generator,
 )
 
 # Utilities
@@ -129,6 +131,7 @@ __all__ = [
     "LinePatternParams",
     "ConcentricBorderParams",
     "XPanelParams",
+    "HoleGridParams",
     "SVGPathParams",
     # Generators
     "flat_pocket_generator",
@@ -138,6 +141,7 @@ __all__ = [
     "line_pattern_generator",
     "concentric_border_generator",
     "x_panel_generator",
+    "hole_grid_generator",
     "profile_generator",
     "bead_generator",
     "chamfer_generator",

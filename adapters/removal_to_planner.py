@@ -15,8 +15,8 @@ from core.constants import (
 )
 
 
-def removal_intent_to_v1_hint(intent: RemovalIntent) -> dict[str, Any]:
-    """Convert RemovalIntent to v1 hint dict format."""
+def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
+    """Convert RemovalIntent to hint dict format for the planner."""
     hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
     shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
     depth_mm = intent.depth_mm()
@@ -148,7 +148,7 @@ def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, 
     }
 
 
-def removal_intents_to_v1_hints(
+def removal_intents_to_hints(
     intents: list[RemovalIntent],
     kerf_width_mm: float = 3.175,
     min_channel_width_mm: float = 6.0,
@@ -160,7 +160,7 @@ def removal_intents_to_v1_hints(
     corner_cleanups: list[dict[str, Any]] = []
 
     for intent in intents:
-        hint = removal_intent_to_v1_hint(intent)
+        hint = removal_intent_to_hint(intent)
         hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
 
         if hint_type == FeatureType.PROFILE:

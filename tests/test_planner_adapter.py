@@ -9,8 +9,8 @@ from adapters.hints_to_removal import (
     hole_hint_to_removal_intent,
 )
 from adapters.removal_to_planner import (
-    removal_intent_to_v1_hint,
-    removal_intents_to_v1_hints,
+    removal_intent_to_hint,
+    removal_intents_to_hints,
 )
 
 
@@ -36,7 +36,7 @@ def test_roundtrip_profile_through_cut():
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=19.1)
 
 
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
 
     assert reconstructed_hint["id"] == original_hint["id"]
@@ -64,7 +64,7 @@ def test_roundtrip_profile_with_tabs():
     }
 
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=18.0)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
@@ -88,7 +88,7 @@ def test_roundtrip_profile_inside_cut():
     }
 
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=12.0)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["side"] == "inside"
     assert approx_eq(reconstructed_hint["depth_mm"], 12.0)
@@ -107,7 +107,7 @@ def test_roundtrip_pocket_basic():
     }
 
     intent = pocket_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == original_hint["shape"]
@@ -132,7 +132,7 @@ def test_roundtrip_pocket_with_start_depth():
     }
 
     intent = pocket_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
@@ -152,7 +152,7 @@ def test_roundtrip_hole_circle():
     }
 
     intent = hole_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == "Circle"
@@ -198,7 +198,7 @@ def test_batch_conversion_to_hints_structure():
 
 
     intents = [profile_intent, pocket_intent, hole_intent]
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175)
 
 
     assert hints["units"] == "mm"
@@ -234,7 +234,7 @@ def test_geometry_preservation_rect():
     }
 
     intent = pocket_hint_to_removal_intent(hint)
-    reconstructed = removal_intent_to_v1_hint(intent)
+    reconstructed = removal_intent_to_hint(intent)
 
 
     assert approx_eq(reconstructed["geometry"]["w_mm"], hint["geometry"]["w_mm"], rel=1e-9)
@@ -256,7 +256,7 @@ def test_geometry_preservation_circle():
     }
 
     intent = hole_hint_to_removal_intent(hint)
-    reconstructed = removal_intent_to_v1_hint(intent)
+    reconstructed = removal_intent_to_hint(intent)
 
     assert approx_eq(reconstructed["geometry"]["diameter_mm"], hint["geometry"]["diameter_mm"], rel=1e-9)
     assert approx_eq(reconstructed["center_xy_mm"][0], hint["center_xy_mm"][0], rel=1e-9)
@@ -277,7 +277,7 @@ def test_depth_preservation():
     }
 
     intent = pocket_hint_to_removal_intent(hint)
-    reconstructed = removal_intent_to_v1_hint(intent)
+    reconstructed = removal_intent_to_hint(intent)
 
 
     assert approx_eq(reconstructed["depth_mm"], hint["depth_mm"], rel=1e-9)
@@ -298,7 +298,7 @@ def test_metadata_fields_preserved():
     }
 
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
-    reconstructed = removal_intent_to_v1_hint(intent)
+    reconstructed = removal_intent_to_hint(intent)
 
     assert reconstructed["id"] == hint["id"]
     assert reconstructed["shape"] == hint["shape"]

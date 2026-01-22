@@ -348,7 +348,7 @@ def test_resolve_wave_gen():
     """Test resolution of wave generator to LayoutAST Items.
 
     Wave generator produces engrave polylines (not a single "wave" item),
-    which correctly map to the engraves bucket in v1 hint export.
+    which correctly map to the engraves bucket in hint export.
     """
     print("Running test_resolve_wave_gen...")
     pml = """

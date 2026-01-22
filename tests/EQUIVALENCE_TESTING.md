@@ -64,7 +64,7 @@ pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
 hole_intent = hole_hint_to_removal_intent(hole_hint)
 
 # Convert RemovalIntent back to v1 hints
-hints_v2 = removal_intents_to_v1_hints([profile_intent, pocket_intent, hole_intent])
+hints_v2 = removal_intents_to_hints([profile_intent, pocket_intent, hole_intent])
 
 # Plan and generate G-code (same path as v1)
 passes_v2, _ = plan_passes(hints_v2, ...)
@@ -159,8 +159,8 @@ These tests **do pass** (7/7) and verify:
 ## Stage 6 Status
 
 **Adapter Implementation:** ✓ Complete
-- `removal_intent_to_v1_hint()` implemented
-- `removal_intents_to_v1_hints()` implemented
+- `removal_intent_to_hint()` implemented
+- `removal_intents_to_hints()` implemented
 - Hint-level round-trip tests: 7/7 pass
 
 **G-code Equivalence Validation:** ⚠ Framework ready, blocked by environment

@@ -140,7 +140,7 @@ The Contact Point heuristic tends to create tighter packings by clustering parts
 
 ```python
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
 
@@ -149,7 +149,7 @@ for ast in result["output"]:
     intents = ast_to_removal_intents(ast)
 
     # Convert to planner hints
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35)
 
     # Plan and generate G-code
     passes, _ = plan_passes(hints, config, tool_db, material, machine, stock, safe_z)

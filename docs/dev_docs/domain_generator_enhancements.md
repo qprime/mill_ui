@@ -317,8 +317,8 @@ panel Rect 300mm 300mm center 150mm 150mm
 
 **Key implementation details:**
 - Wave generator uses `wave_count` to compute effective wavelength: `wavelength = domain_width / wave_count`
-- Wave generates Polyline Items with `feature.type="engrave"`, which route to engraves bucket in v1 hints
-- Polyline geometry (points) is preserved through RemovalIntent metadata and emitted in v1 hint geometry
+- Wave generates Polyline Items with `feature.type="engrave"`, which route to engraves bucket in hints
+- Polyline geometry (points) is preserved through RemovalIntent metadata and emitted in hint geometry
 - Deterministic shape IDs use resolver-level counter (`_shape_counter`) instead of `id(node)`
 
 **Files modified:**
@@ -327,7 +327,7 @@ panel Rect 300mm 300mm center 150mm 150mm
 - `resolution/layout_resolver.py` — Added handler methods for each generator node
 - `pml/compositional_formatter.py` — Added formatting for generator nodes
 - `adapters/ast_to_removal.py` — Handle engrave polylines, bevel, chamfer, wave features
-- `adapters/removal_to_planner.py` — Route feature types to correct v1 hint buckets
+- `adapters/removal_to_planner.py` — Route feature types to correct hint buckets
 - `adapters/hints_to_removal.py` — Preserve polyline points in metadata
 - `generators/area/wave.py` — Implement wave_count parameter
 

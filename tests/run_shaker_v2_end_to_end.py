@@ -10,7 +10,7 @@ from adapters.hints_to_removal import (
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
 )
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.material import Material
@@ -70,8 +70,8 @@ def test_end_to_end_pipeline():
         print(f"    - {hint_type}: depth={depth:.1f}mm, bounds={intent.bounds}")
 
 
-    print("\n[3] Converting RemovalIntent to v1 planner hints...")
-    hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
+    print("\n[3] Converting RemovalIntent to planner hints...")
+    hints = removal_intents_to_hints(removal_intents, kerf_width_mm=3.175)
     print(f"  ✓ Generated hints: {len(hints['profiles'])} profiles, {len(hints['pockets'])} pockets")
 
 

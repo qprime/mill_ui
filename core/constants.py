@@ -18,7 +18,7 @@ Usage:
 
 
 class HintKeys:
-    """Keys for v1 hint dictionaries passed to the planner."""
+    """Keys for hint dictionaries passed to the planner."""
 
     ID = "id"
     SHAPE = "shape"
@@ -65,9 +65,9 @@ class TabKeys:
     """Keys for tab constraint dictionaries."""
 
     COUNT = "count"
-    HEIGHT = "height"  # Legacy key
+    HEIGHT = "height"
     HEIGHT_MM = "height_mm"
-    WIDTH = "width"  # Legacy key
+    WIDTH = "width"
     WIDTH_MM = "width_mm"
 
 

@@ -38,7 +38,7 @@ The system does NOT:
 | LayoutAST | Flat AST with absolute coordinates. Canonical layout representation. |
 | CompositionalLayoutAST | Hierarchical AST with relative positioning. |
 | RemovalIntent | IR representing what volume to remove, independent of toolpath strategy. |
-| Planner Hints | v1-compatible dict structures consumed by the planner pass generator. |
+| Planner Hints | Dict structures consumed by the planner pass generator. |
 | Domain | Bounded 2D region supporting algebraic operations (inset, offset, subtract). |
 | Generator | Deterministic function producing LayoutAST Items from a Domain. |
 | Safe Z | Z height used for rapid (G0) moves to avoid collisions with stock. |
@@ -56,7 +56,7 @@ PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code
 | 1. Parse Compositional PML | `pml/compositional_parser.py:parse_compositional_pml()` | PML text | CompositionalLayoutAST |
 | 2. Resolve Layout | `resolution/layout_resolver.py:resolve_layout()` | CompositionalLayoutAST | LayoutAST |
 | 3. AST → IR | `adapters/ast_to_removal.py:ast_to_removal_intents()` | LayoutAST | list[RemovalIntent] |
-| 4. IR → Planner Hints | `adapters/removal_to_planner.py:removal_intents_to_v1_hints()` | list[RemovalIntent] | hints dict |
+| 4. IR → Planner Hints | `adapters/removal_to_planner.py:removal_intents_to_hints()` | list[RemovalIntent] | hints dict |
 | 5. Plan Passes | `cam/planner/passes/__init__.py:plan_passes()` | hints dict | (pass_records, summary) |
 | 6. Generate G-code | `cam/post/gcode.py:write_gcode()` | moves | G-code string |
 
@@ -335,7 +335,7 @@ mill_ui/
 | resolve_layout() | Well tested |
 | ast_to_removal_intents() | No direct tests |
 | item_to_removal_intent() | Tested |
-| removal_intents_to_v1_hints() | Well tested |
+| removal_intents_to_hints() | Well tested |
 | IR validation functions | Tested |
 | plan_passes() | Tested |
 | write_gcode() | Tested |
@@ -383,12 +383,11 @@ PYTHONPATH=. python3 -m tests.run_removal_intent_tests  # IR tests
 
 ---
 
-## Duplicate or Legacy Paths
+## Adapter Modules
 
 - `adapters/ast_to_removal.py` is the canonical AST→IR adapter.
-- `adapters/hints_to_removal.py` contains converters used both by canonical path (via intermediate hint dict) and legacy v1 hint workflows.
-
-This duplication is intentional and supports incremental migration.
+- `adapters/hints_to_removal.py` contains shared converters for hint dict ↔ RemovalIntent transformations.
+- `adapters/removal_to_planner.py` converts RemovalIntent → hint dict for the planner.
 
 ---
 
@@ -397,6 +396,6 @@ This duplication is intentional and supports incremental migration.
 When modifying this repository:
 - Treat this document as authoritative for described behaviors.
 - Preserve all stated invariants (units, coordinate conventions, IR semantics).
-- Do not remove v1 hint compatibility unless the planner interface changes.
+- Do not change planner hint dict structure unless the planner interface changes.
 - Do not infer unspecified behavior.
 - If a change affects the canonical pipeline stages, update this document in the same commit.

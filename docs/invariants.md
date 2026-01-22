@@ -24,7 +24,7 @@ hints = convert_ast_to_hints_directly(ast)
 **Correct:**
 ```python
 intents = ast_to_removal_intents(ast)
-hints = removal_intents_to_v1_hints(intents)
+hints = removal_intents_to_hints(intents)
 ```
 
 **Why:** RemovalIntent is the semantic validation layer. Bypassing it means no validation, no extensibility.
@@ -130,7 +130,7 @@ def build_layout(...):
 ```python
 ast = build_layout(...)
 intents = ast_to_removal_intents(ast)
-hints = removal_intents_to_v1_hints(intents)
+hints = removal_intents_to_hints(intents)
 gcode = plan_and_generate(hints)
 ```
 

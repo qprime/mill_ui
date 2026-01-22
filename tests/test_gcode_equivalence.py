@@ -18,7 +18,7 @@ from adapters.hints_to_removal import (
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 
 
 TOOL_DB = [
@@ -108,7 +108,7 @@ def test_profile_gcode_equivalence():
 
 
     intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
-    hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
+    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
@@ -150,7 +150,7 @@ def test_pocket_gcode_equivalence():
 
 
     intent = pocket_hint_to_removal_intent(pocket_hint)
-    hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
+    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
@@ -192,7 +192,7 @@ def test_hole_gcode_equivalence():
 
 
     intent = hole_hint_to_removal_intent(hole_hint)
-    hints_v2 = removal_intents_to_v1_hints([intent], kerf_width_mm=3.175)
+    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
     gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
@@ -251,7 +251,7 @@ def test_mixed_operations_gcode_equivalence():
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)
-    hints_v2 = removal_intents_to_v1_hints(
+    hints_v2 = removal_intents_to_hints(
         [profile_intent, pocket_intent, hole_intent],
         kerf_width_mm=3.175,
     )

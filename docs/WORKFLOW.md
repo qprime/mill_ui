@@ -52,7 +52,7 @@ Document Type: Pipeline Reference
     │[PARTIAL]│   │[BROKEN]     │    │[FUTURE]  │    │[FUTURE]      │
     └─────────┘   └─────────────┘    └──────────┘    └──────────────┘
                          │
-                         │ removal_intents_to_v1_hints()
+                         │ removal_intents_to_hints()
                          ▼
          ┌───────────────────────────────────┐
          │      Planner Hint Dicts           │

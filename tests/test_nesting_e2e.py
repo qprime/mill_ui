@@ -5,7 +5,7 @@ import sys
 
 from nesting import nest_and_generate
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
@@ -58,7 +58,7 @@ def test_simple_rect_through_cam():
     assert len(intents) >= 1
 
 
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
     assert len(hints) >= 1
 
 
@@ -119,7 +119,7 @@ def test_multiple_parts_through_cam():
     for ast in asts:
 
         intents = ast_to_removal_intents(ast)
-        hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -192,7 +192,7 @@ def test_template_parts_through_cam():
 
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
     stock = Stock(
         width=ast.sheet.width_mm,
@@ -253,7 +253,7 @@ def test_multi_sheet_through_cam():
     sheet_gcodes = []
     for i, ast in enumerate(asts):
         intents = ast_to_removal_intents(ast)
-        hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -306,7 +306,7 @@ def test_gcode_basic_invariants():
 
     ast = result["output"][0]
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
     stock = Stock(width=300, height=300, thickness=19)
     material = Material(name="MDF")

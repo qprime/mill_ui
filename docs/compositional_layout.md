@@ -220,7 +220,7 @@ MUST NOT:
 - Add algebra/expressions (use layout managers + params)
 - Treat compositional nodes as RemovalIntent
 
-Note: Shapes may use inline `at X,Y size W,H` for absolute positioning when needed (e.g., nesting output, legacy compatibility). Layout managers remain the preferred approach for new designs.
+Note: Shapes may use inline `at X,Y size W,H` for absolute positioning when needed (e.g., nesting output, machine-generated layouts). Both syntaxes are valid - use layout managers for design-time composition and absolute positioning for computed layouts.
 
 ---
 

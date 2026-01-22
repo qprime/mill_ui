@@ -213,7 +213,7 @@ def engrave_hint_to_removal_intent(
 
 
 def _geometry_to_bounds(shape: str, geometry: dict[str, Any], center_xy: tuple[float, float] | list[float] | None) -> Bounds2D:
-    """Convert v1 hint geometry to bounds. Delegates to unified compute_shape_bounds()."""
+    """Convert hint geometry to bounds. Delegates to unified compute_shape_bounds()."""
     return compute_shape_bounds(shape, geometry, center_xy)
 
 

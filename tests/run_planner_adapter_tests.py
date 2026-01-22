@@ -7,8 +7,8 @@ from adapters.hints_to_removal import (
     hole_hint_to_removal_intent,
 )
 from adapters.removal_to_planner import (
-    removal_intent_to_v1_hint,
-    removal_intents_to_v1_hints,
+    removal_intent_to_hint,
+    removal_intents_to_hints,
 )
 
 
@@ -28,7 +28,7 @@ def test_roundtrip_profile_through_cut():
     }
 
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=19.1)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == original_hint["shape"]
@@ -56,7 +56,7 @@ def test_roundtrip_profile_with_tabs():
     }
 
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=18.0)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert approx_equal(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
@@ -80,7 +80,7 @@ def test_roundtrip_pocket_basic():
     }
 
     intent = pocket_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == original_hint["shape"]
@@ -105,7 +105,7 @@ def test_roundtrip_pocket_with_start_depth():
     }
 
     intent = pocket_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert approx_equal(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
@@ -126,7 +126,7 @@ def test_roundtrip_hole_circle():
     }
 
     intent = hole_hint_to_removal_intent(original_hint)
-    reconstructed_hint = removal_intent_to_v1_hint(intent)
+    reconstructed_hint = removal_intent_to_hint(intent)
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == "Circle"
@@ -171,7 +171,7 @@ def test_batch_conversion():
     hole_intent = hole_hint_to_removal_intent(hole_hint)
 
     intents = [profile_intent, pocket_intent, hole_intent]
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175)
 
     assert hints["units"] == "mm"
     assert approx_equal(hints["kerf_width_mm"], 3.175)
@@ -202,7 +202,7 @@ def test_geometry_preservation():
     }
 
     intent = pocket_hint_to_removal_intent(hint)
-    reconstructed = removal_intent_to_v1_hint(intent)
+    reconstructed = removal_intent_to_hint(intent)
 
     assert approx_equal(reconstructed["geometry"]["w_mm"], hint["geometry"]["w_mm"])
     assert approx_equal(reconstructed["geometry"]["h_mm"], hint["geometry"]["h_mm"])

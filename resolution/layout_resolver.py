@@ -785,7 +785,7 @@ class LayoutResolver:
         """Handle WaveGen: Generate wave pattern items for region.
 
         Calls the wave_generator to produce actual engrave polylines,
-        which correctly map to the engraves bucket in v1 hint export.
+        which correctly map to the engraves bucket in hint export.
         """
         domain = Domain.from_rectangle(
             width_mm=region.width,

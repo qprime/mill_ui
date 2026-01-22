@@ -2,7 +2,7 @@
 
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from cam.config import Config
 from cam.planner.passes import plan_passes
 from cam.model.stock import Stock
@@ -36,7 +36,7 @@ def test_corner_cleanup_basic():
     assert intents[0].metadata.get("corner_cleanup_tool_diameter_mm") == 3.175
 
 
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
     assert "corner_cleanups" in hints
     assert len(hints["corner_cleanups"]) == 1
 
@@ -75,7 +75,7 @@ def test_corner_cleanup_planner():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
 
 
     tool_db = [
@@ -149,7 +149,7 @@ def test_corner_cleanup_tool_not_found():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_v1_hints(intents)
+    hints = removal_intents_to_hints(intents)
 
     tool_db = [
         {"name": "3/8_endmill", "diameter": 9.525, "kind": "flat", "rpm": 12000, "feed_xy": 1200, "feed_z": 400},
@@ -199,7 +199,7 @@ def test_corner_cleanup_non_rect_error():
 
 
     try:
-        hints = removal_intents_to_v1_hints(intents)
+        hints = removal_intents_to_hints(intents)
         assert False, "Expected ValueError for non-rectangular pocket"
     except ValueError as e:
         assert "only supported for rectangular pockets" in str(e).lower()
@@ -226,7 +226,7 @@ def test_corner_cleanup_without_flag():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_v1_hints(intents)
+    hints = removal_intents_to_hints(intents)
 
 
     assert len(hints.get("corner_cleanups", [])) == 0

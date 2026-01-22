@@ -364,15 +364,15 @@ def test_shaker_v2_end_to_end_pipeline_validation():
     print(f"  [2/4] ✓ Generated {len(removal_intents)} RemovalIntent regions")
 
 
-    from adapters.removal_to_planner import removal_intents_to_v1_hints
+    from adapters.removal_to_planner import removal_intents_to_hints
 
-    hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
+    hints = removal_intents_to_hints(removal_intents, kerf_width_mm=3.175)
 
     assert "profiles" in hints, "Expected 'profiles' in hints"
     assert "pockets" in hints, "Expected 'pockets' in hints"
     assert len(hints["profiles"]) == 1, f"Expected 1 profile hint, got {len(hints['profiles'])}"
     assert len(hints["pockets"]) == 1, f"Expected 1 pocket hint, got {len(hints['pockets'])}"
-    print(f"  [3/4] ✓ Converted to v1 planner hints ({len(hints['profiles'])} profiles, {len(hints['pockets'])} pockets)")
+    print(f"  [3/4] ✓ Converted to planner hints ({len(hints['profiles'])} profiles, {len(hints['pockets'])} pockets)")
 
 
     try:

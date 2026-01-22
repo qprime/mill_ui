@@ -79,7 +79,7 @@ class DepthMode:
 
 Current state (3 implementations):
 ```
-hints_to_removal.py:165-204  → _geometry_to_bounds() [v1 hint dict]
+hints_to_removal.py:165-204  → _geometry_to_bounds() [hint dict]
 hints_to_removal.py:289-317  → _item_geometry_to_bounds() [Item dataclass]
 layout_resolver.py:106-135   → inline in _collect_island_bounds()
 ```
@@ -168,7 +168,7 @@ Files created:
 - `core/constants.py` - All string constant definitions
 
 Constant classes defined:
-- `HintKeys` - v1 hint dictionary keys (id, shape, geometry, center_xy_mm, etc.)
+- `HintKeys` - Hint dictionary keys (id, shape, geometry, center_xy_mm, etc.)
 - `GeometryKeys` - Geometry data keys (w_mm, h_mm, diameter_mm, islands, etc.)
 - `TabKeys` - Tab constraint keys (count, height, height_mm, width_mm)
 - `MetadataKeys` - RemovalIntent metadata keys (hint_type, original_id, etc.)

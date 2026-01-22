@@ -579,6 +579,73 @@ class XPanelParams(BaseParams):
             )
 
 
+@dataclass(frozen=True)
+class HoleGridParams(BaseParams):
+    """Parameters for hole grid area generator.
+
+    Creates a regular pattern of holes (circles) within a domain. Supports
+    rectangular, hexagonal, and offset grid patterns.
+
+    Attributes:
+        spacing_mm: Center-to-center distance between adjacent holes in mm
+        diameter_mm: Diameter of each hole in mm
+        depth_mm: Depth of holes in mm, or "through" for full material penetration
+        pattern: Grid pattern type
+            - "rectangular": Standard grid aligned to X/Y axes
+            - "hexagonal": Honeycomb pattern (alternating rows offset by spacing/2)
+            - "offset": Like rectangular but alternating rows offset by spacing/2
+        inset_mm: Additional inset from domain boundary in mm (default 0)
+        align: Grid alignment within domain
+            - "center": Grid centered on domain centroid
+            - "corner": Grid aligned to domain bounds corner
+    """
+
+    spacing_mm: float
+    diameter_mm: float
+    depth_mm: Literal["through"] | float
+    pattern: Literal["rectangular", "hexagonal", "offset"] = "rectangular"
+    inset_mm: float = 0.0
+    align: Literal["center", "corner"] = "center"
+
+    def validate(self) -> None:
+        if self.spacing_mm <= 0:
+            raise ValueError(
+                f"HoleGridParams: spacing_mm must be positive, got {self.spacing_mm}"
+            )
+        if self.diameter_mm <= 0:
+            raise ValueError(
+                f"HoleGridParams: diameter_mm must be positive, got {self.diameter_mm}"
+            )
+        if self.diameter_mm >= self.spacing_mm:
+            raise ValueError(
+                f"HoleGridParams: diameter_mm ({self.diameter_mm}) must be less than "
+                f"spacing_mm ({self.spacing_mm}) to avoid overlapping holes"
+            )
+        if self.depth_mm != "through":
+            if not isinstance(self.depth_mm, (int, float)):
+                raise ValueError(
+                    f"HoleGridParams: depth_mm must be 'through' or a number, got {self.depth_mm}"
+                )
+            if self.depth_mm <= 0:
+                raise ValueError(
+                    f"HoleGridParams: depth_mm must be positive when numeric, got {self.depth_mm}"
+                )
+        valid_patterns = ("rectangular", "hexagonal", "offset")
+        if self.pattern not in valid_patterns:
+            raise ValueError(
+                f"HoleGridParams: pattern must be one of {valid_patterns}, got '{self.pattern}'"
+            )
+        if self.inset_mm < 0:
+            raise ValueError(
+                f"HoleGridParams: inset_mm must be non-negative, got {self.inset_mm}"
+            )
+        valid_aligns = ("center", "corner")
+        if self.align not in valid_aligns:
+            raise ValueError(
+                f"HoleGridParams: align must be one of {valid_aligns}, got '{self.align}'"
+            )
+
+
 # =============================================================================
 # Generator Utilities
 # =============================================================================
@@ -649,6 +716,7 @@ __all__ = [
     "LinePatternParams",
     "ConcentricBorderParams",
     "XPanelParams",
+    "HoleGridParams",
     # Type aliases
     "LoopSelection",
     # Utilities

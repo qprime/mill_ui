@@ -314,7 +314,7 @@ def test_shaker_v2_end_to_end_pipeline():
     from cam.model.stock import Stock
     from cam.planner.passes import plan_passes
     from cam.post.gcode import write_gcode
-    from adapters.removal_to_planner import removal_intents_to_v1_hints
+    from adapters.removal_to_planner import removal_intents_to_hints
 
     params = {
         "outer_w": 400.0,
@@ -360,7 +360,7 @@ def test_shaker_v2_end_to_end_pipeline():
     assert len(profile_intents) == 1
     assert len(pocket_intents) == 1
 
-    hints = removal_intents_to_v1_hints(removal_intents, kerf_width_mm=3.175)
+    hints = removal_intents_to_hints(removal_intents, kerf_width_mm=3.175)
 
     assert "profiles" in hints
     assert "pockets" in hints

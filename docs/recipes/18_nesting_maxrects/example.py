@@ -10,7 +10,7 @@ from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
 from pml.formatter import format_pml
 from nesting import nest_and_generate, nest_parts
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
@@ -142,7 +142,7 @@ def main():
 
 
         hints_start = time.perf_counter()
-        hints = removal_intents_to_v1_hints(intents, kerf_width_mm=job.kerf_mm, min_channel_width_mm=12.0)
+        hints = removal_intents_to_hints(intents, kerf_width_mm=job.kerf_mm, min_channel_width_mm=12.0)
         hints_time = time.perf_counter() - hints_start
 
 

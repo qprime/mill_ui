@@ -22,10 +22,12 @@ from generators import (
     ProfileParams,
     RaisedPanelParams,
     ChamferParams,
+    HoleGridParams,
     flat_pocket_generator,
     profile_generator,
     raised_panel_generator,
     chamfer_generator,
+    hole_grid_generator,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -1226,6 +1228,259 @@ def test_iter_polygons():
     ])
     result = iter_polygons(mp)
     assert len(result) == 2
+
+
+# =============================================================================
+# Hole Grid Generator Tests
+# =============================================================================
+
+def test_hole_grid_params_valid():
+    """Test valid HoleGridParams construction."""
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=6.35, depth_mm=12.0)
+    params.validate()
+
+    params_through = HoleGridParams(spacing_mm=25.0, diameter_mm=5.0, depth_mm="through")
+    params_through.validate()
+
+    params_hex = HoleGridParams(
+        spacing_mm=30.0,
+        diameter_mm=8.0,
+        depth_mm=10.0,
+        pattern="hexagonal",
+        inset_mm=5.0,
+        align="corner",
+    )
+    params_hex.validate()
+
+
+def test_hole_grid_params_invalid_spacing():
+    """Test HoleGridParams rejects non-positive spacing."""
+    params = HoleGridParams(spacing_mm=0.0, diameter_mm=5.0, depth_mm=10.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "spacing" in str(e).lower()
+
+
+def test_hole_grid_params_invalid_diameter():
+    """Test HoleGridParams rejects non-positive diameter."""
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=-1.0, depth_mm=10.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "diameter" in str(e).lower()
+
+
+def test_hole_grid_params_diameter_exceeds_spacing():
+    """Test HoleGridParams rejects diameter >= spacing."""
+    params = HoleGridParams(spacing_mm=10.0, diameter_mm=15.0, depth_mm=10.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "overlap" in str(e).lower()
+
+
+def test_hole_grid_params_invalid_depth():
+    """Test HoleGridParams rejects invalid depth."""
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=-5.0)
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "depth" in str(e).lower()
+
+
+def test_hole_grid_params_invalid_pattern():
+    """Test HoleGridParams rejects invalid pattern."""
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")
+    try:
+        params.validate()
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "pattern" in str(e).lower()
+
+
+def test_hole_grid_rectangular_basic():
+    """Test basic rectangular hole grid."""
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=10.0, depth_mm=12.0)
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        assert item.type == "Circle"
+        assert item.feature.type == "hole"
+        assert item.feature.depth_mm == 12.0
+        assert item.geometry.data["diameter_mm"] == 10.0
+
+
+def test_hole_grid_hexagonal():
+    """Test hexagonal pattern hole grid."""
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = HoleGridParams(
+        spacing_mm=30.0,
+        diameter_mm=8.0,
+        depth_mm=10.0,
+        pattern="hexagonal",
+    )
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        assert item.type == "Circle"
+        assert item.feature.type == "hole"
+
+
+def test_hole_grid_offset():
+    """Test offset pattern hole grid."""
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = HoleGridParams(
+        spacing_mm=40.0,
+        diameter_mm=10.0,
+        depth_mm=15.0,
+        pattern="offset",
+    )
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+
+
+def test_hole_grid_through_depth():
+    """Test hole grid with through depth."""
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = HoleGridParams(spacing_mm=30.0, diameter_mm=6.0, depth_mm="through")
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        assert item.feature.depth == "through"
+        assert item.feature.depth_mm is None
+
+
+def test_hole_grid_with_inset():
+    """Test hole grid respects inset parameter."""
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params_no_inset = HoleGridParams(spacing_mm=25.0, diameter_mm=10.0, depth_mm=10.0, inset_mm=0.0)
+    params_with_inset = HoleGridParams(spacing_mm=25.0, diameter_mm=10.0, depth_mm=10.0, inset_mm=40.0)
+
+    items_no_inset = hole_grid_generator(domain, params_no_inset)
+    items_with_inset = hole_grid_generator(domain, params_with_inset)
+
+    assert len(items_with_inset) < len(items_no_inset)
+
+
+def test_hole_grid_corner_align():
+    """Test hole grid with corner alignment."""
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = HoleGridParams(
+        spacing_mm=50.0,
+        diameter_mm=10.0,
+        depth_mm=10.0,
+        align="corner",
+    )
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+
+
+def test_hole_grid_respects_domain_holes():
+    """Test that hole grid avoids domain inner boundaries."""
+    outer = [(0, 0), (200, 0), (200, 200), (0, 200)]
+    inner = [(70, 70), (130, 70), (130, 130), (70, 130)]
+    domain = Domain.from_polygon(outer, holes=[inner])
+
+    params = HoleGridParams(spacing_mm=30.0, diameter_mm=10.0, depth_mm=10.0)
+
+    items = hole_grid_generator(domain, params)
+
+    for item in items:
+        cx, cy = item.placement.center_xy_mm
+        assert not (70 < cx < 130 and 70 < cy < 130), "Hole placed inside domain hole"
+
+
+def test_hole_grid_domain_too_small():
+    """Test hole grid on domain too small for any holes."""
+    domain = Domain.from_rectangle(5, 5, center=(2.5, 2.5))
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=8.0, depth_mm=10.0)
+
+    try:
+        hole_grid_generator(domain, params)
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "area" in str(e).lower() or "small" in str(e).lower()
+
+
+def test_hole_grid_allow_empty():
+    """Test hole grid returns empty with allow_empty on small domain."""
+    domain = Domain.from_rectangle(5, 5, center=(2.5, 2.5))
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=8.0, depth_mm=10.0)
+
+    items = hole_grid_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_hole_grid_inset_too_large():
+    """Test hole grid with inset larger than domain."""
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = HoleGridParams(spacing_mm=20.0, diameter_mm=5.0, depth_mm=10.0, inset_mm=60.0)
+
+    items = hole_grid_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_hole_grid_domain_algebra():
+    """Test hole grid works with domain algebra (subtract)."""
+    outer = Domain.from_rectangle(200, 200, center=(100, 100))
+    keepout = Domain.from_rectangle(60, 60, center=(100, 100))
+    result = outer.subtract(keepout)
+
+    assert not result.is_empty
+    domain = result.domains[0]
+
+    params = HoleGridParams(spacing_mm=25.0, diameter_mm=6.0, depth_mm=10.0)
+
+    items = hole_grid_generator(domain, params)
+
+    assert len(items) > 0
+    for item in items:
+        cx, cy = item.placement.center_xy_mm
+        in_keepout = 70 < cx < 130 and 70 < cy < 130
+        assert not in_keepout, "Hole placed in keepout region"
+
+
+def test_hole_grid_shape_id_prefix():
+    """Test hole grid uses custom shape_id_prefix."""
+    domain = Domain.from_rectangle(100, 100, center=(50, 50))
+    params = HoleGridParams(spacing_mm=30.0, diameter_mm=6.0, depth_mm=10.0)
+
+    items = hole_grid_generator(domain, params, shape_id_prefix="shelf_pin")
+
+    assert len(items) > 0
+    for item in items:
+        assert "shelf_pin" in item.shape_id
+
+
+def test_hole_grid_determinism():
+    """Test hole grid produces identical output for same input."""
+    domain = Domain.from_rectangle(150, 150, center=(75, 75))
+    params = HoleGridParams(spacing_mm=30.0, diameter_mm=8.0, depth_mm=10.0)
+
+    results = [hole_grid_generator(domain, params) for _ in range(3)]
+
+    for result in results[1:]:
+        assert len(result) == len(results[0])
+        for i, item in enumerate(result):
+            ref = results[0][i]
+            assert item.placement.center_xy_mm == ref.placement.center_xy_mm
+            assert item.geometry.data == ref.geometry.data
 
 
 # =============================================================================

@@ -9,7 +9,7 @@ from typing import Any
 from layout_ast.layout import LayoutAST
 from ir.removal_intent import RemovalIntent
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
+from adapters.removal_to_planner import removal_intents_to_hints
 from validation.removal_checks import check_overlap, check_depth_feasibility
 from cam.config import Config
 from cam.model.stock import Stock
@@ -112,7 +112,7 @@ def run_pipeline(
                 warnings.append(warning.message)
 
     hints_start = time.perf_counter()
-    hints = removal_intents_to_v1_hints(
+    hints = removal_intents_to_hints(
         intents,
         kerf_width_mm=kerf_mm,
         min_channel_width_mm=min_channel_width_mm,

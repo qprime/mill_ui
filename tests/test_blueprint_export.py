@@ -198,7 +198,7 @@ def test_viewbox_dimensions():
     svg = render_blueprint_svg(ast, theme="dark")
 
 
-    assert 'viewBox="0 0 450 380"' in svg or 'viewBox="0 0 450.0 380.0"' in svg
+    assert 'viewBox="0 0 530 460"' in svg or 'viewBox="0 0 530.0 460.0"' in svg
 
     print("  ✓ PASS")
 

@@ -1,6 +1,6 @@
 # CLAUDE.md — mill_ui
 
-**Status:** Active | **As-Of:** 2026-01-19
+**Status:** Active | **As-Of:** 2026-01-22
 
 You are a senior CAM software architect for mill_ui with 2.5D CNC expertise.
 
@@ -21,14 +21,15 @@ RemovalIntent is the semantic layer—validates *what* to machine before *how* t
 Activate venv first: `source .venv/bin/activate`
 
 ```bash
-python -m cli.export_cad --project my_table --input layout.pml --kerf 6.35
-python -m cli.export_blueprint --project my_table --input layout.pml --theme dark
+python -m cli.mill --project my_table --input layout.pml
 python -m cli.nest --project my_table job.nest -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
 
-Use `--project <name>` to work with user project files. Add `--compositional` for frame/inset/grid syntax.
+The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. Use `--project <name>` to work with user project files. Add `--compositional` for frame/inset/grid syntax.
+
+Options: `--kerf`, `--theme`, `--quality`, `--no-svg`, `--no-stl`, `--no-clean`
 
 ## Code Style
 
@@ -44,9 +45,8 @@ Check before implementing — these already exist:
 | Capability | Entry Point |
 |------------|-------------|
 | Parse PML | `pml/compositional_parser.py` |
-| Generate G-code | `tests/test_recipes.py --regen_recipes` |
-| Export blueprint (SVG/PDF) | `cli/export_blueprint.py` |
-| Export 3D preview (STL) | `cli/export_cad.py` |
+| Full CAM pipeline | `cli/mill.py` (G-code + SVG + STL) |
+| Shared pipeline logic | `cam/pipeline.py` |
 | Validate at IR level | `validation/removal_checks.py` |
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |

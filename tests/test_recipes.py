@@ -5,63 +5,13 @@ from __future__ import annotations
 import json
 import sys
 import time
-from io import StringIO
 from pathlib import Path
 from typing import Any
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
 from pml.parser import parse_pml
 from resolution.layout_resolver import resolve_layout
-from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.config import Config
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
-from cam.planner.passes import plan_passes
-from cam.post.gcode import write_gcode
-
-
-try:
-    from adapters.ast_to_cad import items_to_shape_dicts
-    from cad.export.stl import export_stl
-    STL_AVAILABLE = True
-except (ImportError, ModuleNotFoundError):
-    STL_AVAILABLE = False
-
-try:
-    from export.blueprint_svg import render_blueprint_svg
-    SVG_AVAILABLE = True
-except (ImportError, ModuleNotFoundError):
-    SVG_AVAILABLE = False
-
-
-RECIPE_TOOL_DB = [
-    {
-        "name": "1_8_endmill",
-        "diameter": 3.175,
-        "kind": "flat",
-        "rpm": 14000,
-        "feed_xy": 900,
-        "feed_z": 300,
-    },
-    {
-        "name": "1_4_endmill",
-        "diameter": 6.35,
-        "kind": "flat",
-        "rpm": 12000,
-        "feed_xy": 800,
-        "feed_z": 280,
-    },
-    {
-        "name": "3_8_endmill",
-        "diameter": 9.525,
-        "kind": "flat",
-        "rpm": 10000,
-        "feed_xy": 700,
-        "feed_z": 250,
-    },
-]
+from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
 
 
 def discover_recipe_pml_files() -> list[Path]:
@@ -74,129 +24,36 @@ def discover_recipe_pml_files() -> list[Path]:
 
 
 def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
-
     parse_start = time.perf_counter()
     with open(pml_path, "r") as f:
         pml_source = f.read()
 
     try:
-
         comp_ast = parse_compositional_pml(pml_source)
         ast = resolve_layout(comp_ast)
     except ParseError:
-
         ast = parse_pml(pml_source)
 
     parse_time = time.perf_counter() - parse_start
 
-
-    ir_start = time.perf_counter()
-    intents = ast_to_removal_intents(ast)
-    ir_time = time.perf_counter() - ir_start
-
-
-    hints_start = time.perf_counter()
-    hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-    hints_time = time.perf_counter() - hints_start
-
-
-    stock = Stock(
-        width=ast.sheet.width_mm,
-        height=ast.sheet.height_mm,
-        thickness=ast.sheet.thickness_mm,
+    result = run_pipeline(
+        ast,
+        kerf_mm=3.175,
+        min_channel_width_mm=6.0,
+        tool_db=DEFAULT_TOOL_DB,
+        generate_svg=True,
+        svg_theme="dark",
+        generate_stl=False,
     )
-    material = Material(name="MDF")
-    machine = Machine(name="default_grbl")
 
-    plan_start = time.perf_counter()
-    passes, _ = plan_passes(
-        hints,
-        config=Config(),
-        tool_db=RECIPE_TOOL_DB,
-        material=material,
-        machine=machine,
-        stock=stock,
-        safe_z=6.0,
+    metrics = result.metrics
+    metrics["timing"]["parse_ms"] = round(parse_time * 1000, 2)
+    metrics["timing"]["total_ms"] = round(
+        parse_time * 1000 + metrics["timing"]["ir_ms"] + metrics["timing"]["hints_ms"] +
+        metrics["timing"]["plan_ms"] + metrics["timing"]["gcode_ms"], 2
     )
-    plan_time = time.perf_counter() - plan_start
 
-
-    gcode_start = time.perf_counter()
-    gcode_dict = {}
-    total_moves = 0
-    total_rapid_moves = 0
-    total_cut_moves = 0
-
-    for pass_dict in passes:
-
-        setup = pass_dict["setup"]
-        gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=setup.safe_z,
-            machine=machine,
-        )
-
-
-        tool_diameter = setup.tool.diameter
-        pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
-        gcode_dict[pass_name] = gcode
-
-
-        moves = pass_dict["moves"]
-        total_moves += len(moves)
-        for move in moves:
-            if isinstance(move, dict) and move.get('is_rapid'):
-                total_rapid_moves += 1
-            else:
-                total_cut_moves += 1
-
-    gcode_time = time.perf_counter() - gcode_start
-
-
-    total_time = parse_time + ir_time + hints_time + plan_time + gcode_time
-    total_gcode_size = sum(len(gc) for gc in gcode_dict.values())
-    total_gcode_lines = sum(gc.count('\n') for gc in gcode_dict.values())
-
-    metrics = {
-        "timing": {
-            "parse_ms": round(parse_time * 1000, 2),
-            "ir_ms": round(ir_time * 1000, 2),
-            "hints_ms": round(hints_time * 1000, 2),
-            "plan_ms": round(plan_time * 1000, 2),
-            "gcode_ms": round(gcode_time * 1000, 2),
-            "total_ms": round(total_time * 1000, 2),
-        },
-        "complexity": {
-            "total_moves": total_moves,
-            "rapid_moves": total_rapid_moves,
-            "cut_moves": total_cut_moves,
-            "rapid_ratio": round(total_rapid_moves / total_moves, 3) if total_moves > 0 else 0,
-        },
-        "fidelity": {
-            "tool_changes": len(passes),
-            "passes": [
-                {
-                    "name": p["op"],
-                    "tool_diameter_mm": p["setup"].tool.diameter,
-                    "move_count": len(p["moves"]),
-                }
-                for p in passes
-            ],
-        },
-        "output_size": {
-            "total_bytes": total_gcode_size,
-            "total_lines": total_gcode_lines,
-            "files": {
-                name: {
-                    "bytes": len(gcode),
-                    "lines": gcode.count('\n'),
-                }
-                for name, gcode in gcode_dict.items()
-            },
-        },
-    }
-
-    return ast, gcode_dict, metrics
+    return ast, result.gcode, metrics
 
 
 def write_outputs(
@@ -207,43 +64,40 @@ def write_outputs(
     metrics: dict[str, Any],
     pml_path: Path,
 ):
+    import shutil
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-
 
     for pass_name, gcode in gcode_dict.items():
         output_path = output_dir / f"{pass_name}.nc"
         with open(output_path, "w") as f:
             f.write(gcode)
 
+    try:
+        from adapters.ast_to_cad import items_to_shape_dicts
+        from cad.export.stl import export_stl
 
-    if STL_AVAILABLE:
-        try:
-            shapes = items_to_shape_dicts(ast.items)
-            stl_path = output_dir / f"{recipe_name}.stl"
-            export_stl(
-                shapes=shapes,
-                sheet_thickness_mm=ast.sheet.thickness_mm,
-                output_path=stl_path,
-            )
-        except Exception as e:
-            print(f"  Warning: STL generation failed: {e}")
-    else:
-        print(f"  Warning: STL generation skipped (trimesh not available)")
+        shapes = items_to_shape_dicts(ast.items)
+        stl_path = output_dir / f"{recipe_name}.stl"
+        export_stl(
+            shapes=shapes,
+            sheet_thickness_mm=ast.sheet.thickness_mm,
+            output_path=stl_path,
+        )
+    except Exception as e:
+        print(f"  Warning: STL generation failed: {e}")
 
+    try:
+        from export.blueprint_svg import render_blueprint_svg
 
-    if SVG_AVAILABLE:
-        try:
-            svg_string = render_blueprint_svg(ast, theme="dark")
-
-            recipe_dir_name = pml_path.parent.name
-            svg_path = output_dir / f"{recipe_dir_name}.svg"
-            with open(svg_path, "w", encoding="utf-8") as f:
-                f.write(svg_string)
-        except Exception as e:
-            print(f"  Warning: SVG generation failed: {e}")
-    else:
-        print(f"  Warning: SVG generation skipped (module not available)")
-
+        svg_string = render_blueprint_svg(ast, theme="dark")
+        recipe_dir_name = pml_path.parent.name
+        svg_path = output_dir / f"{recipe_dir_name}.svg"
+        with open(svg_path, "w", encoding="utf-8") as f:
+            f.write(svg_string)
+    except Exception as e:
+        print(f"  Warning: SVG generation failed: {e}")
 
     metrics_path = output_dir / "metrics.json"
     with open(metrics_path, "w") as f:
@@ -260,7 +114,6 @@ def compare_outputs(
 
     diffs = []
 
-
     for pass_name, generated_gcode in gcode_dict.items():
         expected_path = output_dir / f"{pass_name}.nc"
         if not expected_path.exists():
@@ -271,7 +124,6 @@ def compare_outputs(
             expected_gcode = f.read()
 
         if generated_gcode != expected_gcode:
-
             gen_lines = generated_gcode.split('\n')
             exp_lines = expected_gcode.split('\n')
             diff_count = sum(1 for g, e in zip(gen_lines, exp_lines) if g != e)
@@ -281,13 +133,9 @@ def compare_outputs(
                 f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
             )
 
-
-    expected_files = {f"{name}.nc" for name in gcode_dict.keys()}
-    expected_files.add("metrics.json")
-    actual_files = {f.name for f in output_dir.glob("*.nc")}
-    actual_files.add("metrics.json")
-
-    extra_files = actual_files - expected_files
+    expected_extensions = {".nc", ".stl", ".svg", ".json"}
+    actual_files = {f.name for f in output_dir.iterdir() if f.is_file()}
+    extra_files = {f for f in actual_files if not any(f.endswith(ext) for ext in expected_extensions)}
     if extra_files:
         diffs.append(f"Extra files in output directory: {extra_files}")
 
@@ -295,22 +143,18 @@ def compare_outputs(
 
 
 def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
-
     ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
-
 
     output_dir = pml_path.parent / "output"
     recipe_name = pml_path.stem
 
     if regenerate:
-
         write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
         print(f"\n  Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
         print(f"  Files: {len(gcode_dict)} G-code + STL + SVG + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
     else:
-
         all_match, diffs = compare_outputs(output_dir, gcode_dict, metrics)
 
         if not all_match:
@@ -319,14 +163,12 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
                 f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
             )
 
-
         metrics_path = output_dir / "metrics.json"
         with open(metrics_path, "w") as f:
             json.dump(metrics, f, indent=2)
 
 
 def test_recipe_outputs():
-    """Test all recipe PML files produce expected outputs."""
     print("Running test_recipe_outputs...")
     pml_files = discover_recipe_pml_files()
 
@@ -354,7 +196,6 @@ def test_recipe_outputs():
 
 
 if __name__ == "__main__":
-    """Standalone runner for quick testing."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Test recipe outputs")

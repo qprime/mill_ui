@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -11,83 +12,47 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-# Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mill_mcp.config import ensure_output_dir
 
-# Pipeline imports
 from pml import parse_pml, PMLParseError
 from pml.compositional_parser import parse_compositional_pml
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
 from pml.formatter import format_pml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
-from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
 from adapters.ast_to_cad import items_to_shape_dicts
 from validation.removal_checks import check_overlap, check_depth_feasibility
 from validation.runner import validate_recipe, validate, ValidationInput, ValidationOptions
 from validation.regression import GoldenStore, ComparisonConfig
 from nesting import nest_and_generate
-from cam.config import Config
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
-from cam.planner.passes import plan_passes
-from cam.post.gcode import write_gcode
 from cad.export.stl import export_stl
 from export.blueprint_svg import render_blueprint_svg
+from cam.pipeline import run_pipeline, DEFAULT_TOOL_DB
 
 
 def _sanitize_job_name(name: str) -> str:
-    """Sanitize job name to prevent path traversal.
-
-    Only allows alphanumeric, underscore, and hyphen characters.
-    """
     sanitized = re.sub(r"[^a-zA-Z0-9_-]", "_", name)
-    # Ensure non-empty
     return sanitized or "job"
 
 
 def _safe_job_dir(output_dir: Path, job_name: str, timestamp: str) -> Path:
-    """Create job directory, ensuring it stays under output_dir."""
     safe_name = _sanitize_job_name(job_name)
     job_dir = output_dir / f"{safe_name}_{timestamp}"
 
-    # Verify resolved path is under output_dir
     output_resolved = output_dir.resolve()
     job_resolved = job_dir.resolve()
     if not str(job_resolved).startswith(str(output_resolved)):
         raise ValueError(f"Job directory would escape output directory: {job_name}")
 
+    if job_dir.exists():
+        shutil.rmtree(job_dir)
     job_dir.mkdir(parents=True, exist_ok=True)
     return job_dir
 
 
-# Create the MCP server
 mcp = FastMCP("mill_ui")
-
-
-# Default tool database
-DEFAULT_TOOL_DB = [
-    {
-        "name": "1_4_endmill",
-        "diameter": 6.35,
-        "kind": "flat",
-        "rpm": 12000,
-        "feed_xy": 800,
-        "feed_z": 280,
-    },
-    {
-        "name": "1_8_endmill",
-        "diameter": 3.175,
-        "kind": "flat",
-        "rpm": 14000,
-        "feed_xy": 900,
-        "feed_z": 300,
-    },
-]
 
 
 def _run_cam_pipeline(
@@ -96,11 +61,6 @@ def _run_cam_pipeline(
     output_dir: Path,
     kerf_mm: float = 6.35,
 ) -> dict[str, Any]:
-    """Run the full CAM pipeline on a LayoutAST.
-
-    Returns dict with output paths and metrics.
-    """
-    # Create job subdirectory with timestamp (sanitized)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_name = _sanitize_job_name(job_name)
     job_dir = _safe_job_dir(output_dir, job_name, timestamp)
@@ -120,42 +80,30 @@ def _run_cam_pipeline(
         "warnings": [],
     }
 
-    # Save PML record
     pml_path = job_dir / f"{safe_name}.pml"
     pml_content = format_pml(ast)
     pml_path.write_text(pml_content)
     results["outputs"]["pml"] = str(pml_path)
 
-    # Convert to RemovalIntent IR
-    intents = ast_to_removal_intents(ast)
-    results["intents"] = len(intents)
+    pipeline_result = run_pipeline(
+        ast,
+        kerf_mm=kerf_mm,
+        min_channel_width_mm=12.0,
+        tool_db=DEFAULT_TOOL_DB,
+        generate_svg=True,
+        svg_theme="dark",
+        generate_stl=False,
+    )
 
-    # Run validation
-    overlap_result = check_overlap(intents)
-    if overlap_result.has_issues():
-        for error in overlap_result.errors:
-            results["errors"].append(error.message)
-        for warning in overlap_result.warnings:
-            results["warnings"].append(warning.message)
+    results["intents"] = len(pipeline_result.intents)
+    results["errors"].extend(pipeline_result.errors)
+    results["warnings"].extend(pipeline_result.warnings)
 
-    for intent in intents:
-        depth_result = check_depth_feasibility(intent, ast.sheet.thickness_mm)
-        if depth_result.has_issues():
-            for error in depth_result.errors:
-                results["errors"].append(error.message)
-            for warning in depth_result.warnings:
-                results["warnings"].append(warning.message)
-
-    # Generate SVG blueprint
-    try:
-        svg_string = render_blueprint_svg(ast, intents, theme="dark")
+    if pipeline_result.svg:
         svg_path = job_dir / f"{safe_name}.svg"
-        svg_path.write_text(svg_string, encoding="utf-8")
+        svg_path.write_text(pipeline_result.svg, encoding="utf-8")
         results["outputs"]["svg"] = str(svg_path)
-    except Exception as e:
-        results["warnings"].append(f"SVG generation failed: {e}")
 
-    # Generate STL
     try:
         shapes = items_to_shape_dicts(ast.items)
         stl_path = job_dir / f"{safe_name}.stl"
@@ -171,59 +119,24 @@ def _run_cam_pipeline(
     except Exception as e:
         results["warnings"].append(f"STL generation failed: {e}")
 
-    # Convert to planner hints
-    hints = removal_intents_to_v1_hints(
-        intents,
-        kerf_width_mm=kerf_mm,
-        min_channel_width_mm=12.0,
-    )
-
-    # Setup CAM models
-    stock = Stock(
-        width=ast.sheet.width_mm,
-        height=ast.sheet.height_mm,
-        thickness=ast.sheet.thickness_mm,
-    )
-    material = Material(name="MDF")
-    machine = Machine(name="default_grbl")
-
-    # Plan passes
-    passes, summary = plan_passes(
-        hints,
-        config=Config(),
-        tool_db=DEFAULT_TOOL_DB,
-        material=material,
-        machine=machine,
-        stock=stock,
-        safe_z=6.0,
-    )
-
-    results["passes"] = len(passes)
+    results["passes"] = len(pipeline_result.passes)
     results["outputs"]["gcode"] = []
 
-    # Generate G-code for each pass
     total_moves = 0
-    for pass_dict in passes:
-        gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=pass_dict["setup"].safe_z,
-        )
-
-        tool_diameter = pass_dict["setup"].tool.diameter
-        pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
+    for pass_name, gcode in pipeline_result.gcode.items():
         gcode_path = job_dir / f"{safe_name}-{pass_name}.nc"
         gcode_path.write_text(gcode)
 
+        move_count = pipeline_result.metrics["output_size"]["files"].get(pass_name, {}).get("lines", 0)
         results["outputs"]["gcode"].append({
             "pass": pass_name,
             "path": str(gcode_path),
-            "moves": len(pass_dict["moves"]),
+            "moves": move_count,
         })
-        total_moves += len(pass_dict["moves"])
+        total_moves += move_count
 
-    results["total_moves"] = total_moves
+    results["total_moves"] = pipeline_result.metrics["complexity"]["total_moves"]
 
-    # Save metrics
     metrics_path = job_dir / "metrics.json"
     metrics_path.write_text(json.dumps(results, indent=2))
 
@@ -244,23 +157,19 @@ def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = Fals
     output_dir = ensure_output_dir()
 
     try:
-        # Parse PML
         if compositional:
             comp_ast = parse_compositional_pml(pml_text)
             ast = resolve_layout(comp_ast)
         else:
-            # Try flat first, fall back to compositional
             try:
                 ast = parse_pml(pml_text)
             except PMLParseError:
-                # Check if it looks compositional
                 if any(kw in pml_text for kw in ["component", "frame", "inset", "grid", "split"]):
                     comp_ast = parse_compositional_pml(pml_text)
                     ast = resolve_layout(comp_ast)
                 else:
                     raise
 
-        # Run pipeline
         results = _run_cam_pipeline(ast, job_name, output_dir)
         return json.dumps(results, indent=2)
 
@@ -283,22 +192,20 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
     output_dir = ensure_output_dir()
 
     try:
-        # Parse nest file
         nest_job = parse_nest_pml(nest_text)
 
-        # Run nesting
         api_params = nest_job_to_api_params(nest_job)
         api_params["output_format"] = "ast"
         result = nest_and_generate(**api_params)
 
         asts = result["output"]
 
-        # Create job directory
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         job_dir = output_dir / f"{job_name}_{timestamp}"
+        if job_dir.exists():
+            shutil.rmtree(job_dir)
         job_dir.mkdir(parents=True, exist_ok=True)
 
-        # Results structure
         results: dict[str, Any] = {
             "job_name": job_name,
             "job_dir": str(job_dir),
@@ -314,7 +221,6 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
             "warnings": [],
         }
 
-        # Process each sheet
         for sheet_idx, ast in enumerate(asts):
             sheet_name = f"sheet_{sheet_idx + 1}"
             sheet_results = _run_cam_pipeline(
@@ -325,7 +231,6 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
             )
             results["sheets"].append(sheet_results)
 
-        # Save overall metrics
         metrics_path = job_dir / "job_metrics.json"
         metrics_path.write_text(json.dumps(results, indent=2))
 
@@ -400,7 +305,6 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
     }
 
     try:
-        # Parse PML
         if compositional:
             comp_ast = parse_compositional_pml(pml_text)
             ast = resolve_layout(comp_ast)
@@ -425,11 +329,10 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
             "feature_types": [item.feature.type if item.feature else None for item in ast.items],
         }
 
-        # Validate via IR
+        from adapters.ast_to_removal import ast_to_removal_intents
         intents = ast_to_removal_intents(ast)
         results["info"]["intents"] = len(intents)
 
-        # Check overlaps
         overlap_result = check_overlap(intents)
         if overlap_result.has_issues():
             results["valid"] = False
@@ -438,7 +341,6 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
             for warning in overlap_result.warnings:
                 results["warnings"].append(warning.message)
 
-        # Check depth feasibility
         for intent in intents:
             depth_result = check_depth_feasibility(intent, ast.sheet.thickness_mm)
             if depth_result.has_issues():
@@ -608,11 +510,6 @@ def get_docs(
         return json.dumps({"error": str(e)})
 
 
-# =============================================================================
-# CAM Validation Tools
-# =============================================================================
-
-
 @mcp.tool()
 def validate_cam_recipe(
     recipe_path: str,
@@ -644,7 +541,6 @@ def validate_cam_recipe(
         if not recipe_dir.is_dir():
             return json.dumps({"error": f"Not a directory: {recipe_path}"})
 
-        # Load golden metrics if provided
         golden_metrics = None
         golden_file = None
         if golden_path:
@@ -655,7 +551,6 @@ def validate_cam_recipe(
                 golden_metrics = json.load(f)
             golden_file = str(golden_path_obj)
 
-        # Parse PML if present and assertions requested (like CLI does)
         ast = None
         if check_assertions:
             for pml_name in ["example.pml", "source.pml"]:
@@ -666,11 +561,9 @@ def validate_cam_recipe(
                         pml_content = pml_path.read_text()
                         ast = parse_pml_v1(pml_content)
                     except Exception:
-                        # If PML parsing fails, continue without assertions
                         pass
                     break
 
-        # Build options
         options = ValidationOptions(
             extract_metrics=True,
             check_invariants=check_invariants,
@@ -682,7 +575,6 @@ def validate_cam_recipe(
             default_tolerance_percent=tolerance_percent,
         )
 
-        # Run validation
         result = validate_recipe(
             recipe_dir,
             ast=ast,
@@ -692,8 +584,6 @@ def validate_cam_recipe(
             options=options,
         )
 
-        # Unwrap validation_result for cleaner MCP API
-        # (tests and spec expect top-level verdict/metrics, not wrapped)
         full_result = result.to_dict()
         return json.dumps(full_result.get("validation_result", full_result), indent=2, default=str)
 
@@ -725,7 +615,6 @@ def validate_cam_artifacts(
         if not svg_path and not stl_path and not gcode_paths:
             return json.dumps({"error": "At least one artifact path required"})
 
-        # Verify files exist
         if svg_path and not Path(svg_path).exists():
             return json.dumps({"error": f"SVG file not found: {svg_path}"})
         if stl_path and not Path(stl_path).exists():
@@ -734,7 +623,6 @@ def validate_cam_artifacts(
             if not Path(gcode_path).exists():
                 return json.dumps({"error": f"G-code file not found: {gcode_path}"})
 
-        # Build inputs
         inputs = ValidationInput(
             svg_path=svg_path,
             stl_path=stl_path,
@@ -744,13 +632,12 @@ def validate_cam_artifacts(
         options = ValidationOptions(
             extract_metrics=True,
             check_invariants=check_invariants,
-            check_assertions=False,  # No PML
-            check_regressions=False,  # No golden
+            check_assertions=False,
+            check_regressions=False,
         )
 
         result = validate(inputs, options)
 
-        # Unwrap validation_result for cleaner MCP API
         full_result = result.to_dict()
         return json.dumps(full_result.get("validation_result", full_result), indent=2, default=str)
 
@@ -832,7 +719,6 @@ def get_golden_metrics(recipe_name: str, store_path: str = "tests/golden") -> st
 
 
 def main():
-    """Run the MCP server."""
     mcp.run()
 
 

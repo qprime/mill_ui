@@ -2,7 +2,7 @@
 
 <!-- spec-style -->
 
-**As-Of:** 2026-01-19
+**As-Of:** 2026-01-22
 
 Load this document when you need code examples for standard operations.
 
@@ -283,24 +283,30 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 
 **Use case:** Export CNC-ready G-code from PML layouts.
 
-**CLI (regenerate all recipe outputs):**
+**CLI (unified command - generates G-code, SVG, STL):**
 ```bash
 source .venv/bin/activate
+python -m cli.mill --project my_table --input layout.pml
+```
+
+**Options:**
+- `--kerf 6.35` — Tool kerf in mm (default: 6.35)
+- `--theme dark` — Blueprint theme (dark/light/print)
+- `--no-svg` — Skip SVG generation
+- `--no-stl` — Skip STL generation
+- `--no-clean` — Don't clean output directory before writing
+
+**Regenerate all recipe outputs:**
+```bash
 python -m tests.test_recipes --regen_recipes
 ```
 
-**Programmatic:**
+**Programmatic (using shared pipeline):**
 ```python
 from pml.compositional_parser import parse_compositional_pml
 from resolution.layout_resolver import resolve_layout
-from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_v1_hints
-from cam.planner.passes import plan_passes
-from cam.post.gcode import write_gcode
-from cam.model.machine import Machine
-from cam.model.material import Material
-from cam.model.stock import Stock
-from cam.config import Config
+from cam.pipeline import run_pipeline, write_pipeline_outputs
+from pathlib import Path
 
 pml = """
 sheet 300mm 200mm 19mm
@@ -309,26 +315,16 @@ rounded_rect table_top radius 20mm corners tl tr profile through outside
 
 comp_ast = parse_compositional_pml(pml)
 ast = resolve_layout(comp_ast)
-intents = ast_to_removal_intents(ast)
-hints = removal_intents_to_v1_hints(intents, kerf_width_mm=3.175)
 
-tool_db = [{"name": "1/8 endmill", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300}]
-stock = Stock(width=ast.sheet.width_mm, height=ast.sheet.height_mm, thickness=ast.sheet.thickness_mm)
+result = run_pipeline(ast, kerf_mm=3.175)
 
-passes, summary = plan_passes(
-    hints,
-    config=Config(),
-    tool_db=tool_db,
-    material=Material(name="MDF"),
-    machine=Machine(name="default_grbl"),
-    stock=stock,
+outputs = write_pipeline_outputs(
+    result,
+    output_dir=Path("output"),
+    job_name="table_top",
 )
-
-for p in passes:
-    gcode = write_gcode(p["moves"], unit="mm", prec=3, safe_z=5.0)
-    open(p["filename"], "w").write(gcode)
 ```
 
 **Supported shapes:** Rect, Circle, Polygon, RoundedRect (including selective corner rounding).
 
-**Key point:** The planner handles tool compensation automatically based on the `side` parameter (inside/outside/on).
+**Key point:** The unified pipeline handles tool compensation automatically and generates all outputs (G-code, SVG, STL) in one step.

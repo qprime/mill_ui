@@ -44,6 +44,8 @@ from layout_ast.compositional import (
     Triangle,
     # Stage 16 additions (x_panel generator)
     XPanelGen,
+    # Stage 18 additions (hole_grid generator)
+    HoleGridGen,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -152,6 +154,8 @@ class CompositionalPMLLexer:
             'corners', 'tl', 'tr', 'bl', 'br',
             # Absolute positioning keywords
             'size', 'corner_cleanup', 'tabs', 'kerf',
+            # Stage 18 keywords (hole_grid generator)
+            'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -468,6 +472,9 @@ class CompositionalPMLParser:
         # Stage 16 keywords (x_panel generator)
         elif token.value == 'x_panel':
             return self.parse_x_panel_gen()
+        # Stage 18 keywords (hole_grid generator)
+        elif token.value == 'hole_grid':
+            return self.parse_hole_grid_gen()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
 
@@ -1181,6 +1188,70 @@ class CompositionalPMLParser:
         depth = self.expect('number_with_unit').value
         self.expect_line_end()
         return XPanelGen(bar_width_mm=bar_width, depth_mm=depth)
+
+    def parse_hole_grid_gen(self) -> HoleGridGen:
+        """Parse: hole_grid spacing <mm> diameter <mm> depth <mm>|through [pattern rectangular|hexagonal|offset] [inset <mm>] [align center|corner]
+
+        Example:
+            hole_grid spacing 50mm diameter 6.35mm depth through pattern rectangular inset 50mm align center
+        """
+        self.expect('keyword', 'hole_grid')
+        self.expect('keyword', 'spacing')
+        spacing = self.expect('number_with_unit').value
+        self.expect('keyword', 'diameter')
+        diameter = self.expect('number_with_unit').value
+        self.expect('keyword', 'depth')
+
+        depth_token = self.peek()
+        if depth_token.type == 'keyword' and depth_token.value == 'through':
+            self.advance()
+            depth: str | float = "through"
+        elif depth_token.type == 'number_with_unit':
+            depth = self.advance().value
+        else:
+            raise ParseError(
+                f"Expected 'through' or depth in mm, got {depth_token.value}",
+                depth_token.line, depth_token.column
+            )
+
+        pattern = "rectangular"
+        if self.peek().type == 'keyword' and self.peek().value == 'pattern':
+            self.advance()
+            pattern_token = self.peek()
+            if pattern_token.type == 'keyword' and pattern_token.value in ('rectangular', 'hexagonal', 'offset'):
+                pattern = self.advance().value
+            else:
+                raise ParseError(
+                    f"Expected pattern type (rectangular/hexagonal/offset), got {pattern_token.value}",
+                    pattern_token.line, pattern_token.column
+                )
+
+        inset = 0.0
+        if self.peek().type == 'keyword' and self.peek().value == 'inset':
+            self.advance()
+            inset = self.expect('number_with_unit').value
+
+        align = "center"
+        if self.peek().type == 'keyword' and self.peek().value == 'align':
+            self.advance()
+            align_token = self.peek()
+            if align_token.type == 'keyword' and align_token.value in ('center', 'corner'):
+                align = self.advance().value
+            else:
+                raise ParseError(
+                    f"Expected alignment (center/corner), got {align_token.value}",
+                    align_token.line, align_token.column
+                )
+
+        self.expect_line_end()
+        return HoleGridGen(
+            spacing_mm=spacing,
+            diameter_mm=diameter,
+            depth=depth,
+            pattern=pattern,
+            inset_mm=inset,
+            align=align,
+        )
 
     def parse_split_horizontal(self) -> SplitHorizontal:
         """Parse: split_horizontal <n> gap <mm>

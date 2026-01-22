@@ -396,6 +396,16 @@ class Triangle:
 
 
 @dataclass(frozen=True)
+class HoleGridGen:
+    spacing_mm: float
+    diameter_mm: float
+    depth: str | float
+    pattern: str = "rectangular"
+    inset_mm: float = 0.0
+    align: str = "center"
+
+
+@dataclass(frozen=True)
 class ResolvedRegion:
     x_min: float
     y_min: float

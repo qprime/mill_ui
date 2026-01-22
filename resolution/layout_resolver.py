@@ -45,6 +45,8 @@ from layout_ast.compositional import (
     Triangle,
     # Stage 16 additions (x_panel generator)
     XPanelGen,
+    # Stage 18 additions (hole_grid generator)
+    HoleGridGen,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -64,7 +66,8 @@ from generators.area.wave import wave_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.concentric_border import concentric_border_generator
 from generators.area.x_panel import x_panel_generator
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams
+from generators.area.hole_grid import hole_grid_generator
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams
 
 
 # Type alias for node handlers
@@ -775,6 +778,45 @@ class LayoutResolver:
         except ValueError:
             pass
 
+    def _handle_hole_grid_gen(
+        self,
+        node: HoleGridGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle HoleGridGen: Generate hole grid items for region.
+
+        Creates a grid of circular holes using the hole_grid_generator,
+        which places holes at regular intervals within the domain boundary.
+        """
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = HoleGridParams(
+            spacing_mm=node.spacing_mm,
+            diameter_mm=node.diameter_mm,
+            depth_mm=node.depth,
+            pattern=node.pattern,
+            inset_mm=node.inset_mm,
+            align=node.align,
+        )
+
+        shape_id_prefix = self._next_shape_id("hole")
+        try:
+            generated_items = hole_grid_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
     def _handle_wave_gen(
         self,
         node: WaveGen,
@@ -1449,6 +1491,8 @@ class LayoutResolver:
                 Triangle: LayoutResolver._handle_triangle,
                 # Stage 16 handlers (x_panel generator)
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
+                # Stage 18 handlers (hole_grid generator)
+                HoleGridGen: LayoutResolver._handle_hole_grid_gen,
             }
         return LayoutResolver._NODE_HANDLERS
 

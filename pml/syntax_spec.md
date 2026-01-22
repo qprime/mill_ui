@@ -222,6 +222,38 @@ rect panel
         x_panel bar_width 50mm depth 6mm
 ```
 
+#### Hole Grid
+
+```
+hole_grid spacing <mm> diameter <mm> depth <mm>|through [pattern rectangular|hexagonal|offset] [inset <mm>] [align center|corner]
+```
+
+Creates a grid of circular holes within the shape bounds. Holes are only placed where they fit entirely within the domain boundary.
+
+**Parameters:**
+- `spacing <mm>` - Center-to-center distance between holes (required)
+- `diameter <mm>` - Hole diameter (required)
+- `depth <mm>|through` - Hole depth or "through" for full material penetration (required)
+- `pattern rectangular|hexagonal|offset` - Grid pattern type (optional, default: rectangular)
+  - `rectangular`: Standard grid aligned to X/Y axes
+  - `hexagonal`: Honeycomb pattern (alternating rows offset by spacing/2)
+  - `offset`: Like rectangular but alternating rows offset by spacing/2
+- `inset <mm>` - Inset from domain boundary (optional, default: 0)
+- `align center|corner` - Grid alignment within domain (optional, default: center)
+  - `center`: Grid centered on domain centroid
+  - `corner`: Grid aligned to domain bounds corner
+
+Example:
+```pml
+rect pegboard
+    profile outside through
+    hole_grid spacing 50mm diameter 6.35mm depth through pattern rectangular inset 50mm align center
+
+rounded_rect panel radius 25mm
+    profile outside through
+    hole_grid spacing 25mm diameter 5mm depth 10mm pattern hexagonal
+```
+
 #### Concentric Border
 
 ```

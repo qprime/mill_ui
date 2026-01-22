@@ -26,7 +26,7 @@ Examples:
   python -m cli.mill --project cabinet --input panel.pml --kerf 3.175 --no-stl
 
 Output files:
-  {op}-{tool_diameter}mm.nc   G-code per pass
+  {basename}.{op}-{tool_diameter}mm.nc   G-code per pass
   {basename}.svg              Blueprint drawing
   {basename}.stl              3D preview model
   metrics.json                Pipeline metrics

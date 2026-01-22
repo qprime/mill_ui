@@ -116,12 +116,56 @@ def sample_catmull_rom_spline(control_points: list[tuple[float, float]], toleran
     return sampled_points
 
 
+class ResolutionAssertionError(Exception):
+    """Raised when a geometry assertion fails during resolution."""
+    pass
+
+
 class LayoutResolver:
 
-    def __init__(self, ast: CompositionalLayoutAST):
+    def __init__(self, ast: CompositionalLayoutAST, validate: bool = False):
         self.ast = ast
         self.components = ast.components
         self._shape_counter = 0
+        self._validate = validate
+
+    def _assert_shape_context(
+        self,
+        parent_type: str,
+        child_item: Item,
+        context_desc: str,
+    ) -> None:
+        """Assert that child item preserves parent shape type when expected."""
+        if not self._validate:
+            return
+
+        if child_item.feature and child_item.feature.type == "profile":
+            if child_item.type != parent_type:
+                raise ResolutionAssertionError(
+                    f"Shape context mismatch in {context_desc}: "
+                    f"parent is {parent_type} but profile item is {child_item.type}"
+                )
+
+    def _assert_geometry_preserved(
+        self,
+        parent_geometry: dict[str, Any],
+        child_geometry: dict[str, Any],
+        keys: list[str],
+        context_desc: str,
+    ) -> None:
+        """Assert that specific geometry keys are preserved from parent to child."""
+        if not self._validate:
+            return
+
+        for key in keys:
+            if key in parent_geometry:
+                parent_val = parent_geometry[key]
+                child_val = child_geometry.get(key)
+                if child_val != parent_val:
+                    raise ResolutionAssertionError(
+                        f"Geometry mismatch in {context_desc}: "
+                        f"{key} was {parent_val} in parent but {child_val} in child"
+                    )
 
     def _next_shape_id(self, prefix: str) -> str:
         """Generate a deterministic shape ID using a counter."""
@@ -426,9 +470,21 @@ class LayoutResolver:
         )
         items.append(rounded_rect_item)
 
+        items_before = len(items)
+        child_params = {**params, "shape_context": {"type": "RoundedRect", "geometry_data": geometry_data}}
         for child in node.children:
             if not isinstance(child, (Keepout, Edge)):
-                self._resolve_node(child, region, items, params)
+                self._resolve_node(child, region, items, child_params)
+
+        for child_item in items[items_before:]:
+            self._assert_shape_context("RoundedRect", child_item, f"RoundedRect({node.id})")
+            if child_item.type == "RoundedRect" and child_item.feature:
+                self._assert_geometry_preserved(
+                    geometry_data,
+                    child_item.geometry.data,
+                    ["radius_tl_mm", "radius_tr_mm", "radius_bl_mm", "radius_br_mm"],
+                    f"RoundedRect({node.id}) -> {child_item.feature.type}",
+                )
 
     def _handle_line(
         self,
@@ -556,10 +612,20 @@ class LayoutResolver:
         depth_value = node.depth
         depth_mm = None if depth_value == "through" else float(depth_value)
 
+        shape_context = params.get("shape_context")
+        if shape_context:
+            shape_type = shape_context["type"]
+            geometry_data = {**shape_context["geometry_data"]}
+            geometry_data["w_mm"] = region.width
+            geometry_data["h_mm"] = region.height
+        else:
+            shape_type = "Rect"
+            geometry_data = {"w_mm": region.width, "h_mm": region.height}
+
         profile_item = Item(
             kind="shape",
-            type="Rect",
-            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+            type=shape_type,
+            geometry=Geometry(data=geometry_data),
             placement=Placement(center_xy_mm=region.center),
             feature=Feature(
                 type="profile",
@@ -1404,6 +1470,18 @@ class LayoutResolver:
         # Unknown node types are silently ignored (preserves original behavior)
 
 
-def resolve_layout(ast: CompositionalLayoutAST) -> LayoutAST:
-    resolver = LayoutResolver(ast)
+def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> LayoutAST:
+    """Resolve a compositional layout AST to a flat LayoutAST.
+
+    Args:
+        ast: The compositional layout AST to resolve
+        validate: Run geometry assertions during resolution (default True)
+
+    Returns:
+        Flat LayoutAST with absolute coordinates
+
+    Raises:
+        ResolutionAssertionError: If a geometry assertion fails
+    """
+    resolver = LayoutResolver(ast, validate=validate)
     return resolver.resolve()

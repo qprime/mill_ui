@@ -396,7 +396,7 @@ def test_validate_recipe_with_ast():
         return
 
     # Parse PML to get AST
-    from pml.parser import parse_pml
+    from pml import parse_pml
     with open(pml_path) as f:
         ast = parse_pml(f.read())
 

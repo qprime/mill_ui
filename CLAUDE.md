@@ -27,7 +27,7 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
 
-The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. Use `--project <name>` to work with user project files. Add `--compositional` for frame/inset/grid syntax.
+The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. Use `--project <name>` to work with user project files. The parser supports both absolute positioning (`at X,Y size W,H`) and compositional syntax (frame/inset/grid).
 
 Options: `--kerf`, `--theme`, `--quality`, `--no-svg`, `--no-stl`, `--no-clean`
 

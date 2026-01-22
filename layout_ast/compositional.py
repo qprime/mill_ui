@@ -77,6 +77,7 @@ class Rect:
 @dataclass(frozen=True)
 class Circle:
     diameter_mm: float | None = None
+    radius_mm: float | None = None
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
@@ -478,3 +479,4 @@ class CompositionalLayoutAST:
     components: dict[str, ComponentDef] = field(default_factory=dict)
     root: Any = None
     project: str | None = None
+    kerf_width_mm: float | None = None

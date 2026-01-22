@@ -90,7 +90,8 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm invalid_token 3.175mm
         parse_pml(pml_text)
         assert False, "Expected parse error"
     except Exception as e:
-        assert "unexpected token" in str(e).lower() or "expected 'corner_cleanup'" in str(e).lower()
+        error_msg = str(e).lower()
+        assert "unexpected token" in error_msg or "expected 'corner_cleanup'" in error_msg or "expected end of line" in error_msg
 
 
 def test_pml_corner_cleanup_through_depth():

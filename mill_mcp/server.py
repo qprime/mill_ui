@@ -557,9 +557,9 @@ def validate_cam_recipe(
                 pml_path = recipe_dir / pml_name
                 if pml_path.exists():
                     try:
-                        from pml.parser import parse_pml as parse_pml_v1
+                        from pml import parse_pml
                         pml_content = pml_path.read_text()
-                        ast = parse_pml_v1(pml_content)
+                        ast = parse_pml(pml_content)
                     except Exception:
                         pass
                     break

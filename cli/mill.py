@@ -4,8 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from pml import parse_pml, PMLParseError
-from pml.compositional_parser import parse_compositional_pml
+from pml.compositional_parser import parse_compositional_pml, ParseError
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
@@ -83,12 +82,6 @@ Output files:
         help="Exclude floating parts (cutouts) from STL",
     )
     parser.add_argument(
-        "--compositional",
-        "-c",
-        action="store_true",
-        help="Parse as compositional PML (frame/inset/grid syntax)",
-    )
-    parser.add_argument(
         "--no-clean",
         action="store_true",
         help="Don't clean output directory before writing",
@@ -110,16 +103,8 @@ Output files:
             ast = LayoutAST.from_json(str(input_path))
         elif input_suffix in (".pml", ".txt"):
             input_text = input_path.read_text(encoding="utf-8")
-            if args.compositional:
-                comp_ast = parse_compositional_pml(input_text)
-                ast = resolve_layout(comp_ast)
-            else:
-                try:
-                    ast = parse_pml(input_text)
-                except PMLParseError as e:
-                    if any(keyword in input_text for keyword in ["component", "frame", "inset", "grid", "split"]):
-                        print(f"Hint: This looks like compositional PML. Try adding --compositional flag", file=sys.stderr)
-                    raise
+            comp_ast = parse_compositional_pml(input_text)
+            ast = resolve_layout(comp_ast)
         else:
             print(f"Error: Unsupported input format: {input_suffix}", file=sys.stderr)
             print("Supported formats: .pml, .txt, .json", file=sys.stderr)
@@ -172,13 +157,10 @@ Output files:
         print(f"  Passes: {len(result.passes)}", file=sys.stderr)
         print(f"  Moves: {result.metrics['complexity']['total_moves']}", file=sys.stderr)
 
-    except PMLParseError as e:
+    except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        if e.__class__.__name__ == "ParseError" and "compositional_parser" in str(type(e).__module__):
-            print(f"Compositional PML Parse Error: {e}", file=sys.stderr)
-            sys.exit(1)
         print(f"Error: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc(file=sys.stderr)

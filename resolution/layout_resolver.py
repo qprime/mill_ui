@@ -397,15 +397,17 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         if node.diameter_mm is not None:
-            diameter = node.diameter_mm
+            geometry_data = {"diameter_mm": node.diameter_mm}
+        elif node.radius_mm is not None:
+            geometry_data = {"radius_mm": node.radius_mm}
         else:
             diameter = min(region.width, region.height)
+            geometry_data = {"diameter_mm": diameter}
 
         islands = self._collect_island_bounds(node.children, region, params)
 
         edge_treatment = self._extract_edge_treatment(node.children)
 
-        geometry_data = {"diameter_mm": diameter}
         if islands:
             geometry_data["islands"] = islands
         if edge_treatment:
@@ -455,6 +457,7 @@ class LayoutResolver:
         }
         if radius_tl == radius_tr == radius_bl == radius_br:
             geometry_data["radius_mm"] = radius_tl
+            geometry_data["corner_radius_mm"] = radius_tl
         if islands:
             geometry_data["islands"] = islands
         if edge_treatment:
@@ -1397,6 +1400,7 @@ class LayoutResolver:
             sheet=self.ast.sheet,
             items=tuple(items),
             project=self.ast.project,
+            kerf_width_mm=self.ast.kerf_width_mm,
         )
 
     # Handler map: maps node type to handler method

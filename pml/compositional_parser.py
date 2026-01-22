@@ -123,13 +123,13 @@ class CompositionalPMLLexer:
         start_line = self.line
         start_col = self.column
         ident = ""
-        while self.peek() and (self.peek().isalnum() or self.peek() in ('_', '-')):
+        while self.peek() and (self.peek().isalnum() or self.peek() in ('_', '-', ':')):
             ident += self.advance()
 
 
         keywords = {
             'sheet', 'project', 'component', 'use', 'place',
-            'rect', 'circle', 'rounded_rect', 'line', 'polyline', 'spline', 'keepout', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points', 'tolerance',
+            'rect', 'circle', 'rounded_rect', 'roundedrect', 'line', 'polyline', 'spline', 'keepout', 'inset', 'frame', 'grid', 'split', 'cell', 'gap', 'rail', 'mullion', 'points', 'tolerance',
             'pocket', 'profile', 'engrave', 'hole', 'edge',
             'through', 'inside', 'outside', 'on',
             'diameter', 'radius', 'fit', 'horizontal', 'vertical',
@@ -150,6 +150,8 @@ class CompositionalPMLLexer:
             'x_panel', 'bar_width',
             # Stage 17 keywords (selective corner rounding)
             'corners', 'tl', 'tr', 'bl', 'br',
+            # Absolute positioning keywords
+            'size', 'corner_cleanup', 'tabs', 'kerf',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -292,16 +294,21 @@ class CompositionalPMLParser:
     def parse(self) -> CompositionalLayoutAST:
         self.skip_newlines()
 
-
-        sheet = self.parse_sheet()
-        self.skip_newlines()
-
-
         project = None
-        if self.peek().type == 'keyword' and self.peek().value == 'project':
-            project = self.parse_project()
+        kerf_width_mm = None
+        sheet = None
+
+        while self.peek().type == 'keyword' and self.peek().value in ('project', 'kerf', 'sheet'):
+            if self.peek().value == 'project':
+                project = self.parse_project()
+            elif self.peek().value == 'kerf':
+                kerf_width_mm = self.parse_kerf()
+            elif self.peek().value == 'sheet':
+                sheet = self.parse_sheet()
             self.skip_newlines()
 
+        if sheet is None:
+            raise ParseError("Missing required 'sheet' declaration", self.peek().line, self.peek().column)
 
         components = {}
         while self.peek().type == 'keyword' and self.peek().value == 'component':
@@ -309,11 +316,9 @@ class CompositionalPMLParser:
             components[comp_def.name] = comp_def
             self.skip_newlines()
 
-
         if self.peek().type == 'keyword' and self.peek().value == 'place':
             root = self.parse_place()
         else:
-
             root = self.parse_panel_or_children()
 
         return CompositionalLayoutAST(
@@ -321,6 +326,7 @@ class CompositionalPMLParser:
             components=components,
             root=root,
             project=project,
+            kerf_width_mm=kerf_width_mm,
         )
 
     def parse_sheet(self) -> Sheet:
@@ -336,6 +342,12 @@ class CompositionalPMLParser:
         name = self.expect('identifier').value
         self.expect_line_end()
         return name
+
+    def parse_kerf(self) -> float:
+        self.expect('keyword', 'kerf')
+        value = self.expect('number_with_unit').value
+        self.expect_line_end()
+        return value
 
     def parse_component_def(self) -> ComponentDef:
         self.expect('keyword', 'component')
@@ -394,7 +406,7 @@ class CompositionalPMLParser:
             return self.parse_rect()
         elif token.value == 'circle':
             return self.parse_circle()
-        elif token.value == 'rounded_rect':
+        elif token.value in ('rounded_rect', 'roundedrect'):
             return self.parse_rounded_rect()
         elif token.value == 'line':
             return self.parse_line()
@@ -468,26 +480,41 @@ class CompositionalPMLParser:
             return token.value not in feature_keywords
         return False
 
-    def parse_rect(self) -> Rect:
+    def parse_rect(self) -> Rect | AtPosition:
         self.expect('keyword', 'rect')
 
         rect_id = None
         token = self.peek()
-        if self._is_valid_id_token(token) and token.value not in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+        if self._is_valid_id_token(token) and token.value not in ('pocket', 'profile', 'engrave', 'hole', 'edge', 'at'):
             if token.type in ('identifier', 'keyword'):
                 next_token = self.peek(1)
-                if next_token.type in ('newline', 'eof', 'keyword'):
-                    if next_token.type == 'keyword' and next_token.value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
+                if next_token.type in ('newline', 'eof', 'keyword', 'dedent', 'indent'):
+                    if next_token.type == 'keyword' and next_token.value in ('pocket', 'profile', 'engrave', 'hole', 'edge', 'at'):
                         rect_id = self.advance().value
-                    elif next_token.type in ('newline', 'eof'):
+                    elif next_token.type in ('newline', 'eof', 'dedent', 'indent'):
                         rect_id = self.advance().value
+
+        x_mm = None
+        y_mm = None
+        w_mm = None
+        h_mm = None
+        if self.peek().type == 'keyword' and self.peek().value == 'at':
+            self.advance()
+            x_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'punctuation' and self.peek().value == ',':
+                self.advance()
+            y_mm = self.expect('number_with_unit').value
+            self.expect('keyword', 'size')
+            w_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'punctuation' and self.peek().value == ',':
+                self.advance()
+            h_mm = self.expect('number_with_unit').value
 
         feature = None
         if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
             feature = self.parse_feature()
 
         self.expect_line_end()
-
 
         children = []
         if self.peek().type == 'indent':
@@ -497,33 +524,47 @@ class CompositionalPMLParser:
                 self.skip_newlines()
             self.expect('dedent')
 
-        return Rect(children=tuple(children), feature=feature, id=rect_id)
+        rect = Rect(children=tuple(children), feature=feature, id=rect_id)
 
-    def parse_circle(self) -> Circle:
+        if x_mm is not None:
+            return AtPosition(x_mm=x_mm, y_mm=y_mm, width_mm=w_mm, height_mm=h_mm, child=rect)
+        return rect
+
+    def parse_circle(self) -> Circle | AtPosition:
         self.expect('keyword', 'circle')
-
 
         circle_id = None
         if self.peek().type == 'identifier':
             circle_id = self.advance().value
+        elif self.peek().type == 'keyword' and self.peek().value not in ('at', 'diameter', 'radius', 'fit', 'pocket', 'profile', 'engrave', 'hole', 'edge'):
+            circle_id = self.advance().value
 
+        x_mm = None
+        y_mm = None
+        if self.peek().type == 'keyword' and self.peek().value == 'at':
+            self.advance()
+            x_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'punctuation' and self.peek().value == ',':
+                self.advance()
+            y_mm = self.expect('number_with_unit').value
 
         diameter_mm = None
+        radius_mm = None
         if self.peek().type == 'keyword':
             if self.peek().value == 'diameter':
                 self.advance()
                 diameter_mm = self.expect('number_with_unit').value
+            elif self.peek().value == 'radius':
+                self.advance()
+                radius_mm = self.expect('number_with_unit').value
             elif self.peek().value == 'fit':
                 self.advance()
-                diameter_mm = None
-
 
         feature = None
         if self.peek().type == 'keyword' and self.peek().value in ('pocket', 'profile', 'engrave', 'hole', 'edge'):
             feature = self.parse_feature()
 
         self.expect_line_end()
-
 
         children = []
         if self.peek().type == 'indent':
@@ -533,14 +574,37 @@ class CompositionalPMLParser:
                 self.skip_newlines()
             self.expect('dedent')
 
-        return Circle(diameter_mm=diameter_mm, children=tuple(children), feature=feature, id=circle_id)
+        circle = Circle(diameter_mm=diameter_mm, radius_mm=radius_mm, children=tuple(children), feature=feature, id=circle_id)
 
-    def parse_rounded_rect(self) -> RoundedRect:
-        self.expect('keyword', 'rounded_rect')
+        if x_mm is not None:
+            size = diameter_mm if diameter_mm is not None else (radius_mm * 2 if radius_mm is not None else None)
+            return AtPosition(x_mm=x_mm, y_mm=y_mm, width_mm=size, height_mm=size, child=circle)
+        return circle
+
+    def parse_rounded_rect(self) -> RoundedRect | AtPosition:
+        token = self.advance()
 
         rounded_rect_id = None
         if self.peek().type == 'identifier':
             rounded_rect_id = self.advance().value
+        elif self.peek().type == 'keyword' and self.peek().value not in ('at', 'radius', 'pocket', 'profile', 'engrave', 'hole', 'edge', 'corners'):
+            rounded_rect_id = self.advance().value
+
+        x_mm = None
+        y_mm = None
+        w_mm = None
+        h_mm = None
+        if self.peek().type == 'keyword' and self.peek().value == 'at':
+            self.advance()
+            x_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'punctuation' and self.peek().value == ',':
+                self.advance()
+            y_mm = self.expect('number_with_unit').value
+            self.expect('keyword', 'size')
+            w_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'punctuation' and self.peek().value == ',':
+                self.advance()
+            h_mm = self.expect('number_with_unit').value
 
         self.expect('keyword', 'radius')
         radius_mm = self.expect('number_with_unit').value
@@ -573,7 +637,11 @@ class CompositionalPMLParser:
                 self.skip_newlines()
             self.expect('dedent')
 
-        return RoundedRect(radius_mm=radius_mm, children=tuple(children), feature=feature, id=rounded_rect_id, corners=corners)
+        rounded_rect = RoundedRect(radius_mm=radius_mm, children=tuple(children), feature=feature, id=rounded_rect_id, corners=corners)
+
+        if x_mm is not None:
+            return AtPosition(x_mm=x_mm, y_mm=y_mm, width_mm=w_mm, height_mm=h_mm, child=rounded_rect)
+        return rounded_rect
 
     def parse_line(self) -> Line:
         self.expect('keyword', 'line')
@@ -864,20 +932,54 @@ class CompositionalPMLParser:
         feature_type = self.expect('keyword').value
 
         if feature_type == 'pocket':
-            depth = self.expect('number_with_unit').value
-            return Feature(type='pocket', depth=str(depth), depth_mm=depth)
+            depth_token = self.peek()
+            if depth_token.type == 'keyword' and depth_token.value == 'through':
+                self.advance()
+                depth = 'through'
+                depth_mm = None
+            else:
+                depth_mm = self.expect('number_with_unit').value
+                depth = str(depth_mm)
+            corner_cleanup_tool_diameter_mm = None
+            if self.peek().type == 'keyword' and self.peek().value == 'corner_cleanup':
+                self.advance()
+                corner_cleanup_tool_diameter_mm = self.expect('number_with_unit').value
+            return Feature(type='pocket', depth=depth, depth_mm=depth_mm, corner_cleanup_tool_diameter_mm=corner_cleanup_tool_diameter_mm)
         elif feature_type == 'profile':
-            depth = self.expect('keyword', 'through').value
+            depth_token = self.peek()
+            if depth_token.type == 'keyword' and depth_token.value == 'through':
+                self.advance()
+                depth = 'through'
+                depth_mm = None
+            elif depth_token.type == 'number_with_unit':
+                depth_mm = self.advance().value
+                depth = str(depth_mm)
+            else:
+                raise ParseError(f"Expected 'through' or depth in mm, got {depth_token.value}", depth_token.line, depth_token.column)
             side = self.expect('keyword').value
-            return Feature(type='profile', depth=depth, side=side)
+            tab_count = None
+            tab_height_mm = None
+            tab_width_mm = None
+            if self.peek().type == 'keyword' and self.peek().value == 'tabs':
+                self.advance()
+                tab_count = int(self.expect('number').value)
+                self.expect('keyword', 'height')
+                tab_height_mm = self.expect('number_with_unit').value
+                if self.peek().type == 'keyword' and self.peek().value == 'width':
+                    self.advance()
+                    tab_width_mm = self.expect('number_with_unit').value
+            return Feature(type='profile', depth=depth, side=side, depth_mm=depth_mm, tab_count=tab_count, tab_height_mm=tab_height_mm, tab_width_mm=tab_width_mm)
         elif feature_type == 'engrave':
             depth = self.expect('number_with_unit').value
             return Feature(type='engrave', depth=str(depth), depth_mm=depth)
         elif feature_type == 'hole':
+            depth_token = self.peek()
+            if depth_token.type == 'keyword' and depth_token.value == 'through':
+                self.advance()
+                return Feature(type='hole', depth='through', depth_mm=None)
             depth = self.expect('number_with_unit').value
             return Feature(type='hole', depth=str(depth), depth_mm=depth)
         elif feature_type in ('edge',):
-
             return Feature(type=feature_type, depth='through')
         else:
             raise ParseError(f"Unknown feature type: {feature_type}", self.peek().line, self.peek().column)

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
-from pml.parser import parse_pml
+from pml import parse_pml
 from resolution.layout_resolver import resolve_layout
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
 

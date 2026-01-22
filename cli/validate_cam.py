@@ -198,7 +198,7 @@ def run_validation(args: argparse.Namespace) -> int:
         pml_path = Path(args.pml)
         if not pml_path.exists():
             raise FileNotFoundError(f"PML file not found: {args.pml}")
-        from pml.parser import parse_pml
+        from pml import parse_pml
         with open(pml_path) as f:
             ast = parse_pml(f.read())
 
@@ -216,7 +216,7 @@ def run_validation(args: argparse.Namespace) -> int:
             for candidate in ["example.pml", "source.pml"]:
                 pml_path = recipe_dir / candidate
                 if pml_path.exists():
-                    from pml.parser import parse_pml
+                    from pml import parse_pml
                     with open(pml_path) as f:
                         ast = parse_pml(f.read())
                     break

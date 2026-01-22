@@ -8,7 +8,6 @@ from pathlib import Path
 
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
 from pml.formatter import format_pml
-from pml.parser import parse_pml
 from nesting import nest_and_generate, nest_parts
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_v1_hints

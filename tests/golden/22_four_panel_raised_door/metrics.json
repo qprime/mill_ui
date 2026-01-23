@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-01-23T01:25:11.463893+00:00"
+    "created_at": "2026-01-23T02:24:31.482982+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.29,
+    "extraction_time_ms": 0.28,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -114,53 +114,53 @@
             {
               "element_type": "path",
               "bounds": [
-                230.0,
-                532.5,
-                347.5,
-                750.0
+                81.25,
+                731.25,
+                198.75,
+                948.75
               ],
               "center": [
-                288.75,
-                641.25
+                140.0,
+                840.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                432.5,
-                532.5,
-                550.0,
-                750.0
+                81.25,
+                731.25,
+                198.75,
+                948.75
               ],
               "center": [
-                491.25,
-                641.25
+                140.0,
+                840.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                230.0,
-                230.0,
-                347.5,
-                447.5
+                81.25,
+                731.25,
+                198.75,
+                948.75
               ],
               "center": [
-                288.75,
-                338.75
+                140.0,
+                840.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                432.5,
-                230.0,
-                550.0,
-                447.5
+                81.25,
+                731.25,
+                198.75,
+                948.75
               ],
               "center": [
-                491.25,
-                338.75
+                140.0,
+                840.0
               ]
             }
           ]
@@ -253,10 +253,10 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
+      "x_min": 81.25,
       "x_max": 680.0,
       "y_min": 38.0,
-      "y_max": 840.0
+      "y_max": 948.75
     },
     "text_elements": {
       "count": 18,
@@ -303,10 +303,10 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9036,
+    "extraction_time_ms": 0.7186,
     "mesh": {
-      "vertex_count": 104,
-      "face_count": 204,
+      "vertex_count": 26,
+      "face_count": 48,
       "is_watertight": true,
       "is_manifold": true,
       "is_volume": true,
@@ -326,8 +326,8 @@
       "height_mm": 700.0,
       "thickness_mm": 19.0
     },
-    "volume_mm3": 5983550.0,
-    "surface_area_mm2": 787920.0,
+    "volume_mm3": 6608346.875,
+    "surface_area_mm2": 747610.0,
     "z_statistics": {
       "unique_z_levels": [
         0.0,
@@ -342,7 +342,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 9.5828,
+    "extraction_time_ms": 14.0541,
     "summary": {
       "total_lines": 4464,
       "comment_lines": 24,
@@ -356,7 +356,7 @@
       "g1_count": 1788,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 47933.013399999996,
+      "total_rapid_distance_mm": 47314.3092,
       "total_feed_distance_mm": 177366.42799999999
     },
     "z_profile": {
@@ -384,8 +384,8 @@
     },
     "xy_bounds": {
       "x_min": -1.587,
-      "x_max": 781.488,
-      "y_min": -431.488,
+      "x_max": 501.587,
+      "y_min": -1.587,
       "y_max": 701.587
     },
     "feeds": {
@@ -431,9 +431,15 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 575.1962,
+      "rapid_time_s": 567.7717,
       "feed_time_s": 21625.6776,
-      "total_time_s": 22200.8738
+      "total_time_s": 22193.4493
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

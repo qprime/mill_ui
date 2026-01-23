@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-01-23T02:10:13.430157+00:00"
+    "created_at": "2026-01-23T02:24:31.518345+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -293,7 +293,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7687,
+    "extraction_time_ms": 0.7614,
     "mesh": {
       "vertex_count": 56,
       "face_count": 108,
@@ -331,7 +331,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0586,
+    "extraction_time_ms": 0.0596,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

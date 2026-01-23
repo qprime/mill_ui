@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "27_wave_texture_panel",
-    "created_at": "2026-01-23T01:25:11.626920+00:00"
+    "created_at": "2026-01-23T02:24:31.675319+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -242,7 +242,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6723,
+    "extraction_time_ms": 0.6554,
     "mesh": {
       "vertex_count": 8,
       "face_count": 12,
@@ -279,7 +279,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 24.8611,
+    "extraction_time_ms": 35.5555,
     "summary": {
       "total_lines": 9002,
       "comment_lines": 166,
@@ -349,6 +349,12 @@
       "rapid_time_s": 742.5649000000001,
       "feed_time_s": 5309.6837000000005,
       "total_time_s": 6052.2486
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

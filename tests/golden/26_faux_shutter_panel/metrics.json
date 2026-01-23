@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "26_faux_shutter_panel",
-    "created_at": "2026-01-23T02:10:13.461362+00:00"
+    "created_at": "2026-01-23T02:24:31.549684+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 530.0,
       "height_mm": 880.0,
@@ -486,7 +486,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0958,
+    "extraction_time_ms": 1.1126,
     "mesh": {
       "vertex_count": 200,
       "face_count": 396,
@@ -525,7 +525,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7802,
+    "extraction_time_ms": 1.8077,
     "summary": {
       "total_lines": 2394,
       "comment_lines": 102,

@@ -122,23 +122,23 @@ def raised_panel_generator(
     # -------------------------------------------------------------------------
     # 1. Create border item (bevel pocket)
     # -------------------------------------------------------------------------
-    # The border is the original domain with the field as a hole
-    border_points = [list(pt) for pt in domain.outer_boundary]
-    field_hole = [list(pt) for pt in field_domain.outer_boundary]
+    # Compute border centroid (approximate: use original domain centroid)
+    bcx, bcy = domain.centroid
+
+    # Convert absolute domain coordinates to relative coordinates (centered on placement)
+    border_points = [[pt[0] - bcx, pt[1] - bcy] for pt in domain.outer_boundary]
+    field_hole = [[pt[0] - bcx, pt[1] - bcy] for pt in field_domain.outer_boundary]
 
     # Include any existing holes from the original domain
     holes = [field_hole]
     if domain.inner_boundaries:
         for inner in domain.inner_boundaries:
-            holes.append([list(pt) for pt in inner])
+            holes.append([[pt[0] - bcx, pt[1] - bcy] for pt in inner])
 
     border_geometry_data = {
         "points": border_points,
         "holes": holes,
     }
-
-    # Compute border centroid (approximate: use original domain centroid)
-    bcx, bcy = domain.centroid
 
     border_item = Item(
         kind="shape",
@@ -160,7 +160,10 @@ def raised_panel_generator(
     # -------------------------------------------------------------------------
     # 2. Create field item (flat pocket)
     # -------------------------------------------------------------------------
-    field_points = [list(pt) for pt in field_domain.outer_boundary]
+    fcx, fcy = field_domain.centroid
+
+    # Convert absolute domain coordinates to relative coordinates (centered on placement)
+    field_points = [[pt[0] - fcx, pt[1] - fcy] for pt in field_domain.outer_boundary]
 
     field_geometry_data = {
         "points": field_points,
@@ -169,11 +172,9 @@ def raised_panel_generator(
     # Include any holes that ended up in the field domain
     if field_domain.inner_boundaries:
         field_geometry_data["holes"] = [
-            [list(pt) for pt in hole]
+            [[pt[0] - fcx, pt[1] - fcy] for pt in hole]
             for hole in field_domain.inner_boundaries
         ]
-
-    fcx, fcy = field_domain.centroid
 
     field_item = Item(
         kind="shape",

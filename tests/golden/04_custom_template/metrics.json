@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "04_custom_template",
-    "created_at": "2026-01-23T02:10:11.423169+00:00"
+    "created_at": "2026-01-23T02:24:29.525330+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.53,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 580.0,
       "height_mm": 460.0,
@@ -361,7 +361,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.4259,
+    "extraction_time_ms": 3.2567,
     "mesh": {
       "vertex_count": 1040,
       "face_count": 2076,
@@ -400,7 +400,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.3189,
+    "extraction_time_ms": 16.0253,
     "summary": {
       "total_lines": 3954,
       "comment_lines": 18,

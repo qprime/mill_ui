@@ -68,6 +68,8 @@ class ValidationInput:
 
     # Configuration
     sheet_thickness_mm: float | None = None  # For STL Z-within-sheet check
+    sheet_width_mm: float | None = None  # For G-code XY bounds check
+    sheet_height_mm: float | None = None  # For G-code XY bounds check
     comparison_config: ComparisonConfig | None = None
 
 
@@ -234,6 +236,14 @@ def validate_recipe(
             if not nc_file.name.startswith("."):
                 gcode_paths.append(nc_file)
 
+    sheet_width_mm = None
+    sheet_height_mm = None
+    if ast is not None:
+        sheet_width_mm = ast.sheet.width_mm
+        sheet_height_mm = ast.sheet.height_mm
+        if sheet_thickness_mm is None:
+            sheet_thickness_mm = ast.sheet.thickness_mm
+
     inputs = ValidationInput(
         source_file=source_file,
         ast=ast,
@@ -244,6 +254,8 @@ def validate_recipe(
         golden_file=golden_file,
         comparison_config=comparison_config,
         sheet_thickness_mm=sheet_thickness_mm,
+        sheet_width_mm=sheet_width_mm,
+        sheet_height_mm=sheet_height_mm,
     )
 
     return validate(inputs, options)
@@ -452,15 +464,22 @@ def _run_invariant_checks(
             result.invariants.add(inv_result)
 
     # G-code invariants (check each file)
+    # Pass sheet dimensions if available for accurate XY bounds checking
+    gcode_kwargs: dict[str, Any] = {}
+    if inputs.sheet_width_mm is not None:
+        gcode_kwargs["sheet_width_mm"] = inputs.sheet_width_mm
+    if inputs.sheet_height_mm is not None:
+        gcode_kwargs["sheet_height_mm"] = inputs.sheet_height_mm
+
     for gcode_path in inputs.gcode_paths:
         if Path(gcode_path).exists():
-            gcode_results = check_gcode_invariants(gcode_path)
+            gcode_results = check_gcode_invariants(gcode_path, **gcode_kwargs)
             for inv_result in gcode_results:
                 result.invariants.add(inv_result)
 
     # G-code invariants for content (no file path)
     for gcode_content in inputs.gcode_content:
-        gcode_results = check_gcode_invariants_from_content(gcode_content)
+        gcode_results = check_gcode_invariants_from_content(gcode_content, **gcode_kwargs)
         for inv_result in gcode_results:
             result.invariants.add(inv_result)
 

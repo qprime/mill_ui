@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "03_shaker_door_template",
-    "created_at": "2026-01-23T02:10:11.356394+00:00"
+    "created_at": "2026-01-23T02:24:29.459970+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -280,7 +280,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6826,
+    "extraction_time_ms": 0.7194,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -318,7 +318,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.6129,
+    "extraction_time_ms": 4.5469,
     "summary": {
       "total_lines": 1582,
       "comment_lines": 12,

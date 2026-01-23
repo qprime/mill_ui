@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "15_profile_with_tabs",
-    "created_at": "2026-01-23T02:10:12.190014+00:00"
+    "created_at": "2026-01-23T02:24:30.292318+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.19,
+    "extraction_time_ms": 0.2,
     "document": {
       "width_mm": 880.0,
       "height_mm": 680.0,
@@ -240,7 +240,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6578,
+    "extraction_time_ms": 0.6629,
     "mesh": {
       "vertex_count": 8,
       "face_count": 12,
@@ -277,7 +277,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.5626,
+    "extraction_time_ms": 0.5775,
     "summary": {
       "total_lines": 144,
       "comment_lines": 3,

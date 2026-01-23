@@ -23,28 +23,28 @@
     <rect x="140.0" y="140.0" width="500.0" height="700.0" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 230.000 230.000 L 347.500 230.000 L 347.500 447.500 L 230.000 447.500 Z" fill-rule="evenodd" />
-    <path d="M 432.500 230.000 L 550.000 230.000 L 550.000 447.500 L 432.500 447.500 Z" fill-rule="evenodd" />
-    <path d="M 230.000 532.500 L 347.500 532.500 L 347.500 750.000 L 230.000 750.000 Z" fill-rule="evenodd" />
-    <path d="M 432.500 532.500 L 550.000 532.500 L 550.000 750.000 L 432.500 750.000 Z" fill-rule="evenodd" />
+    <path d="M 230.000 750.000 L 347.500 750.000 L 347.500 532.500 L 230.000 532.500 Z" fill-rule="evenodd" />
+    <path d="M 432.500 750.000 L 550.000 750.000 L 550.000 532.500 L 432.500 532.500 Z" fill-rule="evenodd" />
+    <path d="M 230.000 447.500 L 347.500 447.500 L 347.500 230.000 L 230.000 230.000 Z" fill-rule="evenodd" />
+    <path d="M 432.500 447.500 L 550.000 447.500 L 550.000 230.000 L 432.500 230.000 Z" fill-rule="evenodd" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="230.0" y1="230.0" x2="230.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="347.5" y1="230.0" x2="347.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="230.0" y1="532.5" x2="230.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="347.5" y1="532.5" x2="347.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="230.0" y1="120.0" x2="347.5" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="230.0,120.0 233.0,117.0 233.0,123.0" fill="#5ab9ea" />
     <polygon points="347.5,120.0 344.5,117.0 344.5,123.0" fill="#5ab9ea" />
     <text x="288.75" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">117.5mm</text>
-    <line x1="347.5" y1="230.0" x2="660.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="347.5" y1="447.5" x2="660.0" y2="447.5" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="660.0" y1="230.0" x2="660.0" y2="447.5" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="660.0,230.0 657.0,233.0 663.0,233.0" fill="#5ab9ea" />
-    <polygon points="660.0,447.5 657.0,444.5 663.0,444.5" fill="#5ab9ea" />
-    <text x="665.0" y="338.75" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 338.75)">217.5mm</text>
+    <line x1="347.5" y1="532.5" x2="660.0" y2="532.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="347.5" y1="750.0" x2="660.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="660.0" y1="532.5" x2="660.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="660.0,532.5 657.0,535.5 663.0,535.5" fill="#5ab9ea" />
+    <polygon points="660.0,750.0 657.0,747.0 663.0,747.0" fill="#5ab9ea" />
+    <text x="665.0" y="641.25" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 641.25)">217.5mm</text>
     <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="640.0" y1="140.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="140.0" y1="100.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />

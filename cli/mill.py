@@ -58,6 +58,7 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         generate_stl=not args.no_stl,
         stl_quality=args.quality,
         include_floating_parts=not args.no_floating_parts,
+        y_origin=args.y_origin,
     )
 
     if result.errors:
@@ -166,6 +167,12 @@ Output files:
         "--no-clean",
         action="store_true",
         help="Don't clean output directory before writing",
+    )
+    parser.add_argument(
+        "--y-origin",
+        default="front",
+        choices=["front", "back"],
+        help="Y=0 reference: front (operator side) or back (default: front)",
     )
 
     args = parser.parse_args()

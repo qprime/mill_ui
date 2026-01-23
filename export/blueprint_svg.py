@@ -91,6 +91,7 @@ def render_blueprint_svg(
     layout_ast: LayoutAST,
     removal_intents: Sequence[RemovalIntent] | None = None,
     theme: str = "dark",
+    y_origin: str = "front",
 ) -> str:
     theme_obj = THEMES.get(theme, DARK_THEME)
     sheet = layout_ast.sheet
@@ -131,6 +132,10 @@ def render_blueprint_svg(
     offset_x = margin
     offset_y = margin
 
+    def flip_y(y: float) -> float:
+        if y_origin == "front":
+            return sheet.height_mm - y
+        return y
 
     sheet_group = ET.SubElement(svg, "g", {"id": "SHEET_OUTLINE", "class": "sheet-outline"})
     profile_group = ET.SubElement(svg, "g", {"id": "PROFILE_CUTS", "class": "profile-cuts"})
@@ -154,19 +159,19 @@ def render_blueprint_svg(
 
         feature_type = item.feature.type
         if feature_type == "profile":
-            _render_profile(profile_group, item, offset_x, offset_y, theme_obj)
+            _render_profile(profile_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "pocket":
-            _render_pocket(pocket_group, item, offset_x, offset_y, theme_obj)
+            _render_pocket(pocket_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "hole":
-            _render_hole(hole_group, item, offset_x, offset_y, theme_obj)
+            _render_hole(hole_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "engrave":
-            _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj)
+            _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
 
         if item.shape_id and item.placement and not item.shape_id.startswith("generated_"):
-            _render_label(label_group, item, offset_x, offset_y)
+            _render_label(label_group, item, offset_x, offset_y, y_flip=flip_y)
 
 
-    _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj)
+    _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj, y_flip=flip_y)
 
 
     _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)
@@ -246,16 +251,19 @@ def _polygon_to_path(
     holes: list,
     offset_x: float,
     offset_y: float,
+    y_flip=None,
 ) -> str:
     if not points:
         return ""
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
+
     def ring_to_path(ring: list) -> str:
         if not ring:
             return ""
-        parts = [f"M {ring[0][0] + offset_x:.3f} {ring[0][1] + offset_y:.3f}"]
+        parts = [f"M {ring[0][0] + offset_x:.3f} {yf(ring[0][1]) + offset_y:.3f}"]
         for x, y in ring[1:]:
-            parts.append(f"L {x + offset_x:.3f} {y + offset_y:.3f}")
+            parts.append(f"L {x + offset_x:.3f} {yf(y) + offset_y:.3f}")
         parts.append("Z")
         return " ".join(parts)
 
@@ -266,11 +274,13 @@ def _polygon_to_path(
     return " ".join(segments)
 
 
-def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
+def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme, y_flip=None) -> None:
     if item.geometry is None:
         return
 
     shape_type = item.type
+
+    yf = y_flip if y_flip is not None else (lambda y: y)
 
     if shape_type == "Line":
         start = item.geometry.data.get("start", [0, 0])
@@ -280,9 +290,9 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
             "line",
             {
                 "x1": str(offset_x + start[0]),
-                "y1": str(offset_y + start[1]),
+                "y1": str(offset_y + yf(start[1])),
                 "x2": str(offset_x + end[0]),
-                "y2": str(offset_y + end[1]),
+                "y2": str(offset_y + yf(end[1])),
             },
         )
         return
@@ -291,6 +301,7 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
         return
 
     cx, cy = item.placement.center_xy_mm
+    cy = yf(cy)
 
     if shape_type == "Rect":
         w = item.geometry.data.get("w_mm", 0)
@@ -321,13 +332,13 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     elif shape_type == "Polygon":
         points = item.geometry.data.get("points", [])
         holes = item.geometry.data.get("holes", [])
-        path_d = _polygon_to_path(points, holes, offset_x, offset_y)
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y, y_flip=yf)
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "Polyline":
         points = item.geometry.data.get("points_mm", [])
         if points:
-            points_str = " ".join(f"{x + offset_x},{y + offset_y}" for x, y in points)
+            points_str = " ".join(f"{x + offset_x},{yf(y) + offset_y}" for x, y in points)
             ET.SubElement(group, "polyline", {"points": points_str})
     elif shape_type == "RoundedRect":
         w = item.geometry.data.get("w_mm", 0)
@@ -342,12 +353,14 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
         ET.SubElement(group, "path", {"d": path_d})
 
 
-def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
+def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme, y_flip=None) -> None:
     if item.geometry is None or item.placement is None:
         return
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
     shape_type = item.type
     cx, cy = item.placement.center_xy_mm
+    cy = yf(cy)
 
     if shape_type == "Rect":
         w = item.geometry.data.get("w_mm", 0)
@@ -378,7 +391,7 @@ def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: flo
     elif shape_type == "Polygon":
         points = item.geometry.data.get("points", [])
         holes = item.geometry.data.get("holes", [])
-        path_d = _polygon_to_path(points, holes, offset_x, offset_y)
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y, y_flip=yf)
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "RoundedRect":
@@ -394,13 +407,14 @@ def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: flo
         ET.SubElement(group, "path", {"d": path_d})
 
 
-def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
+def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme, y_flip=None) -> None:
     if item.geometry is None or item.placement is None:
         return
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
     cx, cy = item.placement.center_xy_mm
     abs_cx = offset_x + cx
-    abs_cy = offset_y + cy
+    abs_cy = offset_y + yf(cy)
 
 
     d = item.geometry.data.get("diameter_mm", item.geometry.data.get("radius_mm", 5) * 2)
@@ -441,21 +455,22 @@ def _render_hole(group: ET.Element, item: Item, offset_x: float, offset_y: float
     )
 
 
-def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme) -> None:
-    _render_profile(group, item, offset_x, offset_y, theme)
+def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme, y_flip=None) -> None:
+    _render_profile(group, item, offset_x, offset_y, theme, y_flip=y_flip)
 
 
-def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: float) -> None:
+def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: float, y_flip=None) -> None:
     if not item.shape_id or item.placement is None:
         return
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
     cx, cy = item.placement.center_xy_mm
     label = ET.SubElement(
         group,
         "text",
         {
             "x": str(offset_x + cx),
-            "y": str(offset_y + cy),
+            "y": str(offset_y + yf(cy)),
             "class": "part-label",
             "text-anchor": "middle",
             "dominant-baseline": "middle",
@@ -471,14 +486,14 @@ def _render_dimensions(
     offset_y: float,
     margin: float,
     theme: Theme,
+    y_flip=None,
 ) -> None:
-
-    dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"})
+    yf = y_flip if y_flip is not None else (lambda y: y)
+    dims = place_dimensions_on_rails(ast, offset_x, offset_y, margin=margin, include_features={"profile", "pocket"}, y_flip=yf)
     for dim in dims:
         render_placed_dimension(group, dim, theme.dimension_stroke)
 
-
-    _render_gap_dimensions(group, ast, offset_x, offset_y, theme)
+    _render_gap_dimensions(group, ast, offset_x, offset_y, theme, y_flip=yf)
 
 
 def _render_gap_dimensions(
@@ -487,7 +502,9 @@ def _render_gap_dimensions(
     offset_x: float,
     offset_y: float,
     theme: Theme,
+    y_flip=None,
 ) -> None:
+    yf = y_flip if y_flip is not None else (lambda y: y)
 
     profile_items = [
         item for item in ast.items
@@ -519,15 +536,16 @@ def _render_gap_dimensions(
 
     def get_bounds(item: Item) -> dict:
         cx, cy = item.placement.center_xy_mm
+        cy_t = yf(cy)
         w = float(item.geometry.data.get("w_mm", 0))
         h = float(item.geometry.data.get("h_mm", 0))
         return {
             "cx": cx,
-            "cy": cy,
+            "cy": cy_t,
             "x_min": cx - w / 2.0,
             "x_max": cx + w / 2.0,
-            "y_min": cy - h / 2.0,
-            "y_max": cy + h / 2.0,
+            "y_min": cy_t - h / 2.0,
+            "y_max": cy_t + h / 2.0,
             "w": w,
             "h": h,
         }

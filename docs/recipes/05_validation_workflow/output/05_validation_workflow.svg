@@ -26,18 +26,18 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes">
-    <circle cx="180.0" cy="180.0" r="3.0" />
-    <line x1="177.0" y1="180.0" x2="183.0" y2="180.0" />
-    <line x1="180.0" y1="177.0" x2="180.0" y2="183.0" />
-    <circle cx="300.0" cy="180.0" r="3.0" />
-    <line x1="297.0" y1="180.0" x2="303.0" y2="180.0" />
-    <line x1="300.0" y1="177.0" x2="300.0" y2="183.0" />
+    <circle cx="180.0" cy="250.0" r="3.0" />
+    <line x1="177.0" y1="250.0" x2="183.0" y2="250.0" />
+    <line x1="180.0" y1="247.0" x2="180.0" y2="253.0" />
+    <circle cx="300.0" cy="250.0" r="3.0" />
+    <line x1="297.0" y1="250.0" x2="303.0" y2="250.0" />
+    <line x1="300.0" y1="247.0" x2="300.0" y2="253.0" />
   </g>
   <g id="LABELS" class="labels">
     <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">outer</text>
     <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">recess</text>
-    <text x="180.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:1</text>
-    <text x="300.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:2</text>
+    <text x="180.0" y="250.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:1</text>
+    <text x="300.0" y="250.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:2</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -65,8 +65,8 @@
     <polygon points="380.0,150.0 377.0,153.0 383.0,153.0" fill="#5ab9ea" />
     <polygon points="380.0,280.0 377.0,277.0 383.0,277.0" fill="#5ab9ea" />
     <text x="385.0" y="215.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 385.0 215.0)">130.0mm</text>
-    <line x1="180.0" y1="180.0" x2="180.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="300.0" y1="180.0" x2="300.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="180.0" y1="250.0" x2="180.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="300.0" y1="250.0" x2="300.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="180.0" y1="80.0" x2="300.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="180.0,80.0 183.0,77.0 183.0,83.0" fill="#5ab9ea" />
     <polygon points="300.0,80.0 297.0,77.0 297.0,83.0" fill="#5ab9ea" />

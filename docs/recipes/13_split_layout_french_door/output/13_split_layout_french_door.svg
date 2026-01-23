@@ -22,34 +22,34 @@
     <rect x="140.0" y="140.0" width="500.0" height="700.0" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="170.0" y="170.0" width="190.0" height="290.0" />
-    <rect x="420.0" y="170.0" width="190.0" height="290.0" />
     <rect x="170.0" y="520.0" width="190.0" height="290.0" />
     <rect x="420.0" y="520.0" width="190.0" height="290.0" />
+    <rect x="170.0" y="170.0" width="190.0" height="290.0" />
+    <rect x="420.0" y="170.0" width="190.0" height="290.0" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
     <text x="390.0" y="490.0" class="part-label" text-anchor="middle" dominant-baseline="middle">door</text>
-    <text x="265.0" y="315.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
-    <text x="515.0" y="315.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
     <text x="265.0" y="665.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
     <text x="515.0" y="665.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
+    <text x="265.0" y="315.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
+    <text x="515.0" y="315.0" class="part-label" text-anchor="middle" dominant-baseline="middle">pane</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="170.0" y1="170.0" x2="170.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="360.0" y1="170.0" x2="360.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="170.0" y1="520.0" x2="170.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="360.0" y1="520.0" x2="360.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="170.0" y1="120.0" x2="360.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="170.0,120.0 173.0,117.0 173.0,123.0" fill="#5ab9ea" />
     <polygon points="360.0,120.0 357.0,117.0 357.0,123.0" fill="#5ab9ea" />
     <text x="265.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">190.0mm</text>
-    <line x1="360.0" y1="170.0" x2="660.0" y2="170.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="360.0" y1="460.0" x2="660.0" y2="460.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="660.0" y1="170.0" x2="660.0" y2="460.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="660.0,170.0 657.0,173.0 663.0,173.0" fill="#5ab9ea" />
-    <polygon points="660.0,460.0 657.0,457.0 663.0,457.0" fill="#5ab9ea" />
-    <text x="665.0" y="315.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 315.0)">290.0mm</text>
+    <line x1="360.0" y1="520.0" x2="660.0" y2="520.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="360.0" y1="810.0" x2="660.0" y2="810.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="660.0" y1="520.0" x2="660.0" y2="810.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="660.0,520.0 657.0,523.0 663.0,523.0" fill="#5ab9ea" />
+    <polygon points="660.0,810.0 657.0,807.0 663.0,807.0" fill="#5ab9ea" />
+    <text x="665.0" y="665.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 665.0 665.0)">290.0mm</text>
     <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="640.0" y1="140.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="140.0" y1="100.0" x2="640.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />

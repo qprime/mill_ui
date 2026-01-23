@@ -19,123 +19,123 @@
     <rect x="140" y="140" width="1245.0" height="1232.0" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <rect x="150.0" y="150.0" width="457.0" height="597.0" />
-    <rect x="613.0" y="150.0" width="457.0" height="597.0" />
-    <rect x="150.0" y="753.0" width="457.0" height="597.0" />
-    <rect x="613.0" y="753.0" width="457.0" height="597.0" />
-    <rect x="1076.0" y="150.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="308.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="466.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="624.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="782.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="940.0" width="254.0" height="152.0" />
-    <rect x="1076.0" y="1098.0" width="254.0" height="152.0" />
+    <rect x="150.0" y="765.0" width="457.0" height="597.0" />
+    <rect x="613.0" y="765.0" width="457.0" height="597.0" />
+    <rect x="150.0" y="162.0" width="457.0" height="597.0" />
+    <rect x="613.0" y="162.0" width="457.0" height="597.0" />
+    <rect x="1076.0" y="1210.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="1052.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="894.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="736.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="578.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="420.0" width="254.0" height="152.0" />
+    <rect x="1076.0" y="262.0" width="254.0" height="152.0" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="207.0" y="207.0" width="343.0" height="483.0" />
-    <rect x="670.0" y="207.0" width="343.0" height="483.0" />
-    <rect x="207.0" y="810.0" width="343.0" height="483.0" />
-    <rect x="670.0" y="810.0" width="343.0" height="483.0" />
-    <rect x="1114.0" y="188.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="346.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="504.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="662.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="820.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="978.0" width="178.0" height="76.0" />
-    <rect x="1114.0" y="1136.0" width="178.0" height="76.0" />
+    <rect x="207.0" y="822.0" width="343.0" height="483.0" />
+    <rect x="670.0" y="822.0" width="343.0" height="483.0" />
+    <rect x="207.0" y="219.0" width="343.0" height="483.0" />
+    <rect x="670.0" y="219.0" width="343.0" height="483.0" />
+    <rect x="1114.0" y="1248.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="1090.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="932.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="774.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="616.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="458.0" width="178.0" height="76.0" />
+    <rect x="1114.0" y="300.0" width="178.0" height="76.0" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
-    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1_panel</text>
-    <text x="378.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1</text>
-    <text x="841.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2_panel</text>
-    <text x="841.5" y="448.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2</text>
-    <text x="378.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3_panel</text>
-    <text x="378.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3</text>
-    <text x="841.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4_panel</text>
-    <text x="841.5" y="1051.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4</text>
-    <text x="1203.0" y="226.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1_panel</text>
-    <text x="1203.0" y="226.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1</text>
-    <text x="1203.0" y="384.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2_panel</text>
-    <text x="1203.0" y="384.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2</text>
-    <text x="1203.0" y="542.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3_panel</text>
-    <text x="1203.0" y="542.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3</text>
-    <text x="1203.0" y="700.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4_panel</text>
-    <text x="1203.0" y="700.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4</text>
-    <text x="1203.0" y="858.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5_panel</text>
-    <text x="1203.0" y="858.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5</text>
-    <text x="1203.0" y="1016.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6_panel</text>
-    <text x="1203.0" y="1016.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6</text>
-    <text x="1203.0" y="1174.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7_panel</text>
-    <text x="1203.0" y="1174.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7</text>
+    <text x="378.5" y="1063.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1_panel</text>
+    <text x="378.5" y="1063.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door1</text>
+    <text x="841.5" y="1063.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2_panel</text>
+    <text x="841.5" y="1063.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door2</text>
+    <text x="378.5" y="460.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3_panel</text>
+    <text x="378.5" y="460.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door3</text>
+    <text x="841.5" y="460.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4_panel</text>
+    <text x="841.5" y="460.5" class="part-label" text-anchor="middle" dominant-baseline="middle">door4</text>
+    <text x="1203.0" y="1286.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1_panel</text>
+    <text x="1203.0" y="1286.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer1</text>
+    <text x="1203.0" y="1128.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2_panel</text>
+    <text x="1203.0" y="1128.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer2</text>
+    <text x="1203.0" y="970.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3_panel</text>
+    <text x="1203.0" y="970.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer3</text>
+    <text x="1203.0" y="812.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4_panel</text>
+    <text x="1203.0" y="812.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer4</text>
+    <text x="1203.0" y="654.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5_panel</text>
+    <text x="1203.0" y="654.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer5</text>
+    <text x="1203.0" y="496.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6_panel</text>
+    <text x="1203.0" y="496.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer6</text>
+    <text x="1203.0" y="338.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7_panel</text>
+    <text x="1203.0" y="338.0" class="part-label" text-anchor="middle" dominant-baseline="middle">drawer7</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="207.0" y1="207.0" x2="207.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="550.0" y1="207.0" x2="550.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="207.0" y1="822.0" x2="207.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="550.0" y1="822.0" x2="550.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="207.0" y1="120.0" x2="550.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="207.0,120.0 210.0,117.0 210.0,123.0" fill="#5ab9ea" />
     <polygon points="550.0,120.0 547.0,117.0 547.0,123.0" fill="#5ab9ea" />
     <text x="378.5" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">343.0mm</text>
-    <line x1="550.0" y1="207.0" x2="1405.0" y2="207.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="550.0" y1="690.0" x2="1405.0" y2="690.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1405.0" y1="207.0" x2="1405.0" y2="690.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1405.0,207.0 1402.0,210.0 1408.0,210.0" fill="#5ab9ea" />
-    <polygon points="1405.0,690.0 1402.0,687.0 1408.0,687.0" fill="#5ab9ea" />
-    <text x="1410.0" y="448.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1410.0 448.5)">483.0mm</text>
-    <line x1="1114.0" y1="188.0" x2="1114.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1292.0" y1="188.0" x2="1292.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="550.0" y1="822.0" x2="1405.0" y2="822.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="550.0" y1="1305.0" x2="1405.0" y2="1305.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1405.0" y1="822.0" x2="1405.0" y2="1305.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1405.0,822.0 1402.0,825.0 1408.0,825.0" fill="#5ab9ea" />
+    <polygon points="1405.0,1305.0 1402.0,1302.0 1408.0,1302.0" fill="#5ab9ea" />
+    <text x="1410.0" y="1063.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1410.0 1063.5)">483.0mm</text>
+    <line x1="1114.0" y1="1248.0" x2="1114.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1292.0" y1="1248.0" x2="1292.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="1114.0" y1="120.0" x2="1292.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="1114.0,120.0 1117.0,117.0 1117.0,123.0" fill="#5ab9ea" />
     <polygon points="1292.0,120.0 1289.0,117.0 1289.0,123.0" fill="#5ab9ea" />
     <text x="1203.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">178.0mm</text>
-    <line x1="1292.0" y1="188.0" x2="1425.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1292.0" y1="264.0" x2="1425.0" y2="264.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1425.0" y1="188.0" x2="1425.0" y2="264.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1425.0,188.0 1422.0,191.0 1428.0,191.0" fill="#5ab9ea" />
-    <polygon points="1425.0,264.0 1422.0,261.0 1428.0,261.0" fill="#5ab9ea" />
-    <text x="1430.0" y="226.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1430.0 226.0)">76.0mm</text>
-    <line x1="150.0" y1="150.0" x2="150.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="607.0" y1="150.0" x2="607.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1292.0" y1="1248.0" x2="1425.0" y2="1248.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1292.0" y1="1324.0" x2="1425.0" y2="1324.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1425.0" y1="1248.0" x2="1425.0" y2="1324.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1425.0,1248.0 1422.0,1251.0 1428.0,1251.0" fill="#5ab9ea" />
+    <polygon points="1425.0,1324.0 1422.0,1321.0 1428.0,1321.0" fill="#5ab9ea" />
+    <text x="1430.0" y="1286.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1430.0 1286.0)">76.0mm</text>
+    <line x1="150.0" y1="765.0" x2="150.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="607.0" y1="765.0" x2="607.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="150.0" y1="100.0" x2="607.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="150.0,100.0 153.0,97.0 153.0,103.0" fill="#5ab9ea" />
     <polygon points="607.0,100.0 604.0,97.0 604.0,103.0" fill="#5ab9ea" />
     <text x="378.5" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">457.0mm</text>
-    <line x1="607.0" y1="150.0" x2="1445.0" y2="150.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="607.0" y1="747.0" x2="1445.0" y2="747.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1445.0" y1="150.0" x2="1445.0" y2="747.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1445.0,150.0 1442.0,153.0 1448.0,153.0" fill="#5ab9ea" />
-    <polygon points="1445.0,747.0 1442.0,744.0 1448.0,744.0" fill="#5ab9ea" />
-    <text x="1450.0" y="448.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1450.0 448.5)">597.0mm</text>
-    <line x1="1076.0" y1="150.0" x2="1076.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1330.0" y1="150.0" x2="1330.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="607.0" y1="765.0" x2="1445.0" y2="765.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="607.0" y1="1362.0" x2="1445.0" y2="1362.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1445.0" y1="765.0" x2="1445.0" y2="1362.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1445.0,765.0 1442.0,768.0 1448.0,768.0" fill="#5ab9ea" />
+    <polygon points="1445.0,1362.0 1442.0,1359.0 1448.0,1359.0" fill="#5ab9ea" />
+    <text x="1450.0" y="1063.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1450.0 1063.5)">597.0mm</text>
+    <line x1="1076.0" y1="1210.0" x2="1076.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1330.0" y1="1210.0" x2="1330.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="1076.0" y1="100.0" x2="1330.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="1076.0,100.0 1079.0,97.0 1079.0,103.0" fill="#5ab9ea" />
     <polygon points="1330.0,100.0 1327.0,97.0 1327.0,103.0" fill="#5ab9ea" />
     <text x="1203.0" y="95.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">254.0mm</text>
-    <line x1="1330.0" y1="150.0" x2="1465.0" y2="150.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1330.0" y1="302.0" x2="1465.0" y2="302.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1465.0" y1="150.0" x2="1465.0" y2="302.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1465.0,150.0 1462.0,153.0 1468.0,153.0" fill="#5ab9ea" />
-    <polygon points="1465.0,302.0 1462.0,299.0 1468.0,299.0" fill="#5ab9ea" />
-    <text x="1470.0" y="226.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1470.0 226.0)">152.0mm</text>
-    <line x1="150.0" y1="448.5" x2="207.0" y2="448.5" stroke="#ff9500" stroke-width="1" />
-    <path d="M 150.0,448.5 L 153.0,445.5 L 153.0,451.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 207.0,448.5 L 204.0,445.5 L 204.0,451.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="178.5" y="444.5" class="gap-text" text-anchor="middle">57mm</text>
-    <line x1="378.5" y1="150.0" x2="378.5" y2="207.0" stroke="#ff9500" stroke-width="1" />
-    <path d="M 378.5,150.0 L 375.5,153.0 L 381.5,153.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 378.5,207.0 L 375.5,204.0 L 381.5,204.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="372.5" y="178.5" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 372.5 178.5)">57mm</text>
-    <line x1="1076.0" y1="226.0" x2="1114.0" y2="226.0" stroke="#ff9500" stroke-width="1" />
-    <path d="M 1076.0,226.0 L 1079.0,223.0 L 1079.0,229.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 1114.0,226.0 L 1111.0,223.0 L 1111.0,229.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="1095.0" y="222.0" class="gap-text" text-anchor="middle">38mm</text>
-    <line x1="1203.0" y1="150.0" x2="1203.0" y2="188.0" stroke="#ff9500" stroke-width="1" />
-    <path d="M 1203.0,150.0 L 1200.0,153.0 L 1206.0,153.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 1203.0,188.0 L 1200.0,185.0 L 1206.0,185.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="1197.0" y="169.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1197.0 169.0)">38mm</text>
+    <line x1="1330.0" y1="1210.0" x2="1465.0" y2="1210.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1330.0" y1="1362.0" x2="1465.0" y2="1362.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1465.0" y1="1210.0" x2="1465.0" y2="1362.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1465.0,1210.0 1462.0,1213.0 1468.0,1213.0" fill="#5ab9ea" />
+    <polygon points="1465.0,1362.0 1462.0,1359.0 1468.0,1359.0" fill="#5ab9ea" />
+    <text x="1470.0" y="1286.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1470.0 1286.0)">152.0mm</text>
+    <line x1="150.0" y1="1063.5" x2="207.0" y2="1063.5" stroke="#ff9500" stroke-width="1" />
+    <path d="M 150.0,1063.5 L 153.0,1060.5 L 153.0,1066.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 207.0,1063.5 L 204.0,1060.5 L 204.0,1066.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="178.5" y="1059.5" class="gap-text" text-anchor="middle">57mm</text>
+    <line x1="378.5" y1="765.0" x2="378.5" y2="822.0" stroke="#ff9500" stroke-width="1" />
+    <path d="M 378.5,765.0 L 375.5,768.0 L 381.5,768.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 378.5,822.0 L 375.5,819.0 L 381.5,819.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="372.5" y="793.5" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 372.5 793.5)">57mm</text>
+    <line x1="1076.0" y1="1286.0" x2="1114.0" y2="1286.0" stroke="#ff9500" stroke-width="1" />
+    <path d="M 1076.0,1286.0 L 1079.0,1283.0 L 1079.0,1289.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 1114.0,1286.0 L 1111.0,1283.0 L 1111.0,1289.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="1095.0" y="1282.0" class="gap-text" text-anchor="middle">38mm</text>
+    <line x1="1203.0" y1="1210.0" x2="1203.0" y2="1248.0" stroke="#ff9500" stroke-width="1" />
+    <path d="M 1203.0,1210.0 L 1200.0,1213.0 L 1206.0,1213.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 1203.0,1248.0 L 1200.0,1245.0 L 1206.0,1245.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="1197.0" y="1229.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1197.0 1229.0)">38mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="1392.0" class="notes" font-weight="bold">NOTES</text>

@@ -55,10 +55,11 @@ def collect_dimension_requests(
     *,
     include_features: set[str] | None = None,
     deduplicate: bool = True,
+    y_flip=None,
 ) -> list[DimensionRequest]:
     include_features = include_features or {"profile"}
     return _collect_dimension_requests(
-        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
+        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate, y_flip=y_flip
     )
 
 
@@ -131,9 +132,10 @@ def place_dimensions_on_rails(
     margin: float = 100.0,
     include_features: set[str] | None = None,
     deduplicate: bool = True,
+    y_flip=None,
 ) -> list[PlacedDimension]:
     requests = collect_dimension_requests(
-        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate
+        ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate, y_flip=y_flip
     )
     return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin)
 
@@ -210,7 +212,9 @@ def _collect_dimension_requests(
     *,
     include_features: set[str],
     deduplicate: bool = True,
+    y_flip=None,
 ) -> list[DimensionRequest]:
+    yf = y_flip if y_flip is not None else (lambda y: y)
     requests: list[DimensionRequest] = []
 
 
@@ -232,7 +236,7 @@ def _collect_dimension_requests(
     dimensioned_sizes: set[tuple[str, str, int, int]] = set()
 
     for item in shape_items:
-        bounds = _item_bounds_in_svg(item, offset_x, offset_y)
+        bounds = _item_bounds_in_svg(item, offset_x, offset_y, y_flip=yf)
         if bounds is None:
             continue
 
@@ -284,7 +288,7 @@ def _collect_dimension_requests(
                     text=_fmt_mm(h),
                 )
             )
-            requests.extend(_polygon_edge_requests(item, offset_x, offset_y, deduplicate=deduplicate))
+            requests.extend(_polygon_edge_requests(item, offset_x, offset_y, deduplicate=deduplicate, y_flip=yf))
         elif item.type == "Circle":
             diameter = w
             requests.append(
@@ -298,13 +302,14 @@ def _collect_dimension_requests(
             )
 
 
-    hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y)
+    hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y, y_flip=yf)
     requests.extend(_hole_spacing_requests(hole_centers, deduplicate=deduplicate))
 
     return requests
 
 
-def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float) -> list[tuple[float, float]]:
+def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float, y_flip=None) -> list[tuple[float, float]]:
+    yf = y_flip if y_flip is not None else (lambda y: y)
     holes: list[tuple[float, float]] = []
     for item in ast.items:
         if item.kind != "shape" or item.feature is None or item.feature.type != "hole":
@@ -312,7 +317,7 @@ def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float) -> li
         if item.placement is None:
             continue
         cx, cy = item.placement.center_xy_mm
-        holes.append((offset_x + float(cx), offset_y + float(cy)))
+        holes.append((offset_x + float(cx), offset_y + yf(float(cy))))
     return holes
 
 
@@ -393,8 +398,9 @@ def _hole_spacing_requests(
     return requests
 
 
-def _item_bounds_in_svg(item: Item, offset_x: float, offset_y: float) -> Bounds2D | None:
-    bounds = _item_bounds(item)
+def _item_bounds_in_svg(item: Item, offset_x: float, offset_y: float, y_flip=None) -> Bounds2D | None:
+    yf = y_flip if y_flip is not None else (lambda y: y)
+    bounds = _item_bounds(item, y_flip=yf)
     if bounds is None:
         return None
     return Bounds2D(
@@ -405,17 +411,21 @@ def _item_bounds_in_svg(item: Item, offset_x: float, offset_y: float) -> Bounds2
     )
 
 
-def _item_bounds(item: Item) -> Bounds2D | None:
+def _item_bounds(item: Item, y_flip=None) -> Bounds2D | None:
     if item.geometry is None or item.placement is None:
         return None
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
     cx, cy = item.placement.center_xy_mm
+    cy = yf(cy)
     shape_type = item.type
 
     if shape_type in ("Rect", "RoundedRect"):
         w = float(item.geometry.data.get("w_mm", 0.0))
         h = float(item.geometry.data.get("h_mm", 0.0))
-        return Bounds2D(x_min=cx - w / 2.0, x_max=cx + w / 2.0, y_min=cy - h / 2.0, y_max=cy + h / 2.0)
+        y_min = cy - h / 2.0
+        y_max = cy + h / 2.0
+        return Bounds2D(x_min=cx - w / 2.0, x_max=cx + w / 2.0, y_min=min(y_min, y_max), y_max=max(y_min, y_max))
 
     if shape_type == "Circle":
         diameter = item.geometry.data.get("diameter_mm")
@@ -428,7 +438,7 @@ def _item_bounds(item: Item) -> Bounds2D | None:
         if not points:
             return None
         xs = [p[0] for p in points]
-        ys = [p[1] for p in points]
+        ys = [yf(p[1]) for p in points]
         return Bounds2D(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
 
     return None
@@ -440,10 +450,12 @@ def _polygon_edge_requests(
     offset_y: float,
     *,
     deduplicate: bool = True,
+    y_flip=None,
 ) -> list[DimensionRequest]:
     if item.geometry is None:
         return []
 
+    yf = y_flip if y_flip is not None else (lambda y: y)
     points = item.geometry.data.get("points", [])
     if len(points) < 3:
         return []
@@ -451,7 +463,7 @@ def _polygon_edge_requests(
     requests: list[DimensionRequest] = []
     seen_lengths: set[int] = set()
 
-    bounds = _item_bounds(item)
+    bounds = _item_bounds(item, y_flip=yf)
     if bounds is None:
         return []
 
@@ -462,11 +474,13 @@ def _polygon_edge_requests(
         p1 = points[i]
         p2 = points[(i + 1) % len(points)]
 
-        x1, y1 = float(p1[0]), float(p1[1])
-        x2, y2 = float(p2[0]), float(p2[1])
+        x1, y1_raw = float(p1[0]), float(p1[1])
+        x2, y2_raw = float(p2[0]), float(p2[1])
+        y1 = yf(y1_raw)
+        y2 = yf(y2_raw)
 
         dx = abs(x2 - x1)
-        dy = abs(y2 - y1)
+        dy = abs(y2_raw - y1_raw)
 
         is_horizontal = dy < 0.1 and dx > 0.1
         is_vertical = dx < 0.1 and dy > 0.1

@@ -26,26 +26,26 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes">
-    <circle cx="190.0" cy="180.0" r="3.0" />
-    <line x1="187.0" y1="180.0" x2="193.0" y2="180.0" />
-    <line x1="190.0" y1="177.0" x2="190.0" y2="183.0" />
-    <circle cx="310.0" cy="180.0" r="3.0" />
-    <line x1="307.0" y1="180.0" x2="313.0" y2="180.0" />
-    <line x1="310.0" y1="177.0" x2="310.0" y2="183.0" />
     <circle cx="190.0" cy="260.0" r="3.0" />
     <line x1="187.0" y1="260.0" x2="193.0" y2="260.0" />
     <line x1="190.0" y1="257.0" x2="190.0" y2="263.0" />
     <circle cx="310.0" cy="260.0" r="3.0" />
     <line x1="307.0" y1="260.0" x2="313.0" y2="260.0" />
     <line x1="310.0" y1="257.0" x2="310.0" y2="263.0" />
+    <circle cx="190.0" cy="180.0" r="3.0" />
+    <line x1="187.0" y1="180.0" x2="193.0" y2="180.0" />
+    <line x1="190.0" y1="177.0" x2="190.0" y2="183.0" />
+    <circle cx="310.0" cy="180.0" r="3.0" />
+    <line x1="307.0" y1="180.0" x2="313.0" y2="180.0" />
+    <line x1="310.0" y1="177.0" x2="310.0" y2="183.0" />
   </g>
   <g id="LABELS" class="labels">
     <text x="250.0" y="220.0" class="part-label" text-anchor="middle" dominant-baseline="middle">plate:outer</text>
     <text x="250.0" y="220.0" class="part-label" text-anchor="middle" dominant-baseline="middle">plate:recess</text>
-    <text x="190.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:1</text>
-    <text x="310.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:2</text>
-    <text x="190.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:3</text>
-    <text x="310.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:4</text>
+    <text x="190.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:1</text>
+    <text x="310.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:2</text>
+    <text x="190.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:3</text>
+    <text x="310.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:4</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">

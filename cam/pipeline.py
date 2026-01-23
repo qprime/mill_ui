@@ -84,6 +84,7 @@ def run_pipeline(
     generate_stl: bool = True,
     stl_quality: str = "medium",
     include_floating_parts: bool = True,
+    y_origin: str = "front",
 ) -> PipelineResult:
     if tool_db is None:
         tool_db = DEFAULT_TOOL_DB
@@ -151,6 +152,8 @@ def run_pipeline(
             pass_dict["moves"],
             safe_z=setup.safe_z,
             machine=machine,
+            sheet_height=ast.sheet.height_mm,
+            y_origin=y_origin,
         )
 
         tool_diameter = setup.tool.diameter
@@ -172,7 +175,7 @@ def run_pipeline(
         svg_start = time.perf_counter()
         try:
             from export.blueprint_svg import render_blueprint_svg
-            svg_string = render_blueprint_svg(ast, intents, theme=svg_theme)
+            svg_string = render_blueprint_svg(ast, intents, theme=svg_theme, y_origin=y_origin)
         except Exception as e:
             warnings.append(f"SVG generation failed: {e}")
         timing.svg_ms = (time.perf_counter() - svg_start) * 1000

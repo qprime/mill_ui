@@ -1,13 +1,13 @@
 {
   "timing": {
     "ir_ms": 0.03,
-    "hints_ms": 0.0,
+    "hints_ms": 0.01,
     "plan_ms": 1.4,
-    "gcode_ms": 3.03,
-    "svg_ms": 0.23,
+    "gcode_ms": 2.87,
+    "svg_ms": 0.21,
     "stl_ms": 0.0,
-    "total_ms": 4.56,
-    "parse_ms": 0.1
+    "total_ms": 4.43,
+    "parse_ms": 0.12
   },
   "complexity": {
     "total_moves": 1243,

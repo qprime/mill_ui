@@ -71,55 +71,7 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
-  <g id="LABELS" class="labels">
-    <text x="340.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
-    <text x="534.3341501627344" y="145.66584983726554" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_000</text>
-    <text x="516.7479885008047" y="163.25201149919525" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_001</text>
-    <text x="499.0827262367256" y="180.91727376327438" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_002</text>
-    <text x="481.4099755254349" y="198.59002447456504" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_003</text>
-    <text x="463.7349442620976" y="216.2650557379024" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_004</text>
-    <text x="446.05891999497516" y="233.94108000502501" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_005</text>
-    <text x="428.3823745563283" y="251.61762544367184" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_006</text>
-    <text x="410.7055217247859" y="269.29447827521426" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_007</text>
-    <text x="393.0284724230106" y="286.97152757698905" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_008</text>
-    <text x="375.3512899352146" y="304.6487100647855" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_009</text>
-    <text x="357.6740130018815" y="322.3259869981184" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_010</text>
-    <text x="340.0000000000002" y="340.0000000000002" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_011</text>
-    <text x="322.32598699811865" y="357.6740130018818" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_012</text>
-    <text x="304.6487100647855" y="375.35128993521465" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_013</text>
-    <text x="286.9715275769891" y="393.0284724230106" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_014</text>
-    <text x="269.2944782752141" y="410.7055217247857" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_015</text>
-    <text x="251.6176254436717" y="428.3823745563284" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_016</text>
-    <text x="233.94108000502484" y="446.0589199949751" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_017</text>
-    <text x="216.2650557379024" y="463.7349442620976" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_018</text>
-    <text x="198.59002447456513" y="481.409975525435" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_019</text>
-    <text x="180.9172737632744" y="499.0827262367257" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_020</text>
-    <text x="163.25201149919525" y="516.7479885008047" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_021</text>
-    <text x="145.6658498372656" y="534.3341501627344" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_1_022</text>
-    <text x="145.66584983726554" y="145.66584983726554" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_000</text>
-    <text x="163.25201149919528" y="163.25201149919528" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_001</text>
-    <text x="180.9172737632744" y="180.9172737632744" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_002</text>
-    <text x="198.5900244745651" y="198.59002447456504" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_003</text>
-    <text x="216.2650557379024" y="216.2650557379024" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_004</text>
-    <text x="233.9410800050249" y="233.94108000502487" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_005</text>
-    <text x="251.61762544367173" y="251.61762544367167" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_006</text>
-    <text x="269.29447827521426" y="269.29447827521403" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_007</text>
-    <text x="286.9715275769891" y="286.9715275769894" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_008</text>
-    <text x="304.6487100647855" y="304.6487100647854" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_009</text>
-    <text x="322.32598699811854" y="322.3259869981184" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_010</text>
-    <text x="339.9999999999998" y="340.00000000000034" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_011</text>
-    <text x="357.6740130018818" y="357.67401300188135" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_012</text>
-    <text x="375.3512899352146" y="375.35128993521454" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_013</text>
-    <text x="393.02847242301084" y="393.0284724230107" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_014</text>
-    <text x="410.7055217247857" y="410.70552172478597" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_015</text>
-    <text x="428.3823745563282" y="428.38237455632844" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_016</text>
-    <text x="446.0589199949751" y="446.0589199949751" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_017</text>
-    <text x="463.7349442620976" y="463.73494426209754" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_018</text>
-    <text x="481.40997552543496" y="481.40997552543496" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_019</text>
-    <text x="499.08272623672565" y="499.08272623672565" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_020</text>
-    <text x="516.7479885008047" y="516.7479885008047" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_021</text>
-    <text x="534.3341501627344" y="534.3341501627344" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_lines_2_022</text>
-  </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="526.0803025278549" y1="140.0" x2="526.0803025278549" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -357,54 +309,6 @@
     <text x="20" y="584.0" class="notes">Features: 1 profile, 46 pockets</text>
     <text x="20" y="596.0" class="notes">Depths:</text>
     <text x="30" y="608.0" class="notes">• pocket: 3.0</text>
-    <text x="20" y="620.0" class="notes">Parts (47):</text>
-    <text x="30" y="632.0" class="notes">• generated_lines_1_000</text>
-    <text x="30" y="644.0" class="notes">• generated_lines_1_001</text>
-    <text x="30" y="656.0" class="notes">• generated_lines_1_002</text>
-    <text x="30" y="668.0" class="notes">• generated_lines_1_003</text>
-    <text x="30" y="680.0" class="notes">• generated_lines_1_004</text>
-    <text x="30" y="692.0" class="notes">• generated_lines_1_005</text>
-    <text x="30" y="704.0" class="notes">• generated_lines_1_006</text>
-    <text x="30" y="716.0" class="notes">• generated_lines_1_007</text>
-    <text x="30" y="728.0" class="notes">• generated_lines_1_008</text>
-    <text x="30" y="740.0" class="notes">• generated_lines_1_009</text>
-    <text x="30" y="752.0" class="notes">• generated_lines_1_010</text>
-    <text x="30" y="764.0" class="notes">• generated_lines_1_011</text>
-    <text x="30" y="776.0" class="notes">• generated_lines_1_012</text>
-    <text x="30" y="788.0" class="notes">• generated_lines_1_013</text>
-    <text x="30" y="800.0" class="notes">• generated_lines_1_014</text>
-    <text x="30" y="812.0" class="notes">• generated_lines_1_015</text>
-    <text x="30" y="824.0" class="notes">• generated_lines_1_016</text>
-    <text x="30" y="836.0" class="notes">• generated_lines_1_017</text>
-    <text x="30" y="848.0" class="notes">• generated_lines_1_018</text>
-    <text x="30" y="860.0" class="notes">• generated_lines_1_019</text>
-    <text x="30" y="872.0" class="notes">• generated_lines_1_020</text>
-    <text x="30" y="884.0" class="notes">• generated_lines_1_021</text>
-    <text x="30" y="896.0" class="notes">• generated_lines_1_022</text>
-    <text x="30" y="908.0" class="notes">• generated_lines_2_000</text>
-    <text x="30" y="920.0" class="notes">• generated_lines_2_001</text>
-    <text x="30" y="932.0" class="notes">• generated_lines_2_002</text>
-    <text x="30" y="944.0" class="notes">• generated_lines_2_003</text>
-    <text x="30" y="956.0" class="notes">• generated_lines_2_004</text>
-    <text x="30" y="968.0" class="notes">• generated_lines_2_005</text>
-    <text x="30" y="980.0" class="notes">• generated_lines_2_006</text>
-    <text x="30" y="992.0" class="notes">• generated_lines_2_007</text>
-    <text x="30" y="1004.0" class="notes">• generated_lines_2_008</text>
-    <text x="30" y="1016.0" class="notes">• generated_lines_2_009</text>
-    <text x="30" y="1028.0" class="notes">• generated_lines_2_010</text>
-    <text x="30" y="1040.0" class="notes">• generated_lines_2_011</text>
-    <text x="30" y="1052.0" class="notes">• generated_lines_2_012</text>
-    <text x="30" y="1064.0" class="notes">• generated_lines_2_013</text>
-    <text x="30" y="1076.0" class="notes">• generated_lines_2_014</text>
-    <text x="30" y="1088.0" class="notes">• generated_lines_2_015</text>
-    <text x="30" y="1100.0" class="notes">• generated_lines_2_016</text>
-    <text x="30" y="1112.0" class="notes">• generated_lines_2_017</text>
-    <text x="30" y="1124.0" class="notes">• generated_lines_2_018</text>
-    <text x="30" y="1136.0" class="notes">• generated_lines_2_019</text>
-    <text x="30" y="1148.0" class="notes">• generated_lines_2_020</text>
-    <text x="30" y="1160.0" class="notes">• generated_lines_2_021</text>
-    <text x="30" y="1172.0" class="notes">• generated_lines_2_022</text>
-    <text x="30" y="1184.0" class="notes">• generated_profile_0</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

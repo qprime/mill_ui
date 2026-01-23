@@ -28,8 +28,6 @@
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
     <text x="390.0" y="540.0" class="part-label" text-anchor="middle" dominant-baseline="middle">arch_profile_0</text>
-    <text x="390.00000000000017" y="520.9169360237175" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_arch_raised_panel_1_border</text>
-    <text x="390.0" y="523.3278821886618" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_arch_raised_panel_1_field</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -77,10 +75,8 @@
     <text x="20" y="996.0" class="notes">Depths:</text>
     <text x="30" y="1008.0" class="notes">• bevel: 6.0</text>
     <text x="30" y="1020.0" class="notes">• pocket: 2.0</text>
-    <text x="20" y="1032.0" class="notes">Parts (3):</text>
+    <text x="20" y="1032.0" class="notes">Parts (1):</text>
     <text x="30" y="1044.0" class="notes">• arch_profile_0</text>
-    <text x="30" y="1056.0" class="notes">• generated_arch_raised_panel_1_border</text>
-    <text x="30" y="1068.0" class="notes">• generated_arch_raised_panel_1_field</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

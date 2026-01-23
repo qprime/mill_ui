@@ -37,33 +37,7 @@
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
-  <g id="LABELS" class="labels">
-    <text x="265.0" y="440.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
-    <text x="265.0" y="181.0769230769231" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_1</text>
-    <text x="265.0" y="181.0769230769231" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_2</text>
-    <text x="265.0" y="228.15384615384616" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_3</text>
-    <text x="265.0" y="228.15384615384616" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_4</text>
-    <text x="265.0" y="275.2307692307692" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_5</text>
-    <text x="265.0" y="275.2307692307692" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_6</text>
-    <text x="265.0" y="322.3076923076923" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_7</text>
-    <text x="265.0" y="322.3076923076923" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_8</text>
-    <text x="265.0" y="369.3846153846154" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_9</text>
-    <text x="265.0" y="369.3846153846154" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_10</text>
-    <text x="265.0" y="416.46153846153845" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_11</text>
-    <text x="265.0" y="416.46153846153845" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_12</text>
-    <text x="265.0" y="463.53846153846155" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_13</text>
-    <text x="265.0" y="463.53846153846155" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_14</text>
-    <text x="265.0" y="510.61538461538464" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_15</text>
-    <text x="265.0" y="510.61538461538464" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_16</text>
-    <text x="265.0" y="557.6923076923077" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_17</text>
-    <text x="265.0" y="557.6923076923077" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_18</text>
-    <text x="265.0" y="604.7692307692308" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_19</text>
-    <text x="265.0" y="604.7692307692308" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_20</text>
-    <text x="265.0" y="651.8461538461538" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_21</text>
-    <text x="265.0" y="651.8461538461538" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_22</text>
-    <text x="265.0" y="698.9230769230769" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_pocket_23</text>
-    <text x="265.0" y="698.9230769230769" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_24</text>
-  </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="140.0" y1="175.0769230769231" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -102,32 +76,6 @@
     <text x="20" y="796.0" class="notes">Depths:</text>
     <text x="30" y="808.0" class="notes">• chamfer: 2.0</text>
     <text x="30" y="820.0" class="notes">• pocket: 8.0</text>
-    <text x="20" y="832.0" class="notes">Parts (25):</text>
-    <text x="30" y="844.0" class="notes">• generated_chamfer_10</text>
-    <text x="30" y="856.0" class="notes">• generated_chamfer_12</text>
-    <text x="30" y="868.0" class="notes">• generated_chamfer_14</text>
-    <text x="30" y="880.0" class="notes">• generated_chamfer_16</text>
-    <text x="30" y="892.0" class="notes">• generated_chamfer_18</text>
-    <text x="30" y="904.0" class="notes">• generated_chamfer_2</text>
-    <text x="30" y="916.0" class="notes">• generated_chamfer_20</text>
-    <text x="30" y="928.0" class="notes">• generated_chamfer_22</text>
-    <text x="30" y="940.0" class="notes">• generated_chamfer_24</text>
-    <text x="30" y="952.0" class="notes">• generated_chamfer_4</text>
-    <text x="30" y="964.0" class="notes">• generated_chamfer_6</text>
-    <text x="30" y="976.0" class="notes">• generated_chamfer_8</text>
-    <text x="30" y="988.0" class="notes">• generated_pocket_1</text>
-    <text x="30" y="1000.0" class="notes">• generated_pocket_11</text>
-    <text x="30" y="1012.0" class="notes">• generated_pocket_13</text>
-    <text x="30" y="1024.0" class="notes">• generated_pocket_15</text>
-    <text x="30" y="1036.0" class="notes">• generated_pocket_17</text>
-    <text x="30" y="1048.0" class="notes">• generated_pocket_19</text>
-    <text x="30" y="1060.0" class="notes">• generated_pocket_21</text>
-    <text x="30" y="1072.0" class="notes">• generated_pocket_23</text>
-    <text x="30" y="1084.0" class="notes">• generated_pocket_3</text>
-    <text x="30" y="1096.0" class="notes">• generated_pocket_5</text>
-    <text x="30" y="1108.0" class="notes">• generated_pocket_7</text>
-    <text x="30" y="1120.0" class="notes">• generated_pocket_9</text>
-    <text x="30" y="1132.0" class="notes">• generated_profile_0</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

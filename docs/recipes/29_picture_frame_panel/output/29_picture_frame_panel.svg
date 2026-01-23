@@ -28,10 +28,7 @@
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
-    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_0</text>
-    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_profile_1</text>
     <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">subtract_pocket_2</text>
-    <text x="290.0" y="340.0" class="part-label" text-anchor="middle" dominant-baseline="middle">generated_chamfer_3</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -79,11 +76,8 @@
     <text x="20" y="596.0" class="notes">Depths:</text>
     <text x="30" y="608.0" class="notes">• chamfer: 3.0</text>
     <text x="30" y="620.0" class="notes">• pocket: 5.0</text>
-    <text x="20" y="632.0" class="notes">Parts (4):</text>
-    <text x="30" y="644.0" class="notes">• generated_chamfer_3</text>
-    <text x="30" y="656.0" class="notes">• generated_profile_0</text>
-    <text x="30" y="668.0" class="notes">• generated_profile_1</text>
-    <text x="30" y="680.0" class="notes">• subtract_pocket_2</text>
+    <text x="20" y="632.0" class="notes">Parts (1):</text>
+    <text x="30" y="644.0" class="notes">• subtract_pocket_2</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

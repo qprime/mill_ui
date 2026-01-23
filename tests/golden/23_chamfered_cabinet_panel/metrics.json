@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "23_chamfered_cabinet_panel",
-    "created_at": "2026-01-23T01:25:11.479042+00:00"
+    "created_at": "2026-01-23T02:10:13.412766+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -271,7 +271,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6426,
+    "extraction_time_ms": 0.6653,
     "mesh": {
       "vertex_count": 8,
       "face_count": 12,
@@ -308,7 +308,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.4611,
+    "extraction_time_ms": 3.5736,
     "summary": {
       "total_lines": 1261,
       "comment_lines": 11,
@@ -387,6 +387,12 @@
       "rapid_time_s": 216.3969,
       "feed_time_s": 9544.1472,
       "total_time_s": 9760.5441
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

@@ -91,6 +91,33 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
     for item in ast.items:
         assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm))
 
+    # Aggregate tab count assertion (sum tabs across all profiles)
+    total_tab_count = 0
+    tab_height_mm = None
+    tab_profiles = []
+    for item in ast.items:
+        if item.feature and item.feature.type == "profile":
+            if item.feature.tab_count and item.feature.tab_count > 0:
+                total_tab_count += item.feature.tab_count
+                if tab_height_mm is None:
+                    tab_height_mm = item.feature.tab_height_mm
+                item_id = item.shape_id or item.id or "unnamed"
+                tab_profiles.append(f"{item_id}({item.feature.tab_count})")
+
+    if total_tab_count > 0:
+        assertions.append(IntentAssertion(
+            id="TAB_COUNT",
+            source="ast:aggregate",
+            intent=f"Total {total_tab_count} tabs across {len(tab_profiles)} profiles",
+            expected={
+                "tab_count": total_tab_count,
+                "tab_height_mm": tab_height_mm,
+                "profiles": tab_profiles,
+            },
+            tolerance=0,
+            artifact="gcode",
+        ))
+
     return assertions
 
 
@@ -175,21 +202,8 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                 artifact="gcode",
             ))
 
-        # Tab count assertion (if tabs specified)
-        if feature.tab_count is not None and feature.tab_count > 0:
-            assertions.append(IntentAssertion(
-                id="TAB_COUNT",
-                source=source,
-                intent=f"Profile '{item_id}' has {feature.tab_count} tabs",
-                expected={
-                    "shape_id": item_id,
-                    "tab_count": feature.tab_count,
-                    "tab_height_mm": feature.tab_height_mm,
-                    "tab_width_mm": feature.tab_width_mm,
-                },
-                tolerance=0,  # Exact count match
-                artifact="gcode",
-            ))
+        # Note: Tab count assertions are aggregated at the AST level
+        # to compare total expected tabs vs total detected tabs in G-code
 
     elif feature.type == "pocket":
         # Pocket depth assertion
@@ -837,7 +851,12 @@ def _check_hole_position(
     stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """Check that a hole exists at the expected position in SVG HOLES layer."""
+    """Check that a hole exists at the expected position in SVG HOLES layer.
+
+    Note: SVG blueprint uses visualization coordinates with a 140mm margin
+    and Y-axis flip. This function converts SVG coordinates back to design
+    coordinates before comparing with expected values.
+    """
     if svg_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -850,7 +869,6 @@ def _check_hole_position(
             message="Cannot verify hole position: SVG metrics not provided",
         )
 
-    # Check HOLES layer has content
     layers = svg_metrics.get("layers", {})
     by_layer = layers.get("by_layer", {})
     holes_layer = by_layer.get("HOLES", {})
@@ -862,9 +880,17 @@ def _check_hole_position(
     expected_y = assertion.expected.get("center_y_mm")
     tol = assertion.tolerance
 
+    document = svg_metrics.get("document", {})
+    viewbox = document.get("viewbox", [0, 0, 0, 0])
+    viewbox_height = viewbox[3] if len(viewbox) > 3 else 0
+
+    svg_margin = 140.0
+
     actual: dict[str, Any] = {
         "holes_layer_circles": circle_count,
         "expected_center": (expected_x, expected_y),
+        "viewbox_height": viewbox_height,
+        "svg_margin": svg_margin,
     }
 
     if circle_count == 0:
@@ -879,8 +905,6 @@ def _check_hole_position(
             message="No circles found in HOLES layer",
         )
 
-    # Search for a circle at the expected position
-    # Filter to only circle elements
     circles = [e for e in elements if e.get("element_type") == "circle"]
 
     if not circles:
@@ -895,28 +919,35 @@ def _check_hole_position(
             message=f"HOLES layer has {circle_count} circle(s) but no geometry data available",
         )
 
-    # Find matching circle at expected position
     match_found = False
     best_match = None
     min_distance = float("inf")
+    best_design_coords = None
 
     for circle in circles:
         center = circle.get("center", [0, 0])
-        cx, cy = center[0], center[1]
+        svg_x, svg_y = center[0], center[1]
 
-        distance = ((cx - expected_x) ** 2 + (cy - expected_y) ** 2) ** 0.5
+        design_x = svg_x - svg_margin
+        design_y = viewbox_height - svg_y - svg_margin
+
+        distance = ((design_x - expected_x) ** 2 + (design_y - expected_y) ** 2) ** 0.5
 
         if distance < min_distance:
             min_distance = distance
             best_match = circle
+            best_design_coords = (design_x, design_y)
 
-        if abs(cx - expected_x) <= tol and abs(cy - expected_y) <= tol:
+        if abs(design_x - expected_x) <= tol and abs(design_y - expected_y) <= tol:
             match_found = True
             best_match = circle
+            best_design_coords = (design_x, design_y)
             break
 
     actual["closest_circle"] = best_match
     actual["closest_distance_mm"] = round(min_distance, 3)
+    if best_design_coords:
+        actual["closest_design_coords"] = [round(c, 2) for c in best_design_coords]
 
     if match_found:
         return AssertionResult(

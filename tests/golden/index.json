@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-01-23T01:25:11.695121+00:00",
+  "updated_at": "2026-01-23T02:10:13.616487+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
       "source_file": "docs/recipes/01_simple_profile/example.pml",
       "created_at": "2026-01-17T01:38:42.767863+00:00",
-      "updated_at": "2026-01-23T01:25:09.734797+00:00",
+      "updated_at": "2026-01-23T02:10:11.329278+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -15,7 +15,7 @@
       "recipe_name": "02_pocket_with_cleanup",
       "source_file": "docs/recipes/02_pocket_with_cleanup/example.pml",
       "created_at": "2026-01-17T01:38:42.772940+00:00",
-      "updated_at": "2026-01-23T01:25:09.740094+00:00",
+      "updated_at": "2026-01-23T02:10:11.334300+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -23,7 +23,7 @@
       "recipe_name": "03_shaker_door_template",
       "source_file": "docs/recipes/03_shaker_door_template/example.pml",
       "created_at": "2026-01-17T01:38:42.791976+00:00",
-      "updated_at": "2026-01-23T01:25:09.758995+00:00",
+      "updated_at": "2026-01-23T02:10:11.356679+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -31,7 +31,7 @@
       "recipe_name": "04_custom_template",
       "source_file": "docs/recipes/04_custom_template/example.pml",
       "created_at": "2026-01-17T01:38:42.849160+00:00",
-      "updated_at": "2026-01-23T01:25:09.815495+00:00",
+      "updated_at": "2026-01-23T02:10:11.423592+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -39,7 +39,7 @@
       "recipe_name": "05_validation_workflow",
       "source_file": "docs/recipes/05_validation_workflow/example.pml",
       "created_at": "2026-01-17T01:38:42.881843+00:00",
-      "updated_at": "2026-01-23T01:25:09.848031+00:00",
+      "updated_at": "2026-01-23T02:10:11.460668+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -47,7 +47,7 @@
       "recipe_name": "06_multiple_depths",
       "source_file": "docs/recipes/06_multiple_depths/example.pml",
       "created_at": "2026-01-17T01:38:42.937862+00:00",
-      "updated_at": "2026-01-23T01:25:09.902763+00:00",
+      "updated_at": "2026-01-23T02:10:11.523927+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -55,7 +55,7 @@
       "recipe_name": "07_json_generation",
       "source_file": "docs/recipes/07_json_generation/example.pml",
       "created_at": "2026-01-17T01:38:42.946257+00:00",
-      "updated_at": "2026-01-23T01:25:09.910774+00:00",
+      "updated_at": "2026-01-23T02:10:11.532838+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -63,7 +63,7 @@
       "recipe_name": "08_svg_visualization",
       "source_file": "docs/recipes/08_svg_visualization/example.pml",
       "created_at": "2026-01-17T01:38:42.954391+00:00",
-      "updated_at": "2026-01-23T01:25:09.918630+00:00",
+      "updated_at": "2026-01-23T02:10:11.541705+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -71,7 +71,7 @@
       "recipe_name": "09_config_tuning",
       "source_file": "docs/recipes/09_config_tuning/example.pml",
       "created_at": "2026-01-17T01:38:42.959191+00:00",
-      "updated_at": "2026-01-23T01:25:09.923227+00:00",
+      "updated_at": "2026-01-23T02:10:11.546607+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -79,7 +79,7 @@
       "recipe_name": "10_hole_patterns_grid",
       "source_file": "docs/recipes/10_hole_patterns_grid/example.pml",
       "created_at": "2026-01-17T01:38:43.356934+00:00",
-      "updated_at": "2026-01-23T01:25:10.354212+00:00",
+      "updated_at": "2026-01-23T02:10:12.071619+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -87,7 +87,7 @@
       "recipe_name": "11_keepout_islands",
       "source_file": "docs/recipes/11_keepout_islands/example.pml",
       "created_at": "2026-01-17T01:38:43.370344+00:00",
-      "updated_at": "2026-01-23T01:25:10.367675+00:00",
+      "updated_at": "2026-01-23T02:10:12.087398+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -95,7 +95,7 @@
       "recipe_name": "12_edge_treatment_intent",
       "source_file": "docs/recipes/12_edge_treatment_intent/example.pml",
       "created_at": "2026-01-17T01:38:43.378407+00:00",
-      "updated_at": "2026-01-23T01:25:10.375395+00:00",
+      "updated_at": "2026-01-23T02:10:12.096407+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -103,7 +103,7 @@
       "recipe_name": "13_split_layout_french_door",
       "source_file": "docs/recipes/13_split_layout_french_door/example.pml",
       "created_at": "2026-01-17T01:38:43.414769+00:00",
-      "updated_at": "2026-01-23T01:25:10.411558+00:00",
+      "updated_at": "2026-01-23T02:10:12.139742+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -111,7 +111,7 @@
       "recipe_name": "14_corner_cleanup_multi_tool",
       "source_file": "docs/recipes/14_corner_cleanup_multi_tool/example.pml",
       "created_at": "2026-01-17T01:38:43.454384+00:00",
-      "updated_at": "2026-01-23T01:25:10.450457+00:00",
+      "updated_at": "2026-01-23T02:10:12.186141+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -119,7 +119,7 @@
       "recipe_name": "15_profile_with_tabs",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.459550+00:00",
-      "updated_at": "2026-01-23T01:25:10.455291+00:00",
+      "updated_at": "2026-01-23T02:10:12.190242+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -127,7 +127,7 @@
       "recipe_name": "16_sheet_layout_nesting",
       "source_file": "docs/recipes/16_sheet_layout_nesting/example.pml",
       "created_at": "2026-01-17T01:38:43.557700+00:00",
-      "updated_at": "2026-01-23T01:25:10.551467+00:00",
+      "updated_at": "2026-01-23T02:10:12.294134+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -135,7 +135,7 @@
       "recipe_name": "17_nesting_guillotine",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.936155+00:00",
-      "updated_at": "2026-01-23T01:25:10.932387+00:00",
+      "updated_at": "2026-01-23T02:10:12.751798+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -143,7 +143,7 @@
       "recipe_name": "18_nesting_maxrects",
       "source_file": "",
       "created_at": "2026-01-17T01:38:44.404480+00:00",
-      "updated_at": "2026-01-23T01:25:11.398650+00:00",
+      "updated_at": "2026-01-23T02:10:13.316333+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -151,7 +151,7 @@
       "recipe_name": "21_simple_shaker_door",
       "source_file": "docs/recipes/21_simple_shaker_door/example.pml",
       "created_at": "2026-01-23T00:23:07.813155+00:00",
-      "updated_at": "2026-01-23T01:25:11.416935+00:00",
+      "updated_at": "2026-01-23T02:10:13.338442+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -167,7 +167,7 @@
       "recipe_name": "23_chamfered_cabinet_panel",
       "source_file": "docs/recipes/23_chamfered_cabinet_panel/example.pml",
       "created_at": "2026-01-23T00:23:07.874730+00:00",
-      "updated_at": "2026-01-23T01:25:11.479294+00:00",
+      "updated_at": "2026-01-23T02:10:13.413027+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -175,7 +175,7 @@
       "recipe_name": "24_shelf_dados_side",
       "source_file": "docs/recipes/24_shelf_dados_side/example.pml",
       "created_at": "2026-01-23T00:23:07.884847+00:00",
-      "updated_at": "2026-01-23T01:25:11.489706+00:00",
+      "updated_at": "2026-01-23T02:10:13.424527+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -183,7 +183,7 @@
       "recipe_name": "25_decorative_border_panel",
       "source_file": "docs/recipes/25_decorative_border_panel/example.pml",
       "created_at": "2026-01-23T00:23:07.890318+00:00",
-      "updated_at": "2026-01-23T01:25:11.495253+00:00",
+      "updated_at": "2026-01-23T02:10:13.430405+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -191,7 +191,7 @@
       "recipe_name": "26_faux_shutter_panel",
       "source_file": "docs/recipes/26_faux_shutter_panel/example.pml",
       "created_at": "2026-01-23T00:23:07.917482+00:00",
-      "updated_at": "2026-01-23T01:25:11.522401+00:00",
+      "updated_at": "2026-01-23T02:10:13.461702+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -207,7 +207,7 @@
       "recipe_name": "28_diamond_lattice_panel",
       "source_file": "docs/recipes/28_diamond_lattice_panel/example.pml",
       "created_at": "2026-01-23T00:23:08.039392+00:00",
-      "updated_at": "2026-01-23T01:25:11.644744+00:00",
+      "updated_at": "2026-01-23T02:10:13.608508+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -215,7 +215,7 @@
       "recipe_name": "29_picture_frame_panel",
       "source_file": "docs/recipes/29_picture_frame_panel/example.pml",
       "created_at": "2026-01-23T00:23:08.046573+00:00",
-      "updated_at": "2026-01-23T01:25:11.651950+00:00",
+      "updated_at": "2026-01-23T02:10:13.616484+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },

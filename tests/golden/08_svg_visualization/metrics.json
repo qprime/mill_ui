@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "08_svg_visualization",
-    "created_at": "2026-01-23T01:25:09.918375+00:00"
+    "created_at": "2026-01-23T02:10:11.541458+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.32,
+    "extraction_time_ms": 0.31,
     "document": {
       "width_mm": 580.0,
       "height_mm": 480.0,
@@ -279,7 +279,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6885,
+    "extraction_time_ms": 0.694,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -317,7 +317,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6625,
+    "extraction_time_ms": 0.9359,
     "summary": {
       "total_lines": 532,
       "comment_lines": 12,
@@ -396,6 +396,12 @@
       "rapid_time_s": 128.5556,
       "feed_time_s": 2171.0604,
       "total_time_s": 2299.6159
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

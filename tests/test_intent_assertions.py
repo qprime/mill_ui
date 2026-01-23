@@ -520,9 +520,16 @@ def test_hole_position_pass():
     ast = make_hole_ast()
     assertions = derive_assertions(ast)
 
-    # Mock metrics with per-element geometry matching AST holes
+    # SVG blueprint uses 140mm margin and Y-flip
+    # Sheet: 200x200mm, so viewbox = 200+2*140 = 480mm
     # AST holes: 10mm diameter at (50, 50) and (150, 150)
+    # SVG coordinates:
+    #   hole at (50, 50) -> svg (50+140, 480-50-140) = (190, 290)
+    #   hole at (150, 150) -> svg (150+140, 480-150-140) = (290, 190)
     svg_metrics = {
+        "document": {
+            "viewbox": [0, 0, 480, 480],
+        },
         "layers": {
             "by_layer": {
                 "HOLES": {
@@ -531,14 +538,14 @@ def test_hole_position_pass():
                     "elements": [
                         {
                             "element_type": "circle",
-                            "bounds": [45.0, 45.0, 55.0, 55.0],
-                            "center": [50.0, 50.0],
+                            "bounds": [185.0, 285.0, 195.0, 295.0],
+                            "center": [190.0, 290.0],
                             "radius": 5.0,
                         },
                         {
                             "element_type": "circle",
-                            "bounds": [145.0, 145.0, 155.0, 155.0],
-                            "center": [150.0, 150.0],
+                            "bounds": [285.0, 185.0, 295.0, 195.0],
+                            "center": [290.0, 190.0],
                             "radius": 5.0,
                         },
                     ],

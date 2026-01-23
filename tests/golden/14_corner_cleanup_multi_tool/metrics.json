@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "14_corner_cleanup_multi_tool",
-    "created_at": "2026-01-23T01:25:10.450201+00:00"
+    "created_at": "2026-01-23T02:10:12.185884+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.33,
+    "extraction_time_ms": 0.32,
     "document": {
       "width_mm": 730.0,
       "height_mm": 930.0,
@@ -280,7 +280,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6741,
+    "extraction_time_ms": 0.691,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -318,7 +318,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 5.267,
+    "extraction_time_ms": 7.3962,
     "summary": {
       "total_lines": 3380,
       "comment_lines": 22,
@@ -401,6 +401,12 @@
       "rapid_time_s": 393.10220000000004,
       "feed_time_s": 12705.4584,
       "total_time_s": 13098.560699999998
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 3
   }

@@ -150,9 +150,15 @@ def plan_passes(
     tabs_enabled = bool(tabs_opts)
     cut_through_mm = _extract_positive_float(profile_data.get("cut_through_mm", 0.0))
 
-    merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or tabs_enabled)
-
     profiles = hints.get("profiles", []) or []
+
+    any_profile_has_tabs = tabs_enabled or any(
+        isinstance(rec.get("tabs"), Mapping) and rec.get("tabs")
+        for rec in profiles
+        if isinstance(rec, Mapping)
+    )
+
+    merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or any_profile_has_tabs)
 
     def _tabs_for_record(rec: Mapping[str, Any]) -> Optional[Dict[str, float]]:
         value = rec.get("tabs") if isinstance(rec, Mapping) else None

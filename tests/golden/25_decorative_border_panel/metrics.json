@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-01-23T01:25:11.494995+00:00"
+    "created_at": "2026-01-23T02:10:13.430157+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.37,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 630.0,
       "height_mm": 730.0,
@@ -293,7 +293,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8243,
+    "extraction_time_ms": 0.7687,
     "mesh": {
       "vertex_count": 56,
       "face_count": 108,
@@ -331,7 +331,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0513,
+    "extraction_time_ms": 0.0586,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,
@@ -400,6 +400,12 @@
       "rapid_time_s": 246.7447,
       "feed_time_s": 1998.3104,
       "total_time_s": 2245.0551
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

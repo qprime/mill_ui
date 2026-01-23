@@ -44,7 +44,7 @@ def resolve_output_dir(project: str | None, output: str | None) -> Path:
     if project:
         return get_project_dir(project) / "output"
 
-    return Path(".")
+    return Path("output")
 
 
 def add_project_arg(parser):

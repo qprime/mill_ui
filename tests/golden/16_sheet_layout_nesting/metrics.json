@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-01-23T01:25:10.550959+00:00"
+    "created_at": "2026-01-23T02:10:12.293665+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.06,
+    "extraction_time_ms": 1.02,
     "document": {
       "width_mm": 1525.0,
       "height_mm": 1512.0,
@@ -686,7 +686,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0654,
+    "extraction_time_ms": 1.0261,
     "mesh": {
       "vertex_count": 176,
       "face_count": 308,
@@ -725,22 +725,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.9568,
+    "extraction_time_ms": 21.7268,
     "summary": {
-      "total_lines": 9192,
-      "comment_lines": 92,
-      "motion_lines": 7276,
+      "total_lines": 8013,
+      "comment_lines": 59,
+      "motion_lines": 6526,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 5474
+      "feed_lines": 5120
     },
     "motion": {
-      "g0_count": 3606,
-      "g1_count": 3670,
+      "g0_count": 2814,
+      "g1_count": 3712,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 212338.0777,
-      "total_feed_distance_mm": 585911.848
+      "total_rapid_distance_mm": 33832.649699999994,
+      "total_feed_distance_mm": 581591.816
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -748,6 +748,7 @@
       "unique_cutting_depths": [
         -19.0,
         -17.463,
+        -16.0,
         -15.875,
         -14.288,
         -12.7,
@@ -762,7 +763,7 @@
         -3.0,
         -1.587
       ],
-      "depth_count": 15,
+      "depth_count": 16,
       "max_single_plunge_mm": 25.0
     },
     "xy_bounds": {
@@ -842,9 +843,68 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 2548.0569,
-      "feed_time_s": 69325.5454,
-      "total_time_s": 71873.6024
+      "rapid_time_s": 405.9918,
+      "feed_time_s": 68893.5422,
+      "total_time_s": 69299.5341
+    },
+    "tabs": {
+      "detected_count": 52,
+      "tab_heights_mm": [
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "max_cutting_depth_mm": -19.0,
+      "tabs_at_max_depth": true
     },
     "file_count": 2
   }

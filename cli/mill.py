@@ -186,6 +186,17 @@ Output files:
         output_dir = resolve_output_dir(args.project, args.out)
 
         if not args.no_clean and output_dir.exists():
+            resolved = output_dir.resolve()
+            cwd = Path.cwd().resolve()
+            dangerous = (
+                resolved == cwd
+                or cwd.is_relative_to(resolved)
+                or resolved.name in (".", "..")
+                or str(resolved) in ("/", "/home", "/tmp")
+            )
+            if dangerous:
+                print(f"Error: Refusing to clean dangerous directory: {output_dir}", file=sys.stderr)
+                sys.exit(1)
             import shutil
             shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

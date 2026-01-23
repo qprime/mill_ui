@@ -386,6 +386,22 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                 if key in merged["time_estimate"] and key in other["time_estimate"]:
                     merged["time_estimate"][key] += other["time_estimate"][key]
 
+        # Merge tabs data (sum counts, combine heights)
+        if "tabs" in merged and "tabs" in other:
+            tabs_merged = merged["tabs"]
+            tabs_other = other["tabs"]
+            if "detected_count" in tabs_merged and "detected_count" in tabs_other:
+                tabs_merged["detected_count"] += tabs_other["detected_count"]
+            if "tab_heights_mm" in tabs_merged and "tab_heights_mm" in tabs_other:
+                tabs_merged["tab_heights_mm"] = tabs_merged["tab_heights_mm"] + tabs_other["tab_heights_mm"]
+            if "max_cutting_depth_mm" in tabs_merged and "max_cutting_depth_mm" in tabs_other:
+                tabs_merged["max_cutting_depth_mm"] = min(
+                    tabs_merged["max_cutting_depth_mm"],
+                    tabs_other["max_cutting_depth_mm"]
+                )
+        elif "tabs" in other:
+            merged["tabs"] = other["tabs"]
+
     # Add file count metadata
     merged["file_count"] = len(gcode_list)
 

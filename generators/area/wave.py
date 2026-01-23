@@ -253,17 +253,17 @@ def wave_generator(
             if len(segment) < 2:
                 continue
 
-            # Build polyline geometry
-            polygon_points = [list(pt) for pt in segment]
-
-            geometry_data = {
-                "points": polygon_points,
-                "is_open": True,  # Wave lines are open polylines
-            }
-
             # Compute center for placement
             cx = sum(p[0] for p in segment) / len(segment)
             cy = sum(p[1] for p in segment) / len(segment)
+
+            # Convert absolute sheet coordinates to relative coordinates (centered on placement)
+            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in segment]
+
+            geometry_data = {
+                "points": relative_points,
+                "is_open": True,  # Wave lines are open polylines
+            }
 
             item = Item(
                 kind="shape",

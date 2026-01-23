@@ -22,10 +22,10 @@
     <rect x="140.0" y="140.0" width="500.0" height="700.0" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 81.250 948.750 L 198.750 948.750 L 198.750 731.250 L 81.250 731.250 Z" fill-rule="evenodd" />
-    <path d="M 81.250 948.750 L 198.750 948.750 L 198.750 731.250 L 81.250 731.250 Z" fill-rule="evenodd" />
-    <path d="M 81.250 948.750 L 198.750 948.750 L 198.750 731.250 L 81.250 731.250 Z" fill-rule="evenodd" />
-    <path d="M 81.250 948.750 L 198.750 948.750 L 198.750 731.250 L 81.250 731.250 Z" fill-rule="evenodd" />
+    <path d="M 230.000 750.000 L 347.500 750.000 L 347.500 532.500 L 230.000 532.500 Z" fill-rule="evenodd" />
+    <path d="M 432.500 750.000 L 550.000 750.000 L 550.000 532.500 L 432.500 532.500 Z" fill-rule="evenodd" />
+    <path d="M 230.000 447.500 L 347.500 447.500 L 347.500 230.000 L 230.000 230.000 Z" fill-rule="evenodd" />
+    <path d="M 432.500 447.500 L 550.000 447.500 L 550.000 230.000 L 432.500 230.000 Z" fill-rule="evenodd" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />

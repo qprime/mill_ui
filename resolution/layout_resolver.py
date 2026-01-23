@@ -1213,12 +1213,14 @@ class LayoutResolver:
             y_max=node.height_mm,
         )
 
+        cx, cy = arch_region.center
+        relative_points = [[pt[0] - cx, pt[1] - cy] for pt in arch_domain.outer_boundary]
+
         if node.feature is not None:
-            polygon_points = list(arch_domain.outer_boundary)
             arch_item = Item(
                 kind="shape",
                 type="Polygon",
-                geometry=Geometry(data={"points": polygon_points, "holes": []}),
+                geometry=Geometry(data={"points": relative_points, "holes": []}),
                 placement=Placement(center_xy_mm=arch_region.center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("arch"),
@@ -1227,11 +1229,10 @@ class LayoutResolver:
 
         for child in node.children:
             if isinstance(child, ProfileGen):
-                polygon_points = list(arch_domain.outer_boundary)
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": polygon_points, "holes": []}),
+                    geometry=Geometry(data={"points": relative_points, "holes": []}),
                     placement=Placement(center_xy_mm=arch_region.center),
                     feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("arch_profile"),
@@ -1284,11 +1285,14 @@ class LayoutResolver:
         ys = [p[1] for p in abs_points]
         bounds_center = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
 
+        cx, cy = bounds_center
+        relative_points = [[pt[0] - cx, pt[1] - cy] for pt in abs_points]
+
         if node.feature is not None:
             polygon_item = Item(
                 kind="shape",
                 type="Polygon",
-                geometry=Geometry(data={"points": abs_points, "holes": []}),
+                geometry=Geometry(data={"points": relative_points, "holes": []}),
                 placement=Placement(center_xy_mm=bounds_center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("polygon"),
@@ -1307,7 +1311,7 @@ class LayoutResolver:
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": abs_points, "holes": []}),
+                    geometry=Geometry(data={"points": relative_points, "holes": []}),
                     placement=Placement(center_xy_mm=bounds_center),
                     feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("polygon_profile"),
@@ -1317,7 +1321,7 @@ class LayoutResolver:
                 pocket_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": abs_points, "holes": []}),
+                    geometry=Geometry(data={"points": relative_points, "holes": []}),
                     placement=Placement(center_xy_mm=bounds_center),
                     feature=Feature(
                         type="pocket",

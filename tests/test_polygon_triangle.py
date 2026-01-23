@@ -48,7 +48,7 @@ polygon wedge points (10mm,10mm) (110mm,10mm) (60mm,90mm) pocket 6.00mm
     assert item.type == "Polygon"
     assert item.kind == "shape"
     assert item.placement.center_xy_mm == (60.0, 50.0)
-    assert item.geometry.data["points"] == [(10.0, 10.0), (110.0, 10.0), (60.0, 90.0)]
+    assert item.geometry.data["points"] == [[-50.0, -40.0], [50.0, -40.0], [0.0, 40.0]]
     assert item.geometry.data["holes"] == []
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0

@@ -57,7 +57,7 @@ def offset_circle_shape(diameter: float, center: Tuple[float, float], offset: fl
 
 
 def polygon_shape(points: list, center: Tuple[float, float]) -> Shape2D:
-    return polygon_prim(points, (0.0, 0.0))
+    return polygon_prim(points, center)
 
 
 def offset_polygon_shape(points: list, center: Tuple[float, float], offset: float) -> Shape2D | None:
@@ -88,7 +88,7 @@ def offset_polygon_shape(points: list, center: Tuple[float, float], offset: floa
         else:
             nx, ny = nx / nlen, ny / nlen
         offset_points.append((p1[0] + nx * offset, p1[1] + ny * offset))
-    return polygon_prim(offset_points, (0.0, 0.0))
+    return polygon_prim(offset_points, center)
 
 
 def rounded_rect_shape(w: float, h: float, radii: Dict[str, float], center: Tuple[float, float]) -> Shape2D:

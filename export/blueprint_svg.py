@@ -251,6 +251,8 @@ def _polygon_to_path(
     holes: list,
     offset_x: float,
     offset_y: float,
+    center_x: float = 0.0,
+    center_y: float = 0.0,
     y_flip=None,
 ) -> str:
     if not points:
@@ -261,9 +263,9 @@ def _polygon_to_path(
     def ring_to_path(ring: list) -> str:
         if not ring:
             return ""
-        parts = [f"M {ring[0][0] + offset_x:.3f} {yf(ring[0][1]) + offset_y:.3f}"]
+        parts = [f"M {ring[0][0] + center_x + offset_x:.3f} {yf(ring[0][1] + center_y) + offset_y:.3f}"]
         for x, y in ring[1:]:
-            parts.append(f"L {x + offset_x:.3f} {yf(y) + offset_y:.3f}")
+            parts.append(f"L {x + center_x + offset_x:.3f} {yf(y + center_y) + offset_y:.3f}")
         parts.append("Z")
         return " ".join(parts)
 
@@ -332,7 +334,8 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     elif shape_type == "Polygon":
         points = item.geometry.data.get("points", [])
         holes = item.geometry.data.get("holes", [])
-        path_d = _polygon_to_path(points, holes, offset_x, offset_y, y_flip=yf)
+        orig_cx, orig_cy = item.placement.center_xy_mm
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y, center_x=orig_cx, center_y=orig_cy, y_flip=yf)
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "Polyline":
@@ -391,7 +394,8 @@ def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: flo
     elif shape_type == "Polygon":
         points = item.geometry.data.get("points", [])
         holes = item.geometry.data.get("holes", [])
-        path_d = _polygon_to_path(points, holes, offset_x, offset_y, y_flip=yf)
+        orig_cx, orig_cy = item.placement.center_xy_mm
+        path_d = _polygon_to_path(points, holes, offset_x, offset_y, center_x=orig_cx, center_y=orig_cy, y_flip=yf)
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "RoundedRect":

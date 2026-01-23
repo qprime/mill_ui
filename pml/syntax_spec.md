@@ -22,14 +22,18 @@ rect door:panel at 200mm,300mm size 300mm,500mm pocket 6mm
 
 circle hole:1 at 50mm,50mm diameter 10mm hole 8mm
 
-# Templates (future extension)
-template Shaker door:shaker params {
-  outer_w: 400.0
-  outer_h: 600.0
-  stile_w: 50.0
-  rail_h: 50.0
-  panel_recess: 6.0
-}
+# Templates (stored in templates/*.pml)
+# template shaker
+#     params
+#         stile_w 57mm
+#         rail_h 57mm
+#         panel_recess 6mm
+#         panel_style pocket
+#
+#     rect door
+#         profile outside through
+#         frame ${stile_w}
+#             ${panel_style} ${panel_recess}
 ```
 
 ## Grammar
@@ -420,24 +424,66 @@ triangle corner base 100mm height 80mm
     pocket 4mm
 ```
 
-### Template Invocation (Phase 2)
+### Template Definition
+
+Templates are reusable layout patterns stored as `.pml` files in the `templates/` directory. They support parameter substitution using `${param}` syntax.
 
 ```
-template <TemplateName> <id> params {
-  <param_name>: <value>
-  ...
-}
+template <name>
+    params
+        <param_name> <default_value>mm    # numeric parameter
+        <param_name> <keyword>            # string parameter
+        ...
+
+    <body>
 ```
 
-Example:
+**Components:**
+- `template <name>`: Declares the template name (used for lookup)
+- `params` block: Declares parameters with default values
+- `<body>`: Any valid PML shape/generator node as the template content
+
+**Parameter Types:**
+- **Numeric parameters**: Have `mm` suffix, substituted as `<value>mm`
+- **String parameters**: No suffix, substituted as the literal string (useful for generator selection)
+
+**Parameter Substitution:**
+- Use `${param_name}` anywhere a value is expected
+- Parameters are substituted before parsing
+- Numeric params → `${depth}` becomes `6.0mm`
+- String params → `${style}` becomes `pocket` (literal)
+- Caller can override any parameter when invoking the template
+
+Example template file (`templates/shaker.pml`):
 ```pml
-template Shaker door:main params {
-  outer_w: 400.0
-  outer_h: 600.0
-  stile_w: 50.0
-  rail_h: 50.0
-  panel_recess: 6.0
-}
+template shaker
+    params
+        stile_w 57mm
+        rail_h 57mm
+        panel_recess 6mm
+        panel_style pocket
+
+    rect door
+        profile outside through
+        frame ${stile_w}
+            ${panel_style} ${panel_recess}
+```
+
+In this example, `panel_style` is a string parameter that defaults to `pocket`. This allows the template to be used with different generators without changing the template file.
+
+**Special Parameters:**
+- `outer_w` and `outer_h` are automatically set from the target region dimensions when expanding a template
+- These do not need to be declared in the params block
+
+**Usage in .nest files:**
+
+Templates are referenced by name in `.nest` files (see `nest_syntax_spec.md`):
+```nest
+parts
+    door 400mm 600mm x20
+        template shaker
+            stile_w 57mm
+            panel_recess 6mm
 ```
 
 ### Metadata (Optional)

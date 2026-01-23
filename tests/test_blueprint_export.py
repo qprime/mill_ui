@@ -4,9 +4,10 @@ from pathlib import Path
 import re
 
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+from layout_ast.compositional import CompositionalLayoutAST, Rect, Frame, PocketGen, ProfileGen
 from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
 from export.blueprint_svg import render_blueprint_svg
-from templates import Shaker
+from resolution.layout_resolver import LayoutResolver
 
 
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
@@ -77,27 +78,39 @@ def test_required_layers_exist():
     print("  ✓ PASS")
 
 
+def _create_shaker_ast(outer_w: float, outer_h: float, stile_w: float, rail_h: float, panel_recess: float, sheet_thickness: float) -> LayoutAST:
+    sheet = Sheet(width_mm=outer_w, height_mm=outer_h, thickness_mm=sheet_thickness)
+    root = Rect(
+        children=(
+            ProfileGen(side="outside", depth="through"),
+            Frame(
+                width_mm=stile_w,
+                children=(PocketGen(depth_mm=panel_recess),),
+            ),
+        ),
+        id="door",
+    )
+    comp_ast = CompositionalLayoutAST(sheet=sheet, components={}, root=root)
+    resolver = LayoutResolver(comp_ast)
+    return resolver.resolve()
+
+
 def test_shaker_dimensions():
     print("Running test_shaker_dimensions...")
 
-
-    ast = Shaker.expand_to_ast(
-        params={
-            "outer_w": 400.0,
-            "outer_h": 600.0,
-            "stile_w": 50.0,
-            "rail_h": 50.0,
-            "panel_recess": 6.0,
-        },
-        sheet_thickness_mm=19.0,
+    ast = _create_shaker_ast(
+        outer_w=400.0,
+        outer_h=600.0,
+        stile_w=50.0,
+        rail_h=50.0,
+        panel_recess=6.0,
+        sheet_thickness=19.0,
     )
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-
     assert "PROFILE_CUTS" in svg
     assert "POCKET_REGIONS" in svg
-
 
     print("  ✓ PASS")
 
@@ -273,15 +286,13 @@ def test_golden_file_simple_profile():
 def test_golden_file_shaker_door():
     print("Running test_golden_file_shaker_door...")
 
-    ast = Shaker.expand_to_ast(
-        params={
-            "outer_w": 400.0,
-            "outer_h": 600.0,
-            "stile_w": 50.0,
-            "rail_h": 50.0,
-            "panel_recess": 6.0,
-        },
-        sheet_thickness_mm=19.0
+    ast = _create_shaker_ast(
+        outer_w=400.0,
+        outer_h=600.0,
+        stile_w=50.0,
+        rail_h=50.0,
+        panel_recess=6.0,
+        sheet_thickness=19.0,
     )
 
     svg = render_blueprint_svg(ast, theme="dark")

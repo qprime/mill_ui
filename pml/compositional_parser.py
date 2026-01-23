@@ -46,6 +46,8 @@ from layout_ast.compositional import (
     XPanelGen,
     # Stage 18 additions (hole_grid generator)
     HoleGridGen,
+    # Stage 19 additions (PML templates)
+    TemplateDef,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -156,6 +158,8 @@ class CompositionalPMLLexer:
             'size', 'corner_cleanup', 'tabs', 'kerf',
             # Stage 18 keywords (hole_grid generator)
             'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
+            # Stage 19 keywords (PML templates)
+            'template', 'params',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -241,6 +245,18 @@ class CompositionalPMLLexer:
                 self.advance()
                 continue
 
+            if char == '$' and self.peek(1) == '{':
+                start_line = self.line
+                start_col = self.column
+                self.advance()
+                self.advance()
+                param_name = ""
+                while self.pos < len(self.text) and self.peek() != '}':
+                    param_name += self.advance()
+                if self.peek() == '}':
+                    self.advance()
+                tokens.append(Token('param_ref', param_name, start_line, start_col))
+                continue
 
             raise ParseError(f"Unexpected character: {char}", self.line, self.column)
 
@@ -1618,3 +1634,80 @@ def parse_compositional_pml(text: str) -> CompositionalLayoutAST:
     tokens = lexer.tokenize()
     parser = CompositionalPMLParser(tokens)
     return parser.parse()
+
+
+def substitute_params(text: str, params: dict[str, float | str]) -> str:
+    import re
+
+    def replace_match(m: re.Match[str]) -> str:
+        param_name = m.group(1)
+        if param_name not in params:
+            raise ParseError(f"Unknown parameter: ${{{param_name}}}", 0, 0)
+        value = params[param_name]
+        if isinstance(value, str):
+            return value
+        return f"{value}mm"
+
+    return re.sub(r'\$\{(\w+)\}', replace_match, text)
+
+
+def parse_template_file(text: str, parse_body: bool = False) -> TemplateDef:
+    lexer = CompositionalPMLLexer(text)
+    tokens = lexer.tokenize()
+    parser = TemplateFileParser(tokens)
+    return parser.parse_template(parse_body=parse_body)
+
+
+class TemplateFileParser(CompositionalPMLParser):
+
+    def parse_template(self, parse_body: bool = True) -> TemplateDef:
+        self.skip_newlines()
+
+        if self.peek().type != 'keyword' or self.peek().value != 'template':
+            raise ParseError("Template file must start with 'template <name>'", self.peek().line, self.peek().column)
+
+        self.expect('keyword', 'template')
+        name = self.expect('identifier').value
+        self.expect_line_end()
+
+        params: dict[str, float] = {}
+        body = None
+
+        if self.peek().type == 'indent':
+            self.expect('indent')
+
+            if self.peek().type == 'keyword' and self.peek().value == 'params':
+                self.advance()
+                self.expect_line_end()
+
+                if self.peek().type == 'indent':
+                    self.expect('indent')
+                    while self.peek().type != 'dedent':
+                        token = self.peek()
+                        if token.type == 'identifier':
+                            param_name = self.advance().value
+                        elif token.type == 'keyword':
+                            param_name = self.advance().value
+                        else:
+                            raise ParseError(f"Expected parameter name, got {token.type}", token.line, token.column)
+                        token = self.peek()
+                        if token.type == 'number_with_unit':
+                            param_value = self.advance().value
+                        elif token.type in ('identifier', 'keyword'):
+                            param_value = self.advance().value
+                        else:
+                            raise ParseError(f"Expected parameter value, got {token.type}", token.line, token.column)
+                        params[param_name] = param_value
+                        self.expect_line_end()
+                        self.skip_newlines()
+                    self.expect('dedent')
+                self.skip_newlines()
+
+            if parse_body and self.peek().type != 'dedent' and self.peek().type != 'eof':
+                body = self.parse_node()
+
+            self.skip_newlines()
+            if self.peek().type == 'dedent':
+                self.expect('dedent')
+
+        return TemplateDef(name=name, params=params, body=body)

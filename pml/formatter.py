@@ -25,11 +25,12 @@ def format_pml(ast: LayoutAST) -> str:
 
     for item in ast.items:
         if item.kind == "shape":
+            if not item.feature:
+                continue
             lines.append(_format_shape(item))
         elif item.kind == "template":
             lines.append(_format_template(item))
         else:
-
             continue
 
     return "\n".join(lines) + "\n"

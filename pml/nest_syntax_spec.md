@@ -21,7 +21,7 @@ nest maxrects
 
     parts
         door 400mm 600mm x20
-            template Shaker
+            template shaker
                 stile_w 57mm
                 rail_h 57mm
                 panel_recess 6mm
@@ -118,30 +118,44 @@ parts
 
 ```
 template <TemplateName>
-    <param> <value>mm
-    <param> <value>mm
+    <param> <value>mm    # numeric parameter override
+    <param> <keyword>    # string parameter override
     ...
 ```
 
-Associates a parametric template with a part. Template parameters are indented under the template line.
+Associates a PML template with a part. Templates are `.pml` files in the `templates/` directory that define reusable layout patterns with parameter substitution.
 
-**Available Templates:**
-- `Shaker` - Shaker-style cabinet door with frame and panel
+**Template Resolution:**
+- Template names are case-insensitive for file lookup (e.g., `shaker` finds `templates/shaker.pml`)
+- Parameters override the template's default values
+- Part dimensions (`outer_w`, `outer_h`) are automatically passed to the template
+
+**Parameter Types:**
+- **Numeric parameters**: Have `mm` suffix (e.g., `stile_w 57mm`)
+- **String parameters**: No suffix (e.g., `panel_style pocket`) - useful for selecting generators
+
+**Built-in Templates:**
+- `shaker` - Shaker-style cabinet door with frame and panel pocket
 
 **Shaker Template Parameters:**
-- `stile_w` - Stile (vertical frame) width
-- `rail_h` - Rail (horizontal frame) height
-- `panel_recess` - Panel pocket depth
+- `stile_w` - Stile (vertical frame) width (default: 57mm)
+- `rail_h` - Rail (horizontal frame) height (default: 57mm)
+- `panel_recess` - Panel pocket depth (default: 6mm)
+- `panel_style` - Panel generator type (default: `pocket`)
 
 Example:
 ```nest
 parts
     cabinet_door 457mm 597mm x20
-        template Shaker
+        template shaker
             stile_w 57mm
             rail_h 57mm
             panel_recess 6mm
 ```
+
+**Creating Custom Templates:**
+
+See `pml/syntax_spec.md` for the template definition syntax. Custom templates are placed in the `templates/` directory as `.pml` files.
 
 ## Complete Example
 
@@ -157,7 +171,7 @@ nest maxrects
     parts
         # Large shaker doors (18" x 23.5")
         large_door 457mm 597mm x20
-            template Shaker
+            template shaker
                 stile_w 57mm
                 rail_h 57mm
                 panel_recess 6mm
@@ -167,7 +181,7 @@ nest maxrects
 
         # Tall shaker doors (18" x 36")
         tall_door 457mm 914mm x2
-            template Shaker
+            template shaker
                 stile_w 57mm
                 rail_h 57mm
                 panel_recess 6mm
@@ -213,13 +227,13 @@ nest maxrects
 
     parts
         door_large 500mm 700mm x10
-            template Shaker
+            template shaker
                 stile_w 60mm
                 rail_h 60mm
                 panel_recess 6mm
 
         door_small 400mm 500mm x15
-            template Shaker
+            template shaker
                 stile_w 50mm
                 rail_h 50mm
                 panel_recess 6mm

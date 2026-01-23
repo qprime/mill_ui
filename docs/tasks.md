@@ -86,24 +86,24 @@ ast = resolve_layout(comp_ast)
 
 ## Task 3: Use a Template
 
-**Use case:** Generate standard components.
+**Use case:** Generate standard components using PML templates.
 
 ```python
-from templates import Shaker
+from templates import expand_template
 
-ast = Shaker.expand_to_ast(
+items = expand_template(
+    template_name="shaker",
     params={
-        "outer_w": 400.0,
-        "outer_h": 600.0,
         "stile_w": 50.0,
-        "rail_h": 50.0,
         "panel_recess": 6.0,
     },
-    sheet_thickness_mm=19.0
+    region_width=400.0,
+    region_height=600.0,
+    sheet_thickness=19.0,
 )
 ```
 
-**Key point:** Templates are parametric AST generators. See `templates/` for available templates.
+**Key point:** Templates are PML files with parameter substitution. See `templates/*.pml` for available templates and `pml/syntax_spec.md` for template syntax.
 
 ---
 

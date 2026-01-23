@@ -2,41 +2,14 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any, Protocol
 
-from layout_ast.layout import LayoutAST, Item, Placement as ASTPlacement, Geometry
+from layout_ast.layout import Item, Placement as ASTPlacement, Geometry, Feature
 
 from .types import PartSpec, NestedPart
-
-
-class TemplateProtocol(Protocol):
-
-    @staticmethod
-    def expand_to_ast(params: dict[str, Any], sheet_thickness_mm: float) -> LayoutAST:
-        ...
-
-
-TEMPLATE_REGISTRY: dict[str, TemplateProtocol] = {}
-
-
-def register_template(name: str, template_class: TemplateProtocol) -> None:
-    TEMPLATE_REGISTRY[name] = template_class
-
-
-def _init_templates() -> None:
-    try:
-        from templates import Shaker
-        register_template("Shaker", Shaker)
-    except ImportError:
-        pass
-
-
-_init_templates()
+from templates.loader import expand_template
 
 
 def get_part_bounds(part_spec: PartSpec) -> tuple[float, float]:
-
-
     return (part_spec.width_mm, part_spec.height_mm)
 
 
@@ -49,60 +22,41 @@ def expand_part_to_items(
 ) -> list[Item]:
     cx, cy = center_xy
 
-    if part_spec.template and part_spec.template in TEMPLATE_REGISTRY:
-
-        template_class = TEMPLATE_REGISTRY[part_spec.template]
+    if part_spec.template:
         params = part_spec.template_params or {}
 
+        region_w = part_spec.height_mm if rotated else part_spec.width_mm
+        region_h = part_spec.width_mm if rotated else part_spec.height_mm
 
-        if "outer_w" not in params:
-            params = {**params, "outer_w": part_spec.width_mm}
-        if "outer_h" not in params:
-            params = {**params, "outer_h": part_spec.height_mm}
+        items = expand_template(
+            template_name=part_spec.template,
+            params=params,
+            region_width=region_w,
+            region_height=region_h,
+            sheet_thickness=sheet_thickness_mm,
+        )
 
+        template_center_x = region_w / 2
+        template_center_y = region_h / 2
 
-        template_ast = template_class.expand_to_ast(params, sheet_thickness_mm)
-
-
-        template_center_x = template_ast.sheet.width_mm / 2
-        template_center_y = template_ast.sheet.height_mm / 2
-
-
-        items = []
-        for i, item in enumerate(template_ast.items):
+        result = []
+        for i, item in enumerate(items):
             item_cx, item_cy = item.placement.center_xy_mm
 
             offset_x = item_cx - template_center_x
             offset_y = item_cy - template_center_y
 
-
-            if rotated:
-
-                new_offset_x = -offset_y
-                new_offset_y = offset_x
-                offset_x, offset_y = new_offset_x, new_offset_y
-
-
-                if item.type == "Rect":
-                    old_w = item.geometry.data.get("w_mm", 0)
-                    old_h = item.geometry.data.get("h_mm", 0)
-                    new_geom = Geometry(data={"w_mm": old_h, "h_mm": old_w})
-                    item = replace(item, geometry=new_geom)
-
-
             final_x = cx + offset_x
             final_y = cy + offset_y
-
 
             new_placement = ASTPlacement(center_xy_mm=(final_x, final_y))
             new_shape_id = f"{shape_id_prefix}{item.shape_id}" if item.shape_id else f"{shape_id_prefix}item{i}"
 
-            items.append(replace(item, placement=new_placement, shape_id=new_shape_id))
+            result.append(replace(item, placement=new_placement, shape_id=new_shape_id))
 
-        return items
+        return result
 
     else:
-
         w = part_spec.height_mm if rotated else part_spec.width_mm
         h = part_spec.width_mm if rotated else part_spec.height_mm
 
@@ -112,15 +66,10 @@ def expand_part_to_items(
                 type="Rect",
                 geometry=Geometry(data={"w_mm": w, "h_mm": h}),
                 placement=ASTPlacement(center_xy_mm=(cx, cy)),
-                feature=_default_feature(),
+                feature=Feature(type="profile", depth="through", side="outside"),
                 shape_id=f"{shape_id_prefix}rect",
             )
         ]
-
-
-def _default_feature():
-    from layout_ast.layout import Feature
-    return Feature(type="profile", depth="through", side="outside")
 
 
 def placement_to_items(
@@ -138,8 +87,6 @@ def placement_to_items(
 
 
 __all__ = [
-    "TEMPLATE_REGISTRY",
-    "register_template",
     "get_part_bounds",
     "expand_part_to_items",
     "placement_to_items",

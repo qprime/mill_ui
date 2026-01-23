@@ -13,7 +13,7 @@ nest maxrects
 
     parts
         large_door 457mm 597mm x20
-            template Shaker
+            template shaker
                 stile_w 57mm
                 rail_h 57mm
                 panel_recess 6mm
@@ -21,7 +21,7 @@ nest maxrects
         small_door 305mm 203mm x15
 
         tall_door 457mm 914mm x2
-            template Shaker
+            template shaker
                 stile_w 57mm
                 rail_h 57mm
                 panel_recess 6mm

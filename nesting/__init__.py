@@ -18,8 +18,6 @@ from .maxrects import (
 )
 from .sheet_packer import pack_sheets, PackingAlgorithm
 from .template_expander import (
-    TEMPLATE_REGISTRY,
-    register_template,
     expand_part_to_items,
     placement_to_items,
 )
@@ -55,8 +53,6 @@ __all__ = [
     "pack_sheets",
     "PackingAlgorithm",
 
-    "TEMPLATE_REGISTRY",
-    "register_template",
     "expand_part_to_items",
     "placement_to_items",
 

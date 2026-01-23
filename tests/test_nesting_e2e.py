@@ -160,10 +160,9 @@ def test_template_parts_through_cam():
             "name": "cabinet_door",
             "width_mm": 400,
             "height_mm": 600,
-            "template": "Shaker",
+            "template": "shaker",
             "template_params": {
                 "stile_w": 50,
-                "rail_h": 50,
                 "panel_recess": 6,
             },
         },
@@ -182,11 +181,9 @@ def test_template_parts_through_cam():
     asts = result["output"]
     ast = asts[0]
 
-
     assert len(ast.items) >= 2
 
-
-    feature_types = {item.feature.type for item in ast.items}
+    feature_types = {item.feature.type for item in ast.items if item.feature}
     assert "profile" in feature_types
     assert "pocket" in feature_types
 

@@ -1,18 +1,12 @@
 
 import sys
+import pytest
 from nesting.types import PartSpec, NestedPart
 from nesting.template_expander import (
-    TEMPLATE_REGISTRY,
     get_part_bounds,
     expand_part_to_items,
     placement_to_items,
 )
-
-
-def test_shaker_template_registered():
-    print("Running test_shaker_template_registered...")
-    assert "Shaker" in TEMPLATE_REGISTRY
-    print("  PASSED")
 
 
 def test_get_part_bounds_simple():
@@ -69,10 +63,9 @@ def test_expand_shaker_template():
         name="door",
         width_mm=400,
         height_mm=600,
-        template="Shaker",
+        template="shaker",
         template_params={
             "stile_w": 50,
-            "rail_h": 50,
             "panel_recess": 6,
         },
     )
@@ -83,66 +76,23 @@ def test_expand_shaker_template():
         sheet_thickness_mm=19,
     )
 
-
     assert len(items) >= 2
 
+    profile_items = [i for i in items if i.feature and i.feature.type == "profile"]
+    pocket_items = [i for i in items if i.feature and i.feature.type == "pocket"]
 
-    outer = None
-    panel = None
-    for item in items:
-        if "outer" in (item.shape_id or ""):
-            outer = item
-        elif "panel" in (item.shape_id or ""):
-            panel = item
+    assert len(profile_items) >= 1, "Missing profile"
+    assert len(pocket_items) >= 1, "Missing pocket"
 
-    assert outer is not None, "Missing outer profile"
-    assert panel is not None, "Missing panel pocket"
+    profile = profile_items[0]
+    assert profile.placement.center_xy_mm == (500, 500)
+    assert profile.geometry.data["w_mm"] == 400
+    assert profile.geometry.data["h_mm"] == 600
 
-
-    assert outer.placement.center_xy_mm == (500, 500)
-    assert outer.geometry.data["w_mm"] == 400
-    assert outer.geometry.data["h_mm"] == 600
-
-
-    assert panel.geometry.data["w_mm"] == 300
-    assert panel.geometry.data["h_mm"] == 500
-    assert panel.feature.type == "pocket"
-
-    print("  PASSED")
-
-
-def test_expand_shaker_rotated():
-    print("Running test_expand_shaker_rotated...")
-    part = PartSpec(
-        name="door",
-        width_mm=400,
-        height_mm=600,
-        template="Shaker",
-        template_params={
-            "stile_w": 50,
-            "rail_h": 50,
-            "panel_recess": 6,
-        },
-    )
-    items = expand_part_to_items(
-        part_spec=part,
-        center_xy=(500, 500),
-        rotated=True,
-        sheet_thickness_mm=19,
-    )
-
-
-    outer = None
-    for item in items:
-        if "outer" in (item.shape_id or ""):
-            outer = item
-            break
-
-    assert outer is not None
-
-
-    assert outer.geometry.data["w_mm"] == 600
-    assert outer.geometry.data["h_mm"] == 400
+    pocket = pocket_items[0]
+    assert pocket.geometry.data["w_mm"] == 300
+    assert pocket.geometry.data["h_mm"] == 500
+    assert pocket.feature.type == "pocket"
 
     print("  PASSED")
 
@@ -187,87 +137,40 @@ def test_shape_id_prefix():
     print("  PASSED")
 
 
-def test_shaker_with_anchor_recess():
-    print("Running test_shaker_with_anchor_recess...")
-    part = PartSpec(
-        name="door",
-        width_mm=400,
-        height_mm=600,
-        template="Shaker",
-        template_params={
-            "stile_w": 50,
-            "rail_h": 50,
-            "panel_recess": 6,
-            "anchor_recess": {
-                "enabled": True,
-                "diameter_mm": 25,
-                "extra_depth_mm": 2,
-                "offsets_mm": {"left": 30, "right": 30, "top": 30, "bottom": 30},
-            },
-        },
-    )
-    items = expand_part_to_items(
-        part_spec=part,
-        center_xy=(500, 500),
-        rotated=False,
-        sheet_thickness_mm=19,
-    )
-
-
-    assert len(items) >= 6
-
-
-    anchors = [item for item in items if "anchor" in (item.shape_id or "")]
-    assert len(anchors) == 4
-
-
-    for anchor in anchors:
-        assert anchor.type == "Circle"
-        assert anchor.feature.type == "hole"
-
-    print("  PASSED")
-
-
-def test_unknown_template_fallback():
-    print("Running test_unknown_template_fallback...")
+def test_unknown_template_raises():
+    print("Running test_unknown_template_raises...")
     part = PartSpec(
         name="custom",
         width_mm=300,
         height_mm=400,
         template="UnknownTemplate",
     )
-    items = expand_part_to_items(
-        part_spec=part,
-        center_xy=(200, 250),
-        rotated=False,
-        sheet_thickness_mm=19,
-    )
 
-
-    assert len(items) == 1
-    assert items[0].type == "Rect"
-    assert items[0].geometry.data["w_mm"] == 300
-    assert items[0].geometry.data["h_mm"] == 400
+    with pytest.raises(ValueError) as exc_info:
+        expand_part_to_items(
+            part_spec=part,
+            center_xy=(200, 250),
+            rotated=False,
+            sheet_thickness_mm=19,
+        )
+    assert "Template not found" in str(exc_info.value)
 
     print("  PASSED")
 
 
 def run_all_tests():
     print("=" * 60)
-    print("Phase 4: Template Expander Tests")
+    print("Template Expander Tests")
     print("=" * 60)
 
     tests = [
-        test_shaker_template_registered,
         test_get_part_bounds_simple,
         test_expand_simple_rect,
         test_expand_simple_rect_rotated,
         test_expand_shaker_template,
-        test_expand_shaker_rotated,
         test_placement_to_items,
         test_shape_id_prefix,
-        test_shaker_with_anchor_recess,
-        test_unknown_template_fallback,
+        test_unknown_template_raises,
     ]
 
     passed = 0

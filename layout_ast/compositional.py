@@ -406,6 +406,13 @@ class HoleGridGen:
 
 
 @dataclass(frozen=True)
+class TemplateDef:
+    name: str
+    params: dict[str, float | str] = field(default_factory=dict)
+    body: Any = None
+
+
+@dataclass(frozen=True)
 class ResolvedRegion:
     x_min: float
     y_min: float

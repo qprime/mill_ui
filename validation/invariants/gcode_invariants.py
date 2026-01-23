@@ -13,7 +13,9 @@ from typing import Any
 from validation.core import InvariantResult, Verdict
 from validation.metrics.gcode_metrics import (
     GCodeMetrics,
+    TabMetrics,
     extract_gcode_metrics,
+    detect_tabs_from_content,
     G_CODE_PATTERN,
     M_CODE_PATTERN,
     X_PATTERN,
@@ -36,6 +38,7 @@ GCODE_INVARIANT_IDS = [
     "GCODE_TOOL_DECLARED",
     "GCODE_ENDS_AT_SAFE",
     "GCODE_CONTINUOUS_PATH",
+    "GCODE_TAB_PATTERN",
 ]
 
 
@@ -155,6 +158,9 @@ def check_gcode_invariants(
         lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm
     ))
 
+    # 11. GCODE_TAB_PATTERN (uses pre-computed tab metrics)
+    results.append(_check_tab_pattern(metrics.tabs))
+
     return results
 
 
@@ -260,6 +266,9 @@ def check_gcode_invariants_from_content(
         lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm
     ))
 
+    # 11. GCODE_TAB_PATTERN (uses pre-computed tab metrics)
+    results.append(_check_tab_pattern(metrics.tabs))
+
     return results
 
 
@@ -276,6 +285,7 @@ def _get_invariant_description(inv_id: str) -> str:
         "GCODE_TOOL_DECLARED": "Tool number declared before use",
         "GCODE_ENDS_AT_SAFE": "Program ends with Z at safe height",
         "GCODE_CONTINUOUS_PATH": "No discontinuous jumps during cutting moves",
+        "GCODE_TAB_PATTERN": "Tabs occur at max cutting depth with consistent heights",
     }
     return descriptions.get(inv_id, inv_id)
 
@@ -1210,5 +1220,90 @@ def _check_continuous_path(
             "max_observed_jump_mm": round(max_jump, 4) if max_jump > 0 else None,
             "warning_count": len(warnings),
             "failure_count": len(failures),
+        },
+    )
+
+
+def _check_tab_pattern(
+    tabs: TabMetrics,
+    height_tolerance_mm: float = 0.5,
+) -> InvariantResult:
+    """Check that detected tabs have valid patterns.
+
+    Validates:
+    1. Tabs occur at or near max cutting depth (final passes only)
+    2. Tab heights are consistent (all within tolerance of each other)
+    3. Tab heights are positive and reasonable (0 < height < 20mm)
+
+    Args:
+        tabs: TabMetrics from G-code metric extraction
+        height_tolerance_mm: Tolerance for tab height consistency
+
+    Returns:
+        InvariantResult for tab pattern validation
+    """
+    if tabs.detected_count == 0:
+        return InvariantResult(
+            id="GCODE_TAB_PATTERN",
+            category="structural",
+            artifact="gcode",
+            description="Tabs occur at max cutting depth with consistent heights",
+            status=Verdict.PASS,
+            checked=0,
+            passed=0,
+            details={
+                "detected_count": 0,
+                "note": "No tabs detected in G-code",
+            },
+        )
+
+    failures: list[str] = []
+    warnings: list[str] = []
+    checked = 0
+
+    checked += 1
+    if not tabs.tabs_at_max_depth:
+        failures.append("Tabs detected on non-final passes (not at max cutting depth)")
+
+    if tabs.tab_heights_mm:
+        checked += 1
+        min_height = min(tabs.tab_heights_mm)
+        max_height = max(tabs.tab_heights_mm)
+
+        if max_height - min_height > height_tolerance_mm:
+            warnings.append(
+                f"Inconsistent tab heights: min={min_height:.2f}mm, max={max_height:.2f}mm"
+            )
+
+        checked += 1
+        avg_height = sum(tabs.tab_heights_mm) / len(tabs.tab_heights_mm)
+        if avg_height <= 0:
+            failures.append(f"Invalid tab height: {avg_height:.2f}mm (must be positive)")
+        elif avg_height > 20.0:
+            warnings.append(f"Unusually large tab height: {avg_height:.2f}mm")
+
+    if failures:
+        status = Verdict.FAIL
+    elif warnings:
+        status = Verdict.WARN
+    else:
+        status = Verdict.PASS
+
+    return InvariantResult(
+        id="GCODE_TAB_PATTERN",
+        category="structural",
+        artifact="gcode",
+        description="Tabs occur at max cutting depth with consistent heights",
+        status=status,
+        checked=checked,
+        passed=checked - len(failures) - len(warnings),
+        failed=len(failures),
+        failures=tuple(failures + warnings),
+        details={
+            "detected_count": tabs.detected_count,
+            "tab_heights_mm": tabs.tab_heights_mm,
+            "max_cutting_depth_mm": tabs.max_cutting_depth_mm,
+            "tabs_at_max_depth": tabs.tabs_at_max_depth,
+            "height_tolerance_mm": height_tolerance_mm,
         },
     )

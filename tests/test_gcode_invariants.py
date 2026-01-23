@@ -708,6 +708,150 @@ def test_all_invariant_ids_present():
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Test: Tab Pattern Detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_tab_pattern_detected():
+    """Test that tabs are detected in G-code with lift-cross-plunge pattern."""
+    gcode = """
+(Profile with 4 tabs)
+G21 G90
+G0 Z6.0
+G0 X0 Y0
+M3 S18000
+G1 Z-19.0 F500
+G1 X100 Y0 F1500
+G1 Z-16.0
+G1 X120 Y0
+G1 Z-19.0
+G1 X200 Y0
+G1 Z-16.0
+G1 X220 Y0
+G1 Z-19.0
+G1 X300 Y0
+G1 Z-16.0
+G1 X320 Y0
+G1 Z-19.0
+G1 X400 Y0
+G1 Z-16.0
+G1 X420 Y0
+G1 Z-19.0
+G1 X500 Y0
+G0 Z6.0
+M5
+M30
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
+        f.write(gcode)
+        temp_path = f.name
+
+    try:
+        results = check_gcode_invariants(temp_path)
+
+        tab_result = next(r for r in results if r.id == "GCODE_TAB_PATTERN")
+        assert tab_result.status == Verdict.PASS
+        assert tab_result.details["detected_count"] == 4
+        assert all(abs(h - 3.0) < 0.1 for h in tab_result.details["tab_heights_mm"])
+
+        print("PASS: test_tab_pattern_detected")
+    finally:
+        os.unlink(temp_path)
+
+
+def test_no_tabs_detected():
+    """Test that G-code without tabs shows zero tab count."""
+    gcode = """
+(Simple profile without tabs)
+G21 G90
+G0 Z6.0
+G0 X0 Y0
+M3 S18000
+G1 Z-19.0 F500
+G1 X100 Y0 F1500
+G1 X100 Y100
+G1 X0 Y100
+G1 X0 Y0
+G0 Z6.0
+M5
+M30
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
+        f.write(gcode)
+        temp_path = f.name
+
+    try:
+        results = check_gcode_invariants(temp_path)
+
+        tab_result = next(r for r in results if r.id == "GCODE_TAB_PATTERN")
+        assert tab_result.status == Verdict.PASS
+        assert tab_result.details["detected_count"] == 0
+
+        print("PASS: test_no_tabs_detected")
+    finally:
+        os.unlink(temp_path)
+
+
+def test_tabs_only_on_final_pass():
+    """Test that tabs are only detected on the deepest cutting passes."""
+    gcode = """
+(Multi-pass profile - tabs only on final pass at Z-19)
+G21 G90
+G0 Z6.0
+G0 X0 Y0
+M3 S18000
+; First pass at Z-6 (no tabs)
+G1 Z-6.0 F500
+G1 X100 Y0 F1500
+G1 X100 Y100
+G1 X0 Y100
+G1 X0 Y0
+G0 Z6.0
+; Second pass at Z-12 (no tabs)
+G0 X0 Y0
+G1 Z-12.0 F500
+G1 X100 Y0 F1500
+G1 X100 Y100
+G1 X0 Y100
+G1 X0 Y0
+G0 Z6.0
+; Final pass at Z-19 with tabs
+G0 X0 Y0
+G1 Z-19.0 F500
+G1 X50 Y0 F1500
+G1 Z-16.0
+G1 X60 Y0
+G1 Z-19.0
+G1 X100 Y0
+G1 X100 Y50
+G1 Z-16.0
+G1 X100 Y60
+G1 Z-19.0
+G1 X100 Y100
+G1 X0 Y100
+G1 X0 Y0
+G0 Z6.0
+M5
+M30
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
+        f.write(gcode)
+        temp_path = f.name
+
+    try:
+        results = check_gcode_invariants(temp_path)
+
+        tab_result = next(r for r in results if r.id == "GCODE_TAB_PATTERN")
+        assert tab_result.status == Verdict.PASS
+        assert tab_result.details["detected_count"] == 2
+        assert tab_result.details["tabs_at_max_depth"] is True
+
+        print("PASS: test_tabs_only_on_final_pass")
+    finally:
+        os.unlink(temp_path)
+
+
 def run_all_tests():
     """Run all G-code invariant tests."""
     tests = [
@@ -741,6 +885,10 @@ def run_all_tests():
         # Continuous path tests
         test_path_discontinuity,
         test_continuous_path,
+        # Tab pattern tests
+        test_tab_pattern_detected,
+        test_no_tabs_detected,
+        test_tabs_only_on_final_pass,
         # Recipe validation tests
         test_all_recipe_gcodes_pass,
         # Result structure tests

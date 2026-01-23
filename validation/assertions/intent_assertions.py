@@ -1130,26 +1130,17 @@ def _check_tab_count(
     """
     Check that tab count matches expected value.
 
-    Tab validation counts Z-lifts in G-code that occur at cutting depth.
-    This is a heuristic - each tab causes a retract and plunge sequence.
+    Tab validation detects lift-cross-plunge sequences in G-code that occur
+    at max cutting depth. Each tab causes a Z-lift during feed moves on final
+    passes.
 
-    NOTE: This is a placeholder implementation. Full tab detection requires
-    analyzing G-code Z-movement patterns to identify retract/plunge sequences
-    within a continuous profile cut. For now, we report the expected tab count
-    as informational and warn that verification is not yet implemented.
+    Validates:
+    - Detected tab count matches expected tab_count from AST
+    - Detected tab heights match expected tab_height_mm (within tolerance)
     """
     expected_tab_count = assertion.expected.get("tab_count", 0)
-    tab_height = assertion.expected.get("tab_height_mm")
+    expected_tab_height = assertion.expected.get("tab_height_mm")
     tab_width = assertion.expected.get("tab_width_mm")
-
-    # Currently G-code metrics don't track tab-specific data
-    # This would require tracking Z-lift patterns during profile cuts
-    actual: dict[str, Any] = {
-        "expected_tab_count": expected_tab_count,
-        "tab_height_mm": tab_height,
-        "tab_width_mm": tab_width,
-        "note": "Tab count verification not yet implemented",
-    }
 
     if gcode_metrics is None:
         return AssertionResult(
@@ -1157,21 +1148,66 @@ def _check_tab_count(
             source=assertion.source,
             intent=assertion.intent,
             expected=assertion.expected,
-            actual=actual,
+            actual={"error": "No G-code metrics available"},
             status=Verdict.WARN,
             tolerance=assertion.tolerance,
             message="Cannot verify tab count: G-code metrics not provided",
         )
 
-    # Placeholder: report expected tabs but warn that we can't verify
-    # Future implementation would analyze G-code for Z-lift patterns
+    tabs_data = gcode_metrics.get("tabs", {})
+    detected_count = tabs_data.get("detected_count", 0)
+    detected_heights = tabs_data.get("tab_heights_mm", [])
+    max_depth = tabs_data.get("max_cutting_depth_mm", 0)
+    tabs_at_max = tabs_data.get("tabs_at_max_depth", True)
+
+    actual: dict[str, Any] = {
+        "expected_tab_count": expected_tab_count,
+        "detected_tab_count": detected_count,
+        "expected_tab_height_mm": expected_tab_height,
+        "detected_tab_heights_mm": detected_heights,
+        "max_cutting_depth_mm": max_depth,
+        "tabs_at_max_depth": tabs_at_max,
+        "tab_width_mm": tab_width,
+    }
+
+    count_matches = detected_count == expected_tab_count
+
+    height_matches = True
+    height_message = ""
+    if expected_tab_height is not None and detected_heights:
+        avg_detected_height = sum(detected_heights) / len(detected_heights)
+        height_tolerance = max(assertion.tolerance, 0.5)
+        height_matches = abs(avg_detected_height - expected_tab_height) <= height_tolerance
+        if not height_matches:
+            height_message = f"; height mismatch: expected {expected_tab_height}mm, detected avg {avg_detected_height:.2f}mm"
+
+    if count_matches and height_matches and tabs_at_max:
+        return AssertionResult(
+            id=assertion.id,
+            source=assertion.source,
+            intent=assertion.intent,
+            expected=assertion.expected,
+            actual=actual,
+            status=Verdict.PASS,
+            tolerance=assertion.tolerance,
+            message=f"Tab count verified: {detected_count} tabs detected at max depth",
+        )
+
+    failures = []
+    if not count_matches:
+        failures.append(f"count: expected {expected_tab_count}, detected {detected_count}")
+    if not height_matches:
+        failures.append(f"height mismatch{height_message}")
+    if not tabs_at_max:
+        failures.append("tabs not at max cutting depth")
+
     return AssertionResult(
         id=assertion.id,
         source=assertion.source,
         intent=assertion.intent,
         expected=assertion.expected,
         actual=actual,
-        status=Verdict.WARN,
+        status=Verdict.FAIL,
         tolerance=assertion.tolerance,
-        message=f"Tab count ({expected_tab_count}) recorded but verification not yet implemented",
+        message=f"Tab verification failed: {'; '.join(failures)}",
     )

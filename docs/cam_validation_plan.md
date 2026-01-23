@@ -119,6 +119,7 @@ validation/
 | GCODE_TOOL_DECLARED | Tool declared before M6 |
 | GCODE_ENDS_AT_SAFE | Program ends at safe Z |
 | GCODE_CONTINUOUS_PATH | No large XY jumps during cut |
+| GCODE_TAB_PATTERN | Tabs at max depth with consistent heights |
 
 ---
 

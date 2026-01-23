@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-01-17T01:38:43.378179+00:00"
+    "created_at": "2026-01-23T00:23:06.767918+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2,
+    "extraction_time_ms": 0.22,
     "document": {
       "width_mm": 580.0,
       "height_mm": 480.0,
@@ -17,12 +17,13 @@
       ]
     },
     "layers": {
-      "count": 10,
+      "count": 11,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
         "ENGRAVE_PATHS",
         "HOLES",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -71,6 +72,16 @@
           "text_count": 0,
           "elements": []
         },
+        "LABELS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 1,
+          "elements": []
+        },
         "LEGEND": {
           "element_count": 11,
           "rect_count": 1,
@@ -82,13 +93,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 5,
+          "element_count": 7,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 7,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -190,7 +201,7 @@
       "y_max": 340.0
     },
     "text_elements": {
-      "count": 15,
+      "count": 18,
       "dimension_labels": [
         "200.0mm",
         "300.0mm",
@@ -204,7 +215,9 @@
         "Sheet: 300.0 \u00d7 200.0 \u00d7 19.0mm",
         "Features: 1 pocket",
         "Depths:",
-        "\u2022 pocket: 4.0"
+        "\u2022 pocket: 4.0",
+        "Parts (1):",
+        "\u2022 recess"
       ]
     },
     "circles": {
@@ -231,7 +244,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0995,
+    "extraction_time_ms": 0.7339,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -269,21 +282,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.2878,
+    "extraction_time_ms": 1.2761,
     "summary": {
-      "total_lines": 530,
+      "total_lines": 534,
       "comment_lines": 6,
-      "motion_lines": 414,
+      "motion_lines": 415,
       "tool_change_lines": 0,
-      "spindle_lines": 2,
+      "spindle_lines": 3,
       "feed_lines": 313
     },
     "motion": {
-      "g0_count": 204,
+      "g0_count": 205,
       "g1_count": 210,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1725.2973,
+      "total_rapid_distance_mm": 1729.0989,
       "total_feed_distance_mm": 31890.404
     },
     "z_profile": {
@@ -297,9 +310,9 @@
       "max_single_plunge_mm": 10.0
     },
     "xy_bounds": {
-      "x_min": 4.762,
+      "x_min": 0.0,
       "x_max": 295.238,
-      "y_min": 4.763,
+      "y_min": 0.0,
       "y_max": 195.238
     },
     "feeds": {
@@ -330,9 +343,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 20.7036,
+      "rapid_time_s": 20.7492,
       "feed_time_s": 4028.2616,
-      "total_time_s": 4048.9651
+      "total_time_s": 4049.0107
     }
   }
 }

@@ -243,8 +243,8 @@ def test_stl_export_polyline(tmp_path):
                 }
             ),
             placement=Placement(center_xy_mm=(50.0, 50.0)),
-            feature=Feature(type="engrave", depth=1.0, depth_mm=1.0),
-            shape_id="decorative_line",
+            feature=Feature(type="pocket", depth=5.0, depth_mm=5.0),
+            shape_id="polyline_pocket",
         ),
     )
 

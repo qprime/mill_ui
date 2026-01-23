@@ -20,7 +20,7 @@ rect outer profile through outside
     try:
 
         result = subprocess.run(
-            [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", input_file],
+            [sys.executable, "-m", "cli.parse_compositional_pml", input_file],
             capture_output=True,
             text=True,
         )
@@ -51,7 +51,7 @@ rect outer profile through outside
             [
                 sys.executable,
                 "-m",
-                "skills.mill_ui.cli.parse_compositional_pml",
+                "cli.parse_compositional_pml",
                 input_file,
                 "--resolve",
                 "--format",
@@ -90,7 +90,7 @@ rect outer profile through outside
             [
                 sys.executable,
                 "-m",
-                "skills.mill_ui.cli.parse_compositional_pml",
+                "cli.parse_compositional_pml",
                 input_file,
                 "--resolve",
                 "--format",
@@ -112,7 +112,7 @@ rect outer profile through outside
 
 def test_cli_error_on_missing_file():
     result = subprocess.run(
-        [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", "/nonexistent/file.pml"],
+        [sys.executable, "-m", "cli.parse_compositional_pml", "/nonexistent/file.pml"],
         capture_output=True,
         text=True,
     )
@@ -130,7 +130,7 @@ def test_cli_error_on_invalid_pml():
 
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", input_file],
+            [sys.executable, "-m", "cli.parse_compositional_pml", input_file],
             capture_output=True,
             text=True,
         )
@@ -171,7 +171,7 @@ place grid 2 2 gap 100.00mm
             [
                 sys.executable,
                 "-m",
-                "skills.mill_ui.cli.parse_compositional_pml",
+                "cli.parse_compositional_pml",
                 input_file,
                 "--resolve",
                 "--format",

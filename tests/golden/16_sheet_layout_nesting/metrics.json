@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-01-17T01:38:43.557236+00:00"
+    "created_at": "2026-01-23T00:23:06.942769+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.63,
+    "extraction_time_ms": 1.08,
     "document": {
       "width_mm": 1525.0,
       "height_mm": 1512.0,
@@ -17,12 +17,13 @@
       ]
     },
     "layers": {
-      "count": 10,
+      "count": 11,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
         "ENGRAVE_PATHS",
         "HOLES",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -71,6 +72,16 @@
           "text_count": 0,
           "elements": []
         },
+        "LABELS": {
+          "element_count": 22,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 22,
+          "elements": []
+        },
         "LEGEND": {
           "element_count": 11,
           "rect_count": 1,
@@ -82,13 +93,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 5,
+          "element_count": 28,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 28,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -516,7 +527,7 @@
       "y_max": 1372.0
     },
     "text_elements": {
-      "count": 25,
+      "count": 70,
       "dimension_labels": [
         "152.0mm",
         "178.0mm",
@@ -541,7 +552,30 @@
         "Sheet: 1245.0 \u00d7 1232.0 \u00d7 19.0mm",
         "Features: 11 pockets, 11 profiles",
         "Depths:",
-        "\u2022 pocket: 4.0, 6.0"
+        "\u2022 pocket: 4.0, 6.0",
+        "Parts (22):",
+        "\u2022 door1",
+        "\u2022 door1_panel",
+        "\u2022 door2",
+        "\u2022 door2_panel",
+        "\u2022 door3",
+        "\u2022 door3_panel",
+        "\u2022 door4",
+        "\u2022 door4_panel",
+        "\u2022 drawer1",
+        "\u2022 drawer1_panel",
+        "\u2022 drawer2",
+        "\u2022 drawer2_panel",
+        "\u2022 drawer3",
+        "\u2022 drawer3_panel",
+        "\u2022 drawer4",
+        "\u2022 drawer4_panel",
+        "\u2022 drawer5",
+        "\u2022 drawer5_panel",
+        "\u2022 drawer6",
+        "\u2022 drawer6_panel",
+        "\u2022 drawer7",
+        "\u2022 drawer7_panel"
       ]
     },
     "circles": {
@@ -652,7 +686,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.67,
+    "extraction_time_ms": 1.0648,
     "mesh": {
       "vertex_count": 176,
       "face_count": 308,
@@ -660,7 +694,7 @@
       "is_manifold": true,
       "is_volume": true,
       "euler_number": 22,
-      "connected_components": 11
+      "connected_components": 1
     },
     "bounds": {
       "x_min": 10.0,
@@ -691,21 +725,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.1239,
+    "extraction_time_ms": 15.1232,
     "summary": {
-      "total_lines": 9184,
+      "total_lines": 9192,
       "comment_lines": 92,
-      "motion_lines": 7274,
+      "motion_lines": 7276,
       "tool_change_lines": 0,
-      "spindle_lines": 4,
+      "spindle_lines": 6,
       "feed_lines": 5474
     },
     "motion": {
-      "g0_count": 3604,
+      "g0_count": 3606,
       "g1_count": 3670,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 210058.2415,
+      "total_rapid_distance_mm": 210068.7533,
       "total_feed_distance_mm": 585911.864
     },
     "z_profile": {
@@ -732,9 +766,9 @@
       "max_single_plunge_mm": 25.0
     },
     "xy_bounds": {
-      "x_min": 8.412,
+      "x_min": 0.0,
       "x_max": 1191.588,
-      "y_min": 8.412,
+      "y_min": 0.0,
       "y_max": 1211.588
     },
     "feeds": {
@@ -808,9 +842,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 2520.6989,
+      "rapid_time_s": 2520.8251,
       "feed_time_s": 69325.5475,
-      "total_time_s": 71846.2463
+      "total_time_s": 71846.3725
     },
     "file_count": 2
   }

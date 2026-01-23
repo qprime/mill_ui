@@ -13,6 +13,14 @@ import json
 import os
 import sys
 
+import pytest
+
+try:
+    import rtree
+    RTREE_AVAILABLE = True
+except ImportError:
+    RTREE_AVAILABLE = False
+
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -277,6 +285,7 @@ def test_stl_metrics_single_component():
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.skipif(not RTREE_AVAILABLE, reason="rtree package not installed")
 def test_stl_metrics_heightmap():
     """Test heightmap generation."""
     stl_path = get_recipe_stl_path(1, "simple_profile")
@@ -296,6 +305,7 @@ def test_stl_metrics_heightmap():
     print("PASS: test_stl_metrics_heightmap")
 
 
+@pytest.mark.skipif(not RTREE_AVAILABLE, reason="rtree package not installed")
 def test_stl_metrics_heightmap_deterministic():
     """Verify heightmap checksum is deterministic."""
     stl_path = get_recipe_stl_path(1, "simple_profile")

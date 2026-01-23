@@ -57,11 +57,12 @@ def test_export_cad_produces_stl():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         result = _run_cli([
-            "-m", "cli.export_cad",
+            "-m", "cli.mill",
             "--input", str(PML_FILE),
             "--out", tmpdir,
             "--kerf", "6.35",
             "--quality", "medium",
+            "--no-svg",
         ])
 
         output_path = Path(tmpdir)
@@ -86,18 +87,18 @@ def test_export_blueprint_produces_svg():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         result = _run_cli([
-            "-m", "cli.export_blueprint",
+            "-m", "cli.mill",
             "--input", str(PML_FILE),
             "--out", tmpdir,
             "--theme", "dark",
-            "--format", "svg",
+            "--no-stl",
         ])
 
         output_path = Path(tmpdir)
         svg_files = list(output_path.glob("*.svg"))
         assert len(svg_files) > 0, f"No SVG files generated. stderr: {result.stderr}"
 
-        expected_svg = output_path / "example.blueprint.dark.svg"
+        expected_svg = output_path / "example.svg"
         assert expected_svg.exists(), f"Expected SVG not found. Files: {list(output_path.iterdir())}"
 
         svg_content = expected_svg.read_text()
@@ -174,7 +175,7 @@ def test_cli_missing_input_fails():
     print("Running test_cli_missing_input_fails...")
 
     result = _run_cli([
-        "-m", "cli.export_cad",
+        "-m", "cli.mill",
         "--input", "/nonexistent/path/to/file.pml",
         "--out", "/tmp",
     ], check=False)
@@ -195,7 +196,7 @@ def test_cli_invalid_format_fails():
 
     try:
         result = _run_cli([
-            "-m", "cli.export_cad",
+            "-m", "cli.mill",
             "--input", invalid_file,
             "--out", "/tmp",
         ], check=False)

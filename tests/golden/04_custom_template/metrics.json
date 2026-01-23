@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "04_custom_template",
-    "created_at": "2026-01-17T01:38:42.848736+00:00"
+    "created_at": "2026-01-23T00:23:06.207732+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.4,
+    "extraction_time_ms": 0.51,
     "document": {
       "width_mm": 580.0,
       "height_mm": 460.0,
@@ -17,12 +17,13 @@
       ]
     },
     "layers": {
-      "count": 10,
+      "count": 11,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
         "ENGRAVE_PATHS",
         "HOLES",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -128,6 +129,16 @@
             }
           ]
         },
+        "LABELS": {
+          "element_count": 6,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
         "LEGEND": {
           "element_count": 11,
           "rect_count": 1,
@@ -139,13 +150,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 8,
+          "element_count": 15,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 8,
+          "text_count": 15,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -273,7 +284,7 @@
       "y_max": 320.0
     },
     "text_elements": {
-      "count": 24,
+      "count": 37,
       "dimension_labels": [
         "10mm",
         "10mm",
@@ -288,7 +299,15 @@
       ],
       "depth_annotations": [
         "Features: 1 profile, 1 pocket, 4 holes",
+        "hole:1",
+        "hole:2",
+        "hole:3",
+        "hole:4",
         "\u2022 hole: 10.0",
+        "\u2022 hole:1",
+        "\u2022 hole:2",
+        "\u2022 hole:3",
+        "\u2022 hole:4",
         "\u2022 pocket: 3.0"
       ],
       "notes_text": [
@@ -299,7 +318,14 @@
         "\u2022 hole: 10.0",
         "\u2022 pocket: 3.0",
         "Hole Diameters:",
-        "\u2022 \u23006.0mm"
+        "\u2022 \u23006.0mm",
+        "Parts (6):",
+        "\u2022 hole:1",
+        "\u2022 hole:2",
+        "\u2022 hole:3",
+        "\u2022 hole:4",
+        "\u2022 panel:outer",
+        "\u2022 panel:recess"
       ]
     },
     "circles": {
@@ -335,7 +361,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.2957,
+    "extraction_time_ms": 3.3243,
     "mesh": {
       "vertex_count": 1040,
       "face_count": 2076,
@@ -374,21 +400,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 11.1373,
+    "extraction_time_ms": 11.1561,
     "summary": {
-      "total_lines": 3942,
+      "total_lines": 3954,
       "comment_lines": 18,
-      "motion_lines": 3783,
+      "motion_lines": 3786,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
+      "spindle_lines": 9,
       "feed_lines": 3717
     },
     "motion": {
-      "g0_count": 186,
+      "g0_count": 189,
       "g1_count": 3597,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 13950.0992,
+      "total_rapid_distance_mm": 13962.2359,
       "total_feed_distance_mm": 24837.863699999998
     },
     "z_profile": {
@@ -863,9 +889,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 167.4011,
+      "rapid_time_s": 167.5468,
       "feed_time_s": 2799.8375,
-      "total_time_s": 2967.2385999999997
+      "total_time_s": 2967.3843
     },
     "file_count": 3
   }

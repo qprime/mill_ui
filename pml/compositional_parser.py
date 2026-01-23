@@ -1598,7 +1598,8 @@ class CompositionalPMLParser:
         self.expect('keyword', 'triangle')
 
         triangle_id = None
-        if self.peek().type == 'identifier':
+        token = self.peek()
+        if self._is_valid_id_token(token) and token.value not in ('base', 'pocket', 'profile', 'engrave', 'hole', 'edge'):
             triangle_id = self.advance().value
 
         self.expect('keyword', 'base')

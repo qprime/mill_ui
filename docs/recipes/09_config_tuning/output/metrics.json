@@ -4,7 +4,7 @@
     "hints_ms": 0.0,
     "plan_ms": 0.3,
     "gcode_ms": 0.52,
-    "svg_ms": 0.18,
+    "svg_ms": 0.17,
     "stl_ms": 0.0,
     "total_ms": 0.91,
     "parse_ms": 0.08

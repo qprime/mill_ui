@@ -5,6 +5,8 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+import pytest
+
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
 from nesting import nest_and_generate
 
@@ -18,7 +20,7 @@ def discover_nest_files() -> list[Path]:
     return sorted(nest_files)
 
 
-def test_nest_file(nest_path: Path) -> tuple[bool, str, dict]:
+def _run_nest_file(nest_path: Path) -> tuple[bool, str, dict]:
     try:
         source = nest_path.read_text()
         job = parse_nest_pml(source)
@@ -49,6 +51,17 @@ def test_nest_file(nest_path: Path) -> tuple[bool, str, dict]:
         return False, str(e), {}
 
 
+NEST_FILES = discover_nest_files()
+
+
+@pytest.mark.skipif(not NEST_FILES, reason="No .nest files found in docs/recipes/")
+@pytest.mark.parametrize("nest_path", NEST_FILES, ids=lambda p: p.stem)
+def test_nest_file(nest_path: Path):
+    success, message, metrics = _run_nest_file(nest_path)
+    if not success:
+        pytest.fail(message)
+
+
 def run_nesting_recipe_tests():
     print("=" * 60)
     print("Nesting Recipe Tests (.nest files)")
@@ -69,7 +82,7 @@ def run_nesting_recipe_tests():
         rel_path = nest_path.relative_to(Path(__file__).parent.parent)
         print(f"Testing: {rel_path}")
 
-        success, message, metrics = test_nest_file(nest_path)
+        success, message, metrics = _run_nest_file(nest_path)
 
         if success:
             print(f"  ✓ PASS - {metrics['algorithm']}: {metrics['total_parts']} parts → {metrics['total_sheets']} sheets ({metrics['utilization']} util, {metrics['time_ms']}ms)")

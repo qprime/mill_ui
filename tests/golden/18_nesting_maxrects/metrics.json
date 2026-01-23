@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "18_nesting_maxrects",
-    "created_at": "2026-01-17T01:38:44.404100+00:00"
+    "created_at": "2026-01-23T00:23:07.794923+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.44,
+    "extraction_time_ms": 0.63,
     "document": {
       "width_mm": 1512.0,
       "height_mm": 1525.0,
@@ -17,12 +17,13 @@
       ]
     },
     "layers": {
-      "count": 10,
+      "count": 11,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
         "ENGRAVE_PATHS",
         "HOLES",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -71,6 +72,16 @@
           "text_count": 0,
           "elements": []
         },
+        "LABELS": {
+          "element_count": 10,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 10,
+          "elements": []
+        },
         "LEGEND": {
           "element_count": 11,
           "rect_count": 1,
@@ -82,13 +93,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 5,
+          "element_count": 16,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 16,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -336,7 +347,7 @@
       "y_max": 1385.0
     },
     "text_elements": {
-      "count": 23,
+      "count": 44,
       "dimension_labels": [
         "203.0mm",
         "203.0mm",
@@ -358,7 +369,18 @@
         "Sheet: 1232.0 \u00d7 1245.0 \u00d7 19.0mm",
         "Features: 8 profiles, 2 pockets",
         "Depths:",
-        "\u2022 pocket: 6.0"
+        "\u2022 pocket: 6.0",
+        "Parts (10):",
+        "\u2022 small_door_0_rect",
+        "\u2022 small_door_1_rect",
+        "\u2022 small_door_2_rect",
+        "\u2022 small_door_3_rect",
+        "\u2022 small_door_4_rect",
+        "\u2022 small_door_5_rect",
+        "\u2022 tall_door_0_door:outer",
+        "\u2022 tall_door_0_door:panel",
+        "\u2022 tall_door_1_door:outer",
+        "\u2022 tall_door_1_door:panel"
       ]
     },
     "circles": {
@@ -421,7 +443,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.5065,
+    "extraction_time_ms": 14.6616,
     "summary": {
       "total_lines": 46998,
       "comment_lines": 260,

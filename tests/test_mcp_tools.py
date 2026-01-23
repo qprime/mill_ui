@@ -8,6 +8,16 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
+try:
+    import mcp
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(not MCP_AVAILABLE, reason="mcp package not installed")
+
 
 def test_simple_rect_profile():
     print("Running test_simple_rect_profile...")
@@ -155,8 +165,8 @@ def test_nest_with_template():
             result = json.loads(result_json)
 
             assert "error" not in result
-            # Shaker template creates 2 items per door
-            assert result["sheets"][0]["items"] == 2
+            # Shaker template creates 4 items per door (profile + frame regions)
+            assert result["sheets"][0]["items"] == 4
     print("  PASS")
     return True
 

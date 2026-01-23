@@ -74,6 +74,20 @@ from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, Co
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
 
 
+def _feature_from_profile_gen(node: ProfileGen) -> Feature:
+    depth_value = node.depth
+    depth_mm = None if depth_value == "through" else float(depth_value)
+    return Feature(
+        type="profile",
+        depth=str(depth_value),
+        side=node.side,
+        depth_mm=depth_mm,
+        tab_count=node.tab_count,
+        tab_height_mm=node.tab_height_mm,
+        tab_width_mm=node.tab_width_mm,
+    )
+
+
 def sample_catmull_rom_spline(control_points: list[tuple[float, float]], tolerance_mm: float) -> list[tuple[float, float]]:
     if len(control_points) < 2:
         return list(control_points)
@@ -614,10 +628,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle ProfileGen: Generate profile cut item for region boundary."""
-        depth_value = node.depth
-        depth_mm = None if depth_value == "through" else float(depth_value)
-
         shape_context = params.get("shape_context")
         if shape_context:
             shape_type = shape_context["type"]
@@ -633,12 +643,7 @@ class LayoutResolver:
             type=shape_type,
             geometry=Geometry(data=geometry_data),
             placement=Placement(center_xy_mm=region.center),
-            feature=Feature(
-                type="profile",
-                depth=str(depth_value) if depth_value == "through" else str(depth_value),
-                side=node.side,
-                depth_mm=depth_mm,
-            ),
+            feature=_feature_from_profile_gen(node),
             shape_id=self._next_shape_id("generated_profile"),
         )
         items.append(profile_item)
@@ -1237,19 +1242,12 @@ class LayoutResolver:
         for child in node.children:
             if isinstance(child, ProfileGen):
                 polygon_points = list(arch_domain.outer_boundary)
-                depth_value = child.depth
-                depth_mm = None if depth_value == "through" else float(depth_value)
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
                     geometry=Geometry(data={"points": polygon_points, "holes": []}),
                     placement=Placement(center_xy_mm=arch_region.center),
-                    feature=Feature(
-                        type="profile",
-                        depth=str(depth_value),
-                        side=child.side,
-                        depth_mm=depth_mm,
-                    ),
+                    feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("arch_profile"),
                 )
                 items.append(profile_item)
@@ -1320,19 +1318,12 @@ class LayoutResolver:
 
         for child in node.children:
             if isinstance(child, ProfileGen):
-                depth_value = child.depth
-                depth_mm = None if depth_value == "through" else float(depth_value)
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
                     geometry=Geometry(data={"points": abs_points, "holes": []}),
                     placement=Placement(center_xy_mm=bounds_center),
-                    feature=Feature(
-                        type="profile",
-                        depth=str(depth_value),
-                        side=child.side,
-                        depth_mm=depth_mm,
-                    ),
+                    feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("polygon_profile"),
                 )
                 items.append(profile_item)
@@ -1392,19 +1383,12 @@ class LayoutResolver:
 
         for child in node.children:
             if isinstance(child, ProfileGen):
-                depth_value = child.depth
-                depth_mm = None if depth_value == "through" else float(depth_value)
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
                     geometry=Geometry(data={"points": points, "holes": []}),
                     placement=Placement(center_xy_mm=triangle_center),
-                    feature=Feature(
-                        type="profile",
-                        depth=str(depth_value),
-                        side=child.side,
-                        depth_mm=depth_mm,
-                    ),
+                    feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("triangle_profile"),
                 )
                 items.append(profile_item)

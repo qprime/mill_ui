@@ -1106,7 +1106,6 @@ class CompositionalPMLParser:
             )
         side = self.advance().value
 
-        # Parse depth: "through" or numeric with unit
         depth_token = self.peek()
         if depth_token.type == 'keyword' and depth_token.value == 'through':
             self.advance()
@@ -1119,8 +1118,26 @@ class CompositionalPMLParser:
                 depth_token.line, depth_token.column
             )
 
+        tab_count = None
+        tab_height_mm = None
+        tab_width_mm = None
+        if self.peek().type == 'keyword' and self.peek().value == 'tabs':
+            self.advance()
+            tab_count = int(self.expect('number').value)
+            self.expect('keyword', 'height')
+            tab_height_mm = self.expect('number_with_unit').value
+            if self.peek().type == 'keyword' and self.peek().value == 'width':
+                self.advance()
+                tab_width_mm = self.expect('number_with_unit').value
+
         self.expect_line_end()
-        return ProfileGen(side=side, depth=depth)
+        return ProfileGen(
+            side=side,
+            depth=depth,
+            tab_count=tab_count,
+            tab_height_mm=tab_height_mm,
+            tab_width_mm=tab_width_mm,
+        )
 
     def parse_pocket_gen(self) -> PocketGen:
         """Parse: pocket <depth>

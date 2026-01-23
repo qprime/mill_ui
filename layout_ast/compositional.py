@@ -161,14 +161,11 @@ class SplinePath:
 
 @dataclass(frozen=True)
 class ProfileGen:
-    """Profile cut generator node.
-
-    Attributes:
-        side: Cut position - "outside", "inside", or "on"
-        depth: "through" or depth in mm
-    """
-    side: str  # "outside", "inside", "on"
-    depth: str | float  # "through" or numeric depth
+    side: str
+    depth: str | float
+    tab_count: int | None = None
+    tab_height_mm: float | None = None
+    tab_width_mm: float | None = None
 
 
 @dataclass(frozen=True)

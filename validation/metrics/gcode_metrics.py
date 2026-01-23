@@ -186,6 +186,30 @@ class TimeEstimateMetrics:
 
 
 @dataclass
+class TabMetrics:
+    """Tab detection metrics for profile cuts.
+
+    Tabs are holding tabs that keep parts attached during cutting. They appear
+    as lift-cross-plunge sequences on final passes (at max cutting depth).
+
+    Pattern: cutting at depth -> lift to tab_z -> XY motion -> plunge to depth
+    """
+
+    detected_count: int = 0
+    tab_heights_mm: list[float] = field(default_factory=list)
+    max_cutting_depth_mm: float = 0.0
+    tabs_at_max_depth: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "detected_count": self.detected_count,
+            "tab_heights_mm": [round_metric(h) for h in self.tab_heights_mm],
+            "max_cutting_depth_mm": round_metric(self.max_cutting_depth_mm),
+            "tabs_at_max_depth": self.tabs_at_max_depth,
+        }
+
+
+@dataclass
 class GCodeMetrics:
     """Complete metrics for a G-code file."""
 
@@ -199,6 +223,7 @@ class GCodeMetrics:
     tools: ToolMetrics = field(default_factory=ToolMetrics)
     operations: OperationMetrics = field(default_factory=OperationMetrics)
     time_estimate: TimeEstimateMetrics = field(default_factory=TimeEstimateMetrics)
+    tabs: TabMetrics = field(default_factory=TabMetrics)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -213,6 +238,7 @@ class GCodeMetrics:
                 "tools": self.tools.to_dict(),
                 "operations": self.operations.to_dict(),
                 "time_estimate": self.time_estimate.to_dict(),
+                "tabs": self.tabs.to_dict(),
             }
         }
 
@@ -330,9 +356,10 @@ extract_gcode_metrics_from_file = extract_gcode_metrics
 class _GCodeParser:
     """Internal G-code parser for metric extraction."""
 
-    def __init__(self, config: GCodeConfig):
+    def __init__(self, config: GCodeConfig, lines: list[str] | None = None):
         self.config = config
         self.metrics = GCodeMetrics()
+        self._lines = lines
 
         # Current machine state
         self.current_x: float = 0.0
@@ -360,6 +387,7 @@ class _GCodeParser:
 
     def parse(self, lines: list[str]) -> GCodeMetrics:
         """Parse all lines and return metrics."""
+        self._lines = lines
         for line in lines:
             self._parse_line(line.strip())
 
@@ -825,6 +853,214 @@ class _GCodeParser:
             self.metrics.time_estimate.feed_time_s
         )
 
+        if self._lines:
+            self.metrics.tabs = _detect_tabs_from_lines(
+                self._lines, self.config.z_tolerance
+            )
+
 
 # Convenience alias
 extract_gcode_metrics_from_file = extract_gcode_metrics
+
+
+def detect_tabs_from_content(
+    gcode_content: str,
+    z_tolerance: float = 0.01,
+) -> TabMetrics:
+    """Detect tabs from G-code content string.
+
+    Tabs appear as lift-cross-plunge sequences during feed moves at the deepest
+    cutting levels. The pattern is:
+    1. Cutting at max depth (e.g., Z=-19mm)
+    2. Lift to tab_z during feed move (e.g., Z=-16mm)
+    3. XY motion at tab_z
+    4. Plunge back to max depth
+
+    Args:
+        gcode_content: G-code content as string
+        z_tolerance: Tolerance for Z-level comparison (mm)
+
+    Returns:
+        TabMetrics with detected tab information
+    """
+    lines = gcode_content.splitlines()
+    return _detect_tabs_from_lines(lines, z_tolerance)
+
+
+def detect_tabs_from_file(
+    gcode_path: str | Path,
+    z_tolerance: float = 0.01,
+) -> TabMetrics:
+    """Detect tabs from a G-code file.
+
+    Args:
+        gcode_path: Path to the G-code file
+        z_tolerance: Tolerance for Z-level comparison (mm)
+
+    Returns:
+        TabMetrics with detected tab information
+    """
+    gcode_path = Path(gcode_path)
+    if not gcode_path.exists():
+        return TabMetrics()
+
+    with open(gcode_path, "r", encoding="utf-8", errors="replace") as f:
+        lines = f.readlines()
+
+    return _detect_tabs_from_lines(lines, z_tolerance)
+
+
+def _detect_tabs_from_lines(lines: list[str], z_tolerance: float) -> TabMetrics:
+    """Detect tabs from G-code lines.
+
+    Tab detection algorithm:
+    1. First pass: find max cutting depth (most negative Z during feed moves)
+    2. Second pass: detect lift-cross-plunge patterns near max depth
+
+    A tab is detected when:
+    - We're at or near max cutting depth (within tolerance of deepest Z)
+    - Z increases (lift) during a feed move (G1)
+    - XY motion continues at the lifted Z
+    - Z decreases (plunge) back toward max depth
+
+    The tab height is the difference between the lifted Z and the cutting depth.
+    """
+    moves = _parse_moves(lines)
+    if not moves:
+        return TabMetrics()
+
+    cutting_depths = [m["z"] for m in moves if m["z"] < 0 and m["type"] == "feed"]
+    if not cutting_depths:
+        return TabMetrics()
+
+    max_cutting_depth = min(cutting_depths)
+
+    depth_threshold = max_cutting_depth + z_tolerance
+
+    tabs: list[dict] = []
+    tab_heights: list[float] = []
+    tabs_not_at_max = False
+
+    i = 0
+    while i < len(moves) - 2:
+        m0 = moves[i]
+        m1 = moves[i + 1]
+        m2 = moves[i + 2]
+
+        if m0["type"] != "feed" or m0["z"] > depth_threshold:
+            i += 1
+            continue
+
+        cutting_z = m0["z"]
+
+        is_lift = (
+            m1["type"] == "feed" and
+            m1["z"] > cutting_z + z_tolerance and
+            m1["z"] < 0
+        )
+
+        if not is_lift:
+            i += 1
+            continue
+
+        lifted_z = m1["z"]
+
+        j = i + 2
+        while j < len(moves):
+            mj = moves[j]
+            if mj["type"] != "feed":
+                break
+            if abs(mj["z"] - lifted_z) > z_tolerance:
+                break
+            j += 1
+
+        if j >= len(moves):
+            i += 1
+            continue
+
+        plunge_move = moves[j] if j < len(moves) else None
+        if plunge_move is None:
+            i += 1
+            continue
+
+        is_plunge = (
+            plunge_move["type"] == "feed" and
+            plunge_move["z"] < lifted_z - z_tolerance and
+            plunge_move["z"] <= cutting_z + z_tolerance
+        )
+
+        if is_plunge:
+            tab_height = lifted_z - cutting_z
+            tabs.append({
+                "cutting_z": cutting_z,
+                "lifted_z": lifted_z,
+                "tab_height": tab_height,
+                "line": m0.get("line", 0),
+            })
+            tab_heights.append(tab_height)
+
+            if cutting_z > max_cutting_depth + z_tolerance:
+                tabs_not_at_max = True
+
+            i = j + 1
+        else:
+            i += 1
+
+    return TabMetrics(
+        detected_count=len(tabs),
+        tab_heights_mm=tab_heights,
+        max_cutting_depth_mm=max_cutting_depth,
+        tabs_at_max_depth=not tabs_not_at_max,
+    )
+
+
+def _parse_moves(lines: list[str]) -> list[dict]:
+    """Parse G-code lines into a list of move dictionaries.
+
+    Returns list of dicts with keys: type, x, y, z, line
+    type is 'rapid' for G0, 'feed' for G1/G2/G3
+    """
+    moves: list[dict] = []
+    current_x = 0.0
+    current_y = 0.0
+    current_z = 0.0
+    current_mode = 0
+
+    for line_num, line in enumerate(lines, 1):
+        line = line.strip()
+        if not line or line.startswith("(") or line.startswith(";"):
+            continue
+
+        g_match = G_CODE_PATTERN.search(line)
+        if g_match:
+            g_code = int(g_match.group(1))
+            if g_code in (0, 1, 2, 3):
+                current_mode = g_code
+
+        x_match = X_PATTERN.search(line)
+        y_match = Y_PATTERN.search(line)
+        z_match = Z_PATTERN.search(line)
+
+        has_motion = x_match or y_match or z_match
+        if not has_motion:
+            continue
+
+        new_x = float(x_match.group(1)) if x_match else current_x
+        new_y = float(y_match.group(1)) if y_match else current_y
+        new_z = float(z_match.group(1)) if z_match else current_z
+
+        move_type = "rapid" if current_mode == 0 else "feed"
+
+        moves.append({
+            "type": move_type,
+            "x": new_x,
+            "y": new_y,
+            "z": new_z,
+            "line": line_num,
+        })
+
+        current_x = new_x
+        current_y = new_y
+        current_z = new_z
+
+    return moves

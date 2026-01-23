@@ -267,20 +267,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        outer_rect = Item(
-            kind="shape",
-            type="Rect",
-            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
-            placement=Placement(center_xy_mm=region.center),
-            feature=Feature(
-                type="profile",
-                depth=node.profile_depth,
-                side=node.profile_side,
-                depth_mm=None if DepthMode.is_through(node.profile_depth) else float(node.profile_depth),
-            ),
-        )
-        items.append(outer_rect)
-
         inner_region = region.inset(node.width_mm)
         for child in node.children:
             self._resolve_node(child, inner_region, items, params)

@@ -67,19 +67,17 @@ Use case: Margins, safety zones, workholding clearance.
 
 ### Frame
 
-Creates profile at boundary, produces inner field region for children.
+Layout manager that insets the current region, producing an inner field for children.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | width_mm | float | Frame width (edge to inner field) |
 | children | tuple | Nodes within inner field |
-| profile_depth | str | Default: "through" |
-| profile_side | str | Default: "outside" |
 
 Properties:
 - Works on ANY closed region (rect, circle, irregular)
-- Automatically creates outer profile
 - Children operate in region shrunk by frame width
+- Parent shape is responsible for its own profile cut
 
 Use case: Shaker panels, decorative frames, structural borders.
 

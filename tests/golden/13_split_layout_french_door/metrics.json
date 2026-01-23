@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "13_split_layout_french_door",
-    "created_at": "2026-01-23T00:23:06.804197+00:00"
+    "created_at": "2026-01-23T01:25:10.411268+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.67,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -115,36 +115,6 @@
               "element_type": "rect",
               "bounds": [
                 170.0,
-                170.0,
-                360.0,
-                460.0
-              ],
-              "center": [
-                265.0,
-                315.0
-              ],
-              "width": 190.0,
-              "height": 290.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                420.0,
-                170.0,
-                610.0,
-                460.0
-              ],
-              "center": [
-                515.0,
-                315.0
-              ],
-              "width": 190.0,
-              "height": 290.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                170.0,
                 520.0,
                 360.0,
                 810.0
@@ -167,6 +137,36 @@
               "center": [
                 515.0,
                 665.0
+              ],
+              "width": 190.0,
+              "height": 290.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                170.0,
+                170.0,
+                360.0,
+                460.0
+              ],
+              "center": [
+                265.0,
+                315.0
+              ],
+              "width": 190.0,
+              "height": 290.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                420.0,
+                170.0,
+                610.0,
+                460.0
+              ],
+              "center": [
+                515.0,
+                315.0
               ],
               "width": 190.0,
               "height": 290.0
@@ -336,7 +336,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8086,
+    "extraction_time_ms": 0.7626,
     "mesh": {
       "vertex_count": 40,
       "face_count": 76,
@@ -374,7 +374,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.114,
+    "extraction_time_ms": 7.1578,
     "summary": {
       "total_lines": 3312,
       "comment_lines": 24,
@@ -388,8 +388,8 @@
       "g1_count": 1320,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 40915.311799999996,
-      "total_feed_distance_mm": 149203.512
+      "total_rapid_distance_mm": 42230.1107,
+      "total_feed_distance_mm": 149203.504
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -462,9 +462,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 490.9837,
-      "feed_time_s": 18068.256699999998,
-      "total_time_s": 18559.2404
+      "rapid_time_s": 506.7613,
+      "feed_time_s": 18068.255699999998,
+      "total_time_s": 18575.017
     },
     "file_count": 2
   }

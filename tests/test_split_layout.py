@@ -25,7 +25,7 @@ rect outer profile through outside
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
-    assert len(profile_items) == 2, f"Expected 2 profiles, got {len(profile_items)}"
+    assert len(profile_items) == 1, f"Expected 1 profile, got {len(profile_items)}"
     assert len(pocket_items) == 4, f"Expected 4 pockets (2×2 panes), got {len(pocket_items)}"
 
 
@@ -159,7 +159,7 @@ rect door_outer profile through outside
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
-    assert len(profile_items) == 2
+    assert len(profile_items) == 1
     assert len(pocket_items) == 4
 
 

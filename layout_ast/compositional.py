@@ -21,8 +21,6 @@ class Inset:
 class Frame:
     width_mm: float
     children: tuple[Any, ...] = ()
-    profile_depth: str | float = "through"
-    profile_side: str = "outside"
 
 
 @dataclass(frozen=True)

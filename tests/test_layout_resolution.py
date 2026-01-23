@@ -89,8 +89,8 @@ def test_panel_with_inset():
     return True
 
 
-def test_frame_creates_profile_and_inner_region():
-    print("Running test_frame_creates_profile_and_inner_region...")
+def test_frame_insets_region_for_children():
+    print("Running test_frame_insets_region_for_children...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
         root=Panel(
@@ -116,27 +116,54 @@ def test_frame_creates_profile_and_inner_region():
 
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 3
-
+    assert len(flat.items) == 2
 
     outer = flat.items[0]
     assert outer.shape_id == "outer"
     assert outer.geometry.data["w_mm"] == 400.0
     assert outer.geometry.data["h_mm"] == 600.0
+    assert outer.feature.type == "profile"
 
-
-    frame_profile = flat.items[1]
-    assert frame_profile.feature.type == "profile"
-    assert frame_profile.geometry.data["w_mm"] == 400.0
-    assert frame_profile.geometry.data["h_mm"] == 600.0
-
-
-    inner = flat.items[2]
+    inner = flat.items[1]
     assert inner.shape_id == "inner"
     assert inner.feature.type == "pocket"
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
+    print("  PASS")
+    return True
+
+
+def test_frame_does_not_emit_profile():
+    print("Running test_frame_does_not_emit_profile...")
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        root=Panel(
+            children=(
+                Rect(
+                    children=(
+                        Frame(
+                            width_mm=50,
+                            children=(
+                                Rect(
+                                    feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            )
+        ),
+    )
+
+    flat = resolve_layout(ast)
+
+    profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
+    assert len(profile_items) == 0, f"Frame should not emit profile, but found {len(profile_items)}"
+
+    pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
+    assert len(pocket_items) == 1
+    assert pocket_items[0].geometry.data["w_mm"] == 300.0
+    assert pocket_items[0].geometry.data["h_mm"] == 500.0
     print("  PASS")
     return True
 
@@ -253,9 +280,7 @@ def test_place_grid_with_components():
 
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 12
-
+    assert len(flat.items) == 8
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "outer"
@@ -316,14 +341,11 @@ def test_acceptance_4_instances_frame_grid_pocket():
 
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 24
-
+    assert len(flat.items) == 20
 
     assert flat.sheet.width_mm == 1200
     assert flat.sheet.height_mm == 1200
     assert flat.project == "acceptance_test_grid_panels"
-
 
     pml_output = format_pml(flat)
     assert "sheet 1200.00mm 1200.00mm 19.00mm" in pml_output
@@ -331,13 +353,10 @@ def test_acceptance_4_instances_frame_grid_pocket():
     assert "profile through outside" in pml_output
     assert "pocket 5.00mm" in pml_output
 
-
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
-
-    assert len(profile_items) == 8
-
+    assert len(profile_items) == 4
 
     assert len(pocket_items) == 16
 
@@ -578,7 +597,8 @@ if __name__ == "__main__":
     tests = [
         test_simple_panel_with_rect,
         test_panel_with_inset,
-        test_frame_creates_profile_and_inner_region,
+        test_frame_insets_region_for_children,
+        test_frame_does_not_emit_profile,
         test_grid_subdivides_region,
         test_component_definition_and_use,
         test_place_grid_with_components,

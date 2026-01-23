@@ -20,7 +20,6 @@
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <rect x="140.0" y="140.0" width="400.0" height="600.0" />
-    <rect x="140.0" y="140.0" width="400.0" height="600.0" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
     <path d="M 215.000 215.000 L 340.000 415.000 L 465.000 215.000 Z" fill-rule="evenodd" />
@@ -73,7 +72,7 @@
   <g id="NOTES" class="notes">
     <text x="20" y="760.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="772.0" class="notes">Sheet: 400.0 × 600.0 × 19.0mm</text>
-    <text x="20" y="784.0" class="notes">Features: 2 profiles, 4 pockets</text>
+    <text x="20" y="784.0" class="notes">Features: 1 profile, 4 pockets</text>
     <text x="20" y="796.0" class="notes">Depths:</text>
     <text x="30" y="808.0" class="notes">• pocket: 6.0</text>
   </g>

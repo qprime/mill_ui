@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "26_faux_shutter_panel",
-    "created_at": "2026-01-23T00:23:07.917129+00:00"
+    "created_at": "2026-01-23T01:25:11.522048+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -115,148 +115,13 @@
               "element_type": "rect",
               "bounds": [
                 140.0,
-                175.0769,
+                692.9231,
                 390.0,
-                187.0769
+                704.9231
               ],
               "center": [
                 265.0,
-                181.0769
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                222.1538,
-                390.0,
-                234.1538
-              ],
-              "center": [
-                265.0,
-                228.1538
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                269.2308,
-                390.0,
-                281.2308
-              ],
-              "center": [
-                265.0,
-                275.2308
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                316.3077,
-                390.0,
-                328.3077
-              ],
-              "center": [
-                265.0,
-                322.3077
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                363.3846,
-                390.0,
-                375.3846
-              ],
-              "center": [
-                265.0,
-                369.3846
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                410.4615,
-                390.0,
-                422.4615
-              ],
-              "center": [
-                265.0,
-                416.4615
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                457.5385,
-                390.0,
-                469.5385
-              ],
-              "center": [
-                265.0,
-                463.5385
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                504.6154,
-                390.0,
-                516.6154
-              ],
-              "center": [
-                265.0,
-                510.6154
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                551.6923,
-                390.0,
-                563.6923
-              ],
-              "center": [
-                265.0,
-                557.6923
-              ],
-              "width": 250.0,
-              "height": 12.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                598.7692,
-                390.0,
-                610.7692
-              ],
-              "center": [
-                265.0,
-                604.7692
+                698.9231
               ],
               "width": 250.0,
               "height": 12.0
@@ -280,13 +145,148 @@
               "element_type": "rect",
               "bounds": [
                 140.0,
-                692.9231,
+                598.7692,
                 390.0,
-                704.9231
+                610.7692
               ],
               "center": [
                 265.0,
-                698.9231
+                604.7692
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                551.6923,
+                390.0,
+                563.6923
+              ],
+              "center": [
+                265.0,
+                557.6923
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                504.6154,
+                390.0,
+                516.6154
+              ],
+              "center": [
+                265.0,
+                510.6154
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                457.5385,
+                390.0,
+                469.5385
+              ],
+              "center": [
+                265.0,
+                463.5385
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                410.4615,
+                390.0,
+                422.4615
+              ],
+              "center": [
+                265.0,
+                416.4615
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                363.3846,
+                390.0,
+                375.3846
+              ],
+              "center": [
+                265.0,
+                369.3846
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                316.3077,
+                390.0,
+                328.3077
+              ],
+              "center": [
+                265.0,
+                322.3077
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                269.2308,
+                390.0,
+                281.2308
+              ],
+              "center": [
+                265.0,
+                275.2308
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                222.1538,
+                390.0,
+                234.1538
+              ],
+              "center": [
+                265.0,
+                228.1538
+              ],
+              "width": 250.0,
+              "height": 12.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                175.0769,
+                390.0,
+                187.0769
+              ],
+              "center": [
+                265.0,
+                181.0769
               ],
               "width": 250.0,
               "height": 12.0
@@ -486,7 +486,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.1744,
+    "extraction_time_ms": 1.19,
     "mesh": {
       "vertex_count": 200,
       "face_count": 396,
@@ -525,7 +525,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.2556,
+    "extraction_time_ms": 1.2744,
     "summary": {
       "total_lines": 2394,
       "comment_lines": 102,
@@ -539,7 +539,7 @@
       "g1_count": 972,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 33491.25,
+      "total_rapid_distance_mm": 34540.6283,
       "total_feed_distance_mm": 53891.763999999996
     },
     "z_profile": {
@@ -647,9 +647,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 401.895,
+      "rapid_time_s": 414.4876,
       "feed_time_s": 6098.9527,
-      "total_time_s": 6500.8477
+      "total_time_s": 6513.4403
     },
     "file_count": 2
   }

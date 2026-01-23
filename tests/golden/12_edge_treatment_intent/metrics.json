@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-01-23T00:23:06.767918+00:00"
+    "created_at": "2026-01-23T01:25:10.375165+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -244,7 +244,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7339,
+    "extraction_time_ms": 0.7322,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -282,7 +282,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.2761,
+    "extraction_time_ms": 1.2787,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,
@@ -296,8 +296,8 @@
       "g1_count": 210,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1729.0989,
-      "total_feed_distance_mm": 31890.404
+      "total_rapid_distance_mm": 1917.0666,
+      "total_feed_distance_mm": 31890.408
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -343,9 +343,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 20.7492,
-      "feed_time_s": 4028.2616,
-      "total_time_s": 4049.0107
+      "rapid_time_s": 23.0048,
+      "feed_time_s": 4028.2621,
+      "total_time_s": 4051.2669
     }
   }
 }

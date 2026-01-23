@@ -305,9 +305,9 @@ line divider horizontal engrave 1.50mm
     lines = [item for item in flat.items if item.type == "Line"]
 
 
-    assert len(flat.items) == 8
+    assert len(flat.items) == 7
     assert len(circles) == 4
-    assert len(rects) == 2
+    assert len(rects) == 1
     assert len(rounded_rects) == 1
     assert len(lines) == 1
     assert lines[0].feature.depth_mm == 1.5

@@ -76,17 +76,14 @@ rect outer profile through outside
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 3
+    assert len(flat.items) == 2
 
     outer = flat.items[0]
     assert outer.shape_id == "outer"
     assert outer.geometry.data["w_mm"] == 400.0
+    assert outer.feature.type == "profile"
 
-    frame_profile = flat.items[1]
-    assert frame_profile.feature.type == "profile"
-
-    inner = flat.items[2]
+    inner = flat.items[1]
     assert inner.shape_id == "inner"
     assert inner.feature.type == "pocket"
 
@@ -202,16 +199,12 @@ place grid 2 2 gap 100.00mm
 
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 24
-
+    assert len(flat.items) == 20
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
-
-    assert len(profile_items) == 8
-
+    assert len(profile_items) == 4
 
     assert len(pocket_items) == 16
 

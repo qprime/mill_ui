@@ -204,7 +204,7 @@ place grid 2 2 gap 100.00mm
         )
 
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
-        assert "✓ Resolved to 24 flat items" in result.stderr
+        assert "✓ Resolved to 20 flat items" in result.stderr
 
         print("  ✓ PASS")
         return True

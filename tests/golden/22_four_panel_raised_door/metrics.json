@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-01-23T00:23:07.859544+00:00"
+    "created_at": "2026-01-23T01:25:11.463893+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.3,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -115,32 +115,6 @@
               "element_type": "path",
               "bounds": [
                 230.0,
-                230.0,
-                347.5,
-                447.5
-              ],
-              "center": [
-                288.75,
-                338.75
-              ]
-            },
-            {
-              "element_type": "path",
-              "bounds": [
-                432.5,
-                230.0,
-                550.0,
-                447.5
-              ],
-              "center": [
-                491.25,
-                338.75
-              ]
-            },
-            {
-              "element_type": "path",
-              "bounds": [
-                230.0,
                 532.5,
                 347.5,
                 750.0
@@ -161,34 +135,45 @@
               "center": [
                 491.25,
                 641.25
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                230.0,
+                230.0,
+                347.5,
+                447.5
+              ],
+              "center": [
+                288.75,
+                338.75
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                432.5,
+                230.0,
+                550.0,
+                447.5
+              ],
+              "center": [
+                491.25,
+                338.75
               ]
             }
           ]
         },
         "PROFILE_CUTS": {
-          "element_count": 2,
-          "rect_count": 2,
+          "element_count": 1,
+          "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": [
-            {
-              "element_type": "rect",
-              "bounds": [
-                140.0,
-                140.0,
-                640.0,
-                840.0
-              ],
-              "center": [
-                390.0,
-                490.0
-              ],
-              "width": 500.0,
-              "height": 700.0
-            },
             {
               "element_type": "rect",
               "bounds": [
@@ -245,8 +230,8 @@
       }
     },
     "paths": {
-      "total_count": 7,
-      "closed_count": 7,
+      "total_count": 6,
+      "closed_count": 6,
       "open_count": 0,
       "total_length_mm": 1810.0,
       "by_layer": {
@@ -256,8 +241,8 @@
           "length_mm": 1810.0
         },
         "PROFILE_CUTS": {
-          "count": 2,
-          "closed": 2,
+          "count": 1,
+          "closed": 1,
           "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
@@ -288,7 +273,7 @@
       "notes_text": [
         "NOTES",
         "Sheet: 500.0 \u00d7 700.0 \u00d7 19.0mm",
-        "Features: 2 profiles, 4 bevels, 4 pockets",
+        "Features: 1 profile, 4 bevels, 4 pockets",
         "Depths:",
         "\u2022 bevel: 6.0",
         "\u2022 pocket: 2.0"
@@ -299,15 +284,11 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 4,
+      "count": 3,
       "dimensions": [
         [
           15.0,
           8.0
-        ],
-        [
-          500.0,
-          700.0
         ],
         [
           500.0,
@@ -322,7 +303,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9558,
+    "extraction_time_ms": 0.9036,
     "mesh": {
       "vertex_count": 104,
       "face_count": 204,
@@ -361,22 +342,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 9.6757,
+    "extraction_time_ms": 9.5828,
     "summary": {
-      "total_lines": 4403,
-      "comment_lines": 23,
-      "motion_lines": 3494,
+      "total_lines": 4464,
+      "comment_lines": 24,
+      "motion_lines": 3542,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 2630
+      "feed_lines": 2666
     },
     "motion": {
-      "g0_count": 1730,
-      "g1_count": 1764,
+      "g0_count": 1754,
+      "g1_count": 1788,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 40173.110400000005,
-      "total_feed_distance_mm": 171170.652
+      "total_rapid_distance_mm": 47933.013399999996,
+      "total_feed_distance_mm": 177366.42799999999
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -402,10 +383,10 @@
       "max_single_plunge_mm": 25.0
     },
     "xy_bounds": {
-      "x_min": 0.0,
+      "x_min": -1.587,
       "x_max": 781.488,
-      "y_min": 0.0,
-      "y_max": 1131.488
+      "y_min": -431.488,
+      "y_max": 701.587
     },
     "feeds": {
       "min_feed_rate": 250.0,
@@ -450,9 +431,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 482.07730000000004,
-      "feed_time_s": 21006.100000000002,
-      "total_time_s": 21488.1773
+      "rapid_time_s": 575.1962,
+      "feed_time_s": 21625.6776,
+      "total_time_s": 22200.8738
     },
     "file_count": 2
   }

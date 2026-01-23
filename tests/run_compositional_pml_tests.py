@@ -62,12 +62,13 @@ rect outer profile through outside
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
 
-    assert len(flat.items) == 3
+    assert len(flat.items) == 2
 
     outer = flat.items[0]
     assert outer.shape_id == "outer"
+    assert outer.feature.type == "profile"
 
-    inner = flat.items[2]
+    inner = flat.items[1]
     assert inner.shape_id == "inner"
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
@@ -177,14 +178,12 @@ place grid 2 2 gap 100.00mm
 
     flat = resolve_layout(ast)
 
-
-    assert len(flat.items) == 24, f"Expected 24 items, got {len(flat.items)}"
-
+    assert len(flat.items) == 20, f"Expected 20 items, got {len(flat.items)}"
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
-    assert len(profile_items) == 8, f"Expected 8 profiles, got {len(profile_items)}"
+    assert len(profile_items) == 4, f"Expected 4 profiles, got {len(profile_items)}"
     assert len(pocket_items) == 16, f"Expected 16 pockets, got {len(pocket_items)}"
 
     first_outer = flat.items[0]
@@ -195,7 +194,7 @@ place grid 2 2 gap 100.00mm
     assert approx_equal(first_pocket.geometry.data["w_mm"], 230.0)
 
     print("  ✓ PASS - Stage 13 acceptance test validated!")
-    print(f"    - 24 items resolved (8 profiles, 16 pockets)")
+    print(f"    - 20 items resolved (4 profiles, 16 pockets)")
     print(f"    - Matches Stage 12 gold exemplar exactly")
     return True
 

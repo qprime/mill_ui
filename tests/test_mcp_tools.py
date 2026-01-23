@@ -165,8 +165,7 @@ def test_nest_with_template():
             result = json.loads(result_json)
 
             assert "error" not in result
-            # Shaker template creates 4 items per door (profile + frame regions)
-            assert result["sheets"][0]["items"] == 4
+            assert result["sheets"][0]["items"] == 3
     print("  PASS")
     return True
 

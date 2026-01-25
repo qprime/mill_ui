@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-01-25T20:02:53.661145+00:00"
+    "created_at": "2026-01-25T20:39:55.264812+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.22,
+    "extraction_time_ms": 0.25,
     "document": {
       "width_mm": 580.0,
       "height_mm": 480.0,
@@ -255,7 +255,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.708,
+    "extraction_time_ms": 0.7436,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -293,7 +293,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.8291,
+    "extraction_time_ms": 1.8315,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

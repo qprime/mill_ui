@@ -302,27 +302,75 @@ def _collect_dimension_requests(
             )
 
 
-    hole_centers = _hole_centers_in_svg(ast, offset_x, offset_y, y_flip=yf)
-    requests.extend(_hole_spacing_requests(hole_centers, deduplicate=deduplicate))
+    requests.extend(_hole_spacing_requests(ast, offset_x, offset_y, deduplicate=deduplicate, y_flip=yf))
 
     return requests
 
 
-def _hole_centers_in_svg(ast: LayoutAST, offset_x: float, offset_y: float, y_flip=None) -> list[tuple[float, float]]:
+def _hole_centers_grouped_by_parent(
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    y_flip=None,
+) -> list[list[tuple[float, float]]]:
     yf = y_flip if y_flip is not None else (lambda y: y)
-    holes: list[tuple[float, float]] = []
+
+    profile_bounds: list[tuple[float, float, float, float]] = []
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None:
+            continue
+        if item.feature.type != "profile":
+            continue
+        if item.geometry is None or item.placement is None:
+            continue
+
+        cx, cy = item.placement.center_xy_mm
+        w = float(item.geometry.data.get("w_mm", item.geometry.data.get("width", 0)))
+        h = float(item.geometry.data.get("h_mm", item.geometry.data.get("height", 0)))
+        if w <= 0 or h <= 0:
+            continue
+
+        x_min = cx - w / 2
+        x_max = cx + w / 2
+        y_min = cy - h / 2
+        y_max = cy + h / 2
+        profile_bounds.append((x_min, y_min, x_max, y_max))
+
+    holes_by_parent: dict[int, list[tuple[float, float]]] = {}
+    unparented_holes: list[tuple[float, float]] = []
+
     for item in ast.items:
         if item.kind != "shape" or item.feature is None or item.feature.type != "hole":
             continue
         if item.placement is None:
             continue
-        cx, cy = item.placement.center_xy_mm
-        holes.append((offset_x + float(cx), offset_y + yf(float(cy))))
-    return holes
+
+        hx, hy = item.placement.center_xy_mm
+
+        parent_idx = None
+        for idx, (x_min, y_min, x_max, y_max) in enumerate(profile_bounds):
+            if x_min <= hx <= x_max and y_min <= hy <= y_max:
+                parent_idx = idx
+                break
+
+        svg_x = offset_x + float(hx)
+        svg_y = offset_y + yf(float(hy))
+
+        if parent_idx is not None:
+            holes_by_parent.setdefault(parent_idx, []).append((svg_x, svg_y))
+        else:
+            unparented_holes.append((svg_x, svg_y))
+
+    result = list(holes_by_parent.values())
+    if unparented_holes:
+        result.append(unparented_holes)
+    return result
 
 
-def _hole_spacing_requests(
+def _hole_spacing_requests_for_group(
     centers: list[tuple[float, float]],
+    seen_h_spacings: set[int],
+    seen_v_spacings: set[int],
     *,
     deduplicate: bool = True,
 ) -> list[DimensionRequest]:
@@ -330,11 +378,6 @@ def _hole_spacing_requests(
         return []
 
     requests: list[DimensionRequest] = []
-
-
-    seen_h_spacings: set[int] = set()
-    seen_v_spacings: set[int] = set()
-
 
     by_y: dict[float, list[tuple[float, float]]] = {}
     for x, y in centers:
@@ -365,7 +408,6 @@ def _hole_spacing_requests(
                 )
             )
 
-
     by_x: dict[float, list[tuple[float, float]]] = {}
     for x, y in centers:
         key = round(x, 1)
@@ -394,6 +436,32 @@ def _hole_spacing_requests(
                     text=_fmt_mm(dy),
                 )
             )
+
+    return requests
+
+
+def _hole_spacing_requests(
+    ast: LayoutAST,
+    offset_x: float,
+    offset_y: float,
+    *,
+    deduplicate: bool = True,
+    y_flip=None,
+) -> list[DimensionRequest]:
+    hole_groups = _hole_centers_grouped_by_parent(ast, offset_x, offset_y, y_flip=y_flip)
+
+    requests: list[DimensionRequest] = []
+    seen_h_spacings: set[int] = set()
+    seen_v_spacings: set[int] = set()
+
+    for group in hole_groups:
+        group_requests = _hole_spacing_requests_for_group(
+            group,
+            seen_h_spacings,
+            seen_v_spacings,
+            deduplicate=deduplicate,
+        )
+        requests.extend(group_requests)
 
     return requests
 

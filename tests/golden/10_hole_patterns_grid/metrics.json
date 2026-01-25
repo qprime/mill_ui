@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "10_hole_patterns_grid",
-    "created_at": "2026-01-25T20:02:53.635765+00:00"
+    "created_at": "2026-01-25T20:39:55.239259+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.59,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 580.0,
       "height_mm": 980.0,
@@ -713,7 +713,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 29.7782,
+    "extraction_time_ms": 23.8856,
     "mesh": {
       "vertex_count": 8200,
       "face_count": 16396,
@@ -751,7 +751,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 174.7665,
+    "extraction_time_ms": 147.9968,
     "summary": {
       "total_lines": 31598,
       "comment_lines": 34,

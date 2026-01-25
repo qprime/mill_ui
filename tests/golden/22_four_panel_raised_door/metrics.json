@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-01-23T02:24:31.482982+00:00"
+    "created_at": "2026-01-25T20:02:54.969835+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.28,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 11,
+      "count": 12,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,7 +29,8 @@
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK"
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
       ],
       "by_layer": {
         "CONSTRUCTION": {
@@ -114,53 +115,53 @@
             {
               "element_type": "path",
               "bounds": [
-                81.25,
-                731.25,
-                198.75,
-                948.75
+                230.0,
+                532.5,
+                347.5,
+                750.0
               ],
               "center": [
-                140.0,
-                840.0
+                288.75,
+                641.25
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                81.25,
-                731.25,
-                198.75,
-                948.75
+                432.5,
+                532.5,
+                550.0,
+                750.0
               ],
               "center": [
-                140.0,
-                840.0
+                491.25,
+                641.25
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                81.25,
-                731.25,
-                198.75,
-                948.75
+                230.0,
+                230.0,
+                347.5,
+                447.5
               ],
               "center": [
-                140.0,
-                840.0
+                288.75,
+                338.75
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                81.25,
-                731.25,
-                198.75,
-                948.75
+                432.5,
+                230.0,
+                550.0,
+                447.5
               ],
               "center": [
-                140.0,
-                840.0
+                491.25,
+                338.75
               ]
             }
           ]
@@ -225,6 +226,16 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 2,
+          "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
           "elements": []
         }
       }
@@ -303,7 +314,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7186,
+    "extraction_time_ms": 0.7801,
     "mesh": {
       "vertex_count": 26,
       "face_count": 48,
@@ -342,7 +353,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.0541,
+    "extraction_time_ms": 13.9865,
     "summary": {
       "total_lines": 4464,
       "comment_lines": 24,

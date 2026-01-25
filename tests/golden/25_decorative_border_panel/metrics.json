@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-01-23T02:24:31.518345+00:00"
+    "created_at": "2026-01-25T20:02:55.005770+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.36,
+    "extraction_time_ms": 0.37,
     "document": {
       "width_mm": 630.0,
       "height_mm": 730.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 11,
+      "count": 12,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,7 +29,8 @@
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK"
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
       ],
       "by_layer": {
         "CONSTRUCTION": {
@@ -213,6 +214,16 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
         }
       }
     },
@@ -240,10 +251,10 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
+      "x_min": -20.0,
       "x_max": 570.0,
       "y_min": 38.0,
-      "y_max": 590.0
+      "y_max": 800.0
     },
     "text_elements": {
       "count": 21,
@@ -293,10 +304,10 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7614,
+    "extraction_time_ms": 0.7949,
     "mesh": {
-      "vertex_count": 56,
-      "face_count": 108,
+      "vertex_count": 44,
+      "face_count": 84,
       "is_watertight": true,
       "is_manifold": true,
       "is_volume": true,
@@ -316,8 +327,8 @@
       "height_mm": 450.0,
       "thickness_mm": 19.0
     },
-    "volume_mm3": 2968236.0,
-    "surface_area_mm2": 361576.0,
+    "volume_mm3": 2986434.0,
+    "surface_area_mm2": 349408.0,
     "z_statistics": {
       "unique_z_levels": [
         0.0,
@@ -331,7 +342,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0596,
+    "extraction_time_ms": 0.0599,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

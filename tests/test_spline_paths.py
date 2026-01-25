@@ -41,36 +41,30 @@ def test_spline_lowering_deterministic():
 spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
 """
 
-
     ast = parse_compositional_pml(pml)
     flat = resolve_layout(ast)
-
 
     spline_items = [item for item in flat.items if item.shape_id == "curve"]
     assert len(spline_items) == 1
     spline_item = spline_items[0]
 
-
     assert spline_item.type == "Polyline"
-    assert "points_mm" in spline_item.geometry.data
+    assert "points" in spline_item.geometry.data
 
-
-    points = spline_item.geometry.data["points_mm"]
+    points = spline_item.geometry.data["points"]
+    cx, cy = spline_item.placement.center_xy_mm
     assert len(points) > 3
-
 
     assert spline_item.geometry.data.get("spline_source") is True
     assert abs(spline_item.geometry.data.get("spline_tolerance_mm", 0) - 0.1) < 0.01
 
+    first_abs = (points[0][0] + cx, points[0][1] + cy)
+    last_abs = (points[-1][0] + cx, points[-1][1] + cy)
 
-    first_point = points[0]
-    last_point = points[-1]
-
-
-    assert abs(first_point[0] - 0.0) < 1.0
-    assert abs(first_point[1] - 0.0) < 1.0
-    assert abs(last_point[0] - 400.0) < 1.0
-    assert abs(last_point[1] - 400.0) < 1.0
+    assert abs(first_abs[0] - 0.0) < 1.0
+    assert abs(first_abs[1] - 0.0) < 1.0
+    assert abs(last_abs[0] - 400.0) < 1.0
+    assert abs(last_abs[1] - 400.0) < 1.0
 
 
 def test_spline_engrave_removal_intent():
@@ -116,14 +110,12 @@ spline wave engrave 0.5mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,
     flat1 = resolve_layout(ast1)
     spline1 = [item for item in flat1.items if item.shape_id == "wave"][0]
 
-
     ast2 = parse_compositional_pml(pml)
     flat2 = resolve_layout(ast2)
     spline2 = [item for item in flat2.items if item.shape_id == "wave"][0]
 
-
-    points1 = spline1.geometry.data["points_mm"]
-    points2 = spline2.geometry.data["points_mm"]
+    points1 = spline1.geometry.data["points"]
+    points2 = spline2.geometry.data["points"]
 
     assert len(points1) == len(points2)
     for (x1, y1), (x2, y2) in zip(points1, points2):
@@ -145,12 +137,10 @@ spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.01mm
 
     ast_coarse = parse_compositional_pml(pml_coarse)
     flat_coarse = resolve_layout(ast_coarse)
-    points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points_mm"]
-
+    points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points"]
 
     ast_fine = parse_compositional_pml(pml_fine)
     flat_fine = resolve_layout(ast_fine)
-    points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points_mm"]
-
+    points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points"]
 
     assert len(points_fine) > len(points_coarse)

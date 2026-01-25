@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 220mm 160mm 19mm
 
 # Mounting plate with multiple depths

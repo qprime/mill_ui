@@ -63,10 +63,11 @@ spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
 
 
     assert spline_item.type == "Polyline", f"Expected Polyline, got {spline_item.type}"
-    assert "points_mm" in spline_item.geometry.data, "Missing points_mm in geometry data"
+    assert "points" in spline_item.geometry.data, "Missing points in geometry data"
 
 
-    points = spline_item.geometry.data["points_mm"]
+    points = spline_item.geometry.data["points"]
+    cx, cy = spline_item.placement.center_xy_mm
     assert len(points) > 3, f"Expected > 3 sampled points, got {len(points)}"
 
 
@@ -78,10 +79,10 @@ spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
     last_point = points[-1]
 
 
-    assert abs(first_point[0] - 0.0) < 1.0, f"First point x: {first_point[0]}"
-    assert abs(first_point[1] - 0.0) < 1.0, f"First point y: {first_point[1]}"
-    assert abs(last_point[0] - 400.0) < 1.0, f"Last point x: {last_point[0]}"
-    assert abs(last_point[1] - 400.0) < 1.0, f"Last point y: {last_point[1]}"
+    assert abs(first_point[0] + cx - 0.0) < 1.0, f"First point x: {first_point[0] + cx}"
+    assert abs(first_point[1] + cy - 0.0) < 1.0, f"First point y: {first_point[1] + cy}"
+    assert abs(last_point[0] + cx - 400.0) < 1.0, f"Last point x: {last_point[0] + cx}"
+    assert abs(last_point[1] + cy - 400.0) < 1.0, f"Last point y: {last_point[1] + cy}"
 
     print("  ✓ PASS")
     return True
@@ -150,8 +151,8 @@ spline wave engrave 0.5mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,
     spline2 = [item for item in flat2.items if item.shape_id == "wave"][0]
 
 
-    points1 = spline1.geometry.data["points_mm"]
-    points2 = spline2.geometry.data["points_mm"]
+    points1 = spline1.geometry.data["points"]
+    points2 = spline2.geometry.data["points"]
 
     assert len(points1) == len(points2), f"Point count mismatch: {len(points1)} vs {len(points2)}"
     for i, ((x1, y1), (x2, y2)) in enumerate(zip(points1, points2)):
@@ -182,12 +183,12 @@ spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.01mm
 
     ast_coarse = parse_compositional_pml(pml_coarse)
     flat_coarse = resolve_layout(ast_coarse)
-    points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points_mm"]
+    points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points"]
 
 
     ast_fine = parse_compositional_pml(pml_fine)
     flat_fine = resolve_layout(ast_fine)
-    points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points_mm"]
+    points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points"]
 
 
     assert len(points_fine) > len(points_coarse), f"Fine ({len(points_fine)}) should have more points than coarse ({len(points_coarse)})"

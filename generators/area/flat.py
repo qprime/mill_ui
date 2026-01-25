@@ -95,24 +95,19 @@ def flat_pocket_generator(
     ):
         return []
 
-    # Build the polygon geometry from domain boundary
-    # Convert boundary points to the format expected by Polygon geometry
-    polygon_points = [list(pt) for pt in effective_domain.outer_boundary]
+    cx, cy = effective_domain.centroid
 
-    # Build geometry data
+    polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in effective_domain.outer_boundary]
+
     geometry_data = {
         "points": polygon_points,
     }
 
-    # Add holes if present
     if effective_domain.inner_boundaries:
         geometry_data["holes"] = [
-            [list(pt) for pt in hole]
+            [[pt[0] - cx, pt[1] - cy] for pt in hole]
             for hole in effective_domain.inner_boundaries
         ]
-
-    # Compute center for placement (use centroid of effective domain)
-    cx, cy = effective_domain.centroid
 
     # Create the Item
     item = Item(

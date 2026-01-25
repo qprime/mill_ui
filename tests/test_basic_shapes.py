@@ -146,11 +146,17 @@ line decoration horizontal engrave 1.50mm
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "Line"
-    assert item.kind == "path"
+    assert item.kind == "shape"
 
-
-    assert item.geometry.data["start_xy_mm"] == (0.0, 300.0)
-    assert item.geometry.data["end_xy_mm"] == (400.0, 300.0)
+    cx, cy = item.placement.center_xy_mm
+    start = item.geometry.data["start"]
+    end = item.geometry.data["end"]
+    assert approx_equal(cx, 200.0)
+    assert approx_equal(cy, 300.0)
+    assert approx_equal(start[0] + cx, 0.0)
+    assert approx_equal(start[1] + cy, 300.0)
+    assert approx_equal(end[0] + cx, 400.0)
+    assert approx_equal(end[1] + cy, 300.0)
     assert item.feature.type == "engrave"
     assert item.feature.depth_mm == 1.5
 
@@ -172,9 +178,13 @@ line divider vertical engrave 1.50mm
     item = flat.items[0]
     assert item.type == "Line"
 
-
-    assert item.geometry.data["start_xy_mm"] == (200.0, 0.0)
-    assert item.geometry.data["end_xy_mm"] == (200.0, 600.0)
+    cx, cy = item.placement.center_xy_mm
+    start = item.geometry.data["start"]
+    end = item.geometry.data["end"]
+    assert approx_equal(start[0] + cx, 200.0)
+    assert approx_equal(start[1] + cy, 0.0)
+    assert approx_equal(end[0] + cx, 200.0)
+    assert approx_equal(end[1] + cy, 600.0)
     assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
@@ -196,9 +206,13 @@ inset 50.00mm
     item = flat.items[0]
     assert item.type == "Line"
 
-
-    assert item.geometry.data["start_xy_mm"] == (50.0, 300.0)
-    assert item.geometry.data["end_xy_mm"] == (350.0, 300.0)
+    cx, cy = item.placement.center_xy_mm
+    start = item.geometry.data["start"]
+    end = item.geometry.data["end"]
+    assert approx_equal(start[0] + cx, 50.0)
+    assert approx_equal(start[1] + cy, 300.0)
+    assert approx_equal(end[0] + cx, 350.0)
+    assert approx_equal(end[1] + cy, 300.0)
     assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
@@ -269,8 +283,8 @@ line decoration vertical engrave 1.50mm
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
-    assert flat1.items[0].geometry.data["start_xy_mm"] == flat2.items[0].geometry.data["start_xy_mm"]
-    assert flat1.items[0].geometry.data["end_xy_mm"] == flat2.items[0].geometry.data["end_xy_mm"]
+    assert flat1.items[0].geometry.data["start"] == flat2.items[0].geometry.data["start"]
+    assert flat1.items[0].geometry.data["end"] == flat2.items[0].geometry.data["end"]
     assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
     print("  ✓ PASS")

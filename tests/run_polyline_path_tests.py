@@ -22,13 +22,14 @@ rect canvas
     assert len(items) == 2
 
     polyline_item = [item for item in items if item.type == "Polyline"][0]
-    points = polyline_item.geometry.data["points_mm"]
+    points = polyline_item.geometry.data["points"]
+    cx, cy = polyline_item.placement.center_xy_mm
 
     assert len(points) == 2
-    assert abs(points[0][0] - 0.0) < 0.01
-    assert abs(points[0][1] - 0.0) < 0.01
-    assert abs(points[1][0] - 400.0) < 0.01
-    assert abs(points[1][1] - 300.0) < 0.01
+    assert abs(points[0][0] + cx - 0.0) < 0.01
+    assert abs(points[0][1] + cy - 0.0) < 0.01
+    assert abs(points[1][0] + cx - 400.0) < 0.01
+    assert abs(points[1][1] + cy - 300.0) < 0.01
 
     print("  ✓ PASS")
     return True
@@ -50,12 +51,13 @@ rounded_rect panel radius 20.00mm
     flat = resolve_layout(ast)
 
     polyline_item = [item for item in flat.items if item.type == "Polyline"][0]
-    points = polyline_item.geometry.data["points_mm"]
+    points = polyline_item.geometry.data["points"]
+    cx, cy = polyline_item.placement.center_xy_mm
 
-    assert abs(points[0][0] - 50.0) < 0.01
-    assert abs(points[0][1] - 50.0) < 0.01
-    assert abs(points[1][0] - 450.0) < 0.01
-    assert abs(points[1][1] - 450.0) < 0.01
+    assert abs(points[0][0] + cx - 50.0) < 0.01
+    assert abs(points[0][1] + cy - 50.0) < 0.01
+    assert abs(points[1][0] + cx - 450.0) < 0.01
+    assert abs(points[1][1] + cy - 450.0) < 0.01
 
     print("  ✓ PASS")
     return True
@@ -77,11 +79,12 @@ circle boundary fit
     flat = resolve_layout(ast)
 
     polyline_item = [item for item in flat.items if item.type == "Polyline"][0]
-    points = polyline_item.geometry.data["points_mm"]
+    points = polyline_item.geometry.data["points"]
+    cx, cy = polyline_item.placement.center_xy_mm
 
     assert len(points) == 5
-    assert abs(points[0][0] - 100.0) < 0.01
-    assert abs(points[0][1] - 200.0) < 0.01
+    assert abs(points[0][0] + cx - 100.0) < 0.01
+    assert abs(points[0][1] + cy - 200.0) < 0.01
 
     print("  ✓ PASS")
     return True
@@ -102,13 +105,14 @@ polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
-    points = polyline_item.geometry.data["points_mm"]
+    points = polyline_item.geometry.data["points"]
+    cx, cy = polyline_item.placement.center_xy_mm
 
     assert len(points) == 10
-    assert abs(points[0][0] - 0.0) < 0.01
-    assert abs(points[0][1] - 0.0) < 0.01
-    assert abs(points[9][0] - 540.0) < 0.01
-    assert abs(points[9][1] - 200.0) < 0.01
+    assert abs(points[0][0] + cx - 0.0) < 0.01
+    assert abs(points[0][1] + cy - 0.0) < 0.01
+    assert abs(points[9][0] + cx - 540.0) < 0.01
+    assert abs(points[9][1] + cy - 200.0) < 0.01
 
     print("  ✓ PASS")
     return True
@@ -197,14 +201,16 @@ polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
-    points1 = flat1.items[0].geometry.data["points_mm"]
-    points2 = flat2.items[0].geometry.data["points_mm"]
+    points1 = flat1.items[0].geometry.data["points"]
+    points2 = flat2.items[0].geometry.data["points"]
+    cx1, cy1 = flat1.items[0].placement.center_xy_mm
+    cx2, cy2 = flat2.items[0].placement.center_xy_mm
 
     assert len(points1) == len(points2) == 3
 
     for (x1, y1), (x2, y2) in zip(points1, points2):
-        assert abs(x1 - x2) < 0.01
-        assert abs(y1 - y2) < 0.01
+        assert abs((x1 + cx1) - (x2 + cx2)) < 0.01
+        assert abs((y1 + cy1) - (y2 + cy2)) < 0.01
 
     print("  ✓ PASS")
     return True
@@ -226,12 +232,13 @@ inset 50.00mm
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
-    points = polyline_item.geometry.data["points_mm"]
+    points = polyline_item.geometry.data["points"]
+    cx, cy = polyline_item.placement.center_xy_mm
 
-    assert abs(points[0][0] - 50.0) < 0.01
-    assert abs(points[0][1] - 50.0) < 0.01
-    assert abs(points[1][0] - 550.0) < 0.01
-    assert abs(points[1][1] - 350.0) < 0.01
+    assert abs(points[0][0] + cx - 50.0) < 0.01
+    assert abs(points[0][1] + cy - 50.0) < 0.01
+    assert abs(points[1][0] + cx - 550.0) < 0.01
+    assert abs(points[1][1] + cy - 350.0) < 0.01
 
     print("  ✓ PASS")
     return True

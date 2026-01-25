@@ -199,6 +199,14 @@ def plan_engrave_passes(
                 (cx - half_w, cy + half_h),
                 (cx - half_w, cy - half_h),
             ])
+        elif shape_name == "line":
+            start = geometry.get("start", [0, 0])
+            end = geometry.get("end", [0, 0])
+            cx, cy = ensure_center(entry)
+            lines.append([
+                (float(start[0]) + cx, float(start[1]) + cy),
+                (float(end[0]) + cx, float(end[1]) + cy),
+            ])
         else:
             continue
 

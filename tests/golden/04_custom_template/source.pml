@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 300mm 180mm 19mm
 
 # Panel with holes - demonstrates template-style design

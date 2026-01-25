@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 500mm 700mm 19mm
 
 rect door

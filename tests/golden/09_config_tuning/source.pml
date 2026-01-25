@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 200mm 150mm 19mm
 
 # Example for config tuning (pocket finish perimeter, safe Z)

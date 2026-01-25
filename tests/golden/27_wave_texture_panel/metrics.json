@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "27_wave_texture_panel",
-    "created_at": "2026-01-23T02:24:31.675319+00:00"
+    "created_at": "2026-01-25T20:02:55.165828+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2,
+    "extraction_time_ms": 0.97,
     "document": {
       "width_mm": 580.0,
       "height_mm": 580.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 11,
+      "count": 12,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,7 +29,8 @@
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK"
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
       ],
       "by_layer": {
         "CONSTRUCTION": {
@@ -53,7 +54,7 @@
           "elements": []
         },
         "ENGRAVE_PATHS": {
-          "element_count": 0,
+          "element_count": 158,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
@@ -173,6 +174,16 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
         }
       }
     },
@@ -242,7 +253,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6554,
+    "extraction_time_ms": 0.6605,
     "mesh": {
       "vertex_count": 8,
       "face_count": 12,
@@ -279,7 +290,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 35.5555,
+    "extraction_time_ms": 35.8476,
     "summary": {
       "total_lines": 9002,
       "comment_lines": 166,
@@ -293,8 +304,8 @@
       "g1_count": 8194,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 61880.4103,
-      "total_feed_distance_mm": 53096.8369
+      "total_rapid_distance_mm": 50101.426699999996,
+      "total_feed_distance_mm": 53096.8499
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -319,8 +330,8 @@
     },
     "xy_bounds": {
       "x_min": -1.587,
-      "x_max": 896.25,
-      "y_min": -595.654,
+      "x_max": 301.587,
+      "y_min": -1.587,
       "y_max": 301.587
     },
     "feeds": {
@@ -346,9 +357,9 @@
       "operation_names": []
     },
     "time_estimate": {
-      "rapid_time_s": 742.5649000000001,
-      "feed_time_s": 5309.6837000000005,
-      "total_time_s": 6052.2486
+      "rapid_time_s": 601.2171,
+      "feed_time_s": 5309.685,
+      "total_time_s": 5910.9021
     },
     "tabs": {
       "detected_count": 0,

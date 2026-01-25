@@ -134,20 +134,19 @@ def compute_shape_bounds(
             y_max=cy + 0.5,
         )
 
-    # Line - compute bounds from start and end points
+    # Line - compute bounds from start and end points (relative to center)
     if ShapeType.is_line(shape_type):
         start = geometry_data.get("start", [])
         end = geometry_data.get("end", [])
         if start and end:
-            x1, y1 = float(start[0]), float(start[1])
-            x2, y2 = float(end[0]), float(end[1])
+            x1, y1 = float(start[0]) + cx, float(start[1]) + cy
+            x2, y2 = float(end[0]) + cx, float(end[1]) + cy
             return Bounds2D(
                 x_min=min(x1, x2),
                 x_max=max(x1, x2),
                 y_min=min(y1, y2),
                 y_max=max(y1, y2),
             )
-        # Line with no points - return 1x1 at center
         return Bounds2D(
             x_min=cx - 0.5,
             x_max=cx + 0.5,

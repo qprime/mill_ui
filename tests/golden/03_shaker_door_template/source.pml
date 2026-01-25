@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 450mm 650mm 19mm
 
 # Shaker door: 400mm x 600mm with 50mm frame and 6mm panel recess

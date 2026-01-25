@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-01-23T02:24:31.744802+00:00"
+    "created_at": "2026-01-25T20:02:55.227143+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 11,
+      "count": 12,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,7 +29,8 @@
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK"
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
       ],
       "by_layer": {
         "CONSTRUCTION": {
@@ -114,14 +115,14 @@
             {
               "element_type": "path",
               "bounds": [
-                -25.0,
-                608.393,
-                305.0,
-                1238.328
+                225.0,
+                225.066,
+                555.0,
+                855.0
               ],
               "center": [
-                140.0,
-                923.3605
+                390.0,
+                540.033
               ]
             }
           ]
@@ -185,6 +186,16 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
         }
       }
     },
@@ -192,7 +203,7 @@
       "total_count": 3,
       "closed_count": 3,
       "open_count": 0,
-      "total_length_mm": 3149.8916,
+      "total_length_mm": 3149.8915,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 1,
@@ -202,7 +213,7 @@
         "POCKET_REGIONS": {
           "count": 1,
           "closed": 1,
-          "length_mm": 1314.6956
+          "length_mm": 1314.6955
         },
         "SHEET_OUTLINE": {
           "count": 1,
@@ -212,10 +223,10 @@
       }
     },
     "bounds": {
-      "x_min": -25.0,
+      "x_min": -110.0,
       "x_max": 720.0,
       "y_min": 38.0,
-      "y_max": 1238.3279
+      "y_max": 1340.0
     },
     "text_elements": {
       "count": 23,
@@ -262,10 +273,10 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.1676,
+    "extraction_time_ms": 1.465,
     "mesh": {
-      "vertex_count": 218,
-      "face_count": 432,
+      "vertex_count": 344,
+      "face_count": 684,
       "is_watertight": true,
       "is_manifold": true,
       "is_volume": true,
@@ -273,10 +284,10 @@
       "connected_components": 1
     },
     "bounds": {
-      "x_min": 0.0,
-      "x_max": 500.0,
-      "y_min": 0.0,
-      "y_max": 800.0,
+      "x_min": -250.0,
+      "x_max": 250.0,
+      "y_min": -400.0,
+      "y_max": 400.0,
       "z_min": 0.0,
       "z_max": 19.0
     },
@@ -285,8 +296,8 @@
       "height_mm": 800.0,
       "thickness_mm": 19.0
     },
-    "volume_mm3": 6923553.5919,
-    "surface_area_mm2": 796397.3954,
+    "volume_mm3": 6416032.3,
+    "surface_area_mm2": 817430.3102,
     "z_statistics": {
       "unique_z_levels": [
         0.0,
@@ -301,7 +312,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.8755,
+    "extraction_time_ms": 8.8545,
     "summary": {
       "total_lines": 3284,
       "comment_lines": 9,

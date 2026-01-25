@@ -99,7 +99,8 @@ Lines do NOT support children (open paths, not regions).
 Resolution:
 - Horizontal: spans region.x_min to region.x_max at vertical center
 - Vertical: spans region.y_min to region.y_max at horizontal center
-- Emitted as kind="path" (open), not kind="shape" (closed)
+- Emitted as kind="shape", type="Line"
+- Geometry stores relative coordinates (start/end) with center_xy_mm offset
 
 ### Polyline
 
@@ -121,9 +122,10 @@ Coordinate system:
 Polylines do NOT support children (open paths, not regions).
 
 Resolution:
-- Normalized coordinates mapped to absolute mm within region
+- Normalized coordinates mapped to mm within region, then stored relative to center
 - Points validated to be in range [0, 1] at parse time
-- Emitted as kind="path" (open)
+- Emitted as kind="shape", type="Polyline"
+- Geometry stores relative coordinates (points) with center_xy_mm offset
 
 ### Polygon
 
@@ -139,7 +141,7 @@ Arbitrary closed polygon with explicit absolute coordinates.
 PML: `polygon [id] points (x1mm,y1mm) (x2mm,y2mm) (x3mm,y3mm) ... [feature]`
 
 Coordinate system:
-- Points are absolute (in mm), not normalized
+- Points are specified in absolute mm in PML, stored relative to center_xy_mm
 - Minimum 3 points required
 
 Resolution:

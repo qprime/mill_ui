@@ -262,8 +262,8 @@ def _create_line_item(
     cy = (start[1] + end[1]) / 2
 
     geometry_data = {
-        "start": list(start),
-        "end": list(end),
+        "start": [start[0] - cx, start[1] - cy],
+        "end": [end[0] - cx, end[1] - cy],
         "width_mm": line_width_mm,
     }
 

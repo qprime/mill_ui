@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "10_hole_patterns_grid",
-    "created_at": "2026-01-23T02:24:30.173463+00:00"
+    "created_at": "2026-01-25T20:02:53.635765+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.51,
+    "extraction_time_ms": 0.59,
     "document": {
       "width_mm": 580.0,
       "height_mm": 980.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 11,
+      "count": 12,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,7 +29,8 @@
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK"
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
       ],
       "by_layer": {
         "CONSTRUCTION": {
@@ -606,6 +607,16 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
         }
       }
     },
@@ -702,7 +713,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 22.9271,
+    "extraction_time_ms": 29.7782,
     "mesh": {
       "vertex_count": 8200,
       "face_count": 16396,
@@ -740,7 +751,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 146.7503,
+    "extraction_time_ms": 174.7665,
     "summary": {
       "total_lines": 31598,
       "comment_lines": 34,

@@ -136,11 +136,13 @@ def x_panel_generator(
         centroid_x = sum(p[0] for p in points) / 3
         centroid_y = sum(p[1] for p in points) / 3
 
+        relative_points = [[p[0] - centroid_x, p[1] - centroid_y] for p in points]
+
         item = Item(
             kind="shape",
             type="Polygon",
             geometry=Geometry(data={
-                "points": [list(p) for p in points],
+                "points": relative_points,
             }),
             placement=Placement(center_xy_mm=(centroid_x, centroid_y)),
             feature=Feature(

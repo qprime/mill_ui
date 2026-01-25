@@ -156,16 +156,14 @@ def profile_generator(
     items: list[Item] = []
 
     for loop_idx, boundary in loops:
-        # Build polygon geometry from boundary points
-        polygon_points = [list(pt) for pt in boundary]
+        cx = sum(p[0] for p in boundary) / len(boundary)
+        cy = sum(p[1] for p in boundary) / len(boundary)
+
+        polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in boundary]
 
         geometry_data = {
             "points": polygon_points,
         }
-
-        # Compute center for placement (centroid of this loop)
-        cx = sum(p[0] for p in boundary) / len(boundary)
-        cy = sum(p[1] for p in boundary) / len(boundary)
 
         # Resolve depth
         if params.depth == "through":

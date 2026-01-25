@@ -510,14 +510,17 @@ class LayoutResolver:
         else:
             raise ValueError(f"Unknown line orientation: {node.orientation}")
 
+        cx = (start_xy[0] + end_xy[0]) / 2
+        cy = (start_xy[1] + end_xy[1]) / 2
+
         line_item = Item(
-            kind="path",
+            kind="shape",
             type="Line",
             geometry=Geometry(data={
-                "start_xy_mm": start_xy,
-                "end_xy_mm": end_xy,
+                "start": [start_xy[0] - cx, start_xy[1] - cy],
+                "end": [end_xy[0] - cx, end_xy[1] - cy],
             }),
-            placement=Placement(center_xy_mm=region.center),
+            placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
         )
@@ -536,13 +539,20 @@ class LayoutResolver:
             abs_y = region.y_min + norm_y * region.height
             absolute_points.append((abs_x, abs_y))
 
+        xs = [p[0] for p in absolute_points]
+        ys = [p[1] for p in absolute_points]
+        cx = (min(xs) + max(xs)) / 2
+        cy = (min(ys) + max(ys)) / 2
+
+        relative_points = [[p[0] - cx, p[1] - cy] for p in absolute_points]
+
         polyline_item = Item(
-            kind="path",
+            kind="shape",
             type="Polyline",
             geometry=Geometry(data={
-                "points_mm": absolute_points,
+                "points": relative_points,
             }),
-            placement=Placement(center_xy_mm=region.center),
+            placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
         )
@@ -563,15 +573,22 @@ class LayoutResolver:
             abs_y = region.y_min + norm_y * region.height
             absolute_points.append((abs_x, abs_y))
 
+        xs = [p[0] for p in absolute_points]
+        ys = [p[1] for p in absolute_points]
+        cx = (min(xs) + max(xs)) / 2
+        cy = (min(ys) + max(ys)) / 2
+
+        relative_points = [[p[0] - cx, p[1] - cy] for p in absolute_points]
+
         spline_item = Item(
-            kind="path",
+            kind="shape",
             type="Polyline",
             geometry=Geometry(data={
-                "points_mm": absolute_points,
+                "points": relative_points,
                 "spline_source": True,
                 "spline_tolerance_mm": node.tolerance_mm,
             }),
-            placement=Placement(center_xy_mm=region.center),
+            placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
         )
@@ -1215,8 +1232,9 @@ class LayoutResolver:
                 y_max=ring_bounds.y_max,
             )
 
-            polygon_points = list(ring_domain.outer_boundary)
-            holes = [list(hole) for hole in ring_domain.inner_boundaries]
+            cx, cy = ring_region.center
+            polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in ring_domain.outer_boundary]
+            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in ring_domain.inner_boundaries]
 
             for child in node.children:
                 if isinstance(child, PocketGen):
@@ -1224,7 +1242,7 @@ class LayoutResolver:
                         kind="shape",
                         type="Polygon",
                         geometry=Geometry(data={"points": polygon_points, "holes": holes}),
-                        placement=Placement(center_xy_mm=ring_region.center),
+                        placement=Placement(center_xy_mm=(cx, cy)),
                         feature=Feature(
                             type="pocket",
                             depth=str(child.depth_mm),
@@ -1240,7 +1258,7 @@ class LayoutResolver:
                         kind="shape",
                         type="Polygon",
                         geometry=Geometry(data={"points": polygon_points, "holes": holes}),
-                        placement=Placement(center_xy_mm=ring_region.center),
+                        placement=Placement(center_xy_mm=(cx, cy)),
                         feature=Feature(
                             type="chamfer",
                             depth=str(child.depth_mm),

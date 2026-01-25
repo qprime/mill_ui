@@ -1,120 +1,2999 @@
 {
-  "source": "cabinet_job.nest",
-  "algorithm": "guillotine",
-  "nesting": {
-    "total_sheets": 6,
-    "utilization": 0.8105679037291484,
-    "utilization_percent": "81.1%",
-    "nesting_time_ms": 0.71
-  },
-  "sheets": [
-    {
-      "name": "sheet_1",
-      "pml_file": "sheet_1.pml",
-      "items": 9,
-      "intents": 9,
-      "passes": 2,
-      "moves": 3772,
-      "timing_ms": {
-        "ir": 0.07,
-        "hints": 0.02,
-        "plan": 5.0,
-        "gcode": 8.57
+  "validation_result": {
+    "version": "1.0.0",
+    "timestamp": "2026-01-25T20:02:22.209816+00:00",
+    "input_file": "",
+    "verdict": "pass",
+    "metrics": {
+      "svg": {
+        "version": "1.0.0",
+        "extraction_time_ms": 1.39,
+        "document": {
+          "width_mm": 1512.0,
+          "height_mm": 1525.0,
+          "viewbox": [
+            0.0,
+            0.0,
+            1512.0,
+            1525.0
+          ]
+        },
+        "layers": {
+          "count": 11,
+          "names": [
+            "CONSTRUCTION",
+            "DIMENSIONS",
+            "ENGRAVE_PATHS",
+            "HOLES",
+            "LABELS",
+            "LEGEND",
+            "NOTES",
+            "POCKET_REGIONS",
+            "PROFILE_CUTS",
+            "SHEET_OUTLINE",
+            "TITLE_BLOCK"
+          ],
+          "by_layer": {
+            "CONSTRUCTION": {
+              "element_count": 0,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": []
+            },
+            "DIMENSIONS": {
+              "element_count": 56,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 4,
+              "line_count": 26,
+              "polygon_count": 16,
+              "text_count": 10,
+              "elements": []
+            },
+            "ENGRAVE_PATHS": {
+              "element_count": 0,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": []
+            },
+            "HOLES": {
+              "element_count": 0,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": []
+            },
+            "LABELS": {
+              "element_count": 9,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 9,
+              "elements": []
+            },
+            "LEGEND": {
+              "element_count": 11,
+              "rect_count": 1,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 4,
+              "polygon_count": 0,
+              "text_count": 6,
+              "elements": []
+            },
+            "NOTES": {
+              "element_count": 15,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 15,
+              "elements": []
+            },
+            "POCKET_REGIONS": {
+              "element_count": 2,
+              "rect_count": 2,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": [
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    207.0,
+                    207.0,
+                    1007.0,
+                    550.0
+                  ],
+                  "center": [
+                    607.0,
+                    378.5
+                  ],
+                  "width": 800.0,
+                  "height": 343.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    207.0,
+                    670.35,
+                    1007.0,
+                    1013.35
+                  ],
+                  "center": [
+                    607.0,
+                    841.85
+                  ],
+                  "width": 800.0,
+                  "height": 343.0
+                }
+              ]
+            },
+            "PROFILE_CUTS": {
+              "element_count": 7,
+              "rect_count": 7,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": [
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    150.0,
+                    150.0,
+                    1064.0,
+                    607.0
+                  ],
+                  "center": [
+                    607.0,
+                    378.5
+                  ],
+                  "width": 914.0,
+                  "height": 457.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    150.0,
+                    613.35,
+                    1064.0,
+                    1070.35
+                  ],
+                  "center": [
+                    607.0,
+                    841.85
+                  ],
+                  "width": 914.0,
+                  "height": 457.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    1070.35,
+                    150.0,
+                    1273.35,
+                    455.0
+                  ],
+                  "center": [
+                    1171.85,
+                    302.5
+                  ],
+                  "width": 203.0,
+                  "height": 305.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    1070.35,
+                    613.35,
+                    1273.35,
+                    918.35
+                  ],
+                  "center": [
+                    1171.85,
+                    765.85
+                  ],
+                  "width": 203.0,
+                  "height": 305.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    150.0,
+                    1076.7,
+                    455.0,
+                    1279.7
+                  ],
+                  "center": [
+                    302.5,
+                    1178.2
+                  ],
+                  "width": 305.0,
+                  "height": 203.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    461.35,
+                    1076.7,
+                    766.35,
+                    1279.7
+                  ],
+                  "center": [
+                    613.85,
+                    1178.2
+                  ],
+                  "width": 305.0,
+                  "height": 203.0
+                },
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    772.7,
+                    1076.7,
+                    1077.7,
+                    1279.7
+                  ],
+                  "center": [
+                    925.2,
+                    1178.2
+                  ],
+                  "width": 305.0,
+                  "height": 203.0
+                }
+              ]
+            },
+            "SHEET_OUTLINE": {
+              "element_count": 1,
+              "rect_count": 1,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 0,
+              "elements": [
+                {
+                  "element_type": "rect",
+                  "bounds": [
+                    140.0,
+                    140.0,
+                    1372.0,
+                    1385.0
+                  ],
+                  "center": [
+                    756.0,
+                    762.5
+                  ],
+                  "width": 1232.0,
+                  "height": 1245.0
+                }
+              ]
+            },
+            "TITLE_BLOCK": {
+              "element_count": 2,
+              "rect_count": 0,
+              "circle_count": 0,
+              "path_count": 0,
+              "line_count": 0,
+              "polygon_count": 0,
+              "text_count": 2,
+              "elements": []
+            }
+          }
+        },
+        "paths": {
+          "total_count": 14,
+          "closed_count": 14,
+          "open_count": 0,
+          "total_length_mm": 40.9706,
+          "by_layer": {
+            "DIMENSIONS": {
+              "count": 4,
+              "closed": 4,
+              "length_mm": 40.9706
+            },
+            "PROFILE_CUTS": {
+              "count": 7,
+              "closed": 7,
+              "length_mm": 0.0
+            },
+            "POCKET_REGIONS": {
+              "count": 2,
+              "closed": 2,
+              "length_mm": 0.0
+            },
+            "SHEET_OUTLINE": {
+              "count": 1,
+              "closed": 1,
+              "length_mm": 0.0
+            }
+          }
+        },
+        "bounds": {
+          "x_min": 140.0,
+          "x_max": 1432.0,
+          "y_min": 38.0,
+          "y_max": 1385.0
+        },
+        "text_elements": {
+          "count": 42,
+          "dimension_labels": [
+            "203.0mm",
+            "203.0mm",
+            "305.0mm",
+            "305.0mm",
+            "343.0mm",
+            "457.0mm",
+            "57mm",
+            "57mm",
+            "800.0mm",
+            "914.0mm",
+            "Sheet: 1232.0 \u00d7 1245.0 \u00d7 19.0mm"
+          ],
+          "depth_annotations": [
+            "\u2022 pocket: 6.0"
+          ],
+          "notes_text": [
+            "NOTES",
+            "Sheet: 1232.0 \u00d7 1245.0 \u00d7 19.0mm",
+            "Features: 7 profiles, 2 pockets",
+            "Depths:",
+            "\u2022 pocket: 6.0",
+            "Parts (9):",
+            "\u2022 small_door_0_rect",
+            "\u2022 small_door_1_rect",
+            "\u2022 small_door_2_rect",
+            "\u2022 small_door_3_rect",
+            "\u2022 small_door_4_rect",
+            "\u2022 tall_door_0_door:outer",
+            "\u2022 tall_door_0_door:panel",
+            "\u2022 tall_door_1_door:outer",
+            "\u2022 tall_door_1_door:panel"
+          ]
+        },
+        "circles": {
+          "count": 0,
+          "radii_mm": []
+        },
+        "rects": {
+          "count": 11,
+          "dimensions": [
+            [
+              15.0,
+              8.0
+            ],
+            [
+              203.0,
+              305.0
+            ],
+            [
+              203.0,
+              305.0
+            ],
+            [
+              305.0,
+              203.0
+            ],
+            [
+              305.0,
+              203.0
+            ],
+            [
+              305.0,
+              203.0
+            ],
+            [
+              800.0,
+              343.0
+            ],
+            [
+              800.0,
+              343.0
+            ],
+            [
+              914.0,
+              457.0
+            ],
+            [
+              914.0,
+              457.0
+            ],
+            [
+              1232.0,
+              1245.0
+            ]
+          ]
+        }
       },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
+      "gcode": {
+        "version": "1.0.0",
+        "extraction_time_ms": 16.429,
+        "summary": {
+          "total_lines": 37898,
+          "comment_lines": 260,
+          "motion_lines": 30060,
+          "tool_change_lines": 0,
+          "spindle_lines": 24,
+          "feed_lines": 22590
+        },
+        "motion": {
+          "g0_count": 14964,
+          "g1_count": 15096,
+          "g2_count": 0,
+          "g3_count": 0,
+          "total_rapid_distance_mm": 593146.3655000001,
+          "total_feed_distance_mm": 3554085.6999999997
+        },
+        "z_profile": {
+          "safe_z_mm": 6.0,
+          "max_plunge_z_mm": -19.0,
+          "unique_cutting_depths": [
+            -19.0,
+            -18.0,
+            -15.0,
+            -12.0,
+            -9.0,
+            -6.0,
+            -3.0
+          ],
+          "depth_count": 7,
+          "max_single_plunge_mm": 25.0
+        },
+        "xy_bounds": {
+          "x_min": 6.825,
+          "x_max": 1213.525,
+          "y_min": 6.825,
+          "y_max": 1142.875
+        },
+        "feeds": {
+          "min_feed_rate": 280.0,
+          "max_feed_rate": 800.0,
+          "feed_rates_used": [
+            280.0,
+            800.0
+          ]
+        },
+        "tools": {
+          "tool_numbers": [],
+          "tool_changes": 0,
+          "spindle_speeds": [
+            12000
+          ]
+        },
+        "operations": {
+          "profile_passes": 4,
+          "pocket_passes": 4,
+          "bore_passes": 0,
+          "total_passes": 8,
+          "operation_names": [
+            "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=2.540",
+            "pocket_raster so=2.540 sd=3.000 depth=6.000",
+            "BEGIN finish profile pass",
+            "profile_outline",
+            "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=2.540",
+            "pocket_raster so=2.540 sd=3.000 depth=6.000",
+            "BEGIN finish profile pass",
+            "profile_outline"
+          ]
+        },
+        "time_estimate": {
+          "rapid_time_s": 7117.7562,
+          "feed_time_s": 394898.41089999996,
+          "total_time_s": 402016.1676
+        },
+        "tabs": {
+          "detected_count": 0,
+          "tab_heights_mm": [],
+          "max_cutting_depth_mm": -19.0,
+          "tabs_at_max_depth": true
+        },
+        "file_count": 12
+      }
+    },
+    "invariants": {
+      "total": 141,
+      "passed": 141,
+      "warned": 0,
+      "failed": 0,
+      "results": [
+        {
+          "invariant": {
+            "id": "SVG_VALID_XML",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "SVG parses as valid XML",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_HAS_VIEWBOX",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Document has viewBox attribute",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "viewbox": [
+                0.0,
+                0.0,
+                1512.0,
+                1525.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_POSITIVE_DIMENSIONS",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Width and height > 0",
+            "status": "pass",
+            "details": {
+              "checked": 2,
+              "passed": 2,
+              "failed": 0,
+              "failures": [],
+              "width_mm": 1512.0,
+              "height_mm": 1525.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_PATHS_VALID",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "All path elements have valid d attribute",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_CLOSED_PROFILES",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Profile cut geometry is closed",
+            "status": "pass",
+            "details": {
+              "checked": 7,
+              "passed": 7,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_CLOSED_POCKETS",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Pocket region geometry is closed",
+            "status": "pass",
+            "details": {
+              "checked": 2,
+              "passed": 2,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_NO_EMPTY_LAYERS",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Expected content layers exist and contain elements",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_DIMENSIONS_PRESENT",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "At least one dimension annotation exists",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "dimension_labels": 11,
+              "dimension_layer_elements": 56
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "SVG_BOUNDS_WITHIN_VIEWBOX",
+            "category": "structural",
+            "artifact": "svg",
+            "description": "Content bounds within viewBox",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "viewbox": [
+                0.0,
+                0.0,
+                1512.0,
+                1525.0
+              ],
+              "bounds": {
+                "x_min": 140.0,
+                "x_max": 1432.0,
+                "y_min": 38.0,
+                "y_max": 1385.0
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 2710,
+              "passed": 2710,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 1072,
+              "passed": 1072,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 1621,
+              "passed": 1621,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 536,
+              "passed": 536,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 536,
+              "passed": 536,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 863.825,
+                "y_min": 70.175,
+                "y_max": 870.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 1084,
+              "passed": 1084,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 548,
+              "passed": 548,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 793.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 1018,
+              "passed": 1018,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 392,
+              "passed": 392,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 589,
+              "passed": 589,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 196,
+              "passed": 196,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 196,
+              "passed": 196,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1136.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 392,
+              "passed": 392,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 196,
+              "passed": 196,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 914.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 5960,
+              "passed": 5960,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 2364,
+              "passed": 2364,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 3571,
+              "passed": 3571,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 1150.175,
+                "y_min": 70.175,
+                "y_max": 1010.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 2388,
+              "passed": 2388,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 1206,
+              "passed": 1206,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 476.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 874,
+              "passed": 874,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 505,
+              "passed": 505,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1213.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 597.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 5960,
+              "passed": 5960,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 2364,
+              "passed": 2364,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 3571,
+              "passed": 3571,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 1150.175,
+                "y_min": 70.175,
+                "y_max": 1010.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 2388,
+              "passed": 2388,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 1206,
+              "passed": 1206,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 476.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 874,
+              "passed": 874,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 505,
+              "passed": 505,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1213.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 597.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 5960,
+              "passed": 5960,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 2364,
+              "passed": 2364,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 3571,
+              "passed": 3571,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 1150.175,
+                "y_min": 70.175,
+                "y_max": 1010.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 2388,
+              "passed": 2388,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 1206,
+              "passed": 1206,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 476.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 874,
+              "passed": 874,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 505,
+              "passed": 505,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1213.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 597.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 5960,
+              "passed": 5960,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 2364,
+              "passed": 2364,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 3571,
+              "passed": 3571,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 1150.175,
+                "y_min": 70.175,
+                "y_max": 1010.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 2388,
+              "passed": 2388,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 1206,
+              "passed": 1206,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 476.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 874,
+              "passed": 874,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 505,
+              "passed": 505,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1213.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 597.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 5960,
+              "passed": 5960,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 2364,
+              "passed": 2364,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 3571,
+              "passed": 3571,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 1182,
+              "passed": 1182,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 12.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 70.175,
+                "x_max": 1150.175,
+                "y_min": 70.175,
+                "y_max": 1010.175
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 2388,
+              "passed": 2388,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 1206,
+              "passed": 1206,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 476.65,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_PARSEABLE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "All lines parse as valid G-code",
+            "status": "pass",
+            "details": {
+              "checked": 874,
+              "passed": 874,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SAFE_Z_RESPECTED",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Rapids (G0) only at or above safe_z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": [],
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_NO_NEGATIVE_FEED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Feed rates always positive",
+            "status": "pass",
+            "details": {
+              "checked": 505,
+              "passed": 505,
+              "failed": 0,
+              "failures": [],
+              "feed_rates_used": [
+                280.0,
+                800.0
+              ]
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_Z_MONOTONIC_PLUNGE",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Z decreases monotonically during plunge",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_MAX_STEPDOWN",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Single Z step never exceeds max_stepdown",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "max_stepdown_mm": 25.0,
+              "max_observed_stepdown_mm": 25.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_XY_WITHIN_BOUNDS",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "All XY positions within sheet + margin",
+            "status": "pass",
+            "details": {
+              "checked": 4,
+              "passed": 4,
+              "failed": 0,
+              "failures": [],
+              "sheet_width_mm": 1220.0,
+              "sheet_height_mm": 2440.0,
+              "margin_mm": 50.0,
+              "xy_bounds": {
+                "x_min": 6.825,
+                "x_max": 1213.525,
+                "y_min": 6.825,
+                "y_max": 1142.875
+              }
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_SPINDLE_BEFORE_CUT",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Spindle on (M3/M4) before any G1 at negative Z",
+            "status": "pass",
+            "details": {
+              "checked": 336,
+              "passed": 336,
+              "failed": 0,
+              "failures": []
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TOOL_DECLARED",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tool number declared before use",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "note": "No tool commands found"
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_ENDS_AT_SAFE",
+            "category": "safety",
+            "artifact": "gcode",
+            "description": "Program ends with Z at safe height",
+            "status": "pass",
+            "details": {
+              "checked": 1,
+              "passed": 1,
+              "failed": 0,
+              "failures": [],
+              "final_z_mm": 6.0,
+              "safe_z_mm": 6.0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_CONTINUOUS_PATH",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "No discontinuous jumps during cutting moves",
+            "status": "pass",
+            "details": {
+              "checked": 168,
+              "passed": 168,
+              "failed": 0,
+              "failures": [],
+              "jump_tolerance_mm": 0.1,
+              "warn_threshold_mm": 2750.0,
+              "fail_threshold_mm": 5000.0,
+              "max_observed_jump_mm": 597.0,
+              "warning_count": 0,
+              "failure_count": 0
+            }
+          }
+        },
+        {
+          "invariant": {
+            "id": "GCODE_TAB_PATTERN",
+            "category": "structural",
+            "artifact": "gcode",
+            "description": "Tabs occur at max cutting depth with consistent heights",
+            "status": "pass",
+            "details": {
+              "checked": 0,
+              "passed": 0,
+              "failed": 0,
+              "failures": [],
+              "detected_count": 0,
+              "note": "No tabs detected in G-code"
+            }
+          }
+        }
       ]
     },
-    {
-      "name": "sheet_2",
-      "pml_file": "sheet_2.pml",
-      "items": 10,
-      "intents": 10,
-      "passes": 2,
-      "moves": 6878,
-      "timing_ms": {
-        "ir": 0.06,
-        "hints": 0.01,
-        "plan": 8.2,
-        "gcode": 15.63
-      },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
-      ]
+    "assertions": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "results": []
     },
-    {
-      "name": "sheet_3",
-      "pml_file": "sheet_3.pml",
-      "items": 10,
-      "intents": 10,
-      "passes": 2,
-      "moves": 6878,
-      "timing_ms": {
-        "ir": 0.06,
-        "hints": 0.01,
-        "plan": 7.69,
-        "gcode": 15.39
-      },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
-      ]
+    "regressions": {
+      "compared": false,
+      "golden_file": null,
+      "total": 0,
+      "within_tolerance": 0,
+      "exceeded_tolerance": 0,
+      "results": []
     },
-    {
-      "name": "sheet_4",
-      "pml_file": "sheet_4.pml",
-      "items": 10,
-      "intents": 10,
-      "passes": 2,
-      "moves": 6878,
-      "timing_ms": {
-        "ir": 0.05,
-        "hints": 0.01,
-        "plan": 7.41,
-        "gcode": 15.53
-      },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
-      ]
-    },
-    {
-      "name": "sheet_5",
-      "pml_file": "sheet_5.pml",
-      "items": 10,
-      "intents": 10,
-      "passes": 2,
-      "moves": 6878,
-      "timing_ms": {
-        "ir": 0.05,
-        "hints": 0.01,
-        "plan": 7.53,
-        "gcode": 15.43
-      },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
-      ]
-    },
-    {
-      "name": "sheet_6",
-      "pml_file": "sheet_6.pml",
-      "items": 10,
-      "intents": 10,
-      "passes": 2,
-      "moves": 6878,
-      "timing_ms": {
-        "ir": 0.06,
-        "hints": 0.01,
-        "plan": 7.35,
-        "gcode": 15.54
-      },
-      "gcode_files": [
-        "pocket-6.35mm",
-        "profile-6.35mm"
-      ]
+    "summary": {
+      "verdict_reason": "All checks passed",
+      "execution_time_ms": 472.74
     }
-  ]
+  }
 }

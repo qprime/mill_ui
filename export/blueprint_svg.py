@@ -298,26 +298,27 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
 
     yf = y_flip if y_flip is not None else (lambda y: y)
 
-    if shape_type == "Line":
-        start = item.geometry.data.get("start", [0, 0])
-        end = item.geometry.data.get("end", [0, 0])
-        ET.SubElement(
-            group,
-            "line",
-            {
-                "x1": str(offset_x + start[0]),
-                "y1": str(offset_y + yf(start[1])),
-                "x2": str(offset_x + end[0]),
-                "y2": str(offset_y + yf(end[1])),
-            },
-        )
-        return
-
     if item.placement is None:
         return
 
     cx, cy = item.placement.center_xy_mm
     cy = yf(cy)
+
+    if shape_type == "Line":
+        start = item.geometry.data.get("start", [0, 0])
+        end = item.geometry.data.get("end", [0, 0])
+        y_sign = -1 if y_flip is not None else 1
+        ET.SubElement(
+            group,
+            "line",
+            {
+                "x1": str(offset_x + cx + start[0]),
+                "y1": str(offset_y + cy + y_sign * start[1]),
+                "x2": str(offset_x + cx + end[0]),
+                "y2": str(offset_y + cy + y_sign * end[1]),
+            },
+        )
+        return
 
     if shape_type in ("Rect", "Rectangle"):
         w = item.geometry.data.get("w_mm") or item.geometry.data.get("width", 0)
@@ -353,9 +354,10 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
         if path_d:
             ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
     elif shape_type == "Polyline":
-        points = item.geometry.data.get("points_mm", [])
+        points = item.geometry.data.get("points", [])
         if points:
-            points_str = " ".join(f"{x + offset_x},{yf(y) + offset_y}" for x, y in points)
+            y_sign = -1 if y_flip is not None else 1
+            points_str = " ".join(f"{x + cx + offset_x},{cy + y_sign * y + offset_y}" for x, y in points)
             ET.SubElement(group, "polyline", {"points": points_str})
     elif shape_type == "RoundedRect":
         w = item.geometry.data.get("w_mm", 0)

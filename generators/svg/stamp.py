@@ -144,24 +144,25 @@ def svg_stamp_generator(
         center_x = (px_min + px_max) / 2
         center_y = (py_min + py_max) / 2
 
-        # Build geometry
+        # Build geometry with relative coordinates
+        relative_points = [[p[0] - center_x, p[1] - center_y] for p in polyline]
         if is_closed and params.feature_type == "pocket":
             # Closed path as polygon for pocket
             shape_type = "Polygon"
             geometry_data = {
-                "points": [[p[0], p[1]] for p in polyline],
+                "points": relative_points,
             }
         elif is_closed and params.feature_type == "profile":
             # Closed path for profile cut
             shape_type = "Polygon"
             geometry_data = {
-                "points": [[p[0], p[1]] for p in polyline],
+                "points": relative_points,
             }
         else:
             # Open path or engrave - use Polyline
             shape_type = "Polyline"
             geometry_data = {
-                "points": [[p[0], p[1]] for p in polyline],
+                "points": relative_points,
             }
 
         # Determine feature side for profile

@@ -69,14 +69,14 @@ def test_x_panel_uniform_bar_width():
 
     top_item = next(i for i in items if "top" in i.shape_id)
     bottom_item = next(i for i in items if "bottom" in i.shape_id)
-    left_item = next(i for i in items if "left" in i.shape_id)
-    right_item = next(i for i in items if "right" in i.shape_id)
 
     top_points = top_item.geometry.data["points"]
     bottom_points = bottom_item.geometry.data["points"]
+    top_cx, top_cy = top_item.placement.center_xy_mm
+    bottom_cx, bottom_cy = bottom_item.placement.center_xy_mm
 
-    top_apex_y = min(p[1] for p in top_points)
-    bottom_apex_y = max(p[1] for p in bottom_points)
+    top_apex_y = min(p[1] + top_cy for p in top_points)
+    bottom_apex_y = max(p[1] + bottom_cy for p in bottom_points)
 
     expected_gap = params.bar_width_mm
     actual_gap = top_apex_y - bottom_apex_y
@@ -101,7 +101,10 @@ rect door
 
     for item in polygon_items:
         points = item.geometry.data["points"]
-        for x, y in points:
+        cx, cy = item.placement.center_xy_mm
+        for rel_x, rel_y in points:
+            x = rel_x + cx
+            y = rel_y + cy
             assert 50 <= x <= 350, f"x={x} outside frame bounds"
             assert 50 <= y <= 550, f"y={y} outside frame bounds"
 

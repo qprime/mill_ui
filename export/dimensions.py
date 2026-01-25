@@ -437,8 +437,8 @@ def _item_bounds(item: Item, y_flip=None) -> Bounds2D | None:
         points = item.geometry.data.get("points", [])
         if not points:
             return None
-        xs = [p[0] for p in points]
-        ys = [yf(p[1]) for p in points]
+        xs = [cx + p[0] for p in points]
+        ys = [yf(cy + p[1]) for p in points]
         return Bounds2D(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
 
     return None
@@ -452,13 +452,15 @@ def _polygon_edge_requests(
     deduplicate: bool = True,
     y_flip=None,
 ) -> list[DimensionRequest]:
-    if item.geometry is None:
+    if item.geometry is None or item.placement is None:
         return []
 
     yf = y_flip if y_flip is not None else (lambda y: y)
     points = item.geometry.data.get("points", [])
     if len(points) < 3:
         return []
+
+    cx, cy = item.placement.center_xy_mm
 
     requests: list[DimensionRequest] = []
     seen_lengths: set[int] = set()
@@ -474,8 +476,8 @@ def _polygon_edge_requests(
         p1 = points[i]
         p2 = points[(i + 1) % len(points)]
 
-        x1, y1_raw = float(p1[0]), float(p1[1])
-        x2, y2_raw = float(p2[0]), float(p2[1])
+        x1, y1_raw = cx + float(p1[0]), cy + float(p1[1])
+        x2, y2_raw = cx + float(p2[0]), cy + float(p2[1])
         y1 = yf(y1_raw)
         y2 = yf(y2_raw)
 

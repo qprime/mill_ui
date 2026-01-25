@@ -229,17 +229,15 @@ def bead_generator(
                 f"Use a smaller offset value."
             )
 
-        # Build polygon geometry from offset boundary points
-        polygon_points = [list(pt) for pt in offset_boundary]
+        cx = sum(p[0] for p in offset_boundary) / len(offset_boundary)
+        cy = sum(p[1] for p in offset_boundary) / len(offset_boundary)
+
+        polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in offset_boundary]
 
         geometry_data = {
             "points": polygon_points,
-            "width_mm": params.width_mm,  # Tool width for path planning
+            "width_mm": params.width_mm,
         }
-
-        # Compute center for placement (centroid of the offset boundary)
-        cx = sum(p[0] for p in offset_boundary) / len(offset_boundary)
-        cy = sum(p[1] for p in offset_boundary) / len(offset_boundary)
 
         # Create the Item
         item = Item(

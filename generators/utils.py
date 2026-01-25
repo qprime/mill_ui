@@ -63,27 +63,22 @@ def shapely_to_item(
     if not polygon.is_valid:
         raise ValueError(f"Invalid polygon: {polygon.is_valid}")
 
-    # Extract outer boundary points (exclude closing point)
-    outer_coords = list(polygon.exterior.coords[:-1])
-    outer_points = [[float(x), float(y)] for x, y in outer_coords]
+    centroid = polygon.centroid
+    cx, cy = float(centroid.x), float(centroid.y)
 
-    # Build geometry data
+    outer_coords = list(polygon.exterior.coords[:-1])
+    outer_points = [[float(x) - cx, float(y) - cy] for x, y in outer_coords]
+
     geometry_data = {"points": outer_points}
 
-    # Add holes if present
     if polygon.interiors:
         holes = []
         for interior in polygon.interiors:
             hole_coords = list(interior.coords[:-1])
-            hole_points = [[float(x), float(y)] for x, y in hole_coords]
+            hole_points = [[float(x) - cx, float(y) - cy] for x, y in hole_coords]
             holes.append(hole_points)
         geometry_data["holes"] = holes
 
-    # Get centroid for placement
-    centroid = polygon.centroid
-    cx, cy = float(centroid.x), float(centroid.y)
-
-    # Build feature
     feature = Feature(
         type=feature_type,
         depth=str(depth_mm),

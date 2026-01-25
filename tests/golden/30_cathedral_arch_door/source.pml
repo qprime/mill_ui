@@ -1,3 +1,6 @@
+# mill_ui: e3bdd1a
+# generated: 2026-01-25
+
 sheet 500mm 800mm 19mm
 
 arch door width 500mm height 800mm radius 250mm

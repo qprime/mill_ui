@@ -117,6 +117,89 @@ def _prune_contained(rects: list[tuple[float, float, float, float]]) -> list[tup
     return result
 
 
+def _trim_rect_against_existing(
+    x: float, y: float, w: float, h: float,
+    existing: list[tuple[float, float, float, float]],
+    min_width: float,
+    min_height: float,
+) -> tuple[float, float, float, float] | None:
+    trimmed_x, trimmed_y, trimmed_w, trimmed_h = x, y, w, h
+
+    changed = True
+    iterations = 0
+    max_iterations = len(existing) * 2
+
+    while changed and iterations < max_iterations:
+        changed = False
+        iterations += 1
+
+        for rx, ry, rw, rh in existing:
+            if not _rects_intersect(trimmed_x, trimmed_y, trimmed_w, trimmed_h, rx, ry, rw, rh):
+                continue
+
+            overlap_x_max = min(trimmed_x + trimmed_w, rx + rw)
+            overlap_x_min = max(trimmed_x, rx)
+            overlap_y_max = min(trimmed_y + trimmed_h, ry + rh)
+            overlap_y_min = max(trimmed_y, ry)
+
+            candidates = []
+
+            right_x = overlap_x_max
+            right_w = (trimmed_x + trimmed_w) - overlap_x_max
+            if right_w >= min_width:
+                candidates.append((right_x, trimmed_y, right_w, trimmed_h))
+
+            left_w = overlap_x_min - trimmed_x
+            if left_w >= min_width:
+                candidates.append((trimmed_x, trimmed_y, left_w, trimmed_h))
+
+            top_y = overlap_y_max
+            top_h = (trimmed_y + trimmed_h) - overlap_y_max
+            if top_h >= min_height:
+                candidates.append((trimmed_x, top_y, trimmed_w, top_h))
+
+            bottom_h = overlap_y_min - trimmed_y
+            if bottom_h >= min_height:
+                candidates.append((trimmed_x, trimmed_y, trimmed_w, bottom_h))
+
+            if not candidates:
+                return None
+
+            best = max(candidates, key=lambda r: r[2] * r[3])
+            if best != (trimmed_x, trimmed_y, trimmed_w, trimmed_h):
+                trimmed_x, trimmed_y, trimmed_w, trimmed_h = best
+                changed = True
+            break
+
+    if trimmed_w < min_width or trimmed_h < min_height:
+        return None
+
+    for rx, ry, rw, rh in existing:
+        if _rects_intersect(trimmed_x, trimmed_y, trimmed_w, trimmed_h, rx, ry, rw, rh):
+            return None
+
+    return (trimmed_x, trimmed_y, trimmed_w, trimmed_h)
+
+
+def _remove_overlaps(
+    rects: list[tuple[float, float, float, float]],
+    min_width: float = 0,
+    min_height: float = 0,
+) -> list[tuple[float, float, float, float]]:
+    if not rects:
+        return []
+
+    sorted_rects = sorted(rects, key=lambda r: r[2] * r[3], reverse=True)
+    result = [sorted_rects[0]]
+
+    for x, y, w, h in sorted_rects[1:]:
+        trimmed = _trim_rect_against_existing(x, y, w, h, result, min_width, min_height)
+        if trimmed is not None:
+            result.append(trimmed)
+
+    return result
+
+
 def _compute_maxrects_waste(
     sheet_width: float,
     sheet_height: float,
@@ -144,6 +227,8 @@ def _compute_maxrects_waste(
             else:
                 new_free_rects.append((rx, ry, rw, rh))
         free_rects = _prune_contained(new_free_rects)
+
+    free_rects = _remove_overlaps(free_rects, min_width, min_height)
 
     result = []
     for x, y, w, h in free_rects:

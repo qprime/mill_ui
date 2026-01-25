@@ -113,17 +113,20 @@ triangle shape base 100.00mm height 80.00mm pocket 6.00mm
     assert item.feature.depth_mm == 6.0
 
     points = item.geometry.data["points"]
-    cx, cy = 100.0, 100.0
     half_base = 50.0
     half_height = 40.0
-    expected_points = [
-        (cx - half_base, cy - half_height),
-        (cx + half_base, cy - half_height),
-        (cx, cy + half_height),
+    expected_relative_points = [
+        (-half_base, -half_height),
+        (half_base, -half_height),
+        (0, half_height),
     ]
-    for actual, expected in zip(points, expected_points):
+    for actual, expected in zip(points, expected_relative_points):
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
+
+    cx, cy = item.placement.center_xy_mm
+    assert approx_equal(cx, 100.0)
+    assert approx_equal(cy, 100.0)
 
 
 def test_triangle_with_profile_child():
@@ -155,17 +158,20 @@ inset 100.00mm
     item = flat.items[0]
 
     points = item.geometry.data["points"]
-    cx, cy = 200.0, 200.0
     half_base = 50.0
     half_height = 50.0
-    expected_points = [
-        (cx - half_base, cy - half_height),
-        (cx + half_base, cy - half_height),
-        (cx, cy + half_height),
+    expected_relative_points = [
+        (-half_base, -half_height),
+        (half_base, -half_height),
+        (0, half_height),
     ]
-    for actual, expected in zip(points, expected_points):
+    for actual, expected in zip(points, expected_relative_points):
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
+
+    cx, cy = item.placement.center_xy_mm
+    assert approx_equal(cx, 200.0)
+    assert approx_equal(cy, 200.0)
 
 
 def test_polygon_bounds_calculation():

@@ -1407,19 +1407,19 @@ class LayoutResolver:
         half_base = node.base_mm / 2
         half_height = node.height_mm / 2
 
-        points = [
-            (cx - half_base, cy - half_height),
-            (cx + half_base, cy - half_height),
-            (cx, cy + half_height),
-        ]
+        triangle_center = (cx, cy)
 
-        triangle_center = (cx, cy - half_height + node.height_mm / 3)
+        relative_points = [
+            (-half_base, -half_height),
+            (half_base, -half_height),
+            (0, half_height),
+        ]
 
         if node.feature is not None:
             triangle_item = Item(
                 kind="shape",
                 type="Polygon",
-                geometry=Geometry(data={"points": points, "holes": []}),
+                geometry=Geometry(data={"points": relative_points, "holes": []}),
                 placement=Placement(center_xy_mm=triangle_center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("triangle"),
@@ -1438,7 +1438,7 @@ class LayoutResolver:
                 profile_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": points, "holes": []}),
+                    geometry=Geometry(data={"points": relative_points, "holes": []}),
                     placement=Placement(center_xy_mm=triangle_center),
                     feature=_feature_from_profile_gen(child),
                     shape_id=self._next_shape_id("triangle_profile"),
@@ -1448,7 +1448,7 @@ class LayoutResolver:
                 pocket_item = Item(
                     kind="shape",
                     type="Polygon",
-                    geometry=Geometry(data={"points": points, "holes": []}),
+                    geometry=Geometry(data={"points": relative_points, "holes": []}),
                     placement=Placement(center_xy_mm=triangle_center),
                     feature=Feature(
                         type="pocket",

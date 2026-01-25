@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "14_corner_cleanup_multi_tool",
-    "created_at": "2026-01-25T20:39:55.355777+00:00"
+    "created_at": "2026-01-25T20:51:28.879395+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -233,7 +233,7 @@
     },
     "bounds": {
       "x_min": 140.0,
-      "x_max": 630.0,
+      "x_max": 613.0,
       "y_min": 38.0,
       "y_max": 790.0
     },
@@ -291,7 +291,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7153,
+    "extraction_time_ms": 0.8329,
     "mesh": {
       "vertex_count": 16,
       "face_count": 28,
@@ -329,7 +329,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.5194,
+    "extraction_time_ms": 7.3312,
     "summary": {
       "total_lines": 3380,
       "comment_lines": 22,

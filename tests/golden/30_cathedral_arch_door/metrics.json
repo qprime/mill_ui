@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-01-25T20:39:56.835714+00:00"
+    "created_at": "2026-01-25T20:51:30.344535+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -273,7 +273,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.5563,
+    "extraction_time_ms": 1.5022,
     "mesh": {
       "vertex_count": 344,
       "face_count": 684,
@@ -312,7 +312,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.9027,
+    "extraction_time_ms": 8.9262,
     "summary": {
       "total_lines": 3284,
       "comment_lines": 9,

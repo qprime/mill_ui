@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-01-25T20:39:55.463732+00:00"
+    "created_at": "2026-01-25T20:51:28.986083+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.05,
+    "extraction_time_ms": 1.01,
     "document": {
       "width_mm": 1525.0,
       "height_mm": 1512.0,
@@ -533,7 +533,7 @@
     },
     "bounds": {
       "x_min": 140.0,
-      "x_max": 1465.0,
+      "x_max": 1410.0,
       "y_min": 38.0,
       "y_max": 1372.0
     },
@@ -697,7 +697,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.066,
+    "extraction_time_ms": 1.0331,
     "mesh": {
       "vertex_count": 176,
       "face_count": 308,
@@ -736,7 +736,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 22.0151,
+    "extraction_time_ms": 21.522,
     "summary": {
       "total_lines": 8013,
       "comment_lines": 59,

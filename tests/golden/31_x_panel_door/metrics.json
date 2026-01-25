@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "31_x_panel_door",
-    "created_at": "2026-01-25T20:39:56.841555+00:00"
+    "created_at": "2026-01-25T20:51:30.350329+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.33,
+    "extraction_time_ms": 0.32,
     "document": {
       "width_mm": 680.0,
       "height_mm": 880.0,
@@ -315,7 +315,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7506,
+    "extraction_time_ms": 0.7195,
     "mesh": {
       "vertex_count": 23,
       "face_count": 42,
@@ -353,7 +353,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0599,
+    "extraction_time_ms": 0.0612,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

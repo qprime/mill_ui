@@ -42,12 +42,12 @@
   <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="140.0" y1="692.9230769230769" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="390.0" y1="692.9230769230769" x2="390.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="120.0" x2="390.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
-    <polygon points="390.0,120.0 387.0,117.0 387.0,123.0" fill="#5ab9ea" />
-    <text x="265.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">250.0mm</text>
+    <line x1="140.0" y1="692.9230769230769" x2="140.0" y2="672.9230769230769" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="390.0" y1="692.9230769230769" x2="390.0" y2="672.9230769230769" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="672.9230769230769" x2="390.0" y2="672.9230769230769" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,672.9230769230769 143.0,669.9230769230769 143.0,675.9230769230769" fill="#5ab9ea" />
+    <polygon points="390.0,672.9230769230769 387.0,669.9230769230769 387.0,675.9230769230769" fill="#5ab9ea" />
+    <text x="265.0" y="667.9230769230769" class="dimension-text" text-anchor="middle" dominant-baseline="middle">250.0mm</text>
     <line x1="390.0" y1="692.9230769230769" x2="410.0" y2="692.9230769230769" stroke="#5ab9ea" stroke-width="1" />
     <line x1="390.0" y1="704.9230769230769" x2="410.0" y2="704.9230769230769" stroke="#5ab9ea" stroke-width="1" />
     <line x1="410.0" y1="692.9230769230769" x2="410.0" y2="704.9230769230769" stroke="#5ab9ea" stroke-width="1" />

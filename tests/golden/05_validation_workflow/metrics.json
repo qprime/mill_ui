@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "05_validation_workflow",
-    "created_at": "2026-01-25T20:39:54.624095+00:00"
+    "created_at": "2026-01-25T20:51:28.156061+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.45,
+    "extraction_time_ms": 0.43,
     "document": {
       "width_mm": 480.0,
       "height_mm": 430.0,
@@ -262,7 +262,7 @@
     },
     "bounds": {
       "x_min": 140.0,
-      "x_max": 380.0,
+      "x_max": 370.0,
       "y_min": 38.0,
       "y_max": 290.0
     },
@@ -331,7 +331,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.073,
+    "extraction_time_ms": 2.0338,
     "mesh": {
       "vertex_count": 528,
       "face_count": 1052,
@@ -370,7 +370,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.8858,
+    "extraction_time_ms": 7.7808,
     "summary": {
       "total_lines": 2244,
       "comment_lines": 16,

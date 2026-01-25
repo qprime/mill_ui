@@ -35,12 +35,12 @@
   <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="140.0" y1="780.5" x2="140.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="740.0" y1="780.5" x2="740.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="120.0" x2="740.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,120.0 143.0,117.0 143.0,123.0" fill="#5ab9ea" />
-    <polygon points="740.0,120.0 737.0,117.0 737.0,123.0" fill="#5ab9ea" />
-    <text x="440.0" y="115.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">600.0mm</text>
+    <line x1="140.0" y1="780.5" x2="140.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="740.0" y1="780.5" x2="740.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="760.5" x2="740.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,760.5 143.0,757.5 143.0,763.5" fill="#5ab9ea" />
+    <polygon points="740.0,760.5 737.0,757.5 737.0,763.5" fill="#5ab9ea" />
+    <text x="440.0" y="755.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle">600.0mm</text>
     <line x1="740.0" y1="780.5" x2="760.0" y2="780.5" stroke="#5ab9ea" stroke-width="1" />
     <line x1="740.0" y1="799.5" x2="760.0" y2="799.5" stroke="#5ab9ea" stroke-width="1" />
     <line x1="760.0" y1="780.5" x2="760.0" y2="799.5" stroke="#5ab9ea" stroke-width="1" />

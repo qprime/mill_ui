@@ -71,11 +71,11 @@ def place_on_rails(
     *,
     margin: float = 100.0,
 ) -> list[PlacedDimension]:
-    top_allocator = _IntervalAllocator()
-    right_allocator = _IntervalAllocator()
-
-    base_offset = min(20.0, margin * 0.4)
+    base_offset = 20.0
     stack_gap = 20.0
+
+    h_allocator = _IntervalAllocator()
+    v_allocator = _IntervalAllocator()
 
     placed: list[PlacedDimension] = []
 
@@ -83,9 +83,8 @@ def place_on_rails(
         a, b = (request.a, request.b) if request.a <= request.b else (request.b, request.a)
 
         if request.orientation == "horizontal":
-            level = top_allocator.allocate(a, b, padding=15.0)
-            rail_y = offset_y - base_offset - (level * stack_gap)
-
+            level = h_allocator.allocate(a, b, padding=15.0)
+            rail_y = request.anchor - base_offset - (level * stack_gap)
 
             min_rail_y = offset_y - margin
             if rail_y < min_rail_y:
@@ -102,9 +101,8 @@ def place_on_rails(
                 )
             )
         else:
-            level = right_allocator.allocate(a, b, padding=40.0)
-            rail_x = (offset_x + sheet_width_mm) + base_offset + (level * stack_gap)
-
+            level = v_allocator.allocate(a, b, padding=40.0)
+            rail_x = request.anchor + base_offset + (level * stack_gap)
 
             max_rail_x = offset_x + sheet_width_mm + margin
             if rail_x > max_rail_x:
@@ -505,8 +503,9 @@ def _item_bounds(item: Item, y_flip=None) -> Bounds2D | None:
         points = item.geometry.data.get("points", [])
         if not points:
             return None
-        xs = [cx + p[0] for p in points]
-        ys = [yf(cy + p[1]) for p in points]
+        orig_cx, orig_cy = item.placement.center_xy_mm
+        xs = [orig_cx + p[0] for p in points]
+        ys = [yf(orig_cy + p[1]) for p in points]
         return Bounds2D(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
 
     return None

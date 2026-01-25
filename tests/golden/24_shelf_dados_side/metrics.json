@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-01-25T20:39:56.608562+00:00"
+    "created_at": "2026-01-25T20:51:30.118668+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.32,
+    "extraction_time_ms": 0.31,
     "document": {
       "width_mm": 880.0,
       "height_mm": 1080.0,
@@ -363,7 +363,7 @@
   },
   "stl": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8533,
+    "extraction_time_ms": 0.7949,
     "mesh": {
       "vertex_count": 48,
       "face_count": 92,
@@ -401,7 +401,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.6071,
+    "extraction_time_ms": 1.708,
     "summary": {
       "total_lines": 752,
       "comment_lines": 28,

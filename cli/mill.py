@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.revision_header import update_file_header
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
@@ -89,6 +90,9 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         print(f"    {path.name}", file=sys.stderr)
 
     print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
+
+    if input_suffix in (".pml", ".txt") and result.gcode:
+        update_file_header(input_path)
 
 
 def main():

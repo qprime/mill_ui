@@ -10,6 +10,7 @@ from typing import Any
 
 from pml.compositional_parser import parse_compositional_pml, ParseError
 from pml import parse_pml
+from pml.revision_header import update_file_header
 from resolution.layout_resolver import resolve_layout
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
 
@@ -219,6 +220,7 @@ if __name__ == "__main__":
                 recipe_name = pml_path.stem
 
                 write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
+                update_file_header(pml_path)
 
                 print(f"  Generated {len(gcode_dict)} G-code pass(es) + STL + SVG")
                 print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")

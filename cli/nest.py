@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
 from pml.formatter import format_pml
+from pml.revision_header import format_pml_header
 from nesting import nest_and_generate, nest_parts
 from cli.project import add_project_arg, resolve_input_path, resolve_output_dir
 
@@ -202,7 +203,8 @@ Output files:
 
         pml_content = format_pml(ast)
 
-        header = f"# {sheet_name}.pml\n"
+        header = format_pml_header()
+        header += f"# {sheet_name}.pml\n"
         header += f"# Generated from {input_path.name}\n"
         header += f"# Algorithm: {job.algorithm}\n"
         header += f"# Items: {len(ast.items)}\n"

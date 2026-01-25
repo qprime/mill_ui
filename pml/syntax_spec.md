@@ -545,6 +545,24 @@ kerf 0.2mm
 # Single-line comment (entire line only)
 ```
 
+### Revision Header
+
+PML files automatically receive a revision header when processed by the CLI or recipe regeneration:
+
+```pml
+# mill_ui: fa974a8
+# generated: 2026-01-22
+
+sheet 1220mm 1220mm 19mm
+...
+```
+
+**Purpose:**
+- `# mill_ui: <hash>` - Git revision of mill_ui used to generate outputs
+- `# generated: <date>` - ISO date when file was processed
+
+This enables backward compatibility: checkout the referenced mill_ui revision to regenerate G-code from older PML files. The header is overwritten on each successful pipeline run.
+
 ## Whitespace
 
 - Indentation is significant for nested structures (layout managers, generators, children)

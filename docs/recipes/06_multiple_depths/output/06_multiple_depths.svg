@@ -41,14 +41,7 @@
     <line x1="307.0" y1="180.0" x2="313.0" y2="180.0" />
     <line x1="310.0" y1="177.0" x2="310.0" y2="183.0" />
   </g>
-  <g id="LABELS" class="labels">
-    <text x="250.0" y="220.0" class="part-label" text-anchor="middle" dominant-baseline="middle">plate:outer</text>
-    <text x="250.0" y="220.0" class="part-label" text-anchor="middle" dominant-baseline="middle">plate:recess</text>
-    <text x="190.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:1</text>
-    <text x="310.0" y="260.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:2</text>
-    <text x="190.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:3</text>
-    <text x="310.0" y="180.0" class="part-label" text-anchor="middle" dominant-baseline="middle">hole:4</text>
-  </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="180.0" y1="180.0" x2="180.0" y2="160.0" stroke="#5ab9ea" stroke-width="1" />

@@ -1,4 +1,4 @@
-# mill_ui: b93206f
+# mill_ui: f6bb5d4
 # generated: 2026-01-25
 
 # Waste cuts demo: single panel with waste decomposition

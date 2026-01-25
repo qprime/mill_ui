@@ -35,12 +35,7 @@
     <line x1="297.0" y1="250.0" x2="303.0" y2="250.0" />
     <line x1="300.0" y1="247.0" x2="300.0" y2="253.0" />
   </g>
-  <g id="LABELS" class="labels">
-    <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">outer</text>
-    <text x="240.0" y="215.0" class="part-label" text-anchor="middle" dominant-baseline="middle">recess</text>
-    <text x="180.0" y="250.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:1</text>
-    <text x="300.0" y="250.0" class="part-label" text-anchor="middle" dominant-baseline="middle">mount:2</text>
-  </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="170.0" y1="170.0" x2="170.0" y2="150.0" stroke="#5ab9ea" stroke-width="1" />

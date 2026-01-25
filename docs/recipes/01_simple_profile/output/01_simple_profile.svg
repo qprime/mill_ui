@@ -26,9 +26,7 @@
   <g id="POCKET_REGIONS" class="pocket-regions" />
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
-  <g id="LABELS" class="labels">
-    <text x="365.0" y="465.0" class="part-label" text-anchor="middle" dominant-baseline="middle">part</text>
-  </g>
+  <g id="LABELS" class="labels" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="265.0" y1="390.0" x2="265.0" y2="370.0" stroke="#5ab9ea" stroke-width="1" />

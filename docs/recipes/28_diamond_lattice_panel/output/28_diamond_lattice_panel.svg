@@ -2,6 +2,7 @@
   <style>
         .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
         .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .waste-cuts { stroke: #ff9500; stroke-width: 2; fill: none; stroke-dasharray: 8,4; }
         .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
         .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
         .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
@@ -21,6 +22,7 @@
   <g id="PROFILE_CUTS" class="profile-cuts">
     <rect x="140.0" y="140.0" width="400.0" height="400.0" />
   </g>
+  <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">
     <path d="M 926.071 534.334 L 920.414 534.334 L 934.334 520.414 L 934.334 526.071 Z" fill-rule="evenodd" />
     <path d="M 873.130 516.748 L 867.473 516.748 L 916.748 467.473 L 916.748 473.130 Z" fill-rule="evenodd" />

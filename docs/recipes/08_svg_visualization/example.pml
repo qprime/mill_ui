@@ -1,3 +1,6 @@
+# mill_ui: 3138ae4
+# generated: 2026-01-25
+
 sheet 300mm 200mm 19mm
 
 # Simple layout for blueprint SVG visualization

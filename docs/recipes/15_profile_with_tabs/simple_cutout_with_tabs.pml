@@ -1,3 +1,6 @@
+# mill_ui: 3138ae4
+# generated: 2026-01-25
+
 # Simple rectangular cutout with holding tabs
 # Tabs prevent the part from moving during cutting
 

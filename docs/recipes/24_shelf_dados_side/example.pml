@@ -1,3 +1,6 @@
+# mill_ui: 3138ae4
+# generated: 2026-01-25
+
 sheet 600mm 800mm 19mm
 
 rect panel

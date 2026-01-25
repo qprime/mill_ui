@@ -1,3 +1,6 @@
+# mill_ui: 3138ae4
+# generated: 2026-01-25
+
 # Sheet Layout: Nested Shaker Cabinet Doors and Drawer Fronts
 # Half-sheet MDF: 1245mm x 1232mm (49" x 48.5") x 19mm (3/4")
 # 10mm no-carve margin on all sides for workholding

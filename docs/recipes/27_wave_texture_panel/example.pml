@@ -1,3 +1,6 @@
+# mill_ui: 3138ae4
+# generated: 2026-01-25
+
 sheet 300mm 300mm 19mm
 
 rect panel

@@ -408,6 +408,16 @@ class TemplateDef:
 
 
 @dataclass(frozen=True)
+class WasteCuts:
+    min_width_mm: float
+    min_height_mm: float
+    margin_mm: float
+    tab_count: int
+    tab_height_mm: float
+    strategy: str = "largest"
+
+
+@dataclass(frozen=True)
 class ResolvedRegion:
     x_min: float
     y_min: float

@@ -48,6 +48,8 @@ from layout_ast.compositional import (
     HoleGridGen,
     # Stage 19 additions (PML templates)
     TemplateDef,
+    # Waste cuts directive
+    WasteCuts,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -160,6 +162,8 @@ class CompositionalPMLLexer:
             'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
             # Stage 19 keywords (PML templates)
             'template', 'params',
+            # Waste cuts directive
+            'waste_cuts', 'min_size', 'margin', 'strategy',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -491,6 +495,9 @@ class CompositionalPMLParser:
         # Stage 18 keywords (hole_grid generator)
         elif token.value == 'hole_grid':
             return self.parse_hole_grid_gen()
+        # Waste cuts directive
+        elif token.value == 'waste_cuts':
+            return self.parse_waste_cuts()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
 
@@ -1644,6 +1651,71 @@ class CompositionalPMLParser:
             children=tuple(children),
             feature=feature,
             id=triangle_id,
+        )
+
+    def parse_waste_cuts(self) -> WasteCuts:
+        self.expect('keyword', 'waste_cuts')
+        self.expect_line_end()
+
+        min_width_mm = 200.0
+        min_height_mm = 200.0
+        margin_mm = 15.0
+        tab_count = None
+        tab_height_mm = None
+        strategy = "largest"
+
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent' and self.peek().type != 'eof':
+                token = self.peek()
+                if token.type == 'keyword' and token.value == 'min_size':
+                    self.advance()
+                    min_width_mm = self.expect('number_with_unit').value
+                    min_height_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'margin':
+                    self.advance()
+                    margin_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'tabs':
+                    self.advance()
+                    tab_count = self.expect('number').value
+                    self.expect('keyword', 'height')
+                    tab_height_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'strategy':
+                    self.advance()
+                    strat_token = self.peek()
+                    if strat_token.type in ('keyword', 'identifier') and strat_token.value in ('largest', 'simple'):
+                        strategy = self.advance().value
+                    else:
+                        raise ParseError(
+                            f"Expected 'largest' or 'simple' for strategy, got {strat_token.value}",
+                            strat_token.line, strat_token.column
+                        )
+                    self.expect_line_end()
+                else:
+                    raise ParseError(
+                        f"Unknown waste_cuts parameter: {token.value}",
+                        token.line, token.column
+                    )
+                self.skip_newlines()
+            if self.peek().type == 'dedent':
+                self.expect('dedent')
+
+        if tab_count is None or tab_height_mm is None:
+            raise ParseError(
+                "waste_cuts requires 'tabs N height Hmm' parameter",
+                self.peek().line, self.peek().column
+            )
+
+        return WasteCuts(
+            min_width_mm=min_width_mm,
+            min_height_mm=min_height_mm,
+            margin_mm=margin_mm,
+            tab_count=tab_count,
+            tab_height_mm=tab_height_mm,
+            strategy=strategy,
         )
 
 

@@ -486,6 +486,46 @@ parts
             panel_recess 6mm
 ```
 
+### Waste Cuts Directive
+
+```
+waste_cuts
+    min_size <width>mm <height>mm
+    margin <mm>
+    tabs <count> height <height>mm
+    strategy largest|simple
+```
+
+Automatically decomposes leftover sheet material into rectangular pieces with profile cuts. This prevents irregular waste polygons that require manual trimming.
+
+**Parameters:**
+- `min_size <width>mm <height>mm` - Minimum dimensions for waste rectangles (default: 200mm 200mm)
+- `margin <mm>` - Holddown no-go zone from sheet edges (default: 15mm)
+- `tabs <count> height <height>mm` - Tab configuration for waste cuts (required)
+- `strategy largest|simple` - Decomposition algorithm (default: largest)
+  - `largest`: Maximal rectangles algorithm, produces fewer larger pieces
+  - `simple`: Guillotine decomposition, recursive splits along part edges
+
+**Behavior:**
+- Must appear after all part definitions (shapes with features)
+- Expands into synthetic `rect` items with `profile outside through tabs`
+- Waste rectangles are only created if they meet the min_size threshold
+- Waste cuts run last in the profile pass (parts stay fixtured until removed)
+
+Example:
+```pml
+sheet 1220mm 1220mm 19mm
+
+rect panel1 at 300mm,300mm size 400mm,400mm
+    profile outside through tabs 4 height 3mm
+
+waste_cuts
+    min_size 200mm 200mm
+    margin 15mm
+    tabs 4 height 3mm
+    strategy largest
+```
+
 ### Metadata (Optional)
 
 ```

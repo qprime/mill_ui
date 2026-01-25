@@ -35,6 +35,7 @@ Worked examples demonstrating mill_ui capabilities.
 | 29 | Picture Frame Panel | `29_picture_frame_panel/` |
 | 30 | Cathedral Arch Door | `30_cathedral_arch_door/` |
 | 31 | X-Panel Door | `31_x_panel_door/` |
+| 32 | Waste Cuts | `32_waste_cuts/` |
 
 ## Structure
 

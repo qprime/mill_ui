@@ -54,6 +54,7 @@ Check before implementing — these already exist:
 | Shaker door template | `templates/shaker.py` |
 | Profile with tabs | `pml/compositional_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
+| Waste cuts decomposition | `nesting/waste_decomposition.py` |
 
 ## Don't
 
@@ -117,7 +118,7 @@ Load these when the task requires them:
 | [docs/layout_primitives.md](docs/layout_primitives.md) | Layout manager properties |
 | [pml/syntax_spec.md](pml/syntax_spec.md) | PML language syntax |
 | [pml/nest_syntax_spec.md](pml/nest_syntax_spec.md) | Nesting job syntax |
-| [docs/recipes/](docs/recipes/) | Worked examples (01-30) |
+| [docs/recipes/](docs/recipes/) | Worked examples (01-32) |
 
 ## Working Style
 

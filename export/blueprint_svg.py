@@ -33,6 +33,8 @@ class Theme:
     notes_text: str
     legend_text: str
     label_text: str
+    waste_stroke: str
+    waste_dash: str
 
 
 DARK_THEME = Theme(
@@ -56,6 +58,8 @@ DARK_THEME = Theme(
     notes_text="#cccccc",
     legend_text="#cccccc",
     label_text="#ffcc00",
+    waste_stroke="#ff9500",
+    waste_dash="8,4",
 )
 
 PRINT_THEME = Theme(
@@ -79,6 +83,8 @@ PRINT_THEME = Theme(
     notes_text="#000000",
     legend_text="#000000",
     label_text="#333333",
+    waste_stroke="#cc6600",
+    waste_dash="8,4",
 )
 
 THEMES = {
@@ -139,6 +145,7 @@ def render_blueprint_svg(
 
     sheet_group = ET.SubElement(svg, "g", {"id": "SHEET_OUTLINE", "class": "sheet-outline"})
     profile_group = ET.SubElement(svg, "g", {"id": "PROFILE_CUTS", "class": "profile-cuts"})
+    waste_group = ET.SubElement(svg, "g", {"id": "WASTE_CUTS", "class": "waste-cuts"})
     pocket_group = ET.SubElement(svg, "g", {"id": "POCKET_REGIONS", "class": "pocket-regions"})
     engrave_group = ET.SubElement(svg, "g", {"id": "ENGRAVE_PATHS", "class": "engrave-paths"})
     hole_group = ET.SubElement(svg, "g", {"id": "HOLES", "class": "holes"})
@@ -153,13 +160,19 @@ def render_blueprint_svg(
     _render_sheet_boundary(sheet_group, sheet, offset_x, offset_y, theme_obj)
 
 
+    has_waste_cuts = False
     for item in layout_ast.items:
         if item.kind != "shape" or item.feature is None:
             continue
 
+        is_waste = item.shape_id and "waste" in item.shape_id
+        if is_waste:
+            has_waste_cuts = True
+
         feature_type = item.feature.type
         if feature_type == "profile":
-            _render_profile(profile_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
+            target_group = waste_group if is_waste else profile_group
+            _render_profile(target_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "pocket":
             _render_pocket(pocket_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "hole":
@@ -167,7 +180,7 @@ def render_blueprint_svg(
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
 
-        if item.shape_id and item.placement and not item.shape_id.startswith("generated_"):
+        if item.shape_id and item.placement and not item.shape_id.startswith("generated_") and not is_waste:
             _render_label(label_group, item, offset_x, offset_y, y_flip=flip_y)
 
 
@@ -175,7 +188,7 @@ def render_blueprint_svg(
 
 
     _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)
-    _render_legend(legend_group, viewbox_width, theme_obj)
+    _render_legend(legend_group, viewbox_width, theme_obj, has_waste_cuts=has_waste_cuts)
     _render_notes(notes_group, layout_ast, removal_intents, viewbox_height, theme_obj)
 
 
@@ -187,6 +200,7 @@ def _generate_stylesheet(theme: Theme) -> str:
     return f"""
         .sheet-outline {{ stroke: {theme.construction_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .profile-cuts {{ stroke: {theme.profile_stroke}; stroke-width: {theme.profile_width}; fill: none; }}
+        .waste-cuts {{ stroke: {theme.waste_stroke}; stroke-width: {theme.profile_width}; fill: none; stroke-dasharray: {theme.waste_dash}; }}
         .pocket-regions {{ stroke: {theme.pocket_stroke}; stroke-width: {theme.pocket_width}; fill: {theme.pocket_fill}; fill-opacity: 0.2; }}
         .holes {{ stroke: {theme.hole_stroke}; stroke-width: 1.5; fill: {theme.hole_fill}; }}
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
@@ -305,9 +319,9 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     cx, cy = item.placement.center_xy_mm
     cy = yf(cy)
 
-    if shape_type == "Rect":
-        w = item.geometry.data.get("w_mm", 0)
-        h = item.geometry.data.get("h_mm", 0)
+    if shape_type in ("Rect", "Rectangle"):
+        w = item.geometry.data.get("w_mm") or item.geometry.data.get("width", 0)
+        h = item.geometry.data.get("h_mm") or item.geometry.data.get("height", 0)
         x = offset_x + cx - w / 2
         y = offset_y + cy - h / 2
         ET.SubElement(
@@ -704,7 +718,7 @@ def _render_title_block(group: ET.Element, viewbox_width: float, viewbox_height:
     units.text = "Units: millimeters (mm)"
 
 
-def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> None:
+def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme, has_waste_cuts: bool = False) -> None:
     x = viewbox_width - 132
     y = 20
     line_height = 16
@@ -730,6 +744,9 @@ def _render_legend(group: ET.Element, viewbox_width: float, theme: Theme) -> Non
         ("Holes", theme.hole_stroke, "1.5", None, None),
         ("Dimensions", theme.dimension_stroke, "1", None, None),
     ]
+
+    if has_waste_cuts:
+        layers.append(("Waste Cuts", theme.waste_stroke, "2", theme.waste_dash, None))
 
     for i, (label, stroke, width, dash, fill) in enumerate(layers):
         y_pos = y + (i + 1) * line_height + 5

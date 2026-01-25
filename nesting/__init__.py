@@ -33,6 +33,12 @@ from .validation import (
     validate_nesting_result,
 )
 from .api import nest_parts, nest_and_generate
+from .waste_decomposition import (
+    WasteStrategy,
+    WasteRect,
+    PartBounds,
+    compute_waste_rectangles,
+)
 
 __all__ = [
 
@@ -67,4 +73,9 @@ __all__ = [
 
     "nest_parts",
     "nest_and_generate",
+
+    "WasteStrategy",
+    "WasteRect",
+    "PartBounds",
+    "compute_waste_rectangles",
 ]

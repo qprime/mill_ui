@@ -47,6 +47,8 @@ from layout_ast.compositional import (
     XPanelGen,
     # Stage 18 additions (hole_grid generator)
     HoleGridGen,
+    # Waste cuts directive
+    WasteCuts,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -808,6 +810,66 @@ class LayoutResolver:
         except ValueError:
             pass
 
+    def _handle_waste_cuts(
+        self,
+        node: WasteCuts,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        from nesting.waste_decomposition import compute_waste_rectangles, PartBounds, WasteStrategy
+
+        sheet_width = self.ast.sheet.width_mm
+        sheet_height = self.ast.sheet.height_mm
+
+        part_bounds = []
+        for item in items:
+            if item.kind == "shape" and item.geometry:
+                bounds = compute_shape_bounds_dict(
+                    item.type,
+                    item.geometry.data,
+                    item.placement.center_xy_mm,
+                )
+                part_bounds.append(PartBounds(
+                    x=bounds["x_min"],
+                    y=bounds["y_min"],
+                    width=bounds["x_max"] - bounds["x_min"],
+                    height=bounds["y_max"] - bounds["y_min"],
+                ))
+
+        strategy = WasteStrategy.LARGEST if node.strategy == "largest" else WasteStrategy.SIMPLE
+
+        waste_rects = compute_waste_rectangles(
+            sheet_width=sheet_width,
+            sheet_height=sheet_height,
+            margin=node.margin_mm,
+            parts=part_bounds,
+            min_width=node.min_width_mm,
+            min_height=node.min_height_mm,
+            strategy=strategy,
+        )
+
+        for i, wrect in enumerate(waste_rects):
+            waste_item = Item(
+                kind="shape",
+                type="Rectangle",
+                geometry=Geometry(data={
+                    "width": wrect.width,
+                    "height": wrect.height,
+                }),
+                placement=Placement(center_xy_mm=(wrect.center_x, wrect.center_y)),
+                feature=Feature(
+                    type="profile",
+                    depth="through",
+                    side="outside",
+                    depth_mm=None,
+                    tab_count=node.tab_count,
+                    tab_height_mm=node.tab_height_mm,
+                ),
+                shape_id=self._next_shape_id(f"waste_{i}"),
+            )
+            items.append(waste_item)
+
     def _handle_wave_gen(
         self,
         node: WaveGen,
@@ -1467,6 +1529,8 @@ class LayoutResolver:
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
                 # Stage 18 handlers (hole_grid generator)
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
+                # Waste cuts handler
+                WasteCuts: LayoutResolver._handle_waste_cuts,
             }
         return LayoutResolver._NODE_HANDLERS
 

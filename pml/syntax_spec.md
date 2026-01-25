@@ -309,6 +309,40 @@ rect custom_grid
     measurement_grid unit custom minor_spacing 2mm major_spacing 20mm minor_length 4mm major_length 8mm depth 0.5mm
 ```
 
+#### Measurement Edge
+
+```
+measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+```
+
+Creates ruler-style tick marks along specified edges of a shape, leaving the interior clear for other content. Useful for ruler borders around work areas.
+
+**Parameters:**
+- `edges [<edge>, ...]` - Which edges to add tick marks to (required)
+  - Valid edges: `top`, `bottom`, `left`, `right`
+  - Specify any combination, e.g., `[top, left]` or `[top, bottom, left, right]`
+- `unit metric|imperial|custom` - Preset unit mode (optional, default: metric)
+  - `metric`: minor=1mm, major=10mm
+  - `imperial`: minor=1/16" (1.5875mm), major=1" (25.4mm)
+  - `custom`: uses explicit spacing values (requires minor_spacing and major_spacing)
+- `minor_spacing <mm>` - Distance between minor tick marks (required for custom mode)
+- `major_spacing <mm>` - Distance between major tick marks (required for custom mode)
+- `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
+- `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
+- `depth <mm>` - Engraving depth (optional, default: 0.3mm)
+
+Example:
+```pml
+rect workbench_top
+    measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
+
+rect drafting_table
+    measurement_edge edges [top, bottom, left, right] unit imperial depth 0.25mm
+
+rect custom_ruler_border
+    measurement_edge edges [left] unit custom minor_spacing 5mm major_spacing 50mm depth 0.3mm
+```
+
 #### Split Grid
 
 ```

@@ -33,6 +33,8 @@ from layout_ast.compositional import (
     SplitGrid,
     # Stage 20 generator nodes
     MeasurementGridGen,
+    # Stage 21 generator nodes
+    MeasurementEdgeGen,
 )
 
 
@@ -297,6 +299,19 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
 
     elif isinstance(node, MeasurementGridGen):
         parts = [f"{prefix}measurement_grid"]
+        parts.append(f"unit {node.unit}")
+        if node.minor_spacing_mm is not None:
+            parts.append(f"minor_spacing {node.minor_spacing_mm:.2f}mm")
+        if node.major_spacing_mm is not None:
+            parts.append(f"major_spacing {node.major_spacing_mm:.2f}mm")
+        parts.append(f"minor_length {node.minor_length_mm:.2f}mm")
+        parts.append(f"major_length {node.major_length_mm:.2f}mm")
+        parts.append(f"depth {node.depth_mm:.2f}mm")
+        lines.append(" ".join(parts))
+
+    elif isinstance(node, MeasurementEdgeGen):
+        edges_str = ", ".join(node.edges)
+        parts = [f"{prefix}measurement_edge edges [{edges_str}]"]
         parts.append(f"unit {node.unit}")
         if node.minor_spacing_mm is not None:
             parts.append(f"minor_spacing {node.minor_spacing_mm:.2f}mm")

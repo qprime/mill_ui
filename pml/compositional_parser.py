@@ -50,6 +50,8 @@ from layout_ast.compositional import (
     TemplateDef,
     # Stage 20 additions (measurement_grid generator)
     MeasurementGridGen,
+    # Stage 21 additions (measurement_edge generator)
+    MeasurementEdgeGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -164,6 +166,8 @@ class CompositionalPMLLexer:
             'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
             # Stage 20 keywords (measurement_grid generator)
             'measurement_grid', 'unit', 'metric', 'imperial', 'custom', 'minor_spacing', 'major_spacing', 'minor_length', 'major_length',
+            # Stage 21 keywords (measurement_edge generator)
+            'measurement_edge', 'edges', 'top', 'bottom', 'left', 'right',
             # Stage 19 keywords (PML templates)
             'template', 'params',
             # Waste cuts directive
@@ -248,8 +252,8 @@ class CompositionalPMLLexer:
                 continue
 
 
-            if char in ('(', ')', ','):
-                tokens.append(Token('punctuation', char, self.line, self.column))
+            if char in ('(', ')', ',', '[', ']'):
+                tokens.append(Token('symbol', char, self.line, self.column))
                 self.advance()
                 continue
 
@@ -504,6 +508,9 @@ class CompositionalPMLParser:
         # Stage 20 keywords (measurement_grid generator)
         elif token.value == 'measurement_grid':
             return self.parse_measurement_grid_gen()
+        # Stage 21 keywords (measurement_edge generator)
+        elif token.value == 'measurement_edge':
+            return self.parse_measurement_edge_gen()
         # Waste cuts directive
         elif token.value == 'waste_cuts':
             return self.parse_waste_cuts()
@@ -540,12 +547,12 @@ class CompositionalPMLParser:
         if self.peek().type == 'keyword' and self.peek().value == 'at':
             self.advance()
             x_mm = self.expect('number_with_unit').value
-            if self.peek().type == 'punctuation' and self.peek().value == ',':
+            if self.peek().type == 'symbol' and self.peek().value == ',':
                 self.advance()
             y_mm = self.expect('number_with_unit').value
             self.expect('keyword', 'size')
             w_mm = self.expect('number_with_unit').value
-            if self.peek().type == 'punctuation' and self.peek().value == ',':
+            if self.peek().type == 'symbol' and self.peek().value == ',':
                 self.advance()
             h_mm = self.expect('number_with_unit').value
 
@@ -583,7 +590,7 @@ class CompositionalPMLParser:
         if self.peek().type == 'keyword' and self.peek().value == 'at':
             self.advance()
             x_mm = self.expect('number_with_unit').value
-            if self.peek().type == 'punctuation' and self.peek().value == ',':
+            if self.peek().type == 'symbol' and self.peek().value == ',':
                 self.advance()
             y_mm = self.expect('number_with_unit').value
 
@@ -636,12 +643,12 @@ class CompositionalPMLParser:
         if self.peek().type == 'keyword' and self.peek().value == 'at':
             self.advance()
             x_mm = self.expect('number_with_unit').value
-            if self.peek().type == 'punctuation' and self.peek().value == ',':
+            if self.peek().type == 'symbol' and self.peek().value == ',':
                 self.advance()
             y_mm = self.expect('number_with_unit').value
             self.expect('keyword', 'size')
             w_mm = self.expect('number_with_unit').value
-            if self.peek().type == 'punctuation' and self.peek().value == ',':
+            if self.peek().type == 'symbol' and self.peek().value == ',':
                 self.advance()
             h_mm = self.expect('number_with_unit').value
 
@@ -729,7 +736,7 @@ class CompositionalPMLParser:
                 break
 
 
-            if token.type != 'punctuation' or token.value != '(':
+            if token.type != 'symbol' or token.value != '(':
                 break
             self.advance()
 
@@ -739,7 +746,7 @@ class CompositionalPMLParser:
 
 
             comma_token = self.peek()
-            if comma_token.type != 'punctuation' or comma_token.value != ',':
+            if comma_token.type != 'symbol' or comma_token.value != ',':
                 raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
                                comma_token.line, comma_token.column)
             self.advance()
@@ -750,7 +757,7 @@ class CompositionalPMLParser:
 
 
             close_token = self.peek()
-            if close_token.type != 'punctuation' or close_token.value != ')':
+            if close_token.type != 'symbol' or close_token.value != ')':
                 raise ParseError(f"Expected ')' after point, got {close_token.value}",
                                close_token.line, close_token.column)
             self.advance()
@@ -801,7 +808,7 @@ class CompositionalPMLParser:
                 break
 
 
-            if token.type != 'punctuation' or token.value != '(':
+            if token.type != 'symbol' or token.value != '(':
                 break
             self.advance()
 
@@ -811,7 +818,7 @@ class CompositionalPMLParser:
 
 
             comma_token = self.peek()
-            if comma_token.type != 'punctuation' or comma_token.value != ',':
+            if comma_token.type != 'symbol' or comma_token.value != ',':
                 raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
                                comma_token.line, comma_token.column)
             self.advance()
@@ -822,7 +829,7 @@ class CompositionalPMLParser:
 
 
             close_token = self.peek()
-            if close_token.type != 'punctuation' or close_token.value != ')':
+            if close_token.type != 'symbol' or close_token.value != ')':
                 raise ParseError(f"Expected ')' after point, got {close_token.value}",
                                close_token.line, close_token.column)
             self.advance()
@@ -1359,6 +1366,84 @@ class CompositionalPMLParser:
             depth_mm=depth_mm,
         )
 
+    def parse_measurement_edge_gen(self) -> MeasurementEdgeGen:
+        """Parse: measurement_edge edges [top, left, ...] [unit metric|imperial|custom] [options...]
+
+        Example:
+            measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
+            measurement_edge edges [top, bottom, left, right] unit imperial
+        """
+        self.expect('keyword', 'measurement_edge')
+
+        edges: list[str] = []
+        unit = "metric"
+        minor_spacing_mm: float | None = None
+        major_spacing_mm: float | None = None
+        minor_length_mm = 3.0
+        major_length_mm = 6.0
+        depth_mm = 0.3
+
+        self.expect('keyword', 'edges')
+        self.expect('symbol', '[')
+        valid_edges = ('top', 'bottom', 'left', 'right')
+        while True:
+            edge_token = self.peek()
+            if edge_token.type == 'keyword' and edge_token.value in valid_edges:
+                edges.append(self.advance().value)
+            else:
+                raise ParseError(
+                    f"Expected edge (top/bottom/left/right), got {edge_token.value}",
+                    edge_token.line, edge_token.column
+                )
+            if self.peek().type == 'symbol' and self.peek().value == ',':
+                self.advance()
+            elif self.peek().type == 'symbol' and self.peek().value == ']':
+                break
+            else:
+                break
+        self.expect('symbol', ']')
+
+        while self.peek().type == 'keyword':
+            kw = self.peek().value
+            if kw == 'unit':
+                self.advance()
+                unit_token = self.peek()
+                if unit_token.type == 'keyword' and unit_token.value in ('metric', 'imperial', 'custom'):
+                    unit = self.advance().value
+                else:
+                    raise ParseError(
+                        f"Expected unit type (metric/imperial/custom), got {unit_token.value}",
+                        unit_token.line, unit_token.column
+                    )
+            elif kw == 'minor_spacing':
+                self.advance()
+                minor_spacing_mm = self.expect('number_with_unit').value
+            elif kw == 'major_spacing':
+                self.advance()
+                major_spacing_mm = self.expect('number_with_unit').value
+            elif kw == 'minor_length':
+                self.advance()
+                minor_length_mm = self.expect('number_with_unit').value
+            elif kw == 'major_length':
+                self.advance()
+                major_length_mm = self.expect('number_with_unit').value
+            elif kw == 'depth':
+                self.advance()
+                depth_mm = self.expect('number_with_unit').value
+            else:
+                break
+
+        self.expect_line_end()
+        return MeasurementEdgeGen(
+            edges=tuple(edges),
+            unit=unit,
+            minor_spacing_mm=minor_spacing_mm,
+            major_spacing_mm=major_spacing_mm,
+            minor_length_mm=minor_length_mm,
+            major_length_mm=major_length_mm,
+            depth_mm=depth_mm,
+        )
+
     def parse_split_horizontal(self) -> SplitHorizontal:
         """Parse: split_horizontal <n> gap <mm>
 
@@ -1639,7 +1724,7 @@ class CompositionalPMLParser:
             if token.type in ('newline', 'eof'):
                 break
 
-            if token.type != 'punctuation' or token.value != '(':
+            if token.type != 'symbol' or token.value != '(':
                 break
             self.advance()
 
@@ -1647,7 +1732,7 @@ class CompositionalPMLParser:
             x = x_token.value
 
             comma_token = self.peek()
-            if comma_token.type != 'punctuation' or comma_token.value != ',':
+            if comma_token.type != 'symbol' or comma_token.value != ',':
                 raise ParseError(f"Expected ',' between coordinates, got {comma_token.value}",
                                comma_token.line, comma_token.column)
             self.advance()
@@ -1656,7 +1741,7 @@ class CompositionalPMLParser:
             y = y_token.value
 
             close_token = self.peek()
-            if close_token.type != 'punctuation' or close_token.value != ')':
+            if close_token.type != 'symbol' or close_token.value != ')':
                 raise ParseError(f"Expected ')' after point, got {close_token.value}",
                                close_token.line, close_token.column)
             self.advance()

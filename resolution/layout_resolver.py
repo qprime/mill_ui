@@ -49,6 +49,8 @@ from layout_ast.compositional import (
     HoleGridGen,
     # Stage 20 additions (measurement_grid generator)
     MeasurementGridGen,
+    # Stage 21 additions (measurement_edge generator)
+    MeasurementEdgeGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -72,7 +74,8 @@ from generators.area.concentric_border import concentric_border_generator
 from generators.area.x_panel import x_panel_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.measurement_grid import measurement_grid_generator
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams
+from generators.loop.measurement_edge import measurement_edge_generator
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
 
 
 # Type alias for node handlers
@@ -1041,6 +1044,42 @@ class LayoutResolver:
         except ValueError:
             pass
 
+    def _handle_measurement_edge_gen(
+        self,
+        node: MeasurementEdgeGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle MeasurementEdgeGen: Generate ruler tick marks along specified edges."""
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = MeasurementEdgeParams(
+            edges=node.edges,
+            unit=node.unit,
+            minor_spacing_mm=node.minor_spacing_mm,
+            major_spacing_mm=node.major_spacing_mm,
+            minor_length_mm=node.minor_length_mm,
+            major_length_mm=node.major_length_mm,
+            depth_mm=node.depth_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("measurement_edge")
+        try:
+            generated_items = measurement_edge_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
     def _handle_split_horizontal(
         self,
         node: SplitHorizontal,
@@ -1593,6 +1632,8 @@ class LayoutResolver:
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
                 # Stage 20 handlers (measurement_grid generator)
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
+                # Stage 21 handlers (measurement_edge generator)
+                MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
                 # Waste cuts handler
                 WasteCuts: LayoutResolver._handle_waste_cuts,
             }

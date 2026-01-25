@@ -663,6 +663,108 @@ class MeasurementGridParams(BaseParams):
             return self.major_spacing_mm or 10.0
 
 
+EdgeSelection = Literal["top", "bottom", "left", "right"]
+
+
+@dataclass(frozen=True)
+class MeasurementEdgeParams(BaseParams):
+    """Parameters for measurement edge loop generator.
+
+    Creates ruler-style tick marks along specified edges of a domain,
+    leaving the interior clear for other content. Useful for ruler borders
+    around work areas.
+
+    Attributes:
+        edges: Which edges to add tick marks to (top, bottom, left, right)
+        unit: Preset unit mode ("metric", "imperial", or "custom")
+            - metric: minor=1mm, major=10mm
+            - imperial: minor=1.5875mm (1/16"), major=25.4mm (1")
+            - custom: uses explicit spacing values
+        minor_spacing_mm: Distance between minor tick marks (required for custom)
+        major_spacing_mm: Distance between major tick marks (required for custom)
+        minor_length_mm: Length of minor tick marks
+        major_length_mm: Length of major tick marks
+        depth_mm: Engraving depth for tick marks
+    """
+
+    edges: tuple[EdgeSelection, ...]
+    unit: Literal["metric", "imperial", "custom"] = "metric"
+    minor_spacing_mm: float | None = None
+    major_spacing_mm: float | None = None
+    minor_length_mm: float = 3.0
+    major_length_mm: float = 6.0
+    depth_mm: float = 0.3
+
+    def validate(self) -> None:
+        if not self.edges:
+            raise ValueError(
+                "MeasurementEdgeParams: edges must contain at least one edge"
+            )
+
+        valid_edges = ("top", "bottom", "left", "right")
+        for edge in self.edges:
+            if edge not in valid_edges:
+                raise ValueError(
+                    f"MeasurementEdgeParams: edge must be one of {valid_edges}, got '{edge}'"
+                )
+
+        valid_units = ("metric", "imperial", "custom")
+        if self.unit not in valid_units:
+            raise ValueError(
+                f"MeasurementEdgeParams: unit must be one of {valid_units}, got '{self.unit}'"
+            )
+
+        if self.unit == "custom":
+            if self.minor_spacing_mm is None:
+                raise ValueError(
+                    "MeasurementEdgeParams: minor_spacing_mm required for custom unit"
+                )
+            if self.major_spacing_mm is None:
+                raise ValueError(
+                    "MeasurementEdgeParams: major_spacing_mm required for custom unit"
+                )
+
+        minor_spacing = self.get_minor_spacing()
+        major_spacing = self.get_major_spacing()
+
+        if minor_spacing <= 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: minor_spacing must be positive, got {minor_spacing}"
+            )
+        if major_spacing <= 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: major_spacing must be positive, got {major_spacing}"
+            )
+        if self.minor_length_mm <= 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: minor_length_mm must be positive, got {self.minor_length_mm}"
+            )
+        if self.major_length_mm <= 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: major_length_mm must be positive, got {self.major_length_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+    def get_minor_spacing(self) -> float:
+        if self.unit == "metric":
+            return 1.0
+        elif self.unit == "imperial":
+            return 25.4 / 16  # 1/16"
+        else:
+            return self.minor_spacing_mm or 1.0
+
+    def get_major_spacing(self) -> float:
+        if self.unit == "metric":
+            return 10.0
+        elif self.unit == "imperial":
+            return 25.4  # 1"
+        else:
+            return self.major_spacing_mm or 10.0
+
+
 @dataclass(frozen=True)
 class HoleGridParams(BaseParams):
     """Parameters for hole grid area generator.
@@ -795,6 +897,7 @@ __all__ = [
     "WaveParams",
     "GridParams",
     "MeasurementGridParams",
+    "MeasurementEdgeParams",
     "BeadParams",
     "RaisedPanelParams",
     "ChamferParams",
@@ -804,6 +907,7 @@ __all__ = [
     "HoleGridParams",
     # Type aliases
     "LoopSelection",
+    "EdgeSelection",
     # Utilities
     "generate_shape_id",
     "validate_domain_for_generation",

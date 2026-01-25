@@ -180,7 +180,7 @@ def render_blueprint_svg(
         elif feature_type == "engrave":
             _render_engrave(engrave_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
 
-        if item.shape_id and item.placement and not item.shape_id.startswith("generated_") and not is_waste:
+        if item.label and item.placement:
             _render_label(label_group, item, offset_x, offset_y, y_flip=flip_y)
 
 
@@ -480,12 +480,12 @@ def _render_engrave(group: ET.Element, item: Item, offset_x: float, offset_y: fl
 
 
 def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: float, y_flip=None) -> None:
-    if not item.shape_id or item.placement is None:
+    if not item.label or item.placement is None:
         return
 
     yf = y_flip if y_flip is not None else (lambda y: y)
     cx, cy = item.placement.center_xy_mm
-    label = ET.SubElement(
+    label_elem = ET.SubElement(
         group,
         "text",
         {
@@ -496,7 +496,7 @@ def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: floa
             "dominant-baseline": "middle",
         },
     )
-    label.text = item.shape_id
+    label_elem.text = item.label
 
 
 def _render_dimensions(

@@ -57,6 +57,7 @@ class Item:
     params: dict[str, Any] | None = None
     shape_id: str | None = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)

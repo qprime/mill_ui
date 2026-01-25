@@ -26,7 +26,7 @@ def test_simple_rect_profile():
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         with patch("mill_mcp.config.get_output_dir", return_value=tmp_path):
-            pml = """sheet 450mm 650mm 19mm
+            pml = """sheet 450mm 650mm 19mm margin 0mm
 
 rect door at 225mm,325mm size 400mm,600mm profile through outside
 """
@@ -54,7 +54,7 @@ def test_compositional_pml():
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         with patch("mill_mcp.config.get_output_dir", return_value=tmp_path):
-            pml = """sheet 450mm 650mm 19mm
+            pml = """sheet 450mm 650mm 19mm margin 0mm
 
 component Door
     rect outer profile through outside
@@ -80,7 +80,7 @@ def test_auto_detect_compositional():
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         with patch("mill_mcp.config.get_output_dir", return_value=tmp_path):
-            pml = """sheet 450mm 650mm 19mm
+            pml = """sheet 450mm 650mm 19mm margin 0mm
 
 component Door
     rect outer profile through outside
@@ -124,7 +124,7 @@ def test_simple_nest():
         tmp_path = Path(tmp_dir)
         with patch("mill_mcp.config.get_output_dir", return_value=tmp_path):
             nest = """nest maxrects
-    sheet 1220mm 2440mm 19mm
+    sheet 1220mm 2440mm 19mm margin 0mm
     kerf 6.35mm
     margin 10mm
 
@@ -150,7 +150,7 @@ def test_nest_with_template():
         tmp_path = Path(tmp_dir)
         with patch("mill_mcp.config.get_output_dir", return_value=tmp_path):
             nest = """nest guillotine
-    sheet 1220mm 2440mm 19mm
+    sheet 1220mm 2440mm 19mm margin 0mm
     kerf 6.35mm
 
     parts
@@ -205,7 +205,7 @@ def test_valid_pml():
     print("Running test_valid_pml...")
     from mill_mcp.server import validate_pml
 
-    pml = """sheet 450mm 650mm 19mm
+    pml = """sheet 450mm 650mm 19mm margin 0mm
 
 rect door at 225mm,325mm size 400mm,600mm profile through outside
 """

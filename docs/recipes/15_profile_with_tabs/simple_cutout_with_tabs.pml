@@ -1,10 +1,10 @@
-# mill_ui: 5f53b9a
+# mill_ui: 866253f
 # generated: 2026-01-25
 
 # Simple rectangular cutout with holding tabs
 # Tabs prevent the part from moving during cutting
 
-sheet 600mm 400mm 19mm
+sheet 600mm 400mm 19mm margin 0mm
 
 # Main cutout: 400mm x 250mm rectangle with 4 tabs
 # Tabs are 3mm high and 12mm wide

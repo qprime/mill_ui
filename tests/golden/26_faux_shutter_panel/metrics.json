@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "26_faux_shutter_panel",
-    "created_at": "2026-01-25T20:51:30.156518+00:00"
+    "created_at": "2026-01-25T23:00:01.217691+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -495,48 +495,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 1.1461,
-    "mesh": {
-      "vertex_count": 200,
-      "face_count": 396,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": 0.0,
-      "x_max": 250.0,
-      "y_min": 0.0,
-      "y_max": 600.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 250.0,
-      "height_mm": 600.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 2490000.0763,
-    "surface_area_mm2": 389420.0006,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        2.0,
-        11.0,
-        19.0
-      ],
-      "z_level_count": 4,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.8535,
+    "extraction_time_ms": 1.7337,
     "summary": {
       "total_lines": 2394,
       "comment_lines": 102,

@@ -8,7 +8,7 @@ def test_basic_nest_parsing():
 
     source = """
 nest maxrects
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
     kerf 6.35mm
     margin 10mm
 
@@ -38,7 +38,7 @@ def test_guillotine_algorithm():
 
     source = """
 nest guillotine
-    sheet 1200mm 2400mm 18mm
+    sheet 1200mm 2400mm 18mm margin 0mm
 
     parts
         door 500mm 800mm x2
@@ -62,7 +62,7 @@ def test_multiple_parts():
 
     source = """
 nest maxrects
-    sheet 1232mm 1245mm 19mm
+    sheet 1232mm 1245mm 19mm margin 0mm
     kerf 6.35mm
     margin 10mm
 
@@ -90,7 +90,7 @@ def test_part_with_template():
 
     source = """
 nest maxrects
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
 
     parts
         door 400mm 600mm x2
@@ -118,7 +118,7 @@ def test_mixed_parts_with_and_without_template():
 
     source = """
 nest maxrects
-    sheet 1232mm 1245mm 19mm
+    sheet 1232mm 1245mm 19mm margin 0mm
     kerf 6.35mm
     margin 10mm
 
@@ -166,7 +166,7 @@ def test_comments_ignored():
 
 nest maxrects
 
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
 
     parts
 
@@ -186,7 +186,7 @@ def test_quantity_default():
 
     source = """
 nest maxrects
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
 
     parts
         panel 400mm 600mm
@@ -204,7 +204,7 @@ def test_nest_job_to_api_params():
 
     source = """
 nest maxrects
-    sheet 1232mm 1245mm 19mm
+    sheet 1232mm 1245mm 19mm margin 0mm
     kerf 6.35mm
     margin 10mm
 
@@ -242,7 +242,7 @@ def test_error_missing_nest_directive():
     print("Running test_error_missing_nest_directive...")
 
     source = """
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
 
     parts
         panel 400mm 600mm
@@ -281,7 +281,7 @@ def test_error_no_parts():
 
     source = """
 nest maxrects
-    sheet 1000mm 2000mm 19mm
+    sheet 1000mm 2000mm 19mm margin 0mm
 
     parts
     """

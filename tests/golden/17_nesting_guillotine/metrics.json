@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "17_nesting_guillotine",
-    "created_at": "2026-01-25T20:51:29.443000+00:00"
+    "created_at": "2026-01-25T23:00:00.534746+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -423,7 +423,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.9328,
+    "extraction_time_ms": 8.7682,
     "summary": {
       "total_lines": 37898,
       "comment_lines": 260,

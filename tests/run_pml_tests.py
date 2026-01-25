@@ -11,7 +11,7 @@ def test_pml_parse_minimal_layout():
     print("Running test_pml_parse_minimal_layout...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect outer at 225mm,325mm size 400mm,600mm profile through outside
 """
@@ -45,7 +45,7 @@ def test_pml_parse_with_metadata():
 project test_panel
 kerf 0.15mm
 
-sheet 300mm 400mm 19mm
+sheet 300mm 400mm 19mm margin 0mm
 
 rect panel at 150mm,200mm size 200mm,300mm pocket 5mm
 """
@@ -64,7 +64,7 @@ def test_pml_parse_multiple_shapes():
     print("Running test_pml_parse_multiple_shapes...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
 rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
@@ -104,7 +104,7 @@ def test_pml_parse_circle_diameter_vs_radius():
     print("Running test_pml_parse_circle_diameter_vs_radius...")
 
     pml = """
-sheet 200mm 200mm 19mm
+sheet 200mm 200mm 19mm margin 0mm
 
 circle hole1 at 50mm,50mm diameter 20mm hole through
 circle hole2 at 150mm,150mm radius 8mm hole 12mm
@@ -132,7 +132,7 @@ def test_pml_parse_roundedrect():
     print("Running test_pml_parse_roundedrect...")
 
     pml = """
-sheet 300mm 300mm 19mm
+sheet 300mm 300mm 19mm margin 0mm
 
 roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
 """
@@ -157,7 +157,7 @@ def test_pml_parse_comments_and_blank_lines():
 
     pml = """
 
-sheet 300mm 400mm 19mm
+sheet 300mm 400mm 19mm margin 0mm
 
 
 rect panel at 150mm,200mm size 200mm,300mm profile through inside
@@ -210,7 +210,7 @@ def test_pml_parse_error_invalid_feature():
     print("Running test_pml_parse_error_invalid_feature...")
 
     pml = """
-sheet 300mm 400mm 19mm
+sheet 300mm 400mm 19mm margin 0mm
 rect panel at 150mm,200mm size 200mm,300mm invalid_feature 5mm
 """
 
@@ -229,7 +229,7 @@ def test_pml_format_minimal_layout():
     print("Running test_pml_format_minimal_layout...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -255,7 +255,7 @@ def test_pml_format_with_metadata():
     print("Running test_pml_format_with_metadata...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=300.0, height_mm=400.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=300.0, height_mm=400.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -286,7 +286,7 @@ def test_pml_roundtrip_semantic_equivalence():
 
 project shaker_door
 
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
 rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
@@ -327,7 +327,7 @@ def test_pml_to_json_to_ast_semantic_equivalence():
 project test_panel
 kerf 0.15mm
 
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
 rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
@@ -363,7 +363,7 @@ def test_pml_canonical_formatting():
     print("Running test_pml_canonical_formatting...")
 
     pml_input = """
-sheet 450.123mm 650.456mm 19.789mm
+sheet 450.123mm 650.456mm 19.789mm margin 0mm
 rect test at 100.1mm,200.2mm size 50.5mm,60.6mm pocket 5.123mm
 """
 

@@ -15,6 +15,7 @@ def sheet_layout_to_ast(sheet_layout: SheetLayout) -> LayoutAST:
         width_mm=sheet_spec.width_mm,
         height_mm=sheet_spec.height_mm,
         thickness_mm=sheet_spec.thickness_mm,
+        margin_mm=sheet_spec.margin_mm,
     )
 
 
@@ -39,7 +40,7 @@ def sheet_layout_to_pml(sheet_layout: SheetLayout) -> str:
     spec = sheet_layout.sheet_spec
 
 
-    lines.append(f"sheet {spec.width_mm}mm {spec.height_mm}mm {spec.thickness_mm}mm")
+    lines.append(f"sheet {spec.width_mm}mm {spec.height_mm}mm {spec.thickness_mm}mm margin {spec.margin_mm}mm")
     lines.append("")
     lines.append(f"# Sheet {sheet_layout.sheet_index + 1}")
     lines.append(f"# Utilization: {sheet_layout.utilization_percent:.1f}%")

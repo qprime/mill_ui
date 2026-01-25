@@ -44,7 +44,7 @@ RECIPE_DIR = os.path.join(
 def make_simple_profile_ast() -> LayoutAST:
     """AST for a simple profile cut (like recipe 01)."""
     return LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -61,7 +61,7 @@ def make_simple_profile_ast() -> LayoutAST:
 def make_pocket_ast() -> LayoutAST:
     """AST for a pocket cut (like recipe 02)."""
     return LayoutAST(
-        sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -78,7 +78,7 @@ def make_pocket_ast() -> LayoutAST:
 def make_shaker_door_ast() -> LayoutAST:
     """AST for a shaker door (like recipe 03)."""
     return LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -103,7 +103,7 @@ def make_shaker_door_ast() -> LayoutAST:
 def make_hole_ast() -> LayoutAST:
     """AST with holes."""
     return LayoutAST(
-        sheet=Sheet(width_mm=200.0, height_mm=200.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=200.0, height_mm=200.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",

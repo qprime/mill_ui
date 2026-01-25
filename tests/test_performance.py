@@ -305,7 +305,7 @@ def bench_shaker_door_pipeline():
 
         # Build AST
         ast = LayoutAST(
-            sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+            sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
             items=tuple(profile_items + pocket_items),
         )
         return ast
@@ -333,7 +333,7 @@ def bench_decorated_panel_pipeline():
 
         # Build AST
         ast = LayoutAST(
-            sheet=Sheet(width_mm=350, height_mm=250, thickness_mm=19),
+            sheet=Sheet(width_mm=350, height_mm=250, thickness_mm=19, margin_mm=0.0),
             items=tuple(profile_items + wave_items),
         )
         return ast
@@ -357,7 +357,7 @@ def bench_full_pipeline_with_ir():
 
         # Build AST
         ast = LayoutAST(
-            sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+            sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
             items=tuple(items),
         )
 

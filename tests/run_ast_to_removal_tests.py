@@ -11,7 +11,7 @@ def test_warning_collection_on_invalid_item():
 
     # Create AST with one valid item and one invalid item (missing geometry)
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             # Valid item
             Item(
@@ -54,7 +54,7 @@ def test_no_warnings_when_all_valid():
     print("Running test_no_warnings_when_all_valid...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -90,7 +90,7 @@ def test_warnings_none_by_default():
     print("Running test_warnings_none_by_default...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -116,7 +116,7 @@ def test_skips_non_shape_items():
     print("Running test_skips_non_shape_items...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="component",  # Not a shape
@@ -151,7 +151,7 @@ def test_unknown_feature_type_warning():
     print("Running test_unknown_feature_type_warning...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -181,7 +181,7 @@ def test_multiple_warnings():
     print("Running test_multiple_warnings...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             # Missing geometry (raises ValueError)
             Item(

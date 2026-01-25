@@ -8,7 +8,7 @@ from pathlib import Path
 def test_cli_parse_and_format():
     print("Running test_cli_parse_and_format...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -40,7 +40,7 @@ rect outer profile through outside
 def test_cli_resolve_to_flat_pml():
     print("Running test_cli_resolve_to_flat_pml...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -82,7 +82,7 @@ rect outer profile through outside
 def test_cli_resolve_to_json():
     print("Running test_cli_resolve_to_json...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -166,7 +166,7 @@ def test_cli_error_on_invalid_pml():
 def test_cli_gold_exemplar():
     print("Running test_cli_gold_exemplar...")
 
-    pml = """sheet 1200.00mm 1200.00mm 19.00mm
+    pml = """sheet 1200.00mm 1200.00mm 19.00mm margin 0mm
 
 project acceptance_test_grid_panels
 

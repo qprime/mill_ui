@@ -5,7 +5,7 @@ from resolution.layout_resolver import resolve_layout
 
 
 def test_basic_split_2x2():
-    pml = """sheet 600.00mm 600.00mm 19.00mm
+    pml = """sheet 600.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -35,14 +35,14 @@ rect outer profile through outside
 
 
 def test_split_zero_rails_behaves_like_grid():
-    pml_split = """sheet 400.00mm 400.00mm 19.00mm
+    pml_split = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 split 2 2 rail 0.00mm mullion 0.00mm
     cell
         rect pocket 5.00mm
 """
 
-    pml_grid = """sheet 400.00mm 400.00mm 19.00mm
+    pml_grid = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 grid 2 2 gap 0.00mm
     cell
@@ -71,7 +71,7 @@ grid 2 2 gap 0.00mm
 
 
 def test_split_pane_size_calculation():
-    pml = """sheet 1000.00mm 800.00mm 19.00mm
+    pml = """sheet 1000.00mm 800.00mm 19.00mm margin 0mm
 
 split 3 4 rail 30.00mm mullion 20.00mm
     cell
@@ -92,7 +92,7 @@ split 3 4 rail 30.00mm mullion 20.00mm
 
 
 def test_split_inside_inset():
-    pml = """sheet 500.00mm 500.00mm 19.00mm
+    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
 
 inset 50.00mm
     split 2 2 rail 40.00mm mullion 30.00mm
@@ -113,7 +113,7 @@ inset 50.00mm
 
 
 def test_split_roundtrip_preserves_rail_mullion():
-    original_pml = """sheet 600.00mm 400.00mm 19.00mm
+    original_pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 split 2 3 rail 45.00mm mullion 35.00mm
     cell
@@ -143,7 +143,7 @@ split 2 3 rail 45.00mm mullion 35.00mm
 
 
 def test_french_door_acceptance():
-    pml = """sheet 800.00mm 1200.00mm 19.00mm
+    pml = """sheet 800.00mm 1200.00mm 19.00mm margin 0mm
 
 rect door_outer profile through outside
     frame 60.00mm
@@ -169,7 +169,7 @@ rect door_outer profile through outside
 
 
 def test_split_single_row():
-    pml = """sheet 600.00mm 200.00mm 19.00mm
+    pml = """sheet 600.00mm 200.00mm 19.00mm margin 0mm
 
 split 1 3 rail 0.00mm mullion 30.00mm
     cell
@@ -189,7 +189,7 @@ split 1 3 rail 0.00mm mullion 30.00mm
 
 
 def test_split_single_column():
-    pml = """sheet 200.00mm 600.00mm 19.00mm
+    pml = """sheet 200.00mm 600.00mm 19.00mm margin 0mm
 
 split 3 1 rail 40.00mm mullion 0.00mm
     cell

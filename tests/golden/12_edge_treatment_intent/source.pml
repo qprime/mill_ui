@@ -1,7 +1,7 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 300mm 200mm 19mm
+sheet 300mm 200mm 19mm margin 0mm
 
 # Pocket with edge allowance intent (rough + finish)
 rect recess pocket 4mm

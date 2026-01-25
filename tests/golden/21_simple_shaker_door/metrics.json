@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "21_simple_shaker_door",
-    "created_at": "2026-01-25T20:51:30.031729+00:00"
+    "created_at": "2026-01-25T23:00:01.105023+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.29,
+    "extraction_time_ms": 0.31,
     "document": {
       "width_mm": 680.0,
       "height_mm": 880.0,
@@ -285,47 +285,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 0.8378,
-    "mesh": {
-      "vertex_count": 16,
-      "face_count": 28,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": 0.0,
-      "x_max": 400.0,
-      "y_min": 0.0,
-      "y_max": 600.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 400.0,
-      "height_mm": 600.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 3660000.0,
-    "surface_area_mm2": 527600.0,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        13.0,
-        19.0
-      ],
-      "z_level_count": 3,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.4034,
+    "extraction_time_ms": 4.3214,
     "summary": {
       "total_lines": 1582,
       "comment_lines": 12,

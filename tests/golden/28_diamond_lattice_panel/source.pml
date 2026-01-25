@@ -1,7 +1,7 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 400mm 400mm 19mm
+sheet 400mm 400mm 19mm margin 0mm
 
 rect panel
     profile outside through

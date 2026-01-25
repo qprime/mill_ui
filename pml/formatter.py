@@ -10,7 +10,7 @@ def format_pml(ast: LayoutAST) -> str:
 
 
     lines.append(
-        f"sheet {ast.sheet.width_mm:.2f}mm {ast.sheet.height_mm:.2f}mm {ast.sheet.thickness_mm:.2f}mm"
+        f"sheet {ast.sheet.width_mm:.2f}mm {ast.sheet.height_mm:.2f}mm {ast.sheet.thickness_mm:.2f}mm margin {ast.sheet.margin_mm:.2f}mm"
     )
     lines.append("")
 

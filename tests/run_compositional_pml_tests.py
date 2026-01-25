@@ -14,7 +14,7 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 def test_simple_rect():
     print("Running test_simple_rect...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
 """
@@ -33,7 +33,7 @@ rect outer profile through outside
 def test_rect_with_inset():
     print("Running test_rect_with_inset...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 inset 25.00mm
     rect panel pocket 6.00mm
@@ -53,7 +53,7 @@ inset 25.00mm
 def test_frame_with_pocket():
     print("Running test_frame_with_pocket...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -80,7 +80,7 @@ rect outer profile through outside
 def test_grid_with_pockets():
     print("Running test_grid_with_pockets...")
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 grid 2 2 gap 10.00mm
     cell
@@ -103,7 +103,7 @@ grid 2 2 gap 10.00mm
 def test_component_definition_and_use():
     print("Running test_component_definition_and_use...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 component SimplePanel
     rect panel pocket 6.00mm
@@ -125,7 +125,7 @@ use SimplePanel
 def test_place_with_components():
     print("Running test_place_with_components...")
 
-    pml = """sheet 1000.00mm 1000.00mm 19.00mm
+    pml = """sheet 1000.00mm 1000.00mm 19.00mm margin 0mm
 
 component Panel
     rect outer profile through outside
@@ -151,7 +151,7 @@ place grid 2 2 gap 50.00mm
 def test_acceptance_stage12_gold_exemplar():
     print("Running test_acceptance_stage12_gold_exemplar...")
 
-    pml = """sheet 1200.00mm 1200.00mm 19.00mm
+    pml = """sheet 1200.00mm 1200.00mm 19.00mm margin 0mm
 
 project acceptance_test_grid_panels
 
@@ -202,7 +202,7 @@ place grid 2 2 gap 100.00mm
 def test_roundtrip_preserves_semantics():
     print("Running test_roundtrip_preserves_semantics...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm
+    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 project test_roundtrip
 
@@ -235,7 +235,7 @@ def test_error_handling_invalid_indentation():
     print("Running test_error_handling_invalid_indentation...")
 
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect outer profile through outside
     frame 50.00mm
@@ -259,7 +259,7 @@ rect outer profile through outside
 def test_formatter_produces_canonical_output():
     print("Running test_formatter_produces_canonical_output...")
 
-    pml = """sheet 1200.00mm 1200.00mm 19.00mm
+    pml = """sheet 1200.00mm 1200.00mm 19.00mm margin 0mm
 
 project test_canonical
 

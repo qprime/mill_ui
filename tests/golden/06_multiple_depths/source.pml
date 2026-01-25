@@ -1,7 +1,7 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 220mm 160mm 19mm
+sheet 220mm 160mm 19mm margin 0mm
 
 # Mounting plate with multiple depths
 rect plate:outer at 110mm,80mm size 180mm,120mm profile through outside

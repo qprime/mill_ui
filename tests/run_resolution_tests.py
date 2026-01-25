@@ -27,7 +27,7 @@ def test_simple_panel_with_rect():
     print("Running test_simple_panel_with_rect...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -56,7 +56,7 @@ def test_panel_with_inset():
     print("Running test_panel_with_inset...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Inset(
@@ -88,7 +88,7 @@ def test_frame_insets_region_for_children():
     print("Running test_frame_insets_region_for_children...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -134,7 +134,7 @@ def test_frame_does_not_emit_profile():
     print("Running test_frame_does_not_emit_profile...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -171,7 +171,7 @@ def test_grid_subdivides_region():
     print("Running test_grid_subdivides_region...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Grid(
@@ -219,7 +219,7 @@ def test_component_definition_and_use():
     )
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         components={"SimplePanel": simple_panel},
         root=Panel(
             children=(
@@ -265,7 +265,7 @@ def test_place_grid_with_components():
     )
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=1000, height_mm=1000, thickness_mm=19),
+        sheet=Sheet(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=0.0),
         components={"ShakerPanel": shaker_panel},
         root=Place(
             layout=Grid(rows=2, cols=2, gap_mm=50),
@@ -325,7 +325,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
     )
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19),
+        sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19, margin_mm=0.0),
         components={"GridPanel": grid_panel},
         root=Place(
             layout=Grid(rows=2, cols=2, gap_mm=100),
@@ -369,7 +369,7 @@ def test_grid_with_no_explicit_cell():
     print("Running test_grid_with_no_explicit_cell...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Grid(

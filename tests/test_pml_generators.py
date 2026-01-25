@@ -30,7 +30,7 @@ def test_parse_profile_gen_outside_through():
     """Test parsing: profile outside through"""
     print("Running test_parse_profile_gen_outside_through...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile outside through
@@ -54,7 +54,7 @@ def test_parse_profile_gen_inside_depth():
     """Test parsing: profile inside 10mm"""
     print("Running test_parse_profile_gen_inside_depth...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile inside 10mm
@@ -75,7 +75,7 @@ def test_parse_pocket_gen():
     """Test parsing: pocket 6mm"""
     print("Running test_parse_pocket_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     pocket 6mm
@@ -95,7 +95,7 @@ def test_parse_raised_panel_gen():
     """Test parsing: raised_panel border 25mm border_depth 6mm field_depth 2mm"""
     print("Running test_parse_raised_panel_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     raised_panel border 25mm border_depth 6mm field_depth 2mm
@@ -117,7 +117,7 @@ def test_parse_chamfer_gen():
     """Test parsing: chamfer 5mm 3mm"""
     print("Running test_parse_chamfer_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     chamfer 5mm 3mm
@@ -138,7 +138,7 @@ def test_parse_wave_gen():
     """Test parsing: wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm"""
     print("Running test_parse_wave_gen...")
     pml = """
-sheet 300mm 300mm 19mm
+sheet 300mm 300mm 19mm margin 0mm
 
 rect panel
     wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm
@@ -162,7 +162,7 @@ def test_parse_split_horizontal():
     """Test parsing: split_horizontal 3 gap 20mm"""
     print("Running test_parse_split_horizontal...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     split_horizontal 3 gap 20mm
@@ -186,7 +186,7 @@ def test_parse_split_vertical():
     """Test parsing: split_vertical 2 gap 15mm"""
     print("Running test_parse_split_vertical...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     split_vertical 2 gap 15mm
@@ -209,7 +209,7 @@ def test_parse_split_grid():
     """Test parsing: split_grid 2 2 gap 35mm"""
     print("Running test_parse_split_grid...")
     pml = """
-sheet 500mm 700mm 19mm
+sheet 500mm 700mm 19mm margin 0mm
 
 rect door
     split_grid 2 2 gap 35mm
@@ -239,7 +239,7 @@ def test_resolve_profile_gen():
     """Test resolution of profile generator to LayoutAST Item."""
     print("Running test_resolve_profile_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile outside through
@@ -265,7 +265,7 @@ def test_resolve_pocket_gen():
     """Test resolution of pocket generator to LayoutAST Item."""
     print("Running test_resolve_pocket_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     pocket 6mm
@@ -289,7 +289,7 @@ def test_resolve_raised_panel_gen():
     """Test resolution of raised_panel generator to LayoutAST Items."""
     print("Running test_resolve_raised_panel_gen...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect panel
     raised_panel border 25mm border_depth 6mm field_depth 2mm
@@ -322,7 +322,7 @@ def test_resolve_split_grid_with_raised_panel():
     """Test resolution of split_grid with raised_panel children."""
     print("Running test_resolve_split_grid_with_raised_panel...")
     pml = """
-sheet 500mm 700mm 19mm
+sheet 500mm 700mm 19mm margin 0mm
 
 rect door
     split_grid 2 2 gap 35mm
@@ -352,7 +352,7 @@ def test_resolve_wave_gen():
     """
     print("Running test_resolve_wave_gen...")
     pml = """
-sheet 300mm 300mm 19mm
+sheet 300mm 300mm 19mm margin 0mm
 
 rect panel
     wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm
@@ -382,7 +382,7 @@ def test_example_shaker_door():
     """Test the example from the spec: simple shaker door in PML."""
     print("Running test_example_shaker_door...")
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect door
     profile outside through
@@ -407,7 +407,7 @@ def test_example_four_panel_door():
     """Test the example from the spec: four-panel raised door."""
     print("Running test_example_four_panel_door...")
     pml = """
-sheet 500mm 700mm 19mm
+sheet 500mm 700mm 19mm margin 0mm
 
 rect door
     profile outside through
@@ -437,7 +437,7 @@ def test_example_wave_texture_panel():
     """
     print("Running test_example_wave_texture_panel...")
     pml = """
-sheet 300mm 300mm 19mm
+sheet 300mm 300mm 19mm margin 0mm
 
 rect panel
     profile outside through
@@ -465,7 +465,7 @@ def test_parse_error_invalid_profile_side():
     """Test that invalid profile side raises ParseError."""
     print("Running test_parse_error_invalid_profile_side...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile invalid through
@@ -488,7 +488,7 @@ def test_parse_error_missing_depth():
     """Test that missing depth raises ParseError."""
     print("Running test_parse_error_missing_depth...")
     pml = """
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile outside

@@ -7,7 +7,7 @@ from layout_ast.layout import Feature
 
 
 def test_simple_pocket_with_island():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -40,7 +40,7 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_inside_grid():
-    pml = """sheet 600.00mm 400.00mm 19.00mm
+    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 grid 2 2 gap 10.00mm
     cell
@@ -64,7 +64,7 @@ grid 2 2 gap 10.00mm
 
 
 def test_multiple_keepouts_in_region():
-    pml = """sheet 500.00mm 500.00mm 19.00mm
+    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -92,7 +92,7 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_roundtrip():
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm
+    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -127,7 +127,7 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_with_circle():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -154,7 +154,7 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_with_rounded_rect():
-    pml = """sheet 500.00mm 400.00mm 19.00mm
+    pml = """sheet 500.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -182,7 +182,7 @@ rect panel pocket 6.00mm
 
 
 def test_nested_keepout_error():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout
@@ -202,7 +202,7 @@ rect panel pocket 6.00mm
 def test_removal_intent_includes_islands():
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     keepout

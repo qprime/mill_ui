@@ -16,7 +16,7 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 def test_circle_with_explicit_diameter():
     print("Running test_circle_with_explicit_diameter...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 circle medallion diameter 120.00mm pocket 3.00mm
 """
@@ -40,7 +40,7 @@ circle medallion diameter 120.00mm pocket 3.00mm
 def test_circle_fit_mode():
     print("Running test_circle_fit_mode...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 circle fit pocket 5.00mm
 """
@@ -62,7 +62,7 @@ circle fit pocket 5.00mm
 def test_circle_fit_in_rect_region():
     print("Running test_circle_fit_in_rect_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 inset 50.00mm
     circle badge fit profile through outside
@@ -86,7 +86,7 @@ inset 50.00mm
 def test_rounded_rect_fills_region():
     print("Running test_rounded_rect_fills_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rounded_rect badge radius 8.00mm pocket 3.00mm
 """
@@ -111,7 +111,7 @@ rounded_rect badge radius 8.00mm pocket 3.00mm
 def test_rounded_rect_with_inset():
     print("Running test_rounded_rect_with_inset...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 inset 25.00mm
     rounded_rect panel radius 12.00mm profile through outside
@@ -136,7 +136,7 @@ inset 25.00mm
 def test_line_horizontal():
     print("Running test_line_horizontal...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 line decoration horizontal engrave 1.50mm
 """
@@ -167,7 +167,7 @@ line decoration horizontal engrave 1.50mm
 def test_line_vertical():
     print("Running test_line_vertical...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 line divider vertical engrave 1.50mm
 """
@@ -194,7 +194,7 @@ line divider vertical engrave 1.50mm
 def test_line_in_inset_region():
     print("Running test_line_in_inset_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 inset 50.00mm
     line flourish horizontal engrave 1.50mm
@@ -222,7 +222,7 @@ inset 50.00mm
 def test_round_trip_circle():
     print("Running test_round_trip_circle...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm
+    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 project test_circle
 
@@ -248,7 +248,7 @@ circle badge diameter 100.00mm pocket 5.00mm
 def test_round_trip_rounded_rect():
     print("Running test_round_trip_rounded_rect...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm
+    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rounded_rect panel radius 10.00mm profile through outside
 """
@@ -270,7 +270,7 @@ rounded_rect panel radius 10.00mm profile through outside
 def test_round_trip_line():
     print("Running test_round_trip_line...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm
+    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 line decoration vertical engrave 1.50mm
 """
@@ -294,7 +294,7 @@ line decoration vertical engrave 1.50mm
 def test_mixed_shapes_composition():
     print("Running test_mixed_shapes_composition...")
 
-    pml = """sheet 800.00mm 600.00mm 19.00mm
+    pml = """sheet 800.00mm 600.00mm 19.00mm margin 0mm
 
 project mixed_shapes
 
@@ -333,7 +333,7 @@ line divider horizontal engrave 1.50mm
 def test_rounded_rect_selective_corners():
     print("Running test_rounded_rect_selective_corners...")
 
-    pml = """sheet 686.00mm 864.00mm 19.00mm
+    pml = """sheet 686.00mm 864.00mm 19.00mm margin 0mm
 
 rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 """
@@ -357,7 +357,7 @@ rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 def test_rounded_rect_all_corners_explicit():
     print("Running test_rounded_rect_all_corners_explicit...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rounded_rect panel radius 10.00mm corners tl tr bl br pocket 3.00mm
 """
@@ -379,7 +379,7 @@ rounded_rect panel radius 10.00mm corners tl tr bl br pocket 3.00mm
 def test_rounded_rect_single_corner():
     print("Running test_rounded_rect_single_corner...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rounded_rect corner_piece radius 25.00mm corners tr profile through outside
 """
@@ -400,7 +400,7 @@ rounded_rect corner_piece radius 25.00mm corners tr profile through outside
 def test_rounded_rect_corners_round_trip():
     print("Running test_rounded_rect_corners_round_trip...")
 
-    original_pml = """sheet 686.00mm 864.00mm 19.00mm
+    original_pml = """sheet 686.00mm 864.00mm 19.00mm margin 0mm
 
 rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 """
@@ -427,7 +427,7 @@ rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 def test_acceptance_canonical_formatting():
     print("Running test_acceptance_canonical_formatting...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 project shape_test
 
@@ -457,7 +457,7 @@ def test_rounded_rect_with_profile_child_inherits_geometry():
     """Test that profile generator inside rounded_rect produces RoundedRect profile."""
     print("Running test_rounded_rect_with_profile_child_inherits_geometry...")
 
-    pml = """sheet 584.00mm 584.00mm 19.00mm
+    pml = """sheet 584.00mm 584.00mm 19.00mm margin 0mm
 
 rounded_rect panel radius 25.40mm corners bl br
     profile outside through
@@ -492,7 +492,7 @@ def test_rect_with_profile_child_stays_rect():
     """Test backward compatibility: profile inside rect stays rect."""
     print("Running test_rect_with_profile_child_stays_rect...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm
+    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
 
 rect panel
     profile outside through

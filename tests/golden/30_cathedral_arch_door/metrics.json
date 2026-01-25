@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-01-25T20:51:30.344535+00:00"
+    "created_at": "2026-01-25T23:00:01.396203+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.41,
+    "extraction_time_ms": 0.38,
     "document": {
       "width_mm": 780.0,
       "height_mm": 1080.0,
@@ -74,13 +74,13 @@
           "elements": []
         },
         "LABELS": {
-          "element_count": 1,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 1,
+          "text_count": 0,
           "elements": []
         },
         "LEGEND": {
@@ -229,7 +229,7 @@
       "y_max": 940.0
     },
     "text_elements": {
-      "count": 23,
+      "count": 22,
       "dimension_labels": [
         "330.0mm",
         "463.3mm",
@@ -271,48 +271,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 1.5022,
-    "mesh": {
-      "vertex_count": 344,
-      "face_count": 684,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": -250.0,
-      "x_max": 250.0,
-      "y_min": -400.0,
-      "y_max": 400.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 500.0,
-      "height_mm": 800.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 6416032.3,
-    "surface_area_mm2": 817430.3102,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        6.0,
-        17.0,
-        19.0
-      ],
-      "z_level_count": 4,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.9262,
+    "extraction_time_ms": 8.861,
     "summary": {
       "total_lines": 3284,
       "comment_lines": 9,

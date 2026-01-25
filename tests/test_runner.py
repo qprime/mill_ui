@@ -46,7 +46,7 @@ RECIPE_DIR = os.path.join(
 def make_simple_profile_ast() -> LayoutAST:
     """AST for a simple profile cut (like recipe 01)."""
     return LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",

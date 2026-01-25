@@ -411,7 +411,7 @@ class TemplateDef:
 class WasteCuts:
     min_width_mm: float
     min_height_mm: float
-    margin_mm: float
+    margin_mm: float | None
     tab_count: int
     tab_height_mm: float
     strategy: str = "largest"

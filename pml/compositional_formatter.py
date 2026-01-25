@@ -38,7 +38,7 @@ def format_compositional_pml(ast: CompositionalLayoutAST) -> str:
     lines = []
 
 
-    lines.append(f"sheet {ast.sheet.width_mm:.2f}mm {ast.sheet.height_mm:.2f}mm {ast.sheet.thickness_mm:.2f}mm")
+    lines.append(f"sheet {ast.sheet.width_mm:.2f}mm {ast.sheet.height_mm:.2f}mm {ast.sheet.thickness_mm:.2f}mm margin {ast.sheet.margin_mm:.2f}mm")
     lines.append("")
 
 

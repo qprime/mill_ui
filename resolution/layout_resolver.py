@@ -839,6 +839,11 @@ class LayoutResolver:
         sheet_width = self.ast.sheet.width_mm
         sheet_height = self.ast.sheet.height_mm
 
+        if node.margin_mm is not None:
+            margin = node.margin_mm
+        else:
+            margin = self.ast.sheet.margin_mm
+
         part_bounds = []
         for item in items:
             if item.kind == "shape" and item.geometry:
@@ -859,7 +864,7 @@ class LayoutResolver:
         waste_rects = compute_waste_rectangles(
             sheet_width=sheet_width,
             sheet_height=sheet_height,
-            margin=node.margin_mm,
+            margin=margin,
             parts=part_bounds,
             min_width=node.min_width_mm,
             min_height=node.min_height_mm,
@@ -1480,12 +1485,13 @@ class LayoutResolver:
                 self._resolve_node(child, triangle_region, items, params)
 
     def resolve(self) -> LayoutAST:
+        margin = self.ast.sheet.margin_mm
 
         sheet_region = ResolvedRegion(
-            x_min=0,
-            y_min=0,
-            x_max=self.ast.sheet.width_mm,
-            y_max=self.ast.sheet.height_mm,
+            x_min=margin,
+            y_min=margin,
+            x_max=self.ast.sheet.width_mm - margin,
+            y_max=self.ast.sheet.height_mm - margin,
         )
 
 

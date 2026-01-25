@@ -3,7 +3,7 @@
 # Algorithm: guillotine
 # Items: 10
 
-sheet 1232.00mm 1245.00mm 19.00mm
+sheet 1232.00mm 1245.00mm 19.00mm margin 0mm
 
 kerf 6.35mm
 

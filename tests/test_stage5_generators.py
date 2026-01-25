@@ -689,7 +689,7 @@ def test_end_to_end_stage5_to_ast():
     all_items = wave_items + bead_items
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=350, height_mm=250, thickness_mm=19),
+        sheet=Sheet(width_mm=350, height_mm=250, thickness_mm=19, margin_mm=0.0),
         items=tuple(all_items),
     )
 

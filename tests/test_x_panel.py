@@ -13,7 +13,7 @@ from domains import Domain
 
 
 def test_x_panel_parse():
-    pml = """sheet 300mm 300mm 19mm
+    pml = """sheet 300mm 300mm 19mm margin 0mm
 
 rect panel
     x_panel bar_width 40mm depth 5mm
@@ -24,7 +24,7 @@ rect panel
 
 
 def test_x_panel_resolve():
-    pml = """sheet 300mm 300mm 19mm
+    pml = """sheet 300mm 300mm 19mm margin 0mm
 
 rect panel
     x_panel bar_width 40mm depth 5mm
@@ -86,7 +86,7 @@ def test_x_panel_uniform_bar_width():
 
 
 def test_x_panel_with_frame():
-    pml = """sheet 400mm 600mm 19mm
+    pml = """sheet 400mm 600mm 19mm margin 0mm
 
 rect door
     profile outside through

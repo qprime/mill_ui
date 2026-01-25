@@ -10,7 +10,7 @@ def test_edge_allowance():
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -46,7 +46,7 @@ def test_fillet():
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge fillet 3.00mm
@@ -73,7 +73,7 @@ def test_roundtrip():
     from pml.compositional_formatter import format_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm
+    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -106,7 +106,7 @@ def test_chamfer():
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge chamfer 2.50mm
@@ -133,7 +133,7 @@ def test_multi_tool_scenario():
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -178,7 +178,7 @@ def test_kerf_compatibility():
     from adapters.hints_to_removal import item_to_removal_intent
     from ir.removal_intent import Allowance
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm

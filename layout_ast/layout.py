@@ -10,6 +10,7 @@ class Sheet:
     width_mm: float
     height_mm: float
     thickness_mm: float
+    margin_mm: float
 
 
 @dataclass(frozen=True)

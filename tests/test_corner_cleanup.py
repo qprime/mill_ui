@@ -13,7 +13,7 @@ from cam.model.machine import Machine
 def test_corner_cleanup_basic():
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -56,7 +56,7 @@ def test_corner_cleanup_basic():
 
 def test_corner_cleanup_planner():
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -130,7 +130,7 @@ def test_corner_cleanup_planner():
 
 def test_corner_cleanup_tool_not_found():
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -177,7 +177,7 @@ def test_corner_cleanup_tool_not_found():
 
 def test_corner_cleanup_non_rect_error():
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -207,7 +207,7 @@ def test_corner_cleanup_non_rect_error():
 
 def test_corner_cleanup_without_flag():
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",

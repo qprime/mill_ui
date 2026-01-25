@@ -68,6 +68,7 @@ def expand_template(
         width_mm=region_width,
         height_mm=region_height,
         thickness_mm=sheet_thickness,
+        margin_mm=0.0,
     )
 
     synthetic_ast = CompositionalLayoutAST(

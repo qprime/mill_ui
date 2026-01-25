@@ -33,7 +33,7 @@ def approx_eq(a, b, rel=1e-6):
 def test_simple_panel_with_rect():
     print("Running test_simple_panel_with_rect...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -60,7 +60,7 @@ def test_simple_panel_with_rect():
 def test_panel_with_inset():
     print("Running test_panel_with_inset...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Inset(
@@ -92,7 +92,7 @@ def test_panel_with_inset():
 def test_frame_insets_region_for_children():
     print("Running test_frame_insets_region_for_children...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -136,7 +136,7 @@ def test_frame_insets_region_for_children():
 def test_frame_does_not_emit_profile():
     print("Running test_frame_does_not_emit_profile...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -171,7 +171,7 @@ def test_frame_does_not_emit_profile():
 def test_grid_subdivides_region():
     print("Running test_grid_subdivides_region...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Grid(
@@ -220,7 +220,7 @@ def test_component_definition_and_use():
     )
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         components={"SimplePanel": simple_panel},
         root=Panel(
             children=(
@@ -265,7 +265,7 @@ def test_place_grid_with_components():
     )
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=1000, height_mm=1000, thickness_mm=19),
+        sheet=Sheet(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=0.0),
         components={"ShakerPanel": shaker_panel},
         root=Place(
             layout=Grid(rows=2, cols=2, gap_mm=50),
@@ -325,7 +325,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
 
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19),
+        sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19, margin_mm=0.0),
         components={"GridPanel": grid_panel},
         root=Place(
             layout=Grid(rows=2, cols=2, gap_mm=100),
@@ -369,7 +369,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
 def test_grid_with_no_explicit_cell():
     print("Running test_grid_with_no_explicit_cell...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Grid(
@@ -398,7 +398,7 @@ def test_rounded_rect_profile_inherits_geometry():
     """Test that ProfileGen inside RoundedRect produces RoundedRect profile item."""
     print("Running test_rounded_rect_profile_inherits_geometry...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 RoundedRect(
@@ -436,7 +436,7 @@ def test_rounded_rect_selective_corners_profile_inherits():
     """Test that ProfileGen inside RoundedRect with selective corners preserves corner radii."""
     print("Running test_rounded_rect_selective_corners_profile_inherits...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 RoundedRect(
@@ -478,7 +478,7 @@ def test_rect_profile_stays_rect():
     """Test that ProfileGen inside Rect still produces Rect profile item (backward compatibility)."""
     print("Running test_rect_profile_stays_rect...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 Rect(
@@ -512,7 +512,7 @@ def test_validation_mode_passes_for_correct_resolution():
     """Test that validation mode passes when resolution is correct."""
     print("Running test_validation_mode_passes_for_correct_resolution...")
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
             children=(
                 RoundedRect(
@@ -541,7 +541,7 @@ def test_validation_assertion_catches_type_mismatch():
     from layout_ast.layout import Item, Geometry, Placement
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(children=()),
     )
     resolver = LayoutResolver(ast, validate=True)
@@ -571,7 +571,7 @@ def test_validation_assertion_catches_geometry_mismatch():
     print("Running test_validation_assertion_catches_geometry_mismatch...")
 
     ast = CompositionalLayoutAST(
-        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19),
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(children=()),
     )
     resolver = LayoutResolver(ast, validate=True)

@@ -9,7 +9,7 @@ def test_spline_parsing_and_roundtrip():
     from pml.compositional_parser import parse_compositional_pml
     from pml.compositional_formatter import format_compositional_pml
 
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm
+    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline wave engrave 0.8mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,0.5)
 """
@@ -47,7 +47,7 @@ def test_spline_lowering_deterministic():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
 """
@@ -95,7 +95,7 @@ def test_spline_engrave_removal_intent():
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline decorative engrave 0.8mm points (0.1,0.1) (0.3,0.2) (0.5,0.5) (0.7,0.8) (0.9,0.9)
 """
@@ -135,7 +135,7 @@ def test_tool_diameter_does_not_invalidate():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline wave engrave 0.5mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,0.5)
 """
@@ -170,12 +170,12 @@ def test_tolerance_affects_resolution():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml_coarse = """sheet 400.00mm 400.00mm 19.00mm
+    pml_coarse = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 1.0mm
 """
 
-    pml_fine = """sheet 400.00mm 400.00mm 19.00mm
+    pml_fine = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.01mm
 """

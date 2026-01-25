@@ -492,7 +492,7 @@ def test_end_to_end_domain_to_ast():
     all_items = profile_items + pocket_items
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=tuple(all_items),
     )
 
@@ -516,7 +516,7 @@ def test_end_to_end_domain_to_ir():
 
     # Build AST
     ast = LayoutAST(
-        sheet=Sheet(width_mm=150, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=150, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=tuple(items),
     )
 
@@ -574,6 +574,7 @@ def test_end_to_end_shaker_style_door():
             width_mm=outer_w + 2 * margin,
             height_mm=outer_h + 2 * margin,
             thickness_mm=19.0,
+            margin_mm=0.0,
         ),
         items=tuple(profile_items + pocket_items),
     )

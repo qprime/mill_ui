@@ -1,7 +1,7 @@
-# mill_ui: 5f53b9a
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 200mm 150mm 19mm
+sheet 200mm 150mm 19mm margin 0mm
 
 # Example layout for validation workflow
 rect outer at 100mm,75mm size 180mm,130mm profile through outside

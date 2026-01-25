@@ -889,7 +889,7 @@ def test_svg_to_ast_integration():
 
     # Build LayoutAST
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=200, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=200, thickness_mm=19, margin_mm=0.0),
         items=tuple(items),
     )
 

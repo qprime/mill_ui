@@ -6,7 +6,7 @@ from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Featu
 
 def test_pml_parse_corner_cleanup():
     pml_text = """
-sheet 200mm 150mm 19mm
+sheet 200mm 150mm 19mm margin 0mm
 
 rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
 """
@@ -25,7 +25,7 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
 
 def test_pml_format_corner_cleanup():
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19),
+        sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -51,7 +51,7 @@ def test_pml_format_corner_cleanup():
 
 
 def test_pml_roundtrip_corner_cleanup():
-    pml_input = """sheet 200mm 150mm 19mm
+    pml_input = """sheet 200mm 150mm 19mm margin 0mm
 
 rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
 """
@@ -67,7 +67,7 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
 
 
 def test_pml_pocket_without_corner_cleanup():
-    pml_text = """sheet 200mm 150mm 19mm
+    pml_text = """sheet 200mm 150mm 19mm margin 0mm
 
 rect panel at 100mm,75mm size 100mm,80mm pocket 6mm
 """
@@ -81,7 +81,7 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm
 
 
 def test_pml_corner_cleanup_error_invalid_token():
-    pml_text = """sheet 200mm 150mm 19mm
+    pml_text = """sheet 200mm 150mm 19mm margin 0mm
 
 rect panel at 100mm,75mm size 100mm,80mm pocket 6mm invalid_token 3.175mm
 """
@@ -95,7 +95,7 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm invalid_token 3.175mm
 
 
 def test_pml_corner_cleanup_through_depth():
-    pml_text = """sheet 200mm 150mm 19mm
+    pml_text = """sheet 200mm 150mm 19mm margin 0mm
 
 rect panel at 100mm,75mm size 100mm,80mm pocket through corner_cleanup 3.175mm
 """

@@ -2,10 +2,10 @@
   "timing": {
     "ir_ms": 0.03,
     "hints_ms": 0.01,
-    "plan_ms": 3.54,
-    "gcode_ms": 7.96,
+    "plan_ms": 3.45,
+    "gcode_ms": 7.78,
     "svg_ms": 0.28,
-    "total_ms": 11.69,
+    "total_ms": 11.42,
     "parse_ms": 0.15
   },
   "complexity": {

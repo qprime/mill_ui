@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "13_split_layout_french_door",
-    "created_at": "2026-01-25T20:51:28.832389+00:00"
+    "created_at": "2026-01-25T22:59:59.944975+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.36,
+    "extraction_time_ms": 0.33,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -74,13 +74,13 @@
           "elements": []
         },
         "LABELS": {
-          "element_count": 5,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 0,
           "elements": []
         },
         "LEGEND": {
@@ -283,7 +283,7 @@
       "y_max": 840.0
     },
     "text_elements": {
-      "count": 27,
+      "count": 22,
       "dimension_labels": [
         "190.0mm",
         "290.0mm",
@@ -345,47 +345,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 0.7822,
-    "mesh": {
-      "vertex_count": 40,
-      "face_count": 76,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": 0.0,
-      "x_max": 500.0,
-      "y_min": 0.0,
-      "y_max": 700.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 500.0,
-      "height_mm": 700.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 5768400.0,
-    "surface_area_mm2": 760960.0,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        15.0,
-        19.0
-      ],
-      "z_level_count": 3,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 9.988,
+    "extraction_time_ms": 9.9952,
     "summary": {
       "total_lines": 3312,
       "comment_lines": 24,

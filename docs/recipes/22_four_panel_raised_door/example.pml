@@ -1,7 +1,7 @@
-# mill_ui: 5f53b9a
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 500mm 700mm 19mm
+sheet 500mm 700mm 19mm margin 0mm
 
 rect door
     profile outside through

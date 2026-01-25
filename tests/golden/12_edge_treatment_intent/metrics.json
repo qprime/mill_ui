@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-01-25T20:51:28.789795+00:00"
+    "created_at": "2026-01-25T22:59:59.904984+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -74,13 +74,13 @@
           "elements": []
         },
         "LABELS": {
-          "element_count": 1,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 1,
+          "text_count": 0,
           "elements": []
         },
         "LEGEND": {
@@ -212,7 +212,7 @@
       "y_max": 340.0
     },
     "text_elements": {
-      "count": 18,
+      "count": 17,
       "dimension_labels": [
         "200.0mm",
         "300.0mm",
@@ -253,47 +253,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 0.7312,
-    "mesh": {
-      "vertex_count": 16,
-      "face_count": 28,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": -10.0,
-      "x_max": 310.0,
-      "y_min": -10.0,
-      "y_max": 210.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 320.0,
-      "height_mm": 220.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 1097600.0,
-    "surface_area_mm2": 165320.0,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        15.0,
-        19.0
-      ],
-      "z_level_count": 3,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.808,
+    "extraction_time_ms": 1.7483,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

@@ -1,7 +1,7 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 500mm 800mm 19mm
+sheet 500mm 800mm 19mm margin 0mm
 
 arch door width 500mm height 800mm radius 250mm
     profile outside through

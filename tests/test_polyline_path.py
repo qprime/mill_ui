@@ -7,7 +7,7 @@ from layout_ast.layout import Feature
 
 
 def test_polyline_inside_rect():
-    pml = """sheet 400.00mm 300.00mm 19.00mm
+    pml = """sheet 400.00mm 300.00mm 19.00mm margin 0mm
 
 rect canvas
     polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm
@@ -33,7 +33,7 @@ rect canvas
 
 
 def test_polyline_inside_rounded_rect():
-    pml = """sheet 500.00mm 500.00mm 19.00mm
+    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
 
 rounded_rect panel radius 20.00mm
     polyline diagonal points (0.10,0.10) (0.90,0.90) engrave 1.00mm
@@ -56,7 +56,7 @@ rounded_rect panel radius 20.00mm
 
 
 def test_polyline_inside_circle_fit():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 circle boundary fit
     polyline cross points (0.25,0.50) (0.75,0.50) (0.50,0.50) (0.50,0.25) (0.50,0.75) engrave 1.00mm
@@ -75,7 +75,7 @@ circle boundary fit
 
 
 def test_polyline_with_10_points():
-    pml = """sheet 600.00mm 400.00mm 19.00mm
+    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.7) (0.6,0.3) (0.7,0.6) (0.8,0.4) (0.9,0.5) engrave 1.00mm
 """
@@ -94,7 +94,7 @@ polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.
 
 
 def test_polyline_error_out_of_range_x_negative():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
 """
@@ -109,7 +109,7 @@ polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
 
 
 def test_polyline_error_out_of_range_x_over_one():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,0.5) (1.1,0.5) engrave 1.00mm
 """
@@ -123,7 +123,7 @@ polyline bad points (0.5,0.5) (1.1,0.5) engrave 1.00mm
 
 
 def test_polyline_error_out_of_range_y_negative():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,-0.1) (0.5,1.0) engrave 1.00mm
 """
@@ -137,7 +137,7 @@ polyline bad points (0.5,-0.1) (0.5,1.0) engrave 1.00mm
 
 
 def test_polyline_error_out_of_range_y_over_one():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,0.5) (0.5,1.1) engrave 1.00mm
 """
@@ -151,7 +151,7 @@ polyline bad points (0.5,0.5) (0.5,1.1) engrave 1.00mm
 
 
 def test_polyline_error_single_point():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,0.5) engrave 1.00mm
 """
@@ -165,7 +165,7 @@ polyline bad points (0.5,0.5) engrave 1.00mm
 
 
 def test_polyline_error_malformed_no_comma():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5 0.5) (1.0,1.0) engrave 1.00mm
 """
@@ -178,7 +178,7 @@ polyline bad points (0.5 0.5) (1.0,1.0) engrave 1.00mm
 
 
 def test_polyline_error_malformed_no_closing_paren():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,0.5 (1.0,1.0) engrave 1.00mm
 """
@@ -191,7 +191,7 @@ polyline bad points (0.5,0.5 (1.0,1.0) engrave 1.00mm
 
 
 def test_polyline_roundtrip_preserves_coordinates():
-    original_pml = """sheet 500.00mm 400.00mm 19.00mm
+    original_pml = """sheet 500.00mm 400.00mm 19.00mm margin 0mm
 
 polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
 """
@@ -216,7 +216,7 @@ polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
 
 
 def test_polyline_in_inset_region():
-    pml = """sheet 600.00mm 400.00mm 19.00mm
+    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 inset 50.00mm
     polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm

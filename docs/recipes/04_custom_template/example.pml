@@ -1,7 +1,7 @@
-# mill_ui: 5f53b9a
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 300mm 180mm 19mm
+sheet 300mm 180mm 19mm margin 0mm
 
 # Panel with holes - demonstrates template-style design
 rect panel:outer at 150mm,90mm size 300mm,180mm profile through outside

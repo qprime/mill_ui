@@ -1,4 +1,4 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
 # Sheet Layout: Nested Shaker Cabinet Doors and Drawer Fronts
@@ -12,7 +12,7 @@
 #
 # Shaker style: 57mm (2.25") stile/rail width, 6mm panel recess
 
-sheet 1245mm 1232mm 19mm
+sheet 1245mm 1232mm 19mm margin 0mm
 
 # === Layout Constants ===
 # Margin: 10mm

@@ -358,8 +358,10 @@ class CompositionalPMLParser:
         width = self.expect('number_with_unit').value
         height = self.expect('number_with_unit').value
         thickness = self.expect('number_with_unit').value
+        self.expect('keyword', 'margin')
+        margin = self.expect('number_with_unit').value
         self.expect_line_end()
-        return Sheet(width_mm=width, height_mm=height, thickness_mm=thickness)
+        return Sheet(width_mm=width, height_mm=height, thickness_mm=thickness, margin_mm=margin)
 
     def parse_project(self) -> str:
         self.expect('keyword', 'project')
@@ -1659,7 +1661,7 @@ class CompositionalPMLParser:
 
         min_width_mm = 200.0
         min_height_mm = 200.0
-        margin_mm = 15.0
+        margin_mm = None
         tab_count = None
         tab_height_mm = None
         strategy = "largest"

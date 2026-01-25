@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "04_custom_template",
-    "created_at": "2026-01-25T20:51:28.118157+00:00"
+    "created_at": "2026-01-25T22:59:59.307091+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.53,
+    "extraction_time_ms": 0.48,
     "document": {
       "width_mm": 580.0,
       "height_mm": 460.0,
@@ -131,13 +131,13 @@
           ]
         },
         "LABELS": {
-          "element_count": 6,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 0,
           "elements": []
         },
         "LEGEND": {
@@ -295,7 +295,7 @@
       "y_max": 320.0
     },
     "text_elements": {
-      "count": 37,
+      "count": 31,
       "dimension_labels": [
         "10mm",
         "10mm",
@@ -310,10 +310,6 @@
       ],
       "depth_annotations": [
         "Features: 1 profile, 1 pocket, 4 holes",
-        "hole:1",
-        "hole:2",
-        "hole:3",
-        "hole:4",
         "\u2022 hole: 10.0",
         "\u2022 hole:1",
         "\u2022 hole:2",
@@ -370,48 +366,9 @@
       ]
     }
   },
-  "stl": {
-    "version": "1.0.0",
-    "extraction_time_ms": 3.4434,
-    "mesh": {
-      "vertex_count": 1040,
-      "face_count": 2076,
-      "is_watertight": true,
-      "is_manifold": true,
-      "is_volume": true,
-      "euler_number": 2,
-      "connected_components": 1
-    },
-    "bounds": {
-      "x_min": 0.0,
-      "x_max": 300.0,
-      "y_min": 0.0,
-      "y_max": 180.0,
-      "z_min": 0.0,
-      "z_max": 19.0
-    },
-    "dimensions": {
-      "width_mm": 300.0,
-      "height_mm": 180.0,
-      "thickness_mm": 19.0
-    },
-    "volume_mm3": 890469.4807,
-    "surface_area_mm2": 129633.9066,
-    "z_statistics": {
-      "unique_z_levels": [
-        0.0,
-        10.0,
-        16.0,
-        19.0
-      ],
-      "z_level_count": 4,
-      "min_z": 0.0,
-      "max_z": 19.0
-    }
-  },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.932,
+    "extraction_time_ms": 15.4972,
     "summary": {
       "total_lines": 3954,
       "comment_lines": 18,

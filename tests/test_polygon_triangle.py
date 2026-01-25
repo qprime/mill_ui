@@ -11,7 +11,7 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 
 
 def test_polygon_parse_3_points():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon tri points (0mm,0mm) (100mm,0mm) (50mm,80mm) pocket 5.00mm
 """
@@ -25,7 +25,7 @@ polygon tri points (0mm,0mm) (100mm,0mm) (50mm,80mm) pocket 5.00mm
 
 
 def test_polygon_parse_4_points():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon quad points (0mm,0mm) (100mm,0mm) (100mm,100mm) (0mm,100mm) profile through outside
 """
@@ -36,7 +36,7 @@ polygon quad points (0mm,0mm) (100mm,0mm) (100mm,100mm) (0mm,100mm) profile thro
 
 
 def test_polygon_resolve():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon wedge points (10mm,10mm) (110mm,10mm) (60mm,90mm) pocket 6.00mm
 """
@@ -55,7 +55,7 @@ polygon wedge points (10mm,10mm) (110mm,10mm) (60mm,90mm) pocket 6.00mm
 
 
 def test_polygon_with_profile_child():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon shape points (0mm,0mm) (100mm,0mm) (50mm,80mm)
     profile outside through
@@ -72,7 +72,7 @@ polygon shape points (0mm,0mm) (100mm,0mm) (50mm,80mm)
 
 
 def test_polygon_with_id():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon corner_piece points (0mm,0mm) (50mm,0mm) (0mm,50mm) pocket 3.00mm
 """
@@ -82,7 +82,7 @@ polygon corner_piece points (0mm,0mm) (50mm,0mm) (0mm,50mm) pocket 3.00mm
 
 
 def test_triangle_parse():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 triangle wedge base 100.00mm height 80.00mm pocket 5.00mm
 """
@@ -97,7 +97,7 @@ triangle wedge base 100.00mm height 80.00mm pocket 5.00mm
 
 
 def test_triangle_resolve():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 triangle shape base 100.00mm height 80.00mm pocket 6.00mm
 """
@@ -130,7 +130,7 @@ triangle shape base 100.00mm height 80.00mm pocket 6.00mm
 
 
 def test_triangle_with_profile_child():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 triangle corner base 80.00mm height 60.00mm
     profile inside through
@@ -146,7 +146,7 @@ triangle corner base 80.00mm height 60.00mm
 
 
 def test_triangle_centered_in_region():
-    pml = """sheet 400.00mm 400.00mm 10.00mm
+    pml = """sheet 400.00mm 400.00mm 10.00mm margin 0mm
 
 inset 100.00mm
     triangle centered base 100.00mm height 100.00mm pocket 5.00mm
@@ -175,7 +175,7 @@ inset 100.00mm
 
 
 def test_polygon_bounds_calculation():
-    pml = """sheet 200.00mm 200.00mm 10.00mm
+    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
 
 polygon irregular points (10mm,20mm) (90mm,10mm) (80mm,70mm) (20mm,80mm) pocket 4.00mm
 """

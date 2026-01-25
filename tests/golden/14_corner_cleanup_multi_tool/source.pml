@@ -1,7 +1,7 @@
-# mill_ui: b93206f
+# mill_ui: 866253f
 # generated: 2026-01-25
 
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 # Shaker door with corner cleanup
 # Panel pocket uses large tool (3/8") with small tool (1/8") for corner cleanup

@@ -14,7 +14,7 @@ PML is a human-readable declarative language for defining CNC machining layouts.
 ```pml
 # This is a comment
 
-sheet 400mm 600mm 19mm
+sheet 400mm 600mm 19mm margin 10mm
 
 # Shapes: type identifier at x,y with features
 rect door:outer at 200mm,300mm size 400mm,600mm profile through outside
@@ -41,12 +41,17 @@ circle hole:1 at 50mm,50mm diameter 10mm hole 8mm
 ### Sheet Declaration
 
 ```
-sheet <width>mm <height>mm <thickness>mm
+sheet <width>mm <height>mm <thickness>mm margin <margin>mm
 ```
+
+The `margin` parameter defines a no-machining holddown zone around all sheet edges. When specified:
+- The root layout region starts at (margin, margin) and extends to (width-margin, height-margin)
+- Shapes without explicit positioning fill this region, not the full sheet
+- `waste_cuts` without explicit margin will inherit this sheet margin
 
 Example:
 ```pml
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 10mm
 ```
 
 ### Shape Declarations

@@ -9,7 +9,7 @@ def test_polyline_inside_rect():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 300.00mm 19.00mm
+    pml = """sheet 400.00mm 300.00mm 19.00mm margin 0mm
 
 rect canvas
     polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm
@@ -41,7 +41,7 @@ def test_polyline_inside_rounded_rect():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 500.00mm 500.00mm 19.00mm
+    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
 
 rounded_rect panel radius 20.00mm
     polyline diagonal points (0.10,0.10) (0.90,0.90) engrave 1.00mm
@@ -69,7 +69,7 @@ def test_polyline_inside_circle_fit():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 circle boundary fit
     polyline cross points (0.25,0.50) (0.75,0.50) (0.50,0.50) (0.50,0.25) (0.50,0.75) engrave 1.00mm
@@ -96,7 +96,7 @@ def test_polyline_with_10_points():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 600.00mm 400.00mm 19.00mm
+    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.7) (0.6,0.3) (0.7,0.6) (0.8,0.4) (0.9,0.5) engrave 1.00mm
 """
@@ -124,7 +124,7 @@ def test_polyline_error_out_of_range():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
 """
@@ -146,7 +146,7 @@ def test_polyline_error_single_point():
     from pml.compositional_parser import parse_compositional_pml, ParseError
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5,0.5) engrave 1.00mm
 """
@@ -167,7 +167,7 @@ def test_polyline_error_malformed():
 
     from pml.compositional_parser import parse_compositional_pml, ParseError
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 polyline bad points (0.5 0.5) (1.0,1.0) engrave 1.00mm
 """
@@ -189,7 +189,7 @@ def test_polyline_roundtrip():
     from pml.compositional_formatter import format_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    original_pml = """sheet 500.00mm 400.00mm 19.00mm
+    original_pml = """sheet 500.00mm 400.00mm 19.00mm margin 0mm
 
 polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
 """
@@ -222,7 +222,7 @@ def test_polyline_in_inset_region():
     from pml.compositional_parser import parse_compositional_pml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 600.00mm 400.00mm 19.00mm
+    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
 
 inset 50.00mm
     polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm

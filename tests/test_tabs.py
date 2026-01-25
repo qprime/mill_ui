@@ -9,7 +9,7 @@ def test_pml_parse_profile_with_tabs():
     print("Running test_pml_parse_profile_with_tabs...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
 """
@@ -37,7 +37,7 @@ def test_pml_parse_profile_with_tabs_no_width():
     print("Running test_pml_parse_profile_with_tabs_no_width...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm
 """
@@ -59,7 +59,7 @@ def test_pml_parse_profile_with_tabs_inside():
     print("Running test_pml_parse_profile_with_tabs_inside...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect pocket_outline at 225mm,325mm size 300mm,500mm profile 6mm inside tabs 6 height 2mm width 8mm
 """
@@ -84,7 +84,7 @@ def test_ast_construction_with_tabs():
     print("Running test_ast_construction_with_tabs...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19),
+        sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -185,7 +185,7 @@ def test_full_pipeline_pml_to_removal_intent():
     print("Running test_full_pipeline_pml_to_removal_intent...")
 
     pml = """
-sheet 450mm 650mm 19mm
+sheet 450mm 650mm 19mm margin 0mm
 
 rect door at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
 rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
@@ -219,7 +219,7 @@ def test_pml_roundtrip_with_tabs():
 
     from pml import format_pml
 
-    pml_in = """sheet 450mm 650mm 19mm
+    pml_in = """sheet 450mm 650mm 19mm margin 0mm
 
 rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
 """

@@ -8,7 +8,7 @@ from ir.removal_intent import DepthProfile
 
 
 def test_edge_allowance_influences_removal_intent():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -40,7 +40,7 @@ rect panel profile through outside
 
 
 def test_profile_with_fillet_hint():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge fillet 3.00mm
@@ -63,7 +63,7 @@ rect panel profile through outside
 
 
 def test_edge_chamfer():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge chamfer 2.50mm
@@ -86,7 +86,7 @@ rect panel profile through outside
 
 
 def test_edge_roundtrip():
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm
+    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -114,7 +114,7 @@ rect panel profile through outside
 
 
 def test_pocket_with_edge():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel pocket 6.00mm
     edge allowance 0.30mm 0.05mm
@@ -134,7 +134,7 @@ rect panel pocket 6.00mm
 
 
 def test_multi_tool_scenario():
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm
@@ -171,7 +171,7 @@ rect panel profile through outside
 def test_kerf_compatibility():
     from ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm
+    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
 
 rect panel profile through outside
     edge allowance 0.50mm 0.10mm

@@ -17,7 +17,7 @@ def test_svg_output_deterministic():
     print("Running test_svg_output_deterministic...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200.0, height_mm=100.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=200.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -43,7 +43,7 @@ def test_required_layers_exist():
     print("Running test_required_layers_exist...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=150.0, height_mm=150.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=150.0, height_mm=150.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -79,7 +79,7 @@ def test_required_layers_exist():
 
 
 def _create_shaker_ast(outer_w: float, outer_h: float, stile_w: float, rail_h: float, panel_recess: float, sheet_thickness: float) -> LayoutAST:
-    sheet = Sheet(width_mm=outer_w, height_mm=outer_h, thickness_mm=sheet_thickness)
+    sheet = Sheet(width_mm=outer_w, height_mm=outer_h, thickness_mm=sheet_thickness, margin_mm=0.0)
     root = Rect(
         children=(
             ProfileGen(side="outside", depth="through"),
@@ -119,7 +119,7 @@ def test_theme_toggle():
     print("Running test_theme_toggle...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -157,7 +157,7 @@ def test_multiple_feature_types():
     print("Running test_multiple_feature_types...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=19.0),
+        sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -204,7 +204,7 @@ def test_viewbox_dimensions():
     print("Running test_viewbox_dimensions...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=250.0, height_mm=180.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=250.0, height_mm=180.0, thickness_mm=12.0, margin_mm=0.0),
         items=(),
     )
 
@@ -220,7 +220,7 @@ def test_rounded_rect_rendering():
     print("Running test_rounded_rect_rendering...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -246,7 +246,7 @@ def test_golden_file_simple_profile():
     print("Running test_golden_file_simple_profile...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -323,7 +323,7 @@ def test_label_placement_no_overlap():
 
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",
@@ -362,7 +362,7 @@ def test_pdf_export():
     print("Running test_pdf_export...")
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0),
+        sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
             Item(
                 kind="shape",

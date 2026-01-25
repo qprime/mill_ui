@@ -31,6 +31,7 @@ def parse_layout_json(path: str) -> LayoutAST:
         width_mm=float(sheet_data["width_mm"]),
         height_mm=float(sheet_data["height_mm"]),
         thickness_mm=float(sheet_data["thickness_mm"]),
+        margin_mm=float(sheet_data.get("margin_mm", 0.0)),
     )
 
 

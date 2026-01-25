@@ -9,6 +9,7 @@ from layout_ast.layout import Item, LayoutAST
 from ir.removal_intent import Bounds2D
 
 Orientation = Literal["horizontal", "vertical"]
+DimensionPlacement = Literal["shape_relative", "sheet_edge"]
 
 
 @dataclass(frozen=True)
@@ -70,6 +71,7 @@ def place_on_rails(
     offset_y: float,
     *,
     margin: float = 100.0,
+    placement_mode: DimensionPlacement = "shape_relative",
 ) -> list[PlacedDimension]:
     base_offset = 20.0
     stack_gap = 20.0
@@ -84,7 +86,10 @@ def place_on_rails(
 
         if request.orientation == "horizontal":
             level = h_allocator.allocate(a, b, padding=15.0)
-            rail_y = request.anchor - base_offset - (level * stack_gap)
+            if placement_mode == "sheet_edge":
+                rail_y = offset_y - base_offset - (level * stack_gap)
+            else:
+                rail_y = request.anchor - base_offset - (level * stack_gap)
 
             min_rail_y = offset_y - margin
             if rail_y < min_rail_y:
@@ -102,7 +107,10 @@ def place_on_rails(
             )
         else:
             level = v_allocator.allocate(a, b, padding=40.0)
-            rail_x = request.anchor + base_offset + (level * stack_gap)
+            if placement_mode == "sheet_edge":
+                rail_x = offset_x + sheet_width_mm + base_offset + (level * stack_gap)
+            else:
+                rail_x = request.anchor + base_offset + (level * stack_gap)
 
             max_rail_x = offset_x + sheet_width_mm + margin
             if rail_x > max_rail_x:
@@ -131,11 +139,12 @@ def place_dimensions_on_rails(
     include_features: set[str] | None = None,
     deduplicate: bool = True,
     y_flip=None,
+    placement_mode: DimensionPlacement = "shape_relative",
 ) -> list[PlacedDimension]:
     requests = collect_dimension_requests(
         ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate, y_flip=y_flip
     )
-    return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin)
+    return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin, placement_mode=placement_mode)
 
 
 def render_placed_dimension(parent: ET.Element, dim: PlacedDimension, stroke_color: str) -> None:
@@ -752,5 +761,6 @@ __all__ = [
     "render_placed_dimension",
     "render_gap_dimension",
     "DimensionRequest",
+    "DimensionPlacement",
     "PlacedDimension",
 ]

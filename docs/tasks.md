@@ -22,6 +22,7 @@ Load this document when you need code examples for standard operations.
 | [Run Nesting](#task-8-run-nesting) | Optimize part placement on sheets |
 | [Run Tests](#task-9-run-tests) | Verify changes with IR and CAM tests |
 | [Generate G-code](#task-10-generate-g-code) | Export CNC-ready G-code from PML |
+| [Control Dimension Placement](#task-11-control-dimension-label-placement) | Configure dimension label positioning in SVG |
 
 ---
 
@@ -331,3 +332,27 @@ outputs = write_pipeline_outputs(
 **Supported shapes:** Rect, Circle, Polygon, RoundedRect (including selective corner rounding).
 
 **Key point:** The unified pipeline handles tool compensation automatically and generates all outputs (G-code, SVG, STL) in one step.
+
+---
+
+## Task 11: Control Dimension Label Placement
+
+**Use case:** Change where dimension labels appear in SVG blueprints.
+
+```python
+from export.dimensions import place_on_rails, DimensionPlacement
+
+placed = place_on_rails(
+    requests,
+    sheet_width_mm=ast.sheet.width_mm,
+    offset_x=offset_x,
+    offset_y=offset_y,
+    placement_mode="shape_relative",  # or "sheet_edge"
+)
+```
+
+**Placement modes:**
+- `"shape_relative"` (default) — Dimension labels appear near each shape, with rails positioned relative to the shape's anchor point
+- `"sheet_edge"` — All dimension labels appear at the sheet edges (top for horizontal dimensions, right for vertical dimensions)
+
+**Key point:** Use `"shape_relative"` for layouts with shapes spread across the sheet. Use `"sheet_edge"` for simpler layouts or when you prefer all dimensions grouped at the edges.

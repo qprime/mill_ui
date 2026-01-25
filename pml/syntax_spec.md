@@ -278,6 +278,37 @@ rect panel
     concentric_border insets 15mm 30mm 45mm groove 3mm depth 2mm
 ```
 
+#### Measurement Grid
+
+```
+measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+```
+
+Creates ruler-style tick marks for calibration surfaces and measurement references. Tick marks are generated along all four edges of the shape, pointing inward. Minor ticks occur at regular intervals, with longer major ticks at larger intervals.
+
+**Parameters:**
+- `unit metric|imperial|custom` - Preset unit mode (optional, default: metric)
+  - `metric`: minor=1mm, major=10mm
+  - `imperial`: minor=1/16" (1.5875mm), major=1" (25.4mm)
+  - `custom`: uses explicit spacing values (requires minor_spacing and major_spacing)
+- `minor_spacing <mm>` - Distance between minor tick marks (required for custom mode)
+- `major_spacing <mm>` - Distance between major tick marks (required for custom mode)
+- `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
+- `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
+- `depth <mm>` - Engraving depth (optional, default: 0.5mm)
+
+Example:
+```pml
+rect calibration_surface
+    measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
+
+rect imperial_ruler
+    measurement_grid unit imperial depth 0.3mm
+
+rect custom_grid
+    measurement_grid unit custom minor_spacing 2mm major_spacing 20mm minor_length 4mm major_length 8mm depth 0.5mm
+```
+
 #### Split Grid
 
 ```

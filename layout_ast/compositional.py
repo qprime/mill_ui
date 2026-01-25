@@ -401,6 +401,28 @@ class HoleGridGen:
 
 
 @dataclass(frozen=True)
+class MeasurementGridGen:
+    """Measurement grid generator node.
+
+    Creates ruler-style tick marks for calibration surfaces.
+
+    Attributes:
+        unit: Preset unit mode (metric, imperial, custom)
+        minor_spacing_mm: Override for minor tick spacing (custom mode)
+        major_spacing_mm: Override for major tick spacing (custom mode)
+        minor_length_mm: Length of minor tick marks
+        major_length_mm: Length of major tick marks
+        depth_mm: Engraving depth
+    """
+    unit: str = "metric"
+    minor_spacing_mm: float | None = None
+    major_spacing_mm: float | None = None
+    minor_length_mm: float = 3.0
+    major_length_mm: float = 6.0
+    depth_mm: float = 0.5
+
+
+@dataclass(frozen=True)
 class TemplateDef:
     name: str
     params: dict[str, float | str] = field(default_factory=dict)

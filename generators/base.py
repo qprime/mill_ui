@@ -580,6 +580,90 @@ class XPanelParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class MeasurementGridParams(BaseParams):
+    """Parameters for measurement grid area generator.
+
+    Creates ruler-style tick marks for calibration surfaces and measurement
+    references. Supports both metric and imperial presets, or custom spacing.
+
+    Attributes:
+        unit: Preset unit mode ("metric", "imperial", or "custom")
+            - metric: minor=1mm, major=10mm
+            - imperial: minor=1.5875mm (1/16"), major=25.4mm (1")
+            - custom: uses explicit spacing values
+        minor_spacing_mm: Distance between minor tick marks (required for custom)
+        major_spacing_mm: Distance between major tick marks (required for custom)
+        minor_length_mm: Length of minor tick marks
+        major_length_mm: Length of major tick marks
+        depth_mm: Engraving depth for tick marks
+    """
+
+    unit: Literal["metric", "imperial", "custom"] = "metric"
+    minor_spacing_mm: float | None = None
+    major_spacing_mm: float | None = None
+    minor_length_mm: float = 3.0
+    major_length_mm: float = 6.0
+    depth_mm: float = 0.5
+
+    def validate(self) -> None:
+        valid_units = ("metric", "imperial", "custom")
+        if self.unit not in valid_units:
+            raise ValueError(
+                f"MeasurementGridParams: unit must be one of {valid_units}, got '{self.unit}'"
+            )
+
+        if self.unit == "custom":
+            if self.minor_spacing_mm is None:
+                raise ValueError(
+                    "MeasurementGridParams: minor_spacing_mm required for custom unit"
+                )
+            if self.major_spacing_mm is None:
+                raise ValueError(
+                    "MeasurementGridParams: major_spacing_mm required for custom unit"
+                )
+
+        minor_spacing = self.get_minor_spacing()
+        major_spacing = self.get_major_spacing()
+
+        if minor_spacing <= 0:
+            raise ValueError(
+                f"MeasurementGridParams: minor_spacing must be positive, got {minor_spacing}"
+            )
+        if major_spacing <= 0:
+            raise ValueError(
+                f"MeasurementGridParams: major_spacing must be positive, got {major_spacing}"
+            )
+        if self.minor_length_mm <= 0:
+            raise ValueError(
+                f"MeasurementGridParams: minor_length_mm must be positive, got {self.minor_length_mm}"
+            )
+        if self.major_length_mm <= 0:
+            raise ValueError(
+                f"MeasurementGridParams: major_length_mm must be positive, got {self.major_length_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"MeasurementGridParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+    def get_minor_spacing(self) -> float:
+        if self.unit == "metric":
+            return 1.0
+        elif self.unit == "imperial":
+            return 25.4 / 16  # 1/16"
+        else:
+            return self.minor_spacing_mm or 1.0
+
+    def get_major_spacing(self) -> float:
+        if self.unit == "metric":
+            return 10.0
+        elif self.unit == "imperial":
+            return 25.4  # 1"
+        else:
+            return self.major_spacing_mm or 10.0
+
+
+@dataclass(frozen=True)
 class HoleGridParams(BaseParams):
     """Parameters for hole grid area generator.
 
@@ -710,6 +794,7 @@ __all__ = [
     "ProfileParams",
     "WaveParams",
     "GridParams",
+    "MeasurementGridParams",
     "BeadParams",
     "RaisedPanelParams",
     "ChamferParams",

@@ -48,6 +48,8 @@ from layout_ast.compositional import (
     HoleGridGen,
     # Stage 19 additions (PML templates)
     TemplateDef,
+    # Stage 20 additions (measurement_grid generator)
+    MeasurementGridGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -160,6 +162,8 @@ class CompositionalPMLLexer:
             'size', 'corner_cleanup', 'tabs', 'kerf',
             # Stage 18 keywords (hole_grid generator)
             'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
+            # Stage 20 keywords (measurement_grid generator)
+            'measurement_grid', 'unit', 'metric', 'imperial', 'custom', 'minor_spacing', 'major_spacing', 'minor_length', 'major_length',
             # Stage 19 keywords (PML templates)
             'template', 'params',
             # Waste cuts directive
@@ -497,6 +501,9 @@ class CompositionalPMLParser:
         # Stage 18 keywords (hole_grid generator)
         elif token.value == 'hole_grid':
             return self.parse_hole_grid_gen()
+        # Stage 20 keywords (measurement_grid generator)
+        elif token.value == 'measurement_grid':
+            return self.parse_measurement_grid_gen()
         # Waste cuts directive
         elif token.value == 'waste_cuts':
             return self.parse_waste_cuts()
@@ -1293,6 +1300,63 @@ class CompositionalPMLParser:
             pattern=pattern,
             inset_mm=inset,
             align=align,
+        )
+
+    def parse_measurement_grid_gen(self) -> MeasurementGridGen:
+        """Parse: measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+
+        Example:
+            measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
+            measurement_grid unit imperial
+            measurement_grid unit custom minor_spacing 2mm major_spacing 20mm depth 0.3mm
+        """
+        self.expect('keyword', 'measurement_grid')
+
+        unit = "metric"
+        minor_spacing_mm: float | None = None
+        major_spacing_mm: float | None = None
+        minor_length_mm = 3.0
+        major_length_mm = 6.0
+        depth_mm = 0.5
+
+        while self.peek().type == 'keyword':
+            kw = self.peek().value
+            if kw == 'unit':
+                self.advance()
+                unit_token = self.peek()
+                if unit_token.type == 'keyword' and unit_token.value in ('metric', 'imperial', 'custom'):
+                    unit = self.advance().value
+                else:
+                    raise ParseError(
+                        f"Expected unit type (metric/imperial/custom), got {unit_token.value}",
+                        unit_token.line, unit_token.column
+                    )
+            elif kw == 'minor_spacing':
+                self.advance()
+                minor_spacing_mm = self.expect('number_with_unit').value
+            elif kw == 'major_spacing':
+                self.advance()
+                major_spacing_mm = self.expect('number_with_unit').value
+            elif kw == 'minor_length':
+                self.advance()
+                minor_length_mm = self.expect('number_with_unit').value
+            elif kw == 'major_length':
+                self.advance()
+                major_length_mm = self.expect('number_with_unit').value
+            elif kw == 'depth':
+                self.advance()
+                depth_mm = self.expect('number_with_unit').value
+            else:
+                break
+
+        self.expect_line_end()
+        return MeasurementGridGen(
+            unit=unit,
+            minor_spacing_mm=minor_spacing_mm,
+            major_spacing_mm=major_spacing_mm,
+            minor_length_mm=minor_length_mm,
+            major_length_mm=major_length_mm,
+            depth_mm=depth_mm,
         )
 
     def parse_split_horizontal(self) -> SplitHorizontal:

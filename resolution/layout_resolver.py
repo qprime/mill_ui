@@ -47,6 +47,8 @@ from layout_ast.compositional import (
     XPanelGen,
     # Stage 18 additions (hole_grid generator)
     HoleGridGen,
+    # Stage 20 additions (measurement_grid generator)
+    MeasurementGridGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -69,7 +71,8 @@ from generators.area.line_pattern import line_pattern_generator
 from generators.area.concentric_border import concentric_border_generator
 from generators.area.x_panel import x_panel_generator
 from generators.area.hole_grid import hole_grid_generator
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams
+from generators.area.measurement_grid import measurement_grid_generator
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams
 
 
 # Type alias for node handlers
@@ -1003,6 +1006,41 @@ class LayoutResolver:
         except ValueError:
             pass
 
+    def _handle_measurement_grid_gen(
+        self,
+        node: MeasurementGridGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle MeasurementGridGen: Generate ruler-style tick marks for region."""
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = MeasurementGridParams(
+            unit=node.unit,
+            minor_spacing_mm=node.minor_spacing_mm,
+            major_spacing_mm=node.major_spacing_mm,
+            minor_length_mm=node.minor_length_mm,
+            major_length_mm=node.major_length_mm,
+            depth_mm=node.depth_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("measurement_grid")
+        try:
+            generated_items = measurement_grid_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
     def _handle_split_horizontal(
         self,
         node: SplitHorizontal,
@@ -1553,6 +1591,8 @@ class LayoutResolver:
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
                 # Stage 18 handlers (hole_grid generator)
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
+                # Stage 20 handlers (measurement_grid generator)
+                MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
                 # Waste cuts handler
                 WasteCuts: LayoutResolver._handle_waste_cuts,
             }

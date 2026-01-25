@@ -56,9 +56,6 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         tool_db=DEFAULT_TOOL_DB,
         generate_svg=not args.no_svg,
         svg_theme=args.theme,
-        generate_stl=not args.no_stl,
-        stl_quality=args.quality,
-        include_floating_parts=not args.no_floating_parts,
         y_origin=args.y_origin,
     )
 
@@ -78,10 +75,6 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         result,
         output_dir,
         job_name,
-        write_stl=not args.no_stl,
-        stl_quality=args.quality,
-        kerf_mm=args.kerf,
-        include_floating_parts=not args.no_floating_parts,
         clean_output_dir=False,
     )
 
@@ -97,7 +90,7 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Compile PML to G-code, SVG blueprint, and STL",
+        description="Compile PML to G-code and SVG blueprint",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -108,12 +101,11 @@ Examples:
 
   python -m cli.mill --input /path/to/layout.pml --out output/
 
-  python -m cli.mill --project cabinet --input panel.pml --kerf 3.175 --no-stl
+  python -m cli.mill --project cabinet --input panel.pml --kerf 3.175
 
 Output files:
   {basename}.{op}-{tool_diameter}mm.nc   G-code per pass
   {basename}.svg              Blueprint drawing
-  {basename}.stl              3D preview model
   metrics.json                Pipeline metrics
         """,
     )
@@ -146,26 +138,9 @@ Output files:
         help="Blueprint theme (default: dark)",
     )
     parser.add_argument(
-        "--quality",
-        "-q",
-        default="medium",
-        choices=["low", "medium", "high"],
-        help="STL mesh quality (default: medium)",
-    )
-    parser.add_argument(
         "--no-svg",
         action="store_true",
         help="Skip SVG blueprint generation",
-    )
-    parser.add_argument(
-        "--no-stl",
-        action="store_true",
-        help="Skip STL model generation",
-    )
-    parser.add_argument(
-        "--no-floating-parts",
-        action="store_true",
-        help="Exclude floating parts (cutouts) from STL",
     )
     parser.add_argument(
         "--no-clean",

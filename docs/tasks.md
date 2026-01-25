@@ -16,7 +16,7 @@ Load this document when you need code examples for standard operations.
 | [Parse Human-Authored PML](#task-2-parse-human-authored-pml) | Process user-provided PML text |
 | [Use a Template](#task-3-use-a-template) | Generate standard components (Shaker door, etc.) |
 | [Validate at IR Level](#task-4-validate-at-ir-level) | Check layout validity before CAM execution |
-| [Validate CAM Artifacts](#task-5-validate-cam-artifacts) | Check generated SVG/STL/G-code |
+| [Validate CAM Artifacts](#task-5-validate-cam-artifacts) | Check generated SVG/G-code |
 | [Extract Metrics](#task-6-extract-metrics) | Get stable metrics for comparison |
 | [Create Design with Domains](#task-7-create-design-with-domains) | Build complex designs using domain algebra |
 | [Run Nesting](#task-8-run-nesting) | Optimize part placement on sheets |
@@ -136,7 +136,7 @@ if overlap.has_issues() or any(r.has_issues() for r in depth_results + toolabili
 
 ## Task 5: Validate CAM Artifacts
 
-**Use case:** Validate generated SVG, STL, G-code against invariants.
+**Use case:** Validate generated SVG and G-code against invariants.
 
 ```python
 from validation.runner import validate_recipe, ValidationOptions
@@ -172,14 +172,12 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 **Use case:** Get stable metrics for deterministic comparison.
 
 ```python
-from validation.metrics import extract_svg_metrics, extract_stl_metrics, extract_gcode_metrics
+from validation.metrics import extract_svg_metrics, extract_gcode_metrics
 
 svg_metrics = extract_svg_metrics("output/drawing.svg")
-stl_metrics = extract_stl_metrics("output/model.stl")
 gcode_metrics = extract_gcode_metrics("output/toolpath.nc")
 
 print(f"SVG layers: {svg_metrics.to_dict()['layers']['count']}")
-print(f"STL watertight: {stl_metrics.to_dict()['mesh']['is_watertight']}")
 print(f"G-code depth: {gcode_metrics.to_dict()['z_profile']['max_plunge_z_mm']}")
 ```
 
@@ -249,7 +247,7 @@ for i, ast in enumerate(result["output"]):
 
 **CLI alternative:**
 ```bash
-python -m cli.nest job.nest -o output/ --export-stl --export-svg
+python -m cli.nest job.nest -o output/ --export-svg
 ```
 
 **Key point:** See `docs/recipes/18_nesting_maxrects/` for complete example.
@@ -284,7 +282,7 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 
 **Use case:** Export CNC-ready G-code from PML layouts.
 
-**CLI (unified command - generates G-code, SVG, STL):**
+**CLI (unified command - generates G-code and SVG):**
 ```bash
 source .venv/bin/activate
 python -m cli.mill --project my_table
@@ -297,7 +295,6 @@ With just `--project`, processes all `.pml` files in the project directory. Use 
 - `--kerf 6.35` — Tool kerf in mm (default: 6.35)
 - `--theme dark` — Blueprint theme (dark/light/print)
 - `--no-svg` — Skip SVG generation
-- `--no-stl` — Skip STL generation
 - `--no-clean` — Don't clean output directory before writing
 
 **Regenerate all recipe outputs:**
@@ -331,7 +328,7 @@ outputs = write_pipeline_outputs(
 
 **Supported shapes:** Rect, Circle, Polygon, RoundedRect (including selective corner rounding).
 
-**Key point:** The unified pipeline handles tool compensation automatically and generates all outputs (G-code, SVG, STL) in one step.
+**Key point:** The unified pipeline handles tool compensation automatically and generates all outputs (G-code and SVG) in one step.
 
 ---
 

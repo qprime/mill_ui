@@ -265,7 +265,7 @@ def create_golden_from_recipe(
     Args:
         store: The golden store to save to
         recipe_name: Name for the entry (e.g., "01_simple_profile")
-        metrics: Combined metrics dict (svg, stl, gcode)
+        metrics: Combined metrics dict (svg, gcode)
         source_pml_path: Optional path to source PML file to copy
     """
     # Add metadata wrapper if not present

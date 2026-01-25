@@ -48,7 +48,7 @@ Document Type: Pipeline Reference
          ┌───────────────┼───────────────────┬────────────────┐
          ▼               ▼                   ▼                ▼
     ┌─────────┐   ┌─────────────┐    ┌──────────┐    ┌──────────────┐
-    │ STL     │   │ STEP        │    │ DXF      │    │ DWG          │
+    │ STEP        │    │ DXF      │    │ DWG          │
     │[PARTIAL]│   │[BROKEN]     │    │[FUTURE]  │    │[FUTURE]      │
     └─────────┘   └─────────────┘    └──────────┘    └──────────────┘
                          │
@@ -90,7 +90,7 @@ Document Type: Pipeline Reference
 | 2. Resolution | CompositionalLayoutAST | LayoutAST (flat) | `resolve_layout()` |
 | 2B. Nesting | NestJob | list[LayoutAST] | `nest_and_generate()` |
 | 3. IR Conversion | LayoutAST | list[RemovalIntent] | `ast_to_removal_intents()` |
-| 4A. CAD Export | LayoutAST/IR | STL/STEP/SVG | `cad/export/` |
+| 4A. CAD Export | LayoutAST/IR | STEP/SVG | `cad/export/` |
 | 4B. CAM Planning | RemovalIntent | Move sequences | `plan_all_passes()` |
 | 5. Post-process | Moves | G-code | `post_gcode()` |
 
@@ -114,7 +114,6 @@ Document Type: Pipeline Reference
 | Format | Purpose | Status |
 |--------|---------|--------|
 | G-code | CNC execution | Production |
-| STL | 3D visualization | Partial |
 | SVG | 2D layout debugging | Working |
 | STEP | 3D CAD interop | Broken |
 | DXF/DWG | 2D CAD format | Future |
@@ -142,7 +141,7 @@ Document Type: Pipeline Reference
 | Nesting | `nesting/api.py`, `nesting/guillotine.py`, `nesting/maxrects.py` |
 | Core Pipeline | `adapters/ast_to_removal.py`, `adapters/removal_to_planner.py` |
 | CAM | `cam/planner/plan.py`, `cam/post/gcode.py` |
-| CAD Export | `cad/export/panel_stl.py`, `export/svg_removal.py` |
+| CAD Export | `export/svg_removal.py` |
 | Validation | `validation/removal_checks.py`, `validation/runner.py` |
 
 ---
@@ -155,7 +154,6 @@ Document Type: Pipeline Reference
 | Nesting (guillotine, maxrects) | Production |
 | Profile tabs (F004) | Production |
 | Pocket cleanup pass (F001) | Production |
-| STL export | Partial |
 | SVG visualization | Working |
 | STEP export | Broken (import path) |
 | DXF/DWG export | Future |

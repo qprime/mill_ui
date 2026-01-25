@@ -29,9 +29,6 @@ Common CLI operations (all from mill_ui root):
 # Parse and validate PML
 python -m cli.convert_layout --from pml --to json input.pml output.json
 
-# Export STL (3D model)
-python -m cli.export_cad --input layout.pml --out output/ --kerf 6.35 --quality high
-
 # Export SVG blueprint
 python -m cli.export_blueprint --input layout.pml --out output/ --theme dark
 
@@ -55,7 +52,7 @@ For compositional PML (frame/inset/grid syntax), add `--compositional` flag.
 
 ## TD-2: CLI Should Ingest .nest Files ✅
 
-**Status:** Completed 2026-01-19 — Created `cli/nest.py` with `--export-stl` and `--export-svg` flags.
+**Status:** Completed 2026-01-19 — Created `cli/nest.py` with `--export-svg` flag.
 
 **Problem:** `.nest` files require `tools/nest.py`, which is not in `cli/`. The CLI modules only accept `.pml` and `.json`. This creates confusion and inconsistency.
 
@@ -75,12 +72,12 @@ Move `tools/nest.py` → `cli/nest.py` and add export flags:
 python -m cli.nest job.nest -o output/
 
 # Nesting with automatic exports
-python -m cli.nest job.nest -o output/ --export-stl --export-svg
+python -m cli.nest job.nest -o output/ --export-svg
 ```
 
 **Implementation:**
 1. Move `tools/nest.py` → `cli/nest.py`
-2. Add `--export-stl` and `--export-svg` flags
+2. Add `--export-svg` flag
 3. Chain to `export_cad` and `export_blueprint` internally
 4. Update any tests that import from `tools.nest`
 
@@ -211,10 +208,6 @@ def test_export_cad_from_pml():
         )
 
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
-
-        output_path = Path(tmpdir)
-        stl_files = list(output_path.glob("*.stl"))
-        assert len(stl_files) > 0, "No STL files generated"
 
 def test_export_blueprint_from_pml():
     """Test CLI export_blueprint produces SVG."""

@@ -44,7 +44,6 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         tool_db=DEFAULT_TOOL_DB,
         generate_svg=True,
         svg_theme="dark",
-        generate_stl=False,
     )
 
     metrics = result.metrics
@@ -74,20 +73,6 @@ def write_outputs(
         output_path = output_dir / f"{pass_name}.nc"
         with open(output_path, "w") as f:
             f.write(gcode)
-
-    try:
-        from adapters.ast_to_cad import items_to_shape_dicts
-        from cad.export.stl import export_stl
-
-        shapes = items_to_shape_dicts(ast.items)
-        stl_path = output_dir / f"{recipe_name}.stl"
-        export_stl(
-            shapes=shapes,
-            sheet_thickness_mm=ast.sheet.thickness_mm,
-            output_path=stl_path,
-        )
-    except Exception as e:
-        print(f"  Warning: STL generation failed: {e}")
 
     try:
         from export.blueprint_svg import render_blueprint_svg
@@ -134,7 +119,7 @@ def compare_outputs(
                 f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
             )
 
-    expected_extensions = {".nc", ".stl", ".svg", ".json"}
+    expected_extensions = {".nc", ".svg", ".json"}
     actual_files = {f.name for f in output_dir.iterdir() if f.is_file()}
     extra_files = {f for f in actual_files if not any(f.endswith(ext) for ext in expected_extensions)}
     if extra_files:
@@ -153,7 +138,7 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
         write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
         print(f"\n  Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
-        print(f"  Files: {len(gcode_dict)} G-code + STL + SVG + metrics.json")
+        print(f"  Files: {len(gcode_dict)} G-code + SVG + metrics.json")
         print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
     else:
         all_match, diffs = compare_outputs(output_dir, gcode_dict, metrics)
@@ -222,7 +207,7 @@ if __name__ == "__main__":
                 write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
                 update_file_header(pml_path)
 
-                print(f"  Generated {len(gcode_dict)} G-code pass(es) + STL + SVG")
+                print(f"  Generated {len(gcode_dict)} G-code pass(es) + SVG")
                 print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
                 print(f"  Output: {output_dir}\n")
             except Exception as e:

@@ -54,7 +54,6 @@ class PipelineResult:
     passes: list[dict[str, Any]]
     gcode: dict[str, str]
     svg: str | None
-    stl_path: Path | None
     metrics: dict[str, Any]
     errors: list[str]
     warnings: list[str]
@@ -68,7 +67,6 @@ class PipelineTiming:
     plan_ms: float = 0.0
     gcode_ms: float = 0.0
     svg_ms: float = 0.0
-    stl_ms: float = 0.0
     total_ms: float = 0.0
 
 
@@ -81,9 +79,6 @@ def run_pipeline(
     safe_z: float = 6.0,
     generate_svg: bool = True,
     svg_theme: str = "dark",
-    generate_stl: bool = True,
-    stl_quality: str = "medium",
-    include_floating_parts: bool = True,
     y_origin: str = "front",
 ) -> PipelineResult:
     if tool_db is None:
@@ -180,13 +175,9 @@ def run_pipeline(
             warnings.append(f"SVG generation failed: {e}")
         timing.svg_ms = (time.perf_counter() - svg_start) * 1000
 
-    stl_path: Path | None = None
-    if generate_stl:
-        timing.stl_ms = 0.0
-
     timing.total_ms = (
         timing.ir_ms + timing.hints_ms + timing.plan_ms +
-        timing.gcode_ms + timing.svg_ms + timing.stl_ms
+        timing.gcode_ms + timing.svg_ms
     )
 
     total_gcode_size = sum(len(gc) for gc in gcode_dict.values())
@@ -199,7 +190,6 @@ def run_pipeline(
             "plan_ms": round(timing.plan_ms, 2),
             "gcode_ms": round(timing.gcode_ms, 2),
             "svg_ms": round(timing.svg_ms, 2),
-            "stl_ms": round(timing.stl_ms, 2),
             "total_ms": round(timing.total_ms, 2),
         },
         "complexity": {
@@ -238,7 +228,6 @@ def run_pipeline(
         passes=passes,
         gcode=gcode_dict,
         svg=svg_string,
-        stl_path=stl_path,
         metrics=metrics,
         errors=errors,
         warnings=warnings,
@@ -250,10 +239,6 @@ def write_pipeline_outputs(
     output_dir: Path,
     job_name: str,
     *,
-    write_stl: bool = True,
-    stl_quality: str = "medium",
-    kerf_mm: float = 0.0,
-    include_floating_parts: bool = True,
     clean_output_dir: bool = True,
 ) -> dict[str, Path]:
     if clean_output_dir and output_dir.exists():
@@ -271,25 +256,6 @@ def write_pipeline_outputs(
         svg_path = output_dir / f"{job_name}.svg"
         svg_path.write_text(result.svg, encoding="utf-8")
         outputs["svg"] = svg_path
-
-    if write_stl:
-        try:
-            from adapters.ast_to_cad import items_to_shape_dicts
-            from cad.export.stl import export_stl
-
-            shapes = items_to_shape_dicts(result.ast.items)
-            stl_path = output_dir / f"{job_name}.stl"
-            export_stl(
-                shapes=shapes,
-                sheet_thickness_mm=result.ast.sheet.thickness_mm,
-                output_path=stl_path,
-                kerf_mm=kerf_mm,
-                quality=stl_quality,
-                include_floating_parts=include_floating_parts,
-            )
-            outputs["stl"] = stl_path
-        except Exception:
-            pass
 
     import json
     metrics_path = output_dir / "metrics.json"

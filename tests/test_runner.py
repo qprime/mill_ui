@@ -252,38 +252,6 @@ M2
     print(f"PASS: test_validate_with_gcode_content ({len(gcode_invariants)} G-code invariants)")
 
 
-def test_validate_with_stl_content():
-    """validate() works with STL content (bytes)."""
-    # Read a real STL file to get valid binary content
-    recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
-    stl_path = os.path.join(recipe_dir, "output", "example.stl")
-
-    if not os.path.exists(stl_path):
-        print("SKIP: test_validate_with_stl_content (STL file not found)")
-        return
-
-    with open(stl_path, "rb") as f:
-        stl_content = f.read()
-
-    inputs = ValidationInput(
-        stl_content=stl_content,
-    )
-    options = ValidationOptions(
-        check_assertions=False,
-        check_regressions=False,
-    )
-
-    result = validate(inputs, options)
-
-    assert isinstance(result, CAMValidationResult)
-    # Should have STL metrics
-    assert "stl" in result.metrics
-    # Should have STL invariants
-    stl_invariants = [i for i in result.invariants.results if i.artifact == "stl"]
-    assert len(stl_invariants) > 0
-    print(f"PASS: test_validate_with_stl_content ({len(stl_invariants)} STL invariants)")
-
-
 def test_validate_recipe_with_golden_file():
     """validate_recipe() passes golden_file and comparison_config."""
     recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
@@ -599,7 +567,6 @@ def run_tests() -> bool:
         test_validate_empty_inputs,
         # Content-mode tests
         test_validate_with_gcode_content,
-        test_validate_with_stl_content,
         test_validate_recipe_with_golden_file,
         # merge tests
         test_merge_gcode_metrics_empty,

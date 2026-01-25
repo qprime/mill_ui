@@ -289,8 +289,6 @@ Used existing `DepthMode` class (created in Stage 1) as the `DepthSpec` implemen
 
 Core adapter updates to use `DepthMode.is_through()` and `DepthMode.resolve()`:
 - `adapters/ast_to_removal.py` - `_resolve_depth()` now delegates to `DepthMode.resolve()`
-- `cad/export/stl.py` - 2 depth comparisons updated
-- `cad/export/panel_stl.py` - 2 depth comparisons updated
 - `cam/model/hints.py` - 1 depth comparison updated
 - `pml/parser.py` - 1 depth comparison updated, uses `DepthMode.THROUGH` constant
 - `pml/formatter.py` - 2 depth comparisons updated

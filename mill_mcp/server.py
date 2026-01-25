@@ -22,12 +22,10 @@ from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseErr
 from pml.formatter import format_pml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
-from adapters.ast_to_cad import items_to_shape_dicts
 from validation.removal_checks import check_overlap, check_depth_feasibility
 from validation.runner import validate_recipe, validate, ValidationInput, ValidationOptions
 from validation.regression import GoldenStore, ComparisonConfig
 from nesting import nest_and_generate
-from cad.export.stl import export_stl
 from export.blueprint_svg import render_blueprint_svg
 from cam.pipeline import run_pipeline, DEFAULT_TOOL_DB
 
@@ -59,7 +57,7 @@ You are a CAM (Computer-Aided Manufacturing) assistant for CNC router projects. 
 
 Help users design and manufacture panel-based projects (cabinet doors, furniture parts, decorative panels) by:
 1. Writing PML (Panel Machining Language) code for their designs
-2. Compiling PML to G-code, SVG blueprints, and STL previews
+2. Compiling PML to G-code and SVG blueprints
 3. Optimizing multi-part production with nesting
 
 ## Key Concepts
@@ -107,7 +105,7 @@ nest maxrects
 
 ## Tools Available
 
-- `compile_pml` - Generate G-code, SVG, STL from PML
+- `compile_pml` - Generate G-code and SVG from PML
 - `compile_nest` - Optimize and compile multi-part nesting jobs
 - `validate_pml` - Check PML for errors without generating files
 - `list_templates` - Show available templates (shaker, etc.)
@@ -163,7 +161,6 @@ def _run_cam_pipeline(
         tool_db=DEFAULT_TOOL_DB,
         generate_svg=True,
         svg_theme="dark",
-        generate_stl=False,
     )
 
     results["intents"] = len(pipeline_result.intents)
@@ -174,21 +171,6 @@ def _run_cam_pipeline(
         svg_path = job_dir / f"{safe_name}.svg"
         svg_path.write_text(pipeline_result.svg, encoding="utf-8")
         results["outputs"]["svg"] = str(svg_path)
-
-    try:
-        shapes = items_to_shape_dicts(ast.items)
-        stl_path = job_dir / f"{safe_name}.stl"
-        export_stl(
-            shapes=shapes,
-            sheet_thickness_mm=ast.sheet.thickness_mm,
-            output_path=stl_path,
-            kerf_mm=kerf_mm,
-            quality="medium",
-            include_floating_parts=True,
-        )
-        results["outputs"]["stl"] = str(stl_path)
-    except Exception as e:
-        results["warnings"].append(f"STL generation failed: {e}")
 
     results["passes"] = len(pipeline_result.passes)
     results["outputs"]["gcode"] = []
@@ -216,14 +198,14 @@ def _run_cam_pipeline(
 
 @mcp.tool()
 def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = False) -> str:
-    """Compile PML to G-code, SVG blueprint, and STL.
+    """Compile PML to G-code and SVG blueprint.
 
     Args:
         pml_text: Valid PML source text
         job_name: Name for output files (default: "job")
         compositional: If True, parse as compositional PML (frame/inset/grid syntax)
 
-    Returns JSON with output paths for gcode, svg, stl files, and job metrics.
+    Returns JSON with output paths for gcode and svg files, and job metrics.
     """
     output_dir = ensure_output_dir()
 
@@ -252,7 +234,7 @@ def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = Fals
 
 @mcp.tool()
 def compile_nest(nest_text: str, job_name: str = "job") -> str:
-    """Compile .nest file to multi-sheet G-code, SVG, and STL.
+    """Compile .nest file to multi-sheet G-code and SVG.
 
     Args:
         nest_text: Valid .nest source text defining parts and nesting parameters
@@ -589,7 +571,7 @@ def validate_cam_recipe(
     check_assertions: bool = True,
     tolerance_percent: float = 0.1,
 ) -> str:
-    """Validate CAM artifacts (SVG, STL, G-code) for a recipe directory.
+    """Validate CAM artifacts (SVG, G-code) for a recipe directory.
 
     Args:
         recipe_path: Path to recipe directory with output/ subdirectory
@@ -600,7 +582,7 @@ def validate_cam_recipe(
 
     Returns JSON with:
         - verdict: "pass", "warn", or "fail"
-        - metrics: Extracted metrics from SVG, STL, G-code
+        - metrics: Extracted metrics from SVG, G-code
         - invariants: Structural check results
         - assertions: Intent assertion results (if PML present)
         - regressions: Golden baseline comparison (if golden_path provided)
@@ -665,15 +647,13 @@ def validate_cam_recipe(
 @mcp.tool()
 def validate_cam_artifacts(
     svg_path: str | None = None,
-    stl_path: str | None = None,
     gcode_paths: list[str] | None = None,
     check_invariants: bool = True,
 ) -> str:
-    """Validate specific CAM artifacts (SVG, STL, G-code files).
+    """Validate specific CAM artifacts (SVG, G-code files).
 
     Args:
         svg_path: Optional path to SVG file
-        stl_path: Optional path to STL file
         gcode_paths: Optional list of G-code file paths
         check_invariants: Run structural invariant checks (default: True)
 
@@ -683,20 +663,17 @@ def validate_cam_artifacts(
         - invariants: Structural check results
     """
     try:
-        if not svg_path and not stl_path and not gcode_paths:
+        if not svg_path and not gcode_paths:
             return json.dumps({"error": "At least one artifact path required"})
 
         if svg_path and not Path(svg_path).exists():
             return json.dumps({"error": f"SVG file not found: {svg_path}"})
-        if stl_path and not Path(stl_path).exists():
-            return json.dumps({"error": f"STL file not found: {stl_path}"})
         for gcode_path in (gcode_paths or []):
             if not Path(gcode_path).exists():
                 return json.dumps({"error": f"G-code file not found: {gcode_path}"})
 
         inputs = ValidationInput(
             svg_path=svg_path,
-            stl_path=stl_path,
             gcode_paths=gcode_paths or [],
         )
 

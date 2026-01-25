@@ -1,4 +1,4 @@
-# mill_ui: f6bb5d4
+# mill_ui: 5f53b9a
 # generated: 2026-01-25
 
 # Simple rectangular cutout with holding tabs

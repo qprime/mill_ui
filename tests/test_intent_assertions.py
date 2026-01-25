@@ -1,7 +1,7 @@
 # tests/test_intent_assertions.py - Tests for intent-derived assertions
 #
 # Tests the derivation and checking of assertions from LayoutAST.
-# See docs/cam_validation_plan.md for Stage 7 scope.
+# See docs/cam_validation_plan.md for architecture.
 
 from __future__ import annotations
 
@@ -197,27 +197,15 @@ def test_through_cut_assertion():
     print("PASS: test_through_cut_assertion")
 
 
-def test_pocket_depth_assertion():
-    """Pocket depth assertion is derived for pocket features."""
-    ast = make_pocket_ast()
-    assertions = derive_assertions(ast)
-    pocket_asserts = [a for a in assertions if a.id == "POCKET_DEPTH"]
-    assert len(pocket_asserts) == 1
-    assert pocket_asserts[0].expected["depth_mm"] == 6.0
-    print("PASS: test_pocket_depth_assertion")
-
-
 def test_shaker_door_multiple_assertions():
     """Multiple assertions derived for complex layouts."""
     ast = make_shaker_door_ast()
     assertions = derive_assertions(ast)
 
-    # Should have: 1 sheet, 1 item_count, 1 pocket_depth, 1 profile_exists,
-    # 1 profile_side, 1 through_cut
+    # Should have: 1 sheet, 1 item_count, 1 profile_exists, 1 profile_side, 1 through_cut
     ids = [a.id for a in assertions]
     assert ids.count("SHEET_DIMENSIONS") == 1
     assert ids.count("ITEM_COUNT") == 1
-    assert ids.count("POCKET_DEPTH") == 1
     assert ids.count("PROFILE_EXISTS") == 1
     assert ids.count("PROFILE_SIDE") == 1
     assert ids.count("THROUGH_CUT") == 1
@@ -260,15 +248,24 @@ def test_check_returns_results():
     assertions = derive_assertions(ast)
 
     # Mock metrics that would pass
-    stl_metrics = {
-        "dimensions": {
-            "width_mm": 450.0,
-            "height_mm": 650.0,
-            "thickness_mm": 19.0,
-        },
+    svg_metrics = {
+        "layers": {
+            "by_layer": {
+                "SHEET_OUTLINE": {
+                    "element_count": 1,
+                    "elements": [
+                        {
+                            "element_type": "rect",
+                            "width": 450.0,
+                            "height": 650.0,
+                        }
+                    ],
+                },
+            }
+        }
     }
 
-    results = check_assertions(assertions, stl_metrics=stl_metrics)
+    results = check_assertions(assertions, svg_metrics=svg_metrics)
     assert len(results) > 0
     from validation.core import AssertionResult
     assert all(isinstance(r, AssertionResult) for r in results)
@@ -280,7 +277,7 @@ def test_sheet_dimensions_pass():
     ast = make_simple_profile_ast()
     assertions = derive_assertions(ast)
 
-    # Use SVG SHEET_OUTLINE for sheet dimensions (preferred source)
+    # Use SVG SHEET_OUTLINE for sheet dimensions
     svg_metrics = {
         "layers": {
             "by_layer": {
@@ -299,16 +296,8 @@ def test_sheet_dimensions_pass():
             }
         }
     }
-    # Also provide STL for thickness validation
-    stl_metrics = {
-        "dimensions": {
-            "width_mm": 200.0,  # STL has item dimensions, not sheet
-            "height_mm": 150.0,
-            "thickness_mm": 19.0,
-        },
-    }
 
-    results = check_assertions(assertions, svg_metrics=svg_metrics, stl_metrics=stl_metrics)
+    results = check_assertions(assertions, svg_metrics=svg_metrics)
     sheet_results = [r for r in results if r.id == "SHEET_DIMENSIONS"]
     assert len(sheet_results) == 1
     assert sheet_results[0].status == Verdict.PASS
@@ -338,11 +327,8 @@ def test_sheet_dimensions_fail():
             }
         }
     }
-    stl_metrics = {
-        "dimensions": {"thickness_mm": 19.0},
-    }
 
-    results = check_assertions(assertions, svg_metrics=svg_metrics, stl_metrics=stl_metrics)
+    results = check_assertions(assertions, svg_metrics=svg_metrics)
     sheet_results = [r for r in results if r.id == "SHEET_DIMENSIONS"]
     assert len(sheet_results) == 1
     assert sheet_results[0].status == Verdict.FAIL
@@ -355,7 +341,7 @@ def test_sheet_dimensions_warn_no_metrics():
     ast = make_simple_profile_ast()
     assertions = derive_assertions(ast)
 
-    results = check_assertions(assertions, stl_metrics=None)
+    results = check_assertions(assertions, svg_metrics=None)
     sheet_results = [r for r in results if r.id == "SHEET_DIMENSIONS"]
     assert len(sheet_results) == 1
     assert sheet_results[0].status == Verdict.WARN
@@ -414,45 +400,6 @@ def test_profile_exists_fail():
     assert len(profile_results) == 1
     assert profile_results[0].status == Verdict.FAIL
     print("PASS: test_profile_exists_fail")
-
-
-def test_pocket_depth_pass():
-    """Pocket depth assertion passes when Z level exists."""
-    ast = make_pocket_ast()
-    assertions = derive_assertions(ast)
-
-    # For 6mm pocket in 19mm sheet: Z = 19 - 6 = 13mm
-    stl_metrics = {
-        "dimensions": {"thickness_mm": 19.0, "width_mm": 200.0, "height_mm": 150.0},
-        "z_statistics": {
-            "unique_z_levels": [0.0, 13.0, 19.0],  # bottom, pocket floor, top
-        },
-    }
-
-    results = check_assertions(assertions, stl_metrics=stl_metrics)
-    pocket_results = [r for r in results if r.id == "POCKET_DEPTH"]
-    assert len(pocket_results) == 1
-    assert pocket_results[0].status == Verdict.PASS
-    print("PASS: test_pocket_depth_pass")
-
-
-def test_pocket_depth_fail():
-    """Pocket depth assertion fails when Z level doesn't exist."""
-    ast = make_pocket_ast()
-    assertions = derive_assertions(ast)
-
-    stl_metrics = {
-        "dimensions": {"thickness_mm": 19.0, "width_mm": 200.0, "height_mm": 150.0},
-        "z_statistics": {
-            "unique_z_levels": [0.0, 19.0],  # No pocket floor
-        },
-    }
-
-    results = check_assertions(assertions, stl_metrics=stl_metrics)
-    pocket_results = [r for r in results if r.id == "POCKET_DEPTH"]
-    assert len(pocket_results) == 1
-    assert pocket_results[0].status == Verdict.FAIL
-    print("PASS: test_pocket_depth_fail")
 
 
 def test_through_cut_pass():
@@ -624,20 +571,14 @@ def test_simple_profile_recipe():
     # Extract metrics from outputs (using actual filenames)
     output_dir = os.path.join(recipe_dir, "output")
     svg_path = os.path.join(output_dir, "01_simple_profile.svg")
-    stl_path = os.path.join(output_dir, "example.stl")
     nc_path = os.path.join(output_dir, "profile-3.17mm.nc")
 
     svg_metrics = None
-    stl_metrics = None
     gcode_metrics = None
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
-
-    if os.path.exists(stl_path):
-        from validation.metrics.stl_metrics import extract_stl_metrics
-        stl_metrics = extract_stl_metrics(stl_path).to_dict()
 
     if os.path.exists(nc_path):
         from validation.metrics.gcode_metrics import extract_gcode_metrics
@@ -648,7 +589,6 @@ def test_simple_profile_recipe():
     results = check_assertions(
         assertions,
         svg_metrics=svg_metrics,
-        stl_metrics=stl_metrics,
         gcode_metrics=gcode_metrics,
     )
 
@@ -684,20 +624,14 @@ def test_pocket_recipe():
 
     output_dir = os.path.join(recipe_dir, "output")
     svg_path = os.path.join(output_dir, "02_pocket_with_cleanup.svg")
-    stl_path = os.path.join(output_dir, "example.stl")
     nc_path = os.path.join(output_dir, "pocket-9.53mm.nc")
 
     svg_metrics = None
-    stl_metrics = None
     gcode_metrics = None
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
-
-    if os.path.exists(stl_path):
-        from validation.metrics.stl_metrics import extract_stl_metrics
-        stl_metrics = extract_stl_metrics(stl_path).to_dict()
 
     if os.path.exists(nc_path):
         from validation.metrics.gcode_metrics import extract_gcode_metrics
@@ -707,7 +641,6 @@ def test_pocket_recipe():
     results = check_assertions(
         assertions,
         svg_metrics=svg_metrics,
-        stl_metrics=stl_metrics,
         gcode_metrics=gcode_metrics,
     )
 
@@ -747,19 +680,13 @@ def test_shaker_door_recipe():
 
     output_dir = os.path.join(recipe_dir, "output")
     svg_path = os.path.join(output_dir, "03_shaker_door_template.svg")
-    stl_path = os.path.join(output_dir, "example.stl")
 
     svg_metrics = None
-    stl_metrics = None
     gcode_metrics = None
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
-
-    if os.path.exists(stl_path):
-        from validation.metrics.stl_metrics import extract_stl_metrics
-        stl_metrics = extract_stl_metrics(stl_path).to_dict()
 
     # Merge G-code metrics from all NC files in the output directory
     # This handles multi-tool recipes where different operations are in separate files
@@ -802,7 +729,6 @@ def test_shaker_door_recipe():
     results = check_assertions(
         assertions,
         svg_metrics=svg_metrics,
-        stl_metrics=stl_metrics,
         gcode_metrics=gcode_metrics,
     )
 
@@ -837,7 +763,6 @@ def run_tests():
         test_profile_exists_assertion,
         test_profile_side_assertion,
         test_through_cut_assertion,
-        test_pocket_depth_assertion,
         test_shaker_door_multiple_assertions,
         test_hole_position_assertion,
         test_hole_diameter_assertion,
@@ -848,8 +773,6 @@ def run_tests():
         test_sheet_dimensions_warn_no_metrics,
         test_profile_exists_pass,
         test_profile_exists_fail,
-        test_pocket_depth_pass,
-        test_pocket_depth_fail,
         test_through_cut_pass,
         test_through_cut_fail,
         test_outside_profile_side_pass,

@@ -24,15 +24,6 @@ EXACT_MATCH_PATHS = frozenset({
     "svg.circles.count",
     "svg.rects.count",
     "svg.text_elements.count",
-    # STL
-    "stl.mesh.vertex_count",
-    "stl.mesh.face_count",
-    "stl.mesh.is_watertight",
-    "stl.mesh.is_manifold",
-    "stl.mesh.is_volume",
-    "stl.mesh.euler_number",
-    "stl.mesh.connected_components",
-    "stl.z_statistics.z_level_count",
     # G-code
     "gcode.summary.total_lines",
     "gcode.summary.comment_lines",
@@ -56,21 +47,17 @@ STRUCTURAL_MATCH_PATHS = frozenset({
     "gcode.tools.spindle_speeds",
     "gcode.feeds.feed_rates_used",
     "gcode.z_profile.unique_cutting_depths",
-    "stl.z_statistics.unique_z_levels",
 })
 
 # These paths are checksums (hash comparison)
 CHECKSUM_PATHS = frozenset({
-    "stl.heightmap.checksum",
 })
 
 # These paths are excluded from comparison (non-deterministic metadata)
 EXCLUDED_PATHS = frozenset({
     "svg.extraction_time_ms",
-    "stl.extraction_time_ms",
     "gcode.extraction_time_ms",
     "svg.version",
-    "stl.version",
     "gcode.version",
 })
 
@@ -554,7 +541,7 @@ def metrics_to_comparable_dict(metrics: Any) -> dict[str, Any]:
     """
     Convert metrics (dataclass or dict) to a dict suitable for comparison.
 
-    Handles SVGMetrics, STLMetrics, GCodeMetrics dataclasses.
+    Handles SVGMetrics, GCodeMetrics dataclasses.
     """
     if hasattr(metrics, "to_dict"):
         return metrics.to_dict()

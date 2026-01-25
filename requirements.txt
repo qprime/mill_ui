@@ -3,9 +3,6 @@
 # Domain geometry operations (polygon boolean ops, offsets)
 shapely>=2.0.0
 
-# STL export (3D mesh generation for recipes)
-trimesh>=4.0.0
-
 # MCP server (Model Context Protocol for Claude integration)
 mcp[cli]>=1.25.0
 

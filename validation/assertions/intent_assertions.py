@@ -1,7 +1,7 @@
 # validation/assertions/intent_assertions.py - Intent-derived assertions
 #
 # Derives assertions from LayoutAST (source intent) and validates them
-# against extracted metrics from CAM artifacts (SVG, STL, G-code).
+# against extracted metrics from CAM artifacts (SVG, G-code).
 #
 # See docs/cam_validation_plan.md for architecture and schema.
 
@@ -17,10 +17,9 @@ from validation.core import AssertionResult, Verdict
 
 # Assertion IDs for each type of intent check
 ASSERTION_IDS = [
-    "SHEET_DIMENSIONS",    # Sheet size matches SVG/STL bounds
+    "SHEET_DIMENSIONS",    # Sheet size matches SVG bounds
     "PROFILE_EXISTS",      # Profile cut path exists for profile features
     "PROFILE_SIDE",        # Profile side (inside/outside) affects bounds correctly
-    "POCKET_DEPTH",        # Pocket depth matches STL Z-level
     "HOLE_POSITION",       # Hole center at expected XY
     "HOLE_DIAMETER",       # Hole diameter matches specification
     "THROUGH_CUT",         # Through cut reaches Z=0 (or -thickness)
@@ -45,7 +44,7 @@ class IntentAssertion:
     intent: str  # Human-readable intent
     expected: dict[str, Any]
     tolerance: float = 0.1
-    artifact: str = "any"  # Which artifact to check: "svg", "stl", "gcode", "any"
+    artifact: str = "any"  # Which artifact to check: "svg", "gcode", "any"
 
 
 def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
@@ -74,7 +73,7 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
             "thickness_mm": ast.sheet.thickness_mm,
         },
         tolerance=DEFAULT_DIMENSION_TOLERANCE_MM,
-        artifact="stl",  # STL has 3D bounds including thickness
+        artifact="svg",
     ))
 
     # Item count assertion
@@ -205,22 +204,6 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
         # Note: Tab count assertions are aggregated at the AST level
         # to compare total expected tabs vs total detected tabs in G-code
 
-    elif feature.type == "pocket":
-        # Pocket depth assertion
-        depth_mm = _resolve_depth(feature, sheet_thickness_mm)
-        if depth_mm is not None:
-            assertions.append(IntentAssertion(
-                id="POCKET_DEPTH",
-                source=source,
-                intent=f"Pocket depth {depth_mm}mm for '{item_id}'",
-                expected={
-                    "shape_id": item_id,
-                    "depth_mm": depth_mm,
-                },
-                tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
-                artifact="stl",  # Check in STL z_statistics
-            ))
-
     elif feature.type == "hole":
         # Hole position assertion
         if center_xy:
@@ -293,7 +276,7 @@ def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
 def _unwrap_metrics(metrics: dict[str, Any] | None, key: str) -> dict[str, Any] | None:
     """Unwrap metrics from their container key if present.
 
-    Metrics from to_dict() are wrapped like {"svg": {...}} or {"stl": {...}}.
+    Metrics from to_dict() are wrapped like {"svg": {...}} or {"gcode": {...}}.
     This function extracts the inner dict if the wrapper key is present.
     """
     if metrics is None:
@@ -308,7 +291,6 @@ def _unwrap_metrics(metrics: dict[str, Any] | None, key: str) -> dict[str, Any] 
 def check_assertions(
     assertions: list[IntentAssertion],
     svg_metrics: dict[str, Any] | None = None,
-    stl_metrics: dict[str, Any] | None = None,
     gcode_metrics: dict[str, Any] | None = None,
 ) -> list[AssertionResult]:
     """
@@ -317,7 +299,6 @@ def check_assertions(
     Args:
         assertions: List of IntentAssertion objects from derive_assertions()
         svg_metrics: Extracted SVG metrics (from SVGMetrics.to_dict())
-        stl_metrics: Extracted STL metrics (from STLMetrics.to_dict())
         gcode_metrics: Extracted G-code metrics (from GCodeMetrics.to_dict())
 
     Returns:
@@ -325,7 +306,6 @@ def check_assertions(
     """
     # Unwrap metrics if they have wrapper keys
     svg_unwrapped = _unwrap_metrics(svg_metrics, "svg")
-    stl_unwrapped = _unwrap_metrics(stl_metrics, "stl")
     gcode_unwrapped = _unwrap_metrics(gcode_metrics, "gcode")
 
     results: list[AssertionResult] = []
@@ -334,7 +314,6 @@ def check_assertions(
         result = _check_single_assertion(
             assertion,
             svg_metrics=svg_unwrapped,
-            stl_metrics=stl_unwrapped,
             gcode_metrics=gcode_unwrapped,
         )
         results.append(result)
@@ -345,7 +324,6 @@ def check_assertions(
 def _check_single_assertion(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """Check a single assertion against the appropriate metrics."""
@@ -356,7 +334,6 @@ def _check_single_assertion(
         "ITEM_COUNT": _check_item_count,
         "PROFILE_EXISTS": _check_profile_exists,
         "PROFILE_SIDE": _check_profile_side,
-        "POCKET_DEPTH": _check_pocket_depth,
         "HOLE_POSITION": _check_hole_position,
         "HOLE_DIAMETER": _check_hole_diameter,
         "THROUGH_CUT": _check_through_cut,
@@ -379,7 +356,6 @@ def _check_single_assertion(
     return checker(
         assertion,
         svg_metrics=svg_metrics,
-        stl_metrics=stl_metrics,
         gcode_metrics=gcode_metrics,
     )
 
@@ -387,28 +363,23 @@ def _check_single_assertion(
 def _check_sheet_dimensions(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """
     Check that sheet dimensions are correct.
 
-    Checks SVG SHEET_OUTLINE layer for sheet dimensions (preferred) since the STL
-    typically represents the cut part geometry, not the full sheet. Falls back to
-    STL if SVG not available.
+    Checks SVG SHEET_OUTLINE layer for sheet dimensions.
     """
     expected_width = assertion.expected["width_mm"]
     expected_height = assertion.expected["height_mm"]
-    expected_thickness = assertion.expected["thickness_mm"]
     tol = assertion.tolerance
 
     actual: dict[str, Any] = {}
     actual_width = None
     actual_height = None
-    actual_thickness = None
     source = None
 
-    # Try SVG SHEET_OUTLINE first (more reliable for sheet dimensions)
+    # Check SVG SHEET_OUTLINE
     if svg_metrics is not None:
         layers = svg_metrics.get("layers", {})
         by_layer = layers.get("by_layer", {})
@@ -416,7 +387,6 @@ def _check_sheet_dimensions(
         elements = sheet_outline.get("elements", [])
 
         if elements:
-            # Get sheet dimensions from first SHEET_OUTLINE element
             elem = elements[0]
             actual_width = elem.get("width")
             actual_height = elem.get("height")
@@ -424,17 +394,6 @@ def _check_sheet_dimensions(
             actual["source"] = source
             actual["sheet_outline_element"] = elem
 
-    # Fall back to STL dimensions if SVG didn't work
-    if actual_width is None and stl_metrics is not None:
-        dimensions = stl_metrics.get("dimensions", {})
-        actual_width = dimensions.get("width_mm", 0)
-        actual_height = dimensions.get("height_mm", 0)
-        actual_thickness = dimensions.get("thickness_mm", 0)
-        source = "stl_dimensions"
-        actual["source"] = source
-        actual["note"] = "STL represents cut part geometry, may not match sheet dimensions"
-
-    # Check if we have any dimensions to compare
     if actual_width is None:
         return AssertionResult(
             id=assertion.id,
@@ -444,28 +403,16 @@ def _check_sheet_dimensions(
             actual={"error": "No dimension data available"},
             status=Verdict.WARN,
             tolerance=assertion.tolerance,
-            message="Cannot verify sheet dimensions: no SVG or STL metrics provided",
+            message="Cannot verify sheet dimensions: no SVG metrics provided",
         )
 
     actual["width_mm"] = actual_width
     actual["height_mm"] = actual_height
 
-    # Check width and height within tolerance
     width_ok = abs(actual_width - expected_width) <= tol
     height_ok = abs(actual_height - expected_height) <= tol
 
-    # For thickness, check STL if available (SVG doesn't have thickness)
-    thickness_ok = True
-    if actual_thickness is not None:
-        actual["thickness_mm"] = actual_thickness
-        thickness_ok = abs(actual_thickness - expected_thickness) <= tol
-    elif stl_metrics is not None:
-        dimensions = stl_metrics.get("dimensions", {})
-        actual_thickness = dimensions.get("thickness_mm", 0)
-        actual["thickness_mm"] = actual_thickness
-        thickness_ok = abs(actual_thickness - expected_thickness) <= tol
-
-    all_ok = width_ok and height_ok and thickness_ok
+    all_ok = width_ok and height_ok
 
     if all_ok:
         return AssertionResult(
@@ -484,8 +431,6 @@ def _check_sheet_dimensions(
             failures.append(f"width: expected {expected_width}, got {actual_width}")
         if not height_ok:
             failures.append(f"height: expected {expected_height}, got {actual_height}")
-        if not thickness_ok:
-            failures.append(f"thickness: expected {expected_thickness}, got {actual_thickness}")
 
         return AssertionResult(
             id=assertion.id,
@@ -502,7 +447,6 @@ def _check_sheet_dimensions(
 def _check_item_count(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """
@@ -527,7 +471,6 @@ def _check_item_count(
 def _check_profile_exists(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """Check that a profile cut exists in SVG matching the expected geometry."""
@@ -648,7 +591,6 @@ def _check_profile_exists(
 def _check_profile_side(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """
@@ -779,76 +721,9 @@ def _check_profile_side(
             )
 
 
-def _check_pocket_depth(
-    assertion: IntentAssertion,
-    svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
-    gcode_metrics: dict[str, Any] | None,
-) -> AssertionResult:
-    """Check that pocket depth is present in STL Z levels."""
-    if stl_metrics is None:
-        return AssertionResult(
-            id=assertion.id,
-            source=assertion.source,
-            intent=assertion.intent,
-            expected=assertion.expected,
-            actual={"error": "No STL metrics available"},
-            status=Verdict.WARN,
-            tolerance=assertion.tolerance,
-            message="Cannot verify pocket depth: STL metrics not provided",
-        )
-
-    expected_depth = assertion.expected.get("depth_mm", 0)
-
-    # Get Z levels from STL
-    z_stats = stl_metrics.get("z_statistics", {})
-    unique_z_levels = z_stats.get("unique_z_levels", [])
-
-    # Get sheet thickness from dimensions
-    dimensions = stl_metrics.get("dimensions", {})
-    thickness_mm = dimensions.get("thickness_mm", 0)
-
-    # Calculate expected Z level for pocket (top of sheet minus pocket depth)
-    # Assuming Z=0 at bottom, Z=thickness at top
-    expected_z = thickness_mm - expected_depth
-
-    actual = {
-        "expected_z_level": expected_z,
-        "unique_z_levels": unique_z_levels,
-        "thickness_mm": thickness_mm,
-    }
-
-    # Check if expected Z level is present in unique Z levels
-    found = any(abs(z - expected_z) <= assertion.tolerance for z in unique_z_levels)
-
-    if found:
-        return AssertionResult(
-            id=assertion.id,
-            source=assertion.source,
-            intent=assertion.intent,
-            expected=assertion.expected,
-            actual=actual,
-            status=Verdict.PASS,
-            tolerance=assertion.tolerance,
-            message=f"Pocket depth {expected_depth}mm found at Z={expected_z:.2f}mm",
-        )
-    else:
-        return AssertionResult(
-            id=assertion.id,
-            source=assertion.source,
-            intent=assertion.intent,
-            expected=assertion.expected,
-            actual=actual,
-            status=Verdict.FAIL,
-            tolerance=assertion.tolerance,
-            message=f"Expected Z level {expected_z:.2f}mm not found in STL (pocket depth {expected_depth}mm)",
-        )
-
-
 def _check_hole_position(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """Check that a hole exists at the expected position in SVG HOLES layer.
@@ -976,7 +851,6 @@ def _check_hole_position(
 def _check_hole_diameter(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """Check that a hole with expected diameter exists in the HOLES layer of SVG."""
@@ -1089,7 +963,6 @@ def _check_hole_diameter(
 def _check_through_cut(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """
@@ -1098,7 +971,7 @@ def _check_through_cut(
     LIMITATION: Uses global max plunge depth from G-code, so for multi-item jobs
     where items have different depths, a deep cut on any item will satisfy all
     through-cut assertions. For reliable per-item depth validation, use separate
-    G-code files per item or STL-based depth verification.
+    G-code files per item.
     """
     if gcode_metrics is None:
         return AssertionResult(
@@ -1155,7 +1028,6 @@ def _check_through_cut(
 def _check_tab_count(
     assertion: IntentAssertion,
     svg_metrics: dict[str, Any] | None,
-    stl_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
     """

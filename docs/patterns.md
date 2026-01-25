@@ -228,7 +228,7 @@ def union(self, other: "Domain") -> "MultiDomain":
 4. Add tests
 
 **Files to modify:**
-- `validation/invariants/gcode_invariants.py` (or svg/stl variants)
+- `validation/invariants/gcode_invariants.py` (or svg variant)
 
 **Test location:** `tests/test_*_invariants.py`
 
@@ -274,7 +274,7 @@ def _check_spindle_speed_limit(
 3. Add tests
 
 **Files to modify:**
-- `validation/metrics/gcode_metrics.py` (or svg/stl variants)
+- `validation/metrics/gcode_metrics.py` (or svg variant)
 
 **Test location:** `tests/test_*_metrics.py`
 

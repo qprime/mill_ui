@@ -1,6 +1,6 @@
 # cli/validate_cam.py - Command-line interface for CAM validation
 #
-# Validates CAM artifacts (SVG, STL, G-code) using the validation pipeline.
+# Validates CAM artifacts (SVG, G-code) using the validation pipeline.
 # See docs/cam_validation_plan.md for architecture and schema details.
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ EXIT_FAIL = 2
 def main() -> int:
     """Main entry point for CLI validation."""
     parser = argparse.ArgumentParser(
-        description="Validate CAM artifacts (SVG, STL, G-code)",
+        description="Validate CAM artifacts (SVG, G-code)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -39,7 +39,7 @@ Examples:
   python -m cli.validate_cam --recipe docs/recipes/01_simple_profile
 
   # Validate specific artifacts
-  python -m cli.validate_cam --svg output/drawing.svg --stl output/model.stl --gcode output/toolpath.nc
+  python -m cli.validate_cam --svg output/drawing.svg --gcode output/toolpath.nc
 
   # Validate with golden baseline for regression testing
   python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --golden tests/golden/01_simple_profile/metrics.json
@@ -68,11 +68,6 @@ Exit codes:
         "--svg",
         metavar="FILE",
         help="SVG file to validate",
-    )
-    input_group.add_argument(
-        "--stl",
-        metavar="FILE",
-        help="STL file to validate",
     )
     input_group.add_argument(
         "--gcode", "-g",
@@ -115,12 +110,6 @@ Exit codes:
         action="store_true",
         help="Skip regression comparison (even if golden provided)",
     )
-    options_group.add_argument(
-        "--sheet-thickness",
-        metavar="MM",
-        type=float,
-        help="Sheet thickness in mm (for STL Z-within-sheet check)",
-    )
 
     # Output options
     output_group = parser.add_argument_group("Output options")
@@ -148,8 +137,8 @@ Exit codes:
     args = parser.parse_args()
 
     # Validate inputs
-    if not args.recipe and not args.svg and not args.stl and not args.gcode:
-        parser.error("At least one input required: --recipe, --svg, --stl, or --gcode")
+    if not args.recipe and not args.svg and not args.gcode:
+        parser.error("At least one input required: --recipe, --svg, or --gcode")
 
     try:
         return run_validation(args)
@@ -228,7 +217,6 @@ def run_validation(args: argparse.Namespace) -> int:
             golden_file=golden_file,
             comparison_config=comparison_config,
             options=options,
-            sheet_thickness_mm=args.sheet_thickness,
         )
     else:
         # Explicit artifact mode
@@ -236,19 +224,15 @@ def run_validation(args: argparse.Namespace) -> int:
             source_file=args.pml,
             ast=ast,
             svg_path=args.svg,
-            stl_path=args.stl,
             gcode_paths=args.gcode or [],
             golden_metrics=golden_metrics,
             golden_file=golden_file,
             comparison_config=comparison_config,
-            sheet_thickness_mm=args.sheet_thickness,
         )
 
         # Verify files exist
         if args.svg and not Path(args.svg).exists():
             raise FileNotFoundError(f"SVG file not found: {args.svg}")
-        if args.stl and not Path(args.stl).exists():
-            raise FileNotFoundError(f"STL file not found: {args.stl}")
         for gcode_path in (args.gcode or []):
             if not Path(gcode_path).exists():
                 raise FileNotFoundError(f"G-code file not found: {gcode_path}")
@@ -307,9 +291,6 @@ def output_summary(result, args: argparse.Namespace) -> None:
         lines.append("Metrics extracted:")
         if "svg" in result.metrics:
             lines.append(f"  SVG: {result.metrics['svg'].get('layers', {}).get('count', 0)} layers")
-        if "stl" in result.metrics:
-            mesh = result.metrics['stl'].get('mesh', {})
-            lines.append(f"  STL: {mesh.get('face_count', 0)} faces, watertight={mesh.get('is_watertight', '?')}")
         if "gcode" in result.metrics:
             motion = result.metrics['gcode'].get('motion', {})
             lines.append(f"  G-code: {motion.get('g0_count', 0)} rapids, {motion.get('g1_count', 0)} feeds")

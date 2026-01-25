@@ -6,7 +6,7 @@ Example layout for IR-level validation (overlap, depth feasibility, toolability 
 - Multiple overlapping features
 - Validation at RemovalIntent level
 - Depth and toolability checking
-- CAM artifact validation (SVG, STL, G-code)
+- CAM artifact validation (SVG, G-code)
 
 ## IR-Level Validation
 
@@ -73,8 +73,6 @@ print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
 # Access extracted metrics
 if "svg" in result.metrics:
     print(f"SVG layers: {result.metrics['svg']['layers']['count']}")
-if "stl" in result.metrics:
-    print(f"STL watertight: {result.metrics['stl']['mesh']['is_watertight']}")
 if "gcode" in result.metrics:
     print(f"G-code lines: {result.metrics['gcode']['summary']['total_lines']}")
 ```
@@ -91,5 +89,4 @@ python -m cli.generate_golden --recipe docs/recipes/05_validation_workflow --upd
 ## Output Files
 
 - `output/05_validation_workflow.svg` - Blueprint drawing
-- `output/example.stl` - 3D mesh preview
 - `output/*.nc` - G-code toolpath files

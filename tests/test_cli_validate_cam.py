@@ -165,24 +165,6 @@ def test_cli_svg_only():
     print("PASS: test_cli_svg_only")
 
 
-def test_cli_stl_only():
-    """CLI validates single STL file."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    stl_path = recipe_dir / "output" / "example.stl"
-
-    if not stl_path.exists():
-        print("SKIP: test_cli_stl_only (STL not found)")
-        return
-
-    exit_code, stdout, stderr = run_cli("--stl", str(stl_path), "--quiet")
-    assert exit_code in (EXIT_PASS, EXIT_WARN)
-
-    data = json.loads(stdout)
-    result = data.get("validation_result", data)
-    assert "stl" in result["metrics"]
-    print("PASS: test_cli_stl_only")
-
-
 def test_cli_gcode_only():
     """CLI validates single G-code file."""
     recipe_dir = RECIPE_DIR / "01_simple_profile"
@@ -342,7 +324,7 @@ def test_cli_with_pml_assertions():
         "--pml", str(pml_path),
         "--quiet"
     )
-    # Note: May fail if assertions check STL/G-code metrics which aren't provided
+    # Note: May fail if assertions check G-code metrics which aren't provided
     # We just verify assertions are generated, not that they all pass
     assert exit_code in (EXIT_PASS, EXIT_WARN, EXIT_FAIL)
 
@@ -490,7 +472,6 @@ if __name__ == "__main__":
         test_cli_recipe_with_output_file,
         # Artifact validation tests
         test_cli_svg_only,
-        test_cli_stl_only,
         test_cli_gcode_only,
         test_cli_multiple_gcode,
         # Options tests

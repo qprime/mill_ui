@@ -39,7 +39,6 @@ rect door at 225mm,325mm size 400mm,600mm profile through outside
             assert result["intents"] == 1
             assert "pml" in result["outputs"]
             assert "svg" in result["outputs"]
-            assert "stl" in result["outputs"]
             assert len(result["outputs"]["gcode"]) > 0
 
             # Verify files exist
@@ -383,25 +382,6 @@ def test_svg_validation():
     return True
 
 
-def test_stl_validation():
-    print("Running test_stl_validation...")
-    from mill_mcp.server import validate_cam_artifacts
-
-    stl_path = "docs/recipes/01_simple_profile/output/example.stl"
-    if not Path(stl_path).exists():
-        print("  SKIP: STL not found")
-        return True
-
-    result_json = validate_cam_artifacts(stl_path=stl_path)
-    result = json.loads(result_json)
-
-    assert "error" not in result
-    assert "verdict" in result
-    assert "stl" in result["metrics"]
-    print("  PASS")
-    return True
-
-
 def test_no_artifacts_error():
     print("Running test_no_artifacts_error...")
     from mill_mcp.server import validate_cam_artifacts
@@ -524,7 +504,6 @@ if __name__ == "__main__":
         test_golden_not_found_error,
         test_with_golden_regression,
         test_svg_validation,
-        test_stl_validation,
         test_no_artifacts_error,
         test_file_not_found,
         test_list_baselines,

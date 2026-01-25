@@ -9,7 +9,7 @@ Status: Implementation Complete (Stage 13)
 
 ## Purpose
 
-Extract stable metrics from CAM artifacts (SVG, STL, G-code).
+Extract stable metrics from CAM artifacts (SVG, G-code).
 Validate structural invariants.
 Support intent-aware assertions from source PML/AST.
 Enable regression testing via metric comparison.
@@ -32,7 +32,7 @@ Produce machine-readable JSON output.
 ## Architecture
 
 ```
-Artifacts (SVG/STL/NC) → Metric Extractors → Metric Signature
+Artifacts (SVG/NC) → Metric Extractors → Metric Signature
                                                     ↓
                         ┌───────────────────────────┴───────────────────────────┐
                         ↓                                                       ↓
@@ -58,11 +58,9 @@ validation/
 ├── runner.py               # Pipeline orchestrator
 ├── metrics/
 │   ├── svg_metrics.py      # SVGMetrics, extract_svg_metrics
-│   ├── stl_metrics.py      # STLMetrics, extract_stl_metrics
 │   └── gcode_metrics.py    # GCodeMetrics, extract_gcode_metrics
 ├── invariants/
 │   ├── svg_invariants.py   # check_svg_invariants
-│   ├── stl_invariants.py   # check_stl_invariants
 │   └── gcode_invariants.py # check_gcode_invariants
 ├── assertions/
 │   └── intent_assertions.py # derive_assertions, check_assertions
@@ -86,22 +84,6 @@ validation/
 | SVG_NO_EMPTY_LAYERS | Expected layers have content |
 | SVG_DIMENSIONS_PRESENT | At least one dimension annotation |
 | SVG_BOUNDS_WITHIN_VIEWBOX | Content within viewBox |
-
----
-
-## STL Invariants
-
-| ID | Description |
-|----|-------------|
-| STL_VALID_FILE | Parseable STL (binary or ASCII) |
-| STL_POSITIVE_VOLUME | Volume > 0 |
-| STL_IS_MANIFOLD | Each edge shared by exactly 2 faces |
-| STL_IS_WATERTIGHT | Closed surface |
-| STL_CONSISTENT_NORMALS | Outward-pointing normals |
-| STL_NO_DEGENERATE_FACES | No zero-area triangles |
-| STL_BOUNDS_POSITIVE | All dimensions > 0 |
-| STL_Z_WITHIN_SHEET | Z in [0, sheet_thickness] |
-| STL_CONNECTED | Expected connected components |
 
 ---
 
@@ -131,7 +113,6 @@ validation/
 | ITEM_COUNT | AST.items | Record item count |
 | PROFILE_EXISTS | Item.feature=profile | Geometry exists in PROFILE_CUTS |
 | PROFILE_SIDE | Item.feature.side | Outside profile bounds > shape |
-| POCKET_DEPTH | Item.feature.depth | Z level in STL |
 | HOLE_POSITION | Item.placement | Position in HOLES layer |
 | HOLE_DIAMETER | Item.geometry | Radius in HOLES layer |
 | THROUGH_CUT | depth="through" | G-code reaches full depth |

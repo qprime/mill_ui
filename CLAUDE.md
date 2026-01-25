@@ -28,9 +28,9 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
 
-The unified `cli.mill` command generates all outputs (G-code, SVG blueprint, STL) in one invocation. With just `--project`, it processes all `.pml` files in the project directory. Use `--input` to specify a single file.
+The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation. With just `--project`, it processes all `.pml` files in the project directory. Use `--input` to specify a single file.
 
-Options: `--kerf`, `--theme`, `--quality`, `--no-svg`, `--no-stl`, `--no-clean`
+Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`
 
 ## Code Style
 
@@ -46,7 +46,7 @@ Check before implementing — these already exist:
 | Capability | Entry Point |
 |------------|-------------|
 | Parse PML | `pml/compositional_parser.py` |
-| Full CAM pipeline | `cli/mill.py` (G-code + SVG + STL) |
+| Full CAM pipeline | `cli/mill.py` (G-code + SVG) |
 | Shared pipeline logic | `cam/pipeline.py` |
 | Validate at IR level | `validation/removal_checks.py` |
 | Nest parts on sheets | `cli/nest.py` |

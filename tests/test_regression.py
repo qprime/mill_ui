@@ -68,23 +68,6 @@ def make_sample_metrics() -> dict:
                 "radii_mm": [5.0, 5.0],
             },
         },
-        "stl": {
-            "mesh": {
-                "vertex_count": 1248,
-                "face_count": 2492,
-                "is_watertight": True,
-                "is_manifold": True,
-                "is_volume": True,
-                "euler_number": 2,
-            },
-            "dimensions": {
-                "width_mm": 450.0,
-                "height_mm": 650.0,
-                "thickness_mm": 19.0,
-            },
-            "volume_mm3": 5557500.0,
-            "surface_area_mm2": 614350.0,
-        },
         "gcode": {
             "summary": {
                 "total_lines": 1250,
@@ -202,8 +185,8 @@ def test_get_tolerance_default():
 def test_get_tolerance_category():
     """Tolerance category is used for matching paths."""
     config = ComparisonConfig(default_tolerance_percent=0.5)
-    # Volume paths use volume tolerance (0.1%)
-    tol = _get_tolerance("stl.volume_mm3", config)
+    # Distance paths use position tolerance (0.01%)
+    tol = _get_tolerance("gcode.motion.total_rapid_distance_mm", config)
     assert tol == 0.1
     print("PASS: test_get_tolerance_category")
 
@@ -212,9 +195,9 @@ def test_get_tolerance_override():
     """Explicit override takes precedence."""
     config = ComparisonConfig(
         default_tolerance_percent=0.5,
-        tolerance_overrides={"stl.volume_mm3": 1.0},
+        tolerance_overrides={"gcode.motion.total_rapid_distance_mm": 1.0},
     )
-    tol = _get_tolerance("stl.volume_mm3", config)
+    tol = _get_tolerance("gcode.motion.total_rapid_distance_mm", config)
     assert tol == 1.0
     print("PASS: test_get_tolerance_override")
 
@@ -339,11 +322,11 @@ def test_compare_metrics_count_exact_match():
 
 def test_compare_metrics_boolean_exact_match():
     """Boolean fields use exact matching."""
-    golden = {"stl": {"mesh": {"is_watertight": True}}}
-    current = {"stl": {"mesh": {"is_watertight": False}}}
+    golden = {"svg": {"paths": {"has_closed": True}}}
+    current = {"svg": {"paths": {"has_closed": False}}}
     summary = compare_metrics(current, golden)
 
-    bool_results = [r for r in summary.results if "is_watertight" in r.metric_path]
+    bool_results = [r for r in summary.results if "has_closed" in r.metric_path]
     assert len(bool_results) == 1
     assert bool_results[0].status == Verdict.FAIL
     print("PASS: test_compare_metrics_boolean_exact_match")
@@ -363,14 +346,14 @@ def test_compare_metrics_structural_layers():
 
 def test_compare_metrics_numeric_tolerance():
     """Numeric values use tolerance-based comparison."""
-    golden = {"stl": {"volume_mm3": 1000000.0}}
-    current = {"stl": {"volume_mm3": 1000050.0}}  # 0.005% difference
+    golden = {"gcode": {"motion": {"total_feed_distance_mm": 1000000.0}}}
+    current = {"gcode": {"motion": {"total_feed_distance_mm": 1000050.0}}}  # 0.005% difference
     summary = compare_metrics(current, golden)
 
-    vol_results = [r for r in summary.results if "volume" in r.metric_path]
-    assert len(vol_results) == 1
+    dist_results = [r for r in summary.results if "total_feed_distance" in r.metric_path]
+    assert len(dist_results) == 1
     # 0.005% < 0.1% tolerance = PASS
-    assert vol_results[0].status == Verdict.PASS
+    assert dist_results[0].status == Verdict.PASS
     print("PASS: test_compare_metrics_numeric_tolerance")
 
 
@@ -490,7 +473,6 @@ def test_recipe_metrics_self_comparison():
     """Extracting and comparing recipe metrics against themselves."""
     recipe_01_dir = os.path.join(RECIPE_DIR, "01_simple_profile", "output")
     svg_path = os.path.join(recipe_01_dir, "01_simple_profile.svg")
-    stl_path = os.path.join(recipe_01_dir, "example.stl")
     nc_path = os.path.join(recipe_01_dir, "profile-3.17mm.nc")
 
     if not os.path.exists(svg_path):
@@ -498,17 +480,14 @@ def test_recipe_metrics_self_comparison():
         return
 
     from validation.metrics.svg_metrics import extract_svg_metrics_from_file
-    from validation.metrics.stl_metrics import extract_stl_metrics_from_file
     from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
 
-    # Each to_dict() returns {"svg": {...}}, {"stl": {...}}, {"gcode": {...}}
+    # Each to_dict() returns {"svg": {...}}, {"gcode": {...}}
     # Merge them into one dict
     metrics = {}
 
     if os.path.exists(svg_path):
         metrics.update(extract_svg_metrics_from_file(svg_path).to_dict())
-    if os.path.exists(stl_path):
-        metrics.update(extract_stl_metrics_from_file(stl_path).to_dict())
     if os.path.exists(nc_path):
         metrics.update(extract_gcode_metrics_from_file(nc_path).to_dict())
 

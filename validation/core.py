@@ -44,7 +44,7 @@ class InvariantResult:
 
     id: str
     category: str  # "structural", "topological", "safety"
-    artifact: str  # "svg", "stl", "gcode"
+    artifact: str  # "svg", "gcode"
     description: str
     status: Verdict
     checked: int = 0
@@ -106,7 +106,7 @@ class AssertionResult:
 class RegressionResult:
     """Result of comparing a metric against a golden baseline."""
 
-    metric_path: str  # e.g., "stl.volume_mm3"
+    metric_path: str  # e.g., "gcode.complexity.total_moves"
     golden_value: MetricValue
     current_value: MetricValue
     delta: float | None  # None for non-numeric comparisons

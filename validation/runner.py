@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -22,19 +21,14 @@ from validation.core import (
 )
 from validation.metrics import (
     extract_svg_metrics,
-    extract_stl_metrics,
     extract_gcode_metrics,
     SVGMetrics,
-    STLMetrics,
     GCodeMetrics,
 )
 from validation.metrics.svg_metrics import extract_svg_metrics_from_file
-from validation.metrics.stl_metrics import extract_stl_metrics_from_file
 from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
 from validation.invariants import (
     check_svg_invariants,
-    check_stl_invariants,
-    check_stl_invariants_from_content,
     check_gcode_invariants,
     check_gcode_invariants_from_content,
 )
@@ -54,12 +48,10 @@ class ValidationInput:
 
     # Artifact paths
     svg_path: str | Path | None = None
-    stl_path: str | Path | None = None
     gcode_paths: list[str | Path] = field(default_factory=list)
 
     # Artifact content (alternative to paths)
     svg_content: str | None = None
-    stl_content: bytes | None = None
     gcode_content: list[str] = field(default_factory=list)
 
     # Golden baseline for regression testing
@@ -67,7 +59,6 @@ class ValidationInput:
     golden_file: str | None = None
 
     # Configuration
-    sheet_thickness_mm: float | None = None  # For STL Z-within-sheet check
     sheet_width_mm: float | None = None  # For G-code XY bounds check
     sheet_height_mm: float | None = None  # For G-code XY bounds check
     comparison_config: ComparisonConfig | None = None
@@ -98,7 +89,7 @@ def validate(
     Run full validation pipeline on CAM artifacts.
 
     This is the main entry point for validation. It:
-    1. Extracts metrics from SVG, STL, and G-code artifacts
+    1. Extracts metrics from SVG and G-code artifacts
     2. Runs invariant checks on each artifact type
     3. Derives and checks intent assertions from AST (if provided)
     4. Compares metrics against golden baseline (if provided)
@@ -122,17 +113,14 @@ def validate(
 
     # Step 1: Extract metrics
     svg_metrics = None
-    stl_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     if options.extract_metrics:
-        svg_metrics, stl_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
+        svg_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
 
         # Store metrics in result
         if svg_metrics:
             result.metrics.update(svg_metrics.to_dict())
-        if stl_metrics:
-            result.metrics.update(stl_metrics.to_dict())
         if gcode_metrics_list:
             # Merge multiple G-code files into single metrics dict
             merged_gcode = _merge_gcode_metrics(gcode_metrics_list)
@@ -144,7 +132,6 @@ def validate(
             result,
             inputs,
             svg_metrics,
-            stl_metrics,
             gcode_metrics_list,
             options,
         )
@@ -155,7 +142,6 @@ def validate(
             result,
             inputs.ast,
             svg_metrics,
-            stl_metrics,
             gcode_metrics_list,
         )
 
@@ -182,14 +168,13 @@ def validate_recipe(
     golden_file: str | None = None,
     comparison_config: ComparisonConfig | None = None,
     options: ValidationOptions | None = None,
-    sheet_thickness_mm: float | None = None,
 ) -> CAMValidationResult:
     """
     Validate a recipe directory with standard output structure.
 
     Expects:
     - example.pml or source PML in recipe_dir
-    - output/ subdirectory with SVG, STL, and NC files
+    - output/ subdirectory with SVG and NC files
 
     Args:
         recipe_dir: Path to recipe directory
@@ -198,7 +183,6 @@ def validate_recipe(
         golden_file: Optional path to golden file (for reporting)
         comparison_config: Optional configuration for regression comparison
         options: Validation options
-        sheet_thickness_mm: Optional sheet thickness for STL Z-within-sheet check
 
     Returns:
         CAMValidationResult
@@ -215,7 +199,6 @@ def validate_recipe(
 
     # Find artifacts
     svg_path = None
-    stl_path = None
     gcode_paths: list[Path] = []
 
     if output_dir.exists():
@@ -223,12 +206,6 @@ def validate_recipe(
         for svg_file in output_dir.glob("*.svg"):
             if not svg_file.name.startswith("."):
                 svg_path = svg_file
-                break
-
-        # Find STL
-        for stl_file in output_dir.glob("*.stl"):
-            if not stl_file.name.startswith("."):
-                stl_path = stl_file
                 break
 
         # Find G-code files
@@ -241,19 +218,15 @@ def validate_recipe(
     if ast is not None:
         sheet_width_mm = ast.sheet.width_mm
         sheet_height_mm = ast.sheet.height_mm
-        if sheet_thickness_mm is None:
-            sheet_thickness_mm = ast.sheet.thickness_mm
 
     inputs = ValidationInput(
         source_file=source_file,
         ast=ast,
         svg_path=svg_path,
-        stl_path=stl_path,
         gcode_paths=gcode_paths,
         golden_metrics=golden_metrics,
         golden_file=golden_file,
         comparison_config=comparison_config,
-        sheet_thickness_mm=sheet_thickness_mm,
         sheet_width_mm=sheet_width_mm,
         sheet_height_mm=sheet_height_mm,
     )
@@ -263,10 +236,9 @@ def validate_recipe(
 
 def _extract_all_metrics(
     inputs: ValidationInput,
-) -> tuple[SVGMetrics | None, STLMetrics | None, list[GCodeMetrics]]:
+) -> tuple[SVGMetrics | None, list[GCodeMetrics]]:
     """Extract metrics from all provided artifacts."""
     svg_metrics = None
-    stl_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     # SVG
@@ -274,13 +246,6 @@ def _extract_all_metrics(
         svg_metrics = extract_svg_metrics(inputs.svg_content)
     elif inputs.svg_path and Path(inputs.svg_path).exists():
         svg_metrics = extract_svg_metrics_from_file(inputs.svg_path)
-
-    # STL
-    if inputs.stl_content:
-        from validation.metrics.stl_metrics import extract_stl_metrics_from_content
-        stl_metrics = extract_stl_metrics_from_content(inputs.stl_content)
-    elif inputs.stl_path and Path(inputs.stl_path).exists():
-        stl_metrics = extract_stl_metrics_from_file(inputs.stl_path)
 
     # G-code (may have multiple files)
     for gcode_path in inputs.gcode_paths:
@@ -291,7 +256,7 @@ def _extract_all_metrics(
         from validation.metrics.gcode_metrics import extract_gcode_metrics_from_content
         gcode_metrics_list.append(extract_gcode_metrics_from_content(gcode_content))
 
-    return svg_metrics, stl_metrics, gcode_metrics_list
+    return svg_metrics, gcode_metrics_list
 
 
 def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
@@ -424,7 +389,6 @@ def _run_invariant_checks(
     result: CAMValidationResult,
     inputs: ValidationInput,
     svg_metrics: SVGMetrics | None,
-    stl_metrics: STLMetrics | None,
     gcode_metrics_list: list[GCodeMetrics],
     options: ValidationOptions,
 ) -> None:
@@ -444,24 +408,6 @@ def _run_invariant_checks(
             )
             for inv_result in svg_results:
                 result.invariants.add(inv_result)
-
-    # STL invariants
-    if inputs.stl_content:
-        stl_results = check_stl_invariants_from_content(
-            inputs.stl_content,
-            metrics=stl_metrics,
-            sheet_thickness_mm=inputs.sheet_thickness_mm,
-        )
-        for inv_result in stl_results:
-            result.invariants.add(inv_result)
-    elif inputs.stl_path and Path(inputs.stl_path).exists():
-        stl_results = check_stl_invariants(
-            str(inputs.stl_path),
-            metrics=stl_metrics,
-            sheet_thickness_mm=inputs.sheet_thickness_mm,
-        )
-        for inv_result in stl_results:
-            result.invariants.add(inv_result)
 
     # G-code invariants (check each file)
     # Pass sheet dimensions if available for accurate XY bounds checking
@@ -488,7 +434,6 @@ def _run_assertion_checks(
     result: CAMValidationResult,
     ast: LayoutAST,
     svg_metrics: SVGMetrics | None,
-    stl_metrics: STLMetrics | None,
     gcode_metrics_list: list[GCodeMetrics],
 ) -> None:
     """Run intent assertions derived from AST."""
@@ -497,7 +442,6 @@ def _run_assertion_checks(
 
     # Prepare metrics dicts
     svg_dict = svg_metrics.to_dict() if svg_metrics else None
-    stl_dict = stl_metrics.to_dict() if stl_metrics else None
 
     # Merge G-code metrics
     gcode_dict = None
@@ -509,7 +453,6 @@ def _run_assertion_checks(
     assertion_results = check_assertions(
         assertions,
         svg_metrics=svg_dict,
-        stl_metrics=stl_dict,
         gcode_metrics=gcode_dict,
     )
 

@@ -108,10 +108,9 @@ nest maxrects
 | Command | Description |
 |---------|-------------|
 | `python -m cli.convert_layout --from pml --to json input.pml output.json` | Convert PML to JSON |
-| `python -m cli.export_cad --input layout.pml --out output/ --kerf 6.35` | Export STL |
 | `python -m cli.export_blueprint --input layout.pml --out output/ --theme dark` | Export SVG blueprint |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
-| `python -m cli.nest job.nest -o output/ --export-stl --export-svg` | Run nesting |
+| `python -m cli.nest job.nest -o output/ --export-svg` | Run nesting |
 | `python -m cli.parse_compositional_pml door.pml --resolve --format pml` | Parse compositional PML |
 
 ---
@@ -285,7 +284,6 @@ The system MUST NOT claim these validations exist at IR level:
 | Artifact | Metrics |
 |----------|---------|
 | SVG | Dimensions, layers, path counts, element breakdown. |
-| STL | Vertex/face counts, watertight, manifold, volume. |
 | G-code | Motion counts, distances, Z-profile, feeds, tools. |
 
 ---
@@ -307,7 +305,6 @@ mill_ui/
 ├── validation/         # IR and CAM validation
 ├── export/             # Blueprint SVG, debugging visualizations
 ├── cam/                # CAM planner backend
-├── cad/export/         # CAD export (STL, SVG dims)
 └── tests/              # Test suite
 ```
 

@@ -49,36 +49,6 @@ def _run_cli(args: list[str], check: bool = True) -> subprocess.CompletedProcess
     return result
 
 
-def test_export_cad_produces_stl():
-    print("Running test_export_cad_produces_stl...")
-
-    if _skip_if_missing("shapely"):
-        return None
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        result = _run_cli([
-            "-m", "cli.mill",
-            "--input", str(PML_FILE),
-            "--out", tmpdir,
-            "--kerf", "6.35",
-            "--quality", "medium",
-            "--no-svg",
-        ])
-
-        output_path = Path(tmpdir)
-        stl_files = list(output_path.glob("*.stl"))
-        assert len(stl_files) > 0, f"No STL files generated. stderr: {result.stderr}"
-
-        main_stl = output_path / "example.stl"
-        assert main_stl.exists(), f"Expected example.stl not found. Files: {list(output_path.iterdir())}"
-
-        stl_size = main_stl.stat().st_size
-        assert stl_size > 100, f"STL file too small ({stl_size} bytes), likely corrupt"
-
-    print("  ✓ PASS")
-    return True
-
-
 def test_export_blueprint_produces_svg():
     print("Running test_export_blueprint_produces_svg...")
 
@@ -91,7 +61,6 @@ def test_export_blueprint_produces_svg():
             "--input", str(PML_FILE),
             "--out", tmpdir,
             "--theme", "dark",
-            "--no-stl",
         ])
 
         output_path = Path(tmpdir)
@@ -212,7 +181,6 @@ def test_cli_invalid_format_fails():
 
 if __name__ == "__main__":
     tests = [
-        test_export_cad_produces_stl,
         test_export_blueprint_produces_svg,
         test_convert_layout_pml_to_json,
         test_convert_layout_json_to_pml,

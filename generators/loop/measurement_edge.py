@@ -130,8 +130,11 @@ def measurement_edge_generator(
 
     edges_set = set(params.edges)
 
-    label_offset = major_length + params.label_height_mm * 0.6
+    label_offset = major_length + params.label_height_mm * 0.8
     label_index = 0
+
+    has_left = "left" in edges_set
+    has_bottom = "bottom" in edges_set
 
     def add_label(
         local_pos: tuple[float, float],
@@ -156,6 +159,7 @@ def measurement_edge_generator(
 
     if "bottom" in edges_set or "top" in edges_set:
         x = x_origin
+        first_major = True
         while x <= local_x_max + 0.001:
             tick_length = major_length if is_major_tick(x, x_origin) else minor_length
 
@@ -175,16 +179,19 @@ def measurement_edge_generator(
 
             if is_major_tick(x, x_origin):
                 value = int(round(x - x_origin))
-                if value > 0:
+                skip_label = first_major and has_left and value == 0
+                if value >= 0 and not skip_label:
                     if "bottom" in edges_set:
-                        add_label((x, local_y_min + label_offset), value, "horizontal")
+                        add_label((x, local_y_min - label_offset), value, "horizontal")
                     if "top" in edges_set:
-                        add_label((x, local_y_max - label_offset), value, "horizontal")
+                        add_label((x, local_y_max + label_offset), value, "horizontal")
+                first_major = False
 
             x += minor_spacing
 
     if "left" in edges_set or "right" in edges_set:
         y = y_origin
+        first_major = True
         while y <= local_y_max + 0.001:
             tick_length = major_length if is_major_tick(y, y_origin) else minor_length
 
@@ -204,11 +211,13 @@ def measurement_edge_generator(
 
             if is_major_tick(y, y_origin):
                 value = int(round(y - y_origin))
-                if value > 0:
+                skip_label = first_major and has_bottom and value == 0
+                if value >= 0 and not skip_label:
                     if "left" in edges_set:
-                        add_label((local_x_min + label_offset, y), value, "vertical")
+                        add_label((local_x_min - label_offset, y), value, "vertical")
                     if "right" in edges_set:
-                        add_label((local_x_max - label_offset, y), value, "vertical")
+                        add_label((local_x_max + label_offset, y), value, "vertical")
+                first_major = False
 
             y += minor_spacing
 

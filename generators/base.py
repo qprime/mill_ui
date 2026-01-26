@@ -607,7 +607,7 @@ class MeasurementGridParams(BaseParams):
     major_length_mm: float = 6.0
     depth_mm: float = 0.5
     labels: bool = False
-    label_height_mm: float = 4.0
+    label_height_mm: float = 3.0
 
     def validate(self) -> None:
         valid_units = ("metric", "imperial", "custom")
@@ -701,7 +701,7 @@ class MeasurementEdgeParams(BaseParams):
     major_length_mm: float = 6.0
     depth_mm: float = 0.3
     labels: bool = False
-    label_height_mm: float = 4.0
+    label_height_mm: float = 3.0
 
     def validate(self) -> None:
         if not self.edges:

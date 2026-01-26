@@ -1,4 +1,4 @@
-# mill_ui: 7f436d3
+# mill_ui: d3abd20
 # generated: 2026-01-26
 
 sheet 300mm 200mm 18mm margin 10mm
@@ -12,4 +12,4 @@ inset 60mm
 
 frame 20mm
     rect ruler_with_labels
-        measurement_edge edges [bottom, left] unit metric labels label_height 4mm depth 0.3mm
+        measurement_edge edges [bottom, left] unit metric labels depth 0.3mm

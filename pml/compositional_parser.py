@@ -1362,7 +1362,7 @@ class CompositionalPMLParser:
         major_length_mm = 6.0
         depth_mm = 0.5
         labels = False
-        label_height_mm = 4.0
+        label_height_mm = 3.0
 
         while self.peek().type == 'keyword':
             kw = self.peek().value
@@ -1429,7 +1429,7 @@ class CompositionalPMLParser:
         major_length_mm = 6.0
         depth_mm = 0.3
         labels = False
-        label_height_mm = 4.0
+        label_height_mm = 3.0
 
         self.expect('keyword', 'edges')
         self.expect('symbol', '[')

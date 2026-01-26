@@ -128,7 +128,7 @@ def measurement_grid_generator(
     x_origin = local_x_min
     y_origin = local_y_min
 
-    label_offset = major_length + params.label_height_mm * 0.6
+    label_offset = major_length + params.label_height_mm * 0.8
     label_index = 0
 
     def add_label(
@@ -153,6 +153,7 @@ def measurement_grid_generator(
         label_index += 1
 
     x = x_origin
+    first_x_major = True
     while x <= local_x_max + 0.001:
         tick_length = major_length if is_major_tick(x, x_origin) else minor_length
 
@@ -170,13 +171,16 @@ def measurement_grid_generator(
 
         if is_major_tick(x, x_origin):
             value = int(round(x - x_origin))
-            if value > 0:
-                add_label((x, local_y_min + label_offset), value, "horizontal")
-                add_label((x, local_y_max - label_offset), value, "horizontal")
+            skip_corner = first_x_major and value == 0
+            if value >= 0 and not skip_corner:
+                add_label((x, local_y_min - label_offset), value, "horizontal")
+                add_label((x, local_y_max + label_offset), value, "horizontal")
+            first_x_major = False
 
         x += minor_spacing
 
     y = y_origin
+    first_y_major = True
     while y <= local_y_max + 0.001:
         tick_length = major_length if is_major_tick(y, y_origin) else minor_length
 
@@ -194,9 +198,11 @@ def measurement_grid_generator(
 
         if is_major_tick(y, y_origin):
             value = int(round(y - y_origin))
-            if value > 0:
-                add_label((local_x_min + label_offset, y), value, "vertical")
-                add_label((local_x_max - label_offset, y), value, "vertical")
+            skip_corner = first_y_major and value == 0
+            if value >= 0 and not skip_corner:
+                add_label((local_x_min - label_offset, y), value, "vertical")
+                add_label((local_x_max + label_offset, y), value, "vertical")
+            first_y_major = False
 
         y += minor_spacing
 

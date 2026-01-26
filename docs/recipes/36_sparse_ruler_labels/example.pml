@@ -1,4 +1,4 @@
-# mill_ui: 164ff9f
+# mill_ui: d5772ab
 # generated: 2026-01-26
 
 # Recipe 36: Sparse Ruler Labels

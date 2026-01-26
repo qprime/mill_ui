@@ -42,7 +42,8 @@ def _get_text_lines(
     hf.render_options["scaley"] = scale
     hf.render_options["spacing"] = int((spacing_factor - 1.0) * 5)
 
-    return list(hf.lines_for_text(text))
+    raw_lines = list(hf.lines_for_text(text))
+    return [((x1, -y1), (x2, -y2)) for (x1, y1), (x2, y2) in raw_lines]
 
 
 def _get_text_bounds(

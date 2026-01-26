@@ -4,9 +4,9 @@
     "hints_ms": 0.01,
     "plan_ms": 0.38,
     "gcode_ms": 0.66,
-    "svg_ms": 0.28,
-    "total_ms": 1.32,
-    "parse_ms": 0.23
+    "svg_ms": 0.29,
+    "total_ms": 1.52,
+    "parse_ms": 0.43
   },
   "complexity": {
     "total_moves": 252,

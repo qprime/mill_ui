@@ -1,5 +1,5 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 7f436d3
+# generated: 2026-01-26
 
 # Waste cuts demo: single panel with waste decomposition
 # Remaining sheet material is cut into usable rectangular pieces

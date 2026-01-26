@@ -1,5 +1,5 @@
-# mill_ui: 3364eeb
-# generated: 2026-01-25
+# mill_ui: 7f436d3
+# generated: 2026-01-26
 
 sheet 300mm 200mm 18mm margin 10mm
 

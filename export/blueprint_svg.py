@@ -23,7 +23,7 @@ class Theme:
     hole_stroke: str
     hole_fill: str
     engrave_stroke: str
-    engrave_dash: str
+    engrave_width: str
     construction_stroke: str
     construction_dash: str
     dimension_stroke: str
@@ -48,7 +48,7 @@ DARK_THEME = Theme(
     hole_stroke="#e8e8e8",
     hole_fill="none",
     engrave_stroke="#888888",
-    engrave_dash="4,4",
+    engrave_width="0.25",
     construction_stroke="#6b8e7f",
     construction_dash="2,2",
     dimension_stroke="#5ab9ea",
@@ -73,7 +73,7 @@ PRINT_THEME = Theme(
     hole_stroke="#000000",
     hole_fill="none",
     engrave_stroke="#000000",
-    engrave_dash="4,4",
+    engrave_width="0.25",
     construction_stroke="#666666",
     construction_dash="2,2",
     dimension_stroke="#333333",
@@ -203,7 +203,7 @@ def _generate_stylesheet(theme: Theme) -> str:
         .waste-cuts {{ stroke: {theme.waste_stroke}; stroke-width: {theme.profile_width}; fill: none; stroke-dasharray: {theme.waste_dash}; }}
         .pocket-regions {{ stroke: {theme.pocket_stroke}; stroke-width: {theme.pocket_width}; fill: {theme.pocket_fill}; fill-opacity: 0.2; }}
         .holes {{ stroke: {theme.hole_stroke}; stroke-width: 1.5; fill: {theme.hole_fill}; }}
-        .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.engrave_dash}; }}
+        .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: {theme.engrave_width}; fill: none; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
         .dimension-text {{ fill:

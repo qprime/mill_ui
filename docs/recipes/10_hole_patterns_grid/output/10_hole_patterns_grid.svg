@@ -5,7 +5,7 @@
         .waste-cuts { stroke: #ff9500; stroke-width: 2; fill: none; stroke-dasharray: 8,4; }
         .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
         .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
-        .engrave-paths { stroke: #888888; stroke-width: 1; fill: none; stroke-dasharray: 4,4; }
+        .engrave-paths { stroke: #888888; stroke-width: 0.25; fill: none; }
         .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
         .dimension-text { fill:

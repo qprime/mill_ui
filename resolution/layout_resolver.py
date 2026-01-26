@@ -1033,9 +1033,12 @@ class LayoutResolver:
             minor_length_mm=node.minor_length_mm,
             major_length_mm=node.major_length_mm,
             depth_mm=node.depth_mm,
+            minor_ticks=node.minor_ticks,
             labels=node.labels,
             label_height_mm=node.label_height_mm,
             label_offset_mm=node.label_offset_mm,
+            label_interval=node.label_interval,
+            label_start=node.label_start,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_grid")
@@ -1072,9 +1075,12 @@ class LayoutResolver:
             minor_length_mm=node.minor_length_mm,
             major_length_mm=node.major_length_mm,
             depth_mm=node.depth_mm,
+            minor_ticks=node.minor_ticks,
             labels=node.labels,
             label_height_mm=node.label_height_mm,
             label_offset_mm=node.label_offset_mm,
+            label_interval=node.label_interval,
+            label_start=node.label_start,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_edge")

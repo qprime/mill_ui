@@ -281,7 +281,7 @@ rect panel
 #### Measurement Grid
 
 ```
-measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>] [label_offset <mm>]
+measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [minor_ticks false] [labels] [label_height <mm>] [label_offset <mm>] [label_interval <n>] [label_start <n>]
 ```
 
 Creates ruler-style tick marks for calibration surfaces and measurement references. Tick marks are generated along all four edges of the shape, pointing inward. Minor ticks occur at regular intervals, with longer major ticks at larger intervals.
@@ -296,9 +296,12 @@ Creates ruler-style tick marks for calibration surfaces and measurement referenc
 - `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.5mm)
+- `minor_ticks false` - Hide minor tick marks, show only major ticks (optional, default: show minor ticks)
 - `labels` - Enable numeric labels at major tick intervals (optional flag)
 - `label_height <mm>` - Height of label text (optional, default: 3mm)
 - `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
+- `label_interval <n>` - Label every Nth major tick (optional, default: 1 = every major tick)
+- `label_start <n>` - First labeled value offset (optional, default: 0)
 
 Example:
 ```pml
@@ -310,12 +313,15 @@ rect labeled_ruler
 
 rect custom_grid
     measurement_grid unit custom minor_spacing 2mm major_spacing 20mm minor_length 4mm major_length 8mm depth 0.5mm
+
+rect sparse_labels
+    measurement_grid minor_ticks false labels label_interval 2 depth 0.3mm
 ```
 
 #### Measurement Edge
 
 ```
-measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>] [label_offset <mm>]
+measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [minor_ticks false] [labels] [label_height <mm>] [label_offset <mm>] [label_interval <n>] [label_start <n>]
 ```
 
 Creates ruler-style tick marks along specified edges of a shape, leaving the interior clear for other content. Useful for ruler borders around work areas.
@@ -333,9 +339,12 @@ Creates ruler-style tick marks along specified edges of a shape, leaving the int
 - `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.3mm)
+- `minor_ticks false` - Hide minor tick marks, show only major ticks (optional, default: show minor ticks)
 - `labels` - Enable numeric labels at major tick intervals (optional flag)
 - `label_height <mm>` - Height of label text (optional, default: 3mm)
 - `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
+- `label_interval <n>` - Label every Nth major tick (optional, default: 1 = every major tick)
+- `label_start <n>` - First labeled value offset (optional, default: 0)
 
 Example:
 ```pml
@@ -347,6 +356,9 @@ rect labeled_drafting_table
 
 rect custom_ruler_border
     measurement_edge edges [left] unit custom minor_spacing 5mm major_spacing 50mm depth 0.3mm
+
+rect sparse_labels_ruler
+    measurement_edge edges [bottom, left] minor_ticks false labels label_interval 2 depth 0.3mm
 
 #### Engrave Text
 

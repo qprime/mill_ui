@@ -134,6 +134,13 @@ def measurement_grid_generator(
         label_offset = major_length + params.label_height_mm * 0.8
     label_index = 0
 
+    label_spacing = int(major_spacing) * params.label_interval
+
+    def should_label(value: int) -> bool:
+        if value < params.label_start:
+            return False
+        return (value - params.label_start) % label_spacing == 0
+
     def add_label(
         local_pos: tuple[float, float],
         value: int,
@@ -161,24 +168,26 @@ def measurement_grid_generator(
     x = x_origin
     first_x_major = True
     while x <= local_x_max + 0.001:
-        tick_length = major_length if is_major_tick(x, x_origin) else minor_length
+        is_major = is_major_tick(x, x_origin)
+        if is_major or params.minor_ticks:
+            tick_length = major_length if is_major else minor_length
 
-        add_tick(
-            (x, local_y_min),
-            (x, local_y_min + tick_length),
-            "bottom",
-        )
+            add_tick(
+                (x, local_y_min),
+                (x, local_y_min + tick_length),
+                "bottom",
+            )
 
-        add_tick(
-            (x, local_y_max),
-            (x, local_y_max - tick_length),
-            "top",
-        )
+            add_tick(
+                (x, local_y_max),
+                (x, local_y_max - tick_length),
+                "top",
+            )
 
-        if is_major_tick(x, x_origin):
+        if is_major:
             value = int(round(x - x_origin))
             skip_corner = first_x_major and value == 0
-            if value >= 0 and not skip_corner:
+            if value >= 0 and not skip_corner and should_label(value):
                 add_label((x, local_y_min - label_offset), value, "horizontal")
                 add_label((x, local_y_max + label_offset), value, "horizontal")
             first_x_major = False
@@ -188,24 +197,26 @@ def measurement_grid_generator(
     y = y_origin
     first_y_major = True
     while y <= local_y_max + 0.001:
-        tick_length = major_length if is_major_tick(y, y_origin) else minor_length
+        is_major = is_major_tick(y, y_origin)
+        if is_major or params.minor_ticks:
+            tick_length = major_length if is_major else minor_length
 
-        add_tick(
-            (local_x_min, y),
-            (local_x_min + tick_length, y),
-            "left",
-        )
+            add_tick(
+                (local_x_min, y),
+                (local_x_min + tick_length, y),
+                "left",
+            )
 
-        add_tick(
-            (local_x_max, y),
-            (local_x_max - tick_length, y),
-            "right",
-        )
+            add_tick(
+                (local_x_max, y),
+                (local_x_max - tick_length, y),
+                "right",
+            )
 
-        if is_major_tick(y, y_origin):
+        if is_major:
             value = int(round(y - y_origin))
             skip_corner = first_y_major and value == 0
-            if value >= 0 and not skip_corner:
+            if value >= 0 and not skip_corner and should_label(value):
                 add_label((local_x_min - label_offset, y), value, "vertical", "center", "bottom")
                 add_label((local_x_max + label_offset, y), value, "vertical", "center", "top")
             first_y_major = False

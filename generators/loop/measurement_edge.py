@@ -139,6 +139,13 @@ def measurement_edge_generator(
     has_left = "left" in edges_set
     has_bottom = "bottom" in edges_set
 
+    label_spacing = int(major_spacing) * params.label_interval
+
+    def should_label(value: int) -> bool:
+        if value < params.label_start:
+            return False
+        return (value - params.label_start) % label_spacing == 0
+
     def add_label(
         local_pos: tuple[float, float],
         value: int,
@@ -167,26 +174,28 @@ def measurement_edge_generator(
         x = x_origin
         first_major = True
         while x <= local_x_max + 0.001:
-            tick_length = major_length if is_major_tick(x, x_origin) else minor_length
+            is_major = is_major_tick(x, x_origin)
+            if is_major or params.minor_ticks:
+                tick_length = major_length if is_major else minor_length
 
-            if "bottom" in edges_set:
-                add_tick(
-                    (x, local_y_min),
-                    (x, local_y_min + tick_length),
-                    "bottom",
-                )
+                if "bottom" in edges_set:
+                    add_tick(
+                        (x, local_y_min),
+                        (x, local_y_min + tick_length),
+                        "bottom",
+                    )
 
-            if "top" in edges_set:
-                add_tick(
-                    (x, local_y_max),
-                    (x, local_y_max - tick_length),
-                    "top",
-                )
+                if "top" in edges_set:
+                    add_tick(
+                        (x, local_y_max),
+                        (x, local_y_max - tick_length),
+                        "top",
+                    )
 
-            if is_major_tick(x, x_origin):
+            if is_major:
                 value = int(round(x - x_origin))
                 skip_label = first_major and has_left and value == 0
-                if value >= 0 and not skip_label:
+                if value >= 0 and not skip_label and should_label(value):
                     if "bottom" in edges_set:
                         add_label((x, local_y_min - label_offset), value, "horizontal")
                     if "top" in edges_set:
@@ -199,26 +208,28 @@ def measurement_edge_generator(
         y = y_origin
         first_major = True
         while y <= local_y_max + 0.001:
-            tick_length = major_length if is_major_tick(y, y_origin) else minor_length
+            is_major = is_major_tick(y, y_origin)
+            if is_major or params.minor_ticks:
+                tick_length = major_length if is_major else minor_length
 
-            if "left" in edges_set:
-                add_tick(
-                    (local_x_min, y),
-                    (local_x_min + tick_length, y),
-                    "left",
-                )
+                if "left" in edges_set:
+                    add_tick(
+                        (local_x_min, y),
+                        (local_x_min + tick_length, y),
+                        "left",
+                    )
 
-            if "right" in edges_set:
-                add_tick(
-                    (local_x_max, y),
-                    (local_x_max - tick_length, y),
-                    "right",
-                )
+                if "right" in edges_set:
+                    add_tick(
+                        (local_x_max, y),
+                        (local_x_max - tick_length, y),
+                        "right",
+                    )
 
-            if is_major_tick(y, y_origin):
+            if is_major:
                 value = int(round(y - y_origin))
                 skip_label = first_major and has_bottom and value == 0
-                if value >= 0 and not skip_label:
+                if value >= 0 and not skip_label and should_label(value):
                     if "left" in edges_set:
                         add_label((local_x_min - label_offset, y), value, "vertical", "center", "bottom")
                     if "right" in edges_set:

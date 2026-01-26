@@ -596,9 +596,12 @@ class MeasurementGridParams(BaseParams):
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth for tick marks
+        minor_ticks: Whether to show minor tick marks (default True)
         labels: Whether to engrave numeric labels at major tick intervals
         label_height_mm: Height of label text in mm
         label_offset_mm: Distance from tick mark end to label center (None = auto)
+        label_interval: Label every Nth major tick (default 1 = every major tick)
+        label_start: First labeled value offset (default 0)
     """
 
     unit: Literal["metric", "imperial", "custom"] = "metric"
@@ -607,9 +610,12 @@ class MeasurementGridParams(BaseParams):
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.5
+    minor_ticks: bool = True
     labels: bool = False
     label_height_mm: float = 3.0
     label_offset_mm: float | None = None
+    label_interval: int = 1
+    label_start: int = 0
 
     def validate(self) -> None:
         valid_units = ("metric", "imperial", "custom")
@@ -627,6 +633,15 @@ class MeasurementGridParams(BaseParams):
                 raise ValueError(
                     "MeasurementGridParams: major_spacing_mm required for custom unit"
                 )
+
+        if self.label_interval < 1:
+            raise ValueError(
+                f"MeasurementGridParams: label_interval must be >= 1, got {self.label_interval}"
+            )
+        if self.label_start < 0:
+            raise ValueError(
+                f"MeasurementGridParams: label_start must be >= 0, got {self.label_start}"
+            )
 
         minor_spacing = self.get_minor_spacing()
         major_spacing = self.get_major_spacing()
@@ -691,9 +706,12 @@ class MeasurementEdgeParams(BaseParams):
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth for tick marks
+        minor_ticks: Whether to show minor tick marks (default True)
         labels: Whether to engrave numeric labels at major tick intervals
         label_height_mm: Height of label text in mm
         label_offset_mm: Distance from tick mark end to label center (None = auto)
+        label_interval: Label every Nth major tick (default 1 = every major tick)
+        label_start: First labeled value offset (default 0)
     """
 
     edges: tuple[EdgeSelection, ...]
@@ -703,9 +721,12 @@ class MeasurementEdgeParams(BaseParams):
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.3
+    minor_ticks: bool = True
     labels: bool = False
     label_height_mm: float = 3.0
     label_offset_mm: float | None = None
+    label_interval: int = 1
+    label_start: int = 0
 
     def validate(self) -> None:
         if not self.edges:
@@ -735,6 +756,15 @@ class MeasurementEdgeParams(BaseParams):
                 raise ValueError(
                     "MeasurementEdgeParams: major_spacing_mm required for custom unit"
                 )
+
+        if self.label_interval < 1:
+            raise ValueError(
+                f"MeasurementEdgeParams: label_interval must be >= 1, got {self.label_interval}"
+            )
+        if self.label_start < 0:
+            raise ValueError(
+                f"MeasurementEdgeParams: label_start must be >= 0, got {self.label_start}"
+            )
 
         minor_spacing = self.get_minor_spacing()
         major_spacing = self.get_major_spacing()

@@ -65,7 +65,7 @@ Check before implementing — these already exist:
 - Add comments to code
 - Add generators without corresponding PML syntax
 - Create projects that require Python build scripts instead of PML/nest files
-
+- put Recipes in the system configured "projects" folder.  See docs/task.md for running/implementing recipes.
 ## PML-First Principle
 
 All machining features must be expressible in PML. Python-level generators are implementation details—incomplete without corresponding PML syntax.

@@ -1139,6 +1139,7 @@ class LayoutResolver:
         cell_height = available_height / n
 
         # Create sub-regions from bottom to top
+        num_children = len(node.children)
         for i in range(n):
             y_min = region.y_min + i * (cell_height + gap_mm)
             y_max = y_min + cell_height
@@ -1149,9 +1150,11 @@ class LayoutResolver:
                 y_max=y_max,
             )
 
-            # Apply children to this cell
-            for child in node.children:
-                self._resolve_node(child, cell_region, items, params)
+            if num_children == n:
+                self._resolve_node(node.children[i], cell_region, items, params)
+            else:
+                for child in node.children:
+                    self._resolve_node(child, cell_region, items, params)
 
     def _handle_split_vertical(
         self,
@@ -1181,6 +1184,7 @@ class LayoutResolver:
         cell_width = available_width / n
 
         # Create sub-regions from left to right
+        num_children = len(node.children)
         for i in range(n):
             x_min = region.x_min + i * (cell_width + gap_mm)
             x_max = x_min + cell_width
@@ -1191,9 +1195,11 @@ class LayoutResolver:
                 y_max=region.y_max,
             )
 
-            # Apply children to this cell
-            for child in node.children:
-                self._resolve_node(child, cell_region, items, params)
+            if num_children == n:
+                self._resolve_node(node.children[i], cell_region, items, params)
+            else:
+                for child in node.children:
+                    self._resolve_node(child, cell_region, items, params)
 
     def _handle_split_grid(
         self,

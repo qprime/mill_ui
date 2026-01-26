@@ -1,4 +1,4 @@
-# mill_ui: dd3765d
+# mill_ui: 43dd4dd
 # generated: 2026-01-26
 
 # Recipe 35: Engrave Text
@@ -11,8 +11,8 @@ frame 25mm
         measurement_edge edges [bottom, left] unit metric labels depth 0.3mm
 
 inset 30mm
-    split_vertical 2 gap 10mm
-        rect top_section
-            engrave_text text "FRONT" height 12mm depth 0.5mm alignment center
+    split_horizontal 2 gap 10mm
         rect bottom_section
             engrave_text text "MILL_UI" height 8mm depth 0.3mm alignment center
+        rect top_section
+            engrave_text text "FRONT" height 12mm depth 0.5mm alignment center

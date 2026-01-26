@@ -1,17 +1,17 @@
 {
   "timing": {
-    "ir_ms": 6.86,
+    "ir_ms": 6.61,
     "hints_ms": 1.1,
-    "plan_ms": 17.55,
-    "gcode_ms": 21.94,
-    "svg_ms": 5.62,
-    "total_ms": 525.09,
-    "parse_ms": 477.64
+    "plan_ms": 16.19,
+    "gcode_ms": 21.01,
+    "svg_ms": 5.33,
+    "total_ms": 490.91,
+    "parse_ms": 446.0
   },
   "complexity": {
-    "total_moves": 13016,
+    "total_moves": 12544,
     "rapid_moves": 0,
-    "cut_moves": 13016,
+    "cut_moves": 12544,
     "rapid_ratio": 0.0
   },
   "fidelity": {
@@ -20,17 +20,17 @@
       {
         "name": "engrave",
         "tool_diameter_mm": 3.175,
-        "move_count": 13016
+        "move_count": 12544
       }
     ]
   },
   "output_size": {
-    "total_bytes": 171892,
-    "total_lines": 9776,
+    "total_bytes": 165713,
+    "total_lines": 9422,
     "files": {
       "engrave-3.17mm": {
-        "bytes": 171892,
-        "lines": 9776
+        "bytes": 165713,
+        "lines": 9422
       }
     }
   }

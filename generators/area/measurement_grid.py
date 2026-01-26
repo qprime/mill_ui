@@ -136,6 +136,7 @@ def measurement_grid_generator(
         value: int,
         orientation: str,
         alignment: str = "center",
+        vertical_alignment: str = "center",
     ) -> None:
         nonlocal label_index
         if not params.labels:
@@ -147,6 +148,7 @@ def measurement_grid_generator(
             height_mm=params.label_height_mm,
             depth_mm=params.depth_mm,
             alignment=alignment,
+            vertical_alignment=vertical_alignment,
             orientation=orientation,
             shape_id_prefix=f"{shape_id_prefix}_label_{label_index}",
         )
@@ -201,8 +203,8 @@ def measurement_grid_generator(
             value = int(round(y - y_origin))
             skip_corner = first_y_major and value == 0
             if value >= 0 and not skip_corner:
-                add_label((local_x_min - label_offset, y), value, "vertical", "right")
-                add_label((local_x_max + label_offset, y), value, "vertical", "left")
+                add_label((local_x_min - label_offset, y), value, "vertical", "center", "bottom")
+                add_label((local_x_max + label_offset, y), value, "vertical", "center", "top")
             first_y_major = False
 
         y += minor_spacing

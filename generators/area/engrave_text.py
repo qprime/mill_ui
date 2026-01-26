@@ -94,6 +94,7 @@ def engrave_text_at_position(
     depth_mm: float,
     font: str = "rowmans",
     alignment: str = "left",
+    vertical_alignment: str = "center",
     orientation: str = "horizontal",
     spacing_factor: float = 1.0,
     shape_id_prefix: str = "text",
@@ -116,7 +117,12 @@ def engrave_text_at_position(
     else:
         align_offset_x = -x_max
 
-    align_offset_y = -y_min - text_height / 2
+    if vertical_alignment == "top":
+        align_offset_y = -y_max
+    elif vertical_alignment == "center":
+        align_offset_y = -y_min - text_height / 2
+    else:
+        align_offset_y = -y_min
 
     aligned = _transform_lines(
         lines,
@@ -203,6 +209,7 @@ def engrave_number_label(
     height_mm: float,
     depth_mm: float,
     alignment: str = "center",
+    vertical_alignment: str = "center",
     orientation: str = "horizontal",
     shape_id_prefix: str = "label",
 ) -> GeneratorResult:
@@ -213,6 +220,7 @@ def engrave_number_label(
         depth_mm=depth_mm,
         font="rowmans",
         alignment=alignment,
+        vertical_alignment=vertical_alignment,
         orientation=orientation,
         spacing_factor=1.0,
         shape_id_prefix=shape_id_prefix,

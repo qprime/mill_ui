@@ -167,7 +167,7 @@ class CompositionalPMLLexer:
             # Stage 18 keywords (hole_grid generator)
             'hole_grid', 'pattern', 'rectangular', 'hexagonal', 'offset', 'align', 'center', 'corner',
             # Stage 20 keywords (measurement_grid generator)
-            'measurement_grid', 'unit', 'metric', 'imperial', 'custom', 'minor_spacing', 'major_spacing', 'minor_length', 'major_length',
+            'measurement_grid', 'unit', 'metric', 'imperial', 'custom', 'minor_spacing', 'major_spacing', 'minor_length', 'major_length', 'label_offset',
             # Stage 21 keywords (measurement_edge generator)
             'measurement_edge', 'edges', 'top', 'bottom', 'left', 'right',
             # Stage 22 keywords (engrave_text generator, labels)
@@ -1346,7 +1346,7 @@ class CompositionalPMLParser:
         )
 
     def parse_measurement_grid_gen(self) -> MeasurementGridGen:
-        """Parse: measurement_grid [unit metric|imperial|custom] [options...] [labels] [label_height <mm>]
+        """Parse: measurement_grid [unit metric|imperial|custom] [options...] [labels] [label_height <mm>] [label_offset <mm>]
 
         Example:
             measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
@@ -1363,6 +1363,7 @@ class CompositionalPMLParser:
         depth_mm = 0.5
         labels = False
         label_height_mm = 3.0
+        label_offset_mm: float | None = None
 
         while self.peek().type == 'keyword':
             kw = self.peek().value
@@ -1397,6 +1398,9 @@ class CompositionalPMLParser:
             elif kw == 'label_height':
                 self.advance()
                 label_height_mm = self.expect('number_with_unit').value
+            elif kw == 'label_offset':
+                self.advance()
+                label_offset_mm = self.expect('number_with_unit').value
             else:
                 break
 
@@ -1410,10 +1414,11 @@ class CompositionalPMLParser:
             depth_mm=depth_mm,
             labels=labels,
             label_height_mm=label_height_mm,
+            label_offset_mm=label_offset_mm,
         )
 
     def parse_measurement_edge_gen(self) -> MeasurementEdgeGen:
-        """Parse: measurement_edge edges [top, left, ...] [unit metric|imperial|custom] [options...] [labels] [label_height <mm>]
+        """Parse: measurement_edge edges [top, left, ...] [unit metric|imperial|custom] [options...] [labels] [label_height <mm>] [label_offset <mm>]
 
         Example:
             measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
@@ -1430,6 +1435,7 @@ class CompositionalPMLParser:
         depth_mm = 0.3
         labels = False
         label_height_mm = 3.0
+        label_offset_mm: float | None = None
 
         self.expect('keyword', 'edges')
         self.expect('symbol', '[')
@@ -1484,6 +1490,9 @@ class CompositionalPMLParser:
             elif kw == 'label_height':
                 self.advance()
                 label_height_mm = self.expect('number_with_unit').value
+            elif kw == 'label_offset':
+                self.advance()
+                label_offset_mm = self.expect('number_with_unit').value
             else:
                 break
 
@@ -1498,6 +1507,7 @@ class CompositionalPMLParser:
             depth_mm=depth_mm,
             labels=labels,
             label_height_mm=label_height_mm,
+            label_offset_mm=label_offset_mm,
         )
 
     def parse_engrave_text_gen(self) -> EngraveTextGen:

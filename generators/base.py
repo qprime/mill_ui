@@ -598,6 +598,7 @@ class MeasurementGridParams(BaseParams):
         depth_mm: Engraving depth for tick marks
         labels: Whether to engrave numeric labels at major tick intervals
         label_height_mm: Height of label text in mm
+        label_offset_mm: Distance from tick mark end to label center (None = auto)
     """
 
     unit: Literal["metric", "imperial", "custom"] = "metric"
@@ -608,6 +609,7 @@ class MeasurementGridParams(BaseParams):
     depth_mm: float = 0.5
     labels: bool = False
     label_height_mm: float = 3.0
+    label_offset_mm: float | None = None
 
     def validate(self) -> None:
         valid_units = ("metric", "imperial", "custom")
@@ -691,6 +693,7 @@ class MeasurementEdgeParams(BaseParams):
         depth_mm: Engraving depth for tick marks
         labels: Whether to engrave numeric labels at major tick intervals
         label_height_mm: Height of label text in mm
+        label_offset_mm: Distance from tick mark end to label center (None = auto)
     """
 
     edges: tuple[EdgeSelection, ...]
@@ -702,6 +705,7 @@ class MeasurementEdgeParams(BaseParams):
     depth_mm: float = 0.3
     labels: bool = False
     label_height_mm: float = 3.0
+    label_offset_mm: float | None = None
 
     def validate(self) -> None:
         if not self.edges:

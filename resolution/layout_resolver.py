@@ -1035,6 +1035,7 @@ class LayoutResolver:
             depth_mm=node.depth_mm,
             labels=node.labels,
             label_height_mm=node.label_height_mm,
+            label_offset_mm=node.label_offset_mm,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_grid")
@@ -1073,6 +1074,7 @@ class LayoutResolver:
             depth_mm=node.depth_mm,
             labels=node.labels,
             label_height_mm=node.label_height_mm,
+            label_offset_mm=node.label_offset_mm,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_edge")

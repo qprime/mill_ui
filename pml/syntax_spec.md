@@ -281,7 +281,7 @@ rect panel
 #### Measurement Grid
 
 ```
-measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>]
+measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>] [label_offset <mm>]
 ```
 
 Creates ruler-style tick marks for calibration surfaces and measurement references. Tick marks are generated along all four edges of the shape, pointing inward. Minor ticks occur at regular intervals, with longer major ticks at larger intervals.
@@ -297,7 +297,8 @@ Creates ruler-style tick marks for calibration surfaces and measurement referenc
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.5mm)
 - `labels` - Enable numeric labels at major tick intervals (optional flag)
-- `label_height <mm>` - Height of label text (optional, default: 4mm)
+- `label_height <mm>` - Height of label text (optional, default: 3mm)
+- `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
 
 Example:
 ```pml
@@ -314,7 +315,7 @@ rect custom_grid
 #### Measurement Edge
 
 ```
-measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>]
+measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>] [label_offset <mm>]
 ```
 
 Creates ruler-style tick marks along specified edges of a shape, leaving the interior clear for other content. Useful for ruler borders around work areas.
@@ -333,7 +334,8 @@ Creates ruler-style tick marks along specified edges of a shape, leaving the int
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.3mm)
 - `labels` - Enable numeric labels at major tick intervals (optional flag)
-- `label_height <mm>` - Height of label text (optional, default: 4mm)
+- `label_height <mm>` - Height of label text (optional, default: 3mm)
+- `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
 
 Example:
 ```pml

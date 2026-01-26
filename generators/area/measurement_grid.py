@@ -128,7 +128,10 @@ def measurement_grid_generator(
     x_origin = local_x_min
     y_origin = local_y_min
 
-    label_offset = major_length + params.label_height_mm * 0.8
+    if params.label_offset_mm is not None:
+        label_offset = params.label_offset_mm
+    else:
+        label_offset = major_length + params.label_height_mm * 0.8
     label_index = 0
 
     def add_label(

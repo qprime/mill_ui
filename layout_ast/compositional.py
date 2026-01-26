@@ -415,6 +415,7 @@ class MeasurementGridGen:
         depth_mm: Engraving depth
         labels: Whether to engrave numeric labels at major ticks
         label_height_mm: Height of label text
+        label_offset_mm: Distance from tick mark end to label center (None = auto)
     """
     unit: str = "metric"
     minor_spacing_mm: float | None = None
@@ -424,6 +425,7 @@ class MeasurementGridGen:
     depth_mm: float = 0.5
     labels: bool = False
     label_height_mm: float = 3.0
+    label_offset_mm: float | None = None
 
 
 @dataclass(frozen=True)
@@ -442,6 +444,7 @@ class MeasurementEdgeGen:
         depth_mm: Engraving depth
         labels: Whether to engrave numeric labels at major ticks
         label_height_mm: Height of label text
+        label_offset_mm: Distance from tick mark end to label center (None = auto)
     """
     edges: tuple[str, ...]
     unit: str = "metric"
@@ -452,6 +455,7 @@ class MeasurementEdgeGen:
     depth_mm: float = 0.3
     labels: bool = False
     label_height_mm: float = 3.0
+    label_offset_mm: float | None = None
 
 
 @dataclass(frozen=True)

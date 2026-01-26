@@ -9,6 +9,7 @@ from generators.base import (
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.area.engrave_text import engrave_number_label
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -127,6 +128,30 @@ def measurement_grid_generator(
     x_origin = local_x_min
     y_origin = local_y_min
 
+    label_offset = major_length + params.label_height_mm * 0.6
+    label_index = 0
+
+    def add_label(
+        local_pos: tuple[float, float],
+        value: int,
+        orientation: str,
+    ) -> None:
+        nonlocal label_index
+        if not params.labels:
+            return
+        sheet_pos = local_to_sheet_batch([local_pos], domain)[0]
+        label_items = engrave_number_label(
+            value=value,
+            position=sheet_pos,
+            height_mm=params.label_height_mm,
+            depth_mm=params.depth_mm,
+            alignment="center",
+            orientation=orientation,
+            shape_id_prefix=f"{shape_id_prefix}_label_{label_index}",
+        )
+        items.extend(label_items)
+        label_index += 1
+
     x = x_origin
     while x <= local_x_max + 0.001:
         tick_length = major_length if is_major_tick(x, x_origin) else minor_length
@@ -142,6 +167,12 @@ def measurement_grid_generator(
             (x, local_y_max - tick_length),
             "top",
         )
+
+        if is_major_tick(x, x_origin):
+            value = int(round(x - x_origin))
+            if value > 0:
+                add_label((x, local_y_min + label_offset), value, "horizontal")
+                add_label((x, local_y_max - label_offset), value, "horizontal")
 
         x += minor_spacing
 
@@ -160,6 +191,12 @@ def measurement_grid_generator(
             (local_x_max - tick_length, y),
             "right",
         )
+
+        if is_major_tick(y, y_origin):
+            value = int(round(y - y_origin))
+            if value > 0:
+                add_label((local_x_min + label_offset, y), value, "vertical")
+                add_label((local_x_max - label_offset, y), value, "vertical")
 
         y += minor_spacing
 

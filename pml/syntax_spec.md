@@ -281,7 +281,7 @@ rect panel
 #### Measurement Grid
 
 ```
-measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>]
 ```
 
 Creates ruler-style tick marks for calibration surfaces and measurement references. Tick marks are generated along all four edges of the shape, pointing inward. Minor ticks occur at regular intervals, with longer major ticks at larger intervals.
@@ -296,14 +296,16 @@ Creates ruler-style tick marks for calibration surfaces and measurement referenc
 - `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.5mm)
+- `labels` - Enable numeric labels at major tick intervals (optional flag)
+- `label_height <mm>` - Height of label text (optional, default: 4mm)
 
 Example:
 ```pml
 rect calibration_surface
     measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
 
-rect imperial_ruler
-    measurement_grid unit imperial depth 0.3mm
+rect labeled_ruler
+    measurement_grid unit metric labels label_height 4mm depth 0.5mm
 
 rect custom_grid
     measurement_grid unit custom minor_spacing 2mm major_spacing 20mm minor_length 4mm major_length 8mm depth 0.5mm
@@ -312,7 +314,7 @@ rect custom_grid
 #### Measurement Edge
 
 ```
-measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [labels] [label_height <mm>]
 ```
 
 Creates ruler-style tick marks along specified edges of a shape, leaving the interior clear for other content. Useful for ruler borders around work areas.
@@ -330,17 +332,47 @@ Creates ruler-style tick marks along specified edges of a shape, leaving the int
 - `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
 - `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
 - `depth <mm>` - Engraving depth (optional, default: 0.3mm)
+- `labels` - Enable numeric labels at major tick intervals (optional flag)
+- `label_height <mm>` - Height of label text (optional, default: 4mm)
 
 Example:
 ```pml
 rect workbench_top
     measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
 
-rect drafting_table
-    measurement_edge edges [top, bottom, left, right] unit imperial depth 0.25mm
+rect labeled_drafting_table
+    measurement_edge edges [top, bottom, left, right] unit metric labels label_height 4mm depth 0.3mm
 
 rect custom_ruler_border
     measurement_edge edges [left] unit custom minor_spacing 5mm major_spacing 50mm depth 0.3mm
+
+#### Engrave Text
+
+```
+engrave_text text "<string>" [height <mm>] [depth <mm>] [font <name>] [alignment left|center|right] [orientation horizontal|vertical]
+```
+
+Creates single-stroke engraved text using Hershey fonts. Suitable for CNC engraving labels, part numbers, and other text markings.
+
+**Parameters:**
+- `text "<string>"` - The text to engrave (required)
+- `height <mm>` - Height of text in mm (optional, default: 4mm)
+- `depth <mm>` - Engraving depth (optional, default: 0.3mm)
+- `font <name>` - Hershey font name (optional, default: rowmans)
+  - Available: rowmans, rowmand, futural, futuram, scripts, scriptc, cursive, etc.
+- `alignment left|center|right` - Text alignment relative to position (optional, default: left)
+- `orientation horizontal|vertical` - Text orientation (optional, default: horizontal)
+
+Example:
+```pml
+rect labeled_part
+    engrave_text text "FRONT" height 10mm depth 0.5mm alignment center
+
+rect serial_number
+    engrave_text text "SN-12345" height 4mm depth 0.3mm
+
+rect vertical_label
+    engrave_text text "TOP" height 8mm orientation vertical alignment center
 ```
 
 #### Split Grid

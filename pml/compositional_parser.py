@@ -52,6 +52,8 @@ from layout_ast.compositional import (
     MeasurementGridGen,
     # Stage 21 additions (measurement_edge generator)
     MeasurementEdgeGen,
+    # Stage 22 additions (engrave_text generator)
+    EngraveTextGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -168,6 +170,8 @@ class CompositionalPMLLexer:
             'measurement_grid', 'unit', 'metric', 'imperial', 'custom', 'minor_spacing', 'major_spacing', 'minor_length', 'major_length',
             # Stage 21 keywords (measurement_edge generator)
             'measurement_edge', 'edges', 'top', 'bottom', 'left', 'right',
+            # Stage 22 keywords (engrave_text generator, labels)
+            'engrave_text', 'text', 'font', 'alignment', 'orientation', 'horizontal', 'vertical', 'labels', 'label_height',
             # Stage 19 keywords (PML templates)
             'template', 'params',
             # Waste cuts directive
@@ -268,6 +272,35 @@ class CompositionalPMLLexer:
                 if self.peek() == '}':
                     self.advance()
                 tokens.append(Token('param_ref', param_name, start_line, start_col))
+                continue
+
+            if char == '"':
+                start_line = self.line
+                start_col = self.column
+                self.advance()
+                string_value = ""
+                while self.pos < len(self.text) and self.peek() != '"':
+                    c = self.peek()
+                    if c == '\\' and self.pos + 1 < len(self.text):
+                        self.advance()
+                        next_c = self.advance()
+                        if next_c == 'n':
+                            string_value += '\n'
+                        elif next_c == 't':
+                            string_value += '\t'
+                        elif next_c == '\\':
+                            string_value += '\\'
+                        elif next_c == '"':
+                            string_value += '"'
+                        else:
+                            string_value += '\\' + next_c
+                    else:
+                        string_value += self.advance()
+                if self.peek() == '"':
+                    self.advance()
+                else:
+                    raise ParseError("Unterminated string literal", start_line, start_col)
+                tokens.append(Token('string', string_value, start_line, start_col))
                 continue
 
             raise ParseError(f"Unexpected character: {char}", self.line, self.column)
@@ -511,6 +544,9 @@ class CompositionalPMLParser:
         # Stage 21 keywords (measurement_edge generator)
         elif token.value == 'measurement_edge':
             return self.parse_measurement_edge_gen()
+        # Stage 22 keywords (engrave_text generator)
+        elif token.value == 'engrave_text':
+            return self.parse_engrave_text_gen()
         # Waste cuts directive
         elif token.value == 'waste_cuts':
             return self.parse_waste_cuts()
@@ -1310,12 +1346,12 @@ class CompositionalPMLParser:
         )
 
     def parse_measurement_grid_gen(self) -> MeasurementGridGen:
-        """Parse: measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>]
+        """Parse: measurement_grid [unit metric|imperial|custom] [options...] [labels] [label_height <mm>]
 
         Example:
             measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
-            measurement_grid unit imperial
-            measurement_grid unit custom minor_spacing 2mm major_spacing 20mm depth 0.3mm
+            measurement_grid unit imperial labels label_height 4mm
+            measurement_grid unit custom minor_spacing 2mm major_spacing 20mm depth 0.3mm labels
         """
         self.expect('keyword', 'measurement_grid')
 
@@ -1325,6 +1361,8 @@ class CompositionalPMLParser:
         minor_length_mm = 3.0
         major_length_mm = 6.0
         depth_mm = 0.5
+        labels = False
+        label_height_mm = 4.0
 
         while self.peek().type == 'keyword':
             kw = self.peek().value
@@ -1353,6 +1391,12 @@ class CompositionalPMLParser:
             elif kw == 'depth':
                 self.advance()
                 depth_mm = self.expect('number_with_unit').value
+            elif kw == 'labels':
+                self.advance()
+                labels = True
+            elif kw == 'label_height':
+                self.advance()
+                label_height_mm = self.expect('number_with_unit').value
             else:
                 break
 
@@ -1364,14 +1408,16 @@ class CompositionalPMLParser:
             minor_length_mm=minor_length_mm,
             major_length_mm=major_length_mm,
             depth_mm=depth_mm,
+            labels=labels,
+            label_height_mm=label_height_mm,
         )
 
     def parse_measurement_edge_gen(self) -> MeasurementEdgeGen:
-        """Parse: measurement_edge edges [top, left, ...] [unit metric|imperial|custom] [options...]
+        """Parse: measurement_edge edges [top, left, ...] [unit metric|imperial|custom] [options...] [labels] [label_height <mm>]
 
         Example:
             measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
-            measurement_edge edges [top, bottom, left, right] unit imperial
+            measurement_edge edges [top, bottom, left, right] unit imperial labels label_height 4mm
         """
         self.expect('keyword', 'measurement_edge')
 
@@ -1382,6 +1428,8 @@ class CompositionalPMLParser:
         minor_length_mm = 3.0
         major_length_mm = 6.0
         depth_mm = 0.3
+        labels = False
+        label_height_mm = 4.0
 
         self.expect('keyword', 'edges')
         self.expect('symbol', '[')
@@ -1430,6 +1478,12 @@ class CompositionalPMLParser:
             elif kw == 'depth':
                 self.advance()
                 depth_mm = self.expect('number_with_unit').value
+            elif kw == 'labels':
+                self.advance()
+                labels = True
+            elif kw == 'label_height':
+                self.advance()
+                label_height_mm = self.expect('number_with_unit').value
             else:
                 break
 
@@ -1442,6 +1496,80 @@ class CompositionalPMLParser:
             minor_length_mm=minor_length_mm,
             major_length_mm=major_length_mm,
             depth_mm=depth_mm,
+            labels=labels,
+            label_height_mm=label_height_mm,
+        )
+
+    def parse_engrave_text_gen(self) -> EngraveTextGen:
+        """Parse: engrave_text text "<string>" [height <mm>] [depth <mm>] [font <name>] [alignment left|center|right] [orientation horizontal|vertical]
+
+        Example:
+            engrave_text text "FRONT" height 10mm depth 0.5mm
+            engrave_text text "100" height 4mm alignment center
+            engrave_text text "TOP" orientation vertical
+        """
+        self.expect('keyword', 'engrave_text')
+
+        text = ""
+        height_mm = 4.0
+        depth_mm = 0.3
+        font = "rowmans"
+        alignment = "left"
+        orientation = "horizontal"
+
+        self.expect('keyword', 'text')
+        text_token = self.expect('string')
+        text = text_token.value
+
+        while self.peek().type == 'keyword':
+            kw = self.peek().value
+            if kw == 'height':
+                self.advance()
+                height_mm = self.expect('number_with_unit').value
+            elif kw == 'depth':
+                self.advance()
+                depth_mm = self.expect('number_with_unit').value
+            elif kw == 'font':
+                self.advance()
+                font_token = self.peek()
+                if font_token.type == 'identifier' or font_token.type == 'string':
+                    font = self.advance().value
+                else:
+                    raise ParseError(
+                        f"Expected font name, got {font_token.value}",
+                        font_token.line, font_token.column
+                    )
+            elif kw == 'alignment':
+                self.advance()
+                align_token = self.peek()
+                if align_token.type == 'keyword' and align_token.value in ('left', 'center', 'right'):
+                    alignment = self.advance().value
+                else:
+                    raise ParseError(
+                        f"Expected alignment (left/center/right), got {align_token.value}",
+                        align_token.line, align_token.column
+                    )
+            elif kw == 'orientation':
+                self.advance()
+                orient_token = self.peek()
+                if orient_token.type == 'keyword' and orient_token.value in ('horizontal', 'vertical'):
+                    orientation = self.advance().value
+                else:
+                    raise ParseError(
+                        f"Expected orientation (horizontal/vertical), got {orient_token.value}",
+                        orient_token.line, orient_token.column
+                    )
+            else:
+                break
+
+        self.expect_line_end()
+        return EngraveTextGen(
+            text=text,
+            height_mm=height_mm,
+            depth_mm=depth_mm,
+            font=font,
+            alignment=alignment,
+            orientation=orientation,
         )
 
     def parse_split_horizontal(self) -> SplitHorizontal:

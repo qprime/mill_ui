@@ -413,6 +413,8 @@ class MeasurementGridGen:
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth
+        labels: Whether to engrave numeric labels at major ticks
+        label_height_mm: Height of label text
     """
     unit: str = "metric"
     minor_spacing_mm: float | None = None
@@ -420,6 +422,8 @@ class MeasurementGridGen:
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.5
+    labels: bool = False
+    label_height_mm: float = 4.0
 
 
 @dataclass(frozen=True)
@@ -436,6 +440,8 @@ class MeasurementEdgeGen:
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth
+        labels: Whether to engrave numeric labels at major ticks
+        label_height_mm: Height of label text
     """
     edges: tuple[str, ...]
     unit: str = "metric"
@@ -444,6 +450,30 @@ class MeasurementEdgeGen:
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.3
+    labels: bool = False
+    label_height_mm: float = 4.0
+
+
+@dataclass(frozen=True)
+class EngraveTextGen:
+    """Engrave text generator node.
+
+    Creates single-stroke engraved text using Hershey fonts.
+
+    Attributes:
+        text: The text string to engrave
+        height_mm: Height of text (cap height)
+        depth_mm: Engraving depth
+        font: Hershey font name (default "rowmans")
+        alignment: Text alignment (left, center, right)
+        orientation: Text orientation (horizontal, vertical)
+    """
+    text: str
+    height_mm: float = 4.0
+    depth_mm: float = 0.3
+    font: str = "rowmans"
+    alignment: str = "left"
+    orientation: str = "horizontal"
 
 
 @dataclass(frozen=True)

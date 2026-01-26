@@ -51,6 +51,8 @@ from layout_ast.compositional import (
     MeasurementGridGen,
     # Stage 21 additions (measurement_edge generator)
     MeasurementEdgeGen,
+    # Stage 22 additions (engrave_text generator)
+    EngraveTextGen,
     # Waste cuts directive
     WasteCuts,
 )
@@ -75,6 +77,7 @@ from generators.area.x_panel import x_panel_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.measurement_grid import measurement_grid_generator
 from generators.loop.measurement_edge import measurement_edge_generator
+from generators.area.engrave_text import engrave_text_at_position
 from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
 
 
@@ -1030,6 +1033,8 @@ class LayoutResolver:
             minor_length_mm=node.minor_length_mm,
             major_length_mm=node.major_length_mm,
             depth_mm=node.depth_mm,
+            labels=node.labels,
+            label_height_mm=node.label_height_mm,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_grid")
@@ -1066,6 +1071,8 @@ class LayoutResolver:
             minor_length_mm=node.minor_length_mm,
             major_length_mm=node.major_length_mm,
             depth_mm=node.depth_mm,
+            labels=node.labels,
+            label_height_mm=node.label_height_mm,
         )
 
         shape_id_prefix = self._next_shape_id("measurement_edge")
@@ -1074,6 +1081,30 @@ class LayoutResolver:
                 domain,
                 generator_params,
                 allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_engrave_text_gen(
+        self,
+        node: EngraveTextGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle EngraveTextGen: Generate engraved text at region center."""
+        shape_id_prefix = self._next_shape_id("engrave_text")
+        try:
+            generated_items = engrave_text_at_position(
+                text=node.text,
+                position=region.center,
+                height_mm=node.height_mm,
+                depth_mm=node.depth_mm,
+                font=node.font,
+                alignment=node.alignment,
+                orientation=node.orientation,
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
@@ -1634,6 +1665,8 @@ class LayoutResolver:
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
                 # Stage 21 handlers (measurement_edge generator)
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
+                # Stage 22 handlers (engrave_text generator)
+                EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
                 # Waste cuts handler
                 WasteCuts: LayoutResolver._handle_waste_cuts,
             }

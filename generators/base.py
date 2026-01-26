@@ -596,6 +596,8 @@ class MeasurementGridParams(BaseParams):
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth for tick marks
+        labels: Whether to engrave numeric labels at major tick intervals
+        label_height_mm: Height of label text in mm
     """
 
     unit: Literal["metric", "imperial", "custom"] = "metric"
@@ -604,6 +606,8 @@ class MeasurementGridParams(BaseParams):
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.5
+    labels: bool = False
+    label_height_mm: float = 4.0
 
     def validate(self) -> None:
         valid_units = ("metric", "imperial", "custom")
@@ -685,6 +689,8 @@ class MeasurementEdgeParams(BaseParams):
         minor_length_mm: Length of minor tick marks
         major_length_mm: Length of major tick marks
         depth_mm: Engraving depth for tick marks
+        labels: Whether to engrave numeric labels at major tick intervals
+        label_height_mm: Height of label text in mm
     """
 
     edges: tuple[EdgeSelection, ...]
@@ -694,6 +700,8 @@ class MeasurementEdgeParams(BaseParams):
     minor_length_mm: float = 3.0
     major_length_mm: float = 6.0
     depth_mm: float = 0.3
+    labels: bool = False
+    label_height_mm: float = 4.0
 
     def validate(self) -> None:
         if not self.edges:
@@ -763,6 +771,62 @@ class MeasurementEdgeParams(BaseParams):
             return 25.4  # 1"
         else:
             return self.major_spacing_mm or 10.0
+
+
+TextAlignment = Literal["left", "center", "right"]
+TextOrientation = Literal["horizontal", "vertical"]
+
+
+@dataclass(frozen=True)
+class EngraveTextParams(BaseParams):
+    """Parameters for text engraving generator.
+
+    Creates single-stroke text using Hershey fonts, suitable for CNC engraving.
+    Each character is rendered as a series of line segments.
+
+    Attributes:
+        text: The text string to engrave
+        height_mm: Height of text in mm (cap height)
+        depth_mm: Engraving depth in mm
+        font: Hershey font name (default "rowmans" - simple sans-serif)
+        alignment: Text alignment relative to position ("left", "center", "right")
+        orientation: Text orientation ("horizontal", "vertical")
+        spacing_factor: Character spacing multiplier (1.0 = default spacing)
+    """
+
+    text: str
+    height_mm: float = 4.0
+    depth_mm: float = 0.3
+    font: str = "rowmans"
+    alignment: TextAlignment = "left"
+    orientation: TextOrientation = "horizontal"
+    spacing_factor: float = 1.0
+
+    def validate(self) -> None:
+        if not self.text:
+            raise ValueError("EngraveTextParams: text must not be empty")
+        if self.height_mm <= 0:
+            raise ValueError(
+                f"EngraveTextParams: height_mm must be positive, got {self.height_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"EngraveTextParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+        valid_alignments = ("left", "center", "right")
+        if self.alignment not in valid_alignments:
+            raise ValueError(
+                f"EngraveTextParams: alignment must be one of {valid_alignments}, got '{self.alignment}'"
+            )
+        valid_orientations = ("horizontal", "vertical")
+        if self.orientation not in valid_orientations:
+            raise ValueError(
+                f"EngraveTextParams: orientation must be one of {valid_orientations}, got '{self.orientation}'"
+            )
+        if self.spacing_factor <= 0:
+            raise ValueError(
+                f"EngraveTextParams: spacing_factor must be positive, got {self.spacing_factor}"
+            )
 
 
 @dataclass(frozen=True)
@@ -905,9 +969,12 @@ __all__ = [
     "ConcentricBorderParams",
     "XPanelParams",
     "HoleGridParams",
+    "EngraveTextParams",
     # Type aliases
     "LoopSelection",
     "EdgeSelection",
+    "TextAlignment",
+    "TextOrientation",
     # Utilities
     "generate_shape_id",
     "validate_domain_for_generation",

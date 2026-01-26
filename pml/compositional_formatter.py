@@ -35,6 +35,8 @@ from layout_ast.compositional import (
     MeasurementGridGen,
     # Stage 21 generator nodes
     MeasurementEdgeGen,
+    # Stage 22 generator nodes
+    EngraveTextGen,
 )
 
 
@@ -307,6 +309,9 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
         parts.append(f"minor_length {node.minor_length_mm:.2f}mm")
         parts.append(f"major_length {node.major_length_mm:.2f}mm")
         parts.append(f"depth {node.depth_mm:.2f}mm")
+        if node.labels:
+            parts.append("labels")
+            parts.append(f"label_height {node.label_height_mm:.2f}mm")
         lines.append(" ".join(parts))
 
     elif isinstance(node, MeasurementEdgeGen):
@@ -320,6 +325,22 @@ def _format_node(node: Any, indent: int = 0) -> list[str]:
         parts.append(f"minor_length {node.minor_length_mm:.2f}mm")
         parts.append(f"major_length {node.major_length_mm:.2f}mm")
         parts.append(f"depth {node.depth_mm:.2f}mm")
+        if node.labels:
+            parts.append("labels")
+            parts.append(f"label_height {node.label_height_mm:.2f}mm")
+        lines.append(" ".join(parts))
+
+    elif isinstance(node, EngraveTextGen):
+        parts = [f"{prefix}engrave_text"]
+        parts.append(f'text "{node.text}"')
+        parts.append(f"height {node.height_mm:.2f}mm")
+        parts.append(f"depth {node.depth_mm:.2f}mm")
+        if node.font != "rowmans":
+            parts.append(f"font {node.font}")
+        if node.alignment != "left":
+            parts.append(f"alignment {node.alignment}")
+        if node.orientation != "horizontal":
+            parts.append(f"orientation {node.orientation}")
         lines.append(" ".join(parts))
 
     else:

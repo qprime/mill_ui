@@ -140,6 +140,7 @@ def measurement_edge_generator(
         local_pos: tuple[float, float],
         value: int,
         orientation: str,
+        alignment: str = "center",
     ) -> None:
         nonlocal label_index
         if not params.labels:
@@ -150,7 +151,7 @@ def measurement_edge_generator(
             position=sheet_pos,
             height_mm=params.label_height_mm,
             depth_mm=params.depth_mm,
-            alignment="center",
+            alignment=alignment,
             orientation=orientation,
             shape_id_prefix=f"{shape_id_prefix}_label_{label_index}",
         )
@@ -214,9 +215,9 @@ def measurement_edge_generator(
                 skip_label = first_major and has_bottom and value == 0
                 if value >= 0 and not skip_label:
                     if "left" in edges_set:
-                        add_label((local_x_min - label_offset, y), value, "vertical")
+                        add_label((local_x_min - label_offset, y), value, "vertical", "right")
                     if "right" in edges_set:
-                        add_label((local_x_max + label_offset, y), value, "vertical")
+                        add_label((local_x_max + label_offset, y), value, "vertical", "left")
                 first_major = False
 
             y += minor_spacing

@@ -118,20 +118,20 @@ def engrave_text_at_position(
 
     align_offset_y = -y_min - text_height / 2
 
-    rotation_rad = -math.pi / 2 if orientation == "vertical" else 0.0
-
-    transformed = _transform_lines(
+    aligned = _transform_lines(
         lines,
         offset_x=align_offset_x,
         offset_y=align_offset_y,
-        rotation_rad=rotation_rad,
+        rotation_rad=0.0,
     )
 
+    rotation_rad = -math.pi / 2 if orientation == "vertical" else 0.0
+
     final_lines = _transform_lines(
-        transformed,
+        aligned,
         offset_x=position[0],
         offset_y=position[1],
-        rotation_rad=0.0,
+        rotation_rad=rotation_rad,
     )
 
     items: list[Item] = []

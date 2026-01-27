@@ -11,6 +11,19 @@ from layout_ast.layout import LayoutAST
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
 from cli.project import add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir
 
+RECIPE_DEFAULTS = {
+    "kerf": 3.175,
+    "theme": "dark",
+}
+
+
+def find_recipe_source(recipe_dir: Path) -> Path | None:
+    for candidate in ["example.pml", "source.pml"]:
+        source = recipe_dir / candidate
+        if source.exists():
+            return source
+    return None
+
 
 def collect_input_files(project: str | None, input_arg: str | None) -> list[Path]:
     if input_arg:
@@ -88,6 +101,68 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         update_file_header(input_path)
 
 
+def process_recipe(recipe_dir: Path, args) -> None:
+    source = find_recipe_source(recipe_dir)
+    if not source:
+        print(f"Error: No example.pml or source.pml in {recipe_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    output_dir = recipe_dir / "output"
+
+    kerf = args.kerf if args.kerf != 6.35 else RECIPE_DEFAULTS["kerf"]
+    theme = args.theme if args.theme != "dark" else RECIPE_DEFAULTS["theme"]
+
+    input_text = source.read_text(encoding="utf-8")
+    comp_ast = parse_compositional_pml(input_text)
+    ast = resolve_layout(comp_ast)
+
+    print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
+    print(f"  Source: {source.name}", file=sys.stderr)
+    print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
+    print(f"  Items: {len(ast.items)}", file=sys.stderr)
+
+    result = run_pipeline(
+        ast,
+        kerf_mm=kerf,
+        tool_db=DEFAULT_TOOL_DB,
+        generate_svg=not args.no_svg,
+        svg_theme=theme,
+        y_origin=args.y_origin,
+    )
+
+    if result.errors:
+        print(f"\nErrors:", file=sys.stderr)
+        for error in result.errors:
+            print(f"  - {error}", file=sys.stderr)
+
+    if result.warnings:
+        print(f"\nWarnings:", file=sys.stderr)
+        for warning in result.warnings:
+            print(f"  - {warning}", file=sys.stderr)
+
+    import shutil
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    job_name = recipe_dir.name
+
+    outputs = write_pipeline_outputs(
+        result,
+        output_dir,
+        job_name,
+        clean_output_dir=False,
+    )
+
+    print(f"  Outputs:", file=sys.stderr)
+    for key, path in outputs.items():
+        print(f"    {path.name}", file=sys.stderr)
+
+    print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
+
+    update_file_header(source)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Compile PML to G-code and SVG blueprint",
@@ -103,6 +178,8 @@ Examples:
 
   python -m cli.mill --project cabinet --input panel.pml --kerf 3.175
 
+  python -m cli.mill --recipe docs/recipes/01_simple_profile
+
 Output files:
   {basename}.{op}-{tool_diameter}mm.nc   G-code per pass
   {basename}.svg              Blueprint drawing
@@ -111,6 +188,12 @@ Output files:
     )
 
     add_project_arg(parser)
+    parser.add_argument(
+        "--recipe",
+        "-r",
+        default=None,
+        help="Recipe directory (e.g., docs/recipes/01_simple_profile)",
+    )
     parser.add_argument(
         "--input",
         "-i",
@@ -157,6 +240,14 @@ Output files:
     args = parser.parse_args()
 
     try:
+        if args.recipe:
+            recipe_dir = Path(args.recipe)
+            if not recipe_dir.is_dir():
+                print(f"Error: Recipe directory not found: {recipe_dir}", file=sys.stderr)
+                sys.exit(1)
+            process_recipe(recipe_dir, args)
+            return
+
         input_files = collect_input_files(args.project, args.input)
         if not input_files:
             print("Error: No input files found", file=sys.stderr)

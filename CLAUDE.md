@@ -23,12 +23,15 @@ Activate venv first: `source .venv/bin/activate`
 ```bash
 python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml
+python -m cli.mill --recipe docs/recipes/01_simple_profile
 python -m cli.nest --project my_table job.nest -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
 
-The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation. With just `--project`, it processes all `.pml` files in the project directory. Use `--input` to specify a single file.
+The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:
+- `--project`: User workspace in `$MILL_UI_PROJECTS` (real manufacturing)
+- `--recipe`: Recipe directory in `docs/recipes/` (examples/documentation)
 
 Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`
 

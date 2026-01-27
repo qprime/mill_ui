@@ -285,14 +285,21 @@ python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 **CLI (unified command - generates G-code and SVG):**
 ```bash
 source .venv/bin/activate
+
+# Projects (user workspaces in $MILL_UI_PROJECTS)
 python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml
+
+# Recipes (examples in docs/recipes/)
+python -m cli.mill --recipe docs/recipes/01_simple_profile
 ```
 
-With just `--project`, processes all `.pml` files in the project directory. Use `--input` to specify a single file.
+**Projects vs Recipes:**
+- `--project`: User workspace for real manufacturing (looks in `$MILL_UI_PROJECTS`)
+- `--recipe`: Recipe directory for examples/documentation (outputs to `{recipe}/output/`)
 
 **Options:**
-- `--kerf 6.35` — Tool kerf in mm (default: 6.35)
+- `--kerf 6.35` — Tool kerf in mm (default: 6.35 for projects, 3.175 for recipes)
 - `--theme dark` — Blueprint theme (dark/light/print)
 - `--no-svg` — Skip SVG generation
 - `--no-clean` — Don't clean output directory before writing

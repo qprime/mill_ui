@@ -97,7 +97,7 @@ def render_blueprint_svg(
     layout_ast: LayoutAST,
     removal_intents: Sequence[RemovalIntent] | None = None,
     theme: str = "dark",
-    y_origin: str = "front",
+    y_origin: str = "back",
 ) -> str:
     theme_obj = THEMES.get(theme, DARK_THEME)
     sheet = layout_ast.sheet

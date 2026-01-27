@@ -149,9 +149,9 @@ Output files:
     )
     parser.add_argument(
         "--y-origin",
-        default="front",
+        default="back",
         choices=["front", "back"],
-        help="Y=0 reference: front (operator side) or back (default: front)",
+        help="Y=0 reference: back (lower-left origin) or front (default: back)",
     )
 
     args = parser.parse_args()

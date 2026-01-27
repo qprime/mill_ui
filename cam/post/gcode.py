@@ -44,7 +44,7 @@ def write_gcode(
     footer=None,
     machine: Machine | None = None,
     sheet_height: float | None = None,
-    y_origin: str = 'front',
+    y_origin: str = 'back',
 ):
     if unit not in ('mm', 'inch'):
         raise ValueError("unit must be 'mm' or 'inch'")

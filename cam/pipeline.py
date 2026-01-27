@@ -79,7 +79,7 @@ def run_pipeline(
     safe_z: float = 6.0,
     generate_svg: bool = True,
     svg_theme: str = "dark",
-    y_origin: str = "front",
+    y_origin: str = "back",
 ) -> PipelineResult:
     if tool_db is None:
         tool_db = DEFAULT_TOOL_DB

@@ -55,6 +55,8 @@ from layout_ast.compositional import (
     EngraveTextGen,
     # Waste cuts directive
     WasteCuts,
+    # Box assembly
+    Box,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -79,6 +81,8 @@ from generators.area.measurement_grid import measurement_grid_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.area.engrave_text import engrave_text_at_position
 from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
+from generators.assemblies import BoxParams, FingerStrategy, compute_box_panels
+from generators.panels import JointedPanelParams, jointed_panel_generator
 
 
 # Type alias for node handlers
@@ -1606,6 +1610,159 @@ class LayoutResolver:
             else:
                 self._resolve_node(child, triangle_region, items, params)
 
+    def _handle_box(
+        self,
+        node: Box,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        """Handle Box: Generate all panels for a finger-jointed or butt-jointed box.
+
+        Creates panel specifications using compute_box_panels, then generates
+        profile items for each panel using jointed_panel_generator. Panels are
+        laid out in a grid within the region.
+
+        For panels with dado specs, also generates pocket items for the grooves.
+        """
+        if node.joinery == "finger":
+            if node.finger_count is not None:
+                strategy = FingerStrategy(mode="by_count", value=node.finger_count)
+            elif node.finger_width_mm is not None:
+                strategy = FingerStrategy(mode="by_size", value=node.finger_width_mm)
+            else:
+                strategy = FingerStrategy(mode="by_size", value=12.0)
+        else:
+            strategy = None
+
+        box_params = BoxParams(
+            outer_width_mm=node.outer_width_mm,
+            outer_depth_mm=node.outer_depth_mm,
+            outer_height_mm=node.outer_height_mm,
+            thickness_mm=node.thickness_mm,
+            joinery=node.joinery,
+            finger_strategy=strategy,
+            clearance_mm=node.clearance_mm,
+            include_lid=node.include_lid,
+            include_bottom=node.include_bottom,
+            bottom_style=node.bottom_style,
+            top_style=node.top_style,
+            dado_inset_mm=node.dado_inset_mm,
+            dado_drop_mm=node.dado_drop_mm,
+        )
+
+        panel_specs = compute_box_panels(box_params)
+
+        gap = node.layout_gap_mm
+        x_cursor = region.x_min
+        y_cursor = region.y_min
+        row_height = 0.0
+
+        for spec in panel_specs:
+            if x_cursor + spec.width_mm > region.x_max:
+                x_cursor = region.x_min
+                y_cursor += row_height + gap
+                row_height = 0.0
+
+            panel_center = (
+                x_cursor + spec.width_mm / 2,
+                y_cursor + spec.height_mm / 2,
+            )
+
+            filtered_edge_joints = {
+                name: profile
+                for name, profile in spec.edge_joints.items()
+                if profile is not None
+            }
+
+            panel_params = JointedPanelParams(
+                width_mm=spec.width_mm,
+                height_mm=spec.height_mm,
+                edge_joints=filtered_edge_joints,
+                part_name=spec.name,
+            )
+
+            panel_label = spec.name.upper().replace("_", " ") if node.show_labels else None
+            panel_items = jointed_panel_generator(
+                panel_params,
+                center=panel_center,
+                shape_id_prefix=self._next_shape_id(f"box_{spec.name}"),
+                label=panel_label,
+            )
+
+            if node.show_edge_colors and panel_items:
+                edge_colors = {
+                    "top": "#5ab9ea",
+                    "bottom": "#ff9500",
+                    "left": "#4cd964",
+                    "right": "#ffcc00",
+                }
+                edge_lines = []
+                x_min = x_cursor
+                x_max = x_cursor + spec.width_mm
+                y_min = y_cursor
+                y_max = y_cursor + spec.height_mm
+
+                for edge_name, mating in spec.mating_edges.items():
+                    if not mating:
+                        continue
+                    color = edge_colors.get(edge_name, "#ffffff")
+                    if edge_name == "top":
+                        edge_lines.append({
+                            "x1": x_min, "y1": y_max, "x2": x_max, "y2": y_max, "color": color
+                        })
+                    elif edge_name == "bottom":
+                        edge_lines.append({
+                            "x1": x_min, "y1": y_min, "x2": x_max, "y2": y_min, "color": color
+                        })
+                    elif edge_name == "left":
+                        edge_lines.append({
+                            "x1": x_min, "y1": y_min, "x2": x_min, "y2": y_max, "color": color
+                        })
+                    elif edge_name == "right":
+                        edge_lines.append({
+                            "x1": x_max, "y1": y_min, "x2": x_max, "y2": y_max, "color": color
+                        })
+
+                from dataclasses import replace
+                updated_item = replace(
+                    panel_items[0],
+                    params={"edge_lines": edge_lines} if panel_items[0].params is None
+                    else {**panel_items[0].params, "edge_lines": edge_lines}
+                )
+                panel_items = [updated_item] + panel_items[1:]
+
+            items.extend(panel_items)
+
+            for dado in spec.dados:
+                if dado.edge == "bottom":
+                    dado_y = y_cursor + dado.position_from_edge_mm + dado.width_mm / 2
+                else:
+                    dado_y = y_cursor + spec.height_mm - dado.position_from_edge_mm - dado.width_mm / 2
+
+                dado_center = (x_cursor + spec.width_mm / 2, dado_y)
+                dado_item = Item(
+                    kind="shape",
+                    type="Rect",
+                    geometry=Geometry(
+                        data={
+                            "w_mm": spec.width_mm,
+                            "h_mm": dado.width_mm,
+                        }
+                    ),
+                    placement=Placement(center_xy_mm=dado_center),
+                    feature=Feature(
+                        type="pocket",
+                        depth=str(dado.depth_mm),
+                        depth_mm=dado.depth_mm,
+                    ),
+                    shape_id=self._next_shape_id(f"box_{spec.name}_dado"),
+                )
+                items.append(dado_item)
+
+            x_cursor += spec.width_mm + gap
+            row_height = max(row_height, spec.height_mm)
+
     def resolve(self) -> LayoutAST:
         margin = self.ast.sheet.margin_mm
 
@@ -1683,6 +1840,8 @@ class LayoutResolver:
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
                 # Waste cuts handler
                 WasteCuts: LayoutResolver._handle_waste_cuts,
+                # Box assembly handler
+                Box: LayoutResolver._handle_box,
             }
         return LayoutResolver._NODE_HANDLERS
 

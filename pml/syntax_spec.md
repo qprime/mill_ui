@@ -540,6 +540,140 @@ triangle corner base 100mm height 80mm
     pocket 4mm
 ```
 
+### Box (Finger-Jointed Assembly)
+
+```
+box outer <width>mm <depth>mm <height>mm thickness <mm> joinery finger|butt [options]
+```
+
+Generates all panels for a finger-jointed or butt-jointed box. Panels are laid out flat on the sheet with proper finger joint geometry on mating edges.
+
+**Parameters:**
+- `outer <width>mm <depth>mm <height>mm` - Outer dimensions of assembled box (required)
+- `thickness <mm>` - Material thickness (required)
+- `joinery finger|butt` - Joint type (required)
+  - `finger`: Interlocking finger joints with phase-matched edges
+  - `butt`: Simple butt joints (no interlocking)
+
+**Finger Joint Options (only for `joinery finger`):**
+- `finger_width <mm>` - Target finger width (auto-calculates count)
+- `finger_count <n>` - Explicit finger count per edge
+- `clearance <mm>` - Gap for joint fit (default: 0.1mm)
+
+**General Options:**
+- `lid` - Include a top panel
+- `no_bottom` - Exclude the bottom panel
+- `layout_gap <mm>` - Gap between laid-out panels (default: 10mm)
+
+**SVG Visualization Options:**
+- `labels` - Add part name labels centered on each panel (e.g., "FRONT", "LEFT SIDE")
+- `edge_colors` - Add colored overlay lines showing mating edges:
+  - Top edges: blue (#5ab9ea)
+  - Bottom edges: orange (#ff9500)
+  - Left edges: green (#4cd964)
+  - Right edges: yellow (#ffcc00)
+
+**Bottom/Top Style Options:**
+- `bottom_style captured|finger|dado [inset <mm>]` - How bottom panel connects
+  - `captured` (default): Bottom sits inside walls, no mechanical lock
+  - `finger`: Full finger joints on all bottom edges (requires `joinery finger`)
+  - `dado`: Groove cut into wall panels; bottom slides into grooves
+  - `inset <mm>`: Distance from wall bottom to dado bottom (default: 0 = flush)
+- `top_style captured|finger|dado [drop <mm>]` - How top panel connects
+  - `captured` (default): Top sits inside walls
+  - `finger`: Full finger joints on all top edges (requires `joinery finger`)
+  - `dado`: Groove cut into wall panels; top slides into grooves
+  - `drop <mm>`: Distance from wall top to dado top (default: 0 = flush)
+
+**Generated Panels:**
+- `front` / `back`: Full outer width × (height - adjustments based on style)
+- `left_side` / `right_side`: (depth - 2×thickness) × (height - adjustments)
+- `bottom` (if included): Size depends on bottom_style
+  - `captured`: (width - 2×thickness) × (depth - 2×thickness)
+  - `finger`: Full width × full depth (with finger joints)
+  - `dado`: (width - 2×thickness + dado_depth) × (depth - 2×thickness + dado_depth)
+- `top` (if lid): Same logic as bottom based on top_style
+
+**Phase Assignment (finger joints):**
+- Front/back left/right edges: phase 0 (fingers protrude)
+- Side left/right edges: phase 1 (notches receive fingers)
+- Bottom/top edges: front/back at phase 0, sides at phase 1
+- This ensures mating edges interlock correctly
+
+Example:
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    clearance 0.15mm
+```
+
+Example with lid:
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    lid
+```
+
+Example butt joint:
+```pml
+sheet 600mm 400mm 6mm margin 10mm
+
+box outer 150mm 100mm 75mm thickness 6mm joinery butt
+```
+
+Example finger-jointed bottom (structural):
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    bottom_style finger
+```
+
+Example dado bottom raised 6mm (keeps contents off surface):
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    bottom_style dado inset 6mm
+```
+
+Example sealed box with finger-jointed top:
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    lid
+    top_style finger
+```
+
+Example recessed lid in dado groove:
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    lid
+    top_style dado drop 3mm
+```
+
+Example with labels and edge coloring for assembly visualization:
+```pml
+sheet 800mm 600mm 6mm margin 10mm
+
+box outer 200mm 150mm 100mm thickness 6mm joinery finger
+    finger_width 12mm
+    bottom_style dado inset 6mm
+    labels
+    edge_colors
+```
+
 ### Template Definition
 
 Templates are reusable layout patterns stored as `.pml` files in the `templates/` directory. They support parameter substitution using `${param}` syntax.

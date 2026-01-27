@@ -56,6 +56,8 @@ from layout_ast.compositional import (
     EngraveTextGen,
     # Waste cuts directive
     WasteCuts,
+    # Box generator
+    Box,
 )
 from layout_ast.layout import Sheet, Feature
 
@@ -176,6 +178,10 @@ class CompositionalPMLLexer:
             'template', 'params',
             # Waste cuts directive
             'waste_cuts', 'min_size', 'margin', 'strategy',
+            # Box generator
+            'box', 'outer', 'thickness', 'joinery', 'finger', 'butt',
+            'finger_width', 'finger_count', 'clearance', 'lid', 'no_bottom', 'layout_gap',
+            'bottom_style', 'top_style', 'captured', 'dado', 'inset', 'drop', 'labels', 'edge_colors',
         }
 
         token_type = 'keyword' if ident in keywords else 'identifier'
@@ -550,6 +556,9 @@ class CompositionalPMLParser:
         # Waste cuts directive
         elif token.value == 'waste_cuts':
             return self.parse_waste_cuts()
+        # Box generator
+        elif token.value == 'box':
+            return self.parse_box()
         else:
             raise ParseError(f"Unknown layout node: {token.value}", token.line, token.column)
 
@@ -2043,6 +2052,168 @@ class CompositionalPMLParser:
             tab_count=tab_count,
             tab_height_mm=tab_height_mm,
             strategy=strategy,
+        )
+
+    def parse_box(self) -> Box:
+        """Parse: box outer <w>mm <d>mm <h>mm thickness <t>mm joinery <type>
+
+        Example:
+            box outer 150mm 100mm 75mm thickness 6mm joinery finger
+                finger_width 12mm
+                clearance 0.15mm
+
+            box outer 200mm 150mm 100mm thickness 6mm joinery butt
+
+            box outer 200mm 150mm 100mm thickness 6mm joinery finger
+                finger_width 12mm
+                bottom_style finger
+                top_style dado drop 3mm
+        """
+        self.expect('keyword', 'box')
+        self.expect('keyword', 'outer')
+
+        outer_width = self.expect('number_with_unit').value
+        outer_depth = self.expect('number_with_unit').value
+        outer_height = self.expect('number_with_unit').value
+
+        self.expect('keyword', 'thickness')
+        thickness = self.expect('number_with_unit').value
+
+        joinery = "finger"
+        if self.peek().type == 'keyword' and self.peek().value == 'joinery':
+            self.advance()
+            joinery_token = self.peek()
+            if joinery_token.type in ('keyword', 'identifier') and joinery_token.value in ('finger', 'butt'):
+                joinery = self.advance().value
+            else:
+                raise ParseError(
+                    f"Expected 'finger' or 'butt' for joinery, got {joinery_token.value}",
+                    joinery_token.line, joinery_token.column
+                )
+
+        self.expect_line_end()
+
+        finger_width_mm = None
+        finger_count = None
+        clearance_mm = 0.1
+        include_lid = False
+        include_bottom = True
+        layout_gap_mm = 10.0
+        bottom_style = "captured"
+        top_style = "captured"
+        dado_inset_mm = 0.0
+        dado_drop_mm = 0.0
+        show_labels = False
+        show_edge_colors = False
+        children: list[Any] = []
+
+        if self.peek().type == 'indent':
+            self.expect('indent')
+            while self.peek().type != 'dedent' and self.peek().type != 'eof':
+                token = self.peek()
+                if token.type == 'keyword' and token.value == 'finger_width':
+                    self.advance()
+                    finger_width_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'finger_count':
+                    self.advance()
+                    finger_count = int(self.expect('number').value)
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'clearance':
+                    self.advance()
+                    clearance_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'lid':
+                    self.advance()
+                    include_lid = True
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'no_bottom':
+                    self.advance()
+                    include_bottom = False
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'layout_gap':
+                    self.advance()
+                    layout_gap_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'bottom_style':
+                    self.advance()
+                    style_token = self.peek()
+                    if style_token.type == 'keyword' and style_token.value in ('captured', 'finger', 'dado'):
+                        bottom_style = self.advance().value
+                    else:
+                        raise ParseError(
+                            f"Expected 'captured', 'finger', or 'dado' for bottom_style, got {style_token.value}",
+                            style_token.line, style_token.column
+                        )
+                    if bottom_style == 'dado' and self.peek().type == 'keyword' and self.peek().value == 'inset':
+                        self.advance()
+                        dado_inset_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'top_style':
+                    self.advance()
+                    style_token = self.peek()
+                    if style_token.type == 'keyword' and style_token.value in ('captured', 'finger', 'dado'):
+                        top_style = self.advance().value
+                    else:
+                        raise ParseError(
+                            f"Expected 'captured', 'finger', or 'dado' for top_style, got {style_token.value}",
+                            style_token.line, style_token.column
+                        )
+                    if top_style == 'dado' and self.peek().type == 'keyword' and self.peek().value == 'drop':
+                        self.advance()
+                        dado_drop_mm = self.expect('number_with_unit').value
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'labels':
+                    self.advance()
+                    show_labels = True
+                    self.expect_line_end()
+                elif token.type == 'keyword' and token.value == 'edge_colors':
+                    self.advance()
+                    show_edge_colors = True
+                    self.expect_line_end()
+                else:
+                    children.append(self.parse_node())
+                self.skip_newlines()
+            if self.peek().type == 'dedent':
+                self.expect('dedent')
+
+        if joinery == 'finger' and finger_width_mm is None and finger_count is None:
+            raise ParseError(
+                "box with joinery finger requires either finger_width or finger_count",
+                self.peek().line, self.peek().column
+            )
+
+        if bottom_style == 'finger' and joinery != 'finger':
+            raise ParseError(
+                "bottom_style finger requires joinery finger",
+                self.peek().line, self.peek().column
+            )
+
+        if top_style == 'finger' and joinery != 'finger':
+            raise ParseError(
+                "top_style finger requires joinery finger",
+                self.peek().line, self.peek().column
+            )
+
+        return Box(
+            outer_width_mm=outer_width,
+            outer_depth_mm=outer_depth,
+            outer_height_mm=outer_height,
+            thickness_mm=thickness,
+            joinery=joinery,
+            finger_width_mm=finger_width_mm,
+            finger_count=finger_count,
+            clearance_mm=clearance_mm,
+            include_lid=include_lid,
+            include_bottom=include_bottom,
+            children=tuple(children),
+            layout_gap_mm=layout_gap_mm,
+            bottom_style=bottom_style,
+            top_style=top_style,
+            dado_inset_mm=dado_inset_mm,
+            dado_drop_mm=dado_drop_mm,
+            show_labels=show_labels,
+            show_edge_colors=show_edge_colors,
         )
 
 

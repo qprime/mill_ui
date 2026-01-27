@@ -150,6 +150,7 @@ def render_blueprint_svg(
     engrave_group = ET.SubElement(svg, "g", {"id": "ENGRAVE_PATHS", "class": "engrave-paths"})
     hole_group = ET.SubElement(svg, "g", {"id": "HOLES", "class": "holes"})
     label_group = ET.SubElement(svg, "g", {"id": "LABELS", "class": "labels"})
+    edge_color_group = ET.SubElement(svg, "g", {"id": "EDGE_COLORS", "class": "edge-colors"})
     construction_group = ET.SubElement(svg, "g", {"id": "CONSTRUCTION", "class": "construction"})
     dimension_group = ET.SubElement(svg, "g", {"id": "DIMENSIONS", "class": "dimensions"})
     notes_group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
@@ -182,6 +183,9 @@ def render_blueprint_svg(
 
         if item.label and item.placement:
             _render_label(label_group, item, offset_x, offset_y, y_flip=flip_y)
+
+        if item.params and "edge_lines" in item.params:
+            _render_edge_colors(edge_color_group, item, offset_x, offset_y, y_flip=flip_y)
 
 
     _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj, y_flip=flip_y)
@@ -497,6 +501,29 @@ def _render_label(group: ET.Element, item: Item, offset_x: float, offset_y: floa
         },
     )
     label_elem.text = item.label
+
+
+def _render_edge_colors(group: ET.Element, item: Item, offset_x: float, offset_y: float, y_flip=None) -> None:
+    if item.params is None or "edge_lines" not in item.params:
+        return
+
+    yf = y_flip if y_flip is not None else (lambda y: y)
+    edge_lines = item.params["edge_lines"]
+
+    for line in edge_lines:
+        ET.SubElement(
+            group,
+            "line",
+            {
+                "x1": str(offset_x + line["x1"]),
+                "y1": str(offset_y + yf(line["y1"])),
+                "x2": str(offset_x + line["x2"]),
+                "y2": str(offset_y + yf(line["y2"])),
+                "stroke": line["color"],
+                "stroke-width": "3",
+                "stroke-linecap": "round",
+            },
+        )
 
 
 def _render_dimensions(

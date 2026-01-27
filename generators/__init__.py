@@ -114,6 +114,20 @@ from generators.svg import (
     svg_stamp_generator,
 )
 
+# Panel generators
+from generators.panels import (
+    JointedPanelParams,
+    jointed_panel_generator,
+)
+
+# Assembly generators
+from generators.assemblies import (
+    BoxParams,
+    FingerStrategy,
+    PanelSpec,
+    compute_box_panels,
+)
+
 __all__ = [
     # Protocol and types
     "Generator",
@@ -154,4 +168,12 @@ __all__ = [
     "validate_domain_for_generation",
     "shapely_to_item",
     "iter_polygons",
+    # Panel generators
+    "JointedPanelParams",
+    "jointed_panel_generator",
+    # Assembly generators
+    "BoxParams",
+    "FingerStrategy",
+    "PanelSpec",
+    "compute_box_panels",
 ]

@@ -93,6 +93,7 @@ def profile_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "profile",
     sheet_thickness_mm: float | None = None,
+    label: str | None = None,
 ) -> GeneratorResult:
     """Generate profile cut items along domain boundaries.
 
@@ -107,6 +108,7 @@ def profile_generator(
         shape_id_prefix: Prefix for generated shape IDs
         sheet_thickness_mm: Sheet thickness for "through" depth resolution
             (optional, used for metadata only)
+        label: Optional label for the profile (displayed on SVG)
 
     Returns:
         List of Polygon Items with profile features, one per selected loop
@@ -201,6 +203,7 @@ def profile_generator(
                 loop_idx,
                 _loop_type_suffix(loop_idx),
             ),
+            label=label,
         )
 
         items.append(item)

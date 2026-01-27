@@ -510,6 +510,28 @@ class WasteCuts:
 
 
 @dataclass(frozen=True)
+class Box:
+    outer_width_mm: float
+    outer_depth_mm: float
+    outer_height_mm: float
+    thickness_mm: float
+    joinery: str = "finger"
+    finger_width_mm: float | None = None
+    finger_count: int | None = None
+    clearance_mm: float = 0.1
+    include_lid: bool = False
+    include_bottom: bool = True
+    children: tuple[Any, ...] = ()
+    layout_gap_mm: float = 10.0
+    bottom_style: str = "captured"
+    top_style: str = "captured"
+    dado_inset_mm: float = 0.0
+    dado_drop_mm: float = 0.0
+    show_labels: bool = False
+    show_edge_colors: bool = False
+
+
+@dataclass(frozen=True)
 class ResolvedRegion:
     x_min: float
     y_min: float

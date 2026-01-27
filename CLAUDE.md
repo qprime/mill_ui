@@ -55,6 +55,7 @@ Check before implementing — these already exist:
 | Profile with tabs | `pml/compositional_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
+| Box generator (finger/dado) | `generators/assemblies/box.py` |
 
 ## Don't
 

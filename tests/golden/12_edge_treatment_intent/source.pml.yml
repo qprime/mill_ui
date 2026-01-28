@@ -1,8 +1,18 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 300mm 200mm 19mm margin 0mm
-
-# Pocket with edge allowance intent (rough + finish)
-rect recess pocket 4mm
-    edge allowance 0.5mm 0.1mm
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    id: recess
+    feature:
+      type: pocket
+      depth: 4mm
+    children:
+    - Edge:
+        treatment: allowance
+        rough_allowance: 0.5mm
+        finish_allowance: 0.1mm

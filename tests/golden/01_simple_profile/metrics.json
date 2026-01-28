@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "01_simple_profile",
-    "created_at": "2026-01-25T22:59:59.223812+00:00"
+    "created_at": "2026-01-28T00:30:16.884347+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.42,
+    "extraction_time_ms": 0.44,
     "document": {
       "width_mm": 730.0,
       "height_mm": 930.0,
@@ -17,10 +17,11 @@
       ]
     },
     "layers": {
-      "count": 12,
+      "count": 13,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
+        "EDGE_COLORS",
         "ENGRAVE_PATHS",
         "HOLES",
         "LABELS",
@@ -51,6 +52,16 @@
           "line_count": 6,
           "polygon_count": 4,
           "text_count": 2,
+          "elements": []
+        },
+        "EDGE_COLORS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
           "elements": []
         },
         "ENGRAVE_PATHS": {
@@ -251,7 +262,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9191,
+    "extraction_time_ms": 1.1113,
     "summary": {
       "total_lines": 258,
       "comment_lines": 6,
@@ -265,7 +276,7 @@
       "g1_count": 96,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 9664.3958,
+      "total_rapid_distance_mm": 9524.5935,
       "total_feed_distance_mm": 9183.104
     },
     "z_profile": {
@@ -322,9 +333,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 115.9727,
+      "rapid_time_s": 114.2951,
       "feed_time_s": 918.3104,
-      "total_time_s": 1034.2831
+      "total_time_s": 1032.6055
     },
     "tabs": {
       "detected_count": 0,

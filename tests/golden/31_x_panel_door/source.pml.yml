@@ -1,9 +1,20 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 400mm 600mm 19mm margin 0mm
-
-rect door
-    profile outside through
-    frame 50mm
-        x_panel bar_width 50mm depth 6mm
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 50mm
+        children:
+        - XPanel:
+            bar_width: 50mm
+            depth: 6mm

@@ -1,10 +1,26 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 500mm 700mm 19mm margin 0mm
-
-rect door
-    profile outside through
-    frame 65mm
-        split_grid 2 2 gap 35mm
-            raised_panel border 25mm border_depth 6mm field_depth 2mm
+Sheet:
+  width: 500mm
+  height: 700mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 65mm
+        children:
+        - SplitGrid:
+            rows: 2
+            cols: 2
+            gap: 35mm
+            children:
+            - RaisedPanel:
+                border_width: 25mm
+                border_depth: 6mm
+                field_depth: 2mm

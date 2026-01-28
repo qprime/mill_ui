@@ -139,7 +139,7 @@ def render_blueprint_svg(
     offset_y = margin
 
     def flip_y(y: float) -> float:
-        if y_origin == "front":
+        if y_origin == "back":
             return sheet.height_mm - y
         return y
 
@@ -305,21 +305,20 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     if item.placement is None:
         return
 
-    cx, cy = item.placement.center_xy_mm
-    cy = yf(cy)
+    cx, orig_cy = item.placement.center_xy_mm
+    cy = yf(orig_cy)
 
     if shape_type == "Line":
         start = item.geometry.data.get("start", [0, 0])
         end = item.geometry.data.get("end", [0, 0])
-        y_sign = -1 if y_flip is not None else 1
         ET.SubElement(
             group,
             "line",
             {
                 "x1": str(offset_x + cx + start[0]),
-                "y1": str(offset_y + cy + y_sign * start[1]),
+                "y1": str(offset_y + yf(orig_cy + start[1])),
                 "x2": str(offset_x + cx + end[0]),
-                "y2": str(offset_y + cy + y_sign * end[1]),
+                "y2": str(offset_y + yf(orig_cy + end[1])),
             },
         )
         return
@@ -360,8 +359,7 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
     elif shape_type == "Polyline":
         points = item.geometry.data.get("points", [])
         if points:
-            y_sign = -1 if y_flip is not None else 1
-            points_str = " ".join(f"{x + cx + offset_x},{cy + y_sign * y + offset_y}" for x, y in points)
+            points_str = " ".join(f"{x + cx + offset_x},{yf(orig_cy + y) + offset_y}" for x, y in points)
             ET.SubElement(group, "polyline", {"points": points_str})
     elif shape_type == "RoundedRect":
         w = item.geometry.data.get("w_mm", 0)

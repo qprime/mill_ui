@@ -1,6 +1,18 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 200mm 150mm 19mm margin 0mm
-
-rect panel at 100mm,75mm size 100mm,80mm pocket 6mm
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 100mm
+      y: 75mm
+      width: 100mm
+      height: 80mm

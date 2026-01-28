@@ -1,9 +1,24 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 400mm 400mm 19mm margin 0mm
-
-rect panel
-    profile outside through
-    lines angle 45 spacing 25mm width 4mm depth 3mm
-    lines angle -45 spacing 25mm width 4mm depth 3mm
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Lines:
+        angle: 45.0
+        spacing: 25mm
+        width: 4mm
+        depth: 3mm
+    - Lines:
+        angle: -45.0
+        spacing: 25mm
+        width: 4mm
+        depth: 3mm

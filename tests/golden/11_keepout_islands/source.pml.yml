@@ -1,10 +1,21 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 400mm 400mm 19mm margin 0mm
-
-# Pocket with keepout island (raised panel effect)
-rect panel pocket 6mm
-    keepout
-        inset 60mm
-            rect island
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    feature:
+      type: pocket
+      depth: 6mm
+    children:
+    - Keepout:
+        children:
+        - Inset:
+            distance: 60mm
+            children:
+            - Rect:
+                id: island

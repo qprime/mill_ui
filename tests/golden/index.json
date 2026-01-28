@@ -1,117 +1,117 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-01-27T16:49:42.922795+00:00",
+  "updated_at": "2026-01-28T00:30:20.142965+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
-      "source_file": "docs/recipes/01_simple_profile/example.pml",
+      "source_file": "docs/recipes/01_simple_profile/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.767863+00:00",
-      "updated_at": "2026-01-27T16:49:40.284393+00:00",
+      "updated_at": "2026-01-28T00:30:16.884670+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "02_pocket_with_cleanup": {
       "recipe_name": "02_pocket_with_cleanup",
-      "source_file": "docs/recipes/02_pocket_with_cleanup/example.pml",
+      "source_file": "docs/recipes/02_pocket_with_cleanup/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.772940+00:00",
-      "updated_at": "2026-01-27T16:49:40.288216+00:00",
+      "updated_at": "2026-01-28T00:30:16.889228+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "03_shaker_door_template": {
       "recipe_name": "03_shaker_door_template",
-      "source_file": "docs/recipes/03_shaker_door_template/example.pml",
+      "source_file": "docs/recipes/03_shaker_door_template/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.791976+00:00",
-      "updated_at": "2026-01-27T16:49:40.308712+00:00",
+      "updated_at": "2026-01-28T00:30:16.913879+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "04_custom_template": {
       "recipe_name": "04_custom_template",
-      "source_file": "docs/recipes/04_custom_template/example.pml",
+      "source_file": "docs/recipes/04_custom_template/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.849160+00:00",
-      "updated_at": "2026-01-27T16:49:40.367766+00:00",
+      "updated_at": "2026-01-28T00:30:16.985964+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "05_validation_workflow": {
       "recipe_name": "05_validation_workflow",
-      "source_file": "docs/recipes/05_validation_workflow/example.pml",
+      "source_file": "docs/recipes/05_validation_workflow/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.881843+00:00",
-      "updated_at": "2026-01-27T16:49:40.401196+00:00",
+      "updated_at": "2026-01-28T00:30:17.026561+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "06_multiple_depths": {
       "recipe_name": "06_multiple_depths",
-      "source_file": "docs/recipes/06_multiple_depths/example.pml",
+      "source_file": "docs/recipes/06_multiple_depths/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.937862+00:00",
-      "updated_at": "2026-01-27T16:49:40.458528+00:00",
+      "updated_at": "2026-01-28T00:30:17.096333+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "07_json_generation": {
       "recipe_name": "07_json_generation",
-      "source_file": "docs/recipes/07_json_generation/example.pml",
+      "source_file": "docs/recipes/07_json_generation/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.946257+00:00",
-      "updated_at": "2026-01-27T16:49:40.466032+00:00",
+      "updated_at": "2026-01-28T00:30:17.105285+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "08_svg_visualization": {
       "recipe_name": "08_svg_visualization",
-      "source_file": "docs/recipes/08_svg_visualization/example.pml",
+      "source_file": "docs/recipes/08_svg_visualization/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.954391+00:00",
-      "updated_at": "2026-01-27T16:49:40.473442+00:00",
+      "updated_at": "2026-01-28T00:30:17.114392+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "09_config_tuning": {
       "recipe_name": "09_config_tuning",
-      "source_file": "docs/recipes/09_config_tuning/example.pml",
+      "source_file": "docs/recipes/09_config_tuning/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.959191+00:00",
-      "updated_at": "2026-01-27T16:49:40.477057+00:00",
+      "updated_at": "2026-01-28T00:30:17.118766+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "10_hole_patterns_grid": {
       "recipe_name": "10_hole_patterns_grid",
-      "source_file": "docs/recipes/10_hole_patterns_grid/example.pml",
+      "source_file": "docs/recipes/10_hole_patterns_grid/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.356934+00:00",
-      "updated_at": "2026-01-27T16:49:40.944145+00:00",
+      "updated_at": "2026-01-28T00:30:17.699651+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "11_keepout_islands": {
       "recipe_name": "11_keepout_islands",
-      "source_file": "docs/recipes/11_keepout_islands/example.pml",
+      "source_file": "docs/recipes/11_keepout_islands/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.370344+00:00",
-      "updated_at": "2026-01-27T16:49:40.957582+00:00",
+      "updated_at": "2026-01-28T00:30:17.716641+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "12_edge_treatment_intent": {
       "recipe_name": "12_edge_treatment_intent",
-      "source_file": "docs/recipes/12_edge_treatment_intent/example.pml",
+      "source_file": "docs/recipes/12_edge_treatment_intent/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.378407+00:00",
-      "updated_at": "2026-01-27T16:49:40.964830+00:00",
+      "updated_at": "2026-01-28T00:30:17.725891+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "13_split_layout_french_door": {
       "recipe_name": "13_split_layout_french_door",
-      "source_file": "docs/recipes/13_split_layout_french_door/example.pml",
+      "source_file": "docs/recipes/13_split_layout_french_door/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.414769+00:00",
-      "updated_at": "2026-01-27T16:49:41.004787+00:00",
+      "updated_at": "2026-01-28T00:30:17.775997+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "14_corner_cleanup_multi_tool": {
       "recipe_name": "14_corner_cleanup_multi_tool",
-      "source_file": "docs/recipes/14_corner_cleanup_multi_tool/example.pml",
+      "source_file": "docs/recipes/14_corner_cleanup_multi_tool/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.454384+00:00",
-      "updated_at": "2026-01-27T16:49:41.049015+00:00",
+      "updated_at": "2026-01-28T00:30:17.831106+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -119,15 +119,15 @@
       "recipe_name": "15_profile_with_tabs",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.459550+00:00",
-      "updated_at": "2026-01-27T16:49:41.051901+00:00",
+      "updated_at": "2026-01-28T00:30:17.834614+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "16_sheet_layout_nesting": {
       "recipe_name": "16_sheet_layout_nesting",
-      "source_file": "docs/recipes/16_sheet_layout_nesting/example.pml",
+      "source_file": "docs/recipes/16_sheet_layout_nesting/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.557700+00:00",
-      "updated_at": "2026-01-27T16:49:41.148601+00:00",
+      "updated_at": "2026-01-28T00:30:17.954979+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -135,7 +135,7 @@
       "recipe_name": "17_nesting_guillotine",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.936155+00:00",
-      "updated_at": "2026-01-27T16:49:41.588843+00:00",
+      "updated_at": "2026-01-28T00:30:18.499901+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -143,95 +143,95 @@
       "recipe_name": "18_nesting_maxrects",
       "source_file": "",
       "created_at": "2026-01-17T01:38:44.404480+00:00",
-      "updated_at": "2026-01-27T16:49:42.137109+00:00",
+      "updated_at": "2026-01-28T00:30:19.176200+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "21_simple_shaker_door": {
       "recipe_name": "21_simple_shaker_door",
-      "source_file": "docs/recipes/21_simple_shaker_door/example.pml",
+      "source_file": "docs/recipes/21_simple_shaker_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.813155+00:00",
-      "updated_at": "2026-01-27T16:49:42.156737+00:00",
+      "updated_at": "2026-01-28T00:30:19.200583+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "22_four_panel_raised_door": {
       "recipe_name": "22_four_panel_raised_door",
-      "source_file": "docs/recipes/22_four_panel_raised_door/example.pml",
+      "source_file": "docs/recipes/22_four_panel_raised_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.859820+00:00",
-      "updated_at": "2026-01-27T16:49:42.210416+00:00",
+      "updated_at": "2026-01-28T00:30:19.265985+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "23_chamfered_cabinet_panel": {
       "recipe_name": "23_chamfered_cabinet_panel",
-      "source_file": "docs/recipes/23_chamfered_cabinet_panel/example.pml",
+      "source_file": "docs/recipes/23_chamfered_cabinet_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.874730+00:00",
-      "updated_at": "2026-01-27T16:49:42.226618+00:00",
+      "updated_at": "2026-01-28T00:30:19.285818+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "24_shelf_dados_side": {
       "recipe_name": "24_shelf_dados_side",
-      "source_file": "docs/recipes/24_shelf_dados_side/example.pml",
+      "source_file": "docs/recipes/24_shelf_dados_side/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.884847+00:00",
-      "updated_at": "2026-01-27T16:49:42.236773+00:00",
+      "updated_at": "2026-01-28T00:30:19.298133+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "25_decorative_border_panel": {
       "recipe_name": "25_decorative_border_panel",
-      "source_file": "docs/recipes/25_decorative_border_panel/example.pml",
+      "source_file": "docs/recipes/25_decorative_border_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.890318+00:00",
-      "updated_at": "2026-01-27T16:49:42.241246+00:00",
+      "updated_at": "2026-01-28T00:30:19.303588+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "26_faux_shutter_panel": {
       "recipe_name": "26_faux_shutter_panel",
-      "source_file": "docs/recipes/26_faux_shutter_panel/example.pml",
+      "source_file": "docs/recipes/26_faux_shutter_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.917482+00:00",
-      "updated_at": "2026-01-27T16:49:42.270284+00:00",
+      "updated_at": "2026-01-28T00:30:19.339382+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "27_wave_texture_panel": {
       "recipe_name": "27_wave_texture_panel",
-      "source_file": "docs/recipes/27_wave_texture_panel/example.pml",
+      "source_file": "docs/recipes/27_wave_texture_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.022251+00:00",
-      "updated_at": "2026-01-27T16:49:42.395564+00:00",
+      "updated_at": "2026-01-28T00:30:19.491138+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "28_diamond_lattice_panel": {
       "recipe_name": "28_diamond_lattice_panel",
-      "source_file": "docs/recipes/28_diamond_lattice_panel/example.pml",
+      "source_file": "docs/recipes/28_diamond_lattice_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.039392+00:00",
-      "updated_at": "2026-01-27T16:49:42.402039+00:00",
+      "updated_at": "2026-01-28T00:30:19.498824+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "29_picture_frame_panel": {
       "recipe_name": "29_picture_frame_panel",
-      "source_file": "docs/recipes/29_picture_frame_panel/example.pml",
+      "source_file": "docs/recipes/29_picture_frame_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.046573+00:00",
-      "updated_at": "2026-01-27T16:49:42.408680+00:00",
+      "updated_at": "2026-01-28T00:30:19.506847+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "30_cathedral_arch_door": {
       "recipe_name": "30_cathedral_arch_door",
-      "source_file": "docs/recipes/30_cathedral_arch_door/example.pml",
+      "source_file": "docs/recipes/30_cathedral_arch_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.084147+00:00",
-      "updated_at": "2026-01-27T16:49:42.450304+00:00",
+      "updated_at": "2026-01-28T00:30:19.557247+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "31_x_panel_door": {
       "recipe_name": "31_x_panel_door",
-      "source_file": "docs/recipes/31_x_panel_door/example.pml",
+      "source_file": "docs/recipes/31_x_panel_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:12.198989+00:00",
-      "updated_at": "2026-01-27T16:49:42.454752+00:00",
+      "updated_at": "2026-01-28T00:30:19.562628+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -239,63 +239,63 @@
       "recipe_name": "32_waste_cuts",
       "source_file": "",
       "created_at": "2026-01-25T20:02:55.236154+00:00",
-      "updated_at": "2026-01-27T16:49:42.457622+00:00",
+      "updated_at": "2026-01-28T00:30:19.566173+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "33_measurement_grid": {
       "recipe_name": "33_measurement_grid",
-      "source_file": "docs/recipes/33_measurement_grid/example.pml",
+      "source_file": "docs/recipes/33_measurement_grid/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.523567+00:00",
-      "updated_at": "2026-01-27T16:49:42.523567+00:00",
+      "updated_at": "2026-01-28T00:30:19.646936+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "34_measurement_edge": {
       "recipe_name": "34_measurement_edge",
-      "source_file": "docs/recipes/34_measurement_edge/example.pml",
+      "source_file": "docs/recipes/34_measurement_edge/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.585883+00:00",
-      "updated_at": "2026-01-27T16:49:42.585883+00:00",
+      "updated_at": "2026-01-28T00:30:19.724708+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "35_engrave_text": {
       "recipe_name": "35_engrave_text",
-      "source_file": "docs/recipes/35_engrave_text/example.pml",
+      "source_file": "docs/recipes/35_engrave_text/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.687365+00:00",
-      "updated_at": "2026-01-27T16:49:42.687365+00:00",
+      "updated_at": "2026-01-28T00:30:19.849759+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "36_sparse_ruler_labels": {
       "recipe_name": "36_sparse_ruler_labels",
-      "source_file": "docs/recipes/36_sparse_ruler_labels/example.pml",
+      "source_file": "docs/recipes/36_sparse_ruler_labels/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.743591+00:00",
-      "updated_at": "2026-01-27T16:49:42.743591+00:00",
+      "updated_at": "2026-01-28T00:30:19.918940+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "37_ruler_with_profile": {
       "recipe_name": "37_ruler_with_profile",
-      "source_file": "docs/recipes/37_ruler_with_profile/example.pml",
+      "source_file": "docs/recipes/37_ruler_with_profile/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.900800+00:00",
-      "updated_at": "2026-01-27T16:49:42.900800+00:00",
+      "updated_at": "2026-01-28T00:30:20.115547+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "38_finger_jointed_box": {
       "recipe_name": "38_finger_jointed_box",
-      "source_file": "docs/recipes/38_finger_jointed_box/example.pml",
+      "source_file": "docs/recipes/38_finger_jointed_box/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.909638+00:00",
-      "updated_at": "2026-01-27T16:49:42.909638+00:00",
+      "updated_at": "2026-01-28T00:30:20.126535+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
     "39_box_bottom_styles": {
       "recipe_name": "39_box_bottom_styles",
-      "source_file": "docs/recipes/39_box_bottom_styles/example.pml",
+      "source_file": "docs/recipes/39_box_bottom_styles/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.922794+00:00",
-      "updated_at": "2026-01-27T16:49:42.922794+00:00",
+      "updated_at": "2026-01-28T00:30:20.142962+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

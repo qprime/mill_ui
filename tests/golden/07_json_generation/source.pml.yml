@@ -1,8 +1,29 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 300mm 200mm 19mm margin 0mm
-
-# Minimal example for JSON generation workflow
-rect outer at 150mm,100mm size 220mm,140mm profile through outside
-rect recess at 150mm,100mm size 180mm,100mm pocket 6mm
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    id: outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 150mm
+      y: 100mm
+      width: 220mm
+      height: 140mm
+- Rect:
+    id: recess
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 150mm
+      y: 100mm
+      width: 180mm
+      height: 100mm

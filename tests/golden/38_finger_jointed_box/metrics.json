@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "38_finger_jointed_box",
-    "created_at": "2026-01-27T16:49:42.909405+00:00"
+    "created_at": "2026-01-28T00:30:20.126248+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.51,
+    "extraction_time_ms": 0.6,
     "document": {
       "width_mm": 1080.0,
       "height_mm": 880.0,
@@ -315,7 +315,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.181,
+    "extraction_time_ms": 2.7524,
     "summary": {
       "total_lines": 563,
       "comment_lines": 7,
@@ -329,7 +329,7 @@
       "g1_count": 484,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 2041.0205,
+      "total_rapid_distance_mm": 1629.3293,
       "total_feed_distance_mm": 12193.94
     },
     "z_profile": {
@@ -348,7 +348,7 @@
       "x_min": 0.0,
       "x_max": 720.877,
       "y_min": 0.0,
-      "y_max": 588.877
+      "y_max": 244.877
     },
     "feeds": {
       "min_feed_rate": 300.0,
@@ -379,9 +379,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 24.4922,
+      "rapid_time_s": 19.552,
       "feed_time_s": 1219.394,
-      "total_time_s": 1243.8862
+      "total_time_s": 1238.946
     },
     "tabs": {
       "detected_count": 0,

@@ -1,8 +1,29 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 450mm 650mm 19mm margin 0mm
-
-# Shaker door: 400mm x 600mm with 50mm frame and 6mm panel recess
-rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
-rect door at 225mm,325mm size 400mm,600mm profile through outside
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 225mm
+      y: 325mm
+      width: 300mm
+      height: 500mm
+- Rect:
+    id: door
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 225mm
+      y: 325mm
+      width: 400mm
+      height: 600mm

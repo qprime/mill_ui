@@ -24,10 +24,10 @@
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 215.000 665.000 L 340.000 465.000 L 465.000 665.000 Z" fill-rule="evenodd" />
     <path d="M 215.000 215.000 L 340.000 415.000 L 465.000 215.000 Z" fill-rule="evenodd" />
-    <path d="M 215.000 215.000 L 315.000 440.000 L 215.000 665.000 Z" fill-rule="evenodd" />
-    <path d="M 465.000 215.000 L 365.000 440.000 L 465.000 665.000 Z" fill-rule="evenodd" />
+    <path d="M 215.000 665.000 L 340.000 465.000 L 465.000 665.000 Z" fill-rule="evenodd" />
+    <path d="M 215.000 665.000 L 315.000 440.000 L 215.000 215.000 Z" fill-rule="evenodd" />
+    <path d="M 465.000 665.000 L 365.000 440.000 L 465.000 215.000 Z" fill-rule="evenodd" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
@@ -35,18 +35,18 @@
   <g id="EDGE_COLORS" class="edge-colors" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="215.0" y1="215.0" x2="215.0" y2="195.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="465.0" y1="215.0" x2="465.0" y2="195.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="215.0" y1="195.0" x2="465.0" y2="195.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="215.0,195.0 218.0,192.0 218.0,198.0" fill="#5ab9ea" />
-    <polygon points="465.0,195.0 462.0,192.0 462.0,198.0" fill="#5ab9ea" />
-    <text x="340.0" y="190.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">250.0mm</text>
-    <line x1="465.0" y1="215.0" x2="485.0" y2="215.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="465.0" y1="415.0" x2="485.0" y2="415.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="485.0" y1="215.0" x2="485.0" y2="415.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="485.0,215.0 482.0,218.0 488.0,218.0" fill="#5ab9ea" />
-    <polygon points="485.0,415.0 482.0,412.0 488.0,412.0" fill="#5ab9ea" />
-    <text x="490.0" y="315.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 490.0 315.0)">200.0mm</text>
+    <line x1="215.0" y1="465.0" x2="215.0" y2="445.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="465.0" y1="465.0" x2="465.0" y2="445.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="215.0" y1="445.0" x2="465.0" y2="445.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="215.0,445.0 218.0,442.0 218.0,448.0" fill="#5ab9ea" />
+    <polygon points="465.0,445.0 462.0,442.0 462.0,448.0" fill="#5ab9ea" />
+    <text x="340.0" y="440.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">250.0mm</text>
+    <line x1="465.0" y1="465.0" x2="485.0" y2="465.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="465.0" y1="665.0" x2="485.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="485.0" y1="465.0" x2="485.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="485.0,465.0 482.0,468.0 488.0,468.0" fill="#5ab9ea" />
+    <polygon points="485.0,665.0 482.0,662.0 488.0,662.0" fill="#5ab9ea" />
+    <text x="490.0" y="565.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 490.0 565.0)">200.0mm</text>
     <line x1="215.0" y1="215.0" x2="215.0" y2="175.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="315.0" y1="215.0" x2="315.0" y2="175.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="215.0" y1="175.0" x2="315.0" y2="175.0" stroke="#5ab9ea" stroke-width="1" />

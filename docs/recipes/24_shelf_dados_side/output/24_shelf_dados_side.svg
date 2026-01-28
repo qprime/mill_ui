@@ -24,11 +24,11 @@
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="140.0" y="280.5" width="600.0" height="19.0" />
-    <rect x="140.0" y="430.5" width="600.0" height="19.0" />
-    <rect x="140.0" y="580.5" width="600.0" height="19.0" />
-    <rect x="140.0" y="730.5" width="600.0" height="19.0" />
-    <rect x="140.0" y="880.5" width="600.0" height="19.0" />
+    <rect x="140.0" y="780.5" width="600.0" height="19.0" />
+    <rect x="140.0" y="630.5" width="600.0" height="19.0" />
+    <rect x="140.0" y="480.5" width="600.0" height="19.0" />
+    <rect x="140.0" y="330.5" width="600.0" height="19.0" />
+    <rect x="140.0" y="180.5" width="600.0" height="19.0" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
@@ -36,18 +36,18 @@
   <g id="EDGE_COLORS" class="edge-colors" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="140.0" y1="280.5" x2="140.0" y2="260.5" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="740.0" y1="280.5" x2="740.0" y2="260.5" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="260.5" x2="740.0" y2="260.5" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,260.5 143.0,257.5 143.0,263.5" fill="#5ab9ea" />
-    <polygon points="740.0,260.5 737.0,257.5 737.0,263.5" fill="#5ab9ea" />
-    <text x="440.0" y="255.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle">600.0mm</text>
-    <line x1="740.0" y1="280.5" x2="760.0" y2="280.5" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="740.0" y1="299.5" x2="760.0" y2="299.5" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="760.0" y1="280.5" x2="760.0" y2="299.5" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="760.0,280.5 757.0,283.5 763.0,283.5" fill="#5ab9ea" />
-    <polygon points="760.0,299.5 757.0,296.5 763.0,296.5" fill="#5ab9ea" />
-    <text x="765.0" y="290.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 765.0 290.0)">19.0mm</text>
+    <line x1="140.0" y1="780.5" x2="140.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="740.0" y1="780.5" x2="740.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="760.5" x2="740.0" y2="760.5" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,760.5 143.0,757.5 143.0,763.5" fill="#5ab9ea" />
+    <polygon points="740.0,760.5 737.0,757.5 737.0,763.5" fill="#5ab9ea" />
+    <text x="440.0" y="755.5" class="dimension-text" text-anchor="middle" dominant-baseline="middle">600.0mm</text>
+    <line x1="740.0" y1="780.5" x2="760.0" y2="780.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="740.0" y1="799.5" x2="760.0" y2="799.5" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="760.0" y1="780.5" x2="760.0" y2="799.5" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="760.0,780.5 757.0,783.5 763.0,783.5" fill="#5ab9ea" />
+    <polygon points="760.0,799.5 757.0,796.5 763.0,796.5" fill="#5ab9ea" />
+    <text x="765.0" y="790.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 765.0 790.0)">19.0mm</text>
     <line x1="140.0" y1="140.0" x2="140.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="740.0" y1="140.0" x2="740.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="140.0" y1="100.0" x2="740.0" y2="100.0" stroke="#5ab9ea" stroke-width="1" />
@@ -60,14 +60,14 @@
     <polygon points="780.0,140.0 777.0,143.0 783.0,143.0" fill="#5ab9ea" />
     <polygon points="780.0,940.0 777.0,937.0 783.0,937.0" fill="#5ab9ea" />
     <text x="785.0" y="540.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 785.0 540.0)">800.0mm</text>
-    <line x1="440.0" y1="140.0" x2="440.0" y2="280.5" stroke="#ff9500" stroke-width="1" />
+    <line x1="440.0" y1="140.0" x2="440.0" y2="180.5" stroke="#ff9500" stroke-width="1" />
     <path d="M 440.0,140.0 L 437.0,143.0 L 443.0,143.0 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 440.0,280.5 L 437.0,277.5 L 443.0,277.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="434.0" y="210.25" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 434.0 210.25)">140mm</text>
-    <line x1="440.0" y1="299.5" x2="440.0" y2="430.5" stroke="#ff9500" stroke-width="1" />
-    <path d="M 440.0,299.5 L 437.0,302.5 L 443.0,302.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <path d="M 440.0,430.5 L 437.0,427.5 L 443.0,427.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
-    <text x="434.0" y="365.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 434.0 365.0)">131mm</text>
+    <path d="M 440.0,180.5 L 437.0,177.5 L 443.0,177.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="434.0" y="160.25" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 434.0 160.25)">40mm</text>
+    <line x1="440.0" y1="199.5" x2="440.0" y2="330.5" stroke="#ff9500" stroke-width="1" />
+    <path d="M 440.0,199.5 L 437.0,202.5 L 443.0,202.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <path d="M 440.0,330.5 L 437.0,327.5 L 443.0,327.5 Z" class="gap-dimensions" stroke="none" fill="#ff9500" />
+    <text x="434.0" y="265.0" class="gap-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 434.0 265.0)">131mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>

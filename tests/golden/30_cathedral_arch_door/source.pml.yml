@@ -1,9 +1,24 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 500mm 800mm 19mm margin 0mm
-
-arch door width 500mm height 800mm radius 250mm
-    profile outside through
-    frame 60mm
-        raised_panel border 25mm border_depth 6mm field_depth 2mm
+Sheet:
+  width: 500mm
+  height: 800mm
+  thickness: 19mm
+children:
+- Arch:
+    width: 500mm
+    height: 800mm
+    radius: 250mm
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 60mm
+        children:
+        - RaisedPanel:
+            border_width: 25mm
+            border_depth: 6mm
+            field_depth: 2mm

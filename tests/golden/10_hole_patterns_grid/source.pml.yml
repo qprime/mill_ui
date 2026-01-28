@@ -1,11 +1,26 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 300mm 700mm 19mm margin 0mm
-
-# Shelf pin holes using compositional grid layout
-rect panel
-    inset 25mm
-        grid 16 2 gap 20mm
-            cell
-                circle diameter 5mm hole 12mm
+Sheet:
+  width: 300mm
+  height: 700mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Inset:
+        distance: 25mm
+        children:
+        - Grid:
+            rows: 16
+            cols: 2
+            gap: 20mm
+            children:
+            - Cell:
+                children:
+                - Circle:
+                    diameter: 5mm
+                    feature:
+                      type: hole
+                      depth: 12mm

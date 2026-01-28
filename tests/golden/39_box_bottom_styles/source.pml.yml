@@ -1,11 +1,20 @@
-# mill_ui: 55672bb
+# mill_ui: 85a7ff1
 # generated: 2026-01-27
 
-sheet 1200mm 800mm 6mm margin 10mm
-
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    clearance 0.15mm
-    bottom_style dado inset 6mm
-    labels
-    edge_colors
+Sheet:
+  width: 1200mm
+  height: 800mm
+  thickness: 6mm
+  margin: 10mm
+children:
+- Box:
+    outer_width: 200mm
+    outer_depth: 150mm
+    outer_height: 100mm
+    thickness: 6mm
+    finger_width: 12mm
+    clearance: 0.15mm
+    bottom_style: dado
+    dado_inset: 6mm
+    show_labels: true
+    show_edge_colors: true

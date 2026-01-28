@@ -1,17 +1,54 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 600mm 800mm 19mm margin 0mm
-
-rect panel
-    profile outside through
-    at 300mm 150mm width 600mm height 19mm
-        pocket 10mm
-    at 300mm 300mm width 600mm height 19mm
-        pocket 10mm
-    at 300mm 450mm width 600mm height 19mm
-        pocket 10mm
-    at 300mm 600mm width 600mm height 19mm
-        pocket 10mm
-    at 300mm 750mm width 600mm height 19mm
-        pocket 10mm
+Sheet:
+  width: 600mm
+  height: 800mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - AtPosition:
+        x: 300mm
+        y: 150mm
+        width: 600mm
+        height: 19mm
+        child:
+          Pocket:
+            depth: 10mm
+    - AtPosition:
+        x: 300mm
+        y: 300mm
+        width: 600mm
+        height: 19mm
+        child:
+          Pocket:
+            depth: 10mm
+    - AtPosition:
+        x: 300mm
+        y: 450mm
+        width: 600mm
+        height: 19mm
+        child:
+          Pocket:
+            depth: 10mm
+    - AtPosition:
+        x: 300mm
+        y: 600mm
+        width: 600mm
+        height: 19mm
+        child:
+          Pocket:
+            depth: 10mm
+    - AtPosition:
+        x: 300mm
+        y: 750mm
+        width: 600mm
+        height: 19mm
+        child:
+          Pocket:
+            depth: 10mm

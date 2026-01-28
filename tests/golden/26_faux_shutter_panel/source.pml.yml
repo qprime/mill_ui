@@ -1,10 +1,23 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 250mm 600mm 19mm margin 0mm
-
-rect panel
-    profile outside through
-    split_horizontal_gaps 12 gap 12mm
-        pocket 8mm
-        chamfer 4mm 2mm
+Sheet:
+  width: 250mm
+  height: 600mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - SplitHorizontalGaps:
+        count: 12
+        gap: 12mm
+        children:
+        - Pocket:
+            depth: 8mm
+        - Chamfer:
+            width: 4mm
+            depth: 2mm

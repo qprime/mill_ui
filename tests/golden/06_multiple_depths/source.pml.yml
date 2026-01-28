@@ -1,13 +1,65 @@
-# mill_ui: 866253f
-# generated: 2026-01-25
+# mill_ui: 85a7ff1
+# generated: 2026-01-27
 
-sheet 220mm 160mm 19mm margin 0mm
-
-# Mounting plate with multiple depths
-rect plate:outer at 110mm,80mm size 180mm,120mm profile through outside
-rect plate:recess at 110mm,80mm size 140mm,80mm pocket 3mm
-
-circle hole:1 at 50mm,40mm diameter 6mm hole 10mm
-circle hole:2 at 170mm,40mm diameter 6mm hole 10mm
-circle hole:3 at 50mm,120mm diameter 6mm hole 10mm
-circle hole:4 at 170mm,120mm diameter 6mm hole 10mm
+Sheet:
+  width: 220mm
+  height: 160mm
+  thickness: 19mm
+children:
+- Rect:
+    id: plate:outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 110mm
+      y: 80mm
+      width: 180mm
+      height: 120mm
+- Rect:
+    id: plate:recess
+    feature:
+      type: pocket
+      depth: 3mm
+    at:
+      x: 110mm
+      y: 80mm
+      width: 140mm
+      height: 80mm
+- Circle:
+    id: hole:1
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 50mm
+      y: 40mm
+- Circle:
+    id: hole:2
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 170mm
+      y: 40mm
+- Circle:
+    id: hole:3
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 50mm
+      y: 120mm
+- Circle:
+    id: hole:4
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 170mm
+      y: 120mm

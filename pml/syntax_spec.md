@@ -516,7 +516,7 @@ Multi-panel assembly with automatic topology, joinery selection, and part layout
 | joinery | no | finger | Joint type (finger, butt) |
 | finger_width | no | - | Target finger width (mutually exclusive with finger_count) |
 | finger_count | no | - | Explicit finger count (mutually exclusive with finger_width) |
-| clearance | no | 0.1mm | Gap for joint fit |
+| clearance | no | 0.12mm | Gap for joint fit |
 | include_top | no | false (box), true (carcass) | Generate top panel |
 | include_bottom | no | true | Generate bottom panel |
 | bottom_style | no | captured | Bottom connection (captured, finger, dado) - box only |

@@ -460,7 +460,7 @@ def format_node(node: Any) -> dict[str, Any]:
             result["finger_width"] = dim(node.finger_width_mm)
         if node.finger_count is not None:
             result["finger_count"] = node.finger_count
-        if node.clearance_mm != 0.1:
+        if node.clearance_mm != 0.12:
             result["clearance"] = dim(node.clearance_mm)
         if node.include_top:
             result["include_top"] = True

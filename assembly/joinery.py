@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
-from joints.profiles import JointProfile, FingerJointProfile
 from assembly.topology import MatingEdge, FaceSpec
+from assembly.notches import NotchSpec, finger_joints_to_notches
 
 JoineryType = Literal["butt", "finger"]
 
@@ -16,13 +16,13 @@ class JoineryStrategy(Protocol):
 
     def supports_angle(self, dihedral_deg: float) -> bool: ...
 
-    def compute_profiles(
+    def compute_notches(
         self,
         edge: MatingEdge,
         faces: dict[str, FaceSpec],
         phase_a: int,
         phase_b: int,
-    ) -> tuple[JointProfile | None, JointProfile | None]: ...
+    ) -> tuple[list[NotchSpec], list[NotchSpec]]: ...
 
 
 @dataclass(frozen=True)
@@ -32,21 +32,21 @@ class ButtJoineryStrategy:
     def supports_angle(self, dihedral_deg: float) -> bool:
         return True
 
-    def compute_profiles(
+    def compute_notches(
         self,
         edge: MatingEdge,
         faces: dict[str, FaceSpec],
         phase_a: int,
         phase_b: int,
-    ) -> tuple[JointProfile | None, JointProfile | None]:
-        return (None, None)
+    ) -> tuple[list[NotchSpec], list[NotchSpec]]:
+        return ([], [])
 
 
 @dataclass(frozen=True)
 class FingerJoineryStrategy:
     finger_width_mm: float | None = None
     finger_count: int | None = None
-    clearance_mm: float = 0.1
+    clearance_mm: float = 0.12
     joinery_type: JoineryType = "finger"
 
     def __post_init__(self) -> None:
@@ -56,26 +56,36 @@ class FingerJoineryStrategy:
     def supports_angle(self, dihedral_deg: float) -> bool:
         return abs(dihedral_deg - 90.0) < 1.0
 
-    def compute_profiles(
+    def compute_notches(
         self,
         edge: MatingEdge,
         faces: dict[str, FaceSpec],
         phase_a: int,
         phase_b: int,
-    ) -> tuple[JointProfile | None, JointProfile | None]:
-        depth = faces[edge.face_a].thickness_mm
-        profile_a = FingerJointProfile(
+    ) -> tuple[list[NotchSpec], list[NotchSpec]]:
+        face_a = faces[edge.face_a]
+        face_b = faces[edge.face_b]
+        edge_length = face_a.edge_length(edge.edge_index_a)
+        depth = face_a.thickness_mm
+
+        notches_a = finger_joints_to_notches(
+            edge_index=edge.edge_index_a,
+            edge_length=edge_length,
             depth_mm=depth,
-            width_mm=self.finger_width_mm,
-            count=self.finger_count,
             phase=phase_a,
-            clearance_mm=self.clearance_mm,
-        )
-        profile_b = FingerJointProfile(
-            depth_mm=depth,
             width_mm=self.finger_width_mm,
             count=self.finger_count,
-            phase=phase_b,
             clearance_mm=self.clearance_mm,
         )
-        return (profile_a, profile_b)
+
+        notches_b = finger_joints_to_notches(
+            edge_index=edge.edge_index_b,
+            edge_length=edge_length,
+            depth_mm=depth,
+            phase=phase_b,
+            width_mm=self.finger_width_mm,
+            count=self.finger_count,
+            clearance_mm=self.clearance_mm,
+        )
+
+        return (notches_a, notches_b)

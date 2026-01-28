@@ -91,7 +91,7 @@ from assembly import (
     pyramid_topology,
     generate_assembly_panels,
 )
-from generators.panels import JointedPanelParams, jointed_panel_generator
+from generators.panels import NotchedPanelParams, notched_panel_generator
 
 
 # Type alias for node handlers
@@ -1746,21 +1746,15 @@ class LayoutResolver:
                 y_cursor + panel_height / 2,
             )
 
-            filtered_edge_joints = {
-                edge_name_map.get(idx, f"edge_{idx}"): profile
-                for idx, profile in spec.edge_joints.items()
-                if profile is not None
-            }
-
-            panel_params = JointedPanelParams(
+            panel_params = NotchedPanelParams(
                 width_mm=panel_width,
                 height_mm=panel_height,
-                edge_joints=filtered_edge_joints,
+                notches=spec.notches,
                 part_name=spec.name,
             )
 
             panel_label = spec.name.upper().replace("_", " ") if node.show_labels else None
-            panel_items = jointed_panel_generator(
+            panel_items = notched_panel_generator(
                 panel_params,
                 center=panel_center,
                 shape_id_prefix=self._next_shape_id(f"assembly_{spec.name}"),
@@ -1780,7 +1774,8 @@ class LayoutResolver:
                 y_min = y_cursor
                 y_max = y_cursor + panel_height
 
-                for edge_idx in spec.edge_joints.keys():
+                edges_with_notches = set(n.edge_index for n in spec.notches)
+                for edge_idx in edges_with_notches:
                     edge_name = edge_name_map.get(edge_idx, f"edge_{edge_idx}")
                     color = edge_colors.get(edge_name, "#ffffff")
                     if edge_name == "top":

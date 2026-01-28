@@ -9,11 +9,11 @@ from assembly import (
     frameless_cabinet_topology,
     generate_assembly_panels,
 )
-from joints.profiles import FingerJointProfile
+from assembly.notches import NotchSpec
 
 
 class TestGenerateAssemblyPanels:
-    def test_butt_joint_box_no_edge_joints(self):
+    def test_butt_joint_box_no_notches(self):
         topo = box_topology(
             width_mm=200,
             depth_mm=150,
@@ -31,9 +31,9 @@ class TestGenerateAssemblyPanels:
         assert len(panels) == 5
 
         for panel in panels:
-            assert len(panel.edge_joints) == 0
+            assert len(panel.notches) == 0
 
-    def test_finger_joint_box_has_profiles(self):
+    def test_finger_joint_box_has_notches(self):
         topo = box_topology(
             width_mm=200,
             depth_mm=150,
@@ -50,10 +50,13 @@ class TestGenerateAssemblyPanels:
         panels = generate_assembly_panels(params)
 
         front_panel = next(p for p in panels if p.name == "front")
-        assert 1 in front_panel.edge_joints
-        assert 3 in front_panel.edge_joints
-        assert isinstance(front_panel.edge_joints[1], FingerJointProfile)
-        assert isinstance(front_panel.edge_joints[3], FingerJointProfile)
+        front_notches = front_panel.notches
+        assert len(front_notches) > 0
+        edge_indices = set(n.edge_index for n in front_notches)
+        assert 1 in edge_indices
+        assert 3 in edge_indices
+        for notch in front_notches:
+            assert isinstance(notch, NotchSpec)
 
     def test_panel_polygons_match_faces(self):
         topo = box_topology(
@@ -115,12 +118,14 @@ class TestGenerateAssemblyPanels:
         front = panel_by_name["front"]
         left = panel_by_name["left_side"]
 
-        front_left_profile = front.edge_joints.get(3)
-        left_right_profile = left.edge_joints.get(1)
+        front_notches_edge3 = [n for n in front.notches if n.edge_index == 3]
+        left_notches_edge1 = [n for n in left.notches if n.edge_index == 1]
 
-        assert front_left_profile is not None
-        assert left_right_profile is not None
-        assert front_left_profile.phase != left_right_profile.phase
+        assert len(front_notches_edge3) > 0
+        assert len(left_notches_edge1) > 0
+        front_positions = set(n.u_start_mm for n in front_notches_edge3)
+        left_positions = set(n.u_start_mm for n in left_notches_edge1)
+        assert front_positions != left_positions
 
     def test_edge_overrides(self):
         topo = box_topology(
@@ -141,7 +146,8 @@ class TestGenerateAssemblyPanels:
         panels = generate_assembly_panels(params)
 
         front = next(p for p in panels if p.name == "front")
-        assert 1 not in front.edge_joints or front.edge_joints.get(1) is None
+        edge1_notches = [n for n in front.notches if n.edge_index == 1]
+        assert len(edge1_notches) == 0
 
 
 class TestFramelessCabinetTopology:

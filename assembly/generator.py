@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from joints.profiles import JointProfile
 from assembly.topology import AssemblyTopology, MatingFeature
 from assembly.joinery import JoineryStrategy
+from assembly.notches import NotchSpec
 
 
 @dataclass(frozen=True)
@@ -21,8 +21,8 @@ class PanelSpec:
     name: str
     polygon: tuple[tuple[float, float], ...]
     thickness_mm: float
-    edge_joints: dict[int, JointProfile]
     dados: tuple[DadoSpec, ...] = ()
+    notches: tuple[NotchSpec, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -37,8 +37,8 @@ def generate_assembly_panels(params: AssemblyParams) -> list[PanelSpec]:
 
     phases = params.topology.compute_phase_assignment()
 
-    face_edge_joints: dict[str, dict[int, JointProfile]] = {
-        face_name: {} for face_name in params.topology.faces
+    face_notches: dict[str, list[NotchSpec]] = {
+        face_name: [] for face_name in params.topology.faces
     }
 
     for mating_edge in params.topology.mating_edges:
@@ -65,17 +65,15 @@ def generate_assembly_panels(params: AssemblyParams) -> list[PanelSpec]:
         phase_a = phases.get((mating_edge.face_a, mating_edge.edge_index_a), 0)
         phase_b = phases.get((mating_edge.face_b, mating_edge.edge_index_b), 1)
 
-        profile_a, profile_b = strategy.compute_profiles(
+        notches_a, notches_b = strategy.compute_notches(
             mating_edge,
             params.topology.faces,
             phase_a,
             phase_b,
         )
 
-        if profile_a is not None:
-            face_edge_joints[mating_edge.face_a][mating_edge.edge_index_a] = profile_a
-        if profile_b is not None:
-            face_edge_joints[mating_edge.face_b][mating_edge.edge_index_b] = profile_b
+        face_notches[mating_edge.face_a].extend(notches_a)
+        face_notches[mating_edge.face_b].extend(notches_b)
 
     face_dados: dict[str, list[DadoSpec]] = {
         face_name: [] for face_name in params.topology.faces
@@ -97,8 +95,8 @@ def generate_assembly_panels(params: AssemblyParams) -> list[PanelSpec]:
             name=face_name,
             polygon=face_spec.polygon,
             thickness_mm=face_spec.thickness_mm,
-            edge_joints=face_edge_joints[face_name],
             dados=tuple(face_dados[face_name]),
+            notches=tuple(face_notches[face_name]),
         )
         panels.append(panel)
 

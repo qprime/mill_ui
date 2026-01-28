@@ -116,6 +116,50 @@ def _offset_rounded_rect_shape(w: float, h: float, radii: Dict[str, float], cent
     radii2 = {k: max(0.0, v + offset) for k, v in radii.items()}
     return rounded_rect_shape(w2, h2, radii2, center)
 
+def _polyline_shape(points: List, center: Tuple[float, float], offset: float = 0.0) -> Any:
+    from cam.shape import Shape2D
+    cx, cy = center
+    abs_points = [(float(p[0]) + cx, float(p[1]) + cy) for p in points if isinstance(p, (tuple, list)) and len(p) >= 2]
+    if len(abs_points) < 2:
+        return None
+    if abs(offset) > 1e-9:
+        n = len(abs_points)
+        offset_points = []
+        for i in range(n):
+            if i == 0:
+                dx, dy = abs_points[1][0] - abs_points[0][0], abs_points[1][1] - abs_points[0][1]
+            elif i == n - 1:
+                dx, dy = abs_points[-1][0] - abs_points[-2][0], abs_points[-1][1] - abs_points[-2][1]
+            else:
+                p0 = abs_points[i - 1]
+                p1 = abs_points[i]
+                p2 = abs_points[i + 1]
+                dx1, dy1 = p1[0] - p0[0], p1[1] - p0[1]
+                dx2, dy2 = p2[0] - p1[0], p2[1] - p1[1]
+                len1 = (dx1**2 + dy1**2) ** 0.5
+                len2 = (dx2**2 + dy2**2) ** 0.5
+                if len1 < 1e-9:
+                    dx, dy = dx2, dy2
+                elif len2 < 1e-9:
+                    dx, dy = dx1, dy1
+                else:
+                    nx1, ny1 = -dy1 / len1, dx1 / len1
+                    nx2, ny2 = -dy2 / len2, dx2 / len2
+                    nx, ny = (nx1 + nx2) / 2, (ny1 + ny2) / 2
+                    nlen = (nx**2 + ny**2) ** 0.5
+                    if nlen > 1e-9:
+                        offset_points.append((abs_points[i][0] + nx / nlen * offset, abs_points[i][1] + ny / nlen * offset))
+                        continue
+                    dx, dy = dx1, dy1
+            seg_len = (dx**2 + dy**2) ** 0.5
+            if seg_len < 1e-9:
+                offset_points.append(abs_points[i])
+            else:
+                nx, ny = -dy / seg_len, dx / seg_len
+                offset_points.append((abs_points[i][0] + nx * offset, abs_points[i][1] + ny * offset))
+        abs_points = offset_points
+    return Shape2D([Vec2(p[0], p[1]) for p in abs_points])
+
 def hints_to_moves(
     hints: Dict[str, Any],
     *,
@@ -230,6 +274,13 @@ def hints_to_moves(
                 'bl': float(geom.get('radius_bl_mm', geom.get('radius_mm', 0.0))),
             }
             shape = _offset_rounded_rect_shape(w, h, radii, _ensure_center(rec), off) if off != 0.0 else _rounded_rect_shape(w, h, radii, _ensure_center(rec))
+            if shape is None:
+                continue
+        elif rec.get("shape") == "Polyline":
+            points = geom.get("points", [])
+            if not points:
+                continue
+            shape = _polyline_shape(points, _ensure_center(rec), off)
             if shape is None:
                 continue
         else:

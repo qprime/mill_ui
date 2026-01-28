@@ -1,19 +1,19 @@
 {
   "golden": {
-    "recipe_name": "39_box_bottom_styles",
-    "created_at": "2026-01-28T14:52:29.610269+00:00"
+    "recipe_name": "40_frameless_cabinet",
+    "created_at": "2026-01-28T14:52:29.626869+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.24,
+    "extraction_time_ms": 0.76,
     "document": {
-      "width_mm": 1480.0,
-      "height_mm": 1080.0,
+      "width_mm": 2720.0,
+      "height_mm": 1500.0,
       "viewbox": [
         0.0,
         0.0,
-        1480.0,
-        1080.0
+        2720.0,
+        1500.0
       ]
     },
     "layers": {
@@ -45,21 +45,21 @@
           "elements": []
         },
         "DIMENSIONS": {
-          "element_count": 60,
+          "element_count": 84,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 30,
-          "polygon_count": 20,
-          "text_count": 10,
+          "line_count": 42,
+          "polygon_count": 28,
+          "text_count": 14,
           "elements": []
         },
         "EDGE_COLORS": {
-          "element_count": 8,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 8,
+          "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": []
@@ -85,13 +85,13 @@
           "elements": []
         },
         "LABELS": {
-          "element_count": 5,
+          "element_count": 7,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 7,
           "elements": []
         },
         "LEGEND": {
@@ -105,18 +105,18 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 46,
+          "element_count": 14,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 46,
+          "text_count": 14,
           "elements": []
         },
         "POCKET_REGIONS": {
-          "element_count": 4,
-          "rect_count": 4,
+          "element_count": 8,
+          "rect_count": 8,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
@@ -127,69 +127,129 @@
               "element_type": "rect",
               "bounds": [
                 150.0,
-                918.0,
-                350.0,
-                924.0
+                868.0,
+                500.0,
+                874.0
               ],
               "center": [
-                250.0,
-                921.0
+                325.0,
+                871.0
               ],
-              "width": 200.0,
+              "width": 350.0,
               "height": 6.0
             },
             {
               "element_type": "rect",
               "bounds": [
-                360.0,
-                918.0,
-                560.0,
-                924.0
+                150.0,
+                1168.3333,
+                500.0,
+                1186.3333
               ],
               "center": [
-                460.0,
-                921.0
+                325.0,
+                1177.3333
               ],
-              "width": 200.0,
+              "width": 350.0,
+              "height": 18.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                150.0,
+                1013.6667,
+                500.0,
+                1031.6667
+              ],
+              "center": [
+                325.0,
+                1022.6667
+              ],
+              "width": 350.0,
+              "height": 18.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                510.0,
+                868.0,
+                860.0,
+                874.0
+              ],
+              "center": [
+                685.0,
+                871.0
+              ],
+              "width": 350.0,
               "height": 6.0
             },
             {
               "element_type": "rect",
               "bounds": [
-                570.0,
-                918.0,
-                708.0,
-                924.0
+                510.0,
+                1168.3333,
+                860.0,
+                1186.3333
               ],
               "center": [
-                639.0,
-                921.0
+                685.0,
+                1177.3333
               ],
-              "width": 138.0,
+              "width": 350.0,
+              "height": 18.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                510.0,
+                1013.6667,
+                860.0,
+                1031.6667
+              ],
+              "center": [
+                685.0,
+                1022.6667
+              ],
+              "width": 350.0,
+              "height": 18.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                870.0,
+                1018.0,
+                1234.0,
+                1024.0
+              ],
+              "center": [
+                1052.0,
+                1021.0
+              ],
+              "width": 364.0,
               "height": 6.0
             },
             {
               "element_type": "rect",
               "bounds": [
-                718.0,
-                918.0,
-                856.0,
-                924.0
+                1244.0,
+                1018.0,
+                1608.0,
+                1024.0
               ],
               "center": [
-                787.0,
-                921.0
+                1426.0,
+                1021.0
               ],
-              "width": 138.0,
+              "width": 364.0,
               "height": 6.0
             }
           ]
         },
         "PROFILE_CUTS": {
-          "element_count": 41,
+          "element_count": 7,
           "rect_count": 0,
           "circle_count": 0,
-          "path_count": 5,
+          "path_count": 7,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -198,65 +258,91 @@
               "element_type": "path",
               "bounds": [
                 150.0,
-                836.0,
-                350.0,
-                930.0
+                850.0,
+                500.0,
+                1350.0
               ],
               "center": [
-                250.0,
-                883.0
+                325.0,
+                1100.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                360.0,
-                836.0,
-                560.0,
-                930.0
+                510.0,
+                850.0,
+                860.0,
+                1350.0
               ],
               "center": [
-                460.0,
-                883.0
+                685.0,
+                1100.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                570.0,
-                836.0,
-                708.0,
-                930.0
+                870.0,
+                1018.0,
+                1234.0,
+                1350.0
               ],
               "center": [
-                639.0,
-                883.0
+                1052.0,
+                1184.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                718.0,
-                836.0,
-                856.0,
-                930.0
+                1244.0,
+                1018.0,
+                1608.0,
+                1350.0
               ],
               "center": [
-                787.0,
-                883.0
+                1426.0,
+                1184.0
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                866.0,
-                786.0,
-                1060.0,
-                930.0
+                1618.0,
+                874.0,
+                1994.0,
+                1350.0
               ],
               "center": [
-                963.0,
-                858.0
+                1806.0,
+                1112.0
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                2004.0,
+                1018.0,
+                2380.0,
+                1350.0
+              ],
+              "center": [
+                2192.0,
+                1184.0
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                150.0,
+                508.0,
+                526.0,
+                840.0
+              ],
+              "center": [
+                338.0,
+                674.0
               ]
             }
           ]
@@ -275,15 +361,15 @@
               "bounds": [
                 140.0,
                 140.0,
-                1340.0,
-                940.0
+                2580.0,
+                1360.0
               ],
               "center": [
-                740.0,
-                540.0
+                1360.0,
+                750.0
               ],
-              "width": 1200.0,
-              "height": 800.0
+              "width": 2440.0,
+              "height": 1220.0
             }
           ]
         },
@@ -310,19 +396,19 @@
       }
     },
     "paths": {
-      "total_count": 10,
-      "closed_count": 10,
+      "total_count": 16,
+      "closed_count": 16,
       "open_count": 0,
-      "total_length_mm": 2260.0,
+      "total_length_mm": 7916.0,
       "by_layer": {
         "PROFILE_CUTS": {
-          "count": 5,
-          "closed": 5,
-          "length_mm": 2260.0
+          "count": 7,
+          "closed": 7,
+          "length_mm": 7916.0
         },
         "POCKET_REGIONS": {
-          "count": 4,
-          "closed": 4,
+          "count": 8,
+          "closed": 8,
           "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
@@ -334,75 +420,47 @@
     },
     "bounds": {
       "x_min": 140.0,
-      "x_max": 1363.0,
+      "x_max": 2603.0,
       "y_min": 38.0,
-      "y_max": 940.0
+      "y_max": 1360.0
     },
     "text_elements": {
-      "count": 69,
+      "count": 43,
       "dimension_labels": [
-        "138.0mm",
-        "138.0mm",
-        "144.0mm",
-        "194.0mm",
-        "200.0mm",
-        "200.0mm",
+        "18.0mm",
+        "332.0mm",
+        "332.0mm",
+        "350.0mm",
+        "350.0mm",
+        "350.0mm",
+        "364.0mm",
+        "364.0mm",
+        "376.0mm",
+        "376.0mm",
+        "476.0mm",
+        "500.0mm",
         "6.0mm",
         "6.0mm",
-        "94.0mm",
-        "94.0mm",
-        "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm"
+        "Sheet: 2440.0 \u00d7 1220.0 \u00d7 18.0mm"
       ],
       "depth_annotations": [
-        "\u2022 pocket: 3.0"
+        "\u2022 pocket: 6.0"
       ],
       "notes_text": [
         "NOTES",
-        "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm",
-        "Features: 41 profiles, 4 pockets",
+        "Sheet: 2440.0 \u00d7 1220.0 \u00d7 18.0mm",
+        "Features: 7 profiles, 8 pockets",
         "Depths:",
-        "\u2022 pocket: 3.0",
-        "Parts (40):",
-        "\u2022 assembly_back_2_back_notch_0",
-        "\u2022 assembly_back_2_back_notch_1",
-        "\u2022 assembly_back_2_back_notch_2",
-        "\u2022 assembly_back_2_back_notch_3",
-        "\u2022 assembly_back_2_back_notch_4",
-        "\u2022 assembly_back_2_back_notch_5",
-        "\u2022 assembly_back_2_back_notch_6",
-        "\u2022 assembly_back_2_back_notch_7",
-        "\u2022 assembly_back_dado_3",
-        "\u2022 assembly_front_0_front_notch_0",
-        "\u2022 assembly_front_0_front_notch_1",
-        "\u2022 assembly_front_0_front_notch_2",
-        "\u2022 assembly_front_0_front_notch_3",
-        "\u2022 assembly_front_0_front_notch_4",
-        "\u2022 assembly_front_0_front_notch_5",
-        "\u2022 assembly_front_0_front_notch_6",
-        "\u2022 assembly_front_0_front_notch_7",
-        "\u2022 assembly_front_dado_1",
-        "\u2022 assembly_left_side_4_left_side_notch_0",
-        "\u2022 assembly_left_side_4_left_side_notch_1",
-        "\u2022 assembly_left_side_4_left_side_notch_2",
-        "\u2022 assembly_left_side_4_left_side_notch_3",
-        "\u2022 assembly_left_side_4_left_side_notch_4",
-        "\u2022 assembly_left_side_4_left_side_notch_5",
-        "\u2022 assembly_left_side_4_left_side_notch_6",
-        "\u2022 assembly_left_side_4_left_side_notch_7",
-        "\u2022 assembly_left_side_4_left_side_notch_8",
-        "\u2022 assembly_left_side_4_left_side_notch_9",
-        "\u2022 assembly_left_side_dado_5",
-        "\u2022 assembly_right_side_6_right_side_notch_0",
-        "\u2022 assembly_right_side_6_right_side_notch_1",
-        "\u2022 assembly_right_side_6_right_side_notch_2",
-        "\u2022 assembly_right_side_6_right_side_notch_3",
-        "\u2022 assembly_right_side_6_right_side_notch_4",
-        "\u2022 assembly_right_side_6_right_side_notch_5",
-        "\u2022 assembly_right_side_6_right_side_notch_6",
-        "\u2022 assembly_right_side_6_right_side_notch_7",
-        "\u2022 assembly_right_side_6_right_side_notch_8",
-        "\u2022 assembly_right_side_6_right_side_notch_9",
-        "\u2022 assembly_right_side_dado_7"
+        "\u2022 pocket: 6.0",
+        "Parts (8):",
+        "\u2022 assembly_bottom_dado_11",
+        "\u2022 assembly_left_side_dado_1",
+        "\u2022 assembly_left_side_dado_2",
+        "\u2022 assembly_left_side_dado_3",
+        "\u2022 assembly_right_side_dado_5",
+        "\u2022 assembly_right_side_dado_6",
+        "\u2022 assembly_right_side_dado_7",
+        "\u2022 assembly_top_dado_9"
       ]
     },
     "circles": {
@@ -410,78 +468,105 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 6,
+      "count": 10,
       "dimensions": [
         [
           15.0,
           8.0
         ],
         [
-          138.0,
+          350.0,
           6.0
         ],
         [
-          138.0,
+          350.0,
           6.0
         ],
         [
-          200.0,
+          350.0,
+          18.0
+        ],
+        [
+          350.0,
+          18.0
+        ],
+        [
+          350.0,
+          18.0
+        ],
+        [
+          350.0,
+          18.0
+        ],
+        [
+          364.0,
           6.0
         ],
         [
-          200.0,
+          364.0,
           6.0
         ],
         [
-          1200.0,
-          800.0
+          2440.0,
+          1220.0
         ]
       ]
     }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.571,
+    "extraction_time_ms": 1.0342,
     "summary": {
-      "total_lines": 353,
-      "comment_lines": 25,
-      "motion_lines": 262,
+      "total_lines": 1225,
+      "comment_lines": 45,
+      "motion_lines": 983,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 218
+      "spindle_lines": 9,
+      "feed_lines": 819
     },
     "motion": {
-      "g0_count": 90,
-      "g1_count": 172,
+      "g0_count": 331,
+      "g1_count": 652,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1751.9533999999999,
-      "total_feed_distance_mm": 16680.576
+      "total_rapid_distance_mm": 8642.682700000001,
+      "total_feed_distance_mm": 166520.884
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -6.0,
+      "max_plunge_z_mm": -18.0,
       "unique_cutting_depths": [
+        -18.0,
+        -17.463,
+        -15.875,
+        -14.288,
+        -12.7,
+        -11.113,
+        -9.525,
+        -7.938,
+        -6.35,
         -6.0,
         -4.762,
         -3.175,
         -3.0,
         -1.587
       ],
-      "depth_count": 5,
-      "max_single_plunge_mm": 12.0
+      "depth_count": 14,
+      "max_single_plunge_mm": 24.0
     },
     "xy_bounds": {
       "x_min": 0.0,
-      "x_max": 918.877,
+      "x_max": 2238.877,
       "y_min": 0.0,
-      "y_max": 152.877
+      "y_max": 850.877
     },
     "feeds": {
-      "min_feed_rate": 300.0,
+      "min_feed_rate": 250.0,
       "max_feed_rate": 900.0,
       "feed_rates_used": [
+        250.0,
         300.0,
+        700.0,
         900.0
       ]
     },
@@ -489,6 +574,7 @@
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
+        10000,
         14000
       ]
     },
@@ -499,34 +585,34 @@
       "total_passes": 16,
       "operation_names": [
         "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "pocket_raster so=1.270 sd=1.587 depth=6.000",
         "BEGIN finish profile pass",
         "profile_outline",
         "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "pocket_raster so=1.270 sd=1.587 depth=6.000",
         "BEGIN finish profile pass",
         "profile_outline",
         "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "pocket_raster so=1.270 sd=1.587 depth=6.000",
         "BEGIN finish profile pass",
         "profile_outline",
         "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "pocket_raster so=1.270 sd=1.587 depth=6.000",
         "BEGIN finish profile pass",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 21.023400000000002,
-      "feed_time_s": 1668.0576,
-      "total_time_s": 1689.0810000000001
+      "rapid_time_s": 103.71209999999999,
+      "feed_time_s": 17022.5784,
+      "total_time_s": 17126.290500000003
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -6.0,
+      "max_cutting_depth_mm": -18.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 2
+    "file_count": 3
   }
 }

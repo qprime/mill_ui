@@ -22,6 +22,13 @@ from assembly.primitives import (
     prism_topology,
     pyramid_topology,
 )
+from assembly.notches import (
+    NotchSpec,
+    finger_joints_to_notches,
+    notch_to_polyline,
+    validate_notch_fits_edge,
+    validate_notches_no_overlap,
+)
 
 __all__ = [
     "AssemblyParams",
@@ -34,10 +41,15 @@ __all__ = [
     "JoineryType",
     "MatingEdge",
     "MatingFeature",
+    "NotchSpec",
     "PanelSpec",
     "box_topology",
+    "finger_joints_to_notches",
     "frameless_cabinet_topology",
     "generate_assembly_panels",
+    "notch_to_polyline",
     "prism_topology",
     "pyramid_topology",
+    "validate_notch_fits_edge",
+    "validate_notches_no_overlap",
 ]

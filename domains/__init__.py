@@ -59,11 +59,6 @@ from domains.transforms import (
     get_translation_between,
 )
 
-from domains.edge_joints import (
-    apply_edge_joint,
-    apply_edge_joints,
-)
-
 __all__ = [
     # Domain types
     "Domain",
@@ -81,7 +76,4 @@ __all__ = [
     "compose_transforms",
     "get_rotation_between",
     "get_translation_between",
-    # Edge joint functions
-    "apply_edge_joint",
-    "apply_edge_joints",
 ]

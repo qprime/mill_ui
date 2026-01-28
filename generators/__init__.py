@@ -116,8 +116,8 @@ from generators.svg import (
 
 # Panel generators
 from generators.panels import (
-    JointedPanelParams,
-    jointed_panel_generator,
+    NotchedPanelParams,
+    notched_panel_generator,
 )
 
 
@@ -162,6 +162,6 @@ __all__ = [
     "shapely_to_item",
     "iter_polygons",
     # Panel generators
-    "JointedPanelParams",
-    "jointed_panel_generator",
+    "NotchedPanelParams",
+    "notched_panel_generator",
 ]

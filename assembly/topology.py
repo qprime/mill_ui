@@ -38,7 +38,7 @@ class MatingEdge:
 @dataclass(frozen=True)
 class MatingFeature:
     face: str
-    kind: Literal["dado", "pilot_holes"]
+    kind: Literal["dado", "pilot_holes", "notch"]
     params: dict[str, Any]
     mates_with: str | None = None
 

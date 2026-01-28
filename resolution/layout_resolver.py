@@ -55,8 +55,8 @@ from layout_ast.compositional import (
     EngraveTextGen,
     # Waste cuts directive
     WasteCuts,
-    # Box assembly
-    Box,
+    # Assembly
+    Assembly,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -81,7 +81,15 @@ from generators.area.measurement_grid import measurement_grid_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.area.engrave_text import engrave_text_at_position
 from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
-from generators.assemblies import BoxParams, FingerStrategy, compute_box_panels
+from assembly import (
+    AssemblyParams,
+    AssemblyTopology,
+    ButtJoineryStrategy,
+    FingerJoineryStrategy,
+    box_topology,
+    pyramid_topology,
+    generate_assembly_panels,
+)
 from generators.panels import JointedPanelParams, jointed_panel_generator
 
 
@@ -1624,48 +1632,73 @@ class LayoutResolver:
             else:
                 self._resolve_node(child, triangle_region, items, params)
 
-    def _handle_box(
+    def _handle_assembly(
         self,
-        node: Box,
+        node: Assembly,
         region: ResolvedRegion,
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle Box: Generate all panels for a finger-jointed or butt-jointed box.
+        """Handle Assembly: Generate all panels for a multi-panel assembly.
 
-        Creates panel specifications using compute_box_panels, then generates
-        profile items for each panel using jointed_panel_generator. Panels are
+        Creates topology using the appropriate factory (box_topology, pyramid_topology),
+        then generates panel specifications using the new assembly system. Panels are
         laid out in a grid within the region.
-
-        For panels with dado specs, also generates pocket items for the grooves.
         """
+        topology_type = node.topology
+
+        if topology_type == "box":
+            topology = box_topology(
+                width_mm=node.width_mm,
+                depth_mm=node.depth_mm,
+                height_mm=node.height_mm,
+                thickness_mm=node.thickness_mm,
+                joinery=node.joinery,
+                include_top=node.include_top,
+                include_bottom=node.include_bottom,
+                bottom_style=node.bottom_style,
+                top_style=node.top_style,
+                dado_inset_mm=node.dado_inset_mm,
+                dado_drop_mm=node.dado_drop_mm,
+            )
+        elif topology_type == "pyramid":
+            if node.base_mm is None or node.slant_height_mm is None:
+                raise ValueError("Pyramid topology requires base and slant_height parameters")
+            topology = pyramid_topology(
+                base_mm=node.base_mm,
+                slant_height_mm=node.slant_height_mm,
+                thickness_mm=node.thickness_mm,
+            )
+        else:
+            raise ValueError(f"Unsupported topology type: {topology_type}")
+
         if node.joinery == "finger":
             if node.finger_count is not None:
-                strategy = FingerStrategy(mode="by_count", value=node.finger_count)
+                joinery_strategy = FingerJoineryStrategy(
+                    finger_count=node.finger_count,
+                    clearance_mm=node.clearance_mm,
+                )
             elif node.finger_width_mm is not None:
-                strategy = FingerStrategy(mode="by_size", value=node.finger_width_mm)
+                joinery_strategy = FingerJoineryStrategy(
+                    finger_width_mm=node.finger_width_mm,
+                    clearance_mm=node.clearance_mm,
+                )
             else:
-                strategy = FingerStrategy(mode="by_size", value=12.0)
+                joinery_strategy = FingerJoineryStrategy(
+                    finger_width_mm=12.0,
+                    clearance_mm=node.clearance_mm,
+                )
         else:
-            strategy = None
+            joinery_strategy = ButtJoineryStrategy()
 
-        box_params = BoxParams(
-            outer_width_mm=node.outer_width_mm,
-            outer_depth_mm=node.outer_depth_mm,
-            outer_height_mm=node.outer_height_mm,
-            thickness_mm=node.thickness_mm,
-            joinery=node.joinery,
-            finger_strategy=strategy,
-            clearance_mm=node.clearance_mm,
-            include_lid=node.include_lid,
-            include_bottom=node.include_bottom,
-            bottom_style=node.bottom_style,
-            top_style=node.top_style,
-            dado_inset_mm=node.dado_inset_mm,
-            dado_drop_mm=node.dado_drop_mm,
+        assembly_params = AssemblyParams(
+            topology=topology,
+            joinery_strategy=joinery_strategy,
         )
 
-        panel_specs = compute_box_panels(box_params)
+        panel_specs = generate_assembly_panels(assembly_params)
+
+        edge_name_map = {0: "bottom", 1: "right", 2: "top", 3: "left"}
 
         gap = node.layout_gap_mm
         x_cursor = region.x_min
@@ -1673,25 +1706,33 @@ class LayoutResolver:
         row_height = 0.0
 
         for spec in panel_specs:
-            if x_cursor + spec.width_mm > region.x_max:
+            polygon = spec.polygon
+            min_x = min(p[0] for p in polygon)
+            max_x = max(p[0] for p in polygon)
+            min_y = min(p[1] for p in polygon)
+            max_y = max(p[1] for p in polygon)
+            panel_width = max_x - min_x
+            panel_height = max_y - min_y
+
+            if x_cursor + panel_width > region.x_max:
                 x_cursor = region.x_min
                 y_cursor += row_height + gap
                 row_height = 0.0
 
             panel_center = (
-                x_cursor + spec.width_mm / 2,
-                y_cursor + spec.height_mm / 2,
+                x_cursor + panel_width / 2,
+                y_cursor + panel_height / 2,
             )
 
             filtered_edge_joints = {
-                name: profile
-                for name, profile in spec.edge_joints.items()
+                edge_name_map.get(idx, f"edge_{idx}"): profile
+                for idx, profile in spec.edge_joints.items()
                 if profile is not None
             }
 
             panel_params = JointedPanelParams(
-                width_mm=spec.width_mm,
-                height_mm=spec.height_mm,
+                width_mm=panel_width,
+                height_mm=panel_height,
                 edge_joints=filtered_edge_joints,
                 part_name=spec.name,
             )
@@ -1700,7 +1741,7 @@ class LayoutResolver:
             panel_items = jointed_panel_generator(
                 panel_params,
                 center=panel_center,
-                shape_id_prefix=self._next_shape_id(f"box_{spec.name}"),
+                shape_id_prefix=self._next_shape_id(f"assembly_{spec.name}"),
                 label=panel_label,
             )
 
@@ -1713,13 +1754,12 @@ class LayoutResolver:
                 }
                 edge_lines = []
                 x_min = x_cursor
-                x_max = x_cursor + spec.width_mm
+                x_max = x_cursor + panel_width
                 y_min = y_cursor
-                y_max = y_cursor + spec.height_mm
+                y_max = y_cursor + panel_height
 
-                for edge_name, mating in spec.mating_edges.items():
-                    if not mating:
-                        continue
+                for edge_idx in spec.edge_joints.keys():
+                    edge_name = edge_name_map.get(edge_idx, f"edge_{edge_idx}")
                     color = edge_colors.get(edge_name, "#ffffff")
                     if edge_name == "top":
                         edge_lines.append({
@@ -1738,7 +1778,6 @@ class LayoutResolver:
                             "x1": x_max, "y1": y_min, "x2": x_max, "y2": y_max, "color": color
                         })
 
-                from dataclasses import replace
                 updated_item = replace(
                     panel_items[0],
                     params={"edge_lines": edge_lines} if panel_items[0].params is None
@@ -1752,15 +1791,15 @@ class LayoutResolver:
                 if dado.edge == "bottom":
                     dado_y = y_cursor + dado.position_from_edge_mm + dado.width_mm / 2
                 else:
-                    dado_y = y_cursor + spec.height_mm - dado.position_from_edge_mm - dado.width_mm / 2
+                    dado_y = y_cursor + panel_height - dado.position_from_edge_mm - dado.width_mm / 2
 
-                dado_center = (x_cursor + spec.width_mm / 2, dado_y)
+                dado_center = (x_cursor + panel_width / 2, dado_y)
                 dado_item = Item(
                     kind="shape",
                     type="Rect",
                     geometry=Geometry(
                         data={
-                            "w_mm": spec.width_mm,
+                            "w_mm": panel_width,
                             "h_mm": dado.width_mm,
                         }
                     ),
@@ -1770,12 +1809,12 @@ class LayoutResolver:
                         depth=str(dado.depth_mm),
                         depth_mm=dado.depth_mm,
                     ),
-                    shape_id=self._next_shape_id(f"box_{spec.name}_dado"),
+                    shape_id=self._next_shape_id(f"assembly_{spec.name}_dado"),
                 )
                 items.append(dado_item)
 
-            x_cursor += spec.width_mm + gap
-            row_height = max(row_height, spec.height_mm)
+            x_cursor += panel_width + gap
+            row_height = max(row_height, panel_height)
 
     def resolve(self) -> LayoutAST:
         margin = self.ast.sheet.margin_mm
@@ -1854,8 +1893,8 @@ class LayoutResolver:
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
                 # Waste cuts handler
                 WasteCuts: LayoutResolver._handle_waste_cuts,
-                # Box assembly handler
-                Box: LayoutResolver._handle_box,
+                # Assembly handler
+                Assembly: LayoutResolver._handle_assembly,
             }
         return LayoutResolver._NODE_HANDLERS
 

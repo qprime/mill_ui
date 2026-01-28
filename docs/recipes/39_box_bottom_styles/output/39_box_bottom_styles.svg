@@ -45,20 +45,12 @@
   <g id="EDGE_COLORS" class="edge-colors">
     <line x1="150.0" y1="930.0" x2="150.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
     <line x1="350.0" y1="930.0" x2="350.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="150.0" y1="930.0" x2="350.0" y2="930.0" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
-    <line x1="360.0" y1="930.0" x2="360.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
     <line x1="560.0" y1="930.0" x2="560.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="360.0" y1="930.0" x2="560.0" y2="930.0" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
-    <line x1="570.0" y1="930.0" x2="570.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
+    <line x1="360.0" y1="930.0" x2="360.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
     <line x1="708.0" y1="930.0" x2="708.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="570.0" y1="930.0" x2="708.0" y2="930.0" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
+    <line x1="570.0" y1="930.0" x2="570.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
     <line x1="718.0" y1="930.0" x2="718.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
     <line x1="856.0" y1="930.0" x2="856.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="718.0" y1="930.0" x2="856.0" y2="930.0" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
-    <line x1="866.0" y1="930.0" x2="1060.0" y2="930.0" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
-    <line x1="866.0" y1="786.0" x2="1060.0" y2="786.0" stroke="#5ab9ea" stroke-width="3" stroke-linecap="round" />
-    <line x1="866.0" y1="930.0" x2="866.0" y2="786.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <line x1="1060.0" y1="930.0" x2="1060.0" y2="786.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
@@ -160,10 +152,10 @@
     <text x="20" y="996.0" class="notes">Depths:</text>
     <text x="30" y="1008.0" class="notes">• pocket: 3.0</text>
     <text x="20" y="1020.0" class="notes">Parts (4):</text>
-    <text x="30" y="1032.0" class="notes">• box_back_dado_3</text>
-    <text x="30" y="1044.0" class="notes">• box_front_dado_1</text>
-    <text x="30" y="1056.0" class="notes">• box_left_side_dado_5</text>
-    <text x="30" y="1068.0" class="notes">• box_right_side_dado_7</text>
+    <text x="30" y="1032.0" class="notes">• assembly_back_dado_3</text>
+    <text x="30" y="1044.0" class="notes">• assembly_front_dado_1</text>
+    <text x="30" y="1056.0" class="notes">• assembly_left_side_dado_5</text>
+    <text x="30" y="1068.0" class="notes">• assembly_right_side_dado_7</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

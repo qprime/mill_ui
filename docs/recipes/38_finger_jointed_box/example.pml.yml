@@ -1,4 +1,4 @@
-# mill_ui: 85a7ff1
+# mill_ui: 3e2ebfe
 # generated: 2026-01-27
 
 Sheet:
@@ -7,10 +7,11 @@ Sheet:
   thickness: 6mm
   margin: 10mm
 children:
-- Box:
-    outer_width: 200mm
-    outer_depth: 150mm
-    outer_height: 100mm
+- Assembly:
+    topology: box
+    width: 200mm
+    depth: 150mm
+    height: 100mm
     thickness: 6mm
     finger_width: 12mm
     clearance: 0.15mm

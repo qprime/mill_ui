@@ -115,7 +115,7 @@
         "MeasurementEdge": {"$ref": "#/$defs/measurementEdgeNode"},
         "EngraveText": {"$ref": "#/$defs/engraveTextNode"},
         "WasteCuts": {"$ref": "#/$defs/wasteCutsNode"},
-        "Box": {"$ref": "#/$defs/boxNode"},
+        "Assembly": {"$ref": "#/$defs/assemblyNode"},
         "UseComponent": {"$ref": "#/$defs/useComponentNode"}
       }
     },
@@ -508,19 +508,20 @@
         "strategy": {"type": "string", "enum": ["largest", "simple"]}
       }
     },
-    "boxNode": {
+    "assemblyNode": {
       "type": "object",
-      "required": ["outer_width", "outer_depth", "outer_height", "thickness"],
+      "required": ["width", "depth", "height", "thickness"],
       "properties": {
-        "outer_width": {"$ref": "#/$defs/dimension"},
-        "outer_depth": {"$ref": "#/$defs/dimension"},
-        "outer_height": {"$ref": "#/$defs/dimension"},
+        "topology": {"type": "string", "enum": ["box", "pyramid", "prism"]},
+        "width": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
         "thickness": {"$ref": "#/$defs/dimension"},
         "joinery": {"type": "string", "enum": ["finger", "butt"]},
         "finger_width": {"$ref": "#/$defs/dimension"},
         "finger_count": {"type": "integer"},
         "clearance": {"$ref": "#/$defs/dimension"},
-        "include_lid": {"type": "boolean"},
+        "include_top": {"type": "boolean"},
         "include_bottom": {"type": "boolean"},
         "layout_gap": {"$ref": "#/$defs/dimension"},
         "bottom_style": {"type": "string", "enum": ["captured", "finger", "dado"]},
@@ -529,6 +530,8 @@
         "dado_drop": {"$ref": "#/$defs/dimension"},
         "show_labels": {"type": "boolean"},
         "show_edge_colors": {"type": "boolean"},
+        "base": {"$ref": "#/$defs/dimension"},
+        "slant_height": {"$ref": "#/$defs/dimension"},
         "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
       }
     },

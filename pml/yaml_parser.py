@@ -48,7 +48,7 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
-    Box,
+    Assembly,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart, NestParseError
@@ -484,17 +484,19 @@ def parse_node(data: dict, path: str = "") -> Any:
             strategy=node_data.get("strategy", "largest"),
         )
 
-    elif node_type == "Box":
-        return Box(
-            outer_width_mm=parse_dimension(node_data["outer_width"]),
-            outer_depth_mm=parse_dimension(node_data["outer_depth"]),
-            outer_height_mm=parse_dimension(node_data["outer_height"]),
+    elif node_type == "Assembly":
+        topology = node_data.get("topology", "box")
+        return Assembly(
+            topology=topology,
+            width_mm=parse_dimension(node_data["width"]),
+            depth_mm=parse_dimension(node_data["depth"]),
+            height_mm=parse_dimension(node_data["height"]),
             thickness_mm=parse_dimension(node_data["thickness"]),
             joinery=node_data.get("joinery", "finger"),
             finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
             finger_count=node_data.get("finger_count"),
             clearance_mm=parse_dimension(node_data.get("clearance", "0.1mm")),
-            include_lid=node_data.get("include_lid", False),
+            include_top=node_data.get("include_top", False),
             include_bottom=node_data.get("include_bottom", True),
             children=children,
             layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
@@ -504,6 +506,8 @@ def parse_node(data: dict, path: str = "") -> Any:
             dado_drop_mm=parse_dimension(node_data.get("dado_drop", "0mm")),
             show_labels=node_data.get("show_labels", False),
             show_edge_colors=node_data.get("show_edge_colors", False),
+            base_mm=parse_dimension(node_data["base"]) if "base" in node_data else None,
+            slant_height_mm=parse_dimension(node_data["slant_height"]) if "slant_height" in node_data else None,
         )
 
     elif node_type == "UseComponent":

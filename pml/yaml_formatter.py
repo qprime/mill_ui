@@ -49,7 +49,7 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
-    Box,
+    Assembly,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart
@@ -446,11 +446,12 @@ def format_node(node: Any) -> dict[str, Any]:
             result["strategy"] = node.strategy
         return {"WasteCuts": result}
 
-    elif isinstance(node, Box):
+    elif isinstance(node, Assembly):
         result: dict[str, Any] = {
-            "outer_width": dim(node.outer_width_mm),
-            "outer_depth": dim(node.outer_depth_mm),
-            "outer_height": dim(node.outer_height_mm),
+            "topology": node.topology,
+            "width": dim(node.width_mm),
+            "depth": dim(node.depth_mm),
+            "height": dim(node.height_mm),
             "thickness": dim(node.thickness_mm),
         }
         if node.joinery != "finger":
@@ -461,8 +462,8 @@ def format_node(node: Any) -> dict[str, Any]:
             result["finger_count"] = node.finger_count
         if node.clearance_mm != 0.1:
             result["clearance"] = dim(node.clearance_mm)
-        if node.include_lid:
-            result["include_lid"] = True
+        if node.include_top:
+            result["include_top"] = True
         if not node.include_bottom:
             result["include_bottom"] = False
         if node.layout_gap_mm != 10.0:
@@ -479,9 +480,13 @@ def format_node(node: Any) -> dict[str, Any]:
             result["show_labels"] = True
         if node.show_edge_colors:
             result["show_edge_colors"] = True
+        if node.base_mm is not None:
+            result["base"] = dim(node.base_mm)
+        if node.slant_height_mm is not None:
+            result["slant_height"] = dim(node.slant_height_mm)
         if node.children:
             result["children"] = [format_node(c) for c in node.children]
-        return {"Box": result}
+        return {"Assembly": result}
 
     elif isinstance(node, UseComponent):
         result: dict[str, Any] = {"name": node.component_name}

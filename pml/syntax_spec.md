@@ -425,22 +425,75 @@ Text engraving:
 
 ### Assembly Generators
 
-#### Box
+#### Assembly
 
-Finger-jointed box with automatic part layout:
+Multi-panel assembly with automatic topology, joinery selection, and part layout:
 
 ```yaml
-- Box:
-    outer_width: 200mm
-    outer_depth: 150mm
-    outer_height: 100mm
+# Simple finger-jointed box
+- Assembly:
+    topology: box       # box | pyramid | prism
+    width: 200mm
+    depth: 150mm
+    height: 100mm
     thickness: 6mm
     joinery: finger     # finger | butt
     finger_width: 12mm
     clearance: 0.15mm
-    bottom_style: dado  # captured | finger | dado
-    top_style: captured
 ```
+
+```yaml
+# Box with dado bottom
+- Assembly:
+    topology: box
+    width: 200mm
+    depth: 150mm
+    height: 100mm
+    thickness: 6mm
+    joinery: finger
+    finger_width: 12mm
+    bottom_style: dado  # captured | finger | dado
+    dado_inset: 6mm
+    show_labels: true
+    show_edge_colors: true
+```
+
+```yaml
+# Pyramid (butt joints for non-90° angles)
+- Assembly:
+    topology: pyramid
+    base: 150mm
+    slant_height: 120mm
+    thickness: 6mm
+    joinery: butt
+```
+
+**Parameters:**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| topology | no | box | Assembly shape (box, pyramid, prism) |
+| width | yes* | - | Outer width (X dimension) |
+| depth | yes* | - | Outer depth (Y dimension) |
+| height | yes* | - | Outer height (Z dimension) |
+| thickness | yes | - | Material thickness |
+| joinery | no | finger | Joint type (finger, butt) |
+| finger_width | no | - | Target finger width (mutually exclusive with finger_count) |
+| finger_count | no | - | Explicit finger count (mutually exclusive with finger_width) |
+| clearance | no | 0.1mm | Gap for joint fit |
+| include_top | no | false | Generate top panel |
+| include_bottom | no | true | Generate bottom panel |
+| bottom_style | no | captured | Bottom connection (captured, finger, dado) |
+| top_style | no | captured | Top connection (captured, finger, dado) |
+| dado_inset | no | 0mm | Distance from wall bottom to dado bottom |
+| dado_drop | no | 0mm | Distance from wall top to dado top |
+| layout_gap | no | 10mm | Gap between laid-out panels |
+| show_labels | no | false | Display panel name labels |
+| show_edge_colors | no | false | Display edge color visualization |
+| base | pyramid | - | Base dimension for pyramid |
+| slant_height | pyramid | - | Slant height for pyramid |
+
+*Required dimensions depend on topology. Box requires width/depth/height; pyramid requires base/slant_height.
 
 ### Utility Nodes
 

@@ -120,13 +120,6 @@ from generators.panels import (
     jointed_panel_generator,
 )
 
-# Assembly generators
-from generators.assemblies import (
-    BoxParams,
-    FingerStrategy,
-    PanelSpec,
-    compute_box_panels,
-)
 
 __all__ = [
     # Protocol and types
@@ -171,9 +164,4 @@ __all__ = [
     # Panel generators
     "JointedPanelParams",
     "jointed_panel_generator",
-    # Assembly generators
-    "BoxParams",
-    "FingerStrategy",
-    "PanelSpec",
-    "compute_box_panels",
 ]

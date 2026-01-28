@@ -48,12 +48,11 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
-        assert len(items) == 4
+        assert len(items) == 1
         assert items[0].type == "Polygon"
         assert items[0].feature.type == "profile"
-        for i in range(1, 4):
-            assert items[i].type == "Polyline"
-            assert items[i].geometry.data.get("closed") == False
+        points = items[0].geometry.data.get("points", [])
+        assert len(points) > 4
 
     def test_panel_with_part_name(self):
         params = NotchedPanelParams(
@@ -76,7 +75,7 @@ class TestNotchedPanelGenerator:
 
         assert items[0].feature.depth == "through"
 
-    def test_notch_items_are_profile_type(self):
+    def test_notched_panel_is_single_profile(self):
         notches = (
             NotchSpec(edge_index=0, u_start_mm=20, u_len_mm=20, depth_mm=6),
         )
@@ -87,10 +86,12 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
-        assert len(items) == 2
-        notch_item = items[1]
-        assert notch_item.feature.type == "profile"
-        assert notch_item.feature.depth == "through"
+        assert len(items) == 1
+        assert items[0].type == "Polygon"
+        assert items[0].feature.type == "profile"
+        assert items[0].feature.depth == "through"
+        points = items[0].geometry.data.get("points", [])
+        assert len(points) == 9
 
     def test_notches_on_different_edges(self):
         notches = (
@@ -106,4 +107,7 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
-        assert len(items) == 5
+        assert len(items) == 1
+        assert items[0].type == "Polygon"
+        points = items[0].geometry.data.get("points", [])
+        assert len(points) == 21

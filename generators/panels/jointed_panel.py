@@ -11,7 +11,7 @@ from generators.base import (
 from generators.loop.profile import profile_generator
 from generators.base import ProfileParams
 from layout_ast.layout import Item, Geometry, Placement, Feature
-from assembly.notches import NotchSpec, notch_to_polyline
+from assembly.notches import NotchSpec, build_notched_polygon
 
 
 EdgeName = Literal["top", "bottom", "left", "right"]
@@ -53,6 +53,42 @@ def notched_panel_generator(
 ) -> GeneratorResult:
     params.validate()
 
+    shape_id = shape_id_prefix
+    if params.part_name:
+        shape_id = f"{shape_id_prefix}_{params.part_name.lower()}"
+
+    if params.notches:
+        polygon_pts = build_notched_polygon(
+            params.width_mm,
+            params.height_mm,
+            center,
+            params.notches,
+        )
+
+        if len(polygon_pts) < 3:
+            if allow_empty:
+                return []
+            raise ValueError("build_notched_polygon returned fewer than 3 points")
+
+        cx = sum(p[0] for p in polygon_pts) / len(polygon_pts)
+        cy = sum(p[1] for p in polygon_pts) / len(polygon_pts)
+        relative_pts = [[p[0] - cx, p[1] - cy] for p in polygon_pts]
+
+        item = Item(
+            kind="shape",
+            type="Polygon",
+            geometry=Geometry(data={"points": relative_pts}),
+            placement=Placement(center_xy_mm=(cx, cy)),
+            feature=Feature(
+                type="profile",
+                depth="through",
+                side="outside",
+            ),
+            shape_id=f"{shape_id}_0_outer",
+            label=label,
+        )
+        return [item]
+
     domain = Domain.from_rectangle(
         width_mm=params.width_mm,
         height_mm=params.height_mm,
@@ -64,10 +100,6 @@ def notched_panel_generator(
         depth="through",
     )
 
-    shape_id = shape_id_prefix
-    if params.part_name:
-        shape_id = f"{shape_id_prefix}_{params.part_name.lower()}"
-
     items = list(profile_generator(
         domain,
         profile_params,
@@ -76,42 +108,6 @@ def notched_panel_generator(
         sheet_thickness_mm=params.sheet_thickness_mm,
         label=label,
     ))
-
-    if params.notches:
-        half_w = params.width_mm / 2
-        half_h = params.height_mm / 2
-        polygon = (
-            (center[0] - half_w, center[1] - half_h),
-            (center[0] + half_w, center[1] - half_h),
-            (center[0] + half_w, center[1] + half_h),
-            (center[0] - half_w, center[1] + half_h),
-        )
-
-        for i, notch in enumerate(params.notches):
-            polyline_pts = notch_to_polyline(polygon, notch)
-            if not polyline_pts:
-                continue
-
-            center_x = sum(p[0] for p in polyline_pts) / len(polyline_pts)
-            center_y = sum(p[1] for p in polyline_pts) / len(polyline_pts)
-            relative_pts = [(p[0] - center_x, p[1] - center_y) for p in polyline_pts]
-
-            notch_item = Item(
-                kind="shape",
-                type="Polyline",
-                geometry=Geometry(data={
-                    "points": relative_pts,
-                    "closed": False,
-                }),
-                placement=Placement(center_xy_mm=(center_x, center_y)),
-                feature=Feature(
-                    type="profile",
-                    depth="through",
-                    side="on",
-                ),
-                shape_id=f"{shape_id}_notch_{i}",
-            )
-            items.append(notch_item)
 
     return items
 

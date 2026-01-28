@@ -140,6 +140,67 @@ def notch_to_polyline(
         ]
 
 
+def build_notched_polygon(
+    width_mm: float,
+    height_mm: float,
+    center: tuple[float, float],
+    notches: tuple[NotchSpec, ...] | list[NotchSpec],
+) -> tuple[Point2D, ...]:
+    cx, cy = center
+    half_w = width_mm / 2
+    half_h = height_mm / 2
+
+    corners: tuple[Point2D, ...] = (
+        (cx - half_w, cy - half_h),
+        (cx + half_w, cy - half_h),
+        (cx + half_w, cy + half_h),
+        (cx - half_w, cy + half_h),
+    )
+
+    edge_lengths = (width_mm, height_mm, width_mm, height_mm)
+
+    by_edge: dict[int, list[NotchSpec]] = {}
+    for n in notches:
+        by_edge.setdefault(n.edge_index, []).append(n)
+    for edge_idx in by_edge:
+        by_edge[edge_idx].sort(key=lambda x: x.u_start_mm)
+
+    points: list[Point2D] = []
+
+    for edge_idx in range(4):
+        p0 = corners[edge_idx]
+        p1 = corners[(edge_idx + 1) % 4]
+        edge_len = edge_lengths[edge_idx]
+
+        edge_notches = by_edge.get(edge_idx, [])
+
+        if not edge_notches:
+            points.append(p0)
+            continue
+
+        dx = (p1[0] - p0[0]) / edge_len if edge_len > 0 else 0
+        dy = (p1[1] - p0[1]) / edge_len if edge_len > 0 else 0
+
+        cursor = 0.0
+
+        for notch in edge_notches:
+            if notch.u_start_mm > cursor + 1e-6:
+                pt = (p0[0] + dx * cursor, p0[1] + dy * cursor)
+                points.append(pt)
+
+            notch_pts = notch_to_polyline(corners, notch)
+
+            for pt in notch_pts:
+                points.append(pt)
+
+            cursor = notch.u_start_mm + notch.u_len_mm
+
+    if points and points[0] != points[-1]:
+        points.append(points[0])
+
+    return tuple(points)
+
+
 def finger_joints_to_notches(
     edge_index: int,
     edge_length: float,
@@ -187,5 +248,6 @@ __all__ = [
     "validate_notch_fits_edge",
     "validate_notches_no_overlap",
     "notch_to_polyline",
+    "build_notched_polygon",
     "finger_joints_to_notches",
 ]

@@ -87,6 +87,7 @@ from assembly import (
     ButtJoineryStrategy,
     FingerJoineryStrategy,
     box_topology,
+    frameless_cabinet_topology,
     pyramid_topology,
     generate_assembly_panels,
 )
@@ -1668,6 +1669,27 @@ class LayoutResolver:
                 base_mm=node.base_mm,
                 slant_height_mm=node.slant_height_mm,
                 thickness_mm=node.thickness_mm,
+            )
+        elif topology_type == "carcass":
+            topology = frameless_cabinet_topology(
+                width_mm=node.width_mm,
+                depth_mm=node.depth_mm,
+                height_mm=node.height_mm,
+                thickness_mm=node.thickness_mm,
+                joinery=node.joinery,
+                cap_style=node.cap_style,
+                include_top=node.include_top,
+                include_bottom=node.include_bottom,
+                back=node.back,
+                back_thickness_mm=node.back_thickness_mm,
+                back_inset_mm=node.back_inset_mm,
+                back_dado_depth_mm=node.back_dado_depth_mm,
+                fixed_shelves=node.fixed_shelves,
+                shelf_dado_depth_mm=node.shelf_dado_depth_mm,
+                shelf_setback_front_mm=node.shelf_setback_front_mm,
+                shelf_setback_back_mm=node.shelf_setback_back_mm,
+                vertical_partitions=node.vertical_partitions,
+                partition_dado_depth_mm=node.partition_dado_depth_mm,
             )
         else:
             raise ValueError(f"Unsupported topology type: {topology_type}")

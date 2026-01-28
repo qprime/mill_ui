@@ -486,6 +486,7 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Assembly":
         topology = node_data.get("topology", "box")
+        include_top_default = True if topology == "carcass" else False
         return Assembly(
             topology=topology,
             width_mm=parse_dimension(node_data["width"]),
@@ -496,7 +497,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
             finger_count=node_data.get("finger_count"),
             clearance_mm=parse_dimension(node_data.get("clearance", "0.1mm")),
-            include_top=node_data.get("include_top", False),
+            include_top=node_data.get("include_top", include_top_default),
             include_bottom=node_data.get("include_bottom", True),
             children=children,
             layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
@@ -508,6 +509,17 @@ def parse_node(data: dict, path: str = "") -> Any:
             show_edge_colors=node_data.get("show_edge_colors", False),
             base_mm=parse_dimension(node_data["base"]) if "base" in node_data else None,
             slant_height_mm=parse_dimension(node_data["slant_height"]) if "slant_height" in node_data else None,
+            cap_style=node_data.get("cap_style", "between_sides"),
+            back=node_data.get("back", "none"),
+            back_thickness_mm=parse_dimension(node_data["back_thickness"]) if "back_thickness" in node_data else None,
+            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm")),
+            back_dado_depth_mm=parse_dimension(node_data["back_dado_depth"]) if "back_dado_depth" in node_data else None,
+            fixed_shelves=node_data.get("fixed_shelves", 0),
+            shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"]) if "shelf_dado_depth" in node_data else None,
+            shelf_setback_front_mm=parse_dimension(node_data.get("shelf_setback_front", "0mm")),
+            shelf_setback_back_mm=parse_dimension(node_data.get("shelf_setback_back", "0mm")),
+            vertical_partitions=node_data.get("vertical_partitions", 0),
+            partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"]) if "partition_dado_depth" in node_data else None,
         )
 
     elif node_type == "UseComponent":

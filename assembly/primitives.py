@@ -286,6 +286,295 @@ def pyramid_topology(
     )
 
 
+def frameless_cabinet_topology(
+    width_mm: float,
+    depth_mm: float,
+    height_mm: float,
+    thickness_mm: float,
+    joinery: Literal["butt", "finger"] = "butt",
+    cap_style: Literal["between_sides", "over_sides"] = "between_sides",
+    include_top: bool = True,
+    include_bottom: bool = True,
+    back: Literal["none", "captured"] = "none",
+    back_thickness_mm: float | None = None,
+    back_inset_mm: float = 0.0,
+    back_dado_depth_mm: float | None = None,
+    fixed_shelves: int = 0,
+    shelf_dado_depth_mm: float | None = None,
+    shelf_setback_front_mm: float = 0.0,
+    shelf_setback_back_mm: float = 0.0,
+    vertical_partitions: int = 0,
+    partition_dado_depth_mm: float | None = None,
+) -> AssemblyTopology:
+    w = width_mm
+    d = depth_mm
+    h = height_mm
+    t = thickness_mm
+
+    if back_thickness_mm is None:
+        back_thickness_mm = t
+    if back_dado_depth_mm is None:
+        back_dado_depth_mm = t / 2
+    if shelf_dado_depth_mm is None:
+        shelf_dado_depth_mm = t / 2
+    if partition_dado_depth_mm is None:
+        partition_dado_depth_mm = t / 2
+
+    faces: dict[str, FaceSpec] = {}
+    mating_edges: list[MatingEdge] = []
+    mating_features: list[MatingFeature] = []
+
+    side_width = d
+    side_height = h
+    faces["left_side"] = FaceSpec(
+        name="left_side",
+        polygon=_rect_polygon(side_width, side_height),
+        thickness_mm=t,
+    )
+    faces["right_side"] = FaceSpec(
+        name="right_side",
+        polygon=_rect_polygon(side_width, side_height),
+        thickness_mm=t,
+    )
+
+    if cap_style == "between_sides":
+        cap_width = w - 2 * t
+    else:
+        cap_width = w
+
+    if back == "captured":
+        cap_depth = d - back_inset_mm
+    else:
+        cap_depth = d
+
+    if include_top:
+        faces["top"] = FaceSpec(
+            name="top",
+            polygon=_rect_polygon(cap_width, cap_depth),
+            thickness_mm=t,
+        )
+    if include_bottom:
+        faces["bottom"] = FaceSpec(
+            name="bottom",
+            polygon=_rect_polygon(cap_width, cap_depth),
+            thickness_mm=t,
+        )
+
+    if back == "captured":
+        back_width = w - 2 * t + 2 * back_dado_depth_mm
+        back_height = h
+        if include_top:
+            back_height -= t
+        if include_bottom:
+            back_height -= t
+        back_height += 2 * back_dado_depth_mm
+
+        faces["back"] = FaceSpec(
+            name="back",
+            polygon=_rect_polygon(back_width, back_height),
+            thickness_mm=back_thickness_mm,
+        )
+
+        back_dado_params = {
+            "position_from_edge_mm": back_inset_mm,
+            "width_mm": back_thickness_mm,
+            "depth_mm": back_dado_depth_mm,
+            "edge": "top",
+        }
+        mating_features.append(MatingFeature(
+            face="left_side",
+            kind="dado",
+            params=back_dado_params,
+            mates_with="back",
+        ))
+        mating_features.append(MatingFeature(
+            face="right_side",
+            kind="dado",
+            params=back_dado_params,
+            mates_with="back",
+        ))
+        if include_top:
+            mating_features.append(MatingFeature(
+                face="top",
+                kind="dado",
+                params={
+                    "position_from_edge_mm": 0,
+                    "width_mm": back_thickness_mm,
+                    "depth_mm": back_dado_depth_mm,
+                    "edge": "top",
+                },
+                mates_with="back",
+            ))
+        if include_bottom:
+            mating_features.append(MatingFeature(
+                face="bottom",
+                kind="dado",
+                params={
+                    "position_from_edge_mm": 0,
+                    "width_mm": back_thickness_mm,
+                    "depth_mm": back_dado_depth_mm,
+                    "edge": "top",
+                },
+                mates_with="back",
+            ))
+
+    if joinery == "finger":
+        if cap_style == "between_sides":
+            if include_top:
+                mating_edges.append(MatingEdge(
+                    face_a="left_side",
+                    edge_index_a=2,
+                    face_b="top",
+                    edge_index_b=3,
+                    dihedral_angle_deg=90.0,
+                ))
+                mating_edges.append(MatingEdge(
+                    face_a="right_side",
+                    edge_index_a=2,
+                    face_b="top",
+                    edge_index_b=1,
+                    dihedral_angle_deg=90.0,
+                ))
+            if include_bottom:
+                mating_edges.append(MatingEdge(
+                    face_a="left_side",
+                    edge_index_a=0,
+                    face_b="bottom",
+                    edge_index_b=3,
+                    dihedral_angle_deg=90.0,
+                ))
+                mating_edges.append(MatingEdge(
+                    face_a="right_side",
+                    edge_index_a=0,
+                    face_b="bottom",
+                    edge_index_b=1,
+                    dihedral_angle_deg=90.0,
+                ))
+        else:
+            if include_top:
+                mating_edges.append(MatingEdge(
+                    face_a="top",
+                    edge_index_a=3,
+                    face_b="left_side",
+                    edge_index_b=2,
+                    dihedral_angle_deg=90.0,
+                ))
+                mating_edges.append(MatingEdge(
+                    face_a="top",
+                    edge_index_a=1,
+                    face_b="right_side",
+                    edge_index_b=2,
+                    dihedral_angle_deg=90.0,
+                ))
+            if include_bottom:
+                mating_edges.append(MatingEdge(
+                    face_a="bottom",
+                    edge_index_a=3,
+                    face_b="left_side",
+                    edge_index_b=0,
+                    dihedral_angle_deg=90.0,
+                ))
+                mating_edges.append(MatingEdge(
+                    face_a="bottom",
+                    edge_index_a=1,
+                    face_b="right_side",
+                    edge_index_b=0,
+                    dihedral_angle_deg=90.0,
+                ))
+
+    interior_height = h
+    if include_top:
+        interior_height -= t
+    if include_bottom:
+        interior_height -= t
+
+    if fixed_shelves > 0:
+        shelf_width = w - 2 * t + 2 * shelf_dado_depth_mm
+        shelf_depth = d - shelf_setback_front_mm - shelf_setback_back_mm
+        if back == "captured":
+            shelf_depth -= back_inset_mm
+
+        spacing = interior_height / (fixed_shelves + 1)
+
+        for i in range(fixed_shelves):
+            shelf_name = f"shelf_{i + 1:02d}"
+            faces[shelf_name] = FaceSpec(
+                name=shelf_name,
+                polygon=_rect_polygon(shelf_width, shelf_depth),
+                thickness_mm=t,
+            )
+
+            shelf_position = spacing * (i + 1)
+            if include_bottom:
+                shelf_position += t
+
+            shelf_dado_params = {
+                "position_from_edge_mm": shelf_position - t / 2,
+                "width_mm": t,
+                "depth_mm": shelf_dado_depth_mm,
+                "edge": "bottom",
+            }
+            mating_features.append(MatingFeature(
+                face="left_side",
+                kind="dado",
+                params=shelf_dado_params,
+                mates_with=shelf_name,
+            ))
+            mating_features.append(MatingFeature(
+                face="right_side",
+                kind="dado",
+                params=shelf_dado_params,
+                mates_with=shelf_name,
+            ))
+
+    interior_width = w - 2 * t
+
+    if vertical_partitions > 0:
+        partition_height = interior_height + 2 * partition_dado_depth_mm
+        partition_depth = d
+        if back == "captured":
+            partition_depth -= back_inset_mm
+
+        spacing = interior_width / (vertical_partitions + 1)
+
+        for i in range(vertical_partitions):
+            partition_name = f"partition_{i + 1:02d}"
+            faces[partition_name] = FaceSpec(
+                name=partition_name,
+                polygon=_rect_polygon(partition_depth, partition_height),
+                thickness_mm=t,
+            )
+
+            partition_position = spacing * (i + 1) + t
+
+            partition_dado_params = {
+                "position_from_edge_mm": partition_position - t / 2,
+                "width_mm": t,
+                "depth_mm": partition_dado_depth_mm,
+                "edge": "bottom",
+            }
+            if include_top:
+                mating_features.append(MatingFeature(
+                    face="top",
+                    kind="dado",
+                    params=partition_dado_params,
+                    mates_with=partition_name,
+                ))
+            if include_bottom:
+                mating_features.append(MatingFeature(
+                    face="bottom",
+                    kind="dado",
+                    params=partition_dado_params,
+                    mates_with=partition_name,
+                ))
+
+    return AssemblyTopology(
+        faces=faces,
+        mating_edges=tuple(mating_edges),
+        mating_features=tuple(mating_features),
+    )
+
+
 def prism_topology(
     base_polygon: tuple[tuple[float, float], ...],
     height_mm: float,
@@ -353,6 +642,7 @@ def prism_topology(
 
 __all__ = [
     "box_topology",
+    "frameless_cabinet_topology",
     "pyramid_topology",
     "prism_topology",
 ]

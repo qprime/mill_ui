@@ -468,11 +468,47 @@ Multi-panel assembly with automatic topology, joinery selection, and part layout
     joinery: butt
 ```
 
+```yaml
+# Frameless cabinet carcass with shelves
+- Assembly:
+    topology: carcass
+    width: 600mm
+    depth: 560mm
+    height: 720mm
+    thickness: 18mm
+    joinery: butt
+    cap_style: between_sides  # between_sides | over_sides
+    back: captured            # none | captured
+    back_thickness: 6mm
+    back_inset: 18mm
+    back_dado_depth: 6mm
+    fixed_shelves: 2
+    shelf_dado_depth: 6mm
+    show_labels: true
+    show_edge_colors: true
+```
+
+```yaml
+# Cubby grid with vertical partitions
+- Assembly:
+    topology: carcass
+    width: 1200mm
+    depth: 300mm
+    height: 900mm
+    thickness: 18mm
+    joinery: finger
+    finger_width: 15mm
+    cap_style: between_sides
+    fixed_shelves: 2
+    vertical_partitions: 3
+    show_labels: true
+```
+
 **Parameters:**
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| topology | no | box | Assembly shape (box, pyramid, prism) |
+| topology | no | box | Assembly shape (box, pyramid, carcass) |
 | width | yes* | - | Outer width (X dimension) |
 | depth | yes* | - | Outer depth (Y dimension) |
 | height | yes* | - | Outer height (Z dimension) |
@@ -481,19 +517,30 @@ Multi-panel assembly with automatic topology, joinery selection, and part layout
 | finger_width | no | - | Target finger width (mutually exclusive with finger_count) |
 | finger_count | no | - | Explicit finger count (mutually exclusive with finger_width) |
 | clearance | no | 0.1mm | Gap for joint fit |
-| include_top | no | false | Generate top panel |
+| include_top | no | false (box), true (carcass) | Generate top panel |
 | include_bottom | no | true | Generate bottom panel |
-| bottom_style | no | captured | Bottom connection (captured, finger, dado) |
-| top_style | no | captured | Top connection (captured, finger, dado) |
-| dado_inset | no | 0mm | Distance from wall bottom to dado bottom |
-| dado_drop | no | 0mm | Distance from wall top to dado top |
+| bottom_style | no | captured | Bottom connection (captured, finger, dado) - box only |
+| top_style | no | captured | Top connection (captured, finger, dado) - box only |
+| dado_inset | no | 0mm | Distance from wall bottom to dado bottom - box only |
+| dado_drop | no | 0mm | Distance from wall top to dado top - box only |
 | layout_gap | no | 10mm | Gap between laid-out panels |
 | show_labels | no | false | Display panel name labels |
 | show_edge_colors | no | false | Display edge color visualization |
 | base | pyramid | - | Base dimension for pyramid |
 | slant_height | pyramid | - | Slant height for pyramid |
+| cap_style | carcass | between_sides | How top/bottom meet sides (between_sides, over_sides) |
+| back | carcass | none | Back panel style (none, captured) |
+| back_thickness | carcass | thickness | Back panel material thickness |
+| back_inset | carcass | 0mm | Distance from rear edge to back panel plane |
+| back_dado_depth | carcass | thickness/2 | Depth of back capture dado |
+| fixed_shelves | carcass | 0 | Number of uniformly-spaced shelves |
+| shelf_dado_depth | carcass | thickness/2 | Depth of shelf dados |
+| shelf_setback_front | carcass | 0mm | Shelf inset from front edge |
+| shelf_setback_back | carcass | 0mm | Shelf inset from back edge |
+| vertical_partitions | carcass | 0 | Number of uniformly-spaced vertical dividers |
+| partition_dado_depth | carcass | thickness/2 | Depth of partition dados |
 
-*Required dimensions depend on topology. Box requires width/depth/height; pyramid requires base/slant_height.
+*Required dimensions depend on topology. Box/carcass require width/depth/height; pyramid requires base/slant_height.
 
 ### Utility Nodes
 

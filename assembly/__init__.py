@@ -18,6 +18,7 @@ from assembly.generator import (
 )
 from assembly.primitives import (
     box_topology,
+    frameless_cabinet_topology,
     prism_topology,
     pyramid_topology,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "MatingFeature",
     "PanelSpec",
     "box_topology",
+    "frameless_cabinet_topology",
     "generate_assembly_panels",
     "prism_topology",
     "pyramid_topology",

@@ -532,6 +532,17 @@ class Assembly:
     show_edge_colors: bool = False
     base_mm: float | None = None
     slant_height_mm: float | None = None
+    cap_style: str = "between_sides"
+    back: str = "none"
+    back_thickness_mm: float | None = None
+    back_inset_mm: float = 0.0
+    back_dado_depth_mm: float | None = None
+    fixed_shelves: int = 0
+    shelf_dado_depth_mm: float | None = None
+    shelf_setback_front_mm: float = 0.0
+    shelf_setback_back_mm: float = 0.0
+    vertical_partitions: int = 0
+    partition_dado_depth_mm: float | None = None
 
 
 @dataclass(frozen=True)

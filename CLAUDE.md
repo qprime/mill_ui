@@ -27,6 +27,7 @@ python -m cli.mill --recipe docs/recipes/01_simple_profile
 python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
+gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
 The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:

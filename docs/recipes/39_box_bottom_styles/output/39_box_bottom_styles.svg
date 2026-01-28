@@ -20,46 +20,10 @@
     <rect x="140" y="140" width="1200.0" height="800.0" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 150.000 930.000 L 350.000 930.000 L 350.000 836.000 L 150.000 836.000 Z" fill-rule="evenodd" />
-    <polyline points="150.0,846.4444444444445 144.0,846.4444444444445 144.0,856.8888888888889 150.0,856.8888888888889" />
-    <polyline points="150.0,867.3333333333334 144.0,867.3333333333334 144.0,877.7777777777778 150.0,877.7777777777778" />
-    <polyline points="150.0,888.2222222222222 144.0,888.2222222222222 144.0,898.6666666666666 150.0,898.6666666666666" />
-    <polyline points="150.0,909.1111111111111 144.0,909.1111111111111 144.0,919.5555555555555 150.0,919.5555555555555" />
-    <polyline points="350.0,919.5555555555555 356.0,919.5555555555555 356.0,909.1111111111111 350.0,909.1111111111111" />
-    <polyline points="350.0,898.6666666666666 356.0,898.6666666666666 356.0,888.2222222222222 350.0,888.2222222222222" />
-    <polyline points="350.0,877.7777777777778 356.0,877.7777777777778 356.0,867.3333333333334 350.0,867.3333333333334" />
-    <polyline points="350.0,856.8888888888889 356.0,856.8888888888889 356.0,846.4444444444445 350.0,846.4444444444445" />
-    <path d="M 360.000 930.000 L 560.000 930.000 L 560.000 836.000 L 360.000 836.000 Z" fill-rule="evenodd" />
-    <polyline points="560.0,919.5555555555555 566.0,919.5555555555555 566.0,909.1111111111111 560.0,909.1111111111111" />
-    <polyline points="560.0,898.6666666666666 566.0,898.6666666666666 566.0,888.2222222222222 560.0,888.2222222222222" />
-    <polyline points="560.0,877.7777777777778 566.0,877.7777777777778 566.0,867.3333333333334 560.0,867.3333333333334" />
-    <polyline points="560.0,856.8888888888889 566.0,856.8888888888889 566.0,846.4444444444445 560.0,846.4444444444445" />
-    <polyline points="360.0,846.4444444444445 354.0,846.4444444444445 354.0,856.8888888888889 360.0,856.8888888888889" />
-    <polyline points="360.0,867.3333333333334 354.0,867.3333333333334 354.0,877.7777777777778 360.0,877.7777777777778" />
-    <polyline points="360.0,888.2222222222222 354.0,888.2222222222222 354.0,898.6666666666666 360.0,898.6666666666666" />
-    <polyline points="360.0,909.1111111111111 354.0,909.1111111111111 354.0,919.5555555555555 360.0,919.5555555555555" />
-    <path d="M 570.000 930.000 L 708.000 930.000 L 708.000 836.000 L 570.000 836.000 Z" fill-rule="evenodd" />
-    <polyline points="708.0,930.0 714.0,930.0 714.0,919.5555555555555 708.0,919.5555555555555" />
-    <polyline points="708.0,909.1111111111111 714.0,909.1111111111111 714.0,898.6666666666666 708.0,898.6666666666666" />
-    <polyline points="708.0,888.2222222222222 714.0,888.2222222222222 714.0,877.7777777777778 708.0,877.7777777777778" />
-    <polyline points="708.0,867.3333333333334 714.0,867.3333333333334 714.0,856.8888888888889 708.0,856.8888888888889" />
-    <polyline points="708.0,846.4444444444445 714.0,846.4444444444445 714.0,836.0 708.0,836.0" />
-    <polyline points="570.0,836.0 564.0,836.0 564.0,846.4444444444445 570.0,846.4444444444445" />
-    <polyline points="570.0,856.8888888888889 564.0,856.8888888888889 564.0,867.3333333333334 570.0,867.3333333333334" />
-    <polyline points="570.0,877.7777777777778 564.0,877.7777777777778 564.0,888.2222222222222 570.0,888.2222222222222" />
-    <polyline points="570.0,898.6666666666666 564.0,898.6666666666666 564.0,909.1111111111111 570.0,909.1111111111111" />
-    <polyline points="570.0,919.5555555555555 564.0,919.5555555555555 564.0,930.0 570.0,930.0" />
-    <path d="M 718.000 930.000 L 856.000 930.000 L 856.000 836.000 L 718.000 836.000 Z" fill-rule="evenodd" />
-    <polyline points="718.0,836.0 712.0,836.0 712.0,846.4444444444445 718.0,846.4444444444445" />
-    <polyline points="718.0,856.8888888888889 712.0,856.8888888888889 712.0,867.3333333333334 718.0,867.3333333333334" />
-    <polyline points="718.0,877.7777777777778 712.0,877.7777777777778 712.0,888.2222222222222 718.0,888.2222222222222" />
-    <polyline points="718.0,898.6666666666666 712.0,898.6666666666666 712.0,909.1111111111111 718.0,909.1111111111111" />
-    <polyline points="718.0,919.5555555555555 712.0,919.5555555555555 712.0,930.0 718.0,930.0" />
-    <polyline points="856.0,930.0 862.0,930.0 862.0,919.5555555555555 856.0,919.5555555555555" />
-    <polyline points="856.0,909.1111111111111 862.0,909.1111111111111 862.0,898.6666666666666 856.0,898.6666666666666" />
-    <polyline points="856.0,888.2222222222222 862.0,888.2222222222222 862.0,877.7777777777778 856.0,877.7777777777778" />
-    <polyline points="856.0,867.3333333333334 862.0,867.3333333333334 862.0,856.8888888888889 856.0,856.8888888888889" />
-    <polyline points="856.0,846.4444444444445 862.0,846.4444444444445 862.0,836.0 856.0,836.0" />
+    <path d="M 150.000 930.000 L 350.000 930.000 L 350.000 919.631 L 344.000 919.631 L 344.000 909.036 L 350.000 909.036 L 350.000 909.036 L 350.000 898.742 L 344.000 898.742 L 344.000 888.147 L 350.000 888.147 L 350.000 888.147 L 350.000 877.853 L 344.000 877.853 L 344.000 867.258 L 350.000 867.258 L 350.000 867.258 L 350.000 856.964 L 344.000 856.964 L 344.000 846.369 L 350.000 846.369 L 350.000 836.000 L 150.000 836.000 L 150.000 846.369 L 156.000 846.369 L 156.000 856.964 L 150.000 856.964 L 150.000 856.964 L 150.000 867.258 L 156.000 867.258 L 156.000 877.853 L 150.000 877.853 L 150.000 877.853 L 150.000 888.147 L 156.000 888.147 L 156.000 898.742 L 150.000 898.742 L 150.000 898.742 L 150.000 909.036 L 156.000 909.036 L 156.000 919.631 L 150.000 919.631 L 150.000 930.000 Z" fill-rule="evenodd" />
+    <path d="M 360.000 930.000 L 560.000 930.000 L 560.000 919.631 L 554.000 919.631 L 554.000 909.036 L 560.000 909.036 L 560.000 909.036 L 560.000 898.742 L 554.000 898.742 L 554.000 888.147 L 560.000 888.147 L 560.000 888.147 L 560.000 877.853 L 554.000 877.853 L 554.000 867.258 L 560.000 867.258 L 560.000 867.258 L 560.000 856.964 L 554.000 856.964 L 554.000 846.369 L 560.000 846.369 L 560.000 836.000 L 360.000 836.000 L 360.000 846.369 L 366.000 846.369 L 366.000 856.964 L 360.000 856.964 L 360.000 856.964 L 360.000 867.258 L 366.000 867.258 L 366.000 877.853 L 360.000 877.853 L 360.000 877.853 L 360.000 888.147 L 366.000 888.147 L 366.000 898.742 L 360.000 898.742 L 360.000 898.742 L 360.000 909.036 L 366.000 909.036 L 366.000 919.631 L 360.000 919.631 L 360.000 930.000 Z" fill-rule="evenodd" />
+    <path d="M 570.000 930.000 L 708.000 930.000 L 702.000 930.000 L 702.000 919.481 L 708.000 919.481 L 708.000 919.481 L 708.000 909.186 L 702.000 909.186 L 702.000 898.592 L 708.000 898.592 L 708.000 898.592 L 708.000 888.297 L 702.000 888.297 L 702.000 877.703 L 708.000 877.703 L 708.000 877.703 L 708.000 867.408 L 702.000 867.408 L 702.000 856.814 L 708.000 856.814 L 708.000 856.814 L 708.000 846.519 L 702.000 846.519 L 702.000 836.000 L 708.000 836.000 L 708.000 836.000 L 570.000 836.000 L 576.000 836.000 L 576.000 846.519 L 570.000 846.519 L 570.000 846.519 L 570.000 856.814 L 576.000 856.814 L 576.000 867.408 L 570.000 867.408 L 570.000 867.408 L 570.000 877.703 L 576.000 877.703 L 576.000 888.297 L 570.000 888.297 L 570.000 888.297 L 570.000 898.592 L 576.000 898.592 L 576.000 909.186 L 570.000 909.186 L 570.000 909.186 L 570.000 919.481 L 576.000 919.481 L 576.000 930.000 L 570.000 930.000 Z" fill-rule="evenodd" />
+    <path d="M 718.000 930.000 L 856.000 930.000 L 850.000 930.000 L 850.000 919.481 L 856.000 919.481 L 856.000 919.481 L 856.000 909.186 L 850.000 909.186 L 850.000 898.592 L 856.000 898.592 L 856.000 898.592 L 856.000 888.297 L 850.000 888.297 L 850.000 877.703 L 856.000 877.703 L 856.000 877.703 L 856.000 867.408 L 850.000 867.408 L 850.000 856.814 L 856.000 856.814 L 856.000 856.814 L 856.000 846.519 L 850.000 846.519 L 850.000 836.000 L 856.000 836.000 L 856.000 836.000 L 718.000 836.000 L 724.000 836.000 L 724.000 846.519 L 718.000 846.519 L 718.000 846.519 L 718.000 856.814 L 724.000 856.814 L 724.000 867.408 L 718.000 867.408 L 718.000 867.408 L 718.000 877.703 L 724.000 877.703 L 724.000 888.297 L 718.000 888.297 L 718.000 888.297 L 718.000 898.592 L 724.000 898.592 L 724.000 909.186 L 718.000 909.186 L 718.000 909.186 L 718.000 919.481 L 724.000 919.481 L 724.000 930.000 L 718.000 930.000 Z" fill-rule="evenodd" />
     <path d="M 866.000 930.000 L 1060.000 930.000 L 1060.000 786.000 L 866.000 786.000 Z" fill-rule="evenodd" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
@@ -72,132 +36,30 @@
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
-    <text x="250.0" y="883.0" class="part-label" text-anchor="middle" dominant-baseline="middle">FRONT</text>
-    <text x="460.0" y="883.0" class="part-label" text-anchor="middle" dominant-baseline="middle">BACK</text>
+    <text x="247.67441860465118" y="884.0930232558139" class="part-label" text-anchor="middle" dominant-baseline="middle">FRONT</text>
+    <text x="457.6744186046512" y="884.0930232558139" class="part-label" text-anchor="middle" dominant-baseline="middle">BACK</text>
     <text x="639.0" y="883.0" class="part-label" text-anchor="middle" dominant-baseline="middle">LEFT SIDE</text>
     <text x="787.0" y="883.0" class="part-label" text-anchor="middle" dominant-baseline="middle">RIGHT SIDE</text>
     <text x="963.0" y="858.0" class="part-label" text-anchor="middle" dominant-baseline="middle">BOTTOM</text>
   </g>
-  <g id="EDGE_COLORS" class="edge-colors">
-    <line x1="350.0" y1="930.0" x2="350.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="150.0" y1="930.0" x2="150.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <line x1="560.0" y1="930.0" x2="560.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="360.0" y1="930.0" x2="360.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <line x1="708.0" y1="930.0" x2="708.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="570.0" y1="930.0" x2="570.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <line x1="856.0" y1="930.0" x2="856.0" y2="836.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="718.0" y1="930.0" x2="718.0" y2="836.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-  </g>
+  <g id="EDGE_COLORS" class="edge-colors" />
   <g id="CONSTRUCTION" class="construction" />
-  <g id="DIMENSIONS" class="dimensions">
-    <line x1="360.0" y1="918.0" x2="360.0" y2="898.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="560.0" y1="918.0" x2="560.0" y2="898.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="360.0" y1="898.0" x2="560.0" y2="898.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="360.0,898.0 363.0,895.0 363.0,901.0" fill="#5ab9ea" />
-    <polygon points="560.0,898.0 557.0,895.0 557.0,901.0" fill="#5ab9ea" />
-    <text x="460.0" y="893.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">200.0mm</text>
-    <line x1="560.0" y1="918.0" x2="580.0" y2="918.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="560.0" y1="924.0" x2="580.0" y2="924.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="580.0" y1="918.0" x2="580.0" y2="924.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="580.0,918.0 577.0,921.0 583.0,921.0" fill="#5ab9ea" />
-    <polygon points="580.0,924.0 577.0,921.0 583.0,921.0" fill="#5ab9ea" />
-    <text x="585.0" y="921.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 585.0 921.0)">6.0mm</text>
-    <line x1="570.0" y1="918.0" x2="570.0" y2="878.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="708.0" y1="918.0" x2="708.0" y2="878.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="570.0" y1="878.0" x2="708.0" y2="878.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="570.0,878.0 573.0,875.0 573.0,881.0" fill="#5ab9ea" />
-    <polygon points="708.0,878.0 705.0,875.0 705.0,881.0" fill="#5ab9ea" />
-    <text x="639.0" y="873.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">138.0mm</text>
-    <line x1="708.0" y1="918.0" x2="748.0" y2="918.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="708.0" y1="924.0" x2="748.0" y2="924.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="748.0" y1="918.0" x2="748.0" y2="924.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="748.0,918.0 745.0,921.0 751.0,921.0" fill="#5ab9ea" />
-    <polygon points="748.0,924.0 745.0,921.0 751.0,921.0" fill="#5ab9ea" />
-    <text x="753.0" y="921.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 753.0 921.0)">6.0mm</text>
-    <line x1="360.0" y1="836.0" x2="360.0" y2="776.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="560.0" y1="836.0" x2="560.0" y2="776.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="360.0" y1="776.0" x2="560.0" y2="776.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="360.0,776.0 363.0,773.0 363.0,779.0" fill="#5ab9ea" />
-    <polygon points="560.0,776.0 557.0,773.0 557.0,779.0" fill="#5ab9ea" />
-    <text x="460.0" y="771.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">200.0mm</text>
-    <line x1="560.0" y1="836.0" x2="620.0" y2="836.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="560.0" y1="930.0" x2="620.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="620.0" y1="836.0" x2="620.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="620.0,836.0 617.0,839.0 623.0,839.0" fill="#5ab9ea" />
-    <polygon points="620.0,930.0 617.0,927.0 623.0,927.0" fill="#5ab9ea" />
-    <text x="625.0" y="883.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 625.0 883.0)">94.0mm</text>
-    <line x1="866.0" y1="786.0" x2="866.0" y2="766.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1060.0" y1="786.0" x2="1060.0" y2="766.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="866.0" y1="766.0" x2="1060.0" y2="766.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="866.0,766.0 869.0,763.0 869.0,769.0" fill="#5ab9ea" />
-    <polygon points="1060.0,766.0 1057.0,763.0 1057.0,769.0" fill="#5ab9ea" />
-    <text x="963.0" y="761.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">194.0mm</text>
-    <line x1="1060.0" y1="786.0" x2="1140.0" y2="786.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1060.0" y1="930.0" x2="1140.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1140.0" y1="786.0" x2="1140.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1140.0,786.0 1137.0,789.0 1143.0,789.0" fill="#5ab9ea" />
-    <polygon points="1140.0,930.0 1137.0,927.0 1143.0,927.0" fill="#5ab9ea" />
-    <text x="1145.0" y="858.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1145.0 858.0)">144.0mm</text>
-    <line x1="570.0" y1="836.0" x2="570.0" y2="756.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="708.0" y1="836.0" x2="708.0" y2="756.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="570.0" y1="756.0" x2="708.0" y2="756.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="570.0,756.0 573.0,753.0 573.0,759.0" fill="#5ab9ea" />
-    <polygon points="708.0,756.0 705.0,753.0 705.0,759.0" fill="#5ab9ea" />
-    <text x="639.0" y="751.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">138.0mm</text>
-    <line x1="708.0" y1="836.0" x2="808.0" y2="836.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="708.0" y1="930.0" x2="808.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="808.0" y1="836.0" x2="808.0" y2="930.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="808.0,836.0 805.0,839.0 811.0,839.0" fill="#5ab9ea" />
-    <polygon points="808.0,930.0 805.0,927.0 811.0,927.0" fill="#5ab9ea" />
-    <text x="813.0" y="883.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 813.0 883.0)">94.0mm</text>
-  </g>
+  <g id="DIMENSIONS" class="dimensions" />
   <g id="NOTES" class="notes">
     <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="972.0" class="notes">Sheet: 1200.0 × 800.0 × 6.0mm</text>
-    <text x="20" y="984.0" class="notes">Features: 41 profiles, 4 pockets</text>
+    <text x="20" y="984.0" class="notes">Features: 5 profiles, 4 pockets</text>
     <text x="20" y="996.0" class="notes">Depths:</text>
     <text x="30" y="1008.0" class="notes">• pocket: 3.0</text>
-    <text x="20" y="1020.0" class="notes">Parts (40):</text>
-    <text x="30" y="1032.0" class="notes">• assembly_back_2_back_notch_0</text>
-    <text x="30" y="1044.0" class="notes">• assembly_back_2_back_notch_1</text>
-    <text x="30" y="1056.0" class="notes">• assembly_back_2_back_notch_2</text>
-    <text x="30" y="1068.0" class="notes">• assembly_back_2_back_notch_3</text>
-    <text x="30" y="1080.0" class="notes">• assembly_back_2_back_notch_4</text>
-    <text x="30" y="1092.0" class="notes">• assembly_back_2_back_notch_5</text>
-    <text x="30" y="1104.0" class="notes">• assembly_back_2_back_notch_6</text>
-    <text x="30" y="1116.0" class="notes">• assembly_back_2_back_notch_7</text>
-    <text x="30" y="1128.0" class="notes">• assembly_back_dado_3</text>
-    <text x="30" y="1140.0" class="notes">• assembly_front_0_front_notch_0</text>
-    <text x="30" y="1152.0" class="notes">• assembly_front_0_front_notch_1</text>
-    <text x="30" y="1164.0" class="notes">• assembly_front_0_front_notch_2</text>
-    <text x="30" y="1176.0" class="notes">• assembly_front_0_front_notch_3</text>
-    <text x="30" y="1188.0" class="notes">• assembly_front_0_front_notch_4</text>
-    <text x="30" y="1200.0" class="notes">• assembly_front_0_front_notch_5</text>
-    <text x="30" y="1212.0" class="notes">• assembly_front_0_front_notch_6</text>
-    <text x="30" y="1224.0" class="notes">• assembly_front_0_front_notch_7</text>
-    <text x="30" y="1236.0" class="notes">• assembly_front_dado_1</text>
-    <text x="30" y="1248.0" class="notes">• assembly_left_side_4_left_side_notch_0</text>
-    <text x="30" y="1260.0" class="notes">• assembly_left_side_4_left_side_notch_1</text>
-    <text x="30" y="1272.0" class="notes">• assembly_left_side_4_left_side_notch_2</text>
-    <text x="30" y="1284.0" class="notes">• assembly_left_side_4_left_side_notch_3</text>
-    <text x="30" y="1296.0" class="notes">• assembly_left_side_4_left_side_notch_4</text>
-    <text x="30" y="1308.0" class="notes">• assembly_left_side_4_left_side_notch_5</text>
-    <text x="30" y="1320.0" class="notes">• assembly_left_side_4_left_side_notch_6</text>
-    <text x="30" y="1332.0" class="notes">• assembly_left_side_4_left_side_notch_7</text>
-    <text x="30" y="1344.0" class="notes">• assembly_left_side_4_left_side_notch_8</text>
-    <text x="30" y="1356.0" class="notes">• assembly_left_side_4_left_side_notch_9</text>
-    <text x="30" y="1368.0" class="notes">• assembly_left_side_dado_5</text>
-    <text x="30" y="1380.0" class="notes">• assembly_right_side_6_right_side_notch_0</text>
-    <text x="30" y="1392.0" class="notes">• assembly_right_side_6_right_side_notch_1</text>
-    <text x="30" y="1404.0" class="notes">• assembly_right_side_6_right_side_notch_2</text>
-    <text x="30" y="1416.0" class="notes">• assembly_right_side_6_right_side_notch_3</text>
-    <text x="30" y="1428.0" class="notes">• assembly_right_side_6_right_side_notch_4</text>
-    <text x="30" y="1440.0" class="notes">• assembly_right_side_6_right_side_notch_5</text>
-    <text x="30" y="1452.0" class="notes">• assembly_right_side_6_right_side_notch_6</text>
-    <text x="30" y="1464.0" class="notes">• assembly_right_side_6_right_side_notch_7</text>
-    <text x="30" y="1476.0" class="notes">• assembly_right_side_6_right_side_notch_8</text>
-    <text x="30" y="1488.0" class="notes">• assembly_right_side_6_right_side_notch_9</text>
-    <text x="30" y="1500.0" class="notes">• assembly_right_side_dado_7</text>
+    <text x="20" y="1020.0" class="notes">Parts (8):</text>
+    <text x="30" y="1032.0" class="notes">• assembly_back_2_back_0_outer</text>
+    <text x="30" y="1044.0" class="notes">• assembly_back_dado_3</text>
+    <text x="30" y="1056.0" class="notes">• assembly_front_0_front_0_outer</text>
+    <text x="30" y="1068.0" class="notes">• assembly_front_dado_1</text>
+    <text x="30" y="1080.0" class="notes">• assembly_left_side_4_left_side_0_outer</text>
+    <text x="30" y="1092.0" class="notes">• assembly_left_side_dado_5</text>
+    <text x="30" y="1104.0" class="notes">• assembly_right_side_6_right_side_0_outer</text>
+    <text x="30" y="1116.0" class="notes">• assembly_right_side_dado_7</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

@@ -1,4 +1,4 @@
-# mill_ui: 990f649
+# mill_ui: 55f3eb4
 # generated: 2026-01-28
 
 Sheet:
@@ -6,6 +6,7 @@ Sheet:
   height: 1220mm
   thickness: 18mm
   margin: 10mm
+  show_dimensions: false
 children:
 - Assembly:
     topology: carcass

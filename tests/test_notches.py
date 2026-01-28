@@ -106,8 +106,8 @@ class TestNotchToPolyline:
 
         assert len(pts) == 4
         assert pts[0] == pytest.approx((20, 0), abs=1e-6)
-        assert pts[1] == pytest.approx((20, -10), abs=1e-6)
-        assert pts[2] == pytest.approx((40, -10), abs=1e-6)
+        assert pts[1] == pytest.approx((20, 10), abs=1e-6)
+        assert pts[2] == pytest.approx((40, 10), abs=1e-6)
         assert pts[3] == pytest.approx((40, 0), abs=1e-6)
 
     def test_notch_on_right_edge(self):

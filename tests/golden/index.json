@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-01-28T14:52:29.627212+00:00",
+  "updated_at": "2026-01-28T21:26:01.867320+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -287,7 +287,7 @@
       "recipe_name": "38_finger_jointed_box",
       "source_file": "docs/recipes/38_finger_jointed_box/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.909638+00:00",
-      "updated_at": "2026-01-28T14:52:29.603906+00:00",
+      "updated_at": "2026-01-28T21:25:53.744102+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -295,7 +295,7 @@
       "recipe_name": "39_box_bottom_styles",
       "source_file": "docs/recipes/39_box_bottom_styles/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.922794+00:00",
-      "updated_at": "2026-01-28T14:52:29.610557+00:00",
+      "updated_at": "2026-01-28T21:25:53.801038+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -303,7 +303,7 @@
       "recipe_name": "40_frameless_cabinet",
       "source_file": "docs/recipes/40_frameless_cabinet/example.pml.yml",
       "created_at": "2026-01-28T14:52:29.627210+00:00",
-      "updated_at": "2026-01-28T14:52:29.627210+00:00",
+      "updated_at": "2026-01-28T21:26:01.867316+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

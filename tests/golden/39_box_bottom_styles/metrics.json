@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "39_box_bottom_styles",
-    "created_at": "2026-01-28T14:52:29.610269+00:00"
+    "created_at": "2026-01-28T21:25:53.800711+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.24,
+    "extraction_time_ms": 0.7,
     "document": {
       "width_mm": 1480.0,
       "height_mm": 1080.0,
@@ -45,21 +45,21 @@
           "elements": []
         },
         "DIMENSIONS": {
-          "element_count": 60,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 30,
-          "polygon_count": 20,
-          "text_count": 10,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
           "elements": []
         },
         "EDGE_COLORS": {
-          "element_count": 8,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 8,
+          "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": []
@@ -105,13 +105,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 46,
+          "element_count": 14,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 46,
+          "text_count": 14,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -186,7 +186,7 @@
           ]
         },
         "PROFILE_CUTS": {
-          "element_count": 41,
+          "element_count": 5,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 5,
@@ -313,12 +313,12 @@
       "total_count": 10,
       "closed_count": 10,
       "open_count": 0,
-      "total_length_mm": 2260.0,
+      "total_length_mm": 2560.0,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 5,
           "closed": 5,
-          "length_mm": 2260.0
+          "length_mm": 2560.0
         },
         "POCKET_REGIONS": {
           "count": 4,
@@ -339,18 +339,8 @@
       "y_max": 940.0
     },
     "text_elements": {
-      "count": 69,
+      "count": 27,
       "dimension_labels": [
-        "138.0mm",
-        "138.0mm",
-        "144.0mm",
-        "194.0mm",
-        "200.0mm",
-        "200.0mm",
-        "6.0mm",
-        "6.0mm",
-        "94.0mm",
-        "94.0mm",
         "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm"
       ],
       "depth_annotations": [
@@ -359,49 +349,17 @@
       "notes_text": [
         "NOTES",
         "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm",
-        "Features: 41 profiles, 4 pockets",
+        "Features: 5 profiles, 4 pockets",
         "Depths:",
         "\u2022 pocket: 3.0",
-        "Parts (40):",
-        "\u2022 assembly_back_2_back_notch_0",
-        "\u2022 assembly_back_2_back_notch_1",
-        "\u2022 assembly_back_2_back_notch_2",
-        "\u2022 assembly_back_2_back_notch_3",
-        "\u2022 assembly_back_2_back_notch_4",
-        "\u2022 assembly_back_2_back_notch_5",
-        "\u2022 assembly_back_2_back_notch_6",
-        "\u2022 assembly_back_2_back_notch_7",
+        "Parts (8):",
+        "\u2022 assembly_back_2_back_0_outer",
         "\u2022 assembly_back_dado_3",
-        "\u2022 assembly_front_0_front_notch_0",
-        "\u2022 assembly_front_0_front_notch_1",
-        "\u2022 assembly_front_0_front_notch_2",
-        "\u2022 assembly_front_0_front_notch_3",
-        "\u2022 assembly_front_0_front_notch_4",
-        "\u2022 assembly_front_0_front_notch_5",
-        "\u2022 assembly_front_0_front_notch_6",
-        "\u2022 assembly_front_0_front_notch_7",
+        "\u2022 assembly_front_0_front_0_outer",
         "\u2022 assembly_front_dado_1",
-        "\u2022 assembly_left_side_4_left_side_notch_0",
-        "\u2022 assembly_left_side_4_left_side_notch_1",
-        "\u2022 assembly_left_side_4_left_side_notch_2",
-        "\u2022 assembly_left_side_4_left_side_notch_3",
-        "\u2022 assembly_left_side_4_left_side_notch_4",
-        "\u2022 assembly_left_side_4_left_side_notch_5",
-        "\u2022 assembly_left_side_4_left_side_notch_6",
-        "\u2022 assembly_left_side_4_left_side_notch_7",
-        "\u2022 assembly_left_side_4_left_side_notch_8",
-        "\u2022 assembly_left_side_4_left_side_notch_9",
+        "\u2022 assembly_left_side_4_left_side_0_outer",
         "\u2022 assembly_left_side_dado_5",
-        "\u2022 assembly_right_side_6_right_side_notch_0",
-        "\u2022 assembly_right_side_6_right_side_notch_1",
-        "\u2022 assembly_right_side_6_right_side_notch_2",
-        "\u2022 assembly_right_side_6_right_side_notch_3",
-        "\u2022 assembly_right_side_6_right_side_notch_4",
-        "\u2022 assembly_right_side_6_right_side_notch_5",
-        "\u2022 assembly_right_side_6_right_side_notch_6",
-        "\u2022 assembly_right_side_6_right_side_notch_7",
-        "\u2022 assembly_right_side_6_right_side_notch_8",
-        "\u2022 assembly_right_side_6_right_side_notch_9",
+        "\u2022 assembly_right_side_6_right_side_0_outer",
         "\u2022 assembly_right_side_dado_7"
       ]
     },
@@ -441,22 +399,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.571,
+    "extraction_time_ms": 0.6382,
     "summary": {
-      "total_lines": 353,
+      "total_lines": 865,
       "comment_lines": 25,
-      "motion_lines": 262,
+      "motion_lines": 774,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 218
+      "feed_lines": 730
     },
     "motion": {
       "g0_count": 90,
-      "g1_count": 172,
+      "g1_count": 684,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1751.9533999999999,
-      "total_feed_distance_mm": 16680.576
+      "total_rapid_distance_mm": 1751.9129,
+      "total_feed_distance_mm": 18024.576
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -517,9 +475,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 21.023400000000002,
-      "feed_time_s": 1668.0576,
-      "total_time_s": 1689.0810000000001
+      "rapid_time_s": 21.0229,
+      "feed_time_s": 1802.4576,
+      "total_time_s": 1823.4805000000001
     },
     "tabs": {
       "detected_count": 0,

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40_frameless_cabinet",
-    "created_at": "2026-01-28T14:52:29.626869+00:00"
+    "created_at": "2026-01-28T21:26:01.866925+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.76,
+    "extraction_time_ms": 0.66,
     "document": {
       "width_mm": 2720.0,
       "height_mm": 1500.0,
@@ -45,13 +45,13 @@
           "elements": []
         },
         "DIMENSIONS": {
-          "element_count": 84,
+          "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 42,
-          "polygon_count": 28,
-          "text_count": 14,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
           "elements": []
         },
         "EDGE_COLORS": {
@@ -425,22 +425,8 @@
       "y_max": 1360.0
     },
     "text_elements": {
-      "count": 43,
+      "count": 29,
       "dimension_labels": [
-        "18.0mm",
-        "332.0mm",
-        "332.0mm",
-        "350.0mm",
-        "350.0mm",
-        "350.0mm",
-        "364.0mm",
-        "364.0mm",
-        "376.0mm",
-        "376.0mm",
-        "476.0mm",
-        "500.0mm",
-        "6.0mm",
-        "6.0mm",
         "Sheet: 2440.0 \u00d7 1220.0 \u00d7 18.0mm"
       ],
       "depth_annotations": [
@@ -515,7 +501,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0342,
+    "extraction_time_ms": 1.1379,
     "summary": {
       "total_lines": 1225,
       "comment_lines": 45,

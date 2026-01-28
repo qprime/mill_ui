@@ -91,7 +91,7 @@ class TestNotchedPanelGenerator:
         assert items[0].feature.type == "profile"
         assert items[0].feature.depth == "through"
         points = items[0].geometry.data.get("points", [])
-        assert len(points) == 9
+        assert len(points) == 8
 
     def test_notches_on_different_edges(self):
         notches = (
@@ -110,4 +110,4 @@ class TestNotchedPanelGenerator:
         assert len(items) == 1
         assert items[0].type == "Polygon"
         points = items[0].geometry.data.get("points", [])
-        assert len(points) == 21
+        assert len(points) == 20

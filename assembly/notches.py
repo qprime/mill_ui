@@ -4,6 +4,9 @@ import math
 from dataclasses import dataclass, field
 from typing import Any
 
+from shapely.geometry import Polygon, box
+from shapely.ops import unary_union, orient
+
 Point2D = tuple[float, float]
 
 
@@ -150,55 +153,63 @@ def build_notched_polygon(
     half_w = width_mm / 2
     half_h = height_mm / 2
 
+    base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
+
+    if not notches:
+        result = orient(base, sign=1.0)
+        return tuple(result.exterior.coords[:-1])
+
     corners: tuple[Point2D, ...] = (
         (cx - half_w, cy - half_h),
         (cx + half_w, cy - half_h),
         (cx + half_w, cy + half_h),
         (cx - half_w, cy + half_h),
     )
-
     edge_lengths = (width_mm, height_mm, width_mm, height_mm)
 
-    by_edge: dict[int, list[NotchSpec]] = {}
-    for n in notches:
-        by_edge.setdefault(n.edge_index, []).append(n)
-    for edge_idx in by_edge:
-        by_edge[edge_idx].sort(key=lambda x: x.u_start_mm)
+    notch_boxes = []
+    for notch in notches:
+        edge_idx = notch.edge_index
+        if edge_idx < 0 or edge_idx >= 4:
+            continue
 
-    points: list[Point2D] = []
-
-    for edge_idx in range(4):
         p0 = corners[edge_idx]
         p1 = corners[(edge_idx + 1) % 4]
         edge_len = edge_lengths[edge_idx]
 
-        edge_notches = by_edge.get(edge_idx, [])
-
-        if not edge_notches:
-            points.append(p0)
-            continue
-
         dx = (p1[0] - p0[0]) / edge_len if edge_len > 0 else 0
         dy = (p1[1] - p0[1]) / edge_len if edge_len > 0 else 0
 
-        cursor = 0.0
+        inward_nx = -dy
+        inward_ny = dx
 
-        for notch in edge_notches:
-            if notch.u_start_mm > cursor + 1e-6:
-                pt = (p0[0] + dx * cursor, p0[1] + dy * cursor)
-                points.append(pt)
+        notch_start_x = p0[0] + dx * notch.u_start_mm
+        notch_start_y = p0[1] + dy * notch.u_start_mm
+        notch_end_x = p0[0] + dx * (notch.u_start_mm + notch.u_len_mm)
+        notch_end_y = p0[1] + dy * (notch.u_start_mm + notch.u_len_mm)
 
-            notch_pts = notch_to_polyline(corners, notch)
+        depth = notch.depth_mm
 
-            for pt in notch_pts:
-                points.append(pt)
+        x_coords = [notch_start_x, notch_end_x, notch_end_x + inward_nx * depth, notch_start_x + inward_nx * depth]
+        y_coords = [notch_start_y, notch_end_y, notch_end_y + inward_ny * depth, notch_start_y + inward_ny * depth]
 
-            cursor = notch.u_start_mm + notch.u_len_mm
+        min_x, max_x = min(x_coords), max(x_coords)
+        min_y, max_y = min(y_coords), max(y_coords)
 
-    if points and points[0] != points[-1]:
-        points.append(points[0])
+        notch_boxes.append(box(min_x, min_y, max_x, max_y))
 
-    return tuple(points)
+    if notch_boxes:
+        cutout = unary_union(notch_boxes)
+        result = base.difference(cutout)
+    else:
+        result = base
+
+    result = orient(result, sign=1.0)
+
+    if result.is_empty or not hasattr(result, 'exterior'):
+        return tuple(corners)
+
+    return tuple(result.exterior.coords[:-1])
 
 
 def finger_joints_to_notches(

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Tuple
 
+from shapely.geometry import Polygon
+from shapely.ops import orient
+
 from cam.types import Vec2
 from cam.primitives import rectangle, circle as circle_shape, polygon as polygon_prim, rounded_rect as rounded_rect_prim
 from cam.transforms import Transform2D, place
@@ -66,28 +69,15 @@ def offset_polygon_shape(points: list, center: Tuple[float, float], offset: floa
     abs_points = [(float(p[0]), float(p[1])) for p in points if isinstance(p, (tuple, list)) and len(p) >= 2]
     if len(abs_points) < 3:
         return None
-    n = len(abs_points)
-    offset_points = []
-    for i in range(n):
-        p0 = abs_points[(i - 1) % n]
-        p1 = abs_points[i]
-        p2 = abs_points[(i + 1) % n]
-        dx1, dy1 = p1[0] - p0[0], p1[1] - p0[1]
-        dx2, dy2 = p2[0] - p1[0], p2[1] - p1[1]
-        len1 = (dx1**2 + dy1**2) ** 0.5
-        len2 = (dx2**2 + dy2**2) ** 0.5
-        if len1 < 1e-9 or len2 < 1e-9:
-            offset_points.append(p1)
-            continue
-        nx1, ny1 = -dy1 / len1, dx1 / len1
-        nx2, ny2 = -dy2 / len2, dx2 / len2
-        nx, ny = (nx1 + nx2) / 2, (ny1 + ny2) / 2
-        nlen = (nx**2 + ny**2) ** 0.5
-        if nlen < 1e-9:
-            nx, ny = nx1, ny1
-        else:
-            nx, ny = nx / nlen, ny / nlen
-        offset_points.append((p1[0] + nx * offset, p1[1] + ny * offset))
+
+    poly = Polygon(abs_points)
+    buffered = poly.buffer(offset, join_style='mitre', mitre_limit=2.0)
+    buffered = orient(buffered, sign=1.0)
+
+    if buffered.is_empty or not hasattr(buffered, 'exterior'):
+        return None
+
+    offset_points = list(buffered.exterior.coords[:-1])
     return polygon_prim(offset_points, center)
 
 

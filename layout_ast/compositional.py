@@ -530,6 +530,7 @@ class Assembly:
     dado_drop_mm: float = 0.0
     show_labels: bool = False
     show_edge_colors: bool = False
+    show_dimensions: bool = True
     base_mm: float | None = None
     slant_height_mm: float | None = None
     cap_style: str = "between_sides"

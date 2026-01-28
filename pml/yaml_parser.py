@@ -507,6 +507,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             dado_drop_mm=parse_dimension(node_data.get("dado_drop", "0mm")),
             show_labels=node_data.get("show_labels", False),
             show_edge_colors=node_data.get("show_edge_colors", False),
+            show_dimensions=node_data.get("show_dimensions", True),
             base_mm=parse_dimension(node_data["base"]) if "base" in node_data else None,
             slant_height_mm=parse_dimension(node_data["slant_height"]) if "slant_height" in node_data else None,
             cap_style=node_data.get("cap_style", "between_sides"),
@@ -557,6 +558,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         height_mm=parse_dimension(sheet_block["height"]),
         thickness_mm=parse_dimension(sheet_block["thickness"]),
         margin_mm=parse_dimension(sheet_block.get("margin", "0mm")),
+        show_dimensions=sheet_block.get("show_dimensions", True),
     )
 
     project = data.get("project")

@@ -188,7 +188,8 @@ def render_blueprint_svg(
             _render_edge_colors(edge_color_group, item, offset_x, offset_y, y_flip=flip_y)
 
 
-    _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj, y_flip=flip_y)
+    if getattr(sheet, 'show_dimensions', True):
+        _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj, y_flip=flip_y)
 
 
     _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)

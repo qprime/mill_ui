@@ -11,6 +11,7 @@ class Sheet:
     height_mm: float
     thickness_mm: float
     margin_mm: float
+    show_dimensions: bool = True
 
 
 @dataclass(frozen=True)

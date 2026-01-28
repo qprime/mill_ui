@@ -77,8 +77,8 @@ def notch_to_polyline(
     dx = edge_dx / edge_len
     dy = edge_dy / edge_len
 
-    inward_nx = dy
-    inward_ny = -dx
+    inward_nx = -dy
+    inward_ny = dx
 
     notch_start_x = p0[0] + dx * notch.u_start_mm
     notch_start_y = p0[1] + dy * notch.u_start_mm

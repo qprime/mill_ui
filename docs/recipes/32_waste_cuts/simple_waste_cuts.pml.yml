@@ -1,0 +1,27 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 1200mm
+  height: 800mm
+  thickness: 19mm
+  margin: 15mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+        tab_count: 4
+        tab_height: 3mm
+    at:
+      x: 400mm
+      y: 400mm
+      width: 600mm
+      height: 500mm
+- WasteCuts:
+    tab_count: 4
+    tab_height: 3mm
+    min_width: 150mm
+    min_height: 150mm

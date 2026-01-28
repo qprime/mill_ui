@@ -1,0 +1,12 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    id: calibration_surface
+    children:
+    - MeasurementGrid:

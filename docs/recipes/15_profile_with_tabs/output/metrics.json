@@ -2,11 +2,11 @@
   "timing": {
     "ir_ms": 0.02,
     "hints_ms": 0.0,
-    "plan_ms": 0.18,
-    "gcode_ms": 0.45,
-    "svg_ms": 0.21,
-    "total_ms": 0.89,
-    "parse_ms": 0.24
+    "plan_ms": 0.14,
+    "gcode_ms": 0.34,
+    "svg_ms": 0.19,
+    "total_ms": 1.7,
+    "parse_ms": 1.2
   },
   "complexity": {
     "total_moves": 133,
@@ -25,11 +25,11 @@
     ]
   },
   "output_size": {
-    "total_bytes": 2957,
+    "total_bytes": 2943,
     "total_lines": 144,
     "files": {
       "profile-3.17mm": {
-        "bytes": 2957,
+        "bytes": 2943,
         "lines": 144
       }
     }

@@ -6,30 +6,42 @@ import traceback
 def test_edge_allowance():
     print("Running test_edge_allowance...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     assert len(profile_items) == 1
     profile = profile_items[0]
 
-
     assert "edge_treatment" in profile.geometry.data
     edge = profile.geometry.data["edge_treatment"]
     assert edge["type"] == "allowance"
     assert abs(edge["rough_allowance_mm"] - 0.5) < 0.01
     assert abs(edge["finish_allowance_mm"] - 0.1) < 0.01
-
 
     removal = item_to_removal_intent(profile)
     assert removal.constraints.edge_treatment is not None
@@ -42,17 +54,30 @@ rect panel profile through outside
 def test_fillet():
     print("Running test_fillet...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge fillet 3.00mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: fillet
+            radius: 3mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
@@ -69,19 +94,33 @@ rect panel profile through outside
 def test_roundtrip():
     print("Running test_roundtrip...")
 
-    from pml.compositional_parser import parse_compositional_pml
-    from pml.compositional_formatter import format_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
+    from pml.yaml_formatter import format_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted_pml = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted_pml = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted_pml)
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
@@ -102,17 +141,30 @@ rect panel profile through outside
 def test_chamfer():
     print("Running test_chamfer...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge chamfer 2.50mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: chamfer
+            distance: 2.5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
@@ -129,22 +181,35 @@ rect panel profile through outside
 def test_multi_tool_scenario():
     print("Running test_multi_tool_scenario...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     base_removal = item_to_removal_intent(profile_items[0])
-
 
     assert base_removal.constraints.edge_treatment is not None
     assert base_removal.constraints.edge_treatment.type == "allowance"
@@ -155,14 +220,11 @@ rect panel profile through outside
     assert abs(rough_allowance - 0.5) < 0.01
     assert abs(finish_allowance - 0.1) < 0.01
 
-
     rough_side_offset = rough_allowance
     assert rough_side_offset > 0
 
-
     finish_side_offset = finish_allowance
     assert finish_side_offset < rough_side_offset
-
 
     assert rough_allowance > finish_allowance
 
@@ -173,32 +235,43 @@ rect panel profile through outside
 def test_kerf_compatibility():
     print("Running test_kerf_compatibility...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
     from adapters.hints_to_removal import item_to_removal_intent
     from ir.removal_intent import Allowance
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     base_removal = item_to_removal_intent(profile_items[0])
 
-
     assert base_removal.constraints.edge_treatment is not None
     edge_rough = base_removal.constraints.edge_treatment.rough_allowance_mm
     edge_finish = base_removal.constraints.edge_treatment.finish_allowance_mm
 
-
     tool_kerf_mm = 3.175
     kerf_offset = tool_kerf_mm / 2.0
-
 
     from ir.removal_intent import RemovalIntent, Constraints, EdgeTreatment, DepthProfile
 
@@ -217,11 +290,9 @@ rect panel profile through outside
         metadata=base_removal.metadata
     )
 
-
     assert combined_removal.allowance.kerf_compensation == kerf_offset
     assert combined_removal.constraints.edge_treatment.rough_allowance_mm == edge_rough
     assert combined_removal.constraints.edge_treatment.finish_allowance_mm == edge_finish
-
 
     total_rough_offset = kerf_offset + edge_rough
     total_finish_offset = kerf_offset + edge_finish

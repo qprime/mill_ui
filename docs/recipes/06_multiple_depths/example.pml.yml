@@ -1,0 +1,65 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 220mm
+  height: 160mm
+  thickness: 19mm
+children:
+- Rect:
+    id: plate:outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 110mm
+      y: 80mm
+      width: 180mm
+      height: 120mm
+- Rect:
+    id: plate:recess
+    feature:
+      type: pocket
+      depth: 3mm
+    at:
+      x: 110mm
+      y: 80mm
+      width: 140mm
+      height: 80mm
+- Circle:
+    id: hole:1
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 50mm
+      y: 40mm
+- Circle:
+    id: hole:2
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 170mm
+      y: 40mm
+- Circle:
+    id: hole:3
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 50mm
+      y: 120mm
+- Circle:
+    id: hole:4
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 170mm
+      y: 120mm

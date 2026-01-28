@@ -22,9 +22,9 @@ Activate venv first: `source .venv/bin/activate`
 
 ```bash
 python -m cli.mill --project my_table
-python -m cli.mill --project my_table --input layout.pml
+python -m cli.mill --project my_table --input layout.pml.yml
 python -m cli.mill --recipe docs/recipes/01_simple_profile
-python -m cli.nest --project my_table job.nest -v
+python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
 ```
@@ -48,14 +48,14 @@ Check before implementing — these already exist:
 
 | Capability | Entry Point |
 |------------|-------------|
-| Parse PML | `pml/compositional_parser.py` |
+| Parse PML | `pml/yaml_parser.py` |
 | Full CAM pipeline | `cli/mill.py` (G-code + SVG) |
 | Shared pipeline logic | `cam/pipeline.py` |
 | Validate at IR level | `validation/removal_checks.py` |
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |
 | Shaker door template | `templates/shaker.py` |
-| Profile with tabs | `pml/compositional_parser.py` |
+| Profile with tabs | `pml/yaml_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
 | Box generator (finger/dado) | `generators/assemblies/box.py` |
@@ -77,19 +77,19 @@ All machining features must be expressible in PML. Python-level generators are i
 **Feature completeness checklist:**
 1. Generator implementation in `generators/`
 2. AST node in `layout_ast/compositional.py`
-3. Parser support in `pml/compositional_parser.py`
+3. Parser support in `pml/yaml_parser.py`
 4. Syntax documented in `pml/syntax_spec.md`
 5. Recipe demonstrating usage in `docs/recipes/`
 
 **Projects must use declarative input:**
-- Single-sheet layouts: `.pml` files
-- Multi-part nesting: `.nest` files (bin-packing only—defines part bounding boxes and quantities)
+- Single-sheet layouts: `.pml.yml` files
+- Multi-part nesting: `.nest.yml` files (bin-packing only—defines part bounding boxes and quantities)
 - No Python build scripts—if you need one, the PML syntax is incomplete
 
 **PML vs .nest:**
-- `.pml` = full geometry + machining features (shapes, generators, frames, profiles, pockets)
-- `.nest` = bin-packing optimization (part sizes, quantities, sheet dimensions, algorithm choice)
-- `.nest` references templates for part content; templates should be PML with parameters (not Python)
+- `.pml.yml` = full geometry + machining features (shapes, generators, frames, profiles, pockets)
+- `.nest.yml` = bin-packing optimization (part sizes, quantities, sheet dimensions, algorithm choice)
+- `.nest.yml` references templates for part content; templates should be PML with parameters (not Python)
 
 ## File Orientation
 
@@ -138,6 +138,7 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 - File contents in `<system-reminder>` tags are already in context—don't re-read
 - On clear directives with known implementation paths, execute directly
 - Minimize tool calls: edit → test → done
+- Design documents go in GitHub issues (`gh issue create`) unless otherwise directed
 
 ## When Stuck
 

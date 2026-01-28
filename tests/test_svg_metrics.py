@@ -463,7 +463,7 @@ def test_cam_validation_result_with_svg_metrics():
     metrics = extract_svg_metrics_from_file(svg_path)
 
     # Create validation result with metrics
-    result = CAMValidationResult(input_file="simple_profile.pml")
+    result = CAMValidationResult(input_file="simple_profile.pml.yml")
     result.metrics["svg"] = metrics.to_dict()["svg"]
 
     # Should serialize

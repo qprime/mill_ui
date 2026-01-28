@@ -18,7 +18,7 @@ class GoldenEntry:
     """Metadata for a single golden baseline entry."""
 
     recipe_name: str
-    source_file: str  # e.g., "example.pml"
+    source_file: str  # e.g., "example.pml.yml"
     created_at: str = ""
     updated_at: str = ""
     metrics_file: str = "metrics.json"  # relative to entry directory
@@ -81,7 +81,7 @@ class GoldenStore:
         ├── index.json              # Manifest of all golden files
         ├── 01_simple_profile/
         │   ├── metrics.json        # Full metric signature
-        │   └── source.pml          # Input that generated it (optional copy)
+        │   └── source.pml.yml      # Input that generated it (optional copy)
         ├── 02_pocket_with_cleanup/
         │   ├── metrics.json
         │   └── source.pml
@@ -228,7 +228,7 @@ class GoldenStore:
         entry_dir = self.get_entry_path(name)
         entry_dir.mkdir(parents=True, exist_ok=True)
 
-        dest_path = entry_dir / "source.pml"
+        dest_path = entry_dir / "source.pml.yml"
         import shutil
         shutil.copy2(source_path, dest_path)
 

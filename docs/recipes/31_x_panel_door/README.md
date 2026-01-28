@@ -29,21 +29,24 @@ The `output/` folder contains:
 ## Run
 
 ```python
-from pml.compositional_parser import parse_compositional_pml
-from resolution.layout_resolver import resolve_layout
+from pml import parse_pml
 from export.blueprint_svg import render_blueprint_svg
 
-pml = open('docs/recipes/31_x_panel_door/example.pml').read()
-ast = parse_compositional_pml(pml)
-flat = resolve_layout(ast)
-svg = render_blueprint_svg(flat)
+pml = open('docs/recipes/31_x_panel_door/example.pml.yml').read()
+ast = parse_pml(pml)
+svg = render_blueprint_svg(ast)
 ```
 
 ## Variant: Adjusting X Proportions
 
 The X bars width is controlled by the `bar_width` parameter:
 
-```pml
-x_panel bar_width 30mm depth 6mm   # Narrower bars
-x_panel bar_width 75mm depth 6mm   # Wider bars
+```yaml
+- XPanel:
+    bar_width: 30mm  # Narrower bars
+    depth: 6mm
+
+- XPanel:
+    bar_width: 75mm  # Wider bars
+    depth: 6mm
 ```

@@ -86,7 +86,7 @@ waste_cuts
 PML → Parse waste_cuts → Resolve layout → Compute waste rects → Inject synthetic rects → Normal pipeline
 ```
 
-1. **Parser** ([pml/compositional_parser.py](../../../pml/compositional_parser.py)): Parses `waste_cuts` block into `WasteCuts` AST node
+1. **Parser** ([pml/yaml_parser.py](../../../pml/yaml_parser.py)): Parses `WasteCuts` block into `WasteCuts` AST node
 2. **Resolver** ([resolution/layout_resolver.py](../../../resolution/layout_resolver.py)): After resolving all parts, computes waste rectangles and injects them as synthetic `Item` nodes
 3. **Algorithm** ([nesting/waste_decomposition.py](../../../nesting/waste_decomposition.py)): Implements both maximal rectangles and guillotine algorithms
 

@@ -260,7 +260,7 @@ def generate_recipe(
 
     # Find source PML
     source_pml = None
-    for candidate in ["example.pml", "source.pml"]:
+    for candidate in ["example.pml.yml", "source.pml.yml"]:
         pml_path = recipe_dir / candidate
         if pml_path.exists():
             source_pml = pml_path

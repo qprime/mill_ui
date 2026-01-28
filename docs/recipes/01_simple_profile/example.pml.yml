@@ -1,0 +1,19 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+children:
+- Rect:
+    id: part
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 225mm
+      y: 325mm
+      width: 200mm
+      height: 150mm

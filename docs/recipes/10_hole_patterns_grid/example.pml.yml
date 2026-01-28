@@ -1,0 +1,26 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 700mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Inset:
+        distance: 25mm
+        children:
+        - Grid:
+            rows: 16
+            cols: 2
+            gap: 20mm
+            children:
+            - Cell:
+                children:
+                - Circle:
+                    diameter: 5mm
+                    feature:
+                      type: hole
+                      depth: 12mm

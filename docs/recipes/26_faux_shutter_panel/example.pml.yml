@@ -1,0 +1,23 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 250mm
+  height: 600mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - SplitHorizontalGaps:
+        count: 12
+        gap: 12mm
+        children:
+        - Pocket:
+            depth: 8mm
+        - Chamfer:
+            width: 4mm
+            depth: 2mm

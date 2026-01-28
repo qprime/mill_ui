@@ -6,7 +6,8 @@ import json
 import time
 from pathlib import Path
 
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from pml.yaml_parser import parse_nest_yaml
+from pml.nest_parser import nest_job_to_api_params
 from pml.formatter import format_pml
 from nesting import nest_and_generate, nest_parts
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -48,11 +49,11 @@ def main():
     print("=" * 60)
 
 
-    nest_pml_path = recipe_dir / "cabinet_job.nest"
+    nest_pml_path = recipe_dir / "cabinet_job.nest.yml"
     print(f"\nReading {nest_pml_path.name}...")
 
     source = nest_pml_path.read_text()
-    job = parse_nest_pml(source)
+    job = parse_nest_yaml(source)
 
     print(f"\nJob specification:")
     print(f"  Algorithm: {job.algorithm}")
@@ -101,14 +102,14 @@ def main():
 
     for sheet_idx, ast in enumerate(asts):
         sheet_name = f"sheet_{sheet_idx + 1}"
-        pml_path = output_dir / f"{sheet_name}.pml"
+        pml_path = output_dir / f"{sheet_name}.pml.yml"
 
 
         pml_content = format_pml(ast)
 
 
-        header = f"# {sheet_name}.pml\n"
-        header += f"# Generated from cabinet_job.nest\n"
+        header = f"# {sheet_name}.pml.yml\n"
+        header += f"# Generated from cabinet_job.nest.yml\n"
         header += f"# Algorithm: {job.algorithm}\n"
         header += f"# Items: {len(ast.items)}\n"
         header += "\n"
@@ -120,7 +121,7 @@ def main():
     print("\n--- CAM Processing ---")
 
     metrics = {
-        "source": "cabinet_job.nest",
+        "source": "cabinet_job.nest.yml",
         "algorithm": job.algorithm,
         "nesting": {
             "total_sheets": result["total_sheets"],
@@ -208,7 +209,7 @@ def main():
 
         sheet_metrics = {
             "name": sheet_name,
-            "pml_file": f"{sheet_name}.pml",
+            "pml_file": f"{sheet_name}.pml.yml",
             "items": len(ast.items),
             "intents": len(intents),
             "passes": len(passes),

@@ -1,0 +1,16 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 800mm
+  height: 600mm
+  thickness: 6mm
+  margin: 10mm
+children:
+- Box:
+    outer_width: 200mm
+    outer_depth: 150mm
+    outer_height: 100mm
+    thickness: 6mm
+    finger_width: 12mm
+    clearance: 0.15mm

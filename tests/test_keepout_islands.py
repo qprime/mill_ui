@@ -1,21 +1,35 @@
 
-from pml.compositional_parser import parse_compositional_pml, ParseError
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.compositional import Keepout
 from layout_ast.layout import Feature
 
 
 def test_simple_pocket_with_island():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            rect island
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - Rect:
+                        id: island
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -40,17 +54,34 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_inside_grid():
-    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
 
-grid 2 2 gap 10.00mm
-    cell
-        rect pocket 5.00mm
-            keepout
-                inset 20.00mm
-                    rect
+children:
+  - Grid:
+      rows: 2
+      cols: 2
+      gap: 10mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  feature:
+                    type: pocket
+                    depth: 5mm
+                  children:
+                    - Keepout:
+                        children:
+                          - Inset:
+                              distance: 20mm
+                              children:
+                                - Rect: {}
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -64,19 +95,39 @@ grid 2 2 gap 10.00mm
 
 
 def test_multiple_keepouts_in_region():
-    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 500mm
+  height: 500mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            inset 50.00mm
-                rect island1
-    keepout
-        inset 200.00mm
-            circle fit
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - Inset:
+                        distance: 50mm
+                        children:
+                          - Rect:
+                              id: island1
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 200mm
+                  children:
+                    - Circle:
+                        fit: true
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -92,18 +143,32 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_roundtrip():
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            rect island
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - Rect:
+                        id: island
 """
 
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted_pml = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted_pml = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted_pml)
 
 
     flat1 = resolve_layout(ast1)
@@ -127,14 +192,26 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_with_circle():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        circle diameter 100.00mm
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Circle:
+                  diameter: 100mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
@@ -154,15 +231,29 @@ rect panel pocket 6.00mm
 
 
 def test_keepout_with_rounded_rect():
-    pml = """sheet 500.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 500mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            rounded_rect radius 10.00mm
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - RoundedRect:
+                        radius: 10mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
@@ -182,35 +273,66 @@ rect panel pocket 6.00mm
 
 
 def test_nested_keepout_error():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            rect outer_island
-                keepout
-                    rect nested_island
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - Rect:
+                        id: outer_island
+                        children:
+                          - Keepout:
+                              children:
+                                - Rect:
+                                    id: nested_island
 """
 
     try:
-        ast = parse_compositional_pml(pml)
-        assert False, "Should have raised ParseError for nested keepout"
-    except ParseError as e:
+        ast = parse_pml_yaml(pml)
+        assert False, "Should have raised PMLParseError for nested keepout"
+    except PMLParseError as e:
         assert "nested keepout" in str(e).lower()
 
 
 def test_removal_intent_includes_islands():
     from adapters.hints_to_removal import item_to_removal_intent
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    keepout
-        inset 50.00mm
-            rect island
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 50mm
+                  children:
+                    - Rect:
+                        id: island
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 

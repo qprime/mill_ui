@@ -1,0 +1,24 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 500mm
+  height: 800mm
+  thickness: 19mm
+children:
+- Arch:
+    width: 500mm
+    height: 800mm
+    radius: 250mm
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 60mm
+        children:
+        - RaisedPanel:
+            border_width: 25mm
+            border_depth: 6mm
+            field_depth: 2mm

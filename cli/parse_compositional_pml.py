@@ -5,14 +5,14 @@ import argparse
 import sys
 from pathlib import Path
 
-from pml.compositional_parser import parse_compositional_pml, ParseError
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from pml.yaml_formatter import format_pml_yaml
 from pml import format_pml
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Parse and validate compositional PML files",
+        description="Parse and validate PML YAML files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -36,7 +36,7 @@ Examples:
     parser.add_argument(
         "input_file",
         nargs="?",
-        help="Input compositional PML file (or stdin if omitted)",
+        help="Input PML YAML file (or stdin if omitted)",
     )
     parser.add_argument(
         "--output",
@@ -53,13 +53,12 @@ Examples:
         "--format",
         "-f",
         dest="output_format",
-        choices=["pml", "json", "compositional"],
-        default="compositional",
-        help="Output format (default: compositional). Use 'compositional' for canonical compositional PML, 'pml' for flat PML (requires --resolve), 'json' for flat JSON (requires --resolve)",
+        choices=["pml", "json", "yaml"],
+        default="yaml",
+        help="Output format (default: yaml). Use 'yaml' for canonical PML YAML, 'pml' for flat PML (requires --resolve), 'json' for flat JSON (requires --resolve)",
     )
 
     args = parser.parse_args()
-
 
     if args.output_format in ("pml", "json") and not args.resolve:
         print(f"Error: --format {args.output_format} requires --resolve", file=sys.stderr)
@@ -73,15 +72,13 @@ Examples:
                 print(f"Error: Input file not found: {args.input_file}", file=sys.stderr)
                 sys.exit(1)
             input_text = input_path.read_text()
-            print(f"Parsing compositional PML: {args.input_file}", file=sys.stderr)
+            print(f"Parsing PML YAML: {args.input_file}", file=sys.stderr)
         else:
             input_text = sys.stdin.read()
-            print("Parsing compositional PML from stdin...", file=sys.stderr)
+            print("Parsing PML YAML from stdin...", file=sys.stderr)
 
-
-        comp_ast = parse_compositional_pml(input_text)
+        comp_ast = parse_pml_yaml(input_text)
         print(f"✓ Parse successful", file=sys.stderr)
-
 
         if args.resolve:
             from resolution.layout_resolver import resolve_layout
@@ -90,23 +87,18 @@ Examples:
             flat_ast = resolve_layout(comp_ast)
             print(f"✓ Resolved to {len(flat_ast.items)} flat items", file=sys.stderr)
 
-
-        if args.output_format == "compositional":
-
-            output_text = format_compositional_pml(comp_ast)
-            output_desc = "canonical compositional PML"
+        if args.output_format == "yaml":
+            output_text = format_pml_yaml(comp_ast)
+            output_desc = "canonical PML YAML"
         elif args.output_format == "pml":
-
             output_text = format_pml(flat_ast)
             output_desc = "flat PML"
         elif args.output_format == "json":
-
             output_text = flat_ast.to_json()
             output_desc = "flat JSON"
         else:
             print(f"Error: Unknown output format: {args.output_format}", file=sys.stderr)
             sys.exit(1)
-
 
         if args.output_file:
             output_path = Path(args.output_file)
@@ -115,7 +107,7 @@ Examples:
         else:
             print(output_text, end="")
 
-    except ParseError as e:
+    except PMLParseError as e:
         print(f"✗ Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:

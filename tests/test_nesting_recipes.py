@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from pml.yaml_parser import parse_nest_yaml
+from pml.nest_parser import nest_job_to_api_params
 from nesting import nest_and_generate
 
 
@@ -16,14 +17,14 @@ def discover_nest_files() -> list[Path]:
     if not recipes_dir.exists():
         return []
 
-    nest_files = list(recipes_dir.glob("*/*.nest"))
+    nest_files = list(recipes_dir.glob("*/*.nest.yml"))
     return sorted(nest_files)
 
 
 def _run_nest_file(nest_path: Path) -> tuple[bool, str, dict]:
     try:
         source = nest_path.read_text()
-        job = parse_nest_pml(source)
+        job = parse_nest_yaml(source)
 
         params = nest_job_to_api_params(job)
 
@@ -54,7 +55,7 @@ def _run_nest_file(nest_path: Path) -> tuple[bool, str, dict]:
 NEST_FILES = discover_nest_files()
 
 
-@pytest.mark.skipif(not NEST_FILES, reason="No .nest files found in docs/recipes/")
+@pytest.mark.skipif(not NEST_FILES, reason="No .nest.yml files found in docs/recipes/")
 @pytest.mark.parametrize("nest_path", NEST_FILES, ids=lambda p: p.stem)
 def test_nest_file(nest_path: Path):
     success, message, metrics = _run_nest_file(nest_path)
@@ -70,10 +71,10 @@ def run_nesting_recipe_tests():
     nest_files = discover_nest_files()
 
     if not nest_files:
-        print("No .nest files found in docs/recipes/")
+        print("No .nest.yml files found in docs/recipes/")
         return True
 
-    print(f"Found {len(nest_files)} .nest file(s)\n")
+    print(f"Found {len(nest_files)} .nest.yml file(s)\n")
 
     passed = 0
     failed = 0

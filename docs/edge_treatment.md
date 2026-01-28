@@ -90,6 +90,6 @@ if removal.constraints.edge_treatment:
 |------|---------|
 | layout_ast/compositional.py | Edge node definition |
 | ir/removal_intent.py | EdgeTreatment dataclass |
-| pml/compositional_parser.py | Edge parsing |
+| pml/yaml_parser.py | Edge parsing |
 | resolution/layout_resolver.py | Edge extraction logic |
 | adapters/hints_to_removal.py | Item → RemovalIntent with edge treatment |

@@ -392,7 +392,7 @@ mill_ui/
 │       ├── __init__.py
 │       └── box.py               # BoxParams, PanelSpec, compute_box_panels()
 ├── pml/
-│   └── compositional_parser.py  # add box syntax parsing
+│   └── yaml_parser.py           # box syntax parsing
 ├── export/
 │   └── blueprint.py             # add part labels, edge colors
 ├── templates/

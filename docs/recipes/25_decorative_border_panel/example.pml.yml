@@ -1,0 +1,21 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 350mm
+  height: 450mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - ConcentricBorder:
+        insets:
+        - 15mm
+        - 30mm
+        - 45mm
+        groove: 3mm
+        depth: 2mm

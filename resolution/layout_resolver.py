@@ -403,9 +403,13 @@ class LayoutResolver:
         )
         items.append(rect_item)
 
+        child_params = {**params}
+        if edge_treatment:
+            child_params["edge_treatment"] = edge_treatment
+
         for child in node.children:
             if not isinstance(child, (Keepout, Edge)):
-                self._resolve_node(child, region, items, params)
+                self._resolve_node(child, region, items, child_params)
 
     def _handle_circle(
         self,
@@ -656,6 +660,10 @@ class LayoutResolver:
             shape_type = "Rect"
             geometry_data = {"w_mm": region.width, "h_mm": region.height}
 
+        edge_treatment = params.get("edge_treatment")
+        if edge_treatment:
+            geometry_data["edge_treatment"] = edge_treatment
+
         profile_item = Item(
             kind="shape",
             type=shape_type,
@@ -674,10 +682,16 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         """Handle PocketGen: Generate flat pocket item for region."""
+        geometry_data = {"w_mm": region.width, "h_mm": region.height}
+
+        edge_treatment = params.get("edge_treatment")
+        if edge_treatment:
+            geometry_data["edge_treatment"] = edge_treatment
+
         pocket_item = Item(
             kind="shape",
             type="Rect",
-            geometry=Geometry(data={"w_mm": region.width, "h_mm": region.height}),
+            geometry=Geometry(data=geometry_data),
             placement=Placement(center_xy_mm=region.center),
             feature=Feature(
                 type="pocket",

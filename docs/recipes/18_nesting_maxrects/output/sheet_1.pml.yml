@@ -1,0 +1,114 @@
+kerf: 6.35mm
+Sheet:
+  width: 1232mm
+  height: 1245mm
+  thickness: 19mm
+children:
+- Rect:
+    id: tall_door_0_door:outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 238.5mm
+      y: 467mm
+      width: 457mm
+      height: 914mm
+- Rect:
+    id: tall_door_0_door:panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 238.5mm
+      y: 467mm
+      width: 343mm
+      height: 800mm
+- Rect:
+    id: tall_door_1_door:outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 701.85mm
+      y: 467mm
+      width: 457mm
+      height: 914mm
+- Rect:
+    id: tall_door_1_door:panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 701.85mm
+      y: 467mm
+      width: 343mm
+      height: 800mm
+- Rect:
+    id: small_door_0_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 1038.2mm
+      y: 162.5mm
+      width: 203mm
+      height: 305mm
+- Rect:
+    id: small_door_1_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 162.5mm
+      y: 1031.85mm
+      width: 305mm
+      height: 203mm
+- Rect:
+    id: small_door_2_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 1038.2mm
+      y: 473.85mm
+      width: 203mm
+      height: 305mm
+- Rect:
+    id: small_door_3_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 473.85mm
+      y: 1031.85mm
+      width: 305mm
+      height: 203mm
+- Rect:
+    id: small_door_4_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 785.2mm
+      y: 1031.85mm
+      width: 305mm
+      height: 203mm
+- Rect:
+    id: small_door_5_rect
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 1045.55mm
+      y: 785.2mm
+      width: 203mm
+      height: 305mm

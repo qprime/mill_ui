@@ -18,7 +18,7 @@ All proposed features have been implemented:
 - `generators/assemblies/box.py` - Added `DadoSpec`, extended `BoxParams` and `PanelSpec`, updated `compute_box_panels()`
 - `generators/assemblies/__init__.py` - Export `DadoSpec`
 - `layout_ast/compositional.py` - Added new fields to `Box` AST node
-- `pml/compositional_parser.py` - Added keywords and `parse_box()` updates
+- `pml/yaml_parser.py` - Added keywords and `parse_box()` updates
 - `resolution/layout_resolver.py` - Updated `_handle_box()` for dado pocket generation
 - `pml/syntax_spec.md` - Documented all new options
 - `tests/test_box_assembly.py` - Added 15 new tests
@@ -164,7 +164,7 @@ Update panel dimension calculations:
 
 Add fields matching BoxParams.
 
-### 5. Parser (pml/compositional_parser.py)
+### 5. Parser (pml/yaml_parser.py)
 
 Add keywords: `bottom_style`, `top_style`, `captured`, `dado`, `inset`, `drop`
 

@@ -1,0 +1,65 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 180mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel:outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 150mm
+      y: 90mm
+      width: 300mm
+      height: 180mm
+- Rect:
+    id: panel:recess
+    feature:
+      type: pocket
+      depth: 3mm
+    at:
+      x: 150mm
+      y: 90mm
+      width: 280mm
+      height: 160mm
+- Circle:
+    id: hole:1
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 30mm
+      y: 30mm
+- Circle:
+    id: hole:2
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 270mm
+      y: 30mm
+- Circle:
+    id: hole:3
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 30mm
+      y: 150mm
+- Circle:
+    id: hole:4
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 270mm
+      y: 150mm

@@ -560,7 +560,7 @@ def test_simple_profile_recipe():
 
     # Parse PML to get AST
     from pml import parse_pml
-    pml_path = os.path.join(recipe_dir, "example.pml")
+    pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_simple_profile_recipe (PML file not found)")
         return
@@ -614,7 +614,7 @@ def test_pocket_recipe():
         return
 
     from pml import parse_pml
-    pml_path = os.path.join(recipe_dir, "example.pml")
+    pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_pocket_recipe (PML file not found)")
         return
@@ -670,7 +670,7 @@ def test_shaker_door_recipe():
         return
 
     from pml import parse_pml
-    pml_path = os.path.join(recipe_dir, "example.pml")
+    pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_shaker_door_recipe (PML file not found)")
         return

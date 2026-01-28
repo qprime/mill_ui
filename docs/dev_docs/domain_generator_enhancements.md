@@ -275,7 +275,7 @@ panel Rect 300mm 300mm center 150mm 150mm
 
 ### Implementation Approach
 
-1. Extend `pml/compositional_parser.py` with generator keywords
+1. Extend `pml/yaml_parser.py` with generator keywords
 2. Map PML generator syntax to `generators/` function calls
 3. Domain operations (`frame`, `split_*`) become layout managers
 4. Resolution phase converts PML AST → Domain operations → LayoutAST
@@ -283,7 +283,7 @@ panel Rect 300mm 300mm center 150mm 150mm
 ### Implementation
 
 **Files to modify:**
-- `pml/compositional_parser.py` — Add generator and domain operation keywords
+- `pml/yaml_parser.py` — Add generator and domain operation keywords
 - `resolution/layout_resolver.py` — Map PML keywords to generator calls
 - `layout_ast/layout.py` — May need new AST node types for generators
 
@@ -322,10 +322,10 @@ panel Rect 300mm 300mm center 150mm 150mm
 - Deterministic shape IDs use resolver-level counter (`_shape_counter`) instead of `id(node)`
 
 **Files modified:**
-- `pml/compositional_parser.py` — Added generator keyword parsing
+- `pml/yaml_parser.py` — Added generator keyword parsing
 - `layout_ast/compositional.py` — Added AST node types (ProfileGen, PocketGen, etc.)
 - `resolution/layout_resolver.py` — Added handler methods for each generator node
-- `pml/compositional_formatter.py` — Added formatting for generator nodes
+- `pml/yaml_formatter.py` — Added formatting for generator nodes
 - `adapters/ast_to_removal.py` — Handle engrave polylines, bevel, chamfer, wave features
 - `adapters/removal_to_planner.py` — Route feature types to correct hint buckets
 - `adapters/hints_to_removal.py` — Preserve polyline points in metadata

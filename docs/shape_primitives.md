@@ -213,5 +213,5 @@ Resolution:
 |------|---------|
 | layout_ast/compositional.py | Circle, RoundedRect, Line, Polyline, Polygon, Triangle nodes |
 | resolution/layout_resolver.py | Shape resolution logic |
-| pml/compositional_parser.py | PML syntax parsing |
-| pml/compositional_formatter.py | Canonical PML formatting |
+| pml/yaml_parser.py | PML YAML parsing |
+| pml/yaml_formatter.py | PML YAML formatting |

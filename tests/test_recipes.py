@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
 from pml import parse_pml
 from pml.revision_header import update_file_header
 from resolution.layout_resolver import resolve_layout
@@ -20,7 +20,7 @@ def discover_recipe_pml_files() -> list[Path]:
     if not recipes_dir.exists():
         return []
 
-    pml_files = list(recipes_dir.glob("*/*.pml"))
+    pml_files = list(recipes_dir.glob("*/*.pml.yml"))
     return sorted(pml_files)
 
 
@@ -30,7 +30,7 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         pml_source = f.read()
 
     try:
-        comp_ast = parse_compositional_pml(pml_source)
+        comp_ast = parse_pml_yaml(pml_source)
         ast = resolve_layout(comp_ast)
     except ParseError:
         ast = parse_pml(pml_source)

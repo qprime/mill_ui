@@ -1,0 +1,81 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 700mm
+  height: 250mm
+  thickness: 18mm
+  margin: 10mm
+children:
+- Rect:
+    id: part_a
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Frame:
+        width: 12mm
+        children:
+        - Rect:
+            id: ruler_a
+            children:
+            - MeasurementEdge:
+                edges:
+                - bottom
+                - left
+    at:
+      x: 120mm
+      y: 125mm
+      width: 200mm
+      height: 200mm
+- Rect:
+    id: part_b
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Frame:
+        width: 12mm
+        children:
+        - Rect:
+            id: ruler_b
+            children:
+            - MeasurementEdge:
+                edges:
+                - bottom
+                - left
+                labels: true
+                label_offset: 4.5mm
+                label_interval: 2
+    at:
+      x: 350mm
+      y: 125mm
+      width: 200mm
+      height: 200mm
+- Rect:
+    id: part_c
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Frame:
+        width: 12mm
+        children:
+        - Rect:
+            id: ruler_c
+            children:
+            - MeasurementEdge:
+                edges:
+                - bottom
+                - left
+                minor_ticks: false
+                labels: true
+                label_offset: 4.5mm
+    at:
+      x: 580mm
+      y: 125mm
+      width: 200mm
+      height: 200mm

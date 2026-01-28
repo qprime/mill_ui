@@ -1,872 +1,573 @@
 # PML (Panel Machining Language) Syntax Specification
 
-PML is a human-readable declarative language for defining CNC machining layouts. It compiles to LayoutAST.
+PML is a YAML-based declarative language for defining CNC machining layouts. It compiles to LayoutAST.
 
 ## Design Principles
 
 - **Declarative**: No control flow, no execution, pure data
-- **Human-friendly**: Natural indentation, minimal punctuation
-- **Dimension-explicit**: All dimensions use `mm` suffix for clarity
+- **Standard format**: Valid YAML with JSON Schema validation
+- **Dimension-explicit**: All dimensions use `mm` suffix for clarity (e.g., `100mm`)
 - **Type-safe**: Shape types, feature types, and parameters are explicit
+- **IDE-friendly**: JSON Schema enables autocomplete and validation
 
-## Syntax Overview
+## Quick Example
 
-```pml
-# This is a comment
+```yaml
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+  margin: 10mm
 
-sheet 400mm 600mm 19mm margin 10mm
-
-# Shapes: type identifier at x,y with features
-rect door:outer at 200mm,300mm size 400mm,600mm profile through outside
-rect door:panel at 200mm,300mm size 300mm,500mm pocket 6mm
-
-circle hole:1 at 50mm,50mm diameter 10mm hole 8mm
-
-# Templates (stored in templates/*.pml)
-# template shaker
-#     params
-#         stile_w 57mm
-#         rail_h 57mm
-#         panel_recess 6mm
-#         panel_style pocket
-#
-#     rect door
-#         profile outside through
-#         frame ${stile_w}
-#             ${panel_style} ${panel_recess}
-```
-
-## Grammar
-
-### Sheet Declaration
-
-```
-sheet <width>mm <height>mm <thickness>mm margin <margin>mm
-```
-
-The `margin` parameter defines a no-machining holddown zone around all sheet edges. When specified:
-- The root layout region starts at (margin, margin) and extends to (width-margin, height-margin)
-- Shapes without explicit positioning fill this region, not the full sheet
-- `waste_cuts` without explicit margin will inherit this sheet margin
-
-Example:
-```pml
-sheet 450mm 650mm 19mm margin 10mm
-```
-
-### Shape Declarations
-
-#### Rectangle
-
-```
-rect <id> at <x>mm,<y>mm size <w>mm,<h>mm <feature>
-```
-
-Example:
-```pml
-rect outer at 100mm,200mm size 80mm,120mm profile through outside
-rect panel at 100mm,200mm size 60mm,100mm pocket 5mm
-```
-
-#### Circle
-
-```
-circle <id> at <x>mm,<y>mm diameter <d>mm <feature>
-circle <id> at <x>mm,<y>mm radius <r>mm <feature>
-```
-
-Example:
-```pml
-circle hole1 at 50mm,50mm diameter 10mm hole 8mm
-circle hole2 at 150mm,50mm radius 6mm hole through
-```
-
-#### RoundedRect
-
-```
-roundedrect <id> at <x>mm,<y>mm size <w>mm,<h>mm radius <r>mm [corners <corner>...] <feature>
-```
-
-**Optional selective corners:**
-- `corners tl tr bl br`: Specify which corners to round (any combination)
-- `tl` = top-left, `tr` = top-right, `bl` = bottom-left, `br` = bottom-right
-- Omitted corners get radius 0 (square)
-- If `corners` keyword is omitted, all four corners are rounded
-
-Example:
-```pml
-roundedrect panel at 100mm,100mm size 80mm,60mm radius 5mm pocket 4mm
-roundedrect table_half at 343mm,432mm size 686mm,864mm radius 12.7mm corners tl bl profile through outside
-roundedrect corner at 50mm,50mm size 100mm,100mm radius 25mm corners tr pocket 3mm
-```
-
-### Features
-
-#### Profile (cut outline)
-
-```
-profile through [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
-profile <depth>mm [inside|outside|on] [tabs <count> height <height>mm [width <width>mm]]
-```
-
-**Optional tabs** (holding bridges during cutting):
-- `tabs <count>`: Number of tabs (positive integer)
-- `height <height>mm`: Tab height (material left uncut)
-- `width <width>mm`: Tab width along boundary (optional, defaults to 2× tool diameter, minimum 6mm)
-
-Example:
-```pml
-profile through outside
-profile 10mm inside
-profile through outside tabs 4 height 3mm width 12mm
-profile 6mm inside tabs 6 height 2mm
-```
-
-#### Pocket (recessed area)
-
-```
-pocket <depth>mm [corner_cleanup <diameter>mm]
-pocket through [corner_cleanup <diameter>mm]
-```
-
-**Optional corner_cleanup** (multi-tool workflow for square corners):
-- `corner_cleanup <diameter>mm`: Tool diameter for corner finishing pass
-- Enables two-tool strategy: large tool for roughing, small tool specified here for corners
-- Small tool must be smaller than primary tool to reach into corners
-
-Example:
-```pml
-pocket 5mm
-pocket through
-pocket 6mm corner_cleanup 3.175mm
-```
-
-#### Hole (circular bore)
-
-```
-hole <depth>mm
-hole through
-```
-
-Example:
-```pml
-hole 12mm
-hole through
-```
-
-#### Engrave (surface decoration)
-
-```
-engrave <depth>mm
-```
-
-Example:
-```pml
-engrave 0.5mm
-```
-
-### Generators (Surface Patterns)
-
-Generators create patterns within a shape's bounds. They are specified as children of a shape declaration using indentation.
-
-#### Wave Pattern
-
-```
-wave count <n> amplitude <mm> wavelength <mm> groove <mm> depth <mm>
-```
-
-Creates parallel sinusoidal grooves across the surface.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    wave count 5 amplitude 10mm wavelength 60mm groove 3mm depth 2mm
-```
-
-#### Line Pattern
-
-```
-lines angle <degrees> spacing <mm> width <mm> depth <mm>
-```
-
-Creates parallel line grooves at specified angle. Use multiple `lines` declarations for crosshatch/lattice patterns.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    lines angle 45 spacing 25mm width 4mm depth 3mm
-    lines angle -45 spacing 25mm width 4mm depth 3mm
-```
-
-#### Raised Panel
-
-```
-raised_panel border <mm> border_depth <mm> field_depth <mm>
-```
-
-Creates a raised panel with beveled border and recessed field.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    raised_panel border 25mm border_depth 6mm field_depth 2mm
+children:
+  - Rect:
+      id: door
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: 50mm
+            children:
+              - Pocket:
+                  depth: 6mm
 ```
 
-#### X-Panel
+## Document Structure
 
-```
-x_panel bar_width <mm> depth <mm>
-```
-
-Creates 4 triangular pockets forming an X pattern. The bar_width controls the width of the raised X bars between the pockets.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    frame 50mm
-        x_panel bar_width 50mm depth 6mm
-```
-
-#### Hole Grid
-
-```
-hole_grid spacing <mm> diameter <mm> depth <mm>|through [pattern rectangular|hexagonal|offset] [inset <mm>] [align center|corner]
-```
-
-Creates a grid of circular holes within the shape bounds. Holes are only placed where they fit entirely within the domain boundary.
-
-**Parameters:**
-- `spacing <mm>` - Center-to-center distance between holes (required)
-- `diameter <mm>` - Hole diameter (required)
-- `depth <mm>|through` - Hole depth or "through" for full material penetration (required)
-- `pattern rectangular|hexagonal|offset` - Grid pattern type (optional, default: rectangular)
-  - `rectangular`: Standard grid aligned to X/Y axes
-  - `hexagonal`: Honeycomb pattern (alternating rows offset by spacing/2)
-  - `offset`: Like rectangular but alternating rows offset by spacing/2
-- `inset <mm>` - Inset from domain boundary (optional, default: 0)
-- `align center|corner` - Grid alignment within domain (optional, default: center)
-  - `center`: Grid centered on domain centroid
-  - `corner`: Grid aligned to domain bounds corner
-
-Example:
-```pml
-rect pegboard
-    profile outside through
-    hole_grid spacing 50mm diameter 6.35mm depth through pattern rectangular inset 50mm align center
-
-rounded_rect panel radius 25mm
-    profile outside through
-    hole_grid spacing 25mm diameter 5mm depth 10mm pattern hexagonal
-```
-
-#### Concentric Border
-
-```
-concentric_border insets <mm> <mm> ... groove <mm> depth <mm>
-```
-
-Creates concentric rectangular grooves at specified inset distances.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    concentric_border insets 15mm 30mm 45mm groove 3mm depth 2mm
-```
-
-#### Measurement Grid
-
-```
-measurement_grid [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [minor_ticks false] [labels] [label_height <mm>] [label_offset <mm>] [label_interval <n>] [label_start <n>]
-```
-
-Creates ruler-style tick marks for calibration surfaces and measurement references. Tick marks are generated along all four edges of the shape, pointing inward. Minor ticks occur at regular intervals, with longer major ticks at larger intervals.
-
-**Parameters:**
-- `unit metric|imperial|custom` - Preset unit mode (optional, default: metric)
-  - `metric`: minor=1mm, major=10mm
-  - `imperial`: minor=1/16" (1.5875mm), major=1" (25.4mm)
-  - `custom`: uses explicit spacing values (requires minor_spacing and major_spacing)
-- `minor_spacing <mm>` - Distance between minor tick marks (required for custom mode)
-- `major_spacing <mm>` - Distance between major tick marks (required for custom mode)
-- `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
-- `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
-- `depth <mm>` - Engraving depth (optional, default: 0.5mm)
-- `minor_ticks false` - Hide minor tick marks, show only major ticks (optional, default: show minor ticks)
-- `labels` - Enable numeric labels at major tick intervals (optional flag)
-- `label_height <mm>` - Height of label text (optional, default: 3mm)
-- `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
-- `label_interval <n>` - Label every Nth major tick (optional, default: 1 = every major tick)
-- `label_start <n>` - First labeled value offset (optional, default: 0)
-
-Example:
-```pml
-rect calibration_surface
-    measurement_grid unit metric minor_length 3mm major_length 6mm depth 0.5mm
-
-rect labeled_ruler
-    measurement_grid unit metric labels label_height 4mm depth 0.5mm
-
-rect custom_grid
-    measurement_grid unit custom minor_spacing 2mm major_spacing 20mm minor_length 4mm major_length 8mm depth 0.5mm
-
-rect sparse_labels
-    measurement_grid minor_ticks false labels label_interval 2 depth 0.3mm
-```
-
-#### Measurement Edge
-
-```
-measurement_edge edges [<edge>, ...] [unit metric|imperial|custom] [minor_spacing <mm>] [major_spacing <mm>] [minor_length <mm>] [major_length <mm>] [depth <mm>] [minor_ticks false] [labels] [label_height <mm>] [label_offset <mm>] [label_interval <n>] [label_start <n>]
-```
-
-Creates ruler-style tick marks along specified edges of a shape, leaving the interior clear for other content. Useful for ruler borders around work areas.
-
-**Parameters:**
-- `edges [<edge>, ...]` - Which edges to add tick marks to (required)
-  - Valid edges: `top`, `bottom`, `left`, `right`
-  - Specify any combination, e.g., `[top, left]` or `[top, bottom, left, right]`
-- `unit metric|imperial|custom` - Preset unit mode (optional, default: metric)
-  - `metric`: minor=1mm, major=10mm
-  - `imperial`: minor=1/16" (1.5875mm), major=1" (25.4mm)
-  - `custom`: uses explicit spacing values (requires minor_spacing and major_spacing)
-- `minor_spacing <mm>` - Distance between minor tick marks (required for custom mode)
-- `major_spacing <mm>` - Distance between major tick marks (required for custom mode)
-- `minor_length <mm>` - Length of minor tick marks (optional, default: 3mm)
-- `major_length <mm>` - Length of major tick marks (optional, default: 6mm)
-- `depth <mm>` - Engraving depth (optional, default: 0.3mm)
-- `minor_ticks false` - Hide minor tick marks, show only major ticks (optional, default: show minor ticks)
-- `labels` - Enable numeric labels at major tick intervals (optional flag)
-- `label_height <mm>` - Height of label text (optional, default: 3mm)
-- `label_offset <mm>` - Distance from tick mark end to label center (optional, default: auto-calculated)
-- `label_interval <n>` - Label every Nth major tick (optional, default: 1 = every major tick)
-- `label_start <n>` - First labeled value offset (optional, default: 0)
-
-Example:
-```pml
-rect workbench_top
-    measurement_edge edges [top, left] unit metric minor_length 3mm major_length 6mm depth 0.3mm
-
-rect labeled_drafting_table
-    measurement_edge edges [top, bottom, left, right] unit metric labels label_height 4mm depth 0.3mm
+A PML document has the following top-level keys:
 
-rect custom_ruler_border
-    measurement_edge edges [left] unit custom minor_spacing 5mm major_spacing 50mm depth 0.3mm
-
-rect sparse_labels_ruler
-    measurement_edge edges [bottom, left] minor_ticks false labels label_interval 2 depth 0.3mm
-
-#### Engrave Text
-
-```
-engrave_text text "<string>" [height <mm>] [depth <mm>] [font <name>] [alignment left|center|right] [orientation horizontal|vertical]
-```
-
-Creates single-stroke engraved text using Hershey fonts. Suitable for CNC engraving labels, part numbers, and other text markings.
-
-**Parameters:**
-- `text "<string>"` - The text to engrave (required)
-- `height <mm>` - Height of text in mm (optional, default: 4mm)
-- `depth <mm>` - Engraving depth (optional, default: 0.3mm)
-- `font <name>` - Hershey font name (optional, default: rowmans)
-  - Available: rowmans, rowmand, futural, futuram, scripts, scriptc, cursive, etc.
-- `alignment left|center|right` - Text alignment relative to position (optional, default: left)
-- `orientation horizontal|vertical` - Text orientation (optional, default: horizontal)
-
-Example:
-```pml
-rect labeled_part
-    engrave_text text "FRONT" height 10mm depth 0.5mm alignment center
-
-rect serial_number
-    engrave_text text "SN-12345" height 4mm depth 0.3mm
-
-rect vertical_label
-    engrave_text text "TOP" height 8mm orientation vertical alignment center
-```
-
-#### Split Grid
-
-```
-split_grid <rows> <cols> gap <mm>
-    <generator>
-```
-
-Divides the shape into a grid and applies a generator to each cell.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    split_grid 2 2 gap 35mm
-        raised_panel border 25mm border_depth 6mm field_depth 2mm
-```
-
-#### Split Horizontal / Split Vertical
-
+```yaml
+project: "optional project name"    # Optional
+kerf: 3.175mm                       # Optional tool kerf override
+Sheet:                              # Required
+  width: 1200mm
+  height: 2400mm
+  thickness: 19mm
+  margin: 10mm                      # Optional, default 0mm
+components:                         # Optional reusable components
+  my_component:
+    params: {width: 100mm}
+    body: {Rect: {children: [...]}}
+children:                           # Required - list of child nodes
+  - Rect: {...}
+  - Circle: {...}
 ```
-split_horizontal <n> gap <mm>
-    <children>
 
-split_vertical <n> gap <mm>
-    <children>
-```
-
-Divides region into n equal segments with gaps between. Children applied to each segment.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    split_horizontal 3 gap 20mm
-        pocket 6mm
-```
-
-#### Split Horizontal Gaps
-
-```
-split_horizontal_gaps <n> gap <mm>
-    <children>
-```
-
-Splits region into n+1 segments, applies children to the n gaps (not segments). Used for louver/dado patterns where gaps are machined.
-
-Example:
-```pml
-rect panel
-    profile outside through
-    split_horizontal_gaps 12 gap 12mm
-        pocket 8mm
-        chamfer 4mm 2mm
-```
-
-#### Chamfer
-
-```
-chamfer <width>mm <depth>mm
-```
+## Dimensions
 
-Creates a chamfered edge at specified width and depth.
+All dimensions use the `mm` suffix:
 
-Example:
-```pml
-rect panel
-    profile outside through
-    chamfer 5mm 3mm
+```yaml
+width: 100mm      # Integer
+height: 50.5mm    # Float
+depth: 6mm
 ```
 
-#### Subtract (Ring/Donut)
+Bare numbers without `mm` are also accepted:
 
+```yaml
+width: 100        # Interpreted as 100mm
 ```
-subtract inner <mm>
-    <children>
-```
-
-Creates a ring by subtracting inner region from outer. Children applied to the resulting ring domain.
-
-Example:
-```pml
-rect frame
-    subtract inner 50mm
-        pocket 5mm
-```
 
-#### At Position
+## Node Types
 
-```
-at <x>mm <y>mm [width <w>mm height <h>mm]
-    <child>
-```
+Each node is a single-key object where the key is the node type:
 
-Positions child at explicit coordinates within current region. Optional width/height specify region size.
+```yaml
+- Rect:
+    id: my_rect
+    children: [...]
 
-Example:
-```pml
-rect panel
-    at 300mm 150mm width 600mm height 19mm
-        pocket 10mm
+- Circle:
+    diameter: 50mm
+    feature:
+      type: hole
+      depth: 10mm
 ```
 
 ### Shapes
 
-#### Arch
+#### Rect
 
+Rectangle filling parent region or positioned explicitly.
+
+```yaml
+- Rect:
+    id: panel              # Optional identifier
+    feature:               # Optional inline feature
+      type: profile
+      side: outside
+      depth: through
+    children:              # Optional nested nodes
+      - Pocket: {depth: 6mm}
 ```
-arch [id] width <mm> height <mm> radius <mm> [feature]
-    <children>
+
+With explicit position:
+
+```yaml
+- Rect:
+    id: cutout
+    at:
+      x: 100mm
+      y: 50mm
+      width: 200mm
+      height: 150mm
+    feature:
+      type: pocket
+      depth: 6mm
 ```
 
-Creates an arch shape (rectangle with semicircular top).
+#### Circle
 
-Example:
-```pml
-arch door width 500mm height 800mm radius 250mm
-    profile outside through
-    frame 60mm
-        raised_panel border 25mm border_depth 6mm field_depth 2mm
+```yaml
+- Circle:
+    diameter: 50mm         # Either diameter or radius
+    # radius: 25mm
+    feature:
+      type: hole
+      depth: through
+```
+
+#### RoundedRect
+
+```yaml
+- RoundedRect:
+    radius: 10mm
+    corners: [tl, tr]      # Optional: only round these corners
+    feature:
+      type: profile
+      depth: through
 ```
 
 #### Polygon
 
-```
-polygon [id] points (<x>mm,<y>mm) (<x>mm,<y>mm) (<x>mm,<y>mm) ... [feature]
-    <children>
-```
-
-Creates an arbitrary polygon shape from explicit coordinate points. Minimum 3 points required.
-
-Example:
-```pml
-polygon wedge points (0mm,0mm) (100mm,0mm) (50mm,80mm)
-    pocket 6mm
+```yaml
+- Polygon:
+    id: custom_shape
+    points:
+      - [0mm, 0mm]
+      - [100mm, 0mm]
+      - [100mm, 50mm]
+      - [50mm, 100mm]
+      - [0mm, 50mm]
+    feature:
+      type: profile
+      depth: through
 ```
 
 #### Triangle
 
-```
-triangle [id] base <mm> height <mm> [feature]
-    <children>
-```
-
-Creates a triangular shape centered in the current region. The triangle has its base at the bottom and apex at the top.
-
-Example:
-```pml
-triangle corner base 100mm height 80mm
-    pocket 4mm
+```yaml
+- Triangle:
+    base: 100mm
+    height: 80mm
+    feature:
+      type: pocket
+      depth: 5mm
 ```
 
-### Box (Finger-Jointed Assembly)
+#### Arch
 
-```
-box outer <width>mm <depth>mm <height>mm thickness <mm> joinery finger|butt [options]
-```
-
-Generates all panels for a finger-jointed or butt-jointed box. Panels are laid out flat on the sheet with proper finger joint geometry on mating edges.
-
-**Parameters:**
-- `outer <width>mm <depth>mm <height>mm` - Outer dimensions of assembled box (required)
-- `thickness <mm>` - Material thickness (required)
-- `joinery finger|butt` - Joint type (required)
-  - `finger`: Interlocking finger joints with phase-matched edges
-  - `butt`: Simple butt joints (no interlocking)
-
-**Finger Joint Options (only for `joinery finger`):**
-- `finger_width <mm>` - Target finger width (auto-calculates count)
-- `finger_count <n>` - Explicit finger count per edge
-- `clearance <mm>` - Gap for joint fit (default: 0.1mm)
-
-**General Options:**
-- `lid` - Include a top panel
-- `no_bottom` - Exclude the bottom panel
-- `layout_gap <mm>` - Gap between laid-out panels (default: 10mm)
-
-**SVG Visualization Options:**
-- `labels` - Add part name labels centered on each panel (e.g., "FRONT", "LEFT SIDE")
-- `edge_colors` - Add colored overlay lines showing mating edges:
-  - Top edges: blue (#5ab9ea)
-  - Bottom edges: orange (#ff9500)
-  - Left edges: green (#4cd964)
-  - Right edges: yellow (#ffcc00)
-
-**Bottom/Top Style Options:**
-- `bottom_style captured|finger|dado [inset <mm>]` - How bottom panel connects
-  - `captured` (default): Bottom sits inside walls, no mechanical lock
-  - `finger`: Full finger joints on all bottom edges (requires `joinery finger`)
-  - `dado`: Groove cut into wall panels; bottom slides into grooves
-  - `inset <mm>`: Distance from wall bottom to dado bottom (default: 0 = flush)
-- `top_style captured|finger|dado [drop <mm>]` - How top panel connects
-  - `captured` (default): Top sits inside walls
-  - `finger`: Full finger joints on all top edges (requires `joinery finger`)
-  - `dado`: Groove cut into wall panels; top slides into grooves
-  - `drop <mm>`: Distance from wall top to dado top (default: 0 = flush)
-
-**Generated Panels:**
-- `front` / `back`: Full outer width × (height - adjustments based on style)
-- `left_side` / `right_side`: (depth - 2×thickness) × (height - adjustments)
-- `bottom` (if included): Size depends on bottom_style
-  - `captured`: (width - 2×thickness) × (depth - 2×thickness)
-  - `finger`: Full width × full depth (with finger joints)
-  - `dado`: (width - 2×thickness + dado_depth) × (depth - 2×thickness + dado_depth)
-- `top` (if lid): Same logic as bottom based on top_style
-
-**Phase Assignment (finger joints):**
-- Front/back left/right edges: phase 0 (fingers protrude)
-- Side left/right edges: phase 1 (notches receive fingers)
-- Bottom/top edges: front/back at phase 0, sides at phase 1
-- This ensures mating edges interlock correctly
-
-Example:
-```pml
-sheet 800mm 600mm 6mm margin 10mm
-
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    clearance 0.15mm
+```yaml
+- Arch:
+    width: 500mm
+    height: 800mm
+    radius: 250mm
+    children:
+      - Profile: {side: outside, depth: through}
+      - Frame:
+          width: 60mm
+          children:
+            - RaisedPanel: {border_width: 25mm, border_depth: 6mm, field_depth: 2mm}
 ```
 
-Example with lid:
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+#### Line / Polyline / Spline
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    lid
+```yaml
+- Line:
+    orientation: horizontal  # or vertical
+    feature: {type: engrave, depth: 0.5mm}
+
+- Polyline:
+    points: [[0, 0], [50, 0], [50, 50], [100, 50]]
+    feature: {type: engrave, depth: 0.3mm}
+
+- Spline:
+    points: [[0, 0], [25, 10], [50, 0], [75, -10], [100, 0]]
+    tolerance: 0.1mm
+    feature: {type: engrave, depth: 0.3mm}
 ```
 
-Example butt joint:
-```pml
-sheet 600mm 400mm 6mm margin 10mm
+### Layout Containers
 
-box outer 150mm 100mm 75mm thickness 6mm joinery butt
+#### Inset
+
+Shrink all sides by specified amount:
+
+```yaml
+- Inset:
+    distance: 25mm
+    children:
+      - Pocket: {depth: 6mm}
 ```
 
-Example finger-jointed bottom (structural):
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+#### Frame
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    bottom_style finger
+Create a frame border around content:
+
+```yaml
+- Frame:
+    width: 50mm
+    children:
+      - Pocket: {depth: 6mm}
 ```
 
-Example dado bottom raised 6mm (keeps contents off surface):
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+#### Grid
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    bottom_style dado inset 6mm
+Divide region into rows × cols cells:
+
+```yaml
+- Grid:
+    rows: 4
+    cols: 2
+    gap: 10mm
+    children:
+      - Cell:
+          children:
+            - Circle: {diameter: 20mm}
 ```
 
-Example sealed box with finger-jointed top:
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+#### Split
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    lid
-    top_style finger
+Window-pane style division:
+
+```yaml
+- Split:
+    rows: 2
+    cols: 3
+    rail: 40mm      # Horizontal dividers
+    mullion: 30mm   # Vertical dividers
+    children: [...]
 ```
 
-Example recessed lid in dado groove:
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+### Generators
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    lid
-    top_style dado drop 3mm
+#### Profile
+
+Cut around shape boundary:
+
+```yaml
+- Profile:
+    side: outside   # outside | inside | on
+    depth: through  # or specific depth like 10mm
+    tab_count: 4    # Optional holding tabs
+    tab_height: 3mm
+    tab_width: 10mm # Optional, auto-calculated if omitted
 ```
 
-Example with labels and edge coloring for assembly visualization:
-```pml
-sheet 800mm 600mm 6mm margin 10mm
+#### Pocket
 
-box outer 200mm 150mm 100mm thickness 6mm joinery finger
-    finger_width 12mm
-    bottom_style dado inset 6mm
-    labels
-    edge_colors
+Clear material from enclosed area:
+
+```yaml
+- Pocket:
+    depth: 6mm
 ```
 
-### Template Definition
+#### RaisedPanel
 
-Templates are reusable layout patterns stored as `.pml` files in the `templates/` directory. They support parameter substitution using `${param}` syntax.
+Decorative panel with beveled border:
 
-```
-template <name>
-    params
-        <param_name> <default_value>mm    # numeric parameter
-        <param_name> <keyword>            # string parameter
-        ...
-
-    <body>
+```yaml
+- RaisedPanel:
+    border_width: 25mm
+    border_depth: 6mm
+    field_depth: 2mm
 ```
 
-**Components:**
-- `template <name>`: Declares the template name (used for lookup)
-- `params` block: Declares parameters with default values
-- `<body>`: Any valid PML shape/generator node as the template content
+#### Chamfer
 
-**Parameter Types:**
-- **Numeric parameters**: Have `mm` suffix, substituted as `<value>mm`
-- **String parameters**: No suffix, substituted as the literal string (useful for generator selection)
+Beveled edge treatment:
 
-**Parameter Substitution:**
-- Use `${param_name}` anywhere a value is expected
-- Parameters are substituted before parsing
-- Numeric params → `${depth}` becomes `6.0mm`
-- String params → `${style}` becomes `pocket` (literal)
-- Caller can override any parameter when invoking the template
-
-Example template file (`templates/shaker.pml`):
-```pml
-template shaker
-    params
-        stile_w 57mm
-        rail_h 57mm
-        panel_recess 6mm
-        panel_style pocket
-
-    rect door
-        profile outside through
-        frame ${stile_w}
-            ${panel_style} ${panel_recess}
+```yaml
+- Chamfer:
+    width: 5mm
+    depth: 3mm
 ```
 
-In this example, `panel_style` is a string parameter that defaults to `pocket`. This allows the template to be used with different generators without changing the template file.
+#### SplitGrid
 
-**Special Parameters:**
-- `outer_w` and `outer_h` are automatically set from the target region dimensions when expanding a template
-- These do not need to be declared in the params block
+Divide region into grid, apply children to all cells:
 
-**Usage in .nest files:**
-
-Templates are referenced by name in `.nest` files (see `nest_syntax_spec.md`):
-```nest
-parts
-    door 400mm 600mm x20
-        template shaker
-            stile_w 57mm
-            panel_recess 6mm
+```yaml
+- SplitGrid:
+    rows: 2
+    cols: 2
+    gap: 35mm
+    children:
+      - RaisedPanel: {...}
 ```
 
-### Waste Cuts Directive
+#### SplitHorizontal / SplitVertical
 
-```
-waste_cuts
-    min_size <width>mm <height>mm
-    margin <mm>
-    tabs <count> height <height>mm
-    strategy largest|simple
-```
+Divide into strips:
 
-Automatically decomposes leftover sheet material into rectangular pieces with profile cuts. This prevents irregular waste polygons that require manual trimming.
-
-**Parameters:**
-- `min_size <width>mm <height>mm` - Minimum dimensions for waste rectangles (default: 200mm 200mm)
-- `margin <mm>` - Holddown no-go zone from sheet edges (default: 15mm)
-- `tabs <count> height <height>mm` - Tab configuration for waste cuts (required)
-- `strategy largest|simple` - Decomposition algorithm (default: largest)
-  - `largest`: Maximal rectangles algorithm, produces fewer larger pieces
-  - `simple`: Guillotine decomposition, recursive splits along part edges
-
-**Behavior:**
-- Must appear after all part definitions (shapes with features)
-- Expands into synthetic `rect` items with `profile outside through tabs`
-- Waste rectangles are only created if they meet the min_size threshold
-- Waste cuts run last in the profile pass (parts stay fixtured until removed)
-
-Example:
-```pml
-sheet 1220mm 1220mm 19mm
-
-rect panel1 at 300mm,300mm size 400mm,400mm
-    profile outside through tabs 4 height 3mm
-
-waste_cuts
-    min_size 200mm 200mm
-    margin 15mm
-    tabs 4 height 3mm
-    strategy largest
+```yaml
+- SplitHorizontal:
+    count: 3
+    gap: 20mm
+    children:
+      - Pocket: {depth: 6mm}
 ```
 
-### Metadata (Optional)
+#### SplitHorizontalGaps
 
-```
-project <name>
-kerf <width>mm
-```
+Apply children to gaps (louver/dado patterns):
 
-Example:
-```pml
-project cabinet_door_001
-kerf 0.2mm
-```
-
-## Comments
-
-```pml
-# Single-line comment (entire line only)
+```yaml
+- SplitHorizontalGaps:
+    count: 12
+    gap: 12mm
+    children:
+      - Pocket: {depth: 8mm}
+      - Chamfer: {width: 4mm, depth: 2mm}
 ```
 
-### Revision Header
+#### Lines
 
-PML files automatically receive a revision header when processed by the CLI or recipe regeneration:
+Parallel line pattern:
 
-```pml
-# mill_ui: fa974a8
-# generated: 2026-01-22
-
-sheet 1220mm 1220mm 19mm
-...
+```yaml
+- Lines:
+    angle: 45
+    spacing: 25mm
+    width: 4mm
+    depth: 3mm
 ```
 
-**Purpose:**
-- `# mill_ui: <hash>` - Git revision of mill_ui used to generate outputs
-- `# generated: <date>` - ISO date when file was processed
+#### ConcentricBorder
 
-This enables backward compatibility: checkout the referenced mill_ui revision to regenerate G-code from older PML files. The header is overwritten on each successful pipeline run.
+Nested border grooves:
 
-## Whitespace
-
-- Indentation is significant for nested structures (layout managers, generators, children)
-- Blank lines are ignored
-- Top-level declarations are single logical lines
-- Child nodes must be indented under their parent
-
-## Canonical Formatting
-
-When PML is emitted from LayoutAST (format_pml), the system produces:
-
-1. Sheet declaration first
-2. Optional metadata (project, kerf)
-3. Items in order (shapes, then templates)
-4. 2 decimal places for dimensions
-5. Consistent spacing
-
-## Example: Complete Layout
-
-```pml
-# Shaker cabinet door with anchor holes
-project shaker_door_v1
-kerf 0.15mm
-
-sheet 450mm 650mm 19mm
-
-rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
-rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
-
-circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
-circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
-circle door:anchor:3 at 95mm,105mm diameter 10mm hole 8mm
-circle door:anchor:4 at 355mm,105mm diameter 10mm hole 8mm
+```yaml
+- ConcentricBorder:
+    insets: [15mm, 30mm, 45mm]
+    groove: 3mm
+    depth: 2mm
 ```
 
-## Compilation to LayoutAST
+#### XPanel
 
-PML compiles directly to LayoutAST:
+X-pattern decoration:
 
-- `sheet` → Sheet(width_mm, height_mm, thickness_mm)
-- `rect`/`circle`/`roundedrect` → Item(kind="shape", ...)
-- `template` → Item(kind="template", ...)
-- Feature syntax → Feature(type, depth, side, depth_mm)
-- `project` → LayoutAST.project
-- `kerf` → LayoutAST.kerf_width_mm
+```yaml
+- XPanel:
+    bar_width: 50mm
+    depth: 6mm
+```
 
-## Semantic Equivalence
+#### Wave
 
-PML → AST → PML produces canonical formatting, not original formatting:
+Wavy groove pattern:
 
-- Comments are lost
-- Whitespace is normalized
-- Item ordering may be canonicalized (shapes before templates)
-- Dimension precision normalized to 2 decimal places
-- Geometry representation may differ (radius vs diameter)
+```yaml
+- Wave:
+    count: 5
+    amplitude: 10mm
+    wavelength: 60mm
+    groove: 3mm
+    depth: 2mm
+```
 
-This preserves **semantic equivalence** while losing **surface formatting**.
+#### HoleGrid
+
+Grid of holes:
+
+```yaml
+- HoleGrid:
+    spacing: 50mm
+    diameter: 6.35mm
+    depth: through
+    pattern: rectangular  # rectangular | hexagonal | offset
+    inset: 25mm
+    align: center        # center | corner
+```
+
+#### MeasurementEdge
+
+Ruler marks on edges:
+
+```yaml
+- MeasurementEdge:
+    edges: [top, left]
+    unit: metric         # metric | imperial | custom
+    minor_length: 3mm
+    major_length: 6mm
+    depth: 0.3mm
+    labels: true
+    label_height: 4mm
+```
+
+#### EngraveText
+
+Text engraving:
+
+```yaml
+- EngraveText:
+    text: "FRONT"
+    height: 10mm
+    depth: 0.5mm
+    font: rowmans
+    alignment: center   # left | center | right
+    orientation: horizontal
+```
+
+### Assembly Generators
+
+#### Box
+
+Finger-jointed box with automatic part layout:
+
+```yaml
+- Box:
+    outer_width: 200mm
+    outer_depth: 150mm
+    outer_height: 100mm
+    thickness: 6mm
+    joinery: finger     # finger | butt
+    finger_width: 12mm
+    clearance: 0.15mm
+    bottom_style: dado  # captured | finger | dado
+    top_style: captured
+```
+
+### Utility Nodes
+
+#### AtPosition
+
+Explicit positioning within parent:
+
+```yaml
+- AtPosition:
+    x: 100mm
+    y: 50mm
+    width: 200mm    # Optional
+    height: 150mm   # Optional
+    child:
+      Pocket: {depth: 6mm}
+```
+
+#### Subtract
+
+Ring by subtracting inner from outer:
+
+```yaml
+- Subtract:
+    inner_inset: 50mm
+    children:
+      - Pocket: {depth: 5mm}
+```
+
+#### Keepout
+
+No-machining zone:
+
+```yaml
+- Keepout:
+    id: clamp_zone
+    children:
+      - Rect: {at: {x: 100mm, y: 100mm, width: 50mm, height: 50mm}}
+```
+
+#### WasteCuts
+
+Decompose remaining sheet into usable pieces:
+
+```yaml
+- WasteCuts:
+    min_width: 150mm
+    min_height: 150mm
+    tab_count: 4
+    tab_height: 3mm
+    strategy: largest  # largest | simple
+```
+
+## Features
+
+Features can be specified inline on shapes:
+
+```yaml
+- Rect:
+    feature:
+      type: profile
+      side: outside
+      depth: through
+      tab_count: 4
+      tab_height: 3mm
+```
+
+Or as generator children:
+
+```yaml
+- Rect:
+    children:
+      - Profile:
+          side: outside
+          depth: through
+```
+
+### Feature Types
+
+| Type | Description |
+|------|-------------|
+| `profile` | Cut around boundary |
+| `pocket` | Clear enclosed area |
+| `hole` | Drill/bore operation |
+| `engrave` | Shallow surface marking |
+
+## Components
+
+Reusable components with parameters:
+
+```yaml
+components:
+  door_panel:
+    params:
+      stile_width: 57mm
+      panel_depth: 6mm
+    body:
+      Rect:
+        children:
+          - Profile: {side: outside, depth: through}
+          - Frame:
+              width: ${stile_width}  # Parameter reference
+              children:
+                - Pocket: {depth: ${panel_depth}}
+
+children:
+  - UseComponent:
+      name: door_panel
+      args:
+        stile_width: 65mm
+        panel_depth: 8mm
+```
+
+## JSON Schema
+
+JSON Schema files for IDE validation:
+
+- `pml/schema/pml.schema.json` - PML document schema
+- `pml/schema/nest.schema.json` - Nesting job schema
+
+Configure your IDE to use these schemas for `.pml.yml` files.
+
+## Migration from Legacy Format
+
+The legacy indent-based PML format has been replaced with YAML. Existing files can be converted using:
+
+```bash
+python -m pml.convert_to_yaml path/to/file.pml.yml --dry-run  # Preview
+python -m pml.convert_to_yaml path/to/file.pml.yml            # Convert in place
+python -m pml.convert_to_yaml --all-recipes                   # Convert all recipes
+```

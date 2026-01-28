@@ -1,0 +1,28 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: frame
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Inset:
+        distance: 50mm
+        children:
+        - Profile:
+            side: inside
+            depth: through
+        - Subtract:
+            inner_inset: 10mm
+            children:
+            - Pocket:
+                depth: 5mm
+    - Chamfer:
+        width: 5mm
+        depth: 3mm

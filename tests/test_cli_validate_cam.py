@@ -307,7 +307,7 @@ def test_cli_compact_json():
 def test_cli_with_pml_assertions():
     """CLI --pml enables intent assertions."""
     recipe_dir = RECIPE_DIR / "01_simple_profile"
-    pml_path = recipe_dir / "example.pml"
+    pml_path = recipe_dir / "example.pml.yml"
     output_dir = recipe_dir / "output"
 
     if not pml_path.exists() or not output_dir.exists():

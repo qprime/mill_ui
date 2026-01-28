@@ -192,7 +192,7 @@ def validate_recipe(
 
     # Find source file
     source_file = None
-    for candidate in ["example.pml", "source.pml"]:
+    for candidate in ["example.pml.yml", "source.pml.yml"]:
         if (recipe_dir / candidate).exists():
             source_file = recipe_dir / candidate
             break

@@ -53,7 +53,7 @@ PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code
 
 | Stage | Entry Point | Input | Output |
 |-------|-------------|-------|--------|
-| 1. Parse Compositional PML | `pml/compositional_parser.py:parse_compositional_pml()` | PML text | CompositionalLayoutAST |
+| 1. Parse PML (YAML) | `pml/yaml_parser.py:parse_pml_yaml()` | PML YAML text | CompositionalLayoutAST |
 | 2. Resolve Layout | `resolution/layout_resolver.py:resolve_layout()` | CompositionalLayoutAST | LayoutAST |
 | 3. AST → IR | `adapters/ast_to_removal.py:ast_to_removal_intents()` | LayoutAST | list[RemovalIntent] |
 | 4. IR → Planner Hints | `adapters/removal_to_planner.py:removal_intents_to_hints()` | list[RemovalIntent] | hints dict |
@@ -107,11 +107,11 @@ nest maxrects
 
 | Command | Description |
 |---------|-------------|
-| `python -m cli.convert_layout --from pml --to json input.pml output.json` | Convert PML to JSON |
-| `python -m cli.export_blueprint --input layout.pml --out output/ --theme dark` | Export SVG blueprint |
+| `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert PML to JSON |
+| `python -m cli.export_blueprint --input layout.pml.yml --out output/ --theme dark` | Export SVG blueprint |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
-| `python -m cli.nest job.nest -o output/ --export-svg` | Run nesting |
-| `python -m cli.parse_compositional_pml door.pml --resolve --format pml` | Parse compositional PML |
+| `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
+| `python -m cli.parse_compositional_pml door.pml.yml --resolve --format pml` | Parse compositional PML |
 
 ---
 
@@ -252,7 +252,7 @@ Domains define *where* to machine. Generators define *what* to produce.
 
 ### Output
 
-- One `.pml` file per sheet with explicit part placements.
+- One `.pml.yml` file per sheet with explicit part placements.
 - `manifest.json` with utilization metrics.
 
 ---

@@ -1,20 +1,42 @@
 
-from pml.compositional_parser import parse_compositional_pml
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
 def test_basic_split_2x2():
-    pml = """sheet 600.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 600mm
+  height: 600mm
+  thickness: 19mm
 
-rect outer profile through outside
-    frame 50.00mm
-        split 2 2 rail 50.00mm mullion 40.00mm
-            cell
-                rect pane pocket 6.00mm
+children:
+  - Rect:
+      id: outer
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: 50mm
+            children:
+              - Split:
+                  rows: 2
+                  cols: 2
+                  rail: 50mm
+                  mullion: 40mm
+                  children:
+                    - Cell:
+                        children:
+                          - Rect:
+                              id: pane
+                              children:
+                                - Pocket:
+                                    depth: 6mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     assert ast.sheet.width_mm == 600
     assert ast.sheet.height_mm == 600
 
@@ -35,23 +57,50 @@ rect outer profile through outside
 
 
 def test_split_zero_rails_behaves_like_grid():
-    pml_split = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml_split = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-split 2 2 rail 0.00mm mullion 0.00mm
-    cell
-        rect pocket 5.00mm
+children:
+  - Split:
+      rows: 2
+      cols: 2
+      rail: 0mm
+      mullion: 0mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  children:
+                    - Pocket:
+                        depth: 5mm
 """
 
-    pml_grid = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml_grid = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-grid 2 2 gap 0.00mm
-    cell
-        rect pocket 5.00mm
+children:
+  - Grid:
+      rows: 2
+      cols: 2
+      gap: 0mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  children:
+                    - Pocket:
+                        depth: 5mm
 """
 
 
-    split_ast = parse_compositional_pml(pml_split)
-    grid_ast = parse_compositional_pml(pml_grid)
+    split_ast = parse_pml_yaml(pml_split)
+    grid_ast = parse_pml_yaml(pml_grid)
 
     split_flat = resolve_layout(split_ast)
     grid_flat = resolve_layout(grid_ast)
@@ -71,14 +120,29 @@ grid 2 2 gap 0.00mm
 
 
 def test_split_pane_size_calculation():
-    pml = """sheet 1000.00mm 800.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 1000mm
+  height: 800mm
+  thickness: 19mm
 
-split 3 4 rail 30.00mm mullion 20.00mm
-    cell
-        rect pane pocket 5.00mm
+children:
+  - Split:
+      rows: 3
+      cols: 4
+      rail: 30mm
+      mullion: 20mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  id: pane
+                  children:
+                    - Pocket:
+                        depth: 5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -92,15 +156,32 @@ split 3 4 rail 30.00mm mullion 20.00mm
 
 
 def test_split_inside_inset():
-    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 500mm
+  height: 500mm
+  thickness: 19mm
 
-inset 50.00mm
-    split 2 2 rail 40.00mm mullion 30.00mm
-        cell
-            rect pane pocket 5.00mm
+children:
+  - Inset:
+      distance: 50mm
+      children:
+        - Split:
+            rows: 2
+            cols: 2
+            rail: 40mm
+            mullion: 30mm
+            children:
+              - Cell:
+                  children:
+                    - Rect:
+                        id: pane
+                        children:
+                          - Pocket:
+                              depth: 5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -113,17 +194,31 @@ inset 50.00mm
 
 
 def test_split_roundtrip_preserves_rail_mullion():
-    original_pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
 
-split 2 3 rail 45.00mm mullion 35.00mm
-    cell
-        rect pocket 6.00mm
+children:
+  - Split:
+      rows: 2
+      cols: 3
+      rail: 45mm
+      mullion: 35mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  children:
+                    - Pocket:
+                        depth: 6mm
 """
 
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted_pml = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted_pml = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted_pml)
 
 
     flat1 = resolve_layout(ast1)
@@ -143,16 +238,38 @@ split 2 3 rail 45.00mm mullion 35.00mm
 
 
 def test_french_door_acceptance():
-    pml = """sheet 800.00mm 1200.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 800mm
+  height: 1200mm
+  thickness: 19mm
 
-rect door_outer profile through outside
-    frame 60.00mm
-        split 2 2 rail 50.00mm mullion 40.00mm
-            cell
-                rect glass_pane pocket 8.00mm
+children:
+  - Rect:
+      id: door_outer
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: 60mm
+            children:
+              - Split:
+                  rows: 2
+                  cols: 2
+                  rail: 50mm
+                  mullion: 40mm
+                  children:
+                    - Cell:
+                        children:
+                          - Rect:
+                              id: glass_pane
+                              children:
+                                - Pocket:
+                                    depth: 8mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -169,14 +286,29 @@ rect door_outer profile through outside
 
 
 def test_split_single_row():
-    pml = """sheet 600.00mm 200.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 600mm
+  height: 200mm
+  thickness: 19mm
 
-split 1 3 rail 0.00mm mullion 30.00mm
-    cell
-        rect pane pocket 5.00mm
+children:
+  - Split:
+      rows: 1
+      cols: 3
+      rail: 0mm
+      mullion: 30mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  id: pane
+                  children:
+                    - Pocket:
+                        depth: 5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -189,14 +321,29 @@ split 1 3 rail 0.00mm mullion 30.00mm
 
 
 def test_split_single_column():
-    pml = """sheet 200.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 600mm
+  thickness: 19mm
 
-split 3 1 rail 40.00mm mullion 0.00mm
-    cell
-        rect pane pocket 5.00mm
+children:
+  - Split:
+      rows: 3
+      cols: 1
+      rail: 40mm
+      mullion: 0mm
+      children:
+        - Cell:
+            children:
+              - Rect:
+                  id: pane
+                  children:
+                    - Pocket:
+                        depth: 5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 

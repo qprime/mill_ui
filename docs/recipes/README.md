@@ -41,7 +41,7 @@ Worked examples demonstrating mill_ui capabilities.
 
 Each recipe folder contains:
 - `README.md` — Description and key concepts
-- `example.pml` or `input.pml` — PML source
+- `example.pml.yml` or `input.pml.yml` — PML source
 - `output/` — Generated artifacts (SVG, G-code)
 
 ## Usage

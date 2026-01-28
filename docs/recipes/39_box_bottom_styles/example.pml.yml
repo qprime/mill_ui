@@ -1,0 +1,20 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 1200mm
+  height: 800mm
+  thickness: 6mm
+  margin: 10mm
+children:
+- Box:
+    outer_width: 200mm
+    outer_depth: 150mm
+    outer_height: 100mm
+    thickness: 6mm
+    finger_width: 12mm
+    clearance: 0.15mm
+    bottom_style: dado
+    dado_inset: 6mm
+    show_labels: true
+    show_edge_colors: true

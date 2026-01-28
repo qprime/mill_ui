@@ -228,8 +228,8 @@ Note: Shapes may use inline `at X,Y size W,H` for absolute positioning when need
 |------|---------|
 | layout_ast/compositional.py | Compositional node definitions |
 | resolution/layout_resolver.py | Resolution logic |
-| pml/compositional_parser.py | PML parsing |
-| pml/compositional_formatter.py | PML formatting |
+| pml/yaml_parser.py | PML YAML parsing |
+| pml/yaml_formatter.py | PML YAML formatting |
 
 ---
 

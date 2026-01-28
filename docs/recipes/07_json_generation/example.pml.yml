@@ -1,0 +1,29 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    id: outer
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 150mm
+      y: 100mm
+      width: 220mm
+      height: 140mm
+- Rect:
+    id: recess
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 150mm
+      y: 100mm
+      width: 180mm
+      height: 100mm

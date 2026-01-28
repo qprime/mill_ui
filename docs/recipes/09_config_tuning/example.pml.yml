@@ -1,0 +1,18 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 100mm
+      y: 75mm
+      width: 100mm
+      height: 80mm

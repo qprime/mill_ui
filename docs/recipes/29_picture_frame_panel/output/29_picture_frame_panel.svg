@@ -25,11 +25,12 @@
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 190.000 190.000 L 190.000 490.000 L 390.000 490.000 L 390.000 190.000 Z M 380.000 480.000 L 200.000 480.000 L 200.000 200.000 L 380.000 200.000 Z" fill-rule="evenodd" />
+    <path d="M 190.000 490.000 L 190.000 190.000 L 390.000 190.000 L 390.000 490.000 Z M 380.000 200.000 L 200.000 200.000 L 200.000 480.000 L 380.000 480.000 Z" fill-rule="evenodd" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels" />
+  <g id="EDGE_COLORS" class="edge-colors" />
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions">
     <line x1="190.0" y1="190.0" x2="190.0" y2="170.0" stroke="#5ab9ea" stroke-width="1" />

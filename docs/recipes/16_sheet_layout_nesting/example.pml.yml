@@ -1,0 +1,272 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 1245mm
+  height: 1232mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door1_panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 238.5mm
+      y: 308.5mm
+      width: 343mm
+      height: 483mm
+- Rect:
+    id: door1
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 6
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 238.5mm
+      y: 308.5mm
+      width: 457mm
+      height: 597mm
+- Rect:
+    id: door2_panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 701.5mm
+      y: 308.5mm
+      width: 343mm
+      height: 483mm
+- Rect:
+    id: door2
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 6
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 701.5mm
+      y: 308.5mm
+      width: 457mm
+      height: 597mm
+- Rect:
+    id: door3_panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 238.5mm
+      y: 911.5mm
+      width: 343mm
+      height: 483mm
+- Rect:
+    id: door3
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 6
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 238.5mm
+      y: 911.5mm
+      width: 457mm
+      height: 597mm
+- Rect:
+    id: door4_panel
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 701.5mm
+      y: 911.5mm
+      width: 343mm
+      height: 483mm
+- Rect:
+    id: door4
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 6
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 701.5mm
+      y: 911.5mm
+      width: 457mm
+      height: 597mm
+- Rect:
+    id: drawer1_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 86mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer1
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 86mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer2_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 244mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer2
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 244mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer3_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 402mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer3
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 402mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer4_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 560mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer4
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 560mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer5_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 718mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer5
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 718mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer6_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 876mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer6
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 876mm
+      width: 254mm
+      height: 152mm
+- Rect:
+    id: drawer7_panel
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 1063mm
+      y: 1034mm
+      width: 178mm
+      height: 76mm
+- Rect:
+    id: drawer7
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 10mm
+    at:
+      x: 1063mm
+      y: 1034mm
+      width: 254mm
+      height: 152mm

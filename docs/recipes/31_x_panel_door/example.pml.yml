@@ -1,0 +1,20 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 50mm
+        children:
+        - XPanel:
+            bar_width: 50mm
+            depth: 6mm

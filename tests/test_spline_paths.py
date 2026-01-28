@@ -1,25 +1,36 @@
 
-from pml.compositional_parser import parse_compositional_pml
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from adapters.hints_to_removal import item_to_removal_intent
 
 
 def test_spline_parsing_and_roundtrip():
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline wave engrave 0.8mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,0.5)
+children:
+  - Spline:
+      id: wave
+      points: [[0.0, 0.5], [0.25, 0.6], [0.5, 0.4], [0.75, 0.6], [1.0, 0.5]]
+      children:
+        - Engrave:
+            depth: 0.8mm
 """
 
 
-    ast1 = parse_compositional_pml(original_pml)
+    ast1 = parse_pml_yaml(original_pml)
     assert ast1.root is not None
 
 
-    formatted_pml = format_compositional_pml(ast1)
+    formatted_pml = format_pml_yaml(ast1)
 
 
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast2 = parse_pml_yaml(formatted_pml)
 
 
     spline1 = ast1.root.children[0]
@@ -36,12 +47,24 @@ spline wave engrave 0.8mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,
 
 
 def test_spline_lowering_deterministic():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
+children:
+  - Spline:
+      id: curve
+      points: [[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]]
+      tolerance: 0.1mm
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     spline_items = [item for item in flat.items if item.shape_id == "curve"]
@@ -68,12 +91,23 @@ spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.1mm
 
 
 def test_spline_engrave_removal_intent():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline decorative engrave 0.8mm points (0.1,0.1) (0.3,0.2) (0.5,0.5) (0.7,0.8) (0.9,0.9)
+children:
+  - Spline:
+      id: decorative
+      points: [[0.1, 0.1], [0.3, 0.2], [0.5, 0.5], [0.7, 0.8], [0.9, 0.9]]
+      children:
+        - Engrave:
+            depth: 0.8mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -100,17 +134,28 @@ spline decorative engrave 0.8mm points (0.1,0.1) (0.3,0.2) (0.5,0.5) (0.7,0.8) (
 
 
 def test_tool_diameter_does_not_invalidate():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline wave engrave 0.5mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,0.5)
+children:
+  - Spline:
+      id: wave
+      points: [[0.0, 0.5], [0.25, 0.6], [0.5, 0.4], [0.75, 0.6], [1.0, 0.5]]
+      children:
+        - Engrave:
+            depth: 0.5mm
 """
 
 
-    ast1 = parse_compositional_pml(pml)
+    ast1 = parse_pml_yaml(pml)
     flat1 = resolve_layout(ast1)
     spline1 = [item for item in flat1.items if item.shape_id == "wave"][0]
 
-    ast2 = parse_compositional_pml(pml)
+    ast2 = parse_pml_yaml(pml)
     flat2 = resolve_layout(ast2)
     spline2 = [item for item in flat2.items if item.shape_id == "wave"][0]
 
@@ -124,22 +169,46 @@ spline wave engrave 0.5mm points (0.0,0.5) (0.25,0.6) (0.5,0.4) (0.75,0.6) (1.0,
 
 
 def test_tolerance_affects_resolution():
-    pml_coarse = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml_coarse = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 1.0mm
+children:
+  - Spline:
+      id: curve
+      points: [[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]]
+      tolerance: 1mm
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
-    pml_fine = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml_fine = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-spline curve engrave 1.0mm points (0.0,0.0) (0.5,0.5) (1.0,1.0) tolerance 0.01mm
+children:
+  - Spline:
+      id: curve
+      points: [[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]]
+      tolerance: 0.01mm
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
 
-    ast_coarse = parse_compositional_pml(pml_coarse)
+    ast_coarse = parse_pml_yaml(pml_coarse)
     flat_coarse = resolve_layout(ast_coarse)
     points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points"]
 
-    ast_fine = parse_compositional_pml(pml_fine)
+    ast_fine = parse_pml_yaml(pml_fine)
     flat_fine = resolve_layout(ast_fine)
     points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points"]
 

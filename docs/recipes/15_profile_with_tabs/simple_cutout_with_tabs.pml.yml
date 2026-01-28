@@ -1,0 +1,22 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: cutout
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 300mm
+      y: 200mm
+      width: 400mm
+      height: 250mm

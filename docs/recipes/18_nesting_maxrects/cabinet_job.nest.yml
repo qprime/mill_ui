@@ -1,0 +1,31 @@
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
+  parts:
+  - name: large_door
+    width: 457mm
+    height: 597mm
+    quantity: 20
+    template:
+      name: shaker
+      params:
+        stile_w: 57mm
+        rail_h: 57mm
+        panel_recess: 6mm
+  - name: small_door
+    width: 305mm
+    height: 203mm
+    quantity: 15
+  - name: tall_door
+    width: 457mm
+    height: 914mm
+    quantity: 2
+    template:
+      name: shaker
+      params:
+        stile_w: 57mm
+        rail_h: 57mm
+        panel_recess: 6mm

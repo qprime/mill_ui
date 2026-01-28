@@ -1,0 +1,16 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+  margin: 10mm
+children:
+- Rect:
+    id: workbench_top
+    children:
+    - MeasurementEdge:
+        edges:
+        - top
+        - left

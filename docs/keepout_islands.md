@@ -102,5 +102,5 @@ Downstream toolpath planners receive island information for adaptive clearing.
 |------|---------|
 | layout_ast/compositional.py | Keepout node definition |
 | resolution/layout_resolver.py | Island bounds collection |
-| pml/compositional_parser.py | PML parsing with nested keepout validation |
+| pml/yaml_parser.py | PML YAML parsing with nested keepout validation |
 | adapters/hints_to_removal.py | Item → RemovalIntent with island propagation |

@@ -1,0 +1,18 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    id: recess
+    feature:
+      type: pocket
+      depth: 4mm
+    children:
+    - Edge:
+        treatment: allowance
+        rough_allowance: 0.5mm
+        finish_allowance: 0.1mm

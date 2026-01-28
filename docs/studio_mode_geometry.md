@@ -138,5 +138,5 @@ Spline-derived polylines emit standard RemovalIntent:
 | File | Purpose |
 |------|---------|
 | layout_ast/compositional.py | SplinePath dataclass |
-| pml/compositional_parser.py | parse_spline() |
+| pml/yaml_parser.py | Spline parsing |
 | resolution/layout_resolver.py | Spline lowering logic |

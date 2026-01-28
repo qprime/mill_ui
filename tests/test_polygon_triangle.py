@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from pml.compositional_parser import parse_compositional_pml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.compositional import Polygon, Triangle
 
@@ -11,36 +11,75 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 
 
 def test_polygon_parse_3_points():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon tri points (0mm,0mm) (100mm,0mm) (50mm,80mm) pocket 5.00mm
+children:
+  - Polygon:
+      id: tri
+      points:
+        - [0mm, 0mm]
+        - [100mm, 0mm]
+        - [50mm, 80mm]
+      children:
+        - Pocket:
+            depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     assert ast.root is not None
     assert isinstance(ast.root.children[0], Polygon)
     polygon = ast.root.children[0]
     assert len(polygon.points) == 3
     assert polygon.points == ((0.0, 0.0), (100.0, 0.0), (50.0, 80.0))
-    assert polygon.feature.type == "pocket"
 
 
 def test_polygon_parse_4_points():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon quad points (0mm,0mm) (100mm,0mm) (100mm,100mm) (0mm,100mm) profile through outside
+children:
+  - Polygon:
+      id: quad
+      points:
+        - [0mm, 0mm]
+        - [100mm, 0mm]
+        - [100mm, 100mm]
+        - [0mm, 100mm]
+      children:
+        - Profile:
+            side: outside
+            depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     polygon = ast.root.children[0]
     assert len(polygon.points) == 4
-    assert polygon.feature.type == "profile"
 
 
 def test_polygon_resolve():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon wedge points (10mm,10mm) (110mm,10mm) (60mm,90mm) pocket 6.00mm
+children:
+  - Polygon:
+      id: wedge
+      points:
+        - [10mm, 10mm]
+        - [110mm, 10mm]
+        - [60mm, 90mm]
+      children:
+        - Pocket:
+            depth: 6mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -55,12 +94,25 @@ polygon wedge points (10mm,10mm) (110mm,10mm) (60mm,90mm) pocket 6.00mm
 
 
 def test_polygon_with_profile_child():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon shape points (0mm,0mm) (100mm,0mm) (50mm,80mm)
-    profile outside through
+children:
+  - Polygon:
+      id: shape
+      points:
+        - [0mm, 0mm]
+        - [100mm, 0mm]
+        - [50mm, 80mm]
+      children:
+        - Profile:
+            side: outside
+            depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -72,36 +124,70 @@ polygon shape points (0mm,0mm) (100mm,0mm) (50mm,80mm)
 
 
 def test_polygon_with_id():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon corner_piece points (0mm,0mm) (50mm,0mm) (0mm,50mm) pocket 3.00mm
+children:
+  - Polygon:
+      id: corner_piece
+      points:
+        - [0mm, 0mm]
+        - [50mm, 0mm]
+        - [0mm, 50mm]
+      children:
+        - Pocket:
+            depth: 3mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     polygon = ast.root.children[0]
     assert polygon.id == "corner_piece"
 
 
 def test_triangle_parse():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-triangle wedge base 100.00mm height 80.00mm pocket 5.00mm
+children:
+  - Triangle:
+      id: wedge
+      base: 100mm
+      height: 80mm
+      children:
+        - Pocket:
+            depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     assert ast.root is not None
     assert isinstance(ast.root.children[0], Triangle)
     triangle = ast.root.children[0]
     assert triangle.base_mm == 100.0
     assert triangle.height_mm == 80.0
     assert triangle.id == "wedge"
-    assert triangle.feature.type == "pocket"
 
 
 def test_triangle_resolve():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-triangle shape base 100.00mm height 80.00mm pocket 6.00mm
+children:
+  - Triangle:
+      id: shape
+      base: 100mm
+      height: 80mm
+      children:
+        - Pocket:
+            depth: 6mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -130,12 +216,23 @@ triangle shape base 100.00mm height 80.00mm pocket 6.00mm
 
 
 def test_triangle_with_profile_child():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-triangle corner base 80.00mm height 60.00mm
-    profile inside through
+children:
+  - Triangle:
+      id: corner
+      base: 80mm
+      height: 60mm
+      children:
+        - Profile:
+            side: inside
+            depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -146,12 +243,25 @@ triangle corner base 80.00mm height 60.00mm
 
 
 def test_triangle_centered_in_region():
-    pml = """sheet 400.00mm 400.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 10mm
 
-inset 100.00mm
-    triangle centered base 100.00mm height 100.00mm pocket 5.00mm
+children:
+  - Inset:
+      distance: 100mm
+      children:
+        - Triangle:
+            id: centered
+            base: 100mm
+            height: 100mm
+            children:
+              - Pocket:
+                  depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -175,11 +285,25 @@ inset 100.00mm
 
 
 def test_polygon_bounds_calculation():
-    pml = """sheet 200.00mm 200.00mm 10.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 10mm
 
-polygon irregular points (10mm,20mm) (90mm,10mm) (80mm,70mm) (20mm,80mm) pocket 4.00mm
+children:
+  - Polygon:
+      id: irregular
+      points:
+        - [10mm, 20mm]
+        - [90mm, 10mm]
+        - [80mm, 70mm]
+        - [20mm, 80mm]
+      children:
+        - Pocket:
+            depth: 4mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     item = flat.items[0]

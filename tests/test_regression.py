@@ -382,7 +382,7 @@ def test_golden_store_save_load_metrics():
         store.initialize()
 
         metrics = {"test": {"value": 42}}
-        store.save_metrics("test_entry", metrics, source_file="test.pml")
+        store.save_metrics("test_entry", metrics, source_file="test.pml.yml")
 
         loaded = store.load_metrics("test_entry")
         assert loaded is not None
@@ -436,7 +436,7 @@ def test_golden_index_serialization():
     index = GoldenIndex()
     index.entries["test"] = GoldenEntry(
         recipe_name="test",
-        source_file="test.pml",
+        source_file="test.pml.yml",
         notes="Test entry",
     )
 

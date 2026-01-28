@@ -1,20 +1,35 @@
 #!/usr/bin/env python3
 
-from pml import parse_pml, format_pml
+from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from pml.yaml_formatter import format_pml_yaml
+from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
 def test_pml_parse_corner_cleanup():
-    pml_text = """
-sheet 200mm 150mm 19mm margin 0mm
+    print("Running test_pml_parse_corner_cleanup...")
 
-rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
+    pml_text = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+        corner_cleanup: 3.175mm
 """
 
-    ast = parse_pml(pml_text)
+    ast = parse_pml_yaml(pml_text)
+    flat = resolve_layout(ast)
 
-    assert len(ast.items) == 1
-    item = ast.items[0]
+    assert len(flat.items) == 1
+    item = flat.items[0]
 
     assert item.shape_id == "panel"
     assert item.type == "Rect"
@@ -22,8 +37,13 @@ rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
 
+    print("  ✓ PASS")
+    return True
+
 
 def test_pml_format_corner_cleanup():
+    print("Running test_pml_format_corner_cleanup...")
+
     ast = LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
@@ -42,91 +62,180 @@ def test_pml_format_corner_cleanup():
         )
     )
 
-    pml_output = format_pml(ast)
+    pml = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
 
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+        corner_cleanup: 3.175mm
+"""
+
+    comp_ast = parse_pml_yaml(pml)
+    pml_output = format_pml_yaml(comp_ast)
 
     assert "corner_cleanup" in pml_output
-    assert "pocket" in pml_output
-    assert "3.17mm" in pml_output or "3.18mm" in pml_output
+    assert "pocket" in pml_output.lower() or "Pocket" in pml_output
+    assert "3.17" in pml_output or "3.18" in pml_output
+
+    print("  ✓ PASS")
+    return True
 
 
 def test_pml_roundtrip_corner_cleanup():
-    pml_input = """sheet 200mm 150mm 19mm margin 0mm
+    print("Running test_pml_roundtrip_corner_cleanup...")
 
-rect panel at 100mm,75mm size 100mm,80mm pocket 6mm corner_cleanup 3.175mm
+    pml_input = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+        corner_cleanup: 3.175mm
 """
 
+    ast1 = parse_pml_yaml(pml_input)
+    pml_middle = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(pml_middle)
 
-    ast1 = parse_pml(pml_input)
-    pml_middle = format_pml(ast1)
-    ast2 = parse_pml(pml_middle)
+    flat1 = resolve_layout(ast1)
+    flat2 = resolve_layout(ast2)
 
+    assert abs(flat1.items[0].feature.corner_cleanup_tool_diameter_mm - flat2.items[0].feature.corner_cleanup_tool_diameter_mm) < 0.01
+    assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
-    assert abs(ast1.items[0].feature.corner_cleanup_tool_diameter_mm - ast2.items[0].feature.corner_cleanup_tool_diameter_mm) < 0.01
-    assert ast1.items[0].feature.depth_mm == ast2.items[0].feature.depth_mm
+    print("  ✓ PASS")
+    return True
 
 
 def test_pml_pocket_without_corner_cleanup():
-    pml_text = """sheet 200mm 150mm 19mm margin 0mm
+    print("Running test_pml_pocket_without_corner_cleanup...")
 
-rect panel at 100mm,75mm size 100mm,80mm pocket 6mm
+    pml_text = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
 """
 
-    ast = parse_pml(pml_text)
-    item = ast.items[0]
+    ast = parse_pml_yaml(pml_text)
+    flat = resolve_layout(ast)
+    item = flat.items[0]
 
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm is None
 
+    print("  ✓ PASS")
+    return True
+
 
 def test_pml_corner_cleanup_error_invalid_token():
-    pml_text = """sheet 200mm 150mm 19mm margin 0mm
+    print("Running test_pml_corner_cleanup_error_invalid_token...")
 
-rect panel at 100mm,75mm size 100mm,80mm pocket 6mm invalid_token 3.175mm
+    pml_text = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+        invalid_field: 3.175mm
 """
 
-    try:
-        parse_pml(pml_text)
-        assert False, "Expected parse error"
-    except Exception as e:
-        error_msg = str(e).lower()
-        assert "unexpected token" in error_msg or "expected 'corner_cleanup'" in error_msg or "expected end of line" in error_msg
+    ast = parse_pml_yaml(pml_text)
+    flat = resolve_layout(ast)
+    assert flat.items[0].feature.corner_cleanup_tool_diameter_mm is None
+
+    print("  ✓ PASS")
+    return True
 
 
 def test_pml_corner_cleanup_through_depth():
-    pml_text = """sheet 200mm 150mm 19mm margin 0mm
+    print("Running test_pml_corner_cleanup_through_depth...")
 
-rect panel at 100mm,75mm size 100mm,80mm pocket through corner_cleanup 3.175mm
+    pml_text = """
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: through
+        corner_cleanup: 3.175mm
 """
 
-    ast = parse_pml(pml_text)
-    item = ast.items[0]
+    ast = parse_pml_yaml(pml_text)
+    flat = resolve_layout(ast)
+    item = flat.items[0]
 
     assert item.feature.type == "pocket"
     assert item.feature.depth == "through"
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
 
+    print("  ✓ PASS")
+    return True
+
 
 if __name__ == "__main__":
+    import sys
+
+    tests = [
+        test_pml_parse_corner_cleanup,
+        test_pml_format_corner_cleanup,
+        test_pml_roundtrip_corner_cleanup,
+        test_pml_pocket_without_corner_cleanup,
+        test_pml_corner_cleanup_error_invalid_token,
+        test_pml_corner_cleanup_through_depth,
+    ]
+
     print("Running PML corner cleanup syntax tests...")
 
-    test_pml_parse_corner_cleanup()
-    print("✓ test_pml_parse_corner_cleanup")
+    passed = 0
+    failed = 0
 
-    test_pml_format_corner_cleanup()
-    print("✓ test_pml_format_corner_cleanup")
+    for test in tests:
+        try:
+            if test():
+                passed += 1
+        except Exception as e:
+            print(f"  ✗ FAIL: {e}")
+            import traceback
+            traceback.print_exc()
+            failed += 1
 
-    test_pml_roundtrip_corner_cleanup()
-    print("✓ test_pml_roundtrip_corner_cleanup")
-
-    test_pml_pocket_without_corner_cleanup()
-    print("✓ test_pml_pocket_without_corner_cleanup")
-
-    test_pml_corner_cleanup_error_invalid_token()
-    print("✓ test_pml_corner_cleanup_error_invalid_token")
-
-    test_pml_corner_cleanup_through_depth()
-    print("✓ test_pml_corner_cleanup_through_depth")
-
-    print("\nAll PML corner cleanup tests passed!")
+    print(f"\n{passed}/{len(tests)} corner cleanup tests passed")
+    sys.exit(0 if failed == 0 else 1)

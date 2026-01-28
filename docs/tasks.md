@@ -62,23 +62,29 @@ intents = ast_to_removal_intents(ast)
 **Use case:** Process user-provided PML text.
 
 ```python
-from pml.compositional_parser import parse_compositional_pml
-from resolution.layout_resolver import resolve_layout
+from pml import parse_pml
 
 pml_source = """
-sheet 450mm 650mm 19mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
 
-component Door
-    rect door
-        frame 50mm
-            rect panel pocket 6mm
-
-place grid 1 1 gap 0mm
-    use Door
+children:
+  - Rect:
+      id: door
+      children:
+        - Frame:
+            width: 50mm
+            children:
+              - Rect:
+                  id: panel
+                  children:
+                    - Pocket:
+                        depth: 6mm
 """
 
-comp_ast = parse_compositional_pml(pml_source)
-ast = resolve_layout(comp_ast)
+ast = parse_pml(pml_source)
 ```
 
 **Key point:** `resolve_layout` converts CompositionalLayoutAST to flat LayoutAST.
@@ -104,7 +110,7 @@ items = expand_template(
 )
 ```
 
-**Key point:** Templates are PML files with parameter substitution. See `templates/*.pml` for available templates and `pml/syntax_spec.md` for template syntax.
+**Key point:** Templates are PML files with parameter substitution. See `templates/*.pml.yml` for available templates and `pml/syntax_spec.md` for template syntax.
 
 ---
 
@@ -233,21 +239,22 @@ ast = LayoutAST(
 **Use case:** Optimize part placement on sheet material.
 
 ```python
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params
+from pml.yaml_parser import parse_nest_yaml
+from pml.nest_parser import nest_job_to_api_params
 from nesting import nest_and_generate
 from pml.formatter import format_pml
 
-job = parse_nest_pml(open("job.nest").read())
+job = parse_nest_yaml(open("job.nest.yml").read())
 result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 
 for i, ast in enumerate(result["output"]):
     pml_text = format_pml(ast)
-    open(f"sheet_{i+1}.pml", "w").write(pml_text)
+    open(f"sheet_{i+1}.pml.yml", "w").write(pml_text)
 ```
 
 **CLI alternative:**
 ```bash
-python -m cli.nest job.nest -o output/ --export-svg
+python -m cli.nest job.nest.yml -o output/ --export-svg
 ```
 
 **Key point:** See `docs/recipes/18_nesting_maxrects/` for complete example.
@@ -311,18 +318,28 @@ python -m tests.test_recipes --regen_recipes
 
 **Programmatic (using shared pipeline):**
 ```python
-from pml.compositional_parser import parse_compositional_pml
-from resolution.layout_resolver import resolve_layout
+from pml import parse_pml
 from cam.pipeline import run_pipeline, write_pipeline_outputs
 from pathlib import Path
 
 pml = """
-sheet 300mm 200mm 19mm
-rounded_rect table_top radius 20mm corners tl tr profile through outside
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+
+children:
+  - RoundedRect:
+      id: table_top
+      radius: 20mm
+      corners: [tl, tr]
+      children:
+        - Profile:
+            side: outside
+            depth: through
 """
 
-comp_ast = parse_compositional_pml(pml)
-ast = resolve_layout(comp_ast)
+ast = parse_pml(pml)
 
 result = run_pipeline(ast, kerf_mm=3.175)
 

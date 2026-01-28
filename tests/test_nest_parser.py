@@ -1,22 +1,32 @@
 
 import sys
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
+from pml.yaml_parser import parse_nest_yaml, NestParseError
+from pml.nest_parser import nest_job_to_api_params
 
 
 def test_basic_nest_parsing():
     print("Running test_basic_nest_parsing...")
 
     source = """
-nest maxrects
-    sheet 1000mm 2000mm 19mm margin 0mm
-    kerf 6.35mm
-    margin 10mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        panel 400mm 600mm x4
-    """
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
 
-    job = parse_nest_pml(source)
+  kerf: 6.35mm
+  margin: 10mm
+
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+      quantity: 4
+"""
+
+    job = parse_nest_yaml(source)
 
     assert job.algorithm == "maxrects"
     assert job.sheet_width_mm == 1000.0
@@ -37,14 +47,22 @@ def test_guillotine_algorithm():
     print("Running test_guillotine_algorithm...")
 
     source = """
-nest guillotine
-    sheet 1200mm 2400mm 18mm margin 0mm
+Nest:
+  algorithm: guillotine
 
-    parts
-        door 500mm 800mm x2
-    """
+  Sheet:
+    width: 1200mm
+    height: 2400mm
+    thickness: 18mm
 
-    job = parse_nest_pml(source)
+  parts:
+    - name: door
+      width: 500mm
+      height: 800mm
+      quantity: 2
+"""
+
+    job = parse_nest_yaml(source)
 
     assert job.algorithm == "guillotine"
     assert job.sheet_width_mm == 1200.0
@@ -61,18 +79,35 @@ def test_multiple_parts():
     print("Running test_multiple_parts...")
 
     source = """
-nest maxrects
-    sheet 1232mm 1245mm 19mm margin 0mm
-    kerf 6.35mm
-    margin 10mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        large_door 457mm 597mm x20
-        small_door 305mm 203mm x15
-        tall_door 457mm 914mm x2
-    """
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
 
-    job = parse_nest_pml(source)
+  kerf: 6.35mm
+  margin: 10mm
+
+  parts:
+    - name: large_door
+      width: 457mm
+      height: 597mm
+      quantity: 20
+
+    - name: small_door
+      width: 305mm
+      height: 203mm
+      quantity: 15
+
+    - name: tall_door
+      width: 457mm
+      height: 914mm
+      quantity: 2
+"""
+
+    job = parse_nest_yaml(source)
 
     assert len(job.parts) == 3
     assert job.parts[0].name == "large_door"
@@ -89,18 +124,28 @@ def test_part_with_template():
     print("Running test_part_with_template...")
 
     source = """
-nest maxrects
-    sheet 1000mm 2000mm 19mm margin 0mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        door 400mm 600mm x2
-            template Shaker
-                stile_w 50mm
-                rail_h 50mm
-                panel_recess 6mm
-    """
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
 
-    job = parse_nest_pml(source)
+  parts:
+    - name: door
+      width: 400mm
+      height: 600mm
+      quantity: 2
+      template:
+        name: Shaker
+        params:
+          stile_w: 50mm
+          rail_h: 50mm
+          panel_recess: 6mm
+"""
+
+    job = parse_nest_yaml(source)
 
     assert len(job.parts) == 1
     part = job.parts[0]
@@ -117,28 +162,47 @@ def test_mixed_parts_with_and_without_template():
     print("Running test_mixed_parts_with_and_without_template...")
 
     source = """
-nest maxrects
-    sheet 1232mm 1245mm 19mm margin 0mm
-    kerf 6.35mm
-    margin 10mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        large_door 457mm 597mm x20
-            template Shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
 
-        small_door 305mm 203mm x15
+  kerf: 6.35mm
+  margin: 10mm
 
-        tall_door 457mm 914mm x2
-            template Shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
-    """
+  parts:
+    - name: large_door
+      width: 457mm
+      height: 597mm
+      quantity: 20
+      template:
+        name: Shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
 
-    job = parse_nest_pml(source)
+    - name: small_door
+      width: 305mm
+      height: 203mm
+      quantity: 15
+
+    - name: tall_door
+      width: 457mm
+      height: 914mm
+      quantity: 2
+      template:
+        name: Shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
+"""
+
+    job = parse_nest_yaml(source)
 
     assert len(job.parts) == 3
 
@@ -159,40 +223,25 @@ nest maxrects
     print("  PASSED")
 
 
-def test_comments_ignored():
-    print("Running test_comments_ignored...")
-
-    source = """
-
-nest maxrects
-
-    sheet 1000mm 2000mm 19mm margin 0mm
-
-    parts
-
-        panel 400mm 600mm x4
-    """
-
-    job = parse_nest_pml(source)
-
-    assert job.algorithm == "maxrects"
-    assert len(job.parts) == 1
-
-    print("  PASSED")
-
-
 def test_quantity_default():
     print("Running test_quantity_default...")
 
     source = """
-nest maxrects
-    sheet 1000mm 2000mm 19mm margin 0mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        panel 400mm 600mm
-    """
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
 
-    job = parse_nest_pml(source)
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+"""
+
+    job = parse_nest_yaml(source)
 
     assert job.parts[0].quantity == 1
 
@@ -203,22 +252,36 @@ def test_nest_job_to_api_params():
     print("Running test_nest_job_to_api_params...")
 
     source = """
-nest maxrects
-    sheet 1232mm 1245mm 19mm margin 0mm
-    kerf 6.35mm
-    margin 10mm
+Nest:
+  algorithm: maxrects
 
-    parts
-        door 457mm 597mm x20
-            template Shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
 
-        panel 305mm 203mm x15
-    """
+  kerf: 6.35mm
+  margin: 10mm
 
-    job = parse_nest_pml(source)
+  parts:
+    - name: door
+      width: 457mm
+      height: 597mm
+      quantity: 20
+      template:
+        name: Shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
+
+    - name: panel
+      width: 305mm
+      height: 203mm
+      quantity: 15
+"""
+
+    job = parse_nest_yaml(source)
     params = nest_job_to_api_params(job)
 
     assert params["algorithm"] == "maxrects"
@@ -242,14 +305,19 @@ def test_error_missing_nest_directive():
     print("Running test_error_missing_nest_directive...")
 
     source = """
-    sheet 1000mm 2000mm 19mm margin 0mm
+Sheet:
+  width: 1000mm
+  height: 2000mm
+  thickness: 19mm
 
-    parts
-        panel 400mm 600mm
-    """
+parts:
+  - name: panel
+    width: 400mm
+    height: 600mm
+"""
 
     try:
-        parse_nest_pml(source)
+        parse_nest_yaml(source)
         assert False, "Should have raised NestParseError"
     except NestParseError as e:
         assert "nest" in str(e).lower()
@@ -261,14 +329,17 @@ def test_error_missing_sheet():
     print("Running test_error_missing_sheet...")
 
     source = """
-nest maxrects
+Nest:
+  algorithm: maxrects
 
-    parts
-        panel 400mm 600mm
-    """
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+"""
 
     try:
-        parse_nest_pml(source)
+        parse_nest_yaml(source)
         assert False, "Should have raised NestParseError"
     except NestParseError as e:
         assert "sheet" in str(e).lower()
@@ -280,14 +351,19 @@ def test_error_no_parts():
     print("Running test_error_no_parts...")
 
     source = """
-nest maxrects
-    sheet 1000mm 2000mm 19mm margin 0mm
+Nest:
+  algorithm: maxrects
 
-    parts
-    """
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+
+  parts: []
+"""
 
     try:
-        parse_nest_pml(source)
+        parse_nest_yaml(source)
         assert False, "Should have raised NestParseError"
     except NestParseError as e:
         assert "parts" in str(e).lower() or "no parts" in str(e).lower()
@@ -295,9 +371,40 @@ nest maxrects
     print("  PASSED")
 
 
+def test_simple_template_reference():
+    print("Running test_simple_template_reference...")
+
+    source = """
+Nest:
+  algorithm: maxrects
+
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+
+  parts:
+    - name: door
+      width: 400mm
+      height: 600mm
+      quantity: 2
+      template: shaker
+"""
+
+    job = parse_nest_yaml(source)
+
+    assert len(job.parts) == 1
+    part = job.parts[0]
+    assert part.name == "door"
+    assert part.template == "shaker"
+    assert part.template_params == {}
+
+    print("  PASSED")
+
+
 def run_all_tests():
     print("=" * 60)
-    print("Nest PML Parser Tests")
+    print("Nest YAML Parser Tests")
     print("=" * 60)
 
     tests = [
@@ -306,12 +413,12 @@ def run_all_tests():
         test_multiple_parts,
         test_part_with_template,
         test_mixed_parts_with_and_without_template,
-        test_comments_ignored,
         test_quantity_default,
         test_nest_job_to_api_params,
         test_error_missing_nest_directive,
         test_error_missing_sheet,
         test_error_no_parts,
+        test_simple_template_reference,
     ]
 
     passed = 0

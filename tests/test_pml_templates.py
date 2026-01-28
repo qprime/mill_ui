@@ -3,10 +3,10 @@ import pytest
 from pathlib import Path
 
 from layout_ast.compositional import TemplateDef, Rect, Frame, PocketGen, ProfileGen
-from pml.compositional_parser import (
-    parse_template_file,
+from pml.yaml_parser import (
+    parse_template_yaml,
     substitute_params,
-    ParseError,
+    PMLParseError as ParseError,
 )
 from templates.loader import (
     find_template_file,
@@ -20,15 +20,20 @@ class TestParseTemplateDef:
 
     def test_parse_simple_template(self):
         text = """
-template test
-    params
-        my_width 100mm
-        my_depth 5mm
+Template:
+  name: test
+  params:
+    my_width: 100mm
+    my_depth: 5mm
 
-    rect panel
-        pocket ${my_depth}
+children:
+  - Rect:
+      id: panel
+      children:
+        - Pocket:
+            depth: ${my_depth}
 """
-        result = parse_template_file(text)
+        result = parse_template_yaml(text)
         assert isinstance(result, TemplateDef)
         assert result.name == "test"
         assert result.params == {"my_width": 100.0, "my_depth": 5.0}
@@ -36,29 +41,45 @@ template test
 
     def test_parse_template_without_params(self):
         text = """
-template simple
-    rect panel
-        profile outside through
+Template:
+  name: simple
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
 """
-        result = parse_template_file(text)
+        result = parse_template_yaml(text)
         assert result.name == "simple"
         assert result.params == {}
         assert result.body is None
 
     def test_parse_shaker_template(self):
         text = """
-template shaker
-    params
-        stile_w 57mm
-        rail_h 57mm
-        panel_recess 6mm
+Template:
+  name: shaker
+  params:
+    stile_w: 57mm
+    rail_h: 57mm
+    panel_recess: 6mm
 
-    rect door
-        profile outside through
-        frame ${stile_w}
-            pocket ${panel_recess}
+children:
+  - Rect:
+      id: door
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: ${stile_w}
+            children:
+              - Pocket:
+                  depth: ${panel_recess}
 """
-        result = parse_template_file(text)
+        result = parse_template_yaml(text)
         assert result.name == "shaker"
         assert result.params == {
             "stile_w": 57.0,
@@ -71,14 +92,14 @@ template shaker
 class TestParameterSubstitution:
 
     def test_substitute_single_param(self):
-        text = "frame ${width}"
+        text = "width: ${width}"
         result = substitute_params(text, {"width": 50.0})
-        assert result == "frame 50.0mm"
+        assert result == "width: 50.0mm"
 
     def test_substitute_multiple_params(self):
-        text = "frame ${width}\n    pocket ${depth}"
+        text = "width: ${width}\ndepth: ${depth}"
         result = substitute_params(text, {"width": 50.0, "depth": 6.0})
-        assert result == "frame 50.0mm\n    pocket 6.0mm"
+        assert result == "width: 50.0mm\ndepth: 6.0mm"
 
     def test_substitute_same_param_twice(self):
         text = "${size} ${size}"
@@ -86,48 +107,52 @@ class TestParameterSubstitution:
         assert result == "100.0mm 100.0mm"
 
     def test_unknown_param_raises(self):
-        text = "frame ${unknown}"
+        text = "width: ${unknown}"
         with pytest.raises(ParseError) as exc_info:
             substitute_params(text, {"width": 50.0})
         assert "Unknown parameter" in str(exc_info.value)
 
     def test_substitute_string_param(self):
-        text = "${style} ${depth}"
+        text = "${style}: ${depth}"
         result = substitute_params(text, {"style": "pocket", "depth": 6.0})
-        assert result == "pocket 6.0mm"
+        assert result == "pocket: 6.0mm"
 
     def test_substitute_string_param_keyword(self):
-        text = "frame 50mm\n    ${generator} 6mm"
+        text = "width: 50mm\ntype: ${generator}"
         result = substitute_params(text, {"generator": "concentric_border"})
-        assert result == "frame 50mm\n    concentric_border 6mm"
+        assert result == "width: 50mm\ntype: concentric_border"
 
 
 class TestStringParameters:
 
     def test_parse_template_with_string_param(self):
         text = """
-template test
-    params
-        width 100mm
-        style pocket
+Template:
+  name: test
+  params:
+    width: 100mm
+    style: pocket
 
-    rect panel
-        ${style} ${width}
+children:
+  - Rect:
+      id: panel
 """
-        result = parse_template_file(text)
+        result = parse_template_yaml(text)
         assert result.params == {"width": 100.0, "style": "pocket"}
 
     def test_parse_template_with_keyword_string_param(self):
         text = """
-template test
-    params
-        depth 6mm
-        generator concentric_border
+Template:
+  name: test
+  params:
+    depth: 6mm
+    generator: concentric_border
 
-    rect panel
-        ${generator} ${depth}
+children:
+  - Rect:
+      id: panel
 """
-        result = parse_template_file(text)
+        result = parse_template_yaml(text)
         assert result.params == {"depth": 6.0, "generator": "concentric_border"}
 
 
@@ -139,13 +164,13 @@ class TestTemplateLoader:
     def test_find_template_file_shaker(self):
         path = find_template_file("shaker")
         assert path is not None
-        assert path.name == "shaker.pml"
+        assert path.name == "shaker.pml.yml"
         assert path.exists()
 
     def test_find_template_file_case_insensitive(self):
         path = find_template_file("Shaker")
         assert path is not None
-        assert path.name == "shaker.pml"
+        assert path.name == "shaker.pml.yml"
 
     def test_find_template_file_nonexistent(self):
         path = find_template_file("nonexistent")

@@ -1,6 +1,6 @@
 
-from pml.compositional_parser import parse_compositional_pml, ParseError
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from adapters.hints_to_removal import item_to_removal_intent
 from layout_ast.compositional import Edge
@@ -8,13 +8,26 @@ from ir.removal_intent import DepthProfile
 
 
 def test_edge_allowance_influences_removal_intent():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -40,13 +53,25 @@ rect panel profile through outside
 
 
 def test_profile_with_fillet_hint():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge fillet 3.00mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: fillet
+            radius: 3mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
@@ -63,13 +88,25 @@ rect panel profile through outside
 
 
 def test_edge_chamfer():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge chamfer 2.50mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: chamfer
+            distance: 2.5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
@@ -86,16 +123,29 @@ rect panel profile through outside
 
 
 def test_edge_roundtrip():
-    original_pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted_pml = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted_pml = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted_pml)
 
 
     flat1 = resolve_layout(ast1)
@@ -114,13 +164,25 @@ rect panel profile through outside
 
 
 def test_pocket_with_edge():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel pocket 6.00mm
-    edge allowance 0.30mm 0.05mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Pocket:
+            depth: 6mm
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.3mm
+            finish_allowance: 0.05mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
@@ -134,13 +196,26 @@ rect panel pocket 6.00mm
 
 
 def test_multi_tool_scenario():
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
@@ -171,13 +246,26 @@ rect panel profile through outside
 def test_kerf_compatibility():
     from ir.removal_intent import RemovalIntent, Allowance, Constraints, EdgeTreatment
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
 
-rect panel profile through outside
-    edge allowance 0.50mm 0.10mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]

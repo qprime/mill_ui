@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 RECIPE_DIR = Path(__file__).parent.parent / "docs" / "recipes" / "01_simple_profile"
-PML_FILE = RECIPE_DIR / "example.pml"
+PML_FILE = RECIPE_DIR / "example.pml.yml"
 
 
 def _check_optional_deps() -> dict[str, bool]:
@@ -67,7 +67,7 @@ def test_export_blueprint_produces_svg():
         svg_files = list(output_path.glob("*.svg"))
         assert len(svg_files) > 0, f"No SVG files generated. stderr: {result.stderr}"
 
-        expected_svg = output_path / "example.svg"
+        expected_svg = output_path / "example.pml.svg"
         assert expected_svg.exists(), f"Expected SVG not found. Files: {list(output_path.iterdir())}"
 
         svg_content = expected_svg.read_text()
@@ -111,7 +111,7 @@ def test_convert_layout_json_to_pml():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         json_file = Path(tmpdir) / "intermediate.json"
-        pml_file = Path(tmpdir) / "roundtrip.pml"
+        pml_file = Path(tmpdir) / "roundtrip.pml.yml"
 
         _run_cli([
             "-m", "cli.convert_layout",
@@ -145,7 +145,7 @@ def test_cli_missing_input_fails():
 
     result = _run_cli([
         "-m", "cli.mill",
-        "--input", "/nonexistent/path/to/file.pml",
+        "--input", "/nonexistent/path/to/file.pml.yml",
         "--out", "/tmp",
     ], check=False)
 

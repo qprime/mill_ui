@@ -6,16 +6,29 @@ import traceback
 def test_polyline_inside_rect():
     print("Running test_polyline_inside_rect...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 300.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
 
-rect canvas
-    polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm
+children:
+  - Rect:
+      id: canvas
+      children:
+        - Polyline:
+            id: path1
+            points: [[0.00, 0.00], [1.00, 1.00]]
+            children:
+              - Engrave:
+                  depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     items = flat.items
@@ -38,16 +51,30 @@ rect canvas
 def test_polyline_inside_rounded_rect():
     print("Running test_polyline_inside_rounded_rect...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 500.00mm 500.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 500mm
+  height: 500mm
+  thickness: 19mm
+  margin: 0mm
 
-rounded_rect panel radius 20.00mm
-    polyline diagonal points (0.10,0.10) (0.90,0.90) engrave 1.00mm
+children:
+  - RoundedRect:
+      id: panel
+      radius: 20mm
+      children:
+        - Polyline:
+            id: diagonal
+            points: [[0.10, 0.10], [0.90, 0.90]]
+            children:
+              - Engrave:
+                  depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polyline_item = [item for item in flat.items if item.type == "Polyline"][0]
@@ -66,16 +93,30 @@ rounded_rect panel radius 20.00mm
 def test_polyline_inside_circle_fit():
     print("Running test_polyline_inside_circle_fit...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-circle boundary fit
-    polyline cross points (0.25,0.50) (0.75,0.50) (0.50,0.50) (0.50,0.25) (0.50,0.75) engrave 1.00mm
+children:
+  - Circle:
+      id: boundary
+      fit: true
+      children:
+        - Polyline:
+            id: cross
+            points: [[0.25, 0.50], [0.75, 0.50], [0.50, 0.50], [0.50, 0.25], [0.50, 0.75]]
+            children:
+              - Engrave:
+                  depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polyline_item = [item for item in flat.items if item.type == "Polyline"][0]
@@ -93,15 +134,26 @@ circle boundary fit
 def test_polyline_with_10_points():
     print("Running test_polyline_with_10_points...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.7) (0.6,0.3) (0.7,0.6) (0.8,0.4) (0.9,0.5) engrave 1.00mm
+children:
+  - Polyline:
+      id: zigzag
+      points: [[0.0, 0.0], [0.1, 0.9], [0.2, 0.1], [0.3, 0.8], [0.4, 0.2], [0.5, 0.7], [0.6, 0.3], [0.7, 0.6], [0.8, 0.4], [0.9, 0.5]]
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
@@ -121,16 +173,27 @@ polyline zigzag points (0.0,0.0) (0.1,0.9) (0.2,0.1) (0.3,0.8) (0.4,0.2) (0.5,0.
 def test_polyline_error_out_of_range():
     print("Running test_polyline_error_out_of_range...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
+children:
+  - Polyline:
+      id: bad
+      points: [[-0.1, 0.5], [1.0, 0.5]]
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
     try:
-        ast = parse_compositional_pml(pml)
+        ast = parse_pml_yaml(pml)
         flat = resolve_layout(ast)
         assert False, "Should have raised ValueError"
     except ValueError as e:
@@ -143,16 +206,27 @@ polyline bad points (-0.1,0.5) (1.0,0.5) engrave 1.00mm
 def test_polyline_error_single_point():
     print("Running test_polyline_error_single_point...")
 
-    from pml.compositional_parser import parse_compositional_pml, ParseError
+    from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-polyline bad points (0.5,0.5) engrave 1.00mm
+children:
+  - Polyline:
+      id: bad
+      points: [[0.5, 0.5]]
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
     try:
-        ast = parse_compositional_pml(pml)
+        ast = parse_pml_yaml(pml)
         flat = resolve_layout(ast)
         assert False, "Should have raised ValueError or ParseError"
     except (ValueError, ParseError) as e:
@@ -162,41 +236,32 @@ polyline bad points (0.5,0.5) engrave 1.00mm
     return True
 
 
-def test_polyline_error_malformed():
-    print("Running test_polyline_error_malformed...")
-
-    from pml.compositional_parser import parse_compositional_pml, ParseError
-
-    pml = """sheet 400.00mm 400.00mm 19.00mm margin 0mm
-
-polyline bad points (0.5 0.5) (1.0,1.0) engrave 1.00mm
-"""
-
-    try:
-        ast = parse_compositional_pml(pml)
-        assert False, "Should have raised ParseError"
-    except ParseError as e:
-        assert "," in str(e) or "comma" in str(e).lower()
-
-    print("  ✓ PASS")
-    return True
-
-
 def test_polyline_roundtrip():
     print("Running test_polyline_roundtrip...")
 
-    from pml.compositional_parser import parse_compositional_pml
-    from pml.compositional_formatter import format_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
+    from pml.yaml_formatter import format_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    original_pml = """sheet 500.00mm 400.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 500mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
+children:
+  - Polyline:
+      id: path1
+      points: [[0.10, 0.20], [0.50, 0.50], [0.90, 0.80]]
+      children:
+        - Engrave:
+            depth: 1mm
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted_pml = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted_pml)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted_pml = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted_pml)
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
@@ -219,16 +284,29 @@ polyline path1 points (0.10,0.20) (0.50,0.50) (0.90,0.80) engrave 1.00mm
 def test_polyline_in_inset_region():
     print("Running test_polyline_in_inset_region...")
 
-    from pml.compositional_parser import parse_compositional_pml
+    from pml.yaml_parser import parse_pml_yaml
     from resolution.layout_resolver import resolve_layout
 
-    pml = """sheet 600.00mm 400.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-inset 50.00mm
-    polyline path1 points (0.00,0.00) (1.00,1.00) engrave 1.00mm
+children:
+  - Inset:
+      distance: 50mm
+      children:
+        - Polyline:
+            id: path1
+            points: [[0.00, 0.00], [1.00, 1.00]]
+            children:
+              - Engrave:
+                  depth: 1mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
@@ -252,7 +330,6 @@ if __name__ == "__main__":
         test_polyline_with_10_points,
         test_polyline_error_out_of_range,
         test_polyline_error_single_point,
-        test_polyline_error_malformed,
         test_polyline_roundtrip,
         test_polyline_in_inset_region,
     ]

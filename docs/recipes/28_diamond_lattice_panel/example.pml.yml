@@ -1,0 +1,24 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Lines:
+        angle: 45.0
+        spacing: 25mm
+        width: 4mm
+        depth: 3mm
+    - Lines:
+        angle: -45.0
+        spacing: 25mm
+        width: 4mm
+        depth: 3mm

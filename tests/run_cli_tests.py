@@ -15,7 +15,7 @@ rect outer profile through outside
         rect inner pocket 6.00mm
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
         f.write(pml)
         input_file = f.name
 
@@ -47,7 +47,7 @@ rect outer profile through outside
         rect inner pocket 6.00mm
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
         f.write(pml)
         input_file = f.name
 
@@ -89,7 +89,7 @@ rect outer profile through outside
         rect inner pocket 6.00mm
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
         f.write(pml)
         input_file = f.name
 
@@ -125,7 +125,7 @@ def test_cli_error_on_missing_file():
     print("Running test_cli_error_on_missing_file...")
 
     result = subprocess.run(
-        [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", "/nonexistent/file.pml"],
+        [sys.executable, "-m", "skills.mill_ui.cli.parse_compositional_pml", "/nonexistent/file.pml.yml"],
         capture_output=True,
         text=True,
     )
@@ -142,7 +142,7 @@ def test_cli_error_on_invalid_pml():
 
     pml = "invalid pml syntax"
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
         f.write(pml)
         input_file = f.name
 
@@ -184,7 +184,7 @@ place grid 2 2 gap 100.00mm
     use GridPanel
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
         f.write(pml)
         input_file = f.name
 

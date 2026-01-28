@@ -279,7 +279,7 @@ Before proceeding with any stage:
 
 The UI will integrate with the existing mill_ui Python codebase:
 
-- **PML Parsing:** `skills.mill_ui.pml.parser` (flat) and `skills.mill_ui.pml.compositional_parser` (compositional)
+- **PML Parsing:** `skills.mill_ui.pml.yaml_parser` (YAML-based PML)
 - **LayoutAST:** `skills.mill_ui.layout_ast.layout` and `skills.mill_ui.layout_ast.compositional`
 - **Resolution:** `skills.mill_ui.resolution.layout_resolver` (compositional → flat)
 - **RemovalIntent IR:** `skills.mill_ui.ir.removal_intent`

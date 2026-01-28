@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mill-ui.dev/schemas/nest.schema.json",
+  "title": "Nest Job",
+  "description": "Nesting job definition for multi-part sheet optimization",
+  "type": "object",
+  "required": ["Nest"],
+  "properties": {
+    "Nest": {
+      "$ref": "#/$defs/nestBlock"
+    }
+  },
+  "$defs": {
+    "dimension": {
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?mm$"}
+      ]
+    },
+    "nestBlock": {
+      "type": "object",
+      "required": ["algorithm", "Sheet", "parts"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["guillotine", "maxrects"],
+          "description": "Nesting algorithm to use"
+        },
+        "Sheet": {
+          "$ref": "#/$defs/sheet"
+        },
+        "kerf": {
+          "$ref": "#/$defs/dimension",
+          "description": "Tool kerf width (default: 6.35mm)"
+        },
+        "margin": {
+          "$ref": "#/$defs/dimension",
+          "description": "Sheet edge margin (default: 10mm)"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/part"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "sheet": {
+      "type": "object",
+      "required": ["width", "height", "thickness"],
+      "properties": {
+        "width": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "thickness": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "part": {
+      "type": "object",
+      "required": ["name", "width", "height"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Part identifier"
+        },
+        "width": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Number of copies to nest"
+        },
+        "template": {
+          "oneOf": [
+            {"type": "string"},
+            {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {"type": "string"},
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {"$ref": "#/$defs/dimension"}
+                }
+              }
+            }
+          ],
+          "description": "Template to apply to this part"
+        }
+      }
+    }
+  }
+}

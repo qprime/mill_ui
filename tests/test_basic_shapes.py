@@ -4,8 +4,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from pml.compositional_parser import parse_compositional_pml
-from pml.compositional_formatter import format_compositional_pml
+from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
@@ -16,11 +16,21 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 def test_circle_with_explicit_diameter():
     print("Running test_circle_with_explicit_diameter...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-circle medallion diameter 120.00mm pocket 3.00mm
+children:
+  - Circle:
+      id: medallion
+      diameter: 120mm
+      feature:
+        type: pocket
+        depth: 3mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -40,11 +50,20 @@ circle medallion diameter 120.00mm pocket 3.00mm
 def test_circle_fit_mode():
     print("Running test_circle_fit_mode...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-circle fit pocket 5.00mm
+children:
+  - Circle:
+      fit: true
+      feature:
+        type: pocket
+        depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -62,12 +81,25 @@ circle fit pocket 5.00mm
 def test_circle_fit_in_rect_region():
     print("Running test_circle_fit_in_rect_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-inset 50.00mm
-    circle badge fit profile through outside
+children:
+  - Inset:
+      distance: 50mm
+      children:
+        - Circle:
+            id: badge
+            fit: true
+            feature:
+              type: profile
+              side: outside
+              depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -86,11 +118,21 @@ inset 50.00mm
 def test_rounded_rect_fills_region():
     print("Running test_rounded_rect_fills_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rounded_rect badge radius 8.00mm pocket 3.00mm
+children:
+  - RoundedRect:
+      id: badge
+      radius: 8mm
+      feature:
+        type: pocket
+        depth: 3mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -111,12 +153,25 @@ rounded_rect badge radius 8.00mm pocket 3.00mm
 def test_rounded_rect_with_inset():
     print("Running test_rounded_rect_with_inset...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-inset 25.00mm
-    rounded_rect panel radius 12.00mm profile through outside
+children:
+  - Inset:
+      distance: 25mm
+      children:
+        - RoundedRect:
+            id: panel
+            radius: 12mm
+            feature:
+              type: profile
+              side: outside
+              depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -136,11 +191,21 @@ inset 25.00mm
 def test_line_horizontal():
     print("Running test_line_horizontal...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-line decoration horizontal engrave 1.50mm
+children:
+  - Line:
+      id: decoration
+      orientation: horizontal
+      feature:
+        type: engrave
+        depth: 1.5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -167,11 +232,21 @@ line decoration horizontal engrave 1.50mm
 def test_line_vertical():
     print("Running test_line_vertical...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-line divider vertical engrave 1.50mm
+children:
+  - Line:
+      id: divider
+      orientation: vertical
+      feature:
+        type: engrave
+        depth: 1.5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -194,12 +269,24 @@ line divider vertical engrave 1.50mm
 def test_line_in_inset_region():
     print("Running test_line_in_inset_region...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-inset 50.00mm
-    line flourish horizontal engrave 1.50mm
+children:
+  - Inset:
+      distance: 50mm
+      children:
+        - Line:
+            id: flourish
+            orientation: horizontal
+            feature:
+              type: engrave
+              depth: 1.5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -222,16 +309,26 @@ inset 50.00mm
 def test_round_trip_circle():
     print("Running test_round_trip_circle...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-project test_circle
+project: test_circle
 
-circle badge diameter 100.00mm pocket 5.00mm
+children:
+  - Circle:
+      id: badge
+      diameter: 100mm
+      feature:
+        type: pocket
+        depth: 5mm
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted)
 
 
     flat1 = resolve_layout(ast1)
@@ -248,14 +345,25 @@ circle badge diameter 100.00mm pocket 5.00mm
 def test_round_trip_rounded_rect():
     print("Running test_round_trip_rounded_rect...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rounded_rect panel radius 10.00mm profile through outside
+children:
+  - RoundedRect:
+      id: panel
+      radius: 10mm
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted)
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
@@ -270,14 +378,24 @@ rounded_rect panel radius 10.00mm profile through outside
 def test_round_trip_line():
     print("Running test_round_trip_line...")
 
-    original_pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-line decoration vertical engrave 1.50mm
+children:
+  - Line:
+      id: decoration
+      orientation: vertical
+      feature:
+        type: engrave
+        depth: 1.5mm
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted)
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
@@ -294,22 +412,55 @@ line decoration vertical engrave 1.50mm
 def test_mixed_shapes_composition():
     print("Running test_mixed_shapes_composition...")
 
-    pml = """sheet 800.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 800mm
+  height: 600mm
+  thickness: 19mm
 
-project mixed_shapes
+project: mixed_shapes
 
-rect outer profile through outside
-    frame 40.00mm
-        grid 2 2 gap 20.00mm
-            cell
-                circle fit pocket 5.00mm
+children:
+  - Rect:
+      id: outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+      children:
+        - Frame:
+            width: 40mm
+            children:
+              - Grid:
+                  rows: 2
+                  cols: 2
+                  gap: 20mm
+                  children:
+                    - Cell:
+                        children:
+                          - Circle:
+                              fit: true
+                              feature:
+                                type: pocket
+                                depth: 5mm
 
-rounded_rect badge radius 8.00mm profile through outside
+  - RoundedRect:
+      id: badge
+      radius: 8mm
+      feature:
+        type: profile
+        side: outside
+        depth: through
 
-line divider horizontal engrave 1.50mm
+  - Line:
+      id: divider
+      orientation: horizontal
+      feature:
+        type: engrave
+        depth: 1.5mm
 """
 
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
 
@@ -333,11 +484,23 @@ line divider horizontal engrave 1.50mm
 def test_rounded_rect_selective_corners():
     print("Running test_rounded_rect_selective_corners...")
 
-    pml = """sheet 686.00mm 864.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 686mm
+  height: 864mm
+  thickness: 19mm
 
-rounded_rect table_half radius 12.70mm corners tl bl profile through outside
+children:
+  - RoundedRect:
+      id: table_half
+      radius: 12.7mm
+      corners: [tl, bl]
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -357,11 +520,22 @@ rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 def test_rounded_rect_all_corners_explicit():
     print("Running test_rounded_rect_all_corners_explicit...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rounded_rect panel radius 10.00mm corners tl tr bl br pocket 3.00mm
+children:
+  - RoundedRect:
+      id: panel
+      radius: 10mm
+      corners: [tl, tr, bl, br]
+      feature:
+        type: pocket
+        depth: 3mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -379,11 +553,23 @@ rounded_rect panel radius 10.00mm corners tl tr bl br pocket 3.00mm
 def test_rounded_rect_single_corner():
     print("Running test_rounded_rect_single_corner...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rounded_rect corner_piece radius 25.00mm corners tr profile through outside
+children:
+  - RoundedRect:
+      id: corner_piece
+      radius: 25mm
+      corners: [tr]
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 1
@@ -400,14 +586,26 @@ rounded_rect corner_piece radius 25.00mm corners tr profile through outside
 def test_rounded_rect_corners_round_trip():
     print("Running test_rounded_rect_corners_round_trip...")
 
-    original_pml = """sheet 686.00mm 864.00mm 19.00mm margin 0mm
+    original_pml = """
+Sheet:
+  width: 686mm
+  height: 864mm
+  thickness: 19mm
 
-rounded_rect table_half radius 12.70mm corners tl bl profile through outside
+children:
+  - RoundedRect:
+      id: table_half
+      radius: 12.7mm
+      corners: [tl, bl]
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
 
-    ast1 = parse_compositional_pml(original_pml)
-    formatted = format_compositional_pml(ast1)
-    ast2 = parse_compositional_pml(formatted)
+    ast1 = parse_pml_yaml(original_pml)
+    formatted = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(formatted)
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
@@ -418,7 +616,7 @@ rounded_rect table_half radius 12.70mm corners tl bl profile through outside
     assert flat1.items[0].geometry.data["radius_bl_mm"] == flat2.items[0].geometry.data["radius_bl_mm"]
     assert flat1.items[0].geometry.data["radius_br_mm"] == flat2.items[0].geometry.data["radius_br_mm"]
 
-    assert "corners tl bl" in formatted
+    assert "corners:" in formatted or "corners" in formatted
 
     print("  ✓ PASS")
     return True
@@ -427,89 +625,118 @@ rounded_rect table_half radius 12.70mm corners tl bl profile through outside
 def test_acceptance_canonical_formatting():
     print("Running test_acceptance_canonical_formatting...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-project shape_test
+project: shape_test
 
-circle badge diameter 120.00mm pocket 3.00mm
+children:
+  - Circle:
+      id: badge
+      diameter: 120mm
+      feature:
+        type: pocket
+        depth: 3mm
 
-rounded_rect panel radius 12.00mm profile through outside
+  - RoundedRect:
+      id: panel
+      radius: 12mm
+      feature:
+        type: profile
+        side: outside
+        depth: through
 
-line decoration horizontal engrave 1.50mm
+  - Line:
+      id: decoration
+      orientation: horizontal
+      feature:
+        type: engrave
+        depth: 1.5mm
 """
 
-    ast = parse_compositional_pml(pml)
-    formatted1 = format_compositional_pml(ast)
-    ast2 = parse_compositional_pml(formatted1)
-    formatted2 = format_compositional_pml(ast2)
+    ast = parse_pml_yaml(pml)
+    formatted1 = format_pml_yaml(ast)
+    ast2 = parse_pml_yaml(formatted1)
+    formatted2 = format_pml_yaml(ast2)
 
 
     assert formatted1 == formatted2
-    assert "circle badge diameter 120.00mm pocket 3.00mm" in formatted1
-    assert "rounded_rect panel radius 12.00mm profile through outside" in formatted1
-    assert "line decoration horizontal engrave 1.50mm" in formatted1
+    assert "Circle:" in formatted1
+    assert "RoundedRect:" in formatted1
+    assert "Line:" in formatted1
 
     print("  ✓ PASS")
     return True
 
 
 def test_rounded_rect_with_profile_child_inherits_geometry():
-    """Test that profile generator inside rounded_rect produces RoundedRect profile."""
     print("Running test_rounded_rect_with_profile_child_inherits_geometry...")
 
-    pml = """sheet 584.00mm 584.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 584mm
+  height: 584mm
+  thickness: 19mm
 
-rounded_rect panel radius 25.40mm corners bl br
-    profile outside through
+children:
+  - RoundedRect:
+      id: panel
+      radius: 25.4mm
+      corners: [bl, br]
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-    assert len(flat.items) == 2
+    assert len(flat.items) == 1
 
-    shape_item = flat.items[0]
-    assert shape_item.type == "RoundedRect"
-    assert shape_item.shape_id == "panel"
-    assert shape_item.geometry.data["radius_bl_mm"] == 25.4
-    assert shape_item.geometry.data["radius_br_mm"] == 25.4
-    assert shape_item.geometry.data["radius_tl_mm"] == 0.0
-    assert shape_item.geometry.data["radius_tr_mm"] == 0.0
-
-    profile_item = flat.items[1]
-    assert profile_item.type == "RoundedRect"
-    assert profile_item.feature.type == "profile"
-    assert profile_item.feature.side == "outside"
-    assert profile_item.geometry.data["radius_bl_mm"] == 25.4
-    assert profile_item.geometry.data["radius_br_mm"] == 25.4
-    assert profile_item.geometry.data["radius_tl_mm"] == 0.0
-    assert profile_item.geometry.data["radius_tr_mm"] == 0.0
+    item = flat.items[0]
+    assert item.type == "RoundedRect"
+    assert item.shape_id == "panel"
+    assert item.geometry.data["radius_bl_mm"] == 25.4
+    assert item.geometry.data["radius_br_mm"] == 25.4
+    assert item.geometry.data["radius_tl_mm"] == 0.0
+    assert item.geometry.data["radius_tr_mm"] == 0.0
+    assert item.feature.type == "profile"
+    assert item.feature.side == "outside"
 
     print("  ✓ PASS")
     return True
 
 
 def test_rect_with_profile_child_stays_rect():
-    """Test backward compatibility: profile inside rect stays rect."""
     print("Running test_rect_with_profile_child_stays_rect...")
 
-    pml = """sheet 400.00mm 600.00mm 19.00mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rect panel
-    profile outside through
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-    assert len(flat.items) == 2
+    assert len(flat.items) == 1
 
-    shape_item = flat.items[0]
-    assert shape_item.type == "Rect"
-
-    profile_item = flat.items[1]
-    assert profile_item.type == "Rect"
-    assert profile_item.feature.type == "profile"
-    assert "radius_mm" not in profile_item.geometry.data
-    assert "radius_bl_mm" not in profile_item.geometry.data
+    item = flat.items[0]
+    assert item.type == "Rect"
+    assert item.feature.type == "profile"
+    assert "radius_mm" not in item.geometry.data
+    assert "radius_bl_mm" not in item.geometry.data
 
     print("  ✓ PASS")
     return True

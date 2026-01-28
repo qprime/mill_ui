@@ -357,7 +357,7 @@ def test_validate_recipe_simple_profile():
 def test_validate_recipe_with_ast():
     """validate_recipe() with AST runs assertions."""
     recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
-    pml_path = os.path.join(recipe_dir, "example.pml")
+    pml_path = os.path.join(recipe_dir, "example.pml.yml")
 
     if not os.path.exists(pml_path):
         print("SKIP: test_validate_recipe_with_ast (recipe not found)")
@@ -471,7 +471,7 @@ def test_validate_all_recipes():
 def test_output_format_matches_schema():
     """Output JSON matches the schema in cam_validation_plan.md."""
     inputs = ValidationInput(
-        source_file="test.pml",
+        source_file="test.pml.yml",
         svg_content=make_minimal_svg(),
     )
     options = ValidationOptions(

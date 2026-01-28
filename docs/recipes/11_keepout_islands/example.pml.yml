@@ -1,0 +1,21 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+children:
+- Rect:
+    id: panel
+    feature:
+      type: pocket
+      depth: 6mm
+    children:
+    - Keepout:
+        children:
+        - Inset:
+            distance: 60mm
+            children:
+            - Rect:
+                id: island

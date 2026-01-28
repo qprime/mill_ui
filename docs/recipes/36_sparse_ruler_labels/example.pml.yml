@@ -1,0 +1,44 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 18mm
+  margin: 10mm
+children:
+- Frame:
+    width: 25mm
+    children:
+    - Rect:
+        id: ruler_area
+        children:
+        - MeasurementEdge:
+            edges:
+            - bottom
+            - left
+            minor_ticks: false
+            labels: true
+            label_offset: 4.5mm
+            label_interval: 2
+- Inset:
+    distance: 30mm
+    children:
+    - SplitHorizontal:
+        count: 2
+        gap: 10mm
+        children:
+        - Rect:
+            id: bottom_section
+            children:
+            - EngraveText:
+                text: SPARSE LABELS
+                height: 6mm
+                alignment: center
+        - Rect:
+            id: top_section
+            children:
+            - EngraveText:
+                text: 20, 40, 60...
+                height: 8mm
+                alignment: center

@@ -202,7 +202,7 @@ def run_validation(args: argparse.Namespace) -> int:
 
         # If no AST provided, try to parse from recipe's PML
         if ast is None:
-            for candidate in ["example.pml", "source.pml"]:
+            for candidate in ["example.pml.yml", "source.pml.yml"]:
                 pml_path = recipe_dir / candidate
                 if pml_path.exists():
                     from pml import parse_pml

@@ -1,5 +1,7 @@
 
-from pml import parse_pml
+from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_formatter import format_pml_yaml
+from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents, item_to_removal_intent
 from ir.removal_intent import TabConstraint
@@ -9,21 +11,33 @@ def test_pml_parse_profile_with_tabs():
     print("Running test_pml_parse_profile_with_tabs...")
 
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
+children:
+  - Rect:
+      id: cutout
+      feature:
+        type: profile
+        depth: through
+        side: outside
+        tab_count: 4
+        tab_height: 3mm
+        tab_width: 10mm
 """
 
-    ast = parse_pml(pml)
+    ast = parse_pml_yaml(pml)
+    flat = resolve_layout(ast)
 
-    assert len(ast.items) == 1
-    item = ast.items[0]
-
+    assert len(flat.items) == 1
+    item = flat.items[0]
 
     assert item.feature.type == "profile"
     assert item.feature.depth == "through"
     assert item.feature.side == "outside"
-
 
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
@@ -37,15 +51,27 @@ def test_pml_parse_profile_with_tabs_no_width():
     print("Running test_pml_parse_profile_with_tabs_no_width...")
 
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm
+children:
+  - Rect:
+      id: cutout
+      feature:
+        type: profile
+        depth: through
+        side: outside
+        tab_count: 4
+        tab_height: 3mm
 """
 
-    ast = parse_pml(pml)
+    ast = parse_pml_yaml(pml)
+    flat = resolve_layout(ast)
 
-    item = ast.items[0]
-
+    item = flat.items[0]
 
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
@@ -59,15 +85,28 @@ def test_pml_parse_profile_with_tabs_inside():
     print("Running test_pml_parse_profile_with_tabs_inside...")
 
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect pocket_outline at 225mm,325mm size 300mm,500mm profile 6mm inside tabs 6 height 2mm width 8mm
+children:
+  - Rect:
+      id: pocket_outline
+      feature:
+        type: profile
+        depth: 6mm
+        side: inside
+        tab_count: 6
+        tab_height: 2mm
+        tab_width: 8mm
 """
 
-    ast = parse_pml(pml)
+    ast = parse_pml_yaml(pml)
+    flat = resolve_layout(ast)
 
-    item = ast.items[0]
-
+    item = flat.items[0]
 
     assert item.feature.type == "profile"
     assert item.feature.depth_mm == 6.0
@@ -134,11 +173,9 @@ def test_ast_to_removal_intent_with_tabs():
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
 
-
     assert intent.depth_mm() == 19.0
     assert intent.metadata["hint_type"] == "profile"
     assert intent.metadata["side"] == "outside"
-
 
     assert intent.constraints.tabs is not None
     assert isinstance(intent.constraints.tabs, TabConstraint)
@@ -171,7 +208,6 @@ def test_ast_to_removal_intent_with_tabs_no_width():
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
 
-
     assert intent.constraints.tabs is not None
     assert intent.constraints.tabs.count == 4
     assert intent.constraints.tabs.height_mm == 3.0
@@ -185,18 +221,37 @@ def test_full_pipeline_pml_to_removal_intent():
     print("Running test_full_pipeline_pml_to_removal_intent...")
 
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect door at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
-rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
+children:
+  - Rect:
+      id: door
+      feature:
+        type: profile
+        depth: through
+        side: outside
+        tab_count: 4
+        tab_height: 3mm
+        tab_width: 10mm
+  - Inset:
+      distance: 75mm
+      children:
+        - Rect:
+            id: panel
+            feature:
+              type: pocket
+              depth: 6mm
 """
 
-    ast = parse_pml(pml)
-    intents = ast_to_removal_intents(ast)
-
+    ast = parse_pml_yaml(pml)
+    flat = resolve_layout(ast)
+    intents = ast_to_removal_intents(flat)
 
     assert len(intents) == 2
-
 
     profile_intent = intents[0]
     assert profile_intent.metadata["hint_type"] == "profile"
@@ -204,7 +259,6 @@ rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
     assert profile_intent.constraints.tabs.count == 4
     assert profile_intent.constraints.tabs.height_mm == 3.0
     assert profile_intent.constraints.tabs.width_mm == 10.0
-
 
     pocket_intent = intents[1]
     assert pocket_intent.metadata["hint_type"] == "pocket"
@@ -217,20 +271,34 @@ rect panel at 225mm,325mm size 300mm,500mm pocket 6mm
 def test_pml_roundtrip_with_tabs():
     print("Running test_pml_roundtrip_with_tabs...")
 
-    from pml import format_pml
+    pml_in = """
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-    pml_in = """sheet 450mm 650mm 19mm margin 0mm
-
-rect cutout at 225mm,325mm size 400mm,600mm profile through outside tabs 4 height 3mm width 10mm
+children:
+  - Rect:
+      id: cutout
+      feature:
+        type: profile
+        depth: through
+        side: outside
+        tab_count: 4
+        tab_height: 3mm
+        tab_width: 10mm
 """
 
-    ast = parse_pml(pml_in)
-    pml_out = format_pml(ast)
-    ast2 = parse_pml(pml_out)
+    ast1 = parse_pml_yaml(pml_in)
+    pml_out = format_pml_yaml(ast1)
+    ast2 = parse_pml_yaml(pml_out)
 
+    flat1 = resolve_layout(ast1)
+    flat2 = resolve_layout(ast2)
 
-    item1 = ast.items[0]
-    item2 = ast2.items[0]
+    item1 = flat1.items[0]
+    item2 = flat2.items[0]
 
     assert item1.feature.tab_count == item2.feature.tab_count
     assert item1.feature.tab_height_mm == item2.feature.tab_height_mm
@@ -268,6 +336,8 @@ def run_all_tests():
             failed += 1
         except Exception as e:
             print(f"  ✗ ERROR: {e}")
+            import traceback
+            traceback.print_exc()
             failed += 1
 
     print("\n" + "="*60)

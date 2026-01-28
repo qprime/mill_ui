@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from pml.compositional_parser import parse_compositional_pml, ParseError
+from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
 from pml.revision_header import update_file_header
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
@@ -18,7 +18,7 @@ RECIPE_DEFAULTS = {
 
 
 def find_recipe_source(recipe_dir: Path) -> Path | None:
-    for candidate in ["example.pml", "source.pml"]:
+    for candidate in ["example.pml.yml", "source.pml.yml"]:
         source = recipe_dir / candidate
         if source.exists():
             return source
@@ -31,16 +31,16 @@ def collect_input_files(project: str | None, input_arg: str | None) -> list[Path
         if input_path.is_file():
             return [input_path]
         if input_path.is_dir():
-            return sorted(input_path.glob("*.pml"))
+            return sorted(input_path.glob("*.pml.yml"))
         print(f"Error: Input not found: {input_path}", file=sys.stderr)
         sys.exit(1)
 
     if project:
         project_dir = get_project_dir(project)
-        pml_files = sorted(project_dir.glob("*.pml"))
+        pml_files = sorted(project_dir.glob("*.pml.yml"))
         if pml_files:
             return pml_files
-        print(f"Error: No .pml files found in {project_dir}", file=sys.stderr)
+        print(f"Error: No .pml.yml files found in {project_dir}", file=sys.stderr)
         sys.exit(1)
 
     print("Error: --input or --project required", file=sys.stderr)
@@ -48,15 +48,15 @@ def collect_input_files(project: str | None, input_arg: str | None) -> list[Path
 
 
 def process_file(input_path: Path, output_dir: Path, args) -> None:
-    input_suffix = input_path.suffix.lower()
-    if input_suffix == ".json":
+    input_name = input_path.name.lower()
+    if input_name.endswith(".json"):
         ast = LayoutAST.from_json(str(input_path))
-    elif input_suffix in (".pml", ".txt"):
+    elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
         input_text = input_path.read_text(encoding="utf-8")
-        comp_ast = parse_compositional_pml(input_text)
+        comp_ast = parse_pml_yaml(input_text)
         ast = resolve_layout(comp_ast)
     else:
-        print(f"Error: Unsupported input format: {input_suffix}", file=sys.stderr)
+        print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
         return
 
     print(f"Compiling: {input_path.name}", file=sys.stderr)
@@ -97,14 +97,14 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
     print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
 
-    if input_suffix in (".pml", ".txt") and result.gcode:
+    if (input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")) and result.gcode:
         update_file_header(input_path)
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
     source = find_recipe_source(recipe_dir)
     if not source:
-        print(f"Error: No example.pml or source.pml in {recipe_dir}", file=sys.stderr)
+        print(f"Error: No example.pml.yml or source.pml.yml in {recipe_dir}", file=sys.stderr)
         sys.exit(1)
 
     output_dir = recipe_dir / "output"
@@ -113,7 +113,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
     theme = args.theme if args.theme != "dark" else RECIPE_DEFAULTS["theme"]
 
     input_text = source.read_text(encoding="utf-8")
-    comp_ast = parse_compositional_pml(input_text)
+    comp_ast = parse_pml_yaml(input_text)
     ast = resolve_layout(comp_ast)
 
     print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
@@ -172,11 +172,11 @@ Examples:
 
   python -m cli.mill --project my_table
 
-  python -m cli.mill --project my_table --input door.pml
+  python -m cli.mill --project my_table --input door.pml.yml
 
-  python -m cli.mill --input /path/to/layout.pml --out output/
+  python -m cli.mill --input /path/to/layout.pml.yml --out output/
 
-  python -m cli.mill --project cabinet --input panel.pml --kerf 3.175
+  python -m cli.mill --project cabinet --input panel.pml.yml --kerf 3.175
 
   python -m cli.mill --recipe docs/recipes/01_simple_profile
 
@@ -198,7 +198,7 @@ Output files:
         "--input",
         "-i",
         default=None,
-        help="Input file or directory (default: project dir, processes all .pml files)",
+        help="Input file or directory (default: project dir, processes all .pml.yml files)",
     )
     parser.add_argument(
         "--out",

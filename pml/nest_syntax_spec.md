@@ -1,256 +1,275 @@
-# Nest File Syntax Specification
+# Nest Job Syntax Specification
 
-`.nest` files define bin-packing jobs for optimizing part placement on stock sheets. They compile to multiple `LayoutAST` objects (one per sheet).
+Nest job files (`.nest.yml`) define bin-packing jobs for optimizing part placement on stock sheets using YAML format. They compile to multiple `LayoutAST` objects (one per sheet).
 
 ## Design Principles
 
 - **Declarative**: Define parts and quantities, let the algorithm optimize placement
-- **Human-friendly**: Natural indentation, minimal punctuation
+- **Standard format**: Valid YAML with JSON Schema validation
 - **Dimension-explicit**: All dimensions use `mm` suffix for clarity
 - **Template-aware**: Parts can reference parametric templates (e.g., Shaker doors)
 
-## Syntax Overview
+## Quick Example
 
-```nest
-# This is a comment
+```yaml
+Nest:
+  algorithm: maxrects
 
-nest maxrects
-    sheet 1220mm 2440mm 19mm
-    kerf 6.35mm
-    margin 10mm
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
 
-    parts
-        door 400mm 600mm x20
-            template shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
+  kerf: 6.35mm
+  margin: 10mm
 
-        panel 300mm 200mm x15
+  parts:
+    - name: large_door
+      width: 457mm
+      height: 597mm
+      quantity: 20
+      template:
+        name: shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
+
+    - name: small_door
+      width: 305mm
+      height: 203mm
+      quantity: 15
+
+    - name: tall_door
+      width: 457mm
+      height: 914mm
+      quantity: 2
 ```
 
-## Grammar
+## Document Structure
 
-### Nest Declaration (Required, First Directive)
+```yaml
+Nest:                           # Required root key
+  algorithm: maxrects           # Required: guillotine | maxrects
 
-```
-nest <algorithm>
-```
+  Sheet:                        # Required sheet specification
+    width: 1200mm
+    height: 2400mm
+    thickness: 19mm
 
-**Algorithms:**
-- `guillotine` - Fast, simple guillotine cuts. Best for uniform parts. ~62% utilization.
-- `maxrects` - Higher utilization with free rectangle tracking. Best for mixed sizes. ~83% utilization.
+  kerf: 6.35mm                  # Optional, default 6.35mm
+  margin: 10mm                  # Optional, default 10mm
 
-Example:
-```nest
-nest maxrects
-```
-
-### Sheet Declaration (Required)
-
-```
-sheet <width>mm <height>mm <thickness>mm
-```
-
-Defines the stock sheet dimensions.
-
-Example:
-```nest
-sheet 1220mm 2440mm 19mm
+  parts:                        # Required list of parts
+    - name: part_name
+      width: 400mm
+      height: 600mm
+      quantity: 20
+      template: shaker          # Optional template
 ```
 
-### Kerf Declaration (Optional)
+## Algorithms
 
-```
-kerf <width>mm
-```
+### guillotine
 
-Cutter width for spacing between parts. Default: `6.35mm` (1/4" endmill).
+Guillotine cutting - creates full-width or full-height cuts across the sheet. Produces simpler cut patterns that work well with panel saws.
 
-Example:
-```nest
-kerf 3.175mm
+```yaml
+Nest:
+  algorithm: guillotine
 ```
 
-### Margin Declaration (Optional)
+### maxrects
 
-```
-margin <width>mm
-```
+MaxRects algorithm - higher utilization with free rectangle tracking. Best for mixed part sizes.
 
-No-cut zone around sheet edges. Default: `10mm`.
-
-Example:
-```nest
-margin 15mm
+```yaml
+Nest:
+  algorithm: maxrects
 ```
 
-### Parts Block (Required)
+**Typical utilization:**
+- `guillotine`: ~62% for uniform parts
+- `maxrects`: ~83% for mixed sizes
 
-```
-parts
-    <part declarations>
-```
+## Sheet Specification
 
-Contains one or more part declarations.
-
-### Part Declaration
-
-```
-<name> <width>mm <height>mm [x<quantity>]
+```yaml
+Sheet:
+  width: 1220mm      # Stock sheet width
+  height: 2440mm     # Stock sheet height
+  thickness: 19mm    # Material thickness
 ```
 
-**Fields:**
-- `name` - Identifier for this part type (alphanumeric, no spaces)
-- `width` - Part width in millimeters
-- `height` - Part height in millimeters
-- `quantity` - Number of parts to cut (optional, default: 1)
+**Common stock sheet sizes:**
+- Full sheet (4' x 8'): `1220mm x 2440mm`
+- Half sheet (4' x 4'): `1220mm x 1220mm`
+- Quarter sheet (2' x 4'): `610mm x 1220mm`
 
-Example:
-```nest
-parts
-    door 400mm 600mm x20
-    drawer 200mm 100mm x8
-    panel 300mm 200mm
+## Kerf and Margin
+
+```yaml
+kerf: 6.35mm    # Cutter width for spacing between parts (default: 6.35mm / 1/4")
+margin: 10mm    # No-cut zone around sheet edges (default: 10mm)
 ```
 
-### Template Declaration (Optional, Per-Part)
+## Parts
 
+Each part specifies:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Part identifier (alphanumeric, no spaces) |
+| `width` | Yes | Part width in millimeters |
+| `height` | Yes | Part height in millimeters |
+| `quantity` | No | Number of copies (default: 1) |
+| `template` | No | Template to apply to part |
+
+### Basic Parts
+
+```yaml
+parts:
+  - name: shelf
+    width: 600mm
+    height: 300mm
+    quantity: 8
+
+  - name: side_panel
+    width: 400mm
+    height: 800mm
+    quantity: 4
 ```
-template <TemplateName>
-    <param> <value>mm    # numeric parameter override
-    <param> <keyword>    # string parameter override
-    ...
+
+### Parts with Templates
+
+Templates can be referenced two ways:
+
+**Simple reference (uses template defaults):**
+```yaml
+parts:
+  - name: door
+    width: 400mm
+    height: 600mm
+    quantity: 10
+    template: shaker
 ```
 
-Associates a PML template with a part. Templates are `.pml` files in the `templates/` directory that define reusable layout patterns with parameter substitution.
+**With parameter overrides:**
+```yaml
+parts:
+  - name: door
+    width: 400mm
+    height: 600mm
+    quantity: 10
+    template:
+      name: shaker
+      params:
+        stile_w: 65mm
+        rail_h: 65mm
+        panel_recess: 8mm
+```
 
-**Template Resolution:**
-- Template names are case-insensitive for file lookup (e.g., `shaker` finds `templates/shaker.pml`)
+### Template Resolution
+
+- Template names are case-insensitive for file lookup (e.g., `shaker` finds `templates/shaker.pml.yml`)
 - Parameters override the template's default values
 - Part dimensions (`outer_w`, `outer_h`) are automatically passed to the template
 
-**Parameter Types:**
-- **Numeric parameters**: Have `mm` suffix (e.g., `stile_w 57mm`)
-- **String parameters**: No suffix (e.g., `panel_style pocket`) - useful for selecting generators
+### Built-in Templates
 
-**Built-in Templates:**
-- `shaker` - Shaker-style cabinet door with frame and panel pocket
+**shaker** - Shaker-style cabinet door with frame and panel:
 
-**Shaker Template Parameters:**
-- `stile_w` - Stile (vertical frame) width (default: 57mm)
-- `rail_h` - Rail (horizontal frame) height (default: 57mm)
-- `panel_recess` - Panel pocket depth (default: 6mm)
-- `panel_style` - Panel generator type (default: `pocket`)
-
-Example:
-```nest
-parts
-    cabinet_door 457mm 597mm x20
-        template shaker
-            stile_w 57mm
-            rail_h 57mm
-            panel_recess 6mm
-```
-
-**Creating Custom Templates:**
-
-See `pml/syntax_spec.md` for the template definition syntax. Custom templates are placed in the `templates/` directory as `.pml` files.
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `stile_w` | 57mm | Stile (vertical frame) width |
+| `rail_h` | 57mm | Rail (horizontal frame) height |
+| `panel_recess` | 6mm | Panel pocket depth |
+| `panel_style` | pocket | Panel generator type |
 
 ## Complete Example
 
-```nest
-# Production run: 37 cabinet parts
-# Uses MaxRects for optimal material utilization
+```yaml
+Nest:
+  algorithm: maxrects
 
-nest maxrects
-    sheet 1232mm 1245mm 19mm
-    kerf 6.35mm
-    margin 10mm
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
 
-    parts
-        # Large shaker doors (18" x 23.5")
-        large_door 457mm 597mm x20
-            template shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
+  kerf: 6.35mm
+  margin: 10mm
 
-        # Small plain panels (12" x 8")
-        small_panel 305mm 203mm x15
+  parts:
+    - name: large_door
+      width: 457mm
+      height: 597mm
+      quantity: 20
+      template:
+        name: shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
 
-        # Tall shaker doors (18" x 36")
-        tall_door 457mm 914mm x2
-            template shaker
-                stile_w 57mm
-                rail_h 57mm
-                panel_recess 6mm
+    - name: small_panel
+      width: 305mm
+      height: 203mm
+      quantity: 15
+
+    - name: tall_door
+      width: 457mm
+      height: 914mm
+      quantity: 2
+      template:
+        name: shaker
+        params:
+          stile_w: 57mm
+          rail_h: 57mm
+          panel_recess: 6mm
 ```
 
 ## Output
 
-Running a `.nest` file produces:
+Running a `.nest.yml` file produces:
 - Multiple `LayoutAST` objects (one per sheet needed)
 - Each sheet contains positioned parts with absolute coordinates
 - Templates are expanded to full geometry (profiles, pockets, etc.)
 
-## Validation
+**CLI output files:**
+- `{prefix}_{N}.pml.yml` - One PML file per sheet
+- `manifest.json` - Nesting summary with utilization metrics
+- `{prefix}_{N}.blueprint.{theme}.svg` - Optional SVG blueprints
 
-The parser validates:
-- Required directives present (`nest`, `sheet`, `parts`)
-- At least one part defined
-- Valid numeric values for dimensions
-- Valid algorithm name
-- Template parameters match expected types
+## CLI Usage
 
-## Common Patterns
+```bash
+# Run nesting job
+python -m cli.nest --project my_project job.nest.yml
 
-### Simple Rectangles (No Template)
+# With verbose output
+python -m cli.nest job.nest.yml -v
 
-```nest
-nest guillotine
-    sheet 1220mm 2440mm 18mm
-    kerf 6.35mm
-
-    parts
-        shelf 600mm 300mm x8
-        side_panel 400mm 800mm x4
+# With SVG export
+python -m cli.nest job.nest.yml -o output/ --export-svg --theme dark
 ```
 
-### Mixed Parts with Templates
+## JSON Schema
 
-```nest
-nest maxrects
-    sheet 1220mm 2440mm 19mm
-    kerf 6.35mm
-    margin 10mm
+The nest job schema is available at `pml/schema/nest.schema.json` for IDE validation.
 
-    parts
-        door_large 500mm 700mm x10
-            template shaker
-                stile_w 60mm
-                rail_h 60mm
-                panel_recess 6mm
+## Migration from Legacy Format
 
-        door_small 400mm 500mm x15
-            template shaker
-                stile_w 50mm
-                rail_h 50mm
-                panel_recess 6mm
+Convert legacy nest files to YAML:
 
-        drawer_front 400mm 150mm x20
+```bash
+python -m pml.convert_to_yaml job.nest.yml --dry-run  # Preview
+python -m pml.convert_to_yaml job.nest.yml            # Convert in place
 ```
-
-### Standard Sheet Sizes
-
-Common stock sheet sizes:
-- Full sheet (4' x 8'): `1220mm 2440mm`
-- Half sheet (4' x 4'): `1220mm 1220mm`
-- Quarter sheet (2' x 4'): `610mm 1220mm`
 
 ---
 
 **See Also:**
 - [PML Syntax Specification](syntax_spec.md) - For single-sheet layouts
-- [Recipe 17: Guillotine Nesting](../docs/recipes/17_nesting_guillotine/README.md)
-- [Recipe 18: MaxRects Nesting](../docs/recipes/18_nesting_maxrects/README.md)
+- [Recipe 17: Guillotine Nesting](../docs/recipes/17_nesting_guillotine/)
+- [Recipe 18: MaxRects Nesting](../docs/recipes/18_nesting_maxrects/)

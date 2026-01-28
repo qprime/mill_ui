@@ -1,0 +1,31 @@
+# mill_ui: 4918596
+# generated: 2026-01-27
+
+Sheet:
+  width: 500mm
+  height: 700mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Inset:
+        distance: 30mm
+        children:
+        - Split:
+            rows: 2
+            cols: 2
+            rail: 60mm
+            mullion: 60mm
+            children:
+            - Cell:
+                children:
+                - Rect:
+                    id: pane
+                    feature:
+                      type: pocket
+                      depth: 4mm

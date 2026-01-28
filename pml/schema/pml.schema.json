@@ -1,0 +1,544 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mill-ui.dev/schemas/pml.schema.json",
+  "title": "PML Layout",
+  "description": "Panel Machining Language layout definition",
+  "type": "object",
+  "required": ["Sheet"],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "kerf": {
+      "$ref": "#/$defs/dimension",
+      "description": "Tool kerf width"
+    },
+    "Sheet": {
+      "$ref": "#/$defs/sheet"
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/componentDef"
+      }
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    }
+  },
+  "$defs": {
+    "dimension": {
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?mm$"}
+      ]
+    },
+    "depthOrThrough": {
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?mm$"},
+        {"type": "string", "const": "through"}
+      ]
+    },
+    "sheet": {
+      "type": "object",
+      "required": ["width", "height", "thickness"],
+      "properties": {
+        "width": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "thickness": {"$ref": "#/$defs/dimension"},
+        "margin": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "componentDef": {
+      "type": "object",
+      "properties": {
+        "params": {"type": "object"},
+        "body": {"$ref": "#/$defs/node"}
+      }
+    },
+    "feature": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {"type": "string", "enum": ["profile", "pocket", "engrave", "hole"]},
+        "depth": {"$ref": "#/$defs/depthOrThrough"},
+        "side": {"type": "string", "enum": ["inside", "outside", "on"]},
+        "corner_cleanup": {"$ref": "#/$defs/dimension"},
+        "tab_count": {"type": "integer"},
+        "tab_height": {"$ref": "#/$defs/dimension"},
+        "tab_width": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "Panel": {"$ref": "#/$defs/panelNode"},
+        "Rect": {"$ref": "#/$defs/rectNode"},
+        "Circle": {"$ref": "#/$defs/circleNode"},
+        "RoundedRect": {"$ref": "#/$defs/roundedRectNode"},
+        "Line": {"$ref": "#/$defs/lineNode"},
+        "Polyline": {"$ref": "#/$defs/polylineNode"},
+        "Spline": {"$ref": "#/$defs/splineNode"},
+        "Keepout": {"$ref": "#/$defs/keepoutNode"},
+        "Edge": {"$ref": "#/$defs/edgeNode"},
+        "Inset": {"$ref": "#/$defs/insetNode"},
+        "Frame": {"$ref": "#/$defs/frameNode"},
+        "Grid": {"$ref": "#/$defs/gridNode"},
+        "Cell": {"$ref": "#/$defs/cellNode"},
+        "Split": {"$ref": "#/$defs/splitNode"},
+        "Profile": {"$ref": "#/$defs/profileNode"},
+        "Pocket": {"$ref": "#/$defs/pocketNode"},
+        "RaisedPanel": {"$ref": "#/$defs/raisedPanelNode"},
+        "Chamfer": {"$ref": "#/$defs/chamferNode"},
+        "Wave": {"$ref": "#/$defs/waveNode"},
+        "XPanel": {"$ref": "#/$defs/xPanelNode"},
+        "SplitHorizontal": {"$ref": "#/$defs/splitHorizontalNode"},
+        "SplitVertical": {"$ref": "#/$defs/splitVerticalNode"},
+        "SplitGrid": {"$ref": "#/$defs/splitGridNode"},
+        "SplitHorizontalGaps": {"$ref": "#/$defs/splitHorizontalGapsNode"},
+        "Lines": {"$ref": "#/$defs/linesNode"},
+        "ConcentricBorder": {"$ref": "#/$defs/concentricBorderNode"},
+        "AtPosition": {"$ref": "#/$defs/atPositionNode"},
+        "Subtract": {"$ref": "#/$defs/subtractNode"},
+        "Arch": {"$ref": "#/$defs/archNode"},
+        "Polygon": {"$ref": "#/$defs/polygonNode"},
+        "Triangle": {"$ref": "#/$defs/triangleNode"},
+        "HoleGrid": {"$ref": "#/$defs/holeGridNode"},
+        "MeasurementGrid": {"$ref": "#/$defs/measurementGridNode"},
+        "MeasurementEdge": {"$ref": "#/$defs/measurementEdgeNode"},
+        "EngraveText": {"$ref": "#/$defs/engraveTextNode"},
+        "WasteCuts": {"$ref": "#/$defs/wasteCutsNode"},
+        "Box": {"$ref": "#/$defs/boxNode"},
+        "UseComponent": {"$ref": "#/$defs/useComponentNode"}
+      }
+    },
+    "panelNode": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": {"type": "string"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "rectNode": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "feature": {"$ref": "#/$defs/feature"},
+        "at": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": {"$ref": "#/$defs/dimension"},
+            "y": {"$ref": "#/$defs/dimension"},
+            "width": {"$ref": "#/$defs/dimension"},
+            "height": {"$ref": "#/$defs/dimension"}
+          }
+        },
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "circleNode": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "diameter": {"$ref": "#/$defs/dimension"},
+        "radius": {"$ref": "#/$defs/dimension"},
+        "feature": {"$ref": "#/$defs/feature"},
+        "at": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": {"$ref": "#/$defs/dimension"},
+            "y": {"$ref": "#/$defs/dimension"}
+          }
+        },
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "roundedRectNode": {
+      "type": "object",
+      "required": ["radius"],
+      "properties": {
+        "id": {"type": "string"},
+        "radius": {"$ref": "#/$defs/dimension"},
+        "corners": {"type": "array", "items": {"type": "string", "enum": ["tl", "tr", "bl", "br"]}},
+        "feature": {"$ref": "#/$defs/feature"},
+        "at": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": {"$ref": "#/$defs/dimension"},
+            "y": {"$ref": "#/$defs/dimension"},
+            "width": {"$ref": "#/$defs/dimension"},
+            "height": {"$ref": "#/$defs/dimension"}
+          }
+        },
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "lineNode": {
+      "type": "object",
+      "required": ["orientation"],
+      "properties": {
+        "id": {"type": "string"},
+        "orientation": {"type": "string", "enum": ["horizontal", "vertical"]},
+        "feature": {"$ref": "#/$defs/feature"}
+      }
+    },
+    "polylineNode": {
+      "type": "object",
+      "required": ["points"],
+      "properties": {
+        "id": {"type": "string"},
+        "points": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
+        "feature": {"$ref": "#/$defs/feature"}
+      }
+    },
+    "splineNode": {
+      "type": "object",
+      "required": ["points"],
+      "properties": {
+        "id": {"type": "string"},
+        "points": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
+        "tolerance": {"$ref": "#/$defs/dimension"},
+        "feature": {"$ref": "#/$defs/feature"}
+      }
+    },
+    "keepoutNode": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": {"type": "string"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "edgeNode": {
+      "type": "object",
+      "required": ["treatment"],
+      "properties": {
+        "id": {"type": "string"},
+        "treatment": {"type": "string"},
+        "rough_allowance": {"$ref": "#/$defs/dimension"},
+        "finish_allowance": {"$ref": "#/$defs/dimension"},
+        "radius": {"$ref": "#/$defs/dimension"},
+        "distance": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "insetNode": {
+      "type": "object",
+      "required": ["distance"],
+      "properties": {
+        "distance": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "frameNode": {
+      "type": "object",
+      "required": ["width"],
+      "properties": {
+        "width": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "gridNode": {
+      "type": "object",
+      "required": ["rows", "cols"],
+      "properties": {
+        "rows": {"type": "integer", "minimum": 1},
+        "cols": {"type": "integer", "minimum": 1},
+        "gap": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "cellNode": {
+      "type": ["object", "null"],
+      "properties": {
+        "inset": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "splitNode": {
+      "type": "object",
+      "required": ["rows", "cols"],
+      "properties": {
+        "rows": {"type": "integer", "minimum": 1},
+        "cols": {"type": "integer", "minimum": 1},
+        "rail": {"$ref": "#/$defs/dimension"},
+        "mullion": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "profileNode": {
+      "type": "object",
+      "required": ["side"],
+      "properties": {
+        "side": {"type": "string", "enum": ["inside", "outside", "on"]},
+        "depth": {"$ref": "#/$defs/depthOrThrough"},
+        "tab_count": {"type": "integer"},
+        "tab_height": {"$ref": "#/$defs/dimension"},
+        "tab_width": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "pocketNode": {
+      "type": "object",
+      "required": ["depth"],
+      "properties": {
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "raisedPanelNode": {
+      "type": "object",
+      "required": ["border_width", "border_depth", "field_depth"],
+      "properties": {
+        "border_width": {"$ref": "#/$defs/dimension"},
+        "border_depth": {"$ref": "#/$defs/dimension"},
+        "field_depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "chamferNode": {
+      "type": "object",
+      "required": ["width", "depth"],
+      "properties": {
+        "width": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "waveNode": {
+      "type": "object",
+      "required": ["count", "amplitude", "wavelength", "groove", "depth"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "amplitude": {"$ref": "#/$defs/dimension"},
+        "wavelength": {"$ref": "#/$defs/dimension"},
+        "groove": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "xPanelNode": {
+      "type": "object",
+      "required": ["bar_width", "depth"],
+      "properties": {
+        "bar_width": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "splitHorizontalNode": {
+      "type": "object",
+      "required": ["count"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "gap": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "splitVerticalNode": {
+      "type": "object",
+      "required": ["count"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "gap": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "splitGridNode": {
+      "type": "object",
+      "required": ["rows", "cols"],
+      "properties": {
+        "rows": {"type": "integer", "minimum": 1},
+        "cols": {"type": "integer", "minimum": 1},
+        "gap": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "splitHorizontalGapsNode": {
+      "type": "object",
+      "required": ["count", "gap"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "gap": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "linesNode": {
+      "type": "object",
+      "required": ["angle", "spacing", "width", "depth"],
+      "properties": {
+        "angle": {"type": "number"},
+        "spacing": {"$ref": "#/$defs/dimension"},
+        "width": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "concentricBorderNode": {
+      "type": "object",
+      "required": ["insets", "groove", "depth"],
+      "properties": {
+        "insets": {"type": "array", "items": {"$ref": "#/$defs/dimension"}, "minItems": 1},
+        "groove": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "atPositionNode": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": {"$ref": "#/$defs/dimension"},
+        "y": {"$ref": "#/$defs/dimension"},
+        "width": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "child": {"$ref": "#/$defs/node"}
+      }
+    },
+    "subtractNode": {
+      "type": "object",
+      "required": ["inner_inset"],
+      "properties": {
+        "inner_inset": {"$ref": "#/$defs/dimension"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "archNode": {
+      "type": "object",
+      "required": ["width", "height", "radius"],
+      "properties": {
+        "id": {"type": "string"},
+        "width": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "radius": {"$ref": "#/$defs/dimension"},
+        "feature": {"$ref": "#/$defs/feature"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "polygonNode": {
+      "type": "object",
+      "required": ["points"],
+      "properties": {
+        "id": {"type": "string"},
+        "points": {"type": "array", "items": {"type": "array", "minItems": 2, "maxItems": 2}, "minItems": 3},
+        "feature": {"$ref": "#/$defs/feature"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "triangleNode": {
+      "type": "object",
+      "required": ["base", "height"],
+      "properties": {
+        "id": {"type": "string"},
+        "base": {"$ref": "#/$defs/dimension"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "feature": {"$ref": "#/$defs/feature"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "holeGridNode": {
+      "type": "object",
+      "required": ["spacing", "diameter"],
+      "properties": {
+        "spacing": {"$ref": "#/$defs/dimension"},
+        "diameter": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/depthOrThrough"},
+        "pattern": {"type": "string", "enum": ["rectangular", "hexagonal", "offset"]},
+        "inset": {"$ref": "#/$defs/dimension"},
+        "align": {"type": "string", "enum": ["center", "corner"]}
+      }
+    },
+    "measurementGridNode": {
+      "type": ["object", "null"],
+      "properties": {
+        "unit": {"type": "string", "enum": ["metric", "imperial", "custom"]},
+        "minor_spacing": {"$ref": "#/$defs/dimension"},
+        "major_spacing": {"$ref": "#/$defs/dimension"},
+        "minor_length": {"$ref": "#/$defs/dimension"},
+        "major_length": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"},
+        "minor_ticks": {"type": "boolean"},
+        "labels": {"type": "boolean"},
+        "label_height": {"$ref": "#/$defs/dimension"},
+        "label_offset": {"$ref": "#/$defs/dimension"},
+        "label_interval": {"type": "integer"},
+        "label_start": {"type": "integer"}
+      }
+    },
+    "measurementEdgeNode": {
+      "type": "object",
+      "required": ["edges"],
+      "properties": {
+        "edges": {"type": "array", "items": {"type": "string", "enum": ["top", "bottom", "left", "right"]}, "minItems": 1},
+        "unit": {"type": "string", "enum": ["metric", "imperial", "custom"]},
+        "minor_spacing": {"$ref": "#/$defs/dimension"},
+        "major_spacing": {"$ref": "#/$defs/dimension"},
+        "minor_length": {"$ref": "#/$defs/dimension"},
+        "major_length": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"},
+        "minor_ticks": {"type": "boolean"},
+        "labels": {"type": "boolean"},
+        "label_height": {"$ref": "#/$defs/dimension"},
+        "label_offset": {"$ref": "#/$defs/dimension"},
+        "label_interval": {"type": "integer"},
+        "label_start": {"type": "integer"}
+      }
+    },
+    "engraveTextNode": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string"},
+        "height": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"},
+        "font": {"type": "string"},
+        "alignment": {"type": "string", "enum": ["left", "center", "right"]},
+        "orientation": {"type": "string", "enum": ["horizontal", "vertical"]}
+      }
+    },
+    "wasteCutsNode": {
+      "type": "object",
+      "required": ["tab_count", "tab_height"],
+      "properties": {
+        "min_width": {"$ref": "#/$defs/dimension"},
+        "min_height": {"$ref": "#/$defs/dimension"},
+        "margin": {"$ref": "#/$defs/dimension"},
+        "tab_count": {"type": "integer", "minimum": 0},
+        "tab_height": {"$ref": "#/$defs/dimension"},
+        "strategy": {"type": "string", "enum": ["largest", "simple"]}
+      }
+    },
+    "boxNode": {
+      "type": "object",
+      "required": ["outer_width", "outer_depth", "outer_height", "thickness"],
+      "properties": {
+        "outer_width": {"$ref": "#/$defs/dimension"},
+        "outer_depth": {"$ref": "#/$defs/dimension"},
+        "outer_height": {"$ref": "#/$defs/dimension"},
+        "thickness": {"$ref": "#/$defs/dimension"},
+        "joinery": {"type": "string", "enum": ["finger", "butt"]},
+        "finger_width": {"$ref": "#/$defs/dimension"},
+        "finger_count": {"type": "integer"},
+        "clearance": {"$ref": "#/$defs/dimension"},
+        "include_lid": {"type": "boolean"},
+        "include_bottom": {"type": "boolean"},
+        "layout_gap": {"$ref": "#/$defs/dimension"},
+        "bottom_style": {"type": "string", "enum": ["captured", "finger", "dado"]},
+        "top_style": {"type": "string", "enum": ["captured", "finger", "dado"]},
+        "dado_inset": {"$ref": "#/$defs/dimension"},
+        "dado_drop": {"$ref": "#/$defs/dimension"},
+        "show_labels": {"type": "boolean"},
+        "show_edge_colors": {"type": "boolean"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "useComponentNode": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string"},
+        "args": {"type": "object"}
+      }
+    }
+  }
+}

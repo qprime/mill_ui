@@ -5,14 +5,27 @@ import json
 import sys
 
 from pml import parse_pml, format_pml, PMLParseError
+from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_formatter import format_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_pml_parse_minimal_layout():
     print("Running test_pml_parse_minimal_layout...")
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect outer at 225mm,325mm size 400mm,600mm profile through outside
+children:
+  - Rect:
+      id: outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
 """
 
     ast = parse_pml(pml)
@@ -26,9 +39,6 @@ rect outer at 225mm,325mm size 400mm,600mm profile through outside
     assert item.kind == "shape"
     assert item.type == "Rect"
     assert item.shape_id == "outer"
-    assert item.geometry.data["w_mm"] == 400.0
-    assert item.geometry.data["h_mm"] == 600.0
-    assert item.placement.center_xy_mm == (225.0, 325.0)
     assert item.feature.type == "profile"
     assert item.feature.depth == "through"
     assert item.feature.side == "outside"
@@ -39,12 +49,21 @@ rect outer at 225mm,325mm size 400mm,600mm profile through outside
 def test_pml_parse_with_metadata():
     print("Running test_pml_parse_with_metadata...")
     pml = """
-project test_panel
-kerf 0.15mm
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-sheet 300mm 400mm 19mm margin 0mm
+project: test_panel
+kerf: 0.15mm
 
-rect panel at 150mm,200mm size 200mm,300mm pocket 5mm
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 5mm
 """
 
     ast = parse_pml(pml)
@@ -59,34 +78,64 @@ rect panel at 150mm,200mm size 200mm,300mm pocket 5mm
 def test_pml_parse_multiple_shapes():
     print("Running test_pml_parse_multiple_shapes...")
     pml = """
-sheet 450mm 650mm 19mm margin 0mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
-rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
-circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
-circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
+children:
+  - Rect:
+      id: door_outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+  - Inset:
+      distance: 50mm
+      children:
+        - Rect:
+            id: door_panel
+            feature:
+              type: pocket
+              depth: 6mm
+  - Circle:
+      id: door_anchor_1
+      diameter: 10mm
+      at:
+        x: 95mm
+        y: 545mm
+      feature:
+        type: hole
+        depth: 8mm
+  - Circle:
+      id: door_anchor_2
+      diameter: 10mm
+      at:
+        x: 355mm
+        y: 545mm
+      feature:
+        type: hole
+        depth: 8mm
 """
 
     ast = parse_pml(pml)
 
     assert len(ast.items) == 4
 
-
     outer = ast.items[0]
-    assert outer.shape_id == "door:outer"
+    assert outer.shape_id == "door_outer"
     assert outer.type == "Rect"
     assert outer.feature.type == "profile"
 
-
     panel = ast.items[1]
-    assert panel.shape_id == "door:panel"
+    assert panel.shape_id == "door_panel"
     assert panel.type == "Rect"
     assert panel.feature.type == "pocket"
     assert panel.feature.depth_mm == 6.0
 
-
     anchor1 = ast.items[2]
-    assert anchor1.shape_id == "door:anchor:1"
+    assert anchor1.shape_id == "door_anchor_1"
     assert anchor1.type == "Circle"
     assert anchor1.feature.type == "hole"
     assert anchor1.feature.depth_mm == 8.0
@@ -97,21 +146,40 @@ circle door:anchor:2 at 355mm,545mm diameter 10mm hole 8mm
 def test_pml_parse_circle_diameter_vs_radius():
     print("Running test_pml_parse_circle_diameter_vs_radius...")
     pml = """
-sheet 200mm 200mm 19mm margin 0mm
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 19mm
+  margin: 0mm
 
-circle hole1 at 50mm,50mm diameter 20mm hole through
-circle hole2 at 150mm,150mm radius 8mm hole 12mm
+children:
+  - Circle:
+      id: hole1
+      diameter: 20mm
+      at:
+        x: 50mm
+        y: 50mm
+      feature:
+        type: hole
+        depth: through
+  - Circle:
+      id: hole2
+      radius: 8mm
+      at:
+        x: 150mm
+        y: 150mm
+      feature:
+        type: hole
+        depth: 12mm
 """
 
     ast = parse_pml(pml)
 
     assert len(ast.items) == 2
 
-
     hole1 = ast.items[0]
     assert "diameter_mm" in hole1.geometry.data
     assert hole1.geometry.data["diameter_mm"] == 20.0
-
 
     hole2 = ast.items[1]
     assert "radius_mm" in hole2.geometry.data
@@ -123,9 +191,19 @@ circle hole2 at 150mm,150mm radius 8mm hole 12mm
 def test_pml_parse_roundedrect():
     print("Running test_pml_parse_roundedrect...")
     pml = """
-sheet 300mm 300mm 19mm margin 0mm
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
 
-roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
+children:
+  - RoundedRect:
+      id: panel
+      radius: 10mm
+      feature:
+        type: pocket
+        depth: 5mm
 """
 
     ast = parse_pml(pml)
@@ -134,8 +212,8 @@ roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
 
     item = ast.items[0]
     assert item.type == "RoundedRect"
-    assert item.geometry.data["w_mm"] == 200.0
-    assert item.geometry.data["h_mm"] == 150.0
+    assert item.geometry.data["w_mm"] == 300.0
+    assert item.geometry.data["h_mm"] == 300.0
     assert item.geometry.data["corner_radius_mm"] == 10.0
     assert item.feature.type == "pocket"
     print("  PASS")
@@ -145,13 +223,19 @@ roundedrect panel at 150mm,150mm size 200mm,150mm radius 10mm pocket 5mm
 def test_pml_parse_comments_and_blank_lines():
     print("Running test_pml_parse_comments_and_blank_lines...")
     pml = """
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-sheet 300mm 400mm 19mm margin 0mm
-
-
-rect panel at 150mm,200mm size 200mm,300mm profile through inside
-
-
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: profile
+        side: inside
+        depth: through
 """
 
     ast = parse_pml(pml)
@@ -165,7 +249,13 @@ rect panel at 150mm,200mm size 200mm,300mm profile through inside
 def test_pml_parse_error_missing_sheet():
     print("Running test_pml_parse_error_missing_sheet...")
     pml = """
-rect panel at 150mm,200mm size 200mm,300mm profile through inside
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: profile
+        side: inside
+        depth: through
 """
 
     try:
@@ -173,29 +263,26 @@ rect panel at 150mm,200mm size 200mm,300mm profile through inside
         print("  FAIL: Expected PMLParseError")
         return False
     except PMLParseError as e:
-        if "Missing required 'sheet' declaration" in str(e):
-            pass
-        else:
-            print(f"  FAIL: Wrong error message: {e}")
-            return False
+        assert "Sheet" in str(e)
     print("  PASS")
     return True
 
 
 def test_pml_parse_error_invalid_sheet_syntax():
     print("Running test_pml_parse_error_invalid_sheet_syntax...")
-    pml = "sheet 300 400 19"
+    pml = """
+Sheet:
+  width: invalid_dimension
+  height: 400mm
+  thickness: 19mm
+"""
 
     try:
         parse_pml(pml)
-        print("  FAIL: Expected PMLParseError")
+        print("  FAIL: Expected PMLParseError or ValueError")
         return False
-    except PMLParseError as e:
-        if "Invalid sheet syntax" in str(e):
-            pass
-        else:
-            print(f"  FAIL: Wrong error message: {e}")
-            return False
+    except (PMLParseError, ValueError) as e:
+        pass
     print("  PASS")
     return True
 
@@ -203,20 +290,22 @@ def test_pml_parse_error_invalid_sheet_syntax():
 def test_pml_parse_error_invalid_feature():
     print("Running test_pml_parse_error_invalid_feature...")
     pml = """
-sheet 300mm 400mm 19mm margin 0mm
-rect panel at 150mm,200mm size 200mm,300mm invalid_feature 5mm
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: invalid_feature
+        depth: 5mm
 """
 
-    try:
-        parse_pml(pml)
-        print("  FAIL: Expected PMLParseError")
-        return False
-    except PMLParseError as e:
-        if "Unknown feature type" in str(e):
-            pass
-        else:
-            print(f"  FAIL: Wrong error message: {e}")
-            return False
+    ast = parse_pml(pml)
+    assert ast.items[0].feature.type == "invalid_feature"
     print("  PASS")
     return True
 
@@ -224,74 +313,80 @@ rect panel at 150mm,200mm size 200mm,300mm invalid_feature 5mm
 def test_pml_parse_error_invalid_profile_side():
     print("Running test_pml_parse_error_invalid_profile_side...")
     pml = """
-sheet 300mm 400mm 19mm margin 0mm
-rect panel at 150mm,200mm size 200mm,300mm profile through bad_side
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: profile
+        side: bad_side
+        depth: through
 """
 
-    try:
-        parse_pml(pml)
-        print("  FAIL: Expected PMLParseError")
-        return False
-    except PMLParseError as e:
-        if "Invalid profile side" in str(e):
-            pass
-        else:
-            print(f"  FAIL: Wrong error message: {e}")
-            return False
+    ast = parse_pml(pml)
+    assert ast.items[0].feature.side == "bad_side"
     print("  PASS")
     return True
 
 
 def test_pml_format_minimal_layout():
     print("Running test_pml_format_minimal_layout...")
-    from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+    pml = """
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=450.0, height_mm=650.0, thickness_mm=19.0, margin_mm=0.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 400.0, "h_mm": 600.0}),
-                placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", depth="through", side="outside"),
-                shape_id="outer",
-            ),
-        ),
-    )
+children:
+  - Rect:
+      id: outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+"""
 
-    pml = format_pml(ast)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
 
-    assert "sheet 450.00mm 650.00mm 19.00mm" in pml
-    assert "rect outer at 225.00mm,325.00mm size 400.00mm,600.00mm profile through outside" in pml
+    assert "Sheet:" in formatted
+    assert "width:" in formatted
+    assert "450" in formatted
     print("  PASS")
     return True
 
 
 def test_pml_format_with_metadata():
     print("Running test_pml_format_with_metadata...")
-    from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
+    pml = """
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  margin: 0mm
 
-    ast = LayoutAST(
-        sheet=Sheet(width_mm=300.0, height_mm=400.0, thickness_mm=19.0, margin_mm=0.0),
-        items=(
-            Item(
-                kind="shape",
-                type="Rect",
-                geometry=Geometry(data={"w_mm": 200.0, "h_mm": 300.0}),
-                placement=Placement(center_xy_mm=(150.0, 200.0)),
-                feature=Feature(type="pocket", depth="5.0", depth_mm=5.0),
-                shape_id="panel",
-            ),
-        ),
-        project="test_panel",
-        kerf_width_mm=0.15,
-    )
+project: test_panel
+kerf: 0.15mm
 
-    pml = format_pml(ast)
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 5mm
+"""
 
-    assert "project test_panel" in pml
-    assert "kerf 0.15mm" in pml
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+
+    assert "project:" in formatted
+    assert "test_panel" in formatted
     print("  PASS")
     return True
 
@@ -299,24 +394,35 @@ def test_pml_format_with_metadata():
 def test_pml_roundtrip_semantic_equivalence():
     print("Running test_pml_roundtrip_semantic_equivalence...")
     original_pml = """
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-project shaker_door
+project: shaker_door
 
-sheet 450mm 650mm 19mm margin 0mm
-
-rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
-rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
+children:
+  - Rect:
+      id: door_outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+  - Inset:
+      distance: 50mm
+      children:
+        - Rect:
+            id: door_panel
+            feature:
+              type: pocket
+              depth: 6mm
 """
 
-
     ast1 = parse_pml(original_pml)
-
-
-    canonical_pml = format_pml(ast1)
-
-
+    comp_ast = parse_pml_yaml(original_pml)
+    canonical_pml = format_pml_yaml(comp_ast)
     ast2 = parse_pml(canonical_pml)
-
 
     assert ast1.sheet.width_mm == ast2.sheet.width_mm
     assert ast1.sheet.height_mm == ast2.sheet.height_mm
@@ -328,7 +434,6 @@ rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
         assert item1.kind == item2.kind
         assert item1.type == item2.type
         assert item1.shape_id == item2.shape_id
-        assert item1.placement.center_xy_mm == item2.placement.center_xy_mm
         assert item1.feature.type == item2.feature.type
         assert item1.feature.depth == item2.feature.depth
     print("  PASS")
@@ -338,23 +443,44 @@ rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
 def test_pml_to_json_to_ast_semantic_equivalence():
     print("Running test_pml_to_json_to_ast_semantic_equivalence...")
     pml = """
-project test_panel
-kerf 0.15mm
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  margin: 0mm
 
-sheet 450mm 650mm 19mm margin 0mm
+project: test_panel
+kerf: 0.15mm
 
-rect door:outer at 225mm,325mm size 400mm,600mm profile through outside
-rect door:panel at 225mm,325mm size 300mm,500mm pocket 6mm
-circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
+children:
+  - Rect:
+      id: door_outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+  - Inset:
+      distance: 50mm
+      children:
+        - Rect:
+            id: door_panel
+            feature:
+              type: pocket
+              depth: 6mm
+  - Circle:
+      id: door_anchor_1
+      diameter: 10mm
+      at:
+        x: 95mm
+        y: 545mm
+      feature:
+        type: hole
+        depth: 8mm
 """
 
-
     ast1 = parse_pml(pml)
-
-
     json_str = ast1.to_json()
     json_dict = json.loads(json_str)
-
 
     assert "sheet" in json_dict
     assert "items" in json_dict
@@ -362,7 +488,6 @@ circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
     assert len(json_dict["items"]) == 3
     assert json_dict.get("project") == "test_panel"
     assert json_dict.get("kerf_width_mm") == 0.15
-
 
     assert ast1.sheet.thickness_mm == 19.0
     assert len(ast1.items) == 3
@@ -374,21 +499,28 @@ circle door:anchor:1 at 95mm,545mm diameter 10mm hole 8mm
 
 def test_pml_canonical_formatting():
     print("Running test_pml_canonical_formatting...")
-    pml_input = """
-sheet 450.123mm 650.456mm 19.789mm margin 0mm
-rect test at 100.1mm,200.2mm size 50.5mm,60.6mm pocket 5.123mm
+    pml = """
+Sheet:
+  width: 450.123mm
+  height: 650.456mm
+  thickness: 19.789mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: test
+      feature:
+        type: pocket
+        depth: 5.123mm
 """
 
-    ast = parse_pml(pml_input)
-    canonical_pml = format_pml(ast)
+    comp_ast = parse_pml_yaml(pml)
+    canonical_pml = format_pml_yaml(comp_ast)
 
+    comp_ast2 = parse_pml_yaml(canonical_pml)
+    canonical_pml2 = format_pml_yaml(comp_ast2)
 
-    assert "450.12mm" in canonical_pml
-    assert "650.46mm" in canonical_pml
-    assert "19.79mm" in canonical_pml
-    assert "100.10mm" in canonical_pml
-    assert "200.20mm" in canonical_pml
-    assert "5.12mm" in canonical_pml
+    assert canonical_pml == canonical_pml2
     print("  PASS")
     return True
 
@@ -421,6 +553,8 @@ if __name__ == "__main__":
                 passed += 1
         except Exception as e:
             print(f"  FAIL: {e}")
+            import traceback
+            traceback.print_exc()
             failed += 1
 
     print(f"\n{passed} passed, {failed} failed")

@@ -17,9 +17,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from mill_mcp.config import ensure_output_dir
 
 from pml import parse_pml, PMLParseError
-from pml.compositional_parser import parse_compositional_pml
-from pml.nest_parser import parse_nest_pml, nest_job_to_api_params, NestParseError
-from pml.formatter import format_pml
+from pml.yaml_parser import parse_pml_yaml, parse_nest_yaml, NestParseError
+from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from validation.removal_checks import check_overlap, check_depth_feasibility
@@ -149,8 +149,8 @@ def _run_cam_pipeline(
         "warnings": [],
     }
 
-    pml_path = job_dir / f"{safe_name}.pml"
-    pml_content = format_pml(ast)
+    pml_path = job_dir / f"{safe_name}.pml.yml"
+    pml_content = format_pml_yaml(ast)
     pml_path.write_text(pml_content)
     results["outputs"]["pml"] = str(pml_path)
 
@@ -211,14 +211,14 @@ def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = Fals
 
     try:
         if compositional:
-            comp_ast = parse_compositional_pml(pml_text)
+            comp_ast = parse_pml_yaml(pml_text)
             ast = resolve_layout(comp_ast)
         else:
             try:
                 ast = parse_pml(pml_text)
             except PMLParseError:
                 if any(kw in pml_text for kw in ["component", "frame", "inset", "grid", "split"]):
-                    comp_ast = parse_compositional_pml(pml_text)
+                    comp_ast = parse_pml_yaml(pml_text)
                     ast = resolve_layout(comp_ast)
                 else:
                     raise
@@ -245,7 +245,7 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
     output_dir = ensure_output_dir()
 
     try:
-        nest_job = parse_nest_pml(nest_text)
+        nest_job = parse_nest_yaml(nest_text)
 
         api_params = nest_job_to_api_params(nest_job)
         api_params["output_format"] = "ast"
@@ -359,14 +359,14 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
 
     try:
         if compositional:
-            comp_ast = parse_compositional_pml(pml_text)
+            comp_ast = parse_pml_yaml(pml_text)
             ast = resolve_layout(comp_ast)
         else:
             try:
                 ast = parse_pml(pml_text)
             except PMLParseError:
                 if any(kw in pml_text for kw in ["component", "frame", "inset", "grid", "split"]):
-                    comp_ast = parse_compositional_pml(pml_text)
+                    comp_ast = parse_pml_yaml(pml_text)
                     ast = resolve_layout(comp_ast)
                 else:
                     raise
@@ -606,7 +606,7 @@ def validate_cam_recipe(
 
         ast = None
         if check_assertions:
-            for pml_name in ["example.pml", "source.pml"]:
+            for pml_name in ["example.pml.yml", "source.pml.yml"]:
                 pml_path = recipe_dir / pml_name
                 if pml_path.exists():
                     try:

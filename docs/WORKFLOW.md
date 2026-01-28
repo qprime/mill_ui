@@ -136,7 +136,7 @@ Document Type: Pipeline Reference
 
 | Category | Files |
 |----------|-------|
-| Input Processing | `pml/parser.py`, `pml/compositional_parser.py`, `pml/nest_parser.py` |
+| Input Processing | `pml/yaml_parser.py`, `pml/nest_parser.py` |
 | Resolution | `resolution/layout_resolver.py` |
 | Nesting | `nesting/api.py`, `nesting/guillotine.py`, `nesting/maxrects.py` |
 | Core Pipeline | `adapters/ast_to_removal.py`, `adapters/removal_to_planner.py` |

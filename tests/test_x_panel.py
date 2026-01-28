@@ -1,11 +1,10 @@
-"""Tests for x_panel generator."""
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pml.compositional_parser import parse_compositional_pml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from generators.base import XPanelParams
 from generators.area.x_panel import x_panel_generator
@@ -13,23 +12,41 @@ from domains import Domain
 
 
 def test_x_panel_parse():
-    pml = """sheet 300mm 300mm 19mm margin 0mm
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
 
-rect panel
-    x_panel bar_width 40mm depth 5mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - XPanel:
+            bar_width: 40mm
+            depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     assert ast is not None
     print("  ✓ test_x_panel_parse PASS")
 
 
 def test_x_panel_resolve():
-    pml = """sheet 300mm 300mm 19mm margin 0mm
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
 
-rect panel
-    x_panel bar_width 40mm depth 5mm
+children:
+  - Rect:
+      id: panel
+      children:
+        - XPanel:
+            bar_width: 40mm
+            depth: 5mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polygon_items = [item for item in flat.items if item.type == "Polygon"]
@@ -86,14 +103,27 @@ def test_x_panel_uniform_bar_width():
 
 
 def test_x_panel_with_frame():
-    pml = """sheet 400mm 600mm 19mm margin 0mm
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
 
-rect door
-    profile outside through
-    frame 50mm
-        x_panel bar_width 50mm depth 6mm
+children:
+  - Rect:
+      id: door
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: 50mm
+            children:
+              - XPanel:
+                  bar_width: 50mm
+                  depth: 6mm
 """
-    ast = parse_compositional_pml(pml)
+    ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
     polygon_items = [item for item in flat.items if item.type == "Polygon"]

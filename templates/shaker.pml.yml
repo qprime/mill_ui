@@ -1,0 +1,19 @@
+Template:
+  name: shaker
+  params:
+    stile_w: 57mm
+    rail_h: 57mm
+    panel_recess: 6mm
+
+  body:
+    Rect:
+      id: door
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: ${stile_w}
+            children:
+              - Pocket:
+                  depth: ${panel_recess}

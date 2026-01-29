@@ -185,6 +185,7 @@ def _remove_overlaps(
     rects: list[tuple[float, float, float, float]],
     min_width: float = 0,
     min_height: float = 0,
+    tool_clearance: float = 0,
 ) -> list[tuple[float, float, float, float]]:
     if not rects:
         return []
@@ -193,7 +194,15 @@ def _remove_overlaps(
     result = [sorted_rects[0]]
 
     for x, y, w, h in sorted_rects[1:]:
-        trimmed = _trim_rect_against_existing(x, y, w, h, result, min_width, min_height)
+        if tool_clearance > 0:
+            expanded_existing = [
+                (rx - tool_clearance, ry - tool_clearance,
+                 rw + 2 * tool_clearance, rh + 2 * tool_clearance)
+                for rx, ry, rw, rh in result
+            ]
+            trimmed = _trim_rect_against_existing(x, y, w, h, expanded_existing, min_width, min_height)
+        else:
+            trimmed = _trim_rect_against_existing(x, y, w, h, result, min_width, min_height)
         if trimmed is not None:
             result.append(trimmed)
 
@@ -207,6 +216,7 @@ def _compute_maxrects_waste(
     parts: list[PartBounds],
     min_width: float,
     min_height: float,
+    tool_clearance: float = 0,
 ) -> list[WasteRect]:
     usable_x = margin
     usable_y = margin
@@ -228,7 +238,7 @@ def _compute_maxrects_waste(
                 new_free_rects.append((rx, ry, rw, rh))
         free_rects = _prune_contained(new_free_rects)
 
-    free_rects = _remove_overlaps(free_rects, min_width, min_height)
+    free_rects = _remove_overlaps(free_rects, min_width, min_height, tool_clearance)
 
     result = []
     for x, y, w, h in free_rects:
@@ -313,10 +323,11 @@ def compute_waste_rectangles(
     min_width: float,
     min_height: float,
     strategy: WasteStrategy = WasteStrategy.LARGEST,
+    tool_clearance: float = 0,
 ) -> list[WasteRect]:
     if strategy == WasteStrategy.LARGEST:
         return _compute_maxrects_waste(
-            sheet_width, sheet_height, margin, parts, min_width, min_height
+            sheet_width, sheet_height, margin, parts, min_width, min_height, tool_clearance
         )
     else:
         return _compute_guillotine_waste(

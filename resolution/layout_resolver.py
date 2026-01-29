@@ -875,6 +875,8 @@ class LayoutResolver:
         working_width = self.ast.sheet.working_width_mm
         working_height = self.ast.sheet.working_height_mm
 
+        tool_diameter = self.ast.kerf_width_mm or 6.35
+
         part_bounds = []
         for item in items:
             if item.kind == "shape" and item.geometry:
@@ -884,15 +886,13 @@ class LayoutResolver:
                     item.placement.center_xy_mm,
                 )
                 part_bounds.append(PartBounds(
-                    x=bounds["x_min"],
-                    y=bounds["y_min"],
-                    width=bounds["x_max"] - bounds["x_min"],
-                    height=bounds["y_max"] - bounds["y_min"],
+                    x=bounds["x_min"] - tool_diameter,
+                    y=bounds["y_min"] - tool_diameter,
+                    width=bounds["x_max"] - bounds["x_min"] + 2 * tool_diameter,
+                    height=bounds["y_max"] - bounds["y_min"] + 2 * tool_diameter,
                 ))
 
         strategy = WasteStrategy.LARGEST if node.strategy == "largest" else WasteStrategy.SIMPLE
-
-        tool_diameter = self.ast.kerf_width_mm or 6.35
 
         waste_rects = compute_waste_rectangles(
             sheet_width=working_width,
@@ -902,15 +902,16 @@ class LayoutResolver:
             min_width=node.min_width_mm,
             min_height=node.min_height_mm,
             strategy=strategy,
+            tool_clearance=tool_diameter,
         )
 
         for i, wrect in enumerate(waste_rects):
             waste_item = Item(
                 kind="shape",
-                type="Rectangle",
+                type="Rect",
                 geometry=Geometry(data={
-                    "width": wrect.width,
-                    "height": wrect.height,
+                    "w_mm": wrect.width,
+                    "h_mm": wrect.height,
                 }),
                 placement=Placement(center_xy_mm=(wrect.center_x, wrect.center_y)),
                 feature=Feature(

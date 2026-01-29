@@ -34,8 +34,7 @@
     <path d="M 856.587 776.587 L 856.587 273.413 L 253.412 273.413 L 253.412 776.587 Z" fill-rule="evenodd" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts">
-    <rect x="855.0" y="155.0" width="470.0" height="770.0" />
-    <rect x="155.0" y="775.0" width="700.0" height="150.0" />
+    <rect x="861.3500000000001" y="161.35000000000002" width="457.29999999999984" height="757.3" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions" />
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
@@ -56,14 +55,25 @@
     <polygon points="875.0,275.0 872.0,278.0 878.0,278.0" fill="#5ab9ea" />
     <polygon points="875.0,775.0 872.0,772.0 878.0,772.0" fill="#5ab9ea" />
     <text x="880.0" y="525.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 880.0 525.0)">500.0mm</text>
+    <line x1="861.3500000000001" y1="161.35000000000002" x2="861.3500000000001" y2="121.35000000000002" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1318.6499999999999" y1="161.35000000000002" x2="1318.6499999999999" y2="121.35000000000002" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="861.3500000000001" y1="121.35000000000002" x2="1318.6499999999999" y2="121.35000000000002" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="861.3500000000001,121.35000000000002 864.3500000000001,118.35000000000002 864.3500000000001,124.35000000000002" fill="#5ab9ea" />
+    <polygon points="1318.6499999999999,121.35000000000002 1315.6499999999999,118.35000000000002 1315.6499999999999,124.35000000000002" fill="#5ab9ea" />
+    <text x="1090.0" y="116.35000000000002" class="dimension-text" text-anchor="middle" dominant-baseline="middle">457.3mm</text>
+    <line x1="1318.6499999999999" y1="161.35000000000002" x2="1358.6499999999999" y2="161.35000000000002" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1318.6499999999999" y1="918.65" x2="1358.6499999999999" y2="918.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="1358.6499999999999" y1="161.35000000000002" x2="1358.6499999999999" y2="918.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="1358.6499999999999,161.35000000000002 1355.6499999999999,164.35000000000002 1361.6499999999999,164.35000000000002" fill="#5ab9ea" />
+    <polygon points="1358.6499999999999,918.65 1355.6499999999999,915.65 1361.6499999999999,915.65" fill="#5ab9ea" />
+    <text x="1363.6499999999999" y="540.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1363.6499999999999 540.0)">757.3mm</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="972.0" class="notes">Sheet: 1200.0 × 800.0 × 19.0mm</text>
-    <text x="20" y="984.0" class="notes">Features: 3 profiles</text>
-    <text x="20" y="996.0" class="notes">Parts (2):</text>
+    <text x="20" y="984.0" class="notes">Features: 2 profiles</text>
+    <text x="20" y="996.0" class="notes">Parts (1):</text>
     <text x="30" y="1008.0" class="notes">• waste_0_1</text>
-    <text x="30" y="1020.0" class="notes">• waste_1_2</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

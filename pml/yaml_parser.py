@@ -553,25 +553,33 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     if sheet_block is None:
         raise PMLParseError("Missing 'Sheet:' root key")
 
-    if "physical_width" in sheet_block:
+    margin_mm = parse_dimension(sheet_block.get("margin", "0mm"))
+
+    if "working_width" in sheet_block:
+        working_width = parse_dimension(sheet_block["working_width"])
+        width_mm = working_width + 2 * margin_mm
+    elif "physical_width" in sheet_block:
         width_mm = parse_dimension(sheet_block["physical_width"])
     elif "width" in sheet_block:
         width_mm = parse_dimension(sheet_block["width"])
     else:
-        raise PMLParseError("Sheet missing 'width' or 'physical_width'")
+        raise PMLParseError("Sheet missing 'width', 'physical_width', or 'working_width'")
 
-    if "physical_height" in sheet_block:
+    if "working_height" in sheet_block:
+        working_height = parse_dimension(sheet_block["working_height"])
+        height_mm = working_height + 2 * margin_mm
+    elif "physical_height" in sheet_block:
         height_mm = parse_dimension(sheet_block["physical_height"])
     elif "height" in sheet_block:
         height_mm = parse_dimension(sheet_block["height"])
     else:
-        raise PMLParseError("Sheet missing 'height' or 'physical_height'")
+        raise PMLParseError("Sheet missing 'height', 'physical_height', or 'working_height'")
 
     sheet = Sheet(
         width_mm=width_mm,
         height_mm=height_mm,
         thickness_mm=parse_dimension(sheet_block["thickness"]),
-        margin_mm=parse_dimension(sheet_block.get("margin", "0mm")),
+        margin_mm=margin_mm,
         show_dimensions=sheet_block.get("show_dimensions", True),
     )
 

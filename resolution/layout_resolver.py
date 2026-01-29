@@ -892,10 +892,12 @@ class LayoutResolver:
 
         strategy = WasteStrategy.LARGEST if node.strategy == "largest" else WasteStrategy.SIMPLE
 
+        tool_diameter = self.ast.kerf_width_mm or 6.35
+
         waste_rects = compute_waste_rectangles(
             sheet_width=working_width,
             sheet_height=working_height,
-            margin=0.0,
+            margin=tool_diameter,
             parts=part_bounds,
             min_width=node.min_width_mm,
             min_height=node.min_height_mm,

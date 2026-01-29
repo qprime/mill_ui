@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
 from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
-from pml.revision_header import update_file_header
+from pml.revision_header import update_file_header, format_pml_header
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
@@ -15,6 +16,173 @@ RECIPE_DEFAULTS = {
     "kerf": 3.175,
     "theme": "dark",
 }
+
+DEFAULT_MARGIN_MM = 10.0
+DEFAULT_KERF_MM = 6.35
+
+
+def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
+    match = re.match(r"^(\d+(?:\.\d+)?)[xX](\d+(?:\.\d+)?)$", sheet_str)
+    if not match:
+        raise ValueError(f"Invalid sheet format: {sheet_str}. Expected WxH (e.g., 1220x1220)")
+    return float(match.group(1)), float(match.group(2))
+
+
+def generate_layout_scaffold(
+    sheet_width: float,
+    sheet_height: float,
+    thickness: float,
+    margin: float,
+    kerf: float,
+    project_name: str | None = None,
+) -> str:
+    working_width = sheet_width - 2 * margin
+    working_height = sheet_height - 2 * margin
+
+    header = format_pml_header()
+    header += f"# Working area: {working_width:.0f}x{working_height:.0f}mm\n"
+    header += f"# Valid X: 0 to {working_width:.0f}mm, Valid Y: 0 to {working_height:.0f}mm\n"
+    header += "#\n"
+    header += "# Place parts using center coordinates (x, y) and size (width, height).\n"
+    header += "# Use simple round numbers. Do NOT calculate offsets.\n"
+    header += "\n"
+
+    project_line = f"project: {project_name}\n" if project_name else ""
+
+    pml = f"""{header}{project_line}Sheet:
+  working_width: {working_width:.0f}mm
+  working_height: {working_height:.0f}mm
+  thickness: {thickness:.1f}mm
+  margin: {margin:.0f}mm
+
+children:
+  []
+
+# EXAMPLE - uncomment and modify:
+#  - Rect:
+#      id: my_part
+#      children:
+#        - Profile:
+#            side: outside
+#            depth: through
+#      at:
+#        x: 200mm      # center X
+#        y: 150mm      # center Y
+#        width: 300mm
+#        height: 200mm
+"""
+    return pml
+
+
+def generate_assembly_scaffold(
+    sheet_width: float,
+    sheet_height: float,
+    thickness: float,
+    margin: float,
+    kerf: float,
+    project_name: str | None = None,
+) -> str:
+    working_width = sheet_width - 2 * margin
+    working_height = sheet_height - 2 * margin
+
+    header = format_pml_header()
+    header += f"# Physical sheet: {sheet_width:.0f}x{sheet_height:.0f}mm\n"
+    header += f"# Working area: {working_width:.0f}x{working_height:.0f}mm\n"
+    header += "#\n"
+    header += "# Assembly projects auto-layout parts within the working area.\n"
+    header += "# Do NOT add kerf/tool offsets - CAM handles tool compensation.\n"
+    header += "\n"
+
+    project_line = f"project: {project_name}\n" if project_name else ""
+
+    pml = f"""{header}{project_line}Sheet:
+  width: {sheet_width:.0f}mm
+  height: {sheet_height:.0f}mm
+  thickness: {thickness:.1f}mm
+  margin: {margin:.0f}mm
+
+kerf: {kerf}mm
+
+children:
+  - Assembly:
+      topology: box
+      width: TODO
+      depth: TODO
+      height: TODO
+      thickness: {thickness:.1f}mm
+      joinery: finger
+      finger_width: 12mm
+      clearance: 0.15mm
+      show_labels: true
+"""
+    return pml
+
+
+def init_project(args) -> None:
+    project_type = args.init_project
+
+    if not args.sheet:
+        print("Error: --sheet is required with --init_project", file=sys.stderr)
+        sys.exit(1)
+    if args.thickness is None:
+        print("Error: --thickness is required with --init_project", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        sheet_width, sheet_height = parse_sheet_dimensions(args.sheet)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    margin = args.margin if args.margin is not None else DEFAULT_MARGIN_MM
+    kerf = args.kerf if args.kerf != DEFAULT_KERF_MM else DEFAULT_KERF_MM
+
+    if args.project:
+        project_dir = get_project_dir(args.project)
+        output_path = project_dir / "layout.pml.yml"
+    else:
+        output_path = Path("layout.pml.yml")
+
+    if output_path.exists():
+        print(f"Error: {output_path} already exists. Delete it first to regenerate.", file=sys.stderr)
+        sys.exit(1)
+
+    if project_type == "layout":
+        pml_content = generate_layout_scaffold(
+            sheet_width=sheet_width,
+            sheet_height=sheet_height,
+            thickness=args.thickness,
+            margin=margin,
+            kerf=kerf,
+            project_name=args.project,
+        )
+    elif project_type == "assembly":
+        pml_content = generate_assembly_scaffold(
+            sheet_width=sheet_width,
+            sheet_height=sheet_height,
+            thickness=args.thickness,
+            margin=margin,
+            kerf=kerf,
+            project_name=args.project,
+        )
+    else:
+        print(f"Error: Unknown project type: {project_type}", file=sys.stderr)
+        sys.exit(1)
+
+    if args.project:
+        project_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path.write_text(pml_content, encoding="utf-8")
+    print(f"Created {output_path}", file=sys.stderr)
+
+    print(f"  Type: {project_type}", file=sys.stderr)
+    print(f"  Physical sheet: {sheet_width:.0f}x{sheet_height:.0f}mm", file=sys.stderr)
+    if project_type == "layout":
+        working_width = sheet_width - 2 * margin
+        working_height = sheet_height - 2 * margin
+        print(f"  Working area: {working_width:.0f}x{working_height:.0f}mm", file=sys.stderr)
+    print(f"  Margin: {margin:.0f}mm", file=sys.stderr)
+    print(f"  Kerf: {kerf}mm", file=sys.stderr)
 
 
 def find_recipe_source(recipe_dir: Path) -> Path | None:
@@ -84,11 +252,19 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
     job_name = input_path.stem
 
+    build_params = {
+        "source": input_path.name,
+        "kerf_mm": args.kerf,
+        "theme": args.theme,
+        "y_origin": args.y_origin,
+    }
+
     outputs = write_pipeline_outputs(
         result,
         output_dir,
         job_name,
         clean_output_dir=False,
+        build_params=build_params,
     )
 
     print(f"  Outputs:", file=sys.stderr)
@@ -147,11 +323,19 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     job_name = recipe_dir.name
 
+    build_params = {
+        "source": source.name,
+        "kerf_mm": kerf,
+        "theme": theme,
+        "y_origin": args.y_origin,
+    }
+
     outputs = write_pipeline_outputs(
         result,
         output_dir,
         job_name,
         clean_output_dir=False,
+        build_params=build_params,
     )
 
     print(f"  Outputs:", file=sys.stderr)
@@ -179,6 +363,12 @@ Examples:
   python -m cli.mill --project cabinet --input panel.pml.yml --kerf 3.175
 
   python -m cli.mill --recipe docs/recipes/01_simple_profile
+
+  python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19
+
+  python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
+
+  python -m cli.mill --project my_table --init_project layout --sheet 1220x1220 --thickness 19
 
 Output files:
   {basename}.{op}-{tool_diameter}mm.nc   G-code per pass
@@ -237,9 +427,38 @@ Output files:
         help="Y=0 reference: back (lower-left origin) or front (default: back)",
     )
 
+    init_group = parser.add_argument_group("project initialization")
+    init_group.add_argument(
+        "--init_project",
+        choices=["layout", "assembly"],
+        metavar="TYPE",
+        help="Generate a starter PML file (TYPE: layout, assembly)",
+    )
+    init_group.add_argument(
+        "--sheet",
+        default=None,
+        help="Physical sheet dimensions as WxH in mm (e.g., 1220x1220)",
+    )
+    init_group.add_argument(
+        "--thickness",
+        type=float,
+        default=None,
+        help="Material thickness in mm",
+    )
+    init_group.add_argument(
+        "--margin",
+        type=float,
+        default=None,
+        help=f"Margin/clamp zone in mm (default: {DEFAULT_MARGIN_MM})",
+    )
+
     args = parser.parse_args()
 
     try:
+        if args.init_project:
+            init_project(args)
+            return
+
         if args.recipe:
             recipe_dir = Path(args.recipe)
             if not recipe_dir.is_dir():

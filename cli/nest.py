@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -13,7 +14,102 @@ from pml.nest_parser import nest_job_to_api_params
 from pml.formatter import format_pml
 from pml.revision_header import format_pml_header
 from nesting import nest_and_generate, nest_parts
-from cli.project import add_project_arg, resolve_input_path, resolve_output_dir
+from cli.project import add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir
+
+DEFAULT_MARGIN_MM = 10.0
+DEFAULT_KERF_MM = 6.35
+
+
+def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
+    match = re.match(r"^(\d+(?:\.\d+)?)[xX](\d+(?:\.\d+)?)$", sheet_str)
+    if not match:
+        raise ValueError(f"Invalid sheet format: {sheet_str}. Expected WxH (e.g., 1220x1220)")
+    return float(match.group(1)), float(match.group(2))
+
+
+def generate_nest_scaffold(
+    sheet_width: float,
+    sheet_height: float,
+    thickness: float,
+    margin: float,
+    kerf: float,
+) -> str:
+    working_width = sheet_width - 2 * margin
+    working_height = sheet_height - 2 * margin
+
+    header = format_pml_header()
+    header += f"# Physical sheet: {sheet_width:.0f}x{sheet_height:.0f}mm\n"
+    header += f"# Working area: {working_width:.0f}x{working_height:.0f}mm\n"
+    header += "#\n"
+    header += "# Nesting auto-places parts within the working area.\n"
+    header += "# Part sizes are bounding boxes - do NOT add kerf offsets.\n"
+    header += "# The nesting algorithm accounts for kerf spacing automatically.\n"
+    header += "\n"
+
+    nest = f"""{header}Nest:
+  algorithm: maxrects
+
+  Sheet:
+    width: {sheet_width:.0f}mm
+    height: {sheet_height:.0f}mm
+    thickness: {thickness:.1f}mm
+
+  kerf: {kerf}mm
+  margin: {margin:.0f}mm
+
+  parts:
+    - name: TODO
+      width: TODO
+      height: TODO
+      quantity: 1
+"""
+    return nest
+
+
+def init_project(args) -> None:
+    if not args.sheet:
+        print("Error: --sheet is required with --init_project", file=sys.stderr)
+        sys.exit(1)
+    if args.thickness is None:
+        print("Error: --thickness is required with --init_project", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        sheet_width, sheet_height = parse_sheet_dimensions(args.sheet)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    margin = args.margin if args.margin is not None else DEFAULT_MARGIN_MM
+    kerf = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
+
+    if args.project:
+        project_dir = get_project_dir(args.project)
+        output_path = project_dir / "job.nest.yml"
+    else:
+        output_path = Path("job.nest.yml")
+
+    if output_path.exists():
+        print(f"Error: {output_path} already exists. Delete it first to regenerate.", file=sys.stderr)
+        sys.exit(1)
+
+    nest_content = generate_nest_scaffold(
+        sheet_width=sheet_width,
+        sheet_height=sheet_height,
+        thickness=args.thickness,
+        margin=margin,
+        kerf=kerf,
+    )
+
+    if args.project:
+        project_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path.write_text(nest_content, encoding="utf-8")
+    print(f"Created {output_path}", file=sys.stderr)
+
+    print(f"  Physical sheet: {sheet_width:.0f}x{sheet_height:.0f}mm", file=sys.stderr)
+    print(f"  Margin: {margin:.0f}mm", file=sys.stderr)
+    print(f"  Kerf: {kerf}mm", file=sys.stderr)
 
 
 def run_export_svg(pml_path: Path, output_dir: Path, theme: str) -> Path:
@@ -41,11 +137,13 @@ Examples:
 
   python -m cli.nest --project my_table job.nest.yml
 
-
   python -m cli.nest job.nest.yml -o output/ --export-svg
 
-
   python -m cli.nest job.nest.yml -o output/ --export-svg --theme print
+
+  python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
+
+  python -m cli.nest --project cabinet --init_project --sheet 1220x1220 --thickness 19
 
 Output files:
   PML:  {prefix}_{N}.pml.yml (one per sheet)
@@ -54,7 +152,7 @@ Output files:
         """,
     )
     add_project_arg(parser)
-    parser.add_argument("input", help="Input .nest.yml file")
+    parser.add_argument("input", nargs="?", default=None, help="Input .nest.yml file")
     parser.add_argument(
         "-o", "--output",
         default=None,
@@ -85,7 +183,45 @@ Output files:
         help="SVG blueprint theme (default: dark)"
     )
 
+    init_group = parser.add_argument_group("project initialization")
+    init_group.add_argument(
+        "--init_project",
+        action="store_true",
+        help="Generate a starter .nest.yml file",
+    )
+    init_group.add_argument(
+        "--sheet",
+        default=None,
+        help="Physical sheet dimensions as WxH in mm (e.g., 1220x2440)",
+    )
+    init_group.add_argument(
+        "--thickness",
+        type=float,
+        default=None,
+        help="Material thickness in mm",
+    )
+    init_group.add_argument(
+        "--margin",
+        type=float,
+        default=None,
+        help=f"Margin/clamp zone in mm (default: {DEFAULT_MARGIN_MM})",
+    )
+    init_group.add_argument(
+        "--kerf",
+        type=float,
+        default=None,
+        help=f"Tool kerf in mm (default: {DEFAULT_KERF_MM})",
+    )
+
     args = parser.parse_args()
+
+    if args.init_project:
+        init_project(args)
+        return
+
+    if not args.input:
+        print("Error: input file required (or use --init_project)", file=sys.stderr)
+        sys.exit(1)
 
     input_path = resolve_input_path(args.project, args.input)
     output_dir = resolve_output_dir(args.project, args.output)

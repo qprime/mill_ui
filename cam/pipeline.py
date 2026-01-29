@@ -269,6 +269,7 @@ def write_pipeline_outputs(
     job_name: str,
     *,
     clean_output_dir: bool = True,
+    build_params: dict[str, Any] | None = None,
 ) -> dict[str, Path]:
     if clean_output_dir and output_dir.exists():
         shutil.rmtree(output_dir)
@@ -287,8 +288,15 @@ def write_pipeline_outputs(
         outputs["svg"] = svg_path
 
     import json
+    from datetime import datetime, timezone
+
+    metrics_with_build = dict(result.metrics)
+    if build_params:
+        metrics_with_build["build"] = build_params
+    metrics_with_build["timestamp"] = datetime.now(timezone.utc).isoformat()
+
     metrics_path = output_dir / "metrics.json"
-    metrics_path.write_text(json.dumps(result.metrics, indent=2))
+    metrics_path.write_text(json.dumps(metrics_with_build, indent=2))
     outputs["metrics"] = metrics_path
 
     return outputs

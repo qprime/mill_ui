@@ -24,46 +24,23 @@ This design makes it **impossible** to accidentally cut in the margin zone—tha
 
 ### Tool Clearance for Outside Profiles
 
-When profiling parts with `side: outside`, the **part edge** must be at least one tool diameter from the working area boundary. This ensures the cutting edge stays within the working area and doesn't encroach on the margin zone.
+For outside profile cuts, don't place parts at the very edge of the working area. The validation will catch parts that are too close to the boundary and report an error.
 
-**Rule of thumb:** For a 1/4" (6.35mm) bit, add 6.35mm to edge-adjacent coordinates.
+**Simple rule:** Keep part edges ~10mm or more from working area boundaries. Use round numbers for coordinates.
 
-The tool diameter matters (not radius) because outside profiles cut around the part—the tool center follows the part edge, so the cutting edge extends one radius beyond. A part edge at position 0 means the tool center is at 0 and the cutting edge is at -radius, which violates the margin.
-
-| Quantity | Working Area | Notes |
-|----------|--------------|-------|
-| Part edge (minimum) | 6.35mm | One tool diameter from boundary |
-| Tool center | 3.175mm | Part edge minus tool radius |
-| Cutting edge | 0mm | Exactly at working area boundary |
-
-**Wrong — part edge at x=0, tool cuts into margin:**
 ```yaml
+# Good - parts well within working area, simple coordinates
 - Rect:
     at:
-      x: 50mm      # left edge at 0mm
-      y: 50mm      # bottom edge at 0mm
-      width: 100mm
-      height: 100mm
+      x: 100mm
+      y: 100mm
+      width: 200mm
+      height: 150mm
     children:
       - Profile: {side: outside, depth: through}
 ```
 
-**Correct — part edge offset by tool diameter:**
-```yaml
-- Rect:
-    at:
-      x: 56.35mm   # left edge at 6.35mm (one tool diameter)
-      y: 56.35mm   # bottom edge at 6.35mm
-      width: 100mm
-      height: 100mm
-    children:
-      - Profile: {side: outside, depth: through}
-```
-
-**Common mistakes:**
-1. Using tool radius instead of tool diameter for edge clearance
-2. Forgetting that `at.x` and `at.y` specify the center, not the edge
-3. Adding margin to coordinates (margin is applied at export, not in PML)
+**Note:** `at.x` and `at.y` specify the part **center**, not the edge. A 200mm wide part at x=100mm has edges at x=0mm and x=200mm.
 
 ## Quick Example
 
@@ -107,6 +84,38 @@ components:                         # Optional reusable components
 children:                           # Required - list of child nodes
   - Rect: {...}
   - Circle: {...}
+```
+
+### Working-Area Dimensions
+
+As an alternative to specifying physical sheet dimensions, you can specify the working area directly using `working_width` and `working_height`. The parser derives physical dimensions as `working + 2*margin`:
+
+```yaml
+Sheet:
+  working_width: 1200mm     # cuttable area width
+  working_height: 1200mm    # cuttable area height
+  thickness: 19mm
+  margin: 10mm              # physical sheet = 1220x1220mm
+```
+
+This is useful when you want to work in a coordinate system where (0,0) is the corner of the cuttable zone without thinking about physical sheet size.
+
+Generate a starter file with working-area dimensions using:
+
+```bash
+python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19 --margin 10
+```
+
+For assembly projects (finger-jointed boxes, etc.), use:
+
+```bash
+python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
+```
+
+For nesting projects, use:
+
+```bash
+python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 ```
 
 ## Dimensions

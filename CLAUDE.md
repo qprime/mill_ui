@@ -24,6 +24,9 @@ Activate venv first: `source .venv/bin/activate`
 python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml.yml
 python -m cli.mill --recipe docs/recipes/01_simple_profile
+python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19
+python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
+python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes --regen_recipes
@@ -33,8 +36,9 @@ gh issue view <number> --json title,body,state,labels,comments,author,createdAt,
 The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:
 - `--project`: User workspace in `$MILL_UI_PROJECTS` (real manufacturing)
 - `--recipe`: Recipe directory in `docs/recipes/` (examples/documentation)
+- `--init_project TYPE`: Generate starter PML (TYPE: `layout` for manual placement, `assembly` for boxes)
 
-Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`
+Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`, `--margin`, `--sheet`, `--thickness`
 
 ## Code Style
 

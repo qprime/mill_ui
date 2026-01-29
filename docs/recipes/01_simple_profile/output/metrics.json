@@ -1,12 +1,11 @@
 {
   "timing": {
     "ir_ms": 0.02,
-    "hints_ms": 0.0,
-    "plan_ms": 0.46,
-    "gcode_ms": 0.62,
-    "svg_ms": 0.31,
-    "total_ms": 2.16,
-    "parse_ms": 1.06
+    "hints_ms": 0.01,
+    "plan_ms": 0.41,
+    "gcode_ms": 0.64,
+    "svg_ms": 2.65,
+    "total_ms": 3.72
   },
   "complexity": {
     "total_moves": 252,
@@ -33,5 +32,12 @@
         "lines": 258
       }
     }
-  }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "timestamp": "2026-01-29T20:44:41.504318+00:00"
 }

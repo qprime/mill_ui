@@ -159,44 +159,52 @@ def build_notched_polygon(
         result = orient(base, sign=1.0)
         return tuple(result.exterior.coords[:-1])
 
-    corners: tuple[Point2D, ...] = (
-        (cx - half_w, cy - half_h),
-        (cx + half_w, cy - half_h),
-        (cx + half_w, cy + half_h),
-        (cx - half_w, cy + half_h),
-    )
-    edge_lengths = (width_mm, height_mm, width_mm, height_mm)
-
     notch_boxes = []
     for notch in notches:
-        edge_idx = notch.edge_index
-        if edge_idx < 0 or edge_idx >= 4:
+        edge_idx = int(notch.edge_index)
+        if edge_idx < 0 or edge_idx > 3:
             continue
 
-        p0 = corners[edge_idx]
-        p1 = corners[(edge_idx + 1) % 4]
-        edge_len = edge_lengths[edge_idx]
+        u_start = max(0.0, float(notch.u_start_mm))
+        u_len = max(0.0, float(notch.u_len_mm))
+        depth = max(0.0, float(notch.depth_mm))
+        if u_len <= 0.0 or depth <= 0.0:
+            continue
 
-        dx = (p1[0] - p0[0]) / edge_len if edge_len > 0 else 0
-        dy = (p1[1] - p0[1]) / edge_len if edge_len > 0 else 0
+        # Interpret edge_index using the same canonical frame as NotchGeometry:
+        # 0=bottom (u from left->right), 1=right (u from bottom->top),
+        # 2=top (u from left->right), 3=left (u from bottom->top).
+        if edge_idx == 0:
+            x_min = cx - half_w + u_start
+            x_max = x_min + u_len
+            y_min = cy - half_h
+            y_max = y_min + depth
+        elif edge_idx == 1:
+            y_min = cy - half_h + u_start
+            y_max = y_min + u_len
+            x_max = cx + half_w
+            x_min = x_max - depth
+        elif edge_idx == 2:
+            x_min = cx - half_w + u_start
+            x_max = x_min + u_len
+            y_max = cy + half_h
+            y_min = y_max - depth
+        else:
+            y_min = cy - half_h + u_start
+            y_max = y_min + u_len
+            x_min = cx - half_w
+            x_max = x_min + depth
 
-        inward_nx = -dy
-        inward_ny = dx
+        # Clamp to panel bounds to keep boolean ops stable under small clearances.
+        x_min = max(cx - half_w, x_min)
+        x_max = min(cx + half_w, x_max)
+        y_min = max(cy - half_h, y_min)
+        y_max = min(cy + half_h, y_max)
 
-        notch_start_x = p0[0] + dx * notch.u_start_mm
-        notch_start_y = p0[1] + dy * notch.u_start_mm
-        notch_end_x = p0[0] + dx * (notch.u_start_mm + notch.u_len_mm)
-        notch_end_y = p0[1] + dy * (notch.u_start_mm + notch.u_len_mm)
+        if x_max <= x_min or y_max <= y_min:
+            continue
 
-        depth = notch.depth_mm
-
-        x_coords = [notch_start_x, notch_end_x, notch_end_x + inward_nx * depth, notch_start_x + inward_nx * depth]
-        y_coords = [notch_start_y, notch_end_y, notch_end_y + inward_ny * depth, notch_start_y + inward_ny * depth]
-
-        min_x, max_x = min(x_coords), max(x_coords)
-        min_y, max_y = min(y_coords), max(y_coords)
-
-        notch_boxes.append(box(min_x, min_y, max_x, max_y))
+        notch_boxes.append(box(x_min, y_min, x_max, y_max))
 
     if notch_boxes:
         cutout = unary_union(notch_boxes)
@@ -239,10 +247,19 @@ def finger_joints_to_notches(
     for i in range(n):
         is_notch = (i % 2 == 1) == (phase == 0)
         if is_notch:
-            u_start = i * finger_width - clearance_mm / 2
-            u_end = (i + 1) * finger_width + clearance_mm / 2
+            # Clearance semantics:
+            # - Nominal segment width is `finger_width`.
+            # - Expand each notch boundary by `clearance_mm / 4` so:
+            #     notch_width  = finger_width + (2 * clearance_mm/4) = finger_width + clearance_mm/2
+            #     finger_width = finger_width - (2 * clearance_mm/4) = finger_width - clearance_mm/2
+            #   -> (notch_width - finger_width) == clearance_mm (total looseness)
+            boundary_expansion = clearance_mm / 4
+            u_start = i * finger_width - boundary_expansion
+            u_end = (i + 1) * finger_width + boundary_expansion
             u_start = max(0.0, u_start)
             u_end = min(edge_length, u_end)
+            if u_end - u_start <= 1e-9:
+                continue
             notch = NotchSpec(
                 edge_index=edge_index,
                 u_start_mm=u_start,

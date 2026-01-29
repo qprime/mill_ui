@@ -1719,6 +1719,7 @@ class LayoutResolver:
         )
 
         panel_specs = generate_assembly_panels(assembly_params)
+        phases = topology.compute_phase_assignment()
 
         edge_name_map = {0: "bottom", 1: "right", 2: "top", 3: "left"}
 
@@ -1769,6 +1770,7 @@ class LayoutResolver:
                     "right": "#ffcc00",
                 }
                 edge_lines = []
+                edge_labels = []
                 x_min = x_cursor
                 x_max = x_cursor + panel_width
                 y_min = y_cursor
@@ -1778,27 +1780,58 @@ class LayoutResolver:
                 for edge_idx in edges_with_notches:
                     edge_name = edge_name_map.get(edge_idx, f"edge_{edge_idx}")
                     color = edge_colors.get(edge_name, "#ffffff")
+                    phase = phases.get((spec.name, edge_idx))
+                    pattern = "notch_first" if phase == 1 else "finger_first"
+                    label_text = f"{spec.name}.{edge_name} e{edge_idx} {pattern}"
                     if edge_name == "top":
                         edge_lines.append({
                             "x1": x_min, "y1": y_max, "x2": x_max, "y2": y_max, "color": color
+                        })
+                        edge_labels.append({
+                            "x": (x_min + x_max) / 2,
+                            "y": y_max + 5,
+                            "text": label_text,
+                            "color": color,
+                            "anchor": "middle",
                         })
                     elif edge_name == "bottom":
                         edge_lines.append({
                             "x1": x_min, "y1": y_min, "x2": x_max, "y2": y_min, "color": color
                         })
+                        edge_labels.append({
+                            "x": (x_min + x_max) / 2,
+                            "y": y_min - 5,
+                            "text": label_text,
+                            "color": color,
+                            "anchor": "middle",
+                        })
                     elif edge_name == "left":
                         edge_lines.append({
                             "x1": x_min, "y1": y_min, "x2": x_min, "y2": y_max, "color": color
+                        })
+                        edge_labels.append({
+                            "x": x_min - 5,
+                            "y": (y_min + y_max) / 2,
+                            "text": label_text,
+                            "color": color,
+                            "anchor": "end",
                         })
                     elif edge_name == "right":
                         edge_lines.append({
                             "x1": x_max, "y1": y_min, "x2": x_max, "y2": y_max, "color": color
                         })
+                        edge_labels.append({
+                            "x": x_max + 5,
+                            "y": (y_min + y_max) / 2,
+                            "text": label_text,
+                            "color": color,
+                            "anchor": "start",
+                        })
 
                 updated_item = replace(
                     panel_items[0],
-                    params={"edge_lines": edge_lines} if panel_items[0].params is None
-                    else {**panel_items[0].params, "edge_lines": edge_lines}
+                    params=({"edge_lines": edge_lines, "edge_labels": edge_labels} if panel_items[0].params is None
+                    else {**panel_items[0].params, "edge_lines": edge_lines, "edge_labels": edge_labels})
                 )
                 panel_items = [updated_item] + panel_items[1:]
 

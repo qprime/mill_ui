@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -170,7 +170,8 @@ def run_pipeline(
         svg_start = time.perf_counter()
         try:
             from export.blueprint_svg import render_blueprint_svg
-            svg_string = render_blueprint_svg(ast, intents, theme=svg_theme, y_origin=y_origin)
+            ast_with_kerf = replace(ast, kerf_width_mm=float(kerf_mm))
+            svg_string = render_blueprint_svg(ast_with_kerf, intents, theme=svg_theme, y_origin=y_origin)
         except Exception as e:
             warnings.append(f"SVG generation failed: {e}")
         timing.svg_ms = (time.perf_counter() - svg_start) * 1000

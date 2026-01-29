@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "37_ruler_with_profile",
-    "created_at": "2026-01-28T00:30:20.115217+00:00"
+    "created_at": "2026-01-29T00:17:09.802017+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.81,
+    "extraction_time_ms": 7.48,
     "document": {
       "width_mm": 980.0,
       "height_mm": 530.0,
@@ -306,7 +306,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 48.4073,
+    "extraction_time_ms": 38.7512,
     "summary": {
       "total_lines": 14440,
       "comment_lines": 2296,

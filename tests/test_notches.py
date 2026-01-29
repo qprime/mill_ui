@@ -222,3 +222,26 @@ class TestFingerJointsToNotches:
 
         for notch in notches:
             assert notch.edge_index == 2
+
+    def test_clearance_represents_total_looseness(self):
+        edge_length = 100.0
+        count = 7
+        clearance = 0.2
+        finger_width = edge_length / count
+
+        notches = finger_joints_to_notches(
+            edge_index=0,
+            edge_length=edge_length,
+            depth_mm=6,
+            phase=0,
+            count=count,
+            clearance_mm=clearance,
+        )
+
+        # With phase=0, notches are at odd indices. Use an interior notch to avoid edge clamping.
+        i = 3
+        expected_start = i * finger_width - clearance / 4
+        notch = min(notches, key=lambda n: abs(n.u_start_mm - expected_start))
+        assert notch.u_start_mm == pytest.approx(expected_start)
+
+        assert notch.u_len_mm == pytest.approx(finger_width + clearance / 2)

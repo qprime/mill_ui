@@ -2,18 +2,20 @@
   <style>
         .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
         .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .profile-toolpaths { stroke: #5ab9ea; stroke-width: 1; fill: none; stroke-dasharray: 4,2; }
         .waste-cuts { stroke: #ff9500; stroke-width: 2; fill: none; stroke-dasharray: 8,4; }
         .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
         .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
         .engrave-paths { stroke: #888888; stroke-width: 0.25; fill: none; }
         .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill:
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
         .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
-        .gap-text { fill:
+        .gap-text { fill: #ff9500; font-family: monospace; font-size: 10px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+        .edge-label { fill: #ffcc00; font-family: monospace; font-size: 7px; }
     </style>
   <rect x="0" y="0" width="580.0" height="680.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -21,6 +23,9 @@
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <rect x="140.0" y="140.0" width="300.0" height="400.0" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 441.587 541.587 L 441.587 138.413 L 138.412 138.413 L 138.412 541.587 Z" fill-rule="evenodd" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">

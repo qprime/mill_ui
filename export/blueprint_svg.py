@@ -145,6 +145,7 @@ def render_blueprint_svg(
 
     sheet_group = ET.SubElement(svg, "g", {"id": "SHEET_OUTLINE", "class": "sheet-outline"})
     profile_group = ET.SubElement(svg, "g", {"id": "PROFILE_CUTS", "class": "profile-cuts"})
+    toolpath_group = ET.SubElement(svg, "g", {"id": "PROFILE_TOOLPATHS", "class": "profile-toolpaths"})
     waste_group = ET.SubElement(svg, "g", {"id": "WASTE_CUTS", "class": "waste-cuts"})
     pocket_group = ET.SubElement(svg, "g", {"id": "POCKET_REGIONS", "class": "pocket-regions"})
     engrave_group = ET.SubElement(svg, "g", {"id": "ENGRAVE_PATHS", "class": "engrave-paths"})
@@ -162,6 +163,11 @@ def render_blueprint_svg(
 
 
     has_waste_cuts = False
+    try:
+        tool_radius_mm = float(layout_ast.kerf_width_mm or 0.0) / 2.0
+    except (TypeError, ValueError):
+        tool_radius_mm = 0.0
+
     for item in layout_ast.items:
         if item.kind != "shape" or item.feature is None:
             continue
@@ -174,6 +180,12 @@ def render_blueprint_svg(
         if feature_type == "profile":
             target_group = waste_group if is_waste else profile_group
             _render_profile(target_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
+            if tool_radius_mm > 0.0 and not is_waste:
+                _render_profile_toolpath(toolpath_group, item, offset_x, offset_y, tool_radius_mm, y_flip=flip_y)
+        elif feature_type == "notch":
+            # Notches are edge cutouts; render them in the PROFILE_CUTS layer so
+            # the blueprint reflects the final cut geometry users expect.
+            _render_notch(profile_group, item, offset_x, offset_y, y_flip=flip_y)
         elif feature_type == "pocket":
             _render_pocket(pocket_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)
         elif feature_type == "hole":
@@ -205,18 +217,20 @@ def _generate_stylesheet(theme: Theme) -> str:
     return f"""
         .sheet-outline {{ stroke: {theme.construction_stroke}; stroke-width: 1; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .profile-cuts {{ stroke: {theme.profile_stroke}; stroke-width: {theme.profile_width}; fill: none; }}
+        .profile-toolpaths {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; stroke-dasharray: 4,2; }}
         .waste-cuts {{ stroke: {theme.waste_stroke}; stroke-width: {theme.profile_width}; fill: none; stroke-dasharray: {theme.waste_dash}; }}
         .pocket-regions {{ stroke: {theme.pocket_stroke}; stroke-width: {theme.pocket_width}; fill: {theme.pocket_fill}; fill-opacity: 0.2; }}
         .holes {{ stroke: {theme.hole_stroke}; stroke-width: 1.5; fill: {theme.hole_fill}; }}
         .engrave-paths {{ stroke: {theme.engrave_stroke}; stroke-width: {theme.engrave_width}; fill: none; }}
         .construction {{ stroke: {theme.construction_stroke}; stroke-width: 0.5; fill: none; stroke-dasharray: {theme.construction_dash}; }}
         .dimensions {{ stroke: {theme.dimension_stroke}; stroke-width: 1; fill: none; }}
-        .dimension-text {{ fill:
+        .dimension-text {{ fill: {theme.dimension_text}; font-family: monospace; font-size: 10px; }}
         .gap-dimensions {{ stroke: {theme.gap_stroke}; stroke-width: 1; fill: none; }}
-        .gap-text {{ fill:
+        .gap-text {{ fill: {theme.gap_text}; font-family: monospace; font-size: 10px; }}
         .notes {{ fill: {theme.notes_text}; font-family: monospace; font-size: 10px; }}
         .legend {{ fill: {theme.legend_text}; font-family: monospace; font-size: 10px; }}
         .part-label {{ fill: {theme.label_text}; font-family: monospace; font-size: 8px; font-weight: bold; }}
+        .edge-label {{ fill: {theme.label_text}; font-family: monospace; font-size: 7px; }}
     """
 
 
@@ -375,6 +389,153 @@ def _render_profile(group: ET.Element, item: Item, offset_x: float, offset_y: fl
         ET.SubElement(group, "path", {"d": path_d})
 
 
+def _render_profile_toolpath(group: ET.Element, item: Item, offset_x: float, offset_y: float, tool_radius_mm: float, y_flip=None) -> None:
+    if item.geometry is None or item.feature is None or item.placement is None:
+        return
+    if tool_radius_mm <= 0.0:
+        return
+
+    side = (item.feature.side or "on").lower()
+    offset = 0.0
+    if side == "outside":
+        offset = tool_radius_mm
+    elif side == "inside":
+        offset = -tool_radius_mm
+    else:
+        offset = 0.0
+
+    yf = y_flip if y_flip is not None else (lambda y: y)
+
+    shape_type = item.type
+    cx, cy = item.placement.center_xy_mm
+
+    if shape_type in ("Rect", "Rectangle"):
+        w = float(item.geometry.data.get("w_mm") or item.geometry.data.get("width", 0.0))
+        h = float(item.geometry.data.get("h_mm") or item.geometry.data.get("height", 0.0))
+        if w <= 0.0 or h <= 0.0:
+            return
+        x_min = cx - w / 2.0
+        x_max = cx + w / 2.0
+        y_min = cy - h / 2.0
+        y_max = cy + h / 2.0
+
+        from shapely.geometry import box as shapely_box
+        from shapely.ops import orient
+        from shapely import BufferJoinStyle
+
+        poly = shapely_box(x_min, y_min, x_max, y_max)
+        if offset != 0.0:
+            poly = poly.buffer(offset, join_style=BufferJoinStyle.mitre, mitre_limit=2.0)
+        poly = orient(poly, sign=1.0)
+        if poly.is_empty or not hasattr(poly, "exterior"):
+            return
+        points = list(poly.exterior.coords[:-1])
+        path_d = _polygon_to_path(points, [], offset_x, offset_y, center_x=0.0, center_y=0.0, y_flip=yf)
+        if path_d:
+            ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
+        return
+
+    if shape_type == "Polygon":
+        points = item.geometry.data.get("points", [])
+        holes = item.geometry.data.get("holes", [])
+        if not points:
+            return
+
+        abs_points = [(float(x) + cx, float(y) + cy) for x, y in points]
+        abs_holes: list[list[tuple[float, float]]] = []
+        for hole in holes or []:
+            abs_holes.append([(float(x) + cx, float(y) + cy) for x, y in hole])
+
+        from shapely.geometry import Polygon as ShapelyPolygon, MultiPolygon
+        from shapely.ops import orient
+        from shapely import BufferJoinStyle
+
+        poly = ShapelyPolygon(abs_points, abs_holes if abs_holes else None)
+        if offset != 0.0:
+            poly = poly.buffer(offset, join_style=BufferJoinStyle.mitre, mitre_limit=2.0)
+
+        if poly.is_empty:
+            return
+
+        polys = []
+        if isinstance(poly, MultiPolygon):
+            polys = list(poly.geoms)
+        else:
+            polys = [poly]
+
+        for p in polys:
+            p = orient(p, sign=1.0)
+            if p.is_empty or not hasattr(p, "exterior"):
+                continue
+            exterior = list(p.exterior.coords[:-1])
+            interior_rings = [list(r.coords[:-1]) for r in getattr(p, "interiors", [])]
+            path_d = _polygon_to_path(exterior, interior_rings, offset_x, offset_y, center_x=0.0, center_y=0.0, y_flip=yf)
+            if path_d:
+                ET.SubElement(group, "path", {"d": path_d, "fill-rule": "evenodd"})
+        return
+
+
+def _render_notch(group: ET.Element, item: Item, offset_x: float, offset_y: float, y_flip=None) -> None:
+    if item.geometry is None or item.placement is None:
+        return
+
+    data = item.geometry.data
+    try:
+        edge_index = int(data.get("edge_index", 0))
+        u_start_mm = float(data.get("u_start_mm", 0.0))
+        u_len_mm = float(data.get("u_len_mm", 0.0))
+        inset_mm = float(data.get("inset_mm", data.get("depth_mm", 0.0)))
+        panel_width_mm = float(data.get("panel_width_mm", 0.0))
+        panel_height_mm = float(data.get("panel_height_mm", 0.0))
+    except (TypeError, ValueError):
+        return
+
+    if u_len_mm <= 0.0 or inset_mm <= 0.0 or panel_width_mm <= 0.0 or panel_height_mm <= 0.0:
+        return
+
+    cx, cy = item.placement.center_xy_mm
+    half_w = panel_width_mm / 2.0
+    half_h = panel_height_mm / 2.0
+
+    if edge_index == 0:
+        x_min = cx - half_w + u_start_mm
+        y_min = cy - half_h
+        w = u_len_mm
+        h = inset_mm
+    elif edge_index == 2:
+        x_min = cx - half_w + u_start_mm
+        y_min = cy + half_h - inset_mm
+        w = u_len_mm
+        h = inset_mm
+    elif edge_index == 1:
+        x_min = cx + half_w - inset_mm
+        y_min = cy - half_h + u_start_mm
+        w = inset_mm
+        h = u_len_mm
+    else:
+        x_min = cx - half_w
+        y_min = cy - half_h + u_start_mm
+        w = inset_mm
+        h = u_len_mm
+
+    yf = y_flip if y_flip is not None else (lambda y: y)
+    y0 = yf(y_min)
+    y1 = yf(y_min + h)
+    y = min(y0, y1)
+    h_draw = abs(y1 - y0)
+
+    ET.SubElement(
+        group,
+        "rect",
+        {
+            "x": str(offset_x + x_min),
+            "y": str(offset_y + y),
+            "width": str(w),
+            "height": str(h_draw),
+        },
+    )
+
+
 def _render_pocket(group: ET.Element, item: Item, offset_x: float, offset_y: float, theme: Theme, y_flip=None) -> None:
     if item.geometry is None or item.placement is None:
         return
@@ -523,6 +684,22 @@ def _render_edge_colors(group: ET.Element, item: Item, offset_x: float, offset_y
                 "stroke-linecap": "round",
             },
         )
+
+    edge_labels = item.params.get("edge_labels", [])
+    for label in edge_labels:
+        label_elem = ET.SubElement(
+            group,
+            "text",
+            {
+                "x": str(offset_x + label["x"]),
+                "y": str(offset_y + yf(label["y"])),
+                "class": "edge-label",
+                "text-anchor": label.get("anchor", "middle"),
+                "dominant-baseline": "middle",
+                "fill": label.get("color", "#ffffff"),
+            },
+        )
+        label_elem.text = label["text"]
 
 
 def _render_dimensions(

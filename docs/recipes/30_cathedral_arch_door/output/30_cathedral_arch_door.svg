@@ -2,18 +2,20 @@
   <style>
         .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
         .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
+        .profile-toolpaths { stroke: #5ab9ea; stroke-width: 1; fill: none; stroke-dasharray: 4,2; }
         .waste-cuts { stroke: #ff9500; stroke-width: 2; fill: none; stroke-dasharray: 8,4; }
         .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
         .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
         .engrave-paths { stroke: #888888; stroke-width: 0.25; fill: none; }
         .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
         .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill:
+        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
         .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
-        .gap-text { fill:
+        .gap-text { fill: #ff9500; font-family: monospace; font-size: 10px; }
         .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
         .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+        .edge-label { fill: #ffcc00; font-family: monospace; font-size: 7px; }
     </style>
   <rect x="0" y="0" width="780.0" height="1080.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
@@ -21,6 +23,9 @@
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <path d="M 140.000 940.000 L 640.000 940.000 L 640.000 390.000 L 640.000 390.000 L 639.229 370.385 L 636.922 350.891 L 633.092 331.639 L 627.764 312.746 L 620.970 294.329 L 612.752 276.502 L 603.160 259.375 L 592.254 243.054 L 580.101 227.638 L 566.777 213.223 L 552.362 199.899 L 536.946 187.746 L 520.625 176.840 L 503.498 167.248 L 485.671 159.030 L 467.254 152.236 L 448.361 146.908 L 429.109 143.078 L 409.615 140.771 L 390.000 140.000 L 370.385 140.771 L 350.891 143.078 L 331.639 146.908 L 312.746 152.236 L 294.329 159.030 L 276.502 167.248 L 259.375 176.840 L 243.054 187.746 L 227.638 199.899 L 213.223 213.223 L 199.899 227.638 L 187.746 243.054 L 176.840 259.375 L 167.248 276.502 L 159.030 294.329 L 152.236 312.746 L 146.908 331.639 L 143.078 350.891 L 140.771 370.385 L 140.000 390.000 L 140.000 390.000 Z" fill-rule="evenodd" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 138.412 941.587 L 641.587 941.587 L 641.587 389.969 L 640.813 370.261 L 638.491 350.643 L 634.637 331.268 L 629.275 312.255 L 622.438 293.721 L 614.167 275.781 L 604.515 258.545 L 593.540 242.120 L 581.310 226.606 L 567.900 212.100 L 553.394 198.690 L 537.880 186.460 L 521.455 175.485 L 504.219 165.833 L 486.279 157.562 L 467.745 150.725 L 448.732 145.363 L 429.357 141.509 L 409.739 139.187 L 390.000 138.411 L 370.261 139.187 L 350.643 141.509 L 331.268 145.363 L 312.255 150.725 L 293.721 157.562 L 275.781 165.833 L 258.545 175.485 L 242.120 186.460 L 226.606 198.690 L 212.100 212.100 L 198.690 226.606 L 186.460 242.120 L 175.485 258.545 L 165.833 275.781 L 157.562 293.721 L 150.725 312.255 L 145.363 331.268 L 141.509 350.643 L 139.187 370.261 L 138.412 389.969 Z" fill-rule="evenodd" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">

@@ -3,15 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from domains import Domain
 from generators.base import (
     BaseParams,
     GeneratorResult,
 )
-from generators.loop.profile import profile_generator
-from generators.base import ProfileParams
+from generators.base import generate_shape_id
 from layout_ast.layout import Item, Geometry, Placement, Feature
-from assembly.notches import NotchSpec, build_notched_polygon
+from assembly.notches import NotchSpec
+from assembly.notches import build_notched_polygon
 
 
 EdgeName = Literal["top", "bottom", "left", "right"]
@@ -57,57 +56,31 @@ def notched_panel_generator(
     if params.part_name:
         shape_id = f"{shape_id_prefix}_{params.part_name.lower()}"
 
-    if params.notches:
-        polygon_pts = build_notched_polygon(
-            params.width_mm,
-            params.height_mm,
-            center,
-            params.notches,
-        )
+    items: list[Item] = []
 
-        if len(polygon_pts) < 3:
-            if allow_empty:
-                return []
-            raise ValueError("build_notched_polygon returned fewer than 3 points")
-
-        cx = sum(p[0] for p in polygon_pts) / len(polygon_pts)
-        cy = sum(p[1] for p in polygon_pts) / len(polygon_pts)
-        relative_pts = [[p[0] - cx, p[1] - cy] for p in polygon_pts]
-
-        item = Item(
-            kind="shape",
-            type="Polygon",
-            geometry=Geometry(data={"points": relative_pts}),
-            placement=Placement(center_xy_mm=(cx, cy)),
-            feature=Feature(
-                type="profile",
-                depth="through",
-                side="outside",
-            ),
-            shape_id=f"{shape_id}_0_outer",
-            label=label,
-        )
-        return [item]
-
-    domain = Domain.from_rectangle(
+    # Finger-joint "notches" are edge cutouts that must be part of the final
+    # part boundary. If we emit them as separate notch features, the CAM pass
+    # will cut the full rectangular profile behind them. Instead, bake the
+    # cutouts into the panel's profile polygon.
+    outer = build_notched_polygon(
         width_mm=params.width_mm,
         height_mm=params.height_mm,
         center=center,
+        notches=params.notches,
     )
 
-    profile_params = ProfileParams(
-        side="outside",
-        depth="through",
-    )
-
-    items = list(profile_generator(
-        domain,
-        profile_params,
-        allow_empty=allow_empty,
-        shape_id_prefix=shape_id,
-        sheet_thickness_mm=params.sheet_thickness_mm,
+    cx, cy = center
+    polygon_points = [[x - cx, y - cy] for x, y in outer]
+    profile_item = Item(
+        kind="shape",
+        type="Polygon",
+        geometry=Geometry(data={"points": polygon_points}),
+        placement=Placement(center_xy_mm=center),
+        feature=Feature(type="profile", side="outside", depth="through"),
+        shape_id=generate_shape_id(shape_id, 0, "outer"),
         label=label,
-    ))
+    )
+    items.append(profile_item)
 
     return items
 

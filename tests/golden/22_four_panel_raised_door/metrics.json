@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-01-28T00:30:19.265675+00:00"
+    "created_at": "2026-01-29T00:17:09.109558+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.32,
     "document": {
       "width_mm": 780.0,
       "height_mm": 980.0,
@@ -325,7 +325,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.7356,
+    "extraction_time_ms": 13.5178,
     "summary": {
       "total_lines": 4464,
       "comment_lines": 24,

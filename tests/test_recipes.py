@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,7 @@ from pml import parse_pml
 from pml.revision_header import update_file_header
 from resolution.layout_resolver import resolve_layout
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
+from adapters.ast_to_removal import ast_to_removal_intents
 
 
 def discover_recipe_pml_files() -> list[Path]:
@@ -77,7 +79,11 @@ def write_outputs(
     try:
         from export.blueprint_svg import render_blueprint_svg
 
-        svg_string = render_blueprint_svg(ast, theme="dark")
+        # Keep SVG aligned with the G-code toolpath by stamping in the kerf used
+        # for this recipe run.
+        ast_with_kerf = replace(ast, kerf_width_mm=3.175)
+        removal_intents = ast_to_removal_intents(ast_with_kerf)
+        svg_string = render_blueprint_svg(ast_with_kerf, removal_intents=removal_intents, theme="dark")
         recipe_dir_name = pml_path.parent.name
         svg_path = output_dir / f"{recipe_dir_name}.svg"
         with open(svg_path, "w", encoding="utf-8") as f:

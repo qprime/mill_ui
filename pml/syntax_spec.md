@@ -10,14 +10,69 @@ PML is a YAML-based declarative language for defining CNC machining layouts. It 
 - **Type-safe**: Shape types, feature types, and parameters are explicit
 - **IDE-friendly**: JSON Schema enables autocomplete and validation
 
+## Coordinate System
+
+PML uses a **working-area coordinate system**:
+
+- **Physical sheet dimensions** (`physical_width`, `physical_height` or `width`, `height`): The actual size of the material
+- **Margin**: The clamp zone around the perimeter that cannot be machined (default 0mm)
+- **Working area**: The cuttable zone, derived as `physical - 2*margin`
+
+**All part coordinates are relative to the working area origin (0,0)**. The margin is applied automatically during G-code/SVG export.
+
+This design makes it **impossible** to accidentally cut in the margin zone—that coordinate space doesn't exist internally.
+
+### Tool Clearance for Outside Profiles
+
+When profiling parts with `side: outside`, the **part edge** must be at least one tool diameter from the working area boundary. This ensures the cutting edge stays within the working area and doesn't encroach on the margin zone.
+
+**Rule of thumb:** For a 1/4" (6.35mm) bit, add 6.35mm to edge-adjacent coordinates.
+
+The tool diameter matters (not radius) because outside profiles cut around the part—the tool center follows the part edge, so the cutting edge extends one radius beyond. A part edge at position 0 means the tool center is at 0 and the cutting edge is at -radius, which violates the margin.
+
+| Quantity | Working Area | Notes |
+|----------|--------------|-------|
+| Part edge (minimum) | 6.35mm | One tool diameter from boundary |
+| Tool center | 3.175mm | Part edge minus tool radius |
+| Cutting edge | 0mm | Exactly at working area boundary |
+
+**Wrong — part edge at x=0, tool cuts into margin:**
+```yaml
+- Rect:
+    at:
+      x: 50mm      # left edge at 0mm
+      y: 50mm      # bottom edge at 0mm
+      width: 100mm
+      height: 100mm
+    children:
+      - Profile: {side: outside, depth: through}
+```
+
+**Correct — part edge offset by tool diameter:**
+```yaml
+- Rect:
+    at:
+      x: 56.35mm   # left edge at 6.35mm (one tool diameter)
+      y: 56.35mm   # bottom edge at 6.35mm
+      width: 100mm
+      height: 100mm
+    children:
+      - Profile: {side: outside, depth: through}
+```
+
+**Common mistakes:**
+1. Using tool radius instead of tool diameter for edge clearance
+2. Forgetting that `at.x` and `at.y` specify the center, not the edge
+3. Adding margin to coordinates (margin is applied at export, not in PML)
+
 ## Quick Example
 
 ```yaml
 Sheet:
-  width: 400mm
-  height: 600mm
+  physical_width: 420mm   # actual sheet size
+  physical_height: 620mm
   thickness: 19mm
-  margin: 10mm
+  margin: 10mm            # working area = 400x600mm
 
 children:
   - Rect:
@@ -41,10 +96,10 @@ A PML document has the following top-level keys:
 project: "optional project name"    # Optional
 kerf: 3.175mm                       # Optional tool kerf override
 Sheet:                              # Required
-  width: 1200mm
-  height: 2400mm
+  physical_width: 1220mm            # or 'width' for backward compat
+  physical_height: 2420mm           # or 'height' for backward compat
   thickness: 19mm
-  margin: 10mm                      # Optional, default 0mm
+  margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
 components:                         # Optional reusable components
   my_component:
     params: {width: 100mm}

@@ -20,6 +20,12 @@
   <rect x="0" y="0" width="880.0" height="680.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="140" y="140" width="600.0" height="400.0" />
+    <g class="margin-zone">
+      <rect x="140" y="140" width="600.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="140" y="530.0" width="600.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="140" y="150.0" width="10.0" height="380.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="730.0" y="150.0" width="10.0" height="380.0" fill="#6b8e7f" fill-opacity="0.15" />
+    </g>
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts" />
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths" />

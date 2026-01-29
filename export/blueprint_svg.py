@@ -102,10 +102,11 @@ def render_blueprint_svg(
     theme_obj = THEMES.get(theme, DARK_THEME)
     sheet = layout_ast.sheet
 
+    sheet_margin = sheet.margin_mm
 
-    margin = 140
-    viewbox_width = sheet.width_mm + 2 * margin
-    viewbox_height = sheet.height_mm + 2 * margin
+    svg_margin = 140
+    viewbox_width = sheet.width_mm + 2 * svg_margin
+    viewbox_height = sheet.height_mm + 2 * svg_margin
 
     svg = ET.Element(
         "svg",
@@ -135,12 +136,12 @@ def render_blueprint_svg(
     )
 
 
-    offset_x = margin
-    offset_y = margin
+    offset_x = svg_margin + sheet_margin
+    offset_y = svg_margin + sheet_margin
 
     def flip_y(y: float) -> float:
         if y_origin == "back":
-            return sheet.height_mm - y
+            return sheet.working_height_mm - y
         return y
 
     sheet_group = ET.SubElement(svg, "g", {"id": "SHEET_OUTLINE", "class": "sheet-outline"})
@@ -159,7 +160,7 @@ def render_blueprint_svg(
     legend_group = ET.SubElement(svg, "g", {"id": "LEGEND", "class": "legend"})
 
 
-    _render_sheet_boundary(sheet_group, sheet, offset_x, offset_y, theme_obj)
+    _render_sheet_boundary(sheet_group, sheet, svg_margin, svg_margin, theme_obj)
 
 
     has_waste_cuts = False
@@ -201,7 +202,7 @@ def render_blueprint_svg(
 
 
     if getattr(sheet, 'show_dimensions', True):
-        _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, margin, theme_obj, y_flip=flip_y)
+        _render_dimensions(dimension_group, layout_ast, offset_x, offset_y, svg_margin, theme_obj, y_flip=flip_y)
 
 
     _render_title_block(title_group, viewbox_width, viewbox_height, theme_obj)
@@ -245,6 +246,62 @@ def _render_sheet_boundary(group: ET.Element, sheet: Sheet, offset_x: float, off
             "height": str(sheet.height_mm),
         },
     )
+
+    margin = sheet.margin_mm
+    if margin > 0.0:
+        margin_group = ET.SubElement(group, "g", {"class": "margin-zone"})
+
+        ET.SubElement(
+            margin_group,
+            "rect",
+            {
+                "x": str(offset_x),
+                "y": str(offset_y),
+                "width": str(sheet.width_mm),
+                "height": str(margin),
+                "fill": theme.construction_stroke,
+                "fill-opacity": "0.15",
+            },
+        )
+
+        ET.SubElement(
+            margin_group,
+            "rect",
+            {
+                "x": str(offset_x),
+                "y": str(offset_y + sheet.height_mm - margin),
+                "width": str(sheet.width_mm),
+                "height": str(margin),
+                "fill": theme.construction_stroke,
+                "fill-opacity": "0.15",
+            },
+        )
+
+        ET.SubElement(
+            margin_group,
+            "rect",
+            {
+                "x": str(offset_x),
+                "y": str(offset_y + margin),
+                "width": str(margin),
+                "height": str(sheet.height_mm - 2 * margin),
+                "fill": theme.construction_stroke,
+                "fill-opacity": "0.15",
+            },
+        )
+
+        ET.SubElement(
+            margin_group,
+            "rect",
+            {
+                "x": str(offset_x + sheet.width_mm - margin),
+                "y": str(offset_y + margin),
+                "width": str(margin),
+                "height": str(sheet.height_mm - 2 * margin),
+                "fill": theme.construction_stroke,
+                "fill-opacity": "0.15",
+            },
+        )
 
 
 def _rounded_rect_path(

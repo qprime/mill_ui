@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "28_diamond_lattice_panel",
-    "created_at": "2026-01-29T00:17:09.298842+00:00"
+    "created_at": "2026-01-29T14:31:40.060499+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7,
+    "extraction_time_ms": 1.76,
     "document": {
       "width_mm": 680.0,
       "height_mm": 680.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -749,6 +750,16 @@
             }
           ]
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 1,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
           "element_count": 1,
           "rect_count": 1,
@@ -798,11 +809,16 @@
       }
     },
     "paths": {
-      "total_count": 48,
-      "closed_count": 48,
+      "total_count": 49,
+      "closed_count": 49,
       "open_count": 0,
-      "total_length_mm": 13333.9489,
+      "total_length_mm": 14543.4719,
       "by_layer": {
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 1209.523
+        },
         "POCKET_REGIONS": {
           "count": 46,
           "closed": 46,
@@ -904,7 +920,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0554,
+    "extraction_time_ms": 0.0553,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

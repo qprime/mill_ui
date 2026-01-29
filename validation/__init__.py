@@ -13,6 +13,8 @@ from .removal_checks import (
     check_depth_feasibility,
     check_toolability,
     check_depth_profile,
+    check_toolpath_clearance,
+    check_working_area_bounds,
 )
 
 # CAM validation types (new infrastructure)
@@ -39,6 +41,8 @@ __all__ = [
     "check_depth_feasibility",
     "check_toolability",
     "check_depth_profile",
+    "check_toolpath_clearance",
+    "check_working_area_bounds",
     # CAM validation types
     "Verdict",
     "InvariantResult",

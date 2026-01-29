@@ -148,3 +148,23 @@ Error messages MUST include:
 - What operation failed
 - What constraint was violated
 - Actual vs. expected values
+
+---
+
+### 6. Working-Area Coordinate System
+
+**Rule:** PML specifies physical sheet dimensions (`physical_width`, `physical_height` or `width`, `height`) and margin. The working area is derived as `physical - 2*margin`. All part coordinates are relative to working area origin (0,0). The margin defines a physical offset applied only at G-code/SVG export.
+
+**Wrong:**
+```python
+item_x = margin + offset
+```
+
+**Correct:**
+```python
+item_x = offset  # margin applied at export
+```
+
+**Why:** The margin zone is a physical no-cut zone reserved for clamps. No cutting operation may encroach on this zone—including tool paths for outside profiles. The margin zone cannot be addressed and never exists in internal coordinates.
+
+**Tool clearance:** Outside profile cuts require part edges to be at least one tool diameter from working area boundaries. See [pml/syntax_spec.md](../pml/syntax_spec.md#tool-clearance-for-outside-profiles) for PML placement rules.

@@ -28,6 +28,7 @@ class Config:
     min_overlap_mm: float = 1.0
     cleanup_offset_mm: float = 0.25
     pocket_finish_perimeter: bool = True
+    default_margin_mm: float = 10.0
 
     def as_dict(self) -> dict[str, Any]:
 
@@ -43,6 +44,7 @@ class Config:
             "min_overlap_mm": float(self.min_overlap_mm),
             "cleanup_offset_mm": float(self.cleanup_offset_mm),
             "pocket_finish_perimeter": bool(self.pocket_finish_perimeter),
+            "default_margin_mm": float(self.default_margin_mm),
         }
 
     def with_overrides(self, overrides: Mapping[str, Any]) -> Config:
@@ -108,6 +110,7 @@ _TOLERANCE_FIELDS = {
     "min_overlap_ratio",
     "min_overlap_mm",
     "cleanup_offset_mm",
+    "default_margin_mm",
 }
 _ENV_SUFFIXES = {
     "tool_db_path": "TOOL_DB",
@@ -121,6 +124,7 @@ _ENV_SUFFIXES = {
     "min_overlap_mm": "MIN_OVERLAP_MM",
     "cleanup_offset_mm": "CLEANUP_OFFSET_MM",
     "pocket_finish_perimeter": "POCKET_FINISH_PERIMETER",
+    "default_margin_mm": "DEFAULT_MARGIN",
 }
 
 
@@ -202,6 +206,7 @@ _NORMALISERS = {
     "min_overlap_mm": _non_negative_float,
     "cleanup_offset_mm": _non_negative_float,
     "pocket_finish_perimeter": _normalise_bool,
+    "default_margin_mm": _non_negative_float,
 }
 
 

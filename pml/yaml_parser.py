@@ -553,9 +553,23 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     if sheet_block is None:
         raise PMLParseError("Missing 'Sheet:' root key")
 
+    if "physical_width" in sheet_block:
+        width_mm = parse_dimension(sheet_block["physical_width"])
+    elif "width" in sheet_block:
+        width_mm = parse_dimension(sheet_block["width"])
+    else:
+        raise PMLParseError("Sheet missing 'width' or 'physical_width'")
+
+    if "physical_height" in sheet_block:
+        height_mm = parse_dimension(sheet_block["physical_height"])
+    elif "height" in sheet_block:
+        height_mm = parse_dimension(sheet_block["height"])
+    else:
+        raise PMLParseError("Sheet missing 'height' or 'physical_height'")
+
     sheet = Sheet(
-        width_mm=parse_dimension(sheet_block["width"]),
-        height_mm=parse_dimension(sheet_block["height"]),
+        width_mm=width_mm,
+        height_mm=height_mm,
         thickness_mm=parse_dimension(sheet_block["thickness"]),
         margin_mm=parse_dimension(sheet_block.get("margin", "0mm")),
         show_dimensions=sheet_block.get("show_dimensions", True),

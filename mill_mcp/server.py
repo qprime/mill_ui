@@ -16,10 +16,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from mill_mcp.config import ensure_output_dir
 
-from pml import parse_pml, PMLParseError
+from pml import parse_pml, PMLParseError, format_pml
 from pml.yaml_parser import parse_pml_yaml, parse_nest_yaml, NestParseError
 from pml.nest_parser import nest_job_to_api_params
 from pml.yaml_formatter import format_pml_yaml
+from pml.formatter import format_pml as format_flat_pml
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from validation.removal_checks import check_overlap, check_depth_feasibility
@@ -150,7 +151,7 @@ def _run_cam_pipeline(
     }
 
     pml_path = job_dir / f"{safe_name}.pml.yml"
-    pml_content = format_pml_yaml(ast)
+    pml_content = format_pml(ast)
     pml_path.write_text(pml_content)
     results["outputs"]["pml"] = str(pml_path)
 

@@ -244,11 +244,11 @@
     <polygon points="243.23759005323592,520.0 246.23759005323592,517.0 246.23759005323592,523.0" fill="#5ab9ea" />
     <polygon points="248.89444430272835,520.0 245.89444430272835,517.0 245.89444430272835,523.0" fill="#5ab9ea" />
     <text x="246.06601717798213" y="515.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">5.7mm</text>
-    <line x1="207.88225099390854" y1="207.8822509939086" x2="207.88225099390854" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="540.0" y1="207.8822509939086" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="207.88225099390854" y1="0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="207.88225099390854,0 210.88225099390854,-3.0 210.88225099390854,3.0" fill="#5ab9ea" />
-    <polygon points="540.0,0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
+    <line x1="207.88225099390854" y1="207.8822509939086" x2="207.88225099390854" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="207.8822509939086" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="207.88225099390854" y1="0.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="207.88225099390854,0.0 210.88225099390854,-3.0 210.88225099390854,3.0" fill="#5ab9ea" />
+    <polygon points="540.0,0.0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
     <text x="373.94112549695427" y="-5.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">332.1mm</text>
     <line x1="540.0" y1="207.8822509939086" x2="680.0" y2="207.8822509939086" stroke="#5ab9ea" stroke-width="1" />
     <line x1="540.0" y1="540.0" x2="680.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
@@ -262,11 +262,11 @@
     <polygon points="207.88225099390854,520.0 210.88225099390854,517.0 210.88225099390854,523.0" fill="#5ab9ea" />
     <polygon points="213.53910524340097,520.0 210.53910524340097,517.0 210.53910524340097,523.0" fill="#5ab9ea" />
     <text x="210.71067811865476" y="515.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">5.7mm</text>
-    <line x1="172.52691193458114" y1="172.52691193458116" x2="172.52691193458114" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="540.0" y1="172.52691193458116" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="172.52691193458114" y1="0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="172.52691193458114,0 175.52691193458114,-3.0 175.52691193458114,3.0" fill="#5ab9ea" />
-    <polygon points="540.0,0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
+    <line x1="172.52691193458114" y1="172.52691193458116" x2="172.52691193458114" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="172.52691193458116" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="172.52691193458114" y1="0.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="172.52691193458114,0.0 175.52691193458114,-3.0 175.52691193458114,3.0" fill="#5ab9ea" />
+    <polygon points="540.0,0.0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
     <text x="356.26345596729055" y="-5.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">367.5mm</text>
     <line x1="540.0" y1="172.52691193458116" x2="680.0" y2="172.52691193458116" stroke="#5ab9ea" stroke-width="1" />
     <line x1="540.0" y1="540.0" x2="680.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
@@ -280,11 +280,11 @@
     <polygon points="172.52691193458114,520.0 175.52691193458114,517.0 175.52691193458114,523.0" fill="#5ab9ea" />
     <polygon points="178.18376618407356,520.0 175.18376618407356,517.0 175.18376618407356,523.0" fill="#5ab9ea" />
     <text x="175.35533905932735" y="515.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">5.7mm</text>
-    <line x1="140.0" y1="140.0" x2="140.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="540.0" y1="140.0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,0 143.0,-3.0 143.0,3.0" fill="#5ab9ea" />
-    <polygon points="540.0,0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
+    <line x1="140.0" y1="140.0" x2="140.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="140.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="0.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,0.0 143.0,-3.0 143.0,3.0" fill="#5ab9ea" />
+    <polygon points="540.0,0.0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
     <text x="340.0" y="-5.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">400.0mm</text>
     <line x1="540.0" y1="140.0" x2="680.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="540.0" y1="540.0" x2="680.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />
@@ -298,11 +298,11 @@
     <polygon points="140.0,520.0 143.0,517.0 143.0,523.0" fill="#5ab9ea" />
     <polygon points="142.82842712474618,520.0 139.82842712474618,517.0 139.82842712474618,523.0" fill="#5ab9ea" />
     <text x="141.4142135623731" y="515.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">2.8mm</text>
-    <line x1="140.0" y1="140.0" x2="140.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="540.0" y1="140.0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="0" x2="540.0" y2="0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,0 143.0,-3.0 143.0,3.0" fill="#5ab9ea" />
-    <polygon points="540.0,0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
+    <line x1="140.0" y1="140.0" x2="140.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="540.0" y1="140.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="140.0" y1="0.0" x2="540.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="140.0,0.0 143.0,-3.0 143.0,3.0" fill="#5ab9ea" />
+    <polygon points="540.0,0.0 537.0,-3.0 537.0,3.0" fill="#5ab9ea" />
     <text x="340.0" y="-5.0" class="dimension-text" text-anchor="middle" dominant-baseline="middle">400.0mm</text>
     <line x1="540.0" y1="140.0" x2="680.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="540.0" y1="540.0" x2="680.0" y2="540.0" stroke="#5ab9ea" stroke-width="1" />

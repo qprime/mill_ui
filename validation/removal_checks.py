@@ -194,11 +194,122 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
 
 def _regions_overlap(a: RemovalIntent, b: RemovalIntent) -> bool:
-
     z_overlap = not (a.depth_profile.z_top <= b.depth_profile.z_bottom or b.depth_profile.z_top <= a.depth_profile.z_bottom)
-
 
     x_overlap = not (a.bounds.x_max <= b.bounds.x_min or b.bounds.x_max <= a.bounds.x_min)
     y_overlap = not (a.bounds.y_max <= b.bounds.y_min or b.bounds.y_max <= a.bounds.y_min)
 
     return z_overlap and x_overlap and y_overlap
+
+
+def check_toolpath_clearance(
+    intents: list[RemovalIntent],
+    tool_diameter_mm: float,
+) -> ValidationResult:
+    result = ValidationResult()
+
+    outside_profiles = [
+        i for i in intents
+        if i.metadata.get("side") == "outside" and i.metadata.get("hint_type") == "profile"
+    ]
+
+    for i, a in enumerate(outside_profiles):
+        for b in outside_profiles[i + 1:]:
+            if not _same_z_range(a, b):
+                continue
+
+            gap = _min_gap_between(a.bounds, b.bounds)
+
+            if gap < 0:
+                continue
+
+            if gap < tool_diameter_mm - 0.001:
+                result.add_error(
+                    f"Insufficient clearance between {a.region_id} and {b.region_id}: "
+                    f"{gap:.2f}mm gap, need {tool_diameter_mm:.2f}mm for tool",
+                    region_id=a.region_id,
+                    other_region_id=b.region_id,
+                    gap_mm=gap,
+                    required_mm=tool_diameter_mm,
+                )
+
+    return result
+
+
+def _same_z_range(a: RemovalIntent, b: RemovalIntent) -> bool:
+    return not (
+        a.depth_profile.z_top <= b.depth_profile.z_bottom or
+        b.depth_profile.z_top <= a.depth_profile.z_bottom
+    )
+
+
+def _min_gap_between(a, b) -> float:
+    x_gap = max(a.x_min, b.x_min) - min(a.x_max, b.x_max)
+    y_gap = max(a.y_min, b.y_min) - min(a.y_max, b.y_max)
+
+    if x_gap >= 0 and y_gap >= 0:
+        return min(x_gap, y_gap)
+    elif x_gap >= 0:
+        return x_gap
+    elif y_gap >= 0:
+        return y_gap
+    else:
+        return -1
+
+
+def check_working_area_bounds(
+    intents: list[RemovalIntent],
+    working_width_mm: float,
+    working_height_mm: float,
+    tool_radius_mm: float = 0.0,
+) -> ValidationResult:
+    result = ValidationResult()
+
+    tool_diameter_mm = 2 * tool_radius_mm
+
+    for intent in intents:
+        bounds = intent.bounds
+        side = intent.metadata.get("side", "on")
+
+        offset = tool_diameter_mm if side == "outside" else 0.0
+
+        min_x = bounds.x_min - offset
+        min_y = bounds.y_min - offset
+        max_x = bounds.x_max + offset
+        max_y = bounds.y_max + offset
+
+        if min_x < 0:
+            result.add_error(
+                f"Cutting edge extends {abs(min_x):.2f}mm into left margin zone",
+                region_id=intent.region_id,
+                boundary_exceeded="left",
+                excess_mm=abs(min_x),
+            )
+
+        if min_y < 0:
+            result.add_error(
+                f"Cutting edge extends {abs(min_y):.2f}mm into bottom margin zone",
+                region_id=intent.region_id,
+                boundary_exceeded="bottom",
+                excess_mm=abs(min_y),
+            )
+
+        if max_x > working_width_mm:
+            excess = max_x - working_width_mm
+            result.add_error(
+                f"Cutting edge extends {excess:.2f}mm into right margin zone",
+                region_id=intent.region_id,
+                boundary_exceeded="right",
+                excess_mm=excess,
+            )
+
+        if max_y > working_height_mm:
+            excess = max_y - working_height_mm
+            result.add_error(
+                f"Cutting edge extends {excess:.2f}mm into top margin zone",
+                region_id=intent.region_id,
+                boundary_exceeded="top",
+                excess_mm=excess,
+            )
+
+    return result

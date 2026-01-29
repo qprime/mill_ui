@@ -20,6 +20,12 @@
   <rect x="0" y="0" width="1080.0" height="880.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="140" y="140" width="800.0" height="600.0" />
+    <g class="margin-zone">
+      <rect x="140" y="140" width="800.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="140" y="730.0" width="800.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="140" y="150.0" width="10.0" height="580.0" fill="#6b8e7f" fill-opacity="0.15" />
+      <rect x="930.0" y="150.0" width="10.0" height="580.0" fill="#6b8e7f" fill-opacity="0.15" />
+    </g>
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <path d="M 350.000 730.000 L 350.000 717.466 L 344.000 717.466 L 344.000 704.820 L 350.000 704.820 L 350.000 692.323 L 344.000 692.323 L 344.000 679.677 L 350.000 679.677 L 350.000 667.180 L 344.000 667.180 L 344.000 654.534 L 350.000 654.534 L 350.000 642.000 L 150.000 642.000 L 150.000 654.534 L 156.000 654.534 L 156.000 667.180 L 150.000 667.180 L 150.000 679.677 L 156.000 679.677 L 156.000 692.323 L 150.000 692.323 L 150.000 704.820 L 156.000 704.820 L 156.000 717.466 L 150.000 717.466 L 150.000 730.000 Z" fill-rule="evenodd" />

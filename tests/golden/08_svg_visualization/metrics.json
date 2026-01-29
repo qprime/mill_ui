@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "08_svg_visualization",
-    "created_at": "2026-01-29T00:17:07.360703+00:00"
+    "created_at": "2026-01-29T14:31:38.113196+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -166,6 +167,16 @@
             }
           ]
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 1,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
           "element_count": 1,
           "rect_count": 1,
@@ -215,11 +226,16 @@
       }
     },
     "paths": {
-      "total_count": 7,
-      "closed_count": 7,
+      "total_count": 8,
+      "closed_count": 8,
       "open_count": 0,
-      "total_length_mm": 40.9706,
+      "total_length_mm": 550.4956,
       "by_layer": {
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 509.525
+        },
         "DIMENSIONS": {
           "count": 4,
           "closed": 4,
@@ -301,7 +317,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9296,
+    "extraction_time_ms": 0.944,
     "summary": {
       "total_lines": 532,
       "comment_lines": 12,

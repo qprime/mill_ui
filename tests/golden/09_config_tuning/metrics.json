@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "09_config_tuning",
-    "created_at": "2026-01-29T00:17:07.364401+00:00"
+    "created_at": "2026-01-29T14:31:38.116960+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.21,
+    "extraction_time_ms": 0.22,
     "document": {
       "width_mm": 480.0,
       "height_mm": 430.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -141,6 +142,16 @@
           ]
         },
         "PROFILE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "PROFILE_TOOLPATHS": {
           "element_count": 0,
           "rect_count": 0,
           "circle_count": 0,
@@ -266,7 +277,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7516,
+    "extraction_time_ms": 0.7717,
     "summary": {
       "total_lines": 224,
       "comment_lines": 6,

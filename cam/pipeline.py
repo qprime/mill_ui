@@ -10,7 +10,12 @@ from layout_ast.layout import LayoutAST
 from ir.removal_intent import RemovalIntent
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_hints
-from validation.removal_checks import check_overlap, check_depth_feasibility
+from validation.removal_checks import (
+    check_overlap,
+    check_depth_feasibility,
+    check_working_area_bounds,
+    check_toolpath_clearance,
+)
 from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
@@ -107,6 +112,26 @@ def run_pipeline(
             for warning in depth_result.warnings:
                 warnings.append(warning.message)
 
+    tool_radius = kerf_mm / 2.0
+    bounds_result = check_working_area_bounds(
+        intents,
+        ast.sheet.working_width_mm,
+        ast.sheet.working_height_mm,
+        tool_radius_mm=tool_radius,
+    )
+    if bounds_result.has_issues():
+        for error in bounds_result.errors:
+            errors.append(error.message)
+        for warning in bounds_result.warnings:
+            warnings.append(warning.message)
+
+    clearance_result = check_toolpath_clearance(intents, kerf_mm)
+    if clearance_result.has_issues():
+        for error in clearance_result.errors:
+            errors.append(error.message)
+        for warning in clearance_result.warnings:
+            warnings.append(warning.message)
+
     hints_start = time.perf_counter()
     hints = removal_intents_to_hints(
         intents,
@@ -141,6 +166,8 @@ def run_pipeline(
     total_rapid_moves = 0
     total_cut_moves = 0
 
+    margin_mm = ast.sheet.margin_mm
+
     for pass_dict in passes:
         setup = pass_dict["setup"]
         gcode = write_gcode(
@@ -149,6 +176,7 @@ def run_pipeline(
             machine=machine,
             sheet_height=ast.sheet.height_mm,
             y_origin=y_origin,
+            margin_mm=margin_mm,
         )
 
         tool_diameter = setup.tool.diameter

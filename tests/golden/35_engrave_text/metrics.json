@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "35_engrave_text",
-    "created_at": "2026-01-29T00:17:09.586139+00:00"
+    "created_at": "2026-01-29T14:31:40.351666+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.48,
+    "extraction_time_ms": 4.54,
     "document": {
       "width_mm": 580.0,
       "height_mm": 480.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -134,8 +135,18 @@
           "text_count": 0,
           "elements": []
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
-          "element_count": 1,
+          "element_count": 2,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
@@ -222,11 +233,27 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 2,
+      "count": 6,
       "dimensions": [
+        [
+          10.0,
+          180.0
+        ],
+        [
+          10.0,
+          180.0
+        ],
         [
           15.0,
           8.0
+        ],
+        [
+          300.0,
+          10.0
+        ],
+        [
+          300.0,
+          10.0
         ],
         [
           300.0,
@@ -237,7 +264,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 26.788,
+    "extraction_time_ms": 27.4426,
     "summary": {
       "total_lines": 9422,
       "comment_lines": 1570,

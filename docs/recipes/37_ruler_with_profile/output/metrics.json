@@ -1,12 +1,12 @@
 {
   "timing": {
-    "ir_ms": 9.67,
-    "hints_ms": 1.81,
-    "plan_ms": 33.35,
-    "gcode_ms": 31.73,
-    "svg_ms": 8.58,
-    "total_ms": 672.33,
-    "parse_ms": 595.77
+    "ir_ms": 31.1,
+    "hints_ms": 1.67,
+    "plan_ms": 24.86,
+    "gcode_ms": 33.11,
+    "svg_ms": 8.84,
+    "total_ms": 688.73,
+    "parse_ms": 597.99
   },
   "complexity": {
     "total_moves": 18996,
@@ -30,11 +30,11 @@
     ]
   },
   "output_size": {
-    "total_bytes": 253784,
+    "total_bytes": 253998,
     "total_lines": 14440,
     "files": {
       "engrave-3.17mm": {
-        "bytes": 240501,
+        "bytes": 240715,
         "lines": 13694
       },
       "profile-3.17mm": {

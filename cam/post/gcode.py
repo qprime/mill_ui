@@ -23,6 +23,23 @@ def _flip_y_in_moves(moves, sheet_height: float):
     return flipped
 
 
+def _apply_margin_offset(moves, margin_mm: float):
+    if margin_mm == 0.0:
+        return moves
+    offset_moves = []
+    for move in moves:
+        if isinstance(move, dict):
+            offset_move = dict(move)
+            if 'x' in offset_move and offset_move['x'] is not None:
+                offset_move['x'] = move['x'] + margin_mm
+            if 'y' in offset_move and offset_move['y'] is not None:
+                offset_move['y'] = move['y'] + margin_mm
+            offset_moves.append(offset_move)
+        else:
+            offset_moves.append(move)
+    return offset_moves
+
+
 def _extract_and_strip_first_rpm(moves) -> tuple[float | None, list]:
     first_rpm = None
     result = []
@@ -45,6 +62,7 @@ def write_gcode(
     machine: Machine | None = None,
     sheet_height: float | None = None,
     y_origin: str = 'back',
+    margin_mm: float = 0.0,
 ):
     if unit not in ('mm', 'inch'):
         raise ValueError("unit must be 'mm' or 'inch'")
@@ -53,6 +71,9 @@ def write_gcode(
 
     effective_header = header
     effective_moves = moves
+
+    if margin_mm != 0.0:
+        effective_moves = _apply_margin_offset(effective_moves, margin_mm)
 
     if y_origin == 'front' and sheet_height is not None:
         effective_moves = _flip_y_in_moves(effective_moves, sheet_height)

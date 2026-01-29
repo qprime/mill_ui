@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-01-29T00:17:09.840844+00:00",
+  "updated_at": "2026-01-29T14:31:40.608659+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
       "source_file": "docs/recipes/01_simple_profile/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.767863+00:00",
-      "updated_at": "2026-01-29T00:17:07.171631+00:00",
+      "updated_at": "2026-01-29T14:31:37.919502+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -15,7 +15,7 @@
       "recipe_name": "02_pocket_with_cleanup",
       "source_file": "docs/recipes/02_pocket_with_cleanup/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.772940+00:00",
-      "updated_at": "2026-01-29T00:17:07.175344+00:00",
+      "updated_at": "2026-01-29T14:31:37.923292+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -23,7 +23,7 @@
       "recipe_name": "03_shaker_door_template",
       "source_file": "docs/recipes/03_shaker_door_template/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.791976+00:00",
-      "updated_at": "2026-01-29T00:17:07.195672+00:00",
+      "updated_at": "2026-01-29T14:31:37.943892+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -31,7 +31,7 @@
       "recipe_name": "04_custom_template",
       "source_file": "docs/recipes/04_custom_template/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.849160+00:00",
-      "updated_at": "2026-01-29T00:17:07.254787+00:00",
+      "updated_at": "2026-01-29T14:31:38.004800+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -39,7 +39,7 @@
       "recipe_name": "05_validation_workflow",
       "source_file": "docs/recipes/05_validation_workflow/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.881843+00:00",
-      "updated_at": "2026-01-29T00:17:07.288547+00:00",
+      "updated_at": "2026-01-29T14:31:38.039029+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -47,7 +47,7 @@
       "recipe_name": "06_multiple_depths",
       "source_file": "docs/recipes/06_multiple_depths/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.937862+00:00",
-      "updated_at": "2026-01-29T00:17:07.345778+00:00",
+      "updated_at": "2026-01-29T14:31:38.098177+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -55,7 +55,7 @@
       "recipe_name": "07_json_generation",
       "source_file": "docs/recipes/07_json_generation/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.946257+00:00",
-      "updated_at": "2026-01-29T00:17:07.353364+00:00",
+      "updated_at": "2026-01-29T14:31:38.105804+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -63,7 +63,7 @@
       "recipe_name": "08_svg_visualization",
       "source_file": "docs/recipes/08_svg_visualization/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.954391+00:00",
-      "updated_at": "2026-01-29T00:17:07.360943+00:00",
+      "updated_at": "2026-01-29T14:31:38.113437+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -71,7 +71,7 @@
       "recipe_name": "09_config_tuning",
       "source_file": "docs/recipes/09_config_tuning/example.pml.yml",
       "created_at": "2026-01-17T01:38:42.959191+00:00",
-      "updated_at": "2026-01-29T00:17:07.364611+00:00",
+      "updated_at": "2026-01-29T14:31:38.117177+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -79,7 +79,7 @@
       "recipe_name": "10_hole_patterns_grid",
       "source_file": "docs/recipes/10_hole_patterns_grid/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.356934+00:00",
-      "updated_at": "2026-01-29T00:17:07.832161+00:00",
+      "updated_at": "2026-01-29T14:31:38.587226+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -87,7 +87,7 @@
       "recipe_name": "11_keepout_islands",
       "source_file": "docs/recipes/11_keepout_islands/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.370344+00:00",
-      "updated_at": "2026-01-29T00:17:07.845873+00:00",
+      "updated_at": "2026-01-29T14:31:38.600934+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -95,7 +95,7 @@
       "recipe_name": "12_edge_treatment_intent",
       "source_file": "docs/recipes/12_edge_treatment_intent/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.378407+00:00",
-      "updated_at": "2026-01-29T00:17:07.853266+00:00",
+      "updated_at": "2026-01-29T14:31:38.608284+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -103,7 +103,7 @@
       "recipe_name": "13_split_layout_french_door",
       "source_file": "docs/recipes/13_split_layout_french_door/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.414769+00:00",
-      "updated_at": "2026-01-29T00:17:07.893752+00:00",
+      "updated_at": "2026-01-29T14:31:38.647919+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -111,7 +111,7 @@
       "recipe_name": "14_corner_cleanup_multi_tool",
       "source_file": "docs/recipes/14_corner_cleanup_multi_tool/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.454384+00:00",
-      "updated_at": "2026-01-29T00:17:07.938531+00:00",
+      "updated_at": "2026-01-29T14:31:38.691857+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -119,7 +119,7 @@
       "recipe_name": "15_profile_with_tabs",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.459550+00:00",
-      "updated_at": "2026-01-29T00:17:07.941540+00:00",
+      "updated_at": "2026-01-29T14:31:38.694847+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -127,7 +127,7 @@
       "recipe_name": "16_sheet_layout_nesting",
       "source_file": "docs/recipes/16_sheet_layout_nesting/example.pml.yml",
       "created_at": "2026-01-17T01:38:43.557700+00:00",
-      "updated_at": "2026-01-29T00:17:08.039413+00:00",
+      "updated_at": "2026-01-29T14:31:38.794824+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -135,7 +135,7 @@
       "recipe_name": "17_nesting_guillotine",
       "source_file": "",
       "created_at": "2026-01-17T01:38:43.936155+00:00",
-      "updated_at": "2026-01-29T00:17:08.485715+00:00",
+      "updated_at": "2026-01-29T14:31:39.242224+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -143,7 +143,7 @@
       "recipe_name": "18_nesting_maxrects",
       "source_file": "",
       "created_at": "2026-01-17T01:38:44.404480+00:00",
-      "updated_at": "2026-01-29T00:17:09.036707+00:00",
+      "updated_at": "2026-01-29T14:31:39.794479+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -151,7 +151,7 @@
       "recipe_name": "21_simple_shaker_door",
       "source_file": "docs/recipes/21_simple_shaker_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.813155+00:00",
-      "updated_at": "2026-01-29T00:17:09.056232+00:00",
+      "updated_at": "2026-01-29T14:31:39.814674+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -159,7 +159,7 @@
       "recipe_name": "22_four_panel_raised_door",
       "source_file": "docs/recipes/22_four_panel_raised_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.859820+00:00",
-      "updated_at": "2026-01-29T00:17:09.109853+00:00",
+      "updated_at": "2026-01-29T14:31:39.868479+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -167,7 +167,7 @@
       "recipe_name": "23_chamfered_cabinet_panel",
       "source_file": "docs/recipes/23_chamfered_cabinet_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.874730+00:00",
-      "updated_at": "2026-01-29T00:17:09.126178+00:00",
+      "updated_at": "2026-01-29T14:31:39.884676+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -175,7 +175,7 @@
       "recipe_name": "24_shelf_dados_side",
       "source_file": "docs/recipes/24_shelf_dados_side/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.884847+00:00",
-      "updated_at": "2026-01-29T00:17:09.136305+00:00",
+      "updated_at": "2026-01-29T14:31:39.894985+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -183,7 +183,7 @@
       "recipe_name": "25_decorative_border_panel",
       "source_file": "docs/recipes/25_decorative_border_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.890318+00:00",
-      "updated_at": "2026-01-29T00:17:09.140797+00:00",
+      "updated_at": "2026-01-29T14:31:39.899551+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -191,7 +191,7 @@
       "recipe_name": "26_faux_shutter_panel",
       "source_file": "docs/recipes/26_faux_shutter_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:07.917482+00:00",
-      "updated_at": "2026-01-29T00:17:09.169813+00:00",
+      "updated_at": "2026-01-29T14:31:39.928984+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -199,7 +199,7 @@
       "recipe_name": "27_wave_texture_panel",
       "source_file": "docs/recipes/27_wave_texture_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.022251+00:00",
-      "updated_at": "2026-01-29T00:17:09.292871+00:00",
+      "updated_at": "2026-01-29T14:31:40.054395+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -207,7 +207,7 @@
       "recipe_name": "28_diamond_lattice_panel",
       "source_file": "docs/recipes/28_diamond_lattice_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.039392+00:00",
-      "updated_at": "2026-01-29T00:17:09.299327+00:00",
+      "updated_at": "2026-01-29T14:31:40.060986+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -215,7 +215,7 @@
       "recipe_name": "29_picture_frame_panel",
       "source_file": "docs/recipes/29_picture_frame_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.046573+00:00",
-      "updated_at": "2026-01-29T00:17:09.306065+00:00",
+      "updated_at": "2026-01-29T14:31:40.067732+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -223,7 +223,7 @@
       "recipe_name": "30_cathedral_arch_door",
       "source_file": "docs/recipes/30_cathedral_arch_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.084147+00:00",
-      "updated_at": "2026-01-29T00:17:09.347468+00:00",
+      "updated_at": "2026-01-29T14:31:40.109455+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -231,7 +231,7 @@
       "recipe_name": "31_x_panel_door",
       "source_file": "docs/recipes/31_x_panel_door/example.pml.yml",
       "created_at": "2026-01-23T00:23:12.198989+00:00",
-      "updated_at": "2026-01-29T00:17:09.351979+00:00",
+      "updated_at": "2026-01-29T14:31:40.114037+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -239,7 +239,7 @@
       "recipe_name": "32_waste_cuts",
       "source_file": "",
       "created_at": "2026-01-25T20:02:55.236154+00:00",
-      "updated_at": "2026-01-29T00:17:09.354929+00:00",
+      "updated_at": "2026-01-29T14:31:40.117029+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -247,7 +247,7 @@
       "recipe_name": "33_measurement_grid",
       "source_file": "docs/recipes/33_measurement_grid/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.523567+00:00",
-      "updated_at": "2026-01-29T00:17:09.421104+00:00",
+      "updated_at": "2026-01-29T14:31:40.183105+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -255,7 +255,7 @@
       "recipe_name": "34_measurement_edge",
       "source_file": "docs/recipes/34_measurement_edge/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.585883+00:00",
-      "updated_at": "2026-01-29T00:17:09.483589+00:00",
+      "updated_at": "2026-01-29T14:31:40.247424+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -263,7 +263,7 @@
       "recipe_name": "35_engrave_text",
       "source_file": "docs/recipes/35_engrave_text/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.687365+00:00",
-      "updated_at": "2026-01-29T00:17:09.586363+00:00",
+      "updated_at": "2026-01-29T14:31:40.351938+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -271,7 +271,7 @@
       "recipe_name": "36_sparse_ruler_labels",
       "source_file": "docs/recipes/36_sparse_ruler_labels/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.743591+00:00",
-      "updated_at": "2026-01-29T00:17:09.643329+00:00",
+      "updated_at": "2026-01-29T14:31:40.409663+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -279,7 +279,7 @@
       "recipe_name": "37_ruler_with_profile",
       "source_file": "docs/recipes/37_ruler_with_profile/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.900800+00:00",
-      "updated_at": "2026-01-29T00:17:09.802294+00:00",
+      "updated_at": "2026-01-29T14:31:40.570332+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -287,7 +287,7 @@
       "recipe_name": "38_finger_jointed_box",
       "source_file": "docs/recipes/38_finger_jointed_box/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.909638+00:00",
-      "updated_at": "2026-01-29T00:17:09.817813+00:00",
+      "updated_at": "2026-01-29T14:31:40.579345+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -295,7 +295,7 @@
       "recipe_name": "39_box_bottom_styles",
       "source_file": "docs/recipes/39_box_bottom_styles/example.pml.yml",
       "created_at": "2026-01-27T16:49:42.922794+00:00",
-      "updated_at": "2026-01-29T00:17:09.840841+00:00",
+      "updated_at": "2026-01-29T14:31:40.592109+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -303,7 +303,7 @@
       "recipe_name": "40_frameless_cabinet",
       "source_file": "docs/recipes/40_frameless_cabinet/example.pml.yml",
       "created_at": "2026-01-28T14:52:29.627210+00:00",
-      "updated_at": "2026-01-28T23:41:06.849828+00:00",
+      "updated_at": "2026-01-29T14:31:40.608656+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

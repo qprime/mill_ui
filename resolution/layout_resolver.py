@@ -872,13 +872,8 @@ class LayoutResolver:
     ) -> None:
         from nesting.waste_decomposition import compute_waste_rectangles, PartBounds, WasteStrategy
 
-        sheet_width = self.ast.sheet.width_mm
-        sheet_height = self.ast.sheet.height_mm
-
-        if node.margin_mm is not None:
-            margin = node.margin_mm
-        else:
-            margin = self.ast.sheet.margin_mm
+        working_width = self.ast.sheet.working_width_mm
+        working_height = self.ast.sheet.working_height_mm
 
         part_bounds = []
         for item in items:
@@ -898,9 +893,9 @@ class LayoutResolver:
         strategy = WasteStrategy.LARGEST if node.strategy == "largest" else WasteStrategy.SIMPLE
 
         waste_rects = compute_waste_rectangles(
-            sheet_width=sheet_width,
-            sheet_height=sheet_height,
-            margin=margin,
+            sheet_width=working_width,
+            sheet_height=working_height,
+            margin=0.0,
             parts=part_bounds,
             min_width=node.min_width_mm,
             min_height=node.min_height_mm,
@@ -1867,15 +1862,12 @@ class LayoutResolver:
             row_height = max(row_height, panel_height)
 
     def resolve(self) -> LayoutAST:
-        margin = self.ast.sheet.margin_mm
-
         sheet_region = ResolvedRegion(
-            x_min=margin,
-            y_min=margin,
-            x_max=self.ast.sheet.width_mm - margin,
-            y_max=self.ast.sheet.height_mm - margin,
+            x_min=0.0,
+            y_min=0.0,
+            x_max=self.ast.sheet.working_width_mm,
+            y_max=self.ast.sheet.working_height_mm,
         )
-
 
         items = []
         self._resolve_node(self.ast.root, sheet_region, items, params={})

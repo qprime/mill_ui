@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-01-29T00:17:09.140552+00:00"
+    "created_at": "2026-01-29T14:31:39.899299+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.38,
+    "extraction_time_ms": 0.37,
     "document": {
       "width_mm": 630.0,
       "height_mm": 730.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -190,6 +191,16 @@
             }
           ]
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 1,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
           "element_count": 1,
           "rect_count": 1,
@@ -239,11 +250,16 @@
       }
     },
     "paths": {
-      "total_count": 5,
-      "closed_count": 5,
+      "total_count": 6,
+      "closed_count": 6,
       "open_count": 0,
-      "total_length_mm": 6927.0474,
+      "total_length_mm": 8186.5704,
       "by_layer": {
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 1259.523
+        },
         "POCKET_REGIONS": {
           "count": 3,
           "closed": 3,
@@ -315,7 +331,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0516,
+    "extraction_time_ms": 0.0499,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

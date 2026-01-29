@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40_frameless_cabinet",
-    "created_at": "2026-01-28T23:41:06.849410+00:00"
+    "created_at": "2026-01-29T14:31:40.608315+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.66,
+    "extraction_time_ms": 0.47,
     "document": {
       "width_mm": 2720.0,
       "height_mm": 1500.0,
@@ -17,7 +17,7 @@
       ]
     },
     "layers": {
-      "count": 13,
+      "count": 14,
       "names": [
         "CONSTRUCTION",
         "DIMENSIONS",
@@ -29,6 +29,7 @@
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK",
         "WASTE_CUTS"
@@ -347,8 +348,18 @@
             }
           ]
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 7,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 7,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
-          "element_count": 1,
+          "element_count": 2,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
@@ -396,15 +407,20 @@
       }
     },
     "paths": {
-      "total_count": 16,
-      "closed_count": 16,
+      "total_count": 23,
+      "closed_count": 23,
       "open_count": 0,
-      "total_length_mm": 7916.0,
+      "total_length_mm": 16394.675,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 7,
           "closed": 7,
-          "length_mm": 7916.0
+          "length_mm": 8164.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 7,
+          "closed": 7,
+          "length_mm": 8230.675
         },
         "POCKET_REGIONS": {
           "count": 8,
@@ -454,8 +470,16 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 10,
+      "count": 14,
       "dimensions": [
+        [
+          10.0,
+          1200.0
+        ],
+        [
+          10.0,
+          1200.0
+        ],
         [
           15.0,
           8.0
@@ -494,6 +518,14 @@
         ],
         [
           2440.0,
+          10.0
+        ],
+        [
+          2440.0,
+          10.0
+        ],
+        [
+          2440.0,
           1220.0
         ]
       ]
@@ -501,7 +533,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.126,
+    "extraction_time_ms": 1.0615,
     "summary": {
       "total_lines": 1225,
       "comment_lines": 45,
@@ -515,7 +547,7 @@
       "g1_count": 652,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 8638.849,
+      "total_rapid_distance_mm": 9014.639500000001,
       "total_feed_distance_mm": 168342.364
     },
     "z_profile": {
@@ -589,9 +621,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 103.6661,
+      "rapid_time_s": 108.1756,
       "feed_time_s": 17204.7264,
-      "total_time_s": 17308.3925
+      "total_time_s": 17312.902000000002
     },
     "tabs": {
       "detected_count": 0,

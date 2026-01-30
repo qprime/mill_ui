@@ -413,8 +413,11 @@ def cubby(
         interfaces.append(Interface(InterfaceType.BOTTOM, "bottom", "bottom", "back", "bottom", back))
 
         if back_internal_support:
+            back_cell_width = (width - 2 * back_inset) / cols
+            back_cell_height = (height - 2 * back_inset) / rows
+
             for i in range(rows - 1):
-                shelf_position = (i + 1) * cell_height - thickness / 2
+                back_shelf_position = (i + 1) * back_cell_height - thickness / 2
                 interfaces.append(
                     Interface(
                         InterfaceType.INTERNAL,
@@ -423,12 +426,12 @@ def cubby(
                         f"shelf_{i+1}",
                         "top",
                         shelf_joinery,
-                        position_mm=shelf_position,
+                        position_mm=back_shelf_position,
                     )
                 )
 
             for j in range(cols - 1):
-                partition_position = (j + 1) * cell_width - thickness / 2
+                back_partition_position = (j + 1) * back_cell_width - thickness / 2
                 interfaces.append(
                     Interface(
                         InterfaceType.INTERNAL,
@@ -437,7 +440,7 @@ def cubby(
                         f"partition_{j+1}",
                         "right",
                         partition_joinery,
-                        position_mm=partition_position,
+                        position_mm=back_partition_position,
                     )
                 )
 

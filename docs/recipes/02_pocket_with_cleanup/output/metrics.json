@@ -5,8 +5,8 @@
     "plan_ms": 0.31,
     "gcode_ms": 0.52,
     "svg_ms": 0.18,
-    "total_ms": 1.86,
-    "parse_ms": 1.02
+    "total_ms": 1.88,
+    "parse_ms": 1.04
   },
   "complexity": {
     "total_moves": 214,

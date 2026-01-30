@@ -11,6 +11,17 @@ If a conflict or limitation is discovered, stop and raise an explicit error rath
 
 CAM system that generates G-code for CNC routers. Converts panel layouts (PML/JSON) through a semantic IR layer (RemovalIntent) to toolpaths.
 
+Interfaces are authoritative and explicit: each interface describes a single
+(panel_a, edge_a) ↔ (panel_b, edge_b) relationship.
+
+Joinery strategy names (e.g. HalfLap, Dado, Finger, Captured) are
+canonical identifiers, not descriptive nouns. Do not substitute, rename,
+or reinterpret them based on geometric similarity.
+
+Joinery strategies operate only on the data provided by the interface.
+They must not infer topology, panel roles, or geometry beyond explicit inputs.
+
+
 ## Mental Model
 
 Compiler-style pipeline: `PML/JSON → LayoutAST → RemovalIntent IR → Planner → G-code`
@@ -145,6 +156,44 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 - On clear directives with known implementation paths, execute directly
 - Minimize tool calls: edit → test → done
 - Design documents go in GitHub issues (`gh issue create`) unless otherwise directed
+
+**GEOMETRY & AXIS INVARIANTS (DO NOT REINTERPRET)**
+
+- All geometry is defined in a right-handed Cartesian coordinate system.
+
+- X axis:
+  Left ↔ Right in assembly space.
+  "Length" refers to the X dimension unless explicitly stated otherwise.
+
+- Y axis:
+  Front ↔ Back in assembly space.
+  "Width" refers to the Y dimension unless explicitly stated otherwise.
+
+- Z axis:
+  Bottom ↔ Top in assembly space.
+  "Height" refers to the Z dimension unless explicitly stated otherwise.
+
+- Sheet space:
+  All 2D CAM output lies in the X–Y plane.
+  Z is used only for cut depth.
+  PanelSpec uses standard 2D convention: width_mm=X, height_mm=Y.
+  This differs from 3D assembly terminology (width=Y, height=Z).
+
+- Thickness:
+  "Thickness" refers to the material thickness along the Z axis.
+  Thickness is never an X or Y dimension.
+
+- Cut depth:
+  "Depth" refers to distance along the negative Z axis into the material.
+  Do not use "depth" to describe X or Y extents.
+
+- Joinery geometry:
+  Joinery widths span along X or Y (edge-relative).
+  Joinery depths always operate along Z.
+
+- If ambiguous language is used (e.g., "depth" without axis),
+  stop and ask for clarification instead of guessing.
+
 
 ## When Stuck
 

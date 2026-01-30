@@ -60,12 +60,12 @@ def box(
     ]
 
     if bottom is not None and bottom != "none":
-        bottom_width = width - 2 * thickness
-        bottom_depth = depth - 2 * thickness
+        bottom_x = width - 2 * thickness
+        bottom_y = depth - 2 * thickness
         bottom_panel = PanelSpec(
             name="bottom",
-            width_mm=bottom_width,
-            height_mm=bottom_depth,
+            width_mm=bottom_x,
+            height_mm=bottom_y,
             thickness_mm=thickness,
             role=PanelRole.BOTTOM,
         )
@@ -77,12 +77,12 @@ def box(
         interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
 
     if top is not None and top != "none":
-        top_width = width - 2 * thickness
-        top_depth = depth - 2 * thickness
+        top_x = width - 2 * thickness
+        top_y = depth - 2 * thickness
         top_panel = PanelSpec(
             name="top",
-            width_mm=top_width,
-            height_mm=top_depth,
+            width_mm=top_x,
+            height_mm=top_y,
             thickness_mm=thickness,
             role=PanelRole.TOP,
         )
@@ -191,8 +191,8 @@ def carcass(
         interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "back", "right", back_joinery))
 
     if fixed_shelves > 0:
-        shelf_width = cap_width
-        shelf_depth = depth - back_inset if back_inset else depth
+        shelf_x = cap_width
+        shelf_y = depth - back_inset if back_inset else depth
         interior_height = side_height
         if top is not None and top != "none":
             interior_height -= thickness
@@ -204,8 +204,8 @@ def carcass(
         for i in range(fixed_shelves):
             shelf = PanelSpec(
                 name=f"shelf_{i+1}",
-                width_mm=shelf_width,
-                height_mm=shelf_depth,
+                width_mm=shelf_x,
+                height_mm=shelf_y,
                 thickness_mm=thickness,
                 role=PanelRole.SHELF,
             )
@@ -223,13 +223,13 @@ def carcass(
                 )
 
     if vertical_partitions > 0:
-        partition_height = side_height - 2 * thickness if cap_style == "between_sides" else side_height
-        partition_depth = depth - back_inset if back_inset else depth
+        partition_z = side_height - 2 * thickness if cap_style == "between_sides" else side_height
+        partition_y = depth - back_inset if back_inset else depth
         for i in range(vertical_partitions):
             partition = PanelSpec(
                 name=f"partition_{i+1}",
-                width_mm=partition_depth,
-                height_mm=partition_height,
+                width_mm=partition_y,
+                height_mm=partition_z,
                 thickness_mm=thickness,
                 role=PanelRole.PARTITION,
             )
@@ -309,12 +309,12 @@ def cubby(
     ]
 
     if rows > 1:
-        shelf_depth = depth - back_inset if back_inset else depth
+        shelf_y = depth - back_inset if back_inset else depth
         for i in range(rows - 1):
             shelf = PanelSpec(
                 name=f"shelf_{i+1}",
                 width_mm=width - 2 * thickness,
-                height_mm=shelf_depth,
+                height_mm=shelf_y,
                 thickness_mm=thickness,
                 role=PanelRole.SHELF,
             )
@@ -345,11 +345,11 @@ def cubby(
             )
 
     if cols > 1:
-        partition_depth = depth - back_inset if back_inset else depth
+        partition_y = depth - back_inset if back_inset else depth
         for j in range(cols - 1):
             partition = PanelSpec(
                 name=f"partition_{j+1}",
-                width_mm=partition_depth,
+                width_mm=partition_y,
                 height_mm=height - 2 * thickness,
                 thickness_mm=thickness,
                 role=PanelRole.PARTITION,

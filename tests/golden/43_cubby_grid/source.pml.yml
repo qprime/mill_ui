@@ -1,25 +1,27 @@
-# mill_ui: c72cac8
-# generated: 2026-01-29
+# mill_ui: df7a313
+# generated: 2026-01-30
 
-# Cubby grid with finger-jointed perimeter and half-lap internal joints
+# 2x2 Cubby grid using Assembly system
+# Panel geometry only - no joinery for topology validation
 
 Sheet:
-  width: 2440mm
-  height: 1220mm
+  width: 2000mm
+  height: 1200mm
   thickness: 18mm
-  margin: 10mm
-  show_dimensions: false
+  margin: 15mm
+  show_dimensions: true
 children:
 - Assembly:
     type: cubby
-    width: 900mm
-    depth: 300mm
-    height: 600mm
+    width: 600mm
+    depth: 200mm
+    height: 400mm
     thickness: 18mm
-    grid: [3, 2]
-    perimeter_joinery: finger
+    grid: [2, 2]
+    perimeter_joinery: none
+    shelf_joinery: captured
+    partition_joinery: captured
     internal_joinery: half_lap
-    finger_width: 15mm
-    clearance: 0.15mm
+    back_joinery: captured
+    back_internal_support: true
     show_labels: true
-    show_edge_colors: true

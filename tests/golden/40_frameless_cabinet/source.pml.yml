@@ -1,5 +1,7 @@
-# mill_ui: db89194
+# mill_ui: c72cac8
 # generated: 2026-01-29
+
+# Frameless cabinet carcass with captured back and fixed shelves
 
 Sheet:
   width: 2440mm
@@ -9,18 +11,19 @@ Sheet:
   show_dimensions: false
 children:
 - Assembly:
-    topology: carcass
+    type: carcass
     width: 400mm
     depth: 350mm
     height: 500mm
     thickness: 18mm
     joinery: butt
     cap_style: between_sides
-    back: captured
+    top: butt
+    bottom: butt
     back_thickness: 6mm
     back_inset: 18mm
-    back_dado_depth: 6mm
     fixed_shelves: 2
+    shelf_joinery: captured
     shelf_dado_depth: 6mm
     show_labels: true
     show_edge_colors: true

@@ -81,16 +81,11 @@ from generators.area.measurement_grid import measurement_grid_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.area.engrave_text import engrave_text_at_position
 from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
-from assembly import (
-    AssemblyParams,
-    AssemblyTopology,
-    ButtJoineryStrategy,
-    FingerJoineryStrategy,
-    box_topology,
-    frameless_cabinet_topology,
-    pyramid_topology,
-    generate_assembly_panels,
-)
+from assembly.core import Assembly as AssemblyModel, InterfaceType
+from assembly.panel import PanelSpec, Edge as PanelEdge
+from assembly.joinery import Butt, Finger, Captured, HalfLap, Rabbet, Dado, Step
+from assembly.primitives import box, carcass, cubby
+from assembly.layout import LayoutConfig, layout_panels
 from generators.panels import NotchedPanelParams, notched_panel_generator
 
 
@@ -1631,6 +1626,67 @@ class LayoutResolver:
             else:
                 self._resolve_node(child, triangle_region, items, params)
 
+    def _build_joinery_from_config(
+        self,
+        config: str | Any,
+        default_finger_width: float | None,
+        default_finger_count: int | None,
+        default_clearance: float,
+    ):
+        from layout_ast.compositional import InterfaceConfig
+
+        if config is None or config == "none":
+            return None
+
+        if isinstance(config, str):
+            joinery_name = config.lower()
+        elif isinstance(config, InterfaceConfig):
+            joinery_name = config.joinery.lower()
+        else:
+            joinery_name = "butt"
+
+        if joinery_name == "finger":
+            if isinstance(config, InterfaceConfig):
+                return Finger(
+                    width_mm=config.finger_width_mm or default_finger_width,
+                    count=config.finger_count or default_finger_count,
+                    clearance_mm=config.clearance_mm or default_clearance,
+                )
+            return Finger(
+                width_mm=default_finger_width,
+                count=default_finger_count,
+                clearance_mm=default_clearance,
+            )
+        elif joinery_name == "captured":
+            if isinstance(config, InterfaceConfig):
+                return Captured(
+                    dado_depth_mm=config.dado_depth_mm,
+                    inset_mm=config.inset_mm,
+                )
+            return Captured()
+        elif joinery_name == "dado":
+            if isinstance(config, InterfaceConfig):
+                return Dado(
+                    depth_mm=config.dado_depth_mm,
+                    inset_mm=config.inset_mm,
+                    receiving=config.receiving,
+                )
+            return Dado()
+        elif joinery_name == "rabbet":
+            if isinstance(config, InterfaceConfig):
+                return Rabbet(
+                    depth_mm=config.dado_depth_mm,
+                    receiving=config.receiving,
+                    clearance_mm=config.clearance_mm or default_clearance,
+                )
+            return Rabbet()
+        elif joinery_name == "half_lap":
+            return HalfLap()
+        elif joinery_name == "step":
+            return Step()
+        else:
+            return Butt()
+
     def _handle_assembly(
         self,
         node: Assembly,
@@ -1638,105 +1694,138 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle Assembly: Generate all panels for a multi-panel assembly.
+        assembly_type = node.type
 
-        Creates topology using the appropriate factory (box_topology, pyramid_topology),
-        then generates panel specifications using the new assembly system. Panels are
-        laid out in a grid within the region.
-        """
-        topology_type = node.topology
+        default_finger_width = node.finger_width_mm or 12.0
+        default_finger_count = node.finger_count
+        default_clearance = node.clearance_mm
 
-        if topology_type == "box":
-            topology = box_topology(
-                width_mm=node.width_mm,
-                depth_mm=node.depth_mm,
-                height_mm=node.height_mm,
-                thickness_mm=node.thickness_mm,
-                joinery=node.joinery,
-                include_top=node.include_top,
-                include_bottom=node.include_bottom,
-                bottom_style=node.bottom_style,
-                top_style=node.top_style,
-                dado_inset_mm=node.dado_inset_mm,
-                dado_drop_mm=node.dado_drop_mm,
-            )
-        elif topology_type == "pyramid":
-            if node.base_mm is None or node.slant_height_mm is None:
-                raise ValueError("Pyramid topology requires base and slant_height parameters")
-            topology = pyramid_topology(
-                base_mm=node.base_mm,
-                slant_height_mm=node.slant_height_mm,
-                thickness_mm=node.thickness_mm,
-            )
-        elif topology_type == "carcass":
-            topology = frameless_cabinet_topology(
-                width_mm=node.width_mm,
-                depth_mm=node.depth_mm,
-                height_mm=node.height_mm,
-                thickness_mm=node.thickness_mm,
-                joinery=node.joinery,
-                cap_style=node.cap_style,
-                include_top=node.include_top,
-                include_bottom=node.include_bottom,
-                back=node.back,
-                back_thickness_mm=node.back_thickness_mm,
-                back_inset_mm=node.back_inset_mm,
-                back_dado_depth_mm=node.back_dado_depth_mm,
-                fixed_shelves=node.fixed_shelves,
-                shelf_dado_depth_mm=node.shelf_dado_depth_mm,
-                shelf_setback_front_mm=node.shelf_setback_front_mm,
-                shelf_setback_back_mm=node.shelf_setback_back_mm,
-                vertical_partitions=node.vertical_partitions,
-                partition_dado_depth_mm=node.partition_dado_depth_mm,
-            )
-        else:
-            raise ValueError(f"Unsupported topology type: {topology_type}")
-
-        if node.joinery == "finger":
-            if node.finger_count is not None:
-                joinery_strategy = FingerJoineryStrategy(
-                    finger_count=node.finger_count,
-                    clearance_mm=node.clearance_mm,
-                )
-            elif node.finger_width_mm is not None:
-                joinery_strategy = FingerJoineryStrategy(
-                    finger_width_mm=node.finger_width_mm,
-                    clearance_mm=node.clearance_mm,
-                )
-            else:
-                joinery_strategy = FingerJoineryStrategy(
-                    finger_width_mm=12.0,
-                    clearance_mm=node.clearance_mm,
-                )
-        else:
-            joinery_strategy = ButtJoineryStrategy()
-
-        assembly_params = AssemblyParams(
-            topology=topology,
-            joinery_strategy=joinery_strategy,
+        side_joinery = self._build_joinery_from_config(
+            node.joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
         )
 
-        panel_specs = generate_assembly_panels(assembly_params)
-        phases = topology.compute_phase_assignment()
+        top_joinery = self._build_joinery_from_config(
+            node.top,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+
+        bottom_joinery = self._build_joinery_from_config(
+            node.bottom,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+
+        if assembly_type == "box":
+            assembly = box(
+                width=node.width_mm,
+                depth=node.depth_mm,
+                height=node.height_mm,
+                thickness=node.thickness_mm,
+                side_joinery=side_joinery or Finger(),
+                top=top_joinery,
+                bottom=bottom_joinery,
+            )
+        elif assembly_type == "carcass":
+            shelf_joinery = self._build_joinery_from_config(
+                node.shelf_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or Captured()
+
+            partition_joinery = self._build_joinery_from_config(
+                node.partition_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or Captured()
+
+            back_joinery = self._build_joinery_from_config(
+                node.back,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            )
+
+            assembly = carcass(
+                width=node.width_mm,
+                depth=node.depth_mm,
+                height=node.height_mm,
+                thickness=node.thickness_mm,
+                side_joinery=side_joinery or Butt(),
+                cap_style=node.cap_style,
+                top=top_joinery or Butt(),
+                bottom=bottom_joinery or Butt(),
+                back=back_joinery,
+                back_thickness=node.back_thickness_mm,
+                back_inset=node.back_inset_mm,
+                fixed_shelves=node.fixed_shelves,
+                shelf_joinery=shelf_joinery,
+                shelf_back_support=node.shelf_back_support,
+                vertical_partitions=node.vertical_partitions,
+                partition_joinery=partition_joinery,
+            )
+        elif assembly_type == "cubby":
+            grid = node.grid or (2, 2)
+            perimeter_joinery = self._build_joinery_from_config(
+                node.perimeter_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or Finger()
+
+            internal_joinery = self._build_joinery_from_config(
+                node.internal_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or HalfLap()
+
+            back_joinery = None
+            if node.back_thickness_mm:
+                back_joinery = Captured()
+
+            assembly = cubby(
+                width=node.width_mm,
+                depth=node.depth_mm,
+                height=node.height_mm,
+                thickness=node.thickness_mm,
+                rows=grid[1],
+                cols=grid[0],
+                perimeter_joinery=perimeter_joinery,
+                internal_joinery=internal_joinery,
+                back=back_joinery,
+                back_thickness=node.back_thickness_mm,
+                back_inset=node.back_inset_mm,
+            )
+        else:
+            raise ValueError(f"Unsupported assembly type: {assembly_type}")
+
+        panel_specs = assembly.resolve()
 
         edge_name_map = {0: "bottom", 1: "right", 2: "top", 3: "left"}
 
+        tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
+        edge_clearance = 2 * tool_radius
+
         gap = node.layout_gap_mm
-        x_cursor = region.x_min
-        y_cursor = region.y_min
+        x_cursor = region.x_min + edge_clearance
+        y_cursor = region.y_min + edge_clearance
         row_height = 0.0
+        x_max_with_clearance = region.x_max - edge_clearance
 
         for spec in panel_specs:
-            polygon = spec.polygon
-            min_x = min(p[0] for p in polygon)
-            max_x = max(p[0] for p in polygon)
-            min_y = min(p[1] for p in polygon)
-            max_y = max(p[1] for p in polygon)
-            panel_width = max_x - min_x
-            panel_height = max_y - min_y
+            panel_width = spec.width_mm
+            panel_height = spec.height_mm
 
-            if x_cursor + panel_width > region.x_max:
-                x_cursor = region.x_min
+            if x_cursor + panel_width > x_max_with_clearance:
+                x_cursor = region.x_min + edge_clearance
                 y_cursor += row_height + gap
                 row_height = 0.0
 
@@ -1745,10 +1834,23 @@ class LayoutResolver:
                 y_cursor + panel_height / 2,
             )
 
+            from assembly.notches import NotchSpec as OldNotchSpec
+            old_notches = tuple(
+                OldNotchSpec(
+                    edge_index=n.edge_index,
+                    u_start_mm=n.u_start_mm,
+                    u_len_mm=n.u_len_mm,
+                    depth_mm=n.depth_mm,
+                    shape=n.shape,
+                    shape_params=n.shape_params,
+                )
+                for n in spec.notches
+            )
+
             panel_params = NotchedPanelParams(
                 width_mm=panel_width,
                 height_mm=panel_height,
-                notches=spec.notches,
+                notches=old_notches,
                 part_name=spec.name,
             )
 
@@ -1778,9 +1880,8 @@ class LayoutResolver:
                 for edge_idx in edges_with_notches:
                     edge_name = edge_name_map.get(edge_idx, f"edge_{edge_idx}")
                     color = edge_colors.get(edge_name, "#ffffff")
-                    phase = phases.get((spec.name, edge_idx))
-                    pattern = "notch_first" if phase == 1 else "finger_first"
-                    label_text = f"{spec.name}.{edge_name} e{edge_idx} {pattern}"
+                    pattern = "notch"
+                    label_text = f"{spec.name}.{edge_name}"
                     if edge_name == "top":
                         edge_lines.append({
                             "x1": x_min, "y1": y_max, "x2": x_max, "y2": y_max, "color": color
@@ -1836,19 +1937,30 @@ class LayoutResolver:
             items.extend(panel_items)
 
             for dado in spec.dados:
-                if dado.edge == "bottom":
-                    dado_y = y_cursor + dado.position_from_edge_mm + dado.width_mm / 2
+                if dado.orientation == "vertical":
+                    if dado.edge == "right":
+                        dado_x = x_cursor + panel_width - dado.position_from_edge_mm - dado.width_mm / 2
+                    else:
+                        dado_x = x_cursor + dado.position_from_edge_mm + dado.width_mm / 2
+                    dado_center = (dado_x, y_cursor + panel_height / 2)
+                    dado_w = dado.width_mm
+                    dado_h = panel_height
                 else:
-                    dado_y = y_cursor + panel_height - dado.position_from_edge_mm - dado.width_mm / 2
+                    if dado.edge == "bottom":
+                        dado_y = y_cursor + dado.position_from_edge_mm + dado.width_mm / 2
+                    else:
+                        dado_y = y_cursor + panel_height - dado.position_from_edge_mm - dado.width_mm / 2
+                    dado_center = (x_cursor + panel_width / 2, dado_y)
+                    dado_w = panel_width
+                    dado_h = dado.width_mm
 
-                dado_center = (x_cursor + panel_width / 2, dado_y)
                 dado_item = Item(
                     kind="shape",
                     type="Rect",
                     geometry=Geometry(
                         data={
-                            "w_mm": panel_width,
-                            "h_mm": dado.width_mm,
+                            "w_mm": dado_w,
+                            "h_mm": dado_h,
                         }
                     ),
                     placement=Placement(center_xy_mm=dado_center),

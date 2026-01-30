@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "38_finger_jointed_box",
-    "created_at": "2026-01-29T14:31:40.579079+00:00"
+    "created_at": "2026-01-30T02:38:24.747770+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.49,
+    "extraction_time_ms": 0.61,
     "document": {
       "width_mm": 1080.0,
       "height_mm": 880.0,
@@ -106,24 +106,85 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 3,
+          "element_count": 10,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 3,
+          "text_count": 10,
           "elements": []
         },
         "POCKET_REGIONS": {
-          "element_count": 0,
-          "rect_count": 0,
+          "element_count": 4,
+          "rect_count": 4,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
-          "elements": []
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                156.35,
+                717.45,
+                356.35,
+                723.65
+              ],
+              "center": [
+                256.35,
+                720.55
+              ],
+              "width": 200.0,
+              "height": 6.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                366.35,
+                717.45,
+                566.35,
+                723.65
+              ],
+              "center": [
+                466.35,
+                720.55
+              ],
+              "width": 200.0,
+              "height": 6.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                576.35,
+                717.45,
+                714.35,
+                723.65
+              ],
+              "center": [
+                645.35,
+                720.55
+              ],
+              "width": 138.0,
+              "height": 6.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                724.35,
+                717.45,
+                862.35,
+                723.65
+              ],
+              "center": [
+                793.35,
+                720.55
+              ],
+              "width": 138.0,
+              "height": 6.2
+            }
+          ]
         },
         "PROFILE_CUTS": {
           "element_count": 5,
@@ -137,66 +198,66 @@
             {
               "element_type": "path",
               "bounds": [
-                150.0,
-                642.0,
-                350.0,
-                730.0
+                156.35,
+                623.65,
+                356.35,
+                723.65
               ],
               "center": [
-                250.0,
-                686.0
+                256.35,
+                673.65
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                360.0,
-                642.0,
-                560.0,
-                730.0
+                366.35,
+                623.65,
+                566.35,
+                723.65
               ],
               "center": [
-                460.0,
-                686.0
+                466.35,
+                673.65
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                570.0,
-                642.0,
-                708.0,
-                730.0
+                576.35,
+                623.65,
+                714.35,
+                723.65
               ],
               "center": [
-                639.0,
-                686.0
+                645.35,
+                673.65
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                718.0,
-                642.0,
-                856.0,
-                730.0
+                724.35,
+                623.65,
+                862.35,
+                723.65
               ],
               "center": [
-                787.0,
-                686.0
+                793.35,
+                673.65
               ]
             },
             {
               "element_type": "path",
               "bounds": [
-                150.0,
-                494.0,
-                338.0,
-                632.0
+                156.35,
+                475.65,
+                344.35,
+                613.65
               ],
               "center": [
-                244.0,
-                563.0
+                250.35,
+                544.65
               ]
             }
           ]
@@ -260,20 +321,25 @@
       }
     },
     "paths": {
-      "total_count": 11,
-      "closed_count": 11,
+      "total_count": 15,
+      "closed_count": 15,
       "open_count": 0,
-      "total_length_mm": 4749.96,
+      "total_length_mm": 5133.977,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 5,
           "closed": 5,
-          "length_mm": 2348.0
+          "length_mm": 2540.0
         },
         "PROFILE_TOOLPATHS": {
           "count": 5,
           "closed": 5,
-          "length_mm": 2401.96
+          "length_mm": 2593.977
+        },
+        "POCKET_REGIONS": {
+          "count": 4,
+          "closed": 4,
+          "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
           "count": 1,
@@ -289,15 +355,24 @@
       "y_max": 740.0
     },
     "text_elements": {
-      "count": 24,
+      "count": 31,
       "dimension_labels": [
         "Sheet: 800.0 \u00d7 600.0 \u00d7 6.0mm"
       ],
-      "depth_annotations": [],
+      "depth_annotations": [
+        "\u2022 pocket: 3.0"
+      ],
       "notes_text": [
         "NOTES",
         "Sheet: 800.0 \u00d7 600.0 \u00d7 6.0mm",
-        "Features: 5 profiles"
+        "Features: 5 profiles, 4 pockets",
+        "Depths:",
+        "\u2022 pocket: 3.0",
+        "Parts (4):",
+        "\u2022 assembly_back_dado_3",
+        "\u2022 assembly_front_dado_1",
+        "\u2022 assembly_left_side_dado_5",
+        "\u2022 assembly_right_side_dado_7"
       ]
     },
     "circles": {
@@ -305,7 +380,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 6,
+      "count": 10,
       "dimensions": [
         [
           10.0,
@@ -318,6 +393,22 @@
         [
           15.0,
           8.0
+        ],
+        [
+          138.0,
+          6.2
+        ],
+        [
+          138.0,
+          6.2
+        ],
+        [
+          200.0,
+          6.2
+        ],
+        [
+          200.0,
+          6.2
         ],
         [
           800.0,
@@ -336,22 +427,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.2137,
+    "extraction_time_ms": 0.5701,
     "summary": {
-      "total_lines": 563,
-      "comment_lines": 7,
-      "motion_lines": 525,
+      "total_lines": 865,
+      "comment_lines": 25,
+      "motion_lines": 774,
       "tool_change_lines": 0,
-      "spindle_lines": 3,
-      "feed_lines": 505
+      "spindle_lines": 6,
+      "feed_lines": 730
     },
     "motion": {
-      "g0_count": 41,
-      "g1_count": 484,
+      "g0_count": 90,
+      "g1_count": 684,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1446.9003,
-      "total_feed_distance_mm": 12243.628
+      "total_rapid_distance_mm": 2276.7263000000003,
+      "total_feed_distance_mm": 18557.464
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -360,16 +451,17 @@
         -6.0,
         -4.762,
         -3.175,
+        -3.0,
         -1.587
       ],
-      "depth_count": 4,
+      "depth_count": 5,
       "max_single_plunge_mm": 12.0
     },
     "xy_bounds": {
       "x_min": 0.0,
-      "x_max": 717.587,
+      "x_max": 723.938,
       "y_min": 0.0,
-      "y_max": 247.588
+      "y_max": 265.938
     },
     "feeds": {
       "min_feed_rate": 300.0,
@@ -387,28 +479,40 @@
       ]
     },
     "operations": {
-      "profile_passes": 5,
-      "pocket_passes": 0,
+      "profile_passes": 8,
+      "pocket_passes": 8,
       "bore_passes": 0,
-      "total_passes": 5,
+      "total_passes": 16,
       "operation_names": [
+        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
+        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "BEGIN finish profile pass",
         "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
+        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "BEGIN finish profile pass",
         "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
+        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "BEGIN finish profile pass",
         "profile_outline",
-        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
+        "pocket_raster so=1.270 sd=1.587 depth=3.000",
+        "BEGIN finish profile pass",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 17.3628,
-      "feed_time_s": 1224.3628,
-      "total_time_s": 1241.7256
+      "rapid_time_s": 27.3207,
+      "feed_time_s": 1855.7464,
+      "total_time_s": 1883.0671
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
       "max_cutting_depth_mm": -6.0,
       "tabs_at_max_depth": true
-    }
+    },
+    "file_count": 2
   }
 }

@@ -491,120 +491,187 @@ Text engraving:
 
 #### Assembly
 
-Multi-panel assembly with automatic topology, joinery selection, and part layout:
+Multi-panel assembly with interface-first architecture. Each assembly type (box, carcass, cubby) generates panels and their joinery based on explicit interface specifications.
+
+**Core Concept:** Assemblies are built from panels joined at interfaces. Each interface selects one joinery strategy. Edge-based joinery (butt, finger, step, rabbet) modifies panel edges. Face-based joinery (half-lap, captured, dado) modifies panel faces.
+
+##### Box Assembly
+
+A closed box with four sides and optional top/bottom panels:
 
 ```yaml
-# Simple finger-jointed box
+# Simple finger-jointed box (default)
 - Assembly:
-    topology: box       # box | pyramid | prism
+    type: box
     width: 200mm
     depth: 150mm
     height: 100mm
     thickness: 6mm
-    joinery: finger     # finger | butt
+    joinery: finger           # Default for side-to-side interfaces
     finger_width: 12mm
-    clearance: 0.15mm
+    bottom: captured          # Default: captured in dado
+    top: none                 # No top panel
 ```
 
 ```yaml
-# Box with dado bottom
+# Box with finger-jointed bottom
 - Assembly:
-    topology: box
+    type: box
     width: 200mm
     depth: 150mm
     height: 100mm
     thickness: 6mm
     joinery: finger
     finger_width: 12mm
-    bottom_style: dado  # captured | finger | dado
-    dado_inset: 6mm
+    bottom: finger            # Bottom uses finger joints too
     show_labels: true
-    show_edge_colors: true
 ```
 
-```yaml
-# Pyramid (butt joints for non-90° angles)
-- Assembly:
-    topology: pyramid
-    base: 150mm
-    slant_height: 120mm
-    thickness: 6mm
-    joinery: butt
-```
+##### Carcass Assembly
+
+Open-sided cabinet with optional back, shelves, and partitions:
 
 ```yaml
-# Frameless cabinet carcass with shelves
+# Simple carcass with butt joints
 - Assembly:
-    topology: carcass
+    type: carcass
     width: 600mm
     depth: 560mm
     height: 720mm
     thickness: 18mm
     joinery: butt
-    cap_style: between_sides  # between_sides | over_sides
-    back: captured            # none | captured
-    back_thickness: 6mm
-    back_inset: 18mm
-    back_dado_depth: 6mm
-    fixed_shelves: 2
-    shelf_dado_depth: 6mm
-    show_labels: true
-    show_edge_colors: true
+    cap_style: between_sides  # Cap sits between side panels
+    top: butt
+    bottom: butt
 ```
 
 ```yaml
-# Cubby grid with vertical partitions
+# Frameless cabinet with back and shelves
 - Assembly:
-    topology: carcass
-    width: 1200mm
-    depth: 300mm
-    height: 900mm
+    type: carcass
+    width: 600mm
+    depth: 560mm
+    height: 720mm
     thickness: 18mm
-    joinery: finger
-    finger_width: 15mm
     cap_style: between_sides
+    back_thickness: 6mm       # Captured back panel
+    back_inset: 18mm          # Setback from rear
     fixed_shelves: 2
-    vertical_partitions: 3
+    shelf_joinery: captured   # Shelves in dados
     show_labels: true
 ```
 
-**Parameters:**
+```yaml
+# Carcass with partitions
+- Assembly:
+    type: carcass
+    width: 1200mm
+    depth: 400mm
+    height: 800mm
+    thickness: 18mm
+    fixed_shelves: 2
+    vertical_partitions: 3
+    shelf_joinery: dado
+    partition_joinery: dado
+```
+
+##### Cubby Assembly
+
+Grid of cubbies with perimeter and internal joinery:
+
+```yaml
+# 3x2 cubby grid
+- Assembly:
+    type: cubby
+    width: 900mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    grid: [3, 2]              # cols, rows
+    perimeter_joinery: finger
+    internal_joinery: half_lap
+    finger_width: 15mm
+```
+
+```yaml
+# Cubby with captured back
+- Assembly:
+    type: cubby
+    width: 900mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    grid: [4, 3]
+    perimeter_joinery: finger
+    internal_joinery: half_lap
+    back_thickness: 6mm
+    back_inset: 18mm
+    show_labels: true
+```
+
+##### Joinery Types
+
+| Joinery | Removal | Valid Interfaces | Description |
+|---------|---------|------------------|-------------|
+| `butt` | None | All | Simple butt joint, no modification |
+| `finger` | Edge | side_to_side, top, bottom | Alternating finger pattern |
+| `step` | Edge | side_to_side, top, bottom | Half-lap step on each panel |
+| `rabbet` | Edge | side_to_side, top, bottom | Shoulder cut on receiving panel |
+| `captured` | Face | top, bottom | Dados in side panels for cap |
+| `dado` | Face | top, bottom, internal | Groove in receiving panel |
+| `half_lap` | Face | internal | Cross-lap at intersection (t/2 each) |
+
+##### Parameters
+
+**Common Parameters:**
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| topology | no | box | Assembly shape (box, pyramid, carcass) |
-| width | yes* | - | Outer width (X dimension) |
-| depth | yes* | - | Outer depth (Y dimension) |
-| height | yes* | - | Outer height (Z dimension) |
+| type | yes | - | Assembly type: box, carcass, cubby |
+| width | yes | - | Outer width (X dimension) |
+| depth | yes | - | Outer depth (Y dimension) |
+| height | yes | - | Outer height (Z dimension) |
 | thickness | yes | - | Material thickness |
-| joinery | no | finger | Joint type (finger, butt) |
-| finger_width | no | - | Target finger width (mutually exclusive with finger_count) |
-| finger_count | no | - | Explicit finger count (mutually exclusive with finger_width) |
-| clearance | no | 0.12mm | Gap for joint fit |
-| include_top | no | false (box), true (carcass) | Generate top panel |
-| include_bottom | no | true | Generate bottom panel |
-| bottom_style | no | captured | Bottom connection (captured, finger, dado) - box only |
-| top_style | no | captured | Top connection (captured, finger, dado) - box only |
-| dado_inset | no | 0mm | Distance from wall bottom to dado bottom - box only |
-| dado_drop | no | 0mm | Distance from wall top to dado top - box only |
+| joinery | no | finger | Default joinery for side interfaces |
+| finger_width | no | 12mm | Target finger width |
+| finger_count | no | - | Explicit finger count (alternative to width) |
+| clearance | no | 0.12mm | Joint fit clearance |
 | layout_gap | no | 10mm | Gap between laid-out panels |
 | show_labels | no | false | Display panel name labels |
 | show_edge_colors | no | false | Display edge color visualization |
-| base | pyramid | - | Base dimension for pyramid |
-| slant_height | pyramid | - | Slant height for pyramid |
-| cap_style | carcass | between_sides | How top/bottom meet sides (between_sides, over_sides) |
-| back | carcass | none | Back panel style (none, captured) |
-| back_thickness | carcass | thickness | Back panel material thickness |
-| back_inset | carcass | 0mm | Distance from rear edge to back panel plane |
-| back_dado_depth | carcass | thickness/2 | Depth of back capture dado |
-| fixed_shelves | carcass | 0 | Number of uniformly-spaced shelves |
-| shelf_dado_depth | carcass | thickness/2 | Depth of shelf dados |
-| shelf_setback_front | carcass | 0mm | Shelf inset from front edge |
-| shelf_setback_back | carcass | 0mm | Shelf inset from back edge |
-| vertical_partitions | carcass | 0 | Number of uniformly-spaced vertical dividers |
-| partition_dado_depth | carcass | thickness/2 | Depth of partition dados |
 
-*Required dimensions depend on topology. Box/carcass require width/depth/height; pyramid requires base/slant_height.
+**Box Parameters:**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| top | no | none | Top joinery: none, finger, captured, dado |
+| bottom | no | captured | Bottom joinery: none, finger, captured, dado |
+
+**Carcass Parameters:**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| cap_style | no | between_sides | Cap placement: between_sides, over_sides |
+| top | no | butt | Top panel joinery |
+| bottom | no | butt | Bottom panel joinery |
+| back_thickness | no | - | Back panel thickness (enables captured back) |
+| back_inset | no | 0mm | Back panel setback from rear edge |
+| fixed_shelves | no | 0 | Number of fixed shelves |
+| shelf_joinery | no | captured | Shelf-to-side joinery |
+| shelf_dado_depth | no | t/2 | Shelf dado depth |
+| vertical_partitions | no | 0 | Number of vertical dividers |
+| partition_joinery | no | captured | Partition-to-cap joinery |
+| partition_dado_depth | no | t/2 | Partition dado depth |
+
+**Cubby Parameters:**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| grid | yes | - | Grid dimensions: [cols, rows] |
+| perimeter_joinery | no | finger | Joinery for outer box |
+| internal_joinery | no | half_lap | Joinery for shelf/partition intersections |
+| back_thickness | no | - | Back panel thickness (enables captured back) |
+| back_inset | no | 0mm | Back panel setback from rear edge |
 
 ### Utility Nodes
 

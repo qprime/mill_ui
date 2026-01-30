@@ -1,5 +1,7 @@
-# mill_ui: db89194
+# mill_ui: c72cac8
 # generated: 2026-01-29
+
+# Finger-jointed box with captured bottom
 
 Sheet:
   width: 800mm
@@ -9,12 +11,15 @@ Sheet:
   show_dimensions: false
 children:
 - Assembly:
-    topology: box
+    type: box
     width: 200mm
     depth: 150mm
     height: 100mm
     thickness: 6mm
+    joinery: finger
     finger_width: 12mm
     clearance: 0.15mm
+    bottom: captured
+    top: none
     show_labels: true
     show_edge_colors: true

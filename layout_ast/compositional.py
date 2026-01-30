@@ -510,8 +510,19 @@ class WasteCuts:
 
 
 @dataclass(frozen=True)
+class InterfaceConfig:
+    joinery: str = "butt"
+    finger_width_mm: float | None = None
+    finger_count: int | None = None
+    clearance_mm: float = 0.12
+    dado_depth_mm: float | None = None
+    inset_mm: float = 0.0
+    receiving: str = "a"
+
+
+@dataclass(frozen=True)
 class Assembly:
-    topology: str
+    type: str
     width_mm: float
     depth_mm: float
     height_mm: float
@@ -519,31 +530,29 @@ class Assembly:
     joinery: str = "finger"
     finger_width_mm: float | None = None
     finger_count: int | None = None
-    clearance_mm: float = 0.1
-    include_top: bool = False
-    include_bottom: bool = True
+    clearance_mm: float = 0.12
+    interfaces: dict[str, InterfaceConfig | str] | None = None
+    top: str | InterfaceConfig | None = None
+    bottom: str | InterfaceConfig | None = "captured"
     children: tuple[Any, ...] = ()
     layout_gap_mm: float = 10.0
-    bottom_style: str = "captured"
-    top_style: str = "captured"
-    dado_inset_mm: float = 0.0
-    dado_drop_mm: float = 0.0
     show_labels: bool = False
     show_edge_colors: bool = False
     show_dimensions: bool = True
-    base_mm: float | None = None
-    slant_height_mm: float | None = None
     cap_style: str = "between_sides"
-    back: str = "none"
+    back: str | InterfaceConfig | None = None
     back_thickness_mm: float | None = None
     back_inset_mm: float = 0.0
-    back_dado_depth_mm: float | None = None
     fixed_shelves: int = 0
+    shelf_joinery: str = "captured"
     shelf_dado_depth_mm: float | None = None
-    shelf_setback_front_mm: float = 0.0
-    shelf_setback_back_mm: float = 0.0
+    shelf_back_support: bool = False
     vertical_partitions: int = 0
+    partition_joinery: str = "captured"
     partition_dado_depth_mm: float | None = None
+    grid: tuple[int, int] | None = None
+    perimeter_joinery: str = "finger"
+    internal_joinery: str = "half_lap"
 
 
 @dataclass(frozen=True)

@@ -49,6 +49,7 @@ from layout_ast.compositional import (
     EngraveTextGen,
     WasteCuts,
     Assembly,
+    InterfaceConfig,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart, NestParseError
@@ -485,42 +486,115 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Assembly":
-        topology = node_data.get("topology", "box")
-        include_top_default = True if topology == "carcass" else False
+        assembly_type = node_data.get("type", node_data.get("topology", "box"))
+
+        interfaces_raw = node_data.get("interfaces")
+        interfaces = None
+        if interfaces_raw:
+            interfaces = {}
+            for iface_name, iface_data in interfaces_raw.items():
+                if isinstance(iface_data, str):
+                    interfaces[iface_name] = iface_data
+                elif isinstance(iface_data, dict):
+                    interfaces[iface_name] = InterfaceConfig(
+                        joinery=iface_data.get("joinery", "butt"),
+                        finger_width_mm=parse_dimension(iface_data["finger_width"]) if "finger_width" in iface_data else None,
+                        finger_count=iface_data.get("finger_count"),
+                        clearance_mm=parse_dimension(iface_data.get("clearance", "0.12mm")),
+                        dado_depth_mm=parse_dimension(iface_data["dado_depth"]) if "dado_depth" in iface_data else None,
+                        inset_mm=parse_dimension(iface_data.get("inset", "0mm")),
+                        receiving=iface_data.get("receiving", "a"),
+                    )
+
+        top_raw = node_data.get("top")
+        top = None
+        if top_raw == "none" or top_raw is None:
+            top = None
+        elif isinstance(top_raw, str):
+            top = top_raw
+        elif isinstance(top_raw, dict):
+            top = InterfaceConfig(
+                joinery=top_raw.get("joinery", "butt"),
+                finger_width_mm=parse_dimension(top_raw["finger_width"]) if "finger_width" in top_raw else None,
+                finger_count=top_raw.get("finger_count"),
+                clearance_mm=parse_dimension(top_raw.get("clearance", "0.12mm")),
+                dado_depth_mm=parse_dimension(top_raw["dado_depth"]) if "dado_depth" in top_raw else None,
+                inset_mm=parse_dimension(top_raw.get("inset", "0mm")),
+                receiving=top_raw.get("receiving", "a"),
+            )
+
+        bottom_raw = node_data.get("bottom", "captured")
+        bottom: str | InterfaceConfig | None = "captured"
+        if bottom_raw == "none" or bottom_raw is None:
+            bottom = None
+        elif isinstance(bottom_raw, str):
+            bottom = bottom_raw
+        elif isinstance(bottom_raw, dict):
+            bottom = InterfaceConfig(
+                joinery=bottom_raw.get("joinery", "captured"),
+                finger_width_mm=parse_dimension(bottom_raw["finger_width"]) if "finger_width" in bottom_raw else None,
+                finger_count=bottom_raw.get("finger_count"),
+                clearance_mm=parse_dimension(bottom_raw.get("clearance", "0.12mm")),
+                dado_depth_mm=parse_dimension(bottom_raw["dado_depth"]) if "dado_depth" in bottom_raw else None,
+                inset_mm=parse_dimension(bottom_raw.get("inset", "0mm")),
+                receiving=bottom_raw.get("receiving", "a"),
+            )
+
+        back_raw = node_data.get("back")
+        back: str | InterfaceConfig | None = None
+        if back_raw == "none" or back_raw is None:
+            back = None
+        elif isinstance(back_raw, str):
+            back = back_raw
+        elif isinstance(back_raw, dict):
+            back = InterfaceConfig(
+                joinery=back_raw.get("joinery", "captured"),
+                finger_width_mm=parse_dimension(back_raw["finger_width"]) if "finger_width" in back_raw else None,
+                finger_count=back_raw.get("finger_count"),
+                clearance_mm=parse_dimension(back_raw.get("clearance", "0.12mm")),
+                dado_depth_mm=parse_dimension(back_raw["dado_depth"]) if "dado_depth" in back_raw else None,
+                inset_mm=parse_dimension(back_raw.get("inset", "0mm")),
+                receiving=back_raw.get("receiving", "a"),
+            )
+
+        grid_raw = node_data.get("grid")
+        grid = None
+        if grid_raw:
+            if isinstance(grid_raw, list) and len(grid_raw) == 2:
+                grid = (int(grid_raw[0]), int(grid_raw[1]))
+
         return Assembly(
-            topology=topology,
-            width_mm=parse_dimension(node_data["width"]),
-            depth_mm=parse_dimension(node_data["depth"]),
-            height_mm=parse_dimension(node_data["height"]),
+            type=assembly_type,
+            width_mm=parse_dimension(node_data.get("width") or node_data.get("dimensions", [0])[0] if isinstance(node_data.get("dimensions"), list) else node_data["width"]),
+            depth_mm=parse_dimension(node_data.get("depth") or (node_data.get("dimensions", [0, 0])[1] if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1 else node_data["depth"])),
+            height_mm=parse_dimension(node_data.get("height") or (node_data.get("dimensions", [0, 0, 0])[2] if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2 else node_data["height"])),
             thickness_mm=parse_dimension(node_data["thickness"]),
             joinery=node_data.get("joinery", "finger"),
             finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
             finger_count=node_data.get("finger_count"),
             clearance_mm=parse_dimension(node_data.get("clearance", "0.12mm")),
-            include_top=node_data.get("include_top", include_top_default),
-            include_bottom=node_data.get("include_bottom", True),
+            interfaces=interfaces,
+            top=top,
+            bottom=bottom,
             children=children,
             layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
-            bottom_style=node_data.get("bottom_style", "captured"),
-            top_style=node_data.get("top_style", "captured"),
-            dado_inset_mm=parse_dimension(node_data.get("dado_inset", "0mm")),
-            dado_drop_mm=parse_dimension(node_data.get("dado_drop", "0mm")),
             show_labels=node_data.get("show_labels", False),
             show_edge_colors=node_data.get("show_edge_colors", False),
             show_dimensions=node_data.get("show_dimensions", True),
-            base_mm=parse_dimension(node_data["base"]) if "base" in node_data else None,
-            slant_height_mm=parse_dimension(node_data["slant_height"]) if "slant_height" in node_data else None,
             cap_style=node_data.get("cap_style", "between_sides"),
-            back=node_data.get("back", "none"),
-            back_thickness_mm=parse_dimension(node_data["back_thickness"]) if "back_thickness" in node_data else None,
-            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm")),
-            back_dado_depth_mm=parse_dimension(node_data["back_dado_depth"]) if "back_dado_depth" in node_data else None,
+            back=back,
+            back_thickness_mm=parse_dimension(node_data["back_thickness"]) if "back_thickness" in node_data else (parse_dimension(back_raw["thickness"]) if isinstance(back_raw, dict) and "thickness" in back_raw else None),
+            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm")) if "back_inset" in node_data else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
             fixed_shelves=node_data.get("fixed_shelves", 0),
+            shelf_joinery=node_data.get("shelf_joinery", "captured"),
             shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"]) if "shelf_dado_depth" in node_data else None,
-            shelf_setback_front_mm=parse_dimension(node_data.get("shelf_setback_front", "0mm")),
-            shelf_setback_back_mm=parse_dimension(node_data.get("shelf_setback_back", "0mm")),
+            shelf_back_support=node_data.get("shelf_back_support", False),
             vertical_partitions=node_data.get("vertical_partitions", 0),
+            partition_joinery=node_data.get("partition_joinery", "captured"),
             partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"]) if "partition_dado_depth" in node_data else None,
+            grid=grid,
+            perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),
+            internal_joinery=node_data.get("internal_joinery", "half_lap"),
         )
 
     elif node_type == "UseComponent":

@@ -1,55 +1,78 @@
-from assembly.topology import (
-    AssemblyTopology,
-    FaceSpec,
-    MatingEdge,
-    MatingFeature,
+from assembly.core import (
+    Assembly,
+    Interface,
+    InterfaceType,
+    RemovalKind,
 )
-from assembly.joinery import (
-    ButtJoineryStrategy,
-    FingerJoineryStrategy,
-    JoineryStrategy,
-    JoineryType,
-)
-from assembly.generator import (
-    AssemblyParams,
+from assembly.panel import (
     DadoSpec,
-    PanelSpec,
-    generate_assembly_panels,
-)
-from assembly.primitives import (
-    box_topology,
-    frameless_cabinet_topology,
-    prism_topology,
-    pyramid_topology,
-)
-from assembly.notches import (
+    Edge,
     NotchSpec,
-    finger_joints_to_notches,
-    notch_to_polyline,
+    PanelRole,
+    PanelSpec,
     validate_notch_fits_edge,
     validate_notches_no_overlap,
 )
+from assembly.joinery import (
+    Butt,
+    Captured,
+    Dado,
+    Finger,
+    HalfLap,
+    JoineryStrategy,
+    Rabbet,
+    Step,
+)
+from assembly.primitives import (
+    box,
+    carcass,
+    cubby,
+)
+from assembly.layout import (
+    LayoutConfig,
+    PlacedPanel,
+    layout_panels,
+    panels_to_layout_ast,
+)
+
+from assembly.notches import (
+    NotchSpec as LegacyNotchSpec,
+    build_notched_polygon,
+    finger_joints_to_notches,
+    notch_to_polyline,
+    validate_notch_fits_edge as legacy_validate_notch_fits_edge,
+    validate_notches_no_overlap as legacy_validate_notches_no_overlap,
+)
 
 __all__ = [
-    "AssemblyParams",
-    "AssemblyTopology",
-    "ButtJoineryStrategy",
+    "Assembly",
+    "Interface",
+    "InterfaceType",
+    "RemovalKind",
     "DadoSpec",
-    "FaceSpec",
-    "FingerJoineryStrategy",
-    "JoineryStrategy",
-    "JoineryType",
-    "MatingEdge",
-    "MatingFeature",
+    "Edge",
     "NotchSpec",
+    "PanelRole",
     "PanelSpec",
-    "box_topology",
-    "finger_joints_to_notches",
-    "frameless_cabinet_topology",
-    "generate_assembly_panels",
-    "notch_to_polyline",
-    "prism_topology",
-    "pyramid_topology",
     "validate_notch_fits_edge",
     "validate_notches_no_overlap",
+    "Butt",
+    "Captured",
+    "Dado",
+    "Finger",
+    "HalfLap",
+    "JoineryStrategy",
+    "Rabbet",
+    "Step",
+    "box",
+    "carcass",
+    "cubby",
+    "LayoutConfig",
+    "PlacedPanel",
+    "layout_panels",
+    "panels_to_layout_ast",
+    "LegacyNotchSpec",
+    "build_notched_polygon",
+    "finger_joints_to_notches",
+    "notch_to_polyline",
 ]

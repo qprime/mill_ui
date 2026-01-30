@@ -3,10 +3,10 @@
     "ir_ms": 0.02,
     "hints_ms": 0.0,
     "plan_ms": 0.69,
-    "gcode_ms": 1.24,
-    "svg_ms": 0.37,
-    "total_ms": 3.57,
-    "parse_ms": 1.62
+    "gcode_ms": 1.25,
+    "svg_ms": 0.38,
+    "total_ms": 3.59,
+    "parse_ms": 1.63
   },
   "complexity": {
     "total_moves": 516,

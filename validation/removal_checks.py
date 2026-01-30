@@ -96,12 +96,56 @@ def check_depth_profile(
     return result
 
 
+def _are_perpendicular_pockets(a: RemovalIntent, b: RemovalIntent) -> bool:
+    hint_type_a = a.metadata.get("hint_type", "")
+    hint_type_b = b.metadata.get("hint_type", "")
+    if hint_type_a != "pocket" or hint_type_b != "pocket":
+        return False
+
+    width_a = a.bounds.x_max - a.bounds.x_min
+    height_a = a.bounds.y_max - a.bounds.y_min
+    width_b = b.bounds.x_max - b.bounds.x_min
+    height_b = b.bounds.y_max - b.bounds.y_min
+
+    is_a_horizontal = width_a > height_a * 1.5
+    is_a_vertical = height_a > width_a * 1.5
+    is_b_horizontal = width_b > height_b * 1.5
+    is_b_vertical = height_b > width_b * 1.5
+
+    return (is_a_horizontal and is_b_vertical) or (is_a_vertical and is_b_horizontal)
+
+
+def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
+    hint_type_a = a.metadata.get("hint_type", "")
+    hint_type_b = b.metadata.get("hint_type", "")
+
+    if hint_type_a == "profile" and hint_type_b == "pocket":
+        profile, pocket = a, b
+    elif hint_type_a == "pocket" and hint_type_b == "profile":
+        profile, pocket = b, a
+    else:
+        return False
+
+    pocket_touches_profile_edge = (
+        abs(pocket.bounds.x_min - profile.bounds.x_min) < 1.0 or
+        abs(pocket.bounds.x_max - profile.bounds.x_max) < 1.0 or
+        abs(pocket.bounds.y_min - profile.bounds.y_min) < 1.0 or
+        abs(pocket.bounds.y_max - profile.bounds.y_max) < 1.0
+    )
+
+    return pocket_touches_profile_edge
+
+
 def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
     result = ValidationResult()
 
     for i, intent_a in enumerate(intents):
         for intent_b in intents[i + 1 :]:
             if _regions_overlap(intent_a, intent_b):
+                if _are_perpendicular_pockets(intent_a, intent_b):
+                    continue
+                if _is_pocket_on_profile_edge(intent_a, intent_b):
+                    continue
                 result.add_error(
                     f"Overlapping regions detected: {intent_a.region_id} and {intent_b.region_id}",
                     region_id=intent_a.region_id,

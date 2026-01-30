@@ -63,7 +63,7 @@ Check before implementing — these already exist:
 | Profile with tabs | `pml/yaml_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
-| Assembly topology system | `assembly/` (box, pyramid, prism topologies) |
+| Assembly system | `assembly/` (box, carcass, cubby with interface-first joinery) |
 
 ## Don't
 

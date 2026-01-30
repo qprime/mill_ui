@@ -1,0 +1,25 @@
+# mill_ui: c72cac8
+# generated: 2026-01-29
+
+# Cubby grid with finger-jointed perimeter and half-lap internal joints
+
+Sheet:
+  width: 2440mm
+  height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+  show_dimensions: false
+children:
+- Assembly:
+    type: cubby
+    width: 900mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    grid: [3, 2]
+    perimeter_joinery: finger
+    internal_joinery: half_lap
+    finger_width: 15mm
+    clearance: 0.15mm
+    show_labels: true
+    show_edge_colors: true

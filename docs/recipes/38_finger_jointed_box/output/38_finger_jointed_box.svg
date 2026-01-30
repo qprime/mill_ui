@@ -28,54 +28,66 @@
     </g>
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 350.000 730.000 L 350.000 717.466 L 344.000 717.466 L 344.000 704.820 L 350.000 704.820 L 350.000 692.323 L 344.000 692.323 L 344.000 679.677 L 350.000 679.677 L 350.000 667.180 L 344.000 667.180 L 344.000 654.534 L 350.000 654.534 L 350.000 642.000 L 150.000 642.000 L 150.000 654.534 L 156.000 654.534 L 156.000 667.180 L 150.000 667.180 L 150.000 679.677 L 156.000 679.677 L 156.000 692.323 L 150.000 692.323 L 150.000 704.820 L 156.000 704.820 L 156.000 717.466 L 150.000 717.466 L 150.000 730.000 Z" fill-rule="evenodd" />
-    <path d="M 560.000 730.000 L 560.000 717.466 L 554.000 717.466 L 554.000 704.820 L 560.000 704.820 L 560.000 692.323 L 554.000 692.323 L 554.000 679.677 L 560.000 679.677 L 560.000 667.180 L 554.000 667.180 L 554.000 654.534 L 560.000 654.534 L 560.000 642.000 L 360.000 642.000 L 360.000 654.534 L 366.000 654.534 L 366.000 667.180 L 360.000 667.180 L 360.000 679.677 L 366.000 679.677 L 366.000 692.323 L 360.000 692.323 L 360.000 704.820 L 366.000 704.820 L 366.000 717.466 L 360.000 717.466 L 360.000 730.000 Z" fill-rule="evenodd" />
-    <path d="M 708.000 717.391 L 708.000 704.895 L 702.000 704.895 L 702.000 692.248 L 708.000 692.248 L 708.000 679.752 L 702.000 679.752 L 702.000 667.105 L 708.000 667.105 L 708.000 654.609 L 702.000 654.609 L 702.000 642.000 L 576.000 642.000 L 576.000 654.609 L 570.000 654.609 L 570.000 667.105 L 576.000 667.105 L 576.000 679.752 L 570.000 679.752 L 570.000 692.248 L 576.000 692.248 L 576.000 704.895 L 570.000 704.895 L 570.000 717.391 L 576.000 717.391 L 576.000 730.000 L 702.000 730.000 L 702.000 717.391 Z" fill-rule="evenodd" />
-    <path d="M 856.000 717.391 L 856.000 704.895 L 850.000 704.895 L 850.000 692.248 L 856.000 692.248 L 856.000 679.752 L 850.000 679.752 L 850.000 667.105 L 856.000 667.105 L 856.000 654.609 L 850.000 654.609 L 850.000 642.000 L 724.000 642.000 L 724.000 654.609 L 718.000 654.609 L 718.000 667.105 L 724.000 667.105 L 724.000 679.752 L 718.000 679.752 L 718.000 692.248 L 724.000 692.248 L 724.000 704.895 L 718.000 704.895 L 718.000 717.391 L 724.000 717.391 L 724.000 730.000 L 850.000 730.000 L 850.000 717.391 Z" fill-rule="evenodd" />
-    <path d="M 338.000 632.000 L 338.000 494.000 L 150.000 494.000 L 150.000 632.000 Z" fill-rule="evenodd" />
+    <path d="M 356.350 723.650 L 356.350 712.576 L 350.350 712.576 L 350.350 701.390 L 356.350 701.390 L 356.350 690.354 L 350.350 690.354 L 350.350 679.168 L 356.350 679.168 L 356.350 668.132 L 350.350 668.132 L 350.350 656.946 L 356.350 656.946 L 356.350 645.910 L 350.350 645.910 L 350.350 634.724 L 356.350 634.724 L 356.350 623.650 L 156.350 623.650 L 156.350 634.724 L 162.350 634.724 L 162.350 645.910 L 156.350 645.910 L 156.350 656.946 L 162.350 656.946 L 162.350 668.132 L 156.350 668.132 L 156.350 679.168 L 162.350 679.168 L 162.350 690.354 L 156.350 690.354 L 156.350 701.390 L 162.350 701.390 L 162.350 712.576 L 156.350 712.576 L 156.350 723.650 Z" fill-rule="evenodd" />
+    <path d="M 566.350 723.650 L 566.350 712.576 L 560.350 712.576 L 560.350 701.390 L 566.350 701.390 L 566.350 690.354 L 560.350 690.354 L 560.350 679.168 L 566.350 679.168 L 566.350 668.132 L 560.350 668.132 L 560.350 656.946 L 566.350 656.946 L 566.350 645.910 L 560.350 645.910 L 560.350 634.724 L 566.350 634.724 L 566.350 623.650 L 366.350 623.650 L 366.350 634.724 L 372.350 634.724 L 372.350 645.910 L 366.350 645.910 L 366.350 656.946 L 372.350 656.946 L 372.350 668.132 L 366.350 668.132 L 366.350 679.168 L 372.350 679.168 L 372.350 690.354 L 366.350 690.354 L 366.350 701.390 L 372.350 701.390 L 372.350 712.576 L 366.350 712.576 L 366.350 723.650 Z" fill-rule="evenodd" />
+    <path d="M 714.350 712.501 L 714.350 701.465 L 708.350 701.465 L 708.350 690.279 L 714.350 690.279 L 714.350 679.243 L 708.350 679.243 L 708.350 668.057 L 714.350 668.057 L 714.350 657.021 L 708.350 657.021 L 708.350 645.835 L 714.350 645.835 L 714.350 634.799 L 708.350 634.799 L 708.350 623.650 L 582.350 623.650 L 582.350 634.799 L 576.350 634.799 L 576.350 645.835 L 582.350 645.835 L 582.350 657.021 L 576.350 657.021 L 576.350 668.057 L 582.350 668.057 L 582.350 679.243 L 576.350 679.243 L 576.350 690.279 L 582.350 690.279 L 582.350 701.465 L 576.350 701.465 L 576.350 712.501 L 582.350 712.501 L 582.350 723.650 L 708.350 723.650 L 708.350 712.501 Z" fill-rule="evenodd" />
+    <path d="M 862.350 712.501 L 862.350 701.465 L 856.350 701.465 L 856.350 690.279 L 862.350 690.279 L 862.350 679.243 L 856.350 679.243 L 856.350 668.057 L 862.350 668.057 L 862.350 657.021 L 856.350 657.021 L 856.350 645.835 L 862.350 645.835 L 862.350 634.799 L 856.350 634.799 L 856.350 623.650 L 730.350 623.650 L 730.350 634.799 L 724.350 634.799 L 724.350 645.835 L 730.350 645.835 L 730.350 657.021 L 724.350 657.021 L 724.350 668.057 L 730.350 668.057 L 730.350 679.243 L 724.350 679.243 L 724.350 690.279 L 730.350 690.279 L 730.350 701.465 L 724.350 701.465 L 724.350 712.501 L 730.350 712.501 L 730.350 723.650 L 856.350 723.650 L 856.350 712.501 Z" fill-rule="evenodd" />
+    <path d="M 344.350 613.650 L 344.350 475.650 L 156.350 475.650 L 156.350 613.650 Z" fill-rule="evenodd" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 351.587 731.587 L 351.587 715.879 L 345.587 715.879 L 345.587 706.407 L 351.587 706.407 L 351.587 690.736 L 345.587 690.736 L 345.587 681.264 L 351.587 681.264 L 351.587 665.593 L 345.587 665.593 L 345.587 656.121 L 351.587 656.121 L 351.587 640.413 L 148.412 640.413 L 148.412 656.121 L 154.412 656.121 L 154.412 665.593 L 148.412 665.593 L 148.412 681.264 L 154.412 681.264 L 154.412 690.736 L 148.412 690.736 L 148.412 706.407 L 154.412 706.407 L 154.412 715.879 L 148.412 715.879 L 148.412 731.587 Z" fill-rule="evenodd" />
-    <path d="M 561.587 731.587 L 561.587 715.879 L 555.587 715.879 L 555.587 706.407 L 561.587 706.407 L 561.587 690.736 L 555.587 690.736 L 555.587 681.264 L 561.587 681.264 L 561.587 665.593 L 555.587 665.593 L 555.587 656.121 L 561.587 656.121 L 561.587 640.413 L 358.413 640.413 L 358.413 656.121 L 364.413 656.121 L 364.413 665.593 L 358.413 665.593 L 358.413 681.264 L 364.413 681.264 L 364.413 690.736 L 358.413 690.736 L 358.413 706.407 L 364.413 706.407 L 364.413 715.879 L 358.413 715.879 L 358.413 731.587 Z" fill-rule="evenodd" />
-    <path d="M 709.587 718.979 L 709.587 703.307 L 703.587 703.307 L 703.587 693.836 L 709.587 693.836 L 709.587 678.164 L 703.587 678.164 L 703.587 668.693 L 709.587 668.693 L 709.587 653.021 L 703.587 653.021 L 703.587 640.413 L 574.413 640.413 L 574.413 653.021 L 568.413 653.021 L 568.413 668.693 L 574.413 668.693 L 574.413 678.164 L 568.413 678.164 L 568.413 693.836 L 574.413 693.836 L 574.413 703.307 L 568.413 703.307 L 568.413 718.979 L 574.413 718.979 L 574.413 731.587 L 703.587 731.587 L 703.587 718.979 Z" fill-rule="evenodd" />
-    <path d="M 857.587 718.979 L 857.587 703.307 L 851.587 703.307 L 851.587 693.836 L 857.587 693.836 L 857.587 678.164 L 851.587 678.164 L 851.587 668.693 L 857.587 668.693 L 857.587 653.021 L 851.587 653.021 L 851.587 640.413 L 722.413 640.413 L 722.413 653.021 L 716.413 653.021 L 716.413 668.693 L 722.413 668.693 L 722.413 678.164 L 716.413 678.164 L 716.413 693.836 L 722.413 693.836 L 722.413 703.307 L 716.413 703.307 L 716.413 718.979 L 722.413 718.979 L 722.413 731.587 L 851.587 731.587 L 851.587 718.979 Z" fill-rule="evenodd" />
-    <path d="M 339.587 633.587 L 339.587 492.413 L 148.412 492.413 L 148.412 633.587 Z" fill-rule="evenodd" />
+    <path d="M 357.938 725.237 L 357.938 710.989 L 351.938 710.989 L 351.938 702.978 L 357.938 702.978 L 357.938 688.767 L 351.938 688.767 L 351.938 680.756 L 357.938 680.756 L 357.938 666.544 L 351.938 666.544 L 351.938 658.533 L 357.938 658.533 L 357.938 644.322 L 351.938 644.322 L 351.938 636.311 L 357.938 636.311 L 357.938 622.062 L 154.762 622.062 L 154.762 636.311 L 160.762 636.311 L 160.762 644.322 L 154.762 644.322 L 154.762 658.533 L 160.762 658.533 L 160.762 666.544 L 154.762 666.544 L 154.762 680.756 L 160.762 680.756 L 160.762 688.767 L 154.762 688.767 L 154.762 702.978 L 160.762 702.978 L 160.762 710.989 L 154.762 710.989 L 154.762 725.237 Z" fill-rule="evenodd" />
+    <path d="M 567.938 725.237 L 567.938 710.989 L 561.938 710.989 L 561.938 702.978 L 567.938 702.978 L 567.938 688.767 L 561.938 688.767 L 561.938 680.756 L 567.938 680.756 L 567.938 666.544 L 561.938 666.544 L 561.938 658.533 L 567.938 658.533 L 567.938 644.322 L 561.938 644.322 L 561.938 636.311 L 567.938 636.311 L 567.938 622.062 L 364.763 622.062 L 364.763 636.311 L 370.763 636.311 L 370.763 644.322 L 364.763 644.322 L 364.763 658.533 L 370.763 658.533 L 370.763 666.544 L 364.763 666.544 L 364.763 680.756 L 370.763 680.756 L 370.763 688.767 L 364.763 688.767 L 364.763 702.978 L 370.763 702.978 L 370.763 710.989 L 364.763 710.989 L 364.763 725.237 Z" fill-rule="evenodd" />
+    <path d="M 715.938 714.089 L 715.938 699.878 L 709.938 699.878 L 709.938 691.867 L 715.938 691.867 L 715.938 677.656 L 709.938 677.656 L 709.938 669.644 L 715.938 669.644 L 715.938 655.433 L 709.938 655.433 L 709.938 647.422 L 715.938 647.422 L 715.938 633.211 L 709.938 633.211 L 709.938 622.062 L 580.763 622.062 L 580.763 633.211 L 574.763 633.211 L 574.763 647.422 L 580.763 647.422 L 580.763 655.433 L 574.763 655.433 L 574.763 669.644 L 580.763 669.644 L 580.763 677.656 L 574.763 677.656 L 574.763 691.867 L 580.763 691.867 L 580.763 699.878 L 574.763 699.878 L 574.763 714.089 L 580.763 714.089 L 580.763 725.237 L 709.938 725.237 L 709.938 714.089 Z" fill-rule="evenodd" />
+    <path d="M 863.938 714.089 L 863.938 699.878 L 857.938 699.878 L 857.938 691.867 L 863.938 691.867 L 863.938 677.656 L 857.938 677.656 L 857.938 669.644 L 863.938 669.644 L 863.938 655.433 L 857.938 655.433 L 857.938 647.422 L 863.938 647.422 L 863.938 633.211 L 857.938 633.211 L 857.938 622.062 L 728.763 622.062 L 728.763 633.211 L 722.763 633.211 L 722.763 647.422 L 728.763 647.422 L 728.763 655.433 L 722.763 655.433 L 722.763 669.644 L 728.763 669.644 L 728.763 677.656 L 722.763 677.656 L 722.763 691.867 L 728.763 691.867 L 728.763 699.878 L 722.763 699.878 L 722.763 714.089 L 728.763 714.089 L 728.763 725.237 L 857.938 725.237 L 857.938 714.089 Z" fill-rule="evenodd" />
+    <path d="M 345.938 615.237 L 345.938 474.062 L 154.762 474.062 L 154.762 615.237 Z" fill-rule="evenodd" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts" />
-  <g id="POCKET_REGIONS" class="pocket-regions" />
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="156.35000000000002" y="717.4499999999999" width="200.0" height="6.2" />
+    <rect x="366.35" y="717.4499999999999" width="200.0" height="6.2" />
+    <rect x="576.35" y="717.4499999999999" width="138.0" height="6.2" />
+    <rect x="724.35" y="717.4499999999999" width="138.0" height="6.2" />
+  </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths" />
   <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
-    <text x="250.0" y="686.0" class="part-label" text-anchor="middle" dominant-baseline="middle">FRONT</text>
-    <text x="460.0" y="686.0" class="part-label" text-anchor="middle" dominant-baseline="middle">BACK</text>
-    <text x="639.0" y="686.0" class="part-label" text-anchor="middle" dominant-baseline="middle">LEFT SIDE</text>
-    <text x="787.0" y="686.0" class="part-label" text-anchor="middle" dominant-baseline="middle">RIGHT SIDE</text>
-    <text x="244.0" y="563.0" class="part-label" text-anchor="middle" dominant-baseline="middle">BOTTOM</text>
+    <text x="256.35" y="673.65" class="part-label" text-anchor="middle" dominant-baseline="middle">FRONT</text>
+    <text x="466.35" y="673.65" class="part-label" text-anchor="middle" dominant-baseline="middle">BACK</text>
+    <text x="645.35" y="673.65" class="part-label" text-anchor="middle" dominant-baseline="middle">LEFT SIDE</text>
+    <text x="793.35" y="673.65" class="part-label" text-anchor="middle" dominant-baseline="middle">RIGHT SIDE</text>
+    <text x="250.35" y="544.65" class="part-label" text-anchor="middle" dominant-baseline="middle">BOTTOM</text>
   </g>
   <g id="EDGE_COLORS" class="edge-colors">
-    <line x1="350.0" y1="730.0" x2="350.0" y2="642.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="150.0" y1="730.0" x2="150.0" y2="642.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <text x="355.0" y="686.0" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">front.right e1 finger_first</text>
-    <text x="145.0" y="686.0" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">front.left e3 finger_first</text>
-    <line x1="560.0" y1="730.0" x2="560.0" y2="642.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="360.0" y1="730.0" x2="360.0" y2="642.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <text x="565.0" y="686.0" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">back.right e1 finger_first</text>
-    <text x="355.0" y="686.0" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">back.left e3 finger_first</text>
-    <line x1="708.0" y1="730.0" x2="708.0" y2="642.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="570.0" y1="730.0" x2="570.0" y2="642.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <text x="713.0" y="686.0" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">left_side.right e1 notch_first</text>
-    <text x="565.0" y="686.0" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">left_side.left e3 notch_first</text>
-    <line x1="856.0" y1="730.0" x2="856.0" y2="642.0" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
-    <line x1="718.0" y1="730.0" x2="718.0" y2="642.0" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
-    <text x="861.0" y="686.0" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">right_side.right e1 notch_first</text>
-    <text x="713.0" y="686.0" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">right_side.left e3 notch_first</text>
+    <line x1="356.35" y1="723.65" x2="356.35" y2="623.65" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
+    <line x1="156.35" y1="723.65" x2="156.35" y2="623.65" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
+    <text x="361.35" y="673.65" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">front.right</text>
+    <text x="151.35" y="673.65" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">front.left</text>
+    <line x1="566.35" y1="723.65" x2="566.35" y2="623.65" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
+    <line x1="366.35" y1="723.65" x2="366.35" y2="623.65" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
+    <text x="571.35" y="673.65" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">back.right</text>
+    <text x="361.35" y="673.65" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">back.left</text>
+    <line x1="714.35" y1="723.65" x2="714.35" y2="623.65" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
+    <line x1="576.35" y1="723.65" x2="576.35" y2="623.65" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
+    <text x="719.35" y="673.65" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">left_side.right</text>
+    <text x="571.35" y="673.65" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">left_side.left</text>
+    <line x1="862.35" y1="723.65" x2="862.35" y2="623.65" stroke="#ffcc00" stroke-width="3" stroke-linecap="round" />
+    <line x1="724.35" y1="723.65" x2="724.35" y2="623.65" stroke="#4cd964" stroke-width="3" stroke-linecap="round" />
+    <text x="867.35" y="673.65" class="edge-label" text-anchor="start" dominant-baseline="middle" fill="#ffcc00">right_side.right</text>
+    <text x="719.35" y="673.65" class="edge-label" text-anchor="end" dominant-baseline="middle" fill="#4cd964">right_side.left</text>
   </g>
   <g id="CONSTRUCTION" class="construction" />
   <g id="DIMENSIONS" class="dimensions" />
   <g id="NOTES" class="notes">
     <text x="20" y="760.0" class="notes" font-weight="bold">NOTES</text>
     <text x="20" y="772.0" class="notes">Sheet: 800.0 × 600.0 × 6.0mm</text>
-    <text x="20" y="784.0" class="notes">Features: 5 profiles</text>
+    <text x="20" y="784.0" class="notes">Features: 5 profiles, 4 pockets</text>
+    <text x="20" y="796.0" class="notes">Depths:</text>
+    <text x="30" y="808.0" class="notes">• pocket: 3.0</text>
+    <text x="20" y="820.0" class="notes">Parts (4):</text>
+    <text x="30" y="832.0" class="notes">• assembly_back_dado_3</text>
+    <text x="30" y="844.0" class="notes">• assembly_front_dado_1</text>
+    <text x="30" y="856.0" class="notes">• assembly_left_side_dado_5</text>
+    <text x="30" y="868.0" class="notes">• assembly_right_side_dado_7</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

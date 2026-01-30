@@ -1,5 +1,6 @@
 from assembly.core import (
     Assembly,
+    EdgeName,
     Interface,
     InterfaceType,
     RemovalKind,
@@ -46,6 +47,7 @@ from assembly.notches import (
 
 __all__ = [
     "Assembly",
+    "EdgeName",
     "Interface",
     "InterfaceType",
     "RemovalKind",

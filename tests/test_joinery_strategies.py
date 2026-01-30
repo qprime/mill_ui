@@ -15,7 +15,7 @@ class TestButtJoineryStrategy:
         strategy = Butt()
         panel_a = PanelSpec(name="a", width_mm=100, height_mm=50, thickness_mm=6.0)
         panel_b = PanelSpec(name="b", width_mm=50, height_mm=100, thickness_mm=6.0)
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "b", strategy)
+        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", strategy)
         result_a, result_b = strategy.apply(interface, panel_a, panel_b)
         assert len(result_a.notches) == 0
         assert len(result_b.notches) == 0
@@ -42,7 +42,7 @@ class TestFingerJoineryStrategy:
         strategy = Finger(width_mm=12.0, clearance_mm=0.1)
         panel_a = PanelSpec(name="front", width_mm=100, height_mm=50, thickness_mm=6.0)
         panel_b = PanelSpec(name="left_side", width_mm=50, height_mm=50, thickness_mm=6.0)
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left_side", strategy)
+        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", strategy)
         result_a, result_b = strategy.apply(interface, panel_a, panel_b)
 
         assert len(result_a.notches) > 0
@@ -56,7 +56,7 @@ class TestFingerJoineryStrategy:
         strategy = Finger(count=5, clearance_mm=0.15)
         panel_a = PanelSpec(name="front", width_mm=100, height_mm=50, thickness_mm=6.0)
         panel_b = PanelSpec(name="left_side", width_mm=50, height_mm=50, thickness_mm=6.0)
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left_side", strategy)
+        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", strategy)
         result_a, result_b = strategy.apply(interface, panel_a, panel_b)
 
         assert len(result_a.notches) > 0
@@ -70,7 +70,7 @@ class TestFingerJoineryStrategy:
         strategy = Finger(width_mm=12.0)
         panel_a = PanelSpec(name="front", width_mm=100, height_mm=50, thickness_mm=6.0)
         panel_b = PanelSpec(name="left_side", width_mm=50, height_mm=50, thickness_mm=6.0)
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left_side", strategy)
+        interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", strategy)
         result_a, result_b = strategy.apply(interface, panel_a, panel_b)
 
         positions_a = set(n.u_start_mm for n in result_a.notches)

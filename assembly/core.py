@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from assembly.joinery import JoineryStrategy
     from assembly.panel import PanelSpec
+
+EdgeName = Literal["top", "bottom", "left", "right"]
 
 
 class InterfaceType(Enum):
@@ -26,7 +28,9 @@ class RemovalKind(Enum):
 class Interface:
     type: InterfaceType
     panel_a: str
+    edge_a: EdgeName
     panel_b: str
+    edge_b: EdgeName
     joinery: JoineryStrategy
     position_mm: float | None = None
 
@@ -92,6 +96,7 @@ class Assembly:
 
 
 __all__ = [
+    "EdgeName",
     "InterfaceType",
     "RemovalKind",
     "Interface",

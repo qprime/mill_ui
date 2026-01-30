@@ -53,10 +53,10 @@ def box(
     }
 
     interfaces: list[Interface] = [
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "left_side", side_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "right_side", side_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "left_side", side_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "right_side", side_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", side_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "front", "right", "right_side", "left", side_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "back", "right", "left_side", "left", side_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "back", "left", "right_side", "right", side_joinery),
     ]
 
     if bottom is not None and bottom != "none":
@@ -71,10 +71,10 @@ def box(
         )
         panels["bottom"] = bottom_panel
 
-        for side in ["front", "back", "left_side", "right_side"]:
-            interfaces.append(
-                Interface(InterfaceType.BOTTOM, side, "bottom", bottom)
-            )
+        interfaces.append(Interface(InterfaceType.BOTTOM, "front", "bottom", "bottom", "top", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "back", "bottom", "bottom", "top", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
 
     if top is not None and top != "none":
         top_width = width - 2 * thickness
@@ -88,10 +88,10 @@ def box(
         )
         panels["top"] = top_panel
 
-        for side in ["front", "back", "left_side", "right_side"]:
-            interfaces.append(
-                Interface(InterfaceType.TOP, side, "top", top)
-            )
+        interfaces.append(Interface(InterfaceType.TOP, "front", "top", "top", "top", top))
+        interfaces.append(Interface(InterfaceType.TOP, "back", "top", "top", "top", top))
+        interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
+        interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
     return Assembly(panels=panels, interfaces=tuple(interfaces))
 
@@ -152,8 +152,8 @@ def carcass(
             role=PanelRole.TOP,
         )
         panels["top"] = top_panel
-        interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", top))
-        interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", top))
+        interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
+        interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
     if bottom is not None and bottom != "none":
         bottom_panel = PanelSpec(
@@ -164,8 +164,8 @@ def carcass(
             role=PanelRole.BOTTOM,
         )
         panels["bottom"] = bottom_panel
-        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", bottom))
-        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
 
     if back is not None and back != "none":
         back_width = width - 2 * back_inset if back_inset else width
@@ -187,8 +187,8 @@ def carcass(
             )
         else:
             back_joinery = back
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "back", back_joinery))
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "back", back_joinery))
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "back", "left", back_joinery))
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "back", "right", back_joinery))
 
     if fixed_shelves > 0:
         shelf_width = cap_width
@@ -212,14 +212,14 @@ def carcass(
             panels[f"shelf_{i+1}"] = shelf
             shelf_position = bottom_offset + (i + 1) * shelf_spacing - thickness / 2
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "left_side", f"shelf_{i+1}", shelf_joinery, position_mm=shelf_position)
+                Interface(InterfaceType.INTERNAL, "left_side", "right", f"shelf_{i+1}", "left", shelf_joinery, position_mm=shelf_position)
             )
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "right_side", f"shelf_{i+1}", shelf_joinery, position_mm=shelf_position)
+                Interface(InterfaceType.INTERNAL, "right_side", "left", f"shelf_{i+1}", "right", shelf_joinery, position_mm=shelf_position)
             )
             if shelf_back_support and "back" in panels:
                 interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "back", f"shelf_{i+1}", shelf_joinery, position_mm=shelf_position)
+                    Interface(InterfaceType.INTERNAL, "back", "bottom", f"shelf_{i+1}", "top", shelf_joinery, position_mm=shelf_position)
                 )
 
     if vertical_partitions > 0:
@@ -236,11 +236,11 @@ def carcass(
             panels[f"partition_{i+1}"] = partition
             if "top" in panels:
                 interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "top", f"partition_{i+1}", partition_joinery)
+                    Interface(InterfaceType.INTERNAL, "top", "bottom", f"partition_{i+1}", "top", partition_joinery)
                 )
             if "bottom" in panels:
                 interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "bottom", f"partition_{i+1}", partition_joinery)
+                    Interface(InterfaceType.INTERNAL, "bottom", "top", f"partition_{i+1}", "bottom", partition_joinery)
                 )
 
     return Assembly(panels=panels, interfaces=tuple(interfaces))
@@ -299,10 +299,10 @@ def cubby(
     }
 
     interfaces: list[Interface] = [
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "left_side", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "right_side", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "left_side", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "right_side", perimeter_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", perimeter_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "front", "right", "right_side", "left", perimeter_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "back", "right", "left_side", "left", perimeter_joinery),
+        Interface(InterfaceType.SIDE_TO_SIDE, "back", "left", "right_side", "right", perimeter_joinery),
     ]
 
     if rows > 1:
@@ -331,12 +331,17 @@ def cubby(
 
     for i in range(rows - 1):
         for j in range(cols - 1):
+            shelf_position_on_partition = (i + 1) * cell_height - thickness / 2
+            partition_position_on_shelf = (j + 1) * cell_width - thickness / 2
             interfaces.append(
                 Interface(
                     InterfaceType.INTERNAL,
                     f"shelf_{i+1}",
+                    "bottom",
                     f"partition_{j+1}",
+                    "top",
                     internal_joinery,
+                    position_mm=partition_position_on_shelf,
                 )
             )
 
@@ -350,8 +355,8 @@ def cubby(
             role=PanelRole.BACK,
         )
         panels["captured_back"] = captured_back
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "captured_back", back))
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "captured_back", back))
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "captured_back", "left", back))
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "captured_back", "right", back))
 
     return Assembly(panels=panels, interfaces=tuple(interfaces))
 

@@ -3,11 +3,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
-from assembly.core import InterfaceType, RemovalKind
+from assembly.core import EdgeName, InterfaceType, RemovalKind
 from assembly.panel import Edge, NotchSpec, DadoSpec, PanelSpec
 
 if TYPE_CHECKING:
     from assembly.core import Interface
+
+
+def _edge_name_to_enum(name: EdgeName) -> Edge:
+    return {"top": Edge.TOP, "bottom": Edge.BOTTOM, "left": Edge.LEFT, "right": Edge.RIGHT}[name]
+
+
+def _edge_orientation(edge: EdgeName) -> Literal["horizontal", "vertical"]:
+    return "vertical" if edge in ("left", "right") else "horizontal"
 
 
 @runtime_checkable
@@ -71,35 +79,6 @@ def _finger_joints_to_notches(
     return notches
 
 
-def _get_mating_edges(
-    interface_type: InterfaceType,
-    role_a: str,
-    role_b: str,
-) -> tuple[Edge, Edge]:
-    if interface_type == InterfaceType.SIDE_TO_SIDE:
-        corner_map = {
-            ("front", "left"): (Edge.LEFT, Edge.RIGHT),
-            ("front", "right"): (Edge.RIGHT, Edge.LEFT),
-            ("back", "left"): (Edge.RIGHT, Edge.LEFT),
-            ("back", "right"): (Edge.LEFT, Edge.RIGHT),
-            ("left", "front"): (Edge.RIGHT, Edge.LEFT),
-            ("left", "back"): (Edge.LEFT, Edge.RIGHT),
-            ("right", "front"): (Edge.LEFT, Edge.RIGHT),
-            ("right", "back"): (Edge.RIGHT, Edge.LEFT),
-        }
-        return corner_map.get((role_a, role_b), (Edge.RIGHT, Edge.LEFT))
-    elif interface_type == InterfaceType.TOP:
-        if role_b == "top":
-            return (Edge.TOP, Edge.BOTTOM)
-        return (Edge.TOP, Edge.BOTTOM)
-    elif interface_type == InterfaceType.BOTTOM:
-        if role_b == "bottom":
-            return (Edge.BOTTOM, Edge.TOP)
-        return (Edge.BOTTOM, Edge.TOP)
-    else:
-        return (Edge.TOP, Edge.BOTTOM)
-
-
 @dataclass(frozen=True)
 class Butt:
     removal_kind: RemovalKind = RemovalKind.NONE
@@ -132,17 +111,14 @@ class Finger:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
-        role_a = panel_a.name.lower().replace("_side", "").replace("_", "")
-        role_b = panel_b.name.lower().replace("_side", "").replace("_", "")
-
-        edge_a, edge_b = _get_mating_edges(interface.type, role_a, role_b)
+        edge_a = _edge_name_to_enum(interface.edge_a)
+        edge_b = _edge_name_to_enum(interface.edge_b)
         edge_length = panel_a.edge_length(edge_a)
-        depth = panel_b.thickness_mm
 
         notches_a = _finger_joints_to_notches(
             edge=edge_a,
             edge_length=edge_length,
-            depth_mm=depth,
+            depth_mm=panel_b.thickness_mm,
             phase=0,
             width_mm=self.width_mm,
             count=self.count,
@@ -182,10 +158,8 @@ class Step:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
-        role_a = panel_a.name.lower().replace("_side", "").replace("_", "")
-        role_b = panel_b.name.lower().replace("_side", "").replace("_", "")
-
-        edge_a, edge_b = _get_mating_edges(interface.type, role_a, role_b)
+        edge_a = _edge_name_to_enum(interface.edge_a)
+        edge_b = _edge_name_to_enum(interface.edge_b)
         edge_length = panel_a.edge_length(edge_a)
 
         depth_a = panel_b.thickness_mm * self.depth_ratio
@@ -229,10 +203,8 @@ class Rabbet:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
-        role_a = panel_a.name.lower().replace("_side", "").replace("_", "")
-        role_b = panel_b.name.lower().replace("_side", "").replace("_", "")
-
-        edge_a, edge_b = _get_mating_edges(interface.type, role_a, role_b)
+        edge_a = _edge_name_to_enum(interface.edge_a)
+        edge_b = _edge_name_to_enum(interface.edge_b)
 
         if self.receiving == "a":
             edge_length = panel_a.edge_length(edge_a)
@@ -268,20 +240,25 @@ class HalfLap:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
+        if interface.position_mm is None:
+            raise ValueError(
+                "HalfLap requires interface.position_mm for INTERNAL interfaces"
+            )
+
         dado_a = DadoSpec(
-            position_from_edge_mm=panel_a.height_mm / 2 - panel_b.thickness_mm / 2,
+            position_from_edge_mm=interface.position_mm,
             width_mm=panel_b.thickness_mm + self.fitment_mm,
             depth_mm=panel_a.thickness_mm / 2,
-            edge="bottom",
-            orientation="horizontal",
+            edge=interface.edge_a,
+            orientation=_edge_orientation(interface.edge_a),
         )
 
         dado_b = DadoSpec(
-            position_from_edge_mm=panel_b.height_mm / 2 - panel_a.thickness_mm / 2,
+            position_from_edge_mm=interface.position_mm,
             width_mm=panel_a.thickness_mm + self.fitment_mm,
             depth_mm=panel_b.thickness_mm / 2,
-            edge="bottom",
-            orientation="horizontal",
+            edge=interface.edge_b,
+            orientation=_edge_orientation(interface.edge_b),
         )
 
         return (
@@ -310,43 +287,21 @@ class Captured:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
-        if interface.type in (InterfaceType.TOP, InterfaceType.BOTTOM):
-            cap_panel = panel_b if panel_b.name.lower() in ("top", "bottom") else panel_a
-            side_panel = panel_a if cap_panel == panel_b else panel_b
-            edge: Literal["top", "bottom", "left", "right"] = "bottom" if interface.type == InterfaceType.BOTTOM else "top"
-            position = self.inset_mm
-        else:
-            cap_panel = panel_b if "back" in panel_b.name.lower() or "shelf" in panel_b.name.lower() or "partition" in panel_b.name.lower() else panel_a
-            side_panel = panel_a if cap_panel == panel_b else panel_b
-            if "back" in cap_panel.name.lower():
-                edge = "right"
-                position = self.inset_mm
-            else:
-                edge = "bottom"
-                position = interface.position_mm if interface.position_mm is not None else self.inset_mm
+        edge = interface.edge_a
+        position = interface.position_mm if interface.position_mm is not None else self.inset_mm
 
-        depth = self.dado_depth_mm if self.dado_depth_mm else cap_panel.thickness_mm / 2
-        width = self.dado_width_mm if self.dado_width_mm else cap_panel.thickness_mm
-
-        if interface.type in (InterfaceType.TOP, InterfaceType.BOTTOM):
-            orientation: Literal["horizontal", "vertical"] = "horizontal"
-        elif "back" in cap_panel.name.lower():
-            orientation = "vertical"
-        else:
-            orientation = "horizontal"
+        depth = self.dado_depth_mm if self.dado_depth_mm else panel_b.thickness_mm / 2
+        width = self.dado_width_mm if self.dado_width_mm else panel_b.thickness_mm
 
         dado = DadoSpec(
             position_from_edge_mm=position,
             width_mm=width + self.fitment_mm,
             depth_mm=depth,
             edge=edge,
-            orientation=orientation,
+            orientation=_edge_orientation(edge),
         )
 
-        if side_panel == panel_a:
-            return (panel_a.with_dados((dado,)), panel_b)
-        else:
-            return (panel_a, panel_b.with_dados((dado,)))
+        return (panel_a.with_dados((dado,)), panel_b)
 
 
 @dataclass(frozen=True)
@@ -369,23 +324,25 @@ class Dado:
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
         if self.receiving == "a":
+            edge = interface.edge_a
             depth = self.depth_mm if self.depth_mm else panel_b.thickness_mm / 2
             dado = DadoSpec(
                 position_from_edge_mm=self.inset_mm,
                 width_mm=panel_b.thickness_mm + self.fitment_mm,
                 depth_mm=depth,
-                edge="bottom",
-                orientation="horizontal",
+                edge=edge,
+                orientation=_edge_orientation(edge),
             )
             return (panel_a.with_dados((dado,)), panel_b)
         else:
+            edge = interface.edge_b
             depth = self.depth_mm if self.depth_mm else panel_a.thickness_mm / 2
             dado = DadoSpec(
                 position_from_edge_mm=self.inset_mm,
                 width_mm=panel_a.thickness_mm + self.fitment_mm,
                 depth_mm=depth,
-                edge="bottom",
-                orientation="horizontal",
+                edge=edge,
+                orientation=_edge_orientation(edge),
             )
             return (panel_a, panel_b.with_dados((dado,)))
 

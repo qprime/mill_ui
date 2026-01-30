@@ -563,6 +563,36 @@ def parse_node(data: dict, path: str = "") -> Any:
             if isinstance(grid_raw, list) and len(grid_raw) == 2:
                 grid = (int(grid_raw[0]), int(grid_raw[1]))
 
+        shelf_joinery_raw = node_data.get("shelf_joinery", "captured")
+        shelf_joinery: str | InterfaceConfig = "captured"
+        if isinstance(shelf_joinery_raw, str):
+            shelf_joinery = shelf_joinery_raw
+        elif isinstance(shelf_joinery_raw, dict):
+            shelf_joinery = InterfaceConfig(
+                joinery=shelf_joinery_raw.get("joinery", "captured"),
+                finger_width_mm=parse_dimension(shelf_joinery_raw["finger_width"]) if "finger_width" in shelf_joinery_raw else None,
+                finger_count=shelf_joinery_raw.get("finger_count"),
+                clearance_mm=parse_dimension(shelf_joinery_raw.get("clearance", "0.12mm")),
+                dado_depth_mm=parse_dimension(shelf_joinery_raw["dado_depth"]) if "dado_depth" in shelf_joinery_raw else None,
+                inset_mm=parse_dimension(shelf_joinery_raw.get("inset", "0mm")),
+                receiving=shelf_joinery_raw.get("receiving", "a"),
+            )
+
+        partition_joinery_raw = node_data.get("partition_joinery", "captured")
+        partition_joinery: str | InterfaceConfig = "captured"
+        if isinstance(partition_joinery_raw, str):
+            partition_joinery = partition_joinery_raw
+        elif isinstance(partition_joinery_raw, dict):
+            partition_joinery = InterfaceConfig(
+                joinery=partition_joinery_raw.get("joinery", "captured"),
+                finger_width_mm=parse_dimension(partition_joinery_raw["finger_width"]) if "finger_width" in partition_joinery_raw else None,
+                finger_count=partition_joinery_raw.get("finger_count"),
+                clearance_mm=parse_dimension(partition_joinery_raw.get("clearance", "0.12mm")),
+                dado_depth_mm=parse_dimension(partition_joinery_raw["dado_depth"]) if "dado_depth" in partition_joinery_raw else None,
+                inset_mm=parse_dimension(partition_joinery_raw.get("inset", "0mm")),
+                receiving=partition_joinery_raw.get("receiving", "a"),
+            )
+
         return Assembly(
             type=assembly_type,
             width_mm=parse_dimension(node_data.get("width") or node_data.get("dimensions", [0])[0] if isinstance(node_data.get("dimensions"), list) else node_data["width"]),
@@ -585,12 +615,15 @@ def parse_node(data: dict, path: str = "") -> Any:
             back=back,
             back_thickness_mm=parse_dimension(node_data["back_thickness"]) if "back_thickness" in node_data else (parse_dimension(back_raw["thickness"]) if isinstance(back_raw, dict) and "thickness" in back_raw else None),
             back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm")) if "back_inset" in node_data else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
+            back_joinery=node_data.get("back_joinery"),
+            back_rabbet_depth_mm=parse_dimension(node_data["back_rabbet_depth"]) if "back_rabbet_depth" in node_data else None,
+            back_internal_support=node_data.get("back_internal_support", True),
             fixed_shelves=node_data.get("fixed_shelves", 0),
-            shelf_joinery=node_data.get("shelf_joinery", "captured"),
+            shelf_joinery=shelf_joinery,
             shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"]) if "shelf_dado_depth" in node_data else None,
             shelf_back_support=node_data.get("shelf_back_support", False),
             vertical_partitions=node_data.get("vertical_partitions", 0),
-            partition_joinery=node_data.get("partition_joinery", "captured"),
+            partition_joinery=partition_joinery,
             partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"]) if "partition_dado_depth" in node_data else None,
             grid=grid,
             perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),

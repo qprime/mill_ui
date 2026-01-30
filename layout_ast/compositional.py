@@ -543,12 +543,15 @@ class Assembly:
     back: str | InterfaceConfig | None = None
     back_thickness_mm: float | None = None
     back_inset_mm: float = 0.0
+    back_joinery: str | InterfaceConfig | None = None
+    back_rabbet_depth_mm: float | None = None
+    back_internal_support: bool = True
     fixed_shelves: int = 0
-    shelf_joinery: str = "captured"
+    shelf_joinery: str | InterfaceConfig = "captured"
     shelf_dado_depth_mm: float | None = None
     shelf_back_support: bool = False
     vertical_partitions: int = 0
-    partition_joinery: str = "captured"
+    partition_joinery: str | InterfaceConfig = "captured"
     partition_dado_depth_mm: float | None = None
     grid: tuple[int, int] | None = None
     perimeter_joinery: str = "finger"

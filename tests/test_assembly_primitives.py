@@ -2,7 +2,7 @@ import pytest
 
 from assembly.core import Assembly, InterfaceType
 from assembly.panel import PanelSpec, PanelRole, Edge
-from assembly.joinery import Butt, Finger, Captured, HalfLap, Dado
+from assembly.joinery import Butt, Finger, Captured, HalfLap
 from assembly.primitives import box, carcass, cubby
 
 
@@ -293,8 +293,8 @@ class TestCubbyPrimitive:
             rows=2,
             cols=3,
         )
-        assert "front" in assembly.panels
-        assert "back" in assembly.panels
+        assert "top" in assembly.panels
+        assert "bottom" in assembly.panels
         assert "left_side" in assembly.panels
         assert "right_side" in assembly.panels
 
@@ -333,15 +333,14 @@ class TestCubbyPrimitive:
             cols=3,
             perimeter_joinery=Finger(width_mm=15),
         )
-        side_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.SIDE_TO_SIDE]
-        perimeter_panels = {"front", "back", "left_side", "right_side"}
         perimeter_interfaces = [
-            i for i in side_interfaces
-            if i.panel_a in perimeter_panels and i.panel_b in perimeter_panels
+            i for i in assembly.interfaces
+            if i.type in (InterfaceType.TOP, InterfaceType.BOTTOM)
         ]
+        assert len(perimeter_interfaces) == 4
         assert all(isinstance(i.joinery, Finger) for i in perimeter_interfaces)
 
-    def test_internal_interfaces_use_internal_joinery(self):
+    def test_internal_half_lap_interfaces_use_internal_joinery(self):
         assembly = cubby(
             width=900,
             depth=300,
@@ -351,8 +350,11 @@ class TestCubbyPrimitive:
             cols=2,
             internal_joinery=HalfLap(),
         )
-        internal_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL]
-        assert all(isinstance(i.joinery, HalfLap) for i in internal_interfaces)
+        half_lap_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+        ]
+        assert len(half_lap_interfaces) == 1
 
     def test_shelf_partition_grid_intersections(self):
         assembly = cubby(
@@ -363,8 +365,11 @@ class TestCubbyPrimitive:
             rows=3,
             cols=3,
         )
-        internal_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL]
-        assert len(internal_interfaces) == (3 - 1) * (3 - 1)
+        half_lap_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+        ]
+        assert len(half_lap_interfaces) == (3 - 1) * (3 - 1)
 
     def test_single_row_no_shelves(self):
         assembly = cubby(
@@ -403,10 +408,10 @@ class TestCubbyResolve:
             perimeter_joinery=Finger(width_mm=15),
         )
         panels = assembly.resolve()
-        front = next(p for p in panels if p.name == "front")
-        assert len(front.notches) > 0
+        top = next(p for p in panels if p.name == "top")
+        assert len(top.notches) > 0
 
-    def test_half_lap_internal_creates_dados(self):
+    def test_half_lap_internal_creates_notches(self):
         assembly = cubby(
             width=900,
             depth=300,
@@ -419,8 +424,8 @@ class TestCubbyResolve:
         panels = assembly.resolve()
         shelf = next(p for p in panels if p.name == "shelf_1")
         partition = next(p for p in panels if p.name == "partition_1")
-        assert len(shelf.dados) > 0
-        assert len(partition.dados) > 0
+        assert len(shelf.notches) > 0
+        assert len(partition.notches) > 0
 
 
 class TestPanelSpec:

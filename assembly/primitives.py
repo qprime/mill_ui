@@ -254,109 +254,192 @@ def cubby(
     rows: int,
     cols: int,
     perimeter_joinery: JoineryStrategy = Finger(),
+    shelf_joinery: JoineryStrategy = Captured(),
+    partition_joinery: JoineryStrategy = Captured(),
     internal_joinery: JoineryStrategy = HalfLap(),
     back: JoineryStrategy | Literal["none"] | None = None,
     back_thickness: float | None = None,
     back_inset: float = 0.0,
+    back_internal_support: bool = True,
 ) -> Assembly:
     cell_width = (width - 2 * thickness) / cols
     cell_height = (height - 2 * thickness) / rows
 
-    front = PanelSpec(
-        name="front",
-        width_mm=width,
-        height_mm=height,
+    top = PanelSpec(
+        name="top",
+        width_mm=width - 2 * thickness,
+        height_mm=depth,
         thickness_mm=thickness,
-        role=PanelRole.FRONT,
+        role=PanelRole.TOP,
     )
-    back_panel_spec = PanelSpec(
-        name="back",
-        width_mm=width,
-        height_mm=height,
+    bottom = PanelSpec(
+        name="bottom",
+        width_mm=width - 2 * thickness,
+        height_mm=depth,
         thickness_mm=thickness,
-        role=PanelRole.BACK,
+        role=PanelRole.BOTTOM,
     )
     left = PanelSpec(
         name="left_side",
-        width_mm=depth - 2 * thickness,
+        width_mm=depth,
         height_mm=height,
         thickness_mm=thickness,
         role=PanelRole.LEFT,
     )
     right = PanelSpec(
         name="right_side",
-        width_mm=depth - 2 * thickness,
+        width_mm=depth,
         height_mm=height,
         thickness_mm=thickness,
         role=PanelRole.RIGHT,
     )
 
     panels: dict[str, PanelSpec] = {
-        "front": front,
-        "back": back_panel_spec,
+        "top": top,
+        "bottom": bottom,
         "left_side": left,
         "right_side": right,
     }
 
     interfaces: list[Interface] = [
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "front", "right", "right_side", "left", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "right", "left_side", "left", perimeter_joinery),
-        Interface(InterfaceType.SIDE_TO_SIDE, "back", "left", "right_side", "right", perimeter_joinery),
+        Interface(InterfaceType.TOP, "top", "left", "left_side", "top", perimeter_joinery),
+        Interface(InterfaceType.TOP, "top", "right", "right_side", "top", perimeter_joinery),
+        Interface(InterfaceType.BOTTOM, "bottom", "left", "left_side", "bottom", perimeter_joinery),
+        Interface(InterfaceType.BOTTOM, "bottom", "right", "right_side", "bottom", perimeter_joinery),
     ]
 
     if rows > 1:
-        internal_height = depth - 2 * thickness
+        shelf_depth = depth - back_inset if back_inset else depth
         for i in range(rows - 1):
             shelf = PanelSpec(
                 name=f"shelf_{i+1}",
                 width_mm=width - 2 * thickness,
-                height_mm=internal_height,
+                height_mm=shelf_depth,
                 thickness_mm=thickness,
                 role=PanelRole.SHELF,
             )
             panels[f"shelf_{i+1}"] = shelf
 
+            shelf_position = (i + 1) * cell_height - thickness / 2
+            interfaces.append(
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "left_side",
+                    "bottom",
+                    f"shelf_{i+1}",
+                    "left",
+                    shelf_joinery,
+                    position_mm=shelf_position,
+                )
+            )
+            interfaces.append(
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "right_side",
+                    "bottom",
+                    f"shelf_{i+1}",
+                    "right",
+                    shelf_joinery,
+                    position_mm=shelf_position,
+                )
+            )
+
     if cols > 1:
-        internal_width = depth - 2 * thickness
-        for i in range(cols - 1):
+        partition_depth = depth - back_inset if back_inset else depth
+        for j in range(cols - 1):
             partition = PanelSpec(
-                name=f"partition_{i+1}",
-                width_mm=internal_width,
+                name=f"partition_{j+1}",
+                width_mm=partition_depth,
                 height_mm=height - 2 * thickness,
                 thickness_mm=thickness,
                 role=PanelRole.PARTITION,
             )
-            panels[f"partition_{i+1}"] = partition
+            panels[f"partition_{j+1}"] = partition
+
+            partition_position = (j + 1) * cell_width - thickness / 2
+            interfaces.append(
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "top",
+                    "left",
+                    f"partition_{j+1}",
+                    "top",
+                    partition_joinery,
+                    position_mm=partition_position,
+                )
+            )
+            interfaces.append(
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "bottom",
+                    "left",
+                    f"partition_{j+1}",
+                    "bottom",
+                    partition_joinery,
+                    position_mm=partition_position,
+                )
+            )
 
     for i in range(rows - 1):
         for j in range(cols - 1):
-            shelf_position_on_partition = (i + 1) * cell_height - thickness / 2
-            partition_position_on_shelf = (j + 1) * cell_width - thickness / 2
+            position_on_shelf = (j + 1) * cell_width - thickness / 2
+            position_on_partition = (i + 1) * cell_height - thickness / 2
             interfaces.append(
                 Interface(
                     InterfaceType.INTERNAL,
                     f"shelf_{i+1}",
                     "bottom",
                     f"partition_{j+1}",
-                    "top",
+                    "left",
                     internal_joinery,
-                    position_mm=partition_position_on_shelf,
+                    position_mm=position_on_shelf,
+                    position_along_edge_b_mm=position_on_partition,
                 )
             )
 
     if back is not None and back != "none":
         bt = back_thickness if back_thickness else thickness / 3
-        captured_back = PanelSpec(
-            name="captured_back",
+        back_panel = PanelSpec(
+            name="back",
             width_mm=width - 2 * back_inset,
             height_mm=height - 2 * back_inset,
             thickness_mm=bt,
             role=PanelRole.BACK,
         )
-        panels["captured_back"] = captured_back
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "captured_back", "left", back))
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "captured_back", "right", back))
+        panels["back"] = back_panel
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "back", "left", back))
+        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "back", "right", back))
+        interfaces.append(Interface(InterfaceType.TOP, "top", "top", "back", "top", back))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "bottom", "bottom", "back", "bottom", back))
+
+        if back_internal_support:
+            for i in range(rows - 1):
+                shelf_position = (i + 1) * cell_height - thickness / 2
+                interfaces.append(
+                    Interface(
+                        InterfaceType.INTERNAL,
+                        "back",
+                        "bottom",
+                        f"shelf_{i+1}",
+                        "top",
+                        shelf_joinery,
+                        position_mm=shelf_position,
+                    )
+                )
+
+            for j in range(cols - 1):
+                partition_position = (j + 1) * cell_width - thickness / 2
+                interfaces.append(
+                    Interface(
+                        InterfaceType.INTERNAL,
+                        "back",
+                        "left",
+                        f"partition_{j+1}",
+                        "right",
+                        partition_joinery,
+                        position_mm=partition_position,
+                    )
+                )
 
     return Assembly(panels=panels, interfaces=tuple(interfaces))
 

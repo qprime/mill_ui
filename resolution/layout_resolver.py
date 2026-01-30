@@ -83,7 +83,7 @@ from generators.area.engrave_text import engrave_text_at_position
 from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
 from assembly.core import Assembly as AssemblyModel, InterfaceType
 from assembly.panel import PanelSpec, Edge as PanelEdge
-from assembly.joinery import Butt, Finger, Captured, HalfLap, Rabbet, Dado, Step
+from assembly.joinery import Butt, Finger, Captured, HalfLap
 from assembly.primitives import box, carcass, cubby
 from assembly.layout import LayoutConfig, layout_panels
 from generators.panels import NotchedPanelParams, notched_panel_generator
@@ -1635,8 +1635,10 @@ class LayoutResolver:
     ):
         from layout_ast.compositional import InterfaceConfig
 
-        if config is None or config == "none":
+        if config is None:
             return None
+        if config == "none":
+            return Butt()
 
         if isinstance(config, str):
             joinery_name = config.lower()
@@ -1657,33 +1659,16 @@ class LayoutResolver:
                 count=default_finger_count,
                 clearance_mm=default_clearance,
             )
-        elif joinery_name == "captured":
+        elif joinery_name == "captured" or joinery_name == "dado":
             if isinstance(config, InterfaceConfig):
                 return Captured(
                     dado_depth_mm=config.dado_depth_mm,
                     inset_mm=config.inset_mm,
+                    receiving=config.receiving,
                 )
             return Captured()
-        elif joinery_name == "dado":
-            if isinstance(config, InterfaceConfig):
-                return Dado(
-                    depth_mm=config.dado_depth_mm,
-                    inset_mm=config.inset_mm,
-                    receiving=config.receiving,
-                )
-            return Dado()
-        elif joinery_name == "rabbet":
-            if isinstance(config, InterfaceConfig):
-                return Rabbet(
-                    depth_mm=config.dado_depth_mm,
-                    receiving=config.receiving,
-                    clearance_mm=config.clearance_mm or default_clearance,
-                )
-            return Rabbet()
         elif joinery_name == "half_lap":
             return HalfLap()
-        elif joinery_name == "step":
-            return Step()
         else:
             return Butt()
 
@@ -1694,6 +1679,8 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        from layout_ast.compositional import InterfaceConfig
+
         assembly_type = node.type
 
         default_finger_width = node.finger_width_mm or 12.0
@@ -1780,6 +1767,20 @@ class LayoutResolver:
                 default_clearance,
             ) or Finger()
 
+            shelf_joinery = self._build_joinery_from_config(
+                node.shelf_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or Captured()
+
+            partition_joinery = self._build_joinery_from_config(
+                node.partition_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            ) or Captured()
+
             internal_joinery = self._build_joinery_from_config(
                 node.internal_joinery,
                 default_finger_width,
@@ -1787,9 +1788,35 @@ class LayoutResolver:
                 default_clearance,
             ) or HalfLap()
 
+            back_rabbet_width = node.back_thickness_mm or node.thickness_mm
+            back_rabbet_depth = node.back_rabbet_depth_mm or (node.thickness_mm / 2)
+
             back_joinery = None
-            if node.back_thickness_mm:
-                back_joinery = Captured()
+            back_config = node.back if node.back is not None else node.back_joinery
+            if isinstance(back_config, InterfaceConfig):
+                back_joinery = self._build_joinery_from_config(
+                    back_config,
+                    default_finger_width,
+                    default_finger_count,
+                    default_clearance,
+                )
+            elif isinstance(back_config, str) and back_config.lower() == "captured":
+                back_joinery = Captured(
+                    dado_depth_mm=back_rabbet_depth,
+                    dado_width_mm=back_rabbet_width,
+                )
+            elif node.back_thickness_mm:
+                back_joinery = self._build_joinery_from_config(
+                    back_config,
+                    default_finger_width,
+                    default_finger_count,
+                    default_clearance,
+                ) or Butt()
+            elif node.back_rabbet_depth_mm:
+                back_joinery = Captured(
+                    dado_depth_mm=back_rabbet_depth,
+                    dado_width_mm=back_rabbet_width,
+                )
 
             assembly = cubby(
                 width=node.width_mm,
@@ -1799,10 +1826,13 @@ class LayoutResolver:
                 rows=grid[1],
                 cols=grid[0],
                 perimeter_joinery=perimeter_joinery,
+                shelf_joinery=shelf_joinery,
+                partition_joinery=partition_joinery,
                 internal_joinery=internal_joinery,
                 back=back_joinery,
                 back_thickness=node.back_thickness_mm,
                 back_inset=node.back_inset_mm,
+                back_internal_support=node.back_internal_support,
             )
         else:
             raise ValueError(f"Unsupported assembly type: {assembly_type}")

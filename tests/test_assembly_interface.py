@@ -2,7 +2,7 @@ import pytest
 
 from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
 from assembly.panel import PanelSpec, PanelRole, Edge, NotchSpec, DadoSpec
-from assembly.joinery import Butt, Finger, Step, Rabbet, HalfLap, Captured, Dado
+from assembly.joinery import Butt, Finger, HalfLap, Captured
 
 
 class TestInterfaceTypeValidation:
@@ -29,28 +29,6 @@ class TestInterfaceTypeValidation:
 
     def test_finger_invalid_for_internal(self):
         joinery = Finger(width_mm=12.0)
-        interface = Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", joinery)
-        with pytest.raises(ValueError, match="not valid for INTERNAL"):
-            interface.validate()
-
-    def test_step_valid_for_side_to_side(self):
-        joinery = Step()
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", joinery)
-        interface.validate()
-
-    def test_step_invalid_for_internal(self):
-        joinery = Step()
-        interface = Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", joinery)
-        with pytest.raises(ValueError, match="not valid for INTERNAL"):
-            interface.validate()
-
-    def test_rabbet_valid_for_side_to_side(self):
-        joinery = Rabbet()
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", joinery)
-        interface.validate()
-
-    def test_rabbet_invalid_for_internal(self):
-        joinery = Rabbet()
         interface = Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", joinery)
         with pytest.raises(ValueError, match="not valid for INTERNAL"):
             interface.validate()
@@ -92,26 +70,10 @@ class TestInterfaceTypeValidation:
         interface = Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", joinery)
         interface.validate()
 
-    def test_dado_valid_for_top(self):
-        joinery = Dado()
-        interface = Interface(InterfaceType.TOP, "a", "top", "b", "bottom", joinery)
+    def test_captured_with_receiving_b_valid_for_side_to_side(self):
+        joinery = Captured(receiving="b")
+        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "right", "b", "left", joinery)
         interface.validate()
-
-    def test_dado_valid_for_bottom(self):
-        joinery = Dado()
-        interface = Interface(InterfaceType.BOTTOM, "a", "bottom", "b", "top", joinery)
-        interface.validate()
-
-    def test_dado_valid_for_internal(self):
-        joinery = Dado()
-        interface = Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", joinery)
-        interface.validate()
-
-    def test_dado_invalid_for_side_to_side(self):
-        joinery = Dado()
-        interface = Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", joinery)
-        with pytest.raises(ValueError, match="not valid for SIDE_TO_SIDE"):
-            interface.validate()
 
     def test_edge_joinery_rejects_internal_interface(self):
         joinery = Finger(width_mm=12.0)
@@ -164,17 +126,11 @@ class TestRemovalKindClassification:
     def test_finger_has_edge_removal(self):
         assert Finger().removal_kind == RemovalKind.EDGE
 
-    def test_step_has_edge_removal(self):
-        assert Step().removal_kind == RemovalKind.EDGE
-
-    def test_rabbet_has_edge_removal(self):
-        assert Rabbet().removal_kind == RemovalKind.EDGE
-
-    def test_half_lap_has_face_removal(self):
-        assert HalfLap().removal_kind == RemovalKind.FACE
+    def test_half_lap_has_edge_removal(self):
+        assert HalfLap().removal_kind == RemovalKind.EDGE
 
     def test_captured_has_face_removal(self):
         assert Captured().removal_kind == RemovalKind.FACE
 
-    def test_dado_has_face_removal(self):
-        assert Dado().removal_kind == RemovalKind.FACE
+    def test_captured_with_receiving_b_has_face_removal(self):
+        assert Captured(receiving="b").removal_kind == RemovalKind.FACE

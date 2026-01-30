@@ -1,0 +1,41 @@
+# mill_ui: d6095d4
+# generated: 2026-01-30
+
+# Demonstrates the "receiving" parameter for back panel joinery
+#
+# Compare to recipe 43 which uses default back_joinery: captured
+# - Recipe 43: Side panels receive the back (sides have dados on their inner edge)
+# - Recipe 47: Back panel receives into sides (back has dados near left/right edges)
+#
+# Visual difference:
+# - In 43: left_side and right_side panels show vertical dado grooves on inner edge
+# - In 47: back panel shows vertical dado grooves near left and right edges
+#
+# Use case: When you want clean side panel faces (visible cabinet sides) and
+# don't mind the back panel having grooves (hidden behind the unit)
+
+Sheet:
+  width: 2000mm
+  height: 1200mm
+  thickness: 18mm
+  margin: 15mm
+  show_dimensions: true
+children:
+- Assembly:
+    type: cubby
+    width: 600mm
+    depth: 200mm
+    height: 400mm
+    thickness: 18mm
+    grid: [2, 2]
+    perimeter_joinery: none
+    shelf_joinery: captured
+    partition_joinery: captured
+    internal_joinery: half_lap
+    back:
+      joinery: captured
+      receiving: b
+      inset: 0mm
+    back_thickness: 6mm
+    back_internal_support: true
+    show_labels: true

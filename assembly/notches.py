@@ -215,7 +215,7 @@ def build_notched_polygon(
     result = orient(result, sign=1.0)
 
     if result.is_empty or not hasattr(result, 'exterior'):
-        return tuple(corners)
+        return tuple(base.exterior.coords[:-1])
 
     return tuple(result.exterior.coords[:-1])
 

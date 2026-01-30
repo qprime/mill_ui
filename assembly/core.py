@@ -33,15 +33,13 @@ class Interface:
     edge_b: EdgeName
     joinery: JoineryStrategy
     position_mm: float | None = None
+    position_along_edge_b_mm: float | None = None
 
     def validate(self) -> None:
         if self.type not in self.joinery.valid_interfaces:
             raise ValueError(
                 f"{type(self.joinery).__name__} not valid for {self.type.name}"
             )
-        if self.type == InterfaceType.INTERNAL:
-            if self.joinery.removal_kind == RemovalKind.EDGE:
-                raise ValueError("Internal interfaces require face-based joinery")
 
 
 @dataclass(frozen=True)

@@ -139,8 +139,8 @@ class TestCubbyAssembly:
             cols=2,
         )
         assert len(assembly.panels) == 6
-        assert "front" in assembly.panels
-        assert "back" in assembly.panels
+        assert "top" in assembly.panels
+        assert "bottom" in assembly.panels
         assert "left_side" in assembly.panels
         assert "right_side" in assembly.panels
         assert "shelf_1" in assembly.panels
@@ -161,7 +161,36 @@ class TestCubbyAssembly:
         assert "partition_1" in assembly.panels
         assert "partition_2" in assembly.panels
 
-    def test_cubby_internal_interfaces_have_position_mm(self):
+    def test_cubby_panel_dimensions(self):
+        width = 900
+        depth = 300
+        height = 600
+        thickness = 18
+
+        assembly = cubby(
+            width=width,
+            depth=depth,
+            height=height,
+            thickness=thickness,
+            rows=2,
+            cols=3,
+        )
+
+        assert assembly.panels["top"].width_mm == width - 2 * thickness
+        assert assembly.panels["top"].height_mm == depth
+        assert assembly.panels["bottom"].width_mm == width - 2 * thickness
+        assert assembly.panels["bottom"].height_mm == depth
+        assert assembly.panels["left_side"].width_mm == depth
+        assert assembly.panels["left_side"].height_mm == height
+        assert assembly.panels["right_side"].width_mm == depth
+        assert assembly.panels["right_side"].height_mm == height
+
+        assert assembly.panels["shelf_1"].width_mm == width - 2 * thickness
+        assert assembly.panels["shelf_1"].height_mm == depth
+        assert assembly.panels["partition_1"].width_mm == depth
+        assert assembly.panels["partition_1"].height_mm == height - 2 * thickness
+
+    def test_cubby_half_lap_interfaces_have_both_positions(self):
         assembly = cubby(
             width=300,
             depth=200,
@@ -170,9 +199,13 @@ class TestCubbyAssembly:
             rows=2,
             cols=2,
         )
-        internal_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL]
-        assert len(internal_interfaces) == 1
-        assert internal_interfaces[0].position_mm is not None
+        half_lap_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+        ]
+        assert len(half_lap_interfaces) == 1
+        assert half_lap_interfaces[0].position_mm is not None
+        assert half_lap_interfaces[0].position_along_edge_b_mm is not None
 
     def test_3x3_cubby_intersection_positions(self):
         width = 450
@@ -193,16 +226,61 @@ class TestCubbyAssembly:
             cols=cols,
         )
 
-        internal_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL]
-        assert len(internal_interfaces) == 4
+        half_lap_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+        ]
+        assert len(half_lap_interfaces) == 4
 
-        positions = sorted([i.position_mm for i in internal_interfaces])
+        positions_a = sorted([i.position_mm for i in half_lap_interfaces])
+        positions_b = sorted([i.position_along_edge_b_mm for i in half_lap_interfaces])
 
         expected_partition_1_pos = cell_width - thickness / 2
         expected_partition_2_pos = 2 * cell_width - thickness / 2
+        expected_shelf_1_pos = cell_height - thickness / 2
+        expected_shelf_2_pos = 2 * cell_height - thickness / 2
 
-        assert expected_partition_1_pos in positions
-        assert expected_partition_2_pos in positions
+        assert expected_partition_1_pos in positions_a
+        assert expected_partition_2_pos in positions_a
+        assert expected_shelf_1_pos in positions_b
+        assert expected_shelf_2_pos in positions_b
+
+    def test_asymmetric_cubby_3x2_positions(self):
+        width = 900
+        height = 600
+        thickness = 18
+        rows = 2
+        cols = 3
+
+        cell_width = (width - 2 * thickness) / cols
+        cell_height = (height - 2 * thickness) / rows
+
+        assembly = cubby(
+            width=width,
+            depth=300,
+            height=height,
+            thickness=thickness,
+            rows=rows,
+            cols=cols,
+        )
+
+        half_lap_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+        ]
+        assert len(half_lap_interfaces) == 2
+
+        for interface in half_lap_interfaces:
+            assert interface.position_mm != interface.position_along_edge_b_mm
+
+        positions_a = {i.position_mm for i in half_lap_interfaces}
+        expected_pos_on_shelf_1 = cell_width - thickness / 2
+        expected_pos_on_shelf_2 = 2 * cell_width - thickness / 2
+        assert positions_a == {expected_pos_on_shelf_1, expected_pos_on_shelf_2}
+
+        positions_b = {i.position_along_edge_b_mm for i in half_lap_interfaces}
+        expected_pos_on_partition = cell_height - thickness / 2
+        assert positions_b == {expected_pos_on_partition}
 
     def test_cubby_validates_successfully(self):
         assembly = cubby(
@@ -214,3 +292,39 @@ class TestCubbyAssembly:
             cols=2,
         )
         assembly.validate()
+
+    def test_cubby_shelf_to_side_uses_captured_joinery(self):
+        from assembly.joinery import Captured
+        assembly = cubby(
+            width=300,
+            depth=200,
+            height=300,
+            thickness=18,
+            rows=2,
+            cols=2,
+        )
+        shelf_to_side = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL
+            and isinstance(i.joinery, Captured)
+            and "shelf" in i.panel_b
+        ]
+        assert len(shelf_to_side) == 2
+
+    def test_cubby_partition_to_cap_uses_captured_joinery(self):
+        from assembly.joinery import Captured
+        assembly = cubby(
+            width=300,
+            depth=200,
+            height=300,
+            thickness=18,
+            rows=2,
+            cols=2,
+        )
+        partition_to_cap = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL
+            and isinstance(i.joinery, Captured)
+            and "partition" in i.panel_b
+        ]
+        assert len(partition_to_cap) == 2

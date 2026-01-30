@@ -17,12 +17,9 @@ from assembly.panel import (
 from assembly.joinery import (
     Butt,
     Captured,
-    Dado,
     Finger,
     HalfLap,
     JoineryStrategy,
-    Rabbet,
-    Step,
 )
 from assembly.primitives import (
     box,
@@ -60,12 +57,9 @@ __all__ = [
     "validate_notches_no_overlap",
     "Butt",
     "Captured",
-    "Dado",
     "Finger",
     "HalfLap",
     "JoineryStrategy",
-    "Rabbet",
-    "Step",
     "box",
     "carcass",
     "cubby",

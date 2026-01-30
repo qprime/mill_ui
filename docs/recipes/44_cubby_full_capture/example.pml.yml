@@ -1,12 +1,12 @@
 # mill_ui: d6095d4
 # generated: 2026-01-30
 
-# 2x2 Cubby grid using Assembly system
-# Panel geometry only - no joinery for topology validation
+# 2x2 Cubby grid with full captured joinery
+# All joints use dados - perimeter, internal, and back
 
 Sheet:
   width: 2000mm
-  height: 1200mm
+  height: 1400mm
   thickness: 18mm
   margin: 15mm
   show_dimensions: true
@@ -17,8 +17,8 @@ children:
     depth: 200mm
     height: 400mm
     thickness: 18mm
-    grid: [2, 2]
-    perimeter_joinery: none
+    grid: [2, 3]
+    perimeter_joinery: captured
     shelf_joinery: captured
     partition_joinery: captured
     internal_joinery: half_lap

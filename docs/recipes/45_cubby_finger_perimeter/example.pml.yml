@@ -1,8 +1,8 @@
 # mill_ui: d6095d4
 # generated: 2026-01-30
 
-# 2x2 Cubby grid using Assembly system
-# Panel geometry only - no joinery for topology validation
+# 2x2 Cubby grid with finger joint perimeter
+# Finger joints on perimeter, captured dados for internal
 
 Sheet:
   width: 2000mm
@@ -18,7 +18,7 @@ children:
     height: 400mm
     thickness: 18mm
     grid: [2, 2]
-    perimeter_joinery: none
+    perimeter_joinery: finger
     shelf_joinery: captured
     partition_joinery: captured
     internal_joinery: half_lap

@@ -1709,12 +1709,19 @@ class LayoutResolver:
         )
 
         if assembly_type == "box":
+            box_perimeter_joinery = self._build_joinery_from_config(
+                node.perimeter_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            )
             assembly = box(
                 width=node.width_mm,
                 depth=node.depth_mm,
                 height=node.height_mm,
                 thickness=node.thickness_mm,
                 side_joinery=side_joinery or Finger(),
+                perimeter_joinery=box_perimeter_joinery,
                 top=top_joinery,
                 bottom=bottom_joinery,
             )

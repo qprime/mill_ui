@@ -13,9 +13,15 @@ def box(
     height: float,
     thickness: float,
     side_joinery: JoineryStrategy = Finger(),
+    perimeter_joinery: JoineryStrategy | None = None,
     top: JoineryStrategy | Literal["none"] | None = None,
-    bottom: JoineryStrategy | Literal["none"] | None = Captured(),
+    bottom: JoineryStrategy | Literal["none"] | None = None,
 ) -> Assembly:
+    default_cap_joinery = perimeter_joinery if perimeter_joinery is not None else Captured()
+    if top is None:
+        top = default_cap_joinery
+    if bottom is None:
+        bottom = default_cap_joinery
     front = PanelSpec(
         name="front",
         width_mm=width,
@@ -23,7 +29,7 @@ def box(
         thickness_mm=thickness,
         role=PanelRole.FRONT,
     )
-    back = PanelSpec(
+    back_panel = PanelSpec(
         name="back",
         width_mm=width,
         height_mm=height,
@@ -47,7 +53,7 @@ def box(
 
     panels: dict[str, PanelSpec] = {
         "front": front,
-        "back": back,
+        "back": back_panel,
         "left_side": left,
         "right_side": right,
     }

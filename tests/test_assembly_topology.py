@@ -62,7 +62,8 @@ class TestBoxAssembly:
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
-            bottom=None,
+            top="none",
+            bottom="none",
         )
         assert len(assembly.panels) == 4
         assert "front" in assembly.panels
@@ -77,11 +78,12 @@ class TestBoxAssembly:
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
+            top="none",
         )
         assert len(assembly.panels) == 5
         assert "bottom" in assembly.panels
 
-    def test_box_with_top_has_6_panels(self):
+    def test_default_box_has_6_panels(self):
         from assembly.joinery import Captured
         assembly = box(
             width=200,
@@ -89,9 +91,10 @@ class TestBoxAssembly:
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
-            top=Captured(),
         )
         assert len(assembly.panels) == 6
+        assert "top" in assembly.panels
+        assert "bottom" in assembly.panels
         assert "top" in assembly.panels
 
     def test_finger_joint_dimensions(self):

@@ -14,7 +14,8 @@ class TestAssemblyResolve:
             height=100,
             thickness=6,
             side_joinery=Butt(),
-            bottom=None,
+            top="none",
+            bottom="none",
         )
         panels = assembly.resolve()
 

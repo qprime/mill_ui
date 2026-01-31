@@ -37,9 +37,11 @@ class TestBoxPrimitive:
         assert len(bottom_interfaces) == 4
         assert all(isinstance(i.joinery, Captured) for i in bottom_interfaces)
 
-    def test_no_top_by_default(self):
+    def test_top_is_captured_by_default(self):
         assembly = box(width=200, depth=150, height=100, thickness=6)
-        assert "top" not in assembly.panels
+        assert "top" in assembly.panels
+        top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
+        assert all(isinstance(i.joinery, Captured) for i in top_interfaces)
 
     def test_explicit_top(self):
         assembly = box(width=200, depth=150, height=100, thickness=6, top=Captured())
@@ -47,13 +49,13 @@ class TestBoxPrimitive:
         top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
         assert len(top_interfaces) == 4
 
-    def test_no_bottom_when_none(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6, bottom=None)
-        assert "bottom" not in assembly.panels
-
-    def test_no_bottom_when_string_none(self):
+    def test_no_bottom_when_string_none_explicit(self):
         assembly = box(width=200, depth=150, height=100, thickness=6, bottom="none")
         assert "bottom" not in assembly.panels
+
+    def test_no_top_when_string_none(self):
+        assembly = box(width=200, depth=150, height=100, thickness=6, top="none")
+        assert "top" not in assembly.panels
 
     def test_bottom_dimensions_account_for_side_thickness(self):
         assembly = box(width=200, depth=150, height=100, thickness=6)
@@ -78,6 +80,35 @@ class TestBoxPrimitive:
         assert assembly.panels["left_side"].role == PanelRole.LEFT
         assert assembly.panels["right_side"].role == PanelRole.RIGHT
         assert assembly.panels["bottom"].role == PanelRole.BOTTOM
+
+    def test_perimeter_joinery_sets_top_and_bottom_defaults(self):
+        assembly = box(
+            width=200,
+            depth=150,
+            height=100,
+            thickness=6,
+            perimeter_joinery=Finger(width_mm=15),
+        )
+        top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
+        bottom_interfaces = [i for i in assembly.interfaces if "bottom" in (i.panel_a, i.panel_b)]
+        assert len(top_interfaces) == 4
+        assert len(bottom_interfaces) == 4
+        assert all(isinstance(i.joinery, Finger) for i in top_interfaces)
+        assert all(isinstance(i.joinery, Finger) for i in bottom_interfaces)
+
+    def test_explicit_top_overrides_perimeter_joinery(self):
+        assembly = box(
+            width=200,
+            depth=150,
+            height=100,
+            thickness=6,
+            perimeter_joinery=Finger(width_mm=15),
+            top=Butt(),
+        )
+        top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
+        bottom_interfaces = [i for i in assembly.interfaces if "bottom" in (i.panel_a, i.panel_b)]
+        assert all(isinstance(i.joinery, Butt) for i in top_interfaces)
+        assert all(isinstance(i.joinery, Finger) for i in bottom_interfaces)
 
 
 class TestBoxResolve:

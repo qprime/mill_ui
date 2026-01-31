@@ -1,17 +1,16 @@
 {
   "timing": {
-    "ir_ms": 0.07,
-    "hints_ms": 0.01,
-    "plan_ms": 1.87,
-    "gcode_ms": 2.47,
-    "svg_ms": 0.87,
-    "total_ms": 7.31,
-    "parse_ms": 2.89
+    "ir_ms": 0.13,
+    "hints_ms": 0.02,
+    "plan_ms": 3.63,
+    "gcode_ms": 4.9,
+    "svg_ms": 3.4,
+    "total_ms": 12.07
   },
   "complexity": {
-    "total_moves": 863,
+    "total_moves": 1658,
     "rapid_moves": 0,
-    "cut_moves": 863,
+    "cut_moves": 1658,
     "rapid_ratio": 0.0
   },
   "fidelity": {
@@ -25,22 +24,29 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 687
+        "move_count": 1482
       }
     ]
   },
   "output_size": {
-    "total_bytes": 20878,
-    "total_lines": 865,
+    "total_bytes": 42828,
+    "total_lines": 1658,
     "files": {
       "pocket-3.17mm": {
         "bytes": 3445,
         "lines": 174
       },
       "profile-3.17mm": {
-        "bytes": 17433,
-        "lines": 691
+        "bytes": 39383,
+        "lines": 1484
       }
     }
-  }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "timestamp": "2026-01-31T00:39:36.189467+00:00"
 }

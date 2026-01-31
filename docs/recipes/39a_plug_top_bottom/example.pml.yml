@@ -1,0 +1,32 @@
+# mill_ui: d18fab7
+# generated: 2026-01-30
+
+# Box with "plug" top and bottom
+# The top and bottom panels have rabbets around their perimeter (receiving: b)
+# that wrap over/under the side walls, creating a plug-fit lid/base.
+# Sides are joined with finger joints.
+
+Sheet:
+  width: 1200mm
+  height: 800mm
+  thickness: 6mm
+  margin: 10mm
+  show_dimensions: false
+children:
+- Assembly:
+    type: box
+    width: 200mm
+    depth: 150mm
+    height: 100mm
+    thickness: 6mm
+    joinery: finger
+    finger_width: 12mm
+    clearance: 0.15mm
+    bottom:
+      joinery: captured
+      receiving: b
+    top:
+      joinery: captured
+      receiving: b
+    show_labels: true
+    show_edge_colors: true

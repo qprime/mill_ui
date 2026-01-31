@@ -508,7 +508,7 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         top_raw = node_data.get("top")
         top = None
-        if top_raw == "none" or top_raw is None:
+        if top_raw is None:
             top = None
         elif isinstance(top_raw, str):
             top = top_raw
@@ -525,7 +525,7 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         bottom_raw = node_data.get("bottom", "captured")
         bottom: str | InterfaceConfig | None = "captured"
-        if bottom_raw == "none" or bottom_raw is None:
+        if bottom_raw is None:
             bottom = None
         elif isinstance(bottom_raw, str):
             bottom = bottom_raw
@@ -542,7 +542,7 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         back_raw = node_data.get("back")
         back: str | InterfaceConfig | None = None
-        if back_raw == "none" or back_raw is None:
+        if back_raw is None:
             back = None
         elif isinstance(back_raw, str):
             back = back_raw

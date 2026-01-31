@@ -1638,7 +1638,7 @@ class LayoutResolver:
         if config is None:
             return None
         if config == "none":
-            return Butt()
+            return "none"
 
         if isinstance(config, str):
             joinery_name = config.lower()

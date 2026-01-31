@@ -78,7 +78,7 @@ def box(
         panels["bottom"] = bottom_panel
 
         interfaces.append(Interface(InterfaceType.BOTTOM, "front", "bottom", "bottom", "top", bottom))
-        interfaces.append(Interface(InterfaceType.BOTTOM, "back", "bottom", "bottom", "top", bottom))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "back", "bottom", "bottom", "bottom", bottom))
         interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom))
         interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
 
@@ -95,7 +95,7 @@ def box(
         panels["top"] = top_panel
 
         interfaces.append(Interface(InterfaceType.TOP, "front", "top", "top", "top", top))
-        interfaces.append(Interface(InterfaceType.TOP, "back", "top", "top", "top", top))
+        interfaces.append(Interface(InterfaceType.TOP, "back", "top", "top", "bottom", top))
         interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
         interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 

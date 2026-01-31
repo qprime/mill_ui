@@ -168,3 +168,21 @@ item_x = offset  # margin applied at export
 **Why:** The margin zone is a physical no-cut zone reserved for clamps. No cutting operation may encroach on this zone—including tool paths for outside profiles. The margin zone cannot be addressed and never exists in internal coordinates.
 
 **Tool clearance:** Outside profile cuts require part edges to be at least one tool diameter from working area boundaries. See [pml/syntax_spec.md](../pml/syntax_spec.md#tool-clearance-for-outside-profiles) for PML placement rules.
+
+---
+
+### 7. Toe-Kick Dado Positioning
+
+**Rule:** The bottom face of the bottom panel sits at `toe_kick_height` above the cabinet bottom. For the side-panel capture groove, `position_mm` for the bottom-panel interface must equal `toe_kick_height` (measured from the side panel bottom edge to the near side of the groove).
+
+**Wrong:**
+```python
+bottom_dado_position = toe_kick_height + thickness
+```
+
+**Correct:**
+```python
+bottom_dado_position = toe_kick_height
+```
+
+**Why:** The groove's near edge aligns with the bottom panel's bottom face. Any visual offset in SVG output comes from groove width and centering math in the resolver, not the physical alignment requirement. Do not add thickness or other offsets to `position_mm`.

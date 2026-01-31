@@ -168,12 +168,12 @@ class TestCarcassPrimitive:
         top_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.TOP]
         assert all(isinstance(i.joinery, Butt) for i in top_interfaces)
 
-    def test_no_top_when_none(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18, top=None)
+    def test_no_top_when_none_string(self):
+        assembly = carcass(width=600, depth=400, height=500, thickness=18, top="none")
         assert "top" not in assembly.panels
 
-    def test_no_bottom_when_none(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18, bottom=None)
+    def test_no_bottom_when_none_string(self):
+        assembly = carcass(width=600, depth=400, height=500, thickness=18, bottom="none")
         assert "bottom" not in assembly.panels
 
     def test_fixed_shelves_creates_shelf_panels(self):
@@ -215,31 +215,140 @@ class TestCarcassPrimitive:
         ]
         assert all(isinstance(i.joinery, Captured) for i in shelf_interfaces)
 
-    def test_vertical_partitions_creates_partition_panels(self):
+    def test_perimeter_joinery_sets_top_and_bottom_defaults(self):
+        from assembly.joinery import Finger
         assembly = carcass(
-            width=1200,
+            width=600,
             depth=400,
             height=500,
             thickness=18,
-            vertical_partitions=3,
+            perimeter_joinery=Finger(width_mm=15),
         )
-        assert "partition_1" in assembly.panels
-        assert "partition_2" in assembly.panels
-        assert "partition_3" in assembly.panels
+        top_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.TOP]
+        bottom_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.BOTTOM]
+        assert all(isinstance(i.joinery, Finger) for i in top_interfaces)
+        assert all(isinstance(i.joinery, Finger) for i in bottom_interfaces)
 
-    def test_partition_interfaces_are_internal(self):
+    def test_explicit_top_overrides_perimeter_joinery(self):
+        from assembly.joinery import Finger
         assembly = carcass(
-            width=1200,
+            width=600,
             depth=400,
             height=500,
             thickness=18,
-            vertical_partitions=2,
+            perimeter_joinery=Finger(width_mm=15),
+            top=Butt(),
         )
-        partition_interfaces = [
+        top_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.TOP]
+        assert all(isinstance(i.joinery, Butt) for i in top_interfaces)
+
+    def test_back_to_top_bottom_interfaces_emitted(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            back=Captured(),
+        )
+        back_top_interfaces = [
             i for i in assembly.interfaces
-            if "partition" in i.panel_a or "partition" in i.panel_b
+            if i.type == InterfaceType.TOP and ("back" in i.panel_a or "back" in i.panel_b)
         ]
-        assert all(i.type == InterfaceType.INTERNAL for i in partition_interfaces)
+        back_bottom_interfaces = [
+            i for i in assembly.interfaces
+            if i.type == InterfaceType.BOTTOM and ("back" in i.panel_a or "back" in i.panel_b)
+        ]
+        assert len(back_top_interfaces) == 1
+        assert len(back_bottom_interfaces) == 1
+
+    def test_toe_kick_creates_notches_on_sides(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+        )
+        left = assembly.panels["left_side"]
+        right = assembly.panels["right_side"]
+        assert len(left.notches) == 1
+        assert len(right.notches) == 1
+        assert left.notches[0].depth_mm == 100
+        assert left.notches[0].u_len_mm == 50
+
+    def test_toe_kick_depth_default(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+        )
+        left = assembly.panels["left_side"]
+        assert left.notches[0].u_len_mm == 50
+
+    def test_toe_kick_depth_custom(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+            toe_kick_depth=75,
+        )
+        left = assembly.panels["left_side"]
+        assert left.notches[0].u_len_mm == 75
+
+    def test_toe_kick_shortens_bottom_panel(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+            toe_kick_depth=75,
+        )
+        bottom = assembly.panels["bottom"]
+        assert bottom.height_mm == 400 - 75
+
+    def test_toe_kick_cover_created_between_sides(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+            toe_kick_style="between_sides",
+            toe_kick_cover=True,
+        )
+        assert "toe_kick_cover" in assembly.panels
+        cover = assembly.panels["toe_kick_cover"]
+        assert cover.width_mm == 600 - 2 * 18
+        assert cover.height_mm == 100
+
+    def test_toe_kick_cover_created_over_sides(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+            toe_kick_style="over_sides",
+            toe_kick_cover=True,
+        )
+        cover = assembly.panels["toe_kick_cover"]
+        assert cover.width_mm == 600
+
+    def test_toe_kick_cover_not_created_when_disabled(self):
+        assembly = carcass(
+            width=600,
+            depth=400,
+            height=500,
+            thickness=18,
+            toe_kick_height=100,
+            toe_kick_cover=False,
+        )
+        assert "toe_kick_cover" not in assembly.panels
 
     def test_back_panel_created_when_specified(self):
         assembly = carcass(

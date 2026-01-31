@@ -4,7 +4,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any
 
-from shapely.geometry import Polygon, box
+from shapely.geometry import MultiPolygon, Polygon, box
 from shapely.ops import unary_union, orient
 
 Point2D = tuple[float, float]
@@ -214,7 +214,13 @@ def build_notched_polygon(
 
     result = orient(result, sign=1.0)
 
-    if result.is_empty or not hasattr(result, 'exterior'):
+    if result.is_empty:
+        return tuple(base.exterior.coords[:-1])
+
+    if isinstance(result, MultiPolygon):
+        result = max(result.geoms, key=lambda g: g.area)
+
+    if not hasattr(result, 'exterior'):
         return tuple(base.exterior.coords[:-1])
 
     return tuple(result.exterior.coords[:-1])

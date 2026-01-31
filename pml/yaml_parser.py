@@ -628,6 +628,10 @@ def parse_node(data: dict, path: str = "") -> Any:
             grid=grid,
             perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),
             internal_joinery=node_data.get("internal_joinery", "half_lap"),
+            toe_kick_height_mm=parse_dimension(node_data["toe_kick_height"]) if "toe_kick_height" in node_data else None,
+            toe_kick_depth_mm=parse_dimension(node_data["toe_kick_depth"]) if "toe_kick_depth" in node_data else None,
+            toe_kick_style=node_data.get("toe_kick_style", "open"),
+            toe_kick_cover=node_data.get("toe_kick_cover", False),
         )
 
     elif node_type == "UseComponent":

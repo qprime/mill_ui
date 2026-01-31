@@ -157,6 +157,8 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 - Minimize tool calls: edit → test → done
 - Design documents go in GitHub issues (`gh issue create`) unless otherwise directed
 
+**Visual validation:** When uncertain about geometry, coordinate transforms, or rendering output—ask the user to visually check rather than reverse-engineering SVG/G-code coordinates. The human can validate visual correctness faster than you can audit downstream transforms.
+
 **GEOMETRY & AXIS INVARIANTS (DO NOT REINTERPRET)**
 
 - All geometry is defined in a right-handed Cartesian coordinate system.

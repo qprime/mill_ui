@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from assembly.core import Assembly, Interface, InterfaceType
+from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
 from assembly.joinery import Butt, Finger, Captured, HalfLap, JoineryStrategy
-from assembly.panel import PanelRole, PanelSpec
+from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
 def box(
@@ -103,17 +103,26 @@ def carcass(
     thickness: float,
     side_joinery: JoineryStrategy = Butt(),
     cap_style: Literal["between_sides", "over_sides"] = "between_sides",
-    top: JoineryStrategy | Literal["none"] | None = Butt(),
-    bottom: JoineryStrategy | Literal["none"] | None = Butt(),
+    perimeter_joinery: JoineryStrategy | None = None,
+    top: JoineryStrategy | Literal["none"] | None = None,
+    bottom: JoineryStrategy | Literal["none"] | None = None,
     back: JoineryStrategy | Literal["none"] | None = None,
     back_thickness: float | None = None,
     back_inset: float = 0.0,
     fixed_shelves: int = 0,
     shelf_joinery: JoineryStrategy = Captured(),
     shelf_back_support: bool = False,
-    vertical_partitions: int = 0,
-    partition_joinery: JoineryStrategy = Captured(),
+    toe_kick_height: float | None = None,
+    toe_kick_depth: float | None = None,
+    toe_kick_style: Literal["between_sides", "over_sides"] = "between_sides",
+    toe_kick_cover: bool = True,
 ) -> Assembly:
+    default_cap_joinery = perimeter_joinery if perimeter_joinery is not None else Butt()
+    if top is None:
+        top = default_cap_joinery
+    if bottom is None:
+        bottom = default_cap_joinery
+
     if cap_style == "between_sides":
         side_height = height
         cap_width = width - 2 * thickness
@@ -155,17 +164,43 @@ def carcass(
         interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
         interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
+    effective_toe_kick_depth = toe_kick_depth if toe_kick_depth is not None else (50.0 if toe_kick_height else 0.0)
+    effective_toe_kick_height = toe_kick_height if toe_kick_height is not None else 0.0
+
+    if effective_toe_kick_height > 0:
+        kick_notch = NotchSpec(
+            edge=Edge.BOTTOM,
+            u_start_mm=0.0,
+            u_len_mm=effective_toe_kick_depth,
+            depth_mm=effective_toe_kick_height,
+        )
+        panels["left_side"] = panels["left_side"].with_notches((kick_notch,))
+        panels["right_side"] = panels["right_side"].with_notches((kick_notch,))
+
     if bottom is not None and bottom != "none":
+        bottom_depth = depth - effective_toe_kick_depth if effective_toe_kick_height > 0 else depth
         bottom_panel = PanelSpec(
             name="bottom",
             width_mm=cap_width,
-            height_mm=depth,
+            height_mm=bottom_depth,
             thickness_mm=thickness,
             role=PanelRole.BOTTOM,
         )
         panels["bottom"] = bottom_panel
-        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom))
-        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
+        bottom_dado_position = effective_toe_kick_height if effective_toe_kick_height > 0 else None
+        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom, position_mm=bottom_dado_position))
+        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom, position_mm=bottom_dado_position))
+
+    if effective_toe_kick_height > 0 and toe_kick_cover:
+        kick_cover_width = cap_width if toe_kick_style == "between_sides" else width
+        kick_cover = PanelSpec(
+            name="toe_kick_cover",
+            width_mm=kick_cover_width,
+            height_mm=effective_toe_kick_height,
+            thickness_mm=thickness,
+            role=PanelRole.FRONT,
+        )
+        panels["toe_kick_cover"] = kick_cover
 
     if back is not None and back != "none":
         back_width = width - 2 * back_inset if back_inset else width
@@ -189,6 +224,11 @@ def carcass(
             back_joinery = back
         interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "back", "left", back_joinery))
         interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "back", "right", back_joinery))
+        if back_joinery.removal_kind == RemovalKind.FACE:
+            if "top" in panels:
+                interfaces.append(Interface(InterfaceType.TOP, "top", "top", "back", "top", back_joinery))
+            if "bottom" in panels:
+                interfaces.append(Interface(InterfaceType.BOTTOM, "bottom", "bottom", "back", "bottom", back_joinery))
 
     if fixed_shelves > 0:
         shelf_x = cap_width
@@ -212,35 +252,15 @@ def carcass(
             panels[f"shelf_{i+1}"] = shelf
             shelf_position = bottom_offset + (i + 1) * shelf_spacing - thickness / 2
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "left_side", "right", f"shelf_{i+1}", "left", shelf_joinery, position_mm=shelf_position)
+                Interface(InterfaceType.INTERNAL, "left_side", "bottom", f"shelf_{i+1}", "left", shelf_joinery, position_mm=shelf_position)
             )
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "right_side", "left", f"shelf_{i+1}", "right", shelf_joinery, position_mm=shelf_position)
+                Interface(InterfaceType.INTERNAL, "right_side", "bottom", f"shelf_{i+1}", "right", shelf_joinery, position_mm=shelf_position)
             )
             if shelf_back_support and "back" in panels:
+                back_shelf_position = shelf_position - back_inset
                 interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "back", "bottom", f"shelf_{i+1}", "top", shelf_joinery, position_mm=shelf_position)
-                )
-
-    if vertical_partitions > 0:
-        partition_z = side_height - 2 * thickness if cap_style == "between_sides" else side_height
-        partition_y = depth - back_inset if back_inset else depth
-        for i in range(vertical_partitions):
-            partition = PanelSpec(
-                name=f"partition_{i+1}",
-                width_mm=partition_y,
-                height_mm=partition_z,
-                thickness_mm=thickness,
-                role=PanelRole.PARTITION,
-            )
-            panels[f"partition_{i+1}"] = partition
-            if "top" in panels:
-                interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "top", "bottom", f"partition_{i+1}", "top", partition_joinery)
-                )
-            if "bottom" in panels:
-                interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "bottom", "top", f"partition_{i+1}", "bottom", partition_joinery)
+                    Interface(InterfaceType.INTERNAL, "back", "bottom", f"shelf_{i+1}", "top", shelf_joinery, position_mm=back_shelf_position)
                 )
 
     return Assembly(panels=panels, interfaces=tuple(interfaces))

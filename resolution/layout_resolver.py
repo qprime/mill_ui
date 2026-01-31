@@ -1719,6 +1719,13 @@ class LayoutResolver:
                 bottom=bottom_joinery,
             )
         elif assembly_type == "carcass":
+            perimeter_joinery = self._build_joinery_from_config(
+                node.perimeter_joinery,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            )
+
             shelf_joinery = self._build_joinery_from_config(
                 node.shelf_joinery,
                 default_finger_width,
@@ -1747,16 +1754,19 @@ class LayoutResolver:
                 thickness=node.thickness_mm,
                 side_joinery=side_joinery or Butt(),
                 cap_style=node.cap_style,
-                top=top_joinery or Butt(),
-                bottom=bottom_joinery or Butt(),
+                perimeter_joinery=perimeter_joinery,
+                top=top_joinery,
+                bottom=bottom_joinery,
                 back=back_joinery,
                 back_thickness=node.back_thickness_mm,
                 back_inset=node.back_inset_mm,
                 fixed_shelves=node.fixed_shelves,
                 shelf_joinery=shelf_joinery,
                 shelf_back_support=node.shelf_back_support,
-                vertical_partitions=node.vertical_partitions,
-                partition_joinery=partition_joinery,
+                toe_kick_height=node.toe_kick_height_mm,
+                toe_kick_depth=node.toe_kick_depth_mm,
+                toe_kick_style=node.toe_kick_style,
+                toe_kick_cover=node.toe_kick_cover,
             )
         elif assembly_type == "cubby":
             grid = node.grid or (2, 2)

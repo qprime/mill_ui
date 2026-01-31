@@ -556,6 +556,10 @@ class Assembly:
     grid: tuple[int, int] | None = None
     perimeter_joinery: str = "finger"
     internal_joinery: str = "half_lap"
+    toe_kick_height_mm: float | None = None
+    toe_kick_depth_mm: float | None = None
+    toe_kick_style: str = "open"
+    toe_kick_cover: bool = False
 
 
 @dataclass(frozen=True)

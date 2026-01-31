@@ -166,18 +166,6 @@ class TestCarcassAssembly:
         assert "shelf_1" in assembly.panels
         assert "shelf_2" in assembly.panels
 
-    def test_vertical_partitions_creates_partition_panels(self):
-        assembly = carcass(
-            width=1200,
-            depth=300,
-            height=900,
-            thickness=18,
-            vertical_partitions=3,
-        )
-        assert "partition_1" in assembly.panels
-        assert "partition_2" in assembly.panels
-        assert "partition_3" in assembly.panels
-
     def test_full_carcass_panel_generation(self):
         assembly = carcass(
             width=600,
@@ -205,7 +193,7 @@ class TestCarcassAssembly:
             depth=560,
             height=720,
             thickness=18,
-            top=None,
+            top="none",
         )
         assert "top" not in assembly.panels
 
@@ -215,6 +203,6 @@ class TestCarcassAssembly:
             depth=560,
             height=720,
             thickness=18,
-            bottom=None,
+            bottom="none",
         )
         assert "bottom" not in assembly.panels

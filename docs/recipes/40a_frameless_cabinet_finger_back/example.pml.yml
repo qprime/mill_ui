@@ -1,7 +1,7 @@
 # mill_ui: 4df08e3
 # generated: 2026-01-30
 
-# Frameless cabinet carcass with captured joinery on all edges
+# Frameless cabinet with finger-jointed back panel
 
 Sheet:
   width: 2440mm
@@ -18,5 +18,6 @@ children:
     thickness: 18mm
     top: captured
     bottom: captured
+    back: finger
     fixed_shelves: 1
     show_labels: true

@@ -1,7 +1,7 @@
 # mill_ui: 4df08e3
 # generated: 2026-01-30
 
-# Frameless cabinet carcass with captured joinery on all edges
+# Frameless cabinet carcass with toe kick cutout
 
 Sheet:
   width: 2440mm
@@ -19,4 +19,7 @@ children:
     top: captured
     bottom: captured
     fixed_shelves: 1
+    toe_kick_height: 76mm
+    toe_kick_depth: 76mm
+    toe_kick_cover: true
     show_labels: true

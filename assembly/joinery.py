@@ -14,7 +14,7 @@ def _edge_name_to_enum(name: EdgeName) -> Edge:
     return {"top": Edge.TOP, "bottom": Edge.BOTTOM, "left": Edge.LEFT, "right": Edge.RIGHT}[name]
 
 
-def _edge_orientation(edge: EdgeName) -> Literal["horizontal", "vertical"]:
+def _dado_orientation(edge: EdgeName) -> Literal["horizontal", "vertical"]:
     return "vertical" if edge in ("left", "right") else "horizontal"
 
 
@@ -228,7 +228,7 @@ class Captured:
                 width_mm=width + self.fitment_mm,
                 depth_mm=depth,
                 edge=edge,
-                orientation=_edge_orientation(edge),
+                orientation=_dado_orientation(edge),
             )
             return (panel_a.with_dados((dado,)), panel_b)
         else:
@@ -240,7 +240,7 @@ class Captured:
                 width_mm=width + self.fitment_mm,
                 depth_mm=depth,
                 edge=edge,
-                orientation=_edge_orientation(edge),
+                orientation=_dado_orientation(edge),
             )
             return (panel_a, panel_b.with_dados((dado,)))
 

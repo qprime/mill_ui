@@ -1,0 +1,18 @@
+name: "Shapeoko XXL"
+
+envelope:
+  x_min: 0
+  x_max: 838
+  y_min: 0
+  y_max: 838
+
+wasteboard:
+  width_mm: 800
+  height_mm: 800
+  offset_x: 19
+  offset_y: 19
+
+defaults:
+  safe_z_mm: 5.0
+  feed_rate_mm_min: 2500
+  plunge_rate_mm_min: 750

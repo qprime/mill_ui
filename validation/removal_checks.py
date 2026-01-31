@@ -136,6 +136,27 @@ def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
     return pocket_touches_profile_edge
 
 
+def _is_hole_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
+    hint_type_a = a.metadata.get("hint_type", "")
+    hint_type_b = b.metadata.get("hint_type", "")
+
+    if hint_type_a == "profile" and hint_type_b in ("drill", "hole"):
+        profile, hole = a, b
+    elif hint_type_a in ("drill", "hole") and hint_type_b == "profile":
+        profile, hole = b, a
+    else:
+        return False
+
+    hole_inside_profile = (
+        hole.bounds.x_min >= profile.bounds.x_min and
+        hole.bounds.x_max <= profile.bounds.x_max and
+        hole.bounds.y_min >= profile.bounds.y_min and
+        hole.bounds.y_max <= profile.bounds.y_max
+    )
+
+    return hole_inside_profile
+
+
 def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
     result = ValidationResult()
 
@@ -145,6 +166,8 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue
                 if _is_pocket_on_profile_edge(intent_a, intent_b):
+                    continue
+                if _is_hole_inside_profile(intent_a, intent_b):
                     continue
                 result.add_error(
                     f"Overlapping regions detected: {intent_a.region_id} and {intent_b.region_id}",
@@ -306,6 +329,7 @@ def check_working_area_bounds(
     working_width_mm: float,
     working_height_mm: float,
     tool_radius_mm: float = 0.0,
+    tolerance_mm: float = 0.01,
 ) -> ValidationResult:
     result = ValidationResult()
 
@@ -322,7 +346,7 @@ def check_working_area_bounds(
         max_x = bounds.x_max + offset
         max_y = bounds.y_max + offset
 
-        if min_x < 0:
+        if min_x < -tolerance_mm:
             result.add_error(
                 f"Cutting edge extends {abs(min_x):.2f}mm into left margin zone",
                 region_id=intent.region_id,
@@ -330,7 +354,7 @@ def check_working_area_bounds(
                 excess_mm=abs(min_x),
             )
 
-        if min_y < 0:
+        if min_y < -tolerance_mm:
             result.add_error(
                 f"Cutting edge extends {abs(min_y):.2f}mm into bottom margin zone",
                 region_id=intent.region_id,
@@ -338,7 +362,7 @@ def check_working_area_bounds(
                 excess_mm=abs(min_y),
             )
 
-        if max_x > working_width_mm:
+        if max_x > working_width_mm + tolerance_mm:
             excess = max_x - working_width_mm
             result.add_error(
                 f"Cutting edge extends {excess:.2f}mm into right margin zone",
@@ -347,7 +371,7 @@ def check_working_area_bounds(
                 excess_mm=excess,
             )
 
-        if max_y > working_height_mm:
+        if max_y > working_height_mm + tolerance_mm:
             excess = max_y - working_height_mm
             result.add_error(
                 f"Cutting edge extends {excess:.2f}mm into top margin zone",

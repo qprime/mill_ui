@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from layout_ast.layout import LayoutAST
-from ir.removal_intent import RemovalIntent
+from ir.removal_intent import RemovalIntent, Bounds2D
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_hints
 from validation.removal_checks import (
@@ -22,6 +22,7 @@ from cam.model.material import Material
 from cam.model.machine import Machine
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
+from config.machine_loader import MachineConfig, Endmill
 
 
 DEFAULT_TOOL_DB = [
@@ -85,6 +86,9 @@ def run_pipeline(
     generate_svg: bool = True,
     svg_theme: str = "dark",
     y_origin: str = "back",
+    machine_config: MachineConfig | None = None,
+    endmill: Endmill | None = None,
+    validate_machine_bounds: bool = True,
 ) -> PipelineResult:
     if tool_db is None:
         tool_db = DEFAULT_TOOL_DB
@@ -131,6 +135,29 @@ def run_pipeline(
             errors.append(error.message)
         for warning in clearance_result.warnings:
             warnings.append(warning.message)
+
+    if machine_config is not None and validate_machine_bounds:
+        from validation.machine_checks import check_job_fits_machine
+
+        sheet = ast.sheet
+        margin = sheet.margin_mm
+        job_bounds = Bounds2D(
+            x_min=margin,
+            x_max=sheet.width_mm - margin,
+            y_min=margin,
+            y_max=sheet.height_mm - margin,
+        )
+
+        machine_result = check_job_fits_machine(job_bounds, machine_config, endmill)
+        if machine_result.status.value == "fail":
+            for failure in machine_result.failures:
+                errors.append(f"Machine bounds: {failure}")
+        elif machine_result.status.value == "warn":
+            for failure in machine_result.failures:
+                warnings.append(f"Machine bounds: {failure}")
+
+    if machine_config is not None and safe_z == 6.0:
+        safe_z = machine_config.defaults.safe_z_mm
 
     hints_start = time.perf_counter()
     hints = removal_intents_to_hints(

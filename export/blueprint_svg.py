@@ -1287,3 +1287,36 @@ def _collect_part_inventory(ast: LayoutAST) -> list[str]:
         parts.append(item.shape_id)
 
     return sorted(set(parts))
+
+
+def render_blueprint_svg_via_ir(
+    layout_ast: LayoutAST,
+    removal_intents: Sequence[RemovalIntent] | None = None,
+    theme: str = "dark",
+    y_origin: str = "back",
+) -> str:
+    from adapters.layoutast_to_ir import layoutast_to_diagram_ir
+    from diagram_render import render_diagram_svg
+    from diagram_render.render_svg import DIAGRAM_THEMES
+
+    kerf_width = 0.0
+    try:
+        kerf_width = float(layout_ast.kerf_width_mm or 0.0)
+    except (TypeError, ValueError):
+        pass
+
+    diagram_ir = layoutast_to_diagram_ir(
+        ast=layout_ast,
+        y_origin=y_origin,
+        show_dimensions=getattr(layout_ast.sheet, 'show_dimensions', True),
+        show_toolpaths=True,
+        kerf_width_mm=kerf_width,
+    )
+
+    diagram_theme = DIAGRAM_THEMES.get(theme, DIAGRAM_THEMES["dark"])
+
+    return render_diagram_svg(
+        diagram=diagram_ir,
+        viewport=None,
+        theme=diagram_theme,
+    )

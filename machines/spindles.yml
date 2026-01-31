@@ -1,0 +1,20 @@
+spindles:
+  - name: "Dewalt DWP611"
+    rpm_min: 16000
+    rpm_max: 27000
+
+  - name: "Makita RT0701C"
+    rpm_min: 10000
+    rpm_max: 30000
+
+  - name: "2.2kW Water Cooled"
+    rpm_min: 6000
+    rpm_max: 24000
+
+  - name: "1.5kW Air Cooled"
+    rpm_min: 8000
+    rpm_max: 24000
+
+  - name: "800W Air Cooled"
+    rpm_min: 8000
+    rpm_max: 24000

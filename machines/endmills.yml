@@ -1,0 +1,58 @@
+endmills:
+  - name: "1/4 upcut spiral"
+    diameter_mm: 6.35
+    flute_length_mm: 25.4
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: upcut_spiral
+
+  - name: "1/8 upcut spiral"
+    diameter_mm: 3.175
+    flute_length_mm: 12.7
+    shank_diameter_mm: 3.175
+    flutes: 2
+    type: upcut_spiral
+
+  - name: "1/8 downcut spiral"
+    diameter_mm: 3.175
+    flute_length_mm: 12.7
+    shank_diameter_mm: 3.175
+    flutes: 1
+    type: downcut_spiral
+
+  - name: "1/4 compression"
+    diameter_mm: 6.35
+    flute_length_mm: 22.0
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: compression
+
+  - name: "1/2 straight"
+    diameter_mm: 12.7
+    flute_length_mm: 38.1
+    shank_diameter_mm: 12.7
+    flutes: 2
+    type: straight
+
+  - name: "60 degree v-bit"
+    diameter_mm: 12.7
+    flute_length_mm: 12.0
+    shank_diameter_mm: 6.35
+    flutes: 1
+    type: v_bit
+    v_angle_deg: 60
+
+  - name: "90 degree v-bit"
+    diameter_mm: 12.7
+    flute_length_mm: 12.0
+    shank_diameter_mm: 6.35
+    flutes: 1
+    type: v_bit
+    v_angle_deg: 90
+
+  - name: "1mm engraving bit"
+    diameter_mm: 1.0
+    flute_length_mm: 5.0
+    shank_diameter_mm: 3.175
+    flutes: 1
+    type: engraving

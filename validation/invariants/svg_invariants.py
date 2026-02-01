@@ -1,7 +1,4 @@
-# validation/invariants/svg_invariants.py - SVG invariant checks
-#
-# Implements structural invariants for SVG blueprint drawings.
-# See docs/cam_validation_plan.md Section 4.1 for invariant definitions.
+
 
 from __future__ import annotations
 
@@ -13,7 +10,6 @@ from validation.core import InvariantResult, Verdict
 from validation.metrics.svg_metrics import SVGMetrics, SVG_NS, SEMANTIC_LAYERS
 
 
-# Invariant IDs
 SVG_INVARIANT_IDS = [
     "SVG_VALID_XML",
     "SVG_HAS_VIEWBOX",
@@ -26,35 +22,25 @@ SVG_INVARIANT_IDS = [
     "SVG_BOUNDS_WITHIN_VIEWBOX",
 ]
 
-# Layers expected to have content (when features exist)
+
 CONTENT_LAYERS = ["SHEET_OUTLINE", "PROFILE_CUTS", "POCKET_REGIONS"]
 
 
 def _is_polyline_closed(points: str, tolerance: float = 0.01) -> bool:
-    """Check if a polyline is closed (first point == last point).
-
-    Args:
-        points: SVG points attribute (space/comma separated coordinate pairs)
-        tolerance: Distance tolerance for comparing first/last points
-
-    Returns:
-        True if polyline is closed
-    """
     if not points:
         return False
 
-    # Parse points - can be space or comma separated
-    # Valid formats: "x1,y1 x2,y2" or "x1 y1 x2 y2" or "x1,y1,x2,y2"
+
     coords = re.split(r"[\s,]+", points.strip())
     if len(coords) < 4:
-        return False  # Need at least 2 points
+        return False
 
     try:
-        # Extract first and last points
+
         first_x, first_y = float(coords[0]), float(coords[1])
         last_x, last_y = float(coords[-2]), float(coords[-1])
 
-        # Check if they're approximately equal
+
         dist = ((last_x - first_x) ** 2 + (last_y - first_y) ** 2) ** 0.5
         return dist < tolerance
     except (ValueError, IndexError):
@@ -66,37 +52,26 @@ def check_svg_invariants(
     metrics: SVGMetrics | None = None,
     expected_layers: list[str] | None = None,
 ) -> list[InvariantResult]:
-    """
-    Check all SVG invariants.
-
-    Args:
-        svg_content: SVG content as string or bytes
-        metrics: Pre-computed SVGMetrics (optional, will extract if not provided)
-        expected_layers: Layers expected to have content (optional)
-
-    Returns:
-        List of InvariantResult for each check
-    """
     results: list[InvariantResult] = []
 
     if isinstance(svg_content, bytes):
         svg_content = svg_content.decode("utf-8")
 
-    # 1. SVG_VALID_XML - must parse
+
     xml_result, root = _check_valid_xml(svg_content)
     results.append(xml_result)
 
     if root is None:
-        # Can't continue if XML is invalid
+
         return results
 
-    # Extract metrics if not provided
+
     if metrics is None:
         from validation.metrics.svg_metrics import extract_svg_metrics
         try:
             metrics = extract_svg_metrics(svg_content)
         except Exception as e:
-            # If metrics extraction fails, add error result and return
+
             results.append(InvariantResult(
                 id="SVG_METRICS_ERROR",
                 category="structural",
@@ -107,35 +82,34 @@ def check_svg_invariants(
             ))
             return results
 
-    # 2. SVG_HAS_VIEWBOX
+
     results.append(_check_has_viewbox(root, metrics))
 
-    # 3. SVG_POSITIVE_DIMENSIONS
+
     results.append(_check_positive_dimensions(metrics))
 
-    # 4. SVG_PATHS_VALID
+
     results.append(_check_paths_valid(root))
 
-    # 5. SVG_CLOSED_PROFILES
+
     results.append(_check_closed_profiles(root, metrics))
 
-    # 6. SVG_CLOSED_POCKETS
+
     results.append(_check_closed_pockets(root, metrics))
 
-    # 7. SVG_NO_EMPTY_LAYERS
+
     results.append(_check_no_empty_layers(metrics, expected_layers))
 
-    # 8. SVG_DIMENSIONS_PRESENT
+
     results.append(_check_dimensions_present(metrics))
 
-    # 9. SVG_BOUNDS_WITHIN_VIEWBOX
+
     results.append(_check_bounds_within_viewbox(metrics))
 
     return results
 
 
 def _check_valid_xml(svg_content: str) -> tuple[InvariantResult, ET.Element | None]:
-    """Check that SVG parses as valid XML."""
     try:
         root = ET.fromstring(svg_content)
         return (
@@ -167,7 +141,6 @@ def _check_valid_xml(svg_content: str) -> tuple[InvariantResult, ET.Element | No
 
 
 def _check_has_viewbox(root: ET.Element, metrics: SVGMetrics) -> InvariantResult:
-    """Check that document has viewBox attribute."""
     viewbox = root.get("viewBox")
     vb = metrics.document.viewbox
 
@@ -196,7 +169,6 @@ def _check_has_viewbox(root: ET.Element, metrics: SVGMetrics) -> InvariantResult
 
 
 def _check_positive_dimensions(metrics: SVGMetrics) -> InvariantResult:
-    """Check that width and height are positive."""
     width = metrics.document.width_mm
     height = metrics.document.height_mm
 
@@ -231,7 +203,6 @@ def _check_positive_dimensions(metrics: SVGMetrics) -> InvariantResult:
 
 
 def _check_paths_valid(root: ET.Element) -> InvariantResult:
-    """Check that all path elements have valid d attributes."""
     checked = 0
     passed = 0
     failures: list[str] = []
@@ -244,13 +215,13 @@ def _check_paths_valid(root: ET.Element) -> InvariantResult:
             failures.append(f"Path has empty d attribute")
             continue
 
-        # Basic validation: should start with M or m (moveto)
+
         d_clean = d.strip()
         if not d_clean[0].upper() == "M":
             failures.append(f"Path d attribute doesn't start with M: {d_clean[:20]}...")
             continue
 
-        # Check for obviously invalid characters
+
         if re.search(r"[^MmLlHhVvCcSsQqTtAaZz0-9.,\s\-+eE]", d_clean):
             failures.append(f"Path has invalid characters in d attribute")
             continue
@@ -258,7 +229,7 @@ def _check_paths_valid(root: ET.Element) -> InvariantResult:
         passed += 1
 
     if checked == 0:
-        # No paths is valid (recipe SVGs may use rects instead)
+
         return InvariantResult(
             id="SVG_PATHS_VALID",
             category="structural",
@@ -285,12 +256,11 @@ def _check_paths_valid(root: ET.Element) -> InvariantResult:
 
 
 def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantResult:
-    """Check that profile cut geometry is closed."""
     checked = 0
     passed = 0
     failures: list[str] = []
 
-    # Find PROFILE_CUTS layer
+
     profile_layer = None
     for group in root.iter(f"{SVG_NS}g"):
         if group.get("id") == "PROFILE_CUTS":
@@ -298,7 +268,7 @@ def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantRe
             break
 
     if profile_layer is None:
-        # No profile layer is valid (might not have profile cuts)
+
         return InvariantResult(
             id="SVG_CLOSED_PROFILES",
             category="structural",
@@ -310,7 +280,7 @@ def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantRe
             details={"note": "No PROFILE_CUTS layer found"},
         )
 
-    # Check paths in profile layer
+
     for path in profile_layer.iter(f"{SVG_NS}path"):
         checked += 1
         d = path.get("d", "").strip()
@@ -319,7 +289,7 @@ def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantRe
         else:
             failures.append(f"Profile path is not closed (missing Z): {d[:30]}...")
 
-    # Rects, circles, and polygons are inherently closed
+
     for rect in profile_layer.iter(f"{SVG_NS}rect"):
         checked += 1
         passed += 1
@@ -330,13 +300,13 @@ def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantRe
 
     for polygon in profile_layer.iter(f"{SVG_NS}polygon"):
         checked += 1
-        passed += 1  # Polygons are inherently closed
+        passed += 1
 
     for ellipse in profile_layer.iter(f"{SVG_NS}ellipse"):
         checked += 1
-        passed += 1  # Ellipses are inherently closed
+        passed += 1
 
-    # Polylines need explicit closure check (last point == first point)
+
     for polyline in profile_layer.iter(f"{SVG_NS}polyline"):
         checked += 1
         points = polyline.get("points", "").strip()
@@ -372,12 +342,11 @@ def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantRe
 
 
 def _check_closed_pockets(root: ET.Element, metrics: SVGMetrics) -> InvariantResult:
-    """Check that pocket region geometry is closed."""
     checked = 0
     passed = 0
     failures: list[str] = []
 
-    # Find POCKET_REGIONS layer
+
     pocket_layer = None
     for group in root.iter(f"{SVG_NS}g"):
         if group.get("id") == "POCKET_REGIONS":
@@ -396,7 +365,7 @@ def _check_closed_pockets(root: ET.Element, metrics: SVGMetrics) -> InvariantRes
             details={"note": "No POCKET_REGIONS layer found"},
         )
 
-    # Check paths in pocket layer
+
     for path in pocket_layer.iter(f"{SVG_NS}path"):
         checked += 1
         d = path.get("d", "").strip()
@@ -405,7 +374,7 @@ def _check_closed_pockets(root: ET.Element, metrics: SVGMetrics) -> InvariantRes
         else:
             failures.append(f"Pocket path is not closed (missing Z): {d[:30]}...")
 
-    # Rects, circles, and polygons are inherently closed
+
     for rect in pocket_layer.iter(f"{SVG_NS}rect"):
         checked += 1
         passed += 1
@@ -416,13 +385,13 @@ def _check_closed_pockets(root: ET.Element, metrics: SVGMetrics) -> InvariantRes
 
     for polygon in pocket_layer.iter(f"{SVG_NS}polygon"):
         checked += 1
-        passed += 1  # Polygons are inherently closed
+        passed += 1
 
     for ellipse in pocket_layer.iter(f"{SVG_NS}ellipse"):
         checked += 1
-        passed += 1  # Ellipses are inherently closed
+        passed += 1
 
-    # Polylines need explicit closure check (last point == first point)
+
     for polyline in pocket_layer.iter(f"{SVG_NS}polyline"):
         checked += 1
         points = polyline.get("points", "").strip()
@@ -461,14 +430,8 @@ def _check_no_empty_layers(
     metrics: SVGMetrics,
     expected_layers: list[str] | None = None,
 ) -> InvariantResult:
-    """Check that expected content layers exist and are not empty.
-
-    Checks two conditions:
-    1. Expected layers that exist should have content (not be empty)
-    2. Expected layers should exist in the document (missing = warning)
-    """
     if expected_layers is None:
-        # Default: only check SHEET_OUTLINE which should always exist
+
         expected_layers = ["SHEET_OUTLINE"]
 
     checked = 0
@@ -479,7 +442,7 @@ def _check_no_empty_layers(
         checked += 1
 
         if layer_name not in metrics.layers:
-            # Layer doesn't exist - this is a warning (might indicate regression)
+
             failures.append(f"Expected layer '{layer_name}' is missing from document")
             continue
 
@@ -517,10 +480,9 @@ def _check_no_empty_layers(
 
 
 def _check_dimensions_present(metrics: SVGMetrics) -> InvariantResult:
-    """Check that at least one dimension annotation exists."""
     dim_count = len(metrics.text.dimension_labels)
 
-    # Also check DIMENSIONS layer exists and has content
+
     has_dim_layer = "DIMENSIONS" in metrics.layers
     dim_layer_count = metrics.layers.get("DIMENSIONS", None)
     dim_layer_elements = dim_layer_count.element_count if dim_layer_count else 0
@@ -556,11 +518,10 @@ def _check_dimensions_present(metrics: SVGMetrics) -> InvariantResult:
 
 
 def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
-    """Check that content bounds are within viewBox."""
     vb = metrics.document.viewbox
     bounds = metrics.bounds
 
-    # viewBox: (x, y, width, height)
+
     vb_x_min = vb[0]
     vb_y_min = vb[1]
     vb_x_max = vb[0] + vb[2]
@@ -568,9 +529,9 @@ def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
 
     failures: list[str] = []
 
-    # Check if bounds exist
+
     if bounds.x_min == 0 and bounds.x_max == 0 and bounds.y_min == 0 and bounds.y_max == 0:
-        # No content bounds extracted
+
         return InvariantResult(
             id="SVG_BOUNDS_WITHIN_VIEWBOX",
             category="structural",
@@ -582,7 +543,7 @@ def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
             details={"note": "No content bounds detected"},
         )
 
-    # Check each bound with small tolerance for floating point
+
     tolerance = 0.1
 
     if bounds.x_min < vb_x_min - tolerance:

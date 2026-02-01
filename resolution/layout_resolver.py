@@ -24,7 +24,7 @@ from layout_ast.compositional import (
     Edge,
     ResolvedRegion,
     CompositionalLayoutAST,
-    # Generator AST nodes (Stage 12)
+
     ProfileGen,
     PocketGen,
     RaisedPanelGen,
@@ -35,27 +35,27 @@ from layout_ast.compositional import (
     SplitGrid,
     LinesGen,
     ConcentricBorderGen,
-    # Stage 14 additions
+
     SplitHorizontalGaps,
     AtPosition,
     Subtract,
     Arch,
-    # Stage 15 additions (polygon/triangle)
+
     Polygon,
     Triangle,
-    # Stage 16 additions (x_panel generator)
+
     XPanelGen,
-    # Stage 18 additions (hole_grid generator)
+
     HoleGridGen,
-    # Stage 20 additions (measurement_grid generator)
+
     MeasurementGridGen,
-    # Stage 21 additions (measurement_edge generator)
+
     MeasurementEdgeGen,
-    # Stage 22 additions (engrave_text generator)
+
     EngraveTextGen,
-    # Waste cuts directive
+
     WasteCuts,
-    # Assembly
+
     Assembly,
 )
 from layout_ast.layout import (
@@ -69,7 +69,7 @@ from layout_ast.layout import (
 from core.constants import DepthMode
 from core.geometry import compute_shape_bounds_dict
 
-# Import generators and Domain for Stage 12 integration
+
 from domains import Domain
 from generators.area.raised_panel import raised_panel_generator
 from generators.area.wave import wave_generator
@@ -89,7 +89,6 @@ from assembly.layout import LayoutConfig, layout_panels
 from generators.panels import NotchedPanelParams, notched_panel_generator
 
 
-# Type alias for node handlers
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
 
 
@@ -153,7 +152,6 @@ def sample_catmull_rom_spline(control_points: list[tuple[float, float]], toleran
 
 
 class ResolutionAssertionError(Exception):
-    """Raised when a geometry assertion fails during resolution."""
     pass
 
 
@@ -171,7 +169,6 @@ class LayoutResolver:
         child_item: Item,
         context_desc: str,
     ) -> None:
-        """Assert that child item preserves parent shape type when expected."""
         if not self._validate:
             return
 
@@ -189,7 +186,6 @@ class LayoutResolver:
         keys: list[str],
         context_desc: str,
     ) -> None:
-        """Assert that specific geometry keys are preserved from parent to child."""
         if not self._validate:
             return
 
@@ -204,7 +200,6 @@ class LayoutResolver:
                     )
 
     def _next_shape_id(self, prefix: str) -> str:
-        """Generate a deterministic shape ID using a counter."""
         shape_id = f"{prefix}_{self._shape_counter}"
         self._shape_counter += 1
         return shape_id
@@ -228,7 +223,7 @@ class LayoutResolver:
 
                 for item in keepout_items:
                     if item.kind == "shape" and item.geometry:
-                        # Use unified bounds calculation
+
                         bounds_dict = compute_shape_bounds_dict(
                             item.type,
                             item.geometry.data,
@@ -254,9 +249,6 @@ class LayoutResolver:
                 }
         return None
 
-    # =========================================================================
-    # Node Handlers - Each handles one node type from the AST
-    # =========================================================================
 
     def _handle_panel(
         self,
@@ -622,7 +614,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        # Keepout nodes are processed by _collect_island_bounds, not here
+
         pass
 
     def _handle_item(
@@ -634,18 +626,6 @@ class LayoutResolver:
     ) -> None:
         items.append(node)
 
-    # =========================================================================
-    # Generator Handlers (Stage 12: PML Generator Syntax)
-    # =========================================================================
-    #
-    # KNOWN LIMITATION: Generator handlers emit Rect geometry and operate on
-    # axis-aligned ResolvedRegion. Generators nested under circle/rounded_rect
-    # shapes will NOT be clipped to the parent shape boundary. The parent
-    # shape's profile cut handles the actual boundary in the final output.
-    # This is by design - the compositional system uses rectangular regions
-    # for layout calculations, and non-rectangular clipping would require
-    # passing shape context through the resolution process.
-    # =========================================================================
 
     def _handle_profile_gen(
         self,
@@ -685,7 +665,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle PocketGen: Generate flat pocket item for region."""
         geometry_data = {"w_mm": region.width, "h_mm": region.height}
 
         edge_treatment = params.get("edge_treatment")
@@ -713,38 +692,32 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle RaisedPanelGen: Generate raised panel items for region.
 
-        Creates proper bevel and field items using the raised_panel_generator,
-        which emits correct 'bevel' feature type for the border and 'pocket'
-        for the field, preserving the angled border intent for CAM processing.
-        """
-        # Create a Domain from the ResolvedRegion
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
             center=region.center,
         )
 
-        # Create parameters for the generator
+
         generator_params = RaisedPanelParams(
             border_width_mm=node.border_width_mm,
             border_depth_mm=node.border_depth_mm,
             field_depth_mm=node.field_depth_mm,
         )
 
-        # Call the actual generator - it will produce proper bevel/pocket items
+
         shape_id_prefix = self._next_shape_id("raised_panel")
         try:
             generated_items = raised_panel_generator(
                 domain,
                 generator_params,
-                allow_empty=True,  # Handle too-small regions gracefully
+                allow_empty=True,
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
         except ValueError:
-            # Region too small for raised panel - skip silently
+
             pass
 
     def _handle_chamfer_gen(
@@ -754,14 +727,8 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle ChamferGen: Generate chamfer item for region boundary.
-
-        The chamfer is represented with proper chamfer metadata on the Feature,
-        which ast_to_removal.py uses to compute the chamfer angle and create
-        appropriate RemovalIntent metadata for CAM processing.
-        """
         import math
-        # Calculate chamfer angle from width and depth
+
         chamfer_angle = math.degrees(math.atan2(node.depth_mm, node.width_mm))
 
         chamfer_item = Item(
@@ -790,12 +757,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle XPanelGen: Generate X-panel items for region.
-
-        Creates 4 triangular pockets forming an X pattern using the
-        x_panel_generator, which computes the correct geometry based
-        on bar width and region dimensions.
-        """
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -826,11 +787,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle HoleGridGen: Generate hole grid items for region.
-
-        Creates a grid of circular holes using the hole_grid_generator,
-        which places holes at regular intervals within the domain boundary.
-        """
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -928,11 +884,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle WaveGen: Generate wave pattern items for region.
-
-        Calls the wave_generator to produce actual engrave polylines,
-        which correctly map to the engraves bucket in hint export.
-        """
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -966,11 +917,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle LinesGen: Generate line pattern items for region.
-
-        Calls the line_pattern_generator to produce parallel groove lines
-        at the specified angle.
-        """
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -1003,11 +949,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle ConcentricBorderGen: Generate concentric border items for region.
-
-        Calls the concentric_border_generator to produce nested ring grooves
-        at the specified inset distances.
-        """
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -1039,7 +980,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle MeasurementGridGen: Generate ruler-style tick marks for region."""
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -1080,7 +1020,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle MeasurementEdgeGen: Generate ruler tick marks along specified edges."""
         domain = Domain.from_rectangle(
             width_mm=region.width,
             height_mm=region.height,
@@ -1122,7 +1061,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle EngraveTextGen: Generate engraved text at region center."""
         shape_id_prefix = self._next_shape_id("engrave_text")
         try:
             generated_items = engrave_text_at_position(
@@ -1146,17 +1084,16 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle SplitHorizontal: Split region into n rows and apply children to each."""
         n = node.n
         gap_mm = node.gap_mm
 
-        # Validate inputs
+
         if n < 1:
             raise ValueError(f"split_horizontal: n must be at least 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_horizontal: gap cannot be negative, got {gap_mm}mm")
 
-        # Calculate cell height
+
         total_gap = gap_mm * (n - 1)
         available_height = region.height - total_gap
         if available_height <= 0:
@@ -1166,7 +1103,7 @@ class LayoutResolver:
             )
         cell_height = available_height / n
 
-        # Create sub-regions from bottom to top
+
         num_children = len(node.children)
         for i in range(n):
             y_min = region.y_min + i * (cell_height + gap_mm)
@@ -1191,17 +1128,16 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle SplitVertical: Split region into n columns and apply children to each."""
         n = node.n
         gap_mm = node.gap_mm
 
-        # Validate inputs
+
         if n < 1:
             raise ValueError(f"split_vertical: n must be at least 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_vertical: gap cannot be negative, got {gap_mm}mm")
 
-        # Calculate cell width
+
         total_gap = gap_mm * (n - 1)
         available_width = region.width - total_gap
         if available_width <= 0:
@@ -1211,7 +1147,7 @@ class LayoutResolver:
             )
         cell_width = available_width / n
 
-        # Create sub-regions from left to right
+
         num_children = len(node.children)
         for i in range(n):
             x_min = region.x_min + i * (cell_width + gap_mm)
@@ -1236,12 +1172,11 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle SplitGrid: Split region into rows x cols grid and apply children to each."""
         rows = node.rows
         cols = node.cols
         gap_mm = node.gap_mm
 
-        # Validate inputs
+
         if rows < 1:
             raise ValueError(f"split_grid: rows must be at least 1, got {rows}")
         if cols < 1:
@@ -1249,7 +1184,7 @@ class LayoutResolver:
         if gap_mm < 0:
             raise ValueError(f"split_grid: gap cannot be negative, got {gap_mm}mm")
 
-        # Calculate cell dimensions
+
         total_h_gap = gap_mm * (cols - 1)
         total_v_gap = gap_mm * (rows - 1)
         available_width = region.width - total_h_gap
@@ -1269,7 +1204,7 @@ class LayoutResolver:
         cell_width = available_width / cols
         cell_height = available_height / rows
 
-        # Create sub-regions (row-major from bottom-left)
+
         for row in range(rows):
             for col in range(cols):
                 x_min = region.x_min + col * (cell_width + gap_mm)
@@ -1281,13 +1216,10 @@ class LayoutResolver:
                     y_max=y_min + cell_height,
                 )
 
-                # Apply children to this cell
+
                 for child in node.children:
                     self._resolve_node(child, cell_region, items, params)
 
-    # =========================================================================
-    # Stage 14 Handlers: Additional PML features for remaining recipes
-    # =========================================================================
 
     def _handle_split_horizontal_gaps(
         self,
@@ -1296,7 +1228,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle SplitHorizontalGaps: Apply children to gap regions between n+1 slats."""
         n = node.n
         gap_mm = node.gap_mm
 
@@ -1336,7 +1267,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle AtPosition: Position child at explicit coordinates with explicit size."""
         if node.child is None:
             return
 
@@ -1359,11 +1289,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle Subtract: Create ring domain by subtracting inner from outer.
-
-        Uses the Domain.subtract() operation to create a proper ring,
-        then applies children to the resulting polygon domain.
-        """
         inner_inset = node.inner_inset_mm
 
         outer = Domain.from_rectangle(region.width, region.height, center=region.center)
@@ -1426,11 +1351,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Handle Arch: Create arch shape using Domain.from_arch().
-
-        Creates the arch polygon geometry and processes children
-        within the arch's bounding region.
-        """
         arch_domain = Domain.from_arch(node.width_mm, node.height_mm, node.radius_mm)
 
         arch_region = ResolvedRegion(
@@ -2041,12 +1961,10 @@ class LayoutResolver:
             kerf_width_mm=self.ast.kerf_width_mm,
         )
 
-    # Handler map: maps node type to handler method
-    # Initialized in __init__ to allow self references
+
     _NODE_HANDLERS: dict[type, NodeHandler] | None = None
 
     def _get_handler_map(self) -> dict[type, NodeHandler]:
-        """Return the handler map, initializing lazily if needed."""
         if LayoutResolver._NODE_HANDLERS is None:
             LayoutResolver._NODE_HANDLERS = {
                 Panel: LayoutResolver._handle_panel,
@@ -2065,7 +1983,7 @@ class LayoutResolver:
                 SplinePath: LayoutResolver._handle_spline_path,
                 Keepout: LayoutResolver._handle_keepout,
                 Item: LayoutResolver._handle_item,
-                # Generator handlers (Stage 12)
+
                 ProfileGen: LayoutResolver._handle_profile_gen,
                 PocketGen: LayoutResolver._handle_pocket_gen,
                 RaisedPanelGen: LayoutResolver._handle_raised_panel_gen,
@@ -2074,30 +1992,30 @@ class LayoutResolver:
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,
-                # Stage 13 generator handlers
+
                 LinesGen: LayoutResolver._handle_lines_gen,
                 ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
-                # Stage 14 handlers
+
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,
                 Arch: LayoutResolver._handle_arch,
-                # Stage 15 handlers (polygon/triangle)
+
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,
-                # Stage 16 handlers (x_panel generator)
+
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
-                # Stage 18 handlers (hole_grid generator)
+
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
-                # Stage 20 handlers (measurement_grid generator)
+
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
-                # Stage 21 handlers (measurement_edge generator)
+
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
-                # Stage 22 handlers (engrave_text generator)
+
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
-                # Waste cuts handler
+
                 WasteCuts: LayoutResolver._handle_waste_cuts,
-                # Assembly handler
+
                 Assembly: LayoutResolver._handle_assembly,
             }
         return LayoutResolver._NODE_HANDLERS
@@ -2109,7 +2027,6 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        """Dispatch to the appropriate handler based on node type."""
         if node is None:
             return
 
@@ -2118,21 +2035,8 @@ class LayoutResolver:
 
         if node_type in handler_map:
             handler_map[node_type](self, node, region, items, params)
-        # Unknown node types are silently ignored (preserves original behavior)
 
 
 def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> LayoutAST:
-    """Resolve a compositional layout AST to a flat LayoutAST.
-
-    Args:
-        ast: The compositional layout AST to resolve
-        validate: Run geometry assertions during resolution (default True)
-
-    Returns:
-        Flat LayoutAST with absolute coordinates
-
-    Raises:
-        ResolutionAssertionError: If a geometry assertion fails
-    """
     resolver = LayoutResolver(ast, validate=validate)
     return resolver.resolve()

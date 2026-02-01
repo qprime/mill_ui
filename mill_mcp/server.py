@@ -1,4 +1,3 @@
-"""MCP server exposing mill_ui CAM pipeline tools."""
 
 from __future__ import annotations
 
@@ -54,21 +53,18 @@ def _safe_job_dir(output_dir: Path, job_name: str, timestamp: str) -> Path:
 MILL_UI_INSTRUCTIONS = """
 You are a CAM (Computer-Aided Manufacturing) assistant for CNC router projects. You help users create panel layouts and generate G-code toolpaths.
 
-## Your Role
 
 Help users design and manufacture panel-based projects (cabinet doors, furniture parts, decorative panels) by:
 1. Writing PML (Panel Machining Language) code for their designs
 2. Compiling PML to G-code and SVG blueprints
 3. Optimizing multi-part production with nesting
 
-## Key Concepts
 
 **PML** - Declarative language for single-sheet layouts. Defines shapes and machining operations.
 **Nest files** - Bin-packing jobs for cutting multiple parts from stock sheets.
 **Features** - What to machine: profile (cut outline), pocket (recess), hole (bore), engrave (surface)
 **Generators** - Decorative patterns: wave, lines, raised_panel, hole_grid, concentric_border
 
-## Quick Reference
 
 **Simple rectangle with profile cut:**
 ```pml
@@ -97,14 +93,12 @@ nest maxrects
                 panel_recess 6mm
 ```
 
-## Workflow
 
 1. **Understand the project** - What parts? What size? What features?
 2. **Write PML** - Use `validate_pml` to check before compiling
 3. **Compile** - Use `compile_pml` for single sheets, `compile_nest` for production runs
 4. **Review outputs** - Check the SVG blueprint and metrics
 
-## Tools Available
 
 - `compile_pml` - Generate G-code and SVG from PML
 - `compile_nest` - Optimize and compile multi-part nesting jobs
@@ -113,7 +107,6 @@ nest maxrects
 - `get_syntax_spec` - Full PML/nest language reference
 - `get_docs` - Browse project documentation
 
-## Best Practices
 
 - Always include `mm` suffix on dimensions
 - Use `validate_pml` before `compile_pml` to catch errors early
@@ -199,15 +192,6 @@ def _run_cam_pipeline(
 
 @mcp.tool()
 def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = False) -> str:
-    """Compile PML to G-code and SVG blueprint.
-
-    Args:
-        pml_text: Valid PML source text
-        job_name: Name for output files (default: "job")
-        compositional: If True, parse as compositional PML (frame/inset/grid syntax)
-
-    Returns JSON with output paths for gcode and svg files, and job metrics.
-    """
     output_dir = ensure_output_dir()
 
     try:
@@ -235,14 +219,6 @@ def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = Fals
 
 @mcp.tool()
 def compile_nest(nest_text: str, job_name: str = "job") -> str:
-    """Compile .nest file to multi-sheet G-code and SVG.
-
-    Args:
-        nest_text: Valid .nest source text defining parts and nesting parameters
-        job_name: Base name for output files (default: "job")
-
-    Returns JSON with output paths per sheet, nesting metrics, and job summary.
-    """
     output_dir = ensure_output_dir()
 
     try:
@@ -298,10 +274,6 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
 
 @mcp.tool()
 def list_templates() -> str:
-    """List available templates and their parameters.
-
-    Returns JSON with template names and their required/optional parameters.
-    """
     templates = {
         "Shaker": {
             "description": "Shaker-style cabinet door with frame and recessed panel",
@@ -343,14 +315,6 @@ def list_templates() -> str:
 
 @mcp.tool()
 def validate_pml(pml_text: str, compositional: bool = False) -> str:
-    """Validate PML without generating outputs.
-
-    Args:
-        pml_text: PML source text to validate
-        compositional: If True, parse as compositional PML
-
-    Returns JSON with validation results (errors, warnings, parsed structure info).
-    """
     results: dict[str, Any] = {
         "valid": True,
         "errors": [],
@@ -416,13 +380,6 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
 
 @mcp.tool()
 def get_syntax_spec(format: str = "all") -> str:
-    """Get PML or .nest syntax specification.
-
-    Args:
-        format: "pml", "nest", or "all" (default: "all")
-
-    Returns the syntax specification as markdown text.
-    """
     spec_dir = Path(__file__).parent.parent / "pml"
 
     result_parts = []
@@ -455,23 +412,6 @@ def get_docs(
     section: str | None = None,
     list_only: bool = False,
 ) -> str:
-    """Browse and retrieve markdown documentation from the project.
-
-    Args:
-        name: Specific .md filename without extension (e.g., "README", "CLAUDE")
-        section: Folder path to scope search (e.g., "docs", "mill_mcp", "." for root)
-        list_only: If True, list matching files instead of returning content
-
-    Usage patterns:
-        get_docs(list_only=True)                    - List all .md files in project
-        get_docs(section="docs", list_only=True)   - List .md files in docs/ folder
-        get_docs(name="README")                     - Content of README.md (searches project)
-        get_docs(name="README", section="mill_mcp") - Content of mill_mcp/README.md
-        get_docs(section="docs")                    - Content of all .md files in docs/
-        get_docs()                                  - All .md content in entire project
-
-    Returns JSON with either file list or file contents.
-    """
     project_root = Path(__file__).parent.parent
 
     EXCLUDED_DIRS = {".git", ".venv", "venv", ".pytest_cache", "__pycache__", "node_modules"}
@@ -572,22 +512,6 @@ def validate_cam_recipe(
     check_assertions: bool = True,
     tolerance_percent: float = 0.1,
 ) -> str:
-    """Validate CAM artifacts (SVG, G-code) for a recipe directory.
-
-    Args:
-        recipe_path: Path to recipe directory with output/ subdirectory
-        golden_path: Optional path to golden baseline metrics.json for regression
-        check_invariants: Run structural invariant checks (default: True)
-        check_assertions: Run intent assertions from PML (default: True)
-        tolerance_percent: Default tolerance for numeric comparison (default: 0.1%)
-
-    Returns JSON with:
-        - verdict: "pass", "warn", or "fail"
-        - metrics: Extracted metrics from SVG, G-code
-        - invariants: Structural check results
-        - assertions: Intent assertion results (if PML present)
-        - regressions: Golden baseline comparison (if golden_path provided)
-    """
     try:
         recipe_dir = Path(recipe_path)
         if not recipe_dir.exists():
@@ -651,18 +575,6 @@ def validate_cam_artifacts(
     gcode_paths: list[str] | None = None,
     check_invariants: bool = True,
 ) -> str:
-    """Validate specific CAM artifacts (SVG, G-code files).
-
-    Args:
-        svg_path: Optional path to SVG file
-        gcode_paths: Optional list of G-code file paths
-        check_invariants: Run structural invariant checks (default: True)
-
-    Returns JSON with:
-        - verdict: "pass", "warn", or "fail"
-        - metrics: Extracted metrics from provided artifacts
-        - invariants: Structural check results
-    """
     try:
         if not svg_path and not gcode_paths:
             return json.dumps({"error": "At least one artifact path required"})
@@ -696,16 +608,6 @@ def validate_cam_artifacts(
 
 @mcp.tool()
 def list_golden_baselines(store_path: str = "tests/golden") -> str:
-    """List available golden baselines for regression testing.
-
-    Args:
-        store_path: Path to golden store directory (default: tests/golden)
-
-    Returns JSON with:
-        - baselines: List of available baseline names
-        - total: Total count
-        - store_path: Path to the golden store
-    """
     try:
         store = GoldenStore(store_path)
         if not store.exists():
@@ -741,14 +643,6 @@ def list_golden_baselines(store_path: str = "tests/golden") -> str:
 
 @mcp.tool()
 def get_golden_metrics(recipe_name: str, store_path: str = "tests/golden") -> str:
-    """Get golden baseline metrics for a specific recipe.
-
-    Args:
-        recipe_name: Name of the recipe (e.g., "01_simple_profile")
-        store_path: Path to golden store directory (default: tests/golden)
-
-    Returns JSON with the golden metrics for the recipe.
-    """
     try:
         store = GoldenStore(store_path)
         if not store.exists():

@@ -1,20 +1,3 @@
-"""Profile loop generator.
-
-A profile cut follows the boundary of a domain, cutting through or to a
-specified depth. This is the fundamental operation for cutting parts out
-of sheet material.
-
-Usage:
-    from domains import Domain
-    from generators.loop.profile import profile_generator
-    from generators.base import ProfileParams
-
-    domain = Domain.from_rectangle(100, 100, center=(50, 50))
-    params = ProfileParams(side="outside", depth="through")
-    items = profile_generator(domain, params)
-
-    # Items can then be added to a LayoutAST
-"""
 
 from __future__ import annotations
 
@@ -37,18 +20,6 @@ def _extract_loops(
     domain: Domain,
     selection: LoopSelection,
 ) -> list[tuple[int, tuple[tuple[float, float], ...]]]:
-    """Extract loops from domain based on selection.
-
-    Args:
-        domain: The domain to extract loops from
-        selection: Which loops to extract
-
-    Returns:
-        List of (index, boundary_points) tuples
-
-    Raises:
-        ValueError: If selection references invalid loop indices
-    """
     all_loops = [domain.outer_boundary] + list(domain.inner_boundaries)
     num_loops = len(all_loops)
 
@@ -80,7 +51,6 @@ def _extract_loops(
 
 
 def _loop_type_suffix(index: int) -> str:
-    """Generate suffix for shape ID based on loop index."""
     if index == 0:
         return "outer"
     return f"inner_{index}"
@@ -95,43 +65,10 @@ def profile_generator(
     sheet_thickness_mm: float | None = None,
     label: str | None = None,
 ) -> GeneratorResult:
-    """Generate profile cut items along domain boundaries.
 
-    Creates Polygon items with profile features that follow the specified
-    loops of the domain. Each selected loop produces one Item.
-
-    Args:
-        domain: The domain defining the cut region
-        params: Profile parameters (side, depth, loop selection, tabs)
-        allow_empty: If True, return empty list instead of raising when
-            the domain has no matching loops
-        shape_id_prefix: Prefix for generated shape IDs
-        sheet_thickness_mm: Sheet thickness for "through" depth resolution
-            (optional, used for metadata only)
-        label: Optional label for the profile (displayed on SVG)
-
-    Returns:
-        List of Polygon Items with profile features, one per selected loop
-
-    Raises:
-        ValueError: If params are invalid or requested loops don't exist
-            (unless allow_empty)
-
-    Example:
-        >>> domain = Domain.from_rectangle(100, 50, center=(50, 25))
-        >>> params = ProfileParams(side="outside", depth="through")
-        >>> items = profile_generator(domain, params)
-        >>> len(items)
-        1
-        >>> items[0].feature.type
-        'profile'
-        >>> items[0].feature.side
-        'outside'
-    """
-    # Validate parameters
     params.validate()
 
-    # Validate domain
+
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,
@@ -140,7 +77,7 @@ def profile_generator(
     ):
         return []
 
-    # Extract the loops to process
+
     try:
         loops = _extract_loops(domain, params.loop_selection)
     except ValueError:
@@ -167,7 +104,7 @@ def profile_generator(
             "points": polygon_points,
         }
 
-        # Resolve depth
+
         if params.depth == "through":
             depth_str = "through"
             depth_mm = None
@@ -175,7 +112,7 @@ def profile_generator(
             depth_str = str(params.depth)
             depth_mm = float(params.depth)
 
-        # Build feature
+
         feature_kwargs = {
             "type": "profile",
             "depth": depth_str,
@@ -185,13 +122,13 @@ def profile_generator(
         if depth_mm is not None:
             feature_kwargs["depth_mm"] = depth_mm
 
-        # Add tabs if specified
+
         if params.tab_count > 0:
             feature_kwargs["tab_count"] = params.tab_count
             feature_kwargs["tab_width_mm"] = params.tab_width_mm
             feature_kwargs["tab_height_mm"] = params.tab_height_mm
 
-        # Create the Item
+
         item = Item(
             kind="shape",
             type="Polygon",

@@ -28,17 +28,6 @@ def ast_to_removal_intents(
     ast: LayoutAST,
     warnings: Optional[list[str]] = None,
 ) -> list[RemovalIntent]:
-    """Convert LayoutAST to list of RemovalIntent.
-
-    Args:
-        ast: The layout AST to convert.
-        warnings: Optional list to collect warning messages. If provided,
-            conversion errors will be appended as strings instead of being
-            silently ignored.
-
-    Returns:
-        List of RemovalIntent objects for valid items.
-    """
     intents: list[RemovalIntent] = []
 
     for item in ast.items:
@@ -108,8 +97,8 @@ def item_to_removal_intent(
         return engrave_hint_to_removal_intent(hint)
 
     elif item.feature.type == FeatureType.BEVEL:
-        # Bevel (raised panel border) - store bevel parameters in metadata
-        # CAM backend chooses machining strategy (chamfer mill, ball nose ramp, etc.)
+
+
         from ir.removal_intent import DepthProfile, Allowance, Constraints
         from adapters.hints_to_removal import _geometry_to_bounds
         import math
@@ -118,7 +107,7 @@ def item_to_removal_intent(
         bevel_angle = item.feature.bevel_angle_deg or 45.0
         inner_depth = item.feature.bevel_inner_depth_mm or 0.0
 
-        # Calculate depth from bevel width and angle for bounds/depth_mm
+
         if bevel_angle > 0 and bevel_angle < 90:
             calculated_depth = bevel_width * math.tan(math.radians(bevel_angle))
         else:
@@ -130,7 +119,7 @@ def item_to_removal_intent(
             hint[HintKeys.CENTER_XY_MM],
         )
 
-        # Use constant depth profile - bevel details go in metadata
+
         depth_profile = DepthProfile.constant(
             z_top=0.0,
             z_bottom=-calculated_depth,
@@ -156,8 +145,8 @@ def item_to_removal_intent(
         )
 
     elif item.feature.type == FeatureType.CHAMFER:
-        # Chamfer - store chamfer parameters in metadata
-        # CAM backend chooses machining strategy (chamfer mill, V-bit, etc.)
+
+
         from ir.removal_intent import DepthProfile, Allowance, Constraints
         from adapters.hints_to_removal import _geometry_to_bounds
         import math
@@ -166,7 +155,7 @@ def item_to_removal_intent(
         chamfer_angle = item.feature.chamfer_angle_deg or 45.0
         side = item.feature.side or "outside"
 
-        # Calculate depth from chamfer width and angle for bounds/depth_mm
+
         if chamfer_angle > 0 and chamfer_angle < 90:
             calculated_depth = chamfer_width * math.tan(math.radians(chamfer_angle))
         else:
@@ -178,7 +167,7 @@ def item_to_removal_intent(
             hint[HintKeys.CENTER_XY_MM],
         )
 
-        # Use constant depth profile - chamfer details go in metadata
+
         depth_profile = DepthProfile.constant(
             z_top=0.0,
             z_bottom=-calculated_depth,
@@ -204,8 +193,8 @@ def item_to_removal_intent(
         )
 
     elif item.feature.type == FeatureType.WAVE:
-        # Wave pattern - store wave parameters in metadata
-        # CAM backend generates parallel groove toolpaths following wave shape
+
+
         from ir.removal_intent import DepthProfile, Allowance, Constraints
         from adapters.hints_to_removal import _geometry_to_bounds
 
@@ -217,13 +206,13 @@ def item_to_removal_intent(
 
         depth_mm = item.feature.depth_mm or 0.0
 
-        # Use constant depth profile - wave details go in metadata
+
         depth_profile = DepthProfile.constant(
             z_top=0.0,
             z_bottom=-depth_mm,
         )
 
-        # Extract wave parameters from geometry data (set by layout_resolver)
+
         geometry_data = item.geometry.data if item.geometry else {}
         wave_metadata = {
             "wave_count": geometry_data.get("wave_count"),
@@ -252,20 +241,10 @@ def item_to_removal_intent(
 
 
 def _resolve_depth(depth: str | None, depth_mm: float | None, sheet_thickness_mm: float) -> float:
-    """Resolve depth to millimeters.
-
-    Args:
-        depth: String depth mode ("through", "half") or None
-        depth_mm: Explicit depth in mm, takes precedence if provided
-        sheet_thickness_mm: Sheet thickness for resolving relative depths
-
-    Returns:
-        Depth in millimeters
-    """
     if depth_mm is not None:
         return float(depth_mm)
 
-    # Use DepthMode.resolve() for string modes, defaults to sheet thickness
+
     return DepthMode.resolve(depth, sheet_thickness_mm)
 
 

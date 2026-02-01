@@ -1,27 +1,3 @@
-"""Line pattern area generator.
-
-Creates parallel line grooves across a domain at arbitrary angles.
-Lines are buffered to the specified width and clipped to the domain boundary.
-
-Usage:
-    from domains import Domain
-    from generators.area.line_pattern import line_pattern_generator
-    from generators.base import LinePatternParams
-
-    domain = Domain.from_rectangle(400, 400, center=(200, 200))
-    params = LinePatternParams(
-        angle_deg=45,
-        spacing_mm=25.0,
-        line_width_mm=4.0,
-        depth_mm=3.0,
-    )
-    items = line_pattern_generator(domain, params)
-
-This generator is useful for creating:
-- Diagonal lattice patterns (45° lines)
-- Horizontal/vertical groove patterns
-- Decorative line textures at any angle
-"""
 
 from __future__ import annotations
 
@@ -51,41 +27,10 @@ def line_pattern_generator(
     shape_id_prefix: str = "line_pattern",
     local_coords: bool = False,
 ) -> GeneratorResult:
-    """Generate parallel line grooves at specified angle across domain.
 
-    Lines are created by:
-    1. Computing line positions based on spacing
-    2. Drawing lines that extend beyond the domain bounds
-    3. Buffering lines to the specified width
-    4. Clipping the buffered lines to the domain boundary
-
-    Args:
-        domain: The domain defining the pattern region
-        params: Line pattern parameters (angle, spacing, width, depth)
-        allow_empty: If True, return empty list instead of raising when
-            no lines fit within the domain
-        shape_id_prefix: Prefix for generated shape IDs
-        local_coords: If True, angle_deg is relative to the domain's local
-            X-axis. If False (default), angle_deg is relative to sheet axes.
-
-    Returns:
-        List of Polygon Items for each line groove, or empty list
-        if allow_empty=True and domain is unsuitable
-
-    Raises:
-        ValueError: If params are invalid or domain too small (unless allow_empty)
-
-    Example:
-        >>> domain = Domain.from_rectangle(100, 100, center=(50, 50))
-        >>> params = LinePatternParams(angle_deg=45, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
-        >>> items = line_pattern_generator(domain, params)
-        >>> all(item.feature.type == "pocket" for item in items)
-        True
-    """
-    # Validate parameters
     params.validate()
 
-    # Validate domain
+
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,
@@ -101,7 +46,6 @@ def line_pattern_generator(
 
 
 def _get_local_bounds(domain: Domain) -> dict[str, float]:
-    """Get domain bounds in domain-local coordinates."""
     local_points = [sheet_to_local(pt, domain) for pt in domain.outer_boundary]
     xs = [p[0] for p in local_points]
     ys = [p[1] for p in local_points]
@@ -119,7 +63,6 @@ def _generate_local_coords(
     allow_empty: bool,
     shape_id_prefix: str,
 ) -> GeneratorResult:
-    """Generate lines in domain-local coordinates, then transform to sheet."""
     local_bounds = _get_local_bounds(domain)
     local_width = local_bounds["x_max"] - local_bounds["x_min"]
     local_height = local_bounds["y_max"] - local_bounds["y_min"]
@@ -186,7 +129,6 @@ def _generate_sheet_coords(
     allow_empty: bool,
     shape_id_prefix: str,
 ) -> GeneratorResult:
-    """Generate lines in sheet coordinates (original behavior)."""
     bounds = domain.bounds
     angle_rad = math.radians(params.angle_deg)
 

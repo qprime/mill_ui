@@ -7,23 +7,7 @@ from typing import Any
 
 @dataclass(frozen=True)
 class DepthProfile:
-    """Describes Z variation across a removal region.
-
-    Supports constant depth (default), linear gradients, and V-carve operations.
-
-    Attributes:
-        mode: Depth variation mode. One of:
-            - "constant": Uniform depth across region (default)
-            - "linear_gradient": Depth varies linearly across region
-            - "v_carve": V-bit carving where depth follows contours
-        z_top: Top Z coordinate (material surface, typically 0.0)
-        z_bottom: Bottom Z coordinate (deepest cut, negative value)
-        gradient_direction_deg: For linear_gradient mode, angle in degrees
-            (0=X direction, 90=Y direction). None for other modes.
-        v_angle_deg: For v_carve mode, included angle of V-bit in degrees.
-            None for other modes.
-    """
-    mode: str  # "constant", "linear_gradient", "v_carve"
+    mode: str
     z_top: float
     z_bottom: float
     gradient_direction_deg: float | None = None
@@ -43,12 +27,10 @@ class DepthProfile:
             raise ValueError(f"v_angle_deg must be between 0 and 180, got {self.v_angle_deg}")
 
     def depth_mm(self) -> float:
-        """Calculate total depth in millimeters."""
         return self.z_top - self.z_bottom
 
     @classmethod
     def constant(cls, z_top: float, z_bottom: float) -> "DepthProfile":
-        """Factory for constant-depth profiles."""
         return cls(mode="constant", z_top=z_top, z_bottom=z_bottom)
 
     @classmethod
@@ -58,7 +40,6 @@ class DepthProfile:
         z_bottom: float,
         direction_deg: float,
     ) -> "DepthProfile":
-        """Factory for linear gradient profiles."""
         return cls(
             mode="linear_gradient",
             z_top=z_top,
@@ -68,7 +49,6 @@ class DepthProfile:
 
     @classmethod
     def v_carve(cls, z_top: float, z_bottom: float, v_angle_deg: float) -> "DepthProfile":
-        """Factory for V-carve profiles."""
         return cls(
             mode="v_carve",
             z_top=z_top,
@@ -77,7 +57,6 @@ class DepthProfile:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization."""
         result = {
             "mode": self.mode,
             "z_top": self.z_top,
@@ -155,19 +134,6 @@ class Constraints:
 
 @dataclass(frozen=True)
 class RemovalIntent:
-    """Represents a semantic machining operation.
-
-    RemovalIntent is the IR layer between LayoutAST and CAM planning.
-    It captures *what* material to remove without specifying *how*.
-
-    Attributes:
-        region_id: Unique identifier for this removal region
-        bounds: 2D bounding box in sheet coordinates
-        depth_profile: Z-depth specification (constant, gradient, or v-carve)
-        allowance: Offset allowances for tool compensation
-        constraints: Machining constraints (tabs, keepouts, islands)
-        metadata: Additional data for CAM interpretation
-    """
     region_id: str
     bounds: Bounds2D
     depth_profile: DepthProfile
@@ -176,7 +142,6 @@ class RemovalIntent:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def depth_mm(self) -> float:
-        """Calculate total depth in millimeters."""
         return self.depth_profile.depth_mm()
 
     def to_dict(self) -> dict[str, Any]:

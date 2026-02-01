@@ -50,17 +50,17 @@ class Feature:
     depth_mm: float | None = None
     corner_cleanup_tool_diameter_mm: float | None = None
 
-    # Tab support for profile cuts
+
     tab_count: int | None = None
     tab_height_mm: float | None = None
     tab_width_mm: float | None = None
 
-    # Bevel/raised panel support (Stage 9)
+
     bevel_width_mm: float | None = None
     bevel_angle_deg: float | None = None
     bevel_inner_depth_mm: float | None = None
 
-    # Chamfer support (Stage 9)
+
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
 

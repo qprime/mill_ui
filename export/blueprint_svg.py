@@ -184,8 +184,8 @@ def render_blueprint_svg(
             if tool_radius_mm > 0.0 and not is_waste:
                 _render_profile_toolpath(toolpath_group, item, offset_x, offset_y, tool_radius_mm, y_flip=flip_y)
         elif feature_type == "notch":
-            # Notches are edge cutouts; render them in the PROFILE_CUTS layer so
-            # the blueprint reflects the final cut geometry users expect.
+
+
             _render_notch(profile_group, item, offset_x, offset_y, y_flip=flip_y)
         elif feature_type == "pocket":
             _render_pocket(pocket_group, item, offset_x, offset_y, theme_obj, y_flip=flip_y)

@@ -1,11 +1,3 @@
-"""Core utilities and constants for mill_ui.
-
-This module provides:
-- String constants for hint dictionary keys (prevents typos, enables autocomplete)
-- Feature type and shape type constants
-- Depth mode constants and utilities
-- Geometry utilities (bounds calculation)
-"""
 
 from core.constants import (
     HintKeys,

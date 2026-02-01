@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""
-Diagnostic visualization for finger joints.
-
-Generates a clean SVG showing just the finished parts (material remaining).
-
-Usage:
-    python -m scripts.visualize_finger_joint --recipe docs/recipes/38_finger_jointed_box
-"""
 
 from __future__ import annotations
 
@@ -75,10 +67,10 @@ def generate_diagnostic_svg(
 
     style = ET.SubElement(svg, "style")
     style.text = """
-        .background { fill: #1a1a1a; }
-        .part-fill { fill: #c4a574; stroke: none; }
-        .title { fill: #ffffff; font-family: monospace; font-size: 12px; font-weight: bold; }
-        .label { fill: #ffffff; font-family: monospace; font-size: 10px; }
+        .background { fill:
+        .part-fill { fill:
+        .title { fill:
+        .label { fill:
     """
 
     ET.SubElement(svg, "rect", {

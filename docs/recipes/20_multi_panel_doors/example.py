@@ -1,20 +1,11 @@
 #!/usr/bin/env python3
-"""Recipe 20: Multi-Panel Doors with Split Operations
-
-This script demonstrates Stage 9 features:
-- Domain split operations (split_horizontal, split_vertical, split_grid)
-- Raised panel generator
-- Chamfer generator
-
-Run with: PYTHONPATH=. python3 docs/recipes/20_multi_panel_doors/example.py
-"""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-# Add project root to path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from domains import Domain
@@ -32,20 +23,19 @@ from layout_ast.layout import LayoutAST, Sheet
 
 
 def example_1_two_panel_door():
-    """Simple 2-panel door using horizontal split."""
     print("\n=== Example 1: Two-Panel Door ===")
 
     door = Domain.from_rectangle(400, 600, center=(200, 300))
     panel_region = door.inset(50).domains[0]
 
-    # Split into 2 panels with 30mm center rail
+
     panels = panel_region.split_horizontal(2, gap_mm=30)
 
     print(f"Created {len(panels)} panels")
     for i, panel in enumerate(panels):
         print(f"  Panel {i}: bounds = {panel.bounds}, area = {panel.area_mm2:.1f} mm²")
 
-    # Generate items
+
     profile_items = profile_generator(door, ProfileParams(side="outside", depth="through"))
     pocket_items = []
     for panel in panels:
@@ -61,14 +51,13 @@ def example_1_two_panel_door():
 
 
 def example_2_six_panel_door():
-    """Classic 6-panel door using grid split."""
     print("\n=== Example 2: Six-Panel Door ===")
 
-    # Standard interior door dimensions
+
     door = Domain.from_rectangle(610, 2032, center=(305, 1016))
     panel_region = door.inset(75).domains[0]
 
-    # 3 rows, 2 columns, 30mm rails
+
     panels = panel_region.split_grid(rows=3, cols=2, gap_mm=30)
 
     print(f"Created {len(panels)} panels")
@@ -95,7 +84,6 @@ def example_2_six_panel_door():
 
 
 def example_3_raised_panel():
-    """Single raised panel with beveled border."""
     print("\n=== Example 3: Raised Panel ===")
 
     door = Domain.from_rectangle(400, 600, center=(200, 300))
@@ -126,7 +114,6 @@ def example_3_raised_panel():
 
 
 def example_4_multi_raised_panel():
-    """4-panel door with raised panels in each cell."""
     print("\n=== Example 4: Multi-Panel Raised Door ===")
 
     door = Domain.from_rectangle(500, 700, center=(250, 350))
@@ -160,7 +147,6 @@ def example_4_multi_raised_panel():
 
 
 def example_5_chamfered_door():
-    """Door with chamfered presentation edge."""
     print("\n=== Example 5: Chamfered Door ===")
 
     door = Domain.from_rectangle(400, 600, center=(200, 300))
@@ -191,12 +177,11 @@ def example_5_chamfered_door():
 
 
 def example_6_french_doors():
-    """French door pair using vertical split."""
     print("\n=== Example 6: French Door Pair ===")
 
     sheet = Domain.from_rectangle(900, 600, center=(450, 300))
 
-    # Split into 2 doors with 20mm gap
+
     doors = sheet.split_vertical(2, gap_mm=20)
     print(f"Created {len(doors)} doors")
 
@@ -221,27 +206,26 @@ def example_6_french_doors():
 
 
 def example_7_split_operations_demo():
-    """Demonstrate all split operations."""
     print("\n=== Example 7: Split Operations Demo ===")
 
     domain = Domain.from_rectangle(300, 400, center=(150, 200))
     print(f"Original domain: {domain.bounds.width}mm × {domain.bounds.height}mm")
 
-    # Horizontal split (stacked rows)
+
     h_split = domain.split_horizontal(3, gap_mm=10)
     print(f"\nsplit_horizontal(3, gap_mm=10):")
     print(f"  Expected height each: (400 - 2×10) / 3 = {(400 - 20) / 3:.1f}mm")
     for i, d in enumerate(h_split):
         print(f"  Row {i}: y=[{d.bounds.y_min:.1f}, {d.bounds.y_max:.1f}], height={d.bounds.height:.1f}mm")
 
-    # Vertical split (side-by-side columns)
+
     v_split = domain.split_vertical(2, gap_mm=20)
     print(f"\nsplit_vertical(2, gap_mm=20):")
     print(f"  Expected width each: (300 - 1×20) / 2 = {(300 - 20) / 2:.1f}mm")
     for i, d in enumerate(v_split):
         print(f"  Col {i}: x=[{d.bounds.x_min:.1f}, {d.bounds.x_max:.1f}], width={d.bounds.width:.1f}mm")
 
-    # Grid split
+
     g_split = domain.split_grid(rows=2, cols=3, gap_mm=15)
     print(f"\nsplit_grid(rows=2, cols=3, gap_mm=15):")
     print(f"  Expected cell: {(300 - 2 * 15) / 3:.1f}mm × {(400 - 1 * 15) / 2:.1f}mm")
@@ -253,7 +237,6 @@ def example_7_split_operations_demo():
 
 
 def main():
-    """Run all examples."""
     print("Recipe 20: Multi-Panel Doors with Split Operations")
     print("=" * 60)
 

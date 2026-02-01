@@ -1,9 +1,4 @@
-# validation/core.py - Core types for CAM artifact validation
-#
-# This module defines the base types used throughout the CAM validation system.
-# All types are designed to be JSON-serializable and deterministic.
-#
-# See docs/cam_validation_plan.md for architecture and schemas.
+
 
 from __future__ import annotations
 
@@ -14,25 +9,21 @@ from enum import Enum
 from typing import Any, TypeAlias
 
 
-# Type alias for metric values (must be JSON-serializable)
 MetricValue: TypeAlias = int | float | str | bool | list | dict | None
 
 
 class Verdict(Enum):
-    """Validation verdict for a check or overall result."""
 
     PASS = "pass"
     WARN = "warn"
     FAIL = "fail"
 
     def __lt__(self, other: Verdict) -> bool:
-        """Allow sorting: PASS < WARN < FAIL."""
         order = {Verdict.PASS: 0, Verdict.WARN: 1, Verdict.FAIL: 2}
         return order[self] < order[other]
 
     @classmethod
     def aggregate(cls, verdicts: list[Verdict]) -> Verdict:
-        """Return the worst verdict from a list."""
         if not verdicts:
             return cls.PASS
         return max(verdicts)
@@ -40,11 +31,10 @@ class Verdict(Enum):
 
 @dataclass(frozen=True)
 class InvariantResult:
-    """Result of a single invariant check."""
 
     id: str
-    category: str  # "structural", "topological", "safety"
-    artifact: str  # "svg", "gcode"
+    category: str
+    artifact: str
     description: str
     status: Verdict
     checked: int = 0
@@ -54,7 +44,6 @@ class InvariantResult:
     details: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "invariant": {
                 "id": self.id,
@@ -75,11 +64,10 @@ class InvariantResult:
 
 @dataclass(frozen=True)
 class AssertionResult:
-    """Result of an intent-derived assertion."""
 
     id: str
-    source: str  # e.g., "pml:line:5" or "ast:item:door_outer"
-    intent: str  # Human-readable intent description
+    source: str
+    intent: str
     expected: dict[str, Any]
     actual: dict[str, Any]
     status: Verdict
@@ -87,7 +75,6 @@ class AssertionResult:
     message: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "assertion": {
                 "id": self.id,
@@ -104,19 +91,17 @@ class AssertionResult:
 
 @dataclass(frozen=True)
 class RegressionResult:
-    """Result of comparing a metric against a golden baseline."""
 
-    metric_path: str  # e.g., "gcode.complexity.total_moves"
+    metric_path: str
     golden_value: MetricValue
     current_value: MetricValue
-    delta: float | None  # None for non-numeric comparisons
+    delta: float | None
     delta_percent: float | None
     tolerance_percent: float
     status: Verdict
     message: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "regression": {
                 "metric_path": self.metric_path,
@@ -133,7 +118,6 @@ class RegressionResult:
 
 @dataclass
 class InvariantSummary:
-    """Summary of all invariant checks."""
 
     total: int = 0
     passed: int = 0
@@ -142,7 +126,6 @@ class InvariantSummary:
     results: list[InvariantResult] = field(default_factory=list)
 
     def add(self, result: InvariantResult) -> None:
-        """Add an invariant result and update counts."""
         self.results.append(result)
         self.total += 1
         if result.status == Verdict.PASS:
@@ -153,7 +136,6 @@ class InvariantSummary:
             self.failed += 1
 
     def verdict(self) -> Verdict:
-        """Return aggregate verdict."""
         if self.failed > 0:
             return Verdict.FAIL
         if self.warned > 0:
@@ -161,7 +143,6 @@ class InvariantSummary:
         return Verdict.PASS
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "total": self.total,
             "passed": self.passed,
@@ -173,7 +154,6 @@ class InvariantSummary:
 
 @dataclass
 class AssertionSummary:
-    """Summary of all intent assertions."""
 
     total: int = 0
     passed: int = 0
@@ -181,7 +161,6 @@ class AssertionSummary:
     results: list[AssertionResult] = field(default_factory=list)
 
     def add(self, result: AssertionResult) -> None:
-        """Add an assertion result and update counts."""
         self.results.append(result)
         self.total += 1
         if result.status == Verdict.PASS:
@@ -190,11 +169,9 @@ class AssertionSummary:
             self.failed += 1
 
     def verdict(self) -> Verdict:
-        """Return aggregate verdict."""
         return Verdict.FAIL if self.failed > 0 else Verdict.PASS
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "total": self.total,
             "passed": self.passed,
@@ -205,7 +182,6 @@ class AssertionSummary:
 
 @dataclass
 class RegressionSummary:
-    """Summary of regression comparison."""
 
     compared: bool = False
     golden_file: str | None = None
@@ -215,7 +191,6 @@ class RegressionSummary:
     results: list[RegressionResult] = field(default_factory=list)
 
     def add(self, result: RegressionResult) -> None:
-        """Add a regression result and update counts."""
         self.results.append(result)
         self.total += 1
         if result.status == Verdict.PASS:
@@ -224,14 +199,12 @@ class RegressionSummary:
             self.exceeded_tolerance += 1
 
     def verdict(self) -> Verdict:
-        """Return aggregate verdict."""
         if not self.compared:
-            return Verdict.PASS  # No regression test = pass
+            return Verdict.PASS
         verdicts = [r.status for r in self.results]
         return Verdict.aggregate(verdicts)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict."""
         return {
             "compared": self.compared,
             "golden_file": self.golden_file,
@@ -244,30 +217,21 @@ class RegressionSummary:
 
 @dataclass
 class CAMValidationResult:
-    """
-    Complete validation result for a CAM artifact set.
-
-    This is the top-level result type that aggregates all metrics,
-    invariants, assertions, and regression results.
-
-    Note: Named CAMValidationResult to avoid conflict with existing
-    validation.results.ValidationResult (used for IR-level checks).
-    """
 
     version: str = "1.0.0"
     timestamp: str = ""
     input_file: str = ""
     verdict: Verdict = Verdict.PASS
 
-    # Metrics (populated by metric extractors)
+
     metrics: dict[str, dict[str, Any]] = field(default_factory=dict)
 
-    # Validation results
+
     invariants: InvariantSummary = field(default_factory=InvariantSummary)
     assertions: AssertionSummary = field(default_factory=AssertionSummary)
     regressions: RegressionSummary = field(default_factory=RegressionSummary)
 
-    # Execution metadata
+
     execution_time_ms: float = 0.0
     verdict_reason: str = ""
 
@@ -276,7 +240,6 @@ class CAMValidationResult:
             self.timestamp = datetime.now(timezone.utc).isoformat()
 
     def compute_verdict(self) -> Verdict:
-        """Compute aggregate verdict from all checks."""
         verdicts = [
             self.invariants.verdict(),
             self.assertions.verdict(),
@@ -287,7 +250,6 @@ class CAMValidationResult:
         return self.verdict
 
     def _set_verdict_reason(self) -> None:
-        """Set human-readable verdict reason."""
         if self.verdict == Verdict.PASS:
             self.verdict_reason = "All checks passed"
         elif self.verdict == Verdict.WARN:
@@ -308,7 +270,6 @@ class CAMValidationResult:
             self.verdict_reason = "; ".join(reasons) if reasons else "Failures detected"
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict matching the schema."""
         return {
             "validation_result": {
                 "version": self.version,
@@ -327,12 +288,10 @@ class CAMValidationResult:
         }
 
     def to_json(self, indent: int = 2) -> str:
-        """Serialize to JSON string."""
         return json.dumps(self.to_dict(), indent=indent)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CAMValidationResult:
-        """Deserialize from dict (for loading saved results)."""
         vr = data.get("validation_result", data)
         result = cls(
             version=vr.get("version", "1.0.0"),
@@ -347,12 +306,10 @@ class CAMValidationResult:
 
 
 def round_metric(value: float, precision: int = 4) -> float:
-    """Round a metric value to specified precision for stability."""
     return round(value, precision)
 
 
 def normalize_metric_dict(d: dict[str, Any], precision: int = 4) -> dict[str, Any]:
-    """Recursively round all float values in a dict for stable comparison."""
     result = {}
     for k, v in d.items():
         if isinstance(v, float):

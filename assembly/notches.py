@@ -171,9 +171,7 @@ def build_notched_polygon(
         if u_len <= 0.0 or depth <= 0.0:
             continue
 
-        # Interpret edge_index using the same canonical frame as NotchGeometry:
-        # 0=bottom (u from left->right), 1=right (u from bottom->top),
-        # 2=top (u from left->right), 3=left (u from bottom->top).
+
         if edge_idx == 0:
             x_min = cx - half_w + u_start
             x_max = x_min + u_len
@@ -195,7 +193,7 @@ def build_notched_polygon(
             x_min = cx - half_w
             x_max = x_min + depth
 
-        # Clamp to panel bounds to keep boolean ops stable under small clearances.
+
         x_min = max(cx - half_w, x_min)
         x_max = min(cx + half_w, x_max)
         y_min = max(cy - half_h, y_min)
@@ -253,12 +251,8 @@ def finger_joints_to_notches(
     for i in range(n):
         is_notch = (i % 2 == 1) == (phase == 0)
         if is_notch:
-            # Clearance semantics:
-            # - Nominal segment width is `finger_width`.
-            # - Expand each notch boundary by `clearance_mm / 4` so:
-            #     notch_width  = finger_width + (2 * clearance_mm/4) = finger_width + clearance_mm/2
-            #     finger_width = finger_width - (2 * clearance_mm/4) = finger_width - clearance_mm/2
-            #   -> (notch_width - finger_width) == clearance_mm (total looseness)
+
+
             boundary_expansion = clearance_mm / 4
             u_start = i * finger_width - boundary_expansion
             u_end = (i + 1) * finger_width + boundary_expansion

@@ -1,8 +1,3 @@
-"""CLI introspection utilities for dumping AST and RemovalIntent.
-
-These functions support debugging and testing by converting layouts to
-their internal representations.
-"""
 
 from __future__ import annotations
 
@@ -17,35 +12,19 @@ from adapters.ast_to_removal import ast_to_removal_intents
 
 
 def dump_ast(layout_path: str) -> str:
-    """Load a layout JSON file and dump its AST representation.
-
-    Args:
-        layout_path: Path to a layout JSON file
-
-    Returns:
-        JSON string representation of the LayoutAST
-    """
     ast = parse_layout_json(layout_path)
     return emit_layout_json(ast)
 
 
 def dump_removal_intent(layout_path: str) -> str:
-    """Load a layout JSON file and dump its RemovalIntent representation.
-
-    Args:
-        layout_path: Path to a layout JSON file
-
-    Returns:
-        JSON string representation of the list of RemovalIntents
-    """
     ast = parse_layout_json(layout_path)
     intents = ast_to_removal_intents(ast)
 
-    # Convert to serializable format
+
     result = []
     for intent in intents:
         intent_dict = intent.to_dict()
-        # Add convenience field at top level
+
         intent_dict["depth_mm"] = intent.depth_mm()
         result.append(intent_dict)
 

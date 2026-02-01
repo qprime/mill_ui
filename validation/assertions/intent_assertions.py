@@ -1,9 +1,4 @@
-# validation/assertions/intent_assertions.py - Intent-derived assertions
-#
-# Derives assertions from LayoutAST (source intent) and validates them
-# against extracted metrics from CAM artifacts (SVG, G-code).
-#
-# See docs/cam_validation_plan.md for architecture and schema.
+
 
 from __future__ import annotations
 
@@ -15,54 +10,39 @@ from layout_ast.layout import LayoutAST, Item, Feature
 from validation.core import AssertionResult, Verdict
 
 
-# Assertion IDs for each type of intent check
 ASSERTION_IDS = [
-    "SHEET_DIMENSIONS",    # Sheet size matches SVG bounds
-    "PROFILE_EXISTS",      # Profile cut path exists for profile features
-    "PROFILE_SIDE",        # Profile side (inside/outside) affects bounds correctly
-    "HOLE_POSITION",       # Hole center at expected XY
-    "HOLE_DIAMETER",       # Hole diameter matches specification
-    "THROUGH_CUT",         # Through cut reaches Z=0 (or -thickness)
-    "TAB_COUNT",           # G-code Z lifts match expected tab count
-    "ITEM_COUNT",          # Expected number of items exist
+    "SHEET_DIMENSIONS",
+    "PROFILE_EXISTS",
+    "PROFILE_SIDE",
+    "HOLE_POSITION",
+    "HOLE_DIAMETER",
+    "THROUGH_CUT",
+    "TAB_COUNT",
+    "ITEM_COUNT",
 ]
 
 
-# Default tolerances for assertions (per docs/cam_validation_plan.md section 5.3)
-DEFAULT_POSITION_TOLERANCE_MM = 0.01   # XY position tolerance
-DEFAULT_DEPTH_TOLERANCE_MM = 0.01      # Z depth tolerance
-DEFAULT_DIMENSION_TOLERANCE_MM = 0.01  # Width/height tolerance (length)
-DEFAULT_PERCENT_TOLERANCE = 0.001      # 0.1% for area/volume
+DEFAULT_POSITION_TOLERANCE_MM = 0.01
+DEFAULT_DEPTH_TOLERANCE_MM = 0.01
+DEFAULT_DIMENSION_TOLERANCE_MM = 0.01
+DEFAULT_PERCENT_TOLERANCE = 0.001
 
 
 @dataclass
 class IntentAssertion:
-    """Internal representation of a derived assertion before checking."""
 
     id: str
-    source: str  # e.g., "ast:item:door_outer" or "ast:sheet"
-    intent: str  # Human-readable intent
+    source: str
+    intent: str
     expected: dict[str, Any]
     tolerance: float = 0.1
-    artifact: str = "any"  # Which artifact to check: "svg", "gcode", "any"
+    artifact: str = "any"
 
 
 def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
-    """
-    Derive assertions from a LayoutAST.
-
-    Examines the sheet and items to generate assertions that can be
-    checked against extracted metrics from CAM artifacts.
-
-    Args:
-        ast: The LayoutAST representing the design intent
-
-    Returns:
-        List of IntentAssertion objects to be validated
-    """
     assertions: list[IntentAssertion] = []
 
-    # Sheet dimension assertions
+
     assertions.append(IntentAssertion(
         id="SHEET_DIMENSIONS",
         source="ast:sheet",
@@ -76,21 +56,21 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
         artifact="svg",
     ))
 
-    # Item count assertion
+
     assertions.append(IntentAssertion(
         id="ITEM_COUNT",
         source="ast:items",
         intent=f"Layout has {len(ast.items)} items",
         expected={"count": len(ast.items)},
-        tolerance=0,  # Exact match
+        tolerance=0,
         artifact="any",
     ))
 
-    # Item-specific assertions
+
     for item in ast.items:
         assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm))
 
-    # Aggregate tab count assertion (sum tabs across all profiles)
+
     total_tab_count = 0
     tab_height_mm = None
     tab_profiles = []
@@ -121,7 +101,6 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
 
 
 def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[IntentAssertion]:
-    """Derive assertions from a single Item."""
     assertions: list[IntentAssertion] = []
 
     if item.feature is None:
@@ -131,12 +110,12 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
     item_id = item.shape_id or item.id or "unnamed"
     source = f"ast:item:{item_id}"
 
-    # Get center position if available
+
     center_xy = None
     if item.placement:
         center_xy = item.placement.center_xy_mm
 
-    # Get geometry dimensions
+
     width_mm = None
     height_mm = None
     diameter_mm = None
@@ -145,14 +124,14 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
         height_mm = item.geometry.data.get("h_mm")
         diameter_mm = item.geometry.data.get("diameter_mm")
 
-    # Feature type assertions
+
     if feature.type == "profile":
-        # Profile existence assertion - include expected geometry for matching
+
         expected_profile = {
             "shape_id": item_id,
             "feature_type": "profile",
         }
-        # Include position and dimensions for matching
+
         if center_xy:
             expected_profile["center_xy"] = center_xy
         if width_mm and height_mm:
@@ -167,10 +146,10 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
             intent=f"Profile cut exists for '{item_id}'",
             expected=expected_profile,
             tolerance=DEFAULT_POSITION_TOLERANCE_MM,
-            artifact="svg",  # Check in SVG PROFILE_CUTS layer
+            artifact="svg",
         ))
 
-        # Profile side assertion (outside profiles should be larger)
+
         if feature.side and center_xy and width_mm and height_mm:
             assertions.append(IntentAssertion(
                 id="PROFILE_SIDE",
@@ -187,7 +166,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                 artifact="gcode",
             ))
 
-        # Through cut assertion
+
         if DepthMode.is_through(feature.depth):
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
@@ -195,17 +174,15 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                 intent=f"Through cut for '{item_id}' reaches full depth",
                 expected={
                     "shape_id": item_id,
-                    "target_depth_mm": -sheet_thickness_mm,  # Negative Z in G-code
+                    "target_depth_mm": -sheet_thickness_mm,
                 },
                 tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
                 artifact="gcode",
             ))
 
-        # Note: Tab count assertions are aggregated at the AST level
-        # to compare total expected tabs vs total detected tabs in G-code
 
     elif feature.type == "hole":
-        # Hole position assertion
+
         if center_xy:
             assertions.append(IntentAssertion(
                 id="HOLE_POSITION",
@@ -217,10 +194,10 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                     "center_y_mm": center_xy[1],
                 },
                 tolerance=DEFAULT_POSITION_TOLERANCE_MM,
-                artifact="svg",  # Check in SVG HOLES layer
+                artifact="svg",
             ))
 
-        # Hole diameter assertion
+
         if diameter_mm:
             assertions.append(IntentAssertion(
                 id="HOLE_DIAMETER",
@@ -234,7 +211,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                 artifact="svg",
             ))
 
-        # Through cut assertion for through holes
+
         if DepthMode.is_through(feature.depth):
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
@@ -252,7 +229,6 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
 
 
 def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
-    """Resolve a feature depth to a numeric value in mm."""
     if feature.depth_mm is not None:
         return feature.depth_mm
 
@@ -263,7 +239,7 @@ def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
         return float(feature.depth)
 
     if isinstance(feature.depth, str):
-        # Try to parse as number (e.g., "6" or "6mm")
+
         try:
             depth_str = feature.depth.replace("mm", "").strip()
             return float(depth_str)
@@ -274,17 +250,12 @@ def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
 
 
 def _unwrap_metrics(metrics: dict[str, Any] | None, key: str) -> dict[str, Any] | None:
-    """Unwrap metrics from their container key if present.
-
-    Metrics from to_dict() are wrapped like {"svg": {...}} or {"gcode": {...}}.
-    This function extracts the inner dict if the wrapper key is present.
-    """
     if metrics is None:
         return None
-    # If already unwrapped (no wrapper key), return as-is
+
     if key in metrics and isinstance(metrics[key], dict):
         return metrics[key]
-    # If it has typical metric keys, it's already unwrapped
+
     return metrics
 
 
@@ -293,18 +264,7 @@ def check_assertions(
     svg_metrics: dict[str, Any] | None = None,
     gcode_metrics: dict[str, Any] | None = None,
 ) -> list[AssertionResult]:
-    """
-    Check derived assertions against extracted metrics.
 
-    Args:
-        assertions: List of IntentAssertion objects from derive_assertions()
-        svg_metrics: Extracted SVG metrics (from SVGMetrics.to_dict())
-        gcode_metrics: Extracted G-code metrics (from GCodeMetrics.to_dict())
-
-    Returns:
-        List of AssertionResult objects with pass/fail status
-    """
-    # Unwrap metrics if they have wrapper keys
     svg_unwrapped = _unwrap_metrics(svg_metrics, "svg")
     gcode_unwrapped = _unwrap_metrics(gcode_metrics, "gcode")
 
@@ -326,9 +286,8 @@ def _check_single_assertion(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """Check a single assertion against the appropriate metrics."""
 
-    # Route to the appropriate checker based on assertion ID
+
     checkers = {
         "SHEET_DIMENSIONS": _check_sheet_dimensions,
         "ITEM_COUNT": _check_item_count,
@@ -365,11 +324,6 @@ def _check_sheet_dimensions(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """
-    Check that sheet dimensions are correct.
-
-    Checks SVG SHEET_OUTLINE layer for sheet dimensions.
-    """
     expected_width = assertion.expected["width_mm"]
     expected_height = assertion.expected["height_mm"]
     tol = assertion.tolerance
@@ -379,7 +333,7 @@ def _check_sheet_dimensions(
     actual_height = None
     source = None
 
-    # Check SVG SHEET_OUTLINE
+
     if svg_metrics is not None:
         layers = svg_metrics.get("layers", {})
         by_layer = layers.get("by_layer", {})
@@ -449,19 +403,12 @@ def _check_item_count(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """
-    Check item count.
-
-    This is an informational assertion - the item count is derived from AST
-    and serves as metadata. We always pass it since we're not comparing against
-    artifact counts (which may differ due to multi-pass operations, etc.).
-    """
     return AssertionResult(
         id=assertion.id,
         source=assertion.source,
         intent=assertion.intent,
         expected=assertion.expected,
-        actual=assertion.expected,  # Echo back the expected value
+        actual=assertion.expected,
         status=Verdict.PASS,
         tolerance=assertion.tolerance,
         message=f"Layout contains {assertion.expected['count']} items",
@@ -473,7 +420,6 @@ def _check_profile_exists(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """Check that a profile cut exists in SVG matching the expected geometry."""
     if svg_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -486,7 +432,7 @@ def _check_profile_exists(
             message="Cannot verify profile exists: SVG metrics not provided",
         )
 
-    # Check PROFILE_CUTS layer has content
+
     layers = svg_metrics.get("layers", {})
     by_layer = layers.get("by_layer", {})
     profile_layer = by_layer.get("PROFILE_CUTS", {})
@@ -494,7 +440,7 @@ def _check_profile_exists(
     element_count = profile_layer.get("element_count", 0)
     elements = profile_layer.get("elements", [])
 
-    # If no expected geometry info, fall back to existence check
+
     expected_center = assertion.expected.get("center_xy")
     expected_width = assertion.expected.get("width_mm")
     expected_height = assertion.expected.get("height_mm")
@@ -517,9 +463,7 @@ def _check_profile_exists(
             message="Profile layer is empty - expected profile cut geometry",
         )
 
-    # If we have expected geometry, look for a matching element
-    # NOTE: SVG uses visualization coordinates with margins, so we match primarily
-    # on dimensions rather than absolute position. Position matching is optional.
+
     if expected_width and expected_height or expected_diameter:
         tol = assertion.tolerance
         match_found = False
@@ -531,7 +475,7 @@ def _check_profile_exists(
             elem_height = elem.get("height")
             elem_radius = elem.get("radius")
 
-            # Check dimensions match (primary matching criterion)
+
             if expected_width and expected_height and elem_width and elem_height:
                 dim_match = (
                     abs(elem_width - expected_width) <= tol and
@@ -546,7 +490,7 @@ def _check_profile_exists(
                 dim_matches.append(elem)
                 match_found = True
                 best_match = elem
-                # Don't break - collect all dimension matches
+
 
         actual["matched_element"] = best_match
         actual["dimension_matches_count"] = len(dim_matches)
@@ -563,7 +507,7 @@ def _check_profile_exists(
                 message=f"Profile geometry found with matching dimensions for '{assertion.expected.get('shape_id')}'",
             )
         else:
-            actual["available_elements"] = elements[:5]  # Show first 5 for debugging
+            actual["available_elements"] = elements[:5]
             return AssertionResult(
                 id=assertion.id,
                 source=assertion.source,
@@ -575,7 +519,7 @@ def _check_profile_exists(
                 message=f"No profile geometry matches expected dimensions for '{assertion.expected.get('shape_id')}'",
             )
     else:
-        # Fallback: just verify element exists
+
         return AssertionResult(
             id=assertion.id,
             source=assertion.source,
@@ -593,18 +537,6 @@ def _check_profile_side(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """
-    Check profile side (inside/outside) is correct.
-
-    For outside profiles, the toolpath should be offset outward from the shape.
-    For inside profiles, the toolpath should be offset inward.
-
-    This is checked by examining G-code XY bounds against nominal shape bounds.
-
-    LIMITATION: Uses global G-code bounds, so for multi-item jobs, a large toolpath
-    from any item can satisfy the assertion. For reliable per-item validation,
-    use single-item G-code files or SVG-based verification.
-    """
     if gcode_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -617,13 +549,13 @@ def _check_profile_side(
             message="Cannot verify profile side: G-code metrics not provided",
         )
 
-    # Get expected values
+
     side = assertion.expected.get("side", "outside")
     center_xy = assertion.expected.get("center_xy", (0, 0))
     nominal_width = assertion.expected.get("nominal_width_mm", 0)
     nominal_height = assertion.expected.get("nominal_height_mm", 0)
 
-    # Calculate expected shape bounds
+
     half_w = nominal_width / 2
     half_h = nominal_height / 2
     shape_x_min = center_xy[0] - half_w
@@ -631,7 +563,7 @@ def _check_profile_side(
     shape_y_min = center_xy[1] - half_h
     shape_y_max = center_xy[1] + half_h
 
-    # Get actual G-code bounds
+
     xy_bounds = gcode_metrics.get("xy_bounds", {})
     gcode_x_min = xy_bounds.get("x_min", 0)
     gcode_x_max = xy_bounds.get("x_max", 0)
@@ -652,17 +584,12 @@ def _check_profile_side(
         "note": "Uses global G-code bounds (may include other items)",
     }
 
-    # For outside profile: toolpath bounds should be >= shape bounds
-    # For inside profile: toolpath bounds should be <= shape bounds
-    # (accounting for tool radius offset)
 
-    # Use a relaxed tolerance for G-code bounds comparison since toolpath
-    # offset depends on tool diameter which we don't know here
-    gcode_tolerance = max(assertion.tolerance, 10.0)  # Allow up to 10mm for tool offset
+    gcode_tolerance = max(assertion.tolerance, 10.0)
 
     if side == "outside":
-        # Outside profile should cut at or outside the shape boundary
-        # G-code bounds should be at least as large as shape bounds
+
+
         x_ok = gcode_x_min <= shape_x_min + gcode_tolerance and \
                gcode_x_max >= shape_x_max - gcode_tolerance
         y_ok = gcode_y_min <= shape_y_min + gcode_tolerance and \
@@ -691,7 +618,7 @@ def _check_profile_side(
                 message="Outside profile: G-code bounds do not encompass shape bounds",
             )
     else:
-        # Inside profile should cut at or inside the shape boundary
+
         x_ok = gcode_x_min >= shape_x_min - gcode_tolerance and \
                gcode_x_max <= shape_x_max + gcode_tolerance
         y_ok = gcode_y_min >= shape_y_min - gcode_tolerance and \
@@ -726,12 +653,6 @@ def _check_hole_position(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """Check that a hole exists at the expected position in SVG HOLES layer.
-
-    Note: SVG blueprint uses visualization coordinates with a 140mm margin
-    and Y-axis flip. This function converts SVG coordinates back to design
-    coordinates before comparing with expected values.
-    """
     if svg_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -853,7 +774,6 @@ def _check_hole_diameter(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """Check that a hole with expected diameter exists in the HOLES layer of SVG."""
     if svg_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -870,13 +790,13 @@ def _check_hole_diameter(
     expected_radius = expected_diameter / 2
     tol = assertion.tolerance
 
-    # Get circles from HOLES layer specifically (not all SVG circles)
+
     layers = svg_metrics.get("layers", {})
     by_layer = layers.get("by_layer", {})
     holes_layer = by_layer.get("HOLES", {})
     elements = holes_layer.get("elements", [])
 
-    # Extract radii from circle elements in HOLES layer
+
     hole_radii = []
     for elem in elements:
         if elem.get("element_type") == "circle":
@@ -891,8 +811,8 @@ def _check_hole_diameter(
     }
 
     if not hole_radii:
-        # Fallback: if no per-element data, check global circles
-        # but warn that we can't verify HOLES layer specifically
+
+
         circles = svg_metrics.get("circles", {})
         all_radii = circles.get("radii_mm", [])
         actual["all_svg_radii_mm"] = all_radii
@@ -933,7 +853,7 @@ def _check_hole_diameter(
                 message=f"No hole with diameter {expected_diameter}mm found",
             )
 
-    # Check if expected radius is present in HOLES layer
+
     found = any(abs(r - expected_radius) <= tol for r in hole_radii)
 
     if found:
@@ -965,14 +885,6 @@ def _check_through_cut(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """
-    Check that through cuts reach full depth in G-code.
-
-    LIMITATION: Uses global max plunge depth from G-code, so for multi-item jobs
-    where items have different depths, a deep cut on any item will satisfy all
-    through-cut assertions. For reliable per-item depth validation, use separate
-    G-code files per item.
-    """
     if gcode_metrics is None:
         return AssertionResult(
             id=assertion.id,
@@ -987,7 +899,7 @@ def _check_through_cut(
 
     target_depth = assertion.expected.get("target_depth_mm", 0)
 
-    # Get max plunge depth from G-code
+
     z_profile = gcode_metrics.get("z_profile", {})
     max_plunge_z = z_profile.get("max_plunge_z_mm", 0)
 
@@ -997,8 +909,7 @@ def _check_through_cut(
         "note": "Uses global max plunge depth (may include other items)",
     }
 
-    # Check if max plunge reaches or exceeds target depth
-    # Note: depths are negative (below Z=0)
+
     reaches_target = max_plunge_z <= target_depth + assertion.tolerance
 
     if reaches_target:
@@ -1030,17 +941,6 @@ def _check_tab_count(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
-    """
-    Check that tab count matches expected value.
-
-    Tab validation detects lift-cross-plunge sequences in G-code that occur
-    at max cutting depth. Each tab causes a Z-lift during feed moves on final
-    passes.
-
-    Validates:
-    - Detected tab count matches expected tab_count from AST
-    - Detected tab heights match expected tab_height_mm (within tolerance)
-    """
     expected_tab_count = assertion.expected.get("tab_count", 0)
     expected_tab_height = assertion.expected.get("tab_height_mm")
     tab_width = assertion.expected.get("tab_width_mm")

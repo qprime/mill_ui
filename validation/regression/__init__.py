@@ -1,7 +1,4 @@
-# validation/regression - Regression testing for CAM validation
-#
-# Provides metric comparison against golden baselines.
-# See docs/cam_validation_plan.md Section 6 for strategy.
+
 
 from validation.regression.comparator import (
     compare_metrics,
@@ -22,7 +19,7 @@ from validation.regression.golden_store import (
 )
 
 __all__ = [
-    # Comparator
+
     "compare_metrics",
     "ComparisonConfig",
     "metrics_to_comparable_dict",
@@ -31,7 +28,7 @@ __all__ = [
     "CHECKSUM_PATHS",
     "EXCLUDED_PATHS",
     "DEFAULT_TOLERANCES",
-    # Golden store
+
     "GoldenStore",
     "GoldenIndex",
     "GoldenEntry",

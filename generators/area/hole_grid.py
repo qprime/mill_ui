@@ -25,26 +25,6 @@ def hole_grid_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "hole",
 ) -> GeneratorResult:
-    """Generate a grid of holes within the domain.
-
-    Creates circular holes arranged in a regular pattern (rectangular,
-    hexagonal, or offset) that fit entirely within the domain boundary.
-    Holes are only placed where they fit completely inside the domain,
-    respecting inner boundaries (holes in the domain).
-
-    Args:
-        domain: The domain defining the region for hole placement
-        params: Hole grid parameters (spacing, diameter, depth, pattern)
-        allow_empty: If True, return empty list instead of raising when
-            the domain is too small for any holes
-        shape_id_prefix: Prefix for generated shape IDs
-
-    Returns:
-        List of Circle Items with hole features
-
-    Raises:
-        ValueError: If params are invalid or domain too small (unless allow_empty)
-    """
     params.validate()
 
     effective_domain = domain
@@ -109,7 +89,6 @@ def hole_grid_generator(
 
 
 def _get_local_bounds(domain: Domain) -> dict[str, float]:
-    """Get domain bounds in domain-local coordinates."""
     local_points = [
         sheet_to_local(pt, domain)
         for pt in domain.outer_boundary
@@ -133,7 +112,6 @@ def _generate_grid_points(
     pattern: str,
     align: str,
 ) -> list[tuple[float, float]]:
-    """Generate grid point positions in local coordinates."""
     x_min, x_max = bounds["x_min"], bounds["x_max"]
     y_min, y_max = bounds["y_min"], bounds["y_max"]
 
@@ -179,7 +157,6 @@ def _hole_fits_in_domain(
     radius: float,
     domain: Domain,
 ) -> bool:
-    """Check if a circular hole fits entirely within the domain."""
     hole_circle = Point(center).buffer(radius, resolution=16)
     return domain.polygon.contains(hole_circle)
 
@@ -190,7 +167,6 @@ def _create_hole_item(
     depth: str | float,
     shape_id: str,
 ) -> Item:
-    """Create a Circle Item with hole feature."""
     if depth == "through":
         depth_str = "through"
         depth_mm_val = None

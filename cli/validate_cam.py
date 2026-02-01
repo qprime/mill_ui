@@ -1,7 +1,4 @@
-# cli/validate_cam.py - Command-line interface for CAM validation
-#
-# Validates CAM artifacts (SVG, G-code) using the validation pipeline.
-# See docs/cam_validation_plan.md for architecture and schema details.
+
 
 from __future__ import annotations
 
@@ -21,33 +18,31 @@ from validation.core import Verdict
 from validation.regression import ComparisonConfig
 
 
-# Exit codes for CI integration
 EXIT_PASS = 0
 EXIT_WARN = 1
 EXIT_FAIL = 2
 
 
 def main() -> int:
-    """Main entry point for CLI validation."""
     parser = argparse.ArgumentParser(
         description="Validate CAM artifacts (SVG, G-code)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
 
-  # Validate a recipe directory (auto-discovers artifacts)
+
   python -m cli.validate_cam --recipe docs/recipes/01_simple_profile
 
-  # Validate specific artifacts
+
   python -m cli.validate_cam --svg output/drawing.svg --gcode output/toolpath.nc
 
-  # Validate with golden baseline for regression testing
+
   python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --golden tests/golden/01_simple_profile/metrics.json
 
-  # Extract metrics only (no invariant checks)
+
   python -m cli.validate_cam --svg output/drawing.svg --metrics-only
 
-  # Output JSON to file instead of stdout
+
   python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --output result.json
 
 Exit codes:
@@ -57,7 +52,7 @@ Exit codes:
         """,
     )
 
-    # Input modes (mutually exclusive)
+
     input_group = parser.add_argument_group("Input (choose one mode)")
     input_group.add_argument(
         "--recipe", "-r",
@@ -81,7 +76,7 @@ Exit codes:
         help="PML source file (for intent assertions)",
     )
 
-    # Validation options
+
     options_group = parser.add_argument_group("Validation options")
     options_group.add_argument(
         "--golden",
@@ -111,7 +106,7 @@ Exit codes:
         help="Skip regression comparison (even if golden provided)",
     )
 
-    # Output options
+
     output_group = parser.add_argument_group("Output options")
     output_group.add_argument(
         "--output", "-o",
@@ -136,7 +131,7 @@ Exit codes:
 
     args = parser.parse_args()
 
-    # Validate inputs
+
     if not args.recipe and not args.svg and not args.gcode:
         parser.error("At least one input required: --recipe, --svg, or --gcode")
 
@@ -155,8 +150,7 @@ Exit codes:
 
 
 def run_validation(args: argparse.Namespace) -> int:
-    """Run validation based on parsed arguments."""
-    # Load golden metrics if provided
+
     golden_metrics = None
     golden_file = None
     if args.golden:
@@ -167,13 +161,12 @@ def run_validation(args: argparse.Namespace) -> int:
             golden_metrics = json.load(f)
         golden_file = str(golden_path)
 
-    # Build comparison config
+
     comparison_config = ComparisonConfig(
         default_tolerance_percent=args.tolerance,
     )
 
-    # Build validation options
-    # --metrics-only disables all checks including regressions
+
     options = ValidationOptions(
         extract_metrics=True,
         check_invariants=not args.metrics_only,
@@ -181,7 +174,7 @@ def run_validation(args: argparse.Namespace) -> int:
         check_regressions=not args.metrics_only and not args.no_regressions and golden_metrics is not None,
     )
 
-    # Parse AST if PML provided
+
     ast = None
     if args.pml:
         pml_path = Path(args.pml)
@@ -191,16 +184,16 @@ def run_validation(args: argparse.Namespace) -> int:
         with open(pml_path) as f:
             ast = parse_pml(f.read())
 
-    # Run validation
+
     if args.recipe:
-        # Recipe mode
+
         recipe_dir = Path(args.recipe)
         if not recipe_dir.exists():
             raise FileNotFoundError(f"Recipe directory not found: {args.recipe}")
         if not recipe_dir.is_dir():
             raise ValueError(f"Not a directory: {args.recipe}")
 
-        # If no AST provided, try to parse from recipe's PML
+
         if ast is None:
             for candidate in ["example.pml.yml", "source.pml.yml"]:
                 pml_path = recipe_dir / candidate
@@ -219,7 +212,7 @@ def run_validation(args: argparse.Namespace) -> int:
             options=options,
         )
     else:
-        # Explicit artifact mode
+
         inputs = ValidationInput(
             source_file=args.pml,
             ast=ast,
@@ -230,7 +223,7 @@ def run_validation(args: argparse.Namespace) -> int:
             comparison_config=comparison_config,
         )
 
-        # Verify files exist
+
         if args.svg and not Path(args.svg).exists():
             raise FileNotFoundError(f"SVG file not found: {args.svg}")
         for gcode_path in (args.gcode or []):
@@ -239,13 +232,13 @@ def run_validation(args: argparse.Namespace) -> int:
 
         result = validate(inputs, options)
 
-    # Output result
+
     if args.summary:
         output_summary(result, args)
     else:
         output_json(result, args)
 
-    # Return exit code based on verdict
+
     if result.verdict == Verdict.PASS:
         return EXIT_PASS
     elif result.verdict == Verdict.WARN:
@@ -255,7 +248,6 @@ def run_validation(args: argparse.Namespace) -> int:
 
 
 def output_json(result, args: argparse.Namespace) -> None:
-    """Output validation result as JSON."""
     result_dict = result.to_dict()
     indent = None if args.compact else 2
     json_str = json.dumps(result_dict, indent=indent, default=str)
@@ -271,7 +263,6 @@ def output_json(result, args: argparse.Namespace) -> None:
 
 
 def output_summary(result, args: argparse.Namespace) -> None:
-    """Output human-readable summary."""
     verdict_symbols = {
         Verdict.PASS: "PASS",
         Verdict.WARN: "WARN",
@@ -286,7 +277,7 @@ def output_summary(result, args: argparse.Namespace) -> None:
         "",
     ]
 
-    # Metrics summary
+
     if result.metrics:
         lines.append("Metrics extracted:")
         if "svg" in result.metrics:
@@ -296,7 +287,7 @@ def output_summary(result, args: argparse.Namespace) -> None:
             lines.append(f"  G-code: {motion.get('g0_count', 0)} rapids, {motion.get('g1_count', 0)} feeds")
         lines.append("")
 
-    # Invariants summary
+
     inv = result.invariants
     if inv.total > 0:
         lines.append(f"Invariants: {inv.passed}/{inv.total} passed, {inv.warned} warnings, {inv.failed} failures")
@@ -307,7 +298,7 @@ def output_summary(result, args: argparse.Namespace) -> None:
                     lines.append(f"    - {r.id}: {r.description}")
         lines.append("")
 
-    # Assertions summary
+
     asrt = result.assertions
     if asrt.total > 0:
         lines.append(f"Assertions: {asrt.passed}/{asrt.total} passed, {asrt.failed} failures")
@@ -318,7 +309,7 @@ def output_summary(result, args: argparse.Namespace) -> None:
                     lines.append(f"    - {r.id}: {r.message}")
         lines.append("")
 
-    # Regressions summary
+
     reg = result.regressions
     if reg.compared:
         lines.append(f"Regressions: {reg.total} metrics compared")
@@ -335,11 +326,11 @@ def output_summary(result, args: argparse.Namespace) -> None:
                         lines.append(f"    - {r.metric_path}: {r.message}")
         lines.append("")
 
-    # Verdict reason
+
     if result.verdict_reason:
         lines.append(f"Verdict: {result.verdict_reason}")
 
-    # Output
+
     output = "\n".join(lines)
     if args.output:
         output_path = Path(args.output)

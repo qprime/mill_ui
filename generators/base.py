@@ -1,29 +1,3 @@
-"""Generator protocol and base classes for the domain/generator system.
-
-Generators are deterministic functions that produce LayoutAST Items within a domain.
-This module defines:
-
-1. The Generator protocol (structural typing contract)
-2. Base parameter classes with validation
-3. Common utilities shared across generators
-
-Two generator classes exist:
-- Area generators: operate over the 2D interior of a domain (pockets, patterns)
-- Loop generators: operate on boundary loops of a domain (profiles, beads)
-
-Usage:
-    from generators.base import GeneratorResult, FlatPocketParams
-    from generators.area.flat import flat_pocket_generator
-
-    domain = Domain.from_rectangle(100, 100, center=(50, 50))
-    params = FlatPocketParams(depth_mm=6.0)
-    items = flat_pocket_generator(domain, params)
-
-See Also:
-    - docs/domain_generator_design.md Section 4.2 for generator contract
-    - generators/area/ for area generator implementations
-    - generators/loop/ for loop generator implementations
-"""
 
 from __future__ import annotations
 
@@ -37,35 +11,14 @@ if TYPE_CHECKING:
 from layout_ast.layout import Item
 
 
-# =============================================================================
-# Type Aliases
-# =============================================================================
-
-# Generator output type
 GeneratorResult = list[Item]
 
-# Loop selection modes for loop generators
+
 LoopSelection = Literal["outer_only", "inner_only", "all_loops"] | list[int]
 
 
-# =============================================================================
-# Generator Protocol
-# =============================================================================
-
 @runtime_checkable
 class Generator(Protocol):
-    """Protocol defining the generator interface.
-
-    Generators are deterministic functions that:
-    - Receive a domain and typed parameters
-    - Operate in domain-local coordinates internally
-    - Emit zero or more LayoutAST Items in sheet coordinates
-    - Never modify the input domain
-    - Raise on invalid parameters (unless allow_empty=True)
-
-    This protocol is for documentation and type checking. Generators can be
-    implemented as functions or classes that match this signature.
-    """
 
     def __call__(
         self,
@@ -74,57 +27,19 @@ class Generator(Protocol):
         *,
         allow_empty: bool = False,
     ) -> GeneratorResult:
-        """Generate Items within the given domain.
-
-        Args:
-            domain: The domain defining the region for generation
-            params: Typed parameter object specific to this generator
-            allow_empty: If True, return empty list instead of raising when
-                generation cannot produce output (e.g., domain too small)
-
-        Returns:
-            List of LayoutAST Items with geometry in sheet coordinates
-
-        Raises:
-            ValueError: If parameters are invalid or domain is unsuitable
-                (unless allow_empty=True)
-        """
         ...
 
 
-# =============================================================================
-# Parameter Base Classes
-# =============================================================================
-
 @dataclass(frozen=True)
 class BaseParams(ABC):
-    """Base class for generator parameter objects.
-
-    All parameter classes should inherit from this and implement validation.
-    Parameters are frozen dataclasses to ensure immutability and hashability.
-    """
 
     @abstractmethod
     def validate(self) -> None:
-        """Validate parameter values.
-
-        Raises:
-            ValueError: If any parameter is invalid, with actionable message
-        """
         ...
 
 
 @dataclass(frozen=True)
 class FlatPocketParams(BaseParams):
-    """Parameters for flat pocket area generator.
-
-    A flat pocket removes material uniformly within the domain boundary,
-    creating a recessed area at the specified depth.
-
-    Attributes:
-        depth_mm: Depth of the pocket in millimeters (must be positive)
-        allowance_mm: Optional inward allowance from domain boundary (default 0)
-    """
 
     depth_mm: float
     allowance_mm: float = 0.0
@@ -142,28 +57,6 @@ class FlatPocketParams(BaseParams):
 
 @dataclass(frozen=True)
 class ProfileParams(BaseParams):
-    """Parameters for profile loop generator.
-
-    A profile cut follows the boundary of a domain, cutting through or to
-    a specified depth. The cut can be on the inside, outside, or on the line.
-
-    Attributes:
-        side: Cut position relative to the boundary line
-            - "outside": Cut outside the geometry (material outside boundary removed)
-            - "inside": Cut inside the geometry (material inside boundary removed)
-            - "on": Cut on the line (split the material)
-        depth: Depth specification
-            - "through": Cut completely through the material
-            - float: Cut to specific depth in mm
-        loop_selection: Which loops to profile
-            - "outer_only": Profile only the outer boundary
-            - "inner_only": Profile only inner boundaries (holes)
-            - "all_loops": Profile all boundaries
-            - list[int]: Profile specific loop indices (0=outer, 1+=inner)
-        tab_count: Number of holding tabs (0 for none)
-        tab_width_mm: Width of each tab in mm
-        tab_height_mm: Height of tabs above cut depth in mm
-    """
 
     side: Literal["outside", "inside", "on"]
     depth: Literal["through"] | float
@@ -189,7 +82,7 @@ class ProfileParams(BaseParams):
                     f"ProfileParams: depth must be positive when numeric, got {self.depth}"
                 )
 
-        # Validate loop_selection
+
         valid_selections = ("outer_only", "inner_only", "all_loops")
         if isinstance(self.loop_selection, str):
             if self.loop_selection not in valid_selections:
@@ -228,29 +121,13 @@ class ProfileParams(BaseParams):
 
 @dataclass(frozen=True)
 class WaveParams(BaseParams):
-    """Parameters for wave pattern area generator.
-
-    A wave generator creates a sinusoidal pattern across the domain interior,
-    producing parallel grooves or ridges at the specified depth.
-
-    Attributes:
-        amplitude_mm: Height of wave peaks from centerline in mm (half peak-to-peak)
-        wavelength_mm: Distance between adjacent wave peaks in mm
-        depth_mm: Depth of wave grooves in mm (positive value)
-        direction_rad: Direction of wave propagation in radians (0 = along X-axis)
-            The wave crests are perpendicular to this direction.
-        phase_rad: Phase offset in radians (0 to 2*pi)
-        tool_width_mm: Width of cutting tool for generating toolpath lines.
-            Waves are rendered as parallel lines spaced by this amount.
-        wave_count: Number of complete waves (None = fit as many as domain allows)
-    """
 
     amplitude_mm: float
     wavelength_mm: float
     depth_mm: float
     direction_rad: float = 0.0
     phase_rad: float = 0.0
-    tool_width_mm: float = 3.175  # 1/8" default
+    tool_width_mm: float = 3.175
     wave_count: int | None = None
 
     def validate(self) -> None:
@@ -278,19 +155,6 @@ class WaveParams(BaseParams):
 
 @dataclass(frozen=True)
 class GridParams(BaseParams):
-    """Parameters for grid pattern area generator.
-
-    A grid generator creates a crosshatch pattern of perpendicular lines
-    across the domain interior at the specified depth.
-
-    Attributes:
-        spacing_x_mm: Horizontal spacing between vertical lines in mm
-        spacing_y_mm: Vertical spacing between horizontal lines in mm
-        line_width_mm: Width of grid lines in mm (typically tool diameter)
-        depth_mm: Depth of grid grooves in mm (positive value)
-        offset_x_mm: X offset for grid origin within domain (default 0)
-        offset_y_mm: Y offset for grid origin within domain (default 0)
-    """
 
     spacing_x_mm: float
     spacing_y_mm: float
@@ -320,22 +184,6 @@ class GridParams(BaseParams):
 
 @dataclass(frozen=True)
 class RaisedPanelParams(BaseParams):
-    """Parameters for raised panel area generator.
-
-    Creates the traditional "raised panel" look by generating geometry for
-    both an angled border and a center field. The border is cut deeper at
-    the outer edge and shallower toward the center, creating the classic
-    beveled appearance. The center field is cut to a uniform shallow depth,
-    appearing "raised" relative to the surrounding border.
-
-    Attributes:
-        border_width_mm: Width of the angled border in mm
-        border_depth_mm: Depth at outer edge of border in mm (deeper)
-        field_depth_mm: Depth of center field in mm (shallower = more raised)
-        angle_degrees: Angle of the bevel in degrees (typical: 10-20°).
-            This is informational metadata for the CAM planner; actual
-            toolpath angle is computed from border_width and depth difference.
-    """
 
     border_width_mm: float
     border_depth_mm: float
@@ -368,21 +216,6 @@ class RaisedPanelParams(BaseParams):
 
 @dataclass(frozen=True)
 class ChamferParams(BaseParams):
-    """Parameters for chamfer loop generator.
-
-    Creates angled edge cuts along domain boundaries for presentation edges.
-    The chamfer is defined by its horizontal width and vertical depth, which
-    together determine the chamfer angle.
-
-    Attributes:
-        width_mm: Horizontal width of chamfer in mm
-        depth_mm: Vertical depth of chamfer in mm
-        loop_selection: Which loops to chamfer
-            - "outer_only": Chamfer only the outer boundary
-            - "inner_only": Chamfer only inner boundaries (holes)
-            - "all_loops": Chamfer all boundaries
-            - list[int]: Chamfer specific loop indices (0=outer, 1+=inner)
-    """
 
     width_mm: float
     depth_mm: float
@@ -398,7 +231,7 @@ class ChamferParams(BaseParams):
                 f"ChamferParams: depth_mm must be positive, got {self.depth_mm}"
             )
 
-        # Validate loop_selection (same logic as ProfileParams)
+
         valid_selections = ("outer_only", "inner_only", "all_loops")
         if isinstance(self.loop_selection, str):
             if self.loop_selection not in valid_selections:
@@ -420,30 +253,12 @@ class ChamferParams(BaseParams):
 
     @property
     def angle_degrees(self) -> float:
-        """Compute chamfer angle from width and depth."""
         import math
         return math.degrees(math.atan2(self.depth_mm, self.width_mm))
 
 
 @dataclass(frozen=True)
 class BeadParams(BaseParams):
-    """Parameters for bead loop generator.
-
-    A bead generator creates a decorative groove/bead along domain boundaries.
-    Unlike profile cuts which separate parts, beads are decorative features
-    that stay within the material.
-
-    Attributes:
-        width_mm: Width of the bead groove in mm
-        depth_mm: Depth of the bead groove in mm (positive value)
-        offset_mm: Distance from boundary to bead centerline in mm
-            Positive = inward from outer boundary / outward from holes
-        loop_selection: Which loops to apply bead to
-            - "outer_only": Bead only the outer boundary
-            - "inner_only": Bead only inner boundaries (holes)
-            - "all_loops": Bead all boundaries
-            - list[int]: Bead specific loop indices (0=outer, 1+=inner)
-    """
 
     width_mm: float
     depth_mm: float
@@ -460,7 +275,7 @@ class BeadParams(BaseParams):
                 f"BeadParams: depth_mm must be positive, got {self.depth_mm}"
             )
 
-        # Validate loop_selection (same logic as ProfileParams)
+
         valid_selections = ("outer_only", "inner_only", "all_loops")
         if isinstance(self.loop_selection, str):
             if self.loop_selection not in valid_selections:
@@ -483,17 +298,6 @@ class BeadParams(BaseParams):
 
 @dataclass(frozen=True)
 class LinePatternParams(BaseParams):
-    """Parameters for line pattern area generator.
-
-    Creates parallel line grooves across a domain at arbitrary angles.
-    Lines are clipped to the domain boundary.
-
-    Attributes:
-        angle_deg: Angle of lines in degrees (0=horizontal, 90=vertical, 45=diagonal)
-        spacing_mm: Distance between line centers in mm
-        line_width_mm: Width of each groove in mm (typically tool diameter)
-        depth_mm: Depth of grooves in mm (positive value)
-    """
 
     angle_deg: float = 0.0
     spacing_mm: float = 25.0
@@ -517,16 +321,6 @@ class LinePatternParams(BaseParams):
 
 @dataclass(frozen=True)
 class ConcentricBorderParams(BaseParams):
-    """Parameters for concentric border generator.
-
-    Creates nested contour-following borders (inset loops) as groove patterns.
-    Each border is a groove at the specified inset distance from the domain edge.
-
-    Attributes:
-        insets_mm: Tuple of inset distances from domain boundary (e.g., (15.0, 30.0, 45.0))
-        groove_width_mm: Width of each groove in mm (typically tool diameter)
-        depth_mm: Depth of grooves in mm (positive value)
-    """
 
     insets_mm: tuple[float, ...]
     groove_width_mm: float = 3.0
@@ -554,16 +348,6 @@ class ConcentricBorderParams(BaseParams):
 
 @dataclass(frozen=True)
 class XPanelParams(BaseParams):
-    """Parameters for X-panel area generator.
-
-    Creates 4 triangular pockets forming an X pattern, commonly used in
-    farmhouse and traditional cabinet doors. The raised X bars are formed
-    by the material left between the triangular pockets.
-
-    Attributes:
-        bar_width_mm: Width of the X bars (raised material between pockets) in mm
-        depth_mm: Depth of the triangular pockets in mm (positive value)
-    """
 
     bar_width_mm: float
     depth_mm: float
@@ -581,28 +365,6 @@ class XPanelParams(BaseParams):
 
 @dataclass(frozen=True)
 class MeasurementGridParams(BaseParams):
-    """Parameters for measurement grid area generator.
-
-    Creates ruler-style tick marks for calibration surfaces and measurement
-    references. Supports both metric and imperial presets, or custom spacing.
-
-    Attributes:
-        unit: Preset unit mode ("metric", "imperial", or "custom")
-            - metric: minor=1mm, major=10mm
-            - imperial: minor=1.5875mm (1/16"), major=25.4mm (1")
-            - custom: uses explicit spacing values
-        minor_spacing_mm: Distance between minor tick marks (required for custom)
-        major_spacing_mm: Distance between major tick marks (required for custom)
-        minor_length_mm: Length of minor tick marks
-        major_length_mm: Length of major tick marks
-        depth_mm: Engraving depth for tick marks
-        minor_ticks: Whether to show minor tick marks (default True)
-        labels: Whether to engrave numeric labels at major tick intervals
-        label_height_mm: Height of label text in mm
-        label_offset_mm: Distance from tick mark end to label center (None = auto)
-        label_interval: Label every Nth major tick (default 1 = every major tick)
-        label_start: First labeled value offset (default 0)
-    """
 
     unit: Literal["metric", "imperial", "custom"] = "metric"
     minor_spacing_mm: float | None = None
@@ -671,7 +433,7 @@ class MeasurementGridParams(BaseParams):
         if self.unit == "metric":
             return 1.0
         elif self.unit == "imperial":
-            return 25.4 / 16  # 1/16"
+            return 25.4 / 16
         else:
             return self.minor_spacing_mm or 1.0
 
@@ -679,7 +441,7 @@ class MeasurementGridParams(BaseParams):
         if self.unit == "metric":
             return 10.0
         elif self.unit == "imperial":
-            return 25.4  # 1"
+            return 25.4
         else:
             return self.major_spacing_mm or 10.0
 
@@ -689,30 +451,6 @@ EdgeSelection = Literal["top", "bottom", "left", "right"]
 
 @dataclass(frozen=True)
 class MeasurementEdgeParams(BaseParams):
-    """Parameters for measurement edge loop generator.
-
-    Creates ruler-style tick marks along specified edges of a domain,
-    leaving the interior clear for other content. Useful for ruler borders
-    around work areas.
-
-    Attributes:
-        edges: Which edges to add tick marks to (top, bottom, left, right)
-        unit: Preset unit mode ("metric", "imperial", or "custom")
-            - metric: minor=1mm, major=10mm
-            - imperial: minor=1.5875mm (1/16"), major=25.4mm (1")
-            - custom: uses explicit spacing values
-        minor_spacing_mm: Distance between minor tick marks (required for custom)
-        major_spacing_mm: Distance between major tick marks (required for custom)
-        minor_length_mm: Length of minor tick marks
-        major_length_mm: Length of major tick marks
-        depth_mm: Engraving depth for tick marks
-        minor_ticks: Whether to show minor tick marks (default True)
-        labels: Whether to engrave numeric labels at major tick intervals
-        label_height_mm: Height of label text in mm
-        label_offset_mm: Distance from tick mark end to label center (None = auto)
-        label_interval: Label every Nth major tick (default 1 = every major tick)
-        label_start: First labeled value offset (default 0)
-    """
 
     edges: tuple[EdgeSelection, ...]
     unit: Literal["metric", "imperial", "custom"] = "metric"
@@ -794,7 +532,7 @@ class MeasurementEdgeParams(BaseParams):
         if self.unit == "metric":
             return 1.0
         elif self.unit == "imperial":
-            return 25.4 / 16  # 1/16"
+            return 25.4 / 16
         else:
             return self.minor_spacing_mm or 1.0
 
@@ -802,7 +540,7 @@ class MeasurementEdgeParams(BaseParams):
         if self.unit == "metric":
             return 10.0
         elif self.unit == "imperial":
-            return 25.4  # 1"
+            return 25.4
         else:
             return self.major_spacing_mm or 10.0
 
@@ -813,20 +551,6 @@ TextOrientation = Literal["horizontal", "vertical"]
 
 @dataclass(frozen=True)
 class EngraveTextParams(BaseParams):
-    """Parameters for text engraving generator.
-
-    Creates single-stroke text using Hershey fonts, suitable for CNC engraving.
-    Each character is rendered as a series of line segments.
-
-    Attributes:
-        text: The text string to engrave
-        height_mm: Height of text in mm (cap height)
-        depth_mm: Engraving depth in mm
-        font: Hershey font name (default "rowmans" - simple sans-serif)
-        alignment: Text alignment relative to position ("left", "center", "right")
-        orientation: Text orientation ("horizontal", "vertical")
-        spacing_factor: Character spacing multiplier (1.0 = default spacing)
-    """
 
     text: str
     height_mm: float = 4.0
@@ -865,24 +589,6 @@ class EngraveTextParams(BaseParams):
 
 @dataclass(frozen=True)
 class HoleGridParams(BaseParams):
-    """Parameters for hole grid area generator.
-
-    Creates a regular pattern of holes (circles) within a domain. Supports
-    rectangular, hexagonal, and offset grid patterns.
-
-    Attributes:
-        spacing_mm: Center-to-center distance between adjacent holes in mm
-        diameter_mm: Diameter of each hole in mm
-        depth_mm: Depth of holes in mm, or "through" for full material penetration
-        pattern: Grid pattern type
-            - "rectangular": Standard grid aligned to X/Y axes
-            - "hexagonal": Honeycomb pattern (alternating rows offset by spacing/2)
-            - "offset": Like rectangular but alternating rows offset by spacing/2
-        inset_mm: Additional inset from domain boundary in mm (default 0)
-        align: Grid alignment within domain
-            - "center": Grid centered on domain centroid
-            - "corner": Grid aligned to domain bounds corner
-    """
 
     spacing_mm: float
     diameter_mm: float
@@ -930,21 +636,7 @@ class HoleGridParams(BaseParams):
             )
 
 
-# =============================================================================
-# Generator Utilities
-# =============================================================================
-
 def generate_shape_id(prefix: str, index: int = 0, suffix: str = "") -> str:
-    """Generate a unique shape ID for generator output.
-
-    Args:
-        prefix: Generator type prefix (e.g., "pocket", "profile")
-        index: Sequential index for multiple items from same generator
-        suffix: Optional suffix for additional context
-
-    Returns:
-        Shape ID string like "generated_pocket_001" or "generated_profile_outer"
-    """
     parts = ["generated", prefix]
     if suffix:
         parts.append(suffix)
@@ -960,20 +652,6 @@ def validate_domain_for_generation(
     allow_empty: bool = False,
     generator_name: str = "Generator",
 ) -> bool:
-    """Validate that a domain is suitable for generation.
-
-    Args:
-        domain: The domain to validate
-        min_area_mm2: Minimum area required (default 0.01 mm^2)
-        allow_empty: If True, return False instead of raising
-        generator_name: Name for error messages
-
-    Returns:
-        True if valid
-
-    Raises:
-        ValueError: If domain is too small and allow_empty is False
-    """
     if domain.area_mm2 < min_area_mm2:
         if allow_empty:
             return False
@@ -985,10 +663,10 @@ def validate_domain_for_generation(
 
 
 __all__ = [
-    # Protocol
+
     "Generator",
     "GeneratorResult",
-    # Parameter classes
+
     "BaseParams",
     "FlatPocketParams",
     "ProfileParams",
@@ -1004,12 +682,12 @@ __all__ = [
     "XPanelParams",
     "HoleGridParams",
     "EngraveTextParams",
-    # Type aliases
+
     "LoopSelection",
     "EdgeSelection",
     "TextAlignment",
     "TextOrientation",
-    # Utilities
+
     "generate_shape_id",
     "validate_domain_for_generation",
 ]

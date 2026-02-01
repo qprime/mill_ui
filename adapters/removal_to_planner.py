@@ -16,7 +16,6 @@ from core.constants import (
 
 
 def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
-    """Convert RemovalIntent to hint dict format for the planner."""
     hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
     shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
     depth_mm = intent.depth_mm()

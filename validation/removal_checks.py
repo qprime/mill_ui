@@ -13,26 +13,10 @@ def check_depth_profile(
     sheet_thickness_mm: float,
     available_v_angles: list[float] | None = None,
 ) -> ValidationResult:
-    """Validate depth profile semantics.
-
-    Checks:
-    - V-carve angle must match available tooling (if specified)
-    - Gradient depth must not exceed sheet thickness
-    - Bevel/V-carve inner depth must be reachable with specified angle
-
-    Args:
-        intent: The RemovalIntent to validate
-        sheet_thickness_mm: Material thickness for depth validation
-        available_v_angles: List of available V-bit angles (e.g., [60.0, 90.0, 120.0]).
-            If None, skips V-bit availability check.
-
-    Returns:
-        ValidationResult with any issues found
-    """
     result = ValidationResult()
     profile = intent.depth_profile
 
-    # Check gradient depth doesn't exceed sheet thickness
+
     if profile.mode == "linear_gradient":
         if abs(profile.z_bottom) > sheet_thickness_mm:
             result.add_error(
@@ -42,13 +26,13 @@ def check_depth_profile(
                 sheet_thickness_mm=sheet_thickness_mm,
             )
 
-    # Check V-carve angle availability
+
     if profile.mode == "v_carve":
         v_angle = profile.v_angle_deg
 
-        # Check if V-bit angle is available
+
         if available_v_angles is not None:
-            # Allow 1 degree tolerance for matching
+
             matching = [a for a in available_v_angles if abs(a - v_angle) < 1.0]
             if not matching:
                 result.add_error(
@@ -59,9 +43,7 @@ def check_depth_profile(
                     available_angles=available_v_angles,
                 )
 
-        # Check V-carve depth is achievable
-        # For a V-bit, max depth at a point depends on feature width
-        # This is a basic check - actual depth depends on geometry
+
         if abs(profile.z_bottom) > sheet_thickness_mm:
             result.add_warning(
                 f"V-carve depth ({abs(profile.z_bottom):.2f}mm) may exceed material",
@@ -70,18 +52,17 @@ def check_depth_profile(
                 sheet_thickness_mm=sheet_thickness_mm,
             )
 
-    # Check for bevel metadata (from chamfer/bevel features)
+
     bevel_data = intent.metadata.get("bevel")
     if bevel_data:
         bevel_width = bevel_data.get("width_mm", 0)
         bevel_angle = bevel_data.get("angle_deg", 45)
         inner_depth = bevel_data.get("inner_depth_mm", 0)
 
-        # Calculate expected depth from width and angle
-        # For a 45° bevel, depth = width. For other angles: depth = width * tan(angle)
+
         if bevel_angle > 0 and bevel_angle < 90:
             expected_depth = bevel_width * math.tan(math.radians(bevel_angle))
-            # Allow some tolerance
+
             if inner_depth > expected_depth * 1.1:
                 result.add_warning(
                     f"Bevel inner depth ({inner_depth:.2f}mm) may not be achievable "

@@ -1,7 +1,4 @@
-# validation/regression/comparator.py - Metric delta comparison
-#
-# Compares current metrics against golden baselines with tolerance-based verdicts.
-# See docs/cam_validation_plan.md Section 6 for strategy.
+
 
 from __future__ import annotations
 
@@ -12,19 +9,17 @@ from typing import Any
 from validation.core import Verdict, RegressionResult, RegressionSummary
 
 
-# Metric categories for comparison strategy
-# These paths use exact matching (counts, booleans, enums)
 EXACT_MATCH_PATHS = frozenset({
-    # SVG
+
     "svg.layers.count",
-    # Note: svg.layers.names is in STRUCTURAL_MATCH_PATHS (order-independent)
+
     "svg.paths.total_count",
     "svg.paths.closed_count",
     "svg.paths.open_count",
     "svg.circles.count",
     "svg.rects.count",
     "svg.text_elements.count",
-    # G-code
+
     "gcode.summary.total_lines",
     "gcode.summary.comment_lines",
     "gcode.summary.motion_lines",
@@ -40,7 +35,7 @@ EXACT_MATCH_PATHS = frozenset({
     "gcode.operations.total_passes",
 })
 
-# These paths compare as sets (order-independent)
+
 STRUCTURAL_MATCH_PATHS = frozenset({
     "svg.layers.names",
     "gcode.tools.tool_numbers",
@@ -49,11 +44,11 @@ STRUCTURAL_MATCH_PATHS = frozenset({
     "gcode.z_profile.unique_cutting_depths",
 })
 
-# These paths are checksums (hash comparison)
+
 CHECKSUM_PATHS = frozenset({
 })
 
-# These paths are excluded from comparison (non-deterministic metadata)
+
 EXCLUDED_PATHS = frozenset({
     "svg.extraction_time_ms",
     "gcode.extraction_time_ms",
@@ -61,29 +56,29 @@ EXCLUDED_PATHS = frozenset({
     "gcode.version",
 })
 
-# Prefix patterns to exclude (metadata wrappers)
+
 EXCLUDED_PREFIXES = (
-    "golden.",  # Golden store metadata wrapper
+    "golden.",
 )
 
-# Default tolerances by metric category (percent)
+
 DEFAULT_TOLERANCES: dict[str, float] = {
-    # Position/dimension metrics (0.01mm tolerance = 0.01% for typical 100mm parts)
+
     "position": 0.01,
-    # Area/volume metrics (per plan section 5.3)
+
     "area": 0.1,
     "volume": 0.1,
-    # Distance metrics
+
     "distance": 0.1,
-    # Time estimates (higher tolerance due to machine-specific variability)
+
     "time": 1.0,
-    # Default for unlisted metrics
+
     "default": 0.1,
 }
 
-# Mapping of metric path patterns to tolerance categories
+
 TOLERANCE_CATEGORIES: dict[str, str] = {
-    # Position/dimension
+
     "bounds": "position",
     "x_min": "position",
     "x_max": "position",
@@ -100,16 +95,16 @@ TOLERANCE_CATEGORIES: dict[str, str] = {
     "safe_z": "position",
     "max_plunge": "position",
     "max_single_plunge": "position",
-    # Area/volume
+
     "volume": "volume",
     "surface_area": "area",
     "area": "area",
-    # Distance
+
     "distance": "distance",
     "length": "distance",
     "total_rapid": "distance",
     "total_feed": "distance",
-    # Time
+
     "time_": "time",
     "_time_s": "time",
 }
@@ -117,17 +112,16 @@ TOLERANCE_CATEGORIES: dict[str, str] = {
 
 @dataclass
 class ComparisonConfig:
-    """Configuration for metric comparison."""
 
     default_tolerance_percent: float = 0.1
     tolerance_overrides: dict[str, float] = field(default_factory=dict)
-    # Warn if delta exceeds tolerance but < fail_multiplier * tolerance
-    # Fail if delta >= fail_multiplier * tolerance
+
+
     fail_multiplier: float = 2.0
-    # Absolute tolerance for near-zero values (avoids 0 -> 0.001 = 100% delta)
-    # When abs(golden) < near_zero_threshold, use absolute tolerance instead of percent
-    near_zero_threshold: float = 0.01  # Values below this use absolute tolerance
-    absolute_tolerance: float = 0.01   # Absolute tolerance for near-zero values (mm)
+
+
+    near_zero_threshold: float = 0.01
+    absolute_tolerance: float = 0.01
 
 
 def compare_metrics(
@@ -136,30 +130,19 @@ def compare_metrics(
     config: ComparisonConfig | None = None,
     golden_file: str | None = None,
 ) -> RegressionSummary:
-    """
-    Compare current metrics against golden baseline.
-
-    Args:
-        current: Current metrics dict
-        golden: Golden baseline metrics dict
-        config: Optional comparison configuration
-        golden_file: Optional path to golden file (for reporting)
-
-    Returns a RegressionSummary with all comparison results.
-    """
     if config is None:
         config = ComparisonConfig()
 
     summary = RegressionSummary(compared=True, golden_file=golden_file)
 
-    # Flatten both dicts for comparison
+
     current_flat = _flatten_dict(current)
     golden_flat = _flatten_dict(golden)
 
     all_paths = set(current_flat.keys()) | set(golden_flat.keys())
 
     for path in sorted(all_paths):
-        # Skip excluded paths
+
         if _is_excluded(path):
             continue
 
@@ -177,7 +160,6 @@ def _flatten_dict(
     parent_key: str = "",
     sep: str = ".",
 ) -> dict[str, Any]:
-    """Flatten a nested dict into dot-separated paths."""
     items: list[tuple[str, Any]] = []
 
     for k, v in d.items():
@@ -186,8 +168,8 @@ def _flatten_dict(
         if isinstance(v, dict):
             items.extend(_flatten_dict(v, new_key, sep).items())
         elif isinstance(v, list):
-            # Handle lists: store as-is for structural comparison
-            # Also flatten indexed access for individual elements
+
+
             items.append((new_key, v))
             for i, item in enumerate(v):
                 if isinstance(item, dict):
@@ -201,16 +183,15 @@ def _flatten_dict(
 
 
 def _is_excluded(path: str) -> bool:
-    """Check if a path should be excluded from comparison."""
-    # Check exact paths
+
     for excluded in EXCLUDED_PATHS:
         if path == excluded or path.startswith(excluded + "."):
             return True
-    # Check prefix patterns (e.g., "golden.*" metadata)
+
     for prefix in EXCLUDED_PREFIXES:
         if path.startswith(prefix):
             return True
-    # Exclude array index paths that are redundant with list comparison
+
     if "[" in path and "]" in path:
         return True
     return False
@@ -222,9 +203,8 @@ def _compare_values(
     golden: Any,
     config: ComparisonConfig,
 ) -> RegressionResult:
-    """Compare two values and return a RegressionResult."""
 
-    # Handle missing metrics
+
     if golden is None:
         return RegressionResult(
             metric_path=path,
@@ -233,7 +213,7 @@ def _compare_values(
             delta=None,
             delta_percent=None,
             tolerance_percent=0,
-            status=Verdict.PASS,  # New metrics don't fail
+            status=Verdict.PASS,
             message="New metric (not in golden baseline)",
         )
 
@@ -245,56 +225,54 @@ def _compare_values(
             delta=None,
             delta_percent=None,
             tolerance_percent=0,
-            status=Verdict.WARN,  # Missing metrics warn
+            status=Verdict.WARN,
             message="Missing metric (was in golden baseline)",
         )
 
-    # Structural match paths take precedence (set comparison, order-independent)
+
     if path in STRUCTURAL_MATCH_PATHS or _is_structural_path(path):
         return _compare_structural(path, current, golden)
 
-    # Exact match paths (counts, booleans)
+
     if path in EXACT_MATCH_PATHS or _is_exact_match_path(path):
         return _compare_exact(path, current, golden)
 
-    # Checksum paths
+
     if path in CHECKSUM_PATHS:
         return _compare_checksum(path, current, golden)
 
-    # Boolean comparison
+
     if isinstance(golden, bool) or isinstance(current, bool):
         return _compare_exact(path, current, golden)
 
-    # String comparison
+
     if isinstance(golden, str) or isinstance(current, str):
         return _compare_exact(path, current, golden)
 
-    # List comparison (if not structural)
+
     if isinstance(golden, list) or isinstance(current, list):
         return _compare_lists(path, current, golden, config)
 
-    # Numeric comparison with tolerance
+
     if isinstance(golden, (int, float)) and isinstance(current, (int, float)):
         return _compare_numeric(path, current, golden, config)
 
-    # Fall back to exact match for unknown types
+
     return _compare_exact(path, current, golden)
 
 
 def _is_exact_match_path(path: str) -> bool:
-    """Check if path should use exact matching based on patterns."""
-    # Count fields are exact match
+
     if "_count" in path or "count" == path.split(".")[-1]:
         return True
-    # Boolean fields
+
     if path.split(".")[-1].startswith("is_"):
         return True
     return False
 
 
 def _is_structural_path(path: str) -> bool:
-    """Check if path should use structural (set) matching."""
-    # List of unique values
+
     if "unique_" in path:
         return True
     if "_names" in path:
@@ -305,7 +283,6 @@ def _is_structural_path(path: str) -> bool:
 
 
 def _normalize_for_comparison(value: Any) -> Any:
-    """Normalize values for comparison (tuples -> lists, recursively)."""
     if isinstance(value, tuple):
         return [_normalize_for_comparison(v) for v in value]
     if isinstance(value, list):
@@ -318,8 +295,7 @@ def _compare_exact(
     current: Any,
     golden: Any,
 ) -> RegressionResult:
-    """Compare values for exact equality."""
-    # Normalize tuples to lists for comparison (JSON doesn't distinguish)
+
     current_norm = _normalize_for_comparison(current)
     golden_norm = _normalize_for_comparison(golden)
     matches = current_norm == golden_norm
@@ -341,12 +317,11 @@ def _compare_structural(
     current: Any,
     golden: Any,
 ) -> RegressionResult:
-    """Compare values as sets (order-independent)."""
     try:
         current_set = set(current) if isinstance(current, list) else {current}
         golden_set = set(golden) if isinstance(golden, list) else {golden}
     except TypeError:
-        # Unhashable types fall back to exact match
+
         return _compare_exact(path, current, golden)
 
     matches = current_set == golden_set
@@ -387,7 +362,6 @@ def _compare_checksum(
     current: Any,
     golden: Any,
 ) -> RegressionResult:
-    """Compare checksum values."""
     matches = current == golden
 
     return RegressionResult(
@@ -408,13 +382,12 @@ def _compare_lists(
     golden: Any,
     config: ComparisonConfig,
 ) -> RegressionResult:
-    """Compare lists element by element."""
     if not isinstance(current, list):
         current = [current] if current is not None else []
     if not isinstance(golden, list):
         golden = [golden] if golden is not None else []
 
-    # Check length first
+
     if len(current) != len(golden):
         return RegressionResult(
             metric_path=path,
@@ -427,9 +400,9 @@ def _compare_lists(
             message=f"List length mismatch: expected {len(golden)}, got {len(current)}",
         )
 
-    # Compare elements (numeric lists get tolerance comparison)
+
     if all(isinstance(x, (int, float)) for x in current + golden):
-        # Numeric list - compare with tolerance
+
         max_delta_pct = 0.0
         for c, g in zip(current, golden):
             if g != 0:
@@ -463,7 +436,7 @@ def _compare_lists(
             message=msg,
         )
     else:
-        # Non-numeric list - exact comparison
+
         return _compare_exact(path, current, golden)
 
 
@@ -473,18 +446,16 @@ def _compare_numeric(
     golden: float,
     config: ComparisonConfig,
 ) -> RegressionResult:
-    """Compare numeric values with tolerance."""
     delta = current - golden
     abs_delta = abs(delta)
 
-    # For near-zero values, use absolute tolerance to avoid huge percent deltas
-    # (e.g., 0 -> 0.001 would be 100% but is actually tiny)
+
     use_absolute = abs(golden) < config.near_zero_threshold
 
     if use_absolute:
-        # Use absolute tolerance comparison
+
         tolerance = config.absolute_tolerance
-        delta_percent = None  # Not meaningful for near-zero values
+        delta_percent = None
 
         if abs_delta <= tolerance:
             status = Verdict.PASS
@@ -496,7 +467,7 @@ def _compare_numeric(
             status = Verdict.FAIL
             msg = f"Significantly exceeds absolute tolerance ({abs_delta:.6f}mm >> {tolerance}mm)"
     else:
-        # Use percent tolerance comparison
+
         delta_percent = abs(delta / golden) * 100
         tolerance = _get_tolerance(path, config)
 
@@ -523,12 +494,11 @@ def _compare_numeric(
 
 
 def _get_tolerance(path: str, config: ComparisonConfig) -> float:
-    """Get tolerance for a metric path."""
-    # Check explicit overrides first
+
     if path in config.tolerance_overrides:
         return config.tolerance_overrides[path]
 
-    # Check category patterns
+
     path_lower = path.lower()
     for pattern, category in TOLERANCE_CATEGORIES.items():
         if pattern in path_lower:
@@ -538,11 +508,6 @@ def _get_tolerance(path: str, config: ComparisonConfig) -> float:
 
 
 def metrics_to_comparable_dict(metrics: Any) -> dict[str, Any]:
-    """
-    Convert metrics (dataclass or dict) to a dict suitable for comparison.
-
-    Handles SVGMetrics, GCodeMetrics dataclasses.
-    """
     if hasattr(metrics, "to_dict"):
         return metrics.to_dict()
     if isinstance(metrics, dict):

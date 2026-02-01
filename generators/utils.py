@@ -1,19 +1,3 @@
-"""Utility functions for generators.
-
-This module provides common utilities used across multiple generators,
-including conversions between Shapely geometry and LayoutAST Items.
-
-Usage:
-    from generators.utils import shapely_to_item
-
-    polygon = LineString([(0, 0), (100, 0)]).buffer(2)
-    item = shapely_to_item(
-        polygon,
-        feature_type="pocket",
-        depth_mm=3.0,
-        shape_id="groove_001",
-    )
-"""
 
 from __future__ import annotations
 
@@ -31,32 +15,6 @@ def shapely_to_item(
     *,
     side: str | None = None,
 ) -> Item:
-    """Convert a Shapely Polygon to a LayoutAST Item.
-
-    Handles polygons with holes, converting them to the geometry data
-    format expected by the LayoutAST system.
-
-    Args:
-        polygon: Shapely Polygon to convert (may have holes)
-        feature_type: Feature type string (e.g., "pocket", "profile")
-        depth_mm: Depth in millimeters
-        shape_id: Unique identifier for this shape
-        side: Optional side for profile-type features ("outside", "inside", "on")
-
-    Returns:
-        LayoutAST Item with Polygon geometry
-
-    Raises:
-        ValueError: If polygon is empty or invalid
-
-    Example:
-        >>> from shapely.geometry import LineString
-        >>> line = LineString([(0, 0), (100, 0)])
-        >>> band = line.buffer(2)  # Creates a rectangle-ish polygon
-        >>> item = shapely_to_item(band, "pocket", 3.0, "groove_001")
-        >>> item.type
-        'Polygon'
-    """
     if polygon.is_empty:
         raise ValueError("Cannot convert empty polygon to Item")
 
@@ -97,25 +55,6 @@ def shapely_to_item(
 
 
 def iter_polygons(geom) -> list[Polygon]:
-    """Extract all polygons from a Shapely geometry.
-
-    Handles Polygon, MultiPolygon, and GeometryCollection types,
-    returning a flat list of non-empty Polygon objects.
-
-    Args:
-        geom: Shapely geometry (Polygon, MultiPolygon, or GeometryCollection)
-
-    Returns:
-        List of Polygon objects (may be empty)
-
-    Example:
-        >>> from shapely.geometry import Polygon, MultiPolygon
-        >>> mp = MultiPolygon([Polygon([(0,0),(1,0),(1,1),(0,1)]),
-        ...                    Polygon([(2,0),(3,0),(3,1),(2,1)])])
-        >>> polys = iter_polygons(mp)
-        >>> len(polys)
-        2
-    """
     result = []
 
     if geom.is_empty:
@@ -128,7 +67,7 @@ def iter_polygons(geom) -> list[Polygon]:
             if not poly.is_empty:
                 result.append(poly)
     elif hasattr(geom, "geoms"):
-        # GeometryCollection or similar
+
         for sub in geom.geoms:
             result.extend(iter_polygons(sub))
 

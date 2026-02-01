@@ -57,25 +57,6 @@ def measurement_edge_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "measurement_edge",
 ) -> GeneratorResult:
-    """Generate ruler-style tick marks along specified edges of the domain.
-
-    Creates tick marks along selected edges (top, bottom, left, right) of the
-    domain, with minor ticks at regular intervals and major ticks at larger
-    intervals. Tick marks point inward from the edges.
-
-    Args:
-        domain: The domain defining the measurement area
-        params: Measurement edge parameters (edges, unit, spacing, lengths, depth)
-        allow_empty: If True, return empty list instead of raising when
-            the domain is too small
-        shape_id_prefix: Prefix for generated shape IDs
-
-    Returns:
-        List of Line Items with engrave features representing tick marks
-
-    Raises:
-        ValueError: If params are invalid or domain too small (unless allow_empty)
-    """
     params.validate()
 
     if not validate_domain_for_generation(

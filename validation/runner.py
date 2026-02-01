@@ -1,8 +1,4 @@
-# validation/runner.py - Orchestrates full validation pipeline
-#
-# Combines metric extraction, invariant checks, intent assertions,
-# and regression comparison into a single validation result.
-# See docs/cam_validation_plan.md Section 2.1 for architecture.
+
 
 from __future__ import annotations
 
@@ -38,70 +34,51 @@ from validation.regression import compare_metrics, ComparisonConfig, GoldenStore
 
 @dataclass
 class ValidationInput:
-    """Input specification for validation runner."""
 
-    # Source file (PML or JSON)
+
     source_file: str | Path | None = None
 
-    # LayoutAST (if already parsed)
+
     ast: LayoutAST | None = None
 
-    # Artifact paths
+
     svg_path: str | Path | None = None
     gcode_paths: list[str | Path] = field(default_factory=list)
 
-    # Artifact content (alternative to paths)
+
     svg_content: str | None = None
     gcode_content: list[str] = field(default_factory=list)
 
-    # Golden baseline for regression testing
+
     golden_metrics: dict[str, Any] | None = None
     golden_file: str | None = None
 
-    # Configuration
-    sheet_width_mm: float | None = None  # For G-code XY bounds check
-    sheet_height_mm: float | None = None  # For G-code XY bounds check
+
+    sheet_width_mm: float | None = None
+    sheet_height_mm: float | None = None
     comparison_config: ComparisonConfig | None = None
 
 
 @dataclass
 class ValidationOptions:
-    """Options controlling which validation steps to run."""
 
-    # Which validation steps to perform
+
     extract_metrics: bool = True
     check_invariants: bool = True
     check_assertions: bool = True
-    check_regressions: bool = True  # Only if golden_metrics provided
+    check_regressions: bool = True
 
-    # Invariant options
-    svg_expected_layers: list[str] | None = None  # For SVG_NO_EMPTY_LAYERS
 
-    # Verbosity
-    include_all_results: bool = True  # Include PASS results in output
+    svg_expected_layers: list[str] | None = None
+
+
+    include_all_results: bool = True
 
 
 def validate(
     inputs: ValidationInput,
     options: ValidationOptions | None = None,
 ) -> CAMValidationResult:
-    """
-    Run full validation pipeline on CAM artifacts.
-
-    This is the main entry point for validation. It:
-    1. Extracts metrics from SVG and G-code artifacts
-    2. Runs invariant checks on each artifact type
-    3. Derives and checks intent assertions from AST (if provided)
-    4. Compares metrics against golden baseline (if provided)
-    5. Aggregates all results into a final verdict
-
-    Args:
-        inputs: ValidationInput specifying artifacts and optional AST/golden
-        options: ValidationOptions controlling which steps to run
-
-    Returns:
-        CAMValidationResult with all metrics, invariants, assertions, and regressions
-    """
     if options is None:
         options = ValidationOptions()
 
@@ -111,22 +88,22 @@ def validate(
         input_file=str(inputs.source_file) if inputs.source_file else "",
     )
 
-    # Step 1: Extract metrics
+
     svg_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     if options.extract_metrics:
         svg_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
 
-        # Store metrics in result
+
         if svg_metrics:
             result.metrics.update(svg_metrics.to_dict())
         if gcode_metrics_list:
-            # Merge multiple G-code files into single metrics dict
+
             merged_gcode = _merge_gcode_metrics(gcode_metrics_list)
             result.metrics["gcode"] = merged_gcode
 
-    # Step 2: Check invariants
+
     if options.check_invariants:
         _run_invariant_checks(
             result,
@@ -136,7 +113,7 @@ def validate(
             options,
         )
 
-    # Step 3: Check intent assertions
+
     if options.check_assertions and inputs.ast is not None:
         _run_assertion_checks(
             result,
@@ -145,7 +122,7 @@ def validate(
             gcode_metrics_list,
         )
 
-    # Step 4: Check regressions
+
     if options.check_regressions and inputs.golden_metrics is not None:
         _run_regression_checks(
             result,
@@ -154,7 +131,7 @@ def validate(
             inputs.comparison_config,
         )
 
-    # Compute final verdict
+
     result.execution_time_ms = (time.perf_counter() - start_time) * 1000
     result.compute_verdict()
 
@@ -169,46 +146,28 @@ def validate_recipe(
     comparison_config: ComparisonConfig | None = None,
     options: ValidationOptions | None = None,
 ) -> CAMValidationResult:
-    """
-    Validate a recipe directory with standard output structure.
-
-    Expects:
-    - example.pml or source PML in recipe_dir
-    - output/ subdirectory with SVG and NC files
-
-    Args:
-        recipe_dir: Path to recipe directory
-        ast: Optional pre-parsed LayoutAST
-        golden_metrics: Optional golden baseline for regression
-        golden_file: Optional path to golden file (for reporting)
-        comparison_config: Optional configuration for regression comparison
-        options: Validation options
-
-    Returns:
-        CAMValidationResult
-    """
     recipe_dir = Path(recipe_dir)
     output_dir = recipe_dir / "output"
 
-    # Find source file
+
     source_file = None
     for candidate in ["example.pml.yml", "source.pml.yml"]:
         if (recipe_dir / candidate).exists():
             source_file = recipe_dir / candidate
             break
 
-    # Find artifacts
+
     svg_path = None
     gcode_paths: list[Path] = []
 
     if output_dir.exists():
-        # Find SVG (recipe name or standard names)
+
         for svg_file in output_dir.glob("*.svg"):
             if not svg_file.name.startswith("."):
                 svg_path = svg_file
                 break
 
-        # Find G-code files
+
         for nc_file in sorted(output_dir.glob("*.nc")):
             if not nc_file.name.startswith("."):
                 gcode_paths.append(nc_file)
@@ -237,17 +196,16 @@ def validate_recipe(
 def _extract_all_metrics(
     inputs: ValidationInput,
 ) -> tuple[SVGMetrics | None, list[GCodeMetrics]]:
-    """Extract metrics from all provided artifacts."""
     svg_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
-    # SVG
+
     if inputs.svg_content:
         svg_metrics = extract_svg_metrics(inputs.svg_content)
     elif inputs.svg_path and Path(inputs.svg_path).exists():
         svg_metrics = extract_svg_metrics_from_file(inputs.svg_path)
 
-    # G-code (may have multiple files)
+
     for gcode_path in inputs.gcode_paths:
         if Path(gcode_path).exists():
             gcode_metrics_list.append(extract_gcode_metrics_from_file(gcode_path))
@@ -260,38 +218,33 @@ def _extract_all_metrics(
 
 
 def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
-    """
-    Merge metrics from multiple G-code files.
-
-    Sums counts and distances, unions sets, takes min/max as appropriate.
-    """
     if not gcode_list:
         return {}
 
     if len(gcode_list) == 1:
         return gcode_list[0].to_dict().get("gcode", {})
 
-    # Start with first file's metrics
+
     merged = gcode_list[0].to_dict().get("gcode", {})
 
     for gcode in gcode_list[1:]:
         other = gcode.to_dict().get("gcode", {})
 
-        # Sum counts
+
         if "summary" in merged and "summary" in other:
             for key in ["total_lines", "comment_lines", "motion_lines",
                         "tool_change_lines", "spindle_lines", "feed_lines"]:
                 if key in merged["summary"] and key in other["summary"]:
                     merged["summary"][key] += other["summary"][key]
 
-        # Sum motion counts and distances
+
         if "motion" in merged and "motion" in other:
             for key in ["g0_count", "g1_count", "g2_count", "g3_count",
                         "total_rapid_distance_mm", "total_feed_distance_mm"]:
                 if key in merged["motion"] and key in other["motion"]:
                     merged["motion"][key] += other["motion"][key]
 
-        # Merge Z profile (min/max)
+
         if "z_profile" in merged and "z_profile" in other:
             zp_merged = merged["z_profile"]
             zp_other = other["z_profile"]
@@ -310,7 +263,7 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                     zp_other["max_single_plunge_mm"]
                 )
 
-        # Merge XY bounds (expand)
+
         if "xy_bounds" in merged and "xy_bounds" in other:
             xy_merged = merged["xy_bounds"]
             xy_other = other["xy_bounds"]
@@ -323,7 +276,7 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
             if "y_max" in xy_merged and "y_max" in xy_other:
                 xy_merged["y_max"] = max(xy_merged["y_max"], xy_other["y_max"])
 
-        # Merge tools (union)
+
         if "tools" in merged and "tools" in other:
             tools_merged = merged["tools"]
             tools_other = other["tools"]
@@ -338,7 +291,7 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                     set(tools_merged["spindle_speeds"]) | set(tools_other["spindle_speeds"])
                 )
 
-        # Merge feeds (min/max, union)
+
         if "feeds" in merged and "feeds" in other:
             feeds_merged = merged["feeds"]
             feeds_other = other["feeds"]
@@ -357,13 +310,13 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                     set(feeds_merged["feed_rates_used"]) | set(feeds_other["feed_rates_used"])
                 )
 
-        # Sum time estimates
+
         if "time_estimate" in merged and "time_estimate" in other:
             for key in ["rapid_time_s", "feed_time_s", "total_time_s"]:
                 if key in merged["time_estimate"] and key in other["time_estimate"]:
                     merged["time_estimate"][key] += other["time_estimate"][key]
 
-        # Merge tabs data (sum counts, combine heights)
+
         if "tabs" in merged and "tabs" in other:
             tabs_merged = merged["tabs"]
             tabs_other = other["tabs"]
@@ -379,7 +332,7 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
         elif "tabs" in other:
             merged["tabs"] = other["tabs"]
 
-    # Add file count metadata
+
     merged["file_count"] = len(gcode_list)
 
     return merged
@@ -392,8 +345,7 @@ def _run_invariant_checks(
     gcode_metrics_list: list[GCodeMetrics],
     options: ValidationOptions,
 ) -> None:
-    """Run invariant checks on all artifacts."""
-    # SVG invariants
+
     if inputs.svg_path or inputs.svg_content:
         svg_content = inputs.svg_content
         if not svg_content and inputs.svg_path:
@@ -409,8 +361,7 @@ def _run_invariant_checks(
             for inv_result in svg_results:
                 result.invariants.add(inv_result)
 
-    # G-code invariants (check each file)
-    # Pass sheet dimensions if available for accurate XY bounds checking
+
     gcode_kwargs: dict[str, Any] = {}
     if inputs.sheet_width_mm is not None:
         gcode_kwargs["sheet_width_mm"] = inputs.sheet_width_mm
@@ -423,7 +374,7 @@ def _run_invariant_checks(
             for inv_result in gcode_results:
                 result.invariants.add(inv_result)
 
-    # G-code invariants for content (no file path)
+
     for gcode_content in inputs.gcode_content:
         gcode_results = check_gcode_invariants_from_content(gcode_content, **gcode_kwargs)
         for inv_result in gcode_results:
@@ -436,20 +387,19 @@ def _run_assertion_checks(
     svg_metrics: SVGMetrics | None,
     gcode_metrics_list: list[GCodeMetrics],
 ) -> None:
-    """Run intent assertions derived from AST."""
-    # Derive assertions from AST
+
     assertions = derive_assertions(ast)
 
-    # Prepare metrics dicts
+
     svg_dict = svg_metrics.to_dict() if svg_metrics else None
 
-    # Merge G-code metrics
+
     gcode_dict = None
     if gcode_metrics_list:
         merged = _merge_gcode_metrics(gcode_metrics_list)
         gcode_dict = {"gcode": merged}
 
-    # Check assertions
+
     assertion_results = check_assertions(
         assertions,
         svg_metrics=svg_dict,
@@ -466,7 +416,6 @@ def _run_regression_checks(
     golden_file: str | None,
     config: ComparisonConfig | None,
 ) -> None:
-    """Run regression comparison against golden baseline."""
     summary = compare_metrics(
         current=result.metrics,
         golden=golden_metrics,
@@ -474,7 +423,7 @@ def _run_regression_checks(
         golden_file=golden_file,
     )
 
-    # Copy results to the result's regression summary
+
     result.regressions.compared = summary.compared
     result.regressions.golden_file = summary.golden_file
     for reg_result in summary.results:

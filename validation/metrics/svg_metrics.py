@@ -1,9 +1,4 @@
-# validation/metrics/svg_metrics.py - SVG metric extraction
-#
-# Extracts deterministic metrics from SVG blueprint drawings.
-# All metrics are designed to be stable across formatting changes.
-#
-# See docs/cam_validation_plan.md for schema specification.
+
 
 from __future__ import annotations
 
@@ -16,10 +11,9 @@ from typing import Any
 from validation.core import round_metric, normalize_metric_dict
 
 
-# SVG namespace
 SVG_NS = "{http://www.w3.org/2000/svg}"
 
-# Known semantic layer IDs in mill_ui blueprint SVGs
+
 SEMANTIC_LAYERS = [
     "SHEET_OUTLINE",
     "PROFILE_CUTS",
@@ -36,7 +30,6 @@ SEMANTIC_LAYERS = [
 
 @dataclass
 class DocumentMetrics:
-    """Metrics for the SVG document itself."""
 
     width_mm: float = 0.0
     height_mm: float = 0.0
@@ -52,15 +45,14 @@ class DocumentMetrics:
 
 @dataclass
 class ElementGeometry:
-    """Geometry data for a single SVG element."""
 
-    element_type: str  # "rect", "circle", "path", etc.
-    bounds: tuple[float, float, float, float]  # (x_min, y_min, x_max, y_max)
-    center: tuple[float, float]  # (cx, cy)
-    # For rects
+    element_type: str
+    bounds: tuple[float, float, float, float]
+    center: tuple[float, float]
+
     width: float | None = None
     height: float | None = None
-    # For circles
+
     radius: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -80,7 +72,6 @@ class ElementGeometry:
 
 @dataclass
 class LayerMetrics:
-    """Metrics for a single SVG layer (group)."""
 
     name: str = ""
     element_count: int = 0
@@ -90,7 +81,7 @@ class LayerMetrics:
     line_count: int = 0
     polygon_count: int = 0
     text_count: int = 0
-    # Per-element geometry for semantic layers
+
     elements: list[ElementGeometry] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -108,7 +99,6 @@ class LayerMetrics:
 
 @dataclass
 class PathMetrics:
-    """Aggregated metrics for all paths in the SVG."""
 
     total_count: int = 0
     closed_count: int = 0
@@ -128,7 +118,6 @@ class PathMetrics:
 
 @dataclass
 class BoundsMetrics:
-    """Bounding box metrics."""
 
     x_min: float = 0.0
     x_max: float = 0.0
@@ -146,7 +135,6 @@ class BoundsMetrics:
 
 @dataclass
 class TextMetrics:
-    """Metrics for text elements."""
 
     count: int = 0
     dimension_labels: list[str] = field(default_factory=list)
@@ -158,13 +146,12 @@ class TextMetrics:
             "count": self.count,
             "dimension_labels": sorted(self.dimension_labels),
             "depth_annotations": sorted(self.depth_annotations),
-            "notes_text": self.notes_text,  # Preserve order for notes
+            "notes_text": self.notes_text,
         }
 
 
 @dataclass
 class CircleMetrics:
-    """Metrics for circle elements."""
 
     count: int = 0
     radii_mm: list[float] = field(default_factory=list)
@@ -178,7 +165,6 @@ class CircleMetrics:
 
 @dataclass
 class RectMetrics:
-    """Metrics for rectangle elements."""
 
     count: int = 0
     dimensions: list[tuple[float, float]] = field(default_factory=list)
@@ -194,7 +180,6 @@ class RectMetrics:
 
 @dataclass
 class SVGMetrics:
-    """Complete metrics for an SVG file."""
 
     version: str = "1.0.0"
     extraction_time_ms: float = 0.0
@@ -207,12 +192,11 @@ class SVGMetrics:
     circles: CircleMetrics = field(default_factory=CircleMetrics)
     rects: RectMetrics = field(default_factory=RectMetrics)
 
-    # Summary counts
+
     layer_count: int = 0
     layer_names: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to JSON-serializable dict matching the schema."""
         return {
             "svg": {
                 "version": self.version,
@@ -236,18 +220,6 @@ class SVGMetrics:
 
 
 def extract_svg_metrics(svg_content: str | bytes) -> SVGMetrics:
-    """
-    Extract metrics from SVG content.
-
-    Args:
-        svg_content: SVG content as string or bytes
-
-    Returns:
-        SVGMetrics with all extracted metrics
-
-    Raises:
-        ValueError: If SVG is invalid or cannot be parsed
-    """
     start_time = time.perf_counter()
 
     if isinstance(svg_content, bytes):
@@ -260,26 +232,26 @@ def extract_svg_metrics(svg_content: str | bytes) -> SVGMetrics:
 
     metrics = SVGMetrics()
 
-    # Document metrics
+
     metrics.document = _extract_document_metrics(root)
 
-    # Layer metrics
+
     metrics.layers, metrics.layer_names = _extract_layer_metrics(root)
     metrics.layer_count = len(metrics.layer_names)
 
-    # Path metrics (aggregate)
+
     metrics.paths = _extract_path_metrics(root, metrics.layers)
 
-    # Bounds (from content, not viewBox)
+
     metrics.bounds = _extract_bounds(root)
 
-    # Text metrics
+
     metrics.text = _extract_text_metrics(root)
 
-    # Circle metrics
+
     metrics.circles = _extract_circle_metrics(root)
 
-    # Rectangle metrics
+
     metrics.rects = _extract_rect_metrics(root)
 
     metrics.extraction_time_ms = (time.perf_counter() - start_time) * 1000
@@ -288,38 +260,28 @@ def extract_svg_metrics(svg_content: str | bytes) -> SVGMetrics:
 
 
 def extract_svg_metrics_from_file(file_path: str) -> SVGMetrics:
-    """
-    Extract metrics from an SVG file.
-
-    Args:
-        file_path: Path to SVG file
-
-    Returns:
-        SVGMetrics with all extracted metrics
-    """
     with open(file_path, "r", encoding="utf-8") as f:
         return extract_svg_metrics(f.read())
 
 
 def _extract_document_metrics(root: ET.Element) -> DocumentMetrics:
-    """Extract document-level metrics."""
     metrics = DocumentMetrics()
 
-    # Width and height (may have units like "mm")
+
     width_str = root.get("width", "0")
     height_str = root.get("height", "0")
     metrics.width_mm = _parse_dimension(width_str)
     metrics.height_mm = _parse_dimension(height_str)
 
-    # ViewBox - supports both space and comma separators per SVG spec
+
     viewbox_str = root.get("viewBox", "0 0 0 0")
-    # Split on whitespace and/or commas
+
     parts = re.split(r"[\s,]+", viewbox_str.strip())
     if len(parts) == 4:
         try:
-            metrics.viewbox = tuple(float(p) for p in parts)  # type: ignore
+            metrics.viewbox = tuple(float(p) for p in parts)
         except ValueError:
-            pass  # Keep default (0, 0, 0, 0)
+            pass
 
     return metrics
 
@@ -327,11 +289,10 @@ def _extract_document_metrics(root: ET.Element) -> DocumentMetrics:
 def _extract_layer_metrics(
     root: ET.Element,
 ) -> tuple[dict[str, LayerMetrics], list[str]]:
-    """Extract metrics for each layer (group with id)."""
     layers: dict[str, LayerMetrics] = {}
     layer_names: list[str] = []
 
-    # Semantic layers where we want per-element geometry data
+
     geometry_layers = {
         "PROFILE_CUTS",
         "POCKET_REGIONS",
@@ -349,7 +310,7 @@ def _extract_layer_metrics(
         layer = LayerMetrics(name=layer_id)
         extract_geometry = layer_id in geometry_layers
 
-        # Count elements by type and optionally extract geometry
+
         for child in group:
             tag = child.tag.replace(SVG_NS, "")
             layer.element_count += 1
@@ -385,7 +346,6 @@ def _extract_layer_metrics(
 
 
 def _extract_rect_geometry(elem: ET.Element) -> ElementGeometry | None:
-    """Extract geometry from a rect element."""
     try:
         x = float(elem.get("x", 0))
         y = float(elem.get("y", 0))
@@ -405,7 +365,6 @@ def _extract_rect_geometry(elem: ET.Element) -> ElementGeometry | None:
 
 
 def _extract_circle_geometry(elem: ET.Element) -> ElementGeometry | None:
-    """Extract geometry from a circle element."""
     try:
         cx = float(elem.get("cx", 0))
         cy = float(elem.get("cy", 0))
@@ -423,17 +382,16 @@ def _extract_circle_geometry(elem: ET.Element) -> ElementGeometry | None:
 
 
 def _extract_path_geometry(elem: ET.Element) -> ElementGeometry | None:
-    """Extract bounds from a path element (simplified)."""
     d = elem.get("d", "")
     if not d:
         return None
-    # Extract all numbers from path
+
     numbers = re.findall(r"-?\d+\.?\d*", d)
     if len(numbers) < 4:
         return None
     try:
         coords = [float(n) for n in numbers]
-        # Assume pairs of x,y coordinates
+
         x_coords = [coords[i] for i in range(0, len(coords), 2)]
         y_coords = [coords[i] for i in range(1, len(coords), 2)]
         if not x_coords or not y_coords:
@@ -452,10 +410,9 @@ def _extract_path_geometry(elem: ET.Element) -> ElementGeometry | None:
 def _extract_path_metrics(
     root: ET.Element, layers: dict[str, LayerMetrics]
 ) -> PathMetrics:
-    """Extract aggregated path metrics."""
     metrics = PathMetrics()
 
-    # Find all paths and categorize by layer
+
     for group in root.iter(f"{SVG_NS}g"):
         layer_id = group.get("id")
         if not layer_id:
@@ -472,14 +429,14 @@ def _extract_path_metrics(
             metrics.total_count += 1
             layer_paths["count"] += 1
 
-            # Check if path is closed (ends with Z or z)
+
             if d.strip().upper().endswith("Z"):
                 metrics.closed_count += 1
                 layer_paths["closed"] += 1
             else:
                 metrics.open_count += 1
 
-            # Estimate path length (simplified - sum of numeric values)
+
             length = _estimate_path_length(d)
             metrics.total_length_mm += length
             layer_paths["length_mm"] += length
@@ -491,7 +448,7 @@ def _extract_path_metrics(
                 "length_mm": round_metric(layer_paths["length_mm"]),
             }
 
-    # Also count rect elements as "closed paths" for profile/pocket layers
+
     for layer_id in ["PROFILE_CUTS", "POCKET_REGIONS", "SHEET_OUTLINE"]:
         if layer_id in layers:
             rect_count = layers[layer_id].rect_count
@@ -511,17 +468,16 @@ def _extract_path_metrics(
 
 
 def _extract_bounds(root: ET.Element) -> BoundsMetrics:
-    """Extract content bounds from geometry elements (excluding background)."""
     x_values: list[float] = []
     y_values: list[float] = []
 
-    # Collect bounds from rects (excluding background rect)
+
     for rect in root.iter(f"{SVG_NS}rect"):
-        # Skip background rect: top-level rect with a solid fill
+
         parent = _find_parent_group(root, rect)
         if parent is None:
             fill = rect.get("fill", "")
-            # Background rects typically have solid color fills (not "none")
+
             if fill.startswith("#") and fill != "none":
                 continue
 
@@ -532,7 +488,7 @@ def _extract_bounds(root: ET.Element) -> BoundsMetrics:
         x_values.extend([x, x + w])
         y_values.extend([y, y + h])
 
-    # Collect bounds from circles
+
     for circle in root.iter(f"{SVG_NS}circle"):
         cx = float(circle.get("cx", 0))
         cy = float(circle.get("cy", 0))
@@ -540,7 +496,7 @@ def _extract_bounds(root: ET.Element) -> BoundsMetrics:
         x_values.extend([cx - r, cx + r])
         y_values.extend([cy - r, cy + r])
 
-    # Collect bounds from lines
+
     for line in root.iter(f"{SVG_NS}line"):
         x1 = float(line.get("x1", 0))
         y1 = float(line.get("y1", 0))
@@ -561,7 +517,6 @@ def _extract_bounds(root: ET.Element) -> BoundsMetrics:
 
 
 def _extract_text_metrics(root: ET.Element) -> TextMetrics:
-    """Extract text element metrics."""
     metrics = TextMetrics()
 
     dimension_pattern = re.compile(r"(\d+\.?\d*)\s*mm")
@@ -574,18 +529,17 @@ def _extract_text_metrics(root: ET.Element) -> TextMetrics:
         if not content:
             continue
 
-        # Check for dimension labels (e.g., "200.0mm")
+
         dim_match = dimension_pattern.search(content)
         if dim_match and "mm" in content:
             metrics.dimension_labels.append(content.strip())
 
-        # Check for depth annotations
+
         depth_match = depth_pattern.search(content)
         if depth_match:
             metrics.depth_annotations.append(content.strip())
 
-        # Collect notes text (from NOTES layer)
-        # We identify notes by checking parent group
+
         parent = _find_parent_group(root, text)
         if parent is not None and parent.get("id") == "NOTES":
             metrics.notes_text.append(content.strip())
@@ -594,7 +548,6 @@ def _extract_text_metrics(root: ET.Element) -> TextMetrics:
 
 
 def _extract_circle_metrics(root: ET.Element) -> CircleMetrics:
-    """Extract circle element metrics."""
     metrics = CircleMetrics()
 
     for circle in root.iter(f"{SVG_NS}circle"):
@@ -606,14 +559,13 @@ def _extract_circle_metrics(root: ET.Element) -> CircleMetrics:
 
 
 def _extract_rect_metrics(root: ET.Element) -> RectMetrics:
-    """Extract rectangle element metrics (excluding background)."""
     metrics = RectMetrics()
 
     for rect in root.iter(f"{SVG_NS}rect"):
-        # Skip background rect (typically fills entire viewBox)
+
         parent = _find_parent_group(root, rect)
         if parent is None:
-            # Top-level rect is likely background
+
             fill = rect.get("fill", "")
             if fill.startswith("#") and fill != "none":
                 continue
@@ -628,10 +580,9 @@ def _extract_rect_metrics(root: ET.Element) -> RectMetrics:
 
 
 def _parse_dimension(value: str) -> float:
-    """Parse a dimension string like '450.0mm' to float."""
     if not value:
         return 0.0
-    # Remove common units
+
     value = value.strip()
     for unit in ["mm", "px", "pt", "in", "cm"]:
         if value.endswith(unit):
@@ -644,13 +595,7 @@ def _parse_dimension(value: str) -> float:
 
 
 def _estimate_path_length(d: str) -> float:
-    """
-    Estimate path length from d attribute.
 
-    This is a simplified estimation - extracts numeric values
-    and sums distances. Not geometrically accurate but stable.
-    """
-    # Extract all numbers from the path
     numbers = re.findall(r"-?\d+\.?\d*", d)
     if len(numbers) < 4:
         return 0.0
@@ -658,7 +603,7 @@ def _estimate_path_length(d: str) -> float:
     total_length = 0.0
     coords = [float(n) for n in numbers]
 
-    # Simple estimation: sum of absolute coordinate differences
+
     for i in range(0, len(coords) - 1, 2):
         if i + 3 < len(coords):
             dx = abs(coords[i + 2] - coords[i])
@@ -669,7 +614,6 @@ def _estimate_path_length(d: str) -> float:
 
 
 def _get_text_content(text_elem: ET.Element) -> str:
-    """Get text content including nested tspan elements."""
     content = text_elem.text or ""
     for child in text_elem:
         if child.text:
@@ -682,12 +626,11 @@ def _get_text_content(text_elem: ET.Element) -> str:
 
 
 def _find_parent_group(root: ET.Element, target: ET.Element) -> ET.Element | None:
-    """Find the parent group of an element."""
     for group in root.iter(f"{SVG_NS}g"):
         for child in group:
             if child is target:
                 return group
-            # Check nested elements
+
             for nested in child.iter():
                 if nested is target:
                     return group

@@ -58,10 +58,7 @@ def notched_panel_generator(
 
     items: list[Item] = []
 
-    # Finger-joint "notches" are edge cutouts that must be part of the final
-    # part boundary. If we emit them as separate notch features, the CAM pass
-    # will cut the full rectangular profile behind them. Instead, bake the
-    # cutouts into the panel's profile polygon.
+
     outer = build_notched_polygon(
         width_mm=params.width_mm,
         height_mm=params.height_mm,

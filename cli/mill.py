@@ -58,18 +58,7 @@ def generate_layout_scaffold(
 children:
   []
 
-# EXAMPLE - uncomment and modify:
-#  - Rect:
-#      id: my_part
-#      children:
-#        - Profile:
-#            side: outside
-#            depth: through
-#      at:
-#        x: 200mm      # center X
-#        y: 150mm      # center Y
-#        width: 300mm
-#        height: 200mm
+
 """
     return pml
 

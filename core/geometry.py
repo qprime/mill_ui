@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from ir.removal_intent import Bounds2D
 from core.constants import ShapeType, GeometryKeys
+
+if TYPE_CHECKING:
+    from domains import Domain
 
 
 def compute_shape_bounds(
@@ -151,3 +154,120 @@ def arc_points(
         points.append((x, y))
 
     return points
+
+
+def calculate_angled_depth(width: float, angle_deg: float, fallback: float = 0.0) -> float:
+    if 0.0 < angle_deg < 90.0:
+        return width * math.tan(math.radians(angle_deg))
+    return fallback if fallback > 0.0 else width
+
+
+def bounds_overlap(a: Bounds2D, b: Bounds2D, epsilon: float = 0.0) -> bool:
+    x_overlap = not (a.x_max <= b.x_min + epsilon or b.x_max <= a.x_min + epsilon)
+    y_overlap = not (a.y_max <= b.y_min + epsilon or b.y_max <= a.y_min + epsilon)
+    return x_overlap and y_overlap
+
+
+def clip_line_to_domain(
+    line_start: tuple[float, float],
+    line_end: tuple[float, float],
+    domain: Domain,
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    from shapely.geometry import LineString
+
+    line = LineString([line_start, line_end])
+    polygon = domain.polygon
+
+    intersection = line.intersection(polygon)
+
+    if intersection.is_empty:
+        return []
+
+    segments = []
+
+    if intersection.geom_type == "LineString":
+        coords = list(intersection.coords)
+        if len(coords) >= 2:
+            segments.append(
+                ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
+            )
+    elif intersection.geom_type == "MultiLineString":
+        for geom in intersection.geoms:
+            coords = list(geom.coords)
+            if len(coords) >= 2:
+                segments.append(
+                    ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
+                )
+
+    return segments
+
+
+def extract_shape_geometry(
+    shape: str,
+    bounds: Bounds2D,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    geometry: dict[str, Any] = {}
+
+    if ShapeType.is_rect(shape):
+        geometry = {
+            GeometryKeys.W_MM: bounds.width,
+            GeometryKeys.H_MM: bounds.height,
+        }
+    elif ShapeType.is_circle(shape):
+        if GeometryKeys.DIAMETER_MM in metadata:
+            diameter_mm = metadata[GeometryKeys.DIAMETER_MM]
+        else:
+            diameter_mm = bounds.width
+        geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
+    elif ShapeType.is_polygon(shape):
+        if GeometryKeys.POINTS in metadata:
+            geometry = {GeometryKeys.POINTS: metadata[GeometryKeys.POINTS]}
+        else:
+            geometry = {
+                GeometryKeys.W_MM: bounds.width,
+                GeometryKeys.H_MM: bounds.height,
+            }
+    elif shape == ShapeType.ROUNDED_RECT:
+        geometry = {
+            GeometryKeys.W_MM: bounds.width,
+            GeometryKeys.H_MM: bounds.height,
+        }
+        if GeometryKeys.RADIUS_MM in metadata:
+            geometry[GeometryKeys.RADIUS_MM] = metadata[GeometryKeys.RADIUS_MM]
+        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
+            if key in metadata:
+                geometry[key] = metadata[key]
+    elif ShapeType.is_polyline(shape):
+        if GeometryKeys.POINTS in metadata:
+            geometry = {GeometryKeys.POINTS: metadata[GeometryKeys.POINTS]}
+        else:
+            geometry = {
+                GeometryKeys.W_MM: bounds.width,
+                GeometryKeys.H_MM: bounds.height,
+            }
+    else:
+        geometry = {
+            GeometryKeys.W_MM: bounds.width,
+            GeometryKeys.H_MM: bounds.height,
+        }
+
+    return geometry
+
+
+def extract_circle_diameter(
+    shape: str,
+    geometry: dict[str, Any],
+) -> float | None:
+    if ShapeType.is_circle(shape) and GeometryKeys.DIAMETER_MM in geometry:
+        return float(geometry[GeometryKeys.DIAMETER_MM])
+    return None
+
+
+def extract_polygon_points(
+    shape: str,
+    geometry: dict[str, Any],
+) -> list[list[float]] | None:
+    if (ShapeType.is_polygon(shape) or ShapeType.is_polyline(shape)) and GeometryKeys.POINTS in geometry:
+        return geometry[GeometryKeys.POINTS]
+    return None

@@ -153,9 +153,9 @@ class HalfLap:
         panel_a: PanelSpec,
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
-        if interface.position_mm is None:
+        if interface.position_along_edge_a_mm is None:
             raise ValueError(
-                "HalfLap requires interface.position_mm for INTERNAL interfaces"
+                "HalfLap requires interface.position_along_edge_a_mm for INTERNAL interfaces"
             )
         if interface.position_along_edge_b_mm is None:
             raise ValueError(
@@ -170,7 +170,7 @@ class HalfLap:
 
         notch_a = NotchSpec(
             edge=edge_a,
-            u_start_mm=interface.position_mm,
+            u_start_mm=interface.position_along_edge_a_mm,
             u_len_mm=panel_b.thickness_mm + self.fitment_mm,
             depth_mm=depth_a,
         )
@@ -212,12 +212,12 @@ class Captured:
         if self.receiving == "b" and interface.type == InterfaceType.INTERNAL:
             raise ValueError(
                 f"Captured(receiving='b') is not valid for INTERNAL interfaces. "
-                f"INTERNAL interface position_mm ({interface.position_mm}) describes "
+                f"INTERNAL interface position_along_edge_a_mm ({interface.position_along_edge_a_mm}) describes "
                 f"panel_b's location along panel_a's edge, not a valid dado position on panel_b. "
                 f"Use receiving='a' (default) for shelf/partition to side panel joints."
             )
 
-        position = interface.position_mm if interface.position_mm is not None else self.inset_mm
+        position = interface.position_along_edge_a_mm if interface.position_along_edge_a_mm is not None else self.inset_mm
 
         if self.receiving == "a":
             edge = interface.edge_a

@@ -104,9 +104,18 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
     depth_mm = feature_data.get("depth_mm")
     side = feature_data.get("side")
 
+    is_through = depth == "through"
+    if depth_mm is None:
+        if is_through:
+            depth_mm = 0.0
+        elif depth is not None:
+            depth_mm = float(depth)
+        else:
+            depth_mm = 0.0
+
     return Feature(
         type=feature_type,
-        depth=depth,
-        side=side,
         depth_mm=depth_mm,
+        side=side,
+        is_through=is_through,
     )

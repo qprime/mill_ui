@@ -73,7 +73,7 @@ def notched_panel_generator(
         type="Polygon",
         geometry=Geometry(data={"points": polygon_points}),
         placement=Placement(center_xy_mm=center),
-        feature=Feature(type="profile", side="outside", depth="through"),
+        feature=Feature(type="profile", side="outside", depth_mm=0.0, is_through=True),
         shape_id=generate_shape_id(shape_id, 0, "outer"),
         label=label,
     )

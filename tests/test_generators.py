@@ -310,7 +310,7 @@ def test_profile_numeric_depth():
     items = profile_generator(domain, params)
 
     assert len(items) == 1
-    assert items[0].feature.depth == "12.0"
+    assert items[0].feature.depth_mm == 12.0
     assert items[0].feature.depth_mm == 12.0
 
 
@@ -1361,8 +1361,8 @@ def test_hole_grid_through_depth():
 
     assert len(items) > 0
     for item in items:
-        assert item.feature.depth == "through"
-        assert item.feature.depth_mm is None
+        assert item.feature.is_through is True
+        assert item.feature.depth_mm == 0.0
 
 
 def test_hole_grid_with_inset():

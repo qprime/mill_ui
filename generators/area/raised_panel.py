@@ -76,7 +76,6 @@ def raised_panel_generator(
         placement=Placement(center_xy_mm=(bcx, bcy)),
         feature=Feature(
             type="bevel",
-            depth=str(params.border_depth_mm),
             depth_mm=params.border_depth_mm,
             bevel_width_mm=params.border_width_mm,
             bevel_angle_deg=params.angle_degrees,
@@ -110,7 +109,6 @@ def raised_panel_generator(
         placement=Placement(center_xy_mm=(fcx, fcy)),
         feature=Feature(
             type="pocket",
-            depth=str(params.field_depth_mm),
             depth_mm=params.field_depth_mm,
         ),
         shape_id=generate_shape_id(shape_id_prefix, 1, "field"),

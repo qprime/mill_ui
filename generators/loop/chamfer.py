@@ -105,7 +105,6 @@ def chamfer_generator(
 
         feature_kwargs = {
             "type": "chamfer",
-            "depth": str(params.depth_mm),
             "depth_mm": params.depth_mm,
             "chamfer_width_mm": params.width_mm,
             "chamfer_angle_deg": params.angle_degrees,

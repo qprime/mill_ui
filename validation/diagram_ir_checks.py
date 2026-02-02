@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import logging
+
 from diagram_ir import DiagramIR, LayerIR
 from diagram_ir.shapes import Shape, Rect, Line, Circle, Polyline, Text, Path
 from validation.core import InvariantResult, Verdict
+
+logger = logging.getLogger(__name__)
 
 
 def check_dir_bounds_contain_layers(diagram: DiagramIR) -> InvariantResult:
@@ -172,6 +176,7 @@ def _get_shape_bounds(shape: Shape) -> tuple[float, float, float, float] | None:
         return None
     elif isinstance(shape, Path):
         return None
+    logger.warning("Unsupported shape type for bounds calculation: %s", type(shape).__name__)
     return None
 
 

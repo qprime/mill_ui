@@ -167,7 +167,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
             ))
 
 
-        if DepthMode.is_through(feature.depth):
+        if feature.is_through:
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
                 source=source,
@@ -212,7 +212,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
             ))
 
 
-        if DepthMode.is_through(feature.depth):
+        if feature.is_through:
             assertions.append(IntentAssertion(
                 id="THROUGH_CUT",
                 source=source,
@@ -228,25 +228,10 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
     return assertions
 
 
-def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float | None:
-    if feature.depth_mm is not None:
-        return feature.depth_mm
-
-    if DepthMode.is_through(feature.depth):
+def _resolve_depth(feature: Feature, sheet_thickness_mm: float) -> float:
+    if feature.is_through:
         return sheet_thickness_mm
-
-    if isinstance(feature.depth, (int, float)):
-        return float(feature.depth)
-
-    if isinstance(feature.depth, str):
-
-        try:
-            depth_str = feature.depth.replace("mm", "").strip()
-            return float(depth_str)
-        except (ValueError, AttributeError):
-            pass
-
-    return None
+    return feature.depth_mm
 
 
 def _unwrap_metrics(metrics: dict[str, Any] | None, key: str) -> dict[str, Any] | None:

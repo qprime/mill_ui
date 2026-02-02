@@ -82,8 +82,8 @@
     <text x="20" y="772.0" class="notes">Sheet: 250.0 × 600.0 × 19.0mm</text>
     <text x="20" y="784.0" class="notes">Features: 1 profile, 12 pockets, 12 chamfers</text>
     <text x="20" y="796.0" class="notes">Depths:</text>
-    <text x="30" y="808.0" class="notes">• chamfer: 2.0</text>
-    <text x="30" y="820.0" class="notes">• pocket: 8.0</text>
+    <text x="30" y="808.0" class="notes">• chamfer: 2.0mm</text>
+    <text x="30" y="820.0" class="notes">• pocket: 8.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

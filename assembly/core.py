@@ -32,7 +32,7 @@ class Interface:
     panel_b: str
     edge_b: EdgeName
     joinery: JoineryStrategy
-    position_mm: float | None = None
+    position_along_edge_a_mm: float | None = None
     position_along_edge_b_mm: float | None = None
 
     def validate(self) -> None:

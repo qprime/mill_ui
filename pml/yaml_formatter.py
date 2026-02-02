@@ -64,9 +64,9 @@ def dim(value: float) -> str:
 def format_feature(feature: Feature) -> dict[str, Any]:
     result: dict[str, Any] = {"type": feature.type}
 
-    if feature.depth == "through":
+    if feature.is_through:
         result["depth"] = "through"
-    elif feature.depth_mm is not None:
+    else:
         result["depth"] = dim(feature.depth_mm)
 
     if feature.side:

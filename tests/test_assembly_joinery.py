@@ -97,7 +97,7 @@ class TestHalfLapJoinery:
         half_lap = HalfLap()
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=25.0, position_along_edge_b_mm=30.0
+            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -111,7 +111,7 @@ class TestHalfLapJoinery:
         half_lap = HalfLap()
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=25.0, position_along_edge_b_mm=30.0
+            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -126,7 +126,7 @@ class TestHalfLapJoinery:
         half_lap = HalfLap(fitment_mm=fitment)
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=25.0, position_along_edge_b_mm=30.0
+            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -134,7 +134,7 @@ class TestHalfLapJoinery:
         assert result_a.notches[0].u_len_mm == 12 + fitment
         assert result_b.notches[0].u_len_mm == 18 + fitment
 
-    def test_raises_without_position_mm(self):
+    def test_raises_without_position_along_edge_a_mm(self):
         panel_a = PanelSpec("shelf_1", 100, 50, 18)
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
@@ -143,7 +143,7 @@ class TestHalfLapJoinery:
             position_along_edge_b_mm=30.0
         )
 
-        with pytest.raises(ValueError, match="requires interface.position_mm"):
+        with pytest.raises(ValueError, match="requires interface.position_along_edge_a_mm"):
             half_lap.apply(interface, panel_a, panel_b)
 
     def test_raises_without_position_along_edge_b_mm(self):
@@ -152,7 +152,7 @@ class TestHalfLapJoinery:
         half_lap = HalfLap()
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=25.0
+            position_along_edge_a_mm=25.0
         )
 
         with pytest.raises(ValueError, match="requires interface.position_along_edge_b_mm"):
@@ -164,7 +164,7 @@ class TestHalfLapJoinery:
         half_lap = HalfLap()
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=35.0, position_along_edge_b_mm=40.0
+            position_along_edge_a_mm=35.0, position_along_edge_b_mm=40.0
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -180,7 +180,7 @@ class TestHalfLapJoinery:
         position_on_partition = 94 - 9
         interface = Interface(
             InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_mm=position_on_shelf, position_along_edge_b_mm=position_on_partition
+            position_along_edge_a_mm=position_on_shelf, position_along_edge_b_mm=position_on_partition
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)

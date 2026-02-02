@@ -39,7 +39,6 @@ def shapely_to_item(
 
     feature = Feature(
         type=feature_type,
-        depth=str(depth_mm),
         depth_mm=depth_mm,
         side=side,
     )

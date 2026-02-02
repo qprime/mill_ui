@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from validation.core import InvariantResult, Verdict
 
 
 @dataclass
@@ -35,6 +38,15 @@ class ValidationResult:
     def has_issues(self) -> bool:
         return len(self.errors) > 0 or len(self.warnings) > 0 or len(self.suggestions) > 0
 
+    @property
+    def verdict(self) -> Verdict:
+        from validation.core import Verdict
+        if self.errors:
+            return Verdict.FAIL
+        if self.warnings:
+            return Verdict.WARN
+        return Verdict.PASS
+
     def summary(self) -> str:
         if not self.has_issues():
             return "Validation passed with no issues"
@@ -48,3 +60,42 @@ class ValidationResult:
             parts.append(f"{len(self.suggestions)} suggestion(s)")
 
         return f"Validation: {', '.join(parts)}"
+
+    def to_invariant_result(
+        self,
+        invariant_id: str,
+        category: str = "removal_intent",
+        artifact: str = "ir",
+        description: str = "",
+    ) -> InvariantResult:
+        from validation.core import InvariantResult, Verdict
+
+        failures = tuple(
+            f"{e.message}" + (f" (region: {e.region_id})" if e.region_id else "")
+            for e in self.errors
+        )
+        failures += tuple(
+            f"[WARN] {w.message}" + (f" (region: {w.region_id})" if w.region_id else "")
+            for w in self.warnings
+        )
+
+        checked = len(self.errors) + len(self.warnings) + len(self.suggestions)
+        if checked == 0:
+            checked = 1
+
+        return InvariantResult(
+            id=invariant_id,
+            category=category,
+            artifact=artifact,
+            description=description or invariant_id,
+            status=self.verdict,
+            checked=checked,
+            passed=checked - len(self.errors) - len(self.warnings),
+            failed=len(self.errors),
+            failures=failures,
+            details={
+                "error_count": len(self.errors),
+                "warning_count": len(self.warnings),
+                "suggestion_count": len(self.suggestions),
+            },
+        )

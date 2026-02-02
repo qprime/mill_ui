@@ -22,7 +22,7 @@ def test_corner_cleanup_basic():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
+                    depth_mm=6.0,
                     corner_cleanup_tool_diameter_mm=3.175
                 ),
                 shape_id="panel"
@@ -65,7 +65,6 @@ def test_corner_cleanup_planner():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
                     depth_mm=6.0,
                     corner_cleanup_tool_diameter_mm=3.175
                 ),
@@ -139,7 +138,6 @@ def test_corner_cleanup_tool_not_found():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
                     depth_mm=6.0,
                     corner_cleanup_tool_diameter_mm=2.0
                 ),
@@ -186,7 +184,6 @@ def test_corner_cleanup_non_rect_error():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
                     depth_mm=6.0,
                     corner_cleanup_tool_diameter_mm=3.175
                 ),
@@ -216,7 +213,6 @@ def test_corner_cleanup_without_flag():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
                     depth_mm=6.0,
 
                 ),

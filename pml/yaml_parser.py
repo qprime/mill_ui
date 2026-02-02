@@ -88,24 +88,24 @@ def parse_children(children_data: list[dict] | None, path: str = "") -> tuple[An
     return tuple(parse_node(child, f"{path}.children[{i}]") for i, child in enumerate(children_data))
 
 
-def parse_feature(data: dict, path: str = "") -> Feature:
+def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
     feature_type = data.get("type")
     if feature_type is None:
         raise PMLParseError("Feature missing 'type'", path)
 
     depth = data.get("depth", "through")
-    if depth != "through":
-        depth = str(parse_dimension(depth))
+    is_through = depth == "through"
 
-    depth_mm = None
-    if depth != "through":
-        depth_mm = float(depth)
+    if is_through:
+        depth_mm = sheet_thickness_mm
+    else:
+        depth_mm = float(parse_dimension(depth))
 
     return Feature(
         type=feature_type,
-        depth=depth,
-        side=data.get("side"),
         depth_mm=depth_mm,
+        side=data.get("side"),
+        is_through=is_through,
         corner_cleanup_tool_diameter_mm=parse_dimension(data["corner_cleanup"]) if "corner_cleanup" in data else None,
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
@@ -644,7 +644,6 @@ def parse_node(data: dict, path: str = "") -> Any:
         depth_mm = parse_dimension(node_data["depth"])
         return Feature(
             type="engrave",
-            depth=str(depth_mm),
             depth_mm=depth_mm,
         )
 

@@ -94,12 +94,13 @@ NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[
 
 def _feature_from_profile_gen(node: ProfileGen) -> Feature:
     depth_value = node.depth
-    depth_mm = None if depth_value == "through" else float(depth_value)
+    is_through = depth_value == "through"
+    depth_mm = 0.0 if is_through else float(depth_value)
     return Feature(
         type="profile",
-        depth=str(depth_value),
-        side=node.side,
         depth_mm=depth_mm,
+        side=node.side,
+        is_through=is_through,
         tab_count=node.tab_count,
         tab_height_mm=node.tab_height_mm,
         tab_width_mm=node.tab_width_mm,
@@ -678,7 +679,6 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=region.center),
             feature=Feature(
                 type="pocket",
-                depth=str(node.depth_mm),
                 depth_mm=node.depth_mm,
             ),
             shape_id=self._next_shape_id("generated_pocket"),
@@ -741,7 +741,6 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=region.center),
             feature=Feature(
                 type="chamfer",
-                depth=str(node.depth_mm),
                 depth_mm=node.depth_mm,
                 chamfer_width_mm=node.width_mm,
                 chamfer_angle_deg=chamfer_angle,
@@ -867,9 +866,9 @@ class LayoutResolver:
                 placement=Placement(center_xy_mm=(wrect.center_x, wrect.center_y)),
                 feature=Feature(
                     type="profile",
-                    depth="through",
+                    depth_mm=0.0,
                     side="outside",
-                    depth_mm=None,
+                    is_through=True,
                     tab_count=node.tab_count,
                     tab_height_mm=node.tab_height_mm,
                 ),
@@ -1317,7 +1316,6 @@ class LayoutResolver:
                         placement=Placement(center_xy_mm=(cx, cy)),
                         feature=Feature(
                             type="pocket",
-                            depth=str(child.depth_mm),
                             depth_mm=child.depth_mm,
                         ),
                         shape_id=self._next_shape_id("subtract_pocket"),
@@ -1333,7 +1331,6 @@ class LayoutResolver:
                         placement=Placement(center_xy_mm=(cx, cy)),
                         feature=Feature(
                             type="chamfer",
-                            depth=str(child.depth_mm),
                             depth_mm=child.depth_mm,
                             chamfer_width_mm=child.width_mm,
                             chamfer_angle_deg=chamfer_angle,
@@ -1472,7 +1469,6 @@ class LayoutResolver:
                     placement=Placement(center_xy_mm=bounds_center),
                     feature=Feature(
                         type="pocket",
-                        depth=str(child.depth_mm),
                         depth_mm=child.depth_mm,
                     ),
                     shape_id=self._next_shape_id("polygon_pocket"),
@@ -1537,7 +1533,6 @@ class LayoutResolver:
                     placement=Placement(center_xy_mm=triangle_center),
                     feature=Feature(
                         type="pocket",
-                        depth=str(child.depth_mm),
                         depth_mm=child.depth_mm,
                     ),
                     shape_id=self._next_shape_id("triangle_pocket"),
@@ -1637,7 +1632,7 @@ class LayoutResolver:
             )
             assembly = box(
                 width=node.width_mm,
-                depth=node.depth_mm,
+                length=node.depth_mm,
                 height=node.height_mm,
                 thickness=node.thickness_mm,
                 side_joinery=side_joinery or Finger(),
@@ -1676,7 +1671,7 @@ class LayoutResolver:
 
             assembly = carcass(
                 width=node.width_mm,
-                depth=node.depth_mm,
+                length=node.depth_mm,
                 height=node.height_mm,
                 thickness=node.thickness_mm,
                 side_joinery=side_joinery or Butt(),
@@ -1691,7 +1686,7 @@ class LayoutResolver:
                 shelf_joinery=shelf_joinery,
                 shelf_back_support=node.shelf_back_support,
                 toe_kick_height=node.toe_kick_height_mm,
-                toe_kick_depth=node.toe_kick_depth_mm,
+                toe_kick_setback=node.toe_kick_depth_mm,
                 toe_kick_style=node.toe_kick_style,
                 toe_kick_cover=node.toe_kick_cover,
             )
@@ -1757,7 +1752,7 @@ class LayoutResolver:
 
             assembly = cubby(
                 width=node.width_mm,
-                depth=node.depth_mm,
+                length=node.depth_mm,
                 height=node.height_mm,
                 thickness=node.thickness_mm,
                 rows=grid[1],
@@ -1933,7 +1928,6 @@ class LayoutResolver:
                     placement=Placement(center_xy_mm=dado_center),
                     feature=Feature(
                         type="pocket",
-                        depth=str(dado.depth_mm),
                         depth_mm=dado.depth_mm,
                     ),
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_dado"),

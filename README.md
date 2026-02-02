@@ -108,7 +108,7 @@ nest maxrects
 | Command | Description |
 |---------|-------------|
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert PML to JSON |
-| `python -m cli.export_blueprint --input layout.pml.yml --out output/ --theme dark` | Export SVG blueprint |
+| `python -m cli.mill --project my_project --no-clean` | Generate G-code and SVG blueprint |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.parse_compositional_pml door.pml.yml --resolve --format pml` | Parse compositional PML |

@@ -132,7 +132,7 @@ def test_ast_construction_with_tabs():
                 placement=Placement(center_xy_mm=(225, 325)),
                 feature=Feature(
                     type="profile",
-                    depth="through",
+                    depth_mm=0.0, is_through=True,
                     side="outside",
                     tab_count=4,
                     tab_height_mm=3.0,
@@ -162,7 +162,7 @@ def test_ast_to_removal_intent_with_tabs():
         placement=Placement(center_xy_mm=(225, 325)),
         feature=Feature(
             type="profile",
-            depth="through",
+            depth_mm=0.0, is_through=True,
             side="outside",
             tab_count=4,
             tab_height_mm=3.0,
@@ -197,7 +197,7 @@ def test_ast_to_removal_intent_with_tabs_no_width():
         placement=Placement(center_xy_mm=(225, 325)),
         feature=Feature(
             type="profile",
-            depth="through",
+            depth_mm=0.0, is_through=True,
             side="outside",
             tab_count=4,
             tab_height_mm=3.0,

@@ -85,7 +85,7 @@ class MountingPlate:
                 type="Rect",
                 geometry=Geometry(data={"w_mm": width, "h_mm": height}),
                 placement=Placement(center_xy_mm=(width/2, height/2)),
-                feature=Feature(type="profile", side="outside", depth="through"),
+                feature=Feature(type="profile", side="outside", depth_mm=0.0, is_through=True),
                 shape_id="plate_outer"
             ),
         ]
@@ -101,7 +101,7 @@ class MountingPlate:
                 type="Circle",
                 geometry=Geometry(data={"diameter_mm": hole_diameter}),
                 placement=Placement(center_xy_mm=(x, y)),
-                feature=Feature(type="hole", depth="through"),
+                feature=Feature(type="hole", depth_mm=0.0, is_through=True),
                 shape_id=f"hole_{i}"
             ))
 
@@ -171,7 +171,7 @@ def circle_pattern_generator(
                     type="Circle",
                     geometry=Geometry(data={"diameter_mm": params.circle_diameter_mm}),
                     placement=Placement(center_xy_mm=(x, y)),
-                    feature=Feature(type="pocket", depth=params.depth_mm),
+                    feature=Feature(type="pocket", depth_mm=params.depth_mm),
                     shape_id=generate_shape_id("circle", f"r{row}c{col}"),
                 ))
             x += spacing

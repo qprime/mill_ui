@@ -45,9 +45,7 @@ class GeometryKeys:
 class TabKeys:
 
     COUNT = "count"
-    HEIGHT = "height"
     HEIGHT_MM = "height_mm"
-    WIDTH = "width"
     WIDTH_MM = "width_mm"
 
 

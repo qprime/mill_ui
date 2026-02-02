@@ -13,6 +13,7 @@ from core.constants import (
     ShapeType,
     HintCollectionKeys,
 )
+from core.geometry import extract_shape_geometry
 
 
 def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
@@ -21,48 +22,10 @@ def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
     depth_mm = intent.depth_mm()
 
 
-    cx = (intent.bounds.x_min + intent.bounds.x_max) / 2.0
-    cy = (intent.bounds.y_min + intent.bounds.y_max) / 2.0
+    cx, cy = intent.bounds.center
 
 
-    geometry: dict[str, Any] = {}
-    if ShapeType.is_rect(shape):
-        w_mm = intent.bounds.x_max - intent.bounds.x_min
-        h_mm = intent.bounds.y_max - intent.bounds.y_min
-        geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
-    elif ShapeType.is_circle(shape):
-        if GeometryKeys.DIAMETER_MM in intent.metadata:
-            diameter_mm = intent.metadata[GeometryKeys.DIAMETER_MM]
-        else:
-            diameter_mm = intent.bounds.x_max - intent.bounds.x_min
-        geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
-    elif ShapeType.is_polygon(shape):
-        if GeometryKeys.POINTS in intent.metadata:
-            geometry = {GeometryKeys.POINTS: intent.metadata[GeometryKeys.POINTS]}
-        else:
-            w_mm = intent.bounds.x_max - intent.bounds.x_min
-            h_mm = intent.bounds.y_max - intent.bounds.y_min
-            geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
-    elif shape == ShapeType.ROUNDED_RECT:
-        w_mm = intent.bounds.x_max - intent.bounds.x_min
-        h_mm = intent.bounds.y_max - intent.bounds.y_min
-        geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
-        if GeometryKeys.RADIUS_MM in intent.metadata:
-            geometry[GeometryKeys.RADIUS_MM] = intent.metadata[GeometryKeys.RADIUS_MM]
-        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
-            if key in intent.metadata:
-                geometry[key] = intent.metadata[key]
-    elif ShapeType.is_polyline(shape):
-        if GeometryKeys.POINTS in intent.metadata:
-            geometry = {GeometryKeys.POINTS: intent.metadata[GeometryKeys.POINTS]}
-        else:
-            w_mm = intent.bounds.x_max - intent.bounds.x_min
-            h_mm = intent.bounds.y_max - intent.bounds.y_min
-            geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
-    else:
-        w_mm = intent.bounds.x_max - intent.bounds.x_min
-        h_mm = intent.bounds.y_max - intent.bounds.y_min
-        geometry = {GeometryKeys.W_MM: w_mm, GeometryKeys.H_MM: h_mm}
+    geometry = extract_shape_geometry(shape, intent.bounds, intent.metadata)
 
 
     hint: dict[str, Any] = {
@@ -84,7 +47,7 @@ def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
             tabs = intent.constraints.tabs
             hint[HintKeys.TABS] = {
                 TabKeys.COUNT: tabs.count,
-                TabKeys.HEIGHT: tabs.height_mm,
+                TabKeys.HEIGHT_MM: tabs.height_mm,
                 TabKeys.WIDTH_MM: tabs.width_mm,
             }
 

@@ -2,7 +2,7 @@
 from pml.yaml_parser import parse_pml_yaml
 from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from adapters.hints_to_removal import item_to_removal_intent
+from adapters.hints_to_removal import simple_item_to_removal_intent
 
 
 def test_spline_parsing_and_roundtrip():
@@ -116,7 +116,7 @@ children:
     spline_item = spline_items[0]
 
 
-    removal = item_to_removal_intent(spline_item, region_id_prefix="test_spline")
+    removal = simple_item_to_removal_intent(spline_item, region_id_prefix="test_spline")
 
 
     assert removal.region_id == "test_spline_decorative"

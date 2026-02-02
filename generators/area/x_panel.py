@@ -102,7 +102,6 @@ def x_panel_generator(
             placement=Placement(center_xy_mm=(centroid_x, centroid_y)),
             feature=Feature(
                 type="pocket",
-                depth=str(params.depth_mm),
                 depth_mm=params.depth_mm,
             ),
             shape_id=generate_shape_id(shape_id_prefix, idx, name),

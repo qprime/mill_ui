@@ -83,6 +83,21 @@ class Bounds2D:
         if self.y_max < self.y_min:
             raise ValueError(f"y_max ({self.y_max}) < y_min ({self.y_min})")
 
+    @property
+    def width(self) -> float:
+        return self.x_max - self.x_min
+
+    @property
+    def height(self) -> float:
+        return self.y_max - self.y_min
+
+    @property
+    def center(self) -> tuple[float, float]:
+        return (
+            (self.x_min + self.x_max) / 2.0,
+            (self.y_min + self.y_max) / 2.0,
+        )
+
 
 @dataclass(frozen=True)
 class Allowance:

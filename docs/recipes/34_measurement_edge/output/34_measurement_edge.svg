@@ -1005,7 +1005,7 @@
     <text x="20" y="572.0" class="notes">Sheet: 600.0 × 400.0 × 19.0mm</text>
     <text x="20" y="584.0" class="notes">Features: 962 engraves</text>
     <text x="20" y="596.0" class="notes">Depths:</text>
-    <text x="30" y="608.0" class="notes">• engrave: 0.3</text>
+    <text x="30" y="608.0" class="notes">• engrave: 0.3mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>

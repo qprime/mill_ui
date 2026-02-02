@@ -43,7 +43,7 @@ ast = LayoutAST(
             type="Rect",
             geometry=Geometry(data={"w_mm": 400, "h_mm": 600}),
             placement=Placement(center_xy_mm=(225, 325)),
-            feature=Feature(type="profile", side="outside", depth="through"),
+            feature=Feature(type="profile", side="outside", depth_mm=0.0, is_through=True),
             shape_id="door_outer"
         ),
     )
@@ -216,7 +216,7 @@ panel_domain = panel_result.domains[0]
 
 profile_items = profile_generator(
     outer_domain,
-    ProfileParams(side="outside", depth="through"),
+    ProfileParams(side="outside", depth_mm=0.0, is_through=True),
 )
 
 pocket_items = flat_pocket_generator(

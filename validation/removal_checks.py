@@ -4,7 +4,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from ir.removal_intent import RemovalIntent
+from core.constants import FeatureType, MetadataKeys
+from ir.removal_intent import Bounds2D, RemovalIntent
 from validation.results import ValidationResult
 
 
@@ -77,65 +78,72 @@ def check_depth_profile(
     return result
 
 
+def _match_feature_types(
+    a: RemovalIntent,
+    b: RemovalIntent,
+    type_a: str,
+    type_b: str | tuple[str, ...],
+) -> tuple[RemovalIntent, RemovalIntent] | None:
+    hint_type_a = a.metadata.get(MetadataKeys.HINT_TYPE, "")
+    hint_type_b = b.metadata.get(MetadataKeys.HINT_TYPE, "")
+
+    type_b_set = (type_b,) if isinstance(type_b, str) else type_b
+
+    if hint_type_a == type_a and hint_type_b in type_b_set:
+        return (a, b)
+    if hint_type_b == type_a and hint_type_a in type_b_set:
+        return (b, a)
+    return None
+
+
+def _match_same_type(
+    a: RemovalIntent,
+    b: RemovalIntent,
+    feature_type: str,
+) -> bool:
+    hint_type_a = a.metadata.get(MetadataKeys.HINT_TYPE, "")
+    hint_type_b = b.metadata.get(MetadataKeys.HINT_TYPE, "")
+    return hint_type_a == feature_type and hint_type_b == feature_type
+
+
 def _are_perpendicular_pockets(a: RemovalIntent, b: RemovalIntent) -> bool:
-    hint_type_a = a.metadata.get("hint_type", "")
-    hint_type_b = b.metadata.get("hint_type", "")
-    if hint_type_a != "pocket" or hint_type_b != "pocket":
+    if not _match_same_type(a, b, FeatureType.POCKET):
         return False
 
-    width_a = a.bounds.x_max - a.bounds.x_min
-    height_a = a.bounds.y_max - a.bounds.y_min
-    width_b = b.bounds.x_max - b.bounds.x_min
-    height_b = b.bounds.y_max - b.bounds.y_min
-
-    is_a_horizontal = width_a > height_a * 1.5
-    is_a_vertical = height_a > width_a * 1.5
-    is_b_horizontal = width_b > height_b * 1.5
-    is_b_vertical = height_b > width_b * 1.5
+    is_a_horizontal = a.bounds.width > a.bounds.height * 1.5
+    is_a_vertical = a.bounds.height > a.bounds.width * 1.5
+    is_b_horizontal = b.bounds.width > b.bounds.height * 1.5
+    is_b_vertical = b.bounds.height > b.bounds.width * 1.5
 
     return (is_a_horizontal and is_b_vertical) or (is_a_vertical and is_b_horizontal)
 
 
 def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
-    hint_type_a = a.metadata.get("hint_type", "")
-    hint_type_b = b.metadata.get("hint_type", "")
-
-    if hint_type_a == "profile" and hint_type_b == "pocket":
-        profile, pocket = a, b
-    elif hint_type_a == "pocket" and hint_type_b == "profile":
-        profile, pocket = b, a
-    else:
+    match = _match_feature_types(a, b, FeatureType.PROFILE, FeatureType.POCKET)
+    if match is None:
         return False
+    profile, pocket = match
 
-    pocket_touches_profile_edge = (
+    return (
         abs(pocket.bounds.x_min - profile.bounds.x_min) < 1.0 or
         abs(pocket.bounds.x_max - profile.bounds.x_max) < 1.0 or
         abs(pocket.bounds.y_min - profile.bounds.y_min) < 1.0 or
         abs(pocket.bounds.y_max - profile.bounds.y_max) < 1.0
     )
 
-    return pocket_touches_profile_edge
-
 
 def _is_hole_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
-    hint_type_a = a.metadata.get("hint_type", "")
-    hint_type_b = b.metadata.get("hint_type", "")
-
-    if hint_type_a == "profile" and hint_type_b in ("drill", "hole"):
-        profile, hole = a, b
-    elif hint_type_a in ("drill", "hole") and hint_type_b == "profile":
-        profile, hole = b, a
-    else:
+    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.HOLE, "drill"))
+    if match is None:
         return False
+    profile, hole = match
 
-    hole_inside_profile = (
+    return (
         hole.bounds.x_min >= profile.bounds.x_min and
         hole.bounds.x_max <= profile.bounds.x_max and
         hole.bounds.y_min >= profile.bounds.y_min and
         hole.bounds.y_max <= profile.bounds.y_max
     )
-
-    return hole_inside_profile
 
 
 def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
@@ -202,8 +210,8 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
 
     bounds = intent.bounds
-    width = bounds.x_max - bounds.x_min
-    height = bounds.y_max - bounds.y_min
+    width = bounds.width
+    height = bounds.height
 
 
     if not available_tools:
@@ -291,7 +299,7 @@ def _same_z_range(a: RemovalIntent, b: RemovalIntent) -> bool:
     )
 
 
-def _min_gap_between(a, b) -> float:
+def _min_gap_between(a: Bounds2D, b: Bounds2D) -> float:
     x_gap = max(a.x_min, b.x_min) - min(a.x_max, b.x_max)
     y_gap = max(a.y_min, b.y_min) - min(a.y_max, b.y_max)
 

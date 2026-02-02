@@ -2344,7 +2344,7 @@
     <text x="20" y="422.0" class="notes">Sheet: 700.0 × 250.0 × 18.0mm</text>
     <text x="20" y="434.0" class="notes">Features: 3 profiles, 2280 engraves</text>
     <text x="20" y="446.0" class="notes">Depths:</text>
-    <text x="30" y="458.0" class="notes">• engrave: 0.3</text>
+    <text x="30" y="458.0" class="notes">• engrave: 0.3mm</text>
     <text x="20" y="470.0" class="notes">Parts (3):</text>
     <text x="30" y="482.0" class="notes">• part_a</text>
     <text x="30" y="494.0" class="notes">• part_b</text>

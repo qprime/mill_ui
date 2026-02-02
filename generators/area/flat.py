@@ -71,7 +71,6 @@ def flat_pocket_generator(
         placement=Placement(center_xy_mm=(cx, cy)),
         feature=Feature(
             type="pocket",
-            depth=str(params.depth_mm),
             depth_mm=params.depth_mm,
         ),
         shape_id=generate_shape_id(shape_id_prefix, 0, "flat"),

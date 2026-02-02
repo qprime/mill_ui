@@ -96,10 +96,11 @@ def _feature_to_dict(feature: Feature) -> dict[str, Any]:
         "type": feature.type,
     }
 
-    if feature.depth is not None:
-        data["depth"] = feature.depth
-    if feature.depth_mm is not None:
-        data["depth_mm"] = feature.depth_mm
+    if feature.is_through:
+        data["depth"] = "through"
+    else:
+        data["depth"] = feature.depth_mm
+    data["depth_mm"] = feature.depth_mm
     if feature.side is not None:
         data["side"] = feature.side
 

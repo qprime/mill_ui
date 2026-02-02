@@ -79,16 +79,10 @@ def _format_template(item: Item) -> str:
 def _format_feature(feature: Feature) -> str:
     feature_type = feature.type
 
-
-    if DepthMode.is_through(feature.depth):
+    if feature.is_through:
         depth_str = DepthMode.THROUGH
-    elif feature.depth_mm is not None:
-        depth_str = f"{feature.depth_mm:.2f}mm"
     else:
-
-        depth_str = str(feature.depth)
-        if not depth_str.endswith("mm") and not DepthMode.is_through(depth_str):
-            depth_str = f"{depth_str}mm"
+        depth_str = f"{feature.depth_mm:.2f}mm"
 
 
     result = f"{feature_type} {depth_str}"

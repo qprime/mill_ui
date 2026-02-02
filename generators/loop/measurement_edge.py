@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch, sheet_to_local
 from generators.base import (
     GeneratorResult,
@@ -14,40 +15,6 @@ from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
     from domains import Domain
-
-
-def _clip_line_to_domain(
-    line_start: tuple[float, float],
-    line_end: tuple[float, float],
-    domain: Domain,
-) -> list[tuple[tuple[float, float], tuple[float, float]]]:
-    from shapely.geometry import LineString
-
-    line = LineString([line_start, line_end])
-    polygon = domain.polygon
-
-    intersection = line.intersection(polygon)
-
-    if intersection.is_empty:
-        return []
-
-    segments = []
-
-    if intersection.geom_type == "LineString":
-        coords = list(intersection.coords)
-        if len(coords) >= 2:
-            segments.append(
-                ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
-            )
-    elif intersection.geom_type == "MultiLineString":
-        for geom in intersection.geoms:
-            coords = list(geom.coords)
-            if len(coords) >= 2:
-                segments.append(
-                    ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
-                )
-
-    return segments
 
 
 def measurement_edge_generator(
@@ -94,7 +61,7 @@ def measurement_edge_generator(
         sheet_points = local_to_sheet_batch([start_local, end_local], domain)
         sheet_start, sheet_end = sheet_points[0], sheet_points[1]
 
-        clipped = _clip_line_to_domain(sheet_start, sheet_end, domain)
+        clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
 
         for seg_start, seg_end in clipped:
             item = _create_line_item(
@@ -250,7 +217,6 @@ def _create_line_item(
         placement=Placement(center_xy_mm=(cx, cy)),
         feature=Feature(
             type="engrave",
-            depth=str(depth_mm),
             depth_mm=depth_mm,
         ),
         shape_id=shape_id,

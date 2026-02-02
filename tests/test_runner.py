@@ -53,7 +53,7 @@ def make_simple_profile_ast() -> LayoutAST:
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 200.0, "h_mm": 150.0}),
                 placement=Placement(center_xy_mm=(225.0, 325.0)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="part",
             ),
         ),

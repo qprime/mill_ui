@@ -58,7 +58,7 @@ class TestBoxAssembly:
     def test_basic_finger_box_has_4_side_panels(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -74,7 +74,7 @@ class TestBoxAssembly:
     def test_box_with_bottom_has_5_panels(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -87,7 +87,7 @@ class TestBoxAssembly:
         from assembly.joinery import Captured
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -101,7 +101,7 @@ class TestBoxAssembly:
         from assembly.joinery import Captured
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -123,7 +123,7 @@ class TestBoxAssembly:
     def test_validates_successfully(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -135,7 +135,7 @@ class TestCubbyAssembly:
     def test_2x2_cubby_has_correct_panels(self):
         assembly = cubby(
             width=300,
-            depth=200,
+            length=200,
             height=300,
             thickness=18,
             rows=2,
@@ -152,7 +152,7 @@ class TestCubbyAssembly:
     def test_3x3_cubby_has_correct_panels(self):
         assembly = cubby(
             width=450,
-            depth=200,
+            length=200,
             height=450,
             thickness=18,
             rows=3,
@@ -172,7 +172,7 @@ class TestCubbyAssembly:
 
         assembly = cubby(
             width=width,
-            depth=depth,
+            length=depth,
             height=height,
             thickness=thickness,
             rows=2,
@@ -196,7 +196,7 @@ class TestCubbyAssembly:
     def test_cubby_half_lap_interfaces_have_both_positions(self):
         assembly = cubby(
             width=300,
-            depth=200,
+            length=200,
             height=300,
             thickness=18,
             rows=2,
@@ -207,7 +207,7 @@ class TestCubbyAssembly:
             if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == 1
-        assert half_lap_interfaces[0].position_mm is not None
+        assert half_lap_interfaces[0].position_along_edge_a_mm is not None
         assert half_lap_interfaces[0].position_along_edge_b_mm is not None
 
     def test_3x3_cubby_intersection_positions(self):
@@ -222,7 +222,7 @@ class TestCubbyAssembly:
 
         assembly = cubby(
             width=width,
-            depth=200,
+            length=200,
             height=height,
             thickness=thickness,
             rows=rows,
@@ -235,7 +235,7 @@ class TestCubbyAssembly:
         ]
         assert len(half_lap_interfaces) == 4
 
-        positions_a = sorted([i.position_mm for i in half_lap_interfaces])
+        positions_a = sorted([i.position_along_edge_a_mm for i in half_lap_interfaces])
         positions_b = sorted([i.position_along_edge_b_mm for i in half_lap_interfaces])
 
         expected_partition_1_pos = cell_width - thickness / 2
@@ -260,7 +260,7 @@ class TestCubbyAssembly:
 
         assembly = cubby(
             width=width,
-            depth=300,
+            length=300,
             height=height,
             thickness=thickness,
             rows=rows,
@@ -274,9 +274,9 @@ class TestCubbyAssembly:
         assert len(half_lap_interfaces) == 2
 
         for interface in half_lap_interfaces:
-            assert interface.position_mm != interface.position_along_edge_b_mm
+            assert interface.position_along_edge_a_mm != interface.position_along_edge_b_mm
 
-        positions_a = {i.position_mm for i in half_lap_interfaces}
+        positions_a = {i.position_along_edge_a_mm for i in half_lap_interfaces}
         expected_pos_on_shelf_1 = cell_width - thickness / 2
         expected_pos_on_shelf_2 = 2 * cell_width - thickness / 2
         assert positions_a == {expected_pos_on_shelf_1, expected_pos_on_shelf_2}
@@ -288,7 +288,7 @@ class TestCubbyAssembly:
     def test_cubby_validates_successfully(self):
         assembly = cubby(
             width=300,
-            depth=200,
+            length=200,
             height=300,
             thickness=18,
             rows=2,
@@ -300,7 +300,7 @@ class TestCubbyAssembly:
         from assembly.joinery import Captured
         assembly = cubby(
             width=300,
-            depth=200,
+            length=200,
             height=300,
             thickness=18,
             rows=2,
@@ -318,7 +318,7 @@ class TestCubbyAssembly:
         from assembly.joinery import Captured
         assembly = cubby(
             width=300,
-            depth=200,
+            length=200,
             height=300,
             thickness=18,
             rows=2,

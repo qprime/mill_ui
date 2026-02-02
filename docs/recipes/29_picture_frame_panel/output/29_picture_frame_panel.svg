@@ -81,8 +81,8 @@
     <text x="20" y="572.0" class="notes">Sheet: 300.0 × 400.0 × 19.0mm</text>
     <text x="20" y="584.0" class="notes">Features: 2 profiles, 1 pocket, 1 chamfer</text>
     <text x="20" y="596.0" class="notes">Depths:</text>
-    <text x="30" y="608.0" class="notes">• chamfer: 3.0</text>
-    <text x="30" y="620.0" class="notes">• pocket: 5.0</text>
+    <text x="30" y="608.0" class="notes">• chamfer: 3.0mm</text>
+    <text x="30" y="620.0" class="notes">• pocket: 5.0mm</text>
     <text x="20" y="632.0" class="notes">Parts (1):</text>
     <text x="30" y="644.0" class="notes">• subtract_pocket_2</text>
   </g>

@@ -70,7 +70,7 @@ def test_roundtrip_profile_with_tabs():
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
     assert "tabs" in reconstructed_hint
     assert reconstructed_hint["tabs"]["count"] == 6
-    assert approx_eq(reconstructed_hint["tabs"]["height"], 3.0)
+    assert approx_eq(reconstructed_hint["tabs"]["height_mm"], 3.0)
     assert approx_eq(reconstructed_hint["tabs"]["width_mm"], 10.0)
     print("  PASS")
     return True

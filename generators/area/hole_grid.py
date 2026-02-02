@@ -167,12 +167,8 @@ def _create_hole_item(
     depth: str | float,
     shape_id: str,
 ) -> Item:
-    if depth == "through":
-        depth_str = "through"
-        depth_mm_val = None
-    else:
-        depth_str = str(depth)
-        depth_mm_val = float(depth)
+    is_through = depth == "through"
+    depth_mm_val = 0.0 if is_through else float(depth)
 
     geometry_data = {
         "diameter_mm": diameter_mm,
@@ -185,8 +181,8 @@ def _create_hole_item(
         placement=Placement(center_xy_mm=center),
         feature=Feature(
             type="hole",
-            depth=depth_str,
             depth_mm=depth_mm_val,
+            is_through=is_through,
         ),
         shape_id=shape_id,
     )

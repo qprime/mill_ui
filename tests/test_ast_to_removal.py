@@ -19,7 +19,7 @@ def test_warning_collection_on_invalid_item():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 50}),
                 placement=Placement(center_xy_mm=(200, 150)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="valid_rect",
             ),
             # Invalid item - missing geometry entirely (raises ValueError)
@@ -28,7 +28,7 @@ def test_warning_collection_on_invalid_item():
                 type="Rect",
                 geometry=None,
                 placement=Placement(center_xy_mm=(100, 100)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="invalid_rect",
             ),
         )
@@ -61,7 +61,7 @@ def test_no_warnings_when_all_valid():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 50}),
                 placement=Placement(center_xy_mm=(200, 150)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="rect1",
             ),
             Item(
@@ -69,7 +69,7 @@ def test_no_warnings_when_all_valid():
                 type="Circle",
                 geometry=Geometry(data={"diameter_mm": 20}),
                 placement=Placement(center_xy_mm=(300, 200)),
-                feature=Feature(type="hole", depth="through"),
+                feature=Feature(type="hole", depth_mm=0.0, is_through=True),
                 shape_id="hole1",
             ),
         )
@@ -97,7 +97,7 @@ def test_warnings_none_by_default():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 50}),
                 placement=Placement(center_xy_mm=(200, 150)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="rect1",
             ),
         )
@@ -128,7 +128,7 @@ def test_skips_non_shape_items():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 50}),
                 placement=Placement(center_xy_mm=(200, 150)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="rect1",
             ),
         )
@@ -158,7 +158,7 @@ def test_unknown_feature_type_warning():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 50}),
                 placement=Placement(center_xy_mm=(200, 150)),
-                feature=Feature(type="unknown_feature", depth="through"),  # Unknown type
+                feature=Feature(type="unknown_feature", depth_mm=0.0, is_through=True),  # Unknown type
                 shape_id="bad_feature",
             ),
         )
@@ -189,7 +189,7 @@ def test_multiple_warnings():
                 type="Rect",
                 geometry=None,
                 placement=Placement(center_xy_mm=(100, 100)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="bad1",
             ),
             # Missing placement (raises ValueError)
@@ -198,7 +198,7 @@ def test_multiple_warnings():
                 type="Circle",
                 geometry=Geometry(data={"diameter_mm": 20}),
                 placement=None,
-                feature=Feature(type="hole", depth="through"),
+                feature=Feature(type="hole", depth_mm=0.0, is_through=True),
                 shape_id="bad2",
             ),
         )

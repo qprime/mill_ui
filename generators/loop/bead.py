@@ -167,7 +167,6 @@ def bead_generator(
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=Feature(
                 type="engrave",
-                depth=str(params.depth_mm),
                 depth_mm=params.depth_mm,
             ),
             shape_id=generate_shape_id(

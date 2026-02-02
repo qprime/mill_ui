@@ -20,7 +20,7 @@ class Config:
     tool_db_path: Path | None = _DEFAULT_TOOL_DB_PATH
     project_root: Path | None = _DEFAULT_PROJECT_ROOT
     material_name: str | None = "MDF"
-    safe_z_mm: float = 6.0
+    safe_z_mm: float = 5.0
     z_reference: Literal["top", "bottom"] = "top"
     merge_epsilon_mm: float = 0.10
     colinear_epsilon_deg: float = 1.0

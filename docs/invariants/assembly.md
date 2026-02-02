@@ -15,7 +15,7 @@
 | AJ-5 | STRUCTURAL | BUTT_NO_REMOVAL | Butt joint has RemovalKind.NONE |
 | AJ-6 | STRUCTURAL | BUTT_ALL_INTERFACES | Butt valid for all InterfaceTypes |
 | AJ-7 | HARD | HALFLAP_INTERNAL_ONLY | HalfLap valid only for INTERNAL interfaces |
-| AJ-8 | HARD | HALFLAP_REQUIRES_POSITION | INTERNAL interfaces require position_mm |
+| AJ-8 | HARD | HALFLAP_REQUIRES_POSITION | INTERNAL interfaces require position_along_edge_a_mm |
 | AJ-9 | HARD | CAPTURED_RECEIVING_NOT_INTERNAL | receiving='b' invalid for INTERNAL |
 | AJ-10 | HARD | NOTCH_U_START_NON_NEGATIVE | u_start_mm >= 0 |
 | AJ-11 | HARD | NOTCH_U_LEN_POSITIVE | u_len_mm > 0 |
@@ -23,7 +23,7 @@
 | AJ-13 | STRUCTURAL | EDGE_INDICES_CCW | BOTTOM=0, RIGHT=1, TOP=2, LEFT=3 |
 | AJ-14 | HARD | NOTCH_FITS_EDGE | u_start + u_len <= edge_length |
 | AJ-15 | HARD | NOTCHES_NO_OVERLAP | Adjacent notches cannot overlap |
-| AJ-16 | HARD | TOE_KICK_DADO_POSITION | bottom dado position_mm = toe_kick_height (no thickness offset) |
+| AJ-16 | HARD | TOE_KICK_DADO_POSITION | bottom dado position_along_edge_a_mm = toe_kick_height (no thickness offset) |
 
 ---
 
@@ -47,7 +47,7 @@
 
 ## Toe-Kick Dado Positioning
 
-The bottom face of the bottom panel sits at `toe_kick_height` above the cabinet bottom. For the side-panel capture groove, `position_mm` must equal `toe_kick_height`.
+The bottom face of the bottom panel sits at `toe_kick_height` above the cabinet bottom. For the side-panel capture groove, `position_along_edge_a_mm` must equal `toe_kick_height`.
 
 **Wrong:**
 ```python

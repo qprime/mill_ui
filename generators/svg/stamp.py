@@ -132,7 +132,7 @@ def svg_stamp_generator(
             placement=Placement(center_xy_mm=(center_x, center_y)),
             feature=Feature(
                 type=params.feature_type,
-                depth=params.depth_mm,
+                depth_mm=params.depth_mm,
                 side=feature_side,
             ),
             shape_id=generate_shape_id("svg", i),

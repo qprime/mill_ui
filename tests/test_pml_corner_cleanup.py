@@ -54,7 +54,7 @@ def test_pml_format_corner_cleanup():
                 placement=Placement(center_xy_mm=(100, 75)),
                 feature=Feature(
                     type="pocket",
-                    depth=6.0,
+                    depth_mm=6.0,
                     corner_cleanup_tool_diameter_mm=3.175
                 ),
                 shape_id="panel"

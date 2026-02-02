@@ -166,22 +166,17 @@ def test_integration_with_ast_to_removal():
     print("Running test_integration_with_ast_to_removal...")
 
     from adapters.ast_to_removal import _resolve_depth
+    from layout_ast.layout import Feature
 
     # Test through mode
-    result = _resolve_depth(depth="through", depth_mm=None, sheet_thickness_mm=19.0)
+    feature = Feature(type="profile", depth_mm=0.0, is_through=True)
+    result = _resolve_depth(feature, sheet_thickness_mm=19.0)
     assert result == 19.0
 
-    # Test half mode
-    result = _resolve_depth(depth="half", depth_mm=None, sheet_thickness_mm=19.0)
-    assert result == 9.5
-
-    # Test explicit depth_mm takes precedence
-    result = _resolve_depth(depth="through", depth_mm=6.0, sheet_thickness_mm=19.0)
+    # Test explicit depth_mm
+    feature = Feature(type="pocket", depth_mm=6.0)
+    result = _resolve_depth(feature, sheet_thickness_mm=19.0)
     assert result == 6.0
-
-    # Test None depth defaults to sheet thickness
-    result = _resolve_depth(depth=None, depth_mm=None, sheet_thickness_mm=19.0)
-    assert result == 19.0
 
     print("  ✓ PASS")
     return True

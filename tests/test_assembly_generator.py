@@ -10,7 +10,7 @@ class TestAssemblyResolve:
     def test_butt_joint_box_no_notches(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Butt(),
@@ -27,7 +27,7 @@ class TestAssemblyResolve:
     def test_finger_joint_box_has_notches(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12.0),
@@ -44,7 +44,7 @@ class TestAssemblyResolve:
     def test_panel_dimensions_preserved(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12.0),
@@ -59,7 +59,7 @@ class TestAssemblyResolve:
     def test_captured_bottom_creates_dados(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12.0),
@@ -73,7 +73,7 @@ class TestAssemblyResolve:
     def test_phase_assignment_ensures_interlock(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12.0),
@@ -100,7 +100,7 @@ class TestCarcassAssembly:
     def test_basic_carcass_has_four_panels(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
         )
@@ -113,7 +113,7 @@ class TestCarcassAssembly:
     def test_side_panel_dimensions(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
         )
@@ -124,7 +124,7 @@ class TestCarcassAssembly:
     def test_between_sides_cap_style(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             cap_style="between_sides",
@@ -136,7 +136,7 @@ class TestCarcassAssembly:
     def test_over_sides_cap_style(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             cap_style="over_sides",
@@ -147,7 +147,7 @@ class TestCarcassAssembly:
     def test_captured_back_creates_back_panel(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             back=Captured(),
@@ -159,7 +159,7 @@ class TestCarcassAssembly:
     def test_fixed_shelves_creates_shelf_panels(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             fixed_shelves=2,
@@ -170,7 +170,7 @@ class TestCarcassAssembly:
     def test_full_carcass_panel_generation(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             back=Captured(),
@@ -191,7 +191,7 @@ class TestCarcassAssembly:
     def test_no_top_excludes_top_panel(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             top="none",
@@ -201,7 +201,7 @@ class TestCarcassAssembly:
     def test_no_bottom_excludes_bottom_panel(self):
         assembly = carcass(
             width=600,
-            depth=560,
+            length=560,
             height=720,
             thickness=18,
             bottom="none",

@@ -2,7 +2,7 @@
 from pml.yaml_parser import parse_pml_yaml, PMLParseError
 from pml.yaml_formatter import format_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from adapters.hints_to_removal import item_to_removal_intent
+from adapters.hints_to_removal import simple_item_to_removal_intent
 from layout_ast.compositional import Edge
 from ir.removal_intent import DepthProfile
 
@@ -43,7 +43,7 @@ children:
     assert abs(edge["finish_allowance_mm"] - 0.1) < 0.01
 
 
-    removal = item_to_removal_intent(profile, region_id_prefix="test_profile")
+    removal = simple_item_to_removal_intent(profile, region_id_prefix="test_profile")
 
 
     assert removal.constraints.edge_treatment is not None
@@ -79,7 +79,7 @@ children:
     profile = profile_items[0]
 
 
-    removal = item_to_removal_intent(profile)
+    removal = simple_item_to_removal_intent(profile)
 
 
     assert removal.constraints.edge_treatment is not None
@@ -114,7 +114,7 @@ children:
     profile = profile_items[0]
 
 
-    removal = item_to_removal_intent(profile)
+    removal = simple_item_to_removal_intent(profile)
 
 
     assert removal.constraints.edge_treatment is not None
@@ -219,7 +219,7 @@ children:
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
-    base_removal = item_to_removal_intent(profile_items[0])
+    base_removal = simple_item_to_removal_intent(profile_items[0])
 
 
     assert base_removal.constraints.edge_treatment is not None
@@ -269,7 +269,7 @@ children:
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
-    base_removal = item_to_removal_intent(profile_items[0])
+    base_removal = simple_item_to_removal_intent(profile_items[0])
 
 
     assert base_removal.constraints.edge_treatment is not None

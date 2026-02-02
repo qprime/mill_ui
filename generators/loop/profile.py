@@ -105,22 +105,15 @@ def profile_generator(
         }
 
 
-        if params.depth == "through":
-            depth_str = "through"
-            depth_mm = None
-        else:
-            depth_str = str(params.depth)
-            depth_mm = float(params.depth)
-
+        is_through = params.depth == "through"
+        depth_mm = 0.0 if is_through else float(params.depth)
 
         feature_kwargs = {
             "type": "profile",
-            "depth": depth_str,
+            "depth_mm": depth_mm,
             "side": params.side,
+            "is_through": is_through,
         }
-
-        if depth_mm is not None:
-            feature_kwargs["depth_mm"] = depth_mm
 
 
         if params.tab_count > 0:

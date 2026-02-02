@@ -196,7 +196,6 @@ def _create_line_item(
         placement=Placement(center_xy_mm=(cx, cy)),
         feature=Feature(
             type="engrave",
-            depth=str(depth_mm),
             depth_mm=depth_mm,
         ),
         shape_id=shape_id,

@@ -66,7 +66,7 @@ def expand_part_to_items(
                 type="Rect",
                 geometry=Geometry(data={"w_mm": w, "h_mm": h}),
                 placement=ASTPlacement(center_xy_mm=(cx, cy)),
-                feature=Feature(type="profile", depth="through", side="outside"),
+                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id=f"{shape_id_prefix}rect",
             )
         ]

@@ -37,7 +37,7 @@ def test_simple_panel_with_rect():
         root=Panel(
             children=(
                 Rect(
-                    feature=Feature(type="profile", depth="through", side="outside"),
+                    feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                     id="outer",
                 ),
             )
@@ -67,7 +67,7 @@ def test_panel_with_inset():
                     amount_mm=25,
                     children=(
                         Rect(
-                            feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+                            feature=Feature(type="pocket", depth_mm=6.0),
                             id="panel",
                         ),
                     ),
@@ -101,13 +101,13 @@ def test_frame_insets_region_for_children():
                             width_mm=50,
                             children=(
                                 Rect(
-                                    feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+                                    feature=Feature(type="pocket", depth_mm=6.0),
                                     id="inner",
                                 ),
                             ),
                         ),
                     ),
-                    feature=Feature(type="profile", depth="through", side="outside"),
+                    feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                     id="outer",
                 ),
             )
@@ -145,7 +145,7 @@ def test_frame_does_not_emit_profile():
                             width_mm=50,
                             children=(
                                 Rect(
-                                    feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+                                    feature=Feature(type="pocket", depth_mm=6.0),
                                 ),
                             ),
                         ),
@@ -182,7 +182,7 @@ def test_grid_subdivides_region():
                         Cell(
                             children=(
                                 Rect(
-                                    feature=Feature(type="pocket", depth="5.0", depth_mm=5.0),
+                                    feature=Feature(type="pocket", depth_mm=5.0),
                                     id="cell_pocket",
                                 ),
                             )
@@ -214,7 +214,7 @@ def test_component_definition_and_use():
         name="SimplePanel",
         params={"recess_depth": 6.0},
         body=Rect(
-            feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+            feature=Feature(type="pocket", depth_mm=6.0),
             id="panel",
         ),
     )
@@ -253,13 +253,13 @@ def test_place_grid_with_components():
                     width_mm=50,
                     children=(
                         Rect(
-                            feature=Feature(type="pocket", depth="6.0", depth_mm=6.0),
+                            feature=Feature(type="pocket", depth_mm=6.0),
                             id="inner",
                         ),
                     ),
                 ),
             ),
-            feature=Feature(type="profile", depth="through", side="outside"),
+            feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
             id="outer",
         ),
     )
@@ -309,7 +309,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
                                 Cell(
                                     children=(
                                         Rect(
-                                            feature=Feature(type="pocket", depth="5.0", depth_mm=5.0),
+                                            feature=Feature(type="pocket", depth_mm=5.0),
                                         ),
                                     )
                                 ),
@@ -318,7 +318,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
                     ),
                 ),
             ),
-            feature=Feature(type="profile", depth="through", side="outside"),
+            feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
             id="panel_outer",
         ),
     )
@@ -378,7 +378,7 @@ def test_grid_with_no_explicit_cell():
                     gap_mm=0,
                     children=(
                         Rect(
-                            feature=Feature(type="pocket", depth="5.0", depth_mm=5.0),
+                            feature=Feature(type="pocket", depth_mm=5.0),
                         ),
                     ),
                 ),
@@ -551,7 +551,7 @@ def test_validation_assertion_catches_type_mismatch():
         type="Rect",
         geometry=Geometry(data={"w_mm": 400, "h_mm": 600}),
         placement=Placement(center_xy_mm=(200, 300)),
-        feature=Feature(type="profile", depth="through", side="outside"),
+        feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
         shape_id="test",
     )
 

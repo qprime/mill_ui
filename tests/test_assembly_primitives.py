@@ -8,73 +8,73 @@ from assembly.primitives import box, carcass, cubby
 
 class TestBoxPrimitive:
     def test_creates_four_side_panels(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert "front" in assembly.panels
         assert "back" in assembly.panels
         assert "left_side" in assembly.panels
         assert "right_side" in assembly.panels
 
     def test_front_back_have_full_width(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert assembly.panels["front"].width_mm == 200
         assert assembly.panels["back"].width_mm == 200
 
     def test_sides_have_reduced_width_for_joinery(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert assembly.panels["left_side"].width_mm == 150 - 2 * 6
         assert assembly.panels["right_side"].width_mm == 150 - 2 * 6
 
     def test_all_panels_have_full_height(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         for name, panel in assembly.panels.items():
             if name in ("front", "back", "left_side", "right_side"):
                 assert panel.height_mm == 100
 
     def test_default_bottom_is_captured(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert "bottom" in assembly.panels
         bottom_interfaces = [i for i in assembly.interfaces if "bottom" in (i.panel_a, i.panel_b)]
         assert len(bottom_interfaces) == 4
         assert all(isinstance(i.joinery, Captured) for i in bottom_interfaces)
 
     def test_top_is_captured_by_default(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert "top" in assembly.panels
         top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
         assert all(isinstance(i.joinery, Captured) for i in top_interfaces)
 
     def test_explicit_top(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6, top=Captured())
+        assembly = box(width=200, length=150, height=100, thickness=6, top=Captured())
         assert "top" in assembly.panels
         top_interfaces = [i for i in assembly.interfaces if "top" in (i.panel_a, i.panel_b)]
         assert len(top_interfaces) == 4
 
     def test_no_bottom_when_string_none_explicit(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6, bottom="none")
+        assembly = box(width=200, length=150, height=100, thickness=6, bottom="none")
         assert "bottom" not in assembly.panels
 
     def test_no_top_when_string_none(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6, top="none")
+        assembly = box(width=200, length=150, height=100, thickness=6, top="none")
         assert "top" not in assembly.panels
 
     def test_bottom_dimensions_account_for_side_thickness(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         bottom = assembly.panels["bottom"]
         assert bottom.width_mm == 200 - 2 * 6
         assert bottom.height_mm == 150 - 2 * 6
 
     def test_side_to_side_interfaces(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         side_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.SIDE_TO_SIDE]
         assert len(side_interfaces) == 4
 
     def test_custom_side_joinery(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6, side_joinery=Butt())
+        assembly = box(width=200, length=150, height=100, thickness=6, side_joinery=Butt())
         side_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.SIDE_TO_SIDE]
         assert all(isinstance(i.joinery, Butt) for i in side_interfaces)
 
     def test_panel_roles_assigned(self):
-        assembly = box(width=200, depth=150, height=100, thickness=6)
+        assembly = box(width=200, length=150, height=100, thickness=6)
         assert assembly.panels["front"].role == PanelRole.FRONT
         assert assembly.panels["back"].role == PanelRole.BACK
         assert assembly.panels["left_side"].role == PanelRole.LEFT
@@ -84,7 +84,7 @@ class TestBoxPrimitive:
     def test_perimeter_joinery_sets_top_and_bottom_defaults(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             perimeter_joinery=Finger(width_mm=15),
@@ -99,7 +99,7 @@ class TestBoxPrimitive:
     def test_explicit_top_overrides_perimeter_joinery(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             perimeter_joinery=Finger(width_mm=15),
@@ -115,7 +115,7 @@ class TestBoxResolve:
     def test_finger_joints_create_notches(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -128,7 +128,7 @@ class TestBoxResolve:
     def test_captured_bottom_creates_dados(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             side_joinery=Finger(width_mm=12),
@@ -141,7 +141,7 @@ class TestBoxResolve:
     def test_resolve_returns_all_panels(self):
         assembly = box(
             width=200,
-            depth=150,
+            length=150,
             height=100,
             thickness=6,
             bottom=Captured(),
@@ -154,7 +154,7 @@ class TestBoxResolve:
 
 class TestCarcassPrimitive:
     def test_creates_sides_and_caps(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18)
+        assembly = carcass(width=600, length=400, height=500, thickness=18)
         assert "left_side" in assembly.panels
         assert "right_side" in assembly.panels
         assert "top" in assembly.panels
@@ -163,7 +163,7 @@ class TestCarcassPrimitive:
     def test_between_sides_cap_dimensions(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             cap_style="between_sides",
@@ -175,7 +175,7 @@ class TestCarcassPrimitive:
     def test_over_sides_cap_dimensions(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             cap_style="over_sides",
@@ -186,7 +186,7 @@ class TestCarcassPrimitive:
     def test_over_sides_reduces_side_height(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             cap_style="over_sides",
@@ -195,22 +195,22 @@ class TestCarcassPrimitive:
         assert left.height_mm == 500 - 2 * 18
 
     def test_default_butt_joinery(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18)
+        assembly = carcass(width=600, length=400, height=500, thickness=18)
         top_interfaces = [i for i in assembly.interfaces if i.type == InterfaceType.TOP]
         assert all(isinstance(i.joinery, Butt) for i in top_interfaces)
 
     def test_no_top_when_none_string(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18, top="none")
+        assembly = carcass(width=600, length=400, height=500, thickness=18, top="none")
         assert "top" not in assembly.panels
 
     def test_no_bottom_when_none_string(self):
-        assembly = carcass(width=600, depth=400, height=500, thickness=18, bottom="none")
+        assembly = carcass(width=600, length=400, height=500, thickness=18, bottom="none")
         assert "bottom" not in assembly.panels
 
     def test_fixed_shelves_creates_shelf_panels(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             fixed_shelves=2,
@@ -221,7 +221,7 @@ class TestCarcassPrimitive:
     def test_shelf_interfaces_are_internal(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             fixed_shelves=2,
@@ -235,7 +235,7 @@ class TestCarcassPrimitive:
     def test_shelf_joinery_default_is_captured(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             fixed_shelves=2,
@@ -250,7 +250,7 @@ class TestCarcassPrimitive:
         from assembly.joinery import Finger
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             perimeter_joinery=Finger(width_mm=15),
@@ -264,7 +264,7 @@ class TestCarcassPrimitive:
         from assembly.joinery import Finger
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             perimeter_joinery=Finger(width_mm=15),
@@ -276,7 +276,7 @@ class TestCarcassPrimitive:
     def test_back_to_top_bottom_interfaces_emitted(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             back=Captured(),
@@ -295,7 +295,7 @@ class TestCarcassPrimitive:
     def test_toe_kick_creates_notches_on_sides(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
@@ -310,7 +310,7 @@ class TestCarcassPrimitive:
     def test_toe_kick_depth_default(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
@@ -321,11 +321,11 @@ class TestCarcassPrimitive:
     def test_toe_kick_depth_custom(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
-            toe_kick_depth=75,
+            toe_kick_setback=75,
         )
         left = assembly.panels["left_side"]
         assert left.notches[0].u_len_mm == 75
@@ -333,11 +333,11 @@ class TestCarcassPrimitive:
     def test_toe_kick_shortens_bottom_panel(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
-            toe_kick_depth=75,
+            toe_kick_setback=75,
         )
         bottom = assembly.panels["bottom"]
         assert bottom.height_mm == 400 - 75
@@ -345,7 +345,7 @@ class TestCarcassPrimitive:
     def test_toe_kick_cover_created_between_sides(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
@@ -360,7 +360,7 @@ class TestCarcassPrimitive:
     def test_toe_kick_cover_created_over_sides(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
@@ -373,7 +373,7 @@ class TestCarcassPrimitive:
     def test_toe_kick_cover_not_created_when_disabled(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             toe_kick_height=100,
@@ -384,7 +384,7 @@ class TestCarcassPrimitive:
     def test_back_panel_created_when_specified(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             back=Captured(),
@@ -396,7 +396,7 @@ class TestCarcassPrimitive:
     def test_back_inset_affects_back_dimensions(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             back=Captured(),
@@ -412,7 +412,7 @@ class TestCarcassResolve:
     def test_shelf_joinery_creates_dados_in_sides(self):
         assembly = carcass(
             width=600,
-            depth=400,
+            length=400,
             height=500,
             thickness=18,
             fixed_shelves=2,
@@ -427,7 +427,7 @@ class TestCubbyPrimitive:
     def test_creates_perimeter_panels(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,
@@ -441,7 +441,7 @@ class TestCubbyPrimitive:
     def test_creates_internal_shelves(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=3,
@@ -453,7 +453,7 @@ class TestCubbyPrimitive:
     def test_creates_internal_partitions(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,
@@ -466,7 +466,7 @@ class TestCubbyPrimitive:
     def test_perimeter_interfaces_use_perimeter_joinery(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,
@@ -483,7 +483,7 @@ class TestCubbyPrimitive:
     def test_internal_half_lap_interfaces_use_internal_joinery(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,
@@ -499,7 +499,7 @@ class TestCubbyPrimitive:
     def test_shelf_partition_grid_intersections(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=3,
@@ -514,7 +514,7 @@ class TestCubbyPrimitive:
     def test_single_row_no_shelves(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=1,
@@ -526,7 +526,7 @@ class TestCubbyPrimitive:
     def test_single_col_no_partitions(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=3,
@@ -540,7 +540,7 @@ class TestCubbyResolve:
     def test_finger_perimeter_creates_notches(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,
@@ -554,7 +554,7 @@ class TestCubbyResolve:
     def test_half_lap_internal_creates_notches(self):
         assembly = cubby(
             width=900,
-            depth=300,
+            length=300,
             height=600,
             thickness=18,
             rows=2,

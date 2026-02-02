@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from ir.removal_intent import (
     RemovalIntent,
@@ -23,7 +23,11 @@ from core.constants import (
     ShapeType,
     Side,
 )
-from core.geometry import compute_shape_bounds
+from core.geometry import compute_shape_bounds, extract_circle_diameter, extract_polygon_points
+
+
+def _make_region_id(prefix: str, hint_id: str | None) -> str:
+    return f"{prefix}_{hint_id}" if hint_id else prefix
 
 
 def profile_hint_to_removal_intent(
@@ -33,7 +37,7 @@ def profile_hint_to_removal_intent(
 ) -> RemovalIntent:
 
     hint_id = hint.get(HintKeys.ID, "")
-    region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
+    region_id = _make_region_id(region_id_prefix, hint_id)
 
 
     depth_mm = float(hint.get(HintKeys.DEPTH_MM, sheet_thickness_mm))
@@ -82,18 +86,16 @@ def profile_hint_to_removal_intent(
     )
 
 
-def pocket_hint_to_removal_intent(
+def _simple_hint_to_removal_intent(
     hint: dict[str, Any],
-    region_id_prefix: str = "pocket",
+    feature_type: str,
+    region_id_prefix: str,
+    extra_metadata_fn: Callable[[dict[str, Any], dict[str, Any]], None] | None = None,
 ) -> RemovalIntent:
-
     hint_id = hint.get(HintKeys.ID, "")
-    region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
-
-
+    region_id = _make_region_id(region_id_prefix, hint_id)
     depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
     start_depth_mm = float(hint.get(HintKeys.START_DEPTH_MM, 0.0))
-
 
     bounds = _geometry_to_bounds(
         hint.get(HintKeys.SHAPE, ""),
@@ -101,20 +103,14 @@ def pocket_hint_to_removal_intent(
         hint.get(HintKeys.CENTER_XY_MM),
     )
 
-
-    allowance = Allowance()
-
-
-    metadata = {
-        MetadataKeys.HINT_TYPE: FeatureType.POCKET,
+    metadata: dict[str, Any] = {
+        MetadataKeys.HINT_TYPE: feature_type,
         HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
         MetadataKeys.ORIGINAL_ID: hint_id,
     }
 
-
-    if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in hint:
-        metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = float(hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM])
-
+    if extra_metadata_fn:
+        extra_metadata_fn(hint, metadata)
 
     return RemovalIntent(
         region_id=region_id,
@@ -123,9 +119,41 @@ def pocket_hint_to_removal_intent(
             z_top=-start_depth_mm,
             z_bottom=-(start_depth_mm + depth_mm),
         ),
-        allowance=allowance,
+        allowance=Allowance(),
         constraints=Constraints(),
         metadata=metadata,
+    )
+
+
+def _pocket_extra_metadata(hint: dict[str, Any], metadata: dict[str, Any]) -> None:
+    if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in hint:
+        metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = float(hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM])
+
+
+def _hole_extra_metadata(hint: dict[str, Any], metadata: dict[str, Any]) -> None:
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+    shape = hint.get(HintKeys.SHAPE, "")
+    diameter = extract_circle_diameter(shape, geometry)
+    if diameter is not None:
+        metadata[GeometryKeys.DIAMETER_MM] = diameter
+
+
+def _engrave_extra_metadata(hint: dict[str, Any], metadata: dict[str, Any]) -> None:
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+    shape = hint.get(HintKeys.SHAPE, "")
+    points = extract_polygon_points(shape, geometry)
+    if points is not None:
+        metadata[GeometryKeys.POINTS] = points
+    elif GeometryKeys.POINTS in geometry:
+        metadata[GeometryKeys.POINTS] = geometry[GeometryKeys.POINTS]
+
+
+def pocket_hint_to_removal_intent(
+    hint: dict[str, Any],
+    region_id_prefix: str = "pocket",
+) -> RemovalIntent:
+    return _simple_hint_to_removal_intent(
+        hint, FeatureType.POCKET, region_id_prefix, _pocket_extra_metadata
     )
 
 
@@ -133,41 +161,8 @@ def hole_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "hole",
 ) -> RemovalIntent:
-
-    hint_id = hint.get(HintKeys.ID, "")
-    region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
-
-
-    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
-
-
-    bounds = _geometry_to_bounds(
-        hint.get(HintKeys.SHAPE, ""),
-        hint.get(HintKeys.GEOMETRY, {}),
-        hint.get(HintKeys.CENTER_XY_MM),
-    )
-
-
-    allowance = Allowance()
-
-    metadata = {
-        MetadataKeys.HINT_TYPE: FeatureType.HOLE,
-        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
-        MetadataKeys.ORIGINAL_ID: hint_id,
-    }
-
-    geometry = hint.get(HintKeys.GEOMETRY, {})
-    shape = hint.get(HintKeys.SHAPE, "")
-    if ShapeType.is_circle(shape) and GeometryKeys.DIAMETER_MM in geometry:
-        metadata[GeometryKeys.DIAMETER_MM] = geometry[GeometryKeys.DIAMETER_MM]
-
-    return RemovalIntent(
-        region_id=region_id,
-        bounds=bounds,
-        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
-        allowance=allowance,
-        constraints=Constraints(),
-        metadata=metadata,
+    return _simple_hint_to_removal_intent(
+        hint, FeatureType.HOLE, region_id_prefix, _hole_extra_metadata
     )
 
 
@@ -175,40 +170,8 @@ def engrave_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "engrave",
 ) -> RemovalIntent:
-
-    hint_id = hint.get(HintKeys.ID, "")
-    region_id = f"{region_id_prefix}_{hint_id}" if hint_id else region_id_prefix
-
-
-    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
-
-
-    bounds = _geometry_to_bounds(
-        hint.get(HintKeys.SHAPE, ""),
-        hint.get(HintKeys.GEOMETRY, {}),
-        hint.get(HintKeys.CENTER_XY_MM),
-    )
-
-
-    allowance = Allowance()
-
-    metadata = {
-        MetadataKeys.HINT_TYPE: FeatureType.ENGRAVE,
-        HintKeys.SHAPE: hint.get(HintKeys.SHAPE),
-        MetadataKeys.ORIGINAL_ID: hint_id,
-    }
-
-    geometry = hint.get(HintKeys.GEOMETRY, {})
-    if GeometryKeys.POINTS in geometry:
-        metadata[GeometryKeys.POINTS] = geometry[GeometryKeys.POINTS]
-
-    return RemovalIntent(
-        region_id=region_id,
-        bounds=bounds,
-        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
-        allowance=allowance,
-        constraints=Constraints(),
-        metadata=metadata,
+    return _simple_hint_to_removal_intent(
+        hint, FeatureType.ENGRAVE, region_id_prefix, _engrave_extra_metadata
     )
 
 
@@ -238,17 +201,15 @@ def _tabs_to_constraints(tabs_data: dict[str, Any] | None) -> Constraints:
         return Constraints()
 
     count = int(tabs_data.get(TabKeys.COUNT, 0))
-    height_mm = float(tabs_data.get(TabKeys.HEIGHT, tabs_data.get(TabKeys.HEIGHT_MM, 3.0)))
-
-
-    width_value = tabs_data.get(TabKeys.WIDTH_MM, tabs_data.get(TabKeys.WIDTH))
+    height_mm = float(tabs_data.get(TabKeys.HEIGHT_MM, 3.0))
+    width_value = tabs_data.get(TabKeys.WIDTH_MM)
     width_mm = float(width_value) if width_value is not None else None
 
     tab = TabConstraint(count=count, height_mm=height_mm, width_mm=width_mm)
     return Constraints(tabs=tab)
 
 
-def item_to_removal_intent(
+def simple_item_to_removal_intent(
     item: Item,
     region_id_prefix: str = "item",
 ) -> RemovalIntent:
@@ -260,7 +221,7 @@ def item_to_removal_intent(
         raise ValueError(f"Item {item.shape_id} has no feature")
 
 
-    region_id = f"{region_id_prefix}_{item.shape_id}" if item.shape_id else region_id_prefix
+    region_id = _make_region_id(region_id_prefix, item.shape_id)
 
 
     depth_mm = float(item.feature.depth_mm) if item.feature.depth_mm is not None else 0.0

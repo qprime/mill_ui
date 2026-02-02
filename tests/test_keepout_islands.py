@@ -308,7 +308,7 @@ children:
 
 
 def test_removal_intent_includes_islands():
-    from adapters.hints_to_removal import item_to_removal_intent
+    from adapters.hints_to_removal import simple_item_to_removal_intent
 
     pml = """
 Sheet:
@@ -341,7 +341,7 @@ children:
     pocket = pocket_items[0]
 
 
-    removal = item_to_removal_intent(pocket, region_id_prefix="test_pocket")
+    removal = simple_item_to_removal_intent(pocket, region_id_prefix="test_pocket")
 
 
     assert len(removal.constraints.islands) == 1

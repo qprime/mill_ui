@@ -45,9 +45,9 @@ class Geometry:
 @dataclass(frozen=True)
 class Feature:
     type: str
-    depth: str | float
+    depth_mm: float
     side: str | None = None
-    depth_mm: float | None = None
+    is_through: bool = False
     corner_cleanup_tool_diameter_mm: float | None = None
 
 
@@ -63,6 +63,12 @@ class Feature:
 
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
+
+    @property
+    def depth(self) -> str | float:
+        if self.is_through:
+            return "through"
+        return self.depth_mm
 
 
 @dataclass(frozen=True)

@@ -49,6 +49,7 @@ Before modifying a subsystem, read its invariant file.
 | Coordinates | [coordinates.md](coordinates.md) | All geometry, all dimensions |
 | Data Structures | [data_structures.md](data_structures.md) | Dataclasses, tuples, dicts |
 | Pipeline | [pipeline.md](pipeline.md) | AST, IR, CAM layers |
+| Planner | [planner.md](planner.md) | RemovalIntent → Planner adapter, constraint enforcement |
 | Bounds/Geometry | [bounds_geometry.md](bounds_geometry.md) | Bounds validation, shapes |
 | Domains | [domains.md](domains.md) | Domain algebra, boundaries |
 | Generators | [generators.md](generators.md) | Pattern generators |

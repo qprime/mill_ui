@@ -10,6 +10,7 @@ class HintKeys:
     START_DEPTH_MM = "start_depth_mm"
     SIDE = "side"
     TABS = "tabs"
+    KEEPOUTS = "keepouts"
     CORNER_CLEANUP_TOOL_DIAMETER_MM = "corner_cleanup_tool_diameter_mm"
     CORNERS = "corners"
     CORNER_TOOL_DIAMETER_MM = "corner_tool_diameter_mm"
@@ -160,3 +161,4 @@ class HintCollectionKeys:
     HOLES = "holes"
     ENGRAVES = "engraves"
     CORNER_CLEANUPS = "corner_cleanups"
+    KEEPOUTS = "keepouts"

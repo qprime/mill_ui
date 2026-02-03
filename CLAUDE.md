@@ -150,6 +150,7 @@ Before modifying any subsystem, read its invariant file:
 | pml/* | [docs/invariants/pml.md](docs/invariants/pml.md) |
 | validation/* | [docs/invariants/validation.md](docs/invariants/validation.md) |
 | ir/* | [docs/invariants/pipeline.md](docs/invariants/pipeline.md) |
+| cam/planner/* | [docs/invariants/planner.md](docs/invariants/planner.md) |
 | cam/* | [docs/invariants/gcode.md](docs/invariants/gcode.md) |
 | nesting/* | [docs/invariants/nesting.md](docs/invariants/nesting.md) |
 | All geometry | [docs/invariants/coordinates.md](docs/invariants/coordinates.md) |

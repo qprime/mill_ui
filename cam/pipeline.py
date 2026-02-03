@@ -16,6 +16,8 @@ from validation.removal_checks import (
     check_working_area_bounds,
     check_toolpath_clearance,
 )
+from validation.toolpath_checks import verify_passes_avoid_keepouts
+from cam.planner.capabilities import audit_constraints
 from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
@@ -100,6 +102,12 @@ def run_pipeline(
     ir_start = time.perf_counter()
     intents = ast_to_removal_intents(ast)
     timing.ir_ms = (time.perf_counter() - ir_start) * 1000
+
+    constraint_audit = audit_constraints(intents)
+    for error in constraint_audit.errors:
+        errors.append(f"Constraint audit: {error}")
+    for warning in constraint_audit.warnings:
+        warnings.append(f"Constraint audit: {warning}")
 
     overlap_result = check_overlap(intents)
     if overlap_result.has_issues():
@@ -187,6 +195,13 @@ def run_pipeline(
     )
     timing.plan_ms = (time.perf_counter() - plan_start) * 1000
 
+    keepouts = hints.get("keepouts", [])
+    if keepouts:
+        keepout_result = verify_passes_avoid_keepouts(passes, keepouts)
+        if keepout_result.has_violations():
+            for error_msg in keepout_result.format_errors():
+                errors.append(f"Keepout violation: {error_msg}")
+
     gcode_start = time.perf_counter()
     gcode_dict: dict[str, str] = {}
     total_moves = 0
@@ -239,6 +254,16 @@ def run_pipeline(
     total_gcode_size = sum(len(gc) for gc in gcode_dict.values())
     total_gcode_lines = sum(gc.count("\n") for gc in gcode_dict.values())
 
+    constraint_summary = {
+        entry.constraint: {
+            "status": entry.status.value,
+            "count": entry.count,
+            "safety_critical": entry.safety_critical,
+        }
+        for entry in constraint_audit.entries
+        if entry.count > 0
+    }
+
     metrics = {
         "timing": {
             "ir_ms": round(timing.ir_ms, 2),
@@ -248,6 +273,7 @@ def run_pipeline(
             "svg_ms": round(timing.svg_ms, 2),
             "total_ms": round(timing.total_ms, 2),
         },
+        "constraint_audit": constraint_summary,
         "complexity": {
             "total_moves": total_moves,
             "rapid_moves": total_rapid_moves,

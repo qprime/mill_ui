@@ -56,7 +56,7 @@ from layout_ast.compositional import (
 
     WasteCuts,
 
-    Assembly,
+    AssemblyDecl,
 )
 from layout_ast.layout import (
     LayoutAST,
@@ -1589,7 +1589,7 @@ class LayoutResolver:
 
     def _handle_assembly(
         self,
-        node: Assembly,
+        node: AssemblyDecl,
         region: ResolvedRegion,
         items: list[Item],
         params: dict[str, Any],
@@ -2010,7 +2010,7 @@ class LayoutResolver:
 
                 WasteCuts: LayoutResolver._handle_waste_cuts,
 
-                Assembly: LayoutResolver._handle_assembly,
+                AssemblyDecl: LayoutResolver._handle_assembly,
             }
         return LayoutResolver._NODE_HANDLERS
 

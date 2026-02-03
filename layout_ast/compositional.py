@@ -366,7 +366,7 @@ class InterfaceConfig:
 
 
 @dataclass(frozen=True)
-class Assembly:
+class AssemblyDecl:
     type: str
     width_mm: float
     depth_mm: float

@@ -49,7 +49,7 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
-    Assembly,
+    AssemblyDecl,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart
@@ -446,7 +446,7 @@ def format_node(node: Any) -> dict[str, Any]:
             result["strategy"] = node.strategy
         return {"WasteCuts": result}
 
-    elif isinstance(node, Assembly):
+    elif isinstance(node, AssemblyDecl):
         result: dict[str, Any] = {
             "topology": node.topology,
             "width": dim(node.width_mm),

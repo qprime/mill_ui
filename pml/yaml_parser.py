@@ -48,7 +48,7 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
-    Assembly,
+    AssemblyDecl,
     InterfaceConfig,
 )
 from layout_ast.layout import Sheet, Feature
@@ -593,7 +593,7 @@ def parse_node(data: dict, path: str = "") -> Any:
                 receiving=partition_joinery_raw.get("receiving", "a"),
             )
 
-        return Assembly(
+        return AssemblyDecl(
             type=assembly_type,
             width_mm=parse_dimension(node_data.get("width") or node_data.get("dimensions", [0])[0] if isinstance(node_data.get("dimensions"), list) else node_data["width"]),
             depth_mm=parse_dimension(node_data.get("depth") or (node_data.get("dimensions", [0, 0])[1] if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1 else node_data["depth"])),

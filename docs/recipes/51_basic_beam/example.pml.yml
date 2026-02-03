@@ -1,0 +1,16 @@
+# mill_ui: a894299
+# generated: 2026-02-03
+
+Sheet:
+  width: 800mm
+  height: 600mm
+  thickness: 19mm
+
+children:
+  - Beam:
+      name: post
+      length: 500mm
+      width: 76mm
+      thickness: 19mm
+      layers: 3
+      role: POST

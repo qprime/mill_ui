@@ -99,7 +99,7 @@ def box(
         interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
         interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
-    return Assembly(panels=panels, interfaces=tuple(interfaces))
+    return Assembly(members=panels, interfaces=tuple(interfaces))
 
 
 def carcass(
@@ -269,7 +269,7 @@ def carcass(
                     Interface(InterfaceType.INTERNAL, "back", "bottom", f"shelf_{i+1}", "top", shelf_joinery, position_along_edge_a_mm=back_shelf_position)
                 )
 
-    return Assembly(panels=panels, interfaces=tuple(interfaces))
+    return Assembly(members=panels, interfaces=tuple(interfaces))
 
 
 def cubby(
@@ -470,7 +470,7 @@ def cubby(
                     )
                 )
 
-    return Assembly(panels=panels, interfaces=tuple(interfaces))
+    return Assembly(members=panels, interfaces=tuple(interfaces))
 
 
 __all__ = [

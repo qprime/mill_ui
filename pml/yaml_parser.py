@@ -50,6 +50,9 @@ from layout_ast.compositional import (
     WasteCuts,
     AssemblyDecl,
     InterfaceConfig,
+    BeamDecl,
+    BeamFeatureDecl,
+    BeamLayerDecl,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart, NestParseError
@@ -645,6 +648,74 @@ def parse_node(data: dict, path: str = "") -> Any:
         return Feature(
             type="engrave",
             depth_mm=depth_mm,
+        )
+
+    elif node_type == "Beam":
+        layers_raw = node_data.get("layers", 1)
+        if isinstance(layers_raw, int):
+            layers = layers_raw
+        elif isinstance(layers_raw, list):
+            parsed_layers = []
+            for layer_data in layers_raw:
+                cutouts = ()
+                if "cutouts" in layer_data:
+                    cutouts = tuple(
+                        {
+                            "start_mm": parse_dimension(c["start"]),
+                            "length_mm": parse_dimension(c["length"]),
+                            "width_mm": parse_dimension(c["width"]) if "width" in c else None,
+                            "offset_from_edge_mm": parse_dimension(c.get("offset", "0mm")),
+                        }
+                        for c in layer_data["cutouts"]
+                    )
+                parsed_layers.append(BeamLayerDecl(
+                    length_mm=parse_dimension(layer_data["length"]),
+                    offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
+                    cutouts=cutouts,
+                ))
+            layers = tuple(parsed_layers)
+        else:
+            layers = 1
+
+        def parse_beam_feature(feat_data: dict, feat_path: str) -> BeamFeatureDecl:
+            feat_keys = [k for k in feat_data.keys() if k[0].isupper()]
+            if len(feat_keys) != 1:
+                raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
+            feat_type = feat_keys[0]
+            feat_params = feat_data[feat_type] or {}
+            parsed_params = {}
+            for key, value in feat_params.items():
+                if key in ("x", "y", "width", "height", "depth", "diameter", "radius",
+                           "extension", "position", "start", "end"):
+                    if value is not None:
+                        parsed_params[f"{key}_mm"] = parse_dimension(value)
+                else:
+                    parsed_params[key] = value
+            return BeamFeatureDecl(feature_type=feat_type, params=parsed_params)
+
+        face_features = tuple(
+            parse_beam_feature(f, f"{path}.face_features[{i}]")
+            for i, f in enumerate(node_data.get("face_features", []))
+        )
+        end_features = tuple(
+            parse_beam_feature(f, f"{path}.end_features[{i}]")
+            for i, f in enumerate(node_data.get("end_features", []))
+        )
+        edge_features = tuple(
+            parse_beam_feature(f, f"{path}.edge_features[{i}]")
+            for i, f in enumerate(node_data.get("edge_features", []))
+        )
+
+        return BeamDecl(
+            name=node_data.get("name", "beam"),
+            length_mm=parse_dimension(node_data["length"]),
+            width_mm=parse_dimension(node_data["width"]),
+            thickness_mm=parse_dimension(node_data["thickness"]),
+            layers=layers,
+            role=node_data.get("role"),
+            face_features=face_features,
+            end_features=end_features,
+            edge_features=edge_features,
         )
 
     else:

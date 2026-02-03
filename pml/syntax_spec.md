@@ -724,6 +724,122 @@ Decompose remaining sheet into usable pieces:
     strategy: largest  # largest | simple
 ```
 
+#### Beam
+
+Laminated 3D member that expands to multiple panel layers. Beams enable building furniture with structural wooden members (posts, rails, legs) from plywood sheets.
+
+```yaml
+- Beam:
+    name: post_left
+    length: 800mm      # Total beam length (U dimension)
+    width: 76mm        # Cross-section height (V dimension)
+    thickness: 19mm    # Per-layer sheet thickness
+    layers: 3          # Number of laminated layers
+    role: POST         # Optional: POST, RAIL, LEG, APRON, STRETCHER, STILE, MUNTIN
+```
+
+##### Beam Parameters
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| name | yes | - | Beam identifier |
+| length | yes | - | Total beam length (U dimension) |
+| width | yes | - | Cross-section height (V dimension) |
+| thickness | yes | - | Per-layer sheet thickness |
+| layers | yes | - | Number of layers (int) or explicit LayerSpec list |
+| role | no | - | Beam role: POST, RAIL, LEG, APRON, STRETCHER, STILE, MUNTIN |
+
+##### Splicing
+
+When beam length exceeds sheet size, layers are automatically spliced with staggered butt joints:
+
+```yaml
+- Beam:
+    name: long_rail
+    length: 2000mm     # Exceeds typical sheet size
+    width: 100mm
+    thickness: 19mm
+    layers: 3          # Stagger = sheet_size / layers
+```
+
+##### Explicit Layer Specs
+
+For beams with varying layer lengths (e.g., integral tenons):
+
+```yaml
+- Beam:
+    name: rail_with_tenon
+    length: 500mm
+    width: 100mm
+    thickness: 19mm
+    layers:
+      - {length: 500mm}               # Outer layer
+      - {length: 538mm, offset: 0mm}  # Center extends for tenon
+      - {length: 500mm}               # Outer layer
+```
+
+##### Beam Features
+
+Features can be added to faces, ends, or edges:
+
+```yaml
+- Beam:
+    name: post
+    length: 800mm
+    width: 76mm
+    thickness: 19mm
+    layers: 3
+    face_features:
+      - SquareMortise:
+          x: 200mm
+          y: 38mm
+          width: 38mm
+          height: 50mm
+          depth: 19mm
+    edge_features:
+      - Chamfer:
+          edge: top
+          width: 3mm
+          layers: outer    # outer (default) or all
+    end_features:
+      - Tenon:
+          end: right
+          extension: 38mm
+          width: 100mm
+          height: 19mm
+          layers: center
+```
+
+##### Face Features
+
+| Feature | Parameters | Description |
+|---------|------------|-------------|
+| DrillHole | x, y, diameter, depth, face, stage | Drill hole on face |
+| SquareMortise | x, y, width, height, depth, face | Rectangular mortise |
+| CarvedDesign | x, y, design, depth, face | Reference to design template |
+| GeometricPattern | x, y, pattern_type, params, depth | Geometric pattern (fluting, etc) |
+
+##### End Features
+
+| Feature | Parameters | Description |
+|---------|------------|-------------|
+| Tenon | end, extension, width, height, layers | Projecting tenon |
+| EndCap | end, profile, params | End profile (square, rounded, etc) |
+| EndProfile | end, contour | Custom contour points |
+
+##### Edge Features
+
+| Feature | Parameters | Description |
+|---------|------------|-------------|
+| Chamfer | edge, width, angle_deg, layers | Chamfered edge |
+| Fillet | edge, radius, layers | Rounded edge |
+| Rabbet | edge, width, depth, layers | Step profile |
+| EdgeDado | edge, position, width, depth, layers | Groove on edge |
+| EdgeNotch | edge, position, width, depth, layers | Notch on edge |
+| EdgeContour | edge, contour, layers | Custom edge profile |
+
+Edge features default to `layers: outer` (first and last layers only) since middle layer edges are hidden by lamination. Use `layers: all` for structural features.
+
 ## Features
 
 Features can be specified inline on shapes:

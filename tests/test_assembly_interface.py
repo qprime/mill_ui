@@ -91,8 +91,8 @@ class TestAssemblyValidation:
         interfaces = (
             Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "front", "right", Butt()),
         )
-        assembly = Assembly(panels=panels, interfaces=interfaces)
-        with pytest.raises(ValueError, match="Unknown panel: nonexistent"):
+        assembly = Assembly(members=panels, interfaces=interfaces)
+        with pytest.raises(ValueError, match="Unknown member: nonexistent"):
             assembly.validate()
 
     def test_validates_unknown_panel_b(self):
@@ -102,8 +102,8 @@ class TestAssemblyValidation:
         interfaces = (
             Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "nonexistent", "right", Butt()),
         )
-        assembly = Assembly(panels=panels, interfaces=interfaces)
-        with pytest.raises(ValueError, match="Unknown panel: nonexistent"):
+        assembly = Assembly(members=panels, interfaces=interfaces)
+        with pytest.raises(ValueError, match="Unknown member: nonexistent"):
             assembly.validate()
 
     def test_validates_interface_joinery_compatibility(self):
@@ -114,7 +114,7 @@ class TestAssemblyValidation:
         interfaces = (
             Interface(InterfaceType.INTERNAL, "shelf", "bottom", "partition", "top", Finger(width_mm=12)),
         )
-        assembly = Assembly(panels=panels, interfaces=interfaces)
+        assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="not valid for INTERNAL"):
             assembly.validate()
 

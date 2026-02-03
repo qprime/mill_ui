@@ -1,0 +1,16 @@
+# mill_ui: a894299
+# generated: 2026-02-03
+
+Sheet:
+  width: 1200mm
+  height: 800mm
+  thickness: 19mm
+
+children:
+  - Beam:
+      name: long_rail
+      length: 2000mm
+      width: 100mm
+      thickness: 19mm
+      layers: 3
+      role: RAIL

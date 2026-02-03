@@ -486,6 +486,32 @@ class ResolvedRegion:
 
 
 @dataclass(frozen=True)
+class BeamFeatureDecl:
+    feature_type: str
+    params: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class BeamLayerDecl:
+    length_mm: float
+    offset_mm: float = 0.0
+    cutouts: tuple[dict[str, Any], ...] = ()
+
+
+@dataclass(frozen=True)
+class BeamDecl:
+    name: str
+    length_mm: float
+    width_mm: float
+    thickness_mm: float
+    layers: int | tuple[BeamLayerDecl, ...]
+    role: str | None = None
+    face_features: tuple[BeamFeatureDecl, ...] = ()
+    end_features: tuple[BeamFeatureDecl, ...] = ()
+    edge_features: tuple[BeamFeatureDecl, ...] = ()
+
+
+@dataclass(frozen=True)
 class CompositionalLayoutAST:
     sheet: Any
     components: dict[str, ComponentDef] = field(default_factory=dict)

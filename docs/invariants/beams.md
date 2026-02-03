@@ -421,6 +421,7 @@ class BeamRole(Enum):
 | BM-11 | HARD | SEGMENT_FEATURE_NO_CROSS | Segment-stage features must not span segment boundaries |
 | BM-14 | HARD | DATUM_CONSISTENT | All layer strips share the same beam-local origin; features at U=x align across layers |
 | BM-15 | HARD | EDGE_FEATURES_OUTER_DEFAULT | Decorative edge features (fillet, chamfer) default to outer layers only |
+| BM-16 | HARD | INTERNAL_JOINERY_IN_SPEC | Joinery requiring coordinated cuts across multiple layers must be expressed as BeamSpec features, not via Interface semantics |
 | BM-12 | STRUCTURAL | TENON_LAYERS_VALID | Tenon layer specification must reference valid layers |
 | BM-13 | STRUCTURAL | MORTISE_DEPTH_SUFFICIENT | mortise_depth >= tenon_length |
 

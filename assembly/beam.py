@@ -198,13 +198,21 @@ class EdgeContour:
 EdgeFeature = Fillet | Chamfer | Rabbet | EdgeDado | EdgeNotch | EdgeContour
 
 
-def compute_segments(length: float, sheet_size: float, layers: int) -> list[list[Segment]]:
+def compute_segments(
+    length: float,
+    sheet_size: float,
+    layers: int,
+    min_segment_length: float | None = None,
+) -> list[list[Segment]]:
     if layers < 1:
         raise ValueError(f"layers must be >= 1, got {layers}")
     if length <= 0:
         raise ValueError(f"length must be positive, got {length}")
     if sheet_size <= 0:
         raise ValueError(f"sheet_size must be positive, got {sheet_size}")
+
+    if min_segment_length is None:
+        min_segment_length = sheet_size * 0.1
 
     if length <= sheet_size:
         return [
@@ -222,10 +230,15 @@ def compute_segments(length: float, sheet_size: float, layers: int) -> list[list
         seg_idx = 0
 
         while pos < length:
+            remaining = length - pos
             if seg_idx == 0:
-                seg_len = min(sheet_size - layer_offset, length - pos)
+                seg_len = min(sheet_size - layer_offset, remaining)
             else:
-                seg_len = min(sheet_size, length - pos)
+                seg_len = min(sheet_size, remaining)
+
+            next_remaining = remaining - seg_len
+            if next_remaining > 0 and next_remaining < min_segment_length:
+                seg_len = remaining / 2.0
 
             layer_segments.append(Segment(
                 start_mm=pos,

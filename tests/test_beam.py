@@ -118,6 +118,26 @@ class TestComputeSegments:
         with pytest.raises(ValueError, match="length must be positive"):
             compute_segments(length=0, sheet_size=1200, layers=3)
 
+    def test_minimum_segment_length_avoids_tiny_segments(self):
+        segments = compute_segments(length=2000, sheet_size=1187.3, layers=3)
+        min_len = 1187.3 * 0.1
+        for layer_segments in segments:
+            for seg in layer_segments:
+                assert seg.length >= min_len, f"Segment {seg} is too short"
+
+    def test_minimum_segment_length_custom(self):
+        segments = compute_segments(length=2000, sheet_size=1200, layers=3, min_segment_length=200)
+        for layer_segments in segments:
+            for seg in layer_segments:
+                assert seg.length >= 200, f"Segment {seg} is shorter than custom minimum"
+
+    def test_minimum_segment_splits_evenly(self):
+        segments = compute_segments(length=1250, sheet_size=1200, layers=1, min_segment_length=100)
+        assert len(segments[0]) == 2
+        seg0_len = segments[0][0].length
+        seg1_len = segments[0][1].length
+        assert abs(seg0_len - seg1_len) < 1.0
+
 
 class TestValidateButtsNeverAlign:
     def test_valid_segments_pass(self):

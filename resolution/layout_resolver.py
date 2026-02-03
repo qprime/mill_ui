@@ -1624,12 +1624,13 @@ class LayoutResolver:
         )
 
         if assembly_type == "box":
-            box_perimeter_joinery = self._build_joinery_from_config(
+            box_perimeter_joinery_raw = self._build_joinery_from_config(
                 node.perimeter_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
             )
+            box_perimeter_joinery = None if box_perimeter_joinery_raw == "none" else box_perimeter_joinery_raw
             assembly = box(
                 width=node.width_mm,
                 length=node.depth_mm,
@@ -1641,26 +1642,29 @@ class LayoutResolver:
                 bottom=bottom_joinery,
             )
         elif assembly_type == "carcass":
-            perimeter_joinery = self._build_joinery_from_config(
+            perimeter_joinery_raw = self._build_joinery_from_config(
                 node.perimeter_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
             )
+            perimeter_joinery = None if perimeter_joinery_raw == "none" else perimeter_joinery_raw
 
-            shelf_joinery = self._build_joinery_from_config(
+            shelf_joinery_raw = self._build_joinery_from_config(
                 node.shelf_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or Captured()
+            )
+            shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
 
-            partition_joinery = self._build_joinery_from_config(
+            partition_joinery_raw = self._build_joinery_from_config(
                 node.partition_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or Captured()
+            )
+            partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
 
             back_joinery = self._build_joinery_from_config(
                 node.back,
@@ -1692,33 +1696,37 @@ class LayoutResolver:
             )
         elif assembly_type == "cubby":
             grid = node.grid or (2, 2)
-            perimeter_joinery = self._build_joinery_from_config(
+            perimeter_joinery_raw = self._build_joinery_from_config(
                 node.perimeter_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or Finger()
+            )
+            perimeter_joinery = Butt() if perimeter_joinery_raw == "none" else (perimeter_joinery_raw or Finger())
 
-            shelf_joinery = self._build_joinery_from_config(
+            shelf_joinery_raw = self._build_joinery_from_config(
                 node.shelf_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or Captured()
+            )
+            shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
 
-            partition_joinery = self._build_joinery_from_config(
+            partition_joinery_raw = self._build_joinery_from_config(
                 node.partition_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or Captured()
+            )
+            partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
 
-            internal_joinery = self._build_joinery_from_config(
+            internal_joinery_raw = self._build_joinery_from_config(
                 node.internal_joinery,
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
-            ) or HalfLap()
+            )
+            internal_joinery = Butt() if internal_joinery_raw == "none" else (internal_joinery_raw or HalfLap())
 
             back_rabbet_width = node.back_thickness_mm or node.thickness_mm
             back_rabbet_depth = node.back_rabbet_depth_mm or (node.thickness_mm / 2)

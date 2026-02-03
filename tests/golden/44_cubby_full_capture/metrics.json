@@ -1,0 +1,905 @@
+{
+  "golden": {
+    "recipe_name": "44_cubby_full_capture",
+    "created_at": "2026-02-03T16:09:28.325716+00:00"
+  },
+  "svg": {
+    "version": "1.0.0",
+    "extraction_time_ms": 1.51,
+    "document": {
+      "width_mm": 2280.0,
+      "height_mm": 1680.0,
+      "viewbox": [
+        0.0,
+        0.0,
+        2280.0,
+        1680.0
+      ]
+    },
+    "layers": {
+      "count": 14,
+      "names": [
+        "CONSTRUCTION",
+        "DIMENSIONS",
+        "EDGE_COLORS",
+        "ENGRAVE_PATHS",
+        "HOLES",
+        "LABELS",
+        "LEGEND",
+        "NOTES",
+        "POCKET_REGIONS",
+        "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
+        "SHEET_OUTLINE",
+        "TITLE_BLOCK",
+        "WASTE_CUTS"
+      ],
+      "by_layer": {
+        "CONSTRUCTION": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "DIMENSIONS": {
+          "element_count": 132,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 66,
+          "polygon_count": 44,
+          "text_count": 22,
+          "elements": []
+        },
+        "EDGE_COLORS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "ENGRAVE_PATHS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "HOLES": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 8,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 8,
+          "elements": []
+        },
+        "LEGEND": {
+          "element_count": 11,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 4,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
+        "NOTES": {
+          "element_count": 23,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 23,
+          "elements": []
+        },
+        "POCKET_REGIONS": {
+          "element_count": 17,
+          "rect_count": 17,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                161.35,
+                1318.65,
+                179.55,
+                1518.65
+              ],
+              "center": [
+                170.45,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                707.15,
+                1318.65,
+                725.35,
+                1518.65
+              ],
+              "center": [
+                716.25,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                434.35,
+                1318.65,
+                452.55,
+                1518.65
+              ],
+              "center": [
+                443.45,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                161.35,
+                1318.65,
+                725.35,
+                1336.85
+              ],
+              "center": [
+                443.35,
+                1327.75
+              ],
+              "width": 564.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                735.35,
+                1318.65,
+                753.55,
+                1518.65
+              ],
+              "center": [
+                744.45,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1281.15,
+                1318.65,
+                1299.35,
+                1518.65
+              ],
+              "center": [
+                1290.25,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1008.35,
+                1318.65,
+                1026.55,
+                1518.65
+              ],
+              "center": [
+                1017.45,
+                1418.65
+              ],
+              "width": 18.2,
+              "height": 200.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                735.35,
+                1500.45,
+                1299.35,
+                1518.65
+              ],
+              "center": [
+                1017.35,
+                1509.55
+              ],
+              "width": 564.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1309.35,
+                1388.1167,
+                1509.35,
+                1406.3167
+              ],
+              "center": [
+                1409.35,
+                1397.2167
+              ],
+              "width": 200.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1309.35,
+                1266.7833,
+                1509.35,
+                1284.9833
+              ],
+              "center": [
+                1409.35,
+                1275.8833
+              ],
+              "width": 200.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1491.15,
+                1118.65,
+                1509.35,
+                1518.65
+              ],
+              "center": [
+                1500.25,
+                1318.65
+              ],
+              "width": 18.2,
+              "height": 400.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1519.35,
+                1388.1167,
+                1719.35,
+                1406.3167
+              ],
+              "center": [
+                1619.35,
+                1397.2167
+              ],
+              "width": 200.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1519.35,
+                1266.7833,
+                1719.35,
+                1284.9833
+              ],
+              "center": [
+                1619.35,
+                1275.8833
+              ],
+              "width": 200.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1519.35,
+                1118.65,
+                1537.55,
+                1518.65
+              ],
+              "center": [
+                1528.45,
+                1318.65
+              ],
+              "width": 18.2,
+              "height": 400.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                161.35,
+                592.1167,
+                761.35,
+                610.3167
+              ],
+              "center": [
+                461.35,
+                601.2167
+              ],
+              "width": 600.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                161.35,
+                458.7833,
+                761.35,
+                476.9833
+              ],
+              "center": [
+                461.35,
+                467.8833
+              ],
+              "width": 600.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                452.35,
+                334.65,
+                470.55,
+                734.65
+              ],
+              "center": [
+                461.45,
+                534.65
+              ],
+              "width": 18.2,
+              "height": 400.0
+            }
+          ]
+        },
+        "PROFILE_CUTS": {
+          "element_count": 8,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 8,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "path",
+              "bounds": [
+                161.35,
+                1318.65,
+                725.35,
+                1518.65
+              ],
+              "center": [
+                443.35,
+                1418.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                735.35,
+                1318.65,
+                1299.35,
+                1518.65
+              ],
+              "center": [
+                1017.35,
+                1418.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                1309.35,
+                1118.65,
+                1509.35,
+                1518.65
+              ],
+              "center": [
+                1409.35,
+                1318.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                1519.35,
+                1118.65,
+                1719.35,
+                1518.65
+              ],
+              "center": [
+                1619.35,
+                1318.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                161.35,
+                908.65,
+                725.35,
+                1108.65
+              ],
+              "center": [
+                443.35,
+                1008.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                735.35,
+                908.65,
+                1299.35,
+                1108.65
+              ],
+              "center": [
+                1017.35,
+                1008.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                1309.35,
+                744.65,
+                1509.35,
+                1108.65
+              ],
+              "center": [
+                1409.35,
+                926.65
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                161.35,
+                334.65,
+                761.35,
+                734.65
+              ],
+              "center": [
+                461.35,
+                534.65
+              ]
+            }
+          ]
+        },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 8,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 8,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "SHEET_OUTLINE": {
+          "element_count": 2,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                140.0,
+                140.0,
+                2140.0,
+                1540.0
+              ],
+              "center": [
+                1140.0,
+                840.0
+              ],
+              "width": 2000.0,
+              "height": 1400.0
+            }
+          ]
+        },
+        "TITLE_BLOCK": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
+          "elements": []
+        },
+        "WASTE_CUTS": {
+          "element_count": 0,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        }
+      }
+    },
+    "paths": {
+      "total_count": 34,
+      "closed_count": 34,
+      "open_count": 0,
+      "total_length_mm": 19500.203,
+      "by_layer": {
+        "PROFILE_CUTS": {
+          "count": 8,
+          "closed": 8,
+          "length_mm": 9712.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 8,
+          "closed": 8,
+          "length_mm": 9788.203
+        },
+        "POCKET_REGIONS": {
+          "count": 17,
+          "closed": 17,
+          "length_mm": 0.0
+        },
+        "SHEET_OUTLINE": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 0.0
+        }
+      }
+    },
+    "bounds": {
+      "x_min": 140.0,
+      "x_max": 2163.0,
+      "y_min": 38.0,
+      "y_max": 1540.0
+    },
+    "text_elements": {
+      "count": 61,
+      "dimension_labels": [
+        "100.0mm",
+        "103.1mm",
+        "112.1mm",
+        "18.2mm",
+        "18.2mm",
+        "18.2mm",
+        "18.2mm",
+        "18.2mm",
+        "18.2mm",
+        "200.0mm",
+        "200.0mm",
+        "200.0mm",
+        "200.0mm",
+        "200.0mm",
+        "364.0mm",
+        "400.0mm",
+        "400.0mm",
+        "400.0mm",
+        "564.0mm",
+        "564.0mm",
+        "600.0mm",
+        "600.0mm",
+        "Sheet: 2000.0 \u00d7 1400.0 \u00d7 18.0mm",
+        "\u2022 pocket: 9.0mm"
+      ],
+      "depth_annotations": [
+        "\u2022 pocket: 9.0mm"
+      ],
+      "notes_text": [
+        "NOTES",
+        "Sheet: 2000.0 \u00d7 1400.0 \u00d7 18.0mm",
+        "Features: 8 profiles, 17 pockets",
+        "Depths:",
+        "\u2022 pocket: 9.0mm",
+        "Parts (17):",
+        "\u2022 assembly_back_dado_22",
+        "\u2022 assembly_back_dado_23",
+        "\u2022 assembly_back_dado_24",
+        "\u2022 assembly_bottom_dado_6",
+        "\u2022 assembly_bottom_dado_7",
+        "\u2022 assembly_bottom_dado_8",
+        "\u2022 assembly_bottom_dado_9",
+        "\u2022 assembly_left_side_dado_11",
+        "\u2022 assembly_left_side_dado_12",
+        "\u2022 assembly_left_side_dado_13",
+        "\u2022 assembly_right_side_dado_15",
+        "\u2022 assembly_right_side_dado_16",
+        "\u2022 assembly_right_side_dado_17",
+        "\u2022 assembly_top_dado_1",
+        "\u2022 assembly_top_dado_2",
+        "\u2022 assembly_top_dado_3",
+        "\u2022 assembly_top_dado_4"
+      ]
+    },
+    "circles": {
+      "count": 0,
+      "radii_mm": []
+    },
+    "rects": {
+      "count": 23,
+      "dimensions": [
+        [
+          15.0,
+          8.0
+        ],
+        [
+          15.0,
+          1370.0
+        ],
+        [
+          15.0,
+          1370.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          200.0
+        ],
+        [
+          18.2,
+          400.0
+        ],
+        [
+          18.2,
+          400.0
+        ],
+        [
+          18.2,
+          400.0
+        ],
+        [
+          200.0,
+          18.2
+        ],
+        [
+          200.0,
+          18.2
+        ],
+        [
+          200.0,
+          18.2
+        ],
+        [
+          200.0,
+          18.2
+        ],
+        [
+          564.0,
+          18.2
+        ],
+        [
+          564.0,
+          18.2
+        ],
+        [
+          600.0,
+          18.2
+        ],
+        [
+          600.0,
+          18.2
+        ],
+        [
+          2000.0,
+          15.0
+        ],
+        [
+          2000.0,
+          15.0
+        ],
+        [
+          2000.0,
+          1400.0
+        ]
+      ]
+    }
+  },
+  "gcode": {
+    "version": "1.0.0",
+    "extraction_time_ms": 32.4456,
+    "summary": {
+      "total_lines": 10967,
+      "comment_lines": 80,
+      "motion_lines": 8819,
+      "tool_change_lines": 0,
+      "spindle_lines": 6,
+      "feed_lines": 6773
+    },
+    "motion": {
+      "g0_count": 4094,
+      "g1_count": 4725,
+      "g2_count": 0,
+      "g3_count": 0,
+      "total_rapid_distance_mm": 53547.2015,
+      "total_feed_distance_mm": 250904.141
+    },
+    "z_profile": {
+      "safe_z_mm": 6.0,
+      "max_plunge_z_mm": -18.0,
+      "unique_cutting_depths": [
+        -18.0,
+        -17.463,
+        -15.875,
+        -14.288,
+        -12.7,
+        -11.113,
+        -9.525,
+        -9.0,
+        -7.938,
+        -6.35,
+        -6.0,
+        -4.762,
+        -3.175,
+        -3.0,
+        -1.587
+      ],
+      "depth_count": 15,
+      "max_single_plunge_mm": 24.0
+    },
+    "xy_bounds": {
+      "x_min": 0.0,
+      "x_max": 1580.938,
+      "y_min": 0.0,
+      "y_max": 1206.937
+    },
+    "feeds": {
+      "min_feed_rate": 250.0,
+      "max_feed_rate": 900.0,
+      "feed_rates_used": [
+        250.0,
+        300.0,
+        700.0,
+        900.0
+      ]
+    },
+    "tools": {
+      "tool_numbers": [],
+      "tool_changes": 0,
+      "spindle_speeds": [
+        10000,
+        14000
+      ]
+    },
+    "operations": {
+      "profile_passes": 34,
+      "pocket_passes": 34,
+      "bore_passes": 0,
+      "total_passes": 68,
+      "operation_names": [
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=9.000",
+        "BEGIN finish profile pass",
+        "profile_outline"
+      ]
+    },
+    "time_estimate": {
+      "rapid_time_s": 642.5664,
+      "feed_time_s": 27691.6408,
+      "total_time_s": 28334.207199999997
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -18.0,
+      "tabs_at_max_depth": true
+    },
+    "file_count": 2
+  }
+}

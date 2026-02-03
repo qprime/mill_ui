@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-01-30T02:38:24.069001+00:00"
+    "created_at": "2026-02-03T16:09:27.132133+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.37,
+    "extraction_time_ms": 0.38,
     "document": {
       "width_mm": 630.0,
       "height_mm": 730.0,
@@ -294,17 +294,18 @@
         "390.0mm",
         "420.0mm",
         "450.0mm",
-        "Sheet: 350.0 \u00d7 450.0 \u00d7 19.0mm"
+        "Sheet: 350.0 \u00d7 450.0 \u00d7 19.0mm",
+        "\u2022 pocket: 2.0mm"
       ],
       "depth_annotations": [
-        "\u2022 pocket: 2.0"
+        "\u2022 pocket: 2.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 350.0 \u00d7 450.0 \u00d7 19.0mm",
         "Features: 1 profile, 3 pockets",
         "Depths:",
-        "\u2022 pocket: 2.0"
+        "\u2022 pocket: 2.0mm"
       ]
     },
     "circles": {
@@ -331,7 +332,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0515,
+    "extraction_time_ms": 0.0509,
     "summary": {
       "total_lines": 269,
       "comment_lines": 8,

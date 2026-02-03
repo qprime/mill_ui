@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-01-30T02:38:22.785302+00:00"
+    "created_at": "2026-02-03T16:09:25.841189+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.23,
+    "extraction_time_ms": 0.22,
     "document": {
       "width_mm": 580.0,
       "height_mm": 480.0,
@@ -238,17 +238,18 @@
       "dimension_labels": [
         "200.0mm",
         "300.0mm",
-        "Sheet: 300.0 \u00d7 200.0 \u00d7 19.0mm"
+        "Sheet: 300.0 \u00d7 200.0 \u00d7 19.0mm",
+        "\u2022 pocket: 4.0mm"
       ],
       "depth_annotations": [
-        "\u2022 pocket: 4.0"
+        "\u2022 pocket: 4.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 300.0 \u00d7 200.0 \u00d7 19.0mm",
         "Features: 1 pocket",
         "Depths:",
-        "\u2022 pocket: 4.0",
+        "\u2022 pocket: 4.0mm",
         "Parts (1):",
         "\u2022 recess"
       ]
@@ -277,7 +278,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7474,
+    "extraction_time_ms": 1.766,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

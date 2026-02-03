@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-01-30T02:38:22.972776+00:00"
+    "created_at": "2026-02-03T16:09:26.028442+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.94,
+    "extraction_time_ms": 0.97,
     "document": {
       "width_mm": 1525.0,
       "height_mm": 1512.0,
@@ -579,18 +579,19 @@
         "57mm",
         "597.0mm",
         "76.0mm",
-        "Sheet: 1245.0 \u00d7 1232.0 \u00d7 19.0mm"
+        "Sheet: 1245.0 \u00d7 1232.0 \u00d7 19.0mm",
+        "\u2022 pocket: 4.0mm, 6.0mm"
       ],
       "depth_annotations": [
         "Features: 11 pockets, 11 profiles",
-        "\u2022 pocket: 4.0, 6.0"
+        "\u2022 pocket: 4.0mm, 6.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 1245.0 \u00d7 1232.0 \u00d7 19.0mm",
         "Features: 11 pockets, 11 profiles",
         "Depths:",
-        "\u2022 pocket: 4.0, 6.0",
+        "\u2022 pocket: 4.0mm, 6.0mm",
         "Parts (22):",
         "\u2022 door1",
         "\u2022 door1_panel",
@@ -724,7 +725,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 21.2039,
+    "extraction_time_ms": 21.3099,
     "summary": {
       "total_lines": 8013,
       "comment_lines": 59,

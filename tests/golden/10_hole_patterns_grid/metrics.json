@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "10_hole_patterns_grid",
-    "created_at": "2026-01-30T02:38:22.763540+00:00"
+    "created_at": "2026-02-03T16:09:25.819674+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -667,17 +667,18 @@
         "135.0mm",
         "41.9mm",
         "Sheet: 300.0 \u00d7 700.0 \u00d7 19.0mm",
+        "\u2022 hole: 12.0mm",
         "\u2022 \u23005.0mm"
       ],
       "depth_annotations": [
-        "\u2022 hole: 12.0"
+        "\u2022 hole: 12.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 300.0 \u00d7 700.0 \u00d7 19.0mm",
         "Features: 32 holes",
         "Depths:",
-        "\u2022 hole: 12.0",
+        "\u2022 hole: 12.0mm",
         "Hole Diameters:",
         "\u2022 \u23005.0mm"
       ]
@@ -735,7 +736,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 139.6576,
+    "extraction_time_ms": 139.3928,
     "summary": {
       "total_lines": 31598,
       "comment_lines": 34,

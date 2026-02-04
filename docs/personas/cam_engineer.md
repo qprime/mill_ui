@@ -66,3 +66,9 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 - PML examples demonstrating new features
 - Recipe updates if adding capabilities
 - Clean, minimal diffs that do exactly what was asked
+
+## Committing Changes
+
+When committing, always include updated `docs/recipes/**/*.pml.yml` files. The `# mill_ui: <hash>` header at the top of each recipe tracks which commit the recipe last passed against—these updates are part of the implementation, not noise to be excluded.
+
+Run `python -m tests.test_recipes --regen_recipes` before committing to update all recipe headers, then stage the recipe files along with your implementation changes.

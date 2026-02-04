@@ -311,6 +311,15 @@ class MeasurementGridGen:
 
 
 @dataclass(frozen=True)
+class GridLinesGen:
+    unit: str = "metric"
+    spacing_mm: float | None = None
+    minor_spacing_mm: float | None = None
+    depth_mm: float = 0.3
+    minor_lines: bool = False
+
+
+@dataclass(frozen=True)
 class MeasurementEdgeGen:
     edges: tuple[str, ...]
     unit: str = "metric"

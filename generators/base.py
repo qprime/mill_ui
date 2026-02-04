@@ -12,6 +12,7 @@ from generators.core import (
 from generators.params.area import (
     FlatPocketParams,
     GridParams,
+    GridLinesParams,
     MeasurementGridParams,
     RaisedPanelParams,
     LinePatternParams,
@@ -40,6 +41,7 @@ __all__ = [
     "ProfileParams",
     "WaveParams",
     "GridParams",
+    "GridLinesParams",
     "MeasurementGridParams",
     "MeasurementEdgeParams",
     "BeadParams",

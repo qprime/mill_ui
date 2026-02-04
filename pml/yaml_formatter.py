@@ -46,6 +46,7 @@ from layout_ast.compositional import (
     HoleGridGen,
     TemplateDef,
     MeasurementGridGen,
+    GridLinesGen,
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
@@ -416,6 +417,20 @@ def format_node(node: Any) -> dict[str, Any]:
         if node.label_start != 0:
             result["label_start"] = node.label_start
         return {"MeasurementEdge": result}
+
+    elif isinstance(node, GridLinesGen):
+        result: dict[str, Any] = {}
+        if node.unit != "metric":
+            result["unit"] = node.unit
+        if node.spacing_mm is not None:
+            result["spacing"] = dim(node.spacing_mm)
+        if node.minor_spacing_mm is not None:
+            result["minor_spacing"] = dim(node.minor_spacing_mm)
+        if node.depth_mm != 0.3:
+            result["depth"] = dim(node.depth_mm)
+        if node.minor_lines:
+            result["minor_lines"] = True
+        return {"GridLines": result if result else None}
 
     elif isinstance(node, EngraveTextGen):
         result: dict[str, Any] = {"text": node.text}

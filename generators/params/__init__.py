@@ -2,6 +2,7 @@
 from generators.params.area import (
     FlatPocketParams,
     GridParams,
+    GridLinesParams,
     MeasurementGridParams,
     RaisedPanelParams,
     LinePatternParams,
@@ -21,6 +22,7 @@ from generators.params.loop import (
 __all__ = [
     "FlatPocketParams",
     "GridParams",
+    "GridLinesParams",
     "MeasurementGridParams",
     "RaisedPanelParams",
     "LinePatternParams",

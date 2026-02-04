@@ -50,6 +50,8 @@ from layout_ast.compositional import (
 
     MeasurementGridGen,
 
+    GridLinesGen,
+
     MeasurementEdgeGen,
 
     EngraveTextGen,
@@ -82,9 +84,10 @@ from generators.area.concentric_border import concentric_border_generator
 from generators.area.x_panel import x_panel_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.measurement_grid import measurement_grid_generator
+from generators.area.grid_lines import grid_lines_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.area.engrave_text import engrave_text_at_position
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, MeasurementEdgeParams
+from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, GridLinesParams, MeasurementEdgeParams
 from assembly.core import Assembly as AssemblyModel, InterfaceType
 from assembly.panel import PanelSpec, Edge as PanelEdge
 from assembly.joinery import Butt, Finger, Captured, HalfLap
@@ -1048,6 +1051,39 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("measurement_edge")
         try:
             generated_items = measurement_edge_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_grid_lines_gen(
+        self,
+        node: GridLinesGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = GridLinesParams(
+            unit=node.unit,
+            spacing_mm=node.spacing_mm,
+            minor_spacing_mm=node.minor_spacing_mm,
+            depth_mm=node.depth_mm,
+            minor_lines=node.minor_lines,
+        )
+
+        shape_id_prefix = self._next_shape_id("grid_lines")
+        try:
+            generated_items = grid_lines_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -2255,6 +2291,8 @@ class LayoutResolver:
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
 
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
+
+                GridLinesGen: LayoutResolver._handle_grid_lines_gen,
 
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
 

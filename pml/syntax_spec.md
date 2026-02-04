@@ -473,6 +473,37 @@ Ruler marks on edges:
     label_height: 4mm
 ```
 
+#### GridLines
+
+Interior grid lines spanning edge-to-edge (graph paper / cutting mat style):
+
+```yaml
+- GridLines:
+    unit: metric         # metric | imperial | custom
+    depth: 0.3mm
+    minor_lines: true    # include minor grid lines
+```
+
+Parameters:
+- `unit`: Preset spacing (metric: 10mm major/1mm minor, imperial: 1"/1/16")
+- `spacing`: Custom major line spacing (alternative to unit)
+- `minor_spacing`: Custom minor line spacing
+- `depth`: Engrave depth
+- `minor_lines`: Include minor grid lines between major lines
+
+For labeled grids, combine with MeasurementEdge:
+
+```yaml
+- GridLines:
+    unit: metric
+    depth: 0.3mm
+- MeasurementEdge:
+    edges: [bottom, left]
+    unit: metric
+    labels: true
+    depth: 0.3mm
+```
+
 #### EngraveText
 
 Text engraving:

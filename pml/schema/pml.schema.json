@@ -112,6 +112,7 @@
         "Triangle": {"$ref": "#/$defs/triangleNode"},
         "HoleGrid": {"$ref": "#/$defs/holeGridNode"},
         "MeasurementGrid": {"$ref": "#/$defs/measurementGridNode"},
+        "GridLines": {"$ref": "#/$defs/gridLinesNode"},
         "MeasurementEdge": {"$ref": "#/$defs/measurementEdgeNode"},
         "EngraveText": {"$ref": "#/$defs/engraveTextNode"},
         "WasteCuts": {"$ref": "#/$defs/wasteCutsNode"},
@@ -482,6 +483,16 @@
         "label_offset": {"$ref": "#/$defs/dimension"},
         "label_interval": {"type": "integer"},
         "label_start": {"type": "integer"}
+      }
+    },
+    "gridLinesNode": {
+      "type": ["object", "null"],
+      "properties": {
+        "unit": {"type": "string", "enum": ["metric", "imperial", "custom"]},
+        "spacing": {"$ref": "#/$defs/dimension"},
+        "minor_spacing": {"$ref": "#/$defs/dimension"},
+        "depth": {"$ref": "#/$defs/dimension"},
+        "minor_lines": {"type": "boolean"}
       }
     },
     "engraveTextNode": {

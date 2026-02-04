@@ -45,6 +45,7 @@ from layout_ast.compositional import (
     HoleGridGen,
     TemplateDef,
     MeasurementGridGen,
+    GridLinesGen,
     MeasurementEdgeGen,
     EngraveTextGen,
     WasteCuts,
@@ -466,6 +467,15 @@ def parse_node(data: dict, path: str = "") -> Any:
             label_offset_mm=parse_dimension(node_data["label_offset"]) if "label_offset" in node_data else None,
             label_interval=node_data.get("label_interval", 1),
             label_start=node_data.get("label_start", 0),
+        )
+
+    elif node_type == "GridLines":
+        return GridLinesGen(
+            unit=node_data.get("unit", "metric"),
+            spacing_mm=parse_dimension(node_data["spacing"]) if "spacing" in node_data else None,
+            minor_spacing_mm=parse_dimension(node_data["minor_spacing"]) if "minor_spacing" in node_data else None,
+            depth_mm=parse_dimension(node_data.get("depth", "0.3mm")),
+            minor_lines=node_data.get("minor_lines", False),
         )
 
     elif node_type == "EngraveText":

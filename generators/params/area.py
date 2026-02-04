@@ -153,6 +153,67 @@ class XPanelParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class GridLinesParams(BaseParams):
+
+    unit: Literal["metric", "imperial", "custom"] = "metric"
+    spacing_mm: float | None = None
+    minor_spacing_mm: float | None = None
+    depth_mm: float = 0.3
+    minor_lines: bool = False
+
+    def validate(self) -> None:
+        valid_units = ("metric", "imperial", "custom")
+        if self.unit not in valid_units:
+            raise ValueError(
+                f"GridLinesParams: unit must be one of {valid_units}, got '{self.unit}'"
+            )
+
+        if self.unit == "custom":
+            if self.spacing_mm is None:
+                raise ValueError(
+                    "GridLinesParams: spacing_mm required for custom unit"
+                )
+
+        major_spacing = self.get_major_spacing()
+        if major_spacing <= 0:
+            raise ValueError(
+                f"GridLinesParams: major_spacing must be positive, got {major_spacing}"
+            )
+
+        if self.minor_lines:
+            minor_spacing = self.get_minor_spacing()
+            if minor_spacing <= 0:
+                raise ValueError(
+                    f"GridLinesParams: minor_spacing must be positive, got {minor_spacing}"
+                )
+
+        if self.depth_mm <= 0:
+            raise ValueError(
+                f"GridLinesParams: depth_mm must be positive, got {self.depth_mm}"
+            )
+
+    def get_major_spacing(self) -> float:
+        if self.spacing_mm is not None:
+            return self.spacing_mm
+        if self.unit == "metric":
+            return 10.0
+        elif self.unit == "imperial":
+            return 25.4
+        else:
+            return self.spacing_mm or 10.0
+
+    def get_minor_spacing(self) -> float:
+        if self.minor_spacing_mm is not None:
+            return self.minor_spacing_mm
+        if self.unit == "metric":
+            return 1.0
+        elif self.unit == "imperial":
+            return 25.4 / 16
+        else:
+            return self.minor_spacing_mm or 1.0
+
+
+@dataclass(frozen=True)
 class MeasurementGridParams(BaseParams):
 
     unit: Literal["metric", "imperial", "custom"] = "metric"
@@ -287,6 +348,7 @@ class HoleGridParams(BaseParams):
 __all__ = [
     "FlatPocketParams",
     "GridParams",
+    "GridLinesParams",
     "MeasurementGridParams",
     "RaisedPanelParams",
     "LinePatternParams",

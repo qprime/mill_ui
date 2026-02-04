@@ -1,0 +1,23 @@
+Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+children:
+- Rect:
+    id: cutting_mat
+    at:
+      x: 115mm
+      y: 90mm
+      width: 150mm
+      height: 100mm
+    children:
+    - GridLines:
+        unit: metric
+        depth: 0.3mm
+    - MeasurementEdge:
+        edges:
+        - bottom
+        - left
+        unit: metric
+        labels: true
+        depth: 0.3mm

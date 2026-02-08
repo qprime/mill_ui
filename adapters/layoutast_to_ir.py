@@ -448,6 +448,28 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
             item.shape_id or "item",
         )
 
+    elif shape_type == "RoundedRect":
+        w = float(data.get("w_mm", 0))
+        h = float(data.get("h_mm", 0))
+        if w <= 0 or h <= 0:
+            return []
+        new_w = w + 2 * offset
+        new_h = h + 2 * offset
+        if new_w <= 0 or new_h <= 0:
+            return []
+        radius = float(data.get("radius_mm", 0))
+        r_tl = max(0.0, float(data.get("radius_tl_mm", radius)) + offset)
+        r_tr = max(0.0, float(data.get("radius_tr_mm", radius)) + offset)
+        r_br = max(0.0, float(data.get("radius_br_mm", radius)) + offset)
+        r_bl = max(0.0, float(data.get("radius_bl_mm", radius)) + offset)
+        sx = margin + cx
+        x = sx - new_w / 2
+        y = flip_y(cy + new_h / 2)
+        path_d = rounded_rect_path(x, y, new_w, new_h, r_tl, r_tr, r_br, r_bl)
+        return [
+            Path(d=path_d, style_token="toolpath", id=f"{item.shape_id or 'item'}_toolpath")
+        ]
+
     return []
 
 

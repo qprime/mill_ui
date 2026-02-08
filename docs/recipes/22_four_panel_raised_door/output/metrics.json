@@ -4,10 +4,11 @@
     "hints_ms": 0.01,
     "plan_ms": 4.68,
     "gcode_ms": 10.43,
-    "svg_ms": 0.41,
-    "total_ms": 17.51,
-    "parse_ms": 2.32
+    "svg_ms": 0.12,
+    "total_ms": 17.63,
+    "parse_ms": 2.44
   },
+  "constraint_audit": {},
   "complexity": {
     "total_moves": 4460,
     "rapid_moves": 0,

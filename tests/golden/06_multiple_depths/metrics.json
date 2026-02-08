@@ -1,78 +1,43 @@
 {
   "golden": {
     "recipe_name": "06_multiple_depths",
-    "created_at": "2026-02-03T16:09:25.329927+00:00"
+    "created_at": "2026-02-08T16:49:04.355105+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.5,
+    "extraction_time_ms": 0.44,
     "document": {
-      "width_mm": 500.0,
-      "height_mm": 440.0,
+      "width_mm": 370.0,
+      "height_mm": 420.0,
       "viewbox": [
-        0.0,
-        0.0,
-        500.0,
-        440.0
+        -10.0,
+        -50.0,
+        370.0,
+        420.0
       ]
     },
     "layers": {
-      "count": 14,
+      "count": 9,
       "names": [
-        "CONSTRUCTION",
         "DIMENSIONS",
-        "EDGE_COLORS",
-        "ENGRAVE_PATHS",
         "HOLES",
-        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK",
-        "WASTE_CUTS"
+        "TITLE_BLOCK"
       ],
       "by_layer": {
-        "CONSTRUCTION": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
         "DIMENSIONS": {
-          "element_count": 44,
+          "element_count": 36,
           "rect_count": 0,
           "circle_count": 0,
-          "path_count": 4,
-          "line_count": 20,
+          "path_count": 0,
+          "line_count": 18,
           "polygon_count": 12,
-          "text_count": 8,
-          "elements": []
-        },
-        "EDGE_COLORS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "ENGRAVE_PATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
+          "text_count": 6,
           "elements": []
         },
         "HOLES": {
@@ -87,70 +52,60 @@
             {
               "element_type": "circle",
               "bounds": [
-                187.0,
-                257.0,
-                193.0,
-                263.0
+                47.0,
+                117.0,
+                53.0,
+                123.0
               ],
               "center": [
-                190.0,
-                260.0
+                50.0,
+                120.0
               ],
               "radius": 3.0
             },
             {
               "element_type": "circle",
               "bounds": [
-                307.0,
-                257.0,
-                313.0,
-                263.0
+                167.0,
+                117.0,
+                173.0,
+                123.0
               ],
               "center": [
-                310.0,
-                260.0
+                170.0,
+                120.0
               ],
               "radius": 3.0
             },
             {
               "element_type": "circle",
               "bounds": [
-                187.0,
-                177.0,
-                193.0,
-                183.0
+                47.0,
+                37.0,
+                53.0,
+                43.0
               ],
               "center": [
-                190.0,
-                180.0
+                50.0,
+                40.0
               ],
               "radius": 3.0
             },
             {
               "element_type": "circle",
               "bounds": [
-                307.0,
-                177.0,
-                313.0,
-                183.0
+                167.0,
+                37.0,
+                173.0,
+                43.0
               ],
               "center": [
-                310.0,
-                180.0
+                170.0,
+                40.0
               ],
               "radius": 3.0
             }
           ]
-        },
-        "LABELS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
         },
         "LEGEND": {
           "element_count": 11,
@@ -184,14 +139,14 @@
             {
               "element_type": "rect",
               "bounds": [
+                40.0,
+                40.0,
                 180.0,
-                180.0,
-                320.0,
-                260.0
+                120.0
               ],
               "center": [
-                250.0,
-                220.0
+                110.0,
+                80.0
               ],
               "width": 140.0,
               "height": 80.0
@@ -210,14 +165,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                160.0,
-                160.0,
-                340.0,
-                280.0
+                20.0,
+                20.0,
+                200.0,
+                140.0
               ],
               "center": [
-                250.0,
-                220.0
+                110.0,
+                80.0
               ],
               "width": 180.0,
               "height": 120.0
@@ -226,9 +181,9 @@
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 1,
-          "rect_count": 0,
+          "rect_count": 1,
           "circle_count": 0,
-          "path_count": 1,
+          "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -246,14 +201,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                140.0,
-                140.0,
-                360.0,
-                300.0
+                0.0,
+                0.0,
+                220.0,
+                160.0
               ],
               "center": [
-                250.0,
-                220.0
+                110.0,
+                80.0
               ],
               "width": 220.0,
               "height": 160.0
@@ -269,35 +224,15 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
-        },
-        "WASTE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
         }
       }
     },
     "paths": {
-      "total_count": 8,
-      "closed_count": 8,
+      "total_count": 3,
+      "closed_count": 3,
       "open_count": 0,
-      "total_length_mm": 470.4956,
+      "total_length_mm": 0.0,
       "by_layer": {
-        "PROFILE_TOOLPATHS": {
-          "count": 1,
-          "closed": 1,
-          "length_mm": 429.525
-        },
-        "DIMENSIONS": {
-          "count": 4,
-          "closed": 4,
-          "length_mm": 40.9706
-        },
         "PROFILE_CUTS": {
           "count": 1,
           "closed": 1,
@@ -316,20 +251,18 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
-      "x_max": 383.0,
-      "y_min": 38.0,
-      "y_max": 300.0
+      "x_min": 0.0,
+      "x_max": 243.0,
+      "y_min": -18.0,
+      "y_max": 160.0
     },
     "text_elements": {
-      "count": 31,
+      "count": 29,
       "dimension_labels": [
         "120.0mm",
         "120.0mm",
         "140.0mm",
         "180.0mm",
-        "20mm",
-        "20mm",
         "80.0mm",
         "80.0mm",
         "Sheet: 220.0 \u00d7 160.0 \u00d7 19.0mm",
@@ -374,7 +307,7 @@
       ]
     },
     "rects": {
-      "count": 4,
+      "count": 5,
       "dimensions": [
         [
           15.0,
@@ -389,6 +322,10 @@
           120.0
         ],
         [
+          183.175,
+          123.175
+        ],
+        [
           220.0,
           160.0
         ]
@@ -397,7 +334,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.1947,
+    "extraction_time_ms": 14.9998,
     "summary": {
       "total_lines": 3849,
       "comment_lines": 18,

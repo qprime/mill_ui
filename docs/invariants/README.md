@@ -58,6 +58,7 @@ Before modifying a subsystem, read its invariant file.
 | Validation | [validation.md](validation.md) | Removal checks |
 | G-Code | [gcode.md](gcode.md) | Machine output |
 | Nesting | [nesting.md](nesting.md) | Bin packing |
+| SVG | [svg.md](svg.md) | Blueprint SVG generation |
 | Defaults | [defaults.md](defaults.md) | Default values reference |
 
 ---

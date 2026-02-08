@@ -1,11 +1,24 @@
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Callable, Sequence
 
+from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import Bounds2D
 from export.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir import DiagramIR, LayerIR, Rect, Line, Polyline, Circle, Text, Path, Point2D
+from diagram_ir.shapes import Shape
+from diagram_ir.geometry import rounded_rect_path
+
+
+FEATURE_HANDLERS: dict[str, Callable[[Item, str, Callable, float], list[Shape]]] = {}
+
+
+def register_feature(feature_type: str):
+    def decorator(fn: Callable[[Item, str, Callable, float], list[Shape]]):
+        FEATURE_HANDLERS[feature_type] = fn
+        return fn
+    return decorator
 
 
 def layoutast_to_diagram_ir(
@@ -27,8 +40,8 @@ def layoutast_to_diagram_ir(
 
     def flip_y(y: float) -> float:
         if y_origin == "back":
-            return sheet.working_height_mm - y
-        return y
+            return margin + sheet.working_height_mm - y
+        return margin + y
 
     layers: list[LayerIR] = []
 
@@ -52,36 +65,30 @@ def layoutast_to_diagram_ir(
         is_waste = item.shape_id and "waste" in item.shape_id
         feature_type = item.feature.type
 
-        if feature_type == "profile":
-            shapes = _item_to_shapes(item, "profile" if not is_waste else "waste", flip_y)
-            if is_waste:
-                waste_shapes.extend(shapes)
-            else:
-                profile_shapes.extend(shapes)
-                if show_toolpaths and tool_radius > 0:
-                    tp_shapes = _build_toolpath_shapes(item, tool_radius, flip_y)
-                    toolpath_shapes.extend(tp_shapes)
+        handler = FEATURE_HANDLERS.get(feature_type)
+        if handler:
+            style_token = _get_style_token(feature_type, is_waste)
+            shapes = handler(item, style_token, flip_y, margin)
+            _dispatch_shapes(
+                shapes,
+                feature_type,
+                is_waste,
+                profile_shapes,
+                waste_shapes,
+                pocket_shapes,
+                hole_shapes,
+                engrave_shapes,
+            )
 
-        elif feature_type == "pocket":
-            shapes = _item_to_shapes(item, "pocket", flip_y)
-            pocket_shapes.extend(shapes)
+            if feature_type == "profile" and not is_waste and show_toolpaths and tool_radius > 0:
+                tp_shapes = _build_toolpath_shapes(item, tool_radius, flip_y, margin)
+                toolpath_shapes.extend(tp_shapes)
 
-        elif feature_type == "hole":
-            shapes = _item_to_shapes(item, "hole", flip_y)
-            hole_shapes.extend(shapes)
-            shapes.extend(_build_hole_crosshairs(item, flip_y))
-            hole_shapes.extend(shapes)
-
-        elif feature_type == "engrave":
-            shapes = _item_to_shapes(item, "engrave", flip_y)
-            engrave_shapes.extend(shapes)
-
-        elif feature_type == "notch":
-            shapes = _build_notch_shapes(item, flip_y)
-            profile_shapes.extend(shapes)
+            if feature_type == "hole":
+                hole_shapes.extend(_build_hole_crosshairs(item, flip_y, margin))
 
         if item.label and item.placement:
-            label_shapes.extend(_build_label(item, flip_y))
+            label_shapes.extend(_build_label(item, flip_y, margin))
 
     if profile_shapes:
         layers.append(LayerIR(name="PROFILE_CUTS", items=tuple(profile_shapes)))
@@ -101,26 +108,81 @@ def layoutast_to_diagram_ir(
     dims: tuple[DimensionRequest, ...] = ()
     if show_dimensions and getattr(sheet, 'show_dimensions', True):
         dim_requests = collect_dimension_requests(
-            ast, 0, 0, include_features={"profile", "pocket"}, y_flip=flip_y
+            ast, margin, 0, include_features={"profile", "pocket"}, y_flip=flip_y
         )
         dims = tuple(dim_requests)
-
-    notes = _build_notes(ast, sheet)
 
     metadata = {
         "sheet_width": str(sheet.width_mm),
         "sheet_height": str(sheet.height_mm),
         "sheet_thickness": str(sheet.thickness_mm),
         "y_origin": y_origin,
+        "feature_counts": _count_features(ast),
+        "depth_info": _collect_depth_info(ast),
+        "hole_diameters": _collect_hole_diameters(ast),
+        "part_inventory": _collect_part_inventory(ast),
     }
 
     return DiagramIR(
         bounds=bounds,
         layers=tuple(layers),
         dims=dims,
-        notes=tuple(notes),
         metadata=metadata,
     )
+
+
+def _get_style_token(feature_type: str, is_waste: bool) -> str:
+    if feature_type == "profile":
+        return "waste" if is_waste else "profile"
+    return feature_type
+
+
+def _dispatch_shapes(
+    shapes: list[Shape],
+    feature_type: str,
+    is_waste: bool,
+    profile_shapes: list,
+    waste_shapes: list,
+    pocket_shapes: list,
+    hole_shapes: list,
+    engrave_shapes: list,
+) -> None:
+    if feature_type == "profile" or feature_type == "notch":
+        if is_waste:
+            waste_shapes.extend(shapes)
+        else:
+            profile_shapes.extend(shapes)
+    elif feature_type == "pocket":
+        pocket_shapes.extend(shapes)
+    elif feature_type == "hole":
+        hole_shapes.extend(shapes)
+    elif feature_type == "engrave":
+        engrave_shapes.extend(shapes)
+
+
+@register_feature("profile")
+def _handle_profile(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _item_to_shapes(item, style_token, flip_y, margin)
+
+
+@register_feature("pocket")
+def _handle_pocket(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _item_to_shapes(item, style_token, flip_y, margin)
+
+
+@register_feature("hole")
+def _handle_hole(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _item_to_shapes(item, style_token, flip_y, margin)
+
+
+@register_feature("engrave")
+def _handle_engrave(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _item_to_shapes(item, style_token, flip_y, margin)
+
+
+@register_feature("notch")
+def _handle_notch(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _build_notch_shapes(item, flip_y, margin)
 
 
 def _build_sheet_layer(sheet: Sheet, margin: float) -> list:
@@ -156,11 +218,12 @@ def _build_sheet_layer(sheet: Sheet, margin: float) -> list:
     return shapes
 
 
-def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
+def _item_to_shapes(item: Item, style_token: str, flip_y, margin: float) -> list:
     if item.geometry is None or item.placement is None:
         return []
 
     cx, cy = item.placement.center_xy_mm
+    sx = margin + cx
     cy_flipped = flip_y(cy)
     shape_type = item.type
     data = item.geometry.data
@@ -171,7 +234,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         h = float(data.get("h_mm") or data.get("height", 0))
         return [
             Rect(
-                x=cx - w / 2,
+                x=sx - w / 2,
                 y=flip_y(cy + h / 2),
                 width=w,
                 height=h,
@@ -184,7 +247,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         r = float(data.get("radius_mm") or data.get("diameter_mm", 0) / 2)
         return [
             Circle(
-                cx=cx,
+                cx=sx,
                 cy=cy_flipped,
                 radius=r,
                 style_token=style_token,
@@ -196,7 +259,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         points = data.get("points", [])
         if not points:
             return []
-        transformed = [Point2D(cx + p[0], flip_y(cy + p[1])) for p in points]
+        transformed = [Point2D(sx + p[0], flip_y(cy + p[1])) for p in points]
         return [
             Polyline(
                 points=tuple(transformed),
@@ -215,9 +278,9 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         radius_br = float(data.get("radius_br_mm", radius))
         radius_bl = float(data.get("radius_bl_mm", radius))
 
-        x = cx - w / 2
+        x = sx - w / 2
         y = flip_y(cy + h / 2)
-        path_d = _rounded_rect_path(x, y, w, h, radius_tl, radius_tr, radius_br, radius_bl)
+        path_d = rounded_rect_path(x, y, w, h, radius_tl, radius_tr, radius_br, radius_bl)
         return [
             Path(d=path_d, style_token=style_token, id=shape_id)
         ]
@@ -227,9 +290,9 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         end = data.get("end", [0, 0])
         return [
             Line(
-                x1=cx + start[0],
+                x1=sx + start[0],
                 y1=flip_y(cy + start[1]),
-                x2=cx + end[0],
+                x2=sx + end[0],
                 y2=flip_y(cy + end[1]),
                 style_token=style_token,
                 id=shape_id,
@@ -240,7 +303,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
         points = data.get("points", [])
         if not points:
             return []
-        transformed = [Point2D(cx + p[0], flip_y(cy + p[1])) for p in points]
+        transformed = [Point2D(sx + p[0], flip_y(cy + p[1])) for p in points]
         return [
             Polyline(
                 points=tuple(transformed),
@@ -253,21 +316,22 @@ def _item_to_shapes(item: Item, style_token: str, flip_y) -> list:
     return []
 
 
-def _build_hole_crosshairs(item: Item, flip_y) -> list:
+def _build_hole_crosshairs(item: Item, flip_y, margin: float) -> list:
     if item.placement is None:
         return []
     cx, cy = item.placement.center_xy_mm
+    sx = margin + cx
     cy_flipped = flip_y(cy)
     mark_size = 3
     return [
-        Line(x1=cx - mark_size, y1=cy_flipped, x2=cx + mark_size, y2=cy_flipped,
+        Line(x1=sx - mark_size, y1=cy_flipped, x2=sx + mark_size, y2=cy_flipped,
              style_token="hole", id=f"{item.shape_id or 'hole'}_cross_h"),
-        Line(x1=cx, y1=cy_flipped - mark_size, x2=cx, y2=cy_flipped + mark_size,
+        Line(x1=sx, y1=cy_flipped - mark_size, x2=sx, y2=cy_flipped + mark_size,
              style_token="hole", id=f"{item.shape_id or 'hole'}_cross_v"),
     ]
 
 
-def _build_notch_shapes(item: Item, flip_y) -> list:
+def _build_notch_shapes(item: Item, flip_y, margin: float) -> list:
     if item.geometry is None or item.placement is None:
         return []
 
@@ -313,7 +377,7 @@ def _build_notch_shapes(item: Item, flip_y) -> list:
 
     return [
         Rect(
-            x=x_min,
+            x=margin + x_min,
             y=y_draw,
             width=w,
             height=h_draw,
@@ -323,7 +387,7 @@ def _build_notch_shapes(item: Item, flip_y) -> list:
     ]
 
 
-def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y) -> list:
+def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float) -> list:
     if item.geometry is None or item.feature is None or item.placement is None:
         return []
     if tool_radius <= 0:
@@ -356,7 +420,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y) -> list:
 
         return [
             Rect(
-                x=cx - new_w / 2,
+                x=margin + cx - new_w / 2,
                 y=flip_y(cy + new_h / 2),
                 width=new_w,
                 height=new_h,
@@ -368,13 +432,13 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y) -> list:
     return []
 
 
-def _build_label(item: Item, flip_y) -> list:
+def _build_label(item: Item, flip_y, margin: float) -> list:
     if not item.label or item.placement is None:
         return []
     cx, cy = item.placement.center_xy_mm
     return [
         Text(
-            x=cx,
+            x=margin + cx,
             y=flip_y(cy),
             content=item.label,
             style_token="label",
@@ -385,47 +449,73 @@ def _build_label(item: Item, flip_y) -> list:
     ]
 
 
-def _build_notes(ast: LayoutAST, sheet: Sheet) -> list[Text]:
-    notes = []
-
-    notes.append(
-        Text(
-            x=5,
-            y=sheet.height_mm - 5,
-            content=f"Sheet: {sheet.width_mm:.0f} × {sheet.height_mm:.0f} × {sheet.thickness_mm:.0f}mm",
-            style_token="notes",
-            anchor="start",
-            baseline="text-top",
-        )
-    )
-
-    return notes
+def _count_features(ast: LayoutAST) -> str:
+    counts: dict[str, int] = {}
+    for item in ast.items:
+        if item.feature is None:
+            continue
+        ftype = item.feature.type
+        counts[ftype] = counts.get(ftype, 0) + 1
+    if not counts:
+        return ""
+    return ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in counts.items())
 
 
-def _rounded_rect_path(
-    x: float, y: float, w: float, h: float,
-    radius_tl: float, radius_tr: float, radius_br: float, radius_bl: float
-) -> str:
-    rtl = min(radius_tl, w / 2, h / 2)
-    rtr = min(radius_tr, w / 2, h / 2)
-    rbr = min(radius_br, w / 2, h / 2)
-    rbl = min(radius_bl, w / 2, h / 2)
+def _collect_depth_info(ast: LayoutAST) -> list[str]:
+    depths_by_type: dict[str, set[str]] = {}
+    for item in ast.items:
+        if item.feature is None:
+            continue
+        ftype = item.feature.type
+        depth = item.feature.depth
+        if DepthMode.is_through(depth) and ftype == "profile":
+            continue
+        if DepthMode.is_through(depth):
+            depth_str = DepthMode.THROUGH
+        elif isinstance(depth, (int, float)):
+            depth_str = f"{float(depth):.1f}mm"
+        else:
+            depth_str = str(depth)
+        if ftype not in depths_by_type:
+            depths_by_type[ftype] = set()
+        depths_by_type[ftype].add(depth_str)
 
-    parts = [f"M {x + rtl:.3f} {y:.3f}"]
-    parts.append(f"L {x + w - rtr:.3f} {y:.3f}")
-    if rtr > 0:
-        parts.append(f"A {rtr:.3f} {rtr:.3f} 0 0 1 {x + w:.3f} {y + rtr:.3f}")
-    parts.append(f"L {x + w:.3f} {y + h - rbr:.3f}")
-    if rbr > 0:
-        parts.append(f"A {rbr:.3f} {rbr:.3f} 0 0 1 {x + w - rbr:.3f} {y + h:.3f}")
-    parts.append(f"L {x + rbl:.3f} {y + h:.3f}")
-    if rbl > 0:
-        parts.append(f"A {rbl:.3f} {rbl:.3f} 0 0 1 {x:.3f} {y + h - rbl:.3f}")
-    parts.append(f"L {x:.3f} {y + rtl:.3f}")
-    if rtl > 0:
-        parts.append(f"A {rtl:.3f} {rtl:.3f} 0 0 1 {x + rtl:.3f} {y:.3f}")
-    parts.append("Z")
-    return " ".join(parts)
+    return [
+        f"{ftype}: {', '.join(sorted(depths))}"
+        for ftype in sorted(depths_by_type.keys())
+        for depths in [depths_by_type[ftype]]
+    ]
 
 
-__all__ = ["layoutast_to_diagram_ir"]
+def _collect_hole_diameters(ast: LayoutAST) -> list[str]:
+    diameters: set[float] = set()
+    for item in ast.items:
+        if item.kind != "shape" or item.type != "Circle":
+            continue
+        if item.feature is None or item.feature.type != "hole":
+            continue
+        if item.geometry is None:
+            continue
+        data = item.geometry.data
+        diameter = data.get("diameter_mm")
+        if diameter is not None:
+            diameters.add(float(diameter))
+        else:
+            radius = data.get("radius_mm")
+            if radius is not None:
+                diameters.add(float(radius) * 2.0)
+    return [f"{d:.1f}" for d in sorted(diameters)]
+
+
+def _collect_part_inventory(ast: LayoutAST) -> list[str]:
+    parts: set[str] = set()
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None:
+            continue
+        if not item.shape_id or item.shape_id.startswith("generated_"):
+            continue
+        parts.add(item.shape_id)
+    return sorted(parts)
+
+
+__all__ = ["layoutast_to_diagram_ir", "FEATURE_HANDLERS", "register_feature"]

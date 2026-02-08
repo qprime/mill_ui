@@ -1,12 +1,19 @@
 {
   "timing": {
-    "ir_ms": 0.11,
+    "ir_ms": 0.1,
     "hints_ms": 0.02,
-    "plan_ms": 7.91,
-    "gcode_ms": 18.9,
-    "svg_ms": 1.15,
-    "total_ms": 42.09,
-    "parse_ms": 15.15
+    "plan_ms": 7.84,
+    "gcode_ms": 18.67,
+    "svg_ms": 0.66,
+    "total_ms": 41.58,
+    "parse_ms": 14.95
+  },
+  "constraint_audit": {
+    "tabs": {
+      "status": "honored",
+      "count": 11,
+      "safety_critical": false
+    }
   },
   "complexity": {
     "total_moves": 8051,

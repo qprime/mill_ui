@@ -1,108 +1,52 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-02-03T16:09:26.028442+00:00"
+    "created_at": "2026-02-08T16:49:05.048906+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.97,
+    "extraction_time_ms": 0.85,
     "document": {
-      "width_mm": 1525.0,
-      "height_mm": 1512.0,
+      "width_mm": 1395.0,
+      "height_mm": 1648.0,
       "viewbox": [
-        0.0,
-        0.0,
-        1525.0,
-        1512.0
+        -10.0,
+        -50.0,
+        1395.0,
+        1648.0
       ]
     },
     "layers": {
-      "count": 14,
+      "count": 8,
       "names": [
-        "CONSTRUCTION",
         "DIMENSIONS",
-        "EDGE_COLORS",
-        "ENGRAVE_PATHS",
-        "HOLES",
-        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
         "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK",
-        "WASTE_CUTS"
+        "TITLE_BLOCK"
       ],
       "by_layer": {
-        "CONSTRUCTION": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
         "DIMENSIONS": {
-          "element_count": 64,
+          "element_count": 48,
           "rect_count": 0,
           "circle_count": 0,
-          "path_count": 8,
-          "line_count": 28,
+          "path_count": 0,
+          "line_count": 24,
           "polygon_count": 16,
-          "text_count": 12,
-          "elements": []
-        },
-        "EDGE_COLORS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "ENGRAVE_PATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "HOLES": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "LABELS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
+          "text_count": 8,
           "elements": []
         },
         "LEGEND": {
-          "element_count": 11,
+          "element_count": 9,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 4,
+          "line_count": 3,
           "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 5,
           "elements": []
         },
         "NOTES": {
@@ -127,14 +71,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                207.0,
-                822.0,
-                550.0,
-                1305.0
+                67.0,
+                682.0,
+                410.0,
+                1165.0
               ],
               "center": [
-                378.5,
-                1063.5
+                238.5,
+                923.5
               ],
               "width": 343.0,
               "height": 483.0
@@ -142,14 +86,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                670.0,
-                822.0,
-                1013.0,
-                1305.0
+                530.0,
+                682.0,
+                873.0,
+                1165.0
               ],
               "center": [
-                841.5,
-                1063.5
+                701.5,
+                923.5
               ],
               "width": 343.0,
               "height": 483.0
@@ -157,14 +101,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                207.0,
-                219.0,
-                550.0,
-                702.0
+                67.0,
+                79.0,
+                410.0,
+                562.0
               ],
               "center": [
-                378.5,
-                460.5
+                238.5,
+                320.5
               ],
               "width": 343.0,
               "height": 483.0
@@ -172,14 +116,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                670.0,
-                219.0,
-                1013.0,
-                702.0
+                530.0,
+                79.0,
+                873.0,
+                562.0
               ],
               "center": [
-                841.5,
-                460.5
+                701.5,
+                320.5
               ],
               "width": 343.0,
               "height": 483.0
@@ -187,14 +131,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                1248.0,
-                1292.0,
-                1324.0
+                974.0,
+                1108.0,
+                1152.0,
+                1184.0
               ],
               "center": [
-                1203.0,
-                1286.0
+                1063.0,
+                1146.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -202,14 +146,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                1090.0,
-                1292.0,
-                1166.0
+                974.0,
+                950.0,
+                1152.0,
+                1026.0
               ],
               "center": [
-                1203.0,
-                1128.0
+                1063.0,
+                988.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -217,14 +161,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                932.0,
-                1292.0,
-                1008.0
+                974.0,
+                792.0,
+                1152.0,
+                868.0
               ],
               "center": [
-                1203.0,
-                970.0
+                1063.0,
+                830.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -232,14 +176,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                774.0,
-                1292.0,
-                850.0
+                974.0,
+                634.0,
+                1152.0,
+                710.0
               ],
               "center": [
-                1203.0,
-                812.0
+                1063.0,
+                672.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -247,14 +191,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                616.0,
-                1292.0,
-                692.0
+                974.0,
+                476.0,
+                1152.0,
+                552.0
               ],
               "center": [
-                1203.0,
-                654.0
+                1063.0,
+                514.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -262,14 +206,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                458.0,
-                1292.0,
-                534.0
+                974.0,
+                318.0,
+                1152.0,
+                394.0
               ],
               "center": [
-                1203.0,
-                496.0
+                1063.0,
+                356.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -277,14 +221,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1114.0,
-                300.0,
-                1292.0,
-                376.0
+                974.0,
+                160.0,
+                1152.0,
+                236.0
               ],
               "center": [
-                1203.0,
-                338.0
+                1063.0,
+                198.0
               ],
               "width": 178.0,
               "height": 76.0
@@ -303,14 +247,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                150.0,
-                765.0,
-                607.0,
-                1362.0
+                10.0,
+                625.0,
+                467.0,
+                1222.0
               ],
               "center": [
-                378.5,
-                1063.5
+                238.5,
+                923.5
               ],
               "width": 457.0,
               "height": 597.0
@@ -318,59 +262,59 @@
             {
               "element_type": "rect",
               "bounds": [
-                613.0,
-                765.0,
+                473.0,
+                625.0,
+                930.0,
+                1222.0
+              ],
+              "center": [
+                701.5,
+                923.5
+              ],
+              "width": 457.0,
+              "height": 597.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                10.0,
+                22.0,
+                467.0,
+                619.0
+              ],
+              "center": [
+                238.5,
+                320.5
+              ],
+              "width": 457.0,
+              "height": 597.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                473.0,
+                22.0,
+                930.0,
+                619.0
+              ],
+              "center": [
+                701.5,
+                320.5
+              ],
+              "width": 457.0,
+              "height": 597.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                936.0,
                 1070.0,
-                1362.0
+                1190.0,
+                1222.0
               ],
               "center": [
-                841.5,
-                1063.5
-              ],
-              "width": 457.0,
-              "height": 597.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                150.0,
-                162.0,
-                607.0,
-                759.0
-              ],
-              "center": [
-                378.5,
-                460.5
-              ],
-              "width": 457.0,
-              "height": 597.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                613.0,
-                162.0,
-                1070.0,
-                759.0
-              ],
-              "center": [
-                841.5,
-                460.5
-              ],
-              "width": 457.0,
-              "height": 597.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                1076.0,
-                1210.0,
-                1330.0,
-                1362.0
-              ],
-              "center": [
-                1203.0,
-                1286.0
+                1063.0,
+                1146.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -378,14 +322,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                1052.0,
-                1330.0,
-                1204.0
+                936.0,
+                912.0,
+                1190.0,
+                1064.0
               ],
               "center": [
-                1203.0,
-                1128.0
+                1063.0,
+                988.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -393,14 +337,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                894.0,
-                1330.0,
-                1046.0
+                936.0,
+                754.0,
+                1190.0,
+                906.0
               ],
               "center": [
-                1203.0,
-                970.0
+                1063.0,
+                830.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -408,14 +352,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                736.0,
-                1330.0,
-                888.0
+                936.0,
+                596.0,
+                1190.0,
+                748.0
               ],
               "center": [
-                1203.0,
-                812.0
+                1063.0,
+                672.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -423,14 +367,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                578.0,
-                1330.0,
-                730.0
+                936.0,
+                438.0,
+                1190.0,
+                590.0
               ],
               "center": [
-                1203.0,
-                654.0
+                1063.0,
+                514.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -438,14 +382,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                420.0,
-                1330.0,
-                572.0
+                936.0,
+                280.0,
+                1190.0,
+                432.0
               ],
               "center": [
-                1203.0,
-                496.0
+                1063.0,
+                356.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -453,14 +397,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                1076.0,
-                262.0,
-                1330.0,
-                414.0
+                936.0,
+                122.0,
+                1190.0,
+                274.0
               ],
               "center": [
-                1203.0,
-                338.0
+                1063.0,
+                198.0
               ],
               "width": 254.0,
               "height": 152.0
@@ -469,9 +413,9 @@
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 11,
-          "rect_count": 0,
+          "rect_count": 11,
           "circle_count": 0,
-          "path_count": 11,
+          "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -489,14 +433,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                140.0,
-                140.0,
-                1385.0,
-                1372.0
+                0.0,
+                0.0,
+                1245.0,
+                1232.0
               ],
               "center": [
-                762.5,
-                756.0
+                622.5,
+                616.0
               ],
               "width": 1245.0,
               "height": 1232.0
@@ -512,35 +456,15 @@
           "polygon_count": 0,
           "text_count": 2,
           "elements": []
-        },
-        "WASTE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
         }
       }
     },
     "paths": {
-      "total_count": 42,
-      "closed_count": 42,
+      "total_count": 23,
+      "closed_count": 23,
       "open_count": 0,
-      "total_length_mm": 10696.7211,
+      "total_length_mm": 0.0,
       "by_layer": {
-        "PROFILE_TOOLPATHS": {
-          "count": 11,
-          "closed": 11,
-          "length_mm": 10614.78
-        },
-        "DIMENSIONS": {
-          "count": 8,
-          "closed": 8,
-          "length_mm": 81.9411
-        },
         "PROFILE_CUTS": {
           "count": 11,
           "closed": 11,
@@ -559,24 +483,20 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
-      "x_max": 1410.0,
-      "y_min": 38.0,
-      "y_max": 1372.0
+      "x_min": 0.0,
+      "x_max": 1268.0,
+      "y_min": -18.0,
+      "y_max": 1232.0
     },
     "text_elements": {
-      "count": 48,
+      "count": 43,
       "dimension_labels": [
         "152.0mm",
         "178.0mm",
         "254.0mm",
         "343.0mm",
-        "38mm",
-        "38mm",
         "457.0mm",
         "483.0mm",
-        "57mm",
-        "57mm",
         "597.0mm",
         "76.0mm",
         "Sheet: 1245.0 \u00d7 1232.0 \u00d7 19.0mm",
@@ -622,7 +542,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 24,
+      "count": 35,
       "dimensions": [
         [
           15.0,
@@ -685,6 +605,34 @@
           152.0
         ],
         [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
+          257.175,
+          155.175
+        ],
+        [
           343.0,
           483.0
         ],
@@ -715,6 +663,22 @@
         [
           457.0,
           597.0
+        ],
+        [
+          460.175,
+          600.175
+        ],
+        [
+          460.175,
+          600.175
+        ],
+        [
+          460.175,
+          600.175
+        ],
+        [
+          460.175,
+          600.175
         ],
         [
           1245.0,
@@ -725,7 +689,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 21.3099,
+    "extraction_time_ms": 20.956,
     "summary": {
       "total_lines": 8013,
       "comment_lines": 59,

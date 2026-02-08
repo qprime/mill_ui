@@ -3,7 +3,7 @@ from __future__ import annotations
 from config.machine_loader import MachineConfig, Endmill
 from ir.removal_intent import Bounds2D
 from export.dimensions import DimensionRequest
-from diagram_ir import DiagramIR, LayerIR, Rect, Line, Circle, Text
+from diagram_ir import DiagramIR, LayerIR, Rect, Line, Circle
 
 
 def machine_config_to_diagram_ir(
@@ -179,28 +179,6 @@ def machine_config_to_diagram_ir(
                     )
                 )
 
-    notes: list[Text] = [
-        Text(
-            x=machine.envelope_x_min + 10,
-            y=machine.envelope_y_max - 10,
-            content=f"Machine: {machine.name}",
-            style_token="notes",
-            anchor="start",
-            baseline="text-top",
-        ),
-    ]
-    if endmill:
-        notes.append(
-            Text(
-                x=machine.envelope_x_min + 10,
-                y=machine.envelope_y_max - 25,
-                content=f"Bit: {endmill.name} (⌀{endmill.diameter_mm:.2f}mm)",
-                style_token="notes",
-                anchor="start",
-                baseline="text-top",
-            )
-        )
-
     metadata = {
         "machine_name": machine.name,
         "envelope_width": str(machine.envelope_width),
@@ -214,7 +192,6 @@ def machine_config_to_diagram_ir(
         bounds=bounds,
         layers=tuple(layers),
         dims=tuple(dims),
-        notes=tuple(notes),
         metadata=metadata,
     )
 

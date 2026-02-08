@@ -23,8 +23,7 @@ class DiagramIR:
     bounds: Bounds2D
     layers: tuple[LayerIR, ...]
     dims: tuple[DimensionRequest, ...] = ()
-    notes: tuple[Text, ...] = ()
-    metadata: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self._validate_unique_layer_names()

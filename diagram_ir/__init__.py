@@ -14,6 +14,7 @@ from diagram_ir.diagram import (
     ViewportSpec,
     validate_diagram_ir,
 )
+from diagram_ir.geometry import rounded_rect_path
 
 __all__ = [
     "Point2D",
@@ -28,4 +29,5 @@ __all__ = [
     "DiagramIR",
     "ViewportSpec",
     "validate_diagram_ir",
+    "rounded_rect_path",
 ]

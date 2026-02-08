@@ -13,6 +13,18 @@ from export.dimensions import (
 
 
 @dataclass(frozen=True)
+class StyleSpec:
+    stroke: str | None = None
+    stroke_width: float = 1.0
+    stroke_dasharray: str | None = None
+    fill: str | None = None
+    fill_opacity: float = 1.0
+    font_family: str | None = None
+    font_size: str | None = None
+    font_weight: str | None = None
+
+
+@dataclass(frozen=True)
 class DiagramTheme:
     background: str = "#1a1a1a"
     foreground: str = "#e8e8e8"
@@ -22,6 +34,9 @@ class DiagramTheme:
         if self.style_map and token in self.style_map:
             return self.style_map[token]
         return {"stroke": self.foreground, "fill": "none", "stroke-width": "1"}
+
+    def style_attrs(self, token: str) -> dict[str, str]:
+        return self.get_style(token)
 
 
 DARK_DIAGRAM_THEME = DiagramTheme(
@@ -47,6 +62,8 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "origin": {"stroke": "#ff6b6b", "fill": "#ff6b6b", "stroke-width": "1"},
         "centerline": {"stroke": "#6b8e7f", "fill": "none", "stroke-width": "0.5", "stroke-dasharray": "8,4"},
         "margin-zone": {"fill": "#6b8e7f", "fill-opacity": "0.15"},
+        "legend": {"fill": "#cccccc", "font-family": "monospace", "font-size": "10px"},
+        "title": {"fill": "#cccccc", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
     },
 )
 
@@ -73,6 +90,8 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "origin": {"stroke": "#cc0000", "fill": "#cc0000", "stroke-width": "1"},
         "centerline": {"stroke": "#666666", "fill": "none", "stroke-width": "0.5", "stroke-dasharray": "8,4"},
         "margin-zone": {"fill": "#666666", "fill-opacity": "0.15"},
+        "legend": {"fill": "#000000", "font-family": "monospace", "font-size": "10px"},
+        "title": {"fill": "#000000", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
     },
 )
 
@@ -101,10 +120,14 @@ def render_diagram_svg(
     else:
         transform_y = lambda y: y
 
+    chrome_top = 40.0
+    chrome_bottom = _estimate_notes_height(diagram.metadata)
+    chrome_right = 140.0
+
     viewbox_x = bounds.x_min - padding
-    viewbox_y = bounds.y_min - padding
-    viewbox_width = (bounds.x_max - bounds.x_min) + 2 * padding
-    viewbox_height = (bounds.y_max - bounds.y_min) + 2 * padding
+    viewbox_y = bounds.y_min - padding - chrome_top
+    viewbox_width = (bounds.x_max - bounds.x_min) + padding + chrome_right
+    viewbox_height = (bounds.y_max - bounds.y_min) + 2 * padding + chrome_top + chrome_bottom
 
     svg = ET.Element(
         "svg",
@@ -141,13 +164,31 @@ def render_diagram_svg(
     if diagram.dims:
         _render_dimensions(svg, diagram.dims, bounds, padding, theme, transform_y)
 
-    if diagram.notes:
-        notes_group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
-        for note in diagram.notes:
-            _render_shape(notes_group, note, theme, transform_y, viewport.y_flip)
+    drawing_bottom = bounds.y_max + padding
+    layer_names = {layer.name for layer in diagram.layers}
+    _render_title_block(svg, viewbox_x, viewbox_y, theme)
+    _render_legend(svg, viewbox_x, viewbox_y, viewbox_width, layer_names, theme)
+    _render_notes_block(svg, drawing_bottom, diagram.metadata, theme)
 
     ET.indent(svg, space="  ")
     return ET.tostring(svg, encoding="unicode")
+
+
+def _estimate_notes_height(metadata: dict) -> float:
+    line_height = 12.0
+    lines = 2
+    if metadata.get("feature_counts"):
+        lines += 1
+    depth_info = metadata.get("depth_info", [])
+    if depth_info:
+        lines += 1 + len(depth_info)
+    hole_diameters = metadata.get("hole_diameters", [])
+    if hole_diameters:
+        lines += 1 + len(hole_diameters)
+    part_inventory = metadata.get("part_inventory", [])
+    if part_inventory:
+        lines += 1 + len(part_inventory)
+    return max(lines * line_height + 20.0, 60.0)
 
 
 def _compute_padding(bounds, viewport: ViewportSpec) -> float:
@@ -379,8 +420,179 @@ def _arrow(parent: ET.Element, x: float, y: float, direction: str, color: str) -
     ET.SubElement(parent, "polygon", {"points": points, "fill": color})
 
 
+_LEGEND_ENTRIES = [
+    ("SHEET_OUTLINE", "Sheet Outline", "sheet-outline", "line"),
+    ("PROFILE_CUTS", "Profile Cuts", "profile", "line"),
+    ("POCKET_REGIONS", "Pocket Regions", "pocket", "rect"),
+    ("HOLES", "Holes", "hole", "line"),
+    ("ENGRAVE_PATHS", "Engrave Paths", "engrave", "line"),
+    ("WASTE_CUTS", "Waste Cuts", "waste", "line"),
+]
+
+
+def _render_title_block(
+    svg: ET.Element,
+    viewbox_x: float,
+    viewbox_y: float,
+    theme: DiagramTheme,
+) -> None:
+    group = ET.SubElement(svg, "g", {"id": "TITLE_BLOCK", "class": "title-block"})
+    x = viewbox_x + 10
+    y = viewbox_y + 14
+
+    title_style = theme.get_style("title")
+    title_attrs = {
+        "x": str(x),
+        "y": str(y),
+        **{k: v for k, v in title_style.items()},
+    }
+    title = ET.SubElement(group, "text", title_attrs)
+    title.text = "BLUEPRINT PROOF DRAWING"
+
+    notes_style = theme.get_style("notes")
+    units_attrs = {
+        "x": str(x),
+        "y": str(y + 14),
+        **{k: v for k, v in notes_style.items()},
+        "font-size": "9px",
+    }
+    units = ET.SubElement(group, "text", units_attrs)
+    units.text = "Units: millimeters (mm)"
+
+
+def _render_legend(
+    svg: ET.Element,
+    viewbox_x: float,
+    viewbox_y: float,
+    viewbox_width: float,
+    layer_names: set[str],
+    theme: DiagramTheme,
+) -> None:
+    x = viewbox_x + viewbox_width - 132
+    y = viewbox_y + 14
+    line_height = 16
+    swatch_width = 15
+
+    group = ET.SubElement(svg, "g", {"id": "LEGEND", "class": "legend"})
+
+    legend_style = theme.get_style("legend")
+    header_attrs = {
+        "x": str(x),
+        "y": str(y),
+        **{k: v for k, v in legend_style.items()},
+        "font-weight": "bold",
+    }
+    header = ET.SubElement(group, "text", header_attrs)
+    header.text = "LEGEND"
+
+    visible = [entry for entry in _LEGEND_ENTRIES if entry[0] in layer_names]
+    visible.append(("DIMENSIONS", "Dimensions", "dimension", "line"))
+
+    for i, (_, label, token, swatch_type) in enumerate(visible):
+        y_pos = y + (i + 1) * line_height + 5
+        style = theme.get_style(token)
+
+        if swatch_type == "rect":
+            rect_attrs = {
+                "x": str(x),
+                "y": str(y_pos - 6),
+                "width": str(swatch_width),
+                "height": "8",
+            }
+            for k in ("stroke", "stroke-width", "fill", "fill-opacity", "stroke-dasharray"):
+                if k in style:
+                    rect_attrs[k] = style[k]
+            ET.SubElement(group, "rect", rect_attrs)
+        else:
+            line_attrs = {
+                "x1": str(x),
+                "y1": str(y_pos - 3),
+                "x2": str(x + swatch_width),
+                "y2": str(y_pos - 3),
+            }
+            for k in ("stroke", "stroke-width", "stroke-dasharray"):
+                if k in style:
+                    line_attrs[k] = style[k]
+            ET.SubElement(group, "line", line_attrs)
+
+        label_attrs = {
+            "x": str(x + swatch_width + 5),
+            "y": str(y_pos),
+            **{k: v for k, v in legend_style.items()},
+        }
+        label_elem = ET.SubElement(group, "text", label_attrs)
+        label_elem.text = label
+
+
+def _render_notes_block(
+    svg: ET.Element,
+    drawing_bottom: float,
+    metadata: dict,
+    theme: DiagramTheme,
+) -> None:
+    x = 20
+    y = drawing_bottom + 10
+    line_height = 12
+    indent = 10
+
+    group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
+    notes_style = theme.get_style("notes")
+
+    def _text(x_pos: float, y_pos: float, content: str, bold: bool = False) -> None:
+        attrs = {
+            "x": str(x_pos),
+            "y": str(y_pos),
+            **{k: v for k, v in notes_style.items()},
+        }
+        if bold:
+            attrs["font-weight"] = "bold"
+        elem = ET.SubElement(group, "text", attrs)
+        elem.text = content
+
+    _text(x, y, "NOTES", bold=True)
+    line_num = 1
+
+    sheet_w = metadata.get("sheet_width", "")
+    sheet_h = metadata.get("sheet_height", "")
+    sheet_t = metadata.get("sheet_thickness", "")
+    if sheet_w:
+        _text(x, y + line_num * line_height,
+              f"Sheet: {float(sheet_w):.1f} \u00d7 {float(sheet_h):.1f} \u00d7 {float(sheet_t):.1f}mm")
+        line_num += 1
+
+    feature_counts = metadata.get("feature_counts", "")
+    if feature_counts:
+        _text(x, y + line_num * line_height, f"Features: {feature_counts}")
+        line_num += 1
+
+    depth_info = metadata.get("depth_info", [])
+    if depth_info:
+        _text(x, y + line_num * line_height, "Depths:")
+        line_num += 1
+        for depth_line in depth_info:
+            _text(x + indent, y + line_num * line_height, f"\u2022 {depth_line}")
+            line_num += 1
+
+    hole_diameters = metadata.get("hole_diameters", [])
+    if hole_diameters:
+        _text(x, y + line_num * line_height, "Hole Diameters:")
+        line_num += 1
+        for d in hole_diameters:
+            _text(x + indent, y + line_num * line_height, f"\u2022 \u2300{d}mm")
+            line_num += 1
+
+    part_inventory = metadata.get("part_inventory", [])
+    if part_inventory:
+        _text(x, y + line_num * line_height, f"Parts ({len(part_inventory)}):")
+        line_num += 1
+        for part_id in part_inventory:
+            _text(x + indent, y + line_num * line_height, f"\u2022 {part_id}")
+            line_num += 1
+
+
 __all__ = [
     "render_diagram_svg",
+    "StyleSpec",
     "DiagramTheme",
     "DARK_DIAGRAM_THEME",
     "PRINT_DIAGRAM_THEME",

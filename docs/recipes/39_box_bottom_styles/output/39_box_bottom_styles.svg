@@ -1,92 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480.0 1080.0" width="1480.0mm" height="1080.0mm">
-  <style>
-        .sheet-outline { stroke: #6b8e7f; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
-        .profile-cuts { stroke: #e8e8e8; stroke-width: 2; fill: none; }
-        .profile-toolpaths { stroke: #5ab9ea; stroke-width: 1; fill: none; stroke-dasharray: 4,2; }
-        .waste-cuts { stroke: #ff9500; stroke-width: 2; fill: none; stroke-dasharray: 8,4; }
-        .pocket-regions { stroke: #6496c8; stroke-width: 1.5; fill: #6496c8; fill-opacity: 0.2; }
-        .holes { stroke: #e8e8e8; stroke-width: 1.5; fill: none; }
-        .engrave-paths { stroke: #888888; stroke-width: 0.25; fill: none; }
-        .construction { stroke: #6b8e7f; stroke-width: 0.5; fill: none; stroke-dasharray: 2,2; }
-        .dimensions { stroke: #5ab9ea; stroke-width: 1; fill: none; }
-        .dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
-        .gap-dimensions { stroke: #ff9500; stroke-width: 1; fill: none; }
-        .gap-text { fill: #ff9500; font-family: monospace; font-size: 10px; }
-        .notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
-        .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
-        .part-label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
-        .edge-label { fill: #ffcc00; font-family: monospace; font-size: 7px; }
-    </style>
-  <rect x="0" y="0" width="1480.0" height="1080.0" fill="#1a1a1a" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20.000 -60.000 1370.000 1020.000" width="1370.0mm" height="1020.0mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.wasteboard { stroke: #4ecdc4; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 1.5; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }</style>
+  <rect x="-20.0" y="-60.0" width="1370.0" height="1020.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
-    <rect x="140" y="140" width="1200.0" height="800.0" />
-    <g class="margin-zone">
-      <rect x="140" y="140" width="1200.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
-      <rect x="140" y="930.0" width="1200.0" height="10.0" fill="#6b8e7f" fill-opacity="0.15" />
-      <rect x="140" y="150.0" width="10.0" height="780.0" fill="#6b8e7f" fill-opacity="0.15" />
-      <rect x="1330.0" y="150.0" width="10.0" height="780.0" fill="#6b8e7f" fill-opacity="0.15" />
-    </g>
+    <rect x="0.000" y="0.000" width="1200.000" height="800.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="1200.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="790.000" width="1200.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="780.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
+    <rect x="1190.000" y="10.000" width="10.000" height="780.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 356.350 923.650 L 356.350 912.576 L 350.350 912.576 L 350.350 901.390 L 356.350 901.390 L 356.350 890.354 L 350.350 890.354 L 350.350 879.168 L 356.350 879.168 L 356.350 868.132 L 350.350 868.132 L 350.350 856.946 L 356.350 856.946 L 356.350 845.910 L 350.350 845.910 L 350.350 834.724 L 356.350 834.724 L 356.350 823.650 L 156.350 823.650 L 156.350 834.724 L 162.350 834.724 L 162.350 845.910 L 156.350 845.910 L 156.350 856.946 L 162.350 856.946 L 162.350 868.132 L 156.350 868.132 L 156.350 879.168 L 162.350 879.168 L 162.350 890.354 L 156.350 890.354 L 156.350 901.390 L 162.350 901.390 L 162.350 912.576 L 156.350 912.576 L 156.350 923.650 Z" fill-rule="evenodd" />
-    <path d="M 566.350 923.650 L 566.350 912.576 L 560.350 912.576 L 560.350 901.390 L 566.350 901.390 L 566.350 890.354 L 560.350 890.354 L 560.350 879.168 L 566.350 879.168 L 566.350 868.132 L 560.350 868.132 L 560.350 856.946 L 566.350 856.946 L 566.350 845.910 L 560.350 845.910 L 560.350 834.724 L 566.350 834.724 L 566.350 823.650 L 366.350 823.650 L 366.350 834.724 L 372.350 834.724 L 372.350 845.910 L 366.350 845.910 L 366.350 856.946 L 372.350 856.946 L 372.350 868.132 L 366.350 868.132 L 366.350 879.168 L 372.350 879.168 L 372.350 890.354 L 366.350 890.354 L 366.350 901.390 L 372.350 901.390 L 372.350 912.576 L 366.350 912.576 L 366.350 923.650 Z" fill-rule="evenodd" />
-    <path d="M 714.350 912.501 L 714.350 901.465 L 708.350 901.465 L 708.350 890.279 L 714.350 890.279 L 714.350 879.243 L 708.350 879.243 L 708.350 868.057 L 714.350 868.057 L 714.350 857.021 L 708.350 857.021 L 708.350 845.835 L 714.350 845.835 L 714.350 834.799 L 708.350 834.799 L 708.350 823.650 L 582.350 823.650 L 582.350 834.799 L 576.350 834.799 L 576.350 845.835 L 582.350 845.835 L 582.350 857.021 L 576.350 857.021 L 576.350 868.057 L 582.350 868.057 L 582.350 879.243 L 576.350 879.243 L 576.350 890.279 L 582.350 890.279 L 582.350 901.465 L 576.350 901.465 L 576.350 912.501 L 582.350 912.501 L 582.350 923.650 L 708.350 923.650 L 708.350 912.501 Z" fill-rule="evenodd" />
-    <path d="M 862.350 912.501 L 862.350 901.465 L 856.350 901.465 L 856.350 890.279 L 862.350 890.279 L 862.350 879.243 L 856.350 879.243 L 856.350 868.057 L 862.350 868.057 L 862.350 857.021 L 856.350 857.021 L 856.350 845.835 L 862.350 845.835 L 862.350 834.799 L 856.350 834.799 L 856.350 823.650 L 730.350 823.650 L 730.350 834.799 L 724.350 834.799 L 724.350 845.835 L 730.350 845.835 L 730.350 857.021 L 724.350 857.021 L 724.350 868.057 L 730.350 868.057 L 730.350 879.243 L 724.350 879.243 L 724.350 890.279 L 730.350 890.279 L 730.350 901.465 L 724.350 901.465 L 724.350 912.501 L 730.350 912.501 L 730.350 923.650 L 856.350 923.650 L 856.350 912.501 Z" fill-rule="evenodd" />
-    <path d="M 1060.350 923.650 L 1060.350 785.650 L 872.350 785.650 L 872.350 923.650 Z" fill-rule="evenodd" />
+    <path d="M 216.350 783.650 L 216.350 772.576 L 210.350 772.576 L 210.350 761.390 L 216.350 761.390 L 216.350 750.354 L 210.350 750.354 L 210.350 739.168 L 216.350 739.168 L 216.350 728.132 L 210.350 728.132 L 210.350 716.946 L 216.350 716.946 L 216.350 705.910 L 210.350 705.910 L 210.350 694.724 L 216.350 694.724 L 216.350 683.650 L 16.350 683.650 L 16.350 694.724 L 22.350 694.724 L 22.350 705.910 L 16.350 705.910 L 16.350 716.946 L 22.350 716.946 L 22.350 728.132 L 16.350 728.132 L 16.350 739.168 L 22.350 739.168 L 22.350 750.354 L 16.350 750.354 L 16.350 761.390 L 22.350 761.390 L 22.350 772.576 L 16.350 772.576 L 16.350 783.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_front_0_front_outer" />
+    <path d="M 426.350 783.650 L 426.350 772.576 L 420.350 772.576 L 420.350 761.390 L 426.350 761.390 L 426.350 750.354 L 420.350 750.354 L 420.350 739.168 L 426.350 739.168 L 426.350 728.132 L 420.350 728.132 L 420.350 716.946 L 426.350 716.946 L 426.350 705.910 L 420.350 705.910 L 420.350 694.724 L 426.350 694.724 L 426.350 683.650 L 226.350 683.650 L 226.350 694.724 L 232.350 694.724 L 232.350 705.910 L 226.350 705.910 L 226.350 716.946 L 232.350 716.946 L 232.350 728.132 L 226.350 728.132 L 226.350 739.168 L 232.350 739.168 L 232.350 750.354 L 226.350 750.354 L 226.350 761.390 L 232.350 761.390 L 232.350 772.576 L 226.350 772.576 L 226.350 783.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_back_2_back_outer" />
+    <path d="M 574.350 772.501 L 574.350 761.465 L 568.350 761.465 L 568.350 750.279 L 574.350 750.279 L 574.350 739.243 L 568.350 739.243 L 568.350 728.057 L 574.350 728.057 L 574.350 717.021 L 568.350 717.021 L 568.350 705.835 L 574.350 705.835 L 574.350 694.799 L 568.350 694.799 L 568.350 683.650 L 442.350 683.650 L 442.350 694.799 L 436.350 694.799 L 436.350 705.835 L 442.350 705.835 L 442.350 717.021 L 436.350 717.021 L 436.350 728.057 L 442.350 728.057 L 442.350 739.243 L 436.350 739.243 L 436.350 750.279 L 442.350 750.279 L 442.350 761.465 L 436.350 761.465 L 436.350 772.501 L 442.350 772.501 L 442.350 783.650 L 568.350 783.650 L 568.350 772.501 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_4_left_side_outer" />
+    <path d="M 722.350 772.501 L 722.350 761.465 L 716.350 761.465 L 716.350 750.279 L 722.350 750.279 L 722.350 739.243 L 716.350 739.243 L 716.350 728.057 L 722.350 728.057 L 722.350 717.021 L 716.350 717.021 L 716.350 705.835 L 722.350 705.835 L 722.350 694.799 L 716.350 694.799 L 716.350 683.650 L 590.350 683.650 L 590.350 694.799 L 584.350 694.799 L 584.350 705.835 L 590.350 705.835 L 590.350 717.021 L 584.350 717.021 L 584.350 728.057 L 590.350 728.057 L 590.350 739.243 L 584.350 739.243 L 584.350 750.279 L 590.350 750.279 L 590.350 761.465 L 584.350 761.465 L 584.350 772.501 L 590.350 772.501 L 590.350 783.650 L 716.350 783.650 L 716.350 772.501 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_6_right_side_outer" />
+    <path d="M 920.350 783.650 L 920.350 645.650 L 732.350 645.650 L 732.350 783.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_8_bottom_outer" />
   </g>
-  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 357.938 925.237 L 357.938 910.989 L 351.938 910.989 L 351.938 902.978 L 357.938 902.978 L 357.938 888.767 L 351.938 888.767 L 351.938 880.756 L 357.938 880.756 L 357.938 866.544 L 351.938 866.544 L 351.938 858.533 L 357.938 858.533 L 357.938 844.322 L 351.938 844.322 L 351.938 836.311 L 357.938 836.311 L 357.938 822.062 L 154.762 822.062 L 154.762 836.311 L 160.762 836.311 L 160.762 844.322 L 154.762 844.322 L 154.762 858.533 L 160.762 858.533 L 160.762 866.544 L 154.762 866.544 L 154.762 880.756 L 160.762 880.756 L 160.762 888.767 L 154.762 888.767 L 154.762 902.978 L 160.762 902.978 L 160.762 910.989 L 154.762 910.989 L 154.762 925.237 Z" fill-rule="evenodd" />
-    <path d="M 567.938 925.237 L 567.938 910.989 L 561.938 910.989 L 561.938 902.978 L 567.938 902.978 L 567.938 888.767 L 561.938 888.767 L 561.938 880.756 L 567.938 880.756 L 567.938 866.544 L 561.938 866.544 L 561.938 858.533 L 567.938 858.533 L 567.938 844.322 L 561.938 844.322 L 561.938 836.311 L 567.938 836.311 L 567.938 822.062 L 364.763 822.062 L 364.763 836.311 L 370.763 836.311 L 370.763 844.322 L 364.763 844.322 L 364.763 858.533 L 370.763 858.533 L 370.763 866.544 L 364.763 866.544 L 364.763 880.756 L 370.763 880.756 L 370.763 888.767 L 364.763 888.767 L 364.763 902.978 L 370.763 902.978 L 370.763 910.989 L 364.763 910.989 L 364.763 925.237 Z" fill-rule="evenodd" />
-    <path d="M 715.938 914.089 L 715.938 899.878 L 709.938 899.878 L 709.938 891.867 L 715.938 891.867 L 715.938 877.656 L 709.938 877.656 L 709.938 869.644 L 715.938 869.644 L 715.938 855.433 L 709.938 855.433 L 709.938 847.422 L 715.938 847.422 L 715.938 833.211 L 709.938 833.211 L 709.938 822.062 L 580.763 822.062 L 580.763 833.211 L 574.763 833.211 L 574.763 847.422 L 580.763 847.422 L 580.763 855.433 L 574.763 855.433 L 574.763 869.644 L 580.763 869.644 L 580.763 877.656 L 574.763 877.656 L 574.763 891.867 L 580.763 891.867 L 580.763 899.878 L 574.763 899.878 L 574.763 914.089 L 580.763 914.089 L 580.763 925.237 L 709.938 925.237 L 709.938 914.089 Z" fill-rule="evenodd" />
-    <path d="M 863.938 914.089 L 863.938 899.878 L 857.938 899.878 L 857.938 891.867 L 863.938 891.867 L 863.938 877.656 L 857.938 877.656 L 857.938 869.644 L 863.938 869.644 L 863.938 855.433 L 857.938 855.433 L 857.938 847.422 L 863.938 847.422 L 863.938 833.211 L 857.938 833.211 L 857.938 822.062 L 728.763 822.062 L 728.763 833.211 L 722.763 833.211 L 722.763 847.422 L 728.763 847.422 L 728.763 855.433 L 722.763 855.433 L 722.763 869.644 L 728.763 869.644 L 728.763 877.656 L 722.763 877.656 L 722.763 891.867 L 728.763 891.867 L 728.763 899.878 L 722.763 899.878 L 722.763 914.089 L 728.763 914.089 L 728.763 925.237 L 857.938 925.237 L 857.938 914.089 Z" fill-rule="evenodd" />
-    <path d="M 1061.938 925.237 L 1061.938 784.062 L 870.763 784.062 L 870.763 925.237 Z" fill-rule="evenodd" />
-  </g>
-  <g id="WASTE_CUTS" class="waste-cuts" />
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="156.35000000000002" y="917.4499999999999" width="200.0" height="6.2" />
-    <rect x="366.35" y="917.4499999999999" width="200.0" height="6.2" />
-    <rect x="576.35" y="917.4499999999999" width="138.0" height="6.2" />
-    <rect x="724.35" y="917.4499999999999" width="138.0" height="6.2" />
+    <rect x="16.350" y="777.450" width="200.000" height="6.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_front_dado_1" />
+    <rect x="226.350" y="777.450" width="200.000" height="6.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_back_dado_3" />
+    <rect x="436.350" y="777.450" width="138.000" height="6.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_5" />
+    <rect x="584.350" y="777.450" width="138.000" height="6.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_7" />
   </g>
-  <g id="ENGRAVE_PATHS" class="engrave-paths" />
-  <g id="HOLES" class="holes" />
   <g id="LABELS" class="labels">
-    <text x="256.35" y="873.65" class="part-label" text-anchor="middle" dominant-baseline="middle">FRONT</text>
-    <text x="466.35" y="873.65" class="part-label" text-anchor="middle" dominant-baseline="middle">BACK</text>
-    <text x="645.35" y="873.65" class="part-label" text-anchor="middle" dominant-baseline="middle">LEFT SIDE</text>
-    <text x="793.35" y="873.65" class="part-label" text-anchor="middle" dominant-baseline="middle">RIGHT SIDE</text>
-    <text x="966.35" y="854.65" class="part-label" text-anchor="middle" dominant-baseline="middle">BOTTOM</text>
-  </g>
-  <g id="EDGE_COLORS" class="edge-colors" />
-  <g id="CONSTRUCTION" class="construction" />
-  <g id="DIMENSIONS" class="dimensions" />
-  <g id="NOTES" class="notes">
-    <text x="20" y="960.0" class="notes" font-weight="bold">NOTES</text>
-    <text x="20" y="972.0" class="notes">Sheet: 1200.0 × 800.0 × 6.0mm</text>
-    <text x="20" y="984.0" class="notes">Features: 5 profiles, 4 pockets</text>
-    <text x="20" y="996.0" class="notes">Depths:</text>
-    <text x="30" y="1008.0" class="notes">• pocket: 3.0mm</text>
-    <text x="20" y="1020.0" class="notes">Parts (4):</text>
-    <text x="30" y="1032.0" class="notes">• assembly_back_dado_3</text>
-    <text x="30" y="1044.0" class="notes">• assembly_front_dado_1</text>
-    <text x="30" y="1056.0" class="notes">• assembly_left_side_dado_5</text>
-    <text x="30" y="1068.0" class="notes">• assembly_right_side_dado_7</text>
+    <text x="116.350" y="733.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_front_0_front_outer_label">FRONT</text>
+    <text x="326.350" y="733.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_back_2_back_outer_label">BACK</text>
+    <text x="505.350" y="733.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_4_left_side_outer_label">LEFT SIDE</text>
+    <text x="653.350" y="733.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_6_right_side_outer_label">RIGHT SIDE</text>
+    <text x="826.350" y="714.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_8_bottom_outer_label">BOTTOM</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
-    <text x="20" y="20" class="notes" font-weight="bold" font-size="14px">BLUEPRINT PROOF DRAWING</text>
-    <text x="20" y="34" class="notes" font-size="9px">Units: millimeters (mm)</text>
+    <text x="-10.0" y="-46.0" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-10.0" y="-32.0" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="1348.0" y="20" class="legend" font-weight="bold">LEGEND</text>
-    <line x1="1348.0" y1="38" x2="1363.0" y2="38" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="1368.0" y="41" class="legend">Sheet Outline</text>
-    <line x1="1348.0" y1="54" x2="1363.0" y2="54" stroke="#e8e8e8" stroke-width="2" />
-    <text x="1368.0" y="57" class="legend">Profile Cuts</text>
-    <rect x="1348.0" y="67" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="1368.0" y="73" class="legend">Pocket Regions</text>
-    <line x1="1348.0" y1="86" x2="1363.0" y2="86" stroke="#e8e8e8" stroke-width="1.5" />
-    <text x="1368.0" y="89" class="legend">Holes</text>
-    <line x1="1348.0" y1="102" x2="1363.0" y2="102" stroke="#5ab9ea" stroke-width="1" />
-    <text x="1368.0" y="105" class="legend">Dimensions</text>
+    <text x="1218.0" y="-46.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="1218.0" y1="-28.0" x2="1233.0" y2="-28.0" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="1238.0" y="-25.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="1218.0" y1="-12.0" x2="1233.0" y2="-12.0" stroke="#e8e8e8" stroke-width="2" />
+    <text x="1238.0" y="-9.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="1218.0" y="1.0" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="1238.0" y="7.0" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="1218.0" y1="20.0" x2="1233.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1238.0" y="23.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20" y="830.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20" y="842.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1200.0 × 800.0 × 6.0mm</text>
+    <text x="20" y="854.0" fill="#cccccc" font-family="monospace" font-size="10px">Features: 5 profiles, 4 pockets</text>
+    <text x="20" y="866.0" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30" y="878.0" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
+    <text x="20" y="890.0" fill="#cccccc" font-family="monospace" font-size="10px">Parts (4):</text>
+    <text x="30" y="902.0" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_dado_3</text>
+    <text x="30" y="914.0" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_dado_1</text>
+    <text x="30" y="926.0" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_5</text>
+    <text x="30" y="938.0" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_7</text>
   </g>
 </svg>

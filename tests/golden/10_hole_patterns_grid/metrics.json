@@ -1,50 +1,32 @@
 {
   "golden": {
     "recipe_name": "10_hole_patterns_grid",
-    "created_at": "2026-02-03T16:09:25.819674+00:00"
+    "created_at": "2026-02-08T16:49:04.843574+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.53,
+    "extraction_time_ms": 0.52,
     "document": {
-      "width_mm": 580.0,
-      "height_mm": 980.0,
+      "width_mm": 450.0,
+      "height_mm": 864.0,
       "viewbox": [
-        0.0,
-        0.0,
-        580.0,
-        980.0
+        -10.0,
+        -50.0,
+        450.0,
+        864.0
       ]
     },
     "layers": {
-      "count": 14,
+      "count": 6,
       "names": [
-        "CONSTRUCTION",
         "DIMENSIONS",
-        "EDGE_COLORS",
-        "ENGRAVE_PATHS",
         "HOLES",
-        "LABELS",
         "LEGEND",
         "NOTES",
-        "POCKET_REGIONS",
-        "PROFILE_CUTS",
-        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK",
-        "WASTE_CUTS"
+        "TITLE_BLOCK"
       ],
       "by_layer": {
-        "CONSTRUCTION": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
         "DIMENSIONS": {
           "element_count": 12,
           "rect_count": 0,
@@ -53,26 +35,6 @@
           "line_count": 6,
           "polygon_count": 4,
           "text_count": 2,
-          "elements": []
-        },
-        "EDGE_COLORS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "ENGRAVE_PATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
           "elements": []
         },
         "HOLES": {
@@ -87,471 +49,461 @@
             {
               "element_type": "circle",
               "bounds": [
+                80.0,
+                661.562,
+                85.0,
+                666.562
+              ],
+              "center": [
+                82.5,
+                664.062
+              ],
+              "radius": 2.5
+            },
+            {
+              "element_type": "circle",
+              "bounds": [
+                215.0,
+                661.562,
                 220.0,
-                801.5625,
-                225.0,
-                806.5625
+                666.562
               ],
               "center": [
-                222.5,
-                804.0625
+                217.5,
+                664.062
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                801.5625,
-                360.0,
-                806.5625
+                80.0,
+                619.688,
+                85.0,
+                624.688
               ],
               "center": [
-                357.5,
-                804.0625
+                82.5,
+                622.188
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                619.688,
                 220.0,
-                759.6875,
-                225.0,
-                764.6875
+                624.688
               ],
               "center": [
-                222.5,
-                762.1875
+                217.5,
+                622.188
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                759.6875,
-                360.0,
-                764.6875
+                80.0,
+                577.812,
+                85.0,
+                582.812
               ],
               "center": [
-                357.5,
-                762.1875
+                82.5,
+                580.312
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                577.812,
                 220.0,
-                717.8125,
-                225.0,
-                722.8125
+                582.812
               ],
               "center": [
-                222.5,
-                720.3125
+                217.5,
+                580.312
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                717.8125,
-                360.0,
-                722.8125
+                80.0,
+                535.938,
+                85.0,
+                540.938
               ],
               "center": [
-                357.5,
-                720.3125
+                82.5,
+                538.438
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                535.938,
                 220.0,
-                675.9375,
-                225.0,
-                680.9375
+                540.938
               ],
               "center": [
-                222.5,
-                678.4375
+                217.5,
+                538.438
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                675.9375,
-                360.0,
-                680.9375
+                80.0,
+                494.062,
+                85.0,
+                499.062
               ],
               "center": [
-                357.5,
-                678.4375
+                82.5,
+                496.562
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                494.062,
                 220.0,
-                634.0625,
-                225.0,
-                639.0625
+                499.062
               ],
               "center": [
-                222.5,
-                636.5625
+                217.5,
+                496.562
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                634.0625,
-                360.0,
-                639.0625
+                80.0,
+                452.188,
+                85.0,
+                457.188
               ],
               "center": [
-                357.5,
-                636.5625
+                82.5,
+                454.688
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                452.188,
                 220.0,
-                592.1875,
-                225.0,
-                597.1875
+                457.188
               ],
               "center": [
-                222.5,
-                594.6875
+                217.5,
+                454.688
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                592.1875,
-                360.0,
-                597.1875
+                80.0,
+                410.312,
+                85.0,
+                415.312
               ],
               "center": [
-                357.5,
-                594.6875
+                82.5,
+                412.812
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                410.312,
                 220.0,
-                550.3125,
-                225.0,
-                555.3125
+                415.312
               ],
               "center": [
-                222.5,
-                552.8125
+                217.5,
+                412.812
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                550.3125,
-                360.0,
-                555.3125
+                80.0,
+                368.438,
+                85.0,
+                373.438
               ],
               "center": [
-                357.5,
-                552.8125
+                82.5,
+                370.938
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                368.438,
                 220.0,
-                508.4375,
-                225.0,
-                513.4375
+                373.438
               ],
               "center": [
-                222.5,
-                510.9375
+                217.5,
+                370.938
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                508.4375,
-                360.0,
-                513.4375
+                80.0,
+                326.562,
+                85.0,
+                331.562
               ],
               "center": [
-                357.5,
-                510.9375
+                82.5,
+                329.062
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                326.562,
                 220.0,
-                466.5625,
-                225.0,
-                471.5625
+                331.562
               ],
               "center": [
-                222.5,
-                469.0625
+                217.5,
+                329.062
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                466.5625,
-                360.0,
-                471.5625
+                80.0,
+                284.688,
+                85.0,
+                289.688
               ],
               "center": [
-                357.5,
-                469.0625
+                82.5,
+                287.188
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                284.688,
                 220.0,
-                424.6875,
-                225.0,
-                429.6875
+                289.688
               ],
               "center": [
-                222.5,
-                427.1875
+                217.5,
+                287.188
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                424.6875,
-                360.0,
-                429.6875
+                80.0,
+                242.812,
+                85.0,
+                247.812
               ],
               "center": [
-                357.5,
-                427.1875
+                82.5,
+                245.312
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                242.812,
                 220.0,
-                382.8125,
-                225.0,
-                387.8125
+                247.812
               ],
               "center": [
-                222.5,
-                385.3125
+                217.5,
+                245.312
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                382.8125,
-                360.0,
-                387.8125
+                80.0,
+                200.938,
+                85.0,
+                205.938
               ],
               "center": [
-                357.5,
-                385.3125
+                82.5,
+                203.438
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                200.938,
                 220.0,
-                340.9375,
-                225.0,
-                345.9375
+                205.938
               ],
               "center": [
-                222.5,
-                343.4375
+                217.5,
+                203.438
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                340.9375,
-                360.0,
-                345.9375
+                80.0,
+                159.062,
+                85.0,
+                164.062
               ],
               "center": [
-                357.5,
-                343.4375
+                82.5,
+                161.562
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                159.062,
                 220.0,
-                299.0625,
-                225.0,
-                304.0625
+                164.062
               ],
               "center": [
-                222.5,
-                301.5625
+                217.5,
+                161.562
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                299.0625,
-                360.0,
-                304.0625
+                80.0,
+                117.188,
+                85.0,
+                122.188
               ],
               "center": [
-                357.5,
-                301.5625
+                82.5,
+                119.688
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                117.188,
                 220.0,
-                257.1875,
-                225.0,
-                262.1875
+                122.188
               ],
               "center": [
-                222.5,
-                259.6875
+                217.5,
+                119.688
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                257.1875,
-                360.0,
-                262.1875
+                80.0,
+                75.312,
+                85.0,
+                80.312
               ],
               "center": [
-                357.5,
-                259.6875
+                82.5,
+                77.812
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                75.312,
                 220.0,
-                215.3125,
-                225.0,
-                220.3125
+                80.312
               ],
               "center": [
-                222.5,
-                217.8125
+                217.5,
+                77.812
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
-                355.0,
-                215.3125,
-                360.0,
-                220.3125
+                80.0,
+                33.438,
+                85.0,
+                38.438
               ],
               "center": [
-                357.5,
-                217.8125
+                82.5,
+                35.938
               ],
               "radius": 2.5
             },
             {
               "element_type": "circle",
               "bounds": [
+                215.0,
+                33.438,
                 220.0,
-                173.4375,
-                225.0,
-                178.4375
+                38.438
               ],
               "center": [
-                222.5,
-                175.9375
-              ],
-              "radius": 2.5
-            },
-            {
-              "element_type": "circle",
-              "bounds": [
-                355.0,
-                173.4375,
-                360.0,
-                178.4375
-              ],
-              "center": [
-                357.5,
-                175.9375
+                217.5,
+                35.938
               ],
               "radius": 2.5
             }
           ]
         },
-        "LABELS": {
-          "element_count": 0,
+        "LEGEND": {
+          "element_count": 7,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 0,
+          "line_count": 3,
           "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "LEGEND": {
-          "element_count": 11,
-          "rect_count": 1,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 4,
-          "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 4,
           "elements": []
         },
         "NOTES": {
@@ -562,36 +514,6 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 7,
-          "elements": []
-        },
-        "POCKET_REGIONS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "PROFILE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "PROFILE_TOOLPATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
           "elements": []
         },
         "SHEET_OUTLINE": {
@@ -606,14 +528,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                140.0,
-                140.0,
-                440.0,
-                840.0
+                0.0,
+                0.0,
+                300.0,
+                700.0
               ],
               "center": [
-                290.0,
-                490.0
+                150.0,
+                350.0
               ],
               "width": 300.0,
               "height": 700.0
@@ -628,16 +550,6 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 2,
-          "elements": []
-        },
-        "WASTE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
           "elements": []
         }
       }
@@ -656,13 +568,13 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
-      "x_max": 463.0,
-      "y_min": 38.0,
-      "y_max": 840.0
+      "x_min": 0.0,
+      "x_max": 323.0,
+      "y_min": -18.0,
+      "y_max": 700.0
     },
     "text_elements": {
-      "count": 17,
+      "count": 15,
       "dimension_labels": [
         "135.0mm",
         "41.9mm",
@@ -721,12 +633,8 @@
       ]
     },
     "rects": {
-      "count": 2,
+      "count": 1,
       "dimensions": [
-        [
-          15.0,
-          8.0
-        ],
         [
           300.0,
           700.0
@@ -736,7 +644,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 139.3928,
+    "extraction_time_ms": 140.1442,
     "summary": {
       "total_lines": 31598,
       "comment_lines": 34,

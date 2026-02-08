@@ -1,50 +1,32 @@
 {
   "golden": {
     "recipe_name": "11_keepout_islands",
-    "created_at": "2026-02-03T16:09:25.833762+00:00"
+    "created_at": "2026-02-08T16:49:04.857622+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.25,
+    "extraction_time_ms": 0.21,
     "document": {
-      "width_mm": 680.0,
-      "height_mm": 680.0,
+      "width_mm": 550.0,
+      "height_mm": 564.0,
       "viewbox": [
-        0.0,
-        0.0,
-        680.0,
-        680.0
+        -10.0,
+        -50.0,
+        550.0,
+        564.0
       ]
     },
     "layers": {
-      "count": 14,
+      "count": 6,
       "names": [
-        "CONSTRUCTION",
         "DIMENSIONS",
-        "EDGE_COLORS",
-        "ENGRAVE_PATHS",
-        "HOLES",
-        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
-        "PROFILE_CUTS",
-        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
-        "TITLE_BLOCK",
-        "WASTE_CUTS"
+        "TITLE_BLOCK"
       ],
       "by_layer": {
-        "CONSTRUCTION": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
         "DIMENSIONS": {
           "element_count": 12,
           "rect_count": 0,
@@ -55,54 +37,14 @@
           "text_count": 2,
           "elements": []
         },
-        "EDGE_COLORS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "ENGRAVE_PATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "HOLES": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "LABELS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
         "LEGEND": {
-          "element_count": 11,
+          "element_count": 7,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 4,
+          "line_count": 2,
           "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 4,
           "elements": []
         },
         "NOTES": {
@@ -127,39 +69,19 @@
             {
               "element_type": "rect",
               "bounds": [
-                140.0,
-                140.0,
-                540.0,
-                540.0
+                0.0,
+                0.0,
+                400.0,
+                400.0
               ],
               "center": [
-                340.0,
-                340.0
+                200.0,
+                200.0
               ],
               "width": 400.0,
               "height": 400.0
             }
           ]
-        },
-        "PROFILE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "PROFILE_TOOLPATHS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
         },
         "SHEET_OUTLINE": {
           "element_count": 1,
@@ -173,14 +95,14 @@
             {
               "element_type": "rect",
               "bounds": [
-                140.0,
-                140.0,
-                540.0,
-                540.0
+                0.0,
+                0.0,
+                400.0,
+                400.0
               ],
               "center": [
-                340.0,
-                340.0
+                200.0,
+                200.0
               ],
               "width": 400.0,
               "height": 400.0
@@ -195,16 +117,6 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 2,
-          "elements": []
-        },
-        "WASTE_CUTS": {
-          "element_count": 0,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
           "elements": []
         }
       }
@@ -228,13 +140,13 @@
       }
     },
     "bounds": {
-      "x_min": 140.0,
-      "x_max": 563.0,
-      "y_min": 38.0,
-      "y_max": 540.0
+      "x_min": 0.0,
+      "x_max": 423.0,
+      "y_min": -18.0,
+      "y_max": 400.0
     },
     "text_elements": {
-      "count": 17,
+      "count": 15,
       "dimension_labels": [
         "400.0mm",
         "400.0mm",
@@ -278,7 +190,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.4595,
+    "extraction_time_ms": 3.4711,
     "summary": {
       "total_lines": 1064,
       "comment_lines": 6,

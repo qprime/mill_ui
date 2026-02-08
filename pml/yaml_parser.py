@@ -694,10 +694,14 @@ def parse_node(data: dict, path: str = "") -> Any:
             feat_type = feat_keys[0]
             feat_params = feat_data[feat_type] or {}
             parsed_params = {}
+            dimension_keys = {"x", "y", "width", "height", "depth", "diameter",
+                              "radius", "extension", "position", "start", "end"}
+            literal_values = {"left", "right", "top", "bottom", "front", "back"}
             for key, value in feat_params.items():
-                if key in ("x", "y", "width", "height", "depth", "diameter", "radius",
-                           "extension", "position", "start", "end"):
-                    if value is not None:
+                if key in dimension_keys and value is not None:
+                    if isinstance(value, str) and value in literal_values:
+                        parsed_params[key] = value
+                    else:
                         parsed_params[f"{key}_mm"] = parse_dimension(value)
                 else:
                     parsed_params[key] = value
@@ -726,6 +730,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             face_features=face_features,
             end_features=end_features,
             edge_features=edge_features,
+            show_labels=node_data.get("show_labels", False),
         )
 
     else:

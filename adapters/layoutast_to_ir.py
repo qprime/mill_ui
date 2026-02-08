@@ -123,6 +123,7 @@ def layoutast_to_diagram_ir(
         "part_inventory": _collect_part_inventory(ast),
         "edge_profiles": _collect_edge_profiles(ast),
         "edge_allowances": _collect_edge_allowances(ast),
+        "beam_structures": ast.config.get("beam_structures", []) if ast.config else [],
     }
 
     return DiagramIR(

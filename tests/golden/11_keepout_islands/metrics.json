@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "11_keepout_islands",
-    "created_at": "2026-02-08T21:22:05.392470+00:00"
+    "created_at": "2026-02-08T21:49:41.257123+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -190,7 +190,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.5001,
+    "extraction_time_ms": 3.4812,
     "summary": {
       "total_lines": 1064,
       "comment_lines": 6,

@@ -779,6 +779,7 @@ Laminated 3D member that expands to multiple panel layers. Beams enable building
 | thickness | yes | - | Per-layer sheet thickness |
 | layers | yes | - | Number of layers (int) or explicit LayerSpec list |
 | role | no | - | Beam role: POST, RAIL, LEG, APRON, STRETCHER, STILE, MUNTIN |
+| show_labels | no | false | Display panel name labels on each beam segment |
 
 ##### Splicing
 

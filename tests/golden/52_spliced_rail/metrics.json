@@ -1,25 +1,27 @@
 {
   "golden": {
     "recipe_name": "52_spliced_rail",
-    "created_at": "2026-02-08T21:22:08.134918+00:00"
+    "created_at": "2026-02-08T21:49:43.955403+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.58,
+    "extraction_time_ms": 1.03,
     "document": {
       "width_mm": 1350.0,
-      "height_mm": 1024.0,
+      "height_mm": 1111.0,
       "viewbox": [
         -10.0,
         -50.0,
         1350.0,
-        1024.0
+        1111.0
       ]
     },
     "layers": {
-      "count": 7,
+      "count": 9,
       "names": [
+        "BEAM_ASSEMBLIES",
         "DIMENSIONS",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "PROFILE_CUTS",
@@ -28,6 +30,16 @@
         "TITLE_BLOCK"
       ],
       "by_layer": {
+        "BEAM_ASSEMBLIES": {
+          "element_count": 27,
+          "rect_count": 8,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 5,
+          "polygon_count": 0,
+          "text_count": 14,
+          "elements": []
+        },
         "DIMENSIONS": {
           "element_count": 72,
           "rect_count": 0,
@@ -36,6 +48,16 @@
           "line_count": 36,
           "polygon_count": 24,
           "text_count": 12,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 8,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 8,
           "elements": []
         },
         "LEGEND": {
@@ -259,10 +281,10 @@
       "x_min": 0.0,
       "x_max": 1223.0,
       "y_min": -18.0,
-      "y_max": 800.0
+      "y_max": 1044.0
     },
     "text_elements": {
-      "count": 31,
+      "count": 53,
       "dimension_labels": [
         "100.0mm",
         "100.0mm",
@@ -271,6 +293,7 @@
         "100.0mm",
         "100.0mm",
         "1187.3mm",
+        "2000 \u00d7 100 \u00d7 57mm",
         "395.8mm",
         "416.9mm",
         "604.2mm",
@@ -299,8 +322,40 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 17,
+      "count": 25,
       "dimensions": [
+        [
+          69.26,
+          12.0
+        ],
+        [
+          72.96,
+          12.0
+        ],
+        [
+          105.74,
+          12.0
+        ],
+        [
+          105.74,
+          12.0
+        ],
+        [
+          138.52,
+          12.0
+        ],
+        [
+          142.22,
+          12.0
+        ],
+        [
+          207.78,
+          12.0
+        ],
+        [
+          207.78,
+          12.0
+        ],
         [
           395.767,
           100.0
@@ -374,7 +429,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.2921,
+    "extraction_time_ms": 6.3154,
     "summary": {
       "total_lines": 1966,
       "comment_lines": 34,

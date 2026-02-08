@@ -22,7 +22,10 @@
 .title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
 .section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
 .callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
-.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }</style>
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
   <rect x="-10.0" y="-50.0" width="350.0" height="386.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="200.000" height="150.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />

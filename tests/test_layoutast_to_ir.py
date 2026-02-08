@@ -336,6 +336,63 @@ def test_edge_profiles_empty_when_none():
     assert ir.metadata["edge_allowances"] == []
 
 
+def test_beam_structures_empty_by_default():
+    ast = LayoutAST(
+        sheet=_make_sheet(),
+        items=(_make_profile_item("rect1", 100.0, 80.0, 100.0, 75.0),),
+    )
+    ir = layoutast_to_diagram_ir(ast)
+    assert ir.metadata["beam_structures"] == []
+
+
+def test_beam_structures_passed_through_config():
+    beam_data = [{
+        "name": "test_beam",
+        "length_mm": 1000.0,
+        "width_mm": 100.0,
+        "thickness_mm": 19.0,
+        "layer_count": 3,
+        "total_thickness_mm": 57.0,
+        "role": "RAIL",
+        "layers": [
+            {"layer_index": 0, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+            {"layer_index": 1, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+            {"layer_index": 2, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+        ],
+    }]
+    ast = LayoutAST(
+        sheet=_make_sheet(),
+        items=(_make_profile_item("rect1", 100.0, 80.0, 100.0, 75.0),),
+        config={"beam_structures": beam_data},
+    )
+    ir = layoutast_to_diagram_ir(ast)
+    assert ir.metadata["beam_structures"] == beam_data
+    assert ir.metadata["beam_structures"][0]["name"] == "test_beam"
+    assert ir.metadata["beam_structures"][0]["layer_count"] == 3
+
+
+def test_beam_labels_on_items():
+    item_with_label = Item(
+        kind="shape",
+        type="Rect",
+        geometry=Geometry(data={"w_mm": 50.0, "h_mm": 30.0}),
+        placement=Placement(center_xy_mm=(50.0, 50.0)),
+        feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
+        shape_id="beam_test_L0",
+        label="TEST L0",
+    )
+    ast = LayoutAST(
+        sheet=_make_sheet(),
+        items=(item_with_label,),
+    )
+    ir = layoutast_to_diagram_ir(ast)
+    label_layers = [l for l in ir.layers if l.name == "LABELS"]
+    assert len(label_layers) == 1
+    labels = label_layers[0].items
+    assert len(labels) == 1
+    assert labels[0].content == "TEST L0"
+
+
 if __name__ == "__main__":
     import sys
 
@@ -360,6 +417,9 @@ if __name__ == "__main__":
         test_edge_allowances_collected,
         test_edge_profiles_deduplicated,
         test_edge_profiles_empty_when_none,
+        test_beam_structures_empty_by_default,
+        test_beam_structures_passed_through_config,
+        test_beam_labels_on_items,
     ]
 
     passed = 0

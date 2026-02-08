@@ -518,6 +518,7 @@ class BeamDecl:
     face_features: tuple[BeamFeatureDecl, ...] = ()
     end_features: tuple[BeamFeatureDecl, ...] = ()
     edge_features: tuple[BeamFeatureDecl, ...] = ()
+    show_labels: bool = False
 
 
 @dataclass(frozen=True)

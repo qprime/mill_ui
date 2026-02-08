@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "27_wave_texture_panel",
-    "created_at": "2026-02-08T21:22:06.840127+00:00"
+    "created_at": "2026-02-08T21:49:42.681367+00:00"
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 35.4136,
+    "extraction_time_ms": 34.8417,
     "summary": {
       "total_lines": 9002,
       "comment_lines": 166,

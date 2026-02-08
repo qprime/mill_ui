@@ -1,0 +1,30 @@
+# mill_ui: d707f8d4
+# generated: 2026-02-08
+
+Sheet:
+  width: 800mm
+  height: 600mm
+  thickness: 19mm
+
+children:
+  - Beam:
+      name: rail
+      length: 600mm
+      width: 76mm
+      thickness: 19mm
+      layers: 3
+      role: RAIL
+      show_labels: true
+      end_features:
+        - Tenon:
+            end: left
+            extension: 38mm
+            width: 76mm
+            height: 19mm
+            layers: center
+        - Tenon:
+            end: right
+            extension: 38mm
+            width: 76mm
+            height: 19mm
+            layers: center

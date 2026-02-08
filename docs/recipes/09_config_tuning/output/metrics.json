@@ -4,9 +4,9 @@
     "hints_ms": 0.0,
     "plan_ms": 0.3,
     "gcode_ms": 0.52,
-    "svg_ms": 0.22,
-    "total_ms": 1.86,
-    "parse_ms": 1.03
+    "svg_ms": 0.23,
+    "total_ms": 1.82,
+    "parse_ms": 0.99
   },
   "constraint_audit": {},
   "complexity": {

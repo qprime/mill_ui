@@ -170,6 +170,7 @@ class LayoutResolver:
         self.components = ast.components
         self._shape_counter = 0
         self._validate = validate
+        self._beam_structures: list[dict] = []
 
     def _assert_shape_context(
         self,
@@ -2183,6 +2184,38 @@ class LayoutResolver:
         panel_specs = beam_spec.expand(sheet_size)
         gap = 10.0
 
+        from assembly.beam import compute_segments
+        segments = None
+        if isinstance(beam_spec.layers, int) and beam_spec.layers >= 1:
+            segments = compute_segments(beam_spec.length_mm, sheet_size, beam_spec.layers)
+        beam_structure = {
+            "name": beam_spec.name,
+            "length_mm": beam_spec.length_mm,
+            "width_mm": beam_spec.width_mm,
+            "thickness_mm": beam_spec.thickness_mm,
+            "layer_count": beam_spec.layer_count,
+            "total_thickness_mm": beam_spec.total_thickness,
+            "role": beam_spec.role.name if beam_spec.role else None,
+            "layers": [],
+        }
+        if segments:
+            for layer_idx, layer_segs in enumerate(segments):
+                layer_data = {
+                    "layer_index": layer_idx,
+                    "segments": [
+                        {"index": s.index, "start_mm": s.start_mm, "end_mm": s.end_mm, "length_mm": s.length}
+                        for s in layer_segs
+                    ],
+                }
+                beam_structure["layers"].append(layer_data)
+        elif isinstance(beam_spec.layers, tuple):
+            for layer_idx, layer_spec in enumerate(beam_spec.layers):
+                beam_structure["layers"].append({
+                    "layer_index": layer_idx,
+                    "segments": [{"index": 0, "start_mm": layer_spec.offset_mm, "end_mm": layer_spec.offset_mm + layer_spec.length_mm, "length_mm": layer_spec.length_mm}],
+                })
+        self._beam_structures.append(beam_structure)
+
         x_cursor = region.x_min + edge_clearance
         y_cursor = region.y_min + edge_clearance
         row_height = 0.0
@@ -2202,6 +2235,7 @@ class LayoutResolver:
                 y_cursor + panel_height / 2,
             )
 
+            panel_label = spec.name.upper().replace("_", " ") if node.show_labels else None
             panel_item = Item(
                 kind="shape",
                 type="Rect",
@@ -2217,6 +2251,7 @@ class LayoutResolver:
                     is_through=True,
                 ),
                 shape_id=self._next_shape_id(f"beam_{spec.name}"),
+                label=panel_label,
             )
             items.append(panel_item)
 
@@ -2234,11 +2269,16 @@ class LayoutResolver:
         items = []
         self._resolve_node(self.ast.root, sheet_region, items, params={})
 
+        config: dict = {}
+        if self._beam_structures:
+            config["beam_structures"] = self._beam_structures
+
         return LayoutAST(
             sheet=self.ast.sheet,
             items=tuple(items),
             project=self.ast.project,
             kerf_width_mm=self.ast.kerf_width_mm,
+            config=config,
         )
 
 

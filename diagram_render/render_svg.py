@@ -67,6 +67,9 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "section-label": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},
         "callout-box": {"stroke": "#5ab9ea", "fill": "none", "stroke-width": "1"},
         "callout-detail": {"stroke": "#e8e8e8", "fill": "none", "stroke-width": "1.5"},
+        "beam-assembly": {"stroke": "#e8e8e8", "fill": "none", "stroke-width": "1"},
+        "beam-layer": {"stroke": "#6496c8", "fill": "#6496c8", "fill-opacity": "0.15", "stroke-width": "1"},
+        "beam-splice": {"stroke": "#ff9500", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
     },
 )
 
@@ -98,6 +101,9 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "section-label": {"fill": "#333333", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},
         "callout-box": {"stroke": "#333333", "fill": "none", "stroke-width": "1"},
         "callout-detail": {"stroke": "#000000", "fill": "none", "stroke-width": "1.5"},
+        "beam-assembly": {"stroke": "#000000", "fill": "none", "stroke-width": "1"},
+        "beam-layer": {"stroke": "#333333", "fill": "#e0e0e0", "fill-opacity": "0.3", "stroke-width": "1"},
+        "beam-splice": {"stroke": "#cc6600", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
     },
 )
 
@@ -128,6 +134,8 @@ def render_diagram_svg(
 
     chrome_top = 40.0
     chrome_bottom = _estimate_notes_height(diagram.metadata)
+    beam_assembly_h = _estimate_beam_assembly_height(diagram.metadata)
+    chrome_bottom += beam_assembly_h
     callout_h = _estimate_callout_height(diagram.metadata)
     chrome_right = 140.0
     chrome_right_height = max(0.0, callout_h - 160.0)
@@ -183,7 +191,13 @@ def render_diagram_svg(
             svg, viewbox_x, viewbox_y, viewbox_width,
             edge_profiles, sheet_thickness, theme, diagram.layers,
         )
-    _render_notes_block(svg, drawing_bottom + chrome_right_height, diagram.metadata, theme)
+    notes_top = drawing_bottom + chrome_right_height
+    _render_notes_block(svg, notes_top, diagram.metadata, theme)
+    beam_structures = diagram.metadata.get("beam_structures", [])
+    if beam_structures:
+        notes_h = _estimate_notes_height(diagram.metadata)
+        beam_top = notes_top + notes_h
+        _render_beam_assemblies(svg, beam_top, beam_structures, theme)
 
     ET.indent(svg, space="  ")
     return ET.tostring(svg, encoding="unicode")
@@ -869,6 +883,146 @@ def _render_fillet_section(
     }
     t_elem = ET.SubElement(parent, "text", t_attrs)
     t_elem.text = f"{thickness:.0f}"
+
+
+def _estimate_beam_assembly_height(metadata: dict) -> float:
+    beam_structures = metadata.get("beam_structures", [])
+    if not beam_structures:
+        return 0.0
+    layer_height = 14.0
+    header_height = 20.0
+    beam_spacing = 15.0
+    total = 0.0
+    for beam in beam_structures:
+        layer_count = beam.get("layer_count", 1)
+        total += header_height + layer_count * layer_height + beam_spacing
+    return total + 10.0
+
+
+def _render_beam_assemblies(
+    svg: ET.Element,
+    top_y: float,
+    beam_structures: list[dict],
+    theme: DiagramTheme,
+) -> None:
+    group = ET.SubElement(svg, "g", {"id": "BEAM_ASSEMBLIES", "class": "beam-assemblies"})
+    x = 20.0
+    y = top_y + 10.0
+    layer_height = 14.0
+    header_height = 20.0
+    beam_spacing = 15.0
+    diagram_width = 350.0
+
+    notes_style = theme.get_style("notes")
+    label_style = theme.get_style("label")
+    layer_style = theme.get_style("beam-layer")
+    splice_style = theme.get_style("beam-splice")
+    dim_style = theme.get_style("dimension-text")
+
+    for beam in beam_structures:
+        name = beam.get("name", "beam")
+        length_mm = beam.get("length_mm", 0)
+        width_mm = beam.get("width_mm", 0)
+        total_thickness = beam.get("total_thickness_mm", 0)
+        role = beam.get("role", "")
+        layers = beam.get("layers", [])
+        layer_count = beam.get("layer_count", len(layers))
+
+        role_str = f" ({role})" if role else ""
+        header_text = f"ASSEMBLY: {name}{role_str}"
+        header_attrs = {
+            "x": str(x),
+            "y": str(y),
+            **{k: v for k, v in notes_style.items()},
+            "font-weight": "bold",
+        }
+        header_elem = ET.SubElement(group, "text", header_attrs)
+        header_elem.text = header_text
+
+        dims_text = f"{length_mm:.0f} \u00d7 {width_mm:.0f} \u00d7 {total_thickness:.0f}mm"
+        dims_attrs = {
+            "x": str(x),
+            "y": str(y + 12),
+            **{k: v for k, v in dim_style.items()},
+            "font-size": "8px",
+        }
+        dims_elem = ET.SubElement(group, "text", dims_attrs)
+        dims_elem.text = dims_text
+
+        diagram_y = y + header_height
+        scale = diagram_width / length_mm if length_mm > 0 else 1.0
+
+        for layer_data in layers:
+            layer_idx = layer_data.get("layer_index", 0)
+            segments = layer_data.get("segments", [])
+            ly = diagram_y + layer_idx * layer_height
+
+            label_attrs = {
+                "x": str(x - 2),
+                "y": str(ly + layer_height / 2 + 1),
+                "text-anchor": "end",
+                "dominant-baseline": "middle",
+                **{k: v for k, v in label_style.items()},
+                "font-size": "7px",
+            }
+            label_elem = ET.SubElement(group, "text", label_attrs)
+            label_elem.text = f"L{layer_idx}"
+
+            for seg in segments:
+                seg_start = seg.get("start_mm", 0)
+                seg_end = seg.get("end_mm", 0)
+                seg_length = seg.get("length_mm", seg_end - seg_start)
+                seg_idx = seg.get("index", 0)
+
+                sx = x + seg_start * scale
+                sw = (seg_end - seg_start) * scale
+
+                ET.SubElement(group, "rect", {
+                    "x": f"{sx:.2f}",
+                    "y": f"{ly:.2f}",
+                    "width": f"{sw:.2f}",
+                    "height": f"{layer_height - 2:.2f}",
+                    **{k: v for k, v in layer_style.items()},
+                })
+
+                seg_label = f"S{seg_idx} ({seg_length:.0f})"
+                seg_label_attrs = {
+                    "x": f"{sx + sw / 2:.2f}",
+                    "y": f"{ly + layer_height / 2:.2f}",
+                    "text-anchor": "middle",
+                    "dominant-baseline": "middle",
+                    **{k: v for k, v in dim_style.items()},
+                    "font-size": "7px",
+                }
+                seg_label_elem = ET.SubElement(group, "text", seg_label_attrs)
+                seg_label_elem.text = seg_label
+
+            if len(segments) > 1:
+                for seg in segments[:-1]:
+                    splice_x = x + seg["end_mm"] * scale
+                    splice_y1 = ly
+                    splice_y2 = ly + layer_height - 2
+                    ET.SubElement(group, "line", {
+                        "x1": f"{splice_x:.2f}",
+                        "y1": f"{splice_y1:.2f}",
+                        "x2": f"{splice_x:.2f}",
+                        "y2": f"{splice_y2:.2f}",
+                        **{k: v for k, v in splice_style.items()},
+                    })
+
+        if layer_count > 1 and any(len(ld.get("segments", [])) > 1 for ld in layers):
+            stagger_y = diagram_y + layer_count * layer_height + 4
+            stagger_attrs = {
+                "x": str(x + diagram_width / 2),
+                "y": str(stagger_y),
+                "text-anchor": "middle",
+                **{k: v for k, v in dim_style.items()},
+                "font-size": "7px",
+            }
+            stagger_elem = ET.SubElement(group, "text", stagger_attrs)
+            stagger_elem.text = "butt joints staggered (BM-9)"
+
+        y = diagram_y + layer_count * layer_height + beam_spacing
 
 
 __all__ = [

@@ -348,6 +348,95 @@ def test_section_markers_on_shapes():
     assert svg.count("dominant-baseline=\"central\"") >= 2
 
 
+def _beam_structure_spliced():
+    return [{
+        "name": "long_rail",
+        "length_mm": 2000.0,
+        "width_mm": 100.0,
+        "thickness_mm": 19.0,
+        "layer_count": 3,
+        "total_thickness_mm": 57.0,
+        "role": "RAIL",
+        "layers": [
+            {"layer_index": 0, "segments": [
+                {"index": 0, "start_mm": 0.0, "end_mm": 1200.0, "length_mm": 1200.0},
+                {"index": 1, "start_mm": 1200.0, "end_mm": 2000.0, "length_mm": 800.0},
+            ]},
+            {"layer_index": 1, "segments": [
+                {"index": 0, "start_mm": 0.0, "end_mm": 800.0, "length_mm": 800.0},
+                {"index": 1, "start_mm": 800.0, "end_mm": 2000.0, "length_mm": 1200.0},
+            ]},
+            {"layer_index": 2, "segments": [
+                {"index": 0, "start_mm": 0.0, "end_mm": 400.0, "length_mm": 400.0},
+                {"index": 1, "start_mm": 400.0, "end_mm": 1600.0, "length_mm": 1200.0},
+                {"index": 2, "start_mm": 1600.0, "end_mm": 2000.0, "length_mm": 400.0},
+            ]},
+        ],
+    }]
+
+
+def test_beam_assembly_rendered():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={"beam_structures": _beam_structure_spliced()},
+    )
+    svg = render_diagram_svg(diagram)
+    assert "BEAM_ASSEMBLIES" in svg
+    assert "ASSEMBLY: long_rail" in svg
+    assert "L0" in svg
+    assert "L1" in svg
+    assert "L2" in svg
+    assert "S0" in svg
+    assert "S1" in svg
+
+
+def test_beam_assembly_spliced_has_stagger_note():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={"beam_structures": _beam_structure_spliced()},
+    )
+    svg = render_diagram_svg(diagram)
+    assert "butt joints staggered (BM-9)" in svg
+
+
+def test_no_beam_assembly_when_empty():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={"beam_structures": []},
+    )
+    svg = render_diagram_svg(diagram)
+    assert "BEAM_ASSEMBLIES" not in svg
+
+
+def test_beam_assembly_single_layer():
+    beam_data = [{
+        "name": "short_post",
+        "length_mm": 500.0,
+        "width_mm": 76.0,
+        "thickness_mm": 19.0,
+        "layer_count": 1,
+        "total_thickness_mm": 19.0,
+        "role": "POST",
+        "layers": [
+            {"layer_index": 0, "segments": [
+                {"index": 0, "start_mm": 0.0, "end_mm": 500.0, "length_mm": 500.0},
+            ]},
+        ],
+    }]
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={"beam_structures": beam_data},
+    )
+    svg = render_diagram_svg(diagram)
+    assert "ASSEMBLY: short_post" in svg
+    assert "L0" in svg
+    assert "butt joints staggered" not in svg
+
+
 if __name__ == "__main__":
     import sys
 
@@ -377,6 +466,10 @@ if __name__ == "__main__":
         test_edge_allowance_in_notes,
         test_multiple_callouts,
         test_section_markers_on_shapes,
+        test_beam_assembly_rendered,
+        test_beam_assembly_spliced_has_stagger_note,
+        test_no_beam_assembly_when_empty,
+        test_beam_assembly_single_layer,
     ]
 
     passed = 0

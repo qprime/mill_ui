@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-02-08T21:49:41.264490+00:00"
+    "created_at": "2026-02-08T23:48:57.056620+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2,
+    "extraction_time_ms": 0.21,
     "document": {
       "width_mm": 450.0,
       "height_mm": 388.0,
@@ -17,9 +17,10 @@
       ]
     },
     "layers": {
-      "count": 6,
+      "count": 7,
       "names": [
         "DIMENSIONS",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -35,6 +36,16 @@
           "line_count": 6,
           "polygon_count": 4,
           "text_count": 2,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 1,
           "elements": []
         },
         "LEGEND": {
@@ -146,7 +157,7 @@
       "y_max": 200.0
     },
     "text_elements": {
-      "count": 17,
+      "count": 18,
       "dimension_labels": [
         "200.0mm",
         "300.0mm",
@@ -193,7 +204,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7158,
+    "extraction_time_ms": 1.7043,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "15_profile_with_tabs",
-    "created_at": "2026-02-08T21:49:41.351596+00:00"
+    "created_at": "2026-02-08T23:48:57.143572+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.19,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 750.0,
       "height_mm": 540.0,
@@ -17,9 +17,10 @@
       ]
     },
     "layers": {
-      "count": 7,
+      "count": 8,
       "names": [
         "DIMENSIONS",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "PROFILE_CUTS",
@@ -36,6 +37,16 @@
           "line_count": 6,
           "polygon_count": 4,
           "text_count": 2,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 1,
           "elements": []
         },
         "LEGEND": {
@@ -157,7 +168,7 @@
       "y_max": 400.0
     },
     "text_elements": {
-      "count": 14,
+      "count": 15,
       "dimension_labels": [
         "250.0mm",
         "400.0mm",
@@ -196,7 +207,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.5616,
+    "extraction_time_ms": 0.9571,
     "summary": {
       "total_lines": 144,
       "comment_lines": 3,

@@ -70,6 +70,7 @@ class Rect:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)
@@ -79,6 +80,7 @@ class Circle:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,7 @@ class RoundedRect:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
     corners: frozenset[str] | None = None
 
 
@@ -95,6 +98,7 @@ class Line:
     orientation: str
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)
@@ -102,6 +106,7 @@ class Polyline:
     points: tuple[tuple[float, float], ...]
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
     def __post_init__(self):
         if len(self.points) < 2:
@@ -136,6 +141,7 @@ class SplinePath:
     feature: Any = None
     tolerance_mm: float = 0.1
     id: str | None = None
+    label: str | None = None
 
     def __post_init__(self):
         if len(self.points) < 2:
@@ -261,6 +267,7 @@ class Arch:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)
@@ -269,6 +276,7 @@ class Polygon:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
     def __post_init__(self):
         if len(self.points) < 3:
@@ -282,6 +290,7 @@ class Triangle:
     children: tuple[Any, ...] = ()
     feature: Any = None
     id: str | None = None
+    label: str | None = None
 
 
 @dataclass(frozen=True)

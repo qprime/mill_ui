@@ -2326,6 +2326,11 @@
     <line x1="500.357" y1="36.214" x2="500.500" y2="35.786" stroke="#888888" fill="none" stroke-width="0.25" id="generated_measurement_edge_2_label_33_019" />
     <line x1="500.500" y1="35.786" x2="500.500" y2="35.500" stroke="#888888" fill="none" stroke-width="0.25" id="generated_measurement_edge_2_label_33_020" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="130.000" y="115.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="part_a_label">part_a</text>
+    <text x="360.000" y="115.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="part_b_label">part_b</text>
+    <text x="590.000" y="115.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="part_c_label">part_c</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="30.0" y1="15.0" x2="30.0" y2="-5.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="230.0" y1="15.0" x2="230.0" y2="-5.0" stroke="#5ab9ea" stroke-width="1" />

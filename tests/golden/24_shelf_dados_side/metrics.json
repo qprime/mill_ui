@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-02-08T21:49:42.528382+00:00"
+    "created_at": "2026-02-08T23:48:58.545611+00:00"
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.596,
+    "extraction_time_ms": 1.9515,
     "summary": {
       "total_lines": 752,
       "comment_lines": 28,

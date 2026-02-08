@@ -69,6 +69,30 @@
     <rect x="974.000" y="318.000" width="178.000" height="76.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="drawer6_panel" />
     <rect x="974.000" y="160.000" width="178.000" height="76.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="drawer7_panel" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="238.500" y="923.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door1_panel_label">door1_panel</text>
+    <text x="238.500" y="923.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door1_label">door1</text>
+    <text x="701.500" y="923.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door2_panel_label">door2_panel</text>
+    <text x="701.500" y="923.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door2_label">door2</text>
+    <text x="238.500" y="320.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door3_panel_label">door3_panel</text>
+    <text x="238.500" y="320.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door3_label">door3</text>
+    <text x="701.500" y="320.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door4_panel_label">door4_panel</text>
+    <text x="701.500" y="320.500" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door4_label">door4</text>
+    <text x="1063.000" y="1146.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer1_panel_label">drawer1_panel</text>
+    <text x="1063.000" y="1146.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer1_label">drawer1</text>
+    <text x="1063.000" y="988.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer2_panel_label">drawer2_panel</text>
+    <text x="1063.000" y="988.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer2_label">drawer2</text>
+    <text x="1063.000" y="830.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer3_panel_label">drawer3_panel</text>
+    <text x="1063.000" y="830.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer3_label">drawer3</text>
+    <text x="1063.000" y="672.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer4_panel_label">drawer4_panel</text>
+    <text x="1063.000" y="672.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer4_label">drawer4</text>
+    <text x="1063.000" y="514.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer5_panel_label">drawer5_panel</text>
+    <text x="1063.000" y="514.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer5_label">drawer5</text>
+    <text x="1063.000" y="356.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer6_panel_label">drawer6_panel</text>
+    <text x="1063.000" y="356.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer6_label">drawer6</text>
+    <text x="1063.000" y="198.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer7_panel_label">drawer7_panel</text>
+    <text x="1063.000" y="198.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="drawer7_label">drawer7</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="67.0" y1="682.0" x2="67.0" y2="662.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="410.0" y1="682.0" x2="410.0" y2="662.0" stroke="#5ab9ea" stroke-width="1" />

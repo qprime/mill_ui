@@ -159,6 +159,7 @@ Rectangle filling parent region or positioned explicitly.
 ```yaml
 - Rect:
     id: panel              # Optional identifier
+    label: "Door Panel"    # Optional display label (defaults to id)
     feature:               # Optional inline feature
       type: profile
       side: outside
@@ -188,6 +189,7 @@ With explicit position:
 - Circle:
     diameter: 50mm         # Either diameter or radius
     # radius: 25mm
+    label: "Dowel Hole"    # Optional display label
     feature:
       type: hole
       depth: through
@@ -209,6 +211,7 @@ With explicit position:
 ```yaml
 - Polygon:
     id: custom_shape
+    label: "Bracket"       # Optional display label (defaults to id)
     points:
       - [0mm, 0mm]
       - [100mm, 0mm]
@@ -226,6 +229,7 @@ With explicit position:
 - Triangle:
     base: 100mm
     height: 80mm
+    label: "Gusset"        # Optional display label
     feature:
       type: pocket
       depth: 5mm

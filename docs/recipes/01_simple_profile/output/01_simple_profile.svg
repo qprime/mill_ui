@@ -36,6 +36,9 @@
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
     <rect x="123.412" y="248.413" width="203.175" height="153.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="part_toolpath" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="225.000" y="325.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="part_label">part</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="125.0" y1="250.0" x2="125.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="325.0" y1="250.0" x2="325.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />

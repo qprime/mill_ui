@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "05_validation_workflow",
-    "created_at": "2026-02-08T21:49:40.706087+00:00"
+    "created_at": "2026-02-08T23:48:56.493791+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.41,
+    "extraction_time_ms": 0.42,
     "document": {
       "width_mm": 350.0,
       "height_mm": 386.0,
@@ -17,10 +17,11 @@
       ]
     },
     "layers": {
-      "count": 9,
+      "count": 10,
       "names": [
         "DIMENSIONS",
         "HOLES",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
@@ -78,6 +79,16 @@
               "radius": 3.0
             }
           ]
+        },
+        "LABELS": {
+          "element_count": 4,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 4,
+          "elements": []
         },
         "LEGEND": {
           "element_count": 13,
@@ -229,7 +240,7 @@
       "y_max": 150.0
     },
     "text_elements": {
-      "count": 27,
+      "count": 31,
       "dimension_labels": [
         "120.0mm",
         "130.0mm",
@@ -297,7 +308,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.5794,
+    "extraction_time_ms": 7.6122,
     "summary": {
       "total_lines": 2244,
       "comment_lines": 16,

@@ -39,6 +39,10 @@
   <g id="POCKET_REGIONS" class="pocket-regions">
     <rect x="75.000" y="75.000" width="300.000" height="500.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="panel" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="225.000" y="325.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="panel_label">panel</text>
+    <text x="225.000" y="325.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="door_label">door</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="75.0" y1="75.0" x2="75.0" y2="55.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="375.0" y1="75.0" x2="375.0" y2="55.0" stroke="#5ab9ea" stroke-width="1" />

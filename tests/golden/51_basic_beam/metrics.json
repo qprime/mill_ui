@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "51_basic_beam",
-    "created_at": "2026-02-08T21:49:43.930639+00:00"
+    "created_at": "2026-02-08T23:49:00.222085+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.4,
     "document": {
       "width_mm": 950.0,
       "height_mm": 851.0,
@@ -279,7 +279,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.4521,
+    "extraction_time_ms": 2.9011,
     "summary": {
       "total_lines": 746,
       "comment_lines": 14,

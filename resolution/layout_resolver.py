@@ -405,6 +405,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=region.center),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(rect_item)
 
@@ -447,6 +448,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=region.center),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(circle_item)
 
@@ -497,6 +499,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=region.center),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(rounded_rect_item)
 
@@ -545,6 +548,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(line_item)
 
@@ -577,6 +581,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(polyline_item)
 
@@ -613,6 +618,7 @@ class LayoutResolver:
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
+            label=node.label if node.label else node.id,
         )
         items.append(spline_item)
 
@@ -1409,6 +1415,7 @@ class LayoutResolver:
                 placement=Placement(center_xy_mm=arch_region.center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("arch"),
+                label=node.label if node.label else node.id,
             )
             items.append(arch_item)
 
@@ -1481,6 +1488,7 @@ class LayoutResolver:
                 placement=Placement(center_xy_mm=bounds_center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("polygon"),
+                label=node.label if node.label else node.id,
             )
             items.append(polygon_item)
 
@@ -1545,6 +1553,7 @@ class LayoutResolver:
                 placement=Placement(center_xy_mm=triangle_center),
                 feature=node.feature,
                 shape_id=node.id or self._next_shape_id("triangle"),
+                label=node.label if node.label else node.id,
             )
             items.append(triangle_item)
 

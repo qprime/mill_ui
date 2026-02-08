@@ -53,6 +53,14 @@
     <line x1="167.000" y1="40.000" x2="173.000" y2="40.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="hole:4_cross_h" />
     <line x1="170.000" y1="37.000" x2="170.000" y2="43.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="hole:4_cross_v" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="110.000" y="80.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="plate:outer_label">plate:outer</text>
+    <text x="110.000" y="80.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="plate:recess_label">plate:recess</text>
+    <text x="50.000" y="120.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hole:1_label">hole:1</text>
+    <text x="170.000" y="120.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hole:2_label">hole:2</text>
+    <text x="50.000" y="40.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hole:3_label">hole:3</text>
+    <text x="170.000" y="40.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hole:4_label">hole:4</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="40.0" y1="40.0" x2="40.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="180.0" y1="40.0" x2="180.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />

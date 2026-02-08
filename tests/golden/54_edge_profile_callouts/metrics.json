@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "54_edge_profile_callouts",
-    "created_at": "2026-02-08T21:49:44.029185+00:00"
+    "created_at": "2026-02-08T23:49:00.341435+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.34,
+    "extraction_time_ms": 0.44,
     "document": {
       "width_mm": 670.0,
       "height_mm": 502.0,
@@ -17,10 +17,11 @@
       ]
     },
     "layers": {
-      "count": 8,
+      "count": 9,
       "names": [
         "DIMENSIONS",
         "EDGE_CALLOUTS",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "PROFILE_CUTS",
@@ -47,6 +48,16 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 10,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
           "elements": []
         },
         "LEGEND": {
@@ -248,7 +259,7 @@
       "y_max": 300.0
     },
     "text_elements": {
-      "count": 25,
+      "count": 27,
       "dimension_labels": [
         "100.0mm",
         "120.0mm",
@@ -323,7 +334,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.6069,
+    "extraction_time_ms": 1.9104,
     "summary": {
       "total_lines": 502,
       "comment_lines": 10,

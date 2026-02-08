@@ -149,13 +149,14 @@ def parse_node(data: dict, path: str = "") -> Any:
             children = tuple(c for c in children if not isinstance(c, Feature))
 
     node_id = node_data.get("id") if isinstance(node_data, dict) else None
+    node_label = node_data.get("label") if isinstance(node_data, dict) else None
 
     if node_type == "Panel":
         return Panel(children=children, id=node_id)
 
     elif node_type == "Rect":
         at_data = node_data.get("at") if isinstance(node_data, dict) else None
-        rect = Rect(children=children, feature=feature, id=node_id)
+        rect = Rect(children=children, feature=feature, id=node_id, label=node_label)
         if at_data:
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
@@ -176,6 +177,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             children=children,
             feature=feature,
             id=node_id,
+            label=node_label,
         )
         if at_data:
             size = diameter_mm if diameter_mm else (radius_mm * 2 if radius_mm else None)
@@ -199,6 +201,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             children=children,
             feature=feature,
             id=node_id,
+            label=node_label,
             corners=corners,
         )
         if at_data:
@@ -216,16 +219,17 @@ def parse_node(data: dict, path: str = "") -> Any:
             orientation=node_data["orientation"],
             feature=feature,
             id=node_id,
+            label=node_label,
         )
 
     elif node_type == "Polyline":
         points = tuple(tuple(p) for p in node_data["points"])
-        return Polyline(points=points, feature=feature, id=node_id)
+        return Polyline(points=points, feature=feature, id=node_id, label=node_label)
 
     elif node_type == "Spline":
         points = tuple(tuple(p) for p in node_data["points"])
         tolerance_mm = parse_dimension(node_data.get("tolerance", "0.1mm"))
-        return SplinePath(points=points, feature=feature, tolerance_mm=tolerance_mm, id=node_id)
+        return SplinePath(points=points, feature=feature, tolerance_mm=tolerance_mm, id=node_id, label=node_label)
 
     elif node_type == "Keepout":
         def contains_keepout(nodes: tuple) -> bool:
@@ -409,11 +413,12 @@ def parse_node(data: dict, path: str = "") -> Any:
             children=children,
             feature=feature,
             id=node_id,
+            label=node_label,
         )
 
     elif node_type == "Polygon":
         points = tuple((parse_dimension(p[0]), parse_dimension(p[1])) for p in node_data["points"])
-        return Polygon(points=points, children=children, feature=feature, id=node_id)
+        return Polygon(points=points, children=children, feature=feature, id=node_id, label=node_label)
 
     elif node_type == "Triangle":
         return Triangle(
@@ -422,6 +427,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             children=children,
             feature=feature,
             id=node_id,
+            label=node_label,
         )
 
     elif node_type == "HoleGrid":

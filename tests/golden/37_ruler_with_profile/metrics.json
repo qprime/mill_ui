@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "37_ruler_with_profile",
-    "created_at": "2026-02-08T21:49:43.186642+00:00"
+    "created_at": "2026-02-08T23:48:59.330268+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.55,
+    "extraction_time_ms": 10.03,
     "document": {
       "width_mm": 870.0,
       "height_mm": 458.0,
@@ -17,10 +17,11 @@
       ]
     },
     "layers": {
-      "count": 8,
+      "count": 9,
       "names": [
         "DIMENSIONS",
         "ENGRAVE_PATHS",
+        "LABELS",
         "LEGEND",
         "NOTES",
         "PROFILE_CUTS",
@@ -47,6 +48,16 @@
           "line_count": 2280,
           "polygon_count": 0,
           "text_count": 0,
+          "elements": []
+        },
+        "LABELS": {
+          "element_count": 3,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 3,
           "elements": []
         },
         "LEGEND": {
@@ -258,7 +269,7 @@
       "y_max": 250.0
     },
     "text_elements": {
-      "count": 19,
+      "count": 22,
       "dimension_labels": [
         "200.0mm",
         "200.0mm",
@@ -336,7 +347,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 38.2288,
+    "extraction_time_ms": 45.9771,
     "summary": {
       "total_lines": 14440,
       "comment_lines": 2296,

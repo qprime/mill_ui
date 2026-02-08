@@ -1,11 +1,11 @@
 {
   "golden": {
-    "recipe_name": "52_spliced_rail",
-    "created_at": "2026-02-08T23:49:00.251995+00:00"
+    "recipe_name": "56_spliced_tenoned_rail",
+    "created_at": "2026-02-08T23:49:00.383697+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.23,
+    "extraction_time_ms": 1.24,
     "document": {
       "width_mm": 1350.0,
       "height_mm": 1111.0,
@@ -293,7 +293,7 @@
         "100.0mm",
         "100.0mm",
         "1187.3mm",
-        "2000 \u00d7 100 \u00d7 57mm",
+        "2076 \u00d7 100 \u00d7 57mm",
         "395.8mm",
         "416.9mm",
         "604.2mm",
@@ -325,35 +325,35 @@
       "count": 25,
       "dimensions": [
         [
-          69.26,
+          66.72,
           12.0
         ],
         [
-          72.96,
+          70.29,
           12.0
         ],
         [
-          105.74,
+          101.87,
           12.0
         ],
         [
-          105.74,
+          108.28,
           12.0
         ],
         [
-          138.52,
+          137.02,
           12.0
         ],
         [
-          142.22,
+          139.85,
           12.0
         ],
         [
-          207.78,
+          200.17,
           12.0
         ],
         [
-          207.78,
+          200.17,
           12.0
         ],
         [
@@ -429,7 +429,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.4453,
+    "extraction_time_ms": 7.6045,
     "summary": {
       "total_lines": 1966,
       "comment_lines": 34,

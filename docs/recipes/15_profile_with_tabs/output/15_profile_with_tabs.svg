@@ -36,6 +36,9 @@
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
     <rect x="98.412" y="73.413" width="403.175" height="253.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="cutout_toolpath" />
   </g>
+  <g id="LABELS" class="labels">
+    <text x="300.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="cutout_label">cutout</text>
+  </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="100.0" y1="75.0" x2="100.0" y2="55.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="500.0" y1="75.0" x2="500.0" y2="55.0" stroke="#5ab9ea" stroke-width="1" />

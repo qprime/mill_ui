@@ -228,6 +228,126 @@ def test_deterministic_output():
     assert svg1 == svg2
 
 
+def test_edge_callout_rendered():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={
+            "sheet_thickness": "19",
+            "edge_profiles": [
+                {"type": "chamfer", "distance_mm": 3.0, "items": ["panel_a"]},
+            ],
+            "edge_allowances": [],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "EDGE_CALLOUTS" in svg
+    assert "SECTION A" in svg
+    assert "callout_A_box" in svg
+    assert "panel_a" in svg
+
+
+def test_edge_callout_fillet_has_arc():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={
+            "sheet_thickness": "19",
+            "edge_profiles": [
+                {"type": "fillet", "radius_mm": 5.0, "items": ["panel_b"]},
+            ],
+            "edge_allowances": [],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "SECTION A" in svg
+    assert "R5.0" in svg
+    assert " A " in svg
+
+
+def test_no_callout_when_no_profiles():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={
+            "sheet_thickness": "19",
+            "edge_profiles": [],
+            "edge_allowances": [],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "EDGE_CALLOUTS" not in svg
+
+
+def test_edge_allowance_in_notes():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={
+            "sheet_width": "200",
+            "sheet_height": "200",
+            "sheet_thickness": "19",
+            "edge_profiles": [],
+            "edge_allowances": [{"rough_allowance_mm": 0.5, "finish_allowance_mm": 0.1}],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "Edge Allowances:" in svg
+    assert "Rough: 0.50mm" in svg
+    assert "Finish: 0.10mm" in svg
+
+
+def test_multiple_callouts():
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(),
+        metadata={
+            "sheet_thickness": "19",
+            "edge_profiles": [
+                {"type": "chamfer", "distance_mm": 3.0, "items": ["panel_a"]},
+                {"type": "fillet", "radius_mm": 5.0, "items": ["panel_b"]},
+            ],
+            "edge_allowances": [],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "SECTION A" in svg
+    assert "SECTION B" in svg
+    assert "callout_A_box" in svg
+    assert "callout_B_box" in svg
+
+
+def test_section_markers_on_shapes():
+    profile_layer = LayerIR(
+        name="PROFILE_CUTS",
+        items=(
+            Rect(x=20, y=30, width=60, height=40, style_token="profile", id="panel_a"),
+            Rect(x=120, y=30, width=60, height=40, style_token="profile", id="panel_b"),
+        ),
+    )
+    diagram = DiagramIR(
+        bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
+        layers=(profile_layer,),
+        metadata={
+            "sheet_thickness": "19",
+            "edge_profiles": [
+                {"type": "chamfer", "distance_mm": 3.0, "items": ["panel_a"]},
+                {"type": "fillet", "radius_mm": 5.0, "items": ["panel_b"]},
+            ],
+            "edge_allowances": [],
+        },
+    )
+    svg = render_diagram_svg(diagram)
+
+    assert "<circle" in svg
+    assert svg.count("dominant-baseline=\"central\"") >= 2
+
+
 if __name__ == "__main__":
     import sys
 
@@ -251,6 +371,12 @@ if __name__ == "__main__":
         test_diagram_theme_style_attrs,
         test_themes_dict,
         test_deterministic_output,
+        test_edge_callout_rendered,
+        test_edge_callout_fillet_has_arc,
+        test_no_callout_when_no_profiles,
+        test_edge_allowance_in_notes,
+        test_multiple_callouts,
+        test_section_markers_on_shapes,
     ]
 
     passed = 0

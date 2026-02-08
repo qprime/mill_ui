@@ -14,6 +14,12 @@ class SVGConfig:
     edge_color_width: float = 3.0
     gap_dimension_threshold: float = 5.0
 
+    callout_box_width: float = 100.0
+    callout_box_height: float = 70.0
+    callout_box_spacing: float = 15.0
+    callout_scale: float = 3.0
+    callout_padding: float = 8.0
+
     title_font_size: float = 14.0
     notes_font_size: float = 9.0
     dimension_font_size: float = 9.0

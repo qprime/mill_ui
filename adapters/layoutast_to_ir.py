@@ -121,6 +121,8 @@ def layoutast_to_diagram_ir(
         "depth_info": _collect_depth_info(ast),
         "hole_diameters": _collect_hole_diameters(ast),
         "part_inventory": _collect_part_inventory(ast),
+        "edge_profiles": _collect_edge_profiles(ast),
+        "edge_allowances": _collect_edge_allowances(ast),
     }
 
     return DiagramIR(
@@ -605,6 +607,58 @@ def _collect_part_inventory(ast: LayoutAST) -> list[str]:
             continue
         parts.add(item.shape_id)
     return sorted(parts)
+
+
+def _collect_edge_profiles(ast: LayoutAST) -> list[dict]:
+    profiles: dict[str, dict] = {}
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None or item.geometry is None:
+            continue
+        edge = item.geometry.data.get("edge_treatment")
+        if not edge:
+            continue
+        treatment_type = edge.get("type")
+        if treatment_type == "allowance":
+            continue
+        if treatment_type == "fillet":
+            radius = edge.get("radius_mm")
+            if radius is None or radius <= 0:
+                continue
+            key = f"fillet_r{radius:.1f}"
+            if key not in profiles:
+                profiles[key] = {"type": "fillet", "radius_mm": radius, "items": []}
+        elif treatment_type == "chamfer":
+            distance = edge.get("distance_mm")
+            if distance is None or distance <= 0:
+                continue
+            key = f"chamfer_d{distance:.1f}"
+            if key not in profiles:
+                profiles[key] = {"type": "chamfer", "distance_mm": distance, "items": []}
+        else:
+            continue
+        if item.shape_id:
+            profiles[key]["items"].append(item.shape_id)
+    return [profiles[k] for k in sorted(profiles)]
+
+
+def _collect_edge_allowances(ast: LayoutAST) -> list[dict]:
+    seen: set[tuple[float, float]] = set()
+    result: list[dict] = []
+    for item in ast.items:
+        if item.kind != "shape" or item.feature is None or item.geometry is None:
+            continue
+        edge = item.geometry.data.get("edge_treatment")
+        if not edge or edge.get("type") != "allowance":
+            continue
+        rough = edge.get("rough_allowance_mm")
+        finish = edge.get("finish_allowance_mm")
+        if rough is None or finish is None:
+            continue
+        pair = (rough, finish)
+        if pair not in seen:
+            seen.add(pair)
+            result.append({"rough_allowance_mm": rough, "finish_allowance_mm": finish})
+    return sorted(result, key=lambda a: (-a["rough_allowance_mm"], -a["finish_allowance_mm"]))
 
 
 __all__ = ["layoutast_to_diagram_ir", "FEATURE_HANDLERS", "register_feature"]

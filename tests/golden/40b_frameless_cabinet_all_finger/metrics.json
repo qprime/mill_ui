@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "40b_frameless_cabinet_all_finger",
-    "created_at": "2026-02-08T18:26:47.267757+00:00"
+    "created_at": "2026-02-08T21:22:07.634943+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -435,7 +435,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0278,
+    "extraction_time_ms": 1.0215,
     "summary": {
       "total_lines": 7526,
       "comment_lines": 26,

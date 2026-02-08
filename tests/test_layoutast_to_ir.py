@@ -253,6 +253,89 @@ def test_bounds_calculation():
     assert ir.bounds.y_max == 160.0
 
 
+def _make_item_with_edge(shape_id: str, edge_treatment: dict, feature_type: str = "pocket") -> Item:
+    return Item(
+        kind="shape",
+        type="Rect",
+        geometry=Geometry(data={"w_mm": 60.0, "h_mm": 40.0, "edge_treatment": edge_treatment}),
+        placement=Placement(center_xy_mm=(100.0, 75.0)),
+        feature=Feature(type=feature_type, depth_mm=5.0),
+        shape_id=shape_id,
+    )
+
+
+def test_edge_profiles_collected_for_chamfer():
+    item = _make_item_with_edge("panel_a", {"type": "chamfer", "distance_mm": 3.0})
+    ast = LayoutAST(sheet=_make_sheet(), items=(item,))
+    ir = layoutast_to_diagram_ir(ast)
+
+    profiles = ir.metadata["edge_profiles"]
+    assert len(profiles) == 1
+    assert profiles[0]["type"] == "chamfer"
+    assert profiles[0]["distance_mm"] == 3.0
+    assert "panel_a" in profiles[0]["items"]
+
+
+def test_edge_profiles_collected_for_fillet():
+    item = _make_item_with_edge("panel_b", {"type": "fillet", "radius_mm": 5.0})
+    ast = LayoutAST(sheet=_make_sheet(), items=(item,))
+    ir = layoutast_to_diagram_ir(ast)
+
+    profiles = ir.metadata["edge_profiles"]
+    assert len(profiles) == 1
+    assert profiles[0]["type"] == "fillet"
+    assert profiles[0]["radius_mm"] == 5.0
+    assert "panel_b" in profiles[0]["items"]
+
+
+def test_edge_profiles_skip_allowance():
+    item = _make_item_with_edge(
+        "panel_c",
+        {"type": "allowance", "rough_allowance_mm": 0.5, "finish_allowance_mm": 0.1},
+    )
+    ast = LayoutAST(sheet=_make_sheet(), items=(item,))
+    ir = layoutast_to_diagram_ir(ast)
+
+    profiles = ir.metadata["edge_profiles"]
+    assert len(profiles) == 0
+
+
+def test_edge_allowances_collected():
+    item = _make_item_with_edge(
+        "panel_c",
+        {"type": "allowance", "rough_allowance_mm": 0.5, "finish_allowance_mm": 0.1},
+    )
+    ast = LayoutAST(sheet=_make_sheet(), items=(item,))
+    ir = layoutast_to_diagram_ir(ast)
+
+    allowances = ir.metadata["edge_allowances"]
+    assert len(allowances) == 1
+    assert allowances[0]["rough_allowance_mm"] == 0.5
+    assert allowances[0]["finish_allowance_mm"] == 0.1
+
+
+def test_edge_profiles_deduplicated():
+    item_a = _make_item_with_edge("panel_a", {"type": "chamfer", "distance_mm": 3.0})
+    item_b = _make_item_with_edge("panel_b", {"type": "chamfer", "distance_mm": 3.0})
+    ast = LayoutAST(sheet=_make_sheet(), items=(item_a, item_b))
+    ir = layoutast_to_diagram_ir(ast)
+
+    profiles = ir.metadata["edge_profiles"]
+    assert len(profiles) == 1
+    assert set(profiles[0]["items"]) == {"panel_a", "panel_b"}
+
+
+def test_edge_profiles_empty_when_none():
+    ast = LayoutAST(
+        sheet=_make_sheet(),
+        items=(_make_profile_item("rect1", 100.0, 80.0, 100.0, 75.0),),
+    )
+    ir = layoutast_to_diagram_ir(ast)
+
+    assert ir.metadata["edge_profiles"] == []
+    assert ir.metadata["edge_allowances"] == []
+
+
 if __name__ == "__main__":
     import sys
 
@@ -271,6 +354,12 @@ if __name__ == "__main__":
         test_metadata,
         test_waste_shapes_separated,
         test_bounds_calculation,
+        test_edge_profiles_collected_for_chamfer,
+        test_edge_profiles_collected_for_fillet,
+        test_edge_profiles_skip_allowance,
+        test_edge_allowances_collected,
+        test_edge_profiles_deduplicated,
+        test_edge_profiles_empty_when_none,
     ]
 
     passed = 0

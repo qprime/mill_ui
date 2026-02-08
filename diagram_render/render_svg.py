@@ -64,6 +64,9 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "margin-zone": {"fill": "#6b8e7f", "fill-opacity": "0.15"},
         "legend": {"fill": "#cccccc", "font-family": "monospace", "font-size": "10px"},
         "title": {"fill": "#cccccc", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
+        "section-label": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},
+        "callout-box": {"stroke": "#5ab9ea", "fill": "none", "stroke-width": "1"},
+        "callout-detail": {"stroke": "#e8e8e8", "fill": "none", "stroke-width": "1.5"},
     },
 )
 
@@ -92,6 +95,9 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "margin-zone": {"fill": "#666666", "fill-opacity": "0.15"},
         "legend": {"fill": "#000000", "font-family": "monospace", "font-size": "10px"},
         "title": {"fill": "#000000", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
+        "section-label": {"fill": "#333333", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},
+        "callout-box": {"stroke": "#333333", "fill": "none", "stroke-width": "1"},
+        "callout-detail": {"stroke": "#000000", "fill": "none", "stroke-width": "1.5"},
     },
 )
 
@@ -122,12 +128,14 @@ def render_diagram_svg(
 
     chrome_top = 40.0
     chrome_bottom = _estimate_notes_height(diagram.metadata)
+    callout_h = _estimate_callout_height(diagram.metadata)
     chrome_right = 140.0
+    chrome_right_height = max(0.0, callout_h - 160.0)
 
     viewbox_x = bounds.x_min - padding
     viewbox_y = bounds.y_min - padding - chrome_top
     viewbox_width = (bounds.x_max - bounds.x_min) + padding + chrome_right
-    viewbox_height = (bounds.y_max - bounds.y_min) + 2 * padding + chrome_top + chrome_bottom
+    viewbox_height = (bounds.y_max - bounds.y_min) + 2 * padding + chrome_top + chrome_bottom + chrome_right_height
 
     svg = ET.Element(
         "svg",
@@ -168,7 +176,14 @@ def render_diagram_svg(
     layer_names = {layer.name for layer in diagram.layers}
     _render_title_block(svg, viewbox_x, viewbox_y, theme)
     _render_legend(svg, viewbox_x, viewbox_y, viewbox_width, layer_names, theme)
-    _render_notes_block(svg, drawing_bottom, diagram.metadata, theme)
+    edge_profiles = diagram.metadata.get("edge_profiles", [])
+    if edge_profiles:
+        sheet_thickness = float(diagram.metadata.get("sheet_thickness", "19"))
+        _render_edge_callouts(
+            svg, viewbox_x, viewbox_y, viewbox_width,
+            edge_profiles, sheet_thickness, theme, diagram.layers,
+        )
+    _render_notes_block(svg, drawing_bottom + chrome_right_height, diagram.metadata, theme)
 
     ET.indent(svg, space="  ")
     return ET.tostring(svg, encoding="unicode")
@@ -188,6 +203,9 @@ def _estimate_notes_height(metadata: dict) -> float:
     part_inventory = metadata.get("part_inventory", [])
     if part_inventory:
         lines += 1 + len(part_inventory)
+    edge_allowances = metadata.get("edge_allowances", [])
+    if edge_allowances:
+        lines += 1 + len(edge_allowances)
     return max(lines * line_height + 20.0, 60.0)
 
 
@@ -589,6 +607,268 @@ def _render_notes_block(
         for part_id in part_inventory:
             _text(x + indent, y + line_num * line_height, f"\u2022 {part_id}")
             line_num += 1
+
+    edge_allowances = metadata.get("edge_allowances", [])
+    if edge_allowances:
+        _text(x, y + line_num * line_height, "Edge Allowances:")
+        line_num += 1
+        for allow in edge_allowances:
+            rough = allow["rough_allowance_mm"]
+            finish = allow["finish_allowance_mm"]
+            _text(x + indent, y + line_num * line_height,
+                  f"\u2022 Rough: {rough:.2f}mm, Finish: {finish:.2f}mm")
+            line_num += 1
+
+
+def _estimate_callout_height(metadata: dict) -> float:
+    edge_profiles = metadata.get("edge_profiles", [])
+    if not edge_profiles:
+        return 0.0
+    box_height = 70.0
+    box_spacing = 15.0
+    return len(edge_profiles) * (box_height + box_spacing) + 20.0
+
+
+def _find_shape_bounds(shape_id: str, layers: tuple[LayerIR, ...]) -> tuple[float, float, float, float] | None:
+    for layer in layers:
+        for shape in layer.items:
+            if not hasattr(shape, "id") or shape.id != shape_id:
+                continue
+            if isinstance(shape, Rect):
+                return (shape.x, shape.y, shape.width, shape.height)
+            if isinstance(shape, Circle):
+                return (shape.cx - shape.radius, shape.cy - shape.radius,
+                        shape.radius * 2, shape.radius * 2)
+    return None
+
+
+def _render_edge_callouts(
+    svg: ET.Element,
+    viewbox_x: float,
+    viewbox_y: float,
+    viewbox_width: float,
+    edge_profiles: list[dict],
+    sheet_thickness: float,
+    theme: DiagramTheme,
+    layers: tuple[LayerIR, ...] = (),
+) -> None:
+    if not edge_profiles:
+        return
+
+    group = ET.SubElement(svg, "g", {"id": "EDGE_CALLOUTS", "class": "edge-callouts"})
+
+    box_width = 100.0
+    box_height = 70.0
+    box_spacing = 15.0
+    scale = 3.0
+
+    start_x = viewbox_x + viewbox_width - box_width - 20.0
+    start_y = viewbox_y + 180.0
+
+    section_labels = "ABCDEFGH"
+
+    callout_style = theme.get_style("callout-box")
+    detail_style = theme.get_style("callout-detail")
+    label_style = theme.get_style("section-label")
+    dim_style = theme.get_style("dimension-text")
+
+    for i, profile in enumerate(edge_profiles):
+        if i >= len(section_labels):
+            break
+
+        label = section_labels[i]
+        box_x = start_x
+        box_y = start_y + i * (box_height + box_spacing)
+
+        ET.SubElement(group, "rect", {
+            "x": str(box_x),
+            "y": str(box_y),
+            "width": str(box_width),
+            "height": str(box_height),
+            **{k: v for k, v in callout_style.items()},
+            "id": f"callout_{label}_box",
+        })
+
+        title_attrs = {
+            "x": str(box_x + 8),
+            "y": str(box_y + 12),
+            "text-anchor": "start",
+            **{k: v for k, v in label_style.items()},
+        }
+        title_elem = ET.SubElement(group, "text", title_attrs)
+        title_elem.text = f"SECTION {label}"
+
+        profile_type = profile.get("type")
+        items = profile.get("items", [])
+
+        if items:
+            items_text = ", ".join(items[:3])
+            if len(items) > 3:
+                items_text += f" (+{len(items) - 3})"
+            ref_attrs = {
+                "x": str(box_x + 8),
+                "y": str(box_y + box_height - 6),
+                "text-anchor": "start",
+                **{k: v for k, v in dim_style.items()},
+                "font-size": "7px",
+            }
+            ref_elem = ET.SubElement(group, "text", ref_attrs)
+            ref_elem.text = items_text
+
+        detail_x = box_x + 10
+        detail_y = box_y + 20
+        detail_w = box_width - 20
+        detail_h = box_height - 36
+
+        if profile_type == "chamfer":
+            _render_chamfer_section(
+                group, detail_x, detail_y, detail_w, detail_h,
+                sheet_thickness, profile.get("distance_mm", 0), scale,
+                detail_style, dim_style,
+            )
+        elif profile_type == "fillet":
+            _render_fillet_section(
+                group, detail_x, detail_y, detail_w, detail_h,
+                sheet_thickness, profile.get("radius_mm", 0), scale,
+                detail_style, dim_style,
+            )
+
+        for item_id in items:
+            bounds = _find_shape_bounds(item_id, layers)
+            if bounds is None:
+                continue
+            sx, sy, sw, sh = bounds
+            marker_r = 7.0
+            mx = sx + sw - marker_r - 2
+            my = sy + marker_r + 2
+            ET.SubElement(group, "circle", {
+                "cx": str(mx),
+                "cy": str(my),
+                **{k: v for k, v in callout_style.items()},
+                "r": str(marker_r),
+            })
+            marker_text = ET.SubElement(group, "text", {
+                "x": str(mx),
+                "y": str(my),
+                "text-anchor": "middle",
+                "dominant-baseline": "central",
+                **{k: v for k, v in label_style.items()},
+            })
+            marker_text.text = label
+
+
+def _render_chamfer_section(
+    parent: ET.Element,
+    area_x: float,
+    area_y: float,
+    area_w: float,
+    area_h: float,
+    thickness: float,
+    distance: float,
+    scale: float,
+    detail_style: dict[str, str],
+    dim_style: dict[str, str],
+) -> None:
+    t_s = min(thickness * scale, area_h)
+    d_s = min(distance * scale, t_s)
+    cx = area_x + area_w / 2
+    cy = area_y + area_h / 2
+    x0 = cx - t_s / 2
+    y0 = cy - t_s / 2
+
+    path_d = (
+        f"M {x0:.2f} {y0 + d_s:.2f} "
+        f"L {x0 + d_s:.2f} {y0:.2f} "
+        f"L {x0 + t_s:.2f} {y0:.2f} "
+        f"L {x0 + t_s:.2f} {y0 + t_s:.2f} "
+        f"L {x0:.2f} {y0 + t_s:.2f} "
+        f"Z"
+    )
+
+    ET.SubElement(parent, "path", {
+        "d": path_d,
+        **{k: v for k, v in detail_style.items()},
+    })
+
+    dim_x = x0 + d_s / 2
+    dim_y = y0 - 3
+    dim_attrs = {
+        "x": str(dim_x),
+        "y": str(dim_y),
+        "text-anchor": "middle",
+        **{k: v for k, v in dim_style.items()},
+        "font-size": "8px",
+    }
+    dim_elem = ET.SubElement(parent, "text", dim_attrs)
+    dim_elem.text = f"{distance:.1f}"
+
+    t_attrs = {
+        "x": str(x0 + t_s + 4),
+        "y": str(cy),
+        "text-anchor": "start",
+        "dominant-baseline": "middle",
+        **{k: v for k, v in dim_style.items()},
+        "font-size": "8px",
+    }
+    t_elem = ET.SubElement(parent, "text", t_attrs)
+    t_elem.text = f"{thickness:.0f}"
+
+
+def _render_fillet_section(
+    parent: ET.Element,
+    area_x: float,
+    area_y: float,
+    area_w: float,
+    area_h: float,
+    thickness: float,
+    radius: float,
+    scale: float,
+    detail_style: dict[str, str],
+    dim_style: dict[str, str],
+) -> None:
+    t_s = min(thickness * scale, area_h)
+    r_s = min(radius * scale, t_s)
+    cx = area_x + area_w / 2
+    cy = area_y + area_h / 2
+    x0 = cx - t_s / 2
+    y0 = cy - t_s / 2
+
+    path_d = (
+        f"M {x0:.2f} {y0 + r_s:.2f} "
+        f"A {r_s:.2f} {r_s:.2f} 0 0 1 {x0 + r_s:.2f} {y0:.2f} "
+        f"L {x0 + t_s:.2f} {y0:.2f} "
+        f"L {x0 + t_s:.2f} {y0 + t_s:.2f} "
+        f"L {x0:.2f} {y0 + t_s:.2f} "
+        f"Z"
+    )
+
+    ET.SubElement(parent, "path", {
+        "d": path_d,
+        **{k: v for k, v in detail_style.items()},
+    })
+
+    dim_x = x0 + r_s / 2 - 2
+    dim_y = y0 - 3
+    dim_attrs = {
+        "x": str(dim_x),
+        "y": str(dim_y),
+        "text-anchor": "middle",
+        **{k: v for k, v in dim_style.items()},
+        "font-size": "8px",
+    }
+    dim_elem = ET.SubElement(parent, "text", dim_attrs)
+    dim_elem.text = f"R{radius:.1f}"
+
+    t_attrs = {
+        "x": str(x0 + t_s + 4),
+        "y": str(cy),
+        "text-anchor": "start",
+        "dominant-baseline": "middle",
+        **{k: v for k, v in dim_style.items()},
+        "font-size": "8px",
+    }
+    t_elem = ET.SubElement(parent, "text", t_attrs)
+    t_elem.text = f"{thickness:.0f}"
 
 
 __all__ = [

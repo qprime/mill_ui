@@ -1,0 +1,37 @@
+# mill_ui: 5cafa0d
+# generated: 2026-02-08
+
+Sheet:
+  width: 500mm
+  height: 300mm
+  thickness: 19mm
+  margin: 10mm
+children:
+- Rect:
+    id: chamfer_panel
+    at:
+      x: 140mm
+      y: 140mm
+      width: 120mm
+      height: 100mm
+    feature:
+      type: profile
+      depth: through
+    children:
+    - Edge:
+        treatment: chamfer
+        distance: 3mm
+- Rect:
+    id: fillet_panel
+    at:
+      x: 340mm
+      y: 140mm
+      width: 120mm
+      height: 100mm
+    feature:
+      type: profile
+      depth: through
+    children:
+    - Edge:
+        treatment: fillet
+        radius: 5mm

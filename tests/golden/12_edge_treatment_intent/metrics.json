@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-02-08T18:26:45.049471+00:00"
+    "created_at": "2026-02-08T21:22:05.400121+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.21,
+    "extraction_time_ms": 0.22,
     "document": {
       "width_mm": 450.0,
-      "height_mm": 364.0,
+      "height_mm": 388.0,
       "viewbox": [
         -10.0,
         -50.0,
         450.0,
-        364.0
+        388.0
       ]
     },
     "layers": {
@@ -48,13 +48,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 7,
+          "element_count": 9,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 7,
+          "text_count": 9,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -146,11 +146,12 @@
       "y_max": 200.0
     },
     "text_elements": {
-      "count": 15,
+      "count": 17,
       "dimension_labels": [
         "200.0mm",
         "300.0mm",
         "Sheet: 300.0 \u00d7 200.0 \u00d7 19.0mm",
+        "\u2022 Rough: 0.50mm, Finish: 0.10mm",
         "\u2022 pocket: 4.0mm"
       ],
       "depth_annotations": [
@@ -163,7 +164,9 @@
         "Depths:",
         "\u2022 pocket: 4.0mm",
         "Parts (1):",
-        "\u2022 recess"
+        "\u2022 recess",
+        "Edge Allowances:",
+        "\u2022 Rough: 0.50mm, Finish: 0.10mm"
       ]
     },
     "circles": {
@@ -190,7 +193,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7342,
+    "extraction_time_ms": 1.7802,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

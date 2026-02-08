@@ -80,6 +80,9 @@ Defined in `diagram_render/render_svg.py` DiagramTheme:
 | legend | Legend text |
 | title | Title block text |
 | margin-zone | Sheet margin areas |
+| section-label | Edge profile callout title text |
+| callout-box | Edge profile callout box outline |
+| callout-detail | Edge profile cross-section geometry |
 
 ---
 

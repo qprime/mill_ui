@@ -393,15 +393,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
     if tool_radius <= 0:
         return []
 
-    side = (item.feature.side or "on").lower()
-    offset = 0.0
-    if side == "outside":
-        offset = tool_radius
-    elif side == "inside":
-        offset = -tool_radius
-
-    if offset == 0:
-        return []
+    offset = tool_radius
 
     shape_type = item.type
     cx, cy = item.placement.center_xy_mm
@@ -429,7 +421,82 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
             )
         ]
 
+    elif shape_type == "Circle":
+        r = float(data.get("radius_mm") or data.get("diameter_mm", 0) / 2)
+        if r <= 0:
+            return []
+        new_r = r + offset
+        if new_r <= 0:
+            return []
+        return [
+            Circle(
+                cx=margin + cx,
+                cy=flip_y(cy),
+                radius=new_r,
+                style_token="toolpath",
+                id=f"{item.shape_id or 'item'}_toolpath",
+            )
+        ]
+
+    elif shape_type == "Polygon":
+        points = data.get("points", [])
+        holes = data.get("holes", [])
+        if not points:
+            return []
+        return _build_polygon_toolpath(
+            points, holes, cx, cy, offset, margin, flip_y,
+            item.shape_id or "item",
+        )
+
     return []
+
+
+def _build_polygon_toolpath(
+    points: list,
+    holes: list | None,
+    cx: float,
+    cy: float,
+    offset: float,
+    margin: float,
+    flip_y,
+    shape_id: str,
+) -> list:
+    from shapely.geometry import Polygon as ShapelyPolygon, MultiPolygon
+    from shapely.ops import orient
+    from shapely import BufferJoinStyle
+
+    abs_points = [(float(x) + cx, float(y) + cy) for x, y in points]
+    abs_holes: list[list[tuple[float, float]]] = []
+    for hole in holes or []:
+        abs_holes.append([(float(x) + cx, float(y) + cy) for x, y in hole])
+
+    poly = ShapelyPolygon(abs_points, abs_holes if abs_holes else None)
+    if offset != 0.0:
+        poly = poly.buffer(offset, join_style=BufferJoinStyle.mitre, mitre_limit=2.0)
+
+    if poly.is_empty:
+        return []
+
+    polys = list(poly.geoms) if isinstance(poly, MultiPolygon) else [poly]
+    results: list = []
+    for i, p in enumerate(polys):
+        p = orient(p, sign=1.0)
+        if p.is_empty or not hasattr(p, "exterior"):
+            continue
+        coords = list(p.exterior.coords[:-1])
+        transformed = [
+            Point2D(margin + x, flip_y(y)) for x, y in coords
+        ]
+        suffix = f"_toolpath_{i}" if len(polys) > 1 else "_toolpath"
+        results.append(
+            Polyline(
+                points=tuple(transformed),
+                closed=True,
+                style_token="toolpath",
+                id=f"{shape_id}{suffix}",
+            )
+        )
+    return results
 
 
 def _build_label(item: Item, flip_y, margin: float) -> list:

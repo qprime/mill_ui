@@ -427,6 +427,7 @@ _LEGEND_ENTRIES = [
     ("HOLES", "Holes", "hole", "line"),
     ("ENGRAVE_PATHS", "Engrave Paths", "engrave", "line"),
     ("WASTE_CUTS", "Waste Cuts", "waste", "line"),
+    ("PROFILE_TOOLPATHS", "Toolpath Centerline", "toolpath", "line"),
 ]
 
 

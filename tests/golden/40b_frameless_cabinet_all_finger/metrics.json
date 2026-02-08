@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40b_frameless_cabinet_all_finger",
-    "created_at": "2026-02-08T16:49:07.084264+00:00"
+    "created_at": "2026-02-08T18:26:47.267757+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.78,
+    "extraction_time_ms": 1.09,
     "document": {
       "width_mm": 2610.0,
       "height_mm": 1440.0,
@@ -17,13 +17,14 @@
       ]
     },
     "layers": {
-      "count": 7,
+      "count": 8,
       "names": [
         "LABELS",
         "LEGEND",
         "NOTES",
         "POCKET_REGIONS",
         "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
         "TITLE_BLOCK"
       ],
@@ -39,13 +40,13 @@
           "elements": []
         },
         "LEGEND": {
-          "element_count": 9,
+          "element_count": 11,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 3,
+          "line_count": 4,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 6,
           "elements": []
         },
         "NOTES": {
@@ -218,6 +219,16 @@
             }
           ]
         },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 6,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 6,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
         "SHEET_OUTLINE": {
           "element_count": 5,
           "rect_count": 5,
@@ -317,15 +328,20 @@
       }
     },
     "paths": {
-      "total_count": 15,
-      "closed_count": 15,
+      "total_count": 21,
+      "closed_count": 21,
       "open_count": 0,
-      "total_length_mm": 12622.0,
+      "total_length_mm": 25307.505,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 6,
           "closed": 6,
           "length_mm": 12622.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 6,
+          "closed": 6,
+          "length_mm": 12685.505
         },
         "POCKET_REGIONS": {
           "count": 4,
@@ -346,7 +362,7 @@
       "y_max": 1220.0
     },
     "text_elements": {
-      "count": 23,
+      "count": 24,
       "dimension_labels": [
         "Sheet: 2440.0 \u00d7 1220.0 \u00d7 18.0mm",
         "\u2022 pocket: 9.0mm"
@@ -419,7 +435,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9954,
+    "extraction_time_ms": 1.0278,
     "summary": {
       "total_lines": 7526,
       "comment_lines": 26,

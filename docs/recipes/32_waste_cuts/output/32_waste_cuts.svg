@@ -75,8 +75,10 @@
     <text x="1243.0" y="-14.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <line x1="1223.0" y1="-1.0" x2="1238.0" y2="-1.0" stroke="#ff9500" stroke-width="2" stroke-dasharray="8,4" />
     <text x="1243.0" y="2.0" fill="#cccccc" font-family="monospace" font-size="10px">Waste Cuts</text>
-    <line x1="1223.0" y1="15.0" x2="1238.0" y2="15.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="1243.0" y="18.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="1223.0" y1="15.0" x2="1238.0" y2="15.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1243.0" y="18.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1223.0" y1="31.0" x2="1238.0" y2="31.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1243.0" y="34.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="835.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>

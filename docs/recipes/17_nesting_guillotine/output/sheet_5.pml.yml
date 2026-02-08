@@ -1,112 +1,17 @@
-kerf: 6.35mm
-Sheet:
-  width: 1232mm
-  height: 1245mm
-  thickness: 19mm
-children:
-- Rect:
-    id: large_door_12_door:outer
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 308.5mm
-      y: 238.5mm
-      width: 597mm
-      height: 457mm
-- Rect:
-    id: large_door_12_door:panel
-    feature:
-      type: pocket
-      depth: 6mm
-    at:
-      x: 308.5mm
-      y: 238.5mm
-      width: 483mm
-      height: 343mm
-- Rect:
-    id: large_door_13_door:outer
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 911.85mm
-      y: 238.5mm
-      width: 597mm
-      height: 457mm
-- Rect:
-    id: large_door_13_door:panel
-    feature:
-      type: pocket
-      depth: 6mm
-    at:
-      x: 911.85mm
-      y: 238.5mm
-      width: 483mm
-      height: 343mm
-- Rect:
-    id: large_door_14_door:outer
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 238.5mm
-      y: 771.85mm
-      width: 457mm
-      height: 597mm
-- Rect:
-    id: large_door_14_door:panel
-    feature:
-      type: pocket
-      depth: 6mm
-    at:
-      x: 238.5mm
-      y: 771.85mm
-      width: 343mm
-      height: 483mm
-- Rect:
-    id: large_door_15_door:outer
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 771.85mm
-      y: 701.85mm
-      width: 597mm
-      height: 457mm
-- Rect:
-    id: large_door_15_door:panel
-    feature:
-      type: pocket
-      depth: 6mm
-    at:
-      x: 771.85mm
-      y: 701.85mm
-      width: 483mm
-      height: 343mm
-- Rect:
-    id: small_door_11_rect
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 625.85mm
-      y: 1038.2mm
-      width: 305mm
-      height: 203mm
-- Rect:
-    id: small_door_12_rect
-    feature:
-      type: profile
-      depth: through
-      side: outside
-    at:
-      x: 937.2mm
-      y: 1038.2mm
-      width: 305mm
-      height: 203mm
+# sheet_5.pml.yml
+# Generated from cabinet_job.nest.yml
+# Algorithm: guillotine
+# Items: 12
+
+sheet 1232.00mm 1245.00mm 19.00mm margin 10.00mm
+
+kerf 6.35mm
+
+rect large_door_12_generated_profile_0 at 308.50mm,238.50mm size 597.00mm,457.00mm profile through outside
+rect large_door_12_generated_pocket_1 at 308.50mm,238.50mm size 483.00mm,343.00mm pocket 6.00mm
+rect large_door_13_generated_profile_0 at 905.50mm,238.50mm size 597.00mm,457.00mm profile through outside
+rect large_door_13_generated_pocket_1 at 905.50mm,238.50mm size 483.00mm,343.00mm pocket 6.00mm
+rect large_door_14_generated_profile_0 at 238.50mm,765.50mm size 457.00mm,597.00mm profile through outside
+rect large_door_14_generated_pocket_1 at 238.50mm,765.50mm size 343.00mm,483.00mm pocket 6.00mm
+rect large_door_15_generated_profile_0 at 765.50mm,695.50mm size 597.00mm,457.00mm profile through outside
+rect large_door_15_generated_pocket_1 at 765.50mm,695.50mm size 483.00mm,343.00mm pocket 6.00mm

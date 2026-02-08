@@ -54,8 +54,10 @@
     <text x="478.0" y="-15.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
     <line x1="458.0" y1="-2.0" x2="473.0" y2="-2.0" stroke="#e8e8e8" stroke-width="2" />
     <text x="478.0" y="1.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <line x1="458.0" y1="14.0" x2="473.0" y2="14.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="478.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="458.0" y1="14.0" x2="473.0" y2="14.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="478.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="458.0" y1="30.0" x2="473.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="478.0" y="33.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="670.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>

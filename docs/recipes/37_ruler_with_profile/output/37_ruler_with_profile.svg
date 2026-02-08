@@ -2346,8 +2346,10 @@
     <text x="738.0" y="-9.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <line x1="718.0" y1="4.0" x2="733.0" y2="4.0" stroke="#888888" stroke-width="0.25" />
     <text x="738.0" y="7.0" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
-    <line x1="718.0" y1="20.0" x2="733.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="738.0" y="23.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="718.0" y1="20.0" x2="733.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="738.0" y="23.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="718.0" y1="36.0" x2="733.0" y2="36.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="738.0" y="39.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="280.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>

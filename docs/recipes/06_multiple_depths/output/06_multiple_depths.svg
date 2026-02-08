@@ -99,8 +99,10 @@
     <text x="248.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
     <line x1="228.0" y1="30.0" x2="243.0" y2="30.0" stroke="#e8e8e8" stroke-width="1.5" />
     <text x="248.0" y="33.0" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
-    <line x1="228.0" y1="46.0" x2="243.0" y2="46.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="248.0" y="49.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="228.0" y1="46.0" x2="243.0" y2="46.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="248.0" y="49.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="228.0" y1="62.0" x2="243.0" y2="62.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="248.0" y="65.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="180.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>

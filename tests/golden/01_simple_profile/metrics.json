@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "01_simple_profile",
-    "created_at": "2026-02-08T16:49:04.183465+00:00"
+    "created_at": "2026-02-08T18:26:44.371944+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 600.0,
       "height_mm": 790.0,
@@ -39,13 +39,13 @@
           "elements": []
         },
         "LEGEND": {
-          "element_count": 7,
+          "element_count": 9,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 3,
+          "line_count": 4,
           "polygon_count": 0,
-          "text_count": 4,
+          "text_count": 5,
           "elements": []
         },
         "NOTES": {
@@ -157,7 +157,7 @@
       "y_max": 650.0
     },
     "text_elements": {
-      "count": 13,
+      "count": 14,
       "dimension_labels": [
         "150.0mm",
         "200.0mm",
@@ -196,7 +196,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9162,
+    "extraction_time_ms": 0.9117,
     "summary": {
       "total_lines": 258,
       "comment_lines": 6,

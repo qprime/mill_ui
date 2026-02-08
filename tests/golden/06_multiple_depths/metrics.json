@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "06_multiple_depths",
-    "created_at": "2026-02-08T16:49:04.355105+00:00"
+    "created_at": "2026-02-08T18:26:44.542950+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.44,
+    "extraction_time_ms": 0.46,
     "document": {
       "width_mm": 370.0,
       "height_mm": 420.0,
@@ -108,13 +108,13 @@
           ]
         },
         "LEGEND": {
-          "element_count": 11,
+          "element_count": 13,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 4,
+          "line_count": 5,
           "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 7,
           "elements": []
         },
         "NOTES": {
@@ -257,7 +257,7 @@
       "y_max": 160.0
     },
     "text_elements": {
-      "count": 29,
+      "count": 30,
       "dimension_labels": [
         "120.0mm",
         "120.0mm",
@@ -334,7 +334,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.9998,
+    "extraction_time_ms": 14.8209,
     "summary": {
       "total_lines": 3849,
       "comment_lines": 18,

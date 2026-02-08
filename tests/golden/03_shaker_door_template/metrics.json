@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "03_shaker_door_template",
-    "created_at": "2026-02-08T16:49:04.207373+00:00"
+    "created_at": "2026-02-08T18:26:44.395662+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -40,13 +40,13 @@
           "elements": []
         },
         "LEGEND": {
-          "element_count": 9,
+          "element_count": 11,
           "rect_count": 1,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 3,
+          "line_count": 4,
           "polygon_count": 0,
-          "text_count": 5,
+          "text_count": 6,
           "elements": []
         },
         "NOTES": {
@@ -189,7 +189,7 @@
       "y_max": 650.0
     },
     "text_elements": {
-      "count": 19,
+      "count": 20,
       "dimension_labels": [
         "300.0mm",
         "400.0mm",
@@ -245,7 +245,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.4479,
+    "extraction_time_ms": 4.4458,
     "summary": {
       "total_lines": 1582,
       "comment_lines": 12,

@@ -71,8 +71,10 @@
     <text x="478.0" y="1.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <rect x="458.0" y="11.0" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="478.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="458.0" y1="30.0" x2="473.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="478.0" y="33.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="458.0" y1="30.0" x2="473.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="478.0" y="33.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="458.0" y1="46.0" x2="473.0" y2="46.0" stroke="#5ab9ea" stroke-width="1" />
+    <text x="478.0" y="49.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20" y="670.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>

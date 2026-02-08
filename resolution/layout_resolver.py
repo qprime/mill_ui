@@ -2188,9 +2188,31 @@ class LayoutResolver:
         segments = None
         if isinstance(beam_spec.layers, int) and beam_spec.layers >= 1:
             segments = compute_segments(beam_spec.length_mm, sheet_size, beam_spec.layers)
+
+        from assembly.beam import Tenon as _Tenon
+        left_exts: list[float] = []
+        right_exts: list[float] = []
+        for li in range(beam_spec.layer_count):
+            left = 0.0
+            right = 0.0
+            for feat in beam_spec.end_features:
+                if isinstance(feat, _Tenon) and beam_spec._should_apply_tenon(feat, li):
+                    if feat.end == "left":
+                        left += feat.extension_mm
+                    else:
+                        right += feat.extension_mm
+            left_exts.append(left)
+            right_exts.append(right)
+        max_left = max(left_exts) if left_exts else 0.0
+
+        max_right = max(right_exts) if right_exts else 0.0
+        max_layer_length = max_left + beam_spec.length_mm + max_right
+        if isinstance(beam_spec.layers, tuple):
+            max_layer_length = max(ls.length_mm for ls in beam_spec.layers)
+
         beam_structure = {
             "name": beam_spec.name,
-            "length_mm": beam_spec.length_mm,
+            "length_mm": max_layer_length,
             "width_mm": beam_spec.width_mm,
             "thickness_mm": beam_spec.thickness_mm,
             "layer_count": beam_spec.layer_count,
@@ -2200,12 +2222,29 @@ class LayoutResolver:
         }
         if segments:
             for layer_idx, layer_segs in enumerate(segments):
+                left_ext = left_exts[layer_idx]
+                right_ext = right_exts[layer_idx]
+                adjusted_segs = []
+                seg_count = len(layer_segs)
+                for si, s in enumerate(layer_segs):
+                    s_start = s.start_mm + max_left
+                    s_end = s.end_mm + max_left
+                    s_len = s.length
+                    if si == 0:
+                        s_start -= left_ext
+                        s_len += left_ext
+                    if si == seg_count - 1:
+                        s_end += right_ext
+                        s_len += right_ext
+                    adjusted_segs.append({
+                        "index": s.index,
+                        "start_mm": s_start,
+                        "end_mm": s_end,
+                        "length_mm": s_len,
+                    })
                 layer_data = {
                     "layer_index": layer_idx,
-                    "segments": [
-                        {"index": s.index, "start_mm": s.start_mm, "end_mm": s.end_mm, "length_mm": s.length}
-                        for s in layer_segs
-                    ],
+                    "segments": adjusted_segs,
                 }
                 beam_structure["layers"].append(layer_data)
         elif isinstance(beam_spec.layers, tuple):

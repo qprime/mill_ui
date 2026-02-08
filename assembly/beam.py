@@ -340,6 +340,22 @@ class BeamSpec:
             return True
         return self._is_outer_layer(layer_idx)
 
+    def _should_apply_tenon(self, tenon: Tenon, layer_idx: int) -> bool:
+        if tenon.layers == "all":
+            return True
+        if tenon.layers == "center":
+            return not self._is_outer_layer(layer_idx)
+        if tenon.layers == "outer":
+            return self._is_outer_layer(layer_idx)
+        return layer_idx in tenon.layers
+
+    def _tenon_extensions_for_layer(self, layer_idx: int) -> float:
+        total = 0.0
+        for feat in self.end_features:
+            if isinstance(feat, Tenon) and self._should_apply_tenon(feat, layer_idx):
+                total += feat.extension_mm
+        return total
+
     def expand(self, sheet_size: float) -> list[PanelSpec]:
         if isinstance(self.layers, int):
             segments = compute_segments(self.length_mm, sheet_size, self.layers)
@@ -353,7 +369,7 @@ class BeamSpec:
 
         for layer_idx in range(self.layer_count):
             if isinstance(self.layers, int):
-                layer_length = self.length_mm
+                layer_length = self.length_mm + self._tenon_extensions_for_layer(layer_idx)
                 layer_offset = 0.0
                 layer_segments = segments[layer_idx] if segments else None
             else:

@@ -403,3 +403,114 @@ class TestEdgeFeatureLayerApplication:
         assert beam._should_apply_edge_feature(dado, 0) is True
         assert beam._should_apply_edge_feature(dado, 1) is True
         assert beam._should_apply_edge_feature(dado, 2) is True
+
+
+class TestTenonLayerApplication:
+    def test_center_tenon_applies_to_middle_only(self):
+        beam = BeamSpec(name="test", length_mm=500, width_mm=100, thickness_mm=19, layers=3)
+        tenon = Tenon(end="left", extension_mm=38, width_mm=100, height_mm=19, layers="center")
+        assert beam._should_apply_tenon(tenon, 0) is False
+        assert beam._should_apply_tenon(tenon, 1) is True
+        assert beam._should_apply_tenon(tenon, 2) is False
+
+    def test_outer_tenon_applies_to_first_last(self):
+        beam = BeamSpec(name="test", length_mm=500, width_mm=100, thickness_mm=19, layers=3)
+        tenon = Tenon(end="left", extension_mm=38, width_mm=100, height_mm=19, layers="outer")
+        assert beam._should_apply_tenon(tenon, 0) is True
+        assert beam._should_apply_tenon(tenon, 1) is False
+        assert beam._should_apply_tenon(tenon, 2) is True
+
+    def test_all_tenon_applies_to_all(self):
+        beam = BeamSpec(name="test", length_mm=500, width_mm=100, thickness_mm=19, layers=3)
+        tenon = Tenon(end="left", extension_mm=38, width_mm=100, height_mm=19, layers="all")
+        assert beam._should_apply_tenon(tenon, 0) is True
+        assert beam._should_apply_tenon(tenon, 1) is True
+        assert beam._should_apply_tenon(tenon, 2) is True
+
+    def test_explicit_indices_tenon(self):
+        beam = BeamSpec(name="test", length_mm=500, width_mm=100, thickness_mm=19, layers=3)
+        tenon = Tenon(end="left", extension_mm=38, width_mm=100, height_mm=19, layers=(1,))
+        assert beam._should_apply_tenon(tenon, 0) is False
+        assert beam._should_apply_tenon(tenon, 1) is True
+        assert beam._should_apply_tenon(tenon, 2) is False
+
+
+class TestExpandWithTenons:
+    def test_center_tenons_extend_center_layer(self):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=600,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            end_features=(
+                Tenon(end="left", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
+                Tenon(end="right", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
+            ),
+        )
+        panels = beam.expand(sheet_size=1200)
+        assert len(panels) == 3
+        assert panels[0].width_mm == 600
+        assert panels[1].width_mm == 676
+        assert panels[2].width_mm == 600
+
+    def test_outer_tenons_extend_outer_layers(self):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=600,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            end_features=(
+                Tenon(end="left", extension_mm=25, width_mm=76, height_mm=19, layers="outer"),
+            ),
+        )
+        panels = beam.expand(sheet_size=1200)
+        assert len(panels) == 3
+        assert panels[0].width_mm == 625
+        assert panels[1].width_mm == 600
+        assert panels[2].width_mm == 625
+
+    def test_all_tenons_extend_all_layers(self):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=600,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            end_features=(
+                Tenon(end="left", extension_mm=20, width_mm=76, height_mm=19, layers="all"),
+            ),
+        )
+        panels = beam.expand(sheet_size=1200)
+        assert len(panels) == 3
+        assert panels[0].width_mm == 620
+        assert panels[1].width_mm == 620
+        assert panels[2].width_mm == 620
+
+    def test_no_tenons_no_extension(self):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=600,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+        )
+        panels = beam.expand(sheet_size=1200)
+        assert len(panels) == 3
+        assert all(p.width_mm == 600 for p in panels)
+
+    def test_single_layer_center_tenon_not_applied(self):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=600,
+            width_mm=76,
+            thickness_mm=19,
+            layers=1,
+            end_features=(
+                Tenon(end="left", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
+            ),
+        )
+        panels = beam.expand(sheet_size=1200)
+        assert len(panels) == 1
+        assert panels[0].width_mm == 600

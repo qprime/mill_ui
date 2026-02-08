@@ -2,15 +2,15 @@
 # generated: 2026-02-08
 
 Sheet:
-  width: 800mm
-  height: 600mm
+  width: 1200mm
+  height: 800mm
   thickness: 19mm
 
 children:
   - Beam:
-      name: rail
-      length: 600mm
-      width: 76mm
+      name: long_rail
+      length: 2000mm
+      width: 100mm
       thickness: 19mm
       layers: 3
       role: RAIL
@@ -19,12 +19,12 @@ children:
         - Tenon:
             end: left
             extension: 38mm
-            width: 76mm
+            width: 100mm
             height: 19mm
             layers: center
         - Tenon:
             end: right
             extension: 38mm
-            width: 76mm
+            width: 100mm
             height: 19mm
             layers: center

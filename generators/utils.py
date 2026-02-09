@@ -1,10 +1,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from shapely.geometry import Polygon, MultiPolygon
 
+from domains.transforms import sheet_to_local
+from generators.base import generate_shape_id, LoopSelection
 from layout_ast.layout import Feature, Geometry, Item, Placement
-from generators.base import generate_shape_id
+
+if TYPE_CHECKING:
+    from domains.domain import Domain
 
 
 def shapely_to_item(
@@ -73,7 +79,68 @@ def iter_polygons(geom) -> list[Polygon]:
     return result
 
 
+def get_local_bounds(domain: Domain) -> dict[str, float]:
+    local_points = [
+        sheet_to_local(pt, domain)
+        for pt in domain.outer_boundary
+    ]
+
+    xs = [p[0] for p in local_points]
+    ys = [p[1] for p in local_points]
+
+    return {
+        "x_min": min(xs),
+        "x_max": max(xs),
+        "y_min": min(ys),
+        "y_max": max(ys),
+    }
+
+
+def extract_loops(
+    domain: Domain,
+    selection: LoopSelection,
+    generator_name: str,
+) -> list[tuple[int, tuple[tuple[float, float], ...]]]:
+    all_loops = [domain.outer_boundary] + list(domain.inner_boundaries)
+    num_loops = len(all_loops)
+
+    if selection == "outer_only":
+        return [(0, domain.outer_boundary)]
+
+    elif selection == "inner_only":
+        return [
+            (i + 1, inner)
+            for i, inner in enumerate(domain.inner_boundaries)
+        ]
+
+    elif selection == "all_loops":
+        return [(i, loop) for i, loop in enumerate(all_loops)]
+
+    elif isinstance(selection, list):
+        result = []
+        for idx in selection:
+            if idx < 0 or idx >= num_loops:
+                raise ValueError(
+                    f"{generator_name}: loop index {idx} out of range. "
+                    f"Domain has {num_loops} loops (0=outer, 1-{num_loops-1}=inner)"
+                )
+            result.append((idx, all_loops[idx]))
+        return result
+
+    else:
+        raise ValueError(f"{generator_name}: invalid loop_selection: {selection}")
+
+
+def loop_type_suffix(index: int) -> str:
+    if index == 0:
+        return "outer"
+    return f"inner_{index}"
+
+
 __all__ = [
     "shapely_to_item",
     "iter_polygons",
+    "get_local_bounds",
+    "extract_loops",
+    "loop_type_suffix",
 ]

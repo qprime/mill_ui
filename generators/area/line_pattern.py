@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING
 
 from shapely.geometry import LineString
 
-from domains.transforms import local_to_sheet_batch, sheet_to_local
+from domains.transforms import local_to_sheet_batch
 from generators.base import (
     LinePatternParams,
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
-from generators.utils import shapely_to_item, iter_polygons
+from generators.utils import shapely_to_item, iter_polygons, get_local_bounds
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -45,25 +45,13 @@ def line_pattern_generator(
         return _generate_sheet_coords(domain, params, allow_empty, shape_id_prefix)
 
 
-def _get_local_bounds(domain: Domain) -> dict[str, float]:
-    local_points = [sheet_to_local(pt, domain) for pt in domain.outer_boundary]
-    xs = [p[0] for p in local_points]
-    ys = [p[1] for p in local_points]
-    return {
-        "x_min": min(xs),
-        "x_max": max(xs),
-        "y_min": min(ys),
-        "y_max": max(ys),
-    }
-
-
 def _generate_local_coords(
     domain: Domain,
     params: LinePatternParams,
     allow_empty: bool,
     shape_id_prefix: str,
 ) -> GeneratorResult:
-    local_bounds = _get_local_bounds(domain)
+    local_bounds = get_local_bounds(domain)
     local_width = local_bounds["x_max"] - local_bounds["x_min"]
     local_height = local_bounds["y_max"] - local_bounds["y_min"]
 

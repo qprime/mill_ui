@@ -1854,23 +1854,10 @@ class LayoutResolver:
                 y_cursor + panel_height / 2,
             )
 
-            from assembly.notches import NotchSpec as OldNotchSpec
-            old_notches = tuple(
-                OldNotchSpec(
-                    edge_index=n.edge_index,
-                    u_start_mm=n.u_start_mm,
-                    u_len_mm=n.u_len_mm,
-                    depth_mm=n.depth_mm,
-                    shape=n.shape,
-                    shape_params=n.shape_params,
-                )
-                for n in spec.notches
-            )
-
             panel_params = NotchedPanelParams(
                 width_mm=panel_width,
                 height_mm=panel_height,
-                notches=old_notches,
+                notches=spec.notches,
                 part_name=spec.name,
             )
 

@@ -35,12 +35,9 @@ from assembly.layout import (
 )
 
 from assembly.notches import (
-    NotchSpec as LegacyNotchSpec,
     build_notched_polygon,
     finger_joints_to_notches,
     notch_to_polyline,
-    validate_notch_fits_edge as legacy_validate_notch_fits_edge,
-    validate_notches_no_overlap as legacy_validate_notches_no_overlap,
 )
 from assembly.beam import (
     BeamSpec,
@@ -104,7 +101,6 @@ __all__ = [
     "PlacedPanel",
     "layout_panels",
     "panels_to_layout_ast",
-    "LegacyNotchSpec",
     "build_notched_polygon",
     "finger_joints_to_notches",
     "notch_to_polyline",

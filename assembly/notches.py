@@ -1,33 +1,13 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from typing import Any
 
 from shapely.geometry import MultiPolygon, Polygon, box
 from shapely.ops import unary_union, orient
 
+from assembly.panel import Edge, NotchSpec
+
 Point2D = tuple[float, float]
-
-
-@dataclass(frozen=True)
-class NotchSpec:
-    edge_index: int
-    u_start_mm: float
-    u_len_mm: float
-    depth_mm: float
-    shape: str = "rectangular"
-    shape_params: dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        if self.edge_index < 0:
-            raise ValueError(f"edge_index must be non-negative, got {self.edge_index}")
-        if self.u_start_mm < 0:
-            raise ValueError(f"u_start_mm must be non-negative, got {self.u_start_mm}")
-        if self.u_len_mm <= 0:
-            raise ValueError(f"u_len_mm must be positive, got {self.u_len_mm}")
-        if self.depth_mm <= 0:
-            raise ValueError(f"depth_mm must be positive, got {self.depth_mm}")
 
 
 def validate_notch_fits_edge(notch: NotchSpec, edge_length: float) -> None:
@@ -261,7 +241,7 @@ def finger_joints_to_notches(
             if u_end - u_start <= 1e-9:
                 continue
             notch = NotchSpec(
-                edge_index=edge_index,
+                edge=Edge(edge_index),
                 u_start_mm=u_start,
                 u_len_mm=u_end - u_start,
                 depth_mm=depth_mm,
@@ -272,7 +252,6 @@ def finger_joints_to_notches(
 
 
 __all__ = [
-    "NotchSpec",
     "validate_notch_fits_edge",
     "validate_notches_no_overlap",
     "notch_to_polyline",

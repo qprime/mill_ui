@@ -4,13 +4,14 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
-from domains.transforms import local_to_sheet_batch, sheet_to_local
+from domains.transforms import local_to_sheet_batch
 from generators.base import (
     GeneratorResult,
     WaveParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.utils import get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -119,7 +120,7 @@ def wave_generator(
     wave_spacing = params.tool_width_mm
 
 
-    local_bounds = _get_local_bounds(domain)
+    local_bounds = get_local_bounds(domain)
     local_y_min, local_y_max = local_bounds["y_min"], local_bounds["y_max"]
     local_x_min, local_x_max = local_bounds["x_min"], local_bounds["x_max"]
 
@@ -204,24 +205,6 @@ def wave_generator(
         )
 
     return items
-
-
-def _get_local_bounds(domain: Domain) -> dict[str, float]:
-
-    local_points = [
-        sheet_to_local(pt, domain)
-        for pt in domain.outer_boundary
-    ]
-
-    xs = [p[0] for p in local_points]
-    ys = [p[1] for p in local_points]
-
-    return {
-        "x_min": min(xs),
-        "x_max": max(xs),
-        "y_min": min(ys),
-        "y_max": max(ys),
-    }
 
 
 def _rotate_points(

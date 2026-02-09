@@ -6,54 +6,14 @@ from typing import TYPE_CHECKING
 from generators.base import (
     ChamferParams,
     GeneratorResult,
-    LoopSelection,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.utils import extract_loops, loop_type_suffix
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
     from domains import Domain
-
-
-def _extract_loops(
-    domain: Domain,
-    selection: LoopSelection,
-) -> list[tuple[int, tuple[tuple[float, float], ...]]]:
-    all_loops = [domain.outer_boundary] + list(domain.inner_boundaries)
-    num_loops = len(all_loops)
-
-    if selection == "outer_only":
-        return [(0, domain.outer_boundary)]
-
-    elif selection == "inner_only":
-        return [
-            (i + 1, inner)
-            for i, inner in enumerate(domain.inner_boundaries)
-        ]
-
-    elif selection == "all_loops":
-        return [(i, loop) for i, loop in enumerate(all_loops)]
-
-    elif isinstance(selection, list):
-        result = []
-        for idx in selection:
-            if idx < 0 or idx >= num_loops:
-                raise ValueError(
-                    f"ChamferGenerator: loop index {idx} out of range. "
-                    f"Domain has {num_loops} loops (0=outer, 1-{num_loops-1}=inner)"
-                )
-            result.append((idx, all_loops[idx]))
-        return result
-
-    else:
-        raise ValueError(f"ChamferGenerator: invalid loop_selection: {selection}")
-
-
-def _loop_type_suffix(index: int) -> str:
-    if index == 0:
-        return "outer"
-    return f"inner_{index}"
 
 
 def chamfer_generator(
@@ -77,7 +37,7 @@ def chamfer_generator(
 
 
     try:
-        loops = _extract_loops(domain, params.loop_selection)
+        loops = extract_loops(domain, params.loop_selection, "ChamferGenerator")
     except ValueError:
         if allow_empty:
             return []
@@ -126,7 +86,7 @@ def chamfer_generator(
             shape_id=generate_shape_id(
                 shape_id_prefix,
                 loop_idx,
-                _loop_type_suffix(loop_idx),
+                loop_type_suffix(loop_idx),
             ),
         )
 

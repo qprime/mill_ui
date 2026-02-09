@@ -5,13 +5,14 @@ from typing import TYPE_CHECKING
 
 from shapely.geometry import Point
 
-from domains.transforms import local_to_sheet, sheet_to_local
+from domains.transforms import local_to_sheet
 from generators.base import (
     GeneratorResult,
     HoleGridParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.utils import get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -36,6 +37,11 @@ def hole_grid_generator(
             raise ValueError(
                 f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm"
             )
+        if len(inset_result.domains) != 1:
+            raise ValueError(
+                f"HoleGridGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
+                f"expected exactly 1. Domain may have complex geometry."
+            )
         effective_domain = inset_result.domains[0]
 
     if not validate_domain_for_generation(
@@ -47,7 +53,7 @@ def hole_grid_generator(
         return []
 
     hole_radius = params.diameter_mm / 2
-    local_bounds = _get_local_bounds(effective_domain)
+    local_bounds = get_local_bounds(effective_domain)
 
     if params.pattern == "hexagonal":
         row_spacing = params.spacing_mm * math.sqrt(3) / 2
@@ -87,22 +93,6 @@ def hole_grid_generator(
 
     return items
 
-
-def _get_local_bounds(domain: Domain) -> dict[str, float]:
-    local_points = [
-        sheet_to_local(pt, domain)
-        for pt in domain.outer_boundary
-    ]
-
-    xs = [p[0] for p in local_points]
-    ys = [p[1] for p in local_points]
-
-    return {
-        "x_min": min(xs),
-        "x_max": max(xs),
-        "y_min": min(ys),
-        "y_max": max(ys),
-    }
 
 
 def _generate_grid_points(

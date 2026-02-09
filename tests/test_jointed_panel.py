@@ -1,6 +1,6 @@
 import pytest
 from generators.panels import NotchedPanelParams, notched_panel_generator
-from assembly.notches import NotchSpec
+from assembly.panel import Edge, NotchSpec
 
 
 class TestNotchedPanelParams:
@@ -16,7 +16,7 @@ class TestNotchedPanelParams:
             width_mm=100,
             height_mm=50,
             notches=(
-                NotchSpec(edge_index=0, u_start_mm=10, u_len_mm=20, depth_mm=6),
+                NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6),
             ),
         )
         params.validate()
@@ -37,9 +37,9 @@ class TestNotchedPanelGenerator:
 
     def test_panel_with_notches_bakes_cutouts_into_profile(self):
         notches = (
-            NotchSpec(edge_index=0, u_start_mm=10, u_len_mm=20, depth_mm=6),
-            NotchSpec(edge_index=0, u_start_mm=40, u_len_mm=20, depth_mm=6),
-            NotchSpec(edge_index=0, u_start_mm=70, u_len_mm=20, depth_mm=6),
+            NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6),
+            NotchSpec(edge=Edge.BOTTOM, u_start_mm=40, u_len_mm=20, depth_mm=6),
+            NotchSpec(edge=Edge.BOTTOM, u_start_mm=70, u_len_mm=20, depth_mm=6),
         )
         params = NotchedPanelParams(
             width_mm=100,
@@ -51,8 +51,6 @@ class TestNotchedPanelGenerator:
         assert len(items) == 1
         assert items[0].feature.type == "profile"
         pts = items[0].geometry.data.get("points", [])
-        # A plain rectangle has only corner points; baking notches should introduce
-        # additional vertices along edges.
         assert len(pts) > 4
 
     def test_panel_with_part_name(self):
@@ -78,7 +76,7 @@ class TestNotchedPanelGenerator:
 
     def test_notched_panel_emits_profile_and_notch_items(self):
         notches = (
-            NotchSpec(edge_index=0, u_start_mm=20, u_len_mm=20, depth_mm=6),
+            NotchSpec(edge=Edge.BOTTOM, u_start_mm=20, u_len_mm=20, depth_mm=6),
         )
         params = NotchedPanelParams(
             width_mm=100,
@@ -93,10 +91,10 @@ class TestNotchedPanelGenerator:
 
     def test_notches_on_different_edges_emits_all_notches(self):
         notches = (
-            NotchSpec(edge_index=0, u_start_mm=20, u_len_mm=20, depth_mm=6),
-            NotchSpec(edge_index=1, u_start_mm=10, u_len_mm=15, depth_mm=6),
-            NotchSpec(edge_index=2, u_start_mm=30, u_len_mm=25, depth_mm=6),
-            NotchSpec(edge_index=3, u_start_mm=15, u_len_mm=10, depth_mm=6),
+            NotchSpec(edge=Edge.BOTTOM, u_start_mm=20, u_len_mm=20, depth_mm=6),
+            NotchSpec(edge=Edge.RIGHT, u_start_mm=10, u_len_mm=15, depth_mm=6),
+            NotchSpec(edge=Edge.TOP, u_start_mm=30, u_len_mm=25, depth_mm=6),
+            NotchSpec(edge=Edge.LEFT, u_start_mm=15, u_len_mm=10, depth_mm=6),
         )
         params = NotchedPanelParams(
             width_mm=100,
@@ -112,7 +110,7 @@ class TestNotchedPanelGenerator:
 
     def test_profile_polygon_includes_notch_inset_vertices(self):
         notches = (
-            NotchSpec(edge_index=2, u_start_mm=10, u_len_mm=30, depth_mm=8),
+            NotchSpec(edge=Edge.TOP, u_start_mm=10, u_len_mm=30, depth_mm=8),
         )
         params = NotchedPanelParams(
             width_mm=100,
@@ -122,7 +120,5 @@ class TestNotchedPanelGenerator:
         items = notched_panel_generator(params, center=(50, 25))
 
         pts = items[0].geometry.data.get("points", [])
-        # For a top-edge notch, we expect at least one vertex to be inset from the
-        # outer top edge (y = +25 in local coords).
         ys = [float(p[1]) for p in pts if isinstance(p, (tuple, list)) and len(p) >= 2]
         assert any(y < 25.0 for y in ys)

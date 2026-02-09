@@ -36,6 +36,11 @@ def flat_pocket_generator(
                 f"Domain bounds: {domain.bounds.width}mm x {domain.bounds.height}mm"
             )
 
+        if len(inset_result.domains) != 1:
+            raise ValueError(
+                f"FlatPocketGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
+                f"expected exactly 1. Domain may have complex geometry."
+            )
         effective_domain = inset_result.domains[0]
     else:
         effective_domain = domain

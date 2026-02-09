@@ -47,6 +47,11 @@ def raised_panel_generator(
         )
 
 
+    if len(field_result.domains) != 1:
+        raise ValueError(
+            f"RaisedPanelGenerator: inset produced {len(field_result.domains)} disjoint regions, "
+            f"expected exactly 1. Domain may have complex geometry."
+        )
     field_domain = field_result.domains[0]
 
     items: list[Item] = []

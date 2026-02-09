@@ -9,8 +9,8 @@ from generators.base import (
 )
 from generators.base import generate_shape_id
 from layout_ast.layout import Item, Geometry, Placement, Feature
-from assembly.notches import NotchSpec
 from assembly.notches import build_notched_polygon
+from assembly.panel import NotchSpec
 
 
 EdgeName = Literal["top", "bottom", "left", "right"]

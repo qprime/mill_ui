@@ -111,6 +111,24 @@ def _compute_corners(
     )
 
 
+def _classify_feature(hint_type: str, side: str | None) -> str:
+    if hint_type == FeatureType.PROFILE:
+        return "profiles"
+    if hint_type == FeatureType.POCKET:
+        return "pockets"
+    if hint_type == FeatureType.HOLE:
+        return "holes"
+    if hint_type in (FeatureType.ENGRAVE, FeatureType.WAVE):
+        return "engraves"
+    if hint_type == FeatureType.BEVEL:
+        return "pockets"
+    if hint_type == FeatureType.CHAMFER:
+        if side in ("inside", "outside"):
+            return "profiles"
+        return "engraves"
+    return "pockets"
+
+
 def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, Any]) -> dict[str, Any]:
     corner_tool_diameter, _ = _validate_corner_cleanup(intent)
 
@@ -138,59 +156,44 @@ def removal_intents_to_hints(
     kerf_width_mm: float = 3.175,
     min_channel_width_mm: float = 6.0,
 ) -> dict[str, Any]:
-    profiles: list[dict[str, Any]] = []
-    pockets: list[dict[str, Any]] = []
-    holes: list[dict[str, Any]] = []
-    engraves: list[dict[str, Any]] = []
+    buckets: dict[str, list[dict[str, Any]]] = {
+        "profiles": [], "pockets": [], "holes": [], "engraves": [],
+    }
     corner_cleanups: list[dict[str, Any]] = []
     all_keepouts: list[dict[str, Any]] = []
+    seen_keepouts: set[tuple[float, float, float, float]] = set()
 
     for intent in intents:
         for keepout in intent.constraints.keepouts:
-            keepout_dict = {
-                "x_min": keepout.bounds.x_min,
-                "x_max": keepout.bounds.x_max,
-                "y_min": keepout.bounds.y_min,
-                "y_max": keepout.bounds.y_max,
-                "reason": keepout.reason,
-            }
-            if keepout_dict not in all_keepouts:
-                all_keepouts.append(keepout_dict)
+            key = (keepout.bounds.x_min, keepout.bounds.x_max,
+                   keepout.bounds.y_min, keepout.bounds.y_max)
+            if key not in seen_keepouts:
+                seen_keepouts.add(key)
+                all_keepouts.append({
+                    "x_min": keepout.bounds.x_min,
+                    "x_max": keepout.bounds.x_max,
+                    "y_min": keepout.bounds.y_min,
+                    "y_max": keepout.bounds.y_max,
+                    "reason": keepout.reason,
+                })
+
         hint = removal_intent_to_hint(intent)
         hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
+        side = intent.metadata.get(HintKeys.SIDE, "outside")
+        bucket = _classify_feature(hint_type, side)
+        buckets[bucket].append(hint)
 
-        if hint_type == FeatureType.PROFILE:
-            profiles.append(hint)
-        elif hint_type == FeatureType.POCKET:
-            pockets.append(hint)
-
-            if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
-                corner_cleanups.append(_generate_corner_cleanup_hint(intent, hint))
-        elif hint_type == FeatureType.HOLE:
-            holes.append(hint)
-        elif hint_type == FeatureType.ENGRAVE:
-            engraves.append(hint)
-        elif hint_type == FeatureType.WAVE:
-            engraves.append(hint)
-        elif hint_type == FeatureType.BEVEL:
-            pockets.append(hint)
-        elif hint_type == FeatureType.CHAMFER:
-            side = intent.metadata.get(HintKeys.SIDE, "outside")
-            if side in ("inside", "outside"):
-                profiles.append(hint)
-            else:
-                engraves.append(hint)
-        else:
-            pockets.append(hint)
+        if bucket == "pockets" and HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
+            corner_cleanups.append(_generate_corner_cleanup_hint(intent, hint))
 
     return {
         HintCollectionKeys.UNITS: "mm",
         HintCollectionKeys.KERF_WIDTH_MM: float(kerf_width_mm),
         HintCollectionKeys.MIN_CHANNEL_WIDTH_MM: float(min_channel_width_mm),
-        HintCollectionKeys.PROFILES: profiles,
-        HintCollectionKeys.POCKETS: pockets,
-        HintCollectionKeys.HOLES: holes,
-        HintCollectionKeys.ENGRAVES: engraves,
+        HintCollectionKeys.PROFILES: buckets["profiles"],
+        HintCollectionKeys.POCKETS: buckets["pockets"],
+        HintCollectionKeys.HOLES: buckets["holes"],
+        HintCollectionKeys.ENGRAVES: buckets["engraves"],
         HintCollectionKeys.CORNER_CLEANUPS: corner_cleanups,
         HintCollectionKeys.KEEPOUTS: all_keepouts,
     }
@@ -271,68 +274,44 @@ def removal_intents_to_planner_input(
     kerf_width_mm: float = 3.175,
     min_channel_width_mm: float = 6.0,
 ) -> PlannerInput:
-    profiles: list[FeatureInput] = []
-    pockets: list[FeatureInput] = []
-    holes: list[FeatureInput] = []
-    engraves: list[FeatureInput] = []
+    buckets: dict[str, list[FeatureInput]] = {
+        "profiles": [], "pockets": [], "holes": [], "engraves": [],
+    }
     corner_cleanups: list[CornerCleanupInput] = []
     all_keepouts: list[KeepoutInput] = []
     seen_keepouts: set[tuple[float, float, float, float]] = set()
 
     for intent in intents:
         for keepout in intent.constraints.keepouts:
-            key = (
-                keepout.bounds.x_min,
-                keepout.bounds.x_max,
-                keepout.bounds.y_min,
-                keepout.bounds.y_max,
-            )
+            key = (keepout.bounds.x_min, keepout.bounds.x_max,
+                   keepout.bounds.y_min, keepout.bounds.y_max)
             if key not in seen_keepouts:
                 seen_keepouts.add(key)
-                all_keepouts.append(
-                    KeepoutInput(
-                        x_min=keepout.bounds.x_min,
-                        x_max=keepout.bounds.x_max,
-                        y_min=keepout.bounds.y_min,
-                        y_max=keepout.bounds.y_max,
-                        reason=keepout.reason,
-                    )
-                )
+                all_keepouts.append(KeepoutInput(
+                    x_min=keepout.bounds.x_min,
+                    x_max=keepout.bounds.x_max,
+                    y_min=keepout.bounds.y_min,
+                    y_max=keepout.bounds.y_max,
+                    reason=keepout.reason,
+                ))
 
         feature = _intent_to_feature_input(intent)
         hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
+        side = intent.metadata.get(HintKeys.SIDE, "outside")
+        bucket = _classify_feature(hint_type, side)
+        buckets[bucket].append(feature)
 
-        if hint_type == FeatureType.PROFILE:
-            profiles.append(feature)
-        elif hint_type == FeatureType.POCKET:
-            pockets.append(feature)
-            if HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
-                corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
-        elif hint_type == FeatureType.HOLE:
-            holes.append(feature)
-        elif hint_type == FeatureType.ENGRAVE:
-            engraves.append(feature)
-        elif hint_type == FeatureType.WAVE:
-            engraves.append(feature)
-        elif hint_type == FeatureType.BEVEL:
-            pockets.append(feature)
-        elif hint_type == FeatureType.CHAMFER:
-            side = intent.metadata.get(HintKeys.SIDE, "outside")
-            if side in ("inside", "outside"):
-                profiles.append(feature)
-            else:
-                engraves.append(feature)
-        else:
-            pockets.append(feature)
+        if bucket == "pockets" and HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
+            corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
 
     return PlannerInput(
         units="mm",
         kerf_width_mm=float(kerf_width_mm),
         min_channel_width_mm=float(min_channel_width_mm),
-        profiles=tuple(profiles),
-        pockets=tuple(pockets),
-        holes=tuple(holes),
-        engraves=tuple(engraves),
+        profiles=tuple(buckets["profiles"]),
+        pockets=tuple(buckets["pockets"]),
+        holes=tuple(buckets["holes"]),
+        engraves=tuple(buckets["engraves"]),
         corner_cleanups=tuple(corner_cleanups),
         keepouts=tuple(all_keepouts),
     )

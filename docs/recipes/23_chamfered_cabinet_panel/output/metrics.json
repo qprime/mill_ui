@@ -3,10 +3,10 @@
     "ir_ms": 0.02,
     "hints_ms": 0.01,
     "plan_ms": 1.36,
-    "gcode_ms": 2.83,
+    "gcode_ms": 2.85,
     "svg_ms": 0.06,
-    "total_ms": 5.35,
-    "parse_ms": 1.13
+    "total_ms": 5.4,
+    "parse_ms": 1.16
   },
   "constraint_audit": {},
   "complexity": {

@@ -153,27 +153,6 @@ def engrave_text_at_position(
     return items
 
 
-def engrave_text_generator(
-    params: EngraveTextParams,
-    position: tuple[float, float],
-    *,
-    shape_id_prefix: str = "engrave_text",
-) -> GeneratorResult:
-    params.validate()
-
-    return engrave_text_at_position(
-        text=params.text,
-        position=position,
-        height_mm=params.height_mm,
-        depth_mm=params.depth_mm,
-        font=params.font,
-        alignment=params.alignment,
-        orientation=params.orientation,
-        spacing_factor=params.spacing_factor,
-        shape_id_prefix=shape_id_prefix,
-    )
-
-
 def _create_line_item(
     start: tuple[float, float],
     end: tuple[float, float],
@@ -227,7 +206,6 @@ def engrave_number_label(
 
 
 __all__ = [
-    "engrave_text_generator",
     "engrave_text_at_position",
     "engrave_number_label",
 ]

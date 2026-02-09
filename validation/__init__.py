@@ -1,6 +1,6 @@
 
 
-from .results import ValidationResult
+from .core import ValidationResult, ValidationIssue
 from .removal_checks import (
     check_overlap,
     check_depth_feasibility,
@@ -30,6 +30,7 @@ from .runner import (
 __all__ = [
 
     "ValidationResult",
+    "ValidationIssue",
     "check_overlap",
     "check_depth_feasibility",
     "check_toolability",

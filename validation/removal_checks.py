@@ -6,7 +6,7 @@ from typing import Any
 
 from core.constants import FeatureType, MetadataKeys
 from ir.removal_intent import Bounds2D, RemovalIntent
-from validation.results import ValidationResult
+from validation.core import ValidationResult
 
 
 def check_depth_profile(

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from diagram_ir import DiagramIR, LayerIR
+from diagram_ir import DiagramIR
 from diagram_ir.shapes import Shape, Rect, Line, Circle, Polyline, Text, Path
 from validation.core import InvariantResult, Verdict
 
@@ -69,21 +69,6 @@ def check_dir_layer_names_unique(diagram: DiagramIR) -> InvariantResult:
     )
 
 
-def check_dir_layer_order_stable(diagram: DiagramIR) -> InvariantResult:
-    return InvariantResult(
-        id="DIR_LAYER_ORDER_STABLE",
-        category="structural",
-        artifact="diagram_ir",
-        description="Layers render in list order (first = back, last = front)",
-        status=Verdict.PASS,
-        checked=len(diagram.layers),
-        passed=len(diagram.layers),
-        failed=0,
-        failures=(),
-        details={"layer_order": [l.name for l in diagram.layers]},
-    )
-
-
 def check_dir_shapes_valid(diagram: DiagramIR) -> InvariantResult:
     failures = []
     checked = 0
@@ -147,7 +132,6 @@ def validate_diagram_ir_invariants(diagram: DiagramIR, available_tokens: set[str
     results = [
         check_dir_bounds_contain_layers(diagram),
         check_dir_layer_names_unique(diagram),
-        check_dir_layer_order_stable(diagram),
         check_dir_shapes_valid(diagram),
     ]
 
@@ -216,7 +200,6 @@ def _validate_shape(shape: Shape) -> list[str]:
 __all__ = [
     "check_dir_bounds_contain_layers",
     "check_dir_layer_names_unique",
-    "check_dir_layer_order_stable",
     "check_dir_shapes_valid",
     "check_dir_style_tokens_resolvable",
     "validate_diagram_ir_invariants",

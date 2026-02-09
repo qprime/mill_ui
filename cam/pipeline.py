@@ -67,7 +67,7 @@ class PipelineResult:
     warnings: list[str]
 
 
-@dataclass
+@dataclass(frozen=True)
 class PipelineTiming:
     parse_ms: float = 0.0
     ir_ms: float = 0.0
@@ -97,11 +97,10 @@ def run_pipeline(
 
     errors: list[str] = []
     warnings: list[str] = []
-    timing = PipelineTiming()
 
     ir_start = time.perf_counter()
     intents = ast_to_removal_intents(ast)
-    timing.ir_ms = (time.perf_counter() - ir_start) * 1000
+    _ir_ms = (time.perf_counter() - ir_start) * 1000
 
     constraint_audit = audit_constraints(intents)
     for error in constraint_audit.errors:
@@ -173,7 +172,7 @@ def run_pipeline(
         kerf_width_mm=kerf_mm,
         min_channel_width_mm=min_channel_width_mm,
     )
-    timing.hints_ms = (time.perf_counter() - hints_start) * 1000
+    _hints_ms = (time.perf_counter() - hints_start) * 1000
 
     stock = Stock(
         width=ast.sheet.width_mm,
@@ -193,7 +192,7 @@ def run_pipeline(
         stock=stock,
         safe_z=safe_z,
     )
-    timing.plan_ms = (time.perf_counter() - plan_start) * 1000
+    _plan_ms = (time.perf_counter() - plan_start) * 1000
 
     keepouts = hints.get("keepouts", [])
     if keepouts:
@@ -233,9 +232,10 @@ def run_pipeline(
             else:
                 total_cut_moves += 1
 
-    timing.gcode_ms = (time.perf_counter() - gcode_start) * 1000
+    _gcode_ms = (time.perf_counter() - gcode_start) * 1000
 
     svg_string: str | None = None
+    _svg_ms = 0.0
     if generate_svg:
         svg_start = time.perf_counter()
         try:
@@ -244,11 +244,15 @@ def run_pipeline(
             svg_string = render_blueprint_svg(ast_with_kerf, intents, theme=svg_theme, y_origin=y_origin)
         except Exception as e:
             warnings.append(f"SVG generation failed: {e}")
-        timing.svg_ms = (time.perf_counter() - svg_start) * 1000
+        _svg_ms = (time.perf_counter() - svg_start) * 1000
 
-    timing.total_ms = (
-        timing.ir_ms + timing.hints_ms + timing.plan_ms +
-        timing.gcode_ms + timing.svg_ms
+    timing = PipelineTiming(
+        ir_ms=_ir_ms,
+        hints_ms=_hints_ms,
+        plan_ms=_plan_ms,
+        gcode_ms=_gcode_ms,
+        svg_ms=_svg_ms,
+        total_ms=_ir_ms + _hints_ms + _plan_ms + _gcode_ms + _svg_ms,
     )
 
     total_gcode_size = sum(len(gc) for gc in gcode_dict.values())

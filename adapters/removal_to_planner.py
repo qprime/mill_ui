@@ -83,38 +83,42 @@ def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
     return hint
 
 
-def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, Any]) -> dict[str, Any]:
+def _validate_corner_cleanup(intent: RemovalIntent) -> tuple[float, str]:
     corner_tool_diameter = intent.metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM]
     shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
-
 
     if corner_tool_diameter <= 0.0:
         raise ValueError(
             f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}"
         )
 
-
     if not ShapeType.is_rect(shape):
         raise ValueError(f"Corner cleanup only supported for rectangular pockets, got: {shape}")
 
-
-    geometry = pocket_hint[HintKeys.GEOMETRY]
-    w_mm = geometry[GeometryKeys.W_MM]
-    h_mm = geometry[GeometryKeys.H_MM]
-    cx, cy = pocket_hint[HintKeys.CENTER_XY_MM]
-    depth_mm = pocket_hint[HintKeys.DEPTH_MM]
-    start_depth_mm = pocket_hint.get(HintKeys.START_DEPTH_MM, 0.0)
+    return corner_tool_diameter, shape
 
 
+def _compute_corners(
+    cx: float, cy: float, w_mm: float, h_mm: float,
+) -> tuple[tuple[float, float], ...]:
     half_w = w_mm / 2.0
     half_h = h_mm / 2.0
-
-    corners = [
+    return (
         (cx - half_w, cy - half_h),
         (cx + half_w, cy - half_h),
         (cx + half_w, cy + half_h),
         (cx - half_w, cy + half_h),
-    ]
+    )
+
+
+def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, Any]) -> dict[str, Any]:
+    corner_tool_diameter, _ = _validate_corner_cleanup(intent)
+
+    geometry = pocket_hint[HintKeys.GEOMETRY]
+    cx, cy = pocket_hint[HintKeys.CENTER_XY_MM]
+    corners = _compute_corners(
+        cx, cy, geometry[GeometryKeys.W_MM], geometry[GeometryKeys.H_MM],
+    )
 
     return {
         HintKeys.ID: f"{pocket_hint[HintKeys.ID]}_corners",
@@ -122,10 +126,10 @@ def _generate_corner_cleanup_hint(intent: RemovalIntent, pocket_hint: dict[str, 
         HintKeys.SHAPE: ShapeType.RECT,
         HintKeys.GEOMETRY: geometry,
         HintKeys.CENTER_XY_MM: (cx, cy),
-        HintKeys.CORNERS: corners,
+        HintKeys.CORNERS: list(corners),
         HintKeys.CORNER_TOOL_DIAMETER_MM: corner_tool_diameter,
-        HintKeys.DEPTH_MM: depth_mm,
-        HintKeys.START_DEPTH_MM: start_depth_mm,
+        HintKeys.DEPTH_MM: pocket_hint[HintKeys.DEPTH_MM],
+        HintKeys.START_DEPTH_MM: pocket_hint.get(HintKeys.START_DEPTH_MM, 0.0),
     }
 
 
@@ -240,29 +244,13 @@ def _generate_corner_cleanup_input(
     intent: RemovalIntent,
     feature: FeatureInput,
 ) -> CornerCleanupInput:
-    corner_tool_diameter = intent.metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM]
-    shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
+    corner_tool_diameter, _ = _validate_corner_cleanup(intent)
 
-    if corner_tool_diameter <= 0.0:
-        raise ValueError(
-            f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}"
-        )
-
-    if not ShapeType.is_rect(shape):
-        raise ValueError(f"Corner cleanup only supported for rectangular pockets, got: {shape}")
-
-    w_mm = feature.geometry.data.get(GeometryKeys.W_MM, 0.0)
-    h_mm = feature.geometry.data.get(GeometryKeys.H_MM, 0.0)
     cx, cy = feature.center_xy_mm
-
-    half_w = w_mm / 2.0
-    half_h = h_mm / 2.0
-
-    corners = (
-        (cx - half_w, cy - half_h),
-        (cx + half_w, cy - half_h),
-        (cx + half_w, cy + half_h),
-        (cx - half_w, cy + half_h),
+    corners = _compute_corners(
+        cx, cy,
+        feature.geometry.data.get(GeometryKeys.W_MM, 0.0),
+        feature.geometry.data.get(GeometryKeys.H_MM, 0.0),
     )
 
     return CornerCleanupInput(

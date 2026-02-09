@@ -7,8 +7,6 @@ from cam.ops.drill import drill_peck
 from cam.ops.engrave import engrave_lines
 from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.path.strategies import pocket_then_finish_profile
-from cam.planner.registry import register_strategy
-
 from .profile import circle_shape_mm, ensure_center, rect_shape
 from .tools import (
     ToolSelection,
@@ -303,10 +301,6 @@ def plan_corner_cleanup_passes(
 
             record.add_moves(moves, increment=1)
 
-
-register_strategy("pocket", "rect_raster", pocket_then_finish_profile)
-register_strategy("pocket", "circle_concentric", pocket_circle_concentric)
-register_strategy("pocket", "region_rect_raster", pocket_region_rect_raster)
 
 
 __all__ = [

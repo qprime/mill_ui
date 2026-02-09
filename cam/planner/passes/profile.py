@@ -15,8 +15,6 @@ from cam.path.strategies import (
     onion_skin_then_finish,
     profile_outline_with_tabs,
 )
-from cam.planner.registry import register_strategy
-
 from .tools import ToolSelection, stepdown_for_tool
 
 
@@ -150,9 +148,6 @@ def _profile_plain(
     return profile_outline(shape, setup, depth_mm, step_down=stepdown_for_tool(tool))
 
 
-register_strategy("profile", "onion_skin", onion_skin_then_finish)
-register_strategy("profile", "tabs", profile_outline_with_tabs)
-register_strategy("profile", "plain", _profile_plain)
 
 
 __all__ = [

@@ -59,21 +59,9 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         ConstraintSupport.NOT_IMPLEMENTED,
         note="Uses global safe_z",
     ),
-    "allowance.inside": ConstraintStatus(
+    "allowance": ConstraintStatus(
         ConstraintSupport.VALIDATED_ONLY,
-        note="May be applied upstream by generators",
-    ),
-    "allowance.outside": ConstraintStatus(
-        ConstraintSupport.VALIDATED_ONLY,
-        note="May be applied upstream by generators",
-    ),
-    "allowance.on": ConstraintStatus(
-        ConstraintSupport.VALIDATED_ONLY,
-        note="May be applied upstream by generators",
-    ),
-    "allowance.kerf_compensation": ConstraintStatus(
-        ConstraintSupport.VALIDATED_ONLY,
-        note="Applied via global kerf_width_mm",
+        note="Applied upstream by generators or via global kerf_width_mm",
     ),
 }
 
@@ -166,7 +154,7 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         ("safe_z_mm_custom", "constraints.safe_z_mm"),
         ("v_carve", "depth_profile.mode.v_carve"),
         ("linear_gradient", "depth_profile.mode.linear_gradient"),
-        ("allowance_nonzero", "allowance.inside"),
+        ("allowance_nonzero", "allowance"),
     ]
 
     for count_key, capability_key in constraint_mapping:

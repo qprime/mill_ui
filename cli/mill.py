@@ -204,29 +204,25 @@ def collect_input_files(project: str | None, input_arg: str | None) -> list[Path
     sys.exit(1)
 
 
-def process_file(input_path: Path, output_dir: Path, args) -> None:
-    input_name = input_path.name.lower()
-    if input_name.endswith(".json"):
-        ast = LayoutAST.from_json(str(input_path))
-    elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
-        input_text = input_path.read_text(encoding="utf-8")
-        comp_ast = parse_pml_yaml(input_text)
-        ast = resolve_layout(comp_ast)
-    else:
-        print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
-        return
-
-    print(f"Compiling: {input_path.name}", file=sys.stderr)
-    print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
-    print(f"  Items: {len(ast.items)}", file=sys.stderr)
-
+def _run_and_write(
+    ast: LayoutAST,
+    output_dir: Path,
+    job_name: str,
+    source_path: Path,
+    *,
+    kerf_mm: float,
+    theme: str,
+    y_origin: str,
+    generate_svg: bool,
+    update_header: bool = True,
+) -> None:
     result = run_pipeline(
         ast,
-        kerf_mm=args.kerf,
+        kerf_mm=kerf_mm,
         tool_db=DEFAULT_TOOL_DB,
-        generate_svg=not args.no_svg,
-        svg_theme=args.theme,
-        y_origin=args.y_origin,
+        generate_svg=generate_svg,
+        svg_theme=theme,
+        y_origin=y_origin,
     )
 
     if result.errors:
@@ -239,13 +235,11 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         for warning in result.warnings:
             print(f"  - {warning}", file=sys.stderr)
 
-    job_name = input_path.stem
-
     build_params = {
-        "source": input_path.name,
-        "kerf_mm": args.kerf,
-        "theme": args.theme,
-        "y_origin": args.y_origin,
+        "source": source_path.name,
+        "kerf_mm": kerf_mm,
+        "theme": theme,
+        "y_origin": y_origin,
     }
 
     outputs = write_pipeline_outputs(
@@ -262,8 +256,33 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
     print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
 
-    if (input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")) and result.gcode:
-        update_file_header(input_path)
+    if update_header and result.gcode:
+        update_file_header(source_path)
+
+
+def process_file(input_path: Path, output_dir: Path, args) -> None:
+    input_name = input_path.name.lower()
+    if input_name.endswith(".json"):
+        ast = LayoutAST.from_json(str(input_path))
+    elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
+        input_text = input_path.read_text(encoding="utf-8")
+        comp_ast = parse_pml_yaml(input_text)
+        ast = resolve_layout(comp_ast)
+    else:
+        print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
+        return
+
+    print(f"Compiling: {input_path.name}", file=sys.stderr)
+    print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
+    print(f"  Items: {len(ast.items)}", file=sys.stderr)
+
+    is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
+    _run_and_write(
+        ast, output_dir, input_path.stem, input_path,
+        kerf_mm=args.kerf, theme=args.theme,
+        y_origin=args.y_origin, generate_svg=not args.no_svg,
+        update_header=is_pml,
+    )
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
@@ -286,54 +305,16 @@ def process_recipe(recipe_dir: Path, args) -> None:
     print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
     print(f"  Items: {len(ast.items)}", file=sys.stderr)
 
-    result = run_pipeline(
-        ast,
-        kerf_mm=kerf,
-        tool_db=DEFAULT_TOOL_DB,
-        generate_svg=not args.no_svg,
-        svg_theme=theme,
-        y_origin=args.y_origin,
-    )
-
-    if result.errors:
-        print(f"\nErrors:", file=sys.stderr)
-        for error in result.errors:
-            print(f"  - {error}", file=sys.stderr)
-
-    if result.warnings:
-        print(f"\nWarnings:", file=sys.stderr)
-        for warning in result.warnings:
-            print(f"  - {warning}", file=sys.stderr)
-
     import shutil
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    job_name = recipe_dir.name
-
-    build_params = {
-        "source": source.name,
-        "kerf_mm": kerf,
-        "theme": theme,
-        "y_origin": args.y_origin,
-    }
-
-    outputs = write_pipeline_outputs(
-        result,
-        output_dir,
-        job_name,
-        clean_output_dir=False,
-        build_params=build_params,
+    _run_and_write(
+        ast, output_dir, recipe_dir.name, source,
+        kerf_mm=kerf, theme=theme,
+        y_origin=args.y_origin, generate_svg=not args.no_svg,
     )
-
-    print(f"  Outputs:", file=sys.stderr)
-    for key, path in outputs.items():
-        print(f"    {path.name}", file=sys.stderr)
-
-    print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
-
-    update_file_header(source)
 
 
 def main():

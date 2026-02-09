@@ -86,6 +86,18 @@ def parse_dimension_or_through(value: Any) -> float | str:
     return parse_dimension(value)
 
 
+def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
+    return InterfaceConfig(
+        joinery=data.get("joinery", default_joinery),
+        finger_width_mm=parse_dimension(data["finger_width"]) if "finger_width" in data else None,
+        finger_count=data.get("finger_count"),
+        clearance_mm=parse_dimension(data.get("clearance", "0.12mm")),
+        dado_depth_mm=parse_dimension(data["dado_depth"]) if "dado_depth" in data else None,
+        inset_mm=parse_dimension(data.get("inset", "0mm")),
+        receiving=data.get("receiving", "a"),
+    )
+
+
 def parse_children(children_data: list[dict] | None, path: str = "") -> tuple[Any, ...]:
     if not children_data:
         return ()
@@ -515,15 +527,7 @@ def parse_node(data: dict, path: str = "") -> Any:
                 if isinstance(iface_data, str):
                     interfaces[iface_name] = iface_data
                 elif isinstance(iface_data, dict):
-                    interfaces[iface_name] = InterfaceConfig(
-                        joinery=iface_data.get("joinery", "butt"),
-                        finger_width_mm=parse_dimension(iface_data["finger_width"]) if "finger_width" in iface_data else None,
-                        finger_count=iface_data.get("finger_count"),
-                        clearance_mm=parse_dimension(iface_data.get("clearance", "0.12mm")),
-                        dado_depth_mm=parse_dimension(iface_data["dado_depth"]) if "dado_depth" in iface_data else None,
-                        inset_mm=parse_dimension(iface_data.get("inset", "0mm")),
-                        receiving=iface_data.get("receiving", "a"),
-                    )
+                    interfaces[iface_name] = _parse_interface_config(iface_data)
 
         top_raw = node_data.get("top")
         top = None
@@ -532,15 +536,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         elif isinstance(top_raw, str):
             top = top_raw
         elif isinstance(top_raw, dict):
-            top = InterfaceConfig(
-                joinery=top_raw.get("joinery", "butt"),
-                finger_width_mm=parse_dimension(top_raw["finger_width"]) if "finger_width" in top_raw else None,
-                finger_count=top_raw.get("finger_count"),
-                clearance_mm=parse_dimension(top_raw.get("clearance", "0.12mm")),
-                dado_depth_mm=parse_dimension(top_raw["dado_depth"]) if "dado_depth" in top_raw else None,
-                inset_mm=parse_dimension(top_raw.get("inset", "0mm")),
-                receiving=top_raw.get("receiving", "a"),
-            )
+            top = _parse_interface_config(top_raw)
 
         bottom_raw = node_data.get("bottom", "captured")
         bottom: str | InterfaceConfig | None = "captured"
@@ -549,15 +545,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         elif isinstance(bottom_raw, str):
             bottom = bottom_raw
         elif isinstance(bottom_raw, dict):
-            bottom = InterfaceConfig(
-                joinery=bottom_raw.get("joinery", "captured"),
-                finger_width_mm=parse_dimension(bottom_raw["finger_width"]) if "finger_width" in bottom_raw else None,
-                finger_count=bottom_raw.get("finger_count"),
-                clearance_mm=parse_dimension(bottom_raw.get("clearance", "0.12mm")),
-                dado_depth_mm=parse_dimension(bottom_raw["dado_depth"]) if "dado_depth" in bottom_raw else None,
-                inset_mm=parse_dimension(bottom_raw.get("inset", "0mm")),
-                receiving=bottom_raw.get("receiving", "a"),
-            )
+            bottom = _parse_interface_config(bottom_raw, default_joinery="captured")
 
         back_raw = node_data.get("back")
         back: str | InterfaceConfig | None = None
@@ -566,15 +554,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         elif isinstance(back_raw, str):
             back = back_raw
         elif isinstance(back_raw, dict):
-            back = InterfaceConfig(
-                joinery=back_raw.get("joinery", "captured"),
-                finger_width_mm=parse_dimension(back_raw["finger_width"]) if "finger_width" in back_raw else None,
-                finger_count=back_raw.get("finger_count"),
-                clearance_mm=parse_dimension(back_raw.get("clearance", "0.12mm")),
-                dado_depth_mm=parse_dimension(back_raw["dado_depth"]) if "dado_depth" in back_raw else None,
-                inset_mm=parse_dimension(back_raw.get("inset", "0mm")),
-                receiving=back_raw.get("receiving", "a"),
-            )
+            back = _parse_interface_config(back_raw, default_joinery="captured")
 
         grid_raw = node_data.get("grid")
         grid = None
@@ -587,30 +567,14 @@ def parse_node(data: dict, path: str = "") -> Any:
         if isinstance(shelf_joinery_raw, str):
             shelf_joinery = shelf_joinery_raw
         elif isinstance(shelf_joinery_raw, dict):
-            shelf_joinery = InterfaceConfig(
-                joinery=shelf_joinery_raw.get("joinery", "captured"),
-                finger_width_mm=parse_dimension(shelf_joinery_raw["finger_width"]) if "finger_width" in shelf_joinery_raw else None,
-                finger_count=shelf_joinery_raw.get("finger_count"),
-                clearance_mm=parse_dimension(shelf_joinery_raw.get("clearance", "0.12mm")),
-                dado_depth_mm=parse_dimension(shelf_joinery_raw["dado_depth"]) if "dado_depth" in shelf_joinery_raw else None,
-                inset_mm=parse_dimension(shelf_joinery_raw.get("inset", "0mm")),
-                receiving=shelf_joinery_raw.get("receiving", "a"),
-            )
+            shelf_joinery = _parse_interface_config(shelf_joinery_raw, default_joinery="captured")
 
         partition_joinery_raw = node_data.get("partition_joinery", "captured")
         partition_joinery: str | InterfaceConfig = "captured"
         if isinstance(partition_joinery_raw, str):
             partition_joinery = partition_joinery_raw
         elif isinstance(partition_joinery_raw, dict):
-            partition_joinery = InterfaceConfig(
-                joinery=partition_joinery_raw.get("joinery", "captured"),
-                finger_width_mm=parse_dimension(partition_joinery_raw["finger_width"]) if "finger_width" in partition_joinery_raw else None,
-                finger_count=partition_joinery_raw.get("finger_count"),
-                clearance_mm=parse_dimension(partition_joinery_raw.get("clearance", "0.12mm")),
-                dado_depth_mm=parse_dimension(partition_joinery_raw["dado_depth"]) if "dado_depth" in partition_joinery_raw else None,
-                inset_mm=parse_dimension(partition_joinery_raw.get("inset", "0mm")),
-                receiving=partition_joinery_raw.get("receiving", "a"),
-            )
+            partition_joinery = _parse_interface_config(partition_joinery_raw, default_joinery="captured")
 
         return AssemblyDecl(
             type=assembly_type,

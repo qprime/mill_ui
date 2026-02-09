@@ -766,9 +766,6 @@ class _GCodeParser:
             )
 
 
-extract_gcode_metrics_from_file = extract_gcode_metrics
-
-
 def detect_tabs_from_content(
     gcode_content: str,
     z_tolerance: float = 0.01,

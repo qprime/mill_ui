@@ -88,7 +88,7 @@ Check before implementing — these already exist:
 | Validate at IR level | `validation/removal_checks.py` |
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |
-| Shaker door template | `templates/shaker.py` |
+| Shaker door template | `templates/` (see `docs/recipes/21_simple_shaker_door`) |
 | Profile with tabs | `pml/yaml_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
@@ -103,7 +103,7 @@ Check before implementing — these already exist:
 - Add comments to code
 - Add generators without corresponding PML syntax
 - Create projects that require Python build scripts instead of PML/nest files
-- Put recipes in the system configured "projects" folder.  See docs/task.md for running/implementing recipes.
+- Put recipes in the system configured "projects" folder.  See docs/tasks.md for running/implementing recipes.
 ## PML-First Principle
 
 All machining features must be expressible in PML. Python-level generators are implementation details—incomplete without corresponding PML syntax.
@@ -157,6 +157,9 @@ Before modifying any subsystem, read its invariant file:
 | cam/planner/* | [docs/invariants/planner.md](docs/invariants/planner.md) |
 | cam/* | [docs/invariants/gcode.md](docs/invariants/gcode.md) |
 | nesting/* | [docs/invariants/nesting.md](docs/invariants/nesting.md) |
+| assembly/beams* | [docs/invariants/beams.md](docs/invariants/beams.md) |
+| assembly/beds* | [docs/invariants/beds.md](docs/invariants/beds.md) |
+| templates/* | [docs/invariants/components.md](docs/invariants/components.md) |
 | All geometry | [docs/invariants/coordinates.md](docs/invariants/coordinates.md) |
 
 ## Supplementary Docs
@@ -175,7 +178,7 @@ Load these when the task requires them:
 | [docs/layout_primitives.md](docs/layout_primitives.md) | Layout manager properties |
 | [pml/syntax_spec.md](pml/syntax_spec.md) | PML language syntax |
 | [pml/nest_syntax_spec.md](pml/nest_syntax_spec.md) | Nesting job syntax |
-| [docs/recipes/](docs/recipes/) | Worked examples (01-32) |
+| [docs/recipes/](docs/recipes/) | Worked examples (01-55) |
 
 ## When Stuck
 

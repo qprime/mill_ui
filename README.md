@@ -330,7 +330,7 @@ mill_ui/
 |----------|----------|
 | parse_compositional_pml() | Well tested |
 | resolve_layout() | Well tested |
-| ast_to_removal_intents() | No direct tests |
+| ast_to_removal_intents() | Tested (test_ast_to_removal.py) |
 | item_to_removal_intent() | Tested |
 | removal_intents_to_hints() | Well tested |
 | IR validation functions | Tested |
@@ -341,15 +341,7 @@ mill_ui/
 
 ## Known Issues
 
-1. `cad/export/step.py`, `svg.py`: Import paths reference non-existent modules.
-2. `cli/introspect.py`: Referenced in tests but not implemented.
-3. `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles.
-4. `ast_to_removal_intents()` has no direct tests.
-
-**Recommended actions:**
-1. Implement cli/introspect.py or remove test dependency.
-2. Add direct tests for ast_to_removal_intents().
-3. Fix CAD export import errors.
+1. `frame` auto-generates outer profile. Using `rect outer profile` + `frame` creates two profiles.
 
 ---
 

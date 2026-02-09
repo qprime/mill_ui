@@ -477,6 +477,35 @@ Ruler marks on edges:
     label_height: 4mm
 ```
 
+#### MeasurementGrid
+
+Full measurement grid with tick marks on all edges and optional labels:
+
+```yaml
+- MeasurementGrid:
+    unit: metric         # metric | imperial | custom
+    depth: 0.5mm
+    minor_ticks: true
+    labels: true
+    label_height: 3mm
+    label_interval: 1
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| unit | no | metric | Preset spacing (metric: 10mm major/1mm minor) |
+| major_spacing | no | - | Custom major tick spacing |
+| minor_spacing | no | - | Custom minor tick spacing |
+| minor_length | no | 3mm | Minor tick mark length |
+| major_length | no | 6mm | Major tick mark length |
+| depth | no | 0.5mm | Engrave depth |
+| minor_ticks | no | true | Include minor tick marks |
+| labels | no | false | Include numeric labels |
+| label_height | no | 3mm | Label text height |
+| label_offset | no | - | Label offset from edge |
+| label_interval | no | 1 | Label every Nth major tick |
+| label_start | no | 0 | Starting label value |
+
 #### GridLines
 
 Interior grid lines spanning edge-to-edge (graph paper / cutting mat style):
@@ -734,6 +763,49 @@ Ring by subtracting inner from outer:
     children:
       - Pocket: {depth: 5mm}
 ```
+
+#### Place
+
+Container with optional layout manager for positioning children:
+
+```yaml
+- Place:
+    layout:
+      Grid: {rows: 2, cols: 3, gap: 10mm}
+    children:
+      - Circle: {diameter: 20mm, feature: {type: hole, depth: through}}
+```
+
+#### Edge
+
+Edge treatment specification for profile cross-section callouts:
+
+```yaml
+- Edge:
+    treatment: chamfer
+    distance: 5mm
+    rough_allowance: 1mm
+    finish_allowance: 0.2mm
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| treatment | yes | - | Treatment type identifier |
+| rough_allowance | no | - | Rough pass allowance |
+| finish_allowance | no | - | Finish pass allowance |
+| radius | no | - | Radius for rounded treatments |
+| distance | no | - | Distance parameter |
+
+#### Engrave
+
+Shorthand for an engrave feature:
+
+```yaml
+- Engrave:
+    depth: 0.5mm
+```
+
+Equivalent to `feature: {type: engrave, depth: 0.5mm}` on the parent shape.
 
 #### Keepout
 

@@ -172,8 +172,8 @@ class GeometricPattern:
     x_mm: float
     y_mm: float
     pattern_type: str         # "grid", "diamond", "chevron", etc.
-    params: dict              # Pattern-specific parameters
-    depth_mm: float
+    params: dict[str, Any] = field(default_factory=dict)
+    depth_mm: float = 1.0
     face: Literal["front", "back"] = "front"
     stage: MachiningStage = "strip"
 
@@ -192,18 +192,18 @@ class Tenon:
     width_mm: float           # Tenon width (subset of beam width)
     height_mm: float          # Tenon height (subset of beam thickness)
     center_offset_mm: float = 0.0  # Offset from beam center
-    layers: Literal["center", "outer", "all", tuple[int, ...]] = "center"
+    layers: Literal["center", "outer", "all"] | tuple[int, ...] = "center"
 
 @dataclass(frozen=True)
 class EndCap:
     end: Literal["left", "right"]
     profile: str              # "square", "rounded", "chamfered", etc.
-    params: dict = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 @dataclass(frozen=True)
 class EndProfile:
     end: Literal["left", "right"]
-    contour: list[tuple[float, float]]  # Profile points
+    contour: tuple[tuple[float, float], ...]  # Profile points
 
 EndFeature = Tenon | EndCap | EndProfile
 ```
@@ -260,7 +260,14 @@ class EdgeNotch:
     layers: Literal["outer", "all"] = "all"  # notches typically structural, all layers
     stage: MachiningStage = "strip"
 
-EdgeFeature = Fillet | Chamfer | Rabbet | EdgeDado | EdgeNotch
+@dataclass(frozen=True)
+class EdgeContour:
+    edge: Literal["top", "bottom"]
+    contour: tuple[tuple[float, float], ...]
+    layers: Literal["outer", "all"] = "outer"
+    stage: MachiningStage = "strip"
+
+EdgeFeature = Fillet | Chamfer | Rabbet | EdgeDado | EdgeNotch | EdgeContour
 ```
 
 ---

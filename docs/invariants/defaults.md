@@ -58,10 +58,10 @@
 
 | Parameter | Default | Location |
 |-----------|---------|----------|
-| loop_selection | "outer_only" | generators/base.py |
-| tab_width_mm | 10.0 mm | generators/base.py (ProfileParams) |
-| tab_height_mm | 3.0 mm | generators/base.py (ProfileParams) |
-| tool_width_mm | 3.175 mm | generators/base.py (WaveParams) |
+| loop_selection | "outer_only" | generators/params/loop.py (ProfileParams) |
+| tab_width_mm | 10.0 mm | generators/params/loop.py (ProfileParams) |
+| tab_height_mm | 3.0 mm | generators/params/loop.py (ProfileParams) |
+| tool_width_mm | 3.175 mm | generators/params/loop.py (WaveParams) |
 
 ---
 

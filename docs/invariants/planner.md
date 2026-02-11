@@ -86,7 +86,7 @@ If safety-critical constraints are present but not honored, the build fails with
 When implementing support for a new constraint:
 
 1. Update `PlannerInput` dataclass with new field
-2. Update `removal_intent_to_planner_input()` to extract constraint
+2. Update `removal_intents_to_planner_input()` to extract constraint
 3. Update relevant planner pass to honor constraint
 4. Add post-plan verification if applicable
 5. Update this invariant file's support matrix

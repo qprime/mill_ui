@@ -31,9 +31,10 @@
 
 | Interface Type | Valid Joinery |
 |----------------|---------------|
-| EDGE | Finger, Butt, Captured |
-| CAP | Finger, Butt, Captured |
-| INTERNAL | HalfLap, Butt |
+| SIDE_TO_SIDE | Finger, Butt, Captured |
+| TOP | Finger, Butt, Captured |
+| BOTTOM | Finger, Butt, Captured |
+| INTERNAL | HalfLap, Butt, Captured |
 
 ---
 

@@ -47,6 +47,22 @@ def _safe_job_dir(output_dir: Path, job_name: str, timestamp: str) -> Path:
     return job_dir
 
 
+_COMPOSITIONAL_KEYWORDS = ("component", "frame", "inset", "grid", "split")
+
+
+def _parse_pml_auto(pml_text: str, compositional: bool = False) -> LayoutAST:
+    if compositional:
+        comp_ast = parse_pml_yaml(pml_text)
+        return resolve_layout(comp_ast)
+    try:
+        return parse_pml(pml_text)
+    except PMLParseError:
+        if any(kw in pml_text for kw in _COMPOSITIONAL_KEYWORDS):
+            comp_ast = parse_pml_yaml(pml_text)
+            return resolve_layout(comp_ast)
+        raise
+
+
 MILL_UI_INSTRUCTIONS = """
 You are a CAM (Computer-Aided Manufacturing) assistant for CNC router projects. You help users create panel layouts and generate G-code toolpaths.
 
@@ -192,19 +208,7 @@ def compile_pml(pml_text: str, job_name: str = "job", compositional: bool = Fals
     output_dir = ensure_output_dir()
 
     try:
-        if compositional:
-            comp_ast = parse_pml_yaml(pml_text)
-            ast = resolve_layout(comp_ast)
-        else:
-            try:
-                ast = parse_pml(pml_text)
-            except PMLParseError:
-                if any(kw in pml_text for kw in ["component", "frame", "inset", "grid", "split"]):
-                    comp_ast = parse_pml_yaml(pml_text)
-                    ast = resolve_layout(comp_ast)
-                else:
-                    raise
-
+        ast = _parse_pml_auto(pml_text, compositional)
         results = _run_cam_pipeline(ast, job_name, output_dir)
         return json.dumps(results, indent=2)
 
@@ -317,18 +321,7 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
     }
 
     try:
-        if compositional:
-            comp_ast = parse_pml_yaml(pml_text)
-            ast = resolve_layout(comp_ast)
-        else:
-            try:
-                ast = parse_pml(pml_text)
-            except PMLParseError:
-                if any(kw in pml_text for kw in ["component", "frame", "inset", "grid", "split"]):
-                    comp_ast = parse_pml_yaml(pml_text)
-                    ast = resolve_layout(comp_ast)
-                else:
-                    raise
+        ast = _parse_pml_auto(pml_text, compositional)
 
         results["info"] = {
             "sheet": {

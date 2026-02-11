@@ -1,9 +1,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+
+from nesting.types import FreeRect, PlacementResult
 
 
 class MaxRectsHeuristic(Enum):
@@ -11,55 +12,6 @@ class MaxRectsHeuristic(Enum):
     BEST_SHORT_SIDE_FIT = "bssf"
     BEST_LONG_SIDE_FIT = "blsf"
     CONTACT_POINT = "cp"
-
-
-@dataclass
-class FreeRect:
-    x: float
-    y: float
-    width: float
-    height: float
-
-    @property
-    def area(self) -> float:
-        return self.width * self.height
-
-    @property
-    def right(self) -> float:
-        return self.x + self.width
-
-    @property
-    def top(self) -> float:
-        return self.y + self.height
-
-    def can_fit(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
-        needed_w = part_w + gap
-        needed_h = part_h + gap
-        return self.width >= needed_w and self.height >= needed_h
-
-    def intersects(self, other: "FreeRect") -> bool:
-        return not (
-            self.right <= other.x or
-            other.right <= self.x or
-            self.top <= other.y or
-            other.top <= self.y
-        )
-
-    def contains(self, other: "FreeRect") -> bool:
-        return (
-            self.x <= other.x and
-            self.y <= other.y and
-            self.right >= other.right and
-            self.top >= other.top
-        )
-
-
-@dataclass
-class PlacementResult:
-    x: float
-    y: float
-    rotated: bool
-    metadata: Any
 
 
 def _score_baf(rect: FreeRect, part_w: float, part_h: float, gap: float) -> float:

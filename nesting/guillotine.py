@@ -1,39 +1,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
-
-@dataclass
-class FreeRect:
-
-    x: float
-    y: float
-    width: float
-    height: float
-
-    @property
-    def area(self) -> float:
-        return self.width * self.height
-
-    def can_fit(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
-
-        needed_w = part_w + gap
-        needed_h = part_h + gap
-        return self.width >= needed_w and self.height >= needed_h
-
-    def can_fit_rotated(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
-        return self.can_fit(part_h, part_w, gap)
-
-
-@dataclass
-class PlacementResult:
-
-    x: float
-    y: float
-    rotated: bool
-    metadata: Any
+from nesting.types import FreeRect, PlacementResult
 
 
 def _score_fit(rect: FreeRect, part_w: float, part_h: float, gap: float) -> float:

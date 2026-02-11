@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
@@ -10,22 +9,15 @@ from pml.revision_header import update_file_header, format_pml_header
 from resolution.layout_resolver import resolve_layout
 from layout_ast.layout import LayoutAST
 from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
-from cli.project import add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir
+from cli.project import (
+    add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir,
+    parse_sheet_dimensions, DEFAULT_MARGIN_MM, DEFAULT_KERF_MM,
+)
 
 RECIPE_DEFAULTS = {
     "kerf": 3.175,
     "theme": "dark",
 }
-
-DEFAULT_MARGIN_MM = 10.0
-DEFAULT_KERF_MM = 6.35
-
-
-def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
-    match = re.match(r"^(\d+(?:\.\d+)?)[xX](\d+(?:\.\d+)?)$", sheet_str)
-    if not match:
-        raise ValueError(f"Invalid sheet format: {sheet_str}. Expected WxH (e.g., 1220x1220)")
-    return float(match.group(1)), float(match.group(2))
 
 
 def generate_layout_scaffold(

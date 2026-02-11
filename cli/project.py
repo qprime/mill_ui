@@ -1,8 +1,20 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
+
+DEFAULT_MARGIN_MM = 10.0
+DEFAULT_KERF_MM = 6.35
+
+
+def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
+    match = re.match(r"^(\d+(?:\.\d+)?)[xX](\d+(?:\.\d+)?)$", sheet_str)
+    if not match:
+        raise ValueError(f"Invalid sheet format: {sheet_str}. Expected WxH (e.g., 1220x1220)")
+    return float(match.group(1)), float(match.group(2))
+
 
 PROJECTS_BASE = Path(os.environ.get(
     "MILL_UI_PROJECTS",

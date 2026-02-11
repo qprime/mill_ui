@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from domains.domain import Bounds2D
+
 
 @dataclass(frozen=True)
 class DepthProfile:
@@ -68,35 +70,6 @@ class DepthProfile:
         if self.v_angle_deg is not None:
             result["v_angle_deg"] = self.v_angle_deg
         return result
-
-
-@dataclass(frozen=True)
-class Bounds2D:
-    x_min: float
-    x_max: float
-    y_min: float
-    y_max: float
-
-    def __post_init__(self):
-        if self.x_max < self.x_min:
-            raise ValueError(f"x_max ({self.x_max}) < x_min ({self.x_min})")
-        if self.y_max < self.y_min:
-            raise ValueError(f"y_max ({self.y_max}) < y_min ({self.y_min})")
-
-    @property
-    def width(self) -> float:
-        return self.x_max - self.x_min
-
-    @property
-    def height(self) -> float:
-        return self.y_max - self.y_min
-
-    @property
-    def center(self) -> tuple[float, float]:
-        return (
-            (self.x_min + self.x_max) / 2.0,
-            (self.y_min + self.y_max) / 2.0,
-        )
 
 
 @dataclass(frozen=True)

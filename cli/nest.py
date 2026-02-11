@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 import time
 from pathlib import Path
@@ -14,17 +13,10 @@ from pml.nest_parser import nest_job_to_api_params
 from pml.formatter import format_pml
 from pml.revision_header import format_pml_header
 from nesting import nest_and_generate, nest_parts
-from cli.project import add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir
-
-DEFAULT_MARGIN_MM = 10.0
-DEFAULT_KERF_MM = 6.35
-
-
-def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
-    match = re.match(r"^(\d+(?:\.\d+)?)[xX](\d+(?:\.\d+)?)$", sheet_str)
-    if not match:
-        raise ValueError(f"Invalid sheet format: {sheet_str}. Expected WxH (e.g., 1220x1220)")
-    return float(match.group(1)), float(match.group(2))
+from cli.project import (
+    add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir,
+    parse_sheet_dimensions, DEFAULT_MARGIN_MM, DEFAULT_KERF_MM,
+)
 
 
 def generate_nest_scaffold(

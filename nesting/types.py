@@ -6,6 +6,58 @@ from dataclasses import dataclass, asdict
 from typing import Any
 
 
+@dataclass
+class FreeRect:
+    x: float
+    y: float
+    width: float
+    height: float
+
+    @property
+    def area(self) -> float:
+        return self.width * self.height
+
+    @property
+    def right(self) -> float:
+        return self.x + self.width
+
+    @property
+    def top(self) -> float:
+        return self.y + self.height
+
+    def can_fit(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
+        needed_w = part_w + gap
+        needed_h = part_h + gap
+        return self.width >= needed_w and self.height >= needed_h
+
+    def can_fit_rotated(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
+        return self.can_fit(part_h, part_w, gap)
+
+    def intersects(self, other: FreeRect) -> bool:
+        return not (
+            self.right <= other.x or
+            other.right <= self.x or
+            self.top <= other.y or
+            other.top <= self.y
+        )
+
+    def contains(self, other: FreeRect) -> bool:
+        return (
+            self.x <= other.x and
+            self.y <= other.y and
+            self.right >= other.right and
+            self.top >= other.top
+        )
+
+
+@dataclass
+class PlacementResult:
+    x: float
+    y: float
+    rotated: bool
+    metadata: Any
+
+
 @dataclass(frozen=True)
 class PartSpec:
 

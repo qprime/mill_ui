@@ -6,11 +6,11 @@ from .types import (
     SheetLayout,
     NestingResult,
     DEFAULT_KERF_MM,
+    FreeRect,
+    PlacementResult,
 )
 from .guillotine import (
     guillotine_pack,
-    FreeRect,
-    PlacementResult,
 )
 from .maxrects import (
     maxrects_pack,

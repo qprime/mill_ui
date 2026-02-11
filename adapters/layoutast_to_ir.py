@@ -560,15 +560,12 @@ def _collect_depth_info(ast: LayoutAST) -> list[str]:
         if item.feature is None:
             continue
         ftype = item.feature.type
-        depth = item.feature.depth
-        if DepthMode.is_through(depth) and ftype == "profile":
+        if item.feature.is_through and ftype == "profile":
             continue
-        if DepthMode.is_through(depth):
+        if item.feature.is_through:
             depth_str = DepthMode.THROUGH
-        elif isinstance(depth, (int, float)):
-            depth_str = f"{float(depth):.1f}mm"
         else:
-            depth_str = str(depth)
+            depth_str = f"{float(item.feature.depth_mm):.1f}mm"
         if ftype not in depths_by_type:
             depths_by_type[ftype] = set()
         depths_by_type[ftype].add(depth_str)

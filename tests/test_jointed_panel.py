@@ -72,7 +72,7 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
-        assert items[0].feature.depth == "through"
+        assert items[0].feature.is_through
 
     def test_notched_panel_emits_profile_and_notch_items(self):
         notches = (
@@ -87,7 +87,7 @@ class TestNotchedPanelGenerator:
 
         assert len(items) == 1
         assert items[0].feature.type == "profile"
-        assert items[0].feature.depth == "through"
+        assert items[0].feature.is_through
 
     def test_notches_on_different_edges_emits_all_notches(self):
         notches = (

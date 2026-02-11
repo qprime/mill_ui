@@ -364,7 +364,7 @@ Output files:
         "-k",
         type=float,
         default=None,
-        help="Tool kerf in mm (default: 6.35)",
+        help=f"Tool kerf in mm (default: {DEFAULT_KERF_MM})",
     )
     parser.add_argument(
         "--theme",

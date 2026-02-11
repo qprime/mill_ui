@@ -22,19 +22,19 @@ def _circle_points(cx: float, cy: float, r: float, segments: int = 80) -> List[T
         t = 2.0 * math.pi * (i / segments)
         pts.append((cx + r * math.cos(t), cy + r * math.sin(t)))
     return pts
-def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup: Setup, *, depth: float,
+def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup: Setup, *, depth_mm: float,
                  stepdown_mm: float = 2.5, segments: int = 60) -> List[dict]:
 
     return native_core.bore_helical(
         center_xy,
         hole_d_mm,
         setup,
-        depth_mm=float(depth),
+        depth_mm=float(depth_mm),
         stepdown_mm=float(stepdown_mm),
     )
 
 def pocket_circle_concentric(center_xy: Tuple[float, float], circle_d_mm: float, setup: Setup, *,
-                             depth: float, stepover_mm: float, stepdown_mm: float = 3.0,
+                             depth_mm: float, stepover_mm: float, stepdown_mm: float = 3.0,
                              segments: int = 90, finish: bool = True) -> List[dict]:
     cx, cy = center_xy
     D = float(circle_d_mm)
@@ -60,7 +60,7 @@ def pocket_circle_concentric(center_xy: Tuple[float, float], circle_d_mm: float,
     radii.append(r_wall)
 
     z = 0.0
-    target = -abs(float(depth))
+    target = -abs(float(depth_mm))
     while z > target + 1e-9:
         z_next = max(target, z - sd)
         for ri in radii:
@@ -80,6 +80,6 @@ def pocket_circle_concentric(center_xy: Tuple[float, float], circle_d_mm: float,
 
         finish_d = max(0.0, D - tool_d)
         shp = circle_shape(Vec2(cx, cy), finish_d * 0.5)
-        moves += profile_outline(shp, setup, depth=abs(target), step_down=abs(target))
+        moves += profile_outline(shp, setup, depth_mm=abs(target), step_down=abs(target))
 
     return moves

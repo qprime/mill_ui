@@ -78,7 +78,7 @@ def plan_pocket_passes(
                 ensure_center(entry),
                 diameter,
                 setup,
-                depth=effective_depth,
+                depth_mm=effective_depth,
                 stepover_mm=step_over,
                 stepdown_mm=step_down,
                 finish=True,
@@ -121,14 +121,14 @@ def plan_hole_passes(
             record = accumulator.get_record("drill", tool)
             peck = min(stepdown_for_tool(tool), 2.5)
             record.add_moves(
-                drill_peck([center], record.setup, depth=depth, peck=peck),
+                drill_peck([center], record.setup, depth_mm=depth, peck=peck),
                 increment=1,
             )
         elif diameter <= 3.0 * tool_diameter + eps:
             record = accumulator.get_record("bore", tool)
             step_down = stepdown_for_tool(tool)
             record.add_moves(
-                bore_helical(center, diameter, record.setup, depth=depth, stepdown_mm=step_down),
+                bore_helical(center, diameter, record.setup, depth_mm=depth, stepdown_mm=step_down),
                 increment=1,
             )
         else:
@@ -140,7 +140,7 @@ def plan_hole_passes(
                     center,
                     diameter,
                     record.setup,
-                    depth=depth,
+                    depth_mm=depth,
                     stepover_mm=step_over,
                     stepdown_mm=step_down,
                     finish=True,
@@ -267,7 +267,7 @@ def plan_corner_cleanup_passes(
                 corner_xy,
                 corner_pocket_diameter,
                 setup,
-                depth=effective_depth,
+                depth_mm=effective_depth,
                 stepover_mm=step_over,
                 stepdown_mm=step_down,
                 finish=True,

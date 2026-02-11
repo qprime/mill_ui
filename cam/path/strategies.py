@@ -53,13 +53,13 @@ def onion_skin_then_finish(
 
     moves: List[dict] = []
     if skin <= 0.0:
-        moves += profile_outline(shape, setup, depth=total, step_down=sd)
+        moves += profile_outline(shape, setup, depth_mm=total, step_down=sd)
         return moves
 
     rough_depth = max(0.0, total - skin)
     moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={total:.3f}"))
     if rough_depth > 0:
-        moves += profile_outline(shape, setup, depth=rough_depth, step_down=sd)
+        moves += profile_outline(shape, setup, depth_mm=rough_depth, step_down=sd)
     moves += _finish_profile_pass(shape, setup, depth_mm=total)
     if spring_pass:
         moves += _finish_profile_pass(shape, setup, depth_mm=total)
@@ -107,7 +107,7 @@ def profile_outline_with_tabs(
 
     perimeter_pts = pts[:-1] if pts[0] == pts[-1] else pts
     if len(perimeter_pts) < 2 or tab_count <= 0:
-        return profile_outline(shape, setup, depth=total, step_down=sd)
+        return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
     segments: List[Tuple[Vec2, Vec2]] = []
     lengths: List[float] = []
@@ -119,12 +119,12 @@ def profile_outline_with_tabs(
 
     perimeter = sum(lengths)
     if perimeter <= 0.0:
-        return profile_outline(shape, setup, depth=total, step_down=sd)
+        return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
     width = tab_width_mm if tab_width_mm is not None else max(setup.tool.diameter * 2.0, 6.0)
     tab_windows = _tab_windows(perimeter, tab_count, width)
     if not tab_windows:
-        return profile_outline(shape, setup, depth=total, step_down=sd)
+        return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
     moves: List[dict] = []
     moves.append(move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"))
@@ -253,11 +253,11 @@ def pocket_then_finish_profile(
             rough = rectangle(w_rough, h_rough)
             rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
             moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
-            moves += pocket_raster(rough, setup, depth=cut_depth, stepover=so, stepdown=sd)
+            moves += pocket_raster(rough, setup, depth_mm=cut_depth, stepover=so, stepdown=sd)
     else:
 
         moves.append(move_comment(f"BEGIN pocket (no finish) sd={sd:.3f} so={so:.3f}"))
-        moves += pocket_raster(shape, setup, depth=cut_depth, stepover=so, stepdown=sd)
+        moves += pocket_raster(shape, setup, depth_mm=cut_depth, stepover=so, stepdown=sd)
 
 
     if finish_perimeter:
@@ -267,6 +267,6 @@ def pocket_then_finish_profile(
             finish = rectangle(w_fin, h_fin)
             finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
             moves.append(move_comment("BEGIN finish profile pass"))
-            moves += profile_outline(finish, setup, depth=cut_depth, step_down=sd)
+            moves += profile_outline(finish, setup, depth_mm=cut_depth, step_down=sd)
 
     return offset_moves_z(moves, start)

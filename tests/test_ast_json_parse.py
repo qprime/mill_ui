@@ -45,7 +45,7 @@ def test_parse_minimal_layout():
         assert item.geometry.data["h_mm"] == 30.0
         assert item.placement.center_xy_mm == (60.0, 40.0)
         assert item.feature.type == "profile"
-        assert item.feature.depth == "through"
+        assert item.feature.is_through
 
 
         assert ast.config == {}

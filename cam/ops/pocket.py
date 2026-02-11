@@ -9,14 +9,14 @@ def pocket_raster(
     shape: Shape2D,
     setup: Setup,
     *,
-    depth: float,
+    depth_mm: float,
     stepover: float,
     stepdown: float | None = None,
 ):
     return native_core.pocket_raster(
         shape,
         setup,
-        depth_mm=float(depth),
+        depth_mm=float(depth_mm),
         stepover_mm=float(stepover),
         stepdown_mm=None if stepdown is None else float(stepdown),
     )

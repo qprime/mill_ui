@@ -321,7 +321,7 @@ children:
 
     profile_item = profile_items[0]
     assert profile_item.feature.side == "outside"
-    assert profile_item.feature.depth == "through"
+    assert profile_item.feature.is_through
     print("  PASS")
     return True
 

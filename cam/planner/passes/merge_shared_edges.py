@@ -124,7 +124,7 @@ def merge_rect_profiles(
                     seam_shape = Shape2D([Vec2(x0, y), Vec2(x1, y)])
 
                 depth = max(rect_depths[a.rect_id], rect_depths[b.rect_id]) + cut_through_mm
-                moves = profile_outline(seam_shape, setup, depth=depth, step_down=step_down)
+                moves = profile_outline(seam_shape, setup, depth_mm=depth, step_down=step_down)
                 record.add_moves(moves, increment=1)
                 seam_count += 1
                 used_pairs.add(pair_id)
@@ -153,7 +153,7 @@ def merge_rect_profiles(
         else:
             y_off = edge.coord - tool_radius if math.isclose(edge.coord, edge.miny, abs_tol=merge_tol) else edge.coord + tool_radius
             seam_shape = Shape2D([Vec2(edge.a, y_off), Vec2(edge.b, y_off)])
-        moves = profile_outline(seam_shape, setup, depth=rect_depth, step_down=step_down)
+        moves = profile_outline(seam_shape, setup, depth_mm=rect_depth, step_down=step_down)
         record.add_moves(moves, increment=1)
 
     return seam_count

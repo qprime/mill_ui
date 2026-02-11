@@ -56,12 +56,6 @@ class Feature:
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
 
-    @property
-    def depth(self) -> str | float:
-        if self.is_through:
-            return "through"
-        return self.depth_mm
-
 
 @dataclass(frozen=True)
 class Item:

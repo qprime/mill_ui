@@ -103,7 +103,8 @@ def example_3_raised_panel():
 
     print(f"Raised panel generated {len(raised_items)} items:")
     for item in raised_items:
-        print(f"  - {item.shape_id}: type={item.feature.type}, depth={item.feature.depth}")
+        depth_display = "through" if item.feature.is_through else item.feature.depth_mm
+        print(f"  - {item.shape_id}: type={item.feature.type}, depth={depth_display}")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19.0),

@@ -40,7 +40,7 @@ children:
     assert item.type == "Rect"
     assert item.shape_id == "outer"
     assert item.feature.type == "profile"
-    assert item.feature.depth == "through"
+    assert item.feature.is_through
     assert item.feature.side == "outside"
     print("  PASS")
     return True
@@ -435,7 +435,8 @@ children:
         assert item1.type == item2.type
         assert item1.shape_id == item2.shape_id
         assert item1.feature.type == item2.feature.type
-        assert item1.feature.depth == item2.feature.depth
+        assert item1.feature.is_through == item2.feature.is_through
+        assert item1.feature.depth_mm == item2.feature.depth_mm
     print("  PASS")
     return True
 

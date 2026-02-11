@@ -120,7 +120,7 @@ children:
     assert item.type == "Polygon"
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
-    assert item.feature.depth == "through"
+    assert item.feature.is_through
 
 
 def test_polygon_with_id():

@@ -203,7 +203,7 @@ children:
     item = flat.items[0]
 
     assert item.feature.type == "pocket"
-    assert item.feature.depth == "through"
+    assert item.feature.is_through
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
 
     print("  ✓ PASS")

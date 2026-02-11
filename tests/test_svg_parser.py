@@ -579,7 +579,7 @@ def test_svg_stamp_generator_simple():
     assert len(items) >= 1
     assert items[0].kind == "shape"
     assert items[0].feature.type == "engrave"
-    assert items[0].feature.depth == 2.0
+    assert items[0].feature.depth_mm == 2.0
 
 
 def test_svg_stamp_generator_curved():
@@ -718,7 +718,8 @@ def test_svg_stamp_generator_determinism():
     for i1, i2 in zip(items1, items2):
         assert i1.type == i2.type
         assert i1.feature.type == i2.feature.type
-        assert i1.feature.depth == i2.feature.depth
+        assert i1.feature.is_through == i2.feature.is_through
+        assert i1.feature.depth_mm == i2.feature.depth_mm
         # Compare geometry
         g1 = i1.geometry.data
         g2 = i2.geometry.data

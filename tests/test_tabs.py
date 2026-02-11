@@ -36,7 +36,7 @@ children:
     item = flat.items[0]
 
     assert item.feature.type == "profile"
-    assert item.feature.depth == "through"
+    assert item.feature.is_through
     assert item.feature.side == "outside"
 
     assert item.feature.tab_count == 4

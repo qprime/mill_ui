@@ -286,7 +286,7 @@ def test_profile_simple_rectangle():
     assert item.type == "Polygon"
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
-    assert item.feature.depth == "through"
+    assert item.feature.is_through
     assert "profile" in item.shape_id
 
 
@@ -586,7 +586,7 @@ def test_end_to_end_shaker_style_door():
     pocket_item = next(i for i in ast.items if i.feature.type == "pocket")
 
     assert profile_item.feature.side == "outside"
-    assert profile_item.feature.depth == "through"
+    assert profile_item.feature.is_through
     assert pocket_item.feature.depth_mm == panel_recess
 
 

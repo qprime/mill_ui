@@ -1,7 +1,7 @@
 <!-- spec-style -->
 # mill_ui
 
-**As-Of:** 2026-01-22
+**As-Of:** 2026-02-11
 **Document Type:** System Specification
 **Authority:** This document is authoritative for architecture and behavior described herein.
 
@@ -64,24 +64,47 @@ PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code
 
 ## Input Formats
 
-### Flat PML
+### PML (YAML)
 
-Explicit absolute positioning.
+Explicit absolute positioning with YAML syntax.
 
-```pml
-sheet 450mm 650mm 19mm
-rect door at 225mm,325mm size 400mm,600mm profile through outside
+```yaml
+Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+children:
+- Rect:
+    id: door
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 225mm
+      y: 325mm
+      width: 400mm
+      height: 600mm
 ```
 
-### Compositional PML
+### Compositional PML (YAML)
 
 Relative positioning with layout managers.
 
-```pml
-sheet 400mm 600mm 19mm
-rect outer profile through outside
-    inset 50mm
-        rect inner pocket 6mm
+```yaml
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+children:
+- Frame:
+    width: 50mm
+    children:
+    - Rect:
+        id: inner
+        feature:
+          type: pocket
+          depth: 6mm
 ```
 
 ### JSON
@@ -89,16 +112,23 @@ rect outer profile through outside
 Direct LayoutAST serialization.
 Use `LayoutAST.to_json()` and `LayoutAST.from_json()`.
 
-### Nest PML
+### Nest (YAML)
 
-Block-based nesting job specification.
+Multi-part nesting job specification.
 
-```pml
-nest maxrects
-    sheet 1232mm 1245mm 19mm
-    kerf 6.35mm
-    parts
-        door 457mm 597mm x20
+```yaml
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1232mm
+    height: 1245mm
+    thickness: 19mm
+  kerf: 6.35mm
+  parts:
+    - name: door
+      width: 457mm
+      height: 597mm
+      quantity: 20
 ```
 
 ---
@@ -124,7 +154,7 @@ nest maxrects
 | Sheet | width_mm, height_mm, thickness_mm |
 | Placement | center_xy_mm: tuple[float, float] |
 | Geometry | data: dict[str, Any] |
-| Feature | type, depth, side, depth_mm, tab_count, tab_height_mm, tab_width_mm |
+| Feature | type, depth_mm, side, is_through, corner_cleanup_tool_diameter_mm, tab_count, tab_height_mm, tab_width_mm, bevel_width_mm, bevel_angle_deg, bevel_inner_depth_mm, chamfer_width_mm, chamfer_angle_deg |
 | Item | kind, type, geometry, placement, feature, params, shape_id, id |
 | LayoutAST | sheet, items, config fields |
 
@@ -134,12 +164,15 @@ nest maxrects
 
 | Dataclass | Fields |
 |-----------|--------|
+| DepthProfile | mode, z_top, z_bottom, gradient_direction_deg, v_angle_deg |
 | Bounds2D | x_min, x_max, y_min, y_max |
-| RemovalIntent | region_id, bounds, z_top, z_bottom, allowance, constraints, metadata |
+| Allowance | inside, outside, on, kerf_compensation |
+| Constraints | tabs, keepouts, islands, edge_treatment, tolerance_mm, safe_z_mm |
+| RemovalIntent | region_id, bounds, depth_profile, allowance, constraints, metadata |
 
 **Invariants:**
 - Bounds2D: x_max >= x_min AND y_max >= y_min MUST hold.
-- RemovalIntent: z_bottom <= z_top MUST hold.
+- DepthProfile: z_bottom <= z_top MUST hold.
 
 ---
 
@@ -187,7 +220,7 @@ Planner hints MUST follow this top-level schema:
 
 ### Supported Shapes
 
-Rectangle, Circle, RoundedRect, Line, SplinePath.
+Rectangle, Circle, RoundedRect, Polygon, Polyline, Triangle, Arch, Line, SplinePath.
 
 ### Supported Features
 
@@ -197,24 +230,43 @@ Rectangle, Circle, RoundedRect, Line, SplinePath.
 | pocket | Partial-depth depression. |
 | hole | Through-hole (subtractive). |
 | engrave | Surface carving. |
+| bevel | Angled edge cut with width, angle, and inner depth. |
+| chamfer | Angled edge break with width and angle. |
+| wave | Repeating wave texture pattern. |
 
 ### Tabs (Profile Feature)
 
-```pml
-rect cutout at 300mm,200mm size 400mm,250mm profile through outside tabs 4 height 3mm width 12mm
+```yaml
+- Rect:
+    id: cutout
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+      tab_width: 12mm
+    at:
+      x: 300mm
+      y: 200mm
+      width: 400mm
+      height: 250mm
 ```
-
-Required: `tabs <count> height <height>mm`. Optional: `width <width>mm`.
 
 ---
 
 ## Layout Managers (Compositional PML)
 
-| Manager | Description |
-|---------|-------------|
-| frame \<width\>mm | Inset border, auto-generates outer profile. |
-| inset \<amount\>mm | Uniform inset on all sides. |
-| place grid \<rows\> \<cols\> gap \<gap\>mm | Grid-based component placement. |
+| Manager | Parameters | Description |
+|---------|------------|-------------|
+| Frame | width | Inset border, auto-generates outer profile. |
+| Inset | amount | Uniform inset on all sides. |
+| Grid | rows, cols, gap | Grid-based component placement. |
+| Cell | inset | Grid cell with optional inset. |
+| Split | rows, cols, rail, mullion | Window-style split layout with rail/mullion widths. |
+| Place | layout | Positioned children with explicit mapping. |
+| Panel | id | Basic panel container. |
+| Keepout | id | Exclusion zone (no machining). |
 
 ---
 
@@ -292,19 +344,25 @@ The system MUST NOT claim these validations exist at IR level:
 
 ```
 mill_ui/
-├── adapters/           # RemovalIntent ↔ planner adapters
-├── layout_ast/         # LayoutAST dataclasses and parsers
-├── pml/                # PML parser and formatter
-├── cli/                # Command-line tools
-├── resolution/         # Compositional → Flat layout resolution
+├── adapters/           # AST ↔ IR ↔ planner adapters, AST → DiagramIR
+├── assembly/           # Assembly system (box, carcass, cubby, beams, joinery)
+├── cam/                # CAM planner, passes, post-processor, G-code ops
+├── cli/                # Command-line tools (mill, nest, validate_cam, generate_golden)
+├── config/             # Machine configuration loader
+├── core/               # Shared geometry utilities and constants
+├── diagram_ir/         # DiagramIR intermediate representation for visualization
+├── diagram_render/     # SVG renderer for DiagramIR
+├── domains/            # Domain type and algebraic operations
+├── export/             # Blueprint SVG/PDF export, dimensions
+├── generators/         # Pattern generators (area/loop) producing Items from Domains
 ├── ir/                 # RemovalIntent IR
-├── domains/            # Domain type and operations
-├── generators/         # Generators producing Items from Domains
-├── templates/          # Parametric templates (Shaker)
-├── nesting/            # Bin-packing module
-├── validation/         # IR and CAM validation
-├── export/             # Blueprint SVG, debugging visualizations
-├── cam/                # CAM planner backend
+├── layout_ast/         # LayoutAST and CompositionalLayoutAST dataclasses
+├── mill_mcp/           # MCP server for IDE integration
+├── nesting/            # Bin-packing algorithms (guillotine, maxrects)
+├── pml/                # PML YAML parser and formatter
+├── resolution/         # Compositional → Flat layout resolution
+├── templates/          # Parametric component templates
+├── validation/         # IR and CAM artifact validation
 └── tests/              # Test suite
 ```
 
@@ -364,10 +422,10 @@ The native backend is optional. IR-level tests work without it.
 ## Running Tests
 
 ```bash
-./run_tests.sh                              # All core tests
-./run_tests.sh run_pml_tests                # PML parser tests
-./run_tests.sh run_edge_tests               # Edge case tests
-PYTHONPATH=. python3 -m tests.run_removal_intent_tests  # IR tests
+python -m pytest tests/ -x                  # All tests
+python -m pytest tests/test_pml_yaml.py     # PML parser tests
+python -m pytest tests/test_ast_to_removal.py  # IR tests
+python -m tests.test_recipes                # Recipe verification
 ```
 
 ---

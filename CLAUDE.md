@@ -86,6 +86,7 @@ Check before implementing — these already exist:
 | Full CAM pipeline | `cli/mill.py` (G-code + SVG) |
 | Shared pipeline logic | `cam/pipeline.py` |
 | Validate at IR level | `validation/removal_checks.py` |
+| CAM artifact validation | `validation/runner.py` |
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |
 | Shaker door template | `templates/` (see `docs/recipes/21_simple_shaker_door`) |
@@ -93,6 +94,15 @@ Check before implementing — these already exist:
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
 | Assembly system | `assembly/` (box, carcass, cubby with interface-first joinery) |
+| Beam assembly | `assembly/beam.py`, `assembly/beam_primitives.py` |
+| Blueprint SVG export | `export/blueprint_svg.py` |
+| Blueprint PDF export | `export/blueprint_pdf.py` |
+| DiagramIR generation | `adapters/layoutast_to_ir.py` |
+| SVG rendering | `diagram_render/render_svg.py` |
+| Machine configuration | `config/machine_loader.py` |
+| Layout resolution | `resolution/layout_resolver.py` |
+| MCP server | `mill_mcp/server.py` |
+| Golden metric generation | `cli/generate_golden.py` |
 
 ## Don't
 
@@ -130,13 +140,28 @@ All machining features must be expressible in PML. Python-level generators are i
 | Path | Purpose |
 |------|---------|
 | `layout_ast/layout.py` | AST dataclass definitions |
+| `layout_ast/compositional.py` | CompositionalLayoutAST node types |
 | `ir/removal_intent.py` | RemovalIntent IR spec |
 | `adapters/ast_to_removal.py` | AST → IR conversion |
-| `templates/` | Parametric component generators |
+| `adapters/removal_to_planner.py` | IR → planner hints/input conversion |
+| `adapters/layoutast_to_ir.py` | AST → DiagramIR for visualization |
+| `assembly/` | Box, carcass, cubby, beam assembly with joinery |
+| `cam/pipeline.py` | Shared pipeline orchestration |
+| `cam/planner/passes/` | Planner pass strategies (profile, pocket, hole) |
+| `cam/post/gcode.py` | G-code post-processor |
+| `config/machine_loader.py` | CNC machine configuration |
+| `core/geometry.py` | Shared geometry utilities |
+| `diagram_ir/` | DiagramIR intermediate representation |
+| `diagram_render/render_svg.py` | SVG renderer for DiagramIR |
 | `domains/` | Domain type and algebraic operations |
+| `export/blueprint_svg.py` | Blueprint SVG export |
+| `export/blueprint_pdf.py` | Blueprint PDF export |
 | `generators/` | Pattern generators (area/loop) |
-| `validation/` | CAM artifact validation |
-| `pml/` | PML parser and formatter |
+| `mill_mcp/server.py` | MCP server for IDE integration |
+| `pml/` | PML YAML parser and formatter |
+| `resolution/layout_resolver.py` | Compositional → flat layout resolution |
+| `templates/` | Parametric component templates |
+| `validation/` | IR and CAM artifact validation |
 | `tests/` | Test modules |
 
 ## Invariants (MANDATORY)

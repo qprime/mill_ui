@@ -256,168 +256,94 @@ def _check_paths_valid(root: ET.Element) -> InvariantResult:
 
 
 def _check_closed_profiles(root: ET.Element, metrics: SVGMetrics) -> InvariantResult:
-    checked = 0
-    passed = 0
-    failures: list[str] = []
-
-
-    profile_layer = None
-    for group in root.iter(f"{SVG_NS}g"):
-        if group.get("id") == "PROFILE_CUTS":
-            profile_layer = group
-            break
-
-    if profile_layer is None:
-
-        return InvariantResult(
-            id="SVG_CLOSED_PROFILES",
-            category="structural",
-            artifact="svg",
-            description="Profile cut geometry is closed",
-            status=Verdict.PASS,
-            checked=0,
-            passed=0,
-            details={"note": "No PROFILE_CUTS layer found"},
-        )
-
-
-    for path in profile_layer.iter(f"{SVG_NS}path"):
-        checked += 1
-        d = path.get("d", "").strip()
-        if d.upper().endswith("Z"):
-            passed += 1
-        else:
-            failures.append(f"Profile path is not closed (missing Z): {d[:30]}...")
-
-
-    for rect in profile_layer.iter(f"{SVG_NS}rect"):
-        checked += 1
-        passed += 1
-
-    for circle in profile_layer.iter(f"{SVG_NS}circle"):
-        checked += 1
-        passed += 1
-
-    for polygon in profile_layer.iter(f"{SVG_NS}polygon"):
-        checked += 1
-        passed += 1
-
-    for ellipse in profile_layer.iter(f"{SVG_NS}ellipse"):
-        checked += 1
-        passed += 1
-
-
-    for polyline in profile_layer.iter(f"{SVG_NS}polyline"):
-        checked += 1
-        points = polyline.get("points", "").strip()
-        if _is_polyline_closed(points):
-            passed += 1
-        else:
-            failures.append(f"Profile polyline is not closed: {points[:30]}...")
-
-    if checked == 0:
-        return InvariantResult(
-            id="SVG_CLOSED_PROFILES",
-            category="structural",
-            artifact="svg",
-            description="Profile cut geometry is closed",
-            status=Verdict.PASS,
-            checked=0,
-            passed=0,
-            details={"note": "PROFILE_CUTS layer is empty"},
-        )
-
-    status = Verdict.PASS if len(failures) == 0 else Verdict.FAIL
-    return InvariantResult(
-        id="SVG_CLOSED_PROFILES",
-        category="structural",
-        artifact="svg",
+    return _check_closed_layer(
+        root,
+        layer_id="PROFILE_CUTS",
+        invariant_id="SVG_CLOSED_PROFILES",
         description="Profile cut geometry is closed",
-        status=status,
-        checked=checked,
-        passed=passed,
-        failed=len(failures),
-        failures=tuple(failures),
+        element_prefix="Profile",
     )
 
 
 def _check_closed_pockets(root: ET.Element, metrics: SVGMetrics) -> InvariantResult:
+    return _check_closed_layer(
+        root,
+        layer_id="POCKET_REGIONS",
+        invariant_id="SVG_CLOSED_POCKETS",
+        description="Pocket region geometry is closed",
+        element_prefix="Pocket",
+    )
+
+
+def _check_closed_layer(
+    root: ET.Element,
+    *,
+    layer_id: str,
+    invariant_id: str,
+    description: str,
+    element_prefix: str,
+) -> InvariantResult:
     checked = 0
     passed = 0
     failures: list[str] = []
 
-
-    pocket_layer = None
+    layer = None
     for group in root.iter(f"{SVG_NS}g"):
-        if group.get("id") == "POCKET_REGIONS":
-            pocket_layer = group
+        if group.get("id") == layer_id:
+            layer = group
             break
 
-    if pocket_layer is None:
+    if layer is None:
         return InvariantResult(
-            id="SVG_CLOSED_POCKETS",
+            id=invariant_id,
             category="structural",
             artifact="svg",
-            description="Pocket region geometry is closed",
+            description=description,
             status=Verdict.PASS,
             checked=0,
             passed=0,
-            details={"note": "No POCKET_REGIONS layer found"},
+            details={"note": f"No {layer_id} layer found"},
         )
 
-
-    for path in pocket_layer.iter(f"{SVG_NS}path"):
+    for path in layer.iter(f"{SVG_NS}path"):
         checked += 1
         d = path.get("d", "").strip()
         if d.upper().endswith("Z"):
             passed += 1
         else:
-            failures.append(f"Pocket path is not closed (missing Z): {d[:30]}...")
+            failures.append(f"{element_prefix} path is not closed (missing Z): {d[:30]}...")
 
+    for tag in ("rect", "circle", "polygon", "ellipse"):
+        for _ in layer.iter(f"{SVG_NS}{tag}"):
+            checked += 1
+            passed += 1
 
-    for rect in pocket_layer.iter(f"{SVG_NS}rect"):
-        checked += 1
-        passed += 1
-
-    for circle in pocket_layer.iter(f"{SVG_NS}circle"):
-        checked += 1
-        passed += 1
-
-    for polygon in pocket_layer.iter(f"{SVG_NS}polygon"):
-        checked += 1
-        passed += 1
-
-    for ellipse in pocket_layer.iter(f"{SVG_NS}ellipse"):
-        checked += 1
-        passed += 1
-
-
-    for polyline in pocket_layer.iter(f"{SVG_NS}polyline"):
+    for polyline in layer.iter(f"{SVG_NS}polyline"):
         checked += 1
         points = polyline.get("points", "").strip()
         if _is_polyline_closed(points):
             passed += 1
         else:
-            failures.append(f"Pocket polyline is not closed: {points[:30]}...")
+            failures.append(f"{element_prefix} polyline is not closed: {points[:30]}...")
 
     if checked == 0:
         return InvariantResult(
-            id="SVG_CLOSED_POCKETS",
+            id=invariant_id,
             category="structural",
             artifact="svg",
-            description="Pocket region geometry is closed",
+            description=description,
             status=Verdict.PASS,
             checked=0,
             passed=0,
-            details={"note": "POCKET_REGIONS layer is empty"},
+            details={"note": f"{layer_id} layer is empty"},
         )
 
     status = Verdict.PASS if len(failures) == 0 else Verdict.FAIL
     return InvariantResult(
-        id="SVG_CLOSED_POCKETS",
+        id=invariant_id,
         category="structural",
         artifact="svg",
-        description="Pocket region geometry is closed",
+        description=description,
         status=status,
         checked=checked,
         passed=passed,

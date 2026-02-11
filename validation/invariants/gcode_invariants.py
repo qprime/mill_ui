@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from validation.core import InvariantResult, Verdict
 from validation.metrics.gcode_metrics import (
@@ -62,82 +62,21 @@ def check_gcode_invariants(
     jump_warn_threshold_mm: float = DEFAULT_JUMP_WARN_THRESHOLD_MM,
     jump_fail_threshold_mm: float = DEFAULT_JUMP_FAIL_THRESHOLD_MM,
 ) -> list[InvariantResult]:
-    results: list[InvariantResult] = []
     gcode_path = Path(gcode_path)
-
-
     parse_result, lines = _check_parseable(gcode_path)
-    results.append(parse_result)
 
-    if parse_result.status == Verdict.FAIL:
+    def resolve_metrics() -> GCodeMetrics:
+        return extract_gcode_metrics(gcode_path)
 
-        for inv_id in GCODE_INVARIANT_IDS[1:]:
-            results.append(
-                InvariantResult(
-                    id=inv_id,
-                    category="safety" if "SAFE" in inv_id or "SPINDLE" in inv_id else "structural",
-                    artifact="gcode",
-                    description=_get_invariant_description(inv_id),
-                    status=Verdict.WARN,
-                    details={"skipped": True, "reason": "G-code file not parseable"},
-                )
-            )
-        return results
-
-
-    if metrics is None:
-        try:
-            metrics = extract_gcode_metrics(gcode_path)
-        except Exception as e:
-            results.append(InvariantResult(
-                id="GCODE_METRICS_ERROR",
-                category="structural",
-                artifact="gcode",
-                description="Metrics extraction failed",
-                status=Verdict.FAIL,
-                details={"error": str(e)},
-            ))
-            return results
-
-
-    if safe_z_mm is None:
-        safe_z_mm = metrics.z_profile.safe_z_mm if metrics.z_profile.safe_z_mm > 0 else DEFAULT_SAFE_Z_MM
-
-
-    results.append(_check_safe_z_respected(lines, safe_z_mm))
-
-
-    results.append(_check_no_negative_feed(lines, metrics))
-
-
-    results.append(_check_z_monotonic_plunge(lines))
-
-
-    results.append(_check_max_stepdown(lines, max_stepdown_mm))
-
-
-    results.append(_check_xy_within_bounds(
-        metrics, sheet_width_mm, sheet_height_mm, margin_mm
-    ))
-
-
-    results.append(_check_spindle_before_cut(lines))
-
-
-    results.append(_check_tool_declared(lines))
-
-
-    results.append(_check_ends_at_safe(lines, safe_z_mm))
-
-
-    results.append(_check_continuous_path(
-        lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm
-    ))
-
-
-    results.append(_check_tab_pattern(metrics.tabs))
-
-    return results
+    return _check_gcode_core(
+        parse_result, lines, resolve_metrics,
+        metrics=metrics, safe_z_mm=safe_z_mm,
+        max_stepdown_mm=max_stepdown_mm,
+        sheet_width_mm=sheet_width_mm, sheet_height_mm=sheet_height_mm,
+        margin_mm=margin_mm, jump_tolerance_mm=jump_tolerance_mm,
+        jump_warn_threshold_mm=jump_warn_threshold_mm,
+        jump_fail_threshold_mm=jump_fail_threshold_mm,
+    )
 
 
 def check_gcode_invariants_from_content(
@@ -152,14 +91,41 @@ def check_gcode_invariants_from_content(
     jump_warn_threshold_mm: float = DEFAULT_JUMP_WARN_THRESHOLD_MM,
     jump_fail_threshold_mm: float = DEFAULT_JUMP_FAIL_THRESHOLD_MM,
 ) -> list[InvariantResult]:
-    results: list[InvariantResult] = []
-
-
     parse_result, lines = _check_parseable_content(gcode_content)
-    results.append(parse_result)
+
+    def resolve_metrics() -> GCodeMetrics:
+        from validation.metrics.gcode_metrics import extract_gcode_metrics_from_content
+        return extract_gcode_metrics_from_content(gcode_content)
+
+    return _check_gcode_core(
+        parse_result, lines, resolve_metrics,
+        metrics=metrics, safe_z_mm=safe_z_mm,
+        max_stepdown_mm=max_stepdown_mm,
+        sheet_width_mm=sheet_width_mm, sheet_height_mm=sheet_height_mm,
+        margin_mm=margin_mm, jump_tolerance_mm=jump_tolerance_mm,
+        jump_warn_threshold_mm=jump_warn_threshold_mm,
+        jump_fail_threshold_mm=jump_fail_threshold_mm,
+    )
+
+
+def _check_gcode_core(
+    parse_result: InvariantResult,
+    lines: list[str],
+    resolve_metrics: Callable[[], GCodeMetrics],
+    *,
+    metrics: GCodeMetrics | None,
+    safe_z_mm: float | None,
+    max_stepdown_mm: float,
+    sheet_width_mm: float,
+    sheet_height_mm: float,
+    margin_mm: float,
+    jump_tolerance_mm: float,
+    jump_warn_threshold_mm: float,
+    jump_fail_threshold_mm: float,
+) -> list[InvariantResult]:
+    results: list[InvariantResult] = [parse_result]
 
     if parse_result.status == Verdict.FAIL:
-
         for inv_id in GCODE_INVARIANT_IDS[1:]:
             results.append(
                 InvariantResult(
@@ -168,16 +134,14 @@ def check_gcode_invariants_from_content(
                     artifact="gcode",
                     description=_get_invariant_description(inv_id),
                     status=Verdict.WARN,
-                    details={"skipped": True, "reason": "G-code content not parseable"},
+                    details={"skipped": True, "reason": "G-code not parseable"},
                 )
             )
         return results
 
-
     if metrics is None:
         try:
-            from validation.metrics.gcode_metrics import extract_gcode_metrics_from_content
-            metrics = extract_gcode_metrics_from_content(gcode_content)
+            metrics = resolve_metrics()
         except Exception as e:
             results.append(InvariantResult(
                 id="GCODE_METRICS_ERROR",
@@ -189,42 +153,22 @@ def check_gcode_invariants_from_content(
             ))
             return results
 
-
     if safe_z_mm is None:
         safe_z_mm = metrics.z_profile.safe_z_mm if metrics.z_profile.safe_z_mm > 0 else DEFAULT_SAFE_Z_MM
 
-
     results.append(_check_safe_z_respected(lines, safe_z_mm))
-
-
     results.append(_check_no_negative_feed(lines, metrics))
-
-
     results.append(_check_z_monotonic_plunge(lines))
-
-
     results.append(_check_max_stepdown(lines, max_stepdown_mm))
-
-
     results.append(_check_xy_within_bounds(
         metrics, sheet_width_mm, sheet_height_mm, margin_mm
     ))
-
-
     results.append(_check_spindle_before_cut(lines))
-
-
     results.append(_check_tool_declared(lines))
-
-
     results.append(_check_ends_at_safe(lines, safe_z_mm))
-
-
     results.append(_check_continuous_path(
         lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm
     ))
-
-
     results.append(_check_tab_pattern(metrics.tabs))
 
     return results
@@ -245,6 +189,17 @@ def _get_invariant_description(inv_id: str) -> str:
         "GCODE_TAB_PATTERN": "Tabs occur at max cutting depth with consistent heights",
     }
     return descriptions.get(inv_id, inv_id)
+
+
+_TOKEN_PATTERN = re.compile(
+    r"[GMXYZIJKRABCFSTNOQPLHDEUVW]\s*[+-]?\d*\.?\d+",
+    re.IGNORECASE
+)
+
+_VALID_CHARS_PATTERN = re.compile(
+    r"^[GMTFSXYZIJKRABCDEHLNOPQRUVW\d.\-+\s()]+$",
+    re.IGNORECASE
+)
 
 
 def _check_parseable(gcode_path: Path) -> tuple[InvariantResult, list[str]]:
@@ -282,81 +237,7 @@ def _check_parseable(gcode_path: Path) -> tuple[InvariantResult, list[str]]:
                 [],
             )
 
-
-        invalid_lines: list[str] = []
-        checked = 0
-
-
-        token_pattern = re.compile(
-            r"[GMXYZIJKRABCFSTNOQPLHDEUVW]\s*[+-]?\d*\.?\d+",
-            re.IGNORECASE
-        )
-
-        for i, line in enumerate(lines, 1):
-            line = line.strip()
-            if not line:
-                continue
-
-            checked += 1
-
-
-            if line.startswith("(") and line.endswith(")"):
-                continue
-            if line.startswith(";"):
-                continue
-            if line == "%":
-                continue
-
-
-            line_no_comment = line
-            if "(" in line:
-                line_no_comment = line[:line.index("(")].strip()
-            if ";" in line_no_comment:
-                line_no_comment = line_no_comment[:line_no_comment.index(";")].strip()
-
-
-            if not token_pattern.search(line_no_comment):
-                if len(invalid_lines) < 5:
-                    invalid_lines.append(f"Line {i}: No valid G-code token: {line[:50]}")
-                continue
-
-
-            valid_chars = re.compile(
-                r"^[GMTFSXYZIJKRABCDEHLNOPQRUVW\d.\-+\s()]+$",
-                re.IGNORECASE
-            )
-            if not valid_chars.match(line_no_comment):
-                if len(invalid_lines) < 5:
-                    invalid_lines.append(f"Line {i}: Invalid characters: {line[:50]}")
-
-        if invalid_lines:
-            return (
-                InvariantResult(
-                    id="GCODE_PARSEABLE",
-                    category="structural",
-                    artifact="gcode",
-                    description="All lines parse as valid G-code",
-                    status=Verdict.FAIL,
-                    checked=checked,
-                    passed=checked - len(invalid_lines),
-                    failed=len(invalid_lines),
-                    failures=tuple(invalid_lines),
-                ),
-                lines,
-            )
-
-        return (
-            InvariantResult(
-                id="GCODE_PARSEABLE",
-                category="structural",
-                artifact="gcode",
-                description="All lines parse as valid G-code",
-                status=Verdict.PASS,
-                checked=checked,
-                passed=checked,
-            ),
-            lines,
-        )
+        return _check_parseable_lines(lines)
 
     except Exception as e:
         return (
@@ -393,81 +274,7 @@ def _check_parseable_content(gcode_content: str) -> tuple[InvariantResult, list[
                 [],
             )
 
-
-        invalid_lines: list[str] = []
-        checked = 0
-
-
-        token_pattern = re.compile(
-            r"[GMXYZIJKRABCFSTNOQPLHDEUVW]\s*[+-]?\d*\.?\d+",
-            re.IGNORECASE
-        )
-
-        for i, line in enumerate(lines, 1):
-            line = line.strip()
-            if not line:
-                continue
-
-            checked += 1
-
-
-            if line.startswith("(") and line.endswith(")"):
-                continue
-            if line.startswith(";"):
-                continue
-            if line == "%":
-                continue
-
-
-            line_no_comment = line
-            if "(" in line:
-                line_no_comment = line[:line.index("(")].strip()
-            if ";" in line_no_comment:
-                line_no_comment = line_no_comment[:line_no_comment.index(";")].strip()
-
-
-            if not token_pattern.search(line_no_comment):
-                if len(invalid_lines) < 5:
-                    invalid_lines.append(f"Line {i}: No valid G-code token: {line[:50]}")
-                continue
-
-
-            valid_chars = re.compile(
-                r"^[GMTFSXYZIJKRABCDEHLNOPQRUVW\d.\-+\s()]+$",
-                re.IGNORECASE
-            )
-            if not valid_chars.match(line_no_comment):
-                if len(invalid_lines) < 5:
-                    invalid_lines.append(f"Line {i}: Invalid characters: {line[:50]}")
-
-        if invalid_lines:
-            return (
-                InvariantResult(
-                    id="GCODE_PARSEABLE",
-                    category="structural",
-                    artifact="gcode",
-                    description="All lines parse as valid G-code",
-                    status=Verdict.FAIL,
-                    checked=checked,
-                    passed=checked - len(invalid_lines),
-                    failed=len(invalid_lines),
-                    failures=tuple(invalid_lines),
-                ),
-                lines,
-            )
-
-        return (
-            InvariantResult(
-                id="GCODE_PARSEABLE",
-                category="structural",
-                artifact="gcode",
-                description="All lines parse as valid G-code",
-                status=Verdict.PASS,
-                checked=checked,
-                passed=checked,
-            ),
-            lines,
-        )
+        return _check_parseable_lines(lines)
 
     except Exception as e:
         return (
@@ -483,6 +290,69 @@ def _check_parseable_content(gcode_content: str) -> tuple[InvariantResult, list[
             ),
             [],
         )
+
+
+def _check_parseable_lines(lines: list[str]) -> tuple[InvariantResult, list[str]]:
+    invalid_lines: list[str] = []
+    checked = 0
+
+    for i, line in enumerate(lines, 1):
+        line = line.strip()
+        if not line:
+            continue
+
+        checked += 1
+
+        if line.startswith("(") and line.endswith(")"):
+            continue
+        if line.startswith(";"):
+            continue
+        if line == "%":
+            continue
+
+        line_no_comment = line
+        if "(" in line:
+            line_no_comment = line[:line.index("(")].strip()
+        if ";" in line_no_comment:
+            line_no_comment = line_no_comment[:line_no_comment.index(";")].strip()
+
+        if not _TOKEN_PATTERN.search(line_no_comment):
+            if len(invalid_lines) < 5:
+                invalid_lines.append(f"Line {i}: No valid G-code token: {line[:50]}")
+            continue
+
+        if not _VALID_CHARS_PATTERN.match(line_no_comment):
+            if len(invalid_lines) < 5:
+                invalid_lines.append(f"Line {i}: Invalid characters: {line[:50]}")
+
+    if invalid_lines:
+        return (
+            InvariantResult(
+                id="GCODE_PARSEABLE",
+                category="structural",
+                artifact="gcode",
+                description="All lines parse as valid G-code",
+                status=Verdict.FAIL,
+                checked=checked,
+                passed=checked - len(invalid_lines),
+                failed=len(invalid_lines),
+                failures=tuple(invalid_lines),
+            ),
+            lines,
+        )
+
+    return (
+        InvariantResult(
+            id="GCODE_PARSEABLE",
+            category="structural",
+            artifact="gcode",
+            description="All lines parse as valid G-code",
+            status=Verdict.PASS,
+            checked=checked,
+            passed=checked,
+        ),
+        lines,
+    )
 
 
 def _check_safe_z_respected(lines: list[str], safe_z_mm: float) -> InvariantResult:

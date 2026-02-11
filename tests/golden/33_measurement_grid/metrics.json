@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "33_measurement_grid",
-    "created_at": "2026-02-08T23:48:58.874768+00:00"
+    "created_at": "2026-02-11T18:53:58.918408+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.41,
+    "extraction_time_ms": 2.92,
     "document": {
-      "width_mm": 450.0,
-      "height_mm": 340.0,
+      "width_mm": 453.175,
+      "height_mm": 343.175,
       "viewbox": [
-        -10.0,
-        -50.0,
-        450.0,
-        340.0
+        -11.588,
+        -51.587,
+        453.175,
+        343.175
       ]
     },
     "layers": {
@@ -109,8 +109,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 323.0,
-      "y_min": -18.0,
+      "x_max": 324.5875,
+      "y_min": -19.5875,
       "y_max": 200.0
     },
     "text_elements": {
@@ -146,7 +146,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 20.5109,
+    "extraction_time_ms": 16.5474,
     "summary": {
       "total_lines": 6038,
       "comment_lines": 1006,

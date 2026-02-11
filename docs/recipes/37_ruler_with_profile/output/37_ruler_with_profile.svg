@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20.000 -60.000 870.000 458.000" width="870.0mm" height="458.0mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 873.175 461.175" width="873.175mm" height="461.17499999999995mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -26,7 +26,7 @@
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
 .beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
-  <rect x="-20.0" y="-60.0" width="870.0" height="458.0" fill="#1a1a1a" />
+  <rect x="-21.5875" y="-61.5875" width="873.175" height="461.17499999999995" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="700.000" height="250.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="700.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
@@ -2346,31 +2346,31 @@
     <text x="255.0" y="115.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 255.0 115.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">200.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
-    <text x="-10.0" y="-46.0" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
-    <text x="-10.0" y="-32.0" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="718.0" y="-46.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
-    <line x1="718.0" y1="-28.0" x2="733.0" y2="-28.0" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="738.0" y="-25.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
-    <line x1="718.0" y1="-12.0" x2="733.0" y2="-12.0" stroke="#e8e8e8" stroke-width="2" />
-    <text x="738.0" y="-9.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <line x1="718.0" y1="4.0" x2="733.0" y2="4.0" stroke="#888888" stroke-width="0.25" />
-    <text x="738.0" y="7.0" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
-    <line x1="718.0" y1="20.0" x2="733.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="738.0" y="23.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="718.0" y1="36.0" x2="733.0" y2="36.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="738.0" y="39.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <text x="719.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="719.5875" y1="-29.5875" x2="734.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="739.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="719.5875" y1="-13.587499999999999" x2="734.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
+    <text x="739.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <line x1="719.5875" y1="2.4125000000000014" x2="734.5875" y2="2.4125000000000014" stroke="#888888" stroke-width="0.25" />
+    <text x="739.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
+    <line x1="719.5875" y1="18.4125" x2="734.5875" y2="18.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="739.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="719.5875" y1="34.4125" x2="734.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="739.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="280.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="292.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 700.0 × 250.0 × 18.0mm</text>
-    <text x="20" y="304.0" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 profiles, 2280 engraves</text>
-    <text x="20" y="316.0" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="328.0" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.3mm</text>
-    <text x="20" y="340.0" fill="#cccccc" font-family="monospace" font-size="10px">Parts (3):</text>
-    <text x="30" y="352.0" fill="#cccccc" font-family="monospace" font-size="10px">• part_a</text>
-    <text x="30" y="364.0" fill="#cccccc" font-family="monospace" font-size="10px">• part_b</text>
-    <text x="30" y="376.0" fill="#cccccc" font-family="monospace" font-size="10px">• part_c</text>
+    <text x="20" y="281.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20" y="293.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 700.0 × 250.0 × 18.0mm</text>
+    <text x="20" y="305.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 profiles, 2280 engraves</text>
+    <text x="20" y="317.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30" y="329.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.3mm</text>
+    <text x="20" y="341.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (3):</text>
+    <text x="30" y="353.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_a</text>
+    <text x="30" y="365.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_b</text>
+    <text x="30" y="377.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_c</text>
   </g>
 </svg>

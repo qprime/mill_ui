@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "54_edge_profile_callouts",
-    "created_at": "2026-02-08T23:49:00.341435+00:00"
+    "created_at": "2026-02-11T18:54:00.130542+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.44,
+    "extraction_time_ms": 0.36,
     "document": {
-      "width_mm": 670.0,
-      "height_mm": 502.0,
+      "width_mm": 673.175,
+      "height_mm": 505.175,
       "viewbox": [
-        -20.0,
-        -60.0,
-        670.0,
-        502.0
+        -21.587,
+        -61.587,
+        673.175,
+        505.175
       ]
     },
     "layers": {
@@ -233,12 +233,12 @@
       "total_count": 9,
       "closed_count": 9,
       "open_count": 0,
-      "total_length_mm": 1570.2222,
+      "total_length_mm": 1571.0985,
       "by_layer": {
         "EDGE_CALLOUTS": {
           "count": 2,
           "closed": 2,
-          "length_mm": 1570.2222
+          "length_mm": 1571.0985
         },
         "PROFILE_CUTS": {
           "count": 2,
@@ -254,8 +254,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 630.0,
-      "y_min": -28.0,
+      "x_max": 631.5875,
+      "y_min": -29.5875,
       "y_max": 300.0
     },
     "text_elements": {
@@ -334,7 +334,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9104,
+    "extraction_time_ms": 1.5595,
     "summary": {
       "total_lines": 502,
       "comment_lines": 10,

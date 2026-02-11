@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "44_cubby_full_capture",
-    "created_at": "2026-02-08T23:48:59.944726+00:00"
+    "created_at": "2026-02-11T18:53:59.801985+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.78,
+    "extraction_time_ms": 1.47,
     "document": {
-      "width_mm": 2180.0,
-      "height_mm": 1786.0,
+      "width_mm": 2183.175,
+      "height_mm": 1789.175,
       "viewbox": [
-        -25.0,
-        -65.0,
-        2180.0,
-        1786.0
+        -26.587,
+        -66.588,
+        2183.175,
+        1789.175
       ]
     },
     "layers": {
@@ -589,8 +589,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 2038.0,
-      "y_min": -33.0,
+      "x_max": 2039.5875,
+      "y_min": -34.5875,
       "y_max": 1400.0
     },
     "text_elements": {
@@ -754,7 +754,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 38.7026,
+    "extraction_time_ms": 31.9276,
     "summary": {
       "total_lines": 10967,
       "comment_lines": 80,

@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-02-08T23:48:57.056620+00:00"
+    "created_at": "2026-02-11T18:53:57.379692+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.21,
+    "extraction_time_ms": 0.22,
     "document": {
-      "width_mm": 450.0,
-      "height_mm": 388.0,
+      "width_mm": 453.175,
+      "height_mm": 391.175,
       "viewbox": [
-        -10.0,
-        -50.0,
-        450.0,
-        388.0
+        -11.588,
+        -51.587,
+        453.175,
+        391.175
       ]
     },
     "layers": {
@@ -152,8 +152,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 323.0,
-      "y_min": -18.0,
+      "x_max": 324.5875,
+      "y_min": -19.5875,
       "y_max": 200.0
     },
     "text_elements": {
@@ -204,7 +204,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7043,
+    "extraction_time_ms": 1.7296,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

@@ -1,11 +1,216 @@
 {
   "golden": {
     "recipe_name": "27_wave_texture_panel",
-    "created_at": "2026-02-08T23:48:58.726773+00:00"
+    "created_at": "2026-02-11T18:53:58.792083+00:00"
+  },
+  "svg": {
+    "version": "1.0.0",
+    "extraction_time_ms": 0.85,
+    "document": {
+      "width_mm": 453.175,
+      "height_mm": 443.175,
+      "viewbox": [
+        -11.588,
+        -51.587,
+        453.175,
+        443.175
+      ]
+    },
+    "layers": {
+      "count": 8,
+      "names": [
+        "DIMENSIONS",
+        "ENGRAVE_PATHS",
+        "LEGEND",
+        "NOTES",
+        "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
+        "SHEET_OUTLINE",
+        "TITLE_BLOCK"
+      ],
+      "by_layer": {
+        "DIMENSIONS": {
+          "element_count": 12,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 6,
+          "polygon_count": 4,
+          "text_count": 2,
+          "elements": []
+        },
+        "ENGRAVE_PATHS": {
+          "element_count": 158,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "LEGEND": {
+          "element_count": 11,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 5,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
+        "NOTES": {
+          "element_count": 5,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 5,
+          "elements": []
+        },
+        "PROFILE_CUTS": {
+          "element_count": 1,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                0.0,
+                0.0,
+                300.0,
+                300.0
+              ],
+              "center": [
+                150.0,
+                150.0
+              ],
+              "width": 300.0,
+              "height": 300.0
+            }
+          ]
+        },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 1,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "SHEET_OUTLINE": {
+          "element_count": 1,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                0.0,
+                0.0,
+                300.0,
+                300.0
+              ],
+              "center": [
+                150.0,
+                150.0
+              ],
+              "width": 300.0,
+              "height": 300.0
+            }
+          ]
+        },
+        "TITLE_BLOCK": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
+          "elements": []
+        }
+      }
+    },
+    "paths": {
+      "total_count": 2,
+      "closed_count": 2,
+      "open_count": 0,
+      "total_length_mm": 0.0,
+      "by_layer": {
+        "PROFILE_CUTS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 0.0
+        },
+        "SHEET_OUTLINE": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 0.0
+        }
+      }
+    },
+    "bounds": {
+      "x_min": -1.588,
+      "x_max": 324.5875,
+      "y_min": -19.5875,
+      "y_max": 301.588
+    },
+    "text_elements": {
+      "count": 15,
+      "dimension_labels": [
+        "300.0mm",
+        "300.0mm",
+        "Sheet: 300.0 \u00d7 300.0 \u00d7 19.0mm",
+        "\u2022 engrave: 2.0mm"
+      ],
+      "depth_annotations": [
+        "\u2022 engrave: 2.0mm"
+      ],
+      "notes_text": [
+        "NOTES",
+        "Sheet: 300.0 \u00d7 300.0 \u00d7 19.0mm",
+        "Features: 1 profile, 158 engraves",
+        "Depths:",
+        "\u2022 engrave: 2.0mm"
+      ]
+    },
+    "circles": {
+      "count": 0,
+      "radii_mm": []
+    },
+    "rects": {
+      "count": 3,
+      "dimensions": [
+        [
+          300.0,
+          300.0
+        ],
+        [
+          300.0,
+          300.0
+        ],
+        [
+          303.175,
+          303.175
+        ]
+      ]
+    }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 40.9816,
+    "extraction_time_ms": 34.2278,
     "summary": {
       "total_lines": 9002,
       "comment_lines": 166,

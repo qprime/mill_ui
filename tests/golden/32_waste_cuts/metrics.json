@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "32_waste_cuts",
-    "created_at": "2026-02-08T23:48:58.795688+00:00"
+    "created_at": "2026-02-11T18:53:58.853464+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.34,
+    "extraction_time_ms": 0.26,
     "document": {
-      "width_mm": 1380.0,
-      "height_mm": 970.0,
+      "width_mm": 1383.175,
+      "height_mm": 973.175,
       "viewbox": [
-        -25.0,
-        -65.0,
-        1380.0,
-        970.0
+        -26.587,
+        -66.588,
+        1383.175,
+        973.175
       ]
     },
     "layers": {
@@ -223,8 +223,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 1238.0,
-      "y_min": -33.0,
+      "x_max": 1239.5875,
+      "y_min": -34.5875,
       "y_max": 800.0
     },
     "text_elements": {
@@ -289,7 +289,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.1982,
+    "extraction_time_ms": 1.0013,
     "summary": {
       "total_lines": 276,
       "comment_lines": 4,

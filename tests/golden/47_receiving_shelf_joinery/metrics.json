@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "47_receiving_shelf_joinery",
-    "created_at": "2026-02-08T23:49:00.209011+00:00"
+    "created_at": "2026-02-11T18:54:00.020293+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.3,
+    "extraction_time_ms": 1.09,
     "document": {
-      "width_mm": 2180.0,
-      "height_mm": 1502.0,
+      "width_mm": 2183.175,
+      "height_mm": 1505.175,
       "viewbox": [
-        -25.0,
-        -65.0,
-        2180.0,
-        1502.0
+        -26.587,
+        -66.588,
+        2183.175,
+        1505.175
       ]
     },
     "layers": {
@@ -471,8 +471,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 2038.0,
-      "y_min": -33.0,
+      "x_max": 2039.5875,
+      "y_min": -34.5875,
       "y_max": 1200.0
     },
     "text_elements": {
@@ -598,7 +598,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 25.4668,
+    "extraction_time_ms": 21.1223,
     "summary": {
       "total_lines": 7443,
       "comment_lines": 51,

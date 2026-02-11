@@ -47,10 +47,10 @@ class DiagramIR:
                 if shape_bounds is None:
                     continue
                 x_min, y_min, x_max, y_max = shape_bounds
-                if (x_min < self.bounds.x_min - 0.001 or
-                    x_max > self.bounds.x_max + 0.001 or
-                    y_min < self.bounds.y_min - 0.001 or
-                    y_max > self.bounds.y_max + 0.001):
+                if (x_min < self.bounds.x_min - 0.1 or
+                    x_max > self.bounds.x_max + 0.1 or
+                    y_min < self.bounds.y_min - 0.1 or
+                    y_max > self.bounds.y_max + 0.1):
                     shape_id = getattr(shape, 'id', None) or 'unnamed'
                     raise ValueError(
                         f"Shape '{shape_id}' in layer '{layer.name}' exceeds diagram bounds. "

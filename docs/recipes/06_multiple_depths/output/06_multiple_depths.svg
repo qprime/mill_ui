@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10.000 -50.000 370.000 420.000" width="370.0mm" height="420.0mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.588 -51.587 373.175 423.175" width="373.175mm" height="423.175mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -26,7 +26,7 @@
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
 .beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
-  <rect x="-10.0" y="-50.0" width="370.0" height="420.0" fill="#1a1a1a" />
+  <rect x="-11.5875" y="-51.5875" width="373.175" height="423.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="220.000" height="160.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
   </g>
@@ -74,24 +74,24 @@
     <polygon points="200.0,40.0 197.0,43.0 203.0,43.0" fill="#5ab9ea" />
     <polygon points="200.0,120.0 197.0,117.0 203.0,117.0" fill="#5ab9ea" />
     <text x="205.0" y="80.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 205.0 80.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">80.0mm</text>
-    <line x1="20.0" y1="20.0" x2="20.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="200.0" y1="20.0" x2="200.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="20.0" y1="-10.0" x2="200.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="20.0,-10.0 23.0,-13.0 23.0,-7.0" fill="#5ab9ea" />
-    <polygon points="200.0,-10.0 197.0,-13.0 197.0,-7.0" fill="#5ab9ea" />
-    <text x="110.0" y="-15.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
-    <line x1="200.0" y1="20.0" x2="230.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="200.0" y1="140.0" x2="230.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="230.0" y1="20.0" x2="230.0" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="230.0,20.0 227.0,23.0 233.0,23.0" fill="#5ab9ea" />
-    <polygon points="230.0,140.0 227.0,137.0 233.0,137.0" fill="#5ab9ea" />
-    <text x="235.0" y="80.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 235.0 80.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
-    <line x1="50.0" y1="40.0" x2="50.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="170.0" y1="40.0" x2="170.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="50.0" y1="-10.0" x2="170.0" y2="-10.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="50.0,-10.0 53.0,-13.0 53.0,-7.0" fill="#5ab9ea" />
-    <polygon points="170.0,-10.0 167.0,-13.0 167.0,-7.0" fill="#5ab9ea" />
-    <text x="110.0" y="-15.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
+    <line x1="20.0" y1="20.0" x2="20.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="200.0" y1="20.0" x2="200.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="20.0" y1="-11.5875" x2="200.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="20.0,-11.5875 23.0,-14.5875 23.0,-8.5875" fill="#5ab9ea" />
+    <polygon points="200.0,-11.5875 197.0,-14.5875 197.0,-8.5875" fill="#5ab9ea" />
+    <text x="110.0" y="-16.5875" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
+    <line x1="200.0" y1="20.0" x2="231.5875" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="200.0" y1="140.0" x2="231.5875" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="231.5875" y1="20.0" x2="231.5875" y2="140.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="231.5875,20.0 228.5875,23.0 234.5875,23.0" fill="#5ab9ea" />
+    <polygon points="231.5875,140.0 228.5875,137.0 234.5875,137.0" fill="#5ab9ea" />
+    <text x="236.5875" y="80.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 236.5875 80.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
+    <line x1="50.0" y1="40.0" x2="50.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="170.0" y1="40.0" x2="170.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="50.0" y1="-11.5875" x2="170.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="50.0,-11.5875 53.0,-14.5875 53.0,-8.5875" fill="#5ab9ea" />
+    <polygon points="170.0,-11.5875 167.0,-14.5875 167.0,-8.5875" fill="#5ab9ea" />
+    <text x="110.0" y="-16.5875" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
     <line x1="50.0" y1="40.0" x2="110.0" y2="40.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="50.0" y1="120.0" x2="110.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
     <line x1="110.0" y1="40.0" x2="110.0" y2="120.0" stroke="#5ab9ea" stroke-width="1" />
@@ -100,39 +100,39 @@
     <text x="115.0" y="80.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 115.0 80.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">80.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
-    <text x="0.0" y="-36.0" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
-    <text x="0.0" y="-22.0" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+    <text x="-1.5875000000000004" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-1.5875000000000004" y="-23.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="228.0" y="-36.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
-    <line x1="228.0" y1="-18.0" x2="243.0" y2="-18.0" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="248.0" y="-15.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
-    <line x1="228.0" y1="-2.0" x2="243.0" y2="-2.0" stroke="#e8e8e8" stroke-width="2" />
-    <text x="248.0" y="1.0" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="228.0" y="11.0" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="248.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="228.0" y1="30.0" x2="243.0" y2="30.0" stroke="#e8e8e8" stroke-width="1.5" />
-    <text x="248.0" y="33.0" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
-    <line x1="228.0" y1="46.0" x2="243.0" y2="46.0" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="248.0" y="49.0" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="228.0" y1="62.0" x2="243.0" y2="62.0" stroke="#5ab9ea" stroke-width="1" />
-    <text x="248.0" y="65.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <text x="229.58750000000003" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="229.58750000000003" y1="-19.5875" x2="244.58750000000003" y2="-19.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="249.58750000000003" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="229.58750000000003" y1="-3.5874999999999986" x2="244.58750000000003" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
+    <text x="249.58750000000003" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="229.58750000000003" y="9.412500000000001" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="249.58750000000003" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="229.58750000000003" y1="28.4125" x2="244.58750000000003" y2="28.4125" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="249.58750000000003" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
+    <line x1="229.58750000000003" y1="44.4125" x2="244.58750000000003" y2="44.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="249.58750000000003" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="229.58750000000003" y1="60.4125" x2="244.58750000000003" y2="60.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="249.58750000000003" y="63.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="180.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="192.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 220.0 × 160.0 × 19.0mm</text>
-    <text x="20" y="204.0" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile, 1 pocket, 4 holes</text>
-    <text x="20" y="216.0" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="228.0" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
-    <text x="30" y="240.0" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
-    <text x="20" y="252.0" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
-    <text x="30" y="264.0" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀6.0mm</text>
-    <text x="20" y="276.0" fill="#cccccc" font-family="monospace" font-size="10px">Parts (6):</text>
-    <text x="30" y="288.0" fill="#cccccc" font-family="monospace" font-size="10px">• hole:1</text>
-    <text x="30" y="300.0" fill="#cccccc" font-family="monospace" font-size="10px">• hole:2</text>
-    <text x="30" y="312.0" fill="#cccccc" font-family="monospace" font-size="10px">• hole:3</text>
-    <text x="30" y="324.0" fill="#cccccc" font-family="monospace" font-size="10px">• hole:4</text>
-    <text x="30" y="336.0" fill="#cccccc" font-family="monospace" font-size="10px">• plate:outer</text>
-    <text x="30" y="348.0" fill="#cccccc" font-family="monospace" font-size="10px">• plate:recess</text>
+    <text x="20" y="181.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20" y="193.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 220.0 × 160.0 × 19.0mm</text>
+    <text x="20" y="205.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile, 1 pocket, 4 holes</text>
+    <text x="20" y="217.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30" y="229.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
+    <text x="30" y="241.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
+    <text x="20" y="253.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
+    <text x="30" y="265.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀6.0mm</text>
+    <text x="20" y="277.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (6):</text>
+    <text x="30" y="289.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:1</text>
+    <text x="30" y="301.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:2</text>
+    <text x="30" y="313.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:3</text>
+    <text x="30" y="325.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:4</text>
+    <text x="30" y="337.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:outer</text>
+    <text x="30" y="349.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:recess</text>
   </g>
 </svg>

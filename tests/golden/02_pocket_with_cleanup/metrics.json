@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "02_pocket_with_cleanup",
-    "created_at": "2026-02-08T23:48:56.382146+00:00"
+    "created_at": "2026-02-11T18:53:56.695032+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2,
+    "extraction_time_ms": 0.21,
     "document": {
-      "width_mm": 350.0,
-      "height_mm": 314.0,
+      "width_mm": 353.175,
+      "height_mm": 317.175,
       "viewbox": [
-        -10.0,
-        -50.0,
-        350.0,
-        314.0
+        -11.588,
+        -51.587,
+        353.175,
+        317.175
       ]
     },
     "layers": {
@@ -152,8 +152,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 223.0,
-      "y_min": -18.0,
+      "x_max": 224.5875,
+      "y_min": -19.5875,
       "y_max": 150.0
     },
     "text_elements": {
@@ -201,7 +201,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7407,
+    "extraction_time_ms": 0.7492,
     "summary": {
       "total_lines": 224,
       "comment_lines": 6,

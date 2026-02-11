@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "40_frameless_cabinet",
-    "created_at": "2026-02-08T23:48:59.453947+00:00"
+    "created_at": "2026-02-11T18:53:59.397369+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.47,
+    "extraction_time_ms": 0.39,
     "document": {
-      "width_mm": 2610.0,
-      "height_mm": 1464.0,
+      "width_mm": 2613.175,
+      "height_mm": 1467.175,
       "viewbox": [
-        -20.0,
-        -60.0,
-        2610.0,
-        1464.0
+        -21.587,
+        -61.587,
+        2613.175,
+        1467.175
       ]
     },
     "layers": {
@@ -374,8 +374,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 2473.0,
-      "y_min": -28.0,
+      "x_max": 2474.5875,
+      "y_min": -29.5875,
       "y_max": 1220.0
     },
     "text_elements": {
@@ -462,7 +462,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7761,
+    "extraction_time_ms": 1.427,
     "summary": {
       "total_lines": 951,
       "comment_lines": 33,

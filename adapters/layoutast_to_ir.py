@@ -31,11 +31,12 @@ def layoutast_to_diagram_ir(
     sheet = ast.sheet
     margin = sheet.margin_mm
 
+    toolpath_margin = kerf_width_mm / 2.0 if show_toolpaths and kerf_width_mm > 0 else 0.0
     bounds = Bounds2D(
-        x_min=-margin,
-        x_max=sheet.width_mm + margin,
-        y_min=-margin,
-        y_max=sheet.height_mm + margin,
+        x_min=-margin - toolpath_margin,
+        x_max=sheet.width_mm + margin + toolpath_margin,
+        y_min=-margin - toolpath_margin,
+        y_max=sheet.height_mm + margin + toolpath_margin,
     )
 
     def flip_y(y: float) -> float:

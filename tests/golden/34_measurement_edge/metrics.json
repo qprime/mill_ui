@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "34_measurement_edge",
-    "created_at": "2026-02-08T23:48:58.950035+00:00"
+    "created_at": "2026-02-11T18:53:58.980407+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.27,
+    "extraction_time_ms": 2.66,
     "document": {
-      "width_mm": 770.0,
-      "height_mm": 560.0,
+      "width_mm": 773.175,
+      "height_mm": 563.175,
       "viewbox": [
-        -20.0,
-        -60.0,
-        770.0,
-        560.0
+        -21.587,
+        -61.587,
+        773.175,
+        563.175
       ]
     },
     "layers": {
@@ -169,8 +169,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 633.0,
-      "y_min": -28.0,
+      "x_max": 634.5875,
+      "y_min": -29.5875,
       "y_max": 400.0
     },
     "text_elements": {
@@ -222,7 +222,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 19.5304,
+    "extraction_time_ms": 15.8484,
     "summary": {
       "total_lines": 5786,
       "comment_lines": 964,

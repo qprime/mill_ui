@@ -1,11 +1,272 @@
 {
   "golden": {
     "recipe_name": "29_picture_frame_panel",
-    "created_at": "2026-02-08T23:48:58.738286+00:00"
+    "created_at": "2026-02-11T18:53:58.804904+00:00"
+  },
+  "svg": {
+    "version": "1.0.0",
+    "extraction_time_ms": 0.33,
+    "document": {
+      "width_mm": 453.175,
+      "height_mm": 579.175,
+      "viewbox": [
+        -11.588,
+        -51.587,
+        453.175,
+        579.175
+      ]
+    },
+    "layers": {
+      "count": 8,
+      "names": [
+        "DIMENSIONS",
+        "LEGEND",
+        "NOTES",
+        "POCKET_REGIONS",
+        "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
+        "SHEET_OUTLINE",
+        "TITLE_BLOCK"
+      ],
+      "by_layer": {
+        "DIMENSIONS": {
+          "element_count": 36,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 18,
+          "polygon_count": 12,
+          "text_count": 6,
+          "elements": []
+        },
+        "LEGEND": {
+          "element_count": 11,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 4,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
+        "NOTES": {
+          "element_count": 8,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 8,
+          "elements": []
+        },
+        "POCKET_REGIONS": {
+          "element_count": 1,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 1,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "path",
+              "bounds": [
+                50.0,
+                50.0,
+                250.0,
+                350.0
+              ],
+              "center": [
+                150.0,
+                200.0
+              ]
+            }
+          ]
+        },
+        "PROFILE_CUTS": {
+          "element_count": 2,
+          "rect_count": 2,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                0.0,
+                0.0,
+                300.0,
+                400.0
+              ],
+              "center": [
+                150.0,
+                200.0
+              ],
+              "width": 300.0,
+              "height": 400.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                50.0,
+                50.0,
+                250.0,
+                350.0
+              ],
+              "center": [
+                150.0,
+                200.0
+              ],
+              "width": 200.0,
+              "height": 300.0
+            }
+          ]
+        },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 2,
+          "rect_count": 2,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "SHEET_OUTLINE": {
+          "element_count": 1,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                0.0,
+                0.0,
+                300.0,
+                400.0
+              ],
+              "center": [
+                150.0,
+                200.0
+              ],
+              "width": 300.0,
+              "height": 400.0
+            }
+          ]
+        },
+        "TITLE_BLOCK": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
+          "elements": []
+        }
+      }
+    },
+    "paths": {
+      "total_count": 4,
+      "closed_count": 4,
+      "open_count": 0,
+      "total_length_mm": 800.0,
+      "by_layer": {
+        "POCKET_REGIONS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 800.0
+        },
+        "PROFILE_CUTS": {
+          "count": 2,
+          "closed": 2,
+          "length_mm": 0.0
+        },
+        "SHEET_OUTLINE": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 0.0
+        }
+      }
+    },
+    "bounds": {
+      "x_min": -1.588,
+      "x_max": 324.5875,
+      "y_min": -19.5875,
+      "y_max": 401.588
+    },
+    "text_elements": {
+      "count": 22,
+      "dimension_labels": [
+        "200.0mm",
+        "200.0mm",
+        "300.0mm",
+        "300.0mm",
+        "300.0mm",
+        "400.0mm",
+        "Sheet: 300.0 \u00d7 400.0 \u00d7 19.0mm",
+        "\u2022 chamfer: 3.0mm",
+        "\u2022 pocket: 5.0mm"
+      ],
+      "depth_annotations": [
+        "Features: 2 profiles, 1 pocket, 1 chamfer",
+        "\u2022 pocket: 5.0mm",
+        "\u2022 subtract_pocket_2"
+      ],
+      "notes_text": [
+        "NOTES",
+        "Sheet: 300.0 \u00d7 400.0 \u00d7 19.0mm",
+        "Features: 2 profiles, 1 pocket, 1 chamfer",
+        "Depths:",
+        "\u2022 chamfer: 3.0mm",
+        "\u2022 pocket: 5.0mm",
+        "Parts (1):",
+        "\u2022 subtract_pocket_2"
+      ]
+    },
+    "circles": {
+      "count": 0,
+      "radii_mm": []
+    },
+    "rects": {
+      "count": 6,
+      "dimensions": [
+        [
+          15.0,
+          8.0
+        ],
+        [
+          200.0,
+          300.0
+        ],
+        [
+          203.175,
+          303.175
+        ],
+        [
+          300.0,
+          400.0
+        ],
+        [
+          300.0,
+          400.0
+        ],
+        [
+          303.175,
+          403.175
+        ]
+      ]
+    }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.0589,
+    "extraction_time_ms": 0.0498,
     "summary": {
       "total_lines": 452,
       "comment_lines": 11,

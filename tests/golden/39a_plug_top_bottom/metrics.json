@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "39a_plug_top_bottom",
-    "created_at": "2026-02-08T23:48:59.438260+00:00"
+    "created_at": "2026-02-11T18:53:59.384654+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.75,
+    "extraction_time_ms": 0.59,
     "document": {
-      "width_mm": 1370.0,
-      "height_mm": 1068.0,
+      "width_mm": 1373.175,
+      "height_mm": 1071.175,
       "viewbox": [
-        -20.0,
-        -60.0,
-        1370.0,
-        1068.0
+        -21.587,
+        -61.587,
+        1373.175,
+        1071.175
       ]
     },
     "layers": {
@@ -417,8 +417,8 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 1233.0,
-      "y_min": -28.0,
+      "x_max": 1234.5875,
+      "y_min": -29.5875,
       "y_max": 800.0
     },
     "text_elements": {
@@ -515,7 +515,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 17.4962,
+    "extraction_time_ms": 14.2257,
     "summary": {
       "total_lines": 5218,
       "comment_lines": 42,

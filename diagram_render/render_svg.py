@@ -235,7 +235,7 @@ def _generate_stylesheet(theme: DiagramTheme) -> str:
     lines = []
     if theme.style_map:
         for token, styles in theme.style_map.items():
-            class_name = token.replace("-", "-")
+            class_name = token
             props = "; ".join(f"{k}: {v}" for k, v in styles.items())
             lines.append(f".{class_name} {{ {props}; }}")
     return "\n".join(lines)

@@ -166,6 +166,30 @@ def run_pipeline(
     if machine_config is not None and safe_z == 6.0:
         safe_z = machine_config.defaults.safe_z_mm
 
+    if constraint_audit.has_errors():
+        constraint_summary = {
+            entry.constraint: {
+                "status": entry.status.value,
+                "count": entry.count,
+                "safety_critical": entry.safety_critical,
+            }
+            for entry in constraint_audit.entries
+            if entry.count > 0
+        }
+        return PipelineResult(
+            ast=ast,
+            intents=intents,
+            passes=[],
+            gcode={},
+            svg=None,
+            metrics={
+                "timing": {"ir_ms": round(_ir_ms, 2), "total_ms": round(_ir_ms, 2)},
+                "constraint_audit": constraint_summary,
+            },
+            errors=errors,
+            warnings=warnings,
+        )
+
     hints_start = time.perf_counter()
     hints = removal_intents_to_hints(
         intents,

@@ -124,7 +124,7 @@ def init_project(args) -> None:
         sys.exit(1)
 
     margin = args.margin if args.margin is not None else DEFAULT_MARGIN_MM
-    kerf = args.kerf if args.kerf != DEFAULT_KERF_MM else DEFAULT_KERF_MM
+    kerf = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
 
     if args.project:
         project_dir = get_project_dir(args.project)
@@ -279,7 +279,8 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
     is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
     _run_and_write(
         ast, output_dir, input_path.stem, input_path,
-        kerf_mm=args.kerf, theme=args.theme,
+        kerf_mm=args.kerf if args.kerf is not None else DEFAULT_KERF_MM,
+        theme=args.theme if args.theme is not None else "dark",
         y_origin=args.y_origin, generate_svg=not args.no_svg,
         update_header=is_pml,
     )
@@ -293,8 +294,8 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     output_dir = recipe_dir / "output"
 
-    kerf = args.kerf if args.kerf != 6.35 else RECIPE_DEFAULTS["kerf"]
-    theme = args.theme if args.theme != "dark" else RECIPE_DEFAULTS["theme"]
+    kerf = args.kerf if args.kerf is not None else RECIPE_DEFAULTS["kerf"]
+    theme = args.theme if args.theme is not None else RECIPE_DEFAULTS["theme"]
 
     input_text = source.read_text(encoding="utf-8")
     comp_ast = parse_pml_yaml(input_text)
@@ -370,13 +371,13 @@ Output files:
         "--kerf",
         "-k",
         type=float,
-        default=6.35,
+        default=None,
         help="Tool kerf in mm (default: 6.35)",
     )
     parser.add_argument(
         "--theme",
         "-t",
-        default="dark",
+        default=None,
         choices=["dark", "light", "print"],
         help="Blueprint theme (default: dark)",
     )

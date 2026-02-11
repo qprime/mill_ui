@@ -51,6 +51,10 @@ from layout_ast.compositional import (
     EngraveTextGen,
     WasteCuts,
     AssemblyDecl,
+    InterfaceConfig,
+    BeamDecl,
+    BeamLayerDecl,
+    BeamFeatureDecl,
 )
 from layout_ast.layout import Sheet, Feature
 from pml.nest_parser import NestJob, NestPart
@@ -84,6 +88,40 @@ def format_feature(feature: Feature) -> dict[str, Any]:
         result["tab_width"] = dim(feature.tab_width_mm)
 
     return result
+
+
+def _format_interface_value(val: str | InterfaceConfig | None) -> Any:
+    if val is None:
+        return None
+    if isinstance(val, str):
+        return val
+    result: dict[str, Any] = {"joinery": val.joinery}
+    if val.finger_width_mm is not None:
+        result["finger_width"] = dim(val.finger_width_mm)
+    if val.finger_count is not None:
+        result["finger_count"] = val.finger_count
+    if val.clearance_mm != 0.12:
+        result["clearance"] = dim(val.clearance_mm)
+    if val.dado_depth_mm is not None:
+        result["dado_depth"] = dim(val.dado_depth_mm)
+    if val.inset_mm != 0.0:
+        result["inset"] = dim(val.inset_mm)
+    if val.receiving != "a":
+        result["receiving"] = val.receiving
+    return result
+
+
+def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
+    dimension_keys = {"x_mm", "y_mm", "width_mm", "height_mm", "depth_mm", "diameter_mm",
+                      "radius_mm", "extension_mm", "position_mm", "start_mm", "end_mm"}
+    params: dict[str, Any] = {}
+    for key, value in feat.params.items():
+        if key in dimension_keys and isinstance(value, (int, float)):
+            bare_key = key.removesuffix("_mm")
+            params[bare_key] = dim(value)
+        else:
+            params[key] = value
+    return {feat.feature_type: params if params else None}
 
 
 def format_node(node: Any) -> dict[str, Any]:
@@ -463,7 +501,7 @@ def format_node(node: Any) -> dict[str, Any]:
 
     elif isinstance(node, AssemblyDecl):
         result: dict[str, Any] = {
-            "topology": node.topology,
+            "type": node.type,
             "width": dim(node.width_mm),
             "depth": dim(node.depth_mm),
             "height": dim(node.height_mm),
@@ -477,28 +515,65 @@ def format_node(node: Any) -> dict[str, Any]:
             result["finger_count"] = node.finger_count
         if node.clearance_mm != 0.12:
             result["clearance"] = dim(node.clearance_mm)
-        if node.include_top:
-            result["include_top"] = True
-        if not node.include_bottom:
-            result["include_bottom"] = False
+        if node.interfaces is not None:
+            result["interfaces"] = {
+                name: _format_interface_value(val)
+                for name, val in node.interfaces.items()
+            }
+        if node.top is not None:
+            result["top"] = _format_interface_value(node.top)
+        if node.bottom != "captured":
+            result["bottom"] = _format_interface_value(node.bottom) if node.bottom is not None else None
         if node.layout_gap_mm != 10.0:
             result["layout_gap"] = dim(node.layout_gap_mm)
-        if node.bottom_style != "captured":
-            result["bottom_style"] = node.bottom_style
-        if node.top_style != "captured":
-            result["top_style"] = node.top_style
-        if node.dado_inset_mm:
-            result["dado_inset"] = dim(node.dado_inset_mm)
-        if node.dado_drop_mm:
-            result["dado_drop"] = dim(node.dado_drop_mm)
         if node.show_labels:
             result["show_labels"] = True
         if node.show_edge_colors:
             result["show_edge_colors"] = True
-        if node.base_mm is not None:
-            result["base"] = dim(node.base_mm)
-        if node.slant_height_mm is not None:
-            result["slant_height"] = dim(node.slant_height_mm)
+        if not node.show_dimensions:
+            result["show_dimensions"] = False
+        if node.cap_style != "between_sides":
+            result["cap_style"] = node.cap_style
+        if node.back is not None:
+            result["back"] = _format_interface_value(node.back)
+        if node.back_thickness_mm is not None:
+            result["back_thickness"] = dim(node.back_thickness_mm)
+        if node.back_inset_mm != 0.0:
+            result["back_inset"] = dim(node.back_inset_mm)
+        if node.back_joinery is not None:
+            result["back_joinery"] = node.back_joinery
+        if node.back_rabbet_depth_mm is not None:
+            result["back_rabbet_depth"] = dim(node.back_rabbet_depth_mm)
+        if not node.back_internal_support:
+            result["back_internal_support"] = False
+        if node.fixed_shelves:
+            result["fixed_shelves"] = node.fixed_shelves
+        if node.shelf_joinery != "captured":
+            result["shelf_joinery"] = _format_interface_value(node.shelf_joinery)
+        if node.shelf_dado_depth_mm is not None:
+            result["shelf_dado_depth"] = dim(node.shelf_dado_depth_mm)
+        if node.shelf_back_support:
+            result["shelf_back_support"] = True
+        if node.vertical_partitions:
+            result["vertical_partitions"] = node.vertical_partitions
+        if node.partition_joinery != "captured":
+            result["partition_joinery"] = _format_interface_value(node.partition_joinery)
+        if node.partition_dado_depth_mm is not None:
+            result["partition_dado_depth"] = dim(node.partition_dado_depth_mm)
+        if node.grid is not None:
+            result["grid"] = list(node.grid)
+        if node.perimeter_joinery != "finger":
+            result["perimeter_joinery"] = node.perimeter_joinery
+        if node.internal_joinery != "half_lap":
+            result["internal_joinery"] = node.internal_joinery
+        if node.toe_kick_height_mm is not None:
+            result["toe_kick_height"] = dim(node.toe_kick_height_mm)
+        if node.toe_kick_depth_mm is not None:
+            result["toe_kick_depth"] = dim(node.toe_kick_depth_mm)
+        if node.toe_kick_style != "open":
+            result["toe_kick_style"] = node.toe_kick_style
+        if node.toe_kick_cover:
+            result["toe_kick_cover"] = True
         if node.children:
             result["children"] = [format_node(c) for c in node.children]
         return {"Assembly": result}
@@ -516,6 +591,49 @@ def format_node(node: Any) -> dict[str, Any]:
         if node.children:
             result["children"] = [format_node(c) for c in node.children]
         return {"Place": result}
+
+    elif isinstance(node, BeamDecl):
+        result: dict[str, Any] = {
+            "name": node.name,
+            "length": dim(node.length_mm),
+            "width": dim(node.width_mm),
+            "thickness": dim(node.thickness_mm),
+        }
+        if isinstance(node.layers, int):
+            if node.layers != 1:
+                result["layers"] = node.layers
+        else:
+            layers_list = []
+            for layer in node.layers:
+                layer_data: dict[str, Any] = {"length": dim(layer.length_mm)}
+                if layer.offset_mm != 0.0:
+                    layer_data["offset"] = dim(layer.offset_mm)
+                if layer.cutouts:
+                    cutouts_list = []
+                    for c in layer.cutouts:
+                        cutout_data: dict[str, Any] = {
+                            "start": dim(c["start_mm"]),
+                            "length": dim(c["length_mm"]),
+                        }
+                        if c.get("width_mm") is not None:
+                            cutout_data["width"] = dim(c["width_mm"])
+                        if c.get("offset_from_edge_mm", 0.0) != 0.0:
+                            cutout_data["offset"] = dim(c["offset_from_edge_mm"])
+                        cutouts_list.append(cutout_data)
+                    layer_data["cutouts"] = cutouts_list
+                layers_list.append(layer_data)
+            result["layers"] = layers_list
+        if node.role is not None:
+            result["role"] = node.role
+        if node.face_features:
+            result["face_features"] = [_format_beam_feature(f) for f in node.face_features]
+        if node.end_features:
+            result["end_features"] = [_format_beam_feature(f) for f in node.end_features]
+        if node.edge_features:
+            result["edge_features"] = [_format_beam_feature(f) for f in node.edge_features]
+        if node.show_labels:
+            result["show_labels"] = True
+        return {"Beam": result}
 
     else:
         raise ValueError(f"Unknown node type: {type(node).__name__}")

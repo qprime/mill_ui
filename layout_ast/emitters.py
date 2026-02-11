@@ -52,11 +52,16 @@ def _ast_to_dict(ast: LayoutAST) -> dict[str, Any]:
 
 
 def _sheet_to_dict(sheet: Sheet) -> dict[str, Any]:
-    return {
+    data: dict[str, Any] = {
         "width_mm": sheet.width_mm,
         "height_mm": sheet.height_mm,
         "thickness_mm": sheet.thickness_mm,
     }
+    if sheet.margin_mm != 0.0:
+        data["margin_mm"] = sheet.margin_mm
+    if not sheet.show_dimensions:
+        data["show_dimensions"] = False
+    return data
 
 
 def _item_to_dict(item: Item) -> dict[str, Any]:
@@ -103,5 +108,23 @@ def _feature_to_dict(feature: Feature) -> dict[str, Any]:
     data["depth_mm"] = feature.depth_mm
     if feature.side is not None:
         data["side"] = feature.side
+    if feature.corner_cleanup_tool_diameter_mm is not None:
+        data["corner_cleanup_tool_diameter_mm"] = feature.corner_cleanup_tool_diameter_mm
+    if feature.tab_count is not None:
+        data["tab_count"] = feature.tab_count
+    if feature.tab_height_mm is not None:
+        data["tab_height_mm"] = feature.tab_height_mm
+    if feature.tab_width_mm is not None:
+        data["tab_width_mm"] = feature.tab_width_mm
+    if feature.bevel_width_mm is not None:
+        data["bevel_width_mm"] = feature.bevel_width_mm
+    if feature.bevel_angle_deg is not None:
+        data["bevel_angle_deg"] = feature.bevel_angle_deg
+    if feature.bevel_inner_depth_mm is not None:
+        data["bevel_inner_depth_mm"] = feature.bevel_inner_depth_mm
+    if feature.chamfer_width_mm is not None:
+        data["chamfer_width_mm"] = feature.chamfer_width_mm
+    if feature.chamfer_angle_deg is not None:
+        data["chamfer_angle_deg"] = feature.chamfer_angle_deg
 
     return data

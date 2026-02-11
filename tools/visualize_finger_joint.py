@@ -67,10 +67,10 @@ def generate_diagnostic_svg(
 
     style = ET.SubElement(svg, "style")
     style.text = """
-        .background { fill:
-        .part-fill { fill:
-        .title { fill:
-        .label { fill:
+        .background { fill: #1a1a2e; }
+        .part-fill { fill: #c4a574; stroke: #8b7355; stroke-width: 0.5; }
+        .title { fill: #e0e0e0; font-size: 16px; font-family: monospace; }
+        .label { fill: #b0b0b0; font-size: 11px; font-family: monospace; }
     """
 
     ET.SubElement(svg, "rect", {

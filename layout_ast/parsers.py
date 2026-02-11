@@ -32,6 +32,7 @@ def parse_layout_json(path: str) -> LayoutAST:
         height_mm=float(sheet_data["height_mm"]),
         thickness_mm=float(sheet_data["thickness_mm"]),
         margin_mm=float(sheet_data.get("margin_mm", 0.0)),
+        show_dimensions=sheet_data.get("show_dimensions", True),
     )
 
 
@@ -118,4 +119,13 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
         depth_mm=depth_mm,
         side=side,
         is_through=is_through,
+        corner_cleanup_tool_diameter_mm=feature_data.get("corner_cleanup_tool_diameter_mm"),
+        tab_count=feature_data.get("tab_count"),
+        tab_height_mm=feature_data.get("tab_height_mm"),
+        tab_width_mm=feature_data.get("tab_width_mm"),
+        bevel_width_mm=feature_data.get("bevel_width_mm"),
+        bevel_angle_deg=feature_data.get("bevel_angle_deg"),
+        bevel_inner_depth_mm=feature_data.get("bevel_inner_depth_mm"),
+        chamfer_width_mm=feature_data.get("chamfer_width_mm"),
+        chamfer_angle_deg=feature_data.get("chamfer_angle_deg"),
     )

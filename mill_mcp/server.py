@@ -231,10 +231,7 @@ def compile_nest(nest_text: str, job_name: str = "job") -> str:
         asts = result["output"]
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        job_dir = output_dir / f"{job_name}_{timestamp}"
-        if job_dir.exists():
-            shutil.rmtree(job_dir)
-        job_dir.mkdir(parents=True, exist_ok=True)
+        job_dir = _safe_job_dir(output_dir, job_name, timestamp)
 
         results: dict[str, Any] = {
             "job_name": job_name,

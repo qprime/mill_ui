@@ -388,15 +388,58 @@ def _check_item_count(
     svg_metrics: dict[str, Any] | None,
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
+    expected_count = assertion.expected["count"]
+
+    actual_count = None
+    source = None
+
+    if svg_metrics is not None:
+        layers = svg_metrics.get("layers", {})
+        by_layer = layers.get("by_layer", {})
+        feature_layers = ["PROFILE_CUTS", "POCKET_REGIONS", "HOLES", "ENGRAVE_PATHS"]
+        total = 0
+        for layer_name in feature_layers:
+            layer_data = by_layer.get(layer_name, {})
+            total += layer_data.get("element_count", 0)
+        if total > 0:
+            actual_count = total
+            source = "svg_feature_layers"
+
+    if actual_count is None:
+        return AssertionResult(
+            id=assertion.id,
+            source=assertion.source,
+            intent=assertion.intent,
+            expected=assertion.expected,
+            actual={"error": "No item count data available"},
+            status=Verdict.WARN,
+            tolerance=assertion.tolerance,
+            message="Cannot verify item count: no metrics available",
+        )
+
+    actual = {"count": actual_count, "source": source}
+
+    if actual_count == expected_count:
+        return AssertionResult(
+            id=assertion.id,
+            source=assertion.source,
+            intent=assertion.intent,
+            expected=assertion.expected,
+            actual=actual,
+            status=Verdict.PASS,
+            tolerance=assertion.tolerance,
+            message=f"Item count matches: {expected_count} (source: {source})",
+        )
+
     return AssertionResult(
         id=assertion.id,
         source=assertion.source,
         intent=assertion.intent,
         expected=assertion.expected,
-        actual=assertion.expected,
-        status=Verdict.PASS,
+        actual=actual,
+        status=Verdict.FAIL,
         tolerance=assertion.tolerance,
-        message=f"Layout contains {assertion.expected['count']} items",
+        message=f"Item count mismatch: expected {expected_count}, got {actual_count}",
     )
 
 

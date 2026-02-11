@@ -258,11 +258,11 @@ With explicit position:
     feature: {type: engrave, depth: 0.5mm}
 
 - Polyline:
-    points: [[0, 0], [50, 0], [50, 50], [100, 50]]
+    points: [[0.0, 0.0], [0.5, 0.0], [0.5, 0.5], [1.0, 0.5]]
     feature: {type: engrave, depth: 0.3mm}
 
 - Spline:
-    points: [[0, 0], [25, 10], [50, 0], [75, -10], [100, 0]]
+    points: [[0.0, 0.5], [0.25, 0.6], [0.5, 0.4], [0.75, 0.6], [1.0, 0.5]]
     tolerance: 0.1mm
     feature: {type: engrave, depth: 0.3mm}
 ```
@@ -470,12 +470,34 @@ Ruler marks on edges:
 - MeasurementEdge:
     edges: [top, left]
     unit: metric         # metric | imperial | custom
+    minor_spacing: 1mm   # Custom minor tick spacing (overrides unit preset)
+    major_spacing: 10mm  # Custom major tick spacing (overrides unit preset)
     minor_length: 3mm
     major_length: 6mm
     depth: 0.3mm
+    minor_ticks: true    # Include minor tick marks
     labels: true
     label_height: 4mm
+    label_offset: 8mm    # Label offset from edge
+    label_interval: 5    # Label every Nth major tick
+    label_start: 0       # Starting label value
 ```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| edges | yes | - | Edges to mark: top, bottom, left, right |
+| unit | no | metric | Preset spacing (metric: 10mm major/1mm minor) |
+| major_spacing | no | - | Custom major tick spacing |
+| minor_spacing | no | - | Custom minor tick spacing |
+| minor_length | no | 3mm | Minor tick mark length |
+| major_length | no | 6mm | Major tick mark length |
+| depth | no | 0.3mm | Engrave depth |
+| minor_ticks | no | true | Include minor tick marks |
+| labels | no | false | Include numeric labels |
+| label_height | no | 3mm | Label text height |
+| label_offset | no | - | Label offset from edge |
+| label_interval | no | 1 | Label every Nth major tick |
+| label_start | no | 0 | Starting label value |
 
 #### MeasurementGrid
 
@@ -544,8 +566,8 @@ Text engraving:
 ```yaml
 - EngraveText:
     text: "FRONT"
-    height: 10mm
-    depth: 0.5mm
+    height: 4mm         # Default: 4mm
+    depth: 0.3mm        # Default: 0.3mm
     font: rowmans
     alignment: center   # left | center | right
     orientation: horizontal
@@ -716,16 +738,25 @@ Grid of cubbies with perimeter and internal joinery:
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | cap_style | no | between_sides | Cap placement: between_sides, over_sides |
-| top | no | butt | Top panel joinery |
-| bottom | no | butt | Bottom panel joinery |
+| top | no | none | Top panel joinery |
+| bottom | no | captured | Bottom panel joinery |
+| back | no | none | Back panel joinery strategy |
 | back_thickness | no | - | Back panel thickness (enables captured back) |
 | back_inset | no | 0mm | Back panel setback from rear edge |
+| back_joinery | no | - | Alternative back joinery specification |
+| back_rabbet_depth | no | - | Depth of rabbet/dado for back panel |
+| back_internal_support | no | true | Internal bracing for back panel |
 | fixed_shelves | no | 0 | Number of fixed shelves |
 | shelf_joinery | no | captured | Shelf-to-side joinery |
 | shelf_dado_depth | no | t/2 | Shelf dado depth |
+| shelf_back_support | no | false | Add back panel support for shelves |
 | vertical_partitions | no | 0 | Number of vertical dividers |
 | partition_joinery | no | captured | Partition-to-cap joinery |
 | partition_dado_depth | no | t/2 | Partition dado depth |
+| toe_kick_height | no | - | Height of toe kick cutout |
+| toe_kick_depth | no | - | Depth (setback) of toe kick from front |
+| toe_kick_style | no | open | Toe kick style: open, between_sides, over_sides |
+| toe_kick_cover | no | false | Add a cover panel for toe kick |
 
 **Cubby Parameters:**
 
@@ -824,11 +855,12 @@ Decompose remaining sheet into usable pieces:
 
 ```yaml
 - WasteCuts:
-    min_width: 150mm
-    min_height: 150mm
+    min_width: 200mm    # Default: 200mm
+    min_height: 200mm   # Default: 200mm
+    margin: 5mm         # Optional safety margin around parts
     tab_count: 4
     tab_height: 3mm
-    strategy: largest  # largest | simple
+    strategy: largest   # largest | simple
 ```
 
 #### Beam

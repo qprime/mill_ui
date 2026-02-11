@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Sequence, Tuple
 
 from cam.model.tool import Tool
+from cam.planner.params import stepdown_for, stepover_for
 
 
 @dataclass(frozen=True)
@@ -138,13 +139,13 @@ def pick_tool_for_engrave(tool_db: Sequence[Mapping[str, Any]]) -> ToolSelection
 def stepdown_for_tool(tool: ToolSelection) -> float:
     if tool.depth_per_pass is not None and tool.depth_per_pass > 0.0:
         return float(tool.depth_per_pass)
-    return min(3.0, 0.5 * tool.diameter)
+    return stepdown_for(tool_diameter=tool.diameter, cap_mm=3.0)
 
 
 def stepover_for_tool(tool: ToolSelection) -> float:
     if tool.stepover_percent is not None and tool.stepover_percent > 0.0:
         return float(tool.diameter) * (float(tool.stepover_percent) / 100.0)
-    return float(tool.diameter) * 0.40
+    return stepover_for(tool_diameter=tool.diameter)
 
 
 def tool_identity(tool: ToolSelection) -> dict[str, Any]:

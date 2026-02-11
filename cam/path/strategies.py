@@ -14,7 +14,8 @@ from cam.ops.profile import profile_outline
 from cam.ops.pocket import pocket_raster
 from cam.planner.params import stepdown_for, stepover_for
 from cam.path.toolpath import (
-    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+    move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract,
+    offset_moves_z,
 )
 
 
@@ -63,20 +64,6 @@ def onion_skin_then_finish(
     if spring_pass:
         moves += _finish_profile_pass(shape, setup, depth_mm=total)
     return moves
-
-def _offset_moves_z(moves: List[dict], offset: float) -> List[dict]:
-    if offset <= 0.0:
-        return moves
-    adjusted: List[dict] = []
-    for mv in moves:
-        clone = dict(mv)
-        if "z" in clone and clone["z"] is not None:
-            z_val = float(clone["z"])
-            if z_val <= 0.0:
-                clone["z"] = z_val - offset
-        adjusted.append(clone)
-    return adjusted
-
 
 def _segment_length(a: Vec2, b: Vec2) -> float:
     return math.hypot(b.x - a.x, b.y - a.y)
@@ -282,4 +269,4 @@ def pocket_then_finish_profile(
             moves.append(move_comment("BEGIN finish profile pass"))
             moves += profile_outline(finish, setup, depth=cut_depth, step_down=sd)
 
-    return _offset_moves_z(moves, start)
+    return offset_moves_z(moves, start)

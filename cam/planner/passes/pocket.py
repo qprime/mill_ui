@@ -7,6 +7,7 @@ from cam.ops.drill import drill_peck
 from cam.ops.engrave import engrave_lines
 from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.path.strategies import pocket_then_finish_profile
+from cam.path.toolpath import offset_moves_z
 from .profile import circle_shape_mm, ensure_center, rect_shape
 from .tools import (
     ToolSelection,
@@ -29,19 +30,6 @@ def plan_pocket_passes(
     tool_db: Sequence[Mapping[str, Any]],
     config: "Config",
 ) -> None:
-    def _offset_moves_z(moves: List[dict], offset: float) -> List[dict]:
-        if offset <= 0.0:
-            return moves
-        adj: List[dict] = []
-        for mv in moves:
-            clone = dict(mv)
-            if "z" in clone and clone["z"] is not None:
-                z_val = float(clone["z"])
-                if z_val <= 0.0:
-                    clone["z"] = z_val - offset
-            adj.append(clone)
-        return adj
-
     pockets = hints.get("pockets", []) or []
     for entry in pockets:
         geometry = entry.get("geometry") or {}
@@ -95,7 +83,7 @@ def plan_pocket_passes(
                 stepdown_mm=step_down,
                 finish=True,
             )
-            record.add_moves(_offset_moves_z(moves, start_depth), increment=1)
+            record.add_moves(offset_moves_z(moves, start_depth), increment=1)
         elif shape_name == "region":
             moves = pocket_region_rect_raster(
                 entry,
@@ -105,7 +93,7 @@ def plan_pocket_passes(
                 stepover_mm=step_over,
                 stepdown_mm=step_down,
             )
-            record.add_moves(_offset_moves_z(moves, start_depth), increment=1)
+            record.add_moves(offset_moves_z(moves, start_depth), increment=1)
         else:
             continue
 
@@ -285,17 +273,7 @@ def plan_corner_cleanup_passes(
                 finish=True,
             )
 
-            if start_depth > 0.0:
-                adjusted_moves: List[dict] = []
-                for mv in moves:
-                    clone = dict(mv)
-                    if "z" in clone and clone["z"] is not None:
-                        z_val = float(clone["z"])
-                        if z_val <= 0.0:
-                            clone["z"] = z_val - start_depth
-                    adjusted_moves.append(clone)
-                moves = adjusted_moves
-
+            moves = offset_moves_z(moves, start_depth)
             record.add_moves(moves, increment=1)
 
 

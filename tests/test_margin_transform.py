@@ -41,8 +41,6 @@ children: []
         ast = parse_pml_yaml(pml)
         assert ast.sheet.width_mm == 1200.0
         assert ast.sheet.height_mm == 800.0
-        assert ast.sheet.physical_width_mm == 1200.0
-        assert ast.sheet.physical_height_mm == 800.0
 
     def test_zero_margin_working_equals_physical(self):
         pml = """

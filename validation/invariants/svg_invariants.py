@@ -483,7 +483,6 @@ def _check_dimensions_present(metrics: SVGMetrics) -> InvariantResult:
     dim_count = len(metrics.text.dimension_labels)
 
 
-    has_dim_layer = "DIMENSIONS" in metrics.layers
     dim_layer_count = metrics.layers.get("DIMENSIONS", None)
     dim_layer_elements = dim_layer_count.element_count if dim_layer_count else 0
 

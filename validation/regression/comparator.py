@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -42,10 +41,6 @@ STRUCTURAL_MATCH_PATHS = frozenset({
     "gcode.tools.spindle_speeds",
     "gcode.feeds.feed_rates_used",
     "gcode.z_profile.unique_cutting_depths",
-})
-
-
-CHECKSUM_PATHS = frozenset({
 })
 
 
@@ -238,10 +233,6 @@ def _compare_values(
         return _compare_exact(path, current, golden)
 
 
-    if path in CHECKSUM_PATHS:
-        return _compare_checksum(path, current, golden)
-
-
     if isinstance(golden, bool) or isinstance(current, bool):
         return _compare_exact(path, current, golden)
 
@@ -355,25 +346,6 @@ def _compare_structural(
             status=Verdict.FAIL,
             message=f"Structural mismatch: {'; '.join(msg_parts)}",
         )
-
-
-def _compare_checksum(
-    path: str,
-    current: Any,
-    golden: Any,
-) -> RegressionResult:
-    matches = current == golden
-
-    return RegressionResult(
-        metric_path=path,
-        golden_value=golden,
-        current_value=current,
-        delta=None,
-        delta_percent=None,
-        tolerance_percent=0,
-        status=Verdict.PASS if matches else Verdict.FAIL,
-        message="Checksum match" if matches else "Checksum mismatch (content changed)",
-    )
 
 
 def _compare_lists(

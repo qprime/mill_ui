@@ -49,11 +49,6 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
     )
 
     metrics = result.metrics
-    metrics["timing"]["parse_ms"] = round(parse_time * 1000, 2)
-    metrics["timing"]["total_ms"] = round(
-        parse_time * 1000 + metrics["timing"]["ir_ms"] + metrics["timing"]["hints_ms"] +
-        metrics["timing"]["plan_ms"] + metrics["timing"]["gcode_ms"], 2
-    )
 
     return ast, result.gcode, metrics
 

@@ -9,7 +9,6 @@ from ir.removal_intent import Allowance, Constraints, DepthProfile, RemovalInten
 
 logger = logging.getLogger(__name__)
 from adapters.hints_to_removal import (
-    simple_item_to_removal_intent as _simple_item_to_removal_intent,
     profile_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
@@ -22,7 +21,6 @@ from core.constants import (
     TabKeys,
     MetadataKeys,
     FeatureType,
-    DepthMode,
 )
 
 

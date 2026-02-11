@@ -469,7 +469,6 @@ def _check_profile_exists(
     elements = profile_layer.get("elements", [])
 
 
-    expected_center = assertion.expected.get("center_xy")
     expected_width = assertion.expected.get("width_mm")
     expected_height = assertion.expected.get("height_mm")
     expected_diameter = assertion.expected.get("diameter_mm")

@@ -809,7 +809,6 @@ def _detect_tabs_from_lines(lines: list[str], z_tolerance: float) -> TabMetrics:
     while i < len(moves) - 2:
         m0 = moves[i]
         m1 = moves[i + 1]
-        m2 = moves[i + 2]
 
         if m0["type"] != "feed" or m0["z"] > depth_threshold:
             i += 1

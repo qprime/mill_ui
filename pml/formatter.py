@@ -28,8 +28,6 @@ def format_pml(ast: LayoutAST) -> str:
             if not item.feature:
                 continue
             lines.append(_format_shape(item))
-        elif item.kind == "template":
-            lines.append(_format_template(item))
         else:
             continue
 
@@ -69,11 +67,6 @@ def _format_shape(item: Item) -> str:
     else:
 
         return f"# Unknown shape type: {item.type}"
-
-
-def _format_template(item: Item) -> str:
-    template_id = item.id or "unnamed"
-    return f"# template {item.type} {template_id} (template formatting not yet implemented)"
 
 
 def _format_feature(feature: Feature) -> str:

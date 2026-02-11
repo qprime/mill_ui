@@ -272,9 +272,6 @@ def plan_corner_cleanup_passes(
         step_down = stepdown_for_tool(tool)
 
 
-        geometry = entry.get("geometry", {})
-
-
         corner_pocket_diameter = 2.0 * corner_tool_diameter
 
         for corner_xy in corners:

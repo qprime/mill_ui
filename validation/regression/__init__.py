@@ -6,7 +6,6 @@ from validation.regression.comparator import (
     metrics_to_comparable_dict,
     EXACT_MATCH_PATHS,
     STRUCTURAL_MATCH_PATHS,
-    CHECKSUM_PATHS,
     EXCLUDED_PATHS,
     DEFAULT_TOLERANCES,
 )
@@ -25,7 +24,6 @@ __all__ = [
     "metrics_to_comparable_dict",
     "EXACT_MATCH_PATHS",
     "STRUCTURAL_MATCH_PATHS",
-    "CHECKSUM_PATHS",
     "EXCLUDED_PATHS",
     "DEFAULT_TOLERANCES",
 

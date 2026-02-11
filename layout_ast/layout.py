@@ -14,14 +14,6 @@ class Sheet:
     show_dimensions: bool = True
 
     @property
-    def physical_width_mm(self) -> float:
-        return self.width_mm
-
-    @property
-    def physical_height_mm(self) -> float:
-        return self.height_mm
-
-    @property
     def working_width_mm(self) -> float:
         return self.width_mm - 2 * self.margin_mm
 

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 from io import StringIO
-from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from layout_ast.compositional import (
     Panel,
@@ -57,7 +55,7 @@ from layout_ast.compositional import (
     BeamFeatureDecl,
 )
 from layout_ast.layout import Sheet, Feature
-from pml.nest_parser import NestJob, NestPart
+from pml.nest_parser import NestJob
 
 
 def dim(value: float) -> str:
@@ -717,11 +715,6 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
     return stream.getvalue()
 
 
-def format_pml_yaml_file(ast: CompositionalLayoutAST, path: Path | str) -> None:
-    path = Path(path)
-    path.write_text(format_pml_yaml(ast))
-
-
 def format_nest_yaml(job: NestJob) -> str:
     data: dict[str, Any] = {
         "Nest": {
@@ -769,14 +762,7 @@ def format_nest_yaml(job: NestJob) -> str:
     return stream.getvalue()
 
 
-def format_nest_yaml_file(job: NestJob, path: Path | str) -> None:
-    path = Path(path)
-    path.write_text(format_nest_yaml(job))
-
-
 __all__ = [
     "format_pml_yaml",
-    "format_pml_yaml_file",
     "format_nest_yaml",
-    "format_nest_yaml_file",
 ]

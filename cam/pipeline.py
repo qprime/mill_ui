@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 import time
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +69,6 @@ class PipelineResult:
 
 @dataclass(frozen=True)
 class PipelineTiming:
-    parse_ms: float = 0.0
     ir_ms: float = 0.0
     hints_ms: float = 0.0
     plan_ms: float = 0.0

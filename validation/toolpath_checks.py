@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
-from ir.removal_intent import Bounds2D, KeepoutRegion
+from ir.removal_intent import Bounds2D
 
 
 @dataclass(frozen=True)

@@ -5,16 +5,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Placement, Geometry, Feature
-from layout_ast.canonicalize import canonicalize_layout
+from layout_ast.layout import LayoutAST, Sheet, Item, Placement, Feature
 
 
 def emit_layout_json(ast: LayoutAST, path: str | None = None) -> str:
 
-    canonical_ast = canonicalize_layout(ast)
-
-
-    data = _ast_to_dict(canonical_ast)
+    data = _ast_to_dict(ast)
 
 
     json_str = json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)

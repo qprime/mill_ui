@@ -7,7 +7,7 @@ from layout_ast.compositional import (
     CompositionalLayoutAST,
 )
 from layout_ast.layout import Sheet, Item
-from pml.yaml_parser import parse_template_yaml, substitute_params, parse_pml_yaml
+from pml.yaml_parser import parse_template_yaml, substitute_params
 from resolution.layout_resolver import LayoutResolver
 
 

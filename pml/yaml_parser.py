@@ -780,11 +780,6 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     )
 
 
-def parse_pml_yaml_file(path: Path | str) -> CompositionalLayoutAST:
-    path = Path(path)
-    return parse_pml_yaml(path.read_text())
-
-
 def parse_nest_yaml(source: str) -> NestJob:
     yaml = YAML()
     yaml.preserve_quotes = True
@@ -887,11 +882,6 @@ def parse_nest_yaml(source: str) -> NestJob:
     )
 
 
-def parse_nest_yaml_file(path: Path | str) -> NestJob:
-    path = Path(path)
-    return parse_nest_yaml(path.read_text())
-
-
 def substitute_params(text: str, params: dict[str, Any]) -> str:
     def replace_match(m: re.Match[str]) -> str:
         param_name = m.group(1)
@@ -899,8 +889,6 @@ def substitute_params(text: str, params: dict[str, Any]) -> str:
             raise PMLParseError(f"Unknown parameter: ${{{param_name}}}")
         value = params[param_name]
         if isinstance(value, str):
-            if value.endswith("mm"):
-                return value
             return value
         return f"{value}mm"
 
@@ -938,19 +926,11 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
     return TemplateDef(name=name, params=params, body=body)
 
 
-def parse_template_yaml_file(path: Path | str, parse_body: bool = False) -> TemplateDef:
-    path = Path(path)
-    return parse_template_yaml(path.read_text(), parse_body=parse_body)
-
-
 __all__ = [
     "PMLParseError",
     "parse_dimension",
     "parse_pml_yaml",
-    "parse_pml_yaml_file",
     "parse_nest_yaml",
-    "parse_nest_yaml_file",
     "parse_template_yaml",
-    "parse_template_yaml_file",
     "substitute_params",
 ]

@@ -62,8 +62,6 @@ def svg_stamp_generator(
 
 
     domain_bounds = domain.bounds
-    domain_width = domain_bounds.width
-    domain_height = domain_bounds.height
 
 
     transform = _calculate_transform(
@@ -182,10 +180,6 @@ def _calculate_transform(
 
 
     if center:
-
-
-        scaled_width = svg_width * abs(scale_x)
-        scaled_height = svg_height * abs(scale_y)
 
 
         svg_cx = (x_min + x_max) / 2

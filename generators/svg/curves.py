@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import math
-from typing import Iterator
 
 
 Point2D = tuple[float, float]
@@ -192,7 +191,6 @@ def flatten_arc(
 
 
     avg_radius = (rx_adj + ry_adj) / 2
-    arc_length = avg_radius * abs(dtheta)
 
 
     if avg_radius > tolerance:

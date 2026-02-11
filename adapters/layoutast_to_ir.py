@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Sequence
+from typing import Callable
 
 from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Sheet

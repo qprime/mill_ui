@@ -10,8 +10,8 @@ from generators.base import (
     validate_domain_for_generation,
 )
 from generators.params.area import GridLinesParams
-from generators.utils import get_local_bounds
-from layout_ast.layout import Feature, Geometry, Item, Placement
+from generators.utils import create_line_item, get_local_bounds, is_major_tick
+from layout_ast.layout import Item
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -46,10 +46,6 @@ def grid_lines_generator(
     items: list[Item] = []
     item_index = 0
 
-    def is_major_line(pos: float, origin: float) -> bool:
-        offset = abs(pos - origin)
-        return abs(offset % major_spacing) < 0.001 or abs(offset % major_spacing - major_spacing) < 0.001
-
     def add_line(
         start_local: tuple[float, float],
         end_local: tuple[float, float],
@@ -62,7 +58,7 @@ def grid_lines_generator(
         clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
 
         for seg_start, seg_end in clipped:
-            item = _create_line_item(
+            item = create_line_item(
                 start=seg_start,
                 end=seg_end,
                 depth_mm=params.depth_mm,
@@ -78,7 +74,7 @@ def grid_lines_generator(
 
     x = x_origin + spacing
     while x < local_x_max - 0.001:
-        is_major = is_major_line(x, x_origin)
+        is_major = is_major_tick(x, x_origin, major_spacing)
         if is_major or params.minor_lines:
             add_line(
                 (x, local_y_min),
@@ -89,7 +85,7 @@ def grid_lines_generator(
 
     y = y_origin + spacing
     while y < local_y_max - 0.001:
-        is_major = is_major_line(y, y_origin)
+        is_major = is_major_tick(y, y_origin, major_spacing)
         if is_major or params.minor_lines:
             add_line(
                 (local_x_min, y),
@@ -105,34 +101,6 @@ def grid_lines_generator(
         )
 
     return items
-
-
-def _create_line_item(
-    start: tuple[float, float],
-    end: tuple[float, float],
-    depth_mm: float,
-    shape_id: str,
-) -> Item:
-    cx = (start[0] + end[0]) / 2
-    cy = (start[1] + end[1]) / 2
-
-    geometry_data = {
-        "start": [start[0] - cx, start[1] - cy],
-        "end": [end[0] - cx, end[1] - cy],
-        "width_mm": 0.5,
-    }
-
-    return Item(
-        kind="shape",
-        type="Line",
-        geometry=Geometry(data=geometry_data),
-        placement=Placement(center_xy_mm=(cx, cy)),
-        feature=Feature(
-            type="engrave",
-            depth_mm=depth_mm,
-        ),
-        shape_id=shape_id,
-    )
 
 
 __all__ = ["grid_lines_generator"]

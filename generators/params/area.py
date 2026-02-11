@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from generators.core import BaseParams
+from generators.core import BaseParams, resolve_major_spacing, resolve_minor_spacing
 
 
 @dataclass(frozen=True)
@@ -195,22 +195,12 @@ class GridLinesParams(BaseParams):
     def get_major_spacing(self) -> float:
         if self.spacing_mm is not None:
             return self.spacing_mm
-        if self.unit == "metric":
-            return 10.0
-        elif self.unit == "imperial":
-            return 25.4
-        else:
-            return self.spacing_mm or 10.0
+        return resolve_major_spacing(self.unit, self.spacing_mm)
 
     def get_minor_spacing(self) -> float:
         if self.minor_spacing_mm is not None:
             return self.minor_spacing_mm
-        if self.unit == "metric":
-            return 1.0
-        elif self.unit == "imperial":
-            return 25.4 / 16
-        else:
-            return self.minor_spacing_mm or 1.0
+        return resolve_minor_spacing(self.unit, self.minor_spacing_mm)
 
 
 @dataclass(frozen=True)
@@ -280,20 +270,10 @@ class MeasurementGridParams(BaseParams):
             )
 
     def get_minor_spacing(self) -> float:
-        if self.unit == "metric":
-            return 1.0
-        elif self.unit == "imperial":
-            return 25.4 / 16
-        else:
-            return self.minor_spacing_mm or 1.0
+        return resolve_minor_spacing(self.unit, self.minor_spacing_mm)
 
     def get_major_spacing(self) -> float:
-        if self.unit == "metric":
-            return 10.0
-        elif self.unit == "imperial":
-            return 25.4
-        else:
-            return self.major_spacing_mm or 10.0
+        return resolve_major_spacing(self.unit, self.major_spacing_mm)
 
 
 @dataclass(frozen=True)

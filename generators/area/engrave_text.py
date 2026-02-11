@@ -10,7 +10,8 @@ from generators.base import (
     GeneratorResult,
     generate_shape_id,
 )
-from layout_ast.layout import Feature, Geometry, Item, Placement
+from generators.utils import create_line_item
+from layout_ast.layout import Item
 
 if TYPE_CHECKING:
     pass
@@ -142,7 +143,7 @@ def engrave_text_at_position(
 
     items: list[Item] = []
     for i, ((x1, y1), (x2, y2)) in enumerate(final_lines):
-        item = _create_line_item(
+        item = create_line_item(
             start=(x1, y1),
             end=(x2, y2),
             depth_mm=depth_mm,
@@ -151,34 +152,6 @@ def engrave_text_at_position(
         items.append(item)
 
     return items
-
-
-def _create_line_item(
-    start: tuple[float, float],
-    end: tuple[float, float],
-    depth_mm: float,
-    shape_id: str,
-) -> Item:
-    cx = (start[0] + end[0]) / 2
-    cy = (start[1] + end[1]) / 2
-
-    geometry_data = {
-        "start": [start[0] - cx, start[1] - cy],
-        "end": [end[0] - cx, end[1] - cy],
-        "width_mm": 0.5,
-    }
-
-    return Item(
-        kind="shape",
-        type="Line",
-        geometry=Geometry(data=geometry_data),
-        placement=Placement(center_xy_mm=(cx, cy)),
-        feature=Feature(
-            type="engrave",
-            depth_mm=depth_mm,
-        ),
-        shape_id=shape_id,
-    )
 
 
 def engrave_number_label(

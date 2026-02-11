@@ -456,27 +456,7 @@ class ResolvedRegion:
         )
 
     def subdivide_grid(self, rows: int, cols: int, gap: float) -> list[ResolvedRegion]:
-
-        total_gap_x = gap * (cols - 1) if cols > 1 else 0
-        total_gap_y = gap * (rows - 1) if rows > 1 else 0
-
-        cell_width = (self.width - total_gap_x) / cols
-        cell_height = (self.height - total_gap_y) / rows
-
-        cells = []
-        for row in range(rows):
-            for col in range(cols):
-                x_offset = col * (cell_width + gap)
-                y_offset = row * (cell_height + gap)
-
-                cells.append(ResolvedRegion(
-                    x_min=self.x_min + x_offset,
-                    y_min=self.y_min + y_offset,
-                    x_max=self.x_min + x_offset + cell_width,
-                    y_max=self.y_min + y_offset + cell_height,
-                ))
-
-        return cells
+        return self.subdivide_split(rows, cols, gap, gap)
 
     def subdivide_split(self, rows: int, cols: int, rail_mm: float, mullion_mm: float) -> list[ResolvedRegion]:
 

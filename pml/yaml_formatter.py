@@ -55,6 +55,7 @@ from layout_ast.compositional import (
     BeamFeatureDecl,
 )
 from layout_ast.layout import Sheet, Feature
+from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import NestJob
 
 
@@ -399,59 +400,12 @@ def format_node(node: Any) -> dict[str, Any]:
         return {"HoleGrid": result}
 
     elif isinstance(node, MeasurementGridGen):
-        result: dict[str, Any] = {}
-        if node.unit != "metric":
-            result["unit"] = node.unit
-        if node.minor_spacing_mm is not None:
-            result["minor_spacing"] = dim(node.minor_spacing_mm)
-        if node.major_spacing_mm is not None:
-            result["major_spacing"] = dim(node.major_spacing_mm)
-        if node.minor_length_mm != 3.0:
-            result["minor_length"] = dim(node.minor_length_mm)
-        if node.major_length_mm != 6.0:
-            result["major_length"] = dim(node.major_length_mm)
-        if node.depth_mm != 0.5:
-            result["depth"] = dim(node.depth_mm)
-        if not node.minor_ticks:
-            result["minor_ticks"] = False
-        if node.labels:
-            result["labels"] = True
-        if node.label_height_mm != 3.0:
-            result["label_height"] = dim(node.label_height_mm)
-        if node.label_offset_mm is not None:
-            result["label_offset"] = dim(node.label_offset_mm)
-        if node.label_interval != 1:
-            result["label_interval"] = node.label_interval
-        if node.label_start != 0:
-            result["label_start"] = node.label_start
+        result = format_measurement_fields(node, dim, default_depth=0.5)
         return {"MeasurementGrid": result if result else None}
 
     elif isinstance(node, MeasurementEdgeGen):
         result: dict[str, Any] = {"edges": list(node.edges)}
-        if node.unit != "metric":
-            result["unit"] = node.unit
-        if node.minor_spacing_mm is not None:
-            result["minor_spacing"] = dim(node.minor_spacing_mm)
-        if node.major_spacing_mm is not None:
-            result["major_spacing"] = dim(node.major_spacing_mm)
-        if node.minor_length_mm != 3.0:
-            result["minor_length"] = dim(node.minor_length_mm)
-        if node.major_length_mm != 6.0:
-            result["major_length"] = dim(node.major_length_mm)
-        if node.depth_mm != 0.3:
-            result["depth"] = dim(node.depth_mm)
-        if not node.minor_ticks:
-            result["minor_ticks"] = False
-        if node.labels:
-            result["labels"] = True
-        if node.label_height_mm != 3.0:
-            result["label_height"] = dim(node.label_height_mm)
-        if node.label_offset_mm is not None:
-            result["label_offset"] = dim(node.label_offset_mm)
-        if node.label_interval != 1:
-            result["label_interval"] = node.label_interval
-        if node.label_start != 0:
-            result["label_start"] = node.label_start
+        result.update(format_measurement_fields(node, dim, default_depth=0.3))
         return {"MeasurementEdge": result}
 
     elif isinstance(node, GridLinesGen):

@@ -56,6 +56,7 @@ from layout_ast.compositional import (
     BeamLayerDecl,
 )
 from layout_ast.layout import Sheet, Feature
+from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import NestJob, NestPart, NestParseError
 
 
@@ -454,37 +455,19 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "MeasurementGrid":
+        fields = parse_measurement_fields(node_data, parse_dimension)
         return MeasurementGridGen(
-            unit=node_data.get("unit", "metric"),
-            minor_spacing_mm=parse_dimension(node_data["minor_spacing"]) if "minor_spacing" in node_data else None,
-            major_spacing_mm=parse_dimension(node_data["major_spacing"]) if "major_spacing" in node_data else None,
-            minor_length_mm=parse_dimension(node_data.get("minor_length", "3mm")),
-            major_length_mm=parse_dimension(node_data.get("major_length", "6mm")),
             depth_mm=parse_dimension(node_data.get("depth", "0.5mm")),
-            minor_ticks=node_data.get("minor_ticks", True),
-            labels=node_data.get("labels", False),
-            label_height_mm=parse_dimension(node_data.get("label_height", "3mm")),
-            label_offset_mm=parse_dimension(node_data["label_offset"]) if "label_offset" in node_data else None,
-            label_interval=node_data.get("label_interval", 1),
-            label_start=node_data.get("label_start", 0),
+            **fields,
         )
 
     elif node_type == "MeasurementEdge":
         edges = tuple(node_data["edges"])
+        fields = parse_measurement_fields(node_data, parse_dimension)
         return MeasurementEdgeGen(
             edges=edges,
-            unit=node_data.get("unit", "metric"),
-            minor_spacing_mm=parse_dimension(node_data["minor_spacing"]) if "minor_spacing" in node_data else None,
-            major_spacing_mm=parse_dimension(node_data["major_spacing"]) if "major_spacing" in node_data else None,
-            minor_length_mm=parse_dimension(node_data.get("minor_length", "3mm")),
-            major_length_mm=parse_dimension(node_data.get("major_length", "6mm")),
             depth_mm=parse_dimension(node_data.get("depth", "0.3mm")),
-            minor_ticks=node_data.get("minor_ticks", True),
-            labels=node_data.get("labels", False),
-            label_height_mm=parse_dimension(node_data.get("label_height", "3mm")),
-            label_offset_mm=parse_dimension(node_data["label_offset"]) if "label_offset" in node_data else None,
-            label_interval=node_data.get("label_interval", 1),
-            label_start=node_data.get("label_start", 0),
+            **fields,
         )
 
     elif node_type == "GridLines":

@@ -5,11 +5,32 @@ import math
 from dataclasses import dataclass
 from typing import Literal
 
-from generators.core import BaseParams, LoopSelection
+from generators.core import BaseParams, LoopSelection, resolve_major_spacing, resolve_minor_spacing
 
 EdgeSelection = Literal["top", "bottom", "left", "right"]
 TextAlignment = Literal["left", "center", "right"]
 TextOrientation = Literal["horizontal", "vertical"]
+
+
+def validate_loop_selection(loop_selection: LoopSelection, param_name: str) -> None:
+    valid_selections = ("outer_only", "inner_only", "all_loops")
+    if isinstance(loop_selection, str):
+        if loop_selection not in valid_selections:
+            raise ValueError(
+                f"{param_name}: loop_selection must be one of {valid_selections} "
+                f"or a list of indices, got '{loop_selection}'"
+            )
+    elif isinstance(loop_selection, list):
+        for idx in loop_selection:
+            if not isinstance(idx, int) or idx < 0:
+                raise ValueError(
+                    f"{param_name}: loop_selection indices must be non-negative integers, "
+                    f"got {idx}"
+                )
+    else:
+        raise ValueError(
+            f"{param_name}: loop_selection must be string or list, got {type(loop_selection)}"
+        )
 
 
 @dataclass(frozen=True)
@@ -40,24 +61,7 @@ class ProfileParams(BaseParams):
                 )
 
 
-        valid_selections = ("outer_only", "inner_only", "all_loops")
-        if isinstance(self.loop_selection, str):
-            if self.loop_selection not in valid_selections:
-                raise ValueError(
-                    f"ProfileParams: loop_selection must be one of {valid_selections} "
-                    f"or a list of indices, got '{self.loop_selection}'"
-                )
-        elif isinstance(self.loop_selection, list):
-            for idx in self.loop_selection:
-                if not isinstance(idx, int) or idx < 0:
-                    raise ValueError(
-                        f"ProfileParams: loop_selection indices must be non-negative integers, "
-                        f"got {idx}"
-                    )
-        else:
-            raise ValueError(
-                f"ProfileParams: loop_selection must be string or list, got {type(self.loop_selection)}"
-            )
+        validate_loop_selection(self.loop_selection, "ProfileParams")
 
         if self.tab_count < 0:
             raise ValueError(
@@ -128,24 +132,7 @@ class ChamferParams(BaseParams):
             )
 
 
-        valid_selections = ("outer_only", "inner_only", "all_loops")
-        if isinstance(self.loop_selection, str):
-            if self.loop_selection not in valid_selections:
-                raise ValueError(
-                    f"ChamferParams: loop_selection must be one of {valid_selections} "
-                    f"or a list of indices, got '{self.loop_selection}'"
-                )
-        elif isinstance(self.loop_selection, list):
-            for idx in self.loop_selection:
-                if not isinstance(idx, int) or idx < 0:
-                    raise ValueError(
-                        f"ChamferParams: loop_selection indices must be non-negative integers, "
-                        f"got {idx}"
-                    )
-        else:
-            raise ValueError(
-                f"ChamferParams: loop_selection must be string or list, got {type(self.loop_selection)}"
-            )
+        validate_loop_selection(self.loop_selection, "ChamferParams")
 
     @property
     def angle_degrees(self) -> float:
@@ -171,24 +158,7 @@ class BeadParams(BaseParams):
             )
 
 
-        valid_selections = ("outer_only", "inner_only", "all_loops")
-        if isinstance(self.loop_selection, str):
-            if self.loop_selection not in valid_selections:
-                raise ValueError(
-                    f"BeadParams: loop_selection must be one of {valid_selections} "
-                    f"or a list of indices, got '{self.loop_selection}'"
-                )
-        elif isinstance(self.loop_selection, list):
-            for idx in self.loop_selection:
-                if not isinstance(idx, int) or idx < 0:
-                    raise ValueError(
-                        f"BeadParams: loop_selection indices must be non-negative integers, "
-                        f"got {idx}"
-                    )
-        else:
-            raise ValueError(
-                f"BeadParams: loop_selection must be string or list, got {type(self.loop_selection)}"
-            )
+        validate_loop_selection(self.loop_selection, "BeadParams")
 
 
 @dataclass(frozen=True)
@@ -271,20 +241,10 @@ class MeasurementEdgeParams(BaseParams):
             )
 
     def get_minor_spacing(self) -> float:
-        if self.unit == "metric":
-            return 1.0
-        elif self.unit == "imperial":
-            return 25.4 / 16
-        else:
-            return self.minor_spacing_mm or 1.0
+        return resolve_minor_spacing(self.unit, self.minor_spacing_mm)
 
     def get_major_spacing(self) -> float:
-        if self.unit == "metric":
-            return 10.0
-        elif self.unit == "imperial":
-            return 25.4
-        else:
-            return self.major_spacing_mm or 10.0
+        return resolve_major_spacing(self.unit, self.major_spacing_mm)
 
 
 @dataclass(frozen=True)

@@ -137,10 +137,46 @@ def loop_type_suffix(index: int) -> str:
     return f"inner_{index}"
 
 
+def create_line_item(
+    start: tuple[float, float],
+    end: tuple[float, float],
+    depth_mm: float,
+    shape_id: str,
+    line_width_mm: float = 0.5,
+) -> Item:
+    cx = (start[0] + end[0]) / 2
+    cy = (start[1] + end[1]) / 2
+
+    geometry_data = {
+        "start": [start[0] - cx, start[1] - cy],
+        "end": [end[0] - cx, end[1] - cy],
+        "width_mm": line_width_mm,
+    }
+
+    return Item(
+        kind="shape",
+        type="Line",
+        geometry=Geometry(data=geometry_data),
+        placement=Placement(center_xy_mm=(cx, cy)),
+        feature=Feature(
+            type="engrave",
+            depth_mm=depth_mm,
+        ),
+        shape_id=shape_id,
+    )
+
+
+def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
+    offset = abs(pos - origin)
+    return abs(offset % major_spacing) < 0.001 or abs(offset % major_spacing - major_spacing) < 0.001
+
+
 __all__ = [
     "shapely_to_item",
     "iter_polygons",
     "get_local_bounds",
     "extract_loops",
     "loop_type_suffix",
+    "create_line_item",
+    "is_major_tick",
 ]

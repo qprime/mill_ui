@@ -64,6 +64,24 @@ def validate_domain_for_generation(
     return True
 
 
+def resolve_minor_spacing(unit: str, minor_spacing_mm: float | None) -> float:
+    if unit == "metric":
+        return 1.0
+    elif unit == "imperial":
+        return 25.4 / 16
+    else:
+        return minor_spacing_mm or 1.0
+
+
+def resolve_major_spacing(unit: str, major_spacing_mm: float | None) -> float:
+    if unit == "metric":
+        return 10.0
+    elif unit == "imperial":
+        return 25.4
+    else:
+        return major_spacing_mm or 10.0
+
+
 __all__ = [
     "Generator",
     "GeneratorResult",
@@ -71,4 +89,6 @@ __all__ = [
     "LoopSelection",
     "generate_shape_id",
     "validate_domain_for_generation",
+    "resolve_minor_spacing",
+    "resolve_major_spacing",
 ]

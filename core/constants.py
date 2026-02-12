@@ -23,6 +23,10 @@ class GeometryKeys:
     H_MM = "h_mm"
     DIAMETER_MM = "diameter_mm"
     RADIUS_MM = "radius_mm"
+    RADIUS_TL_MM = "radius_tl_mm"
+    RADIUS_TR_MM = "radius_tr_mm"
+    RADIUS_BR_MM = "radius_br_mm"
+    RADIUS_BL_MM = "radius_bl_mm"
     ISLANDS = "islands"
     EDGE_TREATMENT = "edge_treatment"
 

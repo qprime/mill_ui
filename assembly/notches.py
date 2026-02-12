@@ -6,8 +6,7 @@ from shapely.geometry import MultiPolygon, Polygon, box
 from shapely.ops import unary_union, orient
 
 from assembly.panel import Edge, NotchSpec
-
-Point2D = tuple[float, float]
+from domains.domain import Point2D
 
 
 def validate_notch_fits_edge(notch: NotchSpec, edge_length: float) -> None:

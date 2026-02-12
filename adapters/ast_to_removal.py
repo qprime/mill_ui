@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from layout_ast.layout import LayoutAST, Item, Feature
 from ir.removal_intent import Allowance, Constraints, DepthProfile, RemovalIntent
@@ -26,7 +26,7 @@ from core.constants import (
 
 def ast_to_removal_intents(
     ast: LayoutAST,
-    warnings: Optional[list[str]] = None,
+    warnings: list[str] | None = None,
 ) -> list[RemovalIntent]:
     intents: list[RemovalIntent] = []
 

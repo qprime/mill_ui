@@ -235,7 +235,8 @@ def extract_shape_geometry(
         }
         if GeometryKeys.RADIUS_MM in metadata:
             geometry[GeometryKeys.RADIUS_MM] = metadata[GeometryKeys.RADIUS_MM]
-        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
+        for key in (GeometryKeys.RADIUS_TL_MM, GeometryKeys.RADIUS_TR_MM,
+                    GeometryKeys.RADIUS_BR_MM, GeometryKeys.RADIUS_BL_MM):
             if key in metadata:
                 geometry[key] = metadata[key]
     elif ShapeType.is_polyline(shape):

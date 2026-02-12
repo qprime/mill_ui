@@ -72,7 +72,8 @@ def profile_hint_to_removal_intent(
     elif shape == ShapeType.ROUNDED_RECT:
         if GeometryKeys.RADIUS_MM in geometry:
             metadata[GeometryKeys.RADIUS_MM] = geometry[GeometryKeys.RADIUS_MM]
-        for key in ('radius_tl_mm', 'radius_tr_mm', 'radius_br_mm', 'radius_bl_mm'):
+        for key in (GeometryKeys.RADIUS_TL_MM, GeometryKeys.RADIUS_TR_MM,
+                    GeometryKeys.RADIUS_BR_MM, GeometryKeys.RADIUS_BL_MM):
             if key in geometry:
                 metadata[key] = geometry[key]
 

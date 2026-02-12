@@ -86,7 +86,7 @@ kerf: {kerf}mm
 
 children:
   - Assembly:
-      topology: box
+      type: box
       width: TODO
       depth: TODO
       height: TODO

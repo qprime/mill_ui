@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from domains.domain import Domain
 
-
-Point2D = tuple[float, float]
+from domains.domain import Point2D
 
 
 def local_to_sheet(

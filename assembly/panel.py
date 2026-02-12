@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, replace
 from enum import Enum, auto
 from typing import Any, Literal
 
-Point2D = tuple[float, float]
+from domains.domain import Point2D
 
 
 class PanelRole(Enum):

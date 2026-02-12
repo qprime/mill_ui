@@ -3,8 +3,7 @@ from __future__ import annotations
 
 import math
 
-
-Point2D = tuple[float, float]
+from domains.domain import Point2D
 
 
 def flatten_cubic_bezier(

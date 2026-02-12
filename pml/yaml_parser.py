@@ -500,7 +500,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Assembly":
-        assembly_type = node_data.get("type", node_data.get("topology", "box"))
+        assembly_type = node_data.get("type", "box")
 
         interfaces_raw = node_data.get("interfaces")
         interfaces = None

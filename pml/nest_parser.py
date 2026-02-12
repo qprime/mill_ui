@@ -6,10 +6,13 @@ from typing import Any
 
 
 class NestParseError(Exception):
-    pass
+    def __init__(self, message: str, path: str = ""):
+        self.message = message
+        self.path = path
+        super().__init__(f"{path}: {message}" if path else message)
 
 
-@dataclass
+@dataclass(frozen=True)
 class NestPart:
     name: str
     width_mm: float
@@ -19,7 +22,7 @@ class NestPart:
     template_params: dict[str, float] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class NestJob:
     algorithm: str
     sheet_width_mm: float

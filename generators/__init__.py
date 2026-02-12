@@ -10,6 +10,8 @@ from generators.base import (
     ProfileParams,
     WaveParams,
     GridParams,
+    GridLinesParams,
+    MeasurementGridParams,
     BeadParams,
     RaisedPanelParams,
     ChamferParams,
@@ -17,6 +19,8 @@ from generators.base import (
     ConcentricBorderParams,
     XPanelParams,
     HoleGridParams,
+    MeasurementEdgeParams,
+    EngraveTextParams,
 
     LoopSelection,
 
@@ -34,13 +38,22 @@ from generators.area import (
     concentric_border_generator,
     x_panel_generator,
     hole_grid_generator,
+    measurement_grid_generator,
+    grid_lines_generator,
 )
+
+from generators.area.engrave_text import engrave_text_at_position, engrave_number_label
 
 
 from generators.utils import shapely_to_item, iter_polygons
 
 
-from generators.loop import profile_generator, bead_generator, chamfer_generator
+from generators.loop import (
+    profile_generator,
+    bead_generator,
+    chamfer_generator,
+    measurement_edge_generator,
+)
 
 
 from generators.svg import (
@@ -68,6 +81,8 @@ __all__ = [
     "ProfileParams",
     "WaveParams",
     "GridParams",
+    "GridLinesParams",
+    "MeasurementGridParams",
     "BeadParams",
     "RaisedPanelParams",
     "ChamferParams",
@@ -75,11 +90,15 @@ __all__ = [
     "ConcentricBorderParams",
     "XPanelParams",
     "HoleGridParams",
+    "MeasurementEdgeParams",
+    "EngraveTextParams",
     "SVGPathParams",
 
     "flat_pocket_generator",
     "wave_generator",
     "grid_generator",
+    "grid_lines_generator",
+    "measurement_grid_generator",
     "raised_panel_generator",
     "line_pattern_generator",
     "concentric_border_generator",
@@ -88,6 +107,9 @@ __all__ = [
     "profile_generator",
     "bead_generator",
     "chamfer_generator",
+    "measurement_edge_generator",
+    "engrave_text_at_position",
+    "engrave_number_label",
     "svg_stamp_generator",
 
     "parse_svg_path",

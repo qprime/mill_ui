@@ -7,14 +7,12 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Iterator
 
+from domains.domain import Point2D
 from generators.svg.curves import (
     flatten_cubic_bezier,
     flatten_quadratic_bezier,
     flatten_arc,
 )
-
-
-Point2D = tuple[float, float]
 
 
 Polyline = list[Point2D]

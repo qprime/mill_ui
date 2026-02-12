@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, Sequence, TYPE_CHECKING
 
 from ir.removal_intent import Bounds2D
+
+if TYPE_CHECKING:
+    from cam.planner.passes import PassRecord
 
 
 @dataclass(frozen=True)
@@ -104,7 +109,7 @@ def verify_toolpath_avoids_keepouts(
 
 
 def verify_passes_avoid_keepouts(
-    passes: Sequence[Mapping[str, Any]],
+    passes: Sequence[PassRecord],
     keepouts: Sequence[Mapping[str, Any]],
 ) -> ToolpathVerificationResult:
     if not keepouts:
@@ -112,14 +117,9 @@ def verify_passes_avoid_keepouts(
 
     all_violations: list[KeepoutViolation] = []
 
-    for pass_dict in passes:
-        moves = pass_dict.get("moves", [])
-        setup = pass_dict.get("setup")
-        tool_radius = 0.0
-        if setup is not None and hasattr(setup, "tool"):
-            tool_radius = setup.tool.diameter / 2.0
-
-        result = verify_toolpath_avoids_keepouts(moves, keepouts, tool_radius)
+    for p in passes:
+        tool_radius = p.setup.tool.diameter / 2.0
+        result = verify_toolpath_avoids_keepouts(p.moves, keepouts, tool_radius)
         all_violations.extend(result.keepout_violations)
 
     return ToolpathVerificationResult(keepout_violations=tuple(all_violations))

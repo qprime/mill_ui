@@ -103,27 +103,27 @@ def test_corner_cleanup_planner():
     pocket_pass = None
     corner_pass = None
     for p in passes:
-        if p.get("op") == "pocket":
+        if p.op == "pocket":
             pocket_pass = p
-        elif p.get("op") == "corner_cleanup":
+        elif p.op == "corner_cleanup":
             corner_pass = p
 
     assert pocket_pass is not None, "Missing pocket pass"
     assert corner_pass is not None, "Missing corner_cleanup pass"
 
 
-    pocket_tool_diameter = pocket_pass["tool"]["diameter"]
+    pocket_tool_diameter = pocket_pass.tool_dict["diameter"]
 
 
     assert pocket_tool_diameter in [3.175, 9.525]
 
 
-    corner_tool_diameter = corner_pass["tool"]["diameter"]
+    corner_tool_diameter = corner_pass.tool_dict["diameter"]
     assert corner_tool_diameter == 3.175
 
 
-    assert len(pocket_pass["moves"]) > 0
-    assert len(corner_pass["moves"]) > 0
+    assert len(pocket_pass.moves) > 0
+    assert len(corner_pass.moves) > 0
 
 
 def test_corner_cleanup_tool_not_found():
@@ -246,7 +246,7 @@ def test_corner_cleanup_without_flag():
 
 
     assert len(passes) == 1
-    assert passes[0].get("op") == "pocket"
+    assert passes[0].op == "pocket"
 
 
 if __name__ == "__main__":

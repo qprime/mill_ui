@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Mapping, Sequence
+from typing import Any, Dict, Iterable, Mapping, Sequence, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cam.planner.passes import PassRecord
 
 
 def _summarise_moves(moves: Sequence[Mapping[str, Any]]) -> Dict[str, float]:
@@ -37,7 +40,7 @@ def _summarise_moves(moves: Sequence[Mapping[str, Any]]) -> Dict[str, float]:
 
 
 def summarise_passes(
-    passes: Sequence[Mapping[str, Any]],
+    passes: Sequence[PassRecord],
     *,
     merge_enabled: bool,
     merged_seams: int,
@@ -45,20 +48,20 @@ def summarise_passes(
 ) -> Dict[str, Any]:
     summary_passes: list[Dict[str, Any]] = []
     for entry in passes:
-        metrics = _summarise_moves(entry.get("moves", []))
-        tool = entry.get("tool", {})
+        metrics = _summarise_moves(entry.moves)
+        tool = entry.tool_dict
         diameter = float(tool.get("diameter", 0.0))
         kind = str(tool.get("kind", "flat"))
         rotation = tool.get("rotation")
-        description = f"{entry['op']} with {diameter:.2f}mm {kind}"
+        description = f"{entry.op} with {diameter:.2f}mm {kind}"
         if rotation:
             description += f" ({rotation})"
         summary_passes.append(
             {
-                "filename": entry.get("filename"),
-                "operation": entry.get("op"),
-                "tool": tool,
-                "item_count": entry.get("count", 0),
+                "filename": entry.filename,
+                "operation": entry.op,
+                "tool": dict(tool),
+                "item_count": entry.count,
                 "metrics": metrics,
                 "description": description,
             }

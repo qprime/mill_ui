@@ -59,10 +59,10 @@ def _generate_gcode(
     )
 
     gcode_parts = []
-    for pass_dict in passes:
+    for p in passes:
         gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=pass_dict["setup"].safe_z,
+            p.moves,
+            safe_z=p.setup.safe_z,
         )
         gcode_parts.append(gcode)
 

@@ -79,10 +79,10 @@ def test_simple_rect_through_cam():
     assert len(passes) >= 1
 
 
-    for pass_dict in passes:
+    for p in passes:
         gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=pass_dict["setup"].safe_z,
+            p.moves,
+            safe_z=p.setup.safe_z,
         )
 
 
@@ -139,10 +139,10 @@ def test_multiple_parts_through_cam():
             safe_z=6.0,
         )
 
-        for pass_dict in passes:
+        for p in passes:
             gcode = write_gcode(
-                pass_dict["moves"],
-                safe_z=pass_dict["setup"].safe_z,
+                p.moves,
+                safe_z=p.setup.safe_z,
             )
             total_gcode_lines += gcode.count("\n")
 
@@ -213,10 +213,10 @@ def test_template_parts_through_cam():
     assert len(passes) >= 1
 
 
-    for pass_dict in passes:
+    for p in passes:
         gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=pass_dict["setup"].safe_z,
+            p.moves,
+            safe_z=p.setup.safe_z,
         )
         assert len(gcode) > 0
         assert "G" in gcode
@@ -271,10 +271,10 @@ def test_multi_sheet_through_cam():
         )
 
         sheet_gcode = ""
-        for pass_dict in passes:
+        for p in passes:
             gcode = write_gcode(
-                pass_dict["moves"],
-                safe_z=pass_dict["setup"].safe_z,
+                p.moves,
+                safe_z=p.setup.safe_z,
             )
             sheet_gcode += gcode
 
@@ -319,10 +319,10 @@ def test_gcode_basic_invariants():
         safe_z=6.0,
     )
 
-    for pass_dict in passes:
+    for p in passes:
         gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=pass_dict["setup"].safe_z,
+            p.moves,
+            safe_z=p.setup.safe_z,
         )
 
         lines = [line.strip() for line in gcode.split("\n") if line.strip()]

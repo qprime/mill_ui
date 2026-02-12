@@ -42,15 +42,6 @@ class PassRecord:
         if increment:
             self.count += int(increment)
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "op": self.op,
-            "tool": dict(self.tool_dict),
-            "setup": self.setup,
-            "moves": list(self.moves),
-            "filename": self.filename,
-            "count": self.count,
-        }
 
 
 class PassAccumulator:
@@ -126,7 +117,7 @@ def plan_passes(
     safe_z: float | None = None,
     prime_spindle: bool = False,
     profile_opts: Optional[Mapping[str, Any]] = None,
-) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
+) -> tuple[List[PassRecord], Dict[str, Any]]:
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(
@@ -305,17 +296,17 @@ def plan_passes(
             increment=1,
         )
 
-    pass_dicts = [record.to_dict() for record in accumulator.passes()]
+    pass_records = accumulator.passes()
 
     profile_options_summary = _build_profile_summary(onion_skin_mm, tabs_opts, cut_through_mm)
     summary = summarise_passes(
-        pass_dicts,
+        pass_records,
         merge_enabled=merge_enabled,
         merged_seams=merged_seams,
         profile_options=profile_options_summary,
     )
 
-    return pass_dicts, summary
+    return pass_records, summary
 
 
 def _extract_positive_float(value: Any) -> float:

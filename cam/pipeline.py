@@ -22,7 +22,7 @@ from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
-from cam.planner.passes import plan_passes
+from cam.planner.passes import PassRecord, plan_passes
 from cam.post.gcode import write_gcode
 from config.machine_loader import MachineConfig, Endmill
 
@@ -59,7 +59,7 @@ DEFAULT_TOOL_DB = [
 class PipelineResult:
     ast: LayoutAST
     intents: list[RemovalIntent]
-    passes: list[dict[str, Any]]
+    passes: list[PassRecord]
     gcode: dict[str, str]
     svg: str | None
     metrics: dict[str, Any]
@@ -232,24 +232,22 @@ def run_pipeline(
 
     margin_mm = ast.sheet.margin_mm
 
-    for pass_dict in passes:
-        setup = pass_dict["setup"]
+    for p in passes:
         gcode = write_gcode(
-            pass_dict["moves"],
-            safe_z=setup.safe_z,
+            p.moves,
+            safe_z=p.setup.safe_z,
             machine=machine,
             sheet_height=ast.sheet.height_mm,
             y_origin=y_origin,
             margin_mm=margin_mm,
         )
 
-        tool_diameter = setup.tool.diameter
-        pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
+        tool_diameter = p.setup.tool.diameter
+        pass_name = f"{p.op}-{tool_diameter:.2f}mm"
         gcode_dict[pass_name] = gcode
 
-        moves = pass_dict["moves"]
-        total_moves += len(moves)
-        for move in moves:
+        total_moves += len(p.moves)
+        for move in p.moves:
             if isinstance(move, dict) and move.get("is_rapid"):
                 total_rapid_moves += 1
             else:
@@ -311,9 +309,9 @@ def run_pipeline(
             "tool_changes": len(passes),
             "passes": [
                 {
-                    "name": p["op"],
-                    "tool_diameter_mm": p["setup"].tool.diameter,
-                    "move_count": len(p["moves"]),
+                    "name": p.op,
+                    "tool_diameter_mm": p.setup.tool.diameter,
+                    "move_count": len(p.moves),
                 }
                 for p in passes
             ],

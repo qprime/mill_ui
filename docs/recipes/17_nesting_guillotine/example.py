@@ -172,16 +172,16 @@ def main():
         sheet_gcode_files = {}
         total_moves = 0
 
-        for pass_dict in passes:
+        for p in passes:
             gcode = write_gcode(
-                pass_dict["moves"],
-                safe_z=pass_dict["setup"].safe_z,
+                p.moves,
+                safe_z=p.setup.safe_z,
             )
 
-            tool_diameter = pass_dict["setup"].tool.diameter
-            pass_name = f"{pass_dict['op']}-{tool_diameter:.2f}mm"
+            tool_diameter = p.setup.tool.diameter
+            pass_name = f"{p.op}-{tool_diameter:.2f}mm"
             sheet_gcode_files[pass_name] = gcode
-            total_moves += len(pass_dict["moves"])
+            total_moves += len(p.moves)
 
 
             gcode_path = output_dir / f"{sheet_name}-{pass_name}.nc"

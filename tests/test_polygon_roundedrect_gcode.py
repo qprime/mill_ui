@@ -5,6 +5,7 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
+from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
 from cam.post.gcode import write_gcode
 from cam.config import Config
 
@@ -29,28 +30,28 @@ def _make_test_fixtures():
     return stock, material, machine, config
 
 
+def _feature(shape, geometry, center, depth, side=None, id="test"):
+    return FeatureInput(
+        id=id, shape=shape,
+        geometry=GeometryInput(shape=shape, data=geometry),
+        center_xy_mm=center, depth_mm=depth, start_depth_mm=0.0,
+        side=side,
+    )
+
+
 def test_polygon_triangle_profile():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "triangle",
-            "shape": "Polygon",
-            "geometry": {"points": [(0, 0), (50, 0), (25, 43)]},
-            "center_xy_mm": (100, 100),
-            "depth_mm": 19.0,
-            "side": "outside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("Polygon", {"points": [(0, 0), (50, 0), (25, 43)]},
+                     (100, 100), 19.0, side="outside", id="triangle"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,
@@ -70,30 +71,20 @@ def test_polygon_triangle_profile():
 def test_polygon_l_shape_profile():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "l_shape",
-            "shape": "Polygon",
-            "geometry": {
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("Polygon", {
                 "points": [
                     (0, 0), (60, 0), (60, 30),
                     (30, 30), (30, 60), (0, 60)
                 ]
-            },
-            "center_xy_mm": (150, 100),
-            "depth_mm": 19.0,
-            "side": "outside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+            }, (150, 100), 19.0, side="outside", id="l_shape"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,
@@ -109,29 +100,17 @@ def test_polygon_l_shape_profile():
 def test_roundedrect_uniform_radius_profile():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "rounded_panel",
-            "shape": "RoundedRect",
-            "geometry": {
-                "w_mm": 200.0,
-                "h_mm": 100.0,
-                "radius_mm": 15.0,
-            },
-            "center_xy_mm": (150, 100),
-            "depth_mm": 19.0,
-            "side": "outside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("RoundedRect", {
+                "w_mm": 200.0, "h_mm": 100.0, "radius_mm": 15.0,
+            }, (150, 100), 19.0, side="outside", id="rounded_panel"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,
@@ -148,32 +127,19 @@ def test_roundedrect_uniform_radius_profile():
 def test_roundedrect_selective_corners_profile():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "table_top",
-            "shape": "RoundedRect",
-            "geometry": {
-                "w_mm": 200.0,
-                "h_mm": 100.0,
-                "radius_tl_mm": 20.0,
-                "radius_tr_mm": 20.0,
-                "radius_br_mm": 0.0,
-                "radius_bl_mm": 0.0,
-            },
-            "center_xy_mm": (150, 100),
-            "depth_mm": 19.0,
-            "side": "outside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("RoundedRect", {
+                "w_mm": 200.0, "h_mm": 100.0,
+                "radius_tl_mm": 20.0, "radius_tr_mm": 20.0,
+                "radius_br_mm": 0.0, "radius_bl_mm": 0.0,
+            }, (150, 100), 19.0, side="outside", id="table_top"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,
@@ -189,25 +155,16 @@ def test_roundedrect_selective_corners_profile():
 def test_polygon_inside_cut():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "cutout",
-            "shape": "Polygon",
-            "geometry": {"points": [(0, 0), (80, 0), (80, 60), (0, 60)]},
-            "center_xy_mm": (150, 100),
-            "depth_mm": 19.0,
-            "side": "inside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("Polygon", {"points": [(0, 0), (80, 0), (80, 60), (0, 60)]},
+                     (150, 100), 19.0, side="inside", id="cutout"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,
@@ -223,29 +180,17 @@ def test_polygon_inside_cut():
 def test_roundedrect_inside_cut():
     stock, material, machine, config = _make_test_fixtures()
 
-    hints = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [{
-            "id": "window_cutout",
-            "shape": "RoundedRect",
-            "geometry": {
-                "w_mm": 100.0,
-                "h_mm": 60.0,
-                "radius_mm": 10.0,
-            },
-            "center_xy_mm": (150, 100),
-            "depth_mm": 19.0,
-            "side": "inside",
-        }],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
+    planner_input = PlannerInput(
+        kerf_width_mm=3.175,
+        profiles=(
+            _feature("RoundedRect", {
+                "w_mm": 100.0, "h_mm": 60.0, "radius_mm": 10.0,
+            }, (150, 100), 19.0, side="inside", id="window_cutout"),
+        ),
+    )
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=TOOL_DB,
         material=material,

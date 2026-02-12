@@ -7,6 +7,7 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
+from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
 from cam.post.gcode import write_gcode
 from cam.config import Config
 from adapters.hints_to_removal import (
@@ -14,7 +15,7 @@ from adapters.hints_to_removal import (
     pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
 )
-from adapters.removal_to_planner import removal_intents_to_hints
+from adapters.removal_to_planner import removal_intents_to_planner_input
 
 
 TOOL_DB = [
@@ -41,14 +42,14 @@ def _hash_gcode(gcode: str) -> str:
     return hashlib.sha256(gcode.encode("utf-8")).hexdigest()
 
 
-def _generate_gcode_from_hints(
-    hints: dict[str, Any],
+def _generate_gcode(
+    planner_input: PlannerInput,
     stock: Stock,
     material: Material,
     machine: Machine,
 ) -> str:
     passes, _ = plan_passes(
-        hints,
+        planner_input,
         config=Config(),
         tool_db=TOOL_DB,
         material=material,
@@ -68,6 +69,31 @@ def _generate_gcode_from_hints(
     return "\n".join(gcode_parts)
 
 
+def _planner_input_from_hints(
+    profiles=None, pockets=None, holes=None, engraves=None,
+    kerf_width_mm=3.175,
+) -> PlannerInput:
+    def _to_feature(hint: dict[str, Any]) -> FeatureInput:
+        shape = hint.get("shape", "Rect")
+        return FeatureInput(
+            id=hint.get("id", ""),
+            shape=shape,
+            geometry=GeometryInput(shape=shape, data=hint.get("geometry", {})),
+            center_xy_mm=tuple(hint.get("center_xy_mm", (0.0, 0.0))),
+            depth_mm=float(hint.get("depth_mm", 0.0)),
+            start_depth_mm=float(hint.get("start_depth_mm", 0.0)),
+            side=hint.get("side"),
+        )
+
+    return PlannerInput(
+        kerf_width_mm=kerf_width_mm,
+        profiles=tuple(_to_feature(p) for p in (profiles or [])),
+        pockets=tuple(_to_feature(p) for p in (pockets or [])),
+        holes=tuple(_to_feature(h) for h in (holes or [])),
+        engraves=tuple(_to_feature(e) for e in (engraves or [])),
+    )
+
+
 def test_profile_gcode_equivalence():
     print("Running test_profile_gcode_equivalence...")
     sheet_thickness = 19.0
@@ -84,23 +110,13 @@ def test_profile_gcode_equivalence():
         "side": "outside",
     }
 
-
-    hints_v1 = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [profile_hint],
-        "pockets": [],
-        "holes": [],
-        "engraves": [],
-    }
-    gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
+    planner_input_v1 = _planner_input_from_hints(profiles=[profile_hint])
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-
     intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
-    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
+    planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -125,23 +141,13 @@ def test_pocket_gcode_equivalence():
         "depth_mm": 8.0,
     }
 
-
-    hints_v1 = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [],
-        "pockets": [pocket_hint],
-        "holes": [],
-        "engraves": [],
-    }
-    gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
+    planner_input_v1 = _planner_input_from_hints(pockets=[pocket_hint])
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-
     intent = pocket_hint_to_removal_intent(pocket_hint)
-    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
+    planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -166,23 +172,13 @@ def test_hole_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-
-    hints_v1 = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [],
-        "pockets": [],
-        "holes": [hole_hint],
-        "engraves": [],
-    }
-    gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
+    planner_input_v1 = _planner_input_from_hints(holes=[hole_hint])
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
-
     intent = hole_hint_to_removal_intent(hole_hint)
-    hints_v2 = removal_intents_to_hints([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
+    planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -222,28 +218,22 @@ def test_mixed_operations_gcode_equivalence():
         "depth_mm": 12.0,
     }
 
-
-    hints_v1 = {
-        "units": "mm",
-        "kerf_width_mm": 3.175,
-        "min_channel_width_mm": 6.0,
-        "profiles": [profile_hint],
-        "pockets": [pocket_hint],
-        "holes": [hole_hint],
-        "engraves": [],
-    }
-    gcode_v1 = _generate_gcode_from_hints(hints_v1, stock, material, machine)
+    planner_input_v1 = _planner_input_from_hints(
+        profiles=[profile_hint],
+        pockets=[pocket_hint],
+        holes=[hole_hint],
+    )
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
     hash_v1 = _hash_gcode(gcode_v1)
-
 
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)
-    hints_v2 = removal_intents_to_hints(
+    planner_input_v2 = removal_intents_to_planner_input(
         [profile_intent, pocket_intent, hole_intent],
         kerf_width_mm=3.175,
     )
-    gcode_v2 = _generate_gcode_from_hints(hints_v2, stock, material, machine)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"

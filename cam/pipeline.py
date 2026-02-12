@@ -9,7 +9,7 @@ from typing import Any
 from layout_ast.layout import LayoutAST
 from ir.removal_intent import RemovalIntent, Bounds2D
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_hints
+from adapters.removal_to_planner import removal_intents_to_planner_input
 from validation.removal_checks import (
     check_overlap,
     check_depth_feasibility,
@@ -190,7 +190,7 @@ def run_pipeline(
         )
 
     hints_start = time.perf_counter()
-    hints = removal_intents_to_hints(
+    planner_input = removal_intents_to_planner_input(
         intents,
         kerf_width_mm=kerf_mm,
         min_channel_width_mm=min_channel_width_mm,
@@ -207,7 +207,7 @@ def run_pipeline(
 
     plan_start = time.perf_counter()
     passes, _ = plan_passes(
-        hints,
+        planner_input,
         config=Config(),
         tool_db=tool_db,
         material=material,
@@ -217,9 +217,9 @@ def run_pipeline(
     )
     _plan_ms = (time.perf_counter() - plan_start) * 1000
 
-    keepouts = hints.get("keepouts", [])
-    if keepouts:
-        keepout_result = verify_passes_avoid_keepouts(passes, keepouts)
+    if planner_input.keepouts:
+        keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
+        keepout_result = verify_passes_avoid_keepouts(passes, keepout_dicts)
         if keepout_result.has_violations():
             for error_msg in keepout_result.format_errors():
                 errors.append(f"Keepout violation: {error_msg}")

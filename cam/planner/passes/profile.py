@@ -29,19 +29,6 @@ def circle_shape_mm(diameter: float, center: Tuple[float, float]) -> Shape2D:
     return circle_shape(Vec2(cx, cy), diameter / 2.0)
 
 
-def ensure_center(record: Mapping[str, Any]) -> Tuple[float, float]:
-    placement = record.get("placement") if isinstance(record.get("placement"), Mapping) else None
-    if placement is not None:
-        value = placement.get("center_xy_mm")
-        if isinstance(value, (list, tuple)) and len(value) == 2:
-            return float(value[0]), float(value[1])
-
-    direct = record.get("center_xy_mm")
-    if isinstance(direct, (list, tuple)) and len(direct) == 2:
-        return float(direct[0]), float(direct[1])
-    return 0.0, 0.0
-
-
 def offset_rect_shape(width: float, height: float, center: Tuple[float, float], offset: float) -> Shape2D | None:
     width_expanded = width + 2.0 * offset
     height_expanded = height + 2.0 * offset
@@ -152,7 +139,6 @@ def _profile_plain(
 
 __all__ = [
     "circle_shape_mm",
-    "ensure_center",
     "offset_circle_shape",
     "offset_polygon_shape",
     "offset_rect_shape",

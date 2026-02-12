@@ -26,6 +26,7 @@ from cam.planner.passes.pocket import (
     plan_engrave_passes,
 )
 from cam.planner.passes.merge_shared_edges import _rect_edges, _overlap_len
+from cam.planner.planner_input import FeatureInput, GeometryInput
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
@@ -363,19 +364,23 @@ class TestOverlapLen:
         assert _overlap_len(0, 5, 5, 10) == pytest.approx(0.0)
 
 
+def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
+    return FeatureInput(
+        id=id,
+        shape=shape,
+        geometry=GeometryInput(shape=shape, data=geometry),
+        center_xy_mm=center,
+        depth_mm=depth,
+        start_depth_mm=start_depth,
+    )
+
+
 class TestPlanPocketPasses:
 
     def test_rect_pocket(self):
         acc = _accumulator()
-        hints = {
-            "pockets": [{
-                "shape": "Rect",
-                "geometry": {"w_mm": 50.0, "h_mm": 30.0},
-                "center_xy_mm": (100.0, 75.0),
-                "depth_mm": 6.0,
-            }],
-        }
-        plan_pocket_passes(hints, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        pockets = (_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0),)
+        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "pocket"
@@ -384,15 +389,8 @@ class TestPlanPocketPasses:
 
     def test_circle_pocket(self):
         acc = _accumulator()
-        hints = {
-            "pockets": [{
-                "shape": "Circle",
-                "geometry": {"diameter_mm": 20.0},
-                "center_xy_mm": (100.0, 75.0),
-                "depth_mm": 6.0,
-            }],
-        }
-        plan_pocket_passes(hints, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        pockets = (_feature("Circle", {"diameter_mm": 20.0}, (100.0, 75.0), 6.0),)
+        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "pocket"
@@ -400,50 +398,28 @@ class TestPlanPocketPasses:
 
     def test_zero_depth_produces_no_moves(self):
         acc = _accumulator()
-        hints = {
-            "pockets": [{
-                "shape": "Rect",
-                "geometry": {"w_mm": 50.0, "h_mm": 30.0},
-                "center_xy_mm": (100.0, 75.0),
-                "depth_mm": 0.0,
-            }],
-        }
-        plan_pocket_passes(hints, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        pockets = (_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 0.0),)
+        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         records = acc.passes()
         total_moves = sum(len(r.moves) for r in records)
         assert total_moves == 0
 
     def test_start_depth_offset(self):
         acc = _accumulator()
-        hints = {
-            "pockets": [{
-                "shape": "Rect",
-                "geometry": {"w_mm": 50.0, "h_mm": 30.0},
-                "center_xy_mm": (100.0, 75.0),
-                "depth_mm": 10.0,
-                "start_depth_mm": 4.0,
-            }],
-        }
-        plan_pocket_passes(hints, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        pockets = (_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 10.0, start_depth=4.0),)
+        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         records = acc.passes()
         assert len(records) == 1
 
     def test_empty_pockets_list(self):
         acc = _accumulator()
-        plan_pocket_passes({"pockets": []}, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        plan_pocket_passes((), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         assert len(acc.passes()) == 0
 
     def test_unknown_shape_produces_no_moves(self):
         acc = _accumulator()
-        hints = {
-            "pockets": [{
-                "shape": "Hexagon",
-                "geometry": {},
-                "center_xy_mm": (100.0, 75.0),
-                "depth_mm": 6.0,
-            }],
-        }
-        plan_pocket_passes(hints, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        pockets = (_feature("Hexagon", {}, (100.0, 75.0), 6.0),)
+        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         total_moves = sum(len(r.moves) for r in acc.passes())
         assert total_moves == 0
 
@@ -452,60 +428,32 @@ class TestPlanHolePasses:
 
     def test_drill_strategy_for_matching_diameter(self):
         acc = _accumulator()
-        hints = {
-            "holes": [{
-                "shape": "Circle",
-                "geometry": {"diameter_mm": 3.0},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 10.0,
-            }],
-        }
-        plan_hole_passes(hints, accumulator=acc, tool_db=FLAT_ONLY)
+        holes = (_feature("Circle", {"diameter_mm": 3.0}, (50.0, 50.0), 10.0),)
+        plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "drill"
 
     def test_bore_strategy_for_medium_hole(self):
         acc = _accumulator()
-        hints = {
-            "holes": [{
-                "shape": "Circle",
-                "geometry": {"diameter_mm": 8.0},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 10.0,
-            }],
-        }
-        plan_hole_passes(hints, accumulator=acc, tool_db=FLAT_ONLY)
+        holes = (_feature("Circle", {"diameter_mm": 8.0}, (50.0, 50.0), 10.0),)
+        plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "bore"
 
     def test_pocket_strategy_for_large_hole(self):
         acc = _accumulator()
-        hints = {
-            "holes": [{
-                "shape": "Circle",
-                "geometry": {"diameter_mm": 40.0},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 10.0,
-            }],
-        }
-        plan_hole_passes(hints, accumulator=acc, tool_db=FLAT_ONLY)
+        holes = (_feature("Circle", {"diameter_mm": 40.0}, (50.0, 50.0), 10.0),)
+        plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "pocket"
 
     def test_non_circle_hole_skipped(self):
         acc = _accumulator()
-        hints = {
-            "holes": [{
-                "shape": "Rect",
-                "geometry": {"w_mm": 5.0, "h_mm": 5.0},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 10.0,
-            }],
-        }
-        plan_hole_passes(hints, accumulator=acc, tool_db=FLAT_ONLY)
+        holes = (_feature("Rect", {"w_mm": 5.0, "h_mm": 5.0}, (50.0, 50.0), 10.0),)
+        plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
         assert len(acc.passes()) == 0
 
 
@@ -513,70 +461,36 @@ class TestPlanEngravePasses:
 
     def test_polyline_engrave(self):
         acc = _accumulator()
-        hints = {
-            "engraves": [{
-                "shape": "polyline",
-                "geometry": {"points": [[0, 0], [10, 0], [10, 10]]},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 0.3,
-            }],
-        }
-        plan_engrave_passes(hints, accumulator=acc, tool_db=ALL_TOOLS)
+        engraves = (_feature("polyline", {"points": [[0, 0], [10, 0], [10, 10]]}, (50.0, 50.0), 0.3),)
+        plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
         assert len(records) == 1
         assert records[0].op == "engrave"
 
     def test_rect_engrave(self):
         acc = _accumulator()
-        hints = {
-            "engraves": [{
-                "shape": "rect",
-                "geometry": {"w_mm": 20.0, "h_mm": 10.0},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 0.3,
-            }],
-        }
-        plan_engrave_passes(hints, accumulator=acc, tool_db=ALL_TOOLS)
+        engraves = (_feature("rect", {"w_mm": 20.0, "h_mm": 10.0}, (50.0, 50.0), 0.3),)
+        plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
         assert len(records) == 1
 
     def test_line_engrave(self):
         acc = _accumulator()
-        hints = {
-            "engraves": [{
-                "shape": "line",
-                "geometry": {"start": [0, 0], "end": [20, 0]},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 0.3,
-            }],
-        }
-        plan_engrave_passes(hints, accumulator=acc, tool_db=ALL_TOOLS)
+        engraves = (_feature("line", {"start": [0, 0], "end": [20, 0]}, (50.0, 50.0), 0.3),)
+        plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
         assert len(records) == 1
 
     def test_unknown_shape_skipped(self):
         acc = _accumulator()
-        hints = {
-            "engraves": [{
-                "shape": "arc",
-                "geometry": {},
-                "center_xy_mm": (50.0, 50.0),
-                "depth_mm": 0.3,
-            }],
-        }
-        plan_engrave_passes(hints, accumulator=acc, tool_db=ALL_TOOLS)
+        engraves = (_feature("arc", {}, (50.0, 50.0), 0.3),)
+        plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         assert len(acc.passes()) == 0
 
     def test_default_depth(self):
         acc = _accumulator()
-        hints = {
-            "engraves": [{
-                "shape": "line",
-                "geometry": {"start": [0, 0], "end": [10, 0]},
-                "center_xy_mm": (0.0, 0.0),
-            }],
-        }
-        plan_engrave_passes(hints, accumulator=acc, tool_db=ALL_TOOLS)
+        engraves = (_feature("line", {"start": [0, 0], "end": [10, 0]}, (0.0, 0.0), 0.0),)
+        plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
         assert len(records) == 1
         zs = [m["z"] for m in records[0].moves if m.get("kind") == "cut" and m.get("z") is not None]

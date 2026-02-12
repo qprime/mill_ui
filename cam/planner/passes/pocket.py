@@ -8,7 +8,8 @@ from cam.ops.engrave import engrave_lines
 from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import offset_moves_z
-from .profile import circle_shape_mm, ensure_center, rect_shape
+from cam.planner.planner_input import FeatureInput, CornerCleanupInput
+from .profile import circle_shape_mm, rect_shape
 from .tools import (
     ToolSelection,
     pick_tool_for_engrave,
@@ -24,16 +25,15 @@ if TYPE_CHECKING:
 
 
 def plan_pocket_passes(
-    hints: Mapping[str, Any],
+    pockets: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
     tool_db: Sequence[Mapping[str, Any]],
     config: "Config",
 ) -> None:
-    pockets = hints.get("pockets", []) or []
     for entry in pockets:
-        geometry = entry.get("geometry") or {}
-        shape_name = str(entry.get("shape") or entry.get("type") or "").lower()
+        geometry = entry.geometry.data
+        shape_name = entry.shape.lower()
         required_width = None
         if shape_name == "rect":
             required_width = min(float(geometry.get("w_mm", 0.0)), float(geometry.get("h_mm", 0.0)))
@@ -47,18 +47,20 @@ def plan_pocket_passes(
         )
         record = accumulator.get_record("pocket", tool)
         setup = record.setup
-        depth = float(entry.get("depth_mm", 0.0))
-        start_depth = max(0.0, float(entry.get("start_depth_mm", 0.0)))
+        depth = entry.depth_mm
+        start_depth = max(0.0, entry.start_depth_mm)
         if depth <= start_depth:
             continue
         effective_depth = depth - start_depth
         step_over = stepover_for_tool(tool)
         step_down = stepdown_for_tool(tool)
 
+        center = entry.center_xy_mm
+
         if shape_name == "rect":
             width = float(geometry.get("w_mm", 0.0))
             height = float(geometry.get("h_mm", 0.0))
-            shape = rect_shape(width, height, ensure_center(entry))
+            shape = rect_shape(width, height, center)
             record.add_moves(
                 pocket_then_finish_profile(
                     shape,
@@ -75,7 +77,7 @@ def plan_pocket_passes(
         elif shape_name == "circle":
             diameter = float(geometry.get("diameter_mm", 0.0))
             moves = pocket_circle_concentric(
-                ensure_center(entry),
+                center,
                 diameter,
                 setup,
                 depth_mm=effective_depth,
@@ -86,9 +88,9 @@ def plan_pocket_passes(
             record.add_moves(offset_moves_z(moves, start_depth), increment=1)
         elif shape_name == "region":
             moves = pocket_region_rect_raster(
-                entry,
+                entry.to_dict(),
                 setup,
-                default_center_xy=ensure_center(entry),
+                default_center_xy=center,
                 depth_mm=effective_depth,
                 stepover_mm=step_over,
                 stepdown_mm=step_down,
@@ -99,19 +101,18 @@ def plan_pocket_passes(
 
 
 def plan_hole_passes(
-    hints: Mapping[str, Any],
+    holes: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
     tool_db: Sequence[Mapping[str, Any]],
 ) -> None:
-    holes = hints.get("holes", []) or []
     for entry in holes:
-        if str(entry.get("shape") or entry.get("type") or "").lower() != "circle":
+        if entry.shape.lower() != "circle":
             continue
-        geometry = entry.get("geometry") or {}
+        geometry = entry.geometry.data
         diameter = float(geometry.get("diameter_mm", 0.0))
-        center = ensure_center(entry)
-        depth = float(entry.get("depth_mm", 0.0))
+        center = entry.center_xy_mm
+        depth = entry.depth_mm
 
         tool = pick_tool_for_hole(tool_db, hole_diameter_mm=diameter)
         tool_diameter = float(tool.diameter)
@@ -150,20 +151,19 @@ def plan_hole_passes(
 
 
 def plan_engrave_passes(
-    hints: Mapping[str, Any],
+    engraves: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
     tool_db: Sequence[Mapping[str, Any]],
 ) -> None:
-    engraves = hints.get("engraves", []) or []
     for entry in engraves:
-        geometry = entry.get("geometry") or {}
-        shape_name = str(entry.get("shape") or entry.get("type") or "").lower()
+        geometry = entry.geometry.data
+        shape_name = entry.shape.lower()
         lines: list[list[tuple[float, float]]] = []
 
         if shape_name == "polyline":
             points = geometry.get("points") or []
-            cx, cy = ensure_center(entry)
+            cx, cy = entry.center_xy_mm
             line = []
             for pt in points:
                 if isinstance(pt, (list, tuple)) and len(pt) == 2:
@@ -175,7 +175,7 @@ def plan_engrave_passes(
             height = float(geometry.get("h_mm", 0.0))
             if width <= 0.0 or height <= 0.0:
                 continue
-            cx, cy = ensure_center(entry)
+            cx, cy = entry.center_xy_mm
             half_w = 0.5 * width
             half_h = 0.5 * height
             lines.append([
@@ -188,7 +188,7 @@ def plan_engrave_passes(
         elif shape_name == "line":
             start = geometry.get("start", [0, 0])
             end = geometry.get("end", [0, 0])
-            cx, cy = ensure_center(entry)
+            cx, cy = entry.center_xy_mm
             lines.append([
                 (float(start[0]) + cx, float(start[1]) + cy),
                 (float(end[0]) + cx, float(end[1]) + cy),
@@ -201,7 +201,7 @@ def plan_engrave_passes(
 
         tool = pick_tool_for_engrave(tool_db)
         record = accumulator.get_record("engrave", tool)
-        depth = float(entry.get("depth_mm", 0.0)) or 0.3
+        depth = entry.depth_mm or 0.3
         record.add_moves(
             engrave_lines(lines, record.setup, z=-abs(depth)),
             increment=len(lines),
@@ -209,18 +209,15 @@ def plan_engrave_passes(
 
 
 def plan_corner_cleanup_passes(
-    hints: Mapping[str, Any],
+    corner_cleanups: tuple[CornerCleanupInput, ...],
     *,
     accumulator: "PassAccumulator",
     tool_db: Sequence[Mapping[str, Any]],
 ) -> None:
-    corner_cleanups = hints.get("corner_cleanups", []) or []
-
     for entry in corner_cleanups:
-        corner_tool_diameter = float(entry.get("corner_tool_diameter_mm", 0.0))
+        corner_tool_diameter = entry.corner_tool_diameter_mm
         if corner_tool_diameter <= 0.0:
             continue
-
 
         tool = None
         for t in tool_db:
@@ -246,19 +243,18 @@ def plan_corner_cleanup_passes(
         record = accumulator.get_record("corner_cleanup", tool)
         setup = record.setup
 
-        depth = float(entry.get("depth_mm", 0.0))
-        start_depth = float(entry.get("start_depth_mm", 0.0))
+        depth = entry.depth_mm
+        start_depth = entry.start_depth_mm
         if depth <= start_depth:
             continue
         effective_depth = depth - start_depth
 
-        corners = entry.get("corners", [])
+        corners = entry.corners
         if not corners:
             continue
 
         step_over = stepover_for_tool(tool)
         step_down = stepdown_for_tool(tool)
-
 
         corner_pocket_diameter = 2.0 * corner_tool_diameter
 
@@ -275,7 +271,6 @@ def plan_corner_cleanup_passes(
 
             moves = offset_moves_z(moves, start_depth)
             record.add_moves(moves, increment=1)
-
 
 
 __all__ = [

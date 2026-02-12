@@ -7,8 +7,9 @@ from typing import Any, Dict, List, Mapping, Sequence, Tuple, TYPE_CHECKING
 from cam.types import Vec2
 from cam.shape import Shape2D
 from cam.ops.profile import profile_outline
+from cam.planner.planner_input import FeatureInput
 
-from .profile import ensure_center, rect_shape
+from .profile import rect_shape
 from .tools import ToolSelection, stepdown_for_tool
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ def _overlap_len(a1: float, a2: float, b1: float, b2: float) -> float:
 
 
 def merge_rect_profiles(
-    rect_profiles: Sequence[Mapping[str, Any]],
+    rect_profiles: Sequence[FeatureInput],
     *,
     record: "PassRecord",
     tool: ToolSelection,
@@ -67,17 +68,15 @@ def merge_rect_profiles(
 
     edges: List[_Edge] = []
     rect_depths: Dict[str, float] = {}
-    rect_lookup: Dict[str, Mapping[str, Any]] = {}
 
     for idx, rec in enumerate(rect_profiles):
-        rect_id = str(rec.get("id") or f"rect@{idx}")
-        cx, cy = ensure_center(rec)
-        geom = rec.get("geometry") or {}
+        rect_id = rec.id or f"rect@{idx}"
+        cx, cy = rec.center_xy_mm
+        geom = rec.geometry.data
         width = float(geom.get("w_mm", 0.0))
         height = float(geom.get("h_mm", 0.0))
-        depth = float(rec.get("depth_mm", 0.0))
+        depth = rec.depth_mm
         rect_depths[rect_id] = depth
-        rect_lookup[rect_id] = rec
         edges.extend(_rect_edges(cx, cy, width, height, rect_id))
 
     buckets: Dict[Tuple[str, int], List[_Edge]] = {}

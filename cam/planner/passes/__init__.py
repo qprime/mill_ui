@@ -8,12 +8,12 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
+from cam.planner.planner_input import PlannerInput, FeatureInput, TabsInput
 
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
 from .profile import (
     circle_shape_mm,
-    ensure_center,
     offset_polygon_shape,
     offset_rounded_rect_shape,
     polygon_shape,
@@ -116,7 +116,7 @@ def _build_filename(operation: str, tool_dict: Mapping[str, Any]) -> str:
 
 
 def plan_passes(
-    hints: Mapping[str, Any],
+    planner_input: PlannerInput,
     *,
     config: Config,
     tool_db: Sequence[Mapping[str, Any]],
@@ -137,12 +137,12 @@ def plan_passes(
         prime_spindle=prime_spindle,
     )
 
-    plan_pocket_passes(hints, accumulator=accumulator, tool_db=tool_db, config=config)
-    plan_hole_passes(hints, accumulator=accumulator, tool_db=tool_db)
-    plan_engrave_passes(hints, accumulator=accumulator, tool_db=tool_db)
-    plan_corner_cleanup_passes(hints, accumulator=accumulator, tool_db=tool_db)
+    plan_pocket_passes(planner_input.pockets, accumulator=accumulator, tool_db=tool_db, config=config)
+    plan_hole_passes(planner_input.holes, accumulator=accumulator, tool_db=tool_db)
+    plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
+    plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
 
-    kerf_mm = float(hints.get("kerf_width_mm", 0.0))
+    kerf_mm = planner_input.kerf_width_mm
 
     profile_data = profile_opts or {}
     onion_skin_mm = _extract_positive_float(profile_data.get("onion_skin_mm", 0.0))
@@ -150,35 +150,29 @@ def plan_passes(
     tabs_enabled = bool(tabs_opts)
     cut_through_mm = _extract_positive_float(profile_data.get("cut_through_mm", 0.0))
 
-    profiles = hints.get("profiles", []) or []
+    profiles = planner_input.profiles
 
     any_profile_has_tabs = tabs_enabled or any(
-        isinstance(rec.get("tabs"), Mapping) and rec.get("tabs")
+        rec.tabs is not None
         for rec in profiles
-        if isinstance(rec, Mapping)
     )
 
     merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or any_profile_has_tabs)
 
-    def _tabs_for_record(rec: Mapping[str, Any]) -> Optional[Dict[str, float]]:
-        value = rec.get("tabs") if isinstance(rec, Mapping) else None
-        if isinstance(value, Mapping):
-            custom = _normalize_tabs(value)
+    def _tabs_for_feature(rec: FeatureInput) -> Optional[Dict[str, float]]:
+        if rec.tabs is not None:
+            custom = _normalize_tabs({
+                "count": rec.tabs.count,
+                "height_mm": rec.tabs.height_mm,
+                "width_mm": rec.tabs.width_mm,
+            })
             return custom if custom is not None else tabs_opts
-        if isinstance(value, bool):
-            return tabs_opts if value else None
-        if isinstance(value, str):
-            lowered = value.strip().lower()
-            if lowered in {"off", "none", "skip", "false"}:
-                return None
-            if lowered in {"on", "true", "force"}:
-                return tabs_opts
         return tabs_opts
 
-    rect_profiles = [rec for rec in profiles if _shape_name(rec) == "rect"]
-    circle_profiles = [rec for rec in profiles if _shape_name(rec) == "circle"]
-    polygon_profiles = [rec for rec in profiles if _shape_name(rec) == "polygon"]
-    rounded_rect_profiles = [rec for rec in profiles if _shape_name(rec) == "roundedrect"]
+    rect_profiles = [rec for rec in profiles if rec.shape.lower() == "rect"]
+    circle_profiles = [rec for rec in profiles if rec.shape.lower() == "circle"]
+    polygon_profiles = [rec for rec in profiles if rec.shape.lower() == "polygon"]
+    rounded_rect_profiles = [rec for rec in profiles if rec.shape.lower() == "roundedrect"]
 
     merged_seams = 0
     if merge_enabled and rect_profiles:
@@ -195,11 +189,11 @@ def plan_passes(
         for rec in rect_profiles:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
             record = accumulator.get_record("profile", profile_tool)
-            geom = rec.get("geometry") or {}
+            geom = rec.geometry.data
             width = float(geom.get("w_mm", 0.0))
             height = float(geom.get("h_mm", 0.0))
-            shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, ensure_center(rec))
-            depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+            shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
+            depth = max(0.0, rec.depth_mm) + cut_through_mm
             record.add_moves(
                 profile_moves_with_options(
                     shape,
@@ -207,7 +201,7 @@ def plan_passes(
                     depth_mm=depth,
                     tool=profile_tool,
                     onion_skin_mm=onion_skin_mm,
-                    tabs_opts=_tabs_for_record(rec),
+                    tabs_opts=_tabs_for_feature(rec),
                 ),
                 increment=1,
             )
@@ -215,10 +209,10 @@ def plan_passes(
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.get("geometry") or {}
+        geom = rec.geometry.data
         diameter = float(geom.get("diameter_mm", 0.0))
         radius = 0.5 * diameter
-        side = str(rec.get("side", "on")).lower()
+        side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
         if side == "outside":
             radius += tool_radius
@@ -226,8 +220,8 @@ def plan_passes(
             radius -= tool_radius
         if radius <= 0.0:
             continue
-        shape = circle_shape_mm(radius * 2.0, ensure_center(rec))
-        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+        shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
+        depth = max(0.0, rec.depth_mm) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(
                 shape,
@@ -235,7 +229,7 @@ def plan_passes(
                 depth_mm=depth,
                 tool=profile_tool,
                 onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_record(rec),
+                tabs_opts=_tabs_for_feature(rec),
             ),
             increment=1,
         )
@@ -243,11 +237,11 @@ def plan_passes(
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.get("geometry") or {}
+        geom = rec.geometry.data
         points = geom.get("points", [])
         if not points:
             continue
-        side = str(rec.get("side", "on")).lower()
+        side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
         offset = 0.0
         if side == "outside":
@@ -255,12 +249,12 @@ def plan_passes(
         elif side == "inside":
             offset = -tool_radius
         if offset != 0.0:
-            shape = offset_polygon_shape(points, ensure_center(rec), offset)
+            shape = offset_polygon_shape(points, rec.center_xy_mm, offset)
         else:
-            shape = polygon_shape(points, ensure_center(rec))
+            shape = polygon_shape(points, rec.center_xy_mm)
         if shape is None:
             continue
-        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+        depth = max(0.0, rec.depth_mm) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(
                 shape,
@@ -268,7 +262,7 @@ def plan_passes(
                 depth_mm=depth,
                 tool=profile_tool,
                 onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_record(rec),
+                tabs_opts=_tabs_for_feature(rec),
             ),
             increment=1,
         )
@@ -276,7 +270,7 @@ def plan_passes(
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.get("geometry") or {}
+        geom = rec.geometry.data
         width = float(geom.get("w_mm", 0.0))
         height = float(geom.get("h_mm", 0.0))
         radii = {
@@ -285,7 +279,7 @@ def plan_passes(
             'br': float(geom.get('radius_br_mm', geom.get('radius_mm', 0.0))),
             'bl': float(geom.get('radius_bl_mm', geom.get('radius_mm', 0.0))),
         }
-        side = str(rec.get("side", "on")).lower()
+        side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
         offset = 0.0
         if side == "outside":
@@ -293,12 +287,12 @@ def plan_passes(
         elif side == "inside":
             offset = -tool_radius
         if offset != 0.0:
-            shape = offset_rounded_rect_shape(width, height, radii, ensure_center(rec), offset)
+            shape = offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, offset)
         else:
-            shape = rounded_rect_shape(width, height, radii, ensure_center(rec))
+            shape = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
         if shape is None:
             continue
-        depth = max(0.0, float(rec.get("depth_mm", 0.0))) + cut_through_mm
+        depth = max(0.0, rec.depth_mm) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(
                 shape,
@@ -306,7 +300,7 @@ def plan_passes(
                 depth_mm=depth,
                 tool=profile_tool,
                 onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_record(rec),
+                tabs_opts=_tabs_for_feature(rec),
             ),
             increment=1,
         )
@@ -322,10 +316,6 @@ def plan_passes(
     )
 
     return pass_dicts, summary
-
-
-def _shape_name(record: Mapping[str, Any]) -> str:
-    return str(record.get("shape") or record.get("type") or "").lower()
 
 
 def _extract_positive_float(value: Any) -> float:

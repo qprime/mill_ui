@@ -2,7 +2,7 @@
 
 from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_hints
+from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.planner.passes import plan_passes
 from cam.model.stock import Stock
@@ -36,16 +36,15 @@ def test_corner_cleanup_basic():
     assert intents[0].metadata.get("corner_cleanup_tool_diameter_mm") == 3.175
 
 
-    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
-    assert "corner_cleanups" in hints
-    assert len(hints["corner_cleanups"]) == 1
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    assert len(planner_input.corner_cleanups) == 1
 
-    corner_cleanup = hints["corner_cleanups"][0]
-    assert corner_cleanup["corner_tool_diameter_mm"] == 3.175
-    assert len(corner_cleanup["corners"]) == 4
+    corner_cleanup = planner_input.corner_cleanups[0]
+    assert corner_cleanup.corner_tool_diameter_mm == 3.175
+    assert len(corner_cleanup.corners) == 4
 
 
-    corners = corner_cleanup["corners"]
+    corners = corner_cleanup.corners
 
 
     assert (50.0, 35.0) in corners
@@ -74,7 +73,7 @@ def test_corner_cleanup_planner():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_hints(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
 
 
     tool_db = [
@@ -89,7 +88,7 @@ def test_corner_cleanup_planner():
 
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=tool_db,
         material=material,
@@ -147,7 +146,7 @@ def test_corner_cleanup_tool_not_found():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_hints(intents)
+    planner_input = removal_intents_to_planner_input(intents)
 
     tool_db = [
         {"name": "3/8_endmill", "diameter": 9.525, "kind": "flat", "rpm": 12000, "feed_xy": 1200, "feed_z": 400},
@@ -161,7 +160,7 @@ def test_corner_cleanup_tool_not_found():
 
     try:
         passes, summary = plan_passes(
-            hints,
+            planner_input,
             config=config,
             tool_db=tool_db,
             material=material,
@@ -196,7 +195,7 @@ def test_corner_cleanup_non_rect_error():
 
 
     try:
-        hints = removal_intents_to_hints(intents)
+        planner_input = removal_intents_to_planner_input(intents)
         assert False, "Expected ValueError for non-rectangular pocket"
     except ValueError as e:
         assert "only supported for rectangular pockets" in str(e).lower()
@@ -222,10 +221,10 @@ def test_corner_cleanup_without_flag():
     )
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_hints(intents)
+    planner_input = removal_intents_to_planner_input(intents)
 
 
-    assert len(hints.get("corner_cleanups", [])) == 0
+    assert len(planner_input.corner_cleanups) == 0
 
     tool_db = [
         {"name": "3/8_endmill", "diameter": 9.525, "kind": "flat", "rpm": 12000, "feed_xy": 1200, "feed_z": 400},
@@ -237,7 +236,7 @@ def test_corner_cleanup_without_flag():
     stock = Stock(width=200, height=150, thickness=19)
 
     passes, summary = plan_passes(
-        hints,
+        planner_input,
         config=config,
         tool_db=tool_db,
         material=material,

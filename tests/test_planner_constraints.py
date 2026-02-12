@@ -252,8 +252,8 @@ class TestPlannerCapabilitiesRegistry:
 
 class TestAdapterKeepoutExtraction:
 
-    def test_keepouts_extracted_to_hints(self):
-        from adapters.removal_to_planner import removal_intents_to_hints
+    def test_keepouts_extracted_to_planner_input(self):
+        from adapters.removal_to_planner import removal_intents_to_planner_input
 
         keepout = KeepoutRegion(
             bounds=Bounds2D(x_min=40, x_max=60, y_min=40, y_max=60),
@@ -266,19 +266,18 @@ class TestAdapterKeepoutExtraction:
             constraints=Constraints(keepouts=(keepout,)),
             metadata={"hint_type": "pocket", "shape": "Rect"},
         )
-        hints = removal_intents_to_hints([intent])
+        planner_input = removal_intents_to_planner_input([intent])
 
-        assert "keepouts" in hints
-        assert len(hints["keepouts"]) == 1
-        k = hints["keepouts"][0]
-        assert k["x_min"] == 40
-        assert k["x_max"] == 60
-        assert k["y_min"] == 40
-        assert k["y_max"] == 60
-        assert k["reason"] == "clamp"
+        assert len(planner_input.keepouts) == 1
+        k = planner_input.keepouts[0]
+        assert k.x_min == 40
+        assert k.x_max == 60
+        assert k.y_min == 40
+        assert k.y_max == 60
+        assert k.reason == "clamp"
 
     def test_multiple_keepouts_deduplicated(self):
-        from adapters.removal_to_planner import removal_intents_to_hints
+        from adapters.removal_to_planner import removal_intents_to_planner_input
 
         keepout = KeepoutRegion(
             bounds=Bounds2D(x_min=40, x_max=60, y_min=40, y_max=60),
@@ -298,10 +297,9 @@ class TestAdapterKeepoutExtraction:
             constraints=Constraints(keepouts=(keepout,)),
             metadata={"hint_type": "pocket", "shape": "Rect"},
         )
-        hints = removal_intents_to_hints([intent1, intent2])
+        planner_input = removal_intents_to_planner_input([intent1, intent2])
 
-        assert "keepouts" in hints
-        assert len(hints["keepouts"]) == 1
+        assert len(planner_input.keepouts) == 1
 
 
 class TestTypedPlannerInput:

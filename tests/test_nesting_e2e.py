@@ -5,7 +5,7 @@ import sys
 
 from nesting import nest_and_generate
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_hints
+from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
@@ -58,8 +58,8 @@ def test_simple_rect_through_cam():
     assert len(intents) >= 1
 
 
-    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
-    assert len(hints) >= 1
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    assert len(planner_input.profiles) + len(planner_input.pockets) + len(planner_input.holes) >= 1
 
 
     stock = Stock(width=500, height=500, thickness=19)
@@ -67,7 +67,7 @@ def test_simple_rect_through_cam():
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
-        hints,
+        planner_input,
         config=Config(),
         tool_db=TEST_TOOL_DB,
         material=material,
@@ -119,7 +119,7 @@ def test_multiple_parts_through_cam():
     for ast in asts:
 
         intents = ast_to_removal_intents(ast)
-        hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -130,7 +130,7 @@ def test_multiple_parts_through_cam():
         machine = Machine(name="default_grbl")
 
         passes, _ = plan_passes(
-            hints,
+            planner_input,
             config=Config(),
             tool_db=TEST_TOOL_DB,
             material=material,
@@ -189,7 +189,7 @@ def test_template_parts_through_cam():
 
 
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
     stock = Stock(
         width=ast.sheet.width_mm,
@@ -200,7 +200,7 @@ def test_template_parts_through_cam():
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
-        hints,
+        planner_input,
         config=Config(),
         tool_db=TEST_TOOL_DB,
         material=material,
@@ -250,7 +250,7 @@ def test_multi_sheet_through_cam():
     sheet_gcodes = []
     for i, ast in enumerate(asts):
         intents = ast_to_removal_intents(ast)
-        hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -261,7 +261,7 @@ def test_multi_sheet_through_cam():
         machine = Machine(name="default_grbl")
 
         passes, _ = plan_passes(
-            hints,
+            planner_input,
             config=Config(),
             tool_db=TEST_TOOL_DB,
             material=material,
@@ -303,14 +303,14 @@ def test_gcode_basic_invariants():
 
     ast = result["output"][0]
     intents = ast_to_removal_intents(ast)
-    hints = removal_intents_to_hints(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
     stock = Stock(width=300, height=300, thickness=19)
     material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
-        hints,
+        planner_input,
         config=Config(),
         tool_db=TEST_TOOL_DB,
         material=material,

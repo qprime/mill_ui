@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ir.removal_intent import Bounds2D
-from export.dimensions import DimensionRequest
+from diagram_ir.dimensions import DimensionRequest
 from diagram_ir.shapes import Shape, Rect, Line, Polyline, Circle, Text, Path
 
 

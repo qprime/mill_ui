@@ -5,7 +5,7 @@ from xml.etree import ElementTree as ET
 
 from diagram_ir import DiagramIR, ViewportSpec, LayerIR
 from diagram_ir.shapes import Shape, Rect, Line, Polyline, Circle, Text, Path
-from export.dimensions import (
+from diagram_ir.dimensions import (
     place_on_rails,
     PlacedDimension,
     DimensionRequest,

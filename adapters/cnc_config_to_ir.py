@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from config.machine_loader import MachineConfig, Endmill
 from ir.removal_intent import Bounds2D
-from export.dimensions import DimensionRequest
+from diagram_ir.dimensions import DimensionRequest
 from diagram_ir import DiagramIR, LayerIR, Rect, Line, Circle
 
 

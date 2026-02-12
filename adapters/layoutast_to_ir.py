@@ -5,7 +5,7 @@ from typing import Callable
 from core.constants import DepthMode
 from layout_ast.layout import LayoutAST, Item, Sheet
 from ir.removal_intent import Bounds2D
-from export.dimensions import DimensionRequest, collect_dimension_requests
+from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir import DiagramIR, LayerIR, Rect, Line, Polyline, Circle, Text, Path, Point2D
 from diagram_ir.shapes import Shape
 from diagram_ir.geometry import rounded_rect_path

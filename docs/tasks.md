@@ -361,7 +361,7 @@ outputs = write_pipeline_outputs(
 **Use case:** Change where dimension labels appear in SVG blueprints.
 
 ```python
-from export.dimensions import place_on_rails, DimensionPlacement
+from diagram_ir.dimensions import place_on_rails, DimensionPlacement
 
 placed = place_on_rails(
     requests,

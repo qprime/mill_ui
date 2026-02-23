@@ -1,31 +1,33 @@
 
-
-from generators.base import (
-
+from generators.core import (
     Generator,
     GeneratorResult,
-
     BaseParams,
+    LoopSelection,
+    generate_shape_id,
+    validate_domain_for_generation,
+)
+from generators.params.area import (
     FlatPocketParams,
-    ProfileParams,
-    WaveParams,
     GridParams,
     GridLinesParams,
     MeasurementGridParams,
-    BeadParams,
     RaisedPanelParams,
-    ChamferParams,
     LinePatternParams,
     ConcentricBorderParams,
     XPanelParams,
     HoleGridParams,
+)
+from generators.params.loop import (
+    ProfileParams,
+    WaveParams,
+    ChamferParams,
+    BeadParams,
     MeasurementEdgeParams,
     EngraveTextParams,
-
-    LoopSelection,
-
-    generate_shape_id,
-    validate_domain_for_generation,
+    EdgeSelection,
+    TextAlignment,
+    TextOrientation,
 )
 
 

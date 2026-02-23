@@ -54,6 +54,7 @@ from layout_ast.compositional import (
     BeamLayerDecl,
     BeamFeatureDecl,
 )
+from core.constants import DepthMode
 from layout_ast.layout import Sheet, Feature
 from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import NestJob
@@ -260,8 +261,8 @@ def format_node(node: Any) -> dict[str, Any]:
 
     elif isinstance(node, ProfileGen):
         result: dict[str, Any] = {"side": node.side}
-        if node.depth == "through":
-            result["depth"] = "through"
+        if DepthMode.is_through(node.depth):
+            result["depth"] = DepthMode.THROUGH
         else:
             result["depth"] = dim(node.depth) if isinstance(node.depth, (int, float)) else node.depth
         if node.tab_count is not None:
@@ -387,8 +388,8 @@ def format_node(node: Any) -> dict[str, Any]:
             "spacing": dim(node.spacing_mm),
             "diameter": dim(node.diameter_mm),
         }
-        if node.depth == "through":
-            result["depth"] = "through"
+        if DepthMode.is_through(node.depth):
+            result["depth"] = DepthMode.THROUGH
         else:
             result["depth"] = dim(node.depth) if isinstance(node.depth, (int, float)) else node.depth
         if node.pattern != "rectangular":

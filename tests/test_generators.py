@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from domains import Domain, MultiDomain
 from generators import (
+    Generator,
     FlatPocketParams,
     ProfileParams,
     RaisedPanelParams,
@@ -30,6 +31,17 @@ from generators import (
     hole_grid_generator,
     generate_shape_id,
     validate_domain_for_generation,
+    wave_generator,
+    grid_generator,
+    grid_lines_generator,
+    measurement_grid_generator,
+    line_pattern_generator,
+    concentric_border_generator,
+    x_panel_generator,
+    measurement_edge_generator,
+    bead_generator,
+    svg_stamp_generator,
+    notched_panel_generator,
 )
 from layout_ast.layout import LayoutAST, Sheet
 
@@ -1487,6 +1499,35 @@ def test_hole_grid_determinism():
 # =============================================================================
 # Test Runner
 # =============================================================================
+
+import pytest
+
+ALL_GENERATORS = [
+    flat_pocket_generator,
+    wave_generator,
+    grid_generator,
+    grid_lines_generator,
+    measurement_grid_generator,
+    raised_panel_generator,
+    line_pattern_generator,
+    concentric_border_generator,
+    x_panel_generator,
+    hole_grid_generator,
+    profile_generator,
+    bead_generator,
+    chamfer_generator,
+    measurement_edge_generator,
+    svg_stamp_generator,
+    notched_panel_generator,
+]
+
+
+@pytest.mark.parametrize("gen", ALL_GENERATORS, ids=lambda g: g.__name__)
+def test_generator_satisfies_protocol(gen):
+    assert isinstance(gen, Generator), (
+        f"{gen.__name__} does not satisfy the Generator protocol"
+    )
+
 
 def run_tests():
     """Run all tests and report results."""

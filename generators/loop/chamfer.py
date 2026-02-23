@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from generators.base import (
-    ChamferParams,
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.loop import ChamferParams
 from generators.utils import extract_loops, loop_type_suffix
 from layout_ast.layout import Feature, Geometry, Item, Placement
 

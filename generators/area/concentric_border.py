@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from generators.base import (
-    ConcentricBorderParams,
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.area import ConcentricBorderParams
 from generators.utils import shapely_to_item, iter_polygons
 
 if TYPE_CHECKING:

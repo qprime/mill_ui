@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
-from generators.base import (
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,

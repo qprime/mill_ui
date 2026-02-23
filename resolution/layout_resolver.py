@@ -87,7 +87,7 @@ from generators.area.measurement_grid import measurement_grid_generator
 from generators.area.grid_lines import grid_lines_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.area.engrave_text import engrave_text_at_position
-from generators.base import RaisedPanelParams, WaveParams, LinePatternParams, ConcentricBorderParams, XPanelParams, HoleGridParams, MeasurementGridParams, GridLinesParams, MeasurementEdgeParams
+from generators import ConcentricBorderParams, GridLinesParams, HoleGridParams, LinePatternParams, MeasurementEdgeParams, MeasurementGridParams, RaisedPanelParams, WaveParams, XPanelParams
 from assembly.core import Assembly as AssemblyModel, InterfaceType
 from assembly.panel import PanelSpec, Edge as PanelEdge
 from assembly.joinery import Butt, Finger, Captured, HalfLap

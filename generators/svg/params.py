@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from generators.base import BaseParams
+from generators.core import BaseParams
 
 
 @dataclass(frozen=True)

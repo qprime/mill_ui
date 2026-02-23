@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 from shapely.geometry import Point
 
 from domains.transforms import local_to_sheet
-from generators.base import (
+from generators.core import (
     GeneratorResult,
-    HoleGridParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.area import HoleGridParams
 from generators.utils import get_local_bounds
+from core.constants import DepthMode
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -157,7 +158,7 @@ def _create_hole_item(
     depth: str | float,
     shape_id: str,
 ) -> Item:
-    is_through = depth == "through"
+    is_through = DepthMode.is_through(depth)
     depth_mm_val = 0.0 if is_through else float(depth)
 
     geometry_data = {

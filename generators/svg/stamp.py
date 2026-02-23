@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from domains.transforms import local_to_sheet_batch
-from generators.base import (
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,

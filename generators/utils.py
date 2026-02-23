@@ -1,12 +1,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from shapely.geometry import Polygon, MultiPolygon
 
 from domains.transforms import sheet_to_local
-from generators.base import generate_shape_id, LoopSelection
+from generators.core import (
+    LoopSelection,
+    generate_shape_id,
+)
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -79,7 +82,14 @@ def iter_polygons(geom) -> list[Polygon]:
     return result
 
 
-def get_local_bounds(domain: Domain) -> dict[str, float]:
+class LocalBounds(TypedDict):
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
+
+
+def get_local_bounds(domain: Domain) -> LocalBounds:
     local_points = [
         sheet_to_local(pt, domain)
         for pt in domain.outer_boundary
@@ -172,6 +182,7 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 
 __all__ = [
+    "LocalBounds",
     "shapely_to_item",
     "iter_polygons",
     "get_local_bounds",

@@ -1,20 +1,15 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
 
 from HersheyFonts import HersheyFonts
 
-from generators.base import (
-    EngraveTextParams,
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
 )
 from generators.utils import create_line_item
 from layout_ast.layout import Item
-
-if TYPE_CHECKING:
-    pass
 
 HERSHEY_CAP_LINE = -12
 HERSHEY_BASE_LINE = 9

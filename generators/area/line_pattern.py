@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 from shapely.geometry import LineString
 
 from domains.transforms import local_to_sheet_batch
-from generators.base import (
-    LinePatternParams,
+from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.area import LinePatternParams
 from generators.utils import shapely_to_item, iter_polygons, get_local_bounds
 
 if TYPE_CHECKING:

@@ -5,12 +5,12 @@ import math
 from typing import TYPE_CHECKING
 
 from domains.transforms import local_to_sheet_batch
-from generators.base import (
+from generators.core import (
     GeneratorResult,
-    WaveParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.loop import WaveParams
 from generators.utils import get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 

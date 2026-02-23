@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from generators.base import XPanelParams
+from generators import XPanelParams
 from generators.area.x_panel import x_panel_generator
 from domains import Domain
 

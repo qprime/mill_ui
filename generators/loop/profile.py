@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from generators.base import (
+from core.constants import DepthMode
+from generators.core import (
     GeneratorResult,
-    ProfileParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.loop import ProfileParams
 from generators.utils import extract_loops, loop_type_suffix
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
@@ -65,7 +66,7 @@ def profile_generator(
         }
 
 
-        is_through = params.depth == "through"
+        is_through = DepthMode.is_through(params.depth)
         depth_mm = 0.0 if is_through else float(params.depth)
 
         feature_kwargs = {

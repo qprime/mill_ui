@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 
 from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
-from generators.base import (
+from generators.core import (
     GeneratorResult,
-    GridParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.area import GridParams
 from generators.utils import create_line_item, get_local_bounds
 from layout_ast.layout import Item
 

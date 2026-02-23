@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from core.constants import DepthMode
 from layout_ast.layout import (
     LayoutAST,
     Sheet,
@@ -105,7 +106,7 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
     depth_mm = feature_data.get("depth_mm")
     side = feature_data.get("side")
 
-    is_through = depth == "through"
+    is_through = DepthMode.is_through(depth)
     if depth_mm is None:
         if is_through:
             depth_mm = 0.0

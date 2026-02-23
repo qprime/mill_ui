@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from generators.base import (
+from generators.core import (
     BaseParams,
     GeneratorResult,
+    generate_shape_id,
 )
-from generators.base import generate_shape_id
 from layout_ast.layout import Item, Geometry, Placement, Feature
 from assembly.notches import build_notched_polygon
 from assembly.panel import NotchSpec

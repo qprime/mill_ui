@@ -6,6 +6,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+from core.constants import DepthMode
 from layout_ast.compositional import (
     Panel,
     Inset,
@@ -111,7 +112,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         raise PMLParseError("Feature missing 'type'", path)
 
     depth = data.get("depth", "through")
-    is_through = depth == "through"
+    is_through = DepthMode.is_through(depth)
 
     if is_through:
         depth_mm = sheet_thickness_mm

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence, TYPE_CHECKING
 
 from ir.removal_intent import Bounds2D
+from validation.core import InvariantResult, Verdict
 
 if TYPE_CHECKING:
     from cam.planner.passes import PassRecord
@@ -37,6 +36,20 @@ class ToolpathVerificationResult:
                 f"Y[{v.keepout_bounds.y_min:.2f}, {v.keepout_bounds.y_max:.2f}]"
             )
         return errors
+
+    def to_invariant_result(self) -> InvariantResult:
+        n = len(self.keepout_violations)
+        return InvariantResult(
+            id="KEEPOUT-001",
+            category="toolpath",
+            artifact="gcode",
+            description="Toolpath must not enter keepout regions",
+            status=Verdict.FAIL if n > 0 else Verdict.PASS,
+            checked=max(n, 1),
+            passed=0 if n > 0 else 1,
+            failed=n,
+            failures=tuple(self.format_errors()),
+        )
 
 
 def _point_in_bounds(x: float, y: float, bounds: Bounds2D) -> bool:

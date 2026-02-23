@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from generators.base import (
+from generators.core import (
     GeneratorResult,
-    XPanelParams,
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.params.area import XPanelParams
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:

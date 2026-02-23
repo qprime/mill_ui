@@ -27,6 +27,7 @@ from cam.planner.passes.pocket import (
     plan_engrave_passes,
 )
 from cam.planner.passes.merge_shared_edges import _rect_edges, _overlap_len
+from cam.moves import CutMove, RapidMove, RetractMove, XYMove
 from cam.planner.planner_input import FeatureInput, GeometryInput
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
@@ -256,7 +257,7 @@ class TestPocketCircleConcentric:
             (50.0, 50.0), 20.0, setup,
             depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
         )
-        cut_zs = [m["z"] for m in moves if m.get("kind") == "cut" and m.get("z") is not None]
+        cut_zs = [m.z for m in moves if isinstance(m, CutMove) and m.z is not None]
         assert min(cut_zs) == pytest.approx(-5.0, abs=0.01)
 
     def test_zero_wall_radius_returns_empty(self):
@@ -273,8 +274,8 @@ class TestPocketCircleConcentric:
             (50.0, 50.0), 20.0, setup,
             depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
         )
-        retracts = [m for m in moves if m.get("kind") == "retract"]
-        assert all(m["z"] >= setup.safe_z for m in retracts)
+        retracts = [m for m in moves if isinstance(m, RetractMove)]
+        assert all(m.z >= setup.safe_z for m in retracts)
 
 
 class TestEngraveLines:
@@ -282,18 +283,18 @@ class TestEngraveLines:
     def test_single_line(self):
         setup = _setup()
         moves = engrave_lines([[(0, 0), (10, 10)]], setup, z=-0.3)
-        assert any(m.get("kind") == "cut" for m in moves)
+        assert any(isinstance(m, CutMove) for m in moves)
 
     def test_depth(self):
         setup = _setup()
         moves = engrave_lines([[(0, 0), (10, 10)]], setup, z=-0.5)
-        plunge_zs = [m["z"] for m in moves if m.get("kind") == "cut" and m.get("z") is not None]
+        plunge_zs = [m.z for m in moves if isinstance(m, CutMove) and m.z is not None]
         assert plunge_zs[0] == pytest.approx(-0.5)
 
     def test_empty_polyline_skipped(self):
         setup = _setup()
         moves = engrave_lines([[]], setup, z=-0.3)
-        assert not any(m.get("kind") == "cut" for m in moves)
+        assert not any(isinstance(m, CutMove) for m in moves)
 
     def test_multiple_polylines(self):
         setup = _setup()
@@ -301,7 +302,7 @@ class TestEngraveLines:
             [[(0, 0), (10, 0)], [(20, 20), (30, 20)]],
             setup, z=-0.3,
         )
-        rapids = [m for m in moves if m.get("kind") == "rapid"]
+        rapids = [m for m in moves if isinstance(m, RapidMove)]
         assert len(rapids) >= 2
 
 
@@ -315,13 +316,13 @@ class TestFaceZigzag:
     def test_covers_height(self):
         setup = _setup()
         moves = face_zigzag(100, 50, setup, step=10.0, depth_mm=0.5)
-        cut_ys = [m.get("y") for m in moves if m.get("kind") in ("rapid", "cut") and m.get("y") is not None]
+        cut_ys = [m.y for m in moves if isinstance(m, XYMove) and m.y is not None]
         assert max(cut_ys) >= 50.0
 
     def test_serpentine_direction(self):
         setup = _setup()
         moves = face_zigzag(100, 50, setup, step=25.0, depth_mm=0.5)
-        rapid_xs = [m["x"] for m in moves if m.get("kind") == "rapid" and m.get("x") is not None]
+        rapid_xs = [m.x for m in moves if isinstance(m, RapidMove) and m.x is not None]
         assert rapid_xs[0] == pytest.approx(0.0)
         assert rapid_xs[1] == pytest.approx(100.0)
 
@@ -494,5 +495,5 @@ class TestPlanEngravePasses:
         plan_engrave_passes(engraves, accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
         assert len(records) == 1
-        zs = [m["z"] for m in records[0].moves if m.get("kind") == "cut" and m.get("z") is not None]
+        zs = [m.z for m in records[0].moves if isinstance(m, CutMove) and m.z is not None]
         assert zs[0] == pytest.approx(-0.3)

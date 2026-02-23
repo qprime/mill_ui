@@ -20,6 +20,7 @@ from ir.removal_intent import (
     TabConstraint,
     Allowance,
 )
+from cam.moves import CutMove, RapidMove, SetRpmMove
 from validation.toolpath_checks import (
     verify_toolpath_avoids_keepouts,
     verify_passes_avoid_keepouts,
@@ -106,16 +107,16 @@ class TestToolpathKeepoutVerification:
 
     def test_no_keepouts_passes(self):
         moves = [
-            {"x": 10, "y": 10, "z": -5},
-            {"x": 20, "y": 20, "z": -5},
+            CutMove(x=10, y=10, z=-5),
+            CutMove(x=20, y=20, z=-5),
         ]
         result = verify_toolpath_avoids_keepouts(moves, [])
         assert not result.has_violations()
 
     def test_move_outside_keepout_passes(self):
         moves = [
-            {"x": 10, "y": 10, "z": -5},
-            {"x": 20, "y": 20, "z": -5},
+            CutMove(x=10, y=10, z=-5),
+            CutMove(x=20, y=20, z=-5),
         ]
         keepouts = [
             {"x_min": 50, "x_max": 60, "y_min": 50, "y_max": 60, "reason": "clamp"},
@@ -125,8 +126,8 @@ class TestToolpathKeepoutVerification:
 
     def test_move_inside_keepout_fails(self):
         moves = [
-            {"x": 10, "y": 10, "z": -5},
-            {"x": 55, "y": 55, "z": -5},
+            CutMove(x=10, y=10, z=-5),
+            CutMove(x=55, y=55, z=-5),
         ]
         keepouts = [
             {"x_min": 50, "x_max": 60, "y_min": 50, "y_max": 60, "reason": "clamp"},
@@ -138,7 +139,7 @@ class TestToolpathKeepoutVerification:
 
     def test_tool_radius_expansion(self):
         moves = [
-            {"x": 45, "y": 55, "z": -5},
+            CutMove(x=45, y=55, z=-5),
         ]
         keepouts = [
             {"x_min": 50, "x_max": 60, "y_min": 50, "y_max": 60, "reason": "clamp"},
@@ -151,7 +152,7 @@ class TestToolpathKeepoutVerification:
 
     def test_multiple_keepouts(self):
         moves = [
-            {"x": 55, "y": 55, "z": -5},
+            CutMove(x=55, y=55, z=-5),
         ]
         keepouts = [
             {"x_min": 10, "x_max": 20, "y_min": 10, "y_max": 20, "reason": "clamp1"},
@@ -163,9 +164,9 @@ class TestToolpathKeepoutVerification:
 
     def test_moves_without_xy_ignored(self):
         moves = [
-            {"kind": "set_rpm", "rpm": 10000},
-            {"z": 5},
-            {"x": 55, "y": 55, "z": -5},
+            SetRpmMove(rpm=10000),
+            RapidMove(z=5),
+            CutMove(x=55, y=55, z=-5),
         ]
         keepouts = [
             {"x_min": 50, "x_max": 60, "y_min": 50, "y_max": 60, "reason": "clamp"},

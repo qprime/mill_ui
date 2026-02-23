@@ -5,6 +5,7 @@ import pytest
 
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
+from cam.moves import RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.post.gcode import _apply_margin_offset
 from validation.removal_checks import check_working_area_bounds
@@ -60,31 +61,34 @@ class TestMarginTransformGcode:
 
     def test_margin_offset_applied_to_moves(self):
         moves = [
-            {"kind": "rapid", "x": 100.0, "y": 200.0, "z": 5.0},
-            {"kind": "linear", "x": 150.0, "y": 250.0, "z": -5.0},
+            RapidMove(x=100.0, y=200.0, z=5.0),
+            RapidMove(x=150.0, y=250.0, z=-5.0),
         ]
         margin = 10.0
         offset_moves = _apply_margin_offset(moves, margin)
 
-        assert offset_moves[0]["x"] == 110.0
-        assert offset_moves[0]["y"] == 210.0
-        assert offset_moves[0]["z"] == 5.0
+        assert isinstance(offset_moves[0], RapidMove)
+        assert offset_moves[0].x == 110.0
+        assert offset_moves[0].y == 210.0
+        assert offset_moves[0].z == 5.0
 
-        assert offset_moves[1]["x"] == 160.0
-        assert offset_moves[1]["y"] == 260.0
-        assert offset_moves[1]["z"] == -5.0
+        assert isinstance(offset_moves[1], RapidMove)
+        assert offset_moves[1].x == 160.0
+        assert offset_moves[1].y == 260.0
+        assert offset_moves[1].z == -5.0
 
     def test_zero_margin_no_offset(self):
-        moves = [{"kind": "rapid", "x": 100.0, "y": 200.0, "z": 5.0}]
+        moves = [RapidMove(x=100.0, y=200.0, z=5.0)]
         offset_moves = _apply_margin_offset(moves, 0.0)
-        assert offset_moves[0]["x"] == 100.0
-        assert offset_moves[0]["y"] == 200.0
+        assert isinstance(offset_moves[0], RapidMove)
+        assert offset_moves[0].x == 100.0
+        assert offset_moves[0].y == 200.0
 
     def test_none_coordinates_preserved(self):
-        moves = [{"kind": "set_rpm", "rpm": 10000}]
+        moves = [SetRpmMove(rpm=10000)]
         offset_moves = _apply_margin_offset(moves, 10.0)
-        assert "x" not in offset_moves[0]
-        assert "y" not in offset_moves[0]
+        assert isinstance(offset_moves[0], SetRpmMove)
+        assert offset_moves[0].rpm == 10000
 
 
 class TestResolverWorkingArea:

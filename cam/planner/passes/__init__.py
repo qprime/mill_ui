@@ -8,6 +8,7 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
+from cam.moves import Move, SetRpmMove
 from cam.planner.planner_input import PlannerInput, FeatureInput, TabsInput
 
 from .merge_shared_edges import merge_rect_profiles
@@ -22,23 +23,22 @@ from .profile import (
     rounded_rect_shape,
 )
 from .summary import summarise_passes
-from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile, tool_identity
+from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile
 
 
 @dataclass
 class PassRecord:
 
     op: str
-    tool_dict: Dict[str, Any]
     tool_selection: ToolSelection
     setup: Setup
     filename: str
-    moves: List[Dict[str, Any]] = field(default_factory=list)
+    moves: List[Move] = field(default_factory=list)
     count: int = 0
 
-    def add_moves(self, moves: Iterable[dict[str, Any]], *, increment: int = 0) -> None:
+    def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
         for move in moves:
-            self.moves.append(dict(move))
+            self.moves.append(move)
         if increment:
             self.count += int(increment)
 
@@ -70,14 +70,12 @@ class PassAccumulator:
             machine=self._machine,
             safe_z=self._safe_z,
         )
-        identity = tool_identity(tool)
-        filename = _build_filename(operation, identity)
-        moves = []
+        filename = _build_filename(operation, tool)
+        moves: List[Move] = []
         if self._prime_spindle:
-            moves.append({"kind": "set_rpm", "rpm": 0})
+            moves.append(SetRpmMove(rpm=0))
         return PassRecord(
             op=operation,
-            tool_dict=identity,
             tool_selection=tool,
             setup=setup,
             filename=filename,
@@ -98,11 +96,10 @@ def _mm_str(value: float) -> str:
     return f"{value:.2f}mm".replace(".00mm", "mm")
 
 
-def _build_filename(operation: str, tool_dict: Mapping[str, Any]) -> str:
-    bits = [operation, _mm_str(float(tool_dict.get("diameter", 0.0)))]
-    rotation = tool_dict.get("rotation")
-    if rotation:
-        bits.append(str(rotation))
+def _build_filename(operation: str, tool: ToolSelection) -> str:
+    bits = [operation, _mm_str(float(tool.diameter))]
+    if tool.rotation:
+        bits.append(str(tool.rotation))
     return "-".join(bits).replace(" ", "_") + ".nc"
 
 

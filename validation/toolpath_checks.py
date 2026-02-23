@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence, TYPE_CHECKING
 
+from cam.moves import Move, XYMove
 from ir.removal_intent import Bounds2D
 from validation.core import InvariantResult, Verdict
 
@@ -71,7 +72,7 @@ def _keepout_dict_to_region(keepout: Mapping[str, Any]) -> tuple[Bounds2D, str]:
 
 
 def verify_toolpath_avoids_keepouts(
-    moves: Sequence[Mapping[str, Any]],
+    moves: Sequence[Move],
     keepouts: Sequence[Mapping[str, Any]],
     tool_radius_mm: float = 0.0,
 ) -> ToolpathVerificationResult:
@@ -93,11 +94,11 @@ def verify_toolpath_avoids_keepouts(
     violations: list[KeepoutViolation] = []
 
     for i, move in enumerate(moves):
-        if not isinstance(move, Mapping):
+        if not isinstance(move, XYMove):
             continue
 
-        x = move.get("x")
-        y = move.get("y")
+        x = move.x
+        y = move.y
 
         if x is None or y is None:
             continue

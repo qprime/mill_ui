@@ -22,6 +22,7 @@ from cam.config import Config
 from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
+from cam.moves import CutMove, RapidMove
 from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.tools import ToolSelection, normalize_tool_entries
 from cam.post.gcode import write_gcode
@@ -252,9 +253,9 @@ def run_pipeline(
 
         total_moves += len(p.moves)
         for move in p.moves:
-            if move.get("is_rapid"):
+            if isinstance(move, RapidMove):
                 total_rapid_moves += 1
-            else:
+            elif isinstance(move, CutMove):
                 total_cut_moves += 1
 
     _gcode_ms = (time.perf_counter() - gcode_start) * 1000

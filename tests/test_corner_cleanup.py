@@ -113,13 +113,13 @@ def test_corner_cleanup_planner():
     assert corner_pass is not None, "Missing corner_cleanup pass"
 
 
-    pocket_tool_diameter = pocket_pass.tool_dict["diameter"]
+    pocket_tool_diameter = pocket_pass.tool_selection.diameter
 
 
     assert pocket_tool_diameter in [3.175, 9.525]
 
 
-    corner_tool_diameter = corner_pass.tool_dict["diameter"]
+    corner_tool_diameter = corner_pass.tool_selection.diameter
     assert corner_tool_diameter == 3.175
 
 

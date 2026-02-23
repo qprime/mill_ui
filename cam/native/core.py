@@ -2,10 +2,46 @@ from __future__ import annotations
 
 from typing import Iterable, List, Optional, Sequence, Tuple
 
+from cam.moves import (
+    CommentMove,
+    CutMove,
+    Move,
+    RapidMove,
+    RetractMove,
+    SetFeedMove,
+    SetRpmMove,
+)
+
 try:
     from . import _native
 except Exception:
     _native = None
+
+
+def _dict_to_move(d: dict) -> Move:
+    kind = d.get("kind", "")
+    if kind == "comment":
+        return CommentMove(text=str(d.get("text") or ""))
+    if kind == "set_rpm":
+        return SetRpmMove(rpm=float(d.get("rpm") or 0.0))
+    if kind == "set_feed":
+        return SetFeedMove(feed=float(d.get("feed") or 0.0))
+    if kind == "rapid":
+        return RapidMove(
+            x=None if d.get("x") is None else float(d["x"]),
+            y=None if d.get("y") is None else float(d["y"]),
+            z=None if d.get("z") is None else float(d["z"]),
+        )
+    if kind == "cut":
+        return CutMove(
+            x=None if d.get("x") is None else float(d["x"]),
+            y=None if d.get("y") is None else float(d["y"]),
+            z=None if d.get("z") is None else float(d["z"]),
+            feed=None if d.get("feed") is None else float(d["feed"]),
+        )
+    if kind == "retract":
+        return RetractMove(z=float(d.get("z") or 0.0))
+    raise ValueError(f"Unknown move kind: {kind!r}")
 
 
 def is_native_available() -> bool:
@@ -46,27 +82,27 @@ def _holes_from_points(points: Iterable[Tuple[float, float]], depth_mm: float, t
     return holes
 
 
-def pocket_raster(shape, setup, *, depth_mm: float, stepover_mm: float, stepdown_mm: Optional[float]) -> List[dict]:
+def pocket_raster(shape, setup, *, depth_mm: float, stepover_mm: float, stepdown_mm: Optional[float]) -> List[Move]:
     _require_native()
     face = _planar_face_dict(shape, depth_mm, setup.safe_z)
     step_down_arg = None if stepdown_mm is None else float(stepdown_mm)
-    return _native.plan_pocket(face, setup.tool, float(stepover_mm), step_down_arg)
+    return [_dict_to_move(d) for d in _native.plan_pocket(face, setup.tool, float(stepover_mm), step_down_arg)]
 
 
-def profile_outline(shape, setup, *, depth_mm: float, stepdown_mm: float) -> List[dict]:
+def profile_outline(shape, setup, *, depth_mm: float, stepdown_mm: float) -> List[Move]:
     _require_native()
     boundary = _poly_from_shape(shape)
-    return _native.plan_profile(boundary, setup.tool, float(depth_mm), float(stepdown_mm), float(setup.safe_z))
+    return [_dict_to_move(d) for d in _native.plan_profile(boundary, setup.tool, float(depth_mm), float(stepdown_mm), float(setup.safe_z))]
 
 
-def drill_peck(points: Sequence[Tuple[float, float]], setup, *, depth_mm: float, peck_mm: float) -> List[dict]:
+def drill_peck(points: Sequence[Tuple[float, float]], setup, *, depth_mm: float, peck_mm: float) -> List[Move]:
     _require_native()
     holes = _holes_from_points(points, depth_mm, setup.tool.diameter)
-    return _native.plan_drill(holes, setup.tool, float(peck_mm), float(setup.safe_z))
+    return [_dict_to_move(d) for d in _native.plan_drill(holes, setup.tool, float(peck_mm), float(setup.safe_z))]
 
 
 def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup, *, depth_mm: float,
-                 stepdown_mm: float) -> List[dict]:
+                 stepdown_mm: float) -> List[Move]:
     _require_native()
     hole = {
         "x": float(center_xy[0]),
@@ -74,7 +110,7 @@ def bore_helical(center_xy: Tuple[float, float], hole_d_mm: float, setup, *, dep
         "diameter": float(hole_d_mm),
         "depth": float(depth_mm),
     }
-    return _native.plan_bore_helical(hole, setup.tool, float(stepdown_mm), float(setup.safe_z))
+    return [_dict_to_move(d) for d in _native.plan_bore_helical(hole, setup.tool, float(stepdown_mm), float(setup.safe_z))]
 
 
 def post_gcode(moves: Sequence[dict], *, unit: str = "mm", prec: int = 3, safe_z: float = 5.0,

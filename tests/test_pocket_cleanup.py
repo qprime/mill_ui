@@ -1,5 +1,6 @@
 
 from unittest.mock import patch
+from cam.moves import CommentMove, Move
 from cam.path.strategies import pocket_then_finish_profile
 from cam.primitives import rectangle
 from cam.transforms import Transform2D, place
@@ -18,10 +19,10 @@ def _create_test_setup():
     return Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
 
 
-def _count_comments_with_text(moves: list[dict], text: str) -> int:
+def _count_comments_with_text(moves: list[Move], text: str) -> int:
     count = 0
     for move in moves:
-        if move.get("kind") == "comment" and text in move.get("text", ""):
+        if isinstance(move, CommentMove) and text in move.text:
             count += 1
     return count
 
@@ -132,7 +133,7 @@ def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
 
     found_offset = False
     for move in moves:
-        if move.get("kind") == "comment" and "cleanup=0.5" in move.get("text", ""):
+        if isinstance(move, CommentMove) and "cleanup=0.5" in move.text:
             found_offset = True
             break
     assert found_offset, "Should mention cleanup offset in comment"

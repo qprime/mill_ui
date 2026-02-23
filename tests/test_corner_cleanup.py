@@ -5,6 +5,7 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.planner.passes import plan_passes
+from cam.planner.passes.tools import normalize_tool_entries
 from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
@@ -90,7 +91,7 @@ def test_corner_cleanup_planner():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=tool_db,
+        tool_db=normalize_tool_entries(tool_db),
         material=material,
         machine=machine,
         stock=stock,
@@ -162,7 +163,7 @@ def test_corner_cleanup_tool_not_found():
         passes, summary = plan_passes(
             planner_input,
             config=config,
-            tool_db=tool_db,
+            tool_db=normalize_tool_entries(tool_db),
             material=material,
             machine=machine,
             stock=stock,
@@ -238,7 +239,7 @@ def test_corner_cleanup_without_flag():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=tool_db,
+        tool_db=normalize_tool_entries(tool_db),
         material=material,
         machine=machine,
         stock=stock,

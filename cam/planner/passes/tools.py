@@ -53,23 +53,20 @@ def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
     )
 
 
-def _normalize_tool_entries(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSelection]:
-    selections: list[ToolSelection] = []
-    for entry in tool_db:
-        selections.append(_selection_from_dict(entry))
-    return selections
+def normalize_tool_entries(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSelection]:
+    return [_selection_from_dict(entry) for entry in tool_db]
 
 
-def _flat_tools(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSelection]:
-    return [tool for tool in _normalize_tool_entries(tool_db) if tool.kind != "ball"]
+def _flat_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
+    return [tool for tool in tool_db if tool.kind != "ball"]
 
 
-def _ball_or_v_tools(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSelection]:
-    return [tool for tool in _normalize_tool_entries(tool_db) if tool.kind in {"ball", "v"}]
+def _ball_or_v_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
+    return [tool for tool in tool_db if tool.kind in {"ball", "v"}]
 
 
 def pick_tool_for_pocket(
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
     *,
     required_width_mm: float | None,
     cleanup_offset_mm: float,
@@ -99,7 +96,7 @@ def pick_tool_for_pocket(
 
 
 def pick_tool_for_profile(
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
     *,
     kerf_mm: float | None,
 ) -> ToolSelection:
@@ -115,7 +112,7 @@ def pick_tool_for_profile(
 
 
 def pick_tool_for_hole(
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
     *,
     hole_diameter_mm: float,
 ) -> ToolSelection:
@@ -126,13 +123,12 @@ def pick_tool_for_hole(
     return feasible[-1] if feasible else candidates[0]
 
 
-def pick_tool_for_engrave(tool_db: Sequence[Mapping[str, Any]]) -> ToolSelection:
+def pick_tool_for_engrave(tool_db: Sequence[ToolSelection]) -> ToolSelection:
     candidates = _ball_or_v_tools(tool_db)
     if candidates:
         candidates.sort(key=lambda t: t.diameter)
         return candidates[0]
-    fallback = _normalize_tool_entries(tool_db)
-    fallback.sort(key=lambda t: t.diameter)
+    fallback = sorted(tool_db, key=lambda t: t.diameter)
     return fallback[0]
 
 
@@ -166,6 +162,7 @@ def pass_key(operation: str, tool: ToolSelection) -> Tuple[str, float, str, str 
 
 __all__ = [
     "ToolSelection",
+    "normalize_tool_entries",
     "pass_key",
     "pick_tool_for_pocket",
     "pick_tool_for_profile",

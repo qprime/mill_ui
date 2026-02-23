@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from cam.native import core as native_core
 
@@ -11,10 +11,10 @@ DEFAULT_HEADER = ['(begin)', 'G90', 'G21', 'G17', 'G94']
 DEFAULT_FOOTER = ['M5', 'M2', '(end)']
 
 
-def _flip_y_in_moves(moves, sheet_height: float):
+def _flip_y_in_moves(moves: list[dict[str, Any]], sheet_height: float) -> list[dict[str, Any]]:
     flipped = []
     for move in moves:
-        if isinstance(move, dict) and 'y' in move and move['y'] is not None:
+        if 'y' in move and move['y'] is not None:
             flipped_move = dict(move)
             flipped_move['y'] = sheet_height - move['y']
             flipped.append(flipped_move)
@@ -23,28 +23,25 @@ def _flip_y_in_moves(moves, sheet_height: float):
     return flipped
 
 
-def _apply_margin_offset(moves, margin_mm: float):
+def _apply_margin_offset(moves: list[dict[str, Any]], margin_mm: float) -> list[dict[str, Any]]:
     if margin_mm == 0.0:
         return moves
     offset_moves = []
     for move in moves:
-        if isinstance(move, dict):
-            offset_move = dict(move)
-            if 'x' in offset_move and offset_move['x'] is not None:
-                offset_move['x'] = move['x'] + margin_mm
-            if 'y' in offset_move and offset_move['y'] is not None:
-                offset_move['y'] = move['y'] + margin_mm
-            offset_moves.append(offset_move)
-        else:
-            offset_moves.append(move)
+        offset_move = dict(move)
+        if 'x' in offset_move and offset_move['x'] is not None:
+            offset_move['x'] = move['x'] + margin_mm
+        if 'y' in offset_move and offset_move['y'] is not None:
+            offset_move['y'] = move['y'] + margin_mm
+        offset_moves.append(offset_move)
     return offset_moves
 
 
-def _extract_and_strip_first_rpm(moves) -> tuple[float | None, list]:
+def _extract_and_strip_first_rpm(moves: list[dict[str, Any]]) -> tuple[float | None, list[dict[str, Any]]]:
     first_rpm = None
     result = []
     for move in moves:
-        if first_rpm is None and isinstance(move, dict) and move.get('kind') == 'set_rpm':
+        if first_rpm is None and move.get('kind') == 'set_rpm':
             first_rpm = move.get('rpm')
         else:
             result.append(move)
@@ -68,6 +65,8 @@ def write_gcode(
         raise ValueError("unit must be 'mm' or 'inch'")
     if y_origin not in ('front', 'back'):
         raise ValueError("y_origin must be 'front' or 'back'")
+    if y_origin == 'front' and sheet_height is None:
+        raise ValueError("sheet_height is required when y_origin='front'")
 
     effective_header = header
     effective_moves = moves

@@ -5,6 +5,7 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
+from cam.planner.passes.tools import normalize_tool_entries
 from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
 from cam.post.gcode import write_gcode
 from cam.config import Config
@@ -53,7 +54,7 @@ def test_polygon_triangle_profile():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -86,7 +87,7 @@ def test_polygon_l_shape_profile():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -112,7 +113,7 @@ def test_roundedrect_uniform_radius_profile():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -141,7 +142,7 @@ def test_roundedrect_selective_corners_profile():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -166,7 +167,7 @@ def test_polygon_inside_cut():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -192,7 +193,7 @@ def test_roundedrect_inside_cut():
     passes, summary = plan_passes(
         planner_input,
         config=config,
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,

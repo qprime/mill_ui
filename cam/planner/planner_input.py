@@ -57,7 +57,6 @@ class FeatureInput:
     tabs: TabsInput | None = None
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
     corner_cleanup_tool_diameter_mm: float | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -171,7 +170,6 @@ class PlannerInput:
                 tabs=parse_tabs(f.get("tabs")),
                 keepouts=keepouts,
                 corner_cleanup_tool_diameter_mm=f.get("corner_cleanup_tool_diameter_mm"),
-                metadata={},
             )
 
         def parse_corner_cleanup(c: dict[str, Any]) -> CornerCleanupInput:

@@ -11,6 +11,7 @@ from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
 from cam.planner.passes import plan_passes
+from cam.planner.passes.tools import normalize_tool_entries
 from cam.post.gcode import write_gcode
 
 
@@ -69,7 +70,7 @@ def test_simple_rect_through_cam():
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
-        tool_db=TEST_TOOL_DB,
+        tool_db=normalize_tool_entries(TEST_TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -132,7 +133,7 @@ def test_multiple_parts_through_cam():
         passes, _ = plan_passes(
             planner_input,
             config=Config(),
-            tool_db=TEST_TOOL_DB,
+            tool_db=normalize_tool_entries(TEST_TOOL_DB),
             material=material,
             machine=machine,
             stock=stock,
@@ -202,7 +203,7 @@ def test_template_parts_through_cam():
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
-        tool_db=TEST_TOOL_DB,
+        tool_db=normalize_tool_entries(TEST_TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,
@@ -263,7 +264,7 @@ def test_multi_sheet_through_cam():
         passes, _ = plan_passes(
             planner_input,
             config=Config(),
-            tool_db=TEST_TOOL_DB,
+            tool_db=normalize_tool_entries(TEST_TOOL_DB),
             material=material,
             machine=machine,
             stock=stock,
@@ -312,7 +313,7 @@ def test_gcode_basic_invariants():
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
-        tool_db=TEST_TOOL_DB,
+        tool_db=normalize_tool_entries(TEST_TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,

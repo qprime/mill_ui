@@ -22,7 +22,7 @@ from .profile import (
     rounded_rect_shape,
 )
 from .summary import summarise_passes
-from .tools import ToolSelection, pass_key, pick_tool_for_profile, tool_identity
+from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile, tool_identity
 
 
 @dataclass
@@ -36,7 +36,7 @@ class PassRecord:
     moves: List[Dict[str, Any]] = field(default_factory=list)
     count: int = 0
 
-    def add_moves(self, moves: Iterable[Mapping[str, Any]], *, increment: int = 0) -> None:
+    def add_moves(self, moves: Iterable[dict[str, Any]], *, increment: int = 0) -> None:
         for move in moves:
             self.moves.append(dict(move))
         if increment:
@@ -110,7 +110,7 @@ def plan_passes(
     planner_input: PlannerInput,
     *,
     config: Config,
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
     material: Material,
     machine: Machine,
     stock: Stock,

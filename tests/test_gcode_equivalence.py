@@ -7,6 +7,7 @@ from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
+from cam.planner.passes.tools import normalize_tool_entries
 from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
 from cam.post.gcode import write_gcode
 from cam.config import Config
@@ -51,7 +52,7 @@ def _generate_gcode(
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
-        tool_db=TOOL_DB,
+        tool_db=normalize_tool_entries(TOOL_DB),
         material=material,
         machine=machine,
         stock=stock,

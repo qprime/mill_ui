@@ -13,6 +13,7 @@ from cam.planner.params import stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator
 from cam.planner.passes.tools import (
     ToolSelection,
+    normalize_tool_entries,
     pick_tool_for_pocket,
     pick_tool_for_profile,
     pick_tool_for_hole,
@@ -40,8 +41,8 @@ FLAT_12MM = {"name": "12mm_flat", "diameter": 12.0, "kind": "flat", "rpm": 10000
 BALL_2MM = {"name": "2mm_ball", "diameter": 2.0, "kind": "ball", "rpm": 20000, "feed_xy": 600, "feed_z": 200}
 V_1MM = {"name": "1mm_v", "diameter": 1.0, "kind": "v", "rpm": 22000, "feed_xy": 500, "feed_z": 150}
 
-ALL_TOOLS = [FLAT_3MM, FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM, BALL_2MM, V_1MM]
-FLAT_ONLY = [FLAT_3MM, FLAT_6MM, FLAT_12MM]
+ALL_TOOLS = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM, BALL_2MM, V_1MM])
+FLAT_ONLY = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_12MM])
 
 
 def _setup(tool_diameter=6.0):
@@ -88,7 +89,7 @@ class TestPickToolForPocket:
 
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="No flat tools"):
-            pick_tool_for_pocket([BALL_2MM], required_width_mm=None, cleanup_offset_mm=0.0)
+            pick_tool_for_pocket(normalize_tool_entries([BALL_2MM]), required_width_mm=None, cleanup_offset_mm=0.0)
 
 
 class TestPickToolForProfile:
@@ -107,7 +108,7 @@ class TestPickToolForProfile:
 
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="does not contain a flat tool"):
-            pick_tool_for_profile([BALL_2MM], kerf_mm=None)
+            pick_tool_for_profile(normalize_tool_entries([BALL_2MM]), kerf_mm=None)
 
 
 class TestPickToolForHole:
@@ -126,7 +127,7 @@ class TestPickToolForHole:
 
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="flat tool"):
-            pick_tool_for_hole([BALL_2MM], hole_diameter_mm=5.0)
+            pick_tool_for_hole(normalize_tool_entries([BALL_2MM]), hole_diameter_mm=5.0)
 
 
 class TestPickToolForEngrave:

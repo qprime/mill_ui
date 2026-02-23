@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Sequence
 
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
@@ -28,7 +28,7 @@ def plan_pocket_passes(
     pockets: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
     config: "Config",
 ) -> None:
     for entry in pockets:
@@ -104,7 +104,7 @@ def plan_hole_passes(
     holes: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in holes:
         if entry.shape.lower() != "circle":
@@ -154,7 +154,7 @@ def plan_engrave_passes(
     engraves: tuple[FeatureInput, ...],
     *,
     accumulator: "PassAccumulator",
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in engraves:
         geometry = entry.geometry.data
@@ -212,7 +212,7 @@ def plan_corner_cleanup_passes(
     corner_cleanups: tuple[CornerCleanupInput, ...],
     *,
     accumulator: "PassAccumulator",
-    tool_db: Sequence[Mapping[str, Any]],
+    tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in corner_cleanups:
         corner_tool_diameter = entry.corner_tool_diameter_mm
@@ -221,23 +221,14 @@ def plan_corner_cleanup_passes(
 
         tool = None
         for t in tool_db:
-            if abs(float(t.get("diameter", 0.0)) - corner_tool_diameter) < 0.01:
-                tool = ToolSelection(
-                    diameter=float(t.get("diameter", corner_tool_diameter)),
-                    kind=t.get("kind", "flat"),
-                    name=t.get("name", "corner_tool"),
-                    rpm=float(t.get("rpm", 18000)),
-                    feed_xy=float(t.get("feed_xy", 1000)),
-                    feed_z=float(t.get("feed_z", 300)),
-                    depth_per_pass=float(t.get("depth_per_pass", 3.0)),
-                    stepover_percent=float(t.get("stepover_percent", 40)),
-                )
+            if abs(t.diameter - corner_tool_diameter) < 0.01:
+                tool = t
                 break
 
         if tool is None:
             raise ValueError(
                 f"Corner cleanup tool with diameter {corner_tool_diameter}mm not found in tool_db. "
-                f"Available tools: {[t.get('diameter') for t in tool_db]}"
+                f"Available tools: {[t.diameter for t in tool_db]}"
             )
 
         record = accumulator.get_record("corner_cleanup", tool)

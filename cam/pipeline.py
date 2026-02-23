@@ -23,6 +23,7 @@ from cam.model.stock import Stock
 from cam.model.material import Material
 from cam.model.machine import Machine
 from cam.planner.passes import PassRecord, plan_passes
+from cam.planner.passes.tools import ToolSelection, normalize_tool_entries
 from cam.post.gcode import write_gcode
 from config.machine_loader import MachineConfig, Endmill
 
@@ -91,8 +92,11 @@ def run_pipeline(
     endmill: Endmill | None = None,
     validate_machine_bounds: bool = True,
 ) -> PipelineResult:
+    tools: list[ToolSelection]
     if tool_db is None:
-        tool_db = DEFAULT_TOOL_DB
+        tools = normalize_tool_entries(DEFAULT_TOOL_DB)
+    else:
+        tools = normalize_tool_entries(tool_db)
 
     errors: list[str] = []
     warnings: list[str] = []
@@ -209,7 +213,7 @@ def run_pipeline(
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
-        tool_db=tool_db,
+        tool_db=tools,
         material=material,
         machine=machine,
         stock=stock,
@@ -248,7 +252,7 @@ def run_pipeline(
 
         total_moves += len(p.moves)
         for move in p.moves:
-            if isinstance(move, dict) and move.get("is_rapid"):
+            if move.get("is_rapid"):
                 total_rapid_moves += 1
             else:
                 total_cut_moves += 1

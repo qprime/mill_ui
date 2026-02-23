@@ -112,7 +112,6 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         tabs=tabs,
         keepouts=keepouts,
         corner_cleanup_tool_diameter_mm=corner_cleanup_diameter,
-        metadata={},
     )
 
 
@@ -152,12 +151,12 @@ def removal_intents_to_planner_input(
     }
     corner_cleanups: list[CornerCleanupInput] = []
     all_keepouts: list[KeepoutInput] = []
-    seen_keepouts: set[tuple[float, float, float, float]] = set()
+    seen_keepouts: set[tuple[int, int, int, int]] = set()
 
     for intent in intents:
         for keepout in intent.constraints.keepouts:
-            key = (keepout.bounds.x_min, keepout.bounds.x_max,
-                   keepout.bounds.y_min, keepout.bounds.y_max)
+            key = (round(keepout.bounds.x_min * 1000), round(keepout.bounds.x_max * 1000),
+                   round(keepout.bounds.y_min * 1000), round(keepout.bounds.y_max * 1000))
             if key not in seen_keepouts:
                 seen_keepouts.add(key)
                 all_keepouts.append(KeepoutInput(

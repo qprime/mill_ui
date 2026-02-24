@@ -67,6 +67,13 @@ class PMLParseError(Exception):
         super().__init__(f"{path}: {message}" if path else message)
 
 
+def _require(node_data: dict, key: str, path: str) -> Any:
+    try:
+        return node_data[key]
+    except KeyError:
+        raise PMLParseError(f"Missing required key '{key}'", path) from None
+
+
 def parse_dimension(value: Any) -> float:
     if isinstance(value, (int, float)):
         return float(value)
@@ -201,7 +208,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         return circle
 
     elif node_type == "RoundedRect":
-        radius_mm = parse_dimension(node_data["radius"])
+        radius_mm = parse_dimension(_require(node_data, "radius", f"{path}.RoundedRect"))
         corners = None
         if "corners" in node_data:
             corners = frozenset(node_data["corners"])
@@ -226,18 +233,18 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Line":
         return Line(
-            orientation=node_data["orientation"],
+            orientation=_require(node_data, "orientation", f"{path}.Line"),
             feature=feature,
             id=node_id,
             label=node_label,
         )
 
     elif node_type == "Polyline":
-        points = tuple(tuple(p) for p in node_data["points"])
+        points = tuple(tuple(p) for p in _require(node_data, "points", f"{path}.Polyline"))
         return Polyline(points=points, feature=feature, id=node_id, label=node_label)
 
     elif node_type == "Spline":
-        points = tuple(tuple(p) for p in node_data["points"])
+        points = tuple(tuple(p) for p in _require(node_data, "points", f"{path}.Spline"))
         tolerance_mm = parse_dimension(node_data.get("tolerance", "0.1mm"))
         return SplinePath(points=points, feature=feature, tolerance_mm=tolerance_mm, id=node_id, label=node_label)
 
@@ -282,14 +289,14 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Frame":
         return Frame(
-            width_mm=parse_dimension(node_data["width"]),
+            width_mm=parse_dimension(_require(node_data, "width", f"{path}.Frame")),
             children=children,
         )
 
     elif node_type == "Grid":
         return Grid(
-            rows=node_data["rows"],
-            cols=node_data["cols"],
+            rows=_require(node_data, "rows", f"{path}.Grid"),
+            cols=_require(node_data, "cols", f"{path}.Grid"),
             gap_mm=parse_dimension(node_data.get("gap", "0mm")),
             children=children,
         )
@@ -302,8 +309,8 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Split":
         return Split(
-            rows=node_data["rows"],
-            cols=node_data["cols"],
+            rows=_require(node_data, "rows", f"{path}.Split"),
+            cols=_require(node_data, "cols", f"{path}.Split"),
             rail_mm=parse_dimension(node_data.get("rail", "0mm")),
             mullion_mm=parse_dimension(node_data.get("mullion", "0mm")),
             children=children,
@@ -312,7 +319,7 @@ def parse_node(data: dict, path: str = "") -> Any:
     elif node_type == "Profile":
         depth = parse_dimension_or_through(node_data.get("depth", "through"))
         return ProfileGen(
-            side=node_data["side"],
+            side=_require(node_data, "side", f"{path}.Profile"),
             depth=depth,
             tab_count=node_data.get("tab_count"),
             tab_height_mm=parse_dimension(node_data["tab_height"]) if "tab_height" in node_data else None,
@@ -320,79 +327,79 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Pocket":
-        return PocketGen(depth_mm=parse_dimension(node_data["depth"]))
+        return PocketGen(depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")))
 
     elif node_type == "RaisedPanel":
         return RaisedPanelGen(
-            border_width_mm=parse_dimension(node_data["border_width"]),
-            border_depth_mm=parse_dimension(node_data["border_depth"]),
-            field_depth_mm=parse_dimension(node_data["field_depth"]),
+            border_width_mm=parse_dimension(_require(node_data, "border_width", f"{path}.RaisedPanel")),
+            border_depth_mm=parse_dimension(_require(node_data, "border_depth", f"{path}.RaisedPanel")),
+            field_depth_mm=parse_dimension(_require(node_data, "field_depth", f"{path}.RaisedPanel")),
         )
 
     elif node_type == "Chamfer":
         return ChamferGen(
-            width_mm=parse_dimension(node_data["width"]),
-            depth_mm=parse_dimension(node_data["depth"]),
+            width_mm=parse_dimension(_require(node_data, "width", f"{path}.Chamfer")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Chamfer")),
         )
 
     elif node_type == "Wave":
         return WaveGen(
-            wave_count=node_data["count"],
-            amplitude_mm=parse_dimension(node_data["amplitude"]),
-            wavelength_mm=parse_dimension(node_data["wavelength"]),
-            groove_width_mm=parse_dimension(node_data["groove"]),
-            depth_mm=parse_dimension(node_data["depth"]),
+            wave_count=_require(node_data, "count", f"{path}.Wave"),
+            amplitude_mm=parse_dimension(_require(node_data, "amplitude", f"{path}.Wave")),
+            wavelength_mm=parse_dimension(_require(node_data, "wavelength", f"{path}.Wave")),
+            groove_width_mm=parse_dimension(_require(node_data, "groove", f"{path}.Wave")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Wave")),
         )
 
     elif node_type == "XPanel":
         return XPanelGen(
-            bar_width_mm=parse_dimension(node_data["bar_width"]),
-            depth_mm=parse_dimension(node_data["depth"]),
+            bar_width_mm=parse_dimension(_require(node_data, "bar_width", f"{path}.XPanel")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.XPanel")),
         )
 
     elif node_type == "SplitHorizontal":
         return SplitHorizontal(
-            n=node_data["count"],
+            n=_require(node_data, "count", f"{path}.SplitHorizontal"),
             gap_mm=parse_dimension(node_data.get("gap", "0mm")),
             children=children,
         )
 
     elif node_type == "SplitVertical":
         return SplitVertical(
-            n=node_data["count"],
+            n=_require(node_data, "count", f"{path}.SplitVertical"),
             gap_mm=parse_dimension(node_data.get("gap", "0mm")),
             children=children,
         )
 
     elif node_type == "SplitGrid":
         return SplitGrid(
-            rows=node_data["rows"],
-            cols=node_data["cols"],
+            rows=_require(node_data, "rows", f"{path}.SplitGrid"),
+            cols=_require(node_data, "cols", f"{path}.SplitGrid"),
             gap_mm=parse_dimension(node_data.get("gap", "0mm")),
             children=children,
         )
 
     elif node_type == "SplitHorizontalGaps":
         return SplitHorizontalGaps(
-            n=node_data["count"],
-            gap_mm=parse_dimension(node_data["gap"]),
+            n=_require(node_data, "count", f"{path}.SplitHorizontalGaps"),
+            gap_mm=parse_dimension(_require(node_data, "gap", f"{path}.SplitHorizontalGaps")),
             children=children,
         )
 
     elif node_type == "Lines":
         return LinesGen(
-            angle_deg=float(node_data["angle"]),
-            spacing_mm=parse_dimension(node_data["spacing"]),
-            line_width_mm=parse_dimension(node_data["width"]),
-            depth_mm=parse_dimension(node_data["depth"]),
+            angle_deg=float(_require(node_data, "angle", f"{path}.Lines")),
+            spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Lines")),
+            line_width_mm=parse_dimension(_require(node_data, "width", f"{path}.Lines")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Lines")),
         )
 
     elif node_type == "ConcentricBorder":
-        insets = [parse_dimension(i) for i in node_data["insets"]]
+        insets = [parse_dimension(i) for i in _require(node_data, "insets", f"{path}.ConcentricBorder")]
         return ConcentricBorderGen(
             insets_mm=tuple(insets),
-            groove_width_mm=parse_dimension(node_data["groove"]),
-            depth_mm=parse_dimension(node_data["depth"]),
+            groove_width_mm=parse_dimension(_require(node_data, "groove", f"{path}.ConcentricBorder")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.ConcentricBorder")),
         )
 
     elif node_type == "Place":
@@ -406,8 +413,8 @@ def parse_node(data: dict, path: str = "") -> Any:
     elif node_type == "AtPosition":
         child = parse_node(node_data["child"], f"{path}.{node_type}.child") if "child" in node_data else None
         return AtPosition(
-            x_mm=parse_dimension(node_data["x"]),
-            y_mm=parse_dimension(node_data["y"]),
+            x_mm=parse_dimension(_require(node_data, "x", f"{path}.AtPosition")),
+            y_mm=parse_dimension(_require(node_data, "y", f"{path}.AtPosition")),
             width_mm=parse_dimension(node_data["width"]) if "width" in node_data else None,
             height_mm=parse_dimension(node_data["height"]) if "height" in node_data else None,
             child=child,
@@ -415,15 +422,15 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Subtract":
         return Subtract(
-            inner_inset_mm=parse_dimension(node_data["inner_inset"]),
+            inner_inset_mm=parse_dimension(_require(node_data, "inner_inset", f"{path}.Subtract")),
             children=children,
         )
 
     elif node_type == "Arch":
         return Arch(
-            width_mm=parse_dimension(node_data["width"]),
-            height_mm=parse_dimension(node_data["height"]),
-            radius_mm=parse_dimension(node_data["radius"]),
+            width_mm=parse_dimension(_require(node_data, "width", f"{path}.Arch")),
+            height_mm=parse_dimension(_require(node_data, "height", f"{path}.Arch")),
+            radius_mm=parse_dimension(_require(node_data, "radius", f"{path}.Arch")),
             children=children,
             feature=feature,
             id=node_id,
@@ -431,13 +438,15 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Polygon":
-        points = tuple((parse_dimension(p[0]), parse_dimension(p[1])) for p in node_data["points"])
+        points = tuple(
+            (parse_dimension(p[0]), parse_dimension(p[1])) for p in _require(node_data, "points", f"{path}.Polygon")
+        )
         return Polygon(points=points, children=children, feature=feature, id=node_id, label=node_label)
 
     elif node_type == "Triangle":
         return Triangle(
-            base_mm=parse_dimension(node_data["base"]),
-            height_mm=parse_dimension(node_data["height"]),
+            base_mm=parse_dimension(_require(node_data, "base", f"{path}.Triangle")),
+            height_mm=parse_dimension(_require(node_data, "height", f"{path}.Triangle")),
             children=children,
             feature=feature,
             id=node_id,
@@ -447,8 +456,8 @@ def parse_node(data: dict, path: str = "") -> Any:
     elif node_type == "HoleGrid":
         depth = parse_dimension_or_through(node_data.get("depth", "through"))
         return HoleGridGen(
-            spacing_mm=parse_dimension(node_data["spacing"]),
-            diameter_mm=parse_dimension(node_data["diameter"]),
+            spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.HoleGrid")),
+            diameter_mm=parse_dimension(_require(node_data, "diameter", f"{path}.HoleGrid")),
             depth=depth,
             pattern=node_data.get("pattern", "rectangular"),
             inset_mm=parse_dimension(node_data.get("inset", "0mm")),
@@ -463,7 +472,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "MeasurementEdge":
-        edges = tuple(node_data["edges"])
+        edges = tuple(_require(node_data, "edges", f"{path}.MeasurementEdge"))
         fields = parse_measurement_fields(node_data, parse_dimension)
         return MeasurementEdgeGen(
             edges=edges,
@@ -482,7 +491,7 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "EngraveText":
         return EngraveTextGen(
-            text=node_data["text"],
+            text=_require(node_data, "text", f"{path}.EngraveText"),
             height_mm=parse_dimension(node_data.get("height", "4mm")),
             depth_mm=parse_dimension(node_data.get("depth", "0.3mm")),
             font=node_data.get("font", "rowmans"),
@@ -495,8 +504,8 @@ def parse_node(data: dict, path: str = "") -> Any:
             min_width_mm=parse_dimension(node_data.get("min_width", "200mm")),
             min_height_mm=parse_dimension(node_data.get("min_height", "200mm")),
             margin_mm=parse_dimension(node_data["margin"]) if "margin" in node_data else None,
-            tab_count=node_data["tab_count"],
-            tab_height_mm=parse_dimension(node_data["tab_height"]),
+            tab_count=_require(node_data, "tab_count", f"{path}.WasteCuts"),
+            tab_height_mm=parse_dimension(_require(node_data, "tab_height", f"{path}.WasteCuts")),
             strategy=node_data.get("strategy", "largest"),
         )
 
@@ -564,14 +573,14 @@ def parse_node(data: dict, path: str = "") -> Any:
             width_mm=parse_dimension(
                 node_data.get("width") or node_data.get("dimensions", [0])[0]
                 if isinstance(node_data.get("dimensions"), list)
-                else node_data["width"]
+                else _require(node_data, "width", f"{path}.Assembly")
             ),
             depth_mm=parse_dimension(
                 node_data.get("depth")
                 or (
                     node_data.get("dimensions", [0, 0])[1]
                     if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1
-                    else node_data["depth"]
+                    else _require(node_data, "depth", f"{path}.Assembly")
                 )
             ),
             height_mm=parse_dimension(
@@ -579,10 +588,10 @@ def parse_node(data: dict, path: str = "") -> Any:
                 or (
                     node_data.get("dimensions", [0, 0, 0])[2]
                     if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2
-                    else node_data["height"]
+                    else _require(node_data, "height", f"{path}.Assembly")
                 )
             ),
-            thickness_mm=parse_dimension(node_data["thickness"]),
+            thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Assembly")),
             joinery=node_data.get("joinery", "finger"),
             finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
             finger_count=node_data.get("finger_count"),
@@ -636,12 +645,12 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "UseComponent":
         return UseComponent(
-            component_name=node_data["name"],
+            component_name=_require(node_data, "name", f"{path}.UseComponent"),
             args=node_data.get("args", {}),
         )
 
     elif node_type == "Engrave":
-        depth_mm = parse_dimension(node_data["depth"])
+        depth_mm = parse_dimension(_require(node_data, "depth", f"{path}.Engrave"))
         return Feature(
             type="engrave",
             depth_mm=depth_mm,
@@ -659,8 +668,8 @@ def parse_node(data: dict, path: str = "") -> Any:
                 if "cutouts" in layer_data:
                     cutouts = tuple(
                         {
-                            "start_mm": parse_dimension(c["start"]),
-                            "length_mm": parse_dimension(c["length"]),
+                            "start_mm": parse_dimension(_require(c, "start", f"{path}.Beam.layer.cutout")),
+                            "length_mm": parse_dimension(_require(c, "length", f"{path}.Beam.layer.cutout")),
                             "width_mm": parse_dimension(c["width"]) if "width" in c else None,
                             "offset_from_edge_mm": parse_dimension(c.get("offset", "0mm")),
                         }
@@ -668,7 +677,7 @@ def parse_node(data: dict, path: str = "") -> Any:
                     )
                 parsed_layers.append(
                     BeamLayerDecl(
-                        length_mm=parse_dimension(layer_data["length"]),
+                        length_mm=parse_dimension(_require(layer_data, "length", f"{path}.Beam.layer")),
                         offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
                         cutouts=cutouts,
                     )
@@ -722,9 +731,9 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         return BeamDecl(
             name=node_data.get("name", "beam"),
-            length_mm=parse_dimension(node_data["length"]),
-            width_mm=parse_dimension(node_data["width"]),
-            thickness_mm=parse_dimension(node_data["thickness"]),
+            length_mm=parse_dimension(_require(node_data, "length", f"{path}.Beam")),
+            width_mm=parse_dimension(_require(node_data, "width", f"{path}.Beam")),
+            thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Beam")),
             layers=layers,
             role=node_data.get("role"),
             face_features=face_features,
@@ -740,7 +749,10 @@ def parse_node(data: dict, path: str = "") -> Any:
 def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     yaml = YAML()
     yaml.preserve_quotes = True
-    data = yaml.load(source)
+    try:
+        data = yaml.load(source)
+    except Exception as e:
+        raise PMLParseError(f"Invalid YAML: {e}") from e
 
     if data is None:
         raise PMLParseError("Empty YAML document")
@@ -774,7 +786,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     sheet = Sheet(
         width_mm=width_mm,
         height_mm=height_mm,
-        thickness_mm=parse_dimension(sheet_block["thickness"]),
+        thickness_mm=parse_dimension(_require(sheet_block, "thickness", "Sheet")),
         margin_mm=margin_mm,
         show_dimensions=sheet_block.get("show_dimensions", True),
     )
@@ -813,7 +825,10 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
 def parse_nest_yaml(source: str) -> NestJob:
     yaml = YAML()
     yaml.preserve_quotes = True
-    data = yaml.load(source)
+    try:
+        data = yaml.load(source)
+    except Exception as e:
+        raise NestParseError(f"Invalid YAML: {e}") from e
 
     if data is None:
         raise NestParseError("Empty YAML document")
@@ -930,7 +945,10 @@ def substitute_params(text: str, params: dict[str, Any]) -> str:
 def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
     yaml = YAML()
     yaml.preserve_quotes = True
-    data = yaml.load(source)
+    try:
+        data = yaml.load(source)
+    except Exception as e:
+        raise PMLParseError(f"Invalid YAML: {e}") from e
 
     if data is None:
         raise PMLParseError("Empty YAML document")

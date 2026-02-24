@@ -73,11 +73,9 @@ def generate_diagnostic_svg(
         .label { fill: #b0b0b0; font-size: 11px; font-family: monospace; }
     """
 
-    ET.SubElement(svg, "rect", {
-        "x": "0", "y": "0",
-        "width": str(vb_width), "height": str(vb_height + 350),
-        "class": "background"
-    })
+    ET.SubElement(
+        svg, "rect", {"x": "0", "y": "0", "width": str(vb_width), "height": str(vb_height + 350), "class": "background"}
+    )
 
     title = ET.SubElement(svg, "text", {"x": "20", "y": "25", "class": "title"})
     title.text = "FINISHED PARTS - Material Remaining After Cutting"
@@ -98,11 +96,16 @@ def generate_diagnostic_svg(
         (244, 473, "BOTTOM"),
     ]
     for x, y, text in part_labels:
-        label = ET.SubElement(main_group, "text", {
-            "x": str(x), "y": str(y),
-            "class": "label",
-            "text-anchor": "middle",
-        })
+        label = ET.SubElement(
+            main_group,
+            "text",
+            {
+                "x": str(x),
+                "y": str(y),
+                "class": "label",
+                "text-anchor": "middle",
+            },
+        )
         label.text = text
 
     if len(profile_paths) >= 3:
@@ -166,22 +169,21 @@ def generate_diagnostic_svg(
             left_center_x = left_base_x + left_width * scale / 2
             label_y = base_y + 240
 
-            front_label = ET.SubElement(mating_group, "text", {
-                "x": str(front_center_x), "y": str(label_y),
-                "class": "label", "text-anchor": "middle"
-            })
+            front_label = ET.SubElement(
+                mating_group,
+                "text",
+                {"x": str(front_center_x), "y": str(label_y), "class": "label", "text-anchor": "middle"},
+            )
             front_label.text = "FRONT (finger_first)"
 
-            left_label = ET.SubElement(mating_group, "text", {
-                "x": str(left_center_x), "y": str(label_y),
-                "class": "label", "text-anchor": "middle"
-            })
+            left_label = ET.SubElement(
+                mating_group,
+                "text",
+                {"x": str(left_center_x), "y": str(label_y), "class": "label", "text-anchor": "middle"},
+            )
             left_label.text = "LEFT SIDE (notch_first)"
 
-            gap_note = ET.SubElement(mating_group, "text", {
-                "x": "50", "y": str(label_y + 20),
-                "class": "label"
-            })
+            gap_note = ET.SubElement(mating_group, "text", {"x": "50", "y": str(label_y + 20), "class": "label"})
             gap_note.text = "Mating edges touch - fingers interlock with notches (0.15mm clearance)"
 
     ET.indent(svg, space="  ")

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 
 def rounded_rect_path(
-    x: float, y: float, w: float, h: float,
-    radius_tl: float, radius_tr: float, radius_br: float, radius_bl: float
+    x: float, y: float, w: float, h: float, radius_tl: float, radius_tr: float, radius_br: float, radius_bl: float
 ) -> str:
     rtl = min(radius_tl, w / 2, h / 2)
     rtr = min(radius_tr, w / 2, h / 2)

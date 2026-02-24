@@ -1,4 +1,3 @@
-
 import subprocess
 import sys
 import tempfile
@@ -37,7 +36,6 @@ children:
         input_file = f.name
 
     try:
-
         result = subprocess.run(
             [sys.executable, "-m", "cli.parse_compositional_pml", input_file],
             capture_output=True,
@@ -87,7 +85,6 @@ children:
         input_file = f.name
 
     try:
-
         result = subprocess.run(
             [
                 sys.executable,
@@ -148,7 +145,6 @@ children:
         input_file = f.name
 
     try:
-
         result = subprocess.run(
             [
                 sys.executable,
@@ -277,7 +273,6 @@ children:
         input_file = f.name
 
     try:
-
         result = subprocess.run(
             [
                 sys.executable,
@@ -322,6 +317,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

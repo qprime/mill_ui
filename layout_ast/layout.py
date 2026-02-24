@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -29,8 +28,6 @@ class Placement:
 
 @dataclass(frozen=True)
 class Geometry:
-
-
     data: dict[str, Any]
 
 
@@ -42,16 +39,13 @@ class Feature:
     is_through: bool = False
     corner_cleanup_tool_diameter_mm: float | None = None
 
-
     tab_count: int | None = None
     tab_height_mm: float | None = None
     tab_width_mm: float | None = None
 
-
     bevel_width_mm: float | None = None
     bevel_angle_deg: float | None = None
     bevel_inner_depth_mm: float | None = None
-
 
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
@@ -84,8 +78,10 @@ class LayoutAST:
     @staticmethod
     def from_json(path: str) -> LayoutAST:
         from layout_ast.parsers import parse_layout_json
+
         return parse_layout_json(path)
 
     def to_json(self, path: str | None = None) -> str:
         from layout_ast.emitters import emit_layout_json
+
         return emit_layout_json(self, path)

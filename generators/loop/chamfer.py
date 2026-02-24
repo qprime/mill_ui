@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,7 +25,6 @@ def chamfer_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,
@@ -34,7 +32,6 @@ def chamfer_generator(
         generator_name="ChamferGenerator",
     ):
         return []
-
 
     try:
         loops = extract_loops(domain, params.loop_selection, "ChamferGenerator")
@@ -46,9 +43,7 @@ def chamfer_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(
-            f"ChamferGenerator: No loops match selection '{params.loop_selection}'"
-        )
+        raise ValueError(f"ChamferGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 
@@ -62,7 +57,6 @@ def chamfer_generator(
             "points": polygon_points,
         }
 
-
         feature_kwargs = {
             "type": "chamfer",
             "depth_mm": params.depth_mm,
@@ -70,12 +64,10 @@ def chamfer_generator(
             "chamfer_angle_deg": params.angle_degrees,
         }
 
-
         if loop_idx == 0:
             feature_kwargs["side"] = "outside"
         else:
             feature_kwargs["side"] = "inside"
-
 
         item = Item(
             kind="shape",

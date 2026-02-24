@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -29,7 +28,6 @@ def profile_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,
@@ -37,7 +35,6 @@ def profile_generator(
         generator_name="ProfileGenerator",
     ):
         return []
-
 
     try:
         loops = extract_loops(domain, params.loop_selection, "ProfileGenerator")
@@ -49,9 +46,7 @@ def profile_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(
-            f"ProfileGenerator: No loops match selection '{params.loop_selection}'"
-        )
+        raise ValueError(f"ProfileGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 
@@ -65,7 +60,6 @@ def profile_generator(
             "points": polygon_points,
         }
 
-
         is_through = DepthMode.is_through(params.depth)
         depth_mm = 0.0 if is_through else float(params.depth)
 
@@ -76,12 +70,10 @@ def profile_generator(
             "is_through": is_through,
         }
 
-
         if params.tab_count > 0:
             feature_kwargs["tab_count"] = params.tab_count
             feature_kwargs["tab_width_mm"] = params.tab_width_mm
             feature_kwargs["tab_height_mm"] = params.tab_height_mm
-
 
         item = Item(
             kind="shape",

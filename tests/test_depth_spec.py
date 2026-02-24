@@ -214,7 +214,7 @@ def run_tests():
             traceback.print_exc()
             failed += 1
 
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Results: {passed}/{passed + failed} passed")
 
     return failed == 0

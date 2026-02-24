@@ -1,7 +1,4 @@
-
-
 class HintKeys:
-
     ID = "id"
     SHAPE = "shape"
     GEOMETRY = "geometry"
@@ -18,7 +15,6 @@ class HintKeys:
 
 
 class GeometryKeys:
-
     W_MM = "w_mm"
     H_MM = "h_mm"
     DIAMETER_MM = "diameter_mm"
@@ -30,16 +26,13 @@ class GeometryKeys:
     ISLANDS = "islands"
     EDGE_TREATMENT = "edge_treatment"
 
-
     POINTS = "points"
     HOLES = "holes"
-
 
     X_MIN = "x_min"
     X_MAX = "x_max"
     Y_MIN = "y_min"
     Y_MAX = "y_max"
-
 
     TYPE = "type"
     DISTANCE_MM = "distance_mm"
@@ -48,20 +41,17 @@ class GeometryKeys:
 
 
 class TabKeys:
-
     COUNT = "count"
     HEIGHT_MM = "height_mm"
     WIDTH_MM = "width_mm"
 
 
 class MetadataKeys:
-
     HINT_TYPE = "hint_type"
     ORIGINAL_ID = "original_id"
     ITEM_TYPE = "item_type"
     FEATURE_TYPE = "feature_type"
     SHAPE_ID = "shape_id"
-
 
     BEVEL = "bevel"
     CHAMFER = "chamfer"
@@ -71,19 +61,16 @@ class MetadataKeys:
 
 
 class FeatureType:
-
     PROFILE = "profile"
     POCKET = "pocket"
     HOLE = "hole"
     ENGRAVE = "engrave"
-
 
     BEVEL = "bevel"
     CHAMFER = "chamfer"
 
 
 class ShapeType:
-
     RECT = "Rect"
     RECTANGLE = "Rectangle"
     CIRCLE = "Circle"
@@ -91,7 +78,6 @@ class ShapeType:
     POLYGON = "Polygon"
     LINE = "Line"
     POLYLINE = "Polyline"
-
 
     RECT_LOWER = "rect"
     RECTANGLE_LOWER = "rectangle"
@@ -122,14 +108,12 @@ class ShapeType:
 
 
 class Side:
-
     OUTSIDE = "outside"
     INSIDE = "inside"
     ON = "on"
 
 
 class DepthMode:
-
     THROUGH = "through"
     HALF = "half"
 
@@ -153,7 +137,6 @@ class DepthMode:
 
 
 class HintCollectionKeys:
-
     UNITS = "units"
     KERF_WIDTH_MM = "kerf_width_mm"
     MIN_CHANNEL_WIDTH_MM = "min_channel_width_mm"

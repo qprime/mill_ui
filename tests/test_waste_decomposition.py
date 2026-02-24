@@ -11,7 +11,6 @@ from nesting.waste_decomposition import (
 
 
 class TestWasteRectProperties:
-
     def test_area(self):
         r = WasteRect(x=10, y=20, width=30, height=40)
         assert r.area == 1200.0
@@ -31,7 +30,6 @@ class TestWasteRectProperties:
 
 
 class TestPartBoundsProperties:
-
     def test_right(self):
         p = PartBounds(x=10, y=20, width=30, height=40)
         assert p.right == 40.0
@@ -42,7 +40,6 @@ class TestPartBoundsProperties:
 
 
 class TestComputeWasteNoParts:
-
     def test_empty_sheet_returns_whole_usable(self):
         result = compute_waste_rectangles(
             sheet_width=1000,
@@ -74,7 +71,6 @@ class TestComputeWasteNoParts:
 
 
 class TestComputeWasteSinglePart:
-
     def test_centered_part(self):
         result = compute_waste_rectangles(
             sheet_width=1000,
@@ -115,7 +111,6 @@ class TestComputeWasteSinglePart:
 
 
 class TestComputeWasteMultipleParts:
-
     def test_two_parts_side_by_side(self):
         result = compute_waste_rectangles(
             sheet_width=1000,
@@ -148,7 +143,6 @@ class TestComputeWasteMultipleParts:
 
 
 class TestComputeWasteMinDimensions:
-
     def test_small_gaps_filtered(self):
         result = compute_waste_rectangles(
             sheet_width=200,
@@ -173,7 +167,6 @@ class TestComputeWasteMinDimensions:
 
 
 class TestComputeWasteMargin:
-
     def test_margin_reduces_usable(self):
         with_margin = compute_waste_rectangles(
             sheet_width=1000,
@@ -206,7 +199,6 @@ class TestComputeWasteMargin:
 
 
 class TestComputeWasteStrategies:
-
     def test_guillotine_strategy(self):
         result = compute_waste_rectangles(
             sheet_width=1000,
@@ -248,7 +240,6 @@ class TestComputeWasteStrategies:
 
 
 class TestComputeWasteToolClearance:
-
     def test_tool_clearance(self):
         no_clearance = compute_waste_rectangles(
             sheet_width=1000,
@@ -274,7 +265,6 @@ class TestComputeWasteToolClearance:
 
 
 class TestComputeWasteNoOverlap:
-
     def test_waste_rects_dont_overlap_parts(self):
         parts = [
             PartBounds(x=100, y=100, width=200, height=200),
@@ -291,10 +281,10 @@ class TestComputeWasteNoOverlap:
         for wr in result:
             for part in parts:
                 overlaps = not (
-                    wr.x + wr.width <= part.x or
-                    part.x + part.width <= wr.x or
-                    wr.y + wr.height <= part.y or
-                    part.y + part.height <= wr.y
+                    wr.x + wr.width <= part.x
+                    or part.x + part.width <= wr.x
+                    or wr.y + wr.height <= part.y
+                    or part.y + part.height <= wr.y
                 )
                 assert not overlaps, (
                     f"Waste rect ({wr.x},{wr.y},{wr.width},{wr.height}) "

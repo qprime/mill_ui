@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import json
@@ -31,11 +30,9 @@ def test_parse_minimal_layout():
     try:
         ast = LayoutAST.from_json(temp_path)
 
-
         assert ast.sheet.width_mm == 200.0
         assert ast.sheet.height_mm == 100.0
         assert ast.sheet.thickness_mm == 12.0
-
 
         assert len(ast.items) == 1
         item = ast.items[0]
@@ -46,7 +43,6 @@ def test_parse_minimal_layout():
         assert item.placement.center_xy_mm == (60.0, 40.0)
         assert item.feature.type == "profile"
         assert item.feature.is_through
-
 
         assert ast.config == {}
     finally:
@@ -94,21 +90,17 @@ def test_parse_layout_with_multiple_items():
     try:
         ast = LayoutAST.from_json(temp_path)
 
-
         assert ast.sheet.width_mm == 300.0
         assert ast.sheet.height_mm == 200.0
         assert ast.sheet.thickness_mm == 18.0
 
-
         assert len(ast.items) == 3
-
 
         item0 = ast.items[0]
         assert item0.type == "Rect"
         assert item0.feature.type == "profile"
         assert item0.feature.side == "outside"
         assert item0.shape_id == "rect1"
-
 
         item1 = ast.items[1]
         assert item1.type == "Circle"
@@ -117,13 +109,11 @@ def test_parse_layout_with_multiple_items():
         assert item1.feature.depth_mm == 10.0
         assert item1.shape_id == "hole1"
 
-
         item2 = ast.items[2]
         assert item2.type == "Rect"
         assert item2.feature.type == "pocket"
         assert item2.feature.depth_mm == 5.0
         assert item2.shape_id is None
-
 
         assert ast.config["material"] == "MDF"
         assert ast.config["tool_db"] == "default"
@@ -231,7 +221,15 @@ def test_parse_preserves_numeric_precision():
 def test_parse_cnc_clamp_v1_layout():
     print("Running test_parse_cnc_clamp_v1_layout...")
 
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "cnc_clamp_v1"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print(f"  SKIP: Test layout not found: {layout_path}")
@@ -239,17 +237,14 @@ def test_parse_cnc_clamp_v1_layout():
 
     ast = LayoutAST.from_json(str(layout_path))
 
-
     assert ast.project == "cnc_clamp_v1"
     assert ast.kerf_width_mm == 6.35
     assert ast.cam is not None
     assert ast.layout is not None
 
-
     assert ast.sheet.width_mm == 800.0
     assert ast.sheet.height_mm == 250.0
     assert ast.sheet.thickness_mm == 19.1
-
 
     assert len(ast.items) == 1
     item = ast.items[0]
@@ -260,7 +255,6 @@ def test_parse_cnc_clamp_v1_layout():
     assert "length_mm" in item.params
     assert item.params["length_mm"] == 200.0
 
-
     assert item.geometry is None
     assert item.placement is None
     assert item.feature is None
@@ -270,7 +264,15 @@ def test_parse_cnc_clamp_v1_layout():
 
 def test_parse_mandelbrot_demo_layout():
     print("Running test_parse_mandelbrot_demo_layout...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "mandelbrot_demo"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print(f"  SKIP: Test layout not found: {layout_path}")
@@ -278,15 +280,12 @@ def test_parse_mandelbrot_demo_layout():
 
     ast = LayoutAST.from_json(str(layout_path))
 
-
     assert ast.project == "mandelbrot_demo"
     assert ast.kerf_width_mm == 3.175
-
 
     assert ast.sheet.width_mm == 400.0
     assert ast.sheet.height_mm == 300.0
     assert ast.sheet.thickness_mm == 18.0
-
 
     assert len(ast.items) == 1
     item = ast.items[0]
@@ -299,7 +298,15 @@ def test_parse_mandelbrot_demo_layout():
 
 def test_parse_cnc_clamp_part_a_layout():
     print("Running test_parse_cnc_clamp_part_a_layout...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "cnc_clamp-part_a_layout"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print(f"  SKIP: Test layout not found: {layout_path}")
@@ -307,11 +314,9 @@ def test_parse_cnc_clamp_part_a_layout():
 
     ast = LayoutAST.from_json(str(layout_path))
 
-
     assert ast.layout is not None
     assert ast.layout["cols"] == 2
     assert ast.layout["rows"] == 2
-
 
     assert len(ast.items) == 1
     item = ast.items[0]

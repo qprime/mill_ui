@@ -96,8 +96,7 @@ def grid_lines_generator(
 
     if not items and not allow_empty:
         raise ValueError(
-            "GridLinesGenerator: Could not generate any grid lines. "
-            "Domain may be too small for the specified spacing."
+            "GridLinesGenerator: Could not generate any grid lines. Domain may be too small for the specified spacing."
         )
 
     return items

@@ -43,9 +43,9 @@ def test_rectangle_alias_bounds():
         center_xy=(100.0, 100.0),
     )
 
-    assert bounds.x_min == 70.0   # 100 - 30
+    assert bounds.x_min == 70.0  # 100 - 30
     assert bounds.x_max == 130.0  # 100 + 30
-    assert bounds.y_min == 80.0   # 100 - 20
+    assert bounds.y_min == 80.0  # 100 - 20
     assert bounds.y_max == 120.0  # 100 + 20
 
     print("  ✓ PASS")
@@ -86,9 +86,9 @@ def test_circle_bounds():
         center_xy=(100.0, 100.0),
     )
 
-    assert bounds.x_min == 75.0   # 100 - 25
+    assert bounds.x_min == 75.0  # 100 - 25
     assert bounds.x_max == 125.0  # 100 + 25
-    assert bounds.y_min == 75.0   # 100 - 25
+    assert bounds.y_min == 75.0  # 100 - 25
     assert bounds.y_max == 125.0  # 100 + 25
 
     print("  ✓ PASS")
@@ -146,9 +146,7 @@ def test_polygon_bounds():
 
     bounds = compute_shape_bounds(
         shape_type="Polygon",
-        geometry_data={
-            "points": [[10, 20], [100, 20], [100, 80], [10, 80]]
-        },
+        geometry_data={"points": [[10, 20], [100, 20], [100, 80], [10, 80]]},
         center_xy=(0.0, 0.0),  # Should be ignored for Polygon
     )
 
@@ -191,9 +189,7 @@ def test_polyline_bounds():
 
     bounds = compute_shape_bounds(
         shape_type="Polyline",
-        geometry_data={
-            "points": [[0, 0], [50, 100], [100, 50], [150, 75]]
-        },
+        geometry_data={"points": [[0, 0], [50, 100], [100, 50], [150, 75]]},
         center_xy=(0.0, 0.0),  # Should be ignored for Polyline
     )
 
@@ -282,7 +278,7 @@ def test_line_reversed_coords():
         shape_type="Line",
         geometry_data={
             "start": [100, 80],  # Larger values
-            "end": [10, 20],     # Smaller values
+            "end": [10, 20],  # Smaller values
         },
         center_xy=(0.0, 0.0),
     )
@@ -468,7 +464,7 @@ def run_tests():
             traceback.print_exc()
             failed += 1
 
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Results: {passed}/{passed + failed} passed")
 
     return failed == 0

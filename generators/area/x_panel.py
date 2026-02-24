@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -43,9 +42,7 @@ def x_panel_generator(
     if w <= params.bar_width_mm * 2 or h <= params.bar_width_mm * 2:
         if allow_empty:
             return []
-        raise ValueError(
-            f"XPanelGenerator: Domain {w}x{h}mm too small for bar_width {params.bar_width_mm}mm"
-        )
+        raise ValueError(f"XPanelGenerator: Domain {w}x{h}mm too small for bar_width {params.bar_width_mm}mm")
 
     cx = x0 + w / 2
     cy = y0 + h / 2
@@ -96,9 +93,11 @@ def x_panel_generator(
         item = Item(
             kind="shape",
             type="Polygon",
-            geometry=Geometry(data={
-                "points": relative_points,
-            }),
+            geometry=Geometry(
+                data={
+                    "points": relative_points,
+                }
+            ),
             placement=Placement(center_xy_mm=(centroid_x, centroid_y)),
             feature=Feature(
                 type="pocket",

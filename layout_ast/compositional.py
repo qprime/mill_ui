@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -146,7 +145,6 @@ class SplinePath:
     def __post_init__(self):
         if len(self.points) < 2:
             raise ValueError(f"SplinePath requires at least 2 control points, got {len(self.points)}")
-
 
         for i, (x, y) in enumerate(self.points):
             if not (0.0 <= x <= 1.0):
@@ -469,16 +467,17 @@ class ResolvedRegion:
         panes = []
         for row in range(rows):
             for col in range(cols):
-
                 x_offset = col * (pane_width + mullion_mm)
                 y_offset = row * (pane_height + rail_mm)
 
-                panes.append(ResolvedRegion(
-                    x_min=self.x_min + x_offset,
-                    y_min=self.y_min + y_offset,
-                    x_max=self.x_min + x_offset + pane_width,
-                    y_max=self.y_min + y_offset + pane_height,
-                ))
+                panes.append(
+                    ResolvedRegion(
+                        x_min=self.x_min + x_offset,
+                        y_min=self.y_min + y_offset,
+                        x_max=self.x_min + x_offset + pane_width,
+                        y_max=self.y_min + y_offset + pane_height,
+                    )
+                )
 
         return panes
 

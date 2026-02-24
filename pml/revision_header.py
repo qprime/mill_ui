@@ -32,16 +32,10 @@ def format_pml_header(revision: str | None = None, gen_date: date | None = None)
 
 def has_mill_ui_header(content: str) -> bool:
     lines = content.split("\n")
-    return (
-        len(lines) >= 2
-        and lines[0].startswith("# mill_ui:")
-        and lines[1].startswith("# generated:")
-    )
+    return len(lines) >= 2 and lines[0].startswith("# mill_ui:") and lines[1].startswith("# generated:")
 
 
-def update_pml_header(
-    content: str, revision: str | None = None, gen_date: date | None = None
-) -> str:
+def update_pml_header(content: str, revision: str | None = None, gen_date: date | None = None) -> str:
     header = format_pml_header(revision, gen_date)
     if has_mill_ui_header(content):
         lines = content.split("\n")

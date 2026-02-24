@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -25,7 +24,6 @@ def flat_pocket_generator(
 
     params.validate()
 
-
     if params.allowance_mm > 0:
         inset_result = domain.inset(params.allowance_mm)
         if inset_result.is_empty:
@@ -45,7 +43,6 @@ def flat_pocket_generator(
     else:
         effective_domain = domain
 
-
     if not validate_domain_for_generation(
         effective_domain,
         min_area_mm2=0.01,
@@ -64,10 +61,8 @@ def flat_pocket_generator(
 
     if effective_domain.inner_boundaries:
         geometry_data["holes"] = [
-            [[pt[0] - cx, pt[1] - cy] for pt in hole]
-            for hole in effective_domain.inner_boundaries
+            [[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in effective_domain.inner_boundaries
         ]
-
 
     item = Item(
         kind="shape",

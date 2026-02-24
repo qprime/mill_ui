@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import hashlib
@@ -54,7 +53,15 @@ def test_roundtrip_minimal_shape_layout():
 
 def test_roundtrip_cnc_clamp_v1_layout():
     print("Running test_roundtrip_cnc_clamp_v1_layout...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "cnc_clamp_v1"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print("  SKIP: Test layout not found")
@@ -92,7 +99,15 @@ def test_roundtrip_cnc_clamp_v1_layout():
 
 def test_roundtrip_mandelbrot_demo_layout():
     print("Running test_roundtrip_mandelbrot_demo_layout...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "mandelbrot_demo" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "mandelbrot_demo"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print("  SKIP: Test layout not found")
@@ -115,7 +130,15 @@ def test_roundtrip_mandelbrot_demo_layout():
 
 def test_roundtrip_cnc_clamp_part_a_layout():
     print("Running test_roundtrip_cnc_clamp_part_a_layout...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp-part_a_layout" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "cnc_clamp-part_a_layout"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print("  SKIP: Test layout not found")
@@ -262,6 +285,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

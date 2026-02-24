@@ -16,10 +16,7 @@ def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:
     return float(match.group(1)), float(match.group(2))
 
 
-PROJECTS_BASE = Path(os.environ.get(
-    "MILL_UI_PROJECTS",
-    "/home/squinlan/cliff_ai/memories/cam_projects/mill_ui"
-))
+PROJECTS_BASE = Path(os.environ.get("MILL_UI_PROJECTS", "/home/squinlan/cliff_ai/memories/cam_projects/mill_ui"))
 
 
 def get_project_dir(project: str) -> Path:

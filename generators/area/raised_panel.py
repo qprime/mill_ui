@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -25,7 +24,6 @@ def raised_panel_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,
@@ -33,7 +31,6 @@ def raised_panel_generator(
         generator_name="RaisedPanelGenerator",
     ):
         return []
-
 
     field_result = domain.inset(params.border_width_mm)
 
@@ -46,7 +43,6 @@ def raised_panel_generator(
             f"{domain.bounds.width}mm x {domain.bounds.height}mm"
         )
 
-
     if len(field_result.domains) != 1:
         raise ValueError(
             f"RaisedPanelGenerator: inset produced {len(field_result.domains)} disjoint regions, "
@@ -56,13 +52,10 @@ def raised_panel_generator(
 
     items: list[Item] = []
 
-
     bcx, bcy = domain.centroid
-
 
     border_points = [[pt[0] - bcx, pt[1] - bcy] for pt in domain.outer_boundary]
     field_hole = [[pt[0] - bcx, pt[1] - bcy] for pt in field_domain.outer_boundary]
-
 
     holes = [field_hole]
     if domain.inner_boundaries:
@@ -90,9 +83,7 @@ def raised_panel_generator(
     )
     items.append(border_item)
 
-
     fcx, fcy = field_domain.centroid
-
 
     field_points = [[pt[0] - fcx, pt[1] - fcy] for pt in field_domain.outer_boundary]
 
@@ -100,11 +91,9 @@ def raised_panel_generator(
         "points": field_points,
     }
 
-
     if field_domain.inner_boundaries:
         field_geometry_data["holes"] = [
-            [[pt[0] - fcx, pt[1] - fcy] for pt in hole]
-            for hole in field_domain.inner_boundaries
+            [[pt[0] - fcx, pt[1] - fcy] for pt in hole] for hole in field_domain.inner_boundaries
         ]
 
     field_item = Item(

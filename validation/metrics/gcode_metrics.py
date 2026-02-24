@@ -638,7 +638,7 @@ class _GCodeParser:
             self.metrics.z_profile.max_plunge_z_mm = min(sorted_z) if sorted_z else 0.0
 
             tolerance = self.config.z_tolerance
-            unique_depths = []
+            unique_depths: list[float] = []
             for z in cutting_depths:
                 rounded = round(z / tolerance) * tolerance
                 if not unique_depths or abs(rounded - unique_depths[-1]) > tolerance:

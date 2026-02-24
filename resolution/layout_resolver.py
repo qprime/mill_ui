@@ -204,12 +204,12 @@ class LayoutResolver:
 
         for child in children:
             if isinstance(child, Keepout):
-                keepout_items = []
+                keepout_items: list[Item] = []
                 for keepout_child in child.children:
                     self._resolve_node(keepout_child, region, keepout_items, params)
 
                 for item in keepout_items:
-                    if item.kind == "shape" and item.geometry:
+                    if item.kind == "shape" and item.geometry and item.placement:
                         bounds_dict = compute_shape_bounds_dict(
                             item.type,
                             item.geometry.data,
@@ -362,7 +362,7 @@ class LayoutResolver:
 
         edge_treatment = self._extract_edge_treatment(node.children)
 
-        geometry_data = {
+        geometry_data: dict[str, Any] = {
             "w_mm": region.width,
             "h_mm": region.height,
         }
@@ -399,6 +399,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        geometry_data: dict[str, Any]
         if node.diameter_mm is not None:
             geometry_data = {"diameter_mm": node.diameter_mm}
         elif node.radius_mm is not None:
@@ -450,7 +451,7 @@ class LayoutResolver:
         else:
             radius_tl = radius_tr = radius_bl = radius_br = node.radius_mm
 
-        geometry_data = {
+        geometry_data: dict[str, Any] = {
             "w_mm": region.width,
             "h_mm": region.height,
             "radius_tl_mm": radius_tl,
@@ -787,10 +788,10 @@ class LayoutResolver:
         generator_params = HoleGridParams(
             spacing_mm=node.spacing_mm,
             diameter_mm=node.diameter_mm,
-            depth_mm=node.depth,
-            pattern=node.pattern,
+            depth_mm=node.depth,  # type: ignore[arg-type]
+            pattern=node.pattern,  # type: ignore[arg-type]
             inset_mm=node.inset_mm,
-            align=node.align,
+            align=node.align,  # type: ignore[arg-type]
         )
 
         shape_id_prefix = self._next_shape_id("hole")
@@ -982,7 +983,7 @@ class LayoutResolver:
         )
 
         generator_params = MeasurementGridParams(
-            unit=node.unit,
+            unit=node.unit,  # type: ignore[arg-type]
             minor_spacing_mm=node.minor_spacing_mm,
             major_spacing_mm=node.major_spacing_mm,
             minor_length_mm=node.minor_length_mm,
@@ -1022,8 +1023,8 @@ class LayoutResolver:
         )
 
         generator_params = MeasurementEdgeParams(
-            edges=node.edges,
-            unit=node.unit,
+            edges=node.edges,  # type: ignore[arg-type]
+            unit=node.unit,  # type: ignore[arg-type]
             minor_spacing_mm=node.minor_spacing_mm,
             major_spacing_mm=node.major_spacing_mm,
             minor_length_mm=node.minor_length_mm,
@@ -1063,7 +1064,7 @@ class LayoutResolver:
         )
 
         generator_params = GridLinesParams(
-            unit=node.unit,
+            unit=node.unit,  # type: ignore[arg-type]
             spacing_mm=node.spacing_mm,
             minor_spacing_mm=node.minor_spacing_mm,
             depth_mm=node.depth_mm,
@@ -1600,7 +1601,7 @@ class LayoutResolver:
                 return Captured(
                     dado_depth_mm=config.dado_depth_mm,
                     inset_mm=config.inset_mm,
-                    receiving=config.receiving,
+                    receiving=config.receiving,  # type: ignore[arg-type]
                 )
             return Captured()
         elif joinery_name == "half_lap":
@@ -1700,7 +1701,7 @@ class LayoutResolver:
                 height=node.height_mm,
                 thickness=node.thickness_mm,
                 side_joinery=side_joinery or Butt(),
-                cap_style=node.cap_style,
+                cap_style=node.cap_style,  # type: ignore[arg-type]
                 perimeter_joinery=perimeter_joinery,
                 top=top_joinery,
                 bottom=bottom_joinery,
@@ -1712,7 +1713,7 @@ class LayoutResolver:
                 shelf_back_support=node.shelf_back_support,
                 toe_kick_height=node.toe_kick_height_mm,
                 toe_kick_setback=node.toe_kick_depth_mm,
-                toe_kick_style=node.toe_kick_style,
+                toe_kick_style=node.toe_kick_style,  # type: ignore[arg-type]
                 toe_kick_cover=node.toe_kick_cover,
             )
         elif assembly_type == "cubby":
@@ -2181,7 +2182,7 @@ class LayoutResolver:
         if isinstance(beam_spec.layers, tuple):
             max_layer_length = max(ls.length_mm for ls in beam_spec.layers)
 
-        beam_structure = {
+        beam_structure: dict[str, Any] = {
             "name": beam_spec.name,
             "length_mm": max_layer_length,
             "width_mm": beam_spec.width_mm,
@@ -2289,7 +2290,7 @@ class LayoutResolver:
             y_max=self.ast.sheet.working_height_mm,
         )
 
-        items = []
+        items: list[Item] = []
         self._resolve_node(self.ast.root, sheet_region, items, params={})
 
         config: dict = {}

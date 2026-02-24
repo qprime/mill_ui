@@ -233,17 +233,17 @@ def plan_passes(
             offset = tool_radius
         elif side == "inside":
             offset = -tool_radius
-        shape: Shape2D | None
+        shape_poly: Shape2D | None
         if offset != 0.0:
-            shape = offset_polygon_shape(points, rec.center_xy_mm, offset)
+            shape_poly = offset_polygon_shape(points, rec.center_xy_mm, offset)
         else:
-            shape = polygon_shape(points, rec.center_xy_mm)
-        if shape is None:
+            shape_poly = polygon_shape(points, rec.center_xy_mm)
+        if shape_poly is None:
             continue
         depth = max(0.0, rec.depth_mm) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(
-                shape,
+                shape_poly,
                 setup=record.setup,
                 depth_mm=depth,
                 tool=profile_tool,

@@ -13,7 +13,7 @@ from cam.moves import (
 )
 
 try:
-    from . import _native
+    from . import _native  # type: ignore[attr-defined]
 except Exception:
     _native = None
 
@@ -140,7 +140,7 @@ def post_gcode(
         cfg["header"] = list(header)
     if footer is not None:
         cfg["footer"] = list(footer)
-    return _native.post_gcode(list(moves), cfg)
+    return str(_native.post_gcode(list(moves), cfg))
 
 
 def load_step(path: str):

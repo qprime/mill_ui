@@ -504,7 +504,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         assembly_type = node_data.get("type", "box")
 
         interfaces_raw = node_data.get("interfaces")
-        interfaces = None
+        interfaces: dict[str, str | InterfaceConfig] | None = None
         if interfaces_raw:
             interfaces = {}
             for iface_name, iface_data in interfaces_raw.items():
@@ -514,7 +514,7 @@ def parse_node(data: dict, path: str = "") -> Any:
                     interfaces[iface_name] = _parse_interface_config(iface_data)
 
         top_raw = node_data.get("top")
-        top = None
+        top: str | InterfaceConfig | None = None
         if top_raw is None:
             top = None
         elif isinstance(top_raw, str):
@@ -649,12 +649,13 @@ def parse_node(data: dict, path: str = "") -> Any:
 
     elif node_type == "Beam":
         layers_raw = node_data.get("layers", 1)
+        layers: int | tuple[BeamLayerDecl, ...]
         if isinstance(layers_raw, int):
             layers = layers_raw
         elif isinstance(layers_raw, list):
             parsed_layers = []
             for layer_data in layers_raw:
-                cutouts = ()
+                cutouts: tuple[()] | tuple[dict, ...] = ()
                 if "cutouts" in layer_data:
                     cutouts = tuple(
                         {
@@ -682,7 +683,7 @@ def parse_node(data: dict, path: str = "") -> Any:
                 raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
             feat_type = feat_keys[0]
             feat_params = feat_data[feat_type] or {}
-            parsed_params = {}
+            parsed_params: dict[str, Any] = {}
             dimension_keys = {
                 "x",
                 "y",

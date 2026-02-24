@@ -296,8 +296,10 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     output_dir = recipe_dir / "output"
 
-    kerf = args.kerf if args.kerf is not None else RECIPE_DEFAULTS["kerf"]
-    theme = args.theme if args.theme is not None else RECIPE_DEFAULTS["theme"]
+    _kerf_raw = args.kerf if args.kerf is not None else RECIPE_DEFAULTS["kerf"]
+    kerf = float(_kerf_raw)  # type: ignore[arg-type]
+    _theme_raw = args.theme if args.theme is not None else RECIPE_DEFAULTS["theme"]
+    theme = str(_theme_raw)
 
     input_text = source.read_text(encoding="utf-8")
     comp_ast = parse_pml_yaml(input_text)

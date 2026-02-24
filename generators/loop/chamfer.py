@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
@@ -57,7 +57,7 @@ def chamfer_generator(
             "points": polygon_points,
         }
 
-        feature_kwargs = {
+        feature_kwargs: dict[str, Any] = {
             "type": "chamfer",
             "depth_mm": params.depth_mm,
             "chamfer_width_mm": params.width_mm,

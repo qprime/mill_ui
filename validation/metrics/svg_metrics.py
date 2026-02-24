@@ -5,7 +5,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from validation.core import round_metric
 
@@ -253,7 +253,7 @@ def _extract_document_metrics(root: ET.Element) -> DocumentMetrics:
     parts = re.split(r"[\s,]+", viewbox_str.strip())
     if len(parts) == 4:
         with contextlib.suppress(ValueError):
-            metrics.viewbox = tuple(float(p) for p in parts)
+            metrics.viewbox = cast(tuple[float, float, float, float], tuple(float(p) for p in parts))
 
     return metrics
 

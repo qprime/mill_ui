@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from layout_ast.layout import Feature, Item, LayoutAST
 from validation.core import AssertionResult, Verdict
@@ -119,7 +119,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
         diameter_mm = item.geometry.data.get("diameter_mm")
 
     if feature.type == "profile":
-        expected_profile = {
+        expected_profile: dict[str, Any] = {
             "shape_id": item_id,
             "feature_type": "profile",
         }
@@ -237,7 +237,7 @@ def _unwrap_metrics(metrics: dict[str, Any] | None, key: str) -> dict[str, Any] 
         return None
 
     if key in metrics and isinstance(metrics[key], dict):
-        return metrics[key]
+        return cast(dict[str, Any], metrics[key])
 
     return metrics
 

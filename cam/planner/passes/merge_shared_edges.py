@@ -102,7 +102,8 @@ def merge_rect_profiles(
                     continue
                 if abs(a.coord - b.coord) > merge_tol:
                     continue
-                pair_id = (*sorted((a.rect_id, b.rect_id)), round(a.coord * 1e3))
+                sorted_ids = sorted((a.rect_id, b.rect_id))
+                pair_id: tuple[str, str, int] = (sorted_ids[0], sorted_ids[1], round(a.coord * 1e3))
                 if pair_id in used_pairs:
                     continue
                 overlap = _overlap_len(a.a, a.b, b.a, b.b)

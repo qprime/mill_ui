@@ -26,7 +26,7 @@ def _generate_wave_line(
     phase: float,
     points_per_wavelength: int = 16,
 ) -> list[tuple[float, float]]:
-    points = []
+    points: list[tuple[float, float]] = []
     x_range = x_max - x_min
 
     if x_range <= 0:

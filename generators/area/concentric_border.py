@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+from shapely.geometry import Polygon
 
 from generators.core import (
     GeneratorResult,
@@ -54,7 +56,7 @@ def concentric_border_generator(
 
             ring_polygon = outer_domain.polygon
             for inner_domain in inner_result:
-                ring_polygon = ring_polygon.difference(inner_domain.polygon)
+                ring_polygon = cast(Polygon, ring_polygon.difference(inner_domain.polygon))
 
             for poly in iter_polygons(ring_polygon):
                 if poly.area < 0.01:

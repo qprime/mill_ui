@@ -6,7 +6,7 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
 
@@ -53,7 +53,7 @@ def _parse_pml_auto(pml_text: str, compositional: bool = False) -> LayoutAST:
         comp_ast = parse_pml_yaml(pml_text)
         return resolve_layout(comp_ast)
     try:
-        return parse_pml(pml_text)
+        return cast(LayoutAST, parse_pml(pml_text))
     except PMLParseError:
         if any(kw in pml_text for kw in _COMPOSITIONAL_KEYWORDS):
             comp_ast = parse_pml_yaml(pml_text)
@@ -583,7 +583,7 @@ def validate_cam_artifacts(
 
         inputs = ValidationInput(
             svg_path=svg_path,
-            gcode_paths=gcode_paths or [],
+            gcode_paths=cast(list[str | Path], gcode_paths or []),
         )
 
         options = ValidationOptions(

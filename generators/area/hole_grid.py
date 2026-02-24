@@ -13,7 +13,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import HoleGridParams
-from generators.utils import get_local_bounds
+from generators.utils import LocalBounds, get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -91,7 +91,7 @@ def hole_grid_generator(
 
 
 def _generate_grid_points(
-    bounds: dict[str, float],
+    bounds: LocalBounds,
     col_spacing: float,
     row_spacing: float,
     pattern: str,

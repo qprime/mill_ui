@@ -4,7 +4,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 @dataclass
@@ -119,7 +119,7 @@ class GoldenStore:
         if not metrics_path.exists():
             return None
         with open(metrics_path) as f:
-            return json.load(f)
+            return cast(dict[str, Any], json.load(f))
 
     def save_metrics(
         self,

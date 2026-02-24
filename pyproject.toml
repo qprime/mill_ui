@@ -81,9 +81,9 @@ disable_error_code = [
     "no-redef",         # TypedDict / overload redefinitions
 ]
 
-# cairosvg ships no stubs and no py.typed marker
+# cairosvg and HersheyFonts ship no stubs and no py.typed marker
 [[tool.mypy.overrides]]
-module = ["cairosvg"]
+module = ["cairosvg", "HersheyFonts"]
 ignore_missing_imports = true
 
 # Mutation testing (run manually, not in CI):

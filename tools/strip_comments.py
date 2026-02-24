@@ -28,6 +28,7 @@ def strip_comments_and_docstrings(source: str) -> str:
                 and isinstance(node.body[0].value.value, str)
             ):
                 docstring_node = node.body[0]
+                assert docstring_node.end_lineno is not None
                 for line_no in range(docstring_node.lineno, docstring_node.end_lineno + 1):
                     docstring_lines.add(line_no)
     except SyntaxError:

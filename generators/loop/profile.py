@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from core.constants import DepthMode
 from generators.core import (
@@ -63,7 +63,7 @@ def profile_generator(
         is_through = DepthMode.is_through(params.depth)
         depth_mm = 0.0 if is_through else float(params.depth)
 
-        feature_kwargs = {
+        feature_kwargs: dict[str, Any] = {
             "type": "profile",
             "depth_mm": depth_mm,
             "side": params.side,

@@ -380,7 +380,7 @@ def round_metric(value: float, precision: int = 4) -> float:
 
 
 def normalize_metric_dict(d: dict[str, Any], precision: int = 4) -> dict[str, Any]:
-    result = {}
+    result: dict[str, Any] = {}
     for k, v in d.items():
         if isinstance(v, float):
             result[k] = round_metric(v, precision)

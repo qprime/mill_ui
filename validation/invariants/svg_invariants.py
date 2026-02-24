@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 import xml.etree.ElementTree as ET
 
@@ -34,7 +35,7 @@ def _is_polyline_closed(points: str, tolerance: float = 0.01) -> bool:
         first_x, first_y = float(coords[0]), float(coords[1])
         last_x, last_y = float(coords[-2]), float(coords[-1])
 
-        dist = ((last_x - first_x) ** 2 + (last_y - first_y) ** 2) ** 0.5
+        dist = math.sqrt((last_x - first_x) ** 2 + (last_y - first_y) ** 2)
         return dist < tolerance
     except (ValueError, IndexError):
         return False

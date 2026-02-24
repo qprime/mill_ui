@@ -92,7 +92,7 @@ def machine_config_to_diagram_ir(
             id="origin_y_axis",
         ),
     ]
-    layers.append(LayerIR(name="ORIGIN_MARKER", items=tuple(origin_shapes)))
+    layers.append(LayerIR(name="ORIGIN_MARKER", items=tuple(origin_shapes)))  # type: ignore[arg-type]
 
     if show_centerlines:
         center_x = machine.envelope_center_x

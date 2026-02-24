@@ -250,7 +250,7 @@ def maxrects_pack(
 
     free_rects = [FreeRect(x=0, y=0, width=bin_width, height=bin_height)]
 
-    placements = []
+    placements: list[PlacementResult] = []
 
     for _, part_w, part_h, allow_rotation, metadata in indexed_parts:
         result = _find_best_rect(

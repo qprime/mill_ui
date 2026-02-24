@@ -30,7 +30,7 @@ def _offset_boundary(
 
     buffer_distance = -offset if is_outer else offset
 
-    result = poly.buffer(buffer_distance, join_style=2)
+    result = poly.buffer(buffer_distance, join_style="mitre")
 
     if result.is_empty or result.area < 0.01:
         return None
@@ -41,7 +41,7 @@ def _offset_boundary(
         coords = list(result.exterior.coords)[:-1]
         return tuple((float(x), float(y)) for x, y in coords)
 
-    if result.geom_type == "MultiPolygon":
+    if result.geom_type == "MultiPolygon" and hasattr(result, "geoms"):
         largest = max(result.geoms, key=lambda g: g.area)
         coords = list(largest.exterior.coords)[:-1]
         return tuple((float(x), float(y)) for x, y in coords)

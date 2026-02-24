@@ -7,6 +7,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from cli.project import (
     DEFAULT_KERF_MM,
@@ -292,7 +293,7 @@ Output files:
             if args.verbose:
                 print(f"  {svg_path.name}")
 
-    manifest = {
+    manifest: dict[str, Any] = {
         "source": input_path.name,
         "algorithm": job.algorithm,
         "sheet": {

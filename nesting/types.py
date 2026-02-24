@@ -135,6 +135,7 @@ class SheetSpec:
 
     @property
     def gap_mm(self) -> float:
+        assert self.kerf_mm is not None
         return self.kerf_mm + self.gap_margin_mm
 
     @property

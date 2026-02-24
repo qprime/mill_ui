@@ -68,12 +68,12 @@ def layoutast_to_diagram_ir(
 
         handler = FEATURE_HANDLERS.get(feature_type)
         if handler:
-            style_token = _get_style_token(feature_type, is_waste)
+            style_token = _get_style_token(feature_type, bool(is_waste))
             shapes = handler(item, style_token, flip_y, margin)
             _dispatch_shapes(
                 shapes,
                 feature_type,
-                is_waste,
+                bool(is_waste),
                 profile_shapes,
                 waste_shapes,
                 pocket_shapes,
@@ -162,27 +162,27 @@ def _dispatch_shapes(
         engrave_shapes.extend(shapes)
 
 
-@register_feature("profile")
+@register_feature("profile")  # type: ignore[untyped-decorator]
 def _handle_profile(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _item_to_shapes(item, style_token, flip_y, margin)
 
 
-@register_feature("pocket")
+@register_feature("pocket")  # type: ignore[untyped-decorator]
 def _handle_pocket(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _item_to_shapes(item, style_token, flip_y, margin)
 
 
-@register_feature("hole")
+@register_feature("hole")  # type: ignore[untyped-decorator]
 def _handle_hole(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _item_to_shapes(item, style_token, flip_y, margin)
 
 
-@register_feature("engrave")
+@register_feature("engrave")  # type: ignore[untyped-decorator]
 def _handle_engrave(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _item_to_shapes(item, style_token, flip_y, margin)
 
 
-@register_feature("notch")
+@register_feature("notch")  # type: ignore[untyped-decorator]
 def _handle_notch(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _build_notch_shapes(item, flip_y, margin)
 

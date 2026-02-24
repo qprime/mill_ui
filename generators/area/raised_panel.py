@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
@@ -87,7 +87,7 @@ def raised_panel_generator(
 
     field_points = [[pt[0] - fcx, pt[1] - fcy] for pt in field_domain.outer_boundary]
 
-    field_geometry_data = {
+    field_geometry_data: dict[str, Any] = {
         "points": field_points,
     }
 

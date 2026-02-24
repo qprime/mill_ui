@@ -71,6 +71,7 @@ def grid_lines_generator(
     y_origin = local_y_min
 
     spacing = minor_spacing if params.minor_lines else major_spacing
+    assert spacing is not None
 
     x = x_origin + spacing
     while x < local_x_max - 0.001:

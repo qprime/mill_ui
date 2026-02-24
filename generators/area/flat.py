@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
@@ -55,7 +55,7 @@ def flat_pocket_generator(
 
     polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in effective_domain.outer_boundary]
 
-    geometry_data = {
+    geometry_data: dict[str, Any] = {
         "points": polygon_points,
     }
 

@@ -83,7 +83,7 @@ def _generate_local_coords(
         sheet_start, sheet_end = sheet_points[0], sheet_points[1]
 
         line = LineString([sheet_start, sheet_end])
-        buffered = line.buffer(params.line_width_mm / 2, cap_style=2, join_style=2)
+        buffered = line.buffer(params.line_width_mm / 2, cap_style="flat", join_style="mitre")
         clipped = buffered.intersection(domain.polygon)
 
         for poly in iter_polygons(clipped):
@@ -143,7 +143,7 @@ def _generate_sheet_coords(
         end = (line_cx + extent * dx, line_cy + extent * dy)
 
         line = LineString([start, end])
-        buffered = line.buffer(params.line_width_mm / 2, cap_style=2, join_style=2)
+        buffered = line.buffer(params.line_width_mm / 2, cap_style="flat", join_style="mitre")
         clipped = buffered.intersection(domain.polygon)
 
         for poly in iter_polygons(clipped):

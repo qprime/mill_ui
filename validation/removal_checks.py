@@ -26,6 +26,7 @@ def check_depth_profile(
 
     if profile.mode == "v_carve":
         v_angle = profile.v_angle_deg
+        assert v_angle is not None
 
         if available_v_angles is not None:
             matching = [a for a in available_v_angles if abs(a - v_angle) < 1.0]

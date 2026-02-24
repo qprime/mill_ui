@@ -148,7 +148,7 @@ def _tokenize(path_data: str) -> list[str | float]:
 
 
 def _get_numbers(tokens: list, start: int, count: int) -> tuple[list[float], int]:
-    numbers = []
+    numbers: list[float] = []
     pos = start
 
     for _ in range(count):

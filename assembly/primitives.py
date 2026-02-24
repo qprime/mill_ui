@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
-from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
+from assembly.core import Assembly, Interface, InterfaceType, MemberSpec, RemovalKind
 from assembly.joinery import Butt, Captured, Finger, HalfLap, JoineryStrategy
 from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
@@ -53,7 +53,7 @@ def box(
         role=PanelRole.RIGHT,
     )
 
-    panels: dict[str, PanelSpec] = {
+    panels: dict[str, MemberSpec] = {
         "front": front,
         "back": back_panel,
         "left_side": left,
@@ -157,7 +157,7 @@ def carcass(
         role=PanelRole.RIGHT,
     )
 
-    panels: dict[str, PanelSpec] = {
+    panels: dict[str, MemberSpec] = {
         "left_side": left,
         "right_side": right,
     }
@@ -188,8 +188,8 @@ def carcass(
             u_len_mm=effective_toe_kick_setback,
             depth_mm=effective_toe_kick_height,
         )
-        panels["left_side"] = panels["left_side"].with_notches((kick_notch,))
-        panels["right_side"] = panels["right_side"].with_notches((kick_notch,))
+        panels["left_side"] = cast(PanelSpec, panels["left_side"]).with_notches((kick_notch,))
+        panels["right_side"] = cast(PanelSpec, panels["right_side"]).with_notches((kick_notch,))
 
     if bottom is not None and bottom != "none":
         bottom_len = length - effective_toe_kick_setback if effective_toe_kick_height > 0 else length
@@ -247,6 +247,7 @@ def carcass(
             role=PanelRole.BACK,
         )
         panels["back"] = back_panel
+        back_joinery: JoineryStrategy
         if back_thickness and isinstance(back, Captured):
             back_joinery = Captured(
                 dado_depth_mm=back.dado_depth_mm,
@@ -380,7 +381,7 @@ def cubby(
         role=PanelRole.RIGHT,
     )
 
-    panels: dict[str, PanelSpec] = {
+    panels: dict[str, MemberSpec] = {
         "top": top,
         "bottom": bottom,
         "left_side": left,

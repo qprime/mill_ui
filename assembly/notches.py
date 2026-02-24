@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import math
+from typing import cast
 
-from shapely.geometry import MultiPolygon, box
+from shapely.geometry import MultiPolygon, Polygon, box
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient, unary_union
 
 from assembly.panel import Edge, NotchSpec
@@ -133,8 +135,8 @@ def build_notched_polygon(
     base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
 
     if not notches:
-        result = orient(base, sign=1.0)
-        return tuple(result.exterior.coords[:-1])
+        result_oriented = orient(base, sign=1.0)
+        return tuple(cast(tuple[float, float], c) for c in result_oriented.exterior.coords[:-1])
 
     notch_boxes = []
     for notch in notches:
@@ -179,24 +181,25 @@ def build_notched_polygon(
 
         notch_boxes.append(box(x_min, y_min, x_max, y_max))
 
+    geom: BaseGeometry
     if notch_boxes:
         cutout = unary_union(notch_boxes)
-        result = base.difference(cutout)
+        geom = base.difference(cutout)
     else:
-        result = base
+        geom = base
 
-    result = orient(result, sign=1.0)
+    geom = orient(geom, sign=1.0)
 
-    if result.is_empty:
-        return tuple(base.exterior.coords[:-1])
+    if geom.is_empty:
+        return tuple(cast(tuple[float, float], c) for c in base.exterior.coords[:-1])
 
-    if isinstance(result, MultiPolygon):
-        result = max(result.geoms, key=lambda g: g.area)
+    if isinstance(geom, MultiPolygon):
+        geom = max(geom.geoms, key=lambda g: g.area)
 
-    if not hasattr(result, "exterior"):
-        return tuple(base.exterior.coords[:-1])
+    if not isinstance(geom, Polygon):
+        return tuple(cast(tuple[float, float], c) for c in base.exterior.coords[:-1])
 
-    return tuple(result.exterior.coords[:-1])
+    return tuple(cast(tuple[float, float], c) for c in geom.exterior.coords[:-1])
 
 
 def finger_joints_to_notches(
@@ -211,6 +214,7 @@ def finger_joints_to_notches(
     if (width_mm is None) == (count is None):
         raise ValueError("Specify exactly one of width_mm or count")
 
+    assert width_mm is not None
     n = count if count is not None else round(edge_length / width_mm)
 
     n = max(3, n)

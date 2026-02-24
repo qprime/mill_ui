@@ -236,7 +236,7 @@ def _compute_padding(bounds, viewport: ViewportSpec) -> float:
     if viewport.padding_percent is not None:
         width = bounds.x_max - bounds.x_min
         height = bounds.y_max - bounds.y_min
-        return max(width, height) * viewport.padding_percent / 100.0
+        return float(max(width, height)) * viewport.padding_percent / 100.0
     return viewport.padding_mm
 
 

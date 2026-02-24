@@ -34,10 +34,10 @@ def shapely_to_item(
     outer_coords = list(polygon.exterior.coords[:-1])
     outer_points = [[float(x) - cx, float(y) - cy] for x, y in outer_coords]
 
-    geometry_data = {"points": outer_points}
+    geometry_data: dict[str, list[list[float]] | list[list[list[float]]]] = {"points": outer_points}
 
     if polygon.interiors:
-        holes = []
+        holes: list[list[list[float]]] = []
         for interior in polygon.interiors:
             hole_coords = list(interior.coords[:-1])
             hole_points = [[float(x) - cx, float(y) - cy] for x, y in hole_coords]
@@ -61,7 +61,7 @@ def shapely_to_item(
 
 
 def iter_polygons(geom) -> list[Polygon]:
-    result = []
+    result: list[Polygon] = []
 
     if geom.is_empty:
         return result

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from validation.core import RegressionResult, RegressionSummary, Verdict
 
@@ -440,7 +440,7 @@ def _get_tolerance(path: str, config: ComparisonConfig) -> float:
 
 def metrics_to_comparable_dict(metrics: Any) -> dict[str, Any]:
     if hasattr(metrics, "to_dict"):
-        return metrics.to_dict()
+        return cast(dict[str, Any], metrics.to_dict())
     if isinstance(metrics, dict):
         return metrics
     raise TypeError(f"Cannot convert {type(metrics)} to dict")

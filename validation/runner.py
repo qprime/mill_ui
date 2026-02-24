@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from layout_ast.layout import LayoutAST
 from validation.assertions import check_assertions, derive_assertions
@@ -131,7 +131,7 @@ def validate_recipe(
             break
 
     svg_path = None
-    gcode_paths: list[Path] = []
+    gcode_paths: list[str | Path] = []
 
     if output_dir.exists():
         for svg_file in output_dir.glob("*.svg"):
@@ -173,7 +173,7 @@ def _extract_all_metrics(
     if inputs.svg_content:
         svg_metrics = extract_svg_metrics(inputs.svg_content)
     elif inputs.svg_path and Path(inputs.svg_path).exists():
-        svg_metrics = extract_svg_metrics_from_file(inputs.svg_path)
+        svg_metrics = extract_svg_metrics_from_file(str(inputs.svg_path))
 
     for gcode_path in inputs.gcode_paths:
         if Path(gcode_path).exists():
@@ -192,9 +192,9 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
         return {}
 
     if len(gcode_list) == 1:
-        return gcode_list[0].to_dict().get("gcode", {})
+        return cast(dict[str, Any], gcode_list[0].to_dict().get("gcode", {}))
 
-    merged = gcode_list[0].to_dict().get("gcode", {})
+    merged: dict[str, Any] = cast(dict[str, Any], gcode_list[0].to_dict().get("gcode", {}))
 
     for gcode in gcode_list[1:]:
         other = gcode.to_dict().get("gcode", {})

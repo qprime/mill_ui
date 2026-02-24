@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "55_tenoned_rail",
-    "created_at": "2026-02-24T23:18:59.723279+00:00"
+    "created_at": "2026-02-24T23:38:12.844838+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -281,7 +281,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.382,
+    "extraction_time_ms": 2.4587,
     "summary": {
       "total_lines": 746,
       "comment_lines": 14,

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "27_wave_texture_panel",
-    "created_at": "2026-02-24T23:18:58.194348+00:00"
+    "created_at": "2026-02-24T23:38:11.290795+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.88,
+    "extraction_time_ms": 0.9,
     "document": {
       "width_mm": 453.175,
       "height_mm": 443.175,
@@ -210,7 +210,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 34.911,
+    "extraction_time_ms": 35.2813,
     "summary": {
       "total_lines": 9002,
       "comment_lines": 166,
@@ -256,17 +256,20 @@
     },
     "feeds": {
       "min_feed_rate": 300.0,
-      "max_feed_rate": 900.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
         300.0,
-        900.0
+        400.0,
+        900.0,
+        1200.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        14000
+        14000,
+        16000
       ]
     },
     "operations": {
@@ -278,8 +281,8 @@
     },
     "time_estimate": {
       "rapid_time_s": 594.4590000000001,
-      "feed_time_s": 5309.685,
-      "total_time_s": 5904.144
+      "feed_time_s": 4361.8413,
+      "total_time_s": 4956.3004
     },
     "tabs": {
       "detected_count": 0,

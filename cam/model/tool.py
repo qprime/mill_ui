@@ -12,3 +12,4 @@ class Tool:
     rpm: float = 12000.0
     feed_xy: float = 800.0
     feed_z: float = 300.0
+    v_angle_deg: float | None = None

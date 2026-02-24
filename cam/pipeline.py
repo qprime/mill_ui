@@ -54,6 +54,15 @@ DEFAULT_TOOL_DB = [
         "feed_xy": 700,
         "feed_z": 250,
     },
+    {
+        "name": "90_degree_vbit",
+        "diameter": 12.7,
+        "kind": "v",
+        "rpm": 16000,
+        "feed_xy": 1200,
+        "feed_z": 400,
+        "v_angle_deg": 90,
+    },
 ]
 
 

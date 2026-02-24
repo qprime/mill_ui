@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-02-24T23:18:58.011647+00:00"
+    "created_at": "2026-02-24T23:38:11.105327+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 653.175,
       "height_mm": 855.175,
@@ -276,22 +276,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.7955,
+    "extraction_time_ms": 0.4375,
     "summary": {
-      "total_lines": 1420,
-      "comment_lines": 24,
-      "motion_lines": 1102,
+      "total_lines": 1534,
+      "comment_lines": 30,
+      "motion_lines": 1187,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 830
+      "spindle_lines": 9,
+      "feed_lines": 903
     },
     "motion": {
-      "g0_count": 546,
-      "g1_count": 556,
+      "g0_count": 571,
+      "g1_count": 616,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 34232.7837,
-      "total_feed_distance_mm": 57547.204
+      "total_rapid_distance_mm": 35225.0524,
+      "total_feed_distance_mm": 68765.10399999999
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -305,13 +305,16 @@
         -11.113,
         -9.525,
         -7.938,
+        -6.699,
         -6.35,
+        -6.0,
         -4.762,
         -3.175,
+        -3.0,
         -2.0,
         -1.587
       ],
-      "depth_count": 13,
+      "depth_count": 16,
       "max_single_plunge_mm": 25.0
     },
     "xy_bounds": {
@@ -322,12 +325,14 @@
     },
     "feeds": {
       "min_feed_rate": 250.0,
-      "max_feed_rate": 900.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
         250.0,
         300.0,
+        400.0,
         700.0,
-        900.0
+        900.0,
+        1200.0
       ]
     },
     "tools": {
@@ -335,37 +340,26 @@
       "tool_changes": 0,
       "spindle_speeds": [
         10000,
-        14000
+        14000,
+        16000
       ]
     },
     "operations": {
-      "profile_passes": 8,
-      "pocket_passes": 8,
+      "profile_passes": 4,
+      "pocket_passes": 0,
       "bore_passes": 0,
-      "total_passes": 16,
+      "total_passes": 4,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=2.000",
-        "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=2.000",
-        "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=2.000",
-        "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=2.000",
-        "BEGIN finish profile pass",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 410.7934,
-      "feed_time_s": 6490.6178,
-      "total_time_s": 6901.411099999999
+      "rapid_time_s": 422.7006,
+      "feed_time_s": 7331.960300000001,
+      "total_time_s": 7754.6608
     },
     "tabs": {
       "detected_count": 0,
@@ -373,6 +367,6 @@
       "max_cutting_depth_mm": -19.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 2
+    "file_count": 3
   }
 }

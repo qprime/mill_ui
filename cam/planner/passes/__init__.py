@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -15,6 +14,7 @@ from cam.moves import Move, SetRpmMove
 from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 from cam.shape import Shape2D
 
+from .edge import plan_edge_feature_passes
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
 from .profile import (
@@ -131,9 +131,7 @@ def plan_passes(
     plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
     plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
 
-    _logger = logging.getLogger(__name__)
-    for ef in planner_input.edge_features:
-        _logger.info("Edge feature '%s' collected but not yet implemented — skipping", ef.id)
+    plan_edge_feature_passes(planner_input.edge_features, accumulator=accumulator, tool_db=tool_db)
 
     kerf_mm = planner_input.kerf_width_mm
 

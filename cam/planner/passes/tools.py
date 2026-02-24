@@ -19,6 +19,7 @@ class ToolSelection:
     rotation: str | None = None
     depth_per_pass: float | None = None
     stepover_percent: float | None = None
+    v_angle_deg: float | None = None
 
     def as_model(self) -> Tool:
         return Tool(
@@ -28,6 +29,7 @@ class ToolSelection:
             rpm=self.rpm,
             feed_xy=self.feed_xy,
             feed_z=self.feed_z,
+            v_angle_deg=self.v_angle_deg,
         )
 
 
@@ -64,6 +66,7 @@ def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
             if data.get("step_over_percent") is not None
             else None
         ),
+        v_angle_deg=float(data["v_angle_deg"]) if data.get("v_angle_deg") is not None else None,
     )
 
 
@@ -72,7 +75,7 @@ def normalize_tool_entries(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSel
 
 
 def _flat_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
-    return [tool for tool in tool_db if tool.kind != "ball"]
+    return [tool for tool in tool_db if tool.kind == "flat"]
 
 
 def _ball_or_v_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
@@ -137,6 +140,18 @@ def pick_tool_for_hole(
     return feasible[-1] if feasible else candidates[0]
 
 
+def pick_tool_for_edge(
+    tool_db: Sequence[ToolSelection],
+    *,
+    angle_deg: float,
+) -> ToolSelection:
+    candidates = [t for t in tool_db if t.kind == "v" and t.v_angle_deg is not None]
+    if not candidates:
+        raise ValueError("Tool database does not contain a V-bit for edge features")
+    candidates.sort(key=lambda t: abs((t.v_angle_deg or 0.0) - angle_deg))
+    return candidates[0]
+
+
 def pick_tool_for_engrave(tool_db: Sequence[ToolSelection]) -> ToolSelection:
     candidates = _ball_or_v_tools(tool_db)
     if candidates:
@@ -159,7 +174,7 @@ def stepover_for_tool(tool: ToolSelection) -> float:
 
 
 def tool_identity(tool: ToolSelection) -> dict[str, Any]:
-    return {
+    result: dict[str, Any] = {
         "name": tool.name,
         "diameter": float(tool.diameter),
         "kind": tool.kind,
@@ -168,6 +183,9 @@ def tool_identity(tool: ToolSelection) -> dict[str, Any]:
         "feed_xy": float(tool.feed_xy),
         "feed_z": float(tool.feed_z),
     }
+    if tool.v_angle_deg is not None:
+        result["v_angle_deg"] = tool.v_angle_deg
+    return result
 
 
 def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None]:
@@ -178,6 +196,7 @@ __all__ = [
     "ToolSelection",
     "normalize_tool_entries",
     "pass_key",
+    "pick_tool_for_edge",
     "pick_tool_for_engrave",
     "pick_tool_for_hole",
     "pick_tool_for_pocket",

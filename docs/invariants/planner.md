@@ -31,6 +31,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | constraints.edge_treatment | NOT_IMPLEMENTED | — | Not yet passed to planner |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
+| edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
 | allowance.inside/outside/on | VALIDATED_ONLY | — | May be applied upstream by generators |
 | allowance.kerf_compensation | VALIDATED_ONLY | — | Applied via global kerf_width_mm |
 

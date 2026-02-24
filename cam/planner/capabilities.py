@@ -51,6 +51,10 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
     "constraints.edge_treatment": ConstraintStatus(
         ConstraintSupport.NOT_IMPLEMENTED,
     ),
+    "edge_feature": ConstraintStatus(
+        ConstraintSupport.HONORED,
+        note="Bevel and chamfer edge features produce V-bit toolpaths",
+    ),
     "constraints.tolerance_mm": ConstraintStatus(
         ConstraintSupport.NOT_IMPLEMENTED,
         note="Uses global tolerance",
@@ -114,6 +118,7 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         "v_carve": 0,
         "linear_gradient": 0,
         "allowance_nonzero": 0,
+        "edge_feature": 0,
     }
 
     for intent in intents:
@@ -140,6 +145,8 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
             or intent.allowance.kerf_compensation != 0.0
         ):
             counts["allowance_nonzero"] += 1
+        if intent.edge_feature is not None:
+            counts["edge_feature"] += 1
 
     entries: list[ConstraintAuditEntry] = []
     errors: list[str] = []
@@ -155,6 +162,7 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         ("v_carve", "depth_profile.mode.v_carve"),
         ("linear_gradient", "depth_profile.mode.linear_gradient"),
         ("allowance_nonzero", "allowance"),
+        ("edge_feature", "edge_feature"),
     ]
 
     for count_key, capability_key in constraint_mapping:

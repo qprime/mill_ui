@@ -1,0 +1,37 @@
+{
+  "timing": {
+    "ir_ms": 0.03,
+    "hints_ms": 0.02,
+    "plan_ms": 1.28,
+    "gcode_ms": 1.67,
+    "svg_ms": 0.43,
+    "total_ms": 3.42
+  },
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 756,
+    "rapid_moves": 144,
+    "cut_moves": 288,
+    "rapid_ratio": 0.19
+  },
+  "fidelity": {
+    "tool_changes": 1,
+    "passes": [
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 756
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 12995,
+    "total_lines": 746,
+    "files": {
+      "profile-3.17mm": {
+        "bytes": 12995,
+        "lines": 746
+      }
+    }
+  }
+}

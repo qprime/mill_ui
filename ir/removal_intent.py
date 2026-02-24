@@ -238,3 +238,19 @@ class RemovalIntent:
         if self.shape_id is not None:
             result["shape_id"] = self.shape_id
         return result
+
+
+__all__ = [
+    "Allowance",
+    "BevelSpec",
+    "Bounds2D",
+    "ChamferSpec",
+    "Constraints",
+    "DepthProfile",
+    "EdgeTreatment",
+    "Island",
+    "KeepoutRegion",
+    "RemovalIntent",
+    "ShapeGeometry",
+    "TabConstraint",
+]

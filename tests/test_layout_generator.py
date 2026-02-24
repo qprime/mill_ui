@@ -24,6 +24,7 @@ def test_simple_sheet_to_ast():
     assert len(ast.items) >= 1
     item = ast.items[0]
     assert item.type == "Rect"
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (500, 500)
 
     print("  PASSED")
@@ -45,7 +46,7 @@ def test_multiple_placements_to_ast():
 
     assert len(ast.items) == 3
 
-    positions = {item.placement.center_xy_mm for item in ast.items}
+    positions = {item.placement.center_xy_mm for item in ast.items if item.placement is not None}
     assert (200, 200) in positions
     assert (600, 200) in positions
     assert (200, 600) in positions
@@ -90,6 +91,7 @@ def test_rotated_placement_to_ast():
 
     item = ast.items[0]
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 400
     assert item.geometry.data["h_mm"] == 200
 

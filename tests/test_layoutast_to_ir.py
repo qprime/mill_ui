@@ -391,7 +391,9 @@ def test_beam_labels_on_items():
     assert len(label_layers) == 1
     labels = label_layers[0].items
     assert len(labels) == 1
-    assert labels[0].content == "TEST L0"
+    label = labels[0]
+    assert isinstance(label, Text)
+    assert label.content == "TEST L0"
 
 
 if __name__ == "__main__":

@@ -71,6 +71,7 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
     print("  PASS")
@@ -109,13 +110,17 @@ children:
 
     outer = flat.items[0]
     assert outer.shape_id == "outer"
+    assert outer.geometry is not None
     assert outer.geometry.data["w_mm"] == 400.0
+    assert outer.feature is not None
     assert outer.feature.type == "profile"
 
     inner = flat.items[1]
     assert inner.shape_id == "inner"
+    assert inner.feature is not None
     assert inner.feature.type == "pocket"
 
+    assert inner.geometry is not None
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
     print("  PASS")
@@ -149,8 +154,10 @@ children:
     assert len(flat.items) == 4
 
     for item in flat.items:
+        assert item.feature is not None
         assert item.feature.type == "pocket"
 
+        assert item.geometry is not None
         assert approx_eq(item.geometry.data["w_mm"], 195.0)
         assert approx_eq(item.geometry.data["h_mm"], 195.0)
     print("  PASS")
@@ -233,6 +240,7 @@ children:
 
     first = flat.items[0]
 
+    assert first.geometry is not None
     assert approx_eq(first.geometry.data["w_mm"], 475.0)
     print("  PASS")
     return True
@@ -317,10 +325,12 @@ children:
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "panel_outer"
+    assert first_outer.geometry is not None
     assert approx_eq(first_outer.geometry.data["w_mm"], 550.0)
     assert approx_eq(first_outer.geometry.data["h_mm"], 550.0)
 
     first_pocket = pocket_items[0]
+    assert first_pocket.geometry is not None
     assert approx_eq(first_pocket.geometry.data["w_mm"], 230.0)
     assert approx_eq(first_pocket.geometry.data["h_mm"], 230.0)
     print("  PASS")

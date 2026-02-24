@@ -32,9 +32,12 @@ def test_expand_simple_rect():
     assert len(items) == 1
     item = items[0]
     assert item.type == "Rect"
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 200
     assert item.geometry.data["h_mm"] == 300
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (100, 150)
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
     print("  PASSED")
@@ -53,6 +56,7 @@ def test_expand_simple_rect_rotated():
     assert len(items) == 1
     item = items[0]
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 300
     assert item.geometry.data["h_mm"] == 200
     print("  PASSED")
@@ -86,13 +90,17 @@ def test_expand_shaker_template():
     assert len(pocket_items) >= 1, "Missing pocket"
 
     profile = profile_items[0]
+    assert profile.placement is not None
     assert profile.placement.center_xy_mm == (500, 500)
+    assert profile.geometry is not None
     assert profile.geometry.data["w_mm"] == 400
     assert profile.geometry.data["h_mm"] == 600
 
     pocket = pocket_items[0]
+    assert pocket.geometry is not None
     assert pocket.geometry.data["w_mm"] == 300
     assert pocket.geometry.data["h_mm"] == 500
+    assert pocket.feature is not None
     assert pocket.feature.type == "pocket"
 
     print("  PASSED")
@@ -113,8 +121,10 @@ def test_placement_to_items():
 
     assert len(items) == 1
     item = items[0]
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (250, 350)
 
+    assert item.shape_id is not None
     assert "panel" in item.shape_id
     assert "2" in item.shape_id
 
@@ -133,6 +143,7 @@ def test_shape_id_prefix():
     )
 
     assert len(items) >= 1
+    assert items[0].shape_id is not None
     assert items[0].shape_id.startswith("sheet1_door3_")
 
     print("  PASSED")

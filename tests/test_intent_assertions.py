@@ -597,10 +597,10 @@ def test_simple_profile_recipe():
     # Report any failures
     failures = [r for r in results if r.status == Verdict.FAIL]
     if failures:
-        for f in failures:
-            print(f"  FAIL: {f.id} - {f.message}")
-            print(f"    Expected: {f.expected}")
-            print(f"    Actual: {f.actual}")
+        for failure in failures:
+            print(f"  FAIL: {failure.id} - {failure.message}")
+            print(f"    Expected: {failure.expected}")
+            print(f"    Actual: {failure.actual}")
 
     # All assertions should pass (excluding WARN for missing metrics)
     assert all(r.status != Verdict.FAIL for r in results), f"Recipe 01 has {len(failures)} assertion failures"
@@ -650,10 +650,10 @@ def test_pocket_recipe():
 
     failures = [r for r in results if r.status == Verdict.FAIL]
     if failures:
-        for f in failures:
-            print(f"  FAIL: {f.id} - {f.message}")
-            print(f"    Expected: {f.expected}")
-            print(f"    Actual: {f.actual}")
+        for failure in failures:
+            print(f"  FAIL: {failure.id} - {failure.message}")
+            print(f"    Expected: {failure.expected}")
+            print(f"    Actual: {failure.actual}")
 
     assert all(r.status != Verdict.FAIL for r in results), f"Recipe 02 has {len(failures)} assertion failures"
     print(f"PASS: test_pocket_recipe ({len(results)} assertions, {len(failures)} failures)")
@@ -731,10 +731,10 @@ def test_shaker_door_recipe():
 
     failures = [r for r in results if r.status == Verdict.FAIL]
     if failures:
-        for f in failures:
-            print(f"  FAIL: {f.id} - {f.message}")
-            print(f"    Expected: {f.expected}")
-            print(f"    Actual: {f.actual}")
+        for failure in failures:
+            print(f"  FAIL: {failure.id} - {failure.message}")
+            print(f"    Expected: {failure.expected}")
+            print(f"    Actual: {failure.actual}")
 
     assert all(r.status != Verdict.FAIL for r in results), f"Recipe 03 has {len(failures)} assertion failures"
     print(f"PASS: test_shaker_door_recipe ({len(results)} assertions, {len(failures)} failures)")

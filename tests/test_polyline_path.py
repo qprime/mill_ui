@@ -31,6 +31,8 @@ children:
     assert len(items) == 2
 
     polyline_item = next(item for item in items if item.type == "Polyline")
+    assert polyline_item.geometry is not None
+    assert polyline_item.placement is not None
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -69,6 +71,8 @@ children:
 
     items = flat.items
     polyline_item = next(item for item in items if item.type == "Polyline")
+    assert polyline_item.geometry is not None
+    assert polyline_item.placement is not None
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -105,6 +109,8 @@ children:
     flat = resolve_layout(ast)
 
     polyline_item = next(item for item in flat.items if item.type == "Polyline")
+    assert polyline_item.geometry is not None
+    assert polyline_item.placement is not None
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -134,6 +140,8 @@ children:
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
+    assert polyline_item.geometry is not None
+    assert polyline_item.placement is not None
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -293,6 +301,10 @@ children:
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
+    assert flat1.items[0].geometry is not None
+    assert flat2.items[0].geometry is not None
+    assert flat1.items[0].placement is not None
+    assert flat2.items[0].placement is not None
     points1 = flat1.items[0].geometry.data["points"]
     points2 = flat2.items[0].geometry.data["points"]
     cx1, cy1 = flat1.items[0].placement.center_xy_mm
@@ -329,6 +341,8 @@ children:
     flat = resolve_layout(ast)
 
     polyline_item = flat.items[0]
+    assert polyline_item.geometry is not None
+    assert polyline_item.placement is not None
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 

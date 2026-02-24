@@ -38,8 +38,10 @@ def bounds_approx_equal(b1: Bounds2D, b2: Bounds2D, tolerance: float = 0.01) -> 
     )
 
 
-def point_approx_equal(p1: tuple[float, float], p2: tuple[float, float], tolerance: float = 0.01) -> bool:
+def point_approx_equal(p1: tuple[float, float] | None, p2: tuple[float, float] | None, tolerance: float = 0.01) -> bool:
     """Check if two points are approximately equal."""
+    if p1 is None or p2 is None:
+        return p1 is p2
     return approx_equal(p1[0], p2[0], tolerance) and approx_equal(p1[1], p2[1], tolerance)
 
 
@@ -136,7 +138,7 @@ def test_domain_winding_normalization():
 
     # Should be normalized to CCW
     # Check by verifying signed area is positive
-    area = 0
+    area = 0.0
     for i in range(len(domain.outer_boundary)):
         j = (i + 1) % len(domain.outer_boundary)
         x1, y1 = domain.outer_boundary[i]

@@ -319,6 +319,7 @@ children:
     assert len(profile_items) == 1
 
     profile_item = profile_items[0]
+    assert profile_item.feature is not None
     assert profile_item.feature.side == "outside"
     assert profile_item.feature.is_through
     print("  PASS")
@@ -347,6 +348,7 @@ children:
     assert len(pocket_items) == 1
 
     pocket_item = pocket_items[0]
+    assert pocket_item.feature is not None
     assert pocket_item.feature.type == "pocket"
     assert pocket_item.feature.depth_mm == 6.0
     print("  PASS")
@@ -379,8 +381,10 @@ children:
     assert len(border_items) == 1, f"Expected 1 border item, got {len(border_items)}"
     assert len(field_items) == 1, f"Expected 1 field item, got {len(field_items)}"
 
+    assert border_items[0].feature is not None
     assert border_items[0].feature.type == "bevel", f"Expected bevel, got {border_items[0].feature.type}"
     assert border_items[0].feature.depth_mm == 6.0
+    assert field_items[0].feature is not None
     assert field_items[0].feature.type == "pocket", f"Expected pocket, got {field_items[0].feature.type}"
     assert field_items[0].feature.depth_mm == 2.0
     print("  PASS")
@@ -447,6 +451,7 @@ children:
     assert len(wave_items) >= 1, f"Expected wave items, got {len(wave_items)}"
 
     for item in wave_items:
+        assert item.feature is not None
         assert item.feature.type == "engrave", f"Expected engrave, got {item.feature.type}"
         assert item.feature.depth_mm == 2.0
     print("  PASS")

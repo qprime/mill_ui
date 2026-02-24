@@ -35,9 +35,12 @@ children:
     item = flat.items[0]
     assert item.type == "Circle"
     assert item.shape_id == "medallion"
+    assert item.geometry is not None
     assert item.geometry.data["diameter_mm"] == 120.0
+    assert item.feature is not None
     assert item.feature.type == "pocket"
 
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
     print("  ✓ PASS")
@@ -67,7 +70,9 @@ children:
     item = flat.items[0]
     assert item.type == "Circle"
 
+    assert item.geometry is not None
     assert item.geometry.data["diameter_mm"] == 400.0
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
     print("  ✓ PASS")
@@ -102,8 +107,10 @@ children:
     item = flat.items[0]
     assert item.type == "Circle"
 
+    assert item.geometry is not None
     assert item.geometry.data["diameter_mm"] == 300.0
 
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
     print("  ✓ PASS")
@@ -135,9 +142,11 @@ children:
     assert item.type == "RoundedRect"
     assert item.shape_id == "badge"
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 400.0
     assert item.geometry.data["h_mm"] == 600.0
     assert item.geometry.data["radius_mm"] == 8.0
+    assert item.feature is not None
     assert item.feature.type == "pocket"
 
     print("  ✓ PASS")
@@ -172,6 +181,7 @@ children:
     item = flat.items[0]
     assert item.type == "RoundedRect"
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
 
@@ -206,7 +216,9 @@ children:
     assert item.type == "Line"
     assert item.kind == "shape"
 
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
+    assert item.geometry is not None
     start = item.geometry.data["start"]
     end = item.geometry.data["end"]
     assert approx_equal(cx, 200.0)
@@ -215,6 +227,7 @@ children:
     assert approx_equal(start[1] + cy, 300.0)
     assert approx_equal(end[0] + cx, 400.0)
     assert approx_equal(end[1] + cy, 300.0)
+    assert item.feature is not None
     assert item.feature.type == "engrave"
     assert item.feature.depth_mm == 1.5
 
@@ -246,13 +259,16 @@ children:
     item = flat.items[0]
     assert item.type == "Line"
 
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
+    assert item.geometry is not None
     start = item.geometry.data["start"]
     end = item.geometry.data["end"]
     assert approx_equal(start[0] + cx, 200.0)
     assert approx_equal(start[1] + cy, 0.0)
     assert approx_equal(end[0] + cx, 200.0)
     assert approx_equal(end[1] + cy, 600.0)
+    assert item.feature is not None
     assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
@@ -286,13 +302,16 @@ children:
     item = flat.items[0]
     assert item.type == "Line"
 
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
+    assert item.geometry is not None
     start = item.geometry.data["start"]
     end = item.geometry.data["end"]
     assert approx_equal(start[0] + cx, 50.0)
     assert approx_equal(start[1] + cy, 300.0)
     assert approx_equal(end[0] + cx, 350.0)
     assert approx_equal(end[1] + cy, 300.0)
+    assert item.feature is not None
     assert item.feature.depth_mm == 1.5
 
     print("  ✓ PASS")
@@ -328,6 +347,8 @@ children:
 
     assert len(flat1.items) == len(flat2.items)
     assert flat1.items[0].type == flat2.items[0].type
+    assert flat1.items[0].geometry is not None
+    assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data == flat2.items[0].geometry.data
 
     print("  ✓ PASS")
@@ -361,6 +382,8 @@ children:
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
+    assert flat1.items[0].geometry is not None
+    assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data["radius_mm"] == flat2.items[0].geometry.data["radius_mm"]
 
     print("  ✓ PASS")
@@ -393,8 +416,12 @@ children:
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
+    assert flat1.items[0].geometry is not None
+    assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data["start"] == flat2.items[0].geometry.data["start"]
     assert flat1.items[0].geometry.data["end"] == flat2.items[0].geometry.data["end"]
+    assert flat1.items[0].feature is not None
+    assert flat2.items[0].feature is not None
     assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
     print("  ✓ PASS")
@@ -465,6 +492,7 @@ children:
     assert len(rects) == 1
     assert len(rounded_rects) == 1
     assert len(lines) == 1
+    assert lines[0].feature is not None
     assert lines[0].feature.depth_mm == 1.5
 
     print("  ✓ PASS")
@@ -498,6 +526,7 @@ children:
     assert item.type == "RoundedRect"
     assert item.shape_id == "table_half"
 
+    assert item.geometry is not None
     assert item.geometry.data["radius_tl_mm"] == 12.7
     assert item.geometry.data["radius_tr_mm"] == 0.0
     assert item.geometry.data["radius_bl_mm"] == 12.7
@@ -530,6 +559,7 @@ children:
 
     assert len(flat.items) == 1
     item = flat.items[0]
+    assert item.geometry is not None
     assert item.geometry.data["radius_tl_mm"] == 10.0
     assert item.geometry.data["radius_tr_mm"] == 10.0
     assert item.geometry.data["radius_bl_mm"] == 10.0
@@ -564,6 +594,7 @@ children:
 
     assert len(flat.items) == 1
     item = flat.items[0]
+    assert item.geometry is not None
     assert item.geometry.data["radius_tl_mm"] == 0.0
     assert item.geometry.data["radius_tr_mm"] == 25.0
     assert item.geometry.data["radius_bl_mm"] == 0.0
@@ -601,6 +632,8 @@ children:
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
+    assert flat1.items[0].geometry is not None
+    assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data["radius_tl_mm"] == flat2.items[0].geometry.data["radius_tl_mm"]
     assert flat1.items[0].geometry.data["radius_tr_mm"] == flat2.items[0].geometry.data["radius_tr_mm"]
     assert flat1.items[0].geometry.data["radius_bl_mm"] == flat2.items[0].geometry.data["radius_bl_mm"]
@@ -688,10 +721,12 @@ children:
     item = flat.items[0]
     assert item.type == "RoundedRect"
     assert item.shape_id == "panel"
+    assert item.geometry is not None
     assert item.geometry.data["radius_bl_mm"] == 25.4
     assert item.geometry.data["radius_br_mm"] == 25.4
     assert item.geometry.data["radius_tl_mm"] == 0.0
     assert item.geometry.data["radius_tr_mm"] == 0.0
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
 
@@ -723,7 +758,9 @@ children:
 
     item = flat.items[0]
     assert item.type == "Rect"
+    assert item.feature is not None
     assert item.feature.type == "profile"
+    assert item.geometry is not None
     assert "radius_mm" not in item.geometry.data
     assert "radius_bl_mm" not in item.geometry.data
 

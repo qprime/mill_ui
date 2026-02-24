@@ -47,9 +47,12 @@ def test_simple_panel_with_rect():
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "Rect"
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 400.0
     assert item.geometry.data["h_mm"] == 600.0
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
+    assert item.feature is not None
     assert item.feature.type == "profile"
     print("  PASS")
     return True
@@ -79,9 +82,11 @@ def test_panel_with_inset():
     assert len(flat.items) == 1
     item = flat.items[0]
 
+    assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
 
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
     print("  PASS")
     return True
@@ -118,13 +123,17 @@ def test_frame_insets_region_for_children():
 
     outer = flat.items[0]
     assert outer.shape_id == "outer"
+    assert outer.geometry is not None
     assert outer.geometry.data["w_mm"] == 400.0
     assert outer.geometry.data["h_mm"] == 600.0
+    assert outer.feature is not None
     assert outer.feature.type == "profile"
 
     inner = flat.items[1]
     assert inner.shape_id == "inner"
+    assert inner.feature is not None
     assert inner.feature.type == "pocket"
+    assert inner.geometry is not None
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
     print("  PASS")
@@ -160,6 +169,7 @@ def test_frame_does_not_emit_profile():
 
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pocket_items) == 1
+    assert pocket_items[0].geometry is not None
     assert pocket_items[0].geometry.data["w_mm"] == 300.0
     assert pocket_items[0].geometry.data["h_mm"] == 500.0
     print("  PASS")
@@ -196,7 +206,9 @@ def test_grid_subdivides_region():
     assert len(flat.items) == 4
 
     for item in flat.items:
+        assert item.feature is not None
         assert item.feature.type == "pocket"
+        assert item.geometry is not None
         assert approx_eq(item.geometry.data["w_mm"], 195.0)
         assert approx_eq(item.geometry.data["h_mm"], 195.0)
     print("  PASS")
@@ -280,6 +292,7 @@ def test_place_grid_with_components():
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "outer"
+    assert first_outer.geometry is not None
     assert approx_eq(first_outer.geometry.data["w_mm"], 475.0)
     assert approx_eq(first_outer.geometry.data["h_mm"], 475.0)
     print("  PASS")
@@ -411,11 +424,14 @@ def test_rounded_rect_profile_inherits_geometry():
     shape_item = flat.items[0]
     assert shape_item.shape_id == "panel"
     assert shape_item.type == "RoundedRect"
+    assert shape_item.geometry is not None
     assert shape_item.geometry.data["radius_mm"] == 25.0
 
     profile_item = flat.items[1]
     assert profile_item.type == "RoundedRect"
+    assert profile_item.feature is not None
     assert profile_item.feature.type == "profile"
+    assert profile_item.geometry is not None
     assert profile_item.geometry.data["radius_mm"] == 25.0
     assert profile_item.geometry.data["w_mm"] == 400.0
     assert profile_item.geometry.data["h_mm"] == 600.0
@@ -447,6 +463,7 @@ def test_rounded_rect_selective_corners_profile_inherits():
 
     shape_item = flat.items[0]
     assert shape_item.type == "RoundedRect"
+    assert shape_item.geometry is not None
     assert shape_item.geometry.data["radius_tl_mm"] == 0.0
     assert shape_item.geometry.data["radius_tr_mm"] == 0.0
     assert shape_item.geometry.data["radius_bl_mm"] == 25.4
@@ -454,7 +471,9 @@ def test_rounded_rect_selective_corners_profile_inherits():
 
     profile_item = flat.items[1]
     assert profile_item.type == "RoundedRect"
+    assert profile_item.feature is not None
     assert profile_item.feature.type == "profile"
+    assert profile_item.geometry is not None
     assert profile_item.geometry.data["radius_tl_mm"] == 0.0
     assert profile_item.geometry.data["radius_tr_mm"] == 0.0
     assert profile_item.geometry.data["radius_bl_mm"] == 25.4
@@ -489,7 +508,9 @@ def test_rect_profile_stays_rect():
 
     profile_item = flat.items[1]
     assert profile_item.type == "Rect"
+    assert profile_item.feature is not None
     assert profile_item.feature.type == "profile"
+    assert profile_item.geometry is not None
     assert "radius_mm" not in profile_item.geometry.data
 
     print("  PASS")

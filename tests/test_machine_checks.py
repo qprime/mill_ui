@@ -116,7 +116,7 @@ class TestCheckSheetFitsMachine:
         mc = _machine()
         ast = LayoutAST(
             sheet=Sheet(width_mm=800, height_mm=800, thickness_mm=19, margin_mm=10),
-            items=[],
+            items=(),
         )
         result = check_sheet_fits_machine(ast, mc)
         assert result.status == Verdict.PASS
@@ -125,7 +125,7 @@ class TestCheckSheetFitsMachine:
         mc = _machine(x_max=500, y_max=500)
         ast = LayoutAST(
             sheet=Sheet(width_mm=800, height_mm=800, thickness_mm=19, margin_mm=10),
-            items=[],
+            items=(),
         )
         result = check_sheet_fits_machine(ast, mc)
         assert result.status == Verdict.FAIL

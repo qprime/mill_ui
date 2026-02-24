@@ -27,15 +27,15 @@ def _count_comments_with_text(moves: list[Move], text: str) -> int:
     return count
 
 
-def _has_finish_profile_pass(moves: list[dict]) -> bool:
+def _has_finish_profile_pass(moves: list[Move]) -> bool:
     return _count_comments_with_text(moves, "finish profile pass") > 0
 
 
-def _has_rough_pocket_comment(moves: list[dict]) -> bool:
+def _has_rough_pocket_comment(moves: list[Move]) -> bool:
     return _count_comments_with_text(moves, "rough pocket") > 0
 
 
-def _has_no_finish_comment(moves: list[dict]) -> bool:
+def _has_no_finish_comment(moves: list[Move]) -> bool:
     return _count_comments_with_text(moves, "no finish") > 0
 
 

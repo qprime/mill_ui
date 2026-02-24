@@ -33,6 +33,7 @@ children:
 
     assert item.shape_id == "panel"
     assert item.type == "Rect"
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
@@ -111,6 +112,10 @@ children:
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
+    assert flat1.items[0].feature is not None
+    assert flat2.items[0].feature is not None
+    assert flat1.items[0].feature.corner_cleanup_tool_diameter_mm is not None
+    assert flat2.items[0].feature.corner_cleanup_tool_diameter_mm is not None
     assert (
         abs(
             flat1.items[0].feature.corner_cleanup_tool_diameter_mm
@@ -146,6 +151,7 @@ children:
     flat = resolve_layout(ast)
     item = flat.items[0]
 
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm is None
@@ -175,6 +181,7 @@ children:
 
     ast = parse_pml_yaml(pml_text)
     flat = resolve_layout(ast)
+    assert flat.items[0].feature is not None
     assert flat.items[0].feature.corner_cleanup_tool_diameter_mm is None
 
     print("  ✓ PASS")
@@ -204,6 +211,7 @@ children:
     flat = resolve_layout(ast)
     item = flat.items[0]
 
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.is_through
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175

@@ -31,6 +31,8 @@ class TestNotchedPanelGenerator:
         items = notched_panel_generator(params, center=(50, 25))
 
         assert len(items) == 1
+        assert items[0].feature is not None
+        assert items[0].geometry is not None
         assert items[0].feature.type == "profile"
         assert "points" in items[0].geometry.data
 
@@ -48,6 +50,8 @@ class TestNotchedPanelGenerator:
         items = notched_panel_generator(params, center=(50, 25))
 
         assert len(items) == 1
+        assert items[0].feature is not None
+        assert items[0].geometry is not None
         assert items[0].feature.type == "profile"
         pts = items[0].geometry.data.get("points", [])
         assert len(pts) > 4
@@ -61,6 +65,7 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
+        assert items[0].shape_id is not None
         assert "front" in items[0].shape_id.lower()
 
     def test_panel_profile_is_through_cut(self):
@@ -71,6 +76,7 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
+        assert items[0].feature is not None
         assert items[0].feature.is_through
 
     def test_notched_panel_emits_profile_and_notch_items(self):
@@ -83,6 +89,7 @@ class TestNotchedPanelGenerator:
         items = notched_panel_generator(params, center=(50, 25))
 
         assert len(items) == 1
+        assert items[0].feature is not None
         assert items[0].feature.type == "profile"
         assert items[0].feature.is_through
 
@@ -101,6 +108,8 @@ class TestNotchedPanelGenerator:
         items = notched_panel_generator(params, center=(50, 25))
 
         assert len(items) == 1
+        assert items[0].feature is not None
+        assert items[0].geometry is not None
         assert items[0].feature.type == "profile"
         pts = items[0].geometry.data.get("points", [])
         assert len(pts) > 4
@@ -114,6 +123,7 @@ class TestNotchedPanelGenerator:
         )
         items = notched_panel_generator(params, center=(50, 25))
 
+        assert items[0].geometry is not None
         pts = items[0].geometry.data.get("points", [])
         ys = [float(p[1]) for p in pts if isinstance(p, (tuple, list)) and len(p) >= 2]
         assert any(y < 25.0 for y in ys)

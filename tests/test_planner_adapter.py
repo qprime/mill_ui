@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 from adapters.hints_to_removal import (
     hole_hint_to_removal_intent,
@@ -22,7 +23,7 @@ def approx_eq(a, b, rel=1e-6):
 
 def test_roundtrip_profile_through_cut():
     print("Running test_roundtrip_profile_through_cut...")
-    original_hint = {
+    original_hint: dict[str, Any] = {
         "id": "rect_outline",
         "shape": "Rect",
         "geometry": {"w_mm": 100.0, "h_mm": 50.0},
@@ -94,7 +95,7 @@ def test_roundtrip_profile_inside_cut():
 
 def test_roundtrip_pocket_basic():
     print("Running test_roundtrip_pocket_basic...")
-    original_hint = {
+    original_hint: dict[str, Any] = {
         "id": "pocket_1",
         "shape": "Rect",
         "geometry": {"w_mm": 80.0, "h_mm": 40.0},
@@ -139,7 +140,7 @@ def test_roundtrip_pocket_with_start_depth():
 
 def test_roundtrip_hole_circle():
     print("Running test_roundtrip_hole_circle...")
-    original_hint = {
+    original_hint: dict[str, Any] = {
         "id": "mounting_hole",
         "shape": "Circle",
         "geometry": {"diameter_mm": 10.0},
@@ -215,7 +216,7 @@ def test_batch_conversion_to_hints_structure():
 
 def test_geometry_preservation_rect():
     print("Running test_geometry_preservation_rect...")
-    hint = {
+    hint: dict[str, Any] = {
         "id": "test_rect",
         "shape": "Rect",
         "geometry": {"w_mm": 123.45, "h_mm": 67.89},
@@ -236,7 +237,7 @@ def test_geometry_preservation_rect():
 
 def test_geometry_preservation_circle():
     print("Running test_geometry_preservation_circle...")
-    hint = {
+    hint: dict[str, Any] = {
         "id": "test_circle",
         "shape": "Circle",
         "geometry": {"diameter_mm": 25.4},

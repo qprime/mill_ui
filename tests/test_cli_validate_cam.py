@@ -36,7 +36,7 @@ def run_cli(*args: str) -> tuple[int, str, str]:
         try:
             exit_code = main()
         except SystemExit as e:
-            exit_code = e.code if e.code is not None else 0
+            exit_code = e.code if isinstance(e.code, int) else 0
 
     return exit_code, stdout_capture.getvalue(), stderr_capture.getvalue()
 

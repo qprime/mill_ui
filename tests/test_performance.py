@@ -389,7 +389,7 @@ def bench_full_pipeline_with_ir():
         )
 
         # Convert to IR
-        warnings = []
+        warnings: list[str] = []
         intents = ast_to_removal_intents(ast, warnings=warnings)
         return intents
 

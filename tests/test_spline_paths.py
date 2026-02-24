@@ -66,9 +66,11 @@ children:
     spline_item = spline_items[0]
 
     assert spline_item.type == "Polyline"
+    assert spline_item.geometry is not None
     assert "points" in spline_item.geometry.data
 
     points = spline_item.geometry.data["points"]
+    assert spline_item.placement is not None
     cx, cy = spline_item.placement.center_xy_mm
     assert len(points) > 3
 
@@ -147,6 +149,8 @@ children:
     flat2 = resolve_layout(ast2)
     spline2 = next(item for item in flat2.items if item.shape_id == "wave")
 
+    assert spline1.geometry is not None
+    assert spline2.geometry is not None
     points1 = spline1.geometry.data["points"]
     points2 = spline2.geometry.data["points"]
 
@@ -193,10 +197,14 @@ children:
 
     ast_coarse = parse_pml_yaml(pml_coarse)
     flat_coarse = resolve_layout(ast_coarse)
-    points_coarse = next(item for item in flat_coarse.items if item.shape_id == "curve").geometry.data["points"]
+    coarse_item = next(item for item in flat_coarse.items if item.shape_id == "curve")
+    assert coarse_item.geometry is not None
+    points_coarse = coarse_item.geometry.data["points"]
 
     ast_fine = parse_pml_yaml(pml_fine)
     flat_fine = resolve_layout(ast_fine)
-    points_fine = next(item for item in flat_fine.items if item.shape_id == "curve").geometry.data["points"]
+    fine_item = next(item for item in flat_fine.items if item.shape_id == "curve")
+    assert fine_item.geometry is not None
+    points_fine = fine_item.geometry.data["points"]
 
     assert len(points_fine) > len(points_coarse)

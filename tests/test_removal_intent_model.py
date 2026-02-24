@@ -318,7 +318,7 @@ def test_removal_intent_immutability():
     )
 
     try:
-        intent.depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-5.0)
+        intent.depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-5.0)  # type: ignore[misc]
         print("  FAIL: Expected AttributeError for immutable dataclass")
         return False
     except AttributeError:

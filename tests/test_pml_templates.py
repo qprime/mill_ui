@@ -218,6 +218,7 @@ class TestExpandTemplate:
         assert len(items) >= 2
 
         pocket_item = next(i for i in items if i.feature and i.feature.type == "pocket")
+        assert pocket_item.feature is not None
         assert pocket_item.feature.depth_mm == 10.0
 
     def test_expand_template_nonexistent_raises(self):
@@ -259,6 +260,7 @@ class TestShakerTemplate:
         )
 
         profile_item = next(i for i in items if i.feature and i.feature.type == "profile")
+        assert profile_item.placement is not None
         cx, cy = profile_item.placement.center_xy_mm
         assert cx == pytest.approx(200.0, rel=0.01)
         assert cy == pytest.approx(300.0, rel=0.01)
@@ -274,6 +276,7 @@ class TestShakerTemplate:
         )
 
         pocket_item = next(i for i in items if i.feature and i.feature.type == "pocket")
+        assert pocket_item.geometry is not None
         pocket_w = pocket_item.geometry.data.get("w_mm")
         pocket_h = pocket_item.geometry.data.get("h_mm")
 

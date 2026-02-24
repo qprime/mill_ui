@@ -1,4 +1,5 @@
 import sys
+from typing import Any
 
 from nesting.guillotine import (
     FreeRect,
@@ -268,7 +269,7 @@ def test_empty_bin():
 
 def test_empty_parts_list():
     print("Running test_empty_parts_list...")
-    parts = []
+    parts: list[tuple[float, float, bool, Any]] = []
     placements = guillotine_pack(parts, bin_width=1000, bin_height=1000, gap=0)
     assert len(placements) == 0
     print("  PASSED")

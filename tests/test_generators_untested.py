@@ -60,6 +60,7 @@ class TestGridLinesGenerator:
         params = GridLinesParams(unit="metric", depth_mm=0.5)
         items = grid_lines_generator(domain, params)
         for item in items:
+            assert item.feature is not None
             assert item.feature.depth_mm == pytest.approx(0.5)
 
     def test_items_have_line_geometry(self):
@@ -67,6 +68,7 @@ class TestGridLinesGenerator:
         params = GridLinesParams(unit="metric", depth_mm=0.3)
         items = grid_lines_generator(domain, params)
         for item in items:
+            assert item.geometry is not None
             assert "start" in item.geometry.data
             assert "end" in item.geometry.data
 
@@ -125,6 +127,7 @@ class TestMeasurementGridGenerator:
         params = MeasurementGridParams(unit="metric", depth_mm=0.8)
         items = measurement_grid_generator(domain, params)
         for item in items:
+            assert item.feature is not None
             assert item.feature.depth_mm == pytest.approx(0.8)
 
     def test_custom_spacing(self):
@@ -260,6 +263,7 @@ class TestEngraveText:
             depth_mm=0.7,
         )
         for item in items:
+            assert item.feature is not None
             assert item.feature.depth_mm == pytest.approx(0.7)
 
     def test_number_label(self):
@@ -290,4 +294,4 @@ class TestEngraveText:
 
     def test_param_validation_invalid_alignment(self):
         with pytest.raises(ValueError, match="alignment"):
-            EngraveTextParams(text="X", alignment="middle").validate()
+            EngraveTextParams(text="X", alignment="middle").validate()  # type: ignore[arg-type]

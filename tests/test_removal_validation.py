@@ -18,8 +18,8 @@ def _make_intent(
     bounds: Bounds2D,
     z_top: float = 0.0,
     z_bottom: float = -5.0,
-    allowance: Allowance = None,
-    constraints: Constraints = None,
+    allowance: Allowance | None = None,
+    constraints: Constraints | None = None,
     hint_type: str = "",
     side: str | None = None,
 ) -> RemovalIntent:
@@ -30,7 +30,7 @@ def _make_intent(
         hint_type=hint_type,
         side=side,
         allowance=allowance or Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
-        constraints=constraints or Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
+        constraints=constraints or Constraints(tabs=None, keepouts=(), islands=(), tolerance_mm=0.1, safe_z_mm=5.0),
     )
 
 
@@ -472,7 +472,7 @@ def test_check_overlap_with_keepouts():
     constraints = Constraints(
         tabs=None,
         keepouts=(keepout,),
-        islands=[],
+        islands=(),
         tolerance_mm=0.1,
         safe_z_mm=5.0,
     )
@@ -490,7 +490,7 @@ def test_check_overlap_with_islands():
     island = Island(bounds=island_bounds, label="raised_area")
     constraints = Constraints(
         tabs=None,
-        keepouts=[],
+        keepouts=(),
         islands=(island,),
         tolerance_mm=0.1,
         safe_z_mm=5.0,

@@ -66,11 +66,12 @@ def test_x_panel_generator_directly():
     items = x_panel_generator(domain, params)
 
     assert len(items) == 4
-    names = {item.shape_id.split("_")[-1] for item in items}
+    names = {item.shape_id.split("_")[-1] for item in items if item.shape_id is not None}
     assert names == {"top", "bottom", "left", "right"}
 
     for item in items:
         assert item.type == "Polygon"
+        assert item.geometry is not None
         assert "points" in item.geometry.data
         assert len(item.geometry.data["points"]) == 3
 
@@ -83,11 +84,15 @@ def test_x_panel_uniform_bar_width():
 
     items = x_panel_generator(domain, params)
 
-    top_item = next(i for i in items if "top" in i.shape_id)
-    bottom_item = next(i for i in items if "bottom" in i.shape_id)
+    top_item = next(i for i in items if i.shape_id is not None and "top" in i.shape_id)
+    bottom_item = next(i for i in items if i.shape_id is not None and "bottom" in i.shape_id)
 
+    assert top_item.geometry is not None
+    assert bottom_item.geometry is not None
     top_points = top_item.geometry.data["points"]
     bottom_points = bottom_item.geometry.data["points"]
+    assert top_item.placement is not None
+    assert bottom_item.placement is not None
     _top_cx, top_cy = top_item.placement.center_xy_mm
     _bottom_cx, bottom_cy = bottom_item.placement.center_xy_mm
 
@@ -129,6 +134,8 @@ children:
     assert len(polygon_items) == 4
 
     for item in polygon_items:
+        assert item.geometry is not None
+        assert item.placement is not None
         points = item.geometry.data["points"]
         cx, cy = item.placement.center_xy_mm
         for rel_x, rel_y in points:

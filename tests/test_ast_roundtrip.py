@@ -5,13 +5,14 @@ import json
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from layout_ast.layout import LayoutAST
 
 
 def test_roundtrip_minimal_shape_layout():
     print("Running test_roundtrip_minimal_shape_layout...")
-    layout_data = {
+    layout_data: dict[str, Any] = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [
             {

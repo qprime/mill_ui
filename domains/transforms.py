@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -57,7 +58,7 @@ def sheet_to_local(
 
 
 def local_to_sheet_batch(
-    points: list[Point2D] | tuple[Point2D, ...],
+    points: Sequence[tuple[float, float]] | Sequence[tuple[int, int]],
     domain: Domain,
 ) -> list[Point2D]:
     if not points:
@@ -82,7 +83,7 @@ def local_to_sheet_batch(
 
 
 def sheet_to_local_batch(
-    points: list[Point2D] | tuple[Point2D, ...],
+    points: Sequence[tuple[float, float]] | Sequence[tuple[int, int]],
     domain: Domain,
 ) -> list[Point2D]:
     if not points:

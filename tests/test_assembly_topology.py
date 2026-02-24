@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from assembly.core import Assembly, Interface, InterfaceType
@@ -31,7 +33,7 @@ class TestPanelSpec:
 
 class TestAssemblyValidation:
     def test_validates_missing_panel(self):
-        panels = {
+        panels: dict[str, Any] = {
             "a": PanelSpec(name="a", width_mm=100, height_mm=50, thickness_mm=6.0),
         }
         interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", Butt()),)
@@ -40,7 +42,7 @@ class TestAssemblyValidation:
             assembly.validate()
 
     def test_validates_interface_joinery_compatibility(self):
-        panels = {
+        panels: dict[str, Any] = {
             "a": PanelSpec(name="a", width_mm=100, height_mm=50, thickness_mm=6.0),
             "b": PanelSpec(name="b", width_mm=100, height_mm=50, thickness_mm=6.0),
         }
@@ -229,8 +231,8 @@ class TestCubbyAssembly:
         ]
         assert len(half_lap_interfaces) == 4
 
-        positions_a = sorted([i.position_along_edge_a_mm for i in half_lap_interfaces])
-        positions_b = sorted([i.position_along_edge_b_mm for i in half_lap_interfaces])
+        positions_a = sorted([i.position_along_edge_a_mm for i in half_lap_interfaces if i.position_along_edge_a_mm is not None])
+        positions_b = sorted([i.position_along_edge_b_mm for i in half_lap_interfaces if i.position_along_edge_b_mm is not None])
 
         expected_partition_1_pos = cell_width - thickness / 2
         expected_partition_2_pos = 2 * cell_width - thickness / 2

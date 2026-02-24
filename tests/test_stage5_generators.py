@@ -219,7 +219,7 @@ def test_bead_params_invalid_depth():
 
 def test_bead_params_invalid_loop_selection():
     """Test BeadParams rejects invalid loop_selection."""
-    params = BeadParams(width_mm=6.0, depth_mm=3.0, loop_selection="invalid")
+    params = BeadParams(width_mm=6.0, depth_mm=3.0, loop_selection="invalid")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -249,6 +249,8 @@ def test_wave_simple_rectangle():
     for item in items:
         assert item.kind == "shape"
         assert item.type == "Polyline"
+        assert item.feature is not None
+        assert item.shape_id is not None
         assert item.feature.type == "engrave"
         assert item.feature.depth_mm == 3.0
         assert "wave" in item.shape_id
@@ -341,6 +343,8 @@ def test_grid_simple_rectangle():
     for item in items:
         assert item.kind == "shape"
         assert item.type == "Line"
+        assert item.feature is not None
+        assert item.shape_id is not None
         assert item.feature.type == "engrave"
         assert item.feature.depth_mm == 2.0
         assert "grid" in item.shape_id
@@ -445,6 +449,8 @@ def test_bead_simple_rectangle():
     item = items[0]
     assert item.kind == "shape"
     assert item.type == "Polygon"
+    assert item.feature is not None
+    assert item.shape_id is not None
     assert item.feature.type == "engrave"
     assert item.feature.depth_mm == 3.0
     assert "bead" in item.shape_id
@@ -471,6 +477,7 @@ def test_bead_outer_only():
     items = bead_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "outer" in items[0].shape_id
 
 
@@ -484,6 +491,7 @@ def test_bead_inner_only():
     items = bead_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "inner" in items[0].shape_id
 
 
@@ -497,7 +505,7 @@ def test_bead_all_loops():
     items = bead_generator(domain, params)
 
     assert len(items) == 2
-    shape_ids = [item.shape_id for item in items]
+    shape_ids = [item.shape_id for item in items if item.shape_id is not None]
     assert any("outer" in sid for sid in shape_ids)
     assert any("inner" in sid for sid in shape_ids)
 
@@ -585,6 +593,10 @@ def test_wave_generator_determinism():
         assert len(result) == len(results[0])
         for i, item in enumerate(result):
             ref_item = results[0][i]
+            assert item.geometry is not None
+            assert ref_item.geometry is not None
+            assert item.placement is not None
+            assert ref_item.placement is not None
             assert item.geometry.data == ref_item.geometry.data
             assert item.placement.center_xy_mm == ref_item.placement.center_xy_mm
 
@@ -600,6 +612,8 @@ def test_grid_generator_determinism():
         assert len(result) == len(results[0])
         for i, item in enumerate(result):
             ref_item = results[0][i]
+            assert item.geometry is not None
+            assert ref_item.geometry is not None
             assert item.geometry.data == ref_item.geometry.data
 
 
@@ -614,6 +628,8 @@ def test_bead_generator_determinism():
         assert len(result) == len(results[0])
         for i, item in enumerate(result):
             ref_item = results[0][i]
+            assert item.geometry is not None
+            assert ref_item.geometry is not None
             assert item.geometry.data == ref_item.geometry.data
 
 

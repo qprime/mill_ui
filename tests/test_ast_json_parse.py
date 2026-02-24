@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from layout_ast.layout import LayoutAST
 
@@ -38,6 +39,9 @@ def test_parse_minimal_layout():
         item = ast.items[0]
         assert item.kind == "shape"
         assert item.type == "Rect"
+        assert item.geometry is not None
+        assert item.placement is not None
+        assert item.feature is not None
         assert item.geometry.data["w_mm"] == 50.0
         assert item.geometry.data["h_mm"] == 30.0
         assert item.placement.center_xy_mm == (60.0, 40.0)
@@ -98,12 +102,15 @@ def test_parse_layout_with_multiple_items():
 
         item0 = ast.items[0]
         assert item0.type == "Rect"
+        assert item0.feature is not None
         assert item0.feature.type == "profile"
         assert item0.feature.side == "outside"
         assert item0.shape_id == "rect1"
 
         item1 = ast.items[1]
         assert item1.type == "Circle"
+        assert item1.geometry is not None
+        assert item1.feature is not None
         assert item1.geometry.data["diameter_mm"] == 20.0
         assert item1.feature.type == "hole"
         assert item1.feature.depth_mm == 10.0
@@ -111,6 +118,7 @@ def test_parse_layout_with_multiple_items():
 
         item2 = ast.items[2]
         assert item2.type == "Rect"
+        assert item2.feature is not None
         assert item2.feature.type == "pocket"
         assert item2.feature.depth_mm == 5.0
         assert item2.shape_id is None
@@ -125,7 +133,7 @@ def test_parse_layout_with_multiple_items():
 
 def test_parse_empty_items():
     print("Running test_parse_empty_items...")
-    layout_data = {
+    layout_data: dict[str, Any] = {
         "sheet": {"width_mm": 100.0, "height_mm": 100.0, "thickness_mm": 6.0},
         "items": [],
     }
@@ -145,8 +153,9 @@ def test_parse_empty_items():
 
 
 def test_parse_missing_sheet():
+    from typing import Any
     print("Running test_parse_missing_sheet...")
-    layout_data = {
+    layout_data: dict[str, Any] = {
         "items": [],
     }
 
@@ -210,8 +219,11 @@ def test_parse_preserves_numeric_precision():
         ast = LayoutAST.from_json(temp_path)
         assert ast.sheet.width_mm == 203.2
         assert ast.sheet.thickness_mm == 12.7
-        assert ast.items[0].placement.center_xy_mm == (60.35, 40.75)
-        assert ast.items[0].feature.depth_mm == 3.175
+        item0 = ast.items[0]
+        assert item0.placement is not None
+        assert item0.feature is not None
+        assert item0.placement.center_xy_mm == (60.35, 40.75)
+        assert item0.feature.depth_mm == 3.175
     finally:
         Path(temp_path).unlink()
     print("  PASS")

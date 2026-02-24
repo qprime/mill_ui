@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from nesting.types import FreeRect, PlacementResult
@@ -111,7 +112,7 @@ def _split_rectangle(
 
 
 def guillotine_pack(
-    parts: list[tuple[float, float, bool, Any]],
+    parts: Sequence[tuple[float, float, bool, Any]],
     bin_width: float,
     bin_height: float,
     gap: float = 0.0,
@@ -162,7 +163,7 @@ def guillotine_pack(
 
 def _compute_utilization(
     placements: list[PlacementResult],
-    parts: list[tuple[float, float, bool, Any]],
+    parts: Sequence[tuple[float, float, bool, Any]],
     bin_width: float,
     bin_height: float,
 ) -> float:

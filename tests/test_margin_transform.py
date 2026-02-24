@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from cam.moves import RapidMove, SetRpmMove
+from cam.moves import Move, RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.post.gcode import _apply_margin_offset
 from pml.yaml_parser import parse_pml_yaml
@@ -55,7 +55,7 @@ children: []
 
 class TestMarginTransformGcode:
     def test_margin_offset_applied_to_moves(self):
-        moves = [
+        moves: list[Move] = [
             RapidMove(x=100.0, y=200.0, z=5.0),
             RapidMove(x=150.0, y=250.0, z=-5.0),
         ]
@@ -73,14 +73,14 @@ class TestMarginTransformGcode:
         assert offset_moves[1].z == -5.0
 
     def test_zero_margin_no_offset(self):
-        moves = [RapidMove(x=100.0, y=200.0, z=5.0)]
+        moves: list[Move] = [RapidMove(x=100.0, y=200.0, z=5.0)]
         offset_moves = _apply_margin_offset(moves, 0.0)
         assert isinstance(offset_moves[0], RapidMove)
         assert offset_moves[0].x == 100.0
         assert offset_moves[0].y == 200.0
 
     def test_none_coordinates_preserved(self):
-        moves = [SetRpmMove(rpm=10000)]
+        moves: list[Move] = [SetRpmMove(rpm=10000)]
         offset_moves = _apply_margin_offset(moves, 10.0)
         assert isinstance(offset_moves[0], SetRpmMove)
         assert offset_moves[0].rpm == 10000
@@ -112,10 +112,12 @@ children:
                 break
 
         assert rect_item is not None
+        assert rect_item.placement is not None
         cx, cy = rect_item.placement.center_xy_mm
         assert cx == 590.0
         assert cy == 390.0
 
+        assert rect_item.geometry is not None
         w = rect_item.geometry.data["w_mm"]
         h = rect_item.geometry.data["h_mm"]
         assert w == 1180.0

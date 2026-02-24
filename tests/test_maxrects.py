@@ -14,7 +14,7 @@ def test_maxrects_basic():
     ]
 
     placements = maxrects_pack(
-        parts=parts,
+        parts=parts,  # type: ignore[arg-type]
         bin_width=300,
         bin_height=300,
         gap=0,
@@ -35,7 +35,7 @@ def test_maxrects_with_gap():
     ]
 
     placements = maxrects_pack(
-        parts=parts,
+        parts=parts,  # type: ignore[arg-type]
         bin_width=250,
         bin_height=150,
         gap=10,
@@ -57,7 +57,7 @@ def test_maxrects_rotation():
     ]
 
     placements = maxrects_pack(
-        parts=parts,
+        parts=parts,  # type: ignore[arg-type]
         bin_width=150,
         bin_height=250,
         gap=0,
@@ -76,7 +76,7 @@ def test_maxrects_no_rotation():
     ]
 
     placements = maxrects_pack(
-        parts=parts,
+        parts=parts,  # type: ignore[arg-type]
         bin_width=150,
         bin_height=250,
         gap=0,
@@ -96,7 +96,7 @@ def test_maxrects_heuristics():
 
     for heuristic in MaxRectsHeuristic:
         placements = maxrects_pack(
-            parts=parts,
+            parts=parts,  # type: ignore[arg-type]
             bin_width=300,
             bin_height=300,
             gap=5,
@@ -117,7 +117,7 @@ def test_maxrects_contact_point():
     ]
 
     placements = maxrects_pack(
-        parts=parts,
+        parts=parts,  # type: ignore[arg-type]
         bin_width=200,
         bin_height=200,
         gap=0,

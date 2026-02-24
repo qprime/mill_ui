@@ -33,8 +33,10 @@ children:
     assert len(items) == 1
 
     panel = items[0]
+    assert panel.feature is not None
     assert panel.feature.type == "pocket"
 
+    assert panel.geometry is not None
     assert "islands" in panel.geometry.data
     islands = panel.geometry.data["islands"]
     assert len(islands) == 1
@@ -81,6 +83,7 @@ children:
     assert len(pocket_items) == 4
 
     for pocket in pocket_items:
+        assert pocket.geometry is not None
         assert "islands" in pocket.geometry.data
         assert len(pocket.geometry.data["islands"]) == 1
 
@@ -126,6 +129,7 @@ children:
 
     panel = panel_items[0]
 
+    assert panel.geometry is not None
     assert "islands" in panel.geometry.data
     islands = panel.geometry.data["islands"]
     assert len(islands) == 2
@@ -164,6 +168,8 @@ children:
     pocket1 = next(item for item in flat1.items if item.feature and item.feature.type == "pocket")
     pocket2 = next(item for item in flat2.items if item.feature and item.feature.type == "pocket")
 
+    assert pocket1.geometry is not None
+    assert pocket2.geometry is not None
     islands1 = pocket1.geometry.data.get("islands", [])
     islands2 = pocket2.geometry.data.get("islands", [])
 
@@ -203,6 +209,7 @@ children:
     assert len(pocket_items) == 1
 
     pocket = pocket_items[0]
+    assert pocket.geometry is not None
     assert "islands" in pocket.geometry.data
     islands = pocket.geometry.data["islands"]
     assert len(islands) == 1
@@ -244,6 +251,7 @@ children:
     assert len(pocket_items) == 1
 
     pocket = pocket_items[0]
+    assert pocket.geometry is not None
     assert "islands" in pocket.geometry.data
     islands = pocket.geometry.data["islands"]
     assert len(islands) == 1

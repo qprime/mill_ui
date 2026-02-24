@@ -130,7 +130,7 @@ def test_profile_params_valid():
 
 def test_profile_params_invalid_side():
     """Test ProfileParams rejects invalid side."""
-    params = ProfileParams(side="invalid", depth="through")
+    params = ProfileParams(side="invalid", depth="through")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -150,7 +150,7 @@ def test_profile_params_invalid_depth():
 
 def test_profile_params_invalid_loop_selection():
     """Test ProfileParams rejects invalid loop selection."""
-    params = ProfileParams(side="outside", depth="through", loop_selection="invalid")
+    params = ProfileParams(side="outside", depth="through", loop_selection="invalid")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -189,6 +189,8 @@ def test_flat_pocket_simple_rectangle():
 
     assert item.kind == "shape"
     assert item.type == "Polygon"
+    assert item.feature is not None
+    assert item.shape_id is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
     assert "pocket" in item.shape_id
@@ -206,7 +208,7 @@ def test_flat_pocket_with_hole():
     assert len(items) == 1
     item = items[0]
 
-    # Should have hole in geometry
+    assert item.geometry is not None
     assert "holes" in item.geometry.data
     assert len(item.geometry.data["holes"]) == 1
 
@@ -220,6 +222,7 @@ def test_flat_pocket_various_depths():
         items = flat_pocket_generator(domain, params)
 
         assert len(items) == 1
+        assert items[0].feature is not None
         assert items[0].feature.depth_mm == depth
 
 
@@ -231,7 +234,7 @@ def test_flat_pocket_with_allowance():
     items = flat_pocket_generator(domain, params)
 
     assert len(items) == 1
-    # Geometry should be smaller (80x80 instead of 100x100)
+    assert items[0].geometry is not None
     points = items[0].geometry.data["points"]
     xs = [p[0] for p in points]
     ys = [p[1] for p in points]
@@ -301,6 +304,8 @@ def test_profile_simple_rectangle():
 
     assert item.kind == "shape"
     assert item.type == "Polygon"
+    assert item.feature is not None
+    assert item.shape_id is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
     assert item.feature.is_through
@@ -312,10 +317,11 @@ def test_profile_all_sides():
     domain = Domain.from_rectangle(100, 100)
 
     for side in ["outside", "inside", "on"]:
-        params = ProfileParams(side=side, depth="through")
+        params = ProfileParams(side=side, depth="through")  # type: ignore[arg-type]
         items = profile_generator(domain, params)
 
         assert len(items) == 1
+        assert items[0].feature is not None
         assert items[0].feature.side == side
 
 
@@ -327,6 +333,7 @@ def test_profile_numeric_depth():
     items = profile_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].feature is not None
     assert items[0].feature.depth_mm == 12.0
     assert items[0].feature.depth_mm == 12.0
 
@@ -346,6 +353,7 @@ def test_profile_with_tabs():
 
     assert len(items) == 1
     item = items[0]
+    assert item.feature is not None
     assert item.feature.tab_count == 4
     assert item.feature.tab_width_mm == 15.0
     assert item.feature.tab_height_mm == 5.0
@@ -361,6 +369,7 @@ def test_profile_outer_only():
     items = profile_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "outer" in items[0].shape_id
 
 
@@ -374,6 +383,7 @@ def test_profile_inner_only():
     items = profile_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "inner" in items[0].shape_id
 
 
@@ -388,7 +398,7 @@ def test_profile_all_loops():
 
     assert len(items) == 2
     # Should have both outer and inner
-    shape_ids = [item.shape_id for item in items]
+    shape_ids = [item.shape_id for item in items if item.shape_id is not None]
     assert any("outer" in sid for sid in shape_ids)
     assert any("inner" in sid for sid in shape_ids)
 
@@ -516,6 +526,8 @@ def test_end_to_end_domain_to_ast():
     )
 
     assert len(ast.items) == 2
+    assert ast.items[0].feature is not None
+    assert ast.items[1].feature is not None
     assert ast.items[0].feature.type == "profile"
     assert ast.items[1].feature.type == "pocket"
 
@@ -540,7 +552,7 @@ def test_end_to_end_domain_to_ir():
     )
 
     # Convert to RemovalIntent
-    warnings = []
+    warnings: list[str] = []
     ast_to_removal_intents(ast, warnings=warnings)
 
     # Note: Polygon type may not be fully supported by hints_to_removal
@@ -602,11 +614,13 @@ def test_end_to_end_shaker_style_door():
     assert len(ast.items) == 2
 
     # Verify features
-    profile_item = next(i for i in ast.items if i.feature.type == "profile")
-    pocket_item = next(i for i in ast.items if i.feature.type == "pocket")
+    profile_item = next(i for i in ast.items if i.feature is not None and i.feature.type == "profile")
+    pocket_item = next(i for i in ast.items if i.feature is not None and i.feature.type == "pocket")
 
+    assert profile_item.feature is not None
     assert profile_item.feature.side == "outside"
     assert profile_item.feature.is_through
+    assert pocket_item.feature is not None
     assert pocket_item.feature.depth_mm == panel_recess
 
 
@@ -648,8 +662,14 @@ def test_generator_determinism():
         assert len(result) == len(results[0])
         for i, item in enumerate(result):
             ref_item = results[0][i]
+            assert item.geometry is not None
+            assert ref_item.geometry is not None
             assert item.geometry.data == ref_item.geometry.data
+            assert item.placement is not None
+            assert ref_item.placement is not None
             assert item.placement.center_xy_mm == ref_item.placement.center_xy_mm
+            assert item.feature is not None
+            assert ref_item.feature is not None
             assert item.feature.depth_mm == ref_item.feature.depth_mm
 
 
@@ -719,15 +739,19 @@ def test_raised_panel_simple():
 
     # First item should be border with bevel feature
     border_item = items[0]
+    assert border_item.feature is not None
     assert border_item.feature.type == "bevel"
     assert border_item.feature.depth_mm == 6.0
     assert border_item.feature.bevel_width_mm == 25.0
+    assert border_item.shape_id is not None
     assert "border" in border_item.shape_id
 
     # Second item should be field with pocket feature
     field_item = items[1]
+    assert field_item.feature is not None
     assert field_item.feature.type == "pocket"
     assert field_item.feature.depth_mm == 2.0
+    assert field_item.shape_id is not None
     assert "field" in field_item.shape_id
 
 
@@ -744,6 +768,7 @@ def test_raised_panel_border_has_hole():
     border_item = items[0]
 
     # Border geometry should have a hole (the field)
+    assert border_item.geometry is not None
     assert "holes" in border_item.geometry.data
     assert len(border_item.geometry.data["holes"]) >= 1
 
@@ -824,10 +849,12 @@ def test_chamfer_simple_rectangle():
     assert len(items) == 1
     item = items[0]
 
+    assert item.feature is not None
     assert item.feature.type == "chamfer"
     assert item.feature.depth_mm == 3.0
     assert item.feature.chamfer_width_mm == 5.0
     assert item.feature.side == "outside"  # Outer loop
+    assert item.shape_id is not None
     assert "chamfer" in item.shape_id
 
 
@@ -841,6 +868,7 @@ def test_chamfer_outer_only():
     items = chamfer_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "outer" in items[0].shape_id
 
 
@@ -854,7 +882,9 @@ def test_chamfer_inner_only():
     items = chamfer_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].shape_id is not None
     assert "inner" in items[0].shape_id
+    assert items[0].feature is not None
     assert items[0].feature.side == "inside"  # Inner loops get inside side
 
 
@@ -869,7 +899,7 @@ def test_chamfer_all_loops():
 
     assert len(items) == 2
     # Should have both outer and inner
-    shape_ids = [item.shape_id for item in items]
+    shape_ids = [item.shape_id for item in items if item.shape_id is not None]
     assert any("outer" in sid for sid in shape_ids)
     assert any("inner" in sid for sid in shape_ids)
 
@@ -915,8 +945,8 @@ def test_split_with_raised_panels():
     assert len(all_items) == 8
 
     # Verify we have equal numbers of border and field items
-    bevel_count = sum(1 for i in all_items if i.feature.type == "bevel")
-    pocket_count = sum(1 for i in all_items if i.feature.type == "pocket")
+    bevel_count = len([i for i in all_items if i.feature is not None and i.feature.type == "bevel"])
+    pocket_count = len([i for i in all_items if i.feature is not None and i.feature.type == "pocket"])
     assert bevel_count == 4
     assert pocket_count == 4
 
@@ -939,7 +969,7 @@ def test_door_with_chamfer_and_pocket():
     assert len(all_items) == 3
 
     # Verify feature types
-    feature_types = [i.feature.type for i in all_items]
+    feature_types = [i.feature.type for i in all_items if i.feature is not None]
     assert "profile" in feature_types
     assert "pocket" in feature_types
     assert "chamfer" in feature_types
@@ -1015,6 +1045,7 @@ def test_line_pattern_horizontal():
 
     assert len(items) > 0
     for item in items:
+        assert item.feature is not None
         assert item.feature.type == "pocket"
         assert item.feature.depth_mm == 2.0
 
@@ -1083,6 +1114,8 @@ def test_line_pattern_local_coords_rotated():
     assert len(items_sheet) > 0
     assert len(items_local) > 0
 
+    assert items_sheet[0].geometry is not None
+    assert items_local[0].geometry is not None
     sheet_centroid = items_sheet[0].geometry.data["points"][0]
     local_centroid = items_local[0].geometry.data["points"][0]
     assert sheet_centroid != local_centroid
@@ -1133,6 +1166,7 @@ def test_concentric_border_simple():
 
     assert len(items) >= 2  # At least 2 ring polygons
     for item in items:
+        assert item.feature is not None
         assert item.feature.type == "pocket"
         assert item.feature.depth_mm == 2.0
 
@@ -1172,6 +1206,7 @@ def test_concentric_border_matches_recipe_25_pattern():
     # Should produce 3 rings
     assert len(items) == 3
     for item in items:
+        assert item.feature is not None
         assert item.feature.depth_mm == GROOVE_DEPTH
 
 
@@ -1217,9 +1252,11 @@ def test_shapely_to_item():
     item = shapely_to_item(poly, "pocket", 5.0, "test_001")
 
     assert item.type == "Polygon"
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 5.0
     assert item.shape_id == "test_001"
+    assert item.geometry is not None
     assert len(item.geometry.data["points"]) == 4
 
 
@@ -1235,6 +1272,7 @@ def test_shapely_to_item_with_hole():
 
     item = shapely_to_item(poly, "pocket", 3.0, "with_hole")
 
+    assert item.geometry is not None
     assert "holes" in item.geometry.data
     assert len(item.geometry.data["holes"]) == 1
 
@@ -1327,7 +1365,7 @@ def test_hole_grid_params_invalid_depth():
 
 def test_hole_grid_params_invalid_pattern():
     """Test HoleGridParams rejects invalid pattern."""
-    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")
+    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -1345,8 +1383,10 @@ def test_hole_grid_rectangular_basic():
     assert len(items) > 0
     for item in items:
         assert item.type == "Circle"
+        assert item.feature is not None
         assert item.feature.type == "hole"
         assert item.feature.depth_mm == 12.0
+        assert item.geometry is not None
         assert item.geometry.data["diameter_mm"] == 10.0
 
 
@@ -1365,6 +1405,7 @@ def test_hole_grid_hexagonal():
     assert len(items) > 0
     for item in items:
         assert item.type == "Circle"
+        assert item.feature is not None
         assert item.feature.type == "hole"
 
 
@@ -1392,6 +1433,7 @@ def test_hole_grid_through_depth():
 
     assert len(items) > 0
     for item in items:
+        assert item.feature is not None
         assert item.feature.is_through is True
         assert item.feature.depth_mm == 0.0
 
@@ -1434,6 +1476,7 @@ def test_hole_grid_respects_domain_holes():
     items = hole_grid_generator(domain, params)
 
     for item in items:
+        assert item.placement is not None
         cx, cy = item.placement.center_xy_mm
         assert not (70 < cx < 130 and 70 < cy < 130), "Hole placed inside domain hole"
 
@@ -1483,6 +1526,7 @@ def test_hole_grid_domain_algebra():
 
     assert len(items) > 0
     for item in items:
+        assert item.placement is not None
         cx, cy = item.placement.center_xy_mm
         in_keepout = 70 < cx < 130 and 70 < cy < 130
         assert not in_keepout, "Hole placed in keepout region"
@@ -1497,6 +1541,7 @@ def test_hole_grid_shape_id_prefix():
 
     assert len(items) > 0
     for item in items:
+        assert item.shape_id is not None
         assert "shelf_pin" in item.shape_id
 
 
@@ -1511,7 +1556,11 @@ def test_hole_grid_determinism():
         assert len(result) == len(results[0])
         for i, item in enumerate(result):
             ref = results[0][i]
+            assert item.placement is not None
+            assert ref.placement is not None
             assert item.placement.center_xy_mm == ref.placement.center_xy_mm
+            assert item.geometry is not None
+            assert ref.geometry is not None
             assert item.geometry.data == ref.geometry.data
 
 

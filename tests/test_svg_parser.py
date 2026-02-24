@@ -419,7 +419,7 @@ def test_polylines_bounds():
         [(25, 75), (75, 75)],
     ]
 
-    x_min, y_min, x_max, y_max = polylines_bounds(polylines)
+    x_min, y_min, x_max, y_max = polylines_bounds(polylines)  # type: ignore[arg-type]
 
     assert x_min == 0
     assert y_min == 0
@@ -431,7 +431,7 @@ def test_scale_polylines():
     """Test polyline scaling."""
     polylines = [[(0, 0), (10, 10)]]
 
-    scaled = scale_polylines(polylines, 2.0)
+    scaled = scale_polylines(polylines, 2.0)  # type: ignore[arg-type]
 
     assert point_near(scaled[0][0], (0, 0))
     assert point_near(scaled[0][1], (20, 20))
@@ -441,7 +441,7 @@ def test_translate_polylines():
     """Test polyline translation."""
     polylines = [[(0, 0), (10, 10)]]
 
-    translated = translate_polylines(polylines, 5, -5)
+    translated = translate_polylines(polylines, 5, -5)  # type: ignore[arg-type]
 
     assert point_near(translated[0][0], (5, -5))
     assert point_near(translated[0][1], (15, 5))
@@ -451,7 +451,7 @@ def test_center_polylines():
     """Test polyline centering."""
     polylines = [[(10, 20), (30, 40)]]
 
-    centered = center_polylines(polylines)
+    centered = center_polylines(polylines)  # type: ignore[arg-type]
 
     # Center was at (20, 30), should be translated to origin
     assert point_near(centered[0][0], (-10, -10))
@@ -463,7 +463,7 @@ def test_normalize_polylines():
     polylines = [[(0, 0), (200, 100)]]
 
     # Normalize to 100x100, preserving aspect
-    normalized = normalize_polylines(polylines, target_width=100, target_height=100)
+    normalized = normalize_polylines(polylines, target_width=100, target_height=100)  # type: ignore[arg-type]
 
     x_min, y_min, x_max, y_max = polylines_bounds(normalized)
 
@@ -532,7 +532,7 @@ def test_svg_path_params_invalid_tolerance():
 
 def test_svg_path_params_invalid_feature():
     """SVGPathParams should reject invalid feature type."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, feature_type="invalid")
+    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, feature_type="invalid")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -542,7 +542,7 @@ def test_svg_path_params_invalid_feature():
 
 def test_svg_path_params_invalid_scale():
     """SVGPathParams should reject invalid scale mode."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, scale_mode="stretch")
+    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, scale_mode="stretch")  # type: ignore[arg-type]
     try:
         params.validate()
         raise AssertionError("Should have raised ValueError")
@@ -584,6 +584,7 @@ def test_svg_stamp_generator_simple():
 
     assert len(items) >= 1
     assert items[0].kind == "shape"
+    assert items[0].feature is not None
     assert items[0].feature.type == "engrave"
     assert items[0].feature.depth_mm == 2.0
 
@@ -614,6 +615,7 @@ def test_svg_stamp_generator_pocket():
     items = svg_stamp_generator(domain, params)
 
     assert len(items) >= 1
+    assert items[0].feature is not None
     assert items[0].feature.type == "pocket"
     assert items[0].type == "Polygon"
 
@@ -630,6 +632,7 @@ def test_svg_stamp_generator_profile():
     items = svg_stamp_generator(domain, params)
 
     assert len(items) >= 1
+    assert items[0].feature is not None
     assert items[0].feature.type == "profile"
 
 
@@ -647,6 +650,7 @@ def test_svg_stamp_generator_scale_fit():
 
     # Check that geometry fits within domain bounds (roughly)
     assert len(items) >= 1
+    assert items[0].geometry is not None
     geometry = items[0].geometry.data
     points = geometry.get("points", [])
     if points:
@@ -669,7 +673,7 @@ def test_svg_stamp_generator_no_scale():
     items = svg_stamp_generator(domain, params)
 
     assert len(items) >= 1
-    # Geometry should be approximately 20x20 in size
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     if points:
         x_coords = [p[0] for p in points]
@@ -723,10 +727,13 @@ def test_svg_stamp_generator_determinism():
     assert len(items1) == len(items2)
     for i1, i2 in zip(items1, items2, strict=False):
         assert i1.type == i2.type
+        assert i1.feature is not None
+        assert i2.feature is not None
         assert i1.feature.type == i2.feature.type
         assert i1.feature.is_through == i2.feature.is_through
         assert i1.feature.depth_mm == i2.feature.depth_mm
-        # Compare geometry
+        assert i1.geometry is not None
+        assert i2.geometry is not None
         g1 = i1.geometry.data
         g2 = i2.geometry.data
         if "points" in g1 and "points" in g2:
@@ -775,7 +782,7 @@ def test_svg_stamp_generator_y_inversion_default():
 
     items = svg_stamp_generator(domain, params)
     assert len(items) == 1
-
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     assert len(points) >= 4
 
@@ -808,7 +815,7 @@ def test_svg_stamp_generator_y_inversion_disabled():
 
     items = svg_stamp_generator(domain, params)
     assert len(items) == 1
-
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     assert len(points) >= 4
 
@@ -838,7 +845,7 @@ def test_svg_stamp_generator_svg_unit_mm():
 
     items = svg_stamp_generator(domain, params)
     assert len(items) >= 1
-
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     if points:
         x_coords = [p[0] for p in points]
@@ -867,7 +874,7 @@ def test_svg_stamp_generator_svg_unit_mm_default():
 
     items = svg_stamp_generator(domain, params)
     assert len(items) >= 1
-
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     if points:
         x_coords = [p[0] for p in points]
@@ -933,6 +940,7 @@ def test_svg_complex_path():
     items = svg_stamp_generator(domain, params)
 
     assert len(items) == 1
+    assert items[0].geometry is not None
     points = items[0].geometry.data.get("points", [])
     assert len(points) >= 10  # Star has 10 points + closure
 

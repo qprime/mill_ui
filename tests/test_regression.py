@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import tempfile
+from typing import Any
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -118,6 +119,7 @@ def test_compare_numeric_within_tolerance():
     result = _compare_numeric("test.value", 100.05, 100.0, config)
     assert result.status == Verdict.PASS
     assert result.delta == 0.05
+    assert result.delta_percent is not None
     assert result.delta_percent < 0.1
     print("PASS: test_compare_numeric_within_tolerance")
 
@@ -127,6 +129,7 @@ def test_compare_numeric_exceeds_tolerance():
     config = ComparisonConfig(default_tolerance_percent=0.1, fail_multiplier=2.0)
     # 0.15% delta > 0.1% tolerance, but < 0.2% (2x tolerance) = WARN
     result = _compare_numeric("test.value", 100.15, 100.0, config)
+    assert result.delta_percent is not None
     assert result.status == Verdict.WARN, f"Expected WARN, got {result.status} ({result.delta_percent}%)"
     assert result.delta_percent > 0.1
     assert result.delta_percent < 0.2
@@ -527,7 +530,7 @@ def test_all_recipes_against_golden():
     passed = 0
     failed = 0
     skipped = 0
-    failures = []
+    failures: list[tuple[str, list[Any]]] = []
 
     for name in sorted(entries):
         recipe_dir = os.path.join(RECIPE_DIR, name)

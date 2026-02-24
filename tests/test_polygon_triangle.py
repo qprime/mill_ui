@@ -85,9 +85,12 @@ children:
     item = flat.items[0]
     assert item.type == "Polygon"
     assert item.kind == "shape"
+    assert item.placement is not None
     assert item.placement.center_xy_mm == (60.0, 50.0)
+    assert item.geometry is not None
     assert item.geometry.data["points"] == [[-50.0, -40.0], [50.0, -40.0], [0.0, 40.0]]
     assert item.geometry.data["holes"] == []
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
 
@@ -117,6 +120,7 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "Polygon"
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
     assert item.feature.is_through
@@ -193,7 +197,9 @@ children:
     item = flat.items[0]
     assert item.type == "Polygon"
     assert item.kind == "shape"
+    assert item.geometry is not None
     assert len(item.geometry.data["points"]) == 3
+    assert item.feature is not None
     assert item.feature.type == "pocket"
     assert item.feature.depth_mm == 6.0
 
@@ -209,6 +215,7 @@ children:
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
 
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
     assert approx_equal(cx, 100.0)
     assert approx_equal(cy, 100.0)
@@ -237,6 +244,7 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "Polygon"
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "inside"
 
@@ -266,6 +274,7 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
 
+    assert item.geometry is not None
     points = item.geometry.data["points"]
     half_base = 50.0
     half_height = 50.0
@@ -278,6 +287,7 @@ children:
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
 
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
     assert approx_equal(cx, 200.0)
     assert approx_equal(cy, 200.0)
@@ -306,6 +316,7 @@ children:
     flat = resolve_layout(ast)
 
     item = flat.items[0]
+    assert item.placement is not None
     cx, cy = item.placement.center_xy_mm
     assert approx_equal(cx, 50.0)
     assert approx_equal(cy, 45.0)

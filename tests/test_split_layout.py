@@ -48,6 +48,7 @@ children:
     assert len(pocket_items) == 4, f"Expected 4 pockets (2x2 panes), got {len(pocket_items)}"
 
     first_pocket = pocket_items[0]
+    assert first_pocket.geometry is not None
     assert abs(first_pocket.geometry.data["w_mm"] - 230.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 225.0) < 0.01
 
@@ -108,6 +109,8 @@ children:
     assert len(split_pockets) == len(grid_pockets) == 4
 
     for sp, gp in zip(split_pockets, grid_pockets, strict=False):
+        assert sp.geometry is not None
+        assert gp.geometry is not None
         assert abs(sp.geometry.data["w_mm"] - gp.geometry.data["w_mm"]) < 0.01
         assert abs(sp.geometry.data["h_mm"] - gp.geometry.data["h_mm"]) < 0.01
 
@@ -142,6 +145,7 @@ children:
     assert len(pockets) == 12, f"Expected 12 pockets (3x4 panes), got {len(pockets)}"
 
     first_pocket = pockets[0]
+    assert first_pocket.geometry is not None
     assert abs(first_pocket.geometry.data["w_mm"] - 235.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 246.67) < 0.01
 
@@ -179,6 +183,7 @@ children:
     assert len(pockets) == 4
 
     first_pocket = pockets[0]
+    assert first_pocket.geometry is not None
     assert abs(first_pocket.geometry.data["w_mm"] - 185.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 180.0) < 0.01
 
@@ -220,6 +225,8 @@ children:
     assert len(pockets1) == len(pockets2) == 6
 
     for p1, p2 in zip(pockets1, pockets2, strict=False):
+        assert p1.geometry is not None
+        assert p2.geometry is not None
         assert abs(p1.geometry.data["w_mm"] - p2.geometry.data["w_mm"]) < 0.01
         assert abs(p1.geometry.data["h_mm"] - p2.geometry.data["h_mm"]) < 0.01
 
@@ -266,6 +273,7 @@ children:
     assert len(pocket_items) == 4
 
     first_pane = pocket_items[0]
+    assert first_pane.geometry is not None
     assert abs(first_pane.geometry.data["w_mm"] - 320.0) < 0.01
     assert abs(first_pane.geometry.data["h_mm"] - 515.0) < 0.01
 
@@ -300,6 +308,7 @@ children:
     assert len(pockets) == 3
 
     first_pocket = pockets[0]
+    assert first_pocket.geometry is not None
     assert abs(first_pocket.geometry.data["w_mm"] - 180.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 200.0) < 0.01
 
@@ -334,5 +343,6 @@ children:
     assert len(pockets) == 3
 
     first_pocket = pockets[0]
+    assert first_pocket.geometry is not None
     assert abs(first_pocket.geometry.data["w_mm"] - 200.0) < 0.01
     assert abs(first_pocket.geometry.data["h_mm"] - 173.33) < 0.01

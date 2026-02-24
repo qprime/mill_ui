@@ -32,6 +32,7 @@ children:
     assert len(profile_items) == 1
     profile = profile_items[0]
 
+    assert profile.geometry is not None
     assert "edge_treatment" in profile.geometry.data
     edge = profile.geometry.data["edge_treatment"]
     assert edge["type"] == "allowance"
@@ -42,6 +43,8 @@ children:
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "allowance"
+    assert removal.constraints.edge_treatment.rough_allowance_mm is not None
+    assert removal.constraints.edge_treatment.finish_allowance_mm is not None
     assert abs(removal.constraints.edge_treatment.rough_allowance_mm - 0.5) < 0.01
     assert abs(removal.constraints.edge_treatment.finish_allowance_mm - 0.1) < 0.01
 
@@ -76,6 +79,7 @@ children:
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "fillet"
+    assert removal.constraints.edge_treatment.radius_mm is not None
     assert abs(removal.constraints.edge_treatment.radius_mm - 3.0) < 0.01
 
 
@@ -109,6 +113,7 @@ children:
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "chamfer"
+    assert removal.constraints.edge_treatment.distance_mm is not None
     assert abs(removal.constraints.edge_treatment.distance_mm - 2.5) < 0.01
 
 
@@ -142,6 +147,8 @@ children:
     profile1 = next(item for item in flat1.items if item.feature and item.feature.type == "profile")
     profile2 = next(item for item in flat2.items if item.feature and item.feature.type == "profile")
 
+    assert profile1.geometry is not None
+    assert profile2.geometry is not None
     edge1 = profile1.geometry.data.get("edge_treatment")
     edge2 = profile2.geometry.data.get("edge_treatment")
 
@@ -177,6 +184,7 @@ children:
     assert len(pocket_items) == 1
     pocket = pocket_items[0]
 
+    assert pocket.geometry is not None
     assert "edge_treatment" in pocket.geometry.data
     edge = pocket.geometry.data["edge_treatment"]
     assert edge["type"] == "allowance"
@@ -211,6 +219,8 @@ children:
     assert base_removal.constraints.edge_treatment is not None
     assert base_removal.constraints.edge_treatment.type == "allowance"
 
+    assert base_removal.constraints.edge_treatment.rough_allowance_mm is not None
+    assert base_removal.constraints.edge_treatment.finish_allowance_mm is not None
     rough_allowance = base_removal.constraints.edge_treatment.rough_allowance_mm
     finish_allowance = base_removal.constraints.edge_treatment.finish_allowance_mm
 
@@ -255,6 +265,8 @@ children:
     base_removal = simple_item_to_removal_intent(profile_items[0])
 
     assert base_removal.constraints.edge_treatment is not None
+    assert base_removal.constraints.edge_treatment.rough_allowance_mm is not None
+    assert base_removal.constraints.edge_treatment.finish_allowance_mm is not None
     edge_rough = base_removal.constraints.edge_treatment.rough_allowance_mm
     edge_finish = base_removal.constraints.edge_treatment.finish_allowance_mm
 
@@ -276,11 +288,14 @@ children:
     )
 
     assert combined_removal.allowance.kerf_compensation == kerf_offset
+    assert combined_removal.constraints.edge_treatment is not None
     assert combined_removal.constraints.edge_treatment.rough_allowance_mm == edge_rough
     assert combined_removal.constraints.edge_treatment.finish_allowance_mm == edge_finish
 
-    total_rough_offset = kerf_offset + edge_rough
-    total_finish_offset = kerf_offset + edge_finish
+    assert combined_removal.constraints.edge_treatment.rough_allowance_mm is not None
+    assert combined_removal.constraints.edge_treatment.finish_allowance_mm is not None
+    total_rough_offset = kerf_offset + combined_removal.constraints.edge_treatment.rough_allowance_mm
+    total_finish_offset = kerf_offset + combined_removal.constraints.edge_treatment.finish_allowance_mm
 
     assert total_rough_offset > kerf_offset
     assert total_finish_offset > kerf_offset

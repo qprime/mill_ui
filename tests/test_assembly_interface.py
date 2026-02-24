@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
@@ -85,7 +87,7 @@ class TestInterfaceTypeValidation:
 
 class TestAssemblyValidation:
     def test_validates_unknown_panel_a(self):
-        panels = {
+        panels: dict[str, Any] = {
             "front": PanelSpec("front", 100, 50, 6),
         }
         interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "front", "right", Butt()),)
@@ -94,7 +96,7 @@ class TestAssemblyValidation:
             assembly.validate()
 
     def test_validates_unknown_panel_b(self):
-        panels = {
+        panels: dict[str, Any] = {
             "front": PanelSpec("front", 100, 50, 6),
         }
         interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "nonexistent", "right", Butt()),)
@@ -103,7 +105,7 @@ class TestAssemblyValidation:
             assembly.validate()
 
     def test_validates_interface_joinery_compatibility(self):
-        panels = {
+        panels: dict[str, Any] = {
             "shelf": PanelSpec("shelf", 100, 50, 6, role=PanelRole.SHELF),
             "partition": PanelSpec("partition", 50, 80, 6, role=PanelRole.PARTITION),
         }

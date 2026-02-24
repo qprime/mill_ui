@@ -76,7 +76,7 @@ def test_part_spec_immutable():
     print("Running test_part_spec_immutable...")
     part = PartSpec(name="door", width_mm=100, height_mm=100)
     try:
-        part.width_mm = 200
+        part.width_mm = 200  # type: ignore[misc]
         raise AssertionError("Should have raised AttributeError")
     except AttributeError:
         pass

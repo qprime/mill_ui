@@ -151,7 +151,7 @@ class TestRemovalIntentTypedFields:
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
         )
         defaults.update(kwargs)
-        return RemovalIntent(**defaults)
+        return RemovalIntent(**defaults)  # type: ignore[arg-type]
 
     def test_hint_type_field(self):
         intent = self._base_intent(hint_type="profile")

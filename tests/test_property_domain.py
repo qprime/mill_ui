@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from shapely.geometry.base import BaseGeometry
 
 from domains.domain import Domain, MultiDomain
 
@@ -27,7 +28,7 @@ def test_offset_contains_original_centroid(domain: Domain, offset: float) -> Non
         return
     cx, cy = domain.centroid
     centroid_point = Point(cx, cy)
-    combined_poly = expanded.domains[0].polygon
+    combined_poly: BaseGeometry = expanded.domains[0].polygon
     for d in expanded.domains[1:]:
         combined_poly = combined_poly.union(d.polygon)
     assert combined_poly.contains(centroid_point), f"Offset domain does not contain original centroid {domain.centroid}"

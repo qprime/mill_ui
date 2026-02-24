@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from cam.moves import CutMove, RapidMove, SetRpmMove
+from cam.moves import CutMove, Move, RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.planner.capabilities import (
     PLANNER_CAPABILITIES,
@@ -156,7 +156,7 @@ class TestToolpathKeepoutVerification:
         assert result.keepout_violations[0].keepout_reason == "clamp2"
 
     def test_moves_without_xy_ignored(self):
-        moves = [
+        moves: list[Move] = [
             SetRpmMove(rpm=10000),
             RapidMove(z=5),
             CutMove(x=55, y=55, z=-5),

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -20,7 +20,7 @@ JoinStyle = Literal["mitre", "round", "bevel"]
 
 
 def _normalize_boundary(
-    coords: list[list[float]] | list[tuple[float, float]] | tuple[tuple[float, ...], ...] | tuple[Point2D, ...],
+    coords: Sequence[tuple[float, float]] | Sequence[tuple[int, int]] | list[list[float]] | tuple[tuple[float, ...], ...],
 ) -> tuple[Point2D, ...]:
     result = []
     for point in coords:
@@ -685,8 +685,8 @@ class Domain:
     @classmethod
     def from_polygon(
         cls,
-        vertices: list[Point2D] | tuple[Point2D, ...],
-        holes: list[list[Point2D]] | None = None,
+        vertices: Sequence[tuple[float, float]] | Sequence[tuple[int, int]],
+        holes: list[list[Point2D]] | list[list[tuple[int, int]]] | None = None,
         local_origin: Point2D | None = None,
         local_rotation_rad: float = 0.0,
     ) -> Domain:

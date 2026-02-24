@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from typing import Any
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -298,7 +299,7 @@ def test_merge_gcode_metrics_single():
         def to_dict(self):
             return {"gcode": {"summary": {"total_lines": 100}}}
 
-    result = _merge_gcode_metrics([MockGCodeMetrics()])
+    result = _merge_gcode_metrics([MockGCodeMetrics()])  # type: ignore[list-item]
     assert result["summary"]["total_lines"] == 100
     print("PASS: test_merge_gcode_metrics_single")
 
@@ -318,7 +319,7 @@ def test_merge_gcode_metrics_sums_counts():
                 }
             }
 
-    metrics_list = [MockGCodeMetrics(100), MockGCodeMetrics(200)]
+    metrics_list: list[Any] = [MockGCodeMetrics(100), MockGCodeMetrics(200)]
     result = _merge_gcode_metrics(metrics_list)
 
     assert result["summary"]["total_lines"] == 300

@@ -34,6 +34,7 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
 
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.is_through
     assert item.feature.side == "outside"
@@ -72,6 +73,7 @@ children:
 
     item = flat.items[0]
 
+    assert item.feature is not None
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm is None
@@ -107,6 +109,7 @@ children:
 
     item = flat.items[0]
 
+    assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.depth_mm == 6.0
     assert item.feature.side == "inside"
@@ -144,6 +147,7 @@ def test_ast_construction_with_tabs():
     )
 
     item = ast.items[0]
+    assert item.feature is not None
     assert item.feature.tab_count == 4
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm == 10.0
@@ -302,6 +306,8 @@ children:
     item1 = flat1.items[0]
     item2 = flat2.items[0]
 
+    assert item1.feature is not None
+    assert item2.feature is not None
     assert item1.feature.tab_count == item2.feature.tab_count
     assert item1.feature.tab_height_mm == item2.feature.tab_height_mm
     assert item1.feature.tab_width_mm == item2.feature.tab_width_mm

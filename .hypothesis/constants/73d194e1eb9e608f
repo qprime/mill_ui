@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/core/__init__.py
-# hypothesis_version: 6.151.9
-
-['DepthMode', 'FeatureType', 'GeometryKeys', 'HintKeys', 'MetadataKeys', 'ShapeType', 'Side', 'TabKeys', 'compute_shape_bounds']

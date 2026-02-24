@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/domains/domain.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-10, 1.0, 5.0, '_polygon', 'area_mm2', 'bevel', 'bounds', 'centroid', 'computed', 'count', 'domain', 'domains', 'inner_boundaries', 'local_origin', 'local_rotation_rad', 'mitre', 'multi_domain', 'outer_boundary', 'round', 'x_max', 'x_min', 'y_max', 'y_min']

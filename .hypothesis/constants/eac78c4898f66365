@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/assembly/__init__.py
-# hypothesis_version: 6.151.9
-
-['Assembly', 'BeamRole', 'BeamSpec', 'Butt', 'Captured', 'CarvedDesign', 'Chamfer', 'Cutout', 'DadoSpec', 'DrillHole', 'Edge', 'EdgeContour', 'EdgeDado', 'EdgeFeature', 'EdgeName', 'EdgeNotch', 'EndCap', 'EndFeature', 'EndProfile', 'FaceFeature', 'Fillet', 'Finger', 'GeometricPattern', 'HalfLap', 'Interface', 'InterfaceType', 'JoineryStrategy', 'LayerSpec', 'LayoutConfig', 'MachiningStage', 'MemberSpec', 'NotchSpec', 'PanelRole', 'PanelSpec', 'PlacedPanel', 'Rabbet', 'RemovalKind', 'Segment', 'SquareMortise', 'Tenon', 'apron', 'box', 'carcass', 'chamfered_post', 'compute_segments', 'cubby', 'filleted_leg', 'layout_panels', 'leg', 'notch_to_polyline', 'panels_to_layout_ast', 'post', 'rail']

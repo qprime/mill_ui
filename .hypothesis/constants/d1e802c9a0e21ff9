@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/native/core.py
-# hypothesis_version: 6.151.9
-
-[-2.0, -1.25, 0.0, 0.01, 1.0, 1.25, 2.0, 5.0, 100, 'comment', 'cut', 'depth', 'diameter', 'feed', 'footer', 'header', 'holes', 'kind', 'mm', 'outer', 'points', 'prec', 'rapid', 'retract', 'rpm', 'safe_z', 'set_feed', 'set_rpm', 'text', 'unit', 'x', 'y', 'z']

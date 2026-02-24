@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/assembly/beam.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-06, 0.1, 1.0, 2.0, 45.0, 'BeamRole', 'BeamSpec', 'CarvedDesign', 'Chamfer', 'Cutout', 'DrillHole', 'EdgeContour', 'EdgeDado', 'EdgeFeature', 'EdgeNotch', 'EndCap', 'EndFeature', 'EndProfile', 'FaceFeature', 'Fillet', 'GeometricPattern', 'LayerSpec', 'MachiningStage', 'Rabbet', 'Segment', 'SquareMortise', 'Tenon', 'all', 'back', 'bottom', 'center', 'compute_segments', 'front', 'left', 'outer', 'right', 'segment', 'strip', 'top']

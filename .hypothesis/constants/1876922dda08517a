@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cli/validate_cam.py
-# hypothesis_version: 6.151.9
-
-[0.1, '  Failed:', '+', '--compact', '--gcode', '--golden', '--metrics-only', '--no-assertions', '--no-regressions', '--output', '--pml', '--quiet', '--recipe', '--summary', '--svg', '--tolerance', '-g', '-o', '-p', '-q', '-r', 'DIR', 'FAIL', 'FILE', 'Metrics extracted:', 'Output options', 'PASS', 'PERCENT', 'SVG file to validate', 'Validation options', 'WARN', '__main__', 'example.pml.yml', 'gcode', 'motion', 'source.pml.yml', 'store_true', 'svg']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/planner/passes/__init__.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.5, 2.0, 3.0, '-', '.00mm', '.nc', 'PassAccumulator', 'PassRecord', 'TabsInput', '_', 'bl', 'br', 'circle', 'count', 'cut_through_mm', 'height_mm', 'inside', 'mm', 'on', 'onion_skin_mm', 'outside', 'plan_passes', 'polygon', 'profile', 'rect', 'roundedrect', 'tabs', 'tl', 'tr', 'width_mm']

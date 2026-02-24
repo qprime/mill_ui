@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/model/machine.py
-# hypothesis_version: 6.151.9
-
-[5.0, 6.0, 800.0, 1000.0, 3000.0, '(begin)', 'G17', 'G20', 'G21', 'G54', 'G90', 'G94', 'default_grbl', 'inch', 'mm']

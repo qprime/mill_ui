@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/grid.py
-# hypothesis_version: 6.151.9
-
-[1.0, 'GridGenerator', 'grid', 'grid_generator', 'h', 'v', 'x_max', 'x_min', 'y_max', 'y_min']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/planner/planner_input.py
-# hypothesis_version: 6.151.9
-
-[0.0, 3.0, 3.175, 6.0, 10.0, 'Rect', 'center_xy_mm', 'corner_cleanups', 'corners', 'count', 'depth_mm', 'diameter_mm', 'end', 'engraves', 'geometry', 'h_mm', 'height_mm', 'holes', 'id', 'keepout', 'keepouts', 'kerf_width_mm', 'min_channel_width_mm', 'mm', 'pocket_id', 'pockets', 'points', 'profiles', 'radius_bl_mm', 'radius_br_mm', 'radius_mm', 'radius_tl_mm', 'radius_tr_mm', 'reason', 'shape', 'side', 'start', 'start_depth_mm', 'tabs', 'units', 'w_mm', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/svg/parser.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-10, 0.1, 1.0, ' \t\n\r,', '-inf', './/path', './/svg:path', 'A', 'C', 'H', 'L', 'M', 'Polyline', 'Q', 'S', 'SVGParseError', 'T', 'V', 'Z', 'center_polylines', 'd', 'inf', 'l', 'm', 'normalize_polylines', 'parse_svg_file', 'parse_svg_path', 'polylines_bounds', 'scale_polylines', 'svg', 'translate_polylines']

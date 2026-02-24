@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/templates/loader.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'clear_template_cache', 'expand_template', 'find_template_file', 'load_pml_template', 'outer_h', 'outer_w']

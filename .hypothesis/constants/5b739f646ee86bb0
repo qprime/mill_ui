@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/utils.py
-# hypothesis_version: 6.151.9
-
-[0.001, 0.5, 'Line', 'LocalBounds', 'Polygon', 'all_loops', 'create_line_item', 'end', 'engrave', 'extract_loops', 'geoms', 'get_local_bounds', 'holes', 'inner_only', 'is_major_tick', 'iter_polygons', 'loop_type_suffix', 'outer', 'outer_only', 'points', 'shape', 'shapely_to_item', 'start', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min']

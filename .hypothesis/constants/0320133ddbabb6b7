@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/config.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.1, 0.25, 0.55, 1.0, 5.0, 10.0, '0', '1', 'CAM_', 'CLEANUP_OFFSET_MM', 'COLINEAR_EPS', 'Config', 'DEFAULT_MARGIN', 'MATERIAL', 'MDF', 'MERGE_EPS', 'MIN_OVERLAP_MM', 'MIN_OVERLAP_RATIO', 'PROJECT_ROOT', 'SAFE_Z', 'TOOL_DB', 'Z_REF', 'bottom', 'cam', 'cam_projects', 'cleanup_offset_mm', 'colinear_epsilon_deg', 'config.json', 'default_margin_mm', 'false', 'find_config_file', 'load_config', 'material_name', 'memories', 'merge_epsilon_mm', 'min_overlap_mm', 'min_overlap_ratio', 'no', 'off', 'on', 'project_root', 'r', 'safe_z_mm', 'sheet_layouts', 'tolerances', 'tool_db.json', 'tool_db_path', 'tools', 'top', 'true', 'utf-8', 'yes', 'z_reference']

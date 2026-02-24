@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/primitives.py
-# hypothesis_version: 6.151.9
-
-[0.0, 2.0, 'bl', 'br', 'radius_mm', 'tl', 'tr']

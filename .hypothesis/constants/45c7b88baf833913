@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/nesting/maxrects.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.1, 'FreeRect', 'MaxRectsHeuristic', 'PlacementResult', 'baf', 'blsf', 'bssf', 'cp', 'inf', 'maxrects_pack']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/domains/__init__.py
-# hypothesis_version: 6.151.9
-
-['Boundary', 'Bounds2D', 'Domain', 'JoinStyle', 'MultiDomain', 'Point2D', 'compose_transforms', 'get_rotation_between', 'local_to_sheet', 'local_to_sheet_batch', 'sheet_to_local', 'sheet_to_local_batch', 'transform_boundary']

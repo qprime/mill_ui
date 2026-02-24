@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/diagram_ir/dimensions.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-06, 0.1, 1.0, 2.0, 15.0, 20.0, 40.0, 100.0, 'Circle', 'DimensionPlacement', 'DimensionRequest', 'Orientation', 'PlacedDimension', 'Polygon', 'Rect', 'RoundedRect', 'diameter_mm', 'h_mm', 'height', 'hole', 'horizontal', 'place_on_rails', 'points', 'profile', 'radius_mm', 'shape', 'shape_relative', 'sheet_edge', 'vertical', 'w_mm', 'width']

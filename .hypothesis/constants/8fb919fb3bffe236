@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/validation/regression/comparator.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.01, 0.1, 1.0, 2.0, 100.0, 100, '.', 'Exact match', '[', ']', '_count', '_names', '_time_s', '_used', 'area', 'bounds', 'center', 'count', 'default', 'dimensions', 'distance', 'gcode.version', 'golden.', 'height', 'is_', 'length', 'max_plunge', 'max_single_plunge', 'position', 'radii', 'safe_z', 'surface_area', 'svg.circles.count', 'svg.layers.count', 'svg.layers.names', 'svg.paths.open_count', 'svg.rects.count', 'svg.version', 'thickness', 'time', 'time_', 'to_dict', 'total_feed', 'total_rapid', 'unique_', 'volume', 'width', 'x_max', 'x_min', 'y_max', 'y_min', 'z_max', 'z_min']

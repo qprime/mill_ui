@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/validation/core.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.01, '1.0.0', '; ', 'All checks passed', 'Failures detected', 'Warnings detected', 'actual', 'artifact', 'assertion', 'assertions', 'category', 'checked', 'compared', 'current_value', 'delta', 'delta_percent', 'description', 'details', 'error_count', 'exceeded_tolerance', 'execution_time_ms', 'expected', 'fail', 'failed', 'failures', 'golden_file', 'golden_value', 'id', 'input_file', 'intent', 'invariant', 'invariants', 'ir', 'message', 'metric_path', 'metrics', 'pass', 'passed', 'regression', 'regressions', 'removal_intent', 'results', 'source', 'status', 'suggestion_count', 'summary', 'timestamp', 'tolerance', 'tolerance_percent', 'total', 'validation_result', 'verdict', 'verdict_reason', 'version', 'warn', 'warned', 'warning_count', 'within_tolerance']

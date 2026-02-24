@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/ops/pocket_region.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 0.1, 0.5, 3.0, 'center_xy_mm', 'geometry', 'h_mm', 'holes', 'outer', 'rect', 'type', 'w_mm']

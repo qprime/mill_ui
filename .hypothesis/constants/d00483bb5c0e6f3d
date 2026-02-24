@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/line_pattern.py
-# hypothesis_version: 6.151.9
-
-[0.01, 1.0, 'LinePatternGenerator', 'line_pattern', 'pocket', 'x_max', 'x_min', 'y_max', 'y_min']

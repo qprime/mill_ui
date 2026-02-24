@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/validation/invariants/svg_invariants.py
-# hypothesis_version: 6.151.9
-
-[0.01, 0.1, 0.5, 'DIMENSIONS', 'M', 'POCKET_REGIONS', 'PROFILE_CUTS', 'Pocket', 'Profile', 'SHEET_OUTLINE', 'SVG_CLOSED_POCKETS', 'SVG_CLOSED_PROFILES', 'SVG_HAS_VIEWBOX', 'SVG_METRICS_ERROR', 'SVG_NO_EMPTY_LAYERS', 'SVG_PATHS_VALID', 'SVG_VALID_XML', 'Width and height > 0', 'Z', '[\\s,]+', 'bounds', 'circle', 'd', 'dimension_labels', 'ellipse', 'error', 'height_mm', 'id', 'note', 'points', 'polygon', 'rect', 'structural', 'svg', 'utf-8', 'viewBox', 'viewbox', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min']

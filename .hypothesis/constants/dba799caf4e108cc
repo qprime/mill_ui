@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/assembly/beam_primitives.py
-# hypothesis_version: 6.151.9
-
-[3.0, 6.0, 19.0, 'apron', 'bottom', 'chamfered_post', 'filleted_leg', 'leg', 'post', 'rail', 'top']

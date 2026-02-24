@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/pml/formatter.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'Circle', 'Rect', 'RoundedRect', 'corner_radius_mm', 'diameter_mm', 'h_mm', 'pocket', 'profile', 'radius_mm', 'shape', 'unnamed', 'w_mm']

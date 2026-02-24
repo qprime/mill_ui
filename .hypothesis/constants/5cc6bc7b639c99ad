@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/validation/regression/__init__.py
-# hypothesis_version: 6.151.9
-
-['ComparisonConfig', 'DEFAULT_TOLERANCES', 'EXACT_MATCH_PATHS', 'EXCLUDED_PATHS', 'GoldenEntry', 'GoldenIndex', 'GoldenStore', 'compare_metrics']

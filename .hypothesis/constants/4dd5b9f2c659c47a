@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/layout_ast/compositional.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.1, 0.12, 0.3, 0.5, 1.0, 3.0, 4.0, 6.0, 10.0, 'a', 'between_sides', 'butt', 'captured', 'center', 'finger', 'half_lap', 'horizontal', 'largest', 'left', 'metric', 'open', 'rectangular', 'rowmans']

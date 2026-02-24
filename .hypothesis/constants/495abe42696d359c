@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/assembly/layout.py
-# hypothesis_version: 6.151.9
-
-[0.0, 10.0, 'LayoutConfig', 'PlacedPanel', 'layout_panels', 'panels_to_layout_ast']

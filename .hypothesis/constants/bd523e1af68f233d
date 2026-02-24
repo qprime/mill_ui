@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/hole_grid.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'Circle', 'HoleGridGenerator', 'center', 'diameter_mm', 'hexagonal', 'hole', 'hole_grid_generator', 'offset', 'shape', 'x_max', 'x_min', 'y_max', 'y_min']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/config/machine_loader.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.001, 2.0, 5.0, 500.0, 1500.0, '*.yml', 'CNCMachine2D', 'Endmill', 'MachineConfig', 'MachineDefaults', 'Spindle', 'Wasteboard2D', 'bottom', 'cnc', 'defaults', 'diameter_mm', 'endmills', 'envelope', 'feed_rate_mm_min', 'flute_length_mm', 'flutes', 'get_machines_dir', 'height_mm', 'left', 'load_cnc_machine', 'load_endmills', 'load_machine_by_name', 'load_spindles', 'machines', 'name', 'offset_x', 'offset_y', 'plunge_rate_mm_min', 'right', 'rpm_max', 'rpm_min', 'safe', 'safe_z_mm', 'shank_diameter_mm', 'spindles', 'top', 'type', 'unknown', 'v_angle_deg', 'wasteboard', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/diagram_ir/shapes.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'Circle', 'Line', 'Path', 'Point2D', 'Polyline', 'Rect', 'Shape', 'Text', 'default', 'middle']

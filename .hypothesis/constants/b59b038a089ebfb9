@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/core/constants.py
-# hypothesis_version: 6.151.9
-
-[2.0, 'Circle', 'Line', 'Polygon', 'Polyline', 'Rect', 'Rectangle', 'RoundedRect', 'angle_deg', 'bevel', 'center_xy_mm', 'chamfer', 'circle', 'corner_cleanups', 'corners', 'count', 'depth_mm', 'diameter_mm', 'distance_mm', 'edge_treatment', 'engrave', 'engraves', 'feature_type', 'finish_allowance_mm', 'geometry', 'h_mm', 'half', 'height_mm', 'hint_type', 'hole', 'holes', 'id', 'inner_depth_mm', 'inside', 'islands', 'item_type', 'keepouts', 'kerf_width_mm', 'line', 'min_channel_width_mm', 'on', 'original_id', 'outside', 'pocket', 'pocket_id', 'pockets', 'points', 'polygon', 'polyline', 'profile', 'profiles', 'radius_bl_mm', 'radius_br_mm', 'radius_mm', 'radius_tl_mm', 'radius_tr_mm', 'rect', 'rectangle', 'rough_allowance_mm', 'shape', 'shape_id', 'side', 'start_depth_mm', 'tabs', 'through', 'type', 'units', 'w_mm', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min']

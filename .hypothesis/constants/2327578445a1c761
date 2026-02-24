@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/measurement_grid.py
-# hypothesis_version: 6.151.9
-
-[0.001, 0.8, 1.0, 'bottom', 'center', 'horizontal', 'left', 'measurement_grid', 'right', 'top', 'vertical', 'x_max', 'x_min', 'y_max', 'y_min']

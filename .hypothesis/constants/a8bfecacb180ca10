@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/assembly/core.py
-# hypothesis_version: 6.151.9
-
-[2440.0, 'Assembly', 'BeamSpec', 'EdgeName', 'Interface', 'InterfaceType', 'MemberSpec', 'PanelSpec', 'RemovalKind', '_L0', '_L0_', 'bottom', 'left', 'right', 'top']

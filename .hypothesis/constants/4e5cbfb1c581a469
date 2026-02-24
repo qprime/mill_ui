@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/pml/nest_parser.py
-# hypothesis_version: 6.151.9
-
-[6.35, 10.0, 'NestJob', 'NestParseError', 'NestPart', 'algorithm', 'height_mm', 'kerf_mm', 'margin_mm', 'name', 'parts', 'quantity', 'sheet_height_mm', 'sheet_thickness_mm', 'sheet_width_mm', 'template', 'template_params', 'width_mm']

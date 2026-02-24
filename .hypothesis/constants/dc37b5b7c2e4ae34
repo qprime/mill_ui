@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/core.py
-# hypothesis_version: 6.151.9
-
-[0.01, 1.0, 10.0, 25.4, 'BaseParams', 'Generator', 'GeneratorResult', 'LoopSelection', '_', 'all_loops', 'generate_shape_id', 'generated', 'imperial', 'inner_only', 'metric', 'outer_only']

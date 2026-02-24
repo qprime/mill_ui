@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/svg/stamp.py
-# hypothesis_version: 6.151.9
-
-[1e-10, 0.01, 'Polygon', 'Polyline', 'fill', 'fit', 'offset_x', 'offset_y', 'on', 'pocket', 'points', 'profile', 'scale_x', 'scale_y', 'shape', 'svg', 'svg_stamp_generator']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/pipeline.py
-# hypothesis_version: 6.151.9
-
-[0.0, 2.0, 3.175, 6.0, 6.35, 9.525, 12.0, 250, 280, 300, 700, 800, 900, 1000, 10000, 12000, 14000, '1_4_endmill', '1_8_endmill', '3_8_endmill', 'MDF', 'back', 'build', 'bytes', 'complexity', 'constraint_audit', 'count', 'cut_moves', 'dark', 'default_grbl', 'diameter', 'fail', 'feed_xy', 'feed_z', 'fidelity', 'files', 'flat', 'gcode_ms', 'hints_ms', 'ir_ms', 'kind', 'lines', 'metrics', 'metrics.json', 'move_count', 'name', 'output_size', 'passes', 'plan_ms', 'rapid_moves', 'rapid_ratio', 'rpm', 'safety_critical', 'status', 'svg', 'svg_ms', 'timestamp', 'timing', 'tool_changes', 'tool_diameter_mm', 'total_bytes', 'total_lines', 'total_moves', 'total_ms', 'utf-8', 'warn']

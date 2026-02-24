@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/loop/chamfer.py
-# hypothesis_version: 6.151.9
-
-[0.01, 'ChamferGenerator', 'Polygon', 'chamfer', 'chamfer_angle_deg', 'chamfer_generator', 'chamfer_width_mm', 'depth_mm', 'inside', 'outside', 'points', 'shape', 'side', 'type']

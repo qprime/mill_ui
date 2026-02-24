@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/nesting/sheet_packer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'DEFAULT_ALGORITHM', 'PackingAlgorithm', 'guillotine', 'maxrects', 'pack_sheets']

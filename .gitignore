@@ -32,6 +32,7 @@ build_*.log
 .coverage
 htmlcov/
 coverage.xml
+.hypothesis/
 
 # Mutation testing
 .mutmut-cache/

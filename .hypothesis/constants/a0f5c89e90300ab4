@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/planner/passes/profile.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 0.1, 1.0, 2.0, 3.0, 'circle_shape_mm', 'count', 'exterior', 'height_mm', 'mitre', 'offset_circle_shape', 'offset_polygon_shape', 'offset_rect_shape', 'polygon_shape', 'rect_shape', 'rounded_rect_shape', 'width_mm']

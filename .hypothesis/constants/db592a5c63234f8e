@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/ops/bore.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 1e-06, 0.1, 0.25, 0.5, 2.0, 2.5, 3.0]

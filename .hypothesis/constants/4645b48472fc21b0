@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/raised_panel.py
-# hypothesis_version: 6.151.9
-
-[1.0, 'Polygon', 'RaisedPanelGenerator', 'bevel', 'border', 'field', 'holes', 'pocket', 'points', 'raised_panel', 'shape']

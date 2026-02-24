@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/layout_ast/parsers.py
-# hypothesis_version: 6.151.9
-
-[0.0, 'bevel_angle_deg', 'bevel_inner_depth_mm', 'bevel_width_mm', 'cam', 'center_xy_mm', 'chamfer_angle_deg', 'chamfer_width_mm', 'config', 'depth', 'depth_mm', 'feature', 'geometry', 'height_mm', 'id', 'items', 'kerf_width_mm', 'kind', 'layout', 'margin_mm', 'params', 'placement', 'project', 'r', 'shape', 'shape_id', 'sheet', 'show_dimensions', 'side', 'tab_count', 'tab_height_mm', 'tab_width_mm', 'template', 'thickness_mm', 'type', 'utf-8', 'width_mm']

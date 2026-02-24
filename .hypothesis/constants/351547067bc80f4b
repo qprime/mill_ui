@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/pml/measurement_fields.py
-# hypothesis_version: 6.151.9
-
-[3.0, 6.0, '3mm', '6mm', 'depth', 'label_height', 'label_height_mm', 'label_interval', 'label_offset', 'label_offset_mm', 'label_start', 'labels', 'major_length', 'major_length_mm', 'major_spacing', 'major_spacing_mm', 'metric', 'minor_length', 'minor_length_mm', 'minor_spacing', 'minor_spacing_mm', 'minor_ticks', 'unit']

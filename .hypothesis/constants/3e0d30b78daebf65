@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/loop/bead.py
-# hypothesis_version: 6.151.9
-
-[0.01, 1.0, 'BeadGenerator', 'MultiPolygon', 'Polygon', 'bead', 'bead_generator', 'engrave', 'points', 'shape', 'width_mm']

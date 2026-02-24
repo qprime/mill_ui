@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/generators/area/__init__.py
-# hypothesis_version: 6.151.9
-
-['grid_generator', 'grid_lines_generator', 'hole_grid_generator', 'wave_generator', 'x_panel_generator']

@@ -1,4 +1,0 @@
-# file: /home/squinlan/Code/mill_ui/cam/planner/capabilities.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.1, 5.0, ' [ERROR]', ' [warning]', 'Constraint Audit:', 'Profiles only', 'Uses global safe_z', 'allowance', 'allowance_nonzero', 'bounds', 'constraints.islands', 'constraints.keepouts', 'constraints.tabs', 'depth_profile.z_top', 'edge_treatment', 'honored', 'ignored', 'islands', 'keepouts', 'linear_gradient', 'not_implemented', 'partial', 'safe_z_mm_custom', 'tabs', 'tolerance_mm_custom', 'v_carve', 'validated_only']

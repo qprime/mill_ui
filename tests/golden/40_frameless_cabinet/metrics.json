@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "40_frameless_cabinet",
-    "created_at": "2026-02-24T00:55:44.215499+00:00"
+    "created_at": "2026-02-24T21:26:02.151175+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -462,7 +462,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.4814,
+    "extraction_time_ms": 1.5202,
     "summary": {
       "total_lines": 951,
       "comment_lines": 33,

@@ -28,14 +28,16 @@ class KeepoutInput:
 class TabsInput:
     count: int
     height_mm: float
-    width_mm: float
+    width_mm: float | None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "count": self.count,
             "height_mm": self.height_mm,
-            "width_mm": self.width_mm,
         }
+        if self.width_mm is not None:
+            result["width_mm"] = self.width_mm
+        return result
 
 
 @dataclass(frozen=True)
@@ -169,10 +171,11 @@ class PlannerInput:
         def parse_tabs(t: dict[str, Any] | None) -> TabsInput | None:
             if t is None:
                 return None
+            raw_width = t.get("width_mm")
             return TabsInput(
                 count=int(t.get("count", 0)),
                 height_mm=float(t.get("height_mm", 3.0)),
-                width_mm=float(t.get("width_mm", 10.0)),
+                width_mm=float(raw_width) if raw_width is not None else None,
             )
 
         def parse_geometry(g: dict[str, Any], shape: str) -> GeometryInput:

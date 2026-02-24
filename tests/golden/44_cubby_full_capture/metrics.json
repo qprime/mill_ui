@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "44_cubby_full_capture",
-    "created_at": "2026-02-24T00:55:44.628463+00:00"
+    "created_at": "2026-02-24T21:26:02.560383+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.48,
+    "extraction_time_ms": 1.45,
     "document": {
       "width_mm": 2183.175,
       "height_mm": 1789.175,
@@ -754,7 +754,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 32.6743,
+    "extraction_time_ms": 31.9546,
     "summary": {
       "total_lines": 10967,
       "comment_lines": 80,

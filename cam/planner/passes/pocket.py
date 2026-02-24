@@ -99,6 +99,28 @@ def plan_pocket_passes(
                 stepdown_mm=step_down,
             )
             record.add_moves(offset_moves_z(moves, start_depth), increment=1)
+        elif shape_name == "polygon":
+            pts = sg.points or ()
+            if not pts:
+                continue
+            xs = [float(p[0]) for p in pts]
+            ys = [float(p[1]) for p in pts]
+            width = max(xs) - min(xs)
+            height = max(ys) - min(ys)
+            shape = rect_shape(width, height, center)
+            record.add_moves(
+                pocket_then_finish_profile(
+                    shape,
+                    setup,
+                    total_depth_mm=depth,
+                    stepover_mm=step_over,
+                    step_down_mm=step_down,
+                    cleanup_offset_mm=config.cleanup_offset_mm,
+                    start_depth_mm=start_depth,
+                    finish_perimeter=config.pocket_finish_perimeter,
+                ),
+                increment=1,
+            )
         else:
             continue
 

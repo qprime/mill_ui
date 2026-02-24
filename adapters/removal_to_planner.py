@@ -81,7 +81,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
     tabs: TabsInput | None = None
     if intent.constraints.tabs is not None:
         t = intent.constraints.tabs
-        tabs = TabsInput(count=t.count, height_mm=t.height_mm, width_mm=t.width_mm if t.width_mm is not None else 10.0)
+        tabs = TabsInput(count=t.count, height_mm=t.height_mm, width_mm=t.width_mm)
 
     keepouts = tuple(
         KeepoutInput(

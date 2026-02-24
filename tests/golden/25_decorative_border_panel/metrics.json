@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-02-24T00:55:43.447490+00:00"
+    "created_at": "2026-02-24T21:26:01.193352+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.4,
+    "extraction_time_ms": 0.37,
     "document": {
       "width_mm": 503.175,
       "height_mm": 593.175,
@@ -265,22 +265,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.064,
+    "extraction_time_ms": 5.0212,
     "summary": {
-      "total_lines": 269,
-      "comment_lines": 8,
-      "motion_lines": 195,
+      "total_lines": 1808,
+      "comment_lines": 20,
+      "motion_lines": 1415,
       "tool_change_lines": 0,
-      "spindle_lines": 4,
-      "feed_lines": 145
+      "spindle_lines": 6,
+      "feed_lines": 1064
     },
     "motion": {
-      "g0_count": 99,
-      "g1_count": 96,
+      "g0_count": 704,
+      "g1_count": 711,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 20113.6441,
-      "total_feed_distance_mm": 19983.104
+      "total_rapid_distance_mm": 24872.9758,
+      "total_feed_distance_mm": 110845.522
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -297,9 +297,10 @@
         -6.35,
         -4.762,
         -3.175,
+        -2.0,
         -1.587
       ],
-      "depth_count": 12,
+      "depth_count": 13,
       "max_single_plunge_mm": 25.0
     },
     "xy_bounds": {
@@ -309,10 +310,12 @@
       "y_max": 451.587
     },
     "feeds": {
-      "min_feed_rate": 0.0,
+      "min_feed_rate": 250.0,
       "max_feed_rate": 900.0,
       "feed_rates_used": [
+        250.0,
         300.0,
+        700.0,
         900.0
       ]
     },
@@ -320,20 +323,34 @@
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
+        10000,
         14000
       ]
     },
     "operations": {
-      "profile_passes": 0,
-      "pocket_passes": 0,
+      "profile_passes": 6,
+      "pocket_passes": 6,
       "bore_passes": 0,
-      "total_passes": 0,
-      "operation_names": []
+      "total_passes": 12,
+      "operation_names": [
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=2.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=2.000",
+        "BEGIN finish profile pass",
+        "profile_outline",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
+        "pocket_raster so=3.810 sd=3.000 depth=2.000",
+        "BEGIN finish profile pass",
+        "profile_outline"
+      ]
     },
     "time_estimate": {
-      "rapid_time_s": 241.3637,
-      "feed_time_s": 1998.3104,
-      "total_time_s": 2239.6741
+      "rapid_time_s": 298.47569999999996,
+      "feed_time_s": 13475.6685,
+      "total_time_s": 13774.1441
     },
     "tabs": {
       "detected_count": 0,

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "39_box_bottom_styles",
-    "created_at": "2026-02-24T00:55:44.138625+00:00"
+    "created_at": "2026-02-24T21:26:02.074134+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.55,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 1373.175,
       "height_mm": 1023.175,
@@ -422,7 +422,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.573,
+    "extraction_time_ms": 0.5766,
     "summary": {
       "total_lines": 865,
       "comment_lines": 25,

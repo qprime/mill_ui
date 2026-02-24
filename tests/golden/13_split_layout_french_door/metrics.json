@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "13_split_layout_french_door",
-    "created_at": "2026-02-24T00:55:42.202783+00:00"
+    "created_at": "2026-02-24T21:25:59.910300+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -312,7 +312,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 10.0949,
+    "extraction_time_ms": 9.8957,
     "summary": {
       "total_lines": 3312,
       "comment_lines": 24,

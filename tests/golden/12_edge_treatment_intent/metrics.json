@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-02-24T00:55:42.162661+00:00"
+    "created_at": "2026-02-24T21:25:59.870688+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -204,7 +204,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.754,
+    "extraction_time_ms": 1.7412,
     "summary": {
       "total_lines": 534,
       "comment_lines": 6,

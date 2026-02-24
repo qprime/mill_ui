@@ -46,8 +46,11 @@ def _finger_joints_to_notches(
     if width_mm is None and count is None:
         raise ValueError("Specify at least one of width_mm or count")
 
-    assert width_mm is not None
-    n = count if count is not None else round(edge_length / width_mm)
+    if count is not None:
+        n = count
+    else:
+        assert width_mm is not None
+        n = round(edge_length / width_mm)
 
     n = max(3, n)
     if n % 2 == 0:

@@ -13,5 +13,7 @@ repos:
           - types-shapely
           - hypothesis>=6.0
           - pytest>=9.0
+          - ruamel.yaml>=0.19
+          - mcp[cli]>=1.25
         pass_filenames: false
         args: [.]

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "14_corner_cleanup_multi_tool",
-    "created_at": "2026-02-11T20:11:08.787371+00:00"
+    "created_at": "2026-02-24T00:55:42.246694+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.29,
+    "extraction_time_ms": 0.3,
     "document": {
       "width_mm": 603.175,
       "height_mm": 829.175,
@@ -256,7 +256,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.0417,
+    "extraction_time_ms": 7.2158,
     "summary": {
       "total_lines": 3380,
       "comment_lines": 22,

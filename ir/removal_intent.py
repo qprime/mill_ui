@@ -21,14 +21,6 @@ class ChamferSpec:
 
 
 @dataclass(frozen=True)
-class WaveSpec:
-    wave_count: int
-    amplitude_mm: float
-    wavelength_mm: float
-    groove_width_mm: float
-
-
-@dataclass(frozen=True)
 class ShapeGeometry:
     w_mm: float | None = None
     h_mm: float | None = None
@@ -169,7 +161,6 @@ class RemovalIntent:
     corner_cleanup_tool_diameter_mm: float | None = None
     bevel: BevelSpec | None = None
     chamfer: ChamferSpec | None = None
-    wave: WaveSpec | None = None
     item_type: str | None = None
     feature_type: str | None = None
     shape_id: str | None = None
@@ -232,13 +223,6 @@ class RemovalIntent:
             result["chamfer"] = {
                 "width_mm": self.chamfer.width_mm,
                 "angle_deg": self.chamfer.angle_deg,
-            }
-        if self.wave is not None:
-            result["wave"] = {
-                "wave_count": self.wave.wave_count,
-                "amplitude_mm": self.wave.amplitude_mm,
-                "wavelength_mm": self.wave.wavelength_mm,
-                "groove_width_mm": self.wave.groove_width_mm,
             }
         if self.item_type is not None:
             result["item_type"] = self.item_type

@@ -12,7 +12,6 @@ from ir.removal_intent import (
     RemovalIntent,
     BevelSpec,
     ChamferSpec,
-    WaveSpec,
     ShapeGeometry,
 )
 
@@ -128,20 +127,6 @@ def item_to_removal_intent(
             chamfer=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
         )
 
-    elif item.feature.type == FeatureType.WAVE:
-        depth_mm = item.feature.depth_mm or 0.0
-        geometry_data = item.geometry.data if item.geometry else {}
-
-        return _build_edge_feature_intent(
-            hint, item, FeatureType.WAVE, depth_mm,
-            wave=WaveSpec(
-                wave_count=int(geometry_data.get("wave_count") or 0),
-                amplitude_mm=float(geometry_data.get("wave_amplitude_mm") or 0.0),
-                wavelength_mm=float(geometry_data.get("wave_wavelength_mm") or 0.0),
-                groove_width_mm=float(geometry_data.get("wave_groove_width_mm") or 0.0),
-            ),
-        )
-
     else:
         raise ValueError(f"Unknown feature type: {item.feature.type}")
 
@@ -160,7 +145,6 @@ def _build_edge_feature_intent(
     side: str | None = None,
     bevel: BevelSpec | None = None,
     chamfer: ChamferSpec | None = None,
-    wave: WaveSpec | None = None,
 ) -> RemovalIntent:
     shape = hint[HintKeys.SHAPE]
     geometry = hint[HintKeys.GEOMETRY]
@@ -181,7 +165,6 @@ def _build_edge_feature_intent(
         shape_geometry=shape_geometry,
         bevel=bevel,
         chamfer=chamfer,
-        wave=wave,
         allowance=Allowance(),
         constraints=Constraints(),
     )

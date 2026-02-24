@@ -1,18 +1,18 @@
 {
   "timing": {
-    "ir_ms": 0.2,
-    "hints_ms": 0.13,
-    "plan_ms": 0.53,
-    "gcode_ms": 0.61,
-    "svg_ms": 1.57,
-    "total_ms": 3.03
+    "ir_ms": 0.37,
+    "hints_ms": 0.15,
+    "plan_ms": 0.6,
+    "gcode_ms": 0.7,
+    "svg_ms": 1.69,
+    "total_ms": 3.5
   },
   "constraint_audit": {},
   "complexity": {
     "total_moves": 252,
-    "rapid_moves": 0,
-    "cut_moves": 252,
-    "rapid_ratio": 0.0
+    "rapid_moves": 48,
+    "cut_moves": 96,
+    "rapid_ratio": 0.19
   },
   "fidelity": {
     "tool_changes": 2,

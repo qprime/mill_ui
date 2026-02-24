@@ -82,9 +82,6 @@ class FeatureType:
     CHAMFER = "chamfer"
 
 
-    WAVE = "wave"
-
-
 class ShapeType:
 
     RECT = "Rect"

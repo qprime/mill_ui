@@ -6,7 +6,6 @@ import pytest
 from ir.removal_intent import (
     BevelSpec,
     ChamferSpec,
-    WaveSpec,
     ShapeGeometry,
     Bounds2D,
     DepthProfile,
@@ -65,32 +64,6 @@ class TestChamferSpec:
     def test_equality(self):
         a = ChamferSpec(width_mm=3.0, angle_deg=45.0)
         b = ChamferSpec(width_mm=3.0, angle_deg=45.0)
-        assert a == b
-
-
-class TestWaveSpec:
-
-    def test_basic_construction(self):
-        wave = WaveSpec(wave_count=3, amplitude_mm=5.0, wavelength_mm=20.0, groove_width_mm=4.0)
-        assert wave.wave_count == 3
-        assert wave.amplitude_mm == 5.0
-        assert wave.wavelength_mm == 20.0
-        assert wave.groove_width_mm == 4.0
-
-    def test_frozen(self):
-        wave = WaveSpec(wave_count=3, amplitude_mm=5.0, wavelength_mm=20.0, groove_width_mm=4.0)
-        with pytest.raises(dataclasses.FrozenInstanceError):
-            wave.wave_count = 5  # type: ignore[misc]
-
-    def test_replace(self):
-        wave = WaveSpec(wave_count=3, amplitude_mm=5.0, wavelength_mm=20.0, groove_width_mm=4.0)
-        modified = dataclasses.replace(wave, wave_count=5)
-        assert modified.wave_count == 5
-        assert modified.amplitude_mm == 5.0
-
-    def test_equality(self):
-        a = WaveSpec(wave_count=2, amplitude_mm=3.0, wavelength_mm=15.0, groove_width_mm=2.5)
-        b = WaveSpec(wave_count=2, amplitude_mm=3.0, wavelength_mm=15.0, groove_width_mm=2.5)
         assert a == b
 
 
@@ -220,12 +193,6 @@ class TestRemovalIntentTypedFields:
         assert intent.chamfer is not None
         assert intent.chamfer.width_mm == 4.0
 
-    def test_wave_field(self):
-        wave = WaveSpec(wave_count=4, amplitude_mm=6.0, wavelength_mm=25.0, groove_width_mm=5.0)
-        intent = self._base_intent(wave=wave)
-        assert intent.wave is not None
-        assert intent.wave.wave_count == 4
-
     def test_item_type_field(self):
         intent = self._base_intent(item_type="Rect")
         assert intent.item_type == "Rect"
@@ -248,7 +215,6 @@ class TestRemovalIntentTypedFields:
         assert intent.corner_cleanup_tool_diameter_mm is None
         assert intent.bevel is None
         assert intent.chamfer is None
-        assert intent.wave is None
         assert intent.item_type is None
         assert intent.feature_type is None
         assert intent.shape_id is None

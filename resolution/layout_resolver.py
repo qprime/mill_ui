@@ -485,7 +485,7 @@ class LayoutResolver:
 
         for child_item in items[items_before:]:
             self._assert_shape_context("RoundedRect", child_item, f"RoundedRect({node.id})")
-            if child_item.type == "RoundedRect" and child_item.feature:
+            if child_item.type == "RoundedRect" and child_item.feature and child_item.geometry:
                 self._assert_geometry_preserved(
                     geometry_data,
                     child_item.geometry.data,
@@ -821,7 +821,7 @@ class LayoutResolver:
 
         part_bounds = []
         for item in items:
-            if item.kind == "shape" and item.geometry:
+            if item.kind == "shape" and item.geometry and item.placement:
                 bounds = compute_shape_bounds_dict(
                     item.type,
                     item.geometry.data,

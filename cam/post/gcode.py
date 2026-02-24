@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any
 from cam.moves import (
     CommentMove,
     CutMove,
-    MotionMove,
     Move,
     RapidMove,
     RetractMove,
@@ -41,9 +40,9 @@ def _move_to_dict(m: Move) -> dict[str, Any]:
 
 
 def _flip_y_in_moves(moves: list[Move], sheet_height: float) -> list[Move]:
-    flipped = []
+    flipped: list[Move] = []
     for move in moves:
-        if isinstance(move, MotionMove) and move.y is not None:
+        if isinstance(move, (RapidMove, CutMove)) and move.y is not None:
             flipped.append(replace(move, y=sheet_height - move.y))
         else:
             flipped.append(move)
@@ -53,7 +52,7 @@ def _flip_y_in_moves(moves: list[Move], sheet_height: float) -> list[Move]:
 def _apply_margin_offset(moves: list[Move], margin_mm: float) -> list[Move]:
     if margin_mm == 0.0:
         return moves
-    offset_moves = []
+    offset_moves: list[Move] = []
     for move in moves:
         if isinstance(move, XYMove):
             kwargs: dict[str, Any] = {}
@@ -69,7 +68,7 @@ def _apply_margin_offset(moves: list[Move], margin_mm: float) -> list[Move]:
 
 def _extract_and_strip_first_rpm(moves: list[Move]) -> tuple[float | None, list[Move]]:
     first_rpm = None
-    result = []
+    result: list[Move] = []
     for move in moves:
         if first_rpm is None and isinstance(move, SetRpmMove):
             first_rpm = move.rpm

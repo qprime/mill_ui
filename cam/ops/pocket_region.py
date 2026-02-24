@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.path.toolpath import move_comment, move_cut, move_rapid, move_retract, move_set_feed, move_set_rpm
 
 
@@ -49,7 +50,7 @@ def pocket_region_rect_raster(
     depth_mm: float,
     stepover_mm: float,
     stepdown_mm: float = 3.0,
-) -> list[dict]:
+) -> list[Move]:
     geom = region.get("geometry") or {}
     outer = geom.get("outer") or {}
     holes = geom.get("holes") or []
@@ -76,7 +77,7 @@ def pocket_region_rect_raster(
     so = max(0.1, float(stepover_mm))
     sd = max(0.1, float(stepdown_mm))
 
-    moves: list[dict] = []
+    moves: list[Move] = []
     moves.append(move_comment(f"pocket_region_rect_raster so={so:.3f} sd={sd:.3f} depth={z_target:.3f}"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))

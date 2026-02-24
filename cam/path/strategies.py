@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.ops.pocket import pocket_raster
 from cam.ops.profile import profile_outline
 from cam.path.toolpath import (
@@ -21,12 +22,12 @@ from cam.transforms import Transform2D, place
 from cam.types import Vec2
 
 
-def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> list[dict]:
+def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> list[Move]:
     pts = shape.points
     if not pts:
         return []
     target_z = -abs(float(depth_mm))
-    m: list[dict] = []
+    m: list[Move] = []
     m.append(move_comment("finish_profile_pass"))
     m.append(move_set_rpm(setup.tool.rpm))
     m.append(move_set_feed(setup.tool.feed_xy))
@@ -48,12 +49,12 @@ def onion_skin_then_finish(
     skin_mm: float = 0.5,
     step_down_mm: float | None = None,
     spring_pass: bool = False,
-) -> list[dict]:
+) -> list[Move]:
     total = abs(float(total_depth_mm))
     skin = max(0.0, float(skin_mm))
     sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
 
-    moves: list[dict] = []
+    moves: list[Move] = []
     if skin <= 0.0:
         moves += profile_outline(shape, setup, depth_mm=total, step_down=sd)
         return moves
@@ -100,7 +101,7 @@ def profile_outline_with_tabs(
     tab_count: int = 4,
     tab_height_mm: float = 3.0,
     tab_width_mm: float | None = None,
-) -> list[dict]:
+) -> list[Move]:
     pts = shape.points
     if not pts:
         return []
@@ -129,7 +130,7 @@ def profile_outline_with_tabs(
     if not tab_windows:
         return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
-    moves: list[dict] = []
+    moves: list[Move] = []
     moves.append(move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
@@ -222,7 +223,7 @@ def pocket_then_finish_profile(
     cleanup_offset_mm: float = 0.25,
     start_depth_mm: float = 0.0,
     finish_perimeter: bool = True,
-) -> list[dict]:
+) -> list[Move]:
 
     xs = [p.x for p in shape.points]
     ys = [p.y for p in shape.points]
@@ -244,7 +245,7 @@ def pocket_then_finish_profile(
     sd = step_down_mm if step_down_mm is not None else stepdown_for(tool_diameter=tool_d, cap_mm=3.0)
     so = stepover_mm if stepover_mm is not None else stepover_for(tool_diameter=tool_d)
 
-    moves: list[dict] = []
+    moves: list[Move] = []
 
     if finish_perimeter:
         shrink = tool_r + float(cleanup_offset_mm)

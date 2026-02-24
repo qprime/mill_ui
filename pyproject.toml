@@ -73,30 +73,18 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 explicit_package_bases = true
 exclude = ["^docs/"]
-
-# Modules not yet cleaned up — remove from this list as each is fixed
-[[tool.mypy.overrides]]
-module = [
-    "tests.*",
-    "cli.*",
-    "mill_mcp.*",
-    "cam.*",
-    "adapters.*",
-    "generators.*",
-    "pml.*",
-    "resolution.*",
-    "diagram_ir.*",
-    "validation.*",
-    "assembly.*",
-    "nesting.*",
-    "diagram_render.*",
-    "config.*",
-    "export.*",
-    "layout_ast.*",
-    "templates.*",
-    "tools.*",
+# Suppress annotation-noise errors codebase-wide; real logic errors are fixed explicitly
+disable_error_code = [
+    "no-untyped-def",   # unannotated function parameters/return types
+    "no-untyped-call",  # calling unannotated functions (cascades from above)
+    "type-arg",         # bare list/dict/tuple without type parameters
+    "no-redef",         # TypedDict / overload redefinitions
 ]
-ignore_errors = true
+
+# cairosvg ships no stubs and no py.typed marker
+[[tool.mypy.overrides]]
+module = ["cairosvg"]
+ignore_missing_imports = true
 
 # Mutation testing (run manually, not in CI):
 #   mutmut run --paths-to-mutate=ir/

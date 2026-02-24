@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.native import core as native_core
 from cam.ops.profile import profile_outline
 from cam.path.toolpath import (
@@ -65,7 +66,7 @@ def pocket_circle_concentric(
     sd = max(0.1, float(stepdown_mm))
     so = max(0.1, float(stepover_mm))
 
-    moves: list[dict] = []
+    moves: list[Move] = []
     moves.append(move_comment(f"pocket_circle_concentric D={D:.3f} tool={tool_d:.3f} so={so:.3f}"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))

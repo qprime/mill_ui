@@ -1,9 +1,10 @@
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.path.toolpath import move_comment, move_cut, move_rapid, move_retract, move_set_feed, move_set_rpm
 
 
-def engrave_lines(lines, setup: Setup, z: float = -0.3):
-    moves = []
+def engrave_lines(lines: list[list[tuple[float, float]]], setup: Setup, z: float = -0.3) -> list[Move]:
+    moves: list[Move] = []
     moves.append(move_comment("engrave_lines"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))

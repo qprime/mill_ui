@@ -168,7 +168,7 @@ def _collect_dimension_requests(
         and item.shape_id is not None
     ]
 
-    shape_items.sort(key=lambda i: (i.feature.type, i.shape_id or "", i.type))
+    shape_items.sort(key=lambda i: (i.feature.type, i.shape_id or "", i.type))  # type: ignore[union-attr]
 
     dimensioned_sizes: set[tuple[str, str, int, int]] = set()
 
@@ -181,6 +181,7 @@ def _collect_dimension_requests(
         h = bounds.y_max - bounds.y_min
 
         if deduplicate:
+            assert item.feature is not None
             size_key = (item.feature.type, item.type, round(w), round(h))
             if size_key in dimensioned_sizes:
                 continue

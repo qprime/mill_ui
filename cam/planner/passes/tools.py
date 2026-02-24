@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from cam.model.tool import Tool
+from cam.model.tool import Tool, ToolKind
 from cam.planner.params import stepdown_for, stepover_for
 
 
@@ -12,7 +12,7 @@ from cam.planner.params import stepdown_for, stepover_for
 class ToolSelection:
     name: str
     diameter: float
-    kind: str
+    kind: ToolKind
     rpm: float
     feed_xy: float
     feed_z: float
@@ -31,11 +31,21 @@ class ToolSelection:
         )
 
 
+_VALID_KINDS: frozenset[ToolKind] = frozenset({"flat", "ball", "v"})
+
+
+def _parse_kind(data: Mapping[str, Any]) -> ToolKind:
+    raw = str(data.get("kind", data.get("type", "flat"))).lower()
+    if raw not in _VALID_KINDS:
+        raise ValueError(f"Unknown tool kind {raw!r}; expected one of {sorted(_VALID_KINDS)}")
+    return raw  # type: ignore[return-value]
+
+
 def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
     return ToolSelection(
         name=str(data.get("name", data.get("tool_id", "tool"))),
         diameter=float(data.get("diameter", data.get("diameter_mm", 0.0))),
-        kind=str(data.get("kind", data.get("type", "flat"))).lower(),
+        kind=_parse_kind(data),
         rpm=float(data.get("rpm", 18000.0)),
         feed_xy=float(data.get("feed_xy", data.get("feed_rate_mm_min", 2000.0))),
         feed_z=float(data.get("feed_z", data.get("plunge_rate_mm_min", 300.0))),

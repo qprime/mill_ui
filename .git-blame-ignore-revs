@@ -1,2 +1,4 @@
 # ruff format + lint — initial codebase tooling (issue #88)
 fa18e0d2aafe3ead479fc9a9d55fdb3abc57b6da
+# ruff format — remaining files (issue #88 step 3)
+6c4c784ad453e06ad5d863fa43a7129a4156c188

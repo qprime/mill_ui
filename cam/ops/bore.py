@@ -34,7 +34,7 @@ def bore_helical(
     depth_mm: float,
     stepdown_mm: float = 2.5,
     segments: int = 60,
-) -> list[dict]:
+) -> list[Move]:
 
     return native_core.bore_helical(
         center_xy,
@@ -55,7 +55,7 @@ def pocket_circle_concentric(
     stepdown_mm: float = 3.0,
     segments: int = 90,
     finish: bool = True,
-) -> list[dict]:
+) -> list[Move]:
     cx, cy = center_xy
     D = float(circle_d_mm)
     tool_d = float(setup.tool.diameter)

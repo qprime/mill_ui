@@ -7,6 +7,7 @@ from shapely.geometry import Polygon
 from shapely.ops import orient
 
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.ops.profile import profile_outline
 from cam.path.strategies import (
     onion_skin_then_finish,
@@ -94,7 +95,7 @@ def profile_moves_with_options(
     tool: ToolSelection,
     onion_skin_mm: float,
     tabs_opts: Mapping[str, Any] | None,
-) -> list[dict[str, Any]]:
+) -> list[Move]:
     step_down = stepdown_for_tool(tool)
 
     tabs = tabs_opts if isinstance(tabs_opts, Mapping) else {}
@@ -138,7 +139,7 @@ def _profile_plain(
     depth_mm: float,
     tool: ToolSelection,
     **_: Any,
-) -> list[dict[str, Any]]:
+) -> list[Move]:
     return profile_outline(shape, setup, depth_mm, step_down=stepdown_for_tool(tool))
 
 

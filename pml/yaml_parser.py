@@ -958,6 +958,7 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
 
 
 __all__ = [
+    "NestParseError",
     "PMLParseError",
     "parse_dimension",
     "parse_nest_yaml",

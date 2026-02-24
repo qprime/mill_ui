@@ -12,6 +12,7 @@ from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.moves import Move, SetRpmMove
 from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
+from cam.shape import Shape2D
 
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
@@ -232,6 +233,7 @@ def plan_passes(
             offset = tool_radius
         elif side == "inside":
             offset = -tool_radius
+        shape: Shape2D | None
         if offset != 0.0:
             shape = offset_polygon_shape(points, rec.center_xy_mm, offset)
         else:
@@ -271,16 +273,17 @@ def plan_passes(
             offset = tool_radius
         elif side == "inside":
             offset = -tool_radius
+        shape_rr: Shape2D | None
         if offset != 0.0:
-            shape = offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, offset)
+            shape_rr = offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, offset)
         else:
-            shape = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
-        if shape is None:
+            shape_rr = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
+        if shape_rr is None:
             continue
         depth = max(0.0, rec.depth_mm) + cut_through_mm
         record.add_moves(
             profile_moves_with_options(
-                shape,
+                shape_rr,
                 setup=record.setup,
                 depth_mm=depth,
                 tool=profile_tool,
@@ -327,7 +330,7 @@ def _normalize_tabs(raw: Any) -> dict[str, float] | None:
         tabs["height_mm"] = 3.0
     if "width_mm" in raw:
         with contextlib.suppress(TypeError, ValueError):
-            tabs["width_mm"] = float(raw.get("width_mm"))
+            tabs["width_mm"] = float(raw.get("width_mm", 0.0))
     return tabs
 
 

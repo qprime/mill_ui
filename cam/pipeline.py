@@ -110,18 +110,18 @@ def run_pipeline(
 
     overlap_result = check_overlap(intents)
     if overlap_result.has_issues():
-        for error in overlap_result.errors:
-            errors.append(error.message)
-        for warning in overlap_result.warnings:
-            warnings.append(warning.message)
+        for issue in overlap_result.errors:
+            errors.append(issue.message)
+        for issue in overlap_result.warnings:
+            warnings.append(issue.message)
 
     for intent in intents:
         depth_result = check_depth_feasibility(intent, ast.sheet.thickness_mm)
         if depth_result.has_issues():
-            for error in depth_result.errors:
-                errors.append(error.message)
-            for warning in depth_result.warnings:
-                warnings.append(warning.message)
+            for issue in depth_result.errors:
+                errors.append(issue.message)
+            for issue in depth_result.warnings:
+                warnings.append(issue.message)
 
     tool_radius = kerf_mm / 2.0
     bounds_result = check_working_area_bounds(
@@ -131,17 +131,17 @@ def run_pipeline(
         tool_radius_mm=tool_radius,
     )
     if bounds_result.has_issues():
-        for error in bounds_result.errors:
-            errors.append(error.message)
-        for warning in bounds_result.warnings:
-            warnings.append(warning.message)
+        for issue in bounds_result.errors:
+            errors.append(issue.message)
+        for issue in bounds_result.warnings:
+            warnings.append(issue.message)
 
     clearance_result = check_toolpath_clearance(intents, kerf_mm)
     if clearance_result.has_issues():
-        for error in clearance_result.errors:
-            errors.append(error.message)
-        for warning in clearance_result.warnings:
-            warnings.append(warning.message)
+        for issue in clearance_result.errors:
+            errors.append(issue.message)
+        for issue in clearance_result.warnings:
+            warnings.append(issue.message)
 
     if machine_config is not None and validate_machine_bounds:
         from validation.machine_checks import check_job_fits_machine

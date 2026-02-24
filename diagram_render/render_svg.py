@@ -112,6 +112,19 @@ DIAGRAM_THEMES = {
     "print": PRINT_DIAGRAM_THEME,
 }
 
+_CHROME_TOP = 40.0
+_CHROME_RIGHT = 140.0
+_NOTES_LINE_HEIGHT = 12.0
+_NOTES_Y_OFFSET = 10.0
+_NOTES_PADDING = 20.0
+_NOTES_MIN_HEIGHT = 60.0
+_CALLOUT_BOX_HEIGHT = 70.0
+_CALLOUT_BOX_SPACING = 15.0
+_CALLOUT_MARGIN = 20.0
+_BEAM_LAYER_HEIGHT = 14.0
+_BEAM_HEADER_HEIGHT = 20.0
+_BEAM_SPACING = 15.0
+
 
 def render_diagram_svg(
     diagram: DiagramIR,
@@ -135,12 +148,12 @@ def render_diagram_svg(
 
     transform_y = _transform_y_flip if viewport.y_flip else _transform_y_identity
 
-    chrome_top = 40.0
+    chrome_top = _CHROME_TOP
     chrome_bottom = _estimate_notes_height(diagram.metadata)
     beam_assembly_h = _estimate_beam_assembly_height(diagram.metadata)
     chrome_bottom += beam_assembly_h
     callout_h = _estimate_callout_height(diagram.metadata)
-    chrome_right = 140.0
+    chrome_right = _CHROME_RIGHT
     chrome_right_height = max(0.0, callout_h - 160.0)
 
     viewbox_x = bounds.x_min - padding
@@ -213,7 +226,6 @@ def render_diagram_svg(
 
 
 def _estimate_notes_height(metadata: dict) -> float:
-    line_height = 12.0
     lines = 2
     if metadata.get("feature_counts"):
         lines += 1
@@ -229,7 +241,7 @@ def _estimate_notes_height(metadata: dict) -> float:
     edge_allowances = metadata.get("edge_allowances", [])
     if edge_allowances:
         lines += 1 + len(edge_allowances)
-    return max(lines * line_height + 20.0, 60.0)
+    return max(lines * _NOTES_LINE_HEIGHT + _NOTES_PADDING, _NOTES_MIN_HEIGHT)
 
 
 def _compute_padding(bounds, viewport: ViewportSpec) -> float:
@@ -572,8 +584,8 @@ def _render_notes_block(
     theme: DiagramTheme,
 ) -> None:
     x = 20
-    y = drawing_bottom + 10
-    line_height = 12
+    y = drawing_bottom + _NOTES_Y_OFFSET
+    line_height = _NOTES_LINE_HEIGHT
     indent = 10
 
     group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
@@ -648,9 +660,7 @@ def _estimate_callout_height(metadata: dict) -> float:
     edge_profiles = metadata.get("edge_profiles", [])
     if not edge_profiles:
         return 0.0
-    box_height = 70.0
-    box_spacing = 15.0
-    return len(edge_profiles) * (box_height + box_spacing) + 20.0
+    return len(edge_profiles) * (_CALLOUT_BOX_HEIGHT + _CALLOUT_BOX_SPACING) + _CALLOUT_MARGIN
 
 
 def _find_shape_bounds(shape_id: str, layers: tuple[LayerIR, ...]) -> tuple[float, float, float, float] | None:
@@ -681,11 +691,11 @@ def _render_edge_callouts(
     group = ET.SubElement(svg, "g", {"id": "EDGE_CALLOUTS", "class": "edge-callouts"})
 
     box_width = 100.0
-    box_height = 70.0
-    box_spacing = 15.0
+    box_height = _CALLOUT_BOX_HEIGHT
+    box_spacing = _CALLOUT_BOX_SPACING
     scale = 3.0
 
-    start_x = viewbox_x + viewbox_width - box_width - 20.0
+    start_x = viewbox_x + viewbox_width - box_width - _CALLOUT_MARGIN
     start_y = viewbox_y + 180.0
 
     section_labels = "ABCDEFGH"
@@ -932,13 +942,10 @@ def _estimate_beam_assembly_height(metadata: dict) -> float:
     beam_structures = metadata.get("beam_structures", [])
     if not beam_structures:
         return 0.0
-    layer_height = 14.0
-    header_height = 20.0
-    beam_spacing = 15.0
     total = 0.0
     for beam in beam_structures:
         layer_count = beam.get("layer_count", 1)
-        total += header_height + layer_count * layer_height + beam_spacing
+        total += _BEAM_HEADER_HEIGHT + layer_count * _BEAM_LAYER_HEIGHT + _BEAM_SPACING
     return total + 10.0
 
 
@@ -951,9 +958,9 @@ def _render_beam_assemblies(
     group = ET.SubElement(svg, "g", {"id": "BEAM_ASSEMBLIES", "class": "beam-assemblies"})
     x = 20.0
     y = top_y + 10.0
-    layer_height = 14.0
-    header_height = 20.0
-    beam_spacing = 15.0
+    layer_height = _BEAM_LAYER_HEIGHT
+    header_height = _BEAM_HEADER_HEIGHT
+    beam_spacing = _BEAM_SPACING
     diagram_width = 350.0
 
     notes_style = theme.get_style("notes")

@@ -115,7 +115,7 @@ class Allowance:
 class TabConstraint:
     count: int
     height_mm: float
-    width_mm: float
+    width_mm: float | None
 
 
 @dataclass(frozen=True)

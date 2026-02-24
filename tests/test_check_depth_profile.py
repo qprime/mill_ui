@@ -35,7 +35,7 @@ def _intent(
         region_id="test_region",
         bounds=Bounds2D(x_min=0, x_max=50, y_min=0, y_max=50),
         depth_profile=dp,
-        bevel=bevel,
+        edge_feature=bevel,
     )
 
 

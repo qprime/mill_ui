@@ -4,7 +4,7 @@ import math
 from typing import Any
 
 from core.constants import FeatureType
-from ir.removal_intent import Bounds2D, RemovalIntent
+from ir.removal_intent import BevelSpec, Bounds2D, RemovalIntent
 from validation.core import ValidationResult
 
 
@@ -47,7 +47,7 @@ def check_depth_profile(
                 sheet_thickness_mm=sheet_thickness_mm,
             )
 
-    bevel_data = intent.bevel
+    bevel_data = intent.edge_feature if isinstance(intent.edge_feature, BevelSpec) else None
     if bevel_data:
         bevel_width = bevel_data.width_mm
         bevel_angle = bevel_data.angle_deg

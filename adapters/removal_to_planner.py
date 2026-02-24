@@ -4,6 +4,7 @@ from typing import Any
 
 from cam.planner.planner_input import (
     CornerCleanupInput,
+    EdgeFeatureInput,
     FeatureInput,
     GeometryInput,
     KeepoutInput,
@@ -60,12 +61,8 @@ def _classify_feature(hint_type: str, side: str | None) -> str:
         return "holes"
     if hint_type == FeatureType.ENGRAVE:
         return "engraves"
-    if hint_type == FeatureType.BEVEL:
-        return "pockets"
-    if hint_type == FeatureType.CHAMFER:
-        if side in ("inside", "outside"):
-            return "profiles"
-        return "engraves"
+    if hint_type in (FeatureType.BEVEL, FeatureType.CHAMFER):
+        return "edge_features"
     return "pockets"
 
 
@@ -138,6 +135,27 @@ def _generate_corner_cleanup_input(
     )
 
 
+def _intent_to_edge_feature_input(intent: RemovalIntent) -> EdgeFeatureInput:
+    shape = intent.shape or ShapeType.RECT
+    depth_mm = intent.depth_mm()
+    cx, cy = intent.bounds.center
+
+    shape_geom = extract_shape_geometry(shape, intent.bounds, intent.shape_geometry)
+    geometry = GeometryInput(shape=shape, geometry=shape_geom)
+    start_depth_mm = abs(intent.depth_profile.z_top) if intent.depth_profile.z_top != 0.0 else 0.0
+
+    return EdgeFeatureInput(
+        id=intent.original_id if intent.original_id is not None else intent.region_id,
+        shape=shape,
+        geometry=geometry,
+        center_xy_mm=(cx, cy),
+        depth_mm=depth_mm,
+        start_depth_mm=start_depth_mm,
+        side=intent.side,
+        edge_feature=intent.edge_feature,
+    )
+
+
 def removal_intents_to_planner_input(
     intents: list[RemovalIntent],
     kerf_width_mm: float = 3.175,
@@ -149,6 +167,7 @@ def removal_intents_to_planner_input(
         "holes": [],
         "engraves": [],
     }
+    edge_features: list[EdgeFeatureInput] = []
     corner_cleanups: list[CornerCleanupInput] = []
     all_keepouts: list[KeepoutInput] = []
     seen_keepouts: set[tuple[int, int, int, int]] = set()
@@ -173,14 +192,18 @@ def removal_intents_to_planner_input(
                     )
                 )
 
-        feature = _intent_to_feature_input(intent)
         hint_type = intent.hint_type or FeatureType.POCKET
         side = intent.side or "outside"
         bucket = _classify_feature(hint_type, side)
-        buckets[bucket].append(feature)
 
-        if bucket == "pockets" and intent.corner_cleanup_tool_diameter_mm is not None:
-            corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
+        if bucket == "edge_features":
+            edge_features.append(_intent_to_edge_feature_input(intent))
+        else:
+            feature = _intent_to_feature_input(intent)
+            buckets[bucket].append(feature)
+
+            if bucket == "pockets" and intent.corner_cleanup_tool_diameter_mm is not None:
+                corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
 
     return PlannerInput(
         units="mm",
@@ -191,6 +214,7 @@ def removal_intents_to_planner_input(
         holes=tuple(buckets["holes"]),
         engraves=tuple(buckets["engraves"]),
         corner_cleanups=tuple(corner_cleanups),
+        edge_features=tuple(edge_features),
         keepouts=tuple(all_keepouts),
     )
 

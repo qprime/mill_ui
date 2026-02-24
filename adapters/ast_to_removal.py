@@ -23,6 +23,7 @@ from ir.removal_intent import (
     ChamferSpec,
     Constraints,
     DepthProfile,
+    EdgeFeatureSpec,
     RemovalIntent,
 )
 from layout_ast.layout import Feature, Item, LayoutAST
@@ -106,7 +107,7 @@ def item_to_removal_intent(
             item,
             FeatureType.BEVEL,
             calculated_depth,
-            bevel=BevelSpec(width_mm=bevel_width, angle_deg=bevel_angle, inner_depth_mm=inner_depth),
+            edge_feature=BevelSpec(width_mm=bevel_width, angle_deg=bevel_angle, inner_depth_mm=inner_depth),
         )
 
     elif item.feature.type == FeatureType.CHAMFER:
@@ -121,7 +122,7 @@ def item_to_removal_intent(
             FeatureType.CHAMFER,
             calculated_depth,
             side=side,
-            chamfer=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
+            edge_feature=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
         )
 
     else:
@@ -140,8 +141,7 @@ def _build_edge_feature_intent(
     feature_type: str,
     depth_mm: float,
     side: str | None = None,
-    bevel: BevelSpec | None = None,
-    chamfer: ChamferSpec | None = None,
+    edge_feature: EdgeFeatureSpec | None = None,
 ) -> RemovalIntent:
     shape = hint[HintKeys.SHAPE]
     geometry = hint[HintKeys.GEOMETRY]
@@ -161,8 +161,7 @@ def _build_edge_feature_intent(
         feature_type=item.feature.type,
         shape_id=item.shape_id,
         shape_geometry=shape_geometry,
-        bevel=bevel,
-        chamfer=chamfer,
+        edge_feature=edge_feature,
         allowance=Allowance(),
         constraints=Constraints(),
     )

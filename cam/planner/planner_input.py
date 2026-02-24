@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from ir.removal_intent import ShapeGeometry
+from ir.removal_intent import EdgeFeatureSpec, ShapeGeometry
 
 
 @dataclass(frozen=True)
@@ -133,6 +133,48 @@ class CornerCleanupInput:
 
 
 @dataclass(frozen=True)
+class EdgeFeatureInput:
+    id: str
+    shape: str
+    geometry: GeometryInput
+    center_xy_mm: tuple[float, float]
+    depth_mm: float
+    start_depth_mm: float = 0.0
+    side: str | None = None
+    edge_feature: EdgeFeatureSpec | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        from ir.removal_intent import BevelSpec, ChamferSpec
+
+        result: dict[str, Any] = {
+            "id": self.id,
+            "shape": self.shape,
+            "geometry": self.geometry.to_dict(),
+            "center_xy_mm": self.center_xy_mm,
+            "depth_mm": self.depth_mm,
+        }
+        if self.start_depth_mm > 0.0:
+            result["start_depth_mm"] = self.start_depth_mm
+        if self.side is not None:
+            result["side"] = self.side
+        if self.edge_feature is not None:
+            if isinstance(self.edge_feature, BevelSpec):
+                result["edge_feature"] = {
+                    "type": "bevel",
+                    "width_mm": self.edge_feature.width_mm,
+                    "angle_deg": self.edge_feature.angle_deg,
+                    "inner_depth_mm": self.edge_feature.inner_depth_mm,
+                }
+            elif isinstance(self.edge_feature, ChamferSpec):
+                result["edge_feature"] = {
+                    "type": "chamfer",
+                    "width_mm": self.edge_feature.width_mm,
+                    "angle_deg": self.edge_feature.angle_deg,
+                }
+        return result
+
+
+@dataclass(frozen=True)
 class PlannerInput:
     units: str = "mm"
     kerf_width_mm: float = 3.175
@@ -142,10 +184,11 @@ class PlannerInput:
     holes: tuple[FeatureInput, ...] = field(default_factory=tuple)
     engraves: tuple[FeatureInput, ...] = field(default_factory=tuple)
     corner_cleanups: tuple[CornerCleanupInput, ...] = field(default_factory=tuple)
+    edge_features: tuple[EdgeFeatureInput, ...] = field(default_factory=tuple)
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
 
     def to_hints_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "units": self.units,
             "kerf_width_mm": self.kerf_width_mm,
             "min_channel_width_mm": self.min_channel_width_mm,
@@ -156,6 +199,9 @@ class PlannerInput:
             "corner_cleanups": [c.to_dict() for c in self.corner_cleanups],
             "keepouts": [k.to_dict() for k in self.keepouts],
         }
+        if self.edge_features:
+            result["edge_features"] = [ef.to_dict() for ef in self.edge_features]
+        return result
 
     @classmethod
     def from_hints_dict(cls, hints: dict[str, Any]) -> PlannerInput:
@@ -241,11 +287,44 @@ class PlannerInput:
                 start_depth_mm=float(c.get("start_depth_mm", 0.0)),
             )
 
+        def parse_edge_feature_input(ef: dict[str, Any]) -> EdgeFeatureInput:
+            from ir.removal_intent import BevelSpec, ChamferSpec
+
+            shape = str(ef.get("shape", "Rect"))
+            geometry = parse_geometry(ef.get("geometry", {}), shape)
+            center = ef.get("center_xy_mm", (0.0, 0.0))
+            ef_spec_raw = ef.get("edge_feature")
+            edge_feature: EdgeFeatureSpec | None = None
+            if isinstance(ef_spec_raw, dict):
+                ef_type = ef_spec_raw.get("type")
+                if ef_type == "bevel":
+                    edge_feature = BevelSpec(
+                        width_mm=float(ef_spec_raw.get("width_mm", 0.0)),
+                        angle_deg=float(ef_spec_raw.get("angle_deg", 45.0)),
+                        inner_depth_mm=float(ef_spec_raw.get("inner_depth_mm", 0.0)),
+                    )
+                elif ef_type == "chamfer":
+                    edge_feature = ChamferSpec(
+                        width_mm=float(ef_spec_raw.get("width_mm", 0.0)),
+                        angle_deg=float(ef_spec_raw.get("angle_deg", 45.0)),
+                    )
+            return EdgeFeatureInput(
+                id=str(ef.get("id", "")),
+                shape=shape,
+                geometry=geometry,
+                center_xy_mm=(float(center[0]), float(center[1])),
+                depth_mm=float(ef.get("depth_mm", 0.0)),
+                start_depth_mm=float(ef.get("start_depth_mm", 0.0)),
+                side=ef.get("side"),
+                edge_feature=edge_feature,
+            )
+
         profiles = tuple(parse_feature(p) for p in hints.get("profiles", []))
         pockets = tuple(parse_feature(p) for p in hints.get("pockets", []))
         holes = tuple(parse_feature(h) for h in hints.get("holes", []))
         engraves = tuple(parse_feature(e) for e in hints.get("engraves", []))
         corner_cleanups = tuple(parse_corner_cleanup(c) for c in hints.get("corner_cleanups", []))
+        edge_features = tuple(parse_edge_feature_input(ef) for ef in hints.get("edge_features", []))
         keepouts = tuple(parse_keepout(k) for k in hints.get("keepouts", []))
 
         return cls(
@@ -257,5 +336,6 @@ class PlannerInput:
             holes=holes,
             engraves=engraves,
             corner_cleanups=corner_cleanups,
+            edge_features=edge_features,
             keepouts=keepouts,
         )

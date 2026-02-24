@@ -179,19 +179,21 @@ class TestRemovalIntentTypedFields:
         intent = self._base_intent(corner_cleanup_tool_diameter_mm=3.175)
         assert intent.corner_cleanup_tool_diameter_mm == 3.175
 
-    def test_bevel_field(self):
+    def test_edge_feature_bevel(self):
         bevel = BevelSpec(width_mm=8.0, angle_deg=45.0, inner_depth_mm=7.0)
-        intent = self._base_intent(bevel=bevel)
-        assert intent.bevel is not None
-        assert intent.bevel.width_mm == 8.0
-        assert intent.bevel.angle_deg == 45.0
-        assert intent.bevel.inner_depth_mm == 7.0
+        intent = self._base_intent(edge_feature=bevel)
+        assert intent.edge_feature is not None
+        assert isinstance(intent.edge_feature, BevelSpec)
+        assert intent.edge_feature.width_mm == 8.0
+        assert intent.edge_feature.angle_deg == 45.0
+        assert intent.edge_feature.inner_depth_mm == 7.0
 
-    def test_chamfer_field(self):
+    def test_edge_feature_chamfer(self):
         chamfer = ChamferSpec(width_mm=4.0, angle_deg=45.0)
-        intent = self._base_intent(chamfer=chamfer)
-        assert intent.chamfer is not None
-        assert intent.chamfer.width_mm == 4.0
+        intent = self._base_intent(edge_feature=chamfer)
+        assert intent.edge_feature is not None
+        assert isinstance(intent.edge_feature, ChamferSpec)
+        assert intent.edge_feature.width_mm == 4.0
 
     def test_item_type_field(self):
         intent = self._base_intent(item_type="Rect")
@@ -213,8 +215,7 @@ class TestRemovalIntentTypedFields:
         assert intent.original_id is None
         assert intent.shape_geometry == ShapeGeometry()
         assert intent.corner_cleanup_tool_diameter_mm is None
-        assert intent.bevel is None
-        assert intent.chamfer is None
+        assert intent.edge_feature is None
         assert intent.item_type is None
         assert intent.feature_type is None
         assert intent.shape_id is None
@@ -230,15 +231,16 @@ class TestRemovalIntentTypedFields:
             hint_type="profile",
             shape="Rect",
             side="outside",
-            bevel=bevel,
+            edge_feature=bevel,
         )
         d = intent.to_dict()
         assert d["hint_type"] == "profile"
         assert d["shape"] == "Rect"
         assert d["side"] == "outside"
-        assert d["bevel"]["width_mm"] == 8.0
-        assert d["bevel"]["angle_deg"] == 45.0
-        assert d["bevel"]["inner_depth_mm"] == 7.0
+        assert d["edge_feature"]["type"] == "bevel"
+        assert d["edge_feature"]["width_mm"] == 8.0
+        assert d["edge_feature"]["angle_deg"] == 45.0
+        assert d["edge_feature"]["inner_depth_mm"] == 7.0
 
     def test_to_dict_no_metadata_key(self):
         intent = self._base_intent()

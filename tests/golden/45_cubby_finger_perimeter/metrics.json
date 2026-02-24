@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "45_cubby_finger_perimeter",
-    "created_at": "2026-02-24T21:26:02.692421+00:00"
+    "created_at": "2026-02-24T23:18:59.514824+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.72,
+    "extraction_time_ms": 1.64,
     "document": {
       "width_mm": 2183.175,
       "height_mm": 1505.175,
@@ -605,7 +605,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 21.9292,
+    "extraction_time_ms": 21.4591,
     "summary": {
       "total_lines": 10515,
       "comment_lines": 51,

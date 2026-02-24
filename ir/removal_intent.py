@@ -19,6 +19,9 @@ class ChamferSpec:
     angle_deg: float
 
 
+EdgeFeatureSpec = BevelSpec | ChamferSpec
+
+
 @dataclass(frozen=True)
 class ShapeGeometry:
     w_mm: float | None = None
@@ -162,8 +165,7 @@ class RemovalIntent:
     original_id: str | None = None
     shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
     corner_cleanup_tool_diameter_mm: float | None = None
-    bevel: BevelSpec | None = None
-    chamfer: ChamferSpec | None = None
+    edge_feature: EdgeFeatureSpec | None = None
     item_type: str | None = None
     feature_type: str | None = None
     shape_id: str | None = None
@@ -220,17 +222,20 @@ class RemovalIntent:
             result["original_id"] = self.original_id
         if self.corner_cleanup_tool_diameter_mm is not None:
             result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
-        if self.bevel is not None:
-            result["bevel"] = {
-                "width_mm": self.bevel.width_mm,
-                "angle_deg": self.bevel.angle_deg,
-                "inner_depth_mm": self.bevel.inner_depth_mm,
-            }
-        if self.chamfer is not None:
-            result["chamfer"] = {
-                "width_mm": self.chamfer.width_mm,
-                "angle_deg": self.chamfer.angle_deg,
-            }
+        if self.edge_feature is not None:
+            if isinstance(self.edge_feature, BevelSpec):
+                result["edge_feature"] = {
+                    "type": "bevel",
+                    "width_mm": self.edge_feature.width_mm,
+                    "angle_deg": self.edge_feature.angle_deg,
+                    "inner_depth_mm": self.edge_feature.inner_depth_mm,
+                }
+            elif isinstance(self.edge_feature, ChamferSpec):
+                result["edge_feature"] = {
+                    "type": "chamfer",
+                    "width_mm": self.edge_feature.width_mm,
+                    "angle_deg": self.edge_feature.angle_deg,
+                }
         if self.item_type is not None:
             result["item_type"] = self.item_type
         if self.feature_type is not None:
@@ -247,6 +252,7 @@ __all__ = [
     "ChamferSpec",
     "Constraints",
     "DepthProfile",
+    "EdgeFeatureSpec",
     "EdgeTreatment",
     "Island",
     "KeepoutRegion",

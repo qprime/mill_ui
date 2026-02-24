@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -129,6 +130,10 @@ def plan_passes(
     plan_hole_passes(planner_input.holes, accumulator=accumulator, tool_db=tool_db)
     plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
     plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
+
+    _logger = logging.getLogger(__name__)
+    for ef in planner_input.edge_features:
+        _logger.info("Edge feature '%s' collected but not yet implemented — skipping", ef.id)
 
     kerf_mm = planner_input.kerf_width_mm
 

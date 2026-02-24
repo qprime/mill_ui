@@ -2,7 +2,7 @@
 
 <!-- spec-style -->
 
-**As-Of:** 2026-01-19
+**As-Of:** 2026-02-23
 
 Load this document when extending the system with new components, types, or capabilities.
 
@@ -18,6 +18,7 @@ Load this document when extending the system with new components, types, or capa
 | [Add a Domain Operation](#pattern-4-add-a-domain-operation) | New algebraic operation on domains |
 | [Add a Validation Invariant](#pattern-5-add-a-validation-invariant) | New structural check for CAM artifacts |
 | [Add a Metric](#pattern-6-add-a-metric) | New measurement from CAM artifacts |
+| [Add a Planner Feature Type](#pattern-7-add-a-planner-feature-type) | New machining operation the planner must handle |
 
 ---
 
@@ -289,3 +290,152 @@ def extract_gcode_metrics(gcode_path: str, config: GCodeConfig = None) -> GCodeM
     arc_count = sum(1 for line in lines if line.startswith(("G2", "G3")))
     return GCodeMetrics(arc_count=arc_count)
 ```
+
+---
+
+## Pattern 7: Add a Planner Feature Type
+
+**When:** New machining operation that flows through the full pipeline: RemovalIntent → PlannerInput → planner pass → G-code. Examples: edge chamfer pass, v-carve pass, engraving with a new tool type.
+
+This pattern covers the planner side. If the feature also needs PML syntax, AST nodes, and generators, combine this with Pattern 3 (Create a Generator) and the PML-First checklist in CLAUDE.md.
+
+**Steps:**
+
+1. Define typed input dataclass in `cam/planner/planner_input.py`
+2. Add field to `PlannerInput` for the new feature bucket
+3. Route from `RemovalIntent` in `adapters/removal_to_planner.py`
+4. Implement pass function in `cam/planner/passes/`
+5. Add tool selection in `cam/planner/passes/tools.py` if new tool type needed
+6. Wire dispatch in `plan_passes()` in `cam/planner/passes/__init__.py`
+7. Update `PLANNER_CAPABILITIES` in `cam/planner/capabilities.py`
+8. Update support matrix in `docs/invariants/planner.md`
+9. Add IR-level tests (invariant PL-4: test at IR, not CAM)
+
+**Files to modify:**
+
+| File | Change |
+|------|--------|
+| `cam/planner/planner_input.py` | New input dataclass, new field on `PlannerInput` |
+| `adapters/removal_to_planner.py` | Extract from `RemovalIntent`, populate new bucket |
+| `cam/planner/passes/new_pass.py` | **Create** — pass function |
+| `cam/planner/passes/tools.py` | Tool selection for new operation (if needed) |
+| `cam/planner/passes/__init__.py` | Call new pass from `plan_passes()` |
+| `cam/planner/capabilities.py` | Update `PLANNER_CAPABILITIES` status |
+| `docs/invariants/planner.md` | Update support matrix table |
+
+**Test location:** `tests/test_planner_passes.py` or new test module
+
+**Constraints:**
+
+- Planner passes receive typed frozen dataclasses, not untyped dicts (invariant PC-3)
+- Unsupported constraints must not silently pass — warn or error (invariant PC-1)
+- Every pipeline run audits constraints and emits a summary (invariant PC-2)
+- All Z values respect safe_z for rapids (invariant GC-1)
+- Single plunge must not exceed max_stepdown (invariant GC-4)
+- All XY coordinates within sheet + margin (invariant GC-8)
+
+**Example:** Adding a hypothetical groove pass
+
+### Step 1: Typed input dataclass
+
+```python
+@dataclass(frozen=True)
+class GrooveInput:
+    id: str
+    shape: str
+    geometry: GeometryInput
+    center_xy_mm: tuple[float, float]
+    depth_mm: float
+    groove_width_mm: float
+    start_depth_mm: float = 0.0
+```
+
+### Step 2: Add to PlannerInput
+
+```python
+@dataclass(frozen=True)
+class PlannerInput:
+    ...
+    grooves: tuple[GrooveInput, ...] = field(default_factory=tuple)
+```
+
+### Step 3: Route from RemovalIntent
+
+In `adapters/removal_to_planner.py`, extract the new feature type from RemovalIntent and populate the new bucket:
+
+```python
+def removal_intents_to_planner_input(...) -> PlannerInput:
+    ...
+    grooves: list[GrooveInput] = []
+
+    for intent in intents:
+        if intent.hint_type == "groove":
+            grooves.append(_intent_to_groove_input(intent))
+        else:
+            ...
+
+    return PlannerInput(
+        ...
+        grooves=tuple(grooves),
+    )
+```
+
+### Step 4: Implement the pass
+
+```python
+def plan_groove_passes(
+    grooves: tuple[GrooveInput, ...],
+    *,
+    accumulator: "PassAccumulator",
+    tool_db: Sequence[ToolSelection],
+) -> None:
+    for entry in grooves:
+        tool = pick_tool_for_groove(tool_db, groove_width_mm=entry.groove_width_mm)
+        record = accumulator.get_record("groove", tool)
+
+        moves = generate_groove_moves(
+            center=entry.center_xy_mm,
+            geometry=entry.geometry,
+            depth_mm=entry.depth_mm,
+            tool=tool,
+            setup=record.setup,
+        )
+        record.add_moves(moves, increment=1)
+```
+
+### Step 5: Wire dispatch
+
+In `cam/planner/passes/__init__.py`:
+
+```python
+def plan_passes(planner_input, *, config, tool_db, ...):
+    ...
+    plan_groove_passes(planner_input.grooves, accumulator=accumulator, tool_db=tool_db)
+    ...
+```
+
+### Step 6: Update capabilities
+
+```python
+PLANNER_CAPABILITIES = {
+    ...
+    "groove": ConstraintStatus(ConstraintSupport.HONORED),
+}
+```
+
+### Step 7: Update planner invariant support matrix
+
+In `docs/invariants/planner.md`, add row to the support table:
+
+```
+| groove | HONORED | — | Boundary-following groove cut |
+```
+
+### Key conventions from existing passes
+
+- Pass functions take a tuple of typed inputs + `accumulator` + `tool_db`
+- Pass functions return `None` — they append moves to the accumulator
+- `accumulator.get_record(operation, tool)` groups moves by operation+tool into separate `.nc` files
+- Tool selection happens per-feature inside the pass, not before
+- Depth stepping uses `stepdown_for_tool()` from `tools.py`
+- Stepover uses `stepover_for_tool()` from `tools.py`

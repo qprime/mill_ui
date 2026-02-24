@@ -5,9 +5,6 @@ from typing import Any
 
 from ir.removal_intent import RemovalIntent
 from core.constants import (
-    HintKeys,
-    GeometryKeys,
-    MetadataKeys,
     FeatureType,
     ShapeType,
 )
@@ -27,10 +24,10 @@ def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
 
 
 def _validate_corner_cleanup(intent: RemovalIntent) -> tuple[float, str]:
-    corner_tool_diameter = intent.metadata[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM]
-    shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
+    corner_tool_diameter = intent.corner_cleanup_tool_diameter_mm
+    shape = intent.shape or ShapeType.RECT
 
-    if corner_tool_diameter <= 0.0:
+    if corner_tool_diameter is None or corner_tool_diameter <= 0.0:
         raise ValueError(
             f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}"
         )
@@ -73,13 +70,13 @@ def _classify_feature(hint_type: str, side: str | None) -> str:
 
 
 def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
-    hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
-    shape = intent.metadata.get(HintKeys.SHAPE, ShapeType.RECT)
+    hint_type = intent.hint_type or FeatureType.POCKET
+    shape = intent.shape or ShapeType.RECT
     depth_mm = intent.depth_mm()
     cx, cy = intent.bounds.center
 
-    geometry_dict = extract_shape_geometry(shape, intent.bounds, intent.metadata)
-    geometry = GeometryInput(shape=shape, data=geometry_dict)
+    shape_geom = extract_shape_geometry(shape, intent.bounds, intent.shape_geometry)
+    geometry = GeometryInput(shape=shape, geometry=shape_geom)
 
     tabs: TabsInput | None = None
     if intent.constraints.tabs is not None:
@@ -97,12 +94,11 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         for k in intent.constraints.keepouts
     )
 
-    side = intent.metadata.get(HintKeys.SIDE) if hint_type == FeatureType.PROFILE else None
+    side = intent.side if hint_type == FeatureType.PROFILE else None
     start_depth_mm = abs(intent.depth_profile.z_top) if intent.depth_profile.z_top != 0.0 else 0.0
-    corner_cleanup_diameter = intent.metadata.get(HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM)
 
     return FeatureInput(
-        id=intent.metadata.get(MetadataKeys.ORIGINAL_ID, intent.region_id),
+        id=intent.original_id if intent.original_id is not None else intent.region_id,
         shape=shape,
         geometry=geometry,
         center_xy_mm=(cx, cy),
@@ -111,7 +107,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         side=side,
         tabs=tabs,
         keepouts=keepouts,
-        corner_cleanup_tool_diameter_mm=corner_cleanup_diameter,
+        corner_cleanup_tool_diameter_mm=intent.corner_cleanup_tool_diameter_mm,
     )
 
 
@@ -124,8 +120,8 @@ def _generate_corner_cleanup_input(
     cx, cy = feature.center_xy_mm
     corners = _compute_corners(
         cx, cy,
-        feature.geometry.data.get(GeometryKeys.W_MM, 0.0),
-        feature.geometry.data.get(GeometryKeys.H_MM, 0.0),
+        feature.geometry.geometry.w_mm or 0.0,
+        feature.geometry.geometry.h_mm or 0.0,
     )
 
     return CornerCleanupInput(
@@ -168,12 +164,12 @@ def removal_intents_to_planner_input(
                 ))
 
         feature = _intent_to_feature_input(intent)
-        hint_type = intent.metadata.get(MetadataKeys.HINT_TYPE, FeatureType.POCKET)
-        side = intent.metadata.get(HintKeys.SIDE, "outside")
+        hint_type = intent.hint_type or FeatureType.POCKET
+        side = intent.side or "outside"
         bucket = _classify_feature(hint_type, side)
         buckets[bucket].append(feature)
 
-        if bucket == "pockets" and HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM in intent.metadata:
+        if bucket == "pockets" and intent.corner_cleanup_tool_diameter_mm is not None:
             corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
 
     return PlannerInput(

@@ -165,7 +165,7 @@ def test_dump_removal_intent_pocket():
         intent = removal_data[0]
         assert intent["region_id"] == "pocket_center_pocket"
         assert approx_eq(intent["depth_mm"], 6.0)
-        assert intent["metadata"]["hint_type"] == "pocket"
+        assert intent["hint_type"] == "pocket"
 
     finally:
         Path(temp_path).unlink()
@@ -200,8 +200,8 @@ def test_dump_removal_intent_hole():
         assert len(removal_data) == 1
         intent = removal_data[0]
         assert intent["region_id"] == "hole_mount_hole"
-        assert intent["metadata"]["hint_type"] == "hole"
-        assert intent["metadata"]["shape"] == "Circle"
+        assert intent["hint_type"] == "hole"
+        assert intent["shape"] == "Circle"
 
     finally:
         Path(temp_path).unlink()

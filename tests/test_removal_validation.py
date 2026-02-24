@@ -21,16 +21,17 @@ def _make_intent(
     z_bottom: float = -5.0,
     allowance: Allowance = None,
     constraints: Constraints = None,
-    metadata: dict = None,
+    hint_type: str = "",
+    side: str | None = None,
 ) -> RemovalIntent:
-    """Helper to create RemovalIntent with DepthProfile."""
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
         depth_profile=DepthProfile.constant(z_top=z_top, z_bottom=z_bottom),
+        hint_type=hint_type,
+        side=side,
         allowance=allowance or Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
         constraints=constraints or Constraints(tabs=None, keepouts=[], islands=[], tolerance_mm=0.1, safe_z_mm=5.0),
-        metadata=metadata or {},
     )
 
 
@@ -381,12 +382,14 @@ def test_check_toolpath_clearance_insufficient_gap():
     intent_a = _make_intent(
         region_id="profile_a",
         bounds=Bounds2D(x_min=0.0, x_max=50.0, y_min=0.0, y_max=50.0),
-        metadata={"side": "outside", "hint_type": "profile"},
+        hint_type="profile",
+        side="outside",
     )
     intent_b = _make_intent(
         region_id="profile_b",
         bounds=Bounds2D(x_min=52.0, x_max=100.0, y_min=0.0, y_max=50.0),
-        metadata={"side": "outside", "hint_type": "profile"},
+        hint_type="profile",
+        side="outside",
     )
     result = check_toolpath_clearance([intent_a, intent_b], tool_diameter_mm=6.35)
     assert not result.is_valid()
@@ -397,12 +400,14 @@ def test_check_toolpath_clearance_sufficient_gap():
     intent_a = _make_intent(
         region_id="profile_a",
         bounds=Bounds2D(x_min=0.0, x_max=50.0, y_min=0.0, y_max=50.0),
-        metadata={"side": "outside", "hint_type": "profile"},
+        hint_type="profile",
+        side="outside",
     )
     intent_b = _make_intent(
         region_id="profile_b",
         bounds=Bounds2D(x_min=60.0, x_max=100.0, y_min=0.0, y_max=50.0),
-        metadata={"side": "outside", "hint_type": "profile"},
+        hint_type="profile",
+        side="outside",
     )
     result = check_toolpath_clearance([intent_a, intent_b], tool_diameter_mm=6.35)
     assert result.is_valid()
@@ -441,7 +446,7 @@ def test_check_working_area_bounds_outside_profile_offset():
     intent = _make_intent(
         region_id="outside_prof",
         bounds=Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=100.0),
-        metadata={"side": "outside"},
+        side="outside",
     )
     result = check_working_area_bounds(
         [intent],

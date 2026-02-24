@@ -34,7 +34,7 @@ def test_corner_cleanup_basic():
 
     intents = ast_to_removal_intents(ast)
     assert len(intents) == 1
-    assert intents[0].metadata.get("corner_cleanup_tool_diameter_mm") == 3.175
+    assert intents[0].corner_cleanup_tool_diameter_mm == 3.175
 
 
     planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)

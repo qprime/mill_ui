@@ -8,6 +8,42 @@ from domains.domain import Bounds2D
 
 
 @dataclass(frozen=True)
+class BevelSpec:
+    width_mm: float
+    angle_deg: float
+    inner_depth_mm: float
+
+
+@dataclass(frozen=True)
+class ChamferSpec:
+    width_mm: float
+    angle_deg: float
+
+
+@dataclass(frozen=True)
+class WaveSpec:
+    wave_count: int
+    amplitude_mm: float
+    wavelength_mm: float
+    groove_width_mm: float
+
+
+@dataclass(frozen=True)
+class ShapeGeometry:
+    w_mm: float | None = None
+    h_mm: float | None = None
+    diameter_mm: float | None = None
+    points: tuple[tuple[float, float], ...] | None = None
+    radius_mm: float | None = None
+    radius_tl_mm: float | None = None
+    radius_tr_mm: float | None = None
+    radius_br_mm: float | None = None
+    radius_bl_mm: float | None = None
+    start: tuple[float, float] | None = None
+    end: tuple[float, float] | None = None
+
+
+@dataclass(frozen=True)
 class DepthProfile:
     mode: str
     z_top: float
@@ -125,15 +161,26 @@ class RemovalIntent:
     region_id: str
     bounds: Bounds2D
     depth_profile: DepthProfile
+    hint_type: str = ""
+    shape: str = ""
+    side: str | None = None
+    original_id: str | None = None
+    shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
+    corner_cleanup_tool_diameter_mm: float | None = None
+    bevel: BevelSpec | None = None
+    chamfer: ChamferSpec | None = None
+    wave: WaveSpec | None = None
+    item_type: str | None = None
+    feature_type: str | None = None
+    shape_id: str | None = None
     allowance: Allowance = field(default_factory=Allowance)
     constraints: Constraints = field(default_factory=Constraints)
-    metadata: dict[str, Any] = field(default_factory=dict)
 
     def depth_mm(self) -> float:
         return self.depth_profile.depth_mm()
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "region_id": self.region_id,
             "bounds": {
                 "x_min": self.bounds.x_min,
@@ -142,6 +189,8 @@ class RemovalIntent:
                 "y_max": self.bounds.y_max,
             },
             "depth_profile": self.depth_profile.to_dict(),
+            "hint_type": self.hint_type,
+            "shape": self.shape,
             "allowance": {
                 "inside": self.allowance.inside,
                 "outside": self.allowance.outside,
@@ -166,5 +215,35 @@ class RemovalIntent:
                 "tolerance_mm": self.constraints.tolerance_mm,
                 "safe_z_mm": self.constraints.safe_z_mm,
             },
-            "metadata": self.metadata,
         }
+        if self.side is not None:
+            result["side"] = self.side
+        if self.original_id is not None:
+            result["original_id"] = self.original_id
+        if self.corner_cleanup_tool_diameter_mm is not None:
+            result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
+        if self.bevel is not None:
+            result["bevel"] = {
+                "width_mm": self.bevel.width_mm,
+                "angle_deg": self.bevel.angle_deg,
+                "inner_depth_mm": self.bevel.inner_depth_mm,
+            }
+        if self.chamfer is not None:
+            result["chamfer"] = {
+                "width_mm": self.chamfer.width_mm,
+                "angle_deg": self.chamfer.angle_deg,
+            }
+        if self.wave is not None:
+            result["wave"] = {
+                "wave_count": self.wave.wave_count,
+                "amplitude_mm": self.wave.amplitude_mm,
+                "wavelength_mm": self.wave.wavelength_mm,
+                "groove_width_mm": self.wave.groove_width_mm,
+            }
+        if self.item_type is not None:
+            result["item_type"] = self.item_type
+        if self.feature_type is not None:
+            result["feature_type"] = self.feature_type
+        if self.shape_id is not None:
+            result["shape_id"] = self.shape_id
+        return result

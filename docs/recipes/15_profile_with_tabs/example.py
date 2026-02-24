@@ -109,7 +109,7 @@ rect pocket_outline at 300mm,200mm size 300mm,200mm profile 6mm inside tabs 4 he
     intent = ast_to_removal_intents(ast)[0]
 
     print(f"Profile: {intent.region_id}")
-    print(f"  Side: {intent.metadata.get('side', 'outside')}")
+    print(f"  Side: {intent.side or 'outside'}")
     print(f"  Depth: {intent.depth_mm():.1f}mm")
     if intent.constraints.tabs:
         tabs = intent.constraints.tabs

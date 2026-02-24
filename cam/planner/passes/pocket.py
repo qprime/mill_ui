@@ -32,13 +32,13 @@ def plan_pocket_passes(
     config: "Config",
 ) -> None:
     for entry in pockets:
-        geometry = entry.geometry.data
+        sg = entry.geometry.geometry
         shape_name = entry.shape.lower()
         required_width = None
         if shape_name == "rect":
-            required_width = min(float(geometry.get("w_mm", 0.0)), float(geometry.get("h_mm", 0.0)))
+            required_width = min(float(sg.w_mm or 0.0), float(sg.h_mm or 0.0))
         elif shape_name == "circle":
-            required_width = float(geometry.get("diameter_mm", 0.0))
+            required_width = float(sg.diameter_mm or 0.0)
 
         tool = pick_tool_for_pocket(
             tool_db,
@@ -58,8 +58,8 @@ def plan_pocket_passes(
         center = entry.center_xy_mm
 
         if shape_name == "rect":
-            width = float(geometry.get("w_mm", 0.0))
-            height = float(geometry.get("h_mm", 0.0))
+            width = float(sg.w_mm or 0.0)
+            height = float(sg.h_mm or 0.0)
             shape = rect_shape(width, height, center)
             record.add_moves(
                 pocket_then_finish_profile(
@@ -75,7 +75,7 @@ def plan_pocket_passes(
                 increment=1,
             )
         elif shape_name == "circle":
-            diameter = float(geometry.get("diameter_mm", 0.0))
+            diameter = float(sg.diameter_mm or 0.0)
             moves = pocket_circle_concentric(
                 center,
                 diameter,
@@ -109,8 +109,7 @@ def plan_hole_passes(
     for entry in holes:
         if entry.shape.lower() != "circle":
             continue
-        geometry = entry.geometry.data
-        diameter = float(geometry.get("diameter_mm", 0.0))
+        diameter = float(entry.geometry.geometry.diameter_mm or 0.0)
         center = entry.center_xy_mm
         depth = entry.depth_mm
 
@@ -157,22 +156,19 @@ def plan_engrave_passes(
     tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in engraves:
-        geometry = entry.geometry.data
+        sg = entry.geometry.geometry
         shape_name = entry.shape.lower()
         lines: list[list[tuple[float, float]]] = []
 
         if shape_name == "polyline":
-            points = geometry.get("points") or []
+            raw_points = sg.points or ()
             cx, cy = entry.center_xy_mm
-            line = []
-            for pt in points:
-                if isinstance(pt, (list, tuple)) and len(pt) == 2:
-                    line.append((float(pt[0]) + cx, float(pt[1]) + cy))
+            line = [(float(pt[0]) + cx, float(pt[1]) + cy) for pt in raw_points]
             if line:
                 lines.append(line)
         elif shape_name == "rect":
-            width = float(geometry.get("w_mm", 0.0))
-            height = float(geometry.get("h_mm", 0.0))
+            width = float(sg.w_mm or 0.0)
+            height = float(sg.h_mm or 0.0)
             if width <= 0.0 or height <= 0.0:
                 continue
             cx, cy = entry.center_xy_mm
@@ -186,8 +182,8 @@ def plan_engrave_passes(
                 (cx - half_w, cy - half_h),
             ])
         elif shape_name == "line":
-            start = geometry.get("start", [0, 0])
-            end = geometry.get("end", [0, 0])
+            start = sg.start or (0.0, 0.0)
+            end = sg.end or (0.0, 0.0)
             cx, cy = entry.center_xy_mm
             lines.append([
                 (float(start[0]) + cx, float(start[1]) + cy),

@@ -32,8 +32,8 @@ def test_profile_hint_through_cut():
     assert intent.bounds.x_max == 200.0
     assert intent.bounds.y_min == 50.0
     assert intent.bounds.y_max == 100.0
-    assert intent.metadata["hint_type"] == "profile"
-    assert intent.metadata["side"] == "outside"
+    assert intent.hint_type == "profile"
+    assert intent.side == "outside"
 
     print("  PASS")
     return True
@@ -77,7 +77,7 @@ def test_profile_hint_inside_cut():
 
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
 
-    assert intent.metadata["side"] == "inside"
+    assert intent.side == "inside"
     assert intent.allowance.inside == 0.0
 
     print("  PASS")
@@ -102,7 +102,7 @@ def test_pocket_hint_basic():
     assert intent.depth_mm() == 5.0
     assert intent.bounds.x_min == 60.0
     assert intent.bounds.x_max == 140.0
-    assert intent.metadata["hint_type"] == "pocket"
+    assert intent.hint_type == "pocket"
 
     print("  PASS")
     return True
@@ -151,7 +151,7 @@ def test_hole_hint_circle():
     assert intent.bounds.x_max == 55.0
     assert intent.bounds.y_min == 45.0
     assert intent.bounds.y_max == 55.0
-    assert intent.metadata["hint_type"] == "hole"
+    assert intent.hint_type == "hole"
 
     print("  PASS")
     return True
@@ -173,7 +173,7 @@ def test_engrave_hint():
     assert intent.depth_profile.z_top == 0.0
     assert intent.depth_profile.z_bottom == -0.5
     assert intent.depth_mm() == 0.5
-    assert intent.metadata["hint_type"] == "engrave"
+    assert intent.hint_type == "engrave"
 
     print("  PASS")
     return True
@@ -304,10 +304,10 @@ def test_metadata_preservation():
 
     intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=12.0)
 
-    assert intent.metadata["hint_type"] == "profile"
-    assert intent.metadata["shape"] == "Rect"
-    assert intent.metadata["side"] == "inside"
-    assert intent.metadata["original_id"] == "custom_shape"
+    assert intent.hint_type == "profile"
+    assert intent.shape == "Rect"
+    assert intent.side == "inside"
+    assert intent.original_id == "custom_shape"
 
     print("  PASS")
     return True

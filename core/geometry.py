@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from typing import Any, TYPE_CHECKING
 
-from ir.removal_intent import Bounds2D
+from ir.removal_intent import Bounds2D, ShapeGeometry
 from core.constants import ShapeType, GeometryKeys
 
 if TYPE_CHECKING:
@@ -205,55 +205,33 @@ def clip_line_to_domain(
 def extract_shape_geometry(
     shape: str,
     bounds: Bounds2D,
-    metadata: dict[str, Any],
-) -> dict[str, Any]:
-    geometry: dict[str, Any] = {}
-
+    shape_geometry: "ShapeGeometry",
+) -> "ShapeGeometry":
     if ShapeType.is_rect(shape):
-        geometry = {
-            GeometryKeys.W_MM: bounds.width,
-            GeometryKeys.H_MM: bounds.height,
-        }
+        return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
     elif ShapeType.is_circle(shape):
-        if GeometryKeys.DIAMETER_MM in metadata:
-            diameter_mm = metadata[GeometryKeys.DIAMETER_MM]
-        else:
-            diameter_mm = bounds.width
-        geometry = {GeometryKeys.DIAMETER_MM: diameter_mm}
+        diameter_mm = shape_geometry.diameter_mm if shape_geometry.diameter_mm is not None else bounds.width
+        return ShapeGeometry(diameter_mm=diameter_mm)
     elif ShapeType.is_polygon(shape):
-        if GeometryKeys.POINTS in metadata:
-            geometry = {GeometryKeys.POINTS: metadata[GeometryKeys.POINTS]}
-        else:
-            geometry = {
-                GeometryKeys.W_MM: bounds.width,
-                GeometryKeys.H_MM: bounds.height,
-            }
+        if shape_geometry.points is not None:
+            return ShapeGeometry(points=shape_geometry.points)
+        return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
     elif shape == ShapeType.ROUNDED_RECT:
-        geometry = {
-            GeometryKeys.W_MM: bounds.width,
-            GeometryKeys.H_MM: bounds.height,
-        }
-        if GeometryKeys.RADIUS_MM in metadata:
-            geometry[GeometryKeys.RADIUS_MM] = metadata[GeometryKeys.RADIUS_MM]
-        for key in (GeometryKeys.RADIUS_TL_MM, GeometryKeys.RADIUS_TR_MM,
-                    GeometryKeys.RADIUS_BR_MM, GeometryKeys.RADIUS_BL_MM):
-            if key in metadata:
-                geometry[key] = metadata[key]
+        return ShapeGeometry(
+            w_mm=bounds.width,
+            h_mm=bounds.height,
+            radius_mm=shape_geometry.radius_mm,
+            radius_tl_mm=shape_geometry.radius_tl_mm,
+            radius_tr_mm=shape_geometry.radius_tr_mm,
+            radius_br_mm=shape_geometry.radius_br_mm,
+            radius_bl_mm=shape_geometry.radius_bl_mm,
+        )
     elif ShapeType.is_polyline(shape):
-        if GeometryKeys.POINTS in metadata:
-            geometry = {GeometryKeys.POINTS: metadata[GeometryKeys.POINTS]}
-        else:
-            geometry = {
-                GeometryKeys.W_MM: bounds.width,
-                GeometryKeys.H_MM: bounds.height,
-            }
+        if shape_geometry.points is not None:
+            return ShapeGeometry(points=shape_geometry.points)
+        return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
     else:
-        geometry = {
-            GeometryKeys.W_MM: bounds.width,
-            GeometryKeys.H_MM: bounds.height,
-        }
-
-    return geometry
+        return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
 
 
 def extract_circle_diameter(

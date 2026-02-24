@@ -200,25 +200,24 @@ def test_removal_intent_with_constraints():
     return True
 
 
-def test_removal_intent_with_metadata():
-    print("Running test_removal_intent_with_metadata...")
+def test_removal_intent_with_typed_fields():
+    print("Running test_removal_intent_with_typed_fields...")
     bounds = Bounds2D(x_min=0.0, x_max=50.0, y_min=0.0, y_max=30.0)
-    metadata = {
-        "shape_id": "rect_1",
-        "feature_type": "pocket",
-        "tool_id": "6mm_endmill",
-    }
 
     intent = RemovalIntent(
         region_id="pocket_1",
         bounds=bounds,
         depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-5.0),
-        metadata=metadata,
+        shape_id="rect_1",
+        feature_type="pocket",
+        hint_type="pocket",
+        shape="Rect",
     )
 
-    assert intent.metadata["shape_id"] == "rect_1"
-    assert intent.metadata["feature_type"] == "pocket"
-    assert intent.metadata["tool_id"] == "6mm_endmill"
+    assert intent.shape_id == "rect_1"
+    assert intent.feature_type == "pocket"
+    assert intent.hint_type == "pocket"
+    assert intent.shape == "Rect"
     print("  PASS")
     return True
 
@@ -259,7 +258,9 @@ def test_removal_intent_to_dict():
         depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-12.0),
         allowance=allowance,
         constraints=constraints,
-        metadata={"shape_id": "rect_1"},
+        shape_id="rect_1",
+        hint_type="profile",
+        shape="Rect",
     )
 
     data = intent.to_dict()
@@ -274,7 +275,9 @@ def test_removal_intent_to_dict():
     assert data["depth_profile"]["depth_mm"] == 12.0
     assert data["allowance"]["outside"] == -0.5
     assert data["constraints"]["tabs"]["count"] == 4
-    assert data["metadata"]["shape_id"] == "rect_1"
+    assert data["shape_id"] == "rect_1"
+    assert data["hint_type"] == "profile"
+    assert data["shape"] == "Rect"
     print("  PASS")
     return True
 
@@ -489,7 +492,7 @@ if __name__ == "__main__":
         test_removal_intent_minimal,
         test_removal_intent_with_allowance,
         test_removal_intent_with_constraints,
-        test_removal_intent_with_metadata,
+        test_removal_intent_with_typed_fields,
         test_removal_intent_invalid_depth,
         test_removal_intent_to_dict,
         test_removal_intent_depth_calculation,

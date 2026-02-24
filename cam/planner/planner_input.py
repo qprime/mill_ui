@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from ir.removal_intent import ShapeGeometry
+
 
 @dataclass(frozen=True)
 class KeepoutInput:
@@ -39,10 +41,33 @@ class TabsInput:
 @dataclass(frozen=True)
 class GeometryInput:
     shape: str
-    data: dict[str, Any] = field(default_factory=dict)
+    geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
 
     def to_dict(self) -> dict[str, Any]:
-        return dict(self.data)
+        result: dict[str, Any] = {}
+        if self.geometry.w_mm is not None:
+            result["w_mm"] = self.geometry.w_mm
+        if self.geometry.h_mm is not None:
+            result["h_mm"] = self.geometry.h_mm
+        if self.geometry.diameter_mm is not None:
+            result["diameter_mm"] = self.geometry.diameter_mm
+        if self.geometry.points is not None:
+            result["points"] = [list(p) for p in self.geometry.points]
+        if self.geometry.radius_mm is not None:
+            result["radius_mm"] = self.geometry.radius_mm
+        if self.geometry.radius_tl_mm is not None:
+            result["radius_tl_mm"] = self.geometry.radius_tl_mm
+        if self.geometry.radius_tr_mm is not None:
+            result["radius_tr_mm"] = self.geometry.radius_tr_mm
+        if self.geometry.radius_br_mm is not None:
+            result["radius_br_mm"] = self.geometry.radius_br_mm
+        if self.geometry.radius_bl_mm is not None:
+            result["radius_bl_mm"] = self.geometry.radius_bl_mm
+        if self.geometry.start is not None:
+            result["start"] = list(self.geometry.start)
+        if self.geometry.end is not None:
+            result["end"] = list(self.geometry.end)
+        return result
 
 
 @dataclass(frozen=True)
@@ -151,7 +176,28 @@ class PlannerInput:
             )
 
         def parse_geometry(g: dict[str, Any], shape: str) -> GeometryInput:
-            return GeometryInput(shape=shape, data=dict(g))
+            points_raw = g.get("points")
+            points: tuple[tuple[float, float], ...] | None = None
+            if points_raw is not None:
+                points = tuple((float(p[0]), float(p[1])) for p in points_raw)
+            start_raw = g.get("start")
+            start: tuple[float, float] | None = (float(start_raw[0]), float(start_raw[1])) if start_raw is not None else None
+            end_raw = g.get("end")
+            end: tuple[float, float] | None = (float(end_raw[0]), float(end_raw[1])) if end_raw is not None else None
+            geom = ShapeGeometry(
+                w_mm=float(g["w_mm"]) if "w_mm" in g else None,
+                h_mm=float(g["h_mm"]) if "h_mm" in g else None,
+                diameter_mm=float(g["diameter_mm"]) if "diameter_mm" in g else None,
+                points=points,
+                radius_mm=float(g["radius_mm"]) if "radius_mm" in g else None,
+                radius_tl_mm=float(g["radius_tl_mm"]) if "radius_tl_mm" in g else None,
+                radius_tr_mm=float(g["radius_tr_mm"]) if "radius_tr_mm" in g else None,
+                radius_br_mm=float(g["radius_br_mm"]) if "radius_br_mm" in g else None,
+                radius_bl_mm=float(g["radius_bl_mm"]) if "radius_bl_mm" in g else None,
+                start=start,
+                end=end,
+            )
+            return GeometryInput(shape=shape, geometry=geom)
 
         def parse_feature(f: dict[str, Any]) -> FeatureInput:
             shape = str(f.get("shape", "Rect"))

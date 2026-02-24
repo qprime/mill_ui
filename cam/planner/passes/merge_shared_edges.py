@@ -72,9 +72,8 @@ def merge_rect_profiles(
     for idx, rec in enumerate(rect_profiles):
         rect_id = rec.id or f"rect@{idx}"
         cx, cy = rec.center_xy_mm
-        geom = rec.geometry.data
-        width = float(geom.get("w_mm", 0.0))
-        height = float(geom.get("h_mm", 0.0))
+        width = float(rec.geometry.geometry.w_mm or 0.0)
+        height = float(rec.geometry.geometry.h_mm or 0.0)
         depth = rec.depth_mm
         rect_depths[rect_id] = depth
         edges.extend(_rect_edges(cx, cy, width, height, rect_id))

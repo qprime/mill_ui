@@ -29,6 +29,7 @@ from cam.planner.passes.pocket import (
 from cam.planner.passes.merge_shared_edges import _rect_edges, _overlap_len
 from cam.moves import CutMove, RapidMove, RetractMove, XYMove
 from cam.planner.planner_input import FeatureInput, GeometryInput
+from ir.removal_intent import ShapeGeometry
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
@@ -367,10 +368,24 @@ class TestOverlapLen:
 
 
 def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
+    points_raw = geometry.get("points")
+    points = tuple((float(p[0]), float(p[1])) for p in points_raw) if points_raw else None
+    start_raw = geometry.get("start")
+    start = (float(start_raw[0]), float(start_raw[1])) if start_raw else None
+    end_raw = geometry.get("end")
+    end = (float(end_raw[0]), float(end_raw[1])) if end_raw else None
+    shape_geometry = ShapeGeometry(
+        w_mm=float(geometry["w_mm"]) if "w_mm" in geometry else None,
+        h_mm=float(geometry["h_mm"]) if "h_mm" in geometry else None,
+        diameter_mm=float(geometry["diameter_mm"]) if "diameter_mm" in geometry else None,
+        points=points,
+        start=start,
+        end=end,
+    )
     return FeatureInput(
         id=id,
         shape=shape,
-        geometry=GeometryInput(shape=shape, data=geometry),
+        geometry=GeometryInput(shape=shape, geometry=shape_geometry),
         center_xy_mm=center,
         depth_mm=depth,
         start_depth_mm=start_depth,

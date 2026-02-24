@@ -174,8 +174,8 @@ def test_ast_to_removal_intent_with_tabs():
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
 
     assert intent.depth_mm() == 19.0
-    assert intent.metadata["hint_type"] == "profile"
-    assert intent.metadata["side"] == "outside"
+    assert intent.hint_type == "profile"
+    assert intent.side == "outside"
 
     assert intent.constraints.tabs is not None
     assert isinstance(intent.constraints.tabs, TabConstraint)
@@ -254,14 +254,14 @@ children:
     assert len(intents) == 2
 
     profile_intent = intents[0]
-    assert profile_intent.metadata["hint_type"] == "profile"
+    assert profile_intent.hint_type == "profile"
     assert profile_intent.constraints.tabs is not None
     assert profile_intent.constraints.tabs.count == 4
     assert profile_intent.constraints.tabs.height_mm == 3.0
     assert profile_intent.constraints.tabs.width_mm == 10.0
 
     pocket_intent = intents[1]
-    assert pocket_intent.metadata["hint_type"] == "pocket"
+    assert pocket_intent.hint_type == "pocket"
     assert pocket_intent.constraints.tabs is None
 
     print("  ✓ PASS")

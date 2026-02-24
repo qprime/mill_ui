@@ -9,6 +9,7 @@ from cam.planner.passes.tools import normalize_tool_entries
 from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
 from cam.post.gcode import write_gcode
 from cam.config import Config
+from ir.removal_intent import ShapeGeometry
 
 
 TOOL_DB = [
@@ -32,9 +33,22 @@ def _make_test_fixtures():
 
 
 def _feature(shape, geometry, center, depth, side=None, id="test"):
+    points_raw = geometry.get("points")
+    points = tuple((float(p[0]), float(p[1])) for p in points_raw) if points_raw else None
+    shape_geometry = ShapeGeometry(
+        w_mm=float(geometry["w_mm"]) if "w_mm" in geometry else None,
+        h_mm=float(geometry["h_mm"]) if "h_mm" in geometry else None,
+        diameter_mm=float(geometry["diameter_mm"]) if "diameter_mm" in geometry else None,
+        points=points,
+        radius_mm=float(geometry["radius_mm"]) if "radius_mm" in geometry else None,
+        radius_tl_mm=float(geometry["radius_tl_mm"]) if "radius_tl_mm" in geometry else None,
+        radius_tr_mm=float(geometry["radius_tr_mm"]) if "radius_tr_mm" in geometry else None,
+        radius_br_mm=float(geometry["radius_br_mm"]) if "radius_br_mm" in geometry else None,
+        radius_bl_mm=float(geometry["radius_bl_mm"]) if "radius_bl_mm" in geometry else None,
+    )
     return FeatureInput(
         id=id, shape=shape,
-        geometry=GeometryInput(shape=shape, data=geometry),
+        geometry=GeometryInput(shape=shape, geometry=shape_geometry),
         center_xy_mm=center, depth_mm=depth, start_depth_mm=0.0,
         side=side,
     )

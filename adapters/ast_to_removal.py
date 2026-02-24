@@ -5,7 +5,16 @@ import logging
 from typing import Any
 
 from layout_ast.layout import LayoutAST, Item, Feature
-from ir.removal_intent import Allowance, Constraints, DepthProfile, RemovalIntent
+from ir.removal_intent import (
+    Allowance,
+    Constraints,
+    DepthProfile,
+    RemovalIntent,
+    BevelSpec,
+    ChamferSpec,
+    WaveSpec,
+    ShapeGeometry,
+)
 
 logger = logging.getLogger(__name__)
 from adapters.hints_to_removal import (
@@ -14,12 +23,12 @@ from adapters.hints_to_removal import (
     hole_hint_to_removal_intent,
     engrave_hint_to_removal_intent,
     _geometry_to_bounds,
+    _geometry_dict_to_shape_geometry,
 )
 from core.geometry import calculate_angled_depth
 from core.constants import (
     HintKeys,
     TabKeys,
-    MetadataKeys,
     FeatureType,
 )
 
@@ -104,11 +113,7 @@ def item_to_removal_intent(
 
         return _build_edge_feature_intent(
             hint, item, FeatureType.BEVEL, calculated_depth,
-            {MetadataKeys.BEVEL: {
-                MetadataKeys.WIDTH_MM: bevel_width,
-                MetadataKeys.ANGLE_DEG: bevel_angle,
-                MetadataKeys.INNER_DEPTH_MM: inner_depth,
-            }},
+            bevel=BevelSpec(width_mm=bevel_width, angle_deg=bevel_angle, inner_depth_mm=inner_depth),
         )
 
     elif item.feature.type == FeatureType.CHAMFER:
@@ -119,28 +124,22 @@ def item_to_removal_intent(
 
         return _build_edge_feature_intent(
             hint, item, FeatureType.CHAMFER, calculated_depth,
-            {
-                HintKeys.SIDE: side,
-                MetadataKeys.CHAMFER: {
-                    MetadataKeys.WIDTH_MM: chamfer_width,
-                    MetadataKeys.ANGLE_DEG: chamfer_angle,
-                },
-            },
+            side=side,
+            chamfer=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
         )
 
     elif item.feature.type == FeatureType.WAVE:
         depth_mm = item.feature.depth_mm or 0.0
         geometry_data = item.geometry.data if item.geometry else {}
-        wave_metadata = {
-            "wave_count": geometry_data.get("wave_count"),
-            "amplitude_mm": geometry_data.get("wave_amplitude_mm"),
-            "wavelength_mm": geometry_data.get("wave_wavelength_mm"),
-            "groove_width_mm": geometry_data.get("wave_groove_width_mm"),
-        }
 
         return _build_edge_feature_intent(
             hint, item, FeatureType.WAVE, depth_mm,
-            {"wave": wave_metadata},
+            wave=WaveSpec(
+                wave_count=int(geometry_data.get("wave_count") or 0),
+                amplitude_mm=float(geometry_data.get("wave_amplitude_mm") or 0.0),
+                wavelength_mm=float(geometry_data.get("wave_wavelength_mm") or 0.0),
+                groove_width_mm=float(geometry_data.get("wave_groove_width_mm") or 0.0),
+            ),
         )
 
     else:
@@ -158,31 +157,33 @@ def _build_edge_feature_intent(
     item: Item,
     feature_type: str,
     depth_mm: float,
-    extra_metadata: dict[str, Any],
+    side: str | None = None,
+    bevel: BevelSpec | None = None,
+    chamfer: ChamferSpec | None = None,
+    wave: WaveSpec | None = None,
 ) -> RemovalIntent:
-    bounds = _geometry_to_bounds(
-        hint[HintKeys.SHAPE],
-        hint[HintKeys.GEOMETRY],
-        hint[HintKeys.CENTER_XY_MM],
-    )
-
+    shape = hint[HintKeys.SHAPE]
+    geometry = hint[HintKeys.GEOMETRY]
+    bounds = _geometry_to_bounds(shape, geometry, hint[HintKeys.CENTER_XY_MM])
     depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm)
-
-    metadata = {
-        MetadataKeys.HINT_TYPE: feature_type,
-        MetadataKeys.ITEM_TYPE: item.type,
-        MetadataKeys.FEATURE_TYPE: item.feature.type,
-        MetadataKeys.SHAPE_ID: item.shape_id,
-    }
-    metadata.update(extra_metadata)
+    shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
 
     return RemovalIntent(
         region_id=f"{feature_type}_{hint[HintKeys.ID]}",
         bounds=bounds,
         depth_profile=depth_profile,
+        hint_type=feature_type,
+        shape=shape,
+        side=side,
+        item_type=item.type,
+        feature_type=item.feature.type,
+        shape_id=item.shape_id,
+        shape_geometry=shape_geometry,
+        bevel=bevel,
+        chamfer=chamfer,
+        wave=wave,
         allowance=Allowance(),
         constraints=Constraints(),
-        metadata=metadata,
     )
 
 

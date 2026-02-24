@@ -265,7 +265,7 @@ class TestAdapterKeepoutExtraction:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            metadata={"hint_type": "pocket", "shape": "Rect"},
+            hint_type="pocket", shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 
@@ -289,14 +289,14 @@ class TestAdapterKeepoutExtraction:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            metadata={"hint_type": "pocket", "shape": "Rect"},
+            hint_type="pocket", shape="Rect",
         )
         intent2 = RemovalIntent(
             region_id="test2",
             bounds=Bounds2D(x_min=100, x_max=200, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            metadata={"hint_type": "pocket", "shape": "Rect"},
+            hint_type="pocket", shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent1, intent2])
 
@@ -320,7 +320,7 @@ class TestTypedPlannerInput:
                 keepouts=(keepout,),
                 tabs=TabConstraint(count=4, height_mm=3, width_mm=10),
             ),
-            metadata={"hint_type": "profile", "shape": "Rect"},
+            hint_type="profile", shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 
@@ -345,7 +345,7 @@ class TestTypedPlannerInput:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            metadata={"hint_type": "pocket", "shape": "Rect"},
+            hint_type="pocket", shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
         hints_dict = planner_input.to_hints_dict()
@@ -364,7 +364,7 @@ class TestTypedPlannerInput:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(tabs=TabConstraint(count=4, height_mm=3, width_mm=10)),
-            metadata={"hint_type": "profile", "shape": "Rect"},
+            hint_type="profile", shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 

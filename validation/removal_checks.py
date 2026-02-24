@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from core.constants import FeatureType, MetadataKeys
+from core.constants import FeatureType
 from ir.removal_intent import Bounds2D, RemovalIntent
 from validation.core import ValidationResult
 
@@ -54,11 +54,11 @@ def check_depth_profile(
             )
 
 
-    bevel_data = intent.metadata.get("bevel")
+    bevel_data = intent.bevel
     if bevel_data:
-        bevel_width = bevel_data.get("width_mm", 0)
-        bevel_angle = bevel_data.get("angle_deg", 45)
-        inner_depth = bevel_data.get("inner_depth_mm", 0)
+        bevel_width = bevel_data.width_mm
+        bevel_angle = bevel_data.angle_deg
+        inner_depth = bevel_data.inner_depth_mm
 
 
         if bevel_angle > 0 and bevel_angle < 90:
@@ -84,8 +84,8 @@ def _match_feature_types(
     type_a: str,
     type_b: str | tuple[str, ...],
 ) -> tuple[RemovalIntent, RemovalIntent] | None:
-    hint_type_a = a.metadata.get(MetadataKeys.HINT_TYPE, "")
-    hint_type_b = b.metadata.get(MetadataKeys.HINT_TYPE, "")
+    hint_type_a = a.hint_type
+    hint_type_b = b.hint_type
 
     type_b_set = (type_b,) if isinstance(type_b, str) else type_b
 
@@ -101,9 +101,7 @@ def _match_same_type(
     b: RemovalIntent,
     feature_type: str,
 ) -> bool:
-    hint_type_a = a.metadata.get(MetadataKeys.HINT_TYPE, "")
-    hint_type_b = b.metadata.get(MetadataKeys.HINT_TYPE, "")
-    return hint_type_a == feature_type and hint_type_b == feature_type
+    return a.hint_type == feature_type and b.hint_type == feature_type
 
 
 def _are_perpendicular_pockets(a: RemovalIntent, b: RemovalIntent) -> bool:
@@ -266,7 +264,7 @@ def check_toolpath_clearance(
 
     outside_profiles = [
         i for i in intents
-        if i.metadata.get("side") == "outside" and i.metadata.get("hint_type") == "profile"
+        if i.side == "outside" and i.hint_type == "profile"
     ]
 
     for i, a in enumerate(outside_profiles):
@@ -326,7 +324,7 @@ def check_working_area_bounds(
 
     for intent in intents:
         bounds = intent.bounds
-        side = intent.metadata.get("side", "on")
+        side = intent.side or "on"
 
         offset = tool_diameter_mm if side == "outside" else 0.0
 

@@ -177,9 +177,8 @@ def plan_passes(
         for rec in rect_profiles:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
             record = accumulator.get_record("profile", profile_tool)
-            geom = rec.geometry.data
-            width = float(geom.get("w_mm", 0.0))
-            height = float(geom.get("h_mm", 0.0))
+            width = float(rec.geometry.geometry.w_mm or 0.0)
+            height = float(rec.geometry.geometry.h_mm or 0.0)
             shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
             depth = max(0.0, rec.depth_mm) + cut_through_mm
             record.add_moves(
@@ -197,8 +196,7 @@ def plan_passes(
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.geometry.data
-        diameter = float(geom.get("diameter_mm", 0.0))
+        diameter = float(rec.geometry.geometry.diameter_mm or 0.0)
         radius = 0.5 * diameter
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
@@ -225,8 +223,8 @@ def plan_passes(
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.geometry.data
-        points = geom.get("points", [])
+        raw_points = rec.geometry.geometry.points
+        points = [list(p) for p in raw_points] if raw_points is not None else []
         if not points:
             continue
         side = (rec.side or "on").lower()
@@ -258,14 +256,15 @@ def plan_passes(
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         record = accumulator.get_record("profile", profile_tool)
-        geom = rec.geometry.data
-        width = float(geom.get("w_mm", 0.0))
-        height = float(geom.get("h_mm", 0.0))
+        sg = rec.geometry.geometry
+        width = float(sg.w_mm or 0.0)
+        height = float(sg.h_mm or 0.0)
+        fallback_r = float(sg.radius_mm or 0.0)
         radii = {
-            'tl': float(geom.get('radius_tl_mm', geom.get('radius_mm', 0.0))),
-            'tr': float(geom.get('radius_tr_mm', geom.get('radius_mm', 0.0))),
-            'br': float(geom.get('radius_br_mm', geom.get('radius_mm', 0.0))),
-            'bl': float(geom.get('radius_bl_mm', geom.get('radius_mm', 0.0))),
+            'tl': float(sg.radius_tl_mm if sg.radius_tl_mm is not None else fallback_r),
+            'tr': float(sg.radius_tr_mm if sg.radius_tr_mm is not None else fallback_r),
+            'br': float(sg.radius_br_mm if sg.radius_br_mm is not None else fallback_r),
+            'bl': float(sg.radius_bl_mm if sg.radius_bl_mm is not None else fallback_r),
         }
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter

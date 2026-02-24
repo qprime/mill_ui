@@ -293,7 +293,6 @@ children:
                 finish_allowance_mm=edge_finish
             )
         ),
-        metadata=base_removal.metadata
     )
 
 

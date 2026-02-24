@@ -5,6 +5,7 @@ import pytest
 from ir.removal_intent import (
     Allowance,
     Bounds2D,
+    BevelSpec,
     Constraints,
     DepthProfile,
     RemovalIntent,
@@ -16,7 +17,7 @@ def _intent(
     mode: str = "constant",
     z_top: float = 0.0,
     z_bottom: float = -5.0,
-    metadata: dict | None = None,
+    bevel: BevelSpec | None = None,
     **depth_kwargs,
 ) -> RemovalIntent:
     if mode == "linear_gradient":
@@ -38,7 +39,7 @@ def _intent(
         region_id="test_region",
         bounds=Bounds2D(x_min=0, x_max=50, y_min=0, y_max=50),
         depth_profile=dp,
-        metadata=metadata or {},
+        bevel=bevel,
     )
 
 
@@ -115,20 +116,12 @@ class TestVCarveMode:
 class TestBevelGeometry:
 
     def test_bevel_achievable(self):
-        intent = _intent(metadata={"bevel": {
-            "width_mm": 10.0,
-            "angle_deg": 45.0,
-            "inner_depth_mm": 9.0,
-        }})
+        intent = _intent(bevel=BevelSpec(width_mm=10.0, angle_deg=45.0, inner_depth_mm=9.0))
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
         assert len(result.warnings) == 0
 
     def test_bevel_unachievable(self):
-        intent = _intent(metadata={"bevel": {
-            "width_mm": 5.0,
-            "angle_deg": 30.0,
-            "inner_depth_mm": 20.0,
-        }})
+        intent = _intent(bevel=BevelSpec(width_mm=5.0, angle_deg=30.0, inner_depth_mm=20.0))
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
         assert len(result.warnings) == 1
         assert "Bevel inner depth" in result.warnings[0].message
@@ -140,20 +133,12 @@ class TestBevelGeometry:
         assert result.is_valid()
 
     def test_bevel_zero_angle_skips(self):
-        intent = _intent(metadata={"bevel": {
-            "width_mm": 10.0,
-            "angle_deg": 0,
-            "inner_depth_mm": 20.0,
-        }})
+        intent = _intent(bevel=BevelSpec(width_mm=10.0, angle_deg=0, inner_depth_mm=20.0))
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
         assert len(result.warnings) == 0
 
     def test_bevel_90_angle_skips(self):
-        intent = _intent(metadata={"bevel": {
-            "width_mm": 10.0,
-            "angle_deg": 90,
-            "inner_depth_mm": 20.0,
-        }})
+        intent = _intent(bevel=BevelSpec(width_mm=10.0, angle_deg=90, inner_depth_mm=20.0))
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
         assert len(result.warnings) == 0
 

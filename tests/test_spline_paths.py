@@ -130,7 +130,7 @@ children:
     assert removal.bounds.y_max <= 400.0
 
 
-    assert removal.metadata.get("feature_type") == "engrave"
+    assert removal.feature_type == "engrave"
 
 
 def test_tool_diameter_does_not_invalidate():

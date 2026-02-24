@@ -9,6 +9,7 @@ from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
 from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
+from ir.removal_intent import ShapeGeometry
 from cam.post.gcode import write_gcode
 from cam.config import Config
 from adapters.hints_to_removal import (
@@ -76,10 +77,19 @@ def _planner_input_from_hints(
 ) -> PlannerInput:
     def _to_feature(hint: dict[str, Any]) -> FeatureInput:
         shape = hint.get("shape", "Rect")
+        geom = hint.get("geometry", {})
+        points_raw = geom.get("points")
+        points = tuple((float(p[0]), float(p[1])) for p in points_raw) if points_raw else None
+        shape_geometry = ShapeGeometry(
+            w_mm=float(geom["w_mm"]) if "w_mm" in geom else None,
+            h_mm=float(geom["h_mm"]) if "h_mm" in geom else None,
+            diameter_mm=float(geom["diameter_mm"]) if "diameter_mm" in geom else None,
+            points=points,
+        )
         return FeatureInput(
             id=hint.get("id", ""),
             shape=shape,
-            geometry=GeometryInput(shape=shape, data=hint.get("geometry", {})),
+            geometry=GeometryInput(shape=shape, geometry=shape_geometry),
             center_xy_mm=tuple(hint.get("center_xy_mm", (0.0, 0.0))),
             depth_mm=float(hint.get("depth_mm", 0.0)),
             start_depth_mm=float(hint.get("start_depth_mm", 0.0)),

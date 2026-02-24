@@ -1,14 +1,11 @@
-
+import re
 import tempfile
 from pathlib import Path
-import re
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
-from layout_ast.compositional import CompositionalLayoutAST, Rect, Frame, PocketGen, ProfileGen
-from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints
 from export.blueprint_svg import render_blueprint_svg
+from layout_ast.compositional import CompositionalLayoutAST, Frame, PocketGen, ProfileGen, Rect
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 from resolution.layout_resolver import LayoutResolver
-
 
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
@@ -30,10 +27,8 @@ def test_svg_output_deterministic():
         ),
     )
 
-
     svg1 = render_blueprint_svg(ast, theme="dark")
     svg2 = render_blueprint_svg(ast, theme="dark")
-
 
     assert svg1 == svg2, "SVG output should be deterministic"
     print("  ✓ PASS")
@@ -58,7 +53,6 @@ def test_required_layers_exist():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-
     required_layers = [
         'id="SHEET_OUTLINE"',
         'id="HOLES"',
@@ -67,12 +61,14 @@ def test_required_layers_exist():
     for layer in required_layers:
         assert layer in svg, f"Layer {layer} missing from SVG"
 
-    assert '<circle' in svg, "Hole should be rendered as circle"
+    assert "<circle" in svg, "Hole should be rendered as circle"
 
     print("  ✓ PASS")
 
 
-def _create_shaker_ast(outer_w: float, outer_h: float, stile_w: float, rail_h: float, panel_recess: float, sheet_thickness: float) -> LayoutAST:
+def _create_shaker_ast(
+    outer_w: float, outer_h: float, stile_w: float, rail_h: float, panel_recess: float, sheet_thickness: float
+) -> LayoutAST:
     sheet = Sheet(width_mm=outer_w, height_mm=outer_h, thickness_mm=sheet_thickness, margin_mm=0.0)
     root = Rect(
         children=(
@@ -129,18 +125,16 @@ def test_theme_toggle():
     svg_dark = render_blueprint_svg(ast, theme="dark")
     svg_print = render_blueprint_svg(ast, theme="print")
 
-
     assert "#1a1a1a" in svg_dark, "Dark theme should have dark background"
     assert "#ffffff" in svg_print, "Print theme should have white background"
 
-
     def extract_rects(svg):
         import re
+
         return re.findall(r'<rect[^>]*width="[^"]*"[^>]*height="[^"]*"[^>]*/>', svg)
 
     dark_rects = extract_rects(svg_dark)
     print_rects = extract_rects(svg_print)
-
 
     assert len(dark_rects) == len(print_rects), "Themes should not change geometry count"
 
@@ -182,11 +176,9 @@ def test_multiple_feature_types():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-
     assert 'class="profile-cuts"' in svg
     assert 'class="pocket-regions"' in svg
     assert 'class="holes"' in svg
-
 
     assert svg.count("<rect") >= 3
     assert svg.count("<circle") >= 1
@@ -204,9 +196,9 @@ def test_viewbox_dimensions():
 
     svg = render_blueprint_svg(ast, theme="dark")
 
-    assert 'viewBox=' in svg, "SVG should have viewBox attribute"
-    assert 'width=' in svg, "SVG should have width attribute"
-    assert 'height=' in svg, "SVG should have height attribute"
+    assert "viewBox=" in svg, "SVG should have viewBox attribute"
+    assert "width=" in svg, "SVG should have width attribute"
+    assert "height=" in svg, "SVG should have height attribute"
 
     print("  ✓ PASS")
 
@@ -229,7 +221,6 @@ def test_rounded_rect_rendering():
     )
 
     svg = render_blueprint_svg(ast, theme="dark")
-
 
     assert "<svg" in svg
     assert 'id="PROFILE_CUTS"' in svg
@@ -257,7 +248,6 @@ def test_golden_file_simple_profile():
     svg = render_blueprint_svg(ast, theme="dark")
     golden_path = GOLDEN_DIR / "simple_profile_dark.svg"
 
-
     svg_normalized = _normalize_svg(svg)
 
     if golden_path.exists():
@@ -266,11 +256,10 @@ def test_golden_file_simple_profile():
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
         print("  ✓ PASS")
     else:
-
         import os
+
         if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
             raise AssertionError(f"Golden file missing in CI: {golden_path}")
-
 
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
@@ -301,11 +290,10 @@ def test_golden_file_shaker_door():
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
         print("  ✓ PASS")
     else:
-
         import os
+
         if os.getenv("CI") or os.getenv("GITHUB_ACTIONS"):
             raise AssertionError(f"Golden file missing in CI: {golden_path}")
-
 
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
@@ -373,7 +361,6 @@ def test_pdf_export():
             pdf_path = Path(tmpdir) / "test.pdf"
             svg_to_pdf(svg, pdf_path)
 
-
             assert pdf_path.exists(), "PDF file was not created"
             assert pdf_path.stat().st_size > 0, "PDF file is empty"
 
@@ -385,11 +372,11 @@ def test_pdf_export():
 
 def _normalize_svg(svg_text: str) -> str:
 
-    normalized = re.sub(r'>\s+<', '><', svg_text)
+    normalized = re.sub(r">\s+<", "><", svg_text)
 
-    normalized = '\n'.join(line.strip() for line in normalized.split('\n'))
+    normalized = "\n".join(line.strip() for line in normalized.split("\n"))
 
-    normalized = '\n'.join(line for line in normalized.split('\n') if line)
+    normalized = "\n".join(line for line in normalized.split("\n") if line)
     return normalized
 
 
@@ -418,6 +405,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

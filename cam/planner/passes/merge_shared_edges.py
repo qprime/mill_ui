@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Sequence, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from cam.types import Vec2
-from cam.shape import Shape2D
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import FeatureInput
+from cam.shape import Shape2D
+from cam.types import Vec2
 
-from .profile import rect_shape
 from .tools import ToolSelection, stepdown_for_tool
 
 if TYPE_CHECKING:
     from cam.config import Config
+
     from . import PassRecord
 
 
@@ -34,7 +35,7 @@ class _Edge:
         return abs(self.b - self.a)
 
 
-def _rect_edges(cx: float, cy: float, w: float, h: float, rect_id: str) -> List[_Edge]:
+def _rect_edges(cx: float, cy: float, w: float, h: float, rect_id: str) -> list[_Edge]:
     minx, miny = cx - w / 2.0, cy - h / 2.0
     maxx, maxy = cx + w / 2.0, cy + h / 2.0
     return [
@@ -54,9 +55,9 @@ def _overlap_len(a1: float, a2: float, b1: float, b2: float) -> float:
 def merge_rect_profiles(
     rect_profiles: Sequence[FeatureInput],
     *,
-    record: "PassRecord",
+    record: PassRecord,
     tool: ToolSelection,
-    config: "Config",
+    config: Config,
     cut_through_mm: float,
 ) -> int:
     if not rect_profiles:
@@ -66,8 +67,8 @@ def merge_rect_profiles(
     min_overlap_mm = max(config.min_overlap_mm, 0.0)
     min_overlap_ratio = max(config.min_overlap_ratio, 0.0)
 
-    edges: List[_Edge] = []
-    rect_depths: Dict[str, float] = {}
+    edges: list[_Edge] = []
+    rect_depths: dict[str, float] = {}
 
     for idx, rec in enumerate(rect_profiles):
         rect_id = rec.id or f"rect@{idx}"
@@ -78,17 +79,17 @@ def merge_rect_profiles(
         rect_depths[rect_id] = depth
         edges.extend(_rect_edges(cx, cy, width, height, rect_id))
 
-    buckets: Dict[Tuple[str, int], List[_Edge]] = {}
+    buckets: dict[tuple[str, int], list[_Edge]] = {}
     for edge in edges:
-        buckets.setdefault((edge.orient, int(round(edge.coord / merge_tol))), []).append(edge)
+        buckets.setdefault((edge.orient, round(edge.coord / merge_tol)), []).append(edge)
 
     setup = record.setup
     seam_count = 0
-    used_pairs: set[Tuple[str, str, int]] = set()
+    used_pairs: set[tuple[str, str, int]] = set()
     tool_radius = float(tool.diameter) * 0.5
     step_down = stepdown_for_tool(tool)
 
-    for key, bucket_edges in buckets.items():
+    for _, bucket_edges in buckets.items():
         if len(bucket_edges) < 2:
             continue
         n = len(bucket_edges)
@@ -101,7 +102,7 @@ def merge_rect_profiles(
                     continue
                 if abs(a.coord - b.coord) > merge_tol:
                     continue
-                pair_id = tuple(sorted((a.rect_id, b.rect_id))) + (int(round(a.coord * 1e3)),)
+                pair_id = (*sorted((a.rect_id, b.rect_id)), round(a.coord * 1e3))
                 if pair_id in used_pairs:
                     continue
                 overlap = _overlap_len(a.a, a.b, b.a, b.b)
@@ -128,7 +129,7 @@ def merge_rect_profiles(
                 used_pairs.add(pair_id)
 
     for edge in edges:
-        bucket = buckets.get((edge.orient, int(round(edge.coord / merge_tol))), [])
+        bucket = buckets.get((edge.orient, round(edge.coord / merge_tol)), [])
         has_partner = False
         for other in bucket:
             if other.rect_id == edge.rect_id:
@@ -146,10 +147,18 @@ def merge_rect_profiles(
 
         rect_depth = rect_depths[edge.rect_id] + cut_through_mm
         if edge.orient == "v":
-            x_off = edge.coord - tool_radius if math.isclose(edge.coord, edge.minx, abs_tol=merge_tol) else edge.coord + tool_radius
+            x_off = (
+                edge.coord - tool_radius
+                if math.isclose(edge.coord, edge.minx, abs_tol=merge_tol)
+                else edge.coord + tool_radius
+            )
             seam_shape = Shape2D([Vec2(x_off, edge.a), Vec2(x_off, edge.b)])
         else:
-            y_off = edge.coord - tool_radius if math.isclose(edge.coord, edge.miny, abs_tol=merge_tol) else edge.coord + tool_radius
+            y_off = (
+                edge.coord - tool_radius
+                if math.isclose(edge.coord, edge.miny, abs_tol=merge_tol)
+                else edge.coord + tool_radius
+            )
             seam_shape = Shape2D([Vec2(edge.a, y_off), Vec2(edge.b, y_off)])
         moves = profile_outline(seam_shape, setup, depth_mm=rect_depth, step_down=step_down)
         record.add_moves(moves, increment=1)

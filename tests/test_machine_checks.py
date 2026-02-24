@@ -4,7 +4,7 @@ import pytest
 
 from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, Wasteboard2D
 from ir.removal_intent import Bounds2D
-from layout_ast.layout import Sheet, LayoutAST
+from layout_ast.layout import LayoutAST, Sheet
 from validation.core import Verdict
 from validation.machine_checks import (
     check_job_fits_machine,
@@ -46,7 +46,6 @@ def _endmill(diameter: float = 6.35, flute_length: float = 25.0) -> Endmill:
 
 
 class TestCheckJobFitsMachine:
-
     def test_job_inside_envelope(self):
         mc = _machine()
         bounds = Bounds2D(x_min=10, x_max=500, y_min=10, y_max=500)
@@ -113,7 +112,6 @@ class TestCheckJobFitsMachine:
 
 
 class TestCheckSheetFitsMachine:
-
     def test_sheet_fits(self):
         mc = _machine()
         ast = LayoutAST(
@@ -134,7 +132,6 @@ class TestCheckSheetFitsMachine:
 
 
 class TestCheckMchEnvelopePositive:
-
     def test_valid_envelope(self):
         mc = _machine()
         result = check_mch_envelope_positive(mc)
@@ -153,7 +150,6 @@ class TestCheckMchEnvelopePositive:
 
 
 class TestCheckMchWasteboardFits:
-
     def test_no_wasteboard(self):
         mc = _machine()
         result = check_mch_wasteboard_fits(mc)
@@ -201,7 +197,6 @@ class TestCheckMchWasteboardFits:
 
 
 class TestCheckMchEffectiveEnvelopeShrinks:
-
     def test_shrinks_with_endmill(self):
         mc = _machine()
         endmill = _endmill(diameter=6.35)
@@ -218,7 +213,6 @@ class TestCheckMchEffectiveEnvelopeShrinks:
 
 
 class TestCheckMchEndmillPositive:
-
     def test_valid_endmill(self):
         endmill = _endmill()
         result = check_mch_endmill_positive(endmill)
@@ -227,7 +221,6 @@ class TestCheckMchEndmillPositive:
 
 
 class TestValidateMachineConfig:
-
     def test_basic_config(self):
         mc = _machine()
         results = validate_machine_config(mc)

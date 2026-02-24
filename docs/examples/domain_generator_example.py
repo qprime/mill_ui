@@ -2,28 +2,26 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from domains import Domain, MultiDomain
+from adapters.ast_to_removal import ast_to_removal_intents
+from domains import Domain
 from generators import (
+    BeadParams,
     FlatPocketParams,
+    GridParams,
     ProfileParams,
     WaveParams,
-    GridParams,
-    BeadParams,
+    bead_generator,
     flat_pocket_generator,
+    grid_generator,
     profile_generator,
     wave_generator,
-    grid_generator,
-    bead_generator,
 )
-from layout_ast.layout import LayoutAST, Sheet, Item
-from adapters.ast_to_removal import ast_to_removal_intents
+from layout_ast.layout import LayoutAST, Sheet
 
 
 def create_shaker_door(
@@ -39,7 +37,6 @@ def create_shaker_door(
     print(f"Frame: {stile_w}mm stiles, {rail_h}mm rails")
     print(f"Panel recess: {panel_recess}mm")
 
-
     outer_domain = Domain.from_rectangle(
         width_mm=outer_w,
         height_mm=outer_h,
@@ -47,7 +44,6 @@ def create_shaker_door(
     )
     print(f"\nOuter domain: {outer_domain.bounds.width}mm x {outer_domain.bounds.height}mm")
     print(f"  Area: {outer_domain.area_mm2:.0f}mm²")
-
 
     panel_result = outer_domain.inset(stile_w)
 
@@ -57,7 +53,6 @@ def create_shaker_door(
     panel_domain = panel_result.domains[0]
     print(f"\nPanel domain: {panel_domain.bounds.width}mm x {panel_domain.bounds.height}mm")
     print(f"  Area: {panel_domain.area_mm2:.0f}mm²")
-
 
     profile_items = profile_generator(
         outer_domain,
@@ -69,16 +64,13 @@ def create_shaker_door(
     )
     print(f"\nProfile generator: {len(profile_items)} item(s)")
 
-
     pocket_items = flat_pocket_generator(
         panel_domain,
         FlatPocketParams(depth_mm=panel_recess),
     )
     print(f"Pocket generator: {len(pocket_items)} item(s)")
 
-
     all_items = profile_items + pocket_items
-
 
     margin = 25.0
     ast = LayoutAST(
@@ -90,7 +82,7 @@ def create_shaker_door(
         items=tuple(all_items),
     )
 
-    print(f"\nLayoutAST created:")
+    print("\nLayoutAST created:")
     print(f"  Sheet: {ast.sheet.width_mm}mm x {ast.sheet.height_mm}mm x {ast.sheet.thickness_mm}mm")
     print(f"  Items: {len(ast.items)}")
 
@@ -109,15 +101,12 @@ def create_wave_panel(
     print(f"Dimensions: {width}mm x {height}mm")
     print(f"Wave: {amplitude}mm amplitude, {wavelength}mm wavelength")
 
-
     panel = Domain.from_rectangle(width, height, center=(width / 2, height / 2))
-
 
     profile_items = profile_generator(
         panel,
         ProfileParams(side="outside", depth="through"),
     )
-
 
     wave_items = wave_generator(
         panel,
@@ -130,7 +119,6 @@ def create_wave_panel(
     )
 
     print(f"\nGenerated {len(wave_items)} wave segments")
-
 
     margin = 25.0
     ast = LayoutAST(
@@ -162,9 +150,9 @@ def create_beaded_frame_door(
     print(f"Frame: {frame_width}mm wide")
     print(f"Bead: {bead_width}mm wide, {bead_offset}mm offset, {bead_depth}mm deep")
 
-
     outer_domain = Domain.from_rectangle(
-        outer_w, outer_h,
+        outer_w,
+        outer_h,
         center=(outer_w / 2, outer_h / 2),
     )
 
@@ -173,7 +161,6 @@ def create_beaded_frame_door(
         raise ValueError("Frame too wide for door dimensions")
     panel_domain = panel_domain_result.domains[0]
 
-
     frame_result = outer_domain.subtract(panel_domain)
     if frame_result.is_empty:
         raise ValueError("Failed to create frame domain")
@@ -181,18 +168,15 @@ def create_beaded_frame_door(
 
     print(f"\nFrame domain has {len(frame_domain.inner_boundaries)} inner boundary")
 
-
     profile_items = profile_generator(
         outer_domain,
         ProfileParams(side="outside", depth="through"),
     )
 
-
     pocket_items = flat_pocket_generator(
         panel_domain,
         FlatPocketParams(depth_mm=panel_recess),
     )
-
 
     bead_items = bead_generator(
         frame_domain,
@@ -204,11 +188,10 @@ def create_beaded_frame_door(
         ),
     )
 
-    print(f"\nGenerated:")
+    print("\nGenerated:")
     print(f"  Profile items: {len(profile_items)}")
     print(f"  Pocket items: {len(pocket_items)}")
     print(f"  Bead items: {len(bead_items)}")
-
 
     all_items = profile_items + pocket_items + bead_items
     margin = 25.0
@@ -293,28 +276,23 @@ def visualize_domain_ascii(domain: Domain, width: int = 40, height: int = 20) ->
     x_scale = bounds.width / (width - 1) if bounds.width > 0 else 1
     y_scale = bounds.height / (height - 1) if bounds.height > 0 else 1
 
-
-    grid = [[' ' for _ in range(width)] for _ in range(height)]
-
+    grid = [[" " for _ in range(width)] for _ in range(height)]
 
     for i in range(len(domain.outer_boundary)):
         x1, y1 = domain.outer_boundary[i]
         x2, y2 = domain.outer_boundary[(i + 1) % len(domain.outer_boundary)]
-
 
         gx1 = int((x1 - bounds.x_min) / x_scale)
         gy1 = int((bounds.y_max - y1) / y_scale)
         gx2 = int((x2 - bounds.x_min) / x_scale)
         gy2 = int((bounds.y_max - y2) / y_scale)
 
-
         steps = max(abs(gx2 - gx1), abs(gy2 - gy1), 1)
         for t in range(steps + 1):
             gx = int(gx1 + (gx2 - gx1) * t / steps)
             gy = int(gy1 + (gy2 - gy1) * t / steps)
             if 0 <= gx < width and 0 <= gy < height:
-                grid[gy][gx] = '#'
-
+                grid[gy][gx] = "#"
 
     for inner in domain.inner_boundaries:
         for i in range(len(inner)):
@@ -331,15 +309,14 @@ def visualize_domain_ascii(domain: Domain, width: int = 40, height: int = 20) ->
                 gx = int(gx1 + (gx2 - gx1) * t / steps)
                 gy = int(gy1 + (gy2 - gy1) * t / steps)
                 if 0 <= gx < width and 0 <= gy < height:
-                    grid[gy][gx] = 'o'
+                    grid[gy][gx] = "o"
 
-
-    lines = ['┌' + '─' * width + '┐']
+    lines = ["┌" + "─" * width + "┐"]
     for row in grid:
-        lines.append('│' + ''.join(row) + '│')
-    lines.append('└' + '─' * width + '┘')
+        lines.append("│" + "".join(row) + "│")
+    lines.append("└" + "─" * width + "┘")
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def main():
@@ -347,9 +324,7 @@ def main():
     print("Domain/Generator System - Integration Examples")
     print("=" * 70)
 
-
     shaker_ast = create_shaker_door()
-
 
     outer = Domain.from_rectangle(400, 600, center=(200, 300))
     panel = outer.inset(50).domains[0]
@@ -358,16 +333,12 @@ def main():
     print("\nPanel domain:")
     print(visualize_domain_ascii(panel))
 
-
     convert_to_ir(shaker_ast)
-
 
     wave_ast = create_wave_panel()
     convert_to_ir(wave_ast)
 
-
     beaded_ast = create_beaded_frame_door()
-
 
     outer = Domain.from_rectangle(400, 600, center=(200, 300))
     panel = outer.inset(60).domains[0]
@@ -377,14 +348,12 @@ def main():
 
     convert_to_ir(beaded_ast)
 
-
     grid_ast = create_grid_panel()
     convert_to_ir(grid_ast)
 
     print("\n" + "=" * 70)
     print("All examples completed successfully!")
     print("=" * 70)
-
 
     print("\nSummary of generated LayoutASTs:")
     for name, ast in [

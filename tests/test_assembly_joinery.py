@@ -1,8 +1,8 @@
 import pytest
 
-from assembly.core import Assembly, Interface, InterfaceType
-from assembly.panel import PanelSpec, PanelRole, Edge, NotchSpec, DadoSpec
-from assembly.joinery import Butt, Finger, HalfLap, Captured
+from assembly.core import Interface, InterfaceType
+from assembly.joinery import Butt, Captured, Finger, HalfLap
+from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
 class TestButtJoinery:
@@ -71,7 +71,7 @@ class TestFingerJoinery:
         finger = Finger(width_mm=25, clearance_mm=clearance)
         interface = Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "left_side", "right", finger)
 
-        result_a, result_b = finger.apply(interface, panel_a, panel_b)
+        result_a, _result_b = finger.apply(interface, panel_a, panel_b)
 
         for notch in result_a.notches:
             if notch.u_start_mm > 0.1 and notch.u_start_mm + notch.u_len_mm < 49.9:
@@ -96,8 +96,14 @@ class TestHalfLapJoinery:
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
+            InterfaceType.INTERNAL,
+            "shelf_1",
+            "bottom",
+            "partition_1",
+            "left",
+            half_lap,
+            position_along_edge_a_mm=25.0,
+            position_along_edge_b_mm=30.0,
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -110,8 +116,14 @@ class TestHalfLapJoinery:
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
+            InterfaceType.INTERNAL,
+            "shelf_1",
+            "bottom",
+            "partition_1",
+            "left",
+            half_lap,
+            position_along_edge_a_mm=25.0,
+            position_along_edge_b_mm=30.0,
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -125,8 +137,14 @@ class TestHalfLapJoinery:
         fitment = 0.2
         half_lap = HalfLap(fitment_mm=fitment)
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=25.0, position_along_edge_b_mm=30.0
+            InterfaceType.INTERNAL,
+            "shelf_1",
+            "bottom",
+            "partition_1",
+            "left",
+            half_lap,
+            position_along_edge_a_mm=25.0,
+            position_along_edge_b_mm=30.0,
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -139,11 +157,10 @@ class TestHalfLapJoinery:
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_b_mm=30.0
+            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap, position_along_edge_b_mm=30.0
         )
 
-        with pytest.raises(ValueError, match="requires interface.position_along_edge_a_mm"):
+        with pytest.raises(ValueError, match=r"requires interface\.position_along_edge_a_mm"):
             half_lap.apply(interface, panel_a, panel_b)
 
     def test_raises_without_position_along_edge_b_mm(self):
@@ -151,11 +168,10 @@ class TestHalfLapJoinery:
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=25.0
+            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap, position_along_edge_a_mm=25.0
         )
 
-        with pytest.raises(ValueError, match="requires interface.position_along_edge_b_mm"):
+        with pytest.raises(ValueError, match=r"requires interface\.position_along_edge_b_mm"):
             half_lap.apply(interface, panel_a, panel_b)
 
     def test_notch_position_from_interface(self):
@@ -163,8 +179,14 @@ class TestHalfLapJoinery:
         panel_b = PanelSpec("partition_1", 50, 80, 18)
         half_lap = HalfLap()
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=35.0, position_along_edge_b_mm=40.0
+            InterfaceType.INTERNAL,
+            "shelf_1",
+            "bottom",
+            "partition_1",
+            "left",
+            half_lap,
+            position_along_edge_a_mm=35.0,
+            position_along_edge_b_mm=40.0,
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -179,8 +201,14 @@ class TestHalfLapJoinery:
         position_on_shelf = 96 - 9
         position_on_partition = 94 - 9
         interface = Interface(
-            InterfaceType.INTERNAL, "shelf_1", "bottom", "partition_1", "left", half_lap,
-            position_along_edge_a_mm=position_on_shelf, position_along_edge_b_mm=position_on_partition
+            InterfaceType.INTERNAL,
+            "shelf_1",
+            "bottom",
+            "partition_1",
+            "left",
+            half_lap,
+            position_along_edge_a_mm=position_on_shelf,
+            position_along_edge_b_mm=position_on_partition,
         )
 
         result_a, result_b = half_lap.apply(interface, panel_a, panel_b)
@@ -208,7 +236,7 @@ class TestCapturedJoinery:
         captured = Captured()
         interface = Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        result_a, _result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_a.dados[0].edge == "bottom"
 
@@ -218,7 +246,7 @@ class TestCapturedJoinery:
         captured = Captured()
         interface = Interface(InterfaceType.TOP, "left_side", "top", "top", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        result_a, _result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_a.dados[0].edge == "top"
 
@@ -228,7 +256,7 @@ class TestCapturedJoinery:
         captured = Captured(dado_depth_mm=6.0)
         interface = Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        result_a, _result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_a.dados[0].depth_mm == 6.0
 
@@ -238,7 +266,7 @@ class TestCapturedJoinery:
         captured = Captured()
         interface = Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        result_a, _result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_a.dados[0].depth_mm == 6.0
 
@@ -248,7 +276,7 @@ class TestCapturedJoinery:
         captured = Captured(inset_mm=10.0)
         interface = Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        result_a, _result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_a.dados[0].position_from_edge_mm == 10.0
 
@@ -291,7 +319,7 @@ class TestCapturedReceivingParameter:
         captured = Captured(receiving="b", inset_mm=15.0)
         interface = Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "back", "left", captured)
 
-        result_a, result_b = captured.apply(interface, panel_a, panel_b)
+        _result_a, result_b = captured.apply(interface, panel_a, panel_b)
 
         assert result_b.dados[0].position_from_edge_mm == 15.0
         assert result_b.dados[0].width_mm == 18 + 0.2

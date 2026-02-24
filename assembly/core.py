@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Literal, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Literal, Union
 
 if TYPE_CHECKING:
     from assembly.beam import BeamSpec
@@ -39,13 +39,12 @@ class Interface:
 
     def validate(self) -> None:
         if self.type not in self.joinery.valid_interfaces:
-            raise ValueError(
-                f"{type(self.joinery).__name__} not valid for {self.type.name}"
-            )
+            raise ValueError(f"{type(self.joinery).__name__} not valid for {self.type.name}")
 
 
 def _is_beam_spec(member: MemberSpec) -> bool:
     from assembly.beam import BeamSpec
+
     return isinstance(member, BeamSpec)
 
 
@@ -89,9 +88,12 @@ def _get_outer_layer_panels(
 
     outer_panels: list[PanelSpec] = []
     for panel_name in panel_names:
-        if "_L0_" in panel_name or panel_name.endswith("_L0"):
-            outer_panels.append(expanded_panels[panel_name])
-        elif f"_L{layer_count - 1}_" in panel_name or panel_name.endswith(f"_L{layer_count - 1}"):
+        if (
+            "_L0_" in panel_name
+            or panel_name.endswith("_L0")
+            or f"_L{layer_count - 1}_" in panel_name
+            or panel_name.endswith(f"_L{layer_count - 1}")
+        ):
             outer_panels.append(expanded_panels[panel_name])
 
     return outer_panels
@@ -106,6 +108,7 @@ class Assembly:
     @property
     def panels(self) -> dict[str, PanelSpec]:
         from assembly.panel import PanelSpec as PS
+
         return {k: v for k, v in self.members.items() if isinstance(v, PS)}
 
     def validate(self) -> None:
@@ -147,9 +150,7 @@ class Assembly:
 
             for panel_a in joinery_panels_a:
                 for panel_b in joinery_panels_b:
-                    updated_a, updated_b = interface.joinery.apply(
-                        interface, panel_a, panel_b
-                    )
+                    updated_a, updated_b = interface.joinery.apply(interface, panel_a, panel_b)
 
                     panel_notches[panel_a.name].extend(updated_a.notches)
                     panel_notches[panel_b.name].extend(updated_b.notches)
@@ -174,10 +175,10 @@ class Assembly:
 
 
 __all__ = [
-    "EdgeName",
-    "InterfaceType",
-    "RemovalKind",
-    "Interface",
     "Assembly",
+    "EdgeName",
+    "Interface",
+    "InterfaceType",
     "MemberSpec",
+    "RemovalKind",
 ]

@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from ir.removal_intent import Bounds2D
 from diagram_ir.dimensions import DimensionRequest
-from diagram_ir.shapes import Shape, Rect, Line, Polyline, Circle, Text, Path
+from diagram_ir.shapes import Circle, Line, Path, Polyline, Rect, Shape, Text
+from ir.removal_intent import Bounds2D
 
 
 @dataclass(frozen=True)
@@ -47,11 +47,13 @@ class DiagramIR:
                 if shape_bounds is None:
                     continue
                 x_min, y_min, x_max, y_max = shape_bounds
-                if (x_min < self.bounds.x_min - 0.1 or
-                    x_max > self.bounds.x_max + 0.1 or
-                    y_min < self.bounds.y_min - 0.1 or
-                    y_max > self.bounds.y_max + 0.1):
-                    shape_id = getattr(shape, 'id', None) or 'unnamed'
+                if (
+                    x_min < self.bounds.x_min - 0.1
+                    or x_max > self.bounds.x_max + 0.1
+                    or y_min < self.bounds.y_min - 0.1
+                    or y_max > self.bounds.y_max + 0.1
+                ):
+                    shape_id = getattr(shape, "id", None) or "unnamed"
                     raise ValueError(
                         f"Shape '{shape_id}' in layer '{layer.name}' exceeds diagram bounds. "
                         f"Shape bounds: ({x_min:.1f}, {y_min:.1f}) to ({x_max:.1f}, {y_max:.1f}), "
@@ -64,20 +66,16 @@ def _get_shape_bounds(shape: Shape) -> tuple[float, float, float, float] | None:
     if isinstance(shape, Rect):
         return (shape.x, shape.y, shape.x + shape.width, shape.y + shape.height)
     elif isinstance(shape, Line):
-        return (min(shape.x1, shape.x2), min(shape.y1, shape.y2),
-                max(shape.x1, shape.x2), max(shape.y1, shape.y2))
+        return (min(shape.x1, shape.x2), min(shape.y1, shape.y2), max(shape.x1, shape.x2), max(shape.y1, shape.y2))
     elif isinstance(shape, Circle):
-        return (shape.cx - shape.radius, shape.cy - shape.radius,
-                shape.cx + shape.radius, shape.cy + shape.radius)
+        return (shape.cx - shape.radius, shape.cy - shape.radius, shape.cx + shape.radius, shape.cy + shape.radius)
     elif isinstance(shape, Polyline):
         if not shape.points:
             return None
         xs = [p.x for p in shape.points]
         ys = [p.y for p in shape.points]
         return (min(xs), min(ys), max(xs), max(ys))
-    elif isinstance(shape, Text):
-        return None
-    elif isinstance(shape, Path):
+    elif isinstance(shape, (Text, Path)):
         return None
     return None
 
@@ -98,7 +96,7 @@ def validate_diagram_ir(diagram: DiagramIR, available_style_tokens: set[str] | N
     if available_style_tokens:
         for layer in diagram.layers:
             for shape in layer.items:
-                token = getattr(shape, 'style_token', 'default')
+                token = getattr(shape, "style_token", "default")
                 if token not in available_style_tokens:
                     errors.append(f"Unknown style_token '{token}' in layer '{layer.name}'")
 
@@ -106,8 +104,8 @@ def validate_diagram_ir(diagram: DiagramIR, available_style_tokens: set[str] | N
 
 
 __all__ = [
-    "LayerIR",
     "DiagramIR",
+    "LayerIR",
     "ViewportSpec",
     "validate_diagram_ir",
 ]

@@ -8,15 +8,20 @@ import sys
 import time
 from pathlib import Path
 
-from pml.yaml_parser import parse_nest_yaml, NestParseError
-from pml.nest_parser import nest_job_to_api_params
-from pml.formatter import format_pml
-from pml.revision_header import format_pml_header
-from nesting import nest_and_generate, nest_parts
 from cli.project import (
-    add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir,
-    parse_sheet_dimensions, DEFAULT_MARGIN_MM, DEFAULT_KERF_MM,
+    DEFAULT_KERF_MM,
+    DEFAULT_MARGIN_MM,
+    add_project_arg,
+    get_project_dir,
+    parse_sheet_dimensions,
+    resolve_input_path,
+    resolve_output_dir,
 )
+from nesting import nest_and_generate, nest_parts
+from pml.formatter import format_pml
+from pml.nest_parser import nest_job_to_api_params
+from pml.revision_header import format_pml_header
+from pml.yaml_parser import NestParseError, parse_nest_yaml
 
 
 def generate_nest_scaffold(
@@ -105,9 +110,9 @@ def init_project(args) -> None:
 
 
 def run_export_svg(pml_path: Path, output_dir: Path, theme: str) -> Path:
-    from pml import parse_pml
     from adapters.ast_to_removal import ast_to_removal_intents
     from export.blueprint_svg import render_blueprint_svg
+    from pml import parse_pml
 
     pml_text = pml_path.read_text(encoding="utf-8")
     ast = parse_pml(pml_text)
@@ -146,33 +151,15 @@ Output files:
     add_project_arg(parser)
     parser.add_argument("input", nargs="?", default=None, help="Input .nest.yml file")
     parser.add_argument(
-        "-o", "--output",
-        default=None,
-        help="Output directory (default: project/output or current directory)"
+        "-o", "--output", default=None, help="Output directory (default: project/output or current directory)"
     )
-    parser.add_argument(
-        "--prefix",
-        default="sheet",
-        help="Prefix for output files (default: sheet)"
-    )
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Verbose output"
-    )
+    parser.add_argument("--prefix", default="sheet", help="Prefix for output files (default: sheet)")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     export_group = parser.add_argument_group("export options")
+    export_group.add_argument("--export-svg", action="store_true", help="Export SVG blueprints for each sheet")
     export_group.add_argument(
-        "--export-svg",
-        action="store_true",
-        help="Export SVG blueprints for each sheet"
-    )
-    export_group.add_argument(
-        "--theme",
-        "-t",
-        default="dark",
-        choices=["dark", "light", "print"],
-        help="SVG blueprint theme (default: dark)"
+        "--theme", "-t", default="dark", choices=["dark", "light", "print"], help="SVG blueprint theme (default: dark)"
     )
 
     init_group = parser.add_argument_group("project initialization")

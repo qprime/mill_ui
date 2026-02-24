@@ -1,44 +1,50 @@
 from __future__ import annotations
 
-import math
 import pytest
 
 from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.material import Material
-from cam.model.stock import Stock
 from cam.model.setup import Setup
+from cam.model.stock import Stock
 from cam.model.tool import Tool
-from cam.planner.params import stepdown_for, stepover_for
-from cam.planner.passes import PassAccumulator
-from cam.planner.passes.tools import (
-    ToolSelection,
-    normalize_tool_entries,
-    pick_tool_for_pocket,
-    pick_tool_for_profile,
-    pick_tool_for_hole,
-    pick_tool_for_engrave,
-    stepdown_for_tool,
-    stepover_for_tool,
-)
-from cam.planner.passes.pocket import (
-    plan_pocket_passes,
-    plan_hole_passes,
-    plan_engrave_passes,
-)
-from cam.planner.passes.merge_shared_edges import _rect_edges, _overlap_len
 from cam.moves import CutMove, RapidMove, RetractMove, XYMove
-from cam.planner.planner_input import FeatureInput, GeometryInput
-from ir.removal_intent import ShapeGeometry
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
 from cam.ops.pocket_region import _interval_subtract
-
+from cam.planner.params import stepdown_for, stepover_for
+from cam.planner.passes import PassAccumulator
+from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges
+from cam.planner.passes.pocket import (
+    plan_engrave_passes,
+    plan_hole_passes,
+    plan_pocket_passes,
+)
+from cam.planner.passes.tools import (
+    ToolSelection,
+    normalize_tool_entries,
+    pick_tool_for_engrave,
+    pick_tool_for_hole,
+    pick_tool_for_pocket,
+    pick_tool_for_profile,
+    stepdown_for_tool,
+    stepover_for_tool,
+)
+from cam.planner.planner_input import FeatureInput, GeometryInput
+from ir.removal_intent import ShapeGeometry
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
 FLAT_6MM = {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280}
-FLAT_6MM_UPCUT = {"name": "6mm_upcut", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280, "rotation": "upcut"}
+FLAT_6MM_UPCUT = {
+    "name": "6mm_upcut",
+    "diameter": 6.0,
+    "kind": "flat",
+    "rpm": 14000,
+    "feed_xy": 900,
+    "feed_z": 280,
+    "rotation": "upcut",
+}
 FLAT_12MM = {"name": "12mm_flat", "diameter": 12.0, "kind": "flat", "rpm": 10000, "feed_xy": 800, "feed_z": 250}
 BALL_2MM = {"name": "2mm_ball", "diameter": 2.0, "kind": "ball", "rpm": 20000, "feed_xy": 600, "feed_z": 200}
 V_1MM = {"name": "1mm_v", "diameter": 1.0, "kind": "v", "rpm": 22000, "feed_xy": 500, "feed_z": 150}
@@ -68,7 +74,6 @@ def _accumulator():
 
 
 class TestPickToolForPocket:
-
     def test_prefers_upcut_over_conventional(self):
         tool = pick_tool_for_pocket(ALL_TOOLS, required_width_mm=None, cleanup_offset_mm=0.0)
         assert tool.rotation == "upcut"
@@ -95,7 +100,6 @@ class TestPickToolForPocket:
 
 
 class TestPickToolForProfile:
-
     def test_matches_kerf(self):
         tool = pick_tool_for_profile(FLAT_ONLY, kerf_mm=6.0)
         assert tool.diameter == 6.0
@@ -114,7 +118,6 @@ class TestPickToolForProfile:
 
 
 class TestPickToolForHole:
-
     def test_largest_fitting_tool(self):
         tool = pick_tool_for_hole(FLAT_ONLY, hole_diameter_mm=8.0)
         assert tool.diameter == 6.0
@@ -133,7 +136,6 @@ class TestPickToolForHole:
 
 
 class TestPickToolForEngrave:
-
     def test_prefers_ball_or_v(self):
         tool = pick_tool_for_engrave(ALL_TOOLS)
         assert tool.kind in {"ball", "v"}
@@ -149,7 +151,6 @@ class TestPickToolForEngrave:
 
 
 class TestStepdownForTool:
-
     def test_uses_depth_per_pass_when_set(self):
         tool = ToolSelection(name="t", diameter=6.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, depth_per_pass=2.0)
         assert stepdown_for_tool(tool) == 2.0
@@ -172,7 +173,6 @@ class TestStepdownForTool:
 
 
 class TestStepoverForTool:
-
     def test_uses_stepover_percent_when_set(self):
         tool = ToolSelection(name="t", diameter=10.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, stepover_percent=50.0)
         assert stepover_for_tool(tool) == 5.0
@@ -187,7 +187,6 @@ class TestStepoverForTool:
 
 
 class TestStepdownFor:
-
     def test_half_diameter(self):
         assert stepdown_for(tool_diameter=6.0) == 3.0
 
@@ -199,7 +198,6 @@ class TestStepdownFor:
 
 
 class TestStepoverFor:
-
     def test_default_ratio(self):
         assert stepover_for(tool_diameter=10.0) == pytest.approx(4.0)
 
@@ -208,7 +206,6 @@ class TestStepoverFor:
 
 
 class TestIntervalSubtract:
-
     def test_no_overlap(self):
         assert _interval_subtract([(0, 10)], (15, 20)) == [(0, 10)]
 
@@ -243,20 +240,27 @@ class TestIntervalSubtract:
 
 
 class TestPocketCircleConcentric:
-
     def test_produces_moves(self):
         setup = _setup(tool_diameter=3.0)
         moves = pocket_circle_concentric(
-            (50.0, 50.0), 20.0, setup,
-            depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
+            (50.0, 50.0),
+            20.0,
+            setup,
+            depth_mm=5.0,
+            stepover_mm=1.0,
+            stepdown_mm=2.0,
         )
         assert len(moves) > 0
 
     def test_cutting_moves_reach_target_depth(self):
         setup = _setup(tool_diameter=3.0)
         moves = pocket_circle_concentric(
-            (50.0, 50.0), 20.0, setup,
-            depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
+            (50.0, 50.0),
+            20.0,
+            setup,
+            depth_mm=5.0,
+            stepover_mm=1.0,
+            stepdown_mm=2.0,
         )
         cut_zs = [m.z for m in moves if isinstance(m, CutMove) and m.z is not None]
         assert min(cut_zs) == pytest.approx(-5.0, abs=0.01)
@@ -264,23 +268,30 @@ class TestPocketCircleConcentric:
     def test_zero_wall_radius_returns_empty(self):
         setup = _setup(tool_diameter=20.0)
         moves = pocket_circle_concentric(
-            (50.0, 50.0), 20.0, setup,
-            depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
+            (50.0, 50.0),
+            20.0,
+            setup,
+            depth_mm=5.0,
+            stepover_mm=1.0,
+            stepdown_mm=2.0,
         )
         assert moves == []
 
     def test_retracts_above_safe_z(self):
         setup = _setup(tool_diameter=3.0)
         moves = pocket_circle_concentric(
-            (50.0, 50.0), 20.0, setup,
-            depth_mm=5.0, stepover_mm=1.0, stepdown_mm=2.0,
+            (50.0, 50.0),
+            20.0,
+            setup,
+            depth_mm=5.0,
+            stepover_mm=1.0,
+            stepdown_mm=2.0,
         )
         retracts = [m for m in moves if isinstance(m, RetractMove)]
         assert all(m.z >= setup.safe_z for m in retracts)
 
 
 class TestEngraveLines:
-
     def test_single_line(self):
         setup = _setup()
         moves = engrave_lines([[(0, 0), (10, 10)]], setup, z=-0.3)
@@ -301,14 +312,14 @@ class TestEngraveLines:
         setup = _setup()
         moves = engrave_lines(
             [[(0, 0), (10, 0)], [(20, 20), (30, 20)]],
-            setup, z=-0.3,
+            setup,
+            z=-0.3,
         )
         rapids = [m for m in moves if isinstance(m, RapidMove)]
         assert len(rapids) >= 2
 
 
 class TestFaceZigzag:
-
     def test_produces_moves(self):
         setup = _setup()
         moves = face_zigzag(100, 50, setup, step=10.0, depth_mm=0.5)
@@ -329,7 +340,6 @@ class TestFaceZigzag:
 
 
 class TestRectEdges:
-
     def test_four_edges(self):
         edges = _rect_edges(50, 50, 20, 10, "r1")
         assert len(edges) == 4
@@ -350,7 +360,6 @@ class TestRectEdges:
 
 
 class TestOverlapLen:
-
     def test_full_overlap(self):
         assert _overlap_len(0, 10, 0, 10) == pytest.approx(10.0)
 
@@ -393,7 +402,6 @@ def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
 
 
 class TestPlanPocketPasses:
-
     def test_rect_pocket(self):
         acc = _accumulator()
         pockets = (_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0),)
@@ -442,7 +450,6 @@ class TestPlanPocketPasses:
 
 
 class TestPlanHolePasses:
-
     def test_drill_strategy_for_matching_diameter(self):
         acc = _accumulator()
         holes = (_feature("Circle", {"diameter_mm": 3.0}, (50.0, 50.0), 10.0),)
@@ -475,7 +482,6 @@ class TestPlanHolePasses:
 
 
 class TestPlanEngravePasses:
-
     def test_polyline_engrave(self):
         acc = _accumulator()
         engraves = (_feature("polyline", {"points": [[0, 0], [10, 0], [10, 10]]}, (50.0, 50.0), 0.3),)

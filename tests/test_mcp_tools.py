@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 import tempfile
@@ -10,11 +11,7 @@ from unittest.mock import patch
 
 import pytest
 
-try:
-    import mcp
-    MCP_AVAILABLE = True
-except ImportError:
-    MCP_AVAILABLE = False
+MCP_AVAILABLE = importlib.util.find_spec("mcp") is not None
 
 pytestmark = pytest.mark.skipif(not MCP_AVAILABLE, reason="mcp package not installed")
 
@@ -395,10 +392,7 @@ def test_golden_not_found_error():
         print("  SKIP: Recipe not found")
         return True
 
-    result_json = validate_cam_recipe(
-        recipe_path,
-        golden_path="/nonexistent/golden.json"
-    )
+    result_json = validate_cam_recipe(recipe_path, golden_path="/nonexistent/golden.json")
     result = json.loads(result_json)
 
     assert "error" in result
@@ -421,10 +415,7 @@ def test_with_golden_regression():
         print("  SKIP: Golden baseline not found")
         return True
 
-    result_json = validate_cam_recipe(
-        recipe_path,
-        golden_path=golden_path
-    )
+    result_json = validate_cam_recipe(recipe_path, golden_path=golden_path)
     result = json.loads(result_json)
 
     assert "error" not in result
@@ -541,10 +532,7 @@ def test_nonexistent_store_metrics():
     print("Running test_nonexistent_store_metrics...")
     from mill_mcp.server import get_golden_metrics
 
-    result_json = get_golden_metrics(
-        "01_simple_profile",
-        store_path="/nonexistent/store"
-    )
+    result_json = get_golden_metrics("01_simple_profile", store_path="/nonexistent/store")
     result = json.loads(result_json)
 
     assert "error" in result

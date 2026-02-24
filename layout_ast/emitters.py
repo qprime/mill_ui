@@ -1,17 +1,15 @@
-
 from __future__ import annotations
 
 import json
 from pathlib import Path
 from typing import Any
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Placement, Feature
+from layout_ast.layout import Feature, Item, LayoutAST, Placement, Sheet
 
 
 def emit_layout_json(ast: LayoutAST, path: str | None = None) -> str:
 
     data = _ast_to_dict(ast)
-
 
     json_str = json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
 
@@ -24,7 +22,6 @@ def emit_layout_json(ast: LayoutAST, path: str | None = None) -> str:
 def _ast_to_dict(ast: LayoutAST) -> dict[str, Any]:
     data: dict[str, Any] = {}
 
-
     if ast.project is not None:
         data["project"] = ast.project
     if ast.kerf_width_mm is not None:
@@ -34,12 +31,9 @@ def _ast_to_dict(ast: LayoutAST) -> dict[str, Any]:
     if ast.layout is not None:
         data["layout"] = ast.layout
 
-
     data["sheet"] = _sheet_to_dict(ast.sheet)
 
-
     data["items"] = [_item_to_dict(item) for item in ast.items]
-
 
     if ast.config:
         data["config"] = ast.config
@@ -67,13 +61,11 @@ def _item_to_dict(item: Item) -> dict[str, Any]:
     }
 
     if item.kind == "template":
-
         if item.params is not None:
             data["params"] = item.params
         if item.id is not None:
             data["id"] = item.id
     else:
-
         if item.geometry is not None:
             data["geometry"] = item.geometry.data
         if item.placement is not None:

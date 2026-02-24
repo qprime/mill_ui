@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Sequence, TYPE_CHECKING
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, Any
 
 from cam.moves import CutMove, Move, RapidMove, XYMove
 from cam.planner.passes.tools import tool_identity
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from cam.planner.passes import PassRecord
 
 
-def _summarise_moves(moves: Sequence[Move]) -> Dict[str, float]:
+def _summarise_moves(moves: Sequence[Move]) -> dict[str, float]:
     x = y = z = None
     cut_len_xy = 0.0
     cut_len_3d = 0.0
@@ -28,8 +29,8 @@ def _summarise_moves(moves: Sequence[Move]) -> Dict[str, float]:
             dy = 0.0 if ny is None or y is None else ny - y
             dz = 0.0 if nz is None or z is None else nz - z
             if isinstance(move, CutMove):
-                seg_xy = (dx ** 2 + dy ** 2) ** 0.5
-                seg_3d = (dx ** 2 + dy ** 2 + dz ** 2) ** 0.5
+                seg_xy = (dx**2 + dy**2) ** 0.5
+                seg_3d = (dx**2 + dy**2 + dz**2) ** 0.5
                 cut_len_xy += max(0.0, seg_xy)
                 cut_len_3d += max(0.0, seg_3d)
                 if abs(dx) < 1e-9 and abs(dy) < 1e-9 and nz is not None and z is not None:
@@ -51,8 +52,8 @@ def summarise_passes(
     merge_enabled: bool,
     merged_seams: int,
     profile_options: Mapping[str, Any] | None = None,
-) -> Dict[str, Any]:
-    summary_passes: list[Dict[str, Any]] = []
+) -> dict[str, Any]:
+    summary_passes: list[dict[str, Any]] = []
     for entry in passes:
         metrics = _summarise_moves(entry.moves)
         tool = entry.tool_selection
@@ -74,7 +75,7 @@ def summarise_passes(
         )
 
     note = "Shared-edge merge is ON" if merge_enabled else "Shared-edge merge is OFF"
-    summary: Dict[str, Any] = {
+    summary: dict[str, Any] = {
         "passes": summary_passes,
         "notes": note,
         "merged_seams": merged_seams,

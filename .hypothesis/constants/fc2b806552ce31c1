@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/planner/passes/pocket.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 0.05, 0.3, 0.5, 2.0, 2.5, 3.0, 'bore', 'circle', 'corner_cleanup', 'drill', 'engrave', 'line', 'plan_engrave_passes', 'plan_hole_passes', 'plan_pocket_passes', 'pocket', 'polyline', 'rect', 'region']

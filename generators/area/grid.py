@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -28,7 +27,6 @@ def grid_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,
@@ -37,13 +35,11 @@ def grid_generator(
     ):
         return []
 
-
     local_bounds = get_local_bounds(domain)
     local_x_min = local_bounds["x_min"]
     local_x_max = local_bounds["x_max"]
     local_y_min = local_bounds["y_min"]
     local_y_max = local_bounds["y_max"]
-
 
     domain_width = local_x_max - local_x_min
     domain_height = local_y_max - local_y_min
@@ -60,7 +56,6 @@ def grid_generator(
     items: list[Item] = []
     item_index = 0
 
-
     x_start = params.offset_x_mm
 
     while x_start > local_x_min:
@@ -68,14 +63,11 @@ def grid_generator(
 
     x = x_start
     while x <= local_x_max:
-
         local_start = (x, local_y_min - 10)
         local_end = (x, local_y_max + 10)
 
-
         sheet_points = local_to_sheet_batch([local_start, local_end], domain)
         sheet_start, sheet_end = sheet_points[0], sheet_points[1]
-
 
         clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
 
@@ -92,21 +84,17 @@ def grid_generator(
 
         x += params.spacing_x_mm
 
-
     y_start = params.offset_y_mm
     while y_start > local_y_min:
         y_start -= params.spacing_y_mm
 
     y = y_start
     while y <= local_y_max:
-
         local_start = (local_x_min - 10, y)
         local_end = (local_x_max + 10, y)
 
-
         sheet_points = local_to_sheet_batch([local_start, local_end], domain)
         sheet_start, sheet_end = sheet_points[0], sheet_points[1]
-
 
         clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
 
@@ -125,8 +113,8 @@ def grid_generator(
 
     if not items and not allow_empty:
         raise ValueError(
-            f"GridGenerator: Could not generate any grid lines for domain. "
-            f"Domain may be too small or grid parameters incompatible."
+            "GridGenerator: Could not generate any grid lines for domain. "
+            "Domain may be too small or grid parameters incompatible."
         )
 
     return items

@@ -1,35 +1,33 @@
-
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from layout_ast.layout import LayoutAST, Item, Feature
+from adapters.hints_to_removal import (
+    _geometry_dict_to_shape_geometry,
+    _geometry_to_bounds,
+    engrave_hint_to_removal_intent,
+    hole_hint_to_removal_intent,
+    pocket_hint_to_removal_intent,
+    profile_hint_to_removal_intent,
+)
+from core.constants import (
+    FeatureType,
+    HintKeys,
+    TabKeys,
+)
+from core.geometry import calculate_angled_depth
 from ir.removal_intent import (
     Allowance,
+    BevelSpec,
+    ChamferSpec,
     Constraints,
     DepthProfile,
     RemovalIntent,
-    BevelSpec,
-    ChamferSpec,
-    ShapeGeometry,
 )
+from layout_ast.layout import Feature, Item, LayoutAST
 
 logger = logging.getLogger(__name__)
-from adapters.hints_to_removal import (
-    profile_hint_to_removal_intent,
-    pocket_hint_to_removal_intent,
-    hole_hint_to_removal_intent,
-    engrave_hint_to_removal_intent,
-    _geometry_to_bounds,
-    _geometry_dict_to_shape_geometry,
-)
-from core.geometry import calculate_angled_depth
-from core.constants import (
-    HintKeys,
-    TabKeys,
-    FeatureType,
-)
 
 
 def ast_to_removal_intents(
@@ -39,15 +37,11 @@ def ast_to_removal_intents(
     intents: list[RemovalIntent] = []
 
     for item in ast.items:
-
         if item.kind != "shape" or not item.feature:
             continue
 
         try:
-            intent = item_to_removal_intent(
-                item,
-                sheet_thickness_mm=ast.sheet.thickness_mm
-            )
+            intent = item_to_removal_intent(item, sheet_thickness_mm=ast.sheet.thickness_mm)
             intents.append(intent)
         except ValueError as e:
             msg = f"Skipping item '{item.shape_id}': {e}"
@@ -70,7 +64,6 @@ def item_to_removal_intent(
     if not item.feature:
         raise ValueError(f"Item {item.shape_id} has no feature")
 
-
     hint = {
         HintKeys.ID: item.shape_id or "",
         HintKeys.SHAPE: item.type,
@@ -78,7 +71,6 @@ def item_to_removal_intent(
         HintKeys.CENTER_XY_MM: item.placement.center_xy_mm,
         HintKeys.DEPTH_MM: _resolve_depth(item.feature, sheet_thickness_mm),
     }
-
 
     if item.feature.type == FeatureType.PROFILE:
         if item.feature.side:
@@ -93,7 +85,6 @@ def item_to_removal_intent(
         return profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
 
     elif item.feature.type == FeatureType.POCKET:
-
         if item.feature.corner_cleanup_tool_diameter_mm is not None:
             hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = item.feature.corner_cleanup_tool_diameter_mm
         return pocket_hint_to_removal_intent(hint)
@@ -111,7 +102,10 @@ def item_to_removal_intent(
         calculated_depth = calculate_angled_depth(bevel_width, bevel_angle, inner_depth)
 
         return _build_edge_feature_intent(
-            hint, item, FeatureType.BEVEL, calculated_depth,
+            hint,
+            item,
+            FeatureType.BEVEL,
+            calculated_depth,
             bevel=BevelSpec(width_mm=bevel_width, angle_deg=bevel_angle, inner_depth_mm=inner_depth),
         )
 
@@ -122,7 +116,10 @@ def item_to_removal_intent(
         calculated_depth = calculate_angled_depth(chamfer_width, chamfer_angle)
 
         return _build_edge_feature_intent(
-            hint, item, FeatureType.CHAMFER, calculated_depth,
+            hint,
+            item,
+            FeatureType.CHAMFER,
+            calculated_depth,
             side=side,
             chamfer=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
         )

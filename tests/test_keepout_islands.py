@@ -1,9 +1,6 @@
-
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
 from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from layout_ast.compositional import Keepout
-from layout_ast.layout import Feature
 
 
 def test_simple_pocket_with_island():
@@ -32,19 +29,15 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     items = flat.items
     assert len(items) == 1
-
 
     panel = items[0]
     assert panel.feature.type == "pocket"
 
-
     assert "islands" in panel.geometry.data
     islands = panel.geometry.data["islands"]
     assert len(islands) == 1
-
 
     island = islands[0]
     assert abs(island["x_min"] - 50.0) < 0.01
@@ -84,10 +77,8 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pocket_items) == 4
-
 
     for pocket in pocket_items:
         assert "islands" in pocket.geometry.data
@@ -130,12 +121,10 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     panel_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(panel_items) == 1
 
     panel = panel_items[0]
-
 
     assert "islands" in panel.geometry.data
     islands = panel.geometry.data["islands"]
@@ -165,26 +154,22 @@ children:
                         id: island
 """
 
-
     ast1 = parse_pml_yaml(original_pml)
     formatted_pml = format_pml_yaml(ast1)
     ast2 = parse_pml_yaml(formatted_pml)
 
-
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
-
-    pocket1 = [item for item in flat1.items if item.feature and item.feature.type == "pocket"][0]
-    pocket2 = [item for item in flat2.items if item.feature and item.feature.type == "pocket"][0]
+    pocket1 = next(item for item in flat1.items if item.feature and item.feature.type == "pocket")
+    pocket2 = next(item for item in flat2.items if item.feature and item.feature.type == "pocket")
 
     islands1 = pocket1.geometry.data.get("islands", [])
     islands2 = pocket2.geometry.data.get("islands", [])
 
     assert len(islands1) == len(islands2) == 1
 
-
-    for island1, island2 in zip(islands1, islands2):
+    for island1, island2 in zip(islands1, islands2, strict=False):
         assert abs(island1["x_min"] - island2["x_min"]) < 0.01
         assert abs(island1["x_max"] - island2["x_max"]) < 0.01
         assert abs(island1["y_min"] - island2["y_min"]) < 0.01
@@ -221,7 +206,6 @@ children:
     assert "islands" in pocket.geometry.data
     islands = pocket.geometry.data["islands"]
     assert len(islands) == 1
-
 
     island = islands[0]
     assert abs(island["x_min"] - 150.0) < 0.01
@@ -264,7 +248,6 @@ children:
     islands = pocket.geometry.data["islands"]
     assert len(islands) == 1
 
-
     island = islands[0]
     assert abs(island["x_min"] - 50.0) < 0.01
     assert abs(island["x_max"] - 450.0) < 0.01
@@ -301,8 +284,8 @@ children:
 """
 
     try:
-        ast = parse_pml_yaml(pml)
-        assert False, "Should have raised PMLParseError for nested keepout"
+        parse_pml_yaml(pml)
+        raise AssertionError("Should have raised PMLParseError for nested keepout")
     except PMLParseError as e:
         assert "nested keepout" in str(e).lower()
 
@@ -335,17 +318,13 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pocket_items) == 1
     pocket = pocket_items[0]
 
-
     removal = simple_item_to_removal_intent(pocket, region_id_prefix="test_pocket")
 
-
     assert len(removal.constraints.islands) == 1
-
 
     island = removal.constraints.islands[0]
     assert abs(island.bounds.x_min - 50.0) < 0.01

@@ -1,17 +1,17 @@
-from validation.invariants.svg_invariants import (
-    check_svg_invariants,
-    SVG_INVARIANT_IDS,
-)
 from validation.invariants.gcode_invariants import (
+    GCODE_INVARIANT_IDS,
     check_gcode_invariants,
     check_gcode_invariants_from_content,
-    GCODE_INVARIANT_IDS,
+)
+from validation.invariants.svg_invariants import (
+    SVG_INVARIANT_IDS,
+    check_svg_invariants,
 )
 
 __all__ = [
-    "check_svg_invariants",
+    "GCODE_INVARIANT_IDS",
     "SVG_INVARIANT_IDS",
     "check_gcode_invariants",
     "check_gcode_invariants_from_content",
-    "GCODE_INVARIANT_IDS",
+    "check_svg_invariants",
 ]

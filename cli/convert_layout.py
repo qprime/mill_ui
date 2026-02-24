@@ -1,13 +1,12 @@
-
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
 
-from pml import parse_pml, format_pml, PMLParseError
+from cli.project import add_project_arg, get_project_dir, resolve_input_path
 from layout_ast.layout import LayoutAST
-from cli.project import add_project_arg, resolve_input_path, get_project_dir
+from pml import PMLParseError, format_pml, parse_pml
 
 
 def main():
@@ -56,7 +55,6 @@ Examples:
     args = parser.parse_args()
 
     try:
-
         if args.input_file:
             input_path = resolve_input_path(args.project, args.input_file)
             if not input_path.exists():
@@ -66,11 +64,9 @@ Examples:
         else:
             input_text = sys.stdin.read()
 
-
         if args.input_format == "pml":
             ast = parse_pml(input_text)
         elif args.input_format == "json":
-
             if not args.input_file:
                 print("Error: JSON input requires a file path (stdin not supported for JSON)", file=sys.stderr)
                 sys.exit(1)
@@ -79,7 +75,6 @@ Examples:
             print(f"Error: Unknown input format: {args.input_format}", file=sys.stderr)
             sys.exit(1)
 
-
         if args.output_format == "json":
             output_text = ast.to_json()
         elif args.output_format == "pml":
@@ -87,7 +82,6 @@ Examples:
         else:
             print(f"Error: Unknown output format: {args.output_format}", file=sys.stderr)
             sys.exit(1)
-
 
         if args.output_file:
             if args.project and not Path(args.output_file).is_absolute():
@@ -105,6 +99,7 @@ Examples:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 

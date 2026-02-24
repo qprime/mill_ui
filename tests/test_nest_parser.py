@@ -1,7 +1,7 @@
-
 import sys
-from pml.yaml_parser import parse_nest_yaml, NestParseError
+
 from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_parser import NestParseError, parse_nest_yaml
 
 
 def test_basic_nest_parsing():
@@ -206,16 +206,13 @@ Nest:
 
     assert len(job.parts) == 3
 
-
     assert job.parts[0].name == "large_door"
     assert job.parts[0].template == "Shaker"
     assert job.parts[0].template_params["stile_w"] == 57.0
 
-
     assert job.parts[1].name == "small_door"
     assert job.parts[1].template is None
     assert job.parts[1].template_params == {}
-
 
     assert job.parts[2].name == "tall_door"
     assert job.parts[2].template == "Shaker"
@@ -318,7 +315,7 @@ parts:
 
     try:
         parse_nest_yaml(source)
-        assert False, "Should have raised NestParseError"
+        raise AssertionError("Should have raised NestParseError")
     except NestParseError as e:
         assert "nest" in str(e).lower()
 
@@ -340,7 +337,7 @@ Nest:
 
     try:
         parse_nest_yaml(source)
-        assert False, "Should have raised NestParseError"
+        raise AssertionError("Should have raised NestParseError")
     except NestParseError as e:
         assert "sheet" in str(e).lower()
 
@@ -364,7 +361,7 @@ Nest:
 
     try:
         parse_nest_yaml(source)
-        assert False, "Should have raised NestParseError"
+        raise AssertionError("Should have raised NestParseError")
     except NestParseError as e:
         assert "parts" in str(e).lower() or "no parts" in str(e).lower()
 
@@ -431,6 +428,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

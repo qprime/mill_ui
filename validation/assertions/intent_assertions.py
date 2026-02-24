@@ -1,14 +1,10 @@
-
-
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
 
-from core.constants import DepthMode
-from layout_ast.layout import LayoutAST, Item, Feature
+from layout_ast.layout import Feature, Item, LayoutAST
 from validation.core import AssertionResult, Verdict
-
 
 ASSERTION_IDS = [
     "SHEET_DIMENSIONS",
@@ -30,7 +26,6 @@ DEFAULT_PERCENT_TOLERANCE = 0.001
 
 @dataclass
 class IntentAssertion:
-
     id: str
     source: str
     intent: str
@@ -42,60 +37,61 @@ class IntentAssertion:
 def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
     assertions: list[IntentAssertion] = []
 
+    assertions.append(
+        IntentAssertion(
+            id="SHEET_DIMENSIONS",
+            source="ast:sheet",
+            intent=f"Sheet {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm",
+            expected={
+                "width_mm": ast.sheet.width_mm,
+                "height_mm": ast.sheet.height_mm,
+                "thickness_mm": ast.sheet.thickness_mm,
+            },
+            tolerance=DEFAULT_DIMENSION_TOLERANCE_MM,
+            artifact="svg",
+        )
+    )
 
-    assertions.append(IntentAssertion(
-        id="SHEET_DIMENSIONS",
-        source="ast:sheet",
-        intent=f"Sheet {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm",
-        expected={
-            "width_mm": ast.sheet.width_mm,
-            "height_mm": ast.sheet.height_mm,
-            "thickness_mm": ast.sheet.thickness_mm,
-        },
-        tolerance=DEFAULT_DIMENSION_TOLERANCE_MM,
-        artifact="svg",
-    ))
-
-
-    assertions.append(IntentAssertion(
-        id="ITEM_COUNT",
-        source="ast:items",
-        intent=f"Layout has {len(ast.items)} items",
-        expected={"count": len(ast.items)},
-        tolerance=0,
-        artifact="any",
-    ))
-
+    assertions.append(
+        IntentAssertion(
+            id="ITEM_COUNT",
+            source="ast:items",
+            intent=f"Layout has {len(ast.items)} items",
+            expected={"count": len(ast.items)},
+            tolerance=0,
+            artifact="any",
+        )
+    )
 
     for item in ast.items:
         assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm))
-
 
     total_tab_count = 0
     tab_height_mm = None
     tab_profiles = []
     for item in ast.items:
-        if item.feature and item.feature.type == "profile":
-            if item.feature.tab_count and item.feature.tab_count > 0:
-                total_tab_count += item.feature.tab_count
-                if tab_height_mm is None:
-                    tab_height_mm = item.feature.tab_height_mm
-                item_id = item.shape_id or item.id or "unnamed"
-                tab_profiles.append(f"{item_id}({item.feature.tab_count})")
+        if item.feature and item.feature.type == "profile" and item.feature.tab_count and item.feature.tab_count > 0:
+            total_tab_count += item.feature.tab_count
+            if tab_height_mm is None:
+                tab_height_mm = item.feature.tab_height_mm
+            item_id = item.shape_id or item.id or "unnamed"
+            tab_profiles.append(f"{item_id}({item.feature.tab_count})")
 
     if total_tab_count > 0:
-        assertions.append(IntentAssertion(
-            id="TAB_COUNT",
-            source="ast:aggregate",
-            intent=f"Total {total_tab_count} tabs across {len(tab_profiles)} profiles",
-            expected={
-                "tab_count": total_tab_count,
-                "tab_height_mm": tab_height_mm,
-                "profiles": tab_profiles,
-            },
-            tolerance=0,
-            artifact="gcode",
-        ))
+        assertions.append(
+            IntentAssertion(
+                id="TAB_COUNT",
+                source="ast:aggregate",
+                intent=f"Total {total_tab_count} tabs across {len(tab_profiles)} profiles",
+                expected={
+                    "tab_count": total_tab_count,
+                    "tab_height_mm": tab_height_mm,
+                    "profiles": tab_profiles,
+                },
+                tolerance=0,
+                artifact="gcode",
+            )
+        )
 
     return assertions
 
@@ -110,11 +106,9 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
     item_id = item.shape_id or item.id or "unnamed"
     source = f"ast:item:{item_id}"
 
-
     center_xy = None
     if item.placement:
         center_xy = item.placement.center_xy_mm
-
 
     width_mm = None
     height_mm = None
@@ -124,9 +118,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
         height_mm = item.geometry.data.get("h_mm")
         diameter_mm = item.geometry.data.get("diameter_mm")
 
-
     if feature.type == "profile":
-
         expected_profile = {
             "shape_id": item_id,
             "feature_type": "profile",
@@ -140,90 +132,96 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
         elif diameter_mm:
             expected_profile["diameter_mm"] = diameter_mm
 
-        assertions.append(IntentAssertion(
-            id="PROFILE_EXISTS",
-            source=source,
-            intent=f"Profile cut exists for '{item_id}'",
-            expected=expected_profile,
-            tolerance=DEFAULT_POSITION_TOLERANCE_MM,
-            artifact="svg",
-        ))
-
+        assertions.append(
+            IntentAssertion(
+                id="PROFILE_EXISTS",
+                source=source,
+                intent=f"Profile cut exists for '{item_id}'",
+                expected=expected_profile,
+                tolerance=DEFAULT_POSITION_TOLERANCE_MM,
+                artifact="svg",
+            )
+        )
 
         if feature.side and center_xy and width_mm and height_mm:
-            assertions.append(IntentAssertion(
-                id="PROFILE_SIDE",
-                source=source,
-                intent=f"Profile side is '{feature.side}' for '{item_id}'",
-                expected={
-                    "shape_id": item_id,
-                    "side": feature.side,
-                    "center_xy": center_xy,
-                    "nominal_width_mm": width_mm,
-                    "nominal_height_mm": height_mm,
-                },
-                tolerance=DEFAULT_POSITION_TOLERANCE_MM,
-                artifact="gcode",
-            ))
-
+            assertions.append(
+                IntentAssertion(
+                    id="PROFILE_SIDE",
+                    source=source,
+                    intent=f"Profile side is '{feature.side}' for '{item_id}'",
+                    expected={
+                        "shape_id": item_id,
+                        "side": feature.side,
+                        "center_xy": center_xy,
+                        "nominal_width_mm": width_mm,
+                        "nominal_height_mm": height_mm,
+                    },
+                    tolerance=DEFAULT_POSITION_TOLERANCE_MM,
+                    artifact="gcode",
+                )
+            )
 
         if feature.is_through:
-            assertions.append(IntentAssertion(
-                id="THROUGH_CUT",
-                source=source,
-                intent=f"Through cut for '{item_id}' reaches full depth",
-                expected={
-                    "shape_id": item_id,
-                    "target_depth_mm": -sheet_thickness_mm,
-                },
-                tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
-                artifact="gcode",
-            ))
-
+            assertions.append(
+                IntentAssertion(
+                    id="THROUGH_CUT",
+                    source=source,
+                    intent=f"Through cut for '{item_id}' reaches full depth",
+                    expected={
+                        "shape_id": item_id,
+                        "target_depth_mm": -sheet_thickness_mm,
+                    },
+                    tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
+                    artifact="gcode",
+                )
+            )
 
     elif feature.type == "hole":
-
         if center_xy:
-            assertions.append(IntentAssertion(
-                id="HOLE_POSITION",
-                source=source,
-                intent=f"Hole at ({center_xy[0]}, {center_xy[1]})mm for '{item_id}'",
-                expected={
-                    "shape_id": item_id,
-                    "center_x_mm": center_xy[0],
-                    "center_y_mm": center_xy[1],
-                },
-                tolerance=DEFAULT_POSITION_TOLERANCE_MM,
-                artifact="svg",
-            ))
-
+            assertions.append(
+                IntentAssertion(
+                    id="HOLE_POSITION",
+                    source=source,
+                    intent=f"Hole at ({center_xy[0]}, {center_xy[1]})mm for '{item_id}'",
+                    expected={
+                        "shape_id": item_id,
+                        "center_x_mm": center_xy[0],
+                        "center_y_mm": center_xy[1],
+                    },
+                    tolerance=DEFAULT_POSITION_TOLERANCE_MM,
+                    artifact="svg",
+                )
+            )
 
         if diameter_mm:
-            assertions.append(IntentAssertion(
-                id="HOLE_DIAMETER",
-                source=source,
-                intent=f"Hole diameter {diameter_mm}mm for '{item_id}'",
-                expected={
-                    "shape_id": item_id,
-                    "diameter_mm": diameter_mm,
-                },
-                tolerance=DEFAULT_DIMENSION_TOLERANCE_MM,
-                artifact="svg",
-            ))
-
+            assertions.append(
+                IntentAssertion(
+                    id="HOLE_DIAMETER",
+                    source=source,
+                    intent=f"Hole diameter {diameter_mm}mm for '{item_id}'",
+                    expected={
+                        "shape_id": item_id,
+                        "diameter_mm": diameter_mm,
+                    },
+                    tolerance=DEFAULT_DIMENSION_TOLERANCE_MM,
+                    artifact="svg",
+                )
+            )
 
         if feature.is_through:
-            assertions.append(IntentAssertion(
-                id="THROUGH_CUT",
-                source=source,
-                intent=f"Through hole for '{item_id}' reaches full depth",
-                expected={
-                    "shape_id": item_id,
-                    "target_depth_mm": -sheet_thickness_mm,
-                },
-                tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
-                artifact="gcode",
-            ))
+            assertions.append(
+                IntentAssertion(
+                    id="THROUGH_CUT",
+                    source=source,
+                    intent=f"Through hole for '{item_id}' reaches full depth",
+                    expected={
+                        "shape_id": item_id,
+                        "target_depth_mm": -sheet_thickness_mm,
+                    },
+                    tolerance=DEFAULT_DEPTH_TOLERANCE_MM,
+                    artifact="gcode",
+                )
+            )
 
     return assertions
 
@@ -272,7 +270,6 @@ def _check_single_assertion(
     gcode_metrics: dict[str, Any] | None,
 ) -> AssertionResult:
 
-
     checkers = {
         "SHEET_DIMENSIONS": _check_sheet_dimensions,
         "ITEM_COUNT": _check_item_count,
@@ -317,7 +314,6 @@ def _check_sheet_dimensions(
     actual_width = None
     actual_height = None
     source = None
-
 
     if svg_metrics is not None:
         layers = svg_metrics.get("layers", {})
@@ -460,14 +456,12 @@ def _check_profile_exists(
             message="Cannot verify profile exists: SVG metrics not provided",
         )
 
-
     layers = svg_metrics.get("layers", {})
     by_layer = layers.get("by_layer", {})
     profile_layer = by_layer.get("PROFILE_CUTS", {})
 
     element_count = profile_layer.get("element_count", 0)
     elements = profile_layer.get("elements", [])
-
 
     expected_width = assertion.expected.get("width_mm")
     expected_height = assertion.expected.get("height_mm")
@@ -490,8 +484,7 @@ def _check_profile_exists(
             message="Profile layer is empty - expected profile cut geometry",
         )
 
-
-    if expected_width and expected_height or expected_diameter:
+    if (expected_width and expected_height) or expected_diameter:
         tol = assertion.tolerance
         match_found = False
         best_match = None
@@ -502,12 +495,8 @@ def _check_profile_exists(
             elem_height = elem.get("height")
             elem_radius = elem.get("radius")
 
-
             if expected_width and expected_height and elem_width and elem_height:
-                dim_match = (
-                    abs(elem_width - expected_width) <= tol and
-                    abs(elem_height - expected_height) <= tol
-                )
+                dim_match = abs(elem_width - expected_width) <= tol and abs(elem_height - expected_height) <= tol
             elif expected_diameter and elem_radius:
                 dim_match = abs(elem_radius * 2 - expected_diameter) <= tol
             else:
@@ -517,7 +506,6 @@ def _check_profile_exists(
                 dim_matches.append(elem)
                 match_found = True
                 best_match = elem
-
 
         actual["matched_element"] = best_match
         actual["dimension_matches_count"] = len(dim_matches)
@@ -546,7 +534,6 @@ def _check_profile_exists(
                 message=f"No profile geometry matches expected dimensions for '{assertion.expected.get('shape_id')}'",
             )
     else:
-
         return AssertionResult(
             id=assertion.id,
             source=assertion.source,
@@ -576,12 +563,10 @@ def _check_profile_side(
             message="Cannot verify profile side: G-code metrics not provided",
         )
 
-
     side = assertion.expected.get("side", "outside")
     center_xy = assertion.expected.get("center_xy", (0, 0))
     nominal_width = assertion.expected.get("nominal_width_mm", 0)
     nominal_height = assertion.expected.get("nominal_height_mm", 0)
-
 
     half_w = nominal_width / 2
     half_h = nominal_height / 2
@@ -589,7 +574,6 @@ def _check_profile_side(
     shape_x_max = center_xy[0] + half_w
     shape_y_min = center_xy[1] - half_h
     shape_y_max = center_xy[1] + half_h
-
 
     xy_bounds = gcode_metrics.get("xy_bounds", {})
     gcode_x_min = xy_bounds.get("x_min", 0)
@@ -611,16 +595,11 @@ def _check_profile_side(
         "note": "Uses global G-code bounds (may include other items)",
     }
 
-
     gcode_tolerance = max(assertion.tolerance, 10.0)
 
     if side == "outside":
-
-
-        x_ok = gcode_x_min <= shape_x_min + gcode_tolerance and \
-               gcode_x_max >= shape_x_max - gcode_tolerance
-        y_ok = gcode_y_min <= shape_y_min + gcode_tolerance and \
-               gcode_y_max >= shape_y_max - gcode_tolerance
+        x_ok = gcode_x_min <= shape_x_min + gcode_tolerance and gcode_x_max >= shape_x_max - gcode_tolerance
+        y_ok = gcode_y_min <= shape_y_min + gcode_tolerance and gcode_y_max >= shape_y_max - gcode_tolerance
 
         if x_ok and y_ok:
             return AssertionResult(
@@ -645,11 +624,8 @@ def _check_profile_side(
                 message="Outside profile: G-code bounds do not encompass shape bounds",
             )
     else:
-
-        x_ok = gcode_x_min >= shape_x_min - gcode_tolerance and \
-               gcode_x_max <= shape_x_max + gcode_tolerance
-        y_ok = gcode_y_min >= shape_y_min - gcode_tolerance and \
-               gcode_y_max <= shape_y_max + gcode_tolerance
+        x_ok = gcode_x_min >= shape_x_min - gcode_tolerance and gcode_x_max <= shape_x_max + gcode_tolerance
+        y_ok = gcode_y_min >= shape_y_min - gcode_tolerance and gcode_y_max <= shape_y_max + gcode_tolerance
 
         if x_ok and y_ok:
             return AssertionResult(
@@ -817,12 +793,10 @@ def _check_hole_diameter(
     expected_radius = expected_diameter / 2
     tol = assertion.tolerance
 
-
     layers = svg_metrics.get("layers", {})
     by_layer = layers.get("by_layer", {})
     holes_layer = by_layer.get("HOLES", {})
     elements = holes_layer.get("elements", [])
-
 
     hole_radii = []
     for elem in elements:
@@ -838,8 +812,6 @@ def _check_hole_diameter(
     }
 
     if not hole_radii:
-
-
         circles = svg_metrics.get("circles", {})
         all_radii = circles.get("radii_mm", [])
         actual["all_svg_radii_mm"] = all_radii
@@ -879,7 +851,6 @@ def _check_hole_diameter(
                 tolerance=assertion.tolerance,
                 message=f"No hole with diameter {expected_diameter}mm found",
             )
-
 
     found = any(abs(r - expected_radius) <= tol for r in hole_radii)
 
@@ -926,7 +897,6 @@ def _check_through_cut(
 
     target_depth = assertion.expected.get("target_depth_mm", 0)
 
-
     z_profile = gcode_metrics.get("z_profile", {})
     max_plunge_z = z_profile.get("max_plunge_z_mm", 0)
 
@@ -935,7 +905,6 @@ def _check_through_cut(
         "max_plunge_z_mm": max_plunge_z,
         "note": "Uses global max plunge depth (may include other items)",
     }
-
 
     reaches_target = max_plunge_z <= target_depth + assertion.tolerance
 
@@ -1009,7 +978,9 @@ def _check_tab_count(
         height_tolerance = max(assertion.tolerance, 0.5)
         height_matches = abs(avg_detected_height - expected_tab_height) <= height_tolerance
         if not height_matches:
-            height_message = f"; height mismatch: expected {expected_tab_height}mm, detected avg {avg_detected_height:.2f}mm"
+            height_message = (
+                f"; height mismatch: expected {expected_tab_height}mm, detected avg {avg_detected_height:.2f}mm"
+            )
 
     if count_matches and height_matches and tabs_at_max:
         return AssertionResult(

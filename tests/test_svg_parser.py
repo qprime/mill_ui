@@ -11,7 +11,6 @@ This test module covers:
 
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
 
@@ -20,26 +19,26 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from domains import Domain
 from generators.svg.curves import (
+    flatten_arc,
     flatten_cubic_bezier,
     flatten_quadratic_bezier,
-    flatten_arc,
 )
+from generators.svg.params import SVGPathParams
 from generators.svg.parser import (
-    parse_svg_path,
     SVGParseError,
+    center_polylines,
+    normalize_polylines,
+    parse_svg_path,
     polylines_bounds,
     scale_polylines,
     translate_polylines,
-    center_polylines,
-    normalize_polylines,
 )
-from generators.svg.params import SVGPathParams
 from generators.svg.stamp import svg_stamp_generator
-
 
 # =============================================================================
 # Test Helpers
 # =============================================================================
+
 
 def approx_equal(a: float, b: float, tolerance: float = 0.1) -> bool:
     """Check if two floats are approximately equal within tolerance."""
@@ -54,6 +53,7 @@ def point_near(p1: tuple, p2: tuple, tolerance: float = 0.1) -> bool:
 # =============================================================================
 # Curve Flattening Tests
 # =============================================================================
+
 
 def test_flatten_cubic_bezier_straight_line():
     """A cubic Bezier that is already a line should produce minimal points."""
@@ -153,19 +153,19 @@ def test_flatten_tolerance_validation():
     """Tolerance must be positive."""
     try:
         flatten_cubic_bezier((0, 0), (1, 1), (2, 2), (3, 3), tolerance=0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
     try:
         flatten_quadratic_bezier((0, 0), (1, 1), (2, 2), tolerance=-1)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
     try:
         flatten_arc((0, 0), 10, 10, 0, False, True, (10, 0), tolerance=0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
@@ -173,6 +173,7 @@ def test_flatten_tolerance_validation():
 # =============================================================================
 # SVG Path Parser Tests - Basic Commands
 # =============================================================================
+
 
 def test_parse_simple_line():
     """Parse a simple line: M L commands."""
@@ -263,6 +264,7 @@ def test_parse_implicit_lineto():
 # SVG Path Parser Tests - Curves
 # =============================================================================
 
+
 def test_parse_cubic_bezier():
     """Parse C (cubic Bezier) command."""
     path = "M0,0 C25,50 75,50 100,0"
@@ -332,6 +334,7 @@ def test_parse_arc():
 # SVG Path Parser Tests - Edge Cases
 # =============================================================================
 
+
 def test_parse_empty_path():
     """Empty path should return empty list."""
     assert parse_svg_path("") == []
@@ -390,7 +393,7 @@ def test_parse_invalid_command():
     """Parser should raise on invalid commands."""
     try:
         parse_svg_path("M0,0 X100,100")  # X is not a valid command
-        assert False, "Should have raised SVGParseError"
+        raise AssertionError("Should have raised SVGParseError")
     except SVGParseError:
         pass
 
@@ -399,7 +402,7 @@ def test_parse_missing_arguments():
     """Parser should raise on missing arguments."""
     try:
         parse_svg_path("M0,0 L50")  # L needs 2 arguments
-        assert False, "Should have raised SVGParseError"
+        raise AssertionError("Should have raised SVGParseError")
     except (SVGParseError, ValueError):
         pass
 
@@ -407,6 +410,7 @@ def test_parse_missing_arguments():
 # =============================================================================
 # Polyline Utility Tests
 # =============================================================================
+
 
 def test_polylines_bounds():
     """Test bounding box calculation."""
@@ -472,6 +476,7 @@ def test_normalize_polylines():
 # SVGPathParams Tests
 # =============================================================================
 
+
 def test_svg_path_params_valid():
     """Test valid SVGPathParams construction."""
     params = SVGPathParams(
@@ -500,7 +505,7 @@ def test_svg_path_params_empty_path():
     params = SVGPathParams(svg_path="", depth_mm=2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "empty" in str(e).lower()
 
@@ -510,7 +515,7 @@ def test_svg_path_params_invalid_depth():
     params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
 
@@ -520,7 +525,7 @@ def test_svg_path_params_invalid_tolerance():
     params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, tolerance=-0.1)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "tolerance" in str(e).lower()
 
@@ -530,7 +535,7 @@ def test_svg_path_params_invalid_feature():
     params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, feature_type="invalid")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "feature" in str(e).lower()
 
@@ -540,7 +545,7 @@ def test_svg_path_params_invalid_scale():
     params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, scale_mode="stretch")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "scale" in str(e).lower()
 
@@ -550,14 +555,14 @@ def test_svg_path_params_invalid_svg_unit_mm():
     params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "svg_unit_mm" in str(e).lower()
 
     params2 = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=-1.0)
     try:
         params2.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "svg_unit_mm" in str(e).lower()
 
@@ -565,6 +570,7 @@ def test_svg_path_params_invalid_svg_unit_mm():
 # =============================================================================
 # SVG Stamp Generator Tests
 # =============================================================================
+
 
 def test_svg_stamp_generator_simple():
     """Test svg_stamp_generator with a simple rectangle."""
@@ -645,7 +651,7 @@ def test_svg_stamp_generator_scale_fit():
     points = geometry.get("points", [])
     if points:
         x_coords = [p[0] for p in points]
-        y_coords = [p[1] for p in points]
+        [p[1] for p in points]
         # Should be roughly within domain bounds (with some margin for centering)
         assert max(x_coords) - min(x_coords) <= 60  # Domain is 50, allow some margin
 
@@ -697,7 +703,7 @@ def test_svg_stamp_generator_error_empty_svg():
 
     try:
         svg_stamp_generator(domain, params, allow_empty=False)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
@@ -715,7 +721,7 @@ def test_svg_stamp_generator_determinism():
     items2 = svg_stamp_generator(domain, params)
 
     assert len(items1) == len(items2)
-    for i1, i2 in zip(items1, items2):
+    for i1, i2 in zip(items1, items2, strict=False):
         assert i1.type == i2.type
         assert i1.feature.type == i2.feature.type
         assert i1.feature.is_through == i2.feature.is_through
@@ -744,6 +750,7 @@ def test_svg_stamp_generator_multiple_paths():
 # =============================================================================
 # Transform and Coordinate Tests
 # =============================================================================
+
 
 def test_svg_stamp_generator_y_inversion_default():
     """Test that invert_y=True (default) flips Y coordinates.
@@ -774,7 +781,7 @@ def test_svg_stamp_generator_y_inversion_default():
 
     # Get Y values of top and bottom edges
     y_values = [p[1] for p in points]
-    min_y_out = min(y_values)
+    min(y_values)
     max_y_out = max(y_values)
 
     # The first point (SVG Y=10, which is "top" in SVG) should map to
@@ -807,7 +814,7 @@ def test_svg_stamp_generator_y_inversion_disabled():
 
     y_values = [p[1] for p in points]
     min_y_out = min(y_values)
-    max_y_out = max(y_values)
+    max(y_values)
     first_point_y = points[0][1]
 
     # Without inversion, SVG Y=10 (low Y) should stay at low Y in output
@@ -876,6 +883,7 @@ def test_svg_stamp_generator_svg_unit_mm_default():
 # Integration Tests
 # =============================================================================
 
+
 def test_svg_to_ast_integration():
     """Test that SVG generator output integrates with LayoutAST pipeline."""
     from layout_ast.layout import LayoutAST, Sheet
@@ -933,6 +941,7 @@ def test_svg_complex_path():
 # Test Runner
 # =============================================================================
 
+
 def run_tests():
     """Run all tests and report results."""
     test_functions = [
@@ -944,7 +953,6 @@ def run_tests():
         test_flatten_arc_semicircle,
         test_flatten_arc_zero_radius,
         test_flatten_tolerance_validation,
-
         # Basic path parsing
         test_parse_simple_line,
         test_parse_closed_path,
@@ -953,14 +961,12 @@ def run_tests():
         test_parse_relative_hv,
         test_parse_multiple_subpaths,
         test_parse_implicit_lineto,
-
         # Curve parsing
         test_parse_cubic_bezier,
         test_parse_smooth_cubic,
         test_parse_quadratic_bezier,
         test_parse_smooth_quadratic,
         test_parse_arc,
-
         # Edge cases
         test_parse_empty_path,
         test_parse_whitespace_variations,
@@ -969,14 +975,12 @@ def run_tests():
         test_parse_decimal_numbers,
         test_parse_invalid_command,
         test_parse_missing_arguments,
-
         # Polyline utilities
         test_polylines_bounds,
         test_scale_polylines,
         test_translate_polylines,
         test_center_polylines,
         test_normalize_polylines,
-
         # SVGPathParams
         test_svg_path_params_valid,
         test_svg_path_params_full,
@@ -986,7 +990,6 @@ def run_tests():
         test_svg_path_params_invalid_feature,
         test_svg_path_params_invalid_scale,
         test_svg_path_params_invalid_svg_unit_mm,
-
         # SVG stamp generator
         test_svg_stamp_generator_simple,
         test_svg_stamp_generator_curved,
@@ -998,13 +1001,11 @@ def run_tests():
         test_svg_stamp_generator_error_empty_svg,
         test_svg_stamp_generator_determinism,
         test_svg_stamp_generator_multiple_paths,
-
         # Transform and coordinates
         test_svg_stamp_generator_y_inversion_default,
         test_svg_stamp_generator_y_inversion_disabled,
         test_svg_stamp_generator_svg_unit_mm,
         test_svg_stamp_generator_svg_unit_mm_default,
-
         # Integration
         test_svg_to_ast_integration,
         test_svg_complex_path,

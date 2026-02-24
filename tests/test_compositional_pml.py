@@ -1,20 +1,14 @@
-
 from __future__ import annotations
 
 import sys
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
-from pml.yaml_formatter import format_pml_yaml
-from resolution.layout_resolver import resolve_layout
 from layout_ast.compositional import (
     Panel,
     Rect,
-    Frame,
-    Grid,
-    Cell,
-    UseComponent,
 )
-from layout_ast.layout import Feature
+from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def approx_eq(a, b, rel=1e-6):
@@ -43,7 +37,6 @@ children:
     assert ast.sheet.width_mm == 400.0
     assert ast.sheet.height_mm == 600.0
     assert ast.sheet.thickness_mm == 19.0
-
 
     assert isinstance(ast.root, Panel)
     assert len(ast.root.children) == 1
@@ -153,7 +146,6 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     assert len(flat.items) == 4
 
     for item in flat.items:
@@ -237,9 +229,7 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     assert len(flat.items) == 4
-
 
     first = flat.items[0]
 
@@ -302,16 +292,13 @@ children:
             name: GridPanel
 """
 
-
     ast = parse_pml_yaml(pml)
-
 
     assert ast.sheet.width_mm == 1200
     assert ast.sheet.height_mm == 1200
     assert ast.sheet.thickness_mm == 19
     assert ast.project == "acceptance_test_grid_panels"
     assert "GridPanel" in ast.components
-
 
     flat = resolve_layout(ast)
 
@@ -324,17 +311,14 @@ children:
 
     assert len(pocket_items) == 16
 
-
     assert flat.sheet.width_mm == 1200
     assert flat.sheet.height_mm == 1200
     assert flat.project == "acceptance_test_grid_panels"
-
 
     first_outer = flat.items[0]
     assert first_outer.shape_id == "panel_outer"
     assert approx_eq(first_outer.geometry.data["w_mm"], 550.0)
     assert approx_eq(first_outer.geometry.data["h_mm"], 550.0)
-
 
     first_pocket = pocket_items[0]
     assert approx_eq(first_pocket.geometry.data["w_mm"], 230.0)
@@ -390,21 +374,16 @@ children:
             name: TestPanel
 """
 
-
     ast1 = parse_pml_yaml(original_pml)
-
 
     canonical_pml = format_pml_yaml(ast1)
 
-
     ast2 = parse_pml_yaml(canonical_pml)
-
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
-
 
     types1 = [item.feature.type if item.feature else None for item in flat1.items]
     types2 = [item.feature.type if item.feature else None for item in flat2.items]
@@ -492,11 +471,9 @@ children:
     ast = parse_pml_yaml(pml)
     formatted = format_pml_yaml(ast)
 
-
     assert "Sheet:" in formatted
     assert "project:" in formatted
     assert "components:" in formatted
-
 
     ast2 = parse_pml_yaml(formatted)
     formatted2 = format_pml_yaml(ast2)
@@ -528,7 +505,6 @@ children:
 """
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
-
 
     assert len(flat.items) == 4
     print("  PASS")

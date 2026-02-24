@@ -1,100 +1,89 @@
-
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import replace
-from typing import Any, Callable
+from typing import Any
 
+from assembly.joinery import Butt, Captured, Finger, HalfLap
+from assembly.primitives import box, carcass, cubby
+from core.geometry import compute_shape_bounds_dict
+from domains import Domain
+from generators import (
+    ConcentricBorderParams,
+    GridLinesParams,
+    HoleGridParams,
+    LinePatternParams,
+    MeasurementEdgeParams,
+    MeasurementGridParams,
+    RaisedPanelParams,
+    WaveParams,
+    XPanelParams,
+)
+from generators.area.concentric_border import concentric_border_generator
+from generators.area.engrave_text import engrave_text_at_position
+from generators.area.grid_lines import grid_lines_generator
+from generators.area.hole_grid import hole_grid_generator
+from generators.area.line_pattern import line_pattern_generator
+from generators.area.measurement_grid import measurement_grid_generator
+from generators.area.raised_panel import raised_panel_generator
+from generators.area.wave import wave_generator
+from generators.area.x_panel import x_panel_generator
+from generators.loop.measurement_edge import measurement_edge_generator
+from generators.panels import NotchedPanelParams, notched_panel_generator
 from layout_ast.compositional import (
-    Panel,
-    Inset,
-    Frame,
-    Grid,
-    Cell,
-    Split,
-    ComponentDef,
-    UseComponent,
-    Place,
-    Rect,
-    Circle,
-    RoundedRect,
-    Line,
-    Polyline,
-    SplinePath,
-    Keepout,
-    Edge,
-    ResolvedRegion,
-    CompositionalLayoutAST,
-
-    ProfileGen,
-    PocketGen,
-    RaisedPanelGen,
-    ChamferGen,
-    WaveGen,
-    SplitHorizontal,
-    SplitVertical,
-    SplitGrid,
-    LinesGen,
-    ConcentricBorderGen,
-
-    SplitHorizontalGaps,
-    AtPosition,
-    Subtract,
     Arch,
-
-    Polygon,
-    Triangle,
-
-    XPanelGen,
-
-    HoleGridGen,
-
-    MeasurementGridGen,
-
-    GridLinesGen,
-
-    MeasurementEdgeGen,
-
-    EngraveTextGen,
-
-    WasteCuts,
-
     AssemblyDecl,
-
+    AtPosition,
     BeamDecl,
     BeamFeatureDecl,
     BeamLayerDecl,
+    Cell,
+    ChamferGen,
+    Circle,
+    CompositionalLayoutAST,
+    ConcentricBorderGen,
+    Edge,
+    EngraveTextGen,
+    Frame,
+    Grid,
+    GridLinesGen,
+    HoleGridGen,
+    Inset,
+    Keepout,
+    Line,
+    LinesGen,
+    MeasurementEdgeGen,
+    MeasurementGridGen,
+    Panel,
+    Place,
+    PocketGen,
+    Polygon,
+    Polyline,
+    ProfileGen,
+    RaisedPanelGen,
+    Rect,
+    ResolvedRegion,
+    RoundedRect,
+    SplinePath,
+    Split,
+    SplitGrid,
+    SplitHorizontal,
+    SplitHorizontalGaps,
+    SplitVertical,
+    Subtract,
+    Triangle,
+    UseComponent,
+    WasteCuts,
+    WaveGen,
+    XPanelGen,
 )
 from layout_ast.layout import (
-    LayoutAST,
-    Sheet,
-    Item,
-    Geometry,
-    Placement,
     Feature,
+    Geometry,
+    Item,
+    LayoutAST,
+    Placement,
 )
-from core.constants import DepthMode
-from core.geometry import compute_shape_bounds_dict
-
-
-from domains import Domain
-from generators.area.raised_panel import raised_panel_generator
-from generators.area.wave import wave_generator
-from generators.area.line_pattern import line_pattern_generator
-from generators.area.concentric_border import concentric_border_generator
-from generators.area.x_panel import x_panel_generator
-from generators.area.hole_grid import hole_grid_generator
-from generators.area.measurement_grid import measurement_grid_generator
-from generators.area.grid_lines import grid_lines_generator
-from generators.loop.measurement_edge import measurement_edge_generator
-from generators.area.engrave_text import engrave_text_at_position
-from generators import ConcentricBorderParams, GridLinesParams, HoleGridParams, LinePatternParams, MeasurementEdgeParams, MeasurementGridParams, RaisedPanelParams, WaveParams, XPanelParams
-from assembly.core import Assembly as AssemblyModel, InterfaceType
-from assembly.panel import PanelSpec, Edge as PanelEdge
-from assembly.joinery import Butt, Finger, Captured, HalfLap
-from assembly.primitives import box, carcass, cubby
-from assembly.layout import LayoutConfig, layout_panels
-from generators.panels import NotchedPanelParams, notched_panel_generator
-
 
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
 
@@ -114,45 +103,39 @@ def _feature_from_profile_gen(node: ProfileGen) -> Feature:
     )
 
 
-def sample_catmull_rom_spline(control_points: list[tuple[float, float]], tolerance_mm: float) -> list[tuple[float, float]]:
+def sample_catmull_rom_spline(
+    control_points: list[tuple[float, float]], tolerance_mm: float
+) -> list[tuple[float, float]]:
     if len(control_points) < 2:
         return list(control_points)
 
-
     if len(control_points) == 2:
         return list(control_points)
-
 
     segments_per_span = max(10, int(5.0 / max(tolerance_mm, 0.01)))
 
     sampled_points = []
 
-
-    extended = [control_points[0]] + control_points + [control_points[-1]]
-
+    extended = [control_points[0], *control_points, control_points[-1]]
 
     for i in range(1, len(extended) - 2):
-        p0, p1, p2, p3 = extended[i-1], extended[i], extended[i+1], extended[i+2]
-
+        p0, p1, p2, p3 = extended[i - 1], extended[i], extended[i + 1], extended[i + 2]
 
         for t_step in range(segments_per_span):
             t = t_step / float(segments_per_span)
 
-
             t2 = t * t
             t3 = t2 * t
 
+            q0 = -0.5 * t3 + t2 - 0.5 * t
+            q1 = 1.5 * t3 - 2.5 * t2 + 1.0
+            q2 = -1.5 * t3 + 2.0 * t2 + 0.5 * t
+            q3 = 0.5 * t3 - 0.5 * t2
 
-            q0 = -0.5*t3 + t2 - 0.5*t
-            q1 = 1.5*t3 - 2.5*t2 + 1.0
-            q2 = -1.5*t3 + 2.0*t2 + 0.5*t
-            q3 = 0.5*t3 - 0.5*t2
-
-            x = q0*p0[0] + q1*p1[0] + q2*p2[0] + q3*p3[0]
-            y = q0*p0[1] + q1*p1[1] + q2*p2[1] + q3*p3[1]
+            x = q0 * p0[0] + q1 * p1[0] + q2 * p2[0] + q3 * p3[0]
+            y = q0 * p0[1] + q1 * p1[1] + q2 * p2[1] + q3 * p3[1]
 
             sampled_points.append((x, y))
-
 
     sampled_points.append(control_points[-1])
 
@@ -164,7 +147,6 @@ class ResolutionAssertionError(Exception):
 
 
 class LayoutResolver:
-
     def __init__(self, ast: CompositionalLayoutAST, validate: bool = False):
         self.ast = ast
         self.components = ast.components
@@ -181,12 +163,11 @@ class LayoutResolver:
         if not self._validate:
             return
 
-        if child_item.feature and child_item.feature.type == "profile":
-            if child_item.type != parent_type:
-                raise ResolutionAssertionError(
-                    f"Shape context mismatch in {context_desc}: "
-                    f"parent is {parent_type} but profile item is {child_item.type}"
-                )
+        if child_item.feature and child_item.feature.type == "profile" and child_item.type != parent_type:
+            raise ResolutionAssertionError(
+                f"Shape context mismatch in {context_desc}: "
+                f"parent is {parent_type} but profile item is {child_item.type}"
+            )
 
     def _assert_geometry_preserved(
         self,
@@ -223,16 +204,12 @@ class LayoutResolver:
 
         for child in children:
             if isinstance(child, Keepout):
-
-
                 keepout_items = []
                 for keepout_child in child.children:
                     self._resolve_node(keepout_child, region, keepout_items, params)
 
-
                 for item in keepout_items:
                     if item.kind == "shape" and item.geometry:
-
                         bounds_dict = compute_shape_bounds_dict(
                             item.type,
                             item.geometry.data,
@@ -248,7 +225,6 @@ class LayoutResolver:
     ) -> dict[str, Any] | None:
         for child in children:
             if isinstance(child, Edge):
-
                 return {
                     "type": child.treatment_type,
                     "rough_allowance_mm": child.rough_allowance_mm,
@@ -257,7 +233,6 @@ class LayoutResolver:
                     "distance_mm": child.distance_mm,
                 }
         return None
-
 
     def _handle_panel(
         self,
@@ -467,12 +442,11 @@ class LayoutResolver:
 
         edge_treatment = self._extract_edge_treatment(node.children)
 
-        all_corners = {'tl', 'tr', 'bl', 'br'}
         if node.corners is not None:
-            radius_tl = node.radius_mm if 'tl' in node.corners else 0.0
-            radius_tr = node.radius_mm if 'tr' in node.corners else 0.0
-            radius_bl = node.radius_mm if 'bl' in node.corners else 0.0
-            radius_br = node.radius_mm if 'br' in node.corners else 0.0
+            radius_tl = node.radius_mm if "tl" in node.corners else 0.0
+            radius_tr = node.radius_mm if "tr" in node.corners else 0.0
+            radius_bl = node.radius_mm if "bl" in node.corners else 0.0
+            radius_br = node.radius_mm if "br" in node.corners else 0.0
         else:
             radius_tl = radius_tr = radius_bl = radius_br = node.radius_mm
 
@@ -541,10 +515,12 @@ class LayoutResolver:
         line_item = Item(
             kind="shape",
             type="Line",
-            geometry=Geometry(data={
-                "start": [start_xy[0] - cx, start_xy[1] - cy],
-                "end": [end_xy[0] - cx, end_xy[1] - cy],
-            }),
+            geometry=Geometry(
+                data={
+                    "start": [start_xy[0] - cx, start_xy[1] - cy],
+                    "end": [end_xy[0] - cx, end_xy[1] - cy],
+                }
+            ),
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
@@ -575,9 +551,11 @@ class LayoutResolver:
         polyline_item = Item(
             kind="shape",
             type="Polyline",
-            geometry=Geometry(data={
-                "points": relative_points,
-            }),
+            geometry=Geometry(
+                data={
+                    "points": relative_points,
+                }
+            ),
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
@@ -610,11 +588,13 @@ class LayoutResolver:
         spline_item = Item(
             kind="shape",
             type="Polyline",
-            geometry=Geometry(data={
-                "points": relative_points,
-                "spline_source": True,
-                "spline_tolerance_mm": node.tolerance_mm,
-            }),
+            geometry=Geometry(
+                data={
+                    "points": relative_points,
+                    "spline_source": True,
+                    "spline_tolerance_mm": node.tolerance_mm,
+                }
+            ),
             placement=Placement(center_xy_mm=(cx, cy)),
             feature=node.feature,
             shape_id=node.id,
@@ -640,7 +620,6 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         items.append(node)
-
 
     def _handle_profile_gen(
         self,
@@ -713,13 +692,11 @@ class LayoutResolver:
             center=region.center,
         )
 
-
         generator_params = RaisedPanelParams(
             border_width_mm=node.border_width_mm,
             border_depth_mm=node.border_depth_mm,
             field_depth_mm=node.field_depth_mm,
         )
-
 
         shape_id_prefix = self._next_shape_id("raised_panel")
         try:
@@ -731,7 +708,6 @@ class LayoutResolver:
             )
             items.extend(generated_items)
         except ValueError:
-
             pass
 
     def _handle_chamfer_gen(
@@ -748,10 +724,12 @@ class LayoutResolver:
         chamfer_item = Item(
             kind="shape",
             type="Rect",
-            geometry=Geometry(data={
-                "w_mm": region.width,
-                "h_mm": region.height,
-            }),
+            geometry=Geometry(
+                data={
+                    "w_mm": region.width,
+                    "h_mm": region.height,
+                }
+            ),
             placement=Placement(center_xy_mm=region.center),
             feature=Feature(
                 type="chamfer",
@@ -834,7 +812,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        from nesting.waste_decomposition import compute_waste_rectangles, PartBounds, WasteStrategy
+        from nesting.waste_decomposition import PartBounds, WasteStrategy, compute_waste_rectangles
 
         working_width = self.ast.sheet.working_width_mm
         working_height = self.ast.sheet.working_height_mm
@@ -849,12 +827,14 @@ class LayoutResolver:
                     item.geometry.data,
                     item.placement.center_xy_mm,
                 )
-                part_bounds.append(PartBounds(
-                    x=bounds["x_min"] - tool_diameter,
-                    y=bounds["y_min"] - tool_diameter,
-                    width=bounds["x_max"] - bounds["x_min"] + 2 * tool_diameter,
-                    height=bounds["y_max"] - bounds["y_min"] + 2 * tool_diameter,
-                ))
+                part_bounds.append(
+                    PartBounds(
+                        x=bounds["x_min"] - tool_diameter,
+                        y=bounds["y_min"] - tool_diameter,
+                        width=bounds["x_max"] - bounds["x_min"] + 2 * tool_diameter,
+                        height=bounds["y_max"] - bounds["y_min"] + 2 * tool_diameter,
+                    )
+                )
 
         strategy = WasteStrategy.LARGEST if node.strategy == "largest" else WasteStrategy.SIMPLE
 
@@ -873,10 +853,12 @@ class LayoutResolver:
             waste_item = Item(
                 kind="shape",
                 type="Rect",
-                geometry=Geometry(data={
-                    "w_mm": wrect.width,
-                    "h_mm": wrect.height,
-                }),
+                geometry=Geometry(
+                    data={
+                        "w_mm": wrect.width,
+                        "h_mm": wrect.height,
+                    }
+                ),
                 placement=Placement(center_xy_mm=(wrect.center_x, wrect.center_y)),
                 feature=Feature(
                     type="profile",
@@ -1133,22 +1115,18 @@ class LayoutResolver:
         n = node.n
         gap_mm = node.gap_mm
 
-
         if n < 1:
             raise ValueError(f"split_horizontal: n must be at least 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_horizontal: gap cannot be negative, got {gap_mm}mm")
 
-
         total_gap = gap_mm * (n - 1)
         available_height = region.height - total_gap
         if available_height <= 0:
             raise ValueError(
-                f"split_horizontal: gap {gap_mm}mm × {n-1} = {total_gap}mm exceeds "
-                f"region height {region.height}mm"
+                f"split_horizontal: gap {gap_mm}mm x {n - 1} = {total_gap}mm exceeds region height {region.height}mm"
             )
         cell_height = available_height / n
-
 
         num_children = len(node.children)
         for i in range(n):
@@ -1177,22 +1155,18 @@ class LayoutResolver:
         n = node.n
         gap_mm = node.gap_mm
 
-
         if n < 1:
             raise ValueError(f"split_vertical: n must be at least 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_vertical: gap cannot be negative, got {gap_mm}mm")
 
-
         total_gap = gap_mm * (n - 1)
         available_width = region.width - total_gap
         if available_width <= 0:
             raise ValueError(
-                f"split_vertical: gap {gap_mm}mm × {n-1} = {total_gap}mm exceeds "
-                f"region width {region.width}mm"
+                f"split_vertical: gap {gap_mm}mm x {n - 1} = {total_gap}mm exceeds region width {region.width}mm"
             )
         cell_width = available_width / n
-
 
         num_children = len(node.children)
         for i in range(n):
@@ -1222,14 +1196,12 @@ class LayoutResolver:
         cols = node.cols
         gap_mm = node.gap_mm
 
-
         if rows < 1:
             raise ValueError(f"split_grid: rows must be at least 1, got {rows}")
         if cols < 1:
             raise ValueError(f"split_grid: cols must be at least 1, got {cols}")
         if gap_mm < 0:
             raise ValueError(f"split_grid: gap cannot be negative, got {gap_mm}mm")
-
 
         total_h_gap = gap_mm * (cols - 1)
         total_v_gap = gap_mm * (rows - 1)
@@ -1238,18 +1210,17 @@ class LayoutResolver:
 
         if available_width <= 0:
             raise ValueError(
-                f"split_grid: horizontal gap {gap_mm}mm × {cols-1} = {total_h_gap}mm exceeds "
+                f"split_grid: horizontal gap {gap_mm}mm x {cols - 1} = {total_h_gap}mm exceeds "
                 f"region width {region.width}mm"
             )
         if available_height <= 0:
             raise ValueError(
-                f"split_grid: vertical gap {gap_mm}mm × {rows-1} = {total_v_gap}mm exceeds "
+                f"split_grid: vertical gap {gap_mm}mm x {rows - 1} = {total_v_gap}mm exceeds "
                 f"region height {region.height}mm"
             )
 
         cell_width = available_width / cols
         cell_height = available_height / rows
-
 
         for row in range(rows):
             for col in range(cols):
@@ -1262,10 +1233,8 @@ class LayoutResolver:
                     y_max=y_min + cell_height,
                 )
 
-
                 for child in node.children:
                     self._resolve_node(child, cell_region, items, params)
-
 
     def _handle_split_horizontal_gaps(
         self,
@@ -1285,7 +1254,7 @@ class LayoutResolver:
         total_gap_space = n * gap_mm
         if total_gap_space >= region.height:
             raise ValueError(
-                f"split_horizontal_gaps: {n} gaps × {gap_mm}mm = {total_gap_space}mm "
+                f"split_horizontal_gaps: {n} gaps x {gap_mm}mm = {total_gap_space}mm "
                 f"exceeds region height {region.height}mm"
             )
 
@@ -1370,6 +1339,7 @@ class LayoutResolver:
                     items.append(pocket_item)
                 elif isinstance(child, ChamferGen):
                     import math
+
                     chamfer_angle = math.degrees(math.atan2(child.depth_mm, child.width_mm))
                     chamfer_item = Item(
                         kind="shape",
@@ -1450,6 +1420,7 @@ class LayoutResolver:
                         shape_id_prefix = self._next_shape_id("arch_raised_panel")
                         try:
                             from generators.area.raised_panel import raised_panel_generator
+
                             generated_items = raised_panel_generator(
                                 inset_domain,
                                 generator_params,
@@ -1796,12 +1767,15 @@ class LayoutResolver:
                     dado_width_mm=back_rabbet_width,
                 )
             elif node.back_thickness_mm:
-                back_joinery = self._build_joinery_from_config(
-                    back_config,
-                    default_finger_width,
-                    default_finger_count,
-                    default_clearance,
-                ) or Butt()
+                back_joinery = (
+                    self._build_joinery_from_config(
+                        back_config,
+                        default_finger_width,
+                        default_finger_count,
+                        default_clearance,
+                    )
+                    or Butt()
+                )
             elif node.back_rabbet_depth_mm:
                 back_joinery = Captured(
                     dado_depth_mm=back_rabbet_depth,
@@ -1887,59 +1861,61 @@ class LayoutResolver:
                 for edge_idx in edges_with_notches:
                     edge_name = edge_name_map.get(edge_idx, f"edge_{edge_idx}")
                     color = edge_colors.get(edge_name, "#ffffff")
-                    pattern = "notch"
                     label_text = f"{spec.name}.{edge_name}"
                     if edge_name == "top":
-                        edge_lines.append({
-                            "x1": x_min, "y1": y_max, "x2": x_max, "y2": y_max, "color": color
-                        })
-                        edge_labels.append({
-                            "x": (x_min + x_max) / 2,
-                            "y": y_max + 5,
-                            "text": label_text,
-                            "color": color,
-                            "anchor": "middle",
-                        })
+                        edge_lines.append({"x1": x_min, "y1": y_max, "x2": x_max, "y2": y_max, "color": color})
+                        edge_labels.append(
+                            {
+                                "x": (x_min + x_max) / 2,
+                                "y": y_max + 5,
+                                "text": label_text,
+                                "color": color,
+                                "anchor": "middle",
+                            }
+                        )
                     elif edge_name == "bottom":
-                        edge_lines.append({
-                            "x1": x_min, "y1": y_min, "x2": x_max, "y2": y_min, "color": color
-                        })
-                        edge_labels.append({
-                            "x": (x_min + x_max) / 2,
-                            "y": y_min - 5,
-                            "text": label_text,
-                            "color": color,
-                            "anchor": "middle",
-                        })
+                        edge_lines.append({"x1": x_min, "y1": y_min, "x2": x_max, "y2": y_min, "color": color})
+                        edge_labels.append(
+                            {
+                                "x": (x_min + x_max) / 2,
+                                "y": y_min - 5,
+                                "text": label_text,
+                                "color": color,
+                                "anchor": "middle",
+                            }
+                        )
                     elif edge_name == "left":
-                        edge_lines.append({
-                            "x1": x_min, "y1": y_min, "x2": x_min, "y2": y_max, "color": color
-                        })
-                        edge_labels.append({
-                            "x": x_min - 5,
-                            "y": (y_min + y_max) / 2,
-                            "text": label_text,
-                            "color": color,
-                            "anchor": "end",
-                        })
+                        edge_lines.append({"x1": x_min, "y1": y_min, "x2": x_min, "y2": y_max, "color": color})
+                        edge_labels.append(
+                            {
+                                "x": x_min - 5,
+                                "y": (y_min + y_max) / 2,
+                                "text": label_text,
+                                "color": color,
+                                "anchor": "end",
+                            }
+                        )
                     elif edge_name == "right":
-                        edge_lines.append({
-                            "x1": x_max, "y1": y_min, "x2": x_max, "y2": y_max, "color": color
-                        })
-                        edge_labels.append({
-                            "x": x_max + 5,
-                            "y": (y_min + y_max) / 2,
-                            "text": label_text,
-                            "color": color,
-                            "anchor": "start",
-                        })
+                        edge_lines.append({"x1": x_max, "y1": y_min, "x2": x_max, "y2": y_max, "color": color})
+                        edge_labels.append(
+                            {
+                                "x": x_max + 5,
+                                "y": (y_min + y_max) / 2,
+                                "text": label_text,
+                                "color": color,
+                                "anchor": "start",
+                            }
+                        )
 
                 updated_item = replace(
                     panel_items[0],
-                    params=({"edge_lines": edge_lines, "edge_labels": edge_labels} if panel_items[0].params is None
-                    else {**panel_items[0].params, "edge_lines": edge_lines, "edge_labels": edge_labels})
+                    params=(
+                        {"edge_lines": edge_lines, "edge_labels": edge_labels}
+                        if panel_items[0].params is None
+                        else {**panel_items[0].params, "edge_lines": edge_lines, "edge_labels": edge_labels}
+                    ),
                 )
-                panel_items = [updated_item] + panel_items[1:]
+                panel_items = [updated_item, *panel_items[1:]]
 
             items.extend(panel_items)
 
@@ -1990,23 +1966,23 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         from assembly.beam import (
-            BeamSpec,
             BeamRole,
-            LayerSpec,
+            BeamSpec,
+            CarvedDesign,
+            Chamfer,
             Cutout,
             DrillHole,
-            SquareMortise,
-            CarvedDesign,
-            GeometricPattern,
-            Tenon,
+            EdgeContour,
+            EdgeDado,
+            EdgeNotch,
             EndCap,
             EndProfile,
             Fillet,
-            Chamfer,
+            GeometricPattern,
+            LayerSpec,
             Rabbet,
-            EdgeDado,
-            EdgeNotch,
-            EdgeContour,
+            SquareMortise,
+            Tenon,
         )
 
         def convert_layer(layer_decl: BeamLayerDecl) -> LayerSpec:
@@ -2149,10 +2125,7 @@ class LayoutResolver:
                 )
             raise ValueError(f"Unknown edge feature type: {feat.feature_type}")
 
-        if isinstance(node.layers, int):
-            layers = node.layers
-        else:
-            layers = tuple(convert_layer(ld) for ld in node.layers)
+        layers = node.layers if isinstance(node.layers, int) else tuple(convert_layer(ld) for ld in node.layers)
 
         role = None
         if node.role:
@@ -2181,11 +2154,13 @@ class LayoutResolver:
         gap = 10.0
 
         from assembly.beam import compute_segments
+
         segments = None
         if isinstance(beam_spec.layers, int) and beam_spec.layers >= 1:
             segments = compute_segments(beam_spec.length_mm, sheet_size, beam_spec.layers)
 
         from assembly.beam import Tenon as _Tenon
+
         left_exts: list[float] = []
         right_exts: list[float] = []
         for li in range(beam_spec.layer_count):
@@ -2232,12 +2207,14 @@ class LayoutResolver:
                     if si == seg_count - 1:
                         s_end += right_ext
                         s_len += right_ext
-                    adjusted_segs.append({
-                        "index": s.index,
-                        "start_mm": s_start,
-                        "end_mm": s_end,
-                        "length_mm": s_len,
-                    })
+                    adjusted_segs.append(
+                        {
+                            "index": s.index,
+                            "start_mm": s_start,
+                            "end_mm": s_end,
+                            "length_mm": s_len,
+                        }
+                    )
                 layer_data = {
                     "layer_index": layer_idx,
                     "segments": adjusted_segs,
@@ -2245,10 +2222,19 @@ class LayoutResolver:
                 beam_structure["layers"].append(layer_data)
         elif isinstance(beam_spec.layers, tuple):
             for layer_idx, layer_spec in enumerate(beam_spec.layers):
-                beam_structure["layers"].append({
-                    "layer_index": layer_idx,
-                    "segments": [{"index": 0, "start_mm": layer_spec.offset_mm, "end_mm": layer_spec.offset_mm + layer_spec.length_mm, "length_mm": layer_spec.length_mm}],
-                })
+                beam_structure["layers"].append(
+                    {
+                        "layer_index": layer_idx,
+                        "segments": [
+                            {
+                                "index": 0,
+                                "start_mm": layer_spec.offset_mm,
+                                "end_mm": layer_spec.offset_mm + layer_spec.length_mm,
+                                "length_mm": layer_spec.length_mm,
+                            }
+                        ],
+                    }
+                )
         self._beam_structures.append(beam_structure)
 
         x_cursor = region.x_min + edge_clearance
@@ -2274,10 +2260,12 @@ class LayoutResolver:
             panel_item = Item(
                 kind="shape",
                 type="Rect",
-                geometry=Geometry(data={
-                    "w_mm": panel_width,
-                    "h_mm": panel_height,
-                }),
+                geometry=Geometry(
+                    data={
+                        "w_mm": panel_width,
+                        "h_mm": panel_height,
+                    }
+                ),
                 placement=Placement(center_xy_mm=panel_center),
                 feature=Feature(
                     type="profile",
@@ -2316,7 +2304,6 @@ class LayoutResolver:
             config=config,
         )
 
-
     _NODE_HANDLERS: dict[type, NodeHandler] | None = None
 
     def _get_handler_map(self) -> dict[type, NodeHandler]:
@@ -2338,7 +2325,6 @@ class LayoutResolver:
                 SplinePath: LayoutResolver._handle_spline_path,
                 Keepout: LayoutResolver._handle_keepout,
                 Item: LayoutResolver._handle_item,
-
                 ProfileGen: LayoutResolver._handle_profile_gen,
                 PocketGen: LayoutResolver._handle_pocket_gen,
                 RaisedPanelGen: LayoutResolver._handle_raised_panel_gen,
@@ -2347,34 +2333,22 @@ class LayoutResolver:
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,
-
                 LinesGen: LayoutResolver._handle_lines_gen,
                 ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
-
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,
                 Arch: LayoutResolver._handle_arch,
-
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,
-
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
-
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
-
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
-
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
-
                 GridLinesGen: LayoutResolver._handle_grid_lines_gen,
-
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
-
                 WasteCuts: LayoutResolver._handle_waste_cuts,
-
                 AssemblyDecl: LayoutResolver._handle_assembly,
-
                 BeamDecl: LayoutResolver._handle_beam_decl,
             }
         return LayoutResolver._NODE_HANDLERS

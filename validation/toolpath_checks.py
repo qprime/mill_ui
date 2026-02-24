@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cam.moves import Move, XYMove
 from ir.removal_intent import Bounds2D
@@ -54,10 +55,7 @@ class ToolpathVerificationResult:
 
 
 def _point_in_bounds(x: float, y: float, bounds: Bounds2D) -> bool:
-    return (
-        bounds.x_min <= x <= bounds.x_max
-        and bounds.y_min <= y <= bounds.y_max
-    )
+    return bounds.x_min <= x <= bounds.x_max and bounds.y_min <= y <= bounds.y_max
 
 
 def _keepout_dict_to_region(keepout: Mapping[str, Any]) -> tuple[Bounds2D, str]:

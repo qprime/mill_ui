@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/validation/removal_checks.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.001, 0.01, 0.5, 1.0, 1.1, 1.5, 'bottom', 'diameter_mm', 'drill', 'inf', 'left', 'linear_gradient', 'on', 'outside', 'profile', 'right', 'top', 'v_carve']

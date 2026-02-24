@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 import math
@@ -12,13 +10,11 @@ from typing import Any
 
 from validation.core import round_metric
 
-
 DEFAULT_RAPID_RATE_MM_MIN = 5000.0
 
 
 @dataclass
 class SummaryMetrics:
-
     total_lines: int = 0
     comment_lines: int = 0
     motion_lines: int = 0
@@ -39,7 +35,6 @@ class SummaryMetrics:
 
 @dataclass
 class MotionMetrics:
-
     g0_count: int = 0
     g1_count: int = 0
     g2_count: int = 0
@@ -60,7 +55,6 @@ class MotionMetrics:
 
 @dataclass
 class ZProfileMetrics:
-
     safe_z_mm: float = 0.0
     max_plunge_z_mm: float = 0.0
     unique_cutting_depths: list[float] = field(default_factory=list)
@@ -79,7 +73,6 @@ class ZProfileMetrics:
 
 @dataclass
 class XYBoundsMetrics:
-
     x_min: float = float("inf")
     x_max: float = float("-inf")
     y_min: float = float("inf")
@@ -101,7 +94,6 @@ class XYBoundsMetrics:
 
 @dataclass
 class FeedMetrics:
-
     min_feed_rate: float = float("inf")
     max_feed_rate: float = float("-inf")
     feed_rates_used: list[float] = field(default_factory=list)
@@ -118,7 +110,6 @@ class FeedMetrics:
 
 @dataclass
 class ToolMetrics:
-
     tool_numbers: list[int] = field(default_factory=list)
     tool_changes: int = 0
     spindle_speeds: list[int] = field(default_factory=list)
@@ -133,7 +124,6 @@ class ToolMetrics:
 
 @dataclass
 class OperationMetrics:
-
     profile_passes: int = 0
     pocket_passes: int = 0
     bore_passes: int = 0
@@ -152,7 +142,6 @@ class OperationMetrics:
 
 @dataclass
 class TimeEstimateMetrics:
-
     rapid_time_s: float = 0.0
     feed_time_s: float = 0.0
     total_time_s: float = 0.0
@@ -167,7 +156,6 @@ class TimeEstimateMetrics:
 
 @dataclass
 class TabMetrics:
-
     detected_count: int = 0
     tab_heights_mm: list[float] = field(default_factory=list)
     max_cutting_depth_mm: float = 0.0
@@ -184,7 +172,6 @@ class TabMetrics:
 
 @dataclass
 class GCodeMetrics:
-
     version: str = "1.0.0"
     extraction_time_ms: float = 0.0
     summary: SummaryMetrics = field(default_factory=SummaryMetrics)
@@ -217,7 +204,6 @@ class GCodeMetrics:
 
 @dataclass
 class GCodeConfig:
-
     rapid_rate_mm_min: float = DEFAULT_RAPID_RATE_MM_MIN
     z_tolerance: float = 0.001
 
@@ -254,12 +240,11 @@ def extract_gcode_metrics(
     if not gcode_path.exists():
         raise FileNotFoundError(f"G-code file not found: {gcode_path}")
 
-    with open(gcode_path, "r", encoding="utf-8", errors="replace") as f:
+    with open(gcode_path, encoding="utf-8", errors="replace") as f:
         lines = f.readlines()
 
     if not lines:
         raise ValueError(f"G-code file is empty: {gcode_path}")
-
 
     parser = _GCodeParser(config)
     metrics = parser.parse(lines)
@@ -284,7 +269,6 @@ def extract_gcode_metrics_from_content(
     if not lines:
         raise ValueError("G-code content is empty")
 
-
     parser = _GCodeParser(config)
     metrics = parser.parse(lines)
 
@@ -298,12 +282,10 @@ extract_gcode_metrics_from_file = extract_gcode_metrics
 
 
 class _GCodeParser:
-
     def __init__(self, config: GCodeConfig, lines: list[str] | None = None):
         self.config = config
         self.metrics = GCodeMetrics()
         self._lines = lines
-
 
         self.current_x: float = 0.0
         self.current_y: float = 0.0
@@ -312,17 +294,14 @@ class _GCodeParser:
         self.current_mode: int = 0
         self.current_plane: int = 17
 
-
         self.z_values: set[float] = set()
         self.feed_rates: set[float] = set()
         self.tool_numbers: set[int] = set()
         self.spindle_speeds: set[int] = set()
         self.operation_names: list[str] = []
 
-
         self.last_z: float = 0.0
         self.max_plunge: float = 0.0
-
 
         self._warned_g20: bool = False
         self._warned_g91: bool = False
@@ -339,28 +318,23 @@ class _GCodeParser:
     def _parse_line(self, line: str) -> None:
         self.metrics.summary.total_lines += 1
 
-
         if not line:
             return
-
 
         if COMMENT_PATTERN.match(line) or SEMICOLON_COMMENT_PATTERN.match(line):
             self.metrics.summary.comment_lines += 1
             self._parse_comment(line)
             return
 
-
         g_match = G_CODE_PATTERN.search(line)
         if g_match:
             g_code = int(g_match.group(1))
             self._handle_g_code(g_code, line)
 
-
         m_match = M_CODE_PATTERN.search(line)
         if m_match:
             m_code = int(m_match.group(1))
             self._handle_m_code(m_code, line)
-
 
         if "F" in line.upper():
             f_match = F_PATTERN.search(line)
@@ -371,7 +345,6 @@ class _GCodeParser:
                     self.current_feed = new_feed
                     self.feed_rates.add(new_feed)
                     self.metrics.summary.feed_lines += 1
-
 
         t_match = T_PATTERN.search(line)
         if t_match:
@@ -390,15 +363,12 @@ class _GCodeParser:
         elif content.startswith(";"):
             content = content[1:].strip()
 
-
         if content.lower() in ("begin", "end", ""):
             return
-
 
         lower_content = content.lower()
         if any(op in lower_content for op in ("profile", "pocket", "bore", "drill", "contour")):
             self.operation_names.append(content)
-
 
             if "profile" in lower_content or "contour" in lower_content:
                 self.metrics.operations.profile_passes += 1
@@ -413,12 +383,12 @@ class _GCodeParser:
         elif g_code == 90:
             pass
         elif g_code == 91:
-
             if not self._warned_g91:
                 warnings.warn(
                     "G91 (incremental mode) detected; metrics assume G90 (absolute). "
                     "Distances and bounds may be incorrect.",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
                 self._warned_g91 = True
         elif g_code == 17:
@@ -430,6 +400,7 @@ class _GCodeParser:
                     "G18 (XZ plane) detected; arc distance and bounds assume G17 (XY plane). "
                     "Arc metrics will be inaccurate.",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
                 self._warned_plane = True
         elif g_code == 19:
@@ -439,25 +410,23 @@ class _GCodeParser:
                     "G19 (YZ plane) detected; arc distance and bounds assume G17 (XY plane). "
                     "Arc metrics will be inaccurate.",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
                 self._warned_plane = True
         elif g_code == 20:
-
             if not self._warned_g20:
                 warnings.warn(
                     "G20 (inch mode) detected; metrics assume G21 (mm). "
                     "All distance and coordinate values will be incorrect.",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
                 self._warned_g20 = True
-        elif g_code == 21:
-            pass
-        elif g_code == 94:
+        elif g_code == 21 or g_code == 94:
             pass
 
     def _handle_motion(self, g_code: int, line: str) -> None:
         self.metrics.summary.motion_lines += 1
-
 
         new_x = self.current_x
         new_y = self.current_y
@@ -478,20 +447,14 @@ class _GCodeParser:
             self.current_feed = float(f_match.group(1))
             self.feed_rates.add(self.current_feed)
 
-
         if g_code in (0, 1):
-            distance = self._linear_distance(
-                self.current_x, self.current_y, self.current_z,
-                new_x, new_y, new_z
-            )
+            distance = self._linear_distance(self.current_x, self.current_y, self.current_z, new_x, new_y, new_z)
 
             self._update_bounds_point(new_x, new_y)
         else:
-
             distance = self._arc_distance(g_code, line, new_x, new_y, new_z)
 
             self._update_arc_bounds(g_code, line, new_x, new_y)
-
 
         if g_code == 0:
             self.metrics.motion.g0_count += 1
@@ -506,22 +469,17 @@ class _GCodeParser:
             self.metrics.motion.g3_count += 1
             self.metrics.motion.total_feed_distance_mm += distance
 
-
         if z_match:
             self.z_values.add(new_z)
             plunge = self.current_z - new_z
             if plunge > 0:
                 self.max_plunge = max(self.max_plunge, plunge)
 
-
         self.current_x = new_x
         self.current_y = new_y
         self.current_z = new_z
 
-    def _linear_distance(
-        self, x1: float, y1: float, z1: float,
-        x2: float, y2: float, z2: float
-    ) -> float:
+    def _linear_distance(self, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float) -> float:
         return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
 
     def _update_bounds_point(self, x: float, y: float) -> None:
@@ -530,10 +488,7 @@ class _GCodeParser:
         self.metrics.xy_bounds.y_min = min(self.metrics.xy_bounds.y_min, y)
         self.metrics.xy_bounds.y_max = max(self.metrics.xy_bounds.y_max, y)
 
-    def _arc_distance(
-        self, g_code: int, line: str,
-        end_x: float, end_y: float, end_z: float
-    ) -> float:
+    def _arc_distance(self, g_code: int, line: str, end_x: float, end_y: float, end_z: float) -> float:
 
         i_match = I_PATTERN.search(line)
         j_match = J_PATTERN.search(line)
@@ -543,15 +498,12 @@ class _GCodeParser:
         z_delta = end_z - self.current_z
 
         if r_match:
-
             radius = abs(float(r_match.group(1)))
 
             chord = math.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2)
             if chord > 2 * radius:
-
                 xy_arc_length = chord
             else:
-
                 angle = 2 * math.asin(min(chord / (2 * radius), 1.0))
 
                 if float(r_match.group(1)) < 0:
@@ -559,27 +511,18 @@ class _GCodeParser:
                 xy_arc_length = radius * angle
 
         elif i_match or j_match:
-
             i_val = float(i_match.group(1)) if i_match else 0.0
             j_val = float(j_match.group(1)) if j_match else 0.0
 
-
-            radius = math.sqrt(i_val ** 2 + j_val ** 2)
-
+            radius = math.sqrt(i_val**2 + j_val**2)
 
             center_x = start_x + i_val
             center_y = start_y + j_val
 
-
             start_angle = math.atan2(start_y - center_y, start_x - center_x)
             end_angle = math.atan2(end_y - center_y, end_x - center_x)
 
-
-            if g_code == 2:
-                sweep = start_angle - end_angle
-            else:
-                sweep = end_angle - start_angle
-
+            sweep = start_angle - end_angle if g_code == 2 else end_angle - start_angle
 
             if sweep <= 0:
                 sweep += 2 * math.pi
@@ -587,26 +530,19 @@ class _GCodeParser:
             xy_arc_length = radius * sweep
 
         else:
-
             xy_arc_length = math.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2)
 
-
         if abs(z_delta) > 1e-9:
-            return math.sqrt(xy_arc_length ** 2 + z_delta ** 2)
+            return math.sqrt(xy_arc_length**2 + z_delta**2)
         return xy_arc_length
 
-    def _update_arc_bounds(
-        self, g_code: int, line: str,
-        end_x: float, end_y: float
-    ) -> None:
+    def _update_arc_bounds(self, g_code: int, line: str, end_x: float, end_y: float) -> None:
 
         self._update_bounds_point(self.current_x, self.current_y)
         self._update_bounds_point(end_x, end_y)
 
-
         if self.current_plane != 17:
             return
-
 
         i_match = I_PATTERN.search(line)
         j_match = J_PATTERN.search(line)
@@ -615,27 +551,22 @@ class _GCodeParser:
         start_x, start_y = self.current_x, self.current_y
 
         if r_match:
-
             r_val = float(r_match.group(1))
             radius = abs(r_val)
             chord = math.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2)
             if chord > 2 * radius or chord < 1e-9:
                 return
 
-
             mid_x = (start_x + end_x) / 2
             mid_y = (start_y + end_y) / 2
 
-
             half_chord = chord / 2
-            h = math.sqrt(radius ** 2 - half_chord ** 2)
-
+            h = math.sqrt(radius**2 - half_chord**2)
 
             dx = end_x - start_x
             dy = end_y - start_y
             perp_x = -dy / chord
             perp_y = dx / chord
-
 
             if (g_code == 2) != (r_val < 0):
                 center_x = mid_x + h * perp_x
@@ -645,27 +576,22 @@ class _GCodeParser:
                 center_y = mid_y - h * perp_y
 
         elif i_match or j_match:
-
             i_val = float(i_match.group(1)) if i_match else 0.0
             j_val = float(j_match.group(1)) if j_match else 0.0
             center_x = start_x + i_val
             center_y = start_y + j_val
-            radius = math.sqrt(i_val ** 2 + j_val ** 2)
+            radius = math.sqrt(i_val**2 + j_val**2)
 
         else:
-
             return
-
 
         start_angle = math.atan2(start_y - center_y, start_x - center_x)
         end_angle = math.atan2(end_y - center_y, end_x - center_x)
-
 
         if start_angle < 0:
             start_angle += 2 * math.pi
         if end_angle < 0:
             end_angle += 2 * math.pi
-
 
         cardinals = [0, math.pi / 2, math.pi, 3 * math.pi / 2]
         extrema = [
@@ -675,13 +601,11 @@ class _GCodeParser:
             (center_x, center_y - radius),
         ]
 
-        for angle, (ex, ey) in zip(cardinals, extrema):
+        for angle, (ex, ey) in zip(cardinals, extrema, strict=False):
             if self._angle_in_arc(angle, start_angle, end_angle, g_code):
                 self._update_bounds_point(ex, ey)
 
-    def _angle_in_arc(
-        self, angle: float, start: float, end: float, g_code: int
-    ) -> bool:
+    def _angle_in_arc(self, angle: float, start: float, end: float, g_code: int) -> bool:
         if g_code == 3:
             if start <= end:
                 return start <= angle <= end
@@ -713,7 +637,6 @@ class _GCodeParser:
             self.metrics.z_profile.safe_z_mm = max(safe_z_values) if safe_z_values else 0.0
             self.metrics.z_profile.max_plunge_z_mm = min(sorted_z) if sorted_z else 0.0
 
-
             tolerance = self.config.z_tolerance
             unique_depths = []
             for z in cutting_depths:
@@ -725,45 +648,36 @@ class _GCodeParser:
             self.metrics.z_profile.depth_count = len(unique_depths)
             self.metrics.z_profile.max_single_plunge_mm = self.max_plunge
 
-
         if self.feed_rates:
             self.metrics.feeds.feed_rates_used = sorted(self.feed_rates)
             self.metrics.feeds.min_feed_rate = min(self.feed_rates)
             self.metrics.feeds.max_feed_rate = max(self.feed_rates)
 
-
         self.metrics.tools.tool_numbers = sorted(self.tool_numbers)
         self.metrics.tools.spindle_speeds = sorted(self.spindle_speeds)
 
-
         self.metrics.operations.total_passes = (
-            self.metrics.operations.profile_passes +
-            self.metrics.operations.pocket_passes +
-            self.metrics.operations.bore_passes
+            self.metrics.operations.profile_passes
+            + self.metrics.operations.pocket_passes
+            + self.metrics.operations.bore_passes
         )
         self.metrics.operations.operation_names = self.operation_names
-
 
         rapid_rate = self.config.rapid_rate_mm_min
         rapid_distance = self.metrics.motion.total_rapid_distance_mm
         feed_distance = self.metrics.motion.total_feed_distance_mm
 
-
         self.metrics.time_estimate.rapid_time_s = (rapid_distance / rapid_rate) * 60 if rapid_rate > 0 else 0.0
-
 
         avg_feed = sum(self.feed_rates) / len(self.feed_rates) if self.feed_rates else 1000.0
         self.metrics.time_estimate.feed_time_s = (feed_distance / avg_feed) * 60 if avg_feed > 0 else 0.0
 
         self.metrics.time_estimate.total_time_s = (
-            self.metrics.time_estimate.rapid_time_s +
-            self.metrics.time_estimate.feed_time_s
+            self.metrics.time_estimate.rapid_time_s + self.metrics.time_estimate.feed_time_s
         )
 
         if self._lines:
-            self.metrics.tabs = _detect_tabs_from_lines(
-                self._lines, self.config.z_tolerance
-            )
+            self.metrics.tabs = _detect_tabs_from_lines(self._lines, self.config.z_tolerance)
 
 
 def detect_tabs_from_content(
@@ -782,7 +696,7 @@ def detect_tabs_from_file(
     if not gcode_path.exists():
         return TabMetrics()
 
-    with open(gcode_path, "r", encoding="utf-8", errors="replace") as f:
+    with open(gcode_path, encoding="utf-8", errors="replace") as f:
         lines = f.readlines()
 
     return _detect_tabs_from_lines(lines, z_tolerance)
@@ -816,11 +730,7 @@ def _detect_tabs_from_lines(lines: list[str], z_tolerance: float) -> TabMetrics:
 
         cutting_z = m0["z"]
 
-        is_lift = (
-            m1["type"] == "feed" and
-            m1["z"] > cutting_z + z_tolerance and
-            m1["z"] < 0
-        )
+        is_lift = m1["type"] == "feed" and m1["z"] > cutting_z + z_tolerance and m1["z"] < 0
 
         if not is_lift:
             i += 1
@@ -847,19 +757,21 @@ def _detect_tabs_from_lines(lines: list[str], z_tolerance: float) -> TabMetrics:
             continue
 
         is_plunge = (
-            plunge_move["type"] == "feed" and
-            plunge_move["z"] < lifted_z - z_tolerance and
-            plunge_move["z"] <= cutting_z + z_tolerance
+            plunge_move["type"] == "feed"
+            and plunge_move["z"] < lifted_z - z_tolerance
+            and plunge_move["z"] <= cutting_z + z_tolerance
         )
 
         if is_plunge:
             tab_height = lifted_z - cutting_z
-            tabs.append({
-                "cutting_z": cutting_z,
-                "lifted_z": lifted_z,
-                "tab_height": tab_height,
-                "line": m0.get("line", 0),
-            })
+            tabs.append(
+                {
+                    "cutting_z": cutting_z,
+                    "lifted_z": lifted_z,
+                    "tab_height": tab_height,
+                    "line": m0.get("line", 0),
+                }
+            )
             tab_heights.append(tab_height)
 
             if cutting_z > max_cutting_depth + z_tolerance:
@@ -909,13 +821,15 @@ def _parse_moves(lines: list[str]) -> list[dict]:
 
         move_type = "rapid" if current_mode == 0 else "feed"
 
-        moves.append({
-            "type": move_type,
-            "x": new_x,
-            "y": new_y,
-            "z": new_z,
-            "line": line_num,
-        })
+        moves.append(
+            {
+                "type": move_type,
+                "x": new_x,
+                "y": new_y,
+                "z": new_z,
+                "line": line_num,
+            }
+        )
 
         current_x = new_x
         current_y = new_y

@@ -1,26 +1,24 @@
-
 from __future__ import annotations
 
 import sys
 
 from layout_ast.compositional import (
-    Panel,
-    Inset,
-    Frame,
-    Grid,
     Cell,
     ComponentDef,
-    UseComponent,
+    CompositionalLayoutAST,
+    Frame,
+    Grid,
+    Inset,
+    Panel,
     Place,
+    ProfileGen,
     Rect,
     RoundedRect,
-    Triangle,
-    ProfileGen,
-    CompositionalLayoutAST,
+    UseComponent,
 )
-from layout_ast.layout import Sheet, Feature
-from resolution.layout_resolver import resolve_layout, LayoutResolver, ResolutionAssertionError
+from layout_ast.layout import Feature, Sheet
 from pml import format_pml
+from resolution.layout_resolver import LayoutResolver, ResolutionAssertionError, resolve_layout
 
 
 def approx_eq(a, b, rel=1e-6):
@@ -195,9 +193,7 @@ def test_grid_subdivides_region():
 
     flat = resolve_layout(ast)
 
-
     assert len(flat.items) == 4
-
 
     for item in flat.items:
         assert item.feature.type == "pocket"
@@ -323,7 +319,6 @@ def test_acceptance_4_instances_frame_grid_pocket():
         ),
     )
 
-
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=1200, height_mm=1200, thickness_mm=19, margin_mm=0.0),
         components={"GridPanel": grid_panel},
@@ -388,7 +383,6 @@ def test_grid_with_no_explicit_cell():
 
     flat = resolve_layout(ast)
 
-
     assert len(flat.items) == 4
     print("  PASS")
     return True
@@ -403,9 +397,7 @@ def test_rounded_rect_profile_inherits_geometry():
             children=(
                 RoundedRect(
                     radius_mm=25.0,
-                    children=(
-                        ProfileGen(side="outside", depth="through"),
-                    ),
+                    children=(ProfileGen(side="outside", depth="through"),),
                     id="panel",
                 ),
             )
@@ -442,9 +434,7 @@ def test_rounded_rect_selective_corners_profile_inherits():
                 RoundedRect(
                     radius_mm=25.4,
                     corners=frozenset({"bl", "br"}),
-                    children=(
-                        ProfileGen(side="outside", depth="through"),
-                    ),
+                    children=(ProfileGen(side="outside", depth="through"),),
                     id="panel",
                 ),
             )
@@ -482,9 +472,7 @@ def test_rect_profile_stays_rect():
         root=Panel(
             children=(
                 Rect(
-                    children=(
-                        ProfileGen(side="outside", depth="through"),
-                    ),
+                    children=(ProfileGen(side="outside", depth="through"),),
                     id="panel",
                 ),
             )
@@ -518,9 +506,7 @@ def test_validation_mode_passes_for_correct_resolution():
                 RoundedRect(
                     radius_mm=25.0,
                     corners=frozenset({"bl", "br"}),
-                    children=(
-                        ProfileGen(side="outside", depth="through"),
-                    ),
+                    children=(ProfileGen(side="outside", depth="through"),),
                     id="panel",
                 ),
             )
@@ -538,7 +524,7 @@ def test_validation_mode_passes_for_correct_resolution():
 def test_validation_assertion_catches_type_mismatch():
     """Test that validation assertions catch shape context type mismatches."""
     print("Running test_validation_assertion_catches_type_mismatch...")
-    from layout_ast.layout import Item, Geometry, Placement
+    from layout_ast.layout import Geometry, Item, Placement
 
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
@@ -557,7 +543,7 @@ def test_validation_assertion_catches_type_mismatch():
 
     try:
         resolver._assert_shape_context("RoundedRect", bad_item, "test")
-        assert False, "Should have raised ResolutionAssertionError"
+        raise AssertionError("Should have raised ResolutionAssertionError")
     except ResolutionAssertionError as e:
         assert "RoundedRect" in str(e)
         assert "Rect" in str(e)
@@ -580,10 +566,8 @@ def test_validation_assertion_catches_geometry_mismatch():
     child_geom = {"radius_bl_mm": 0.0, "radius_br_mm": 25.4}
 
     try:
-        resolver._assert_geometry_preserved(
-            parent_geom, child_geom, ["radius_bl_mm", "radius_br_mm"], "test"
-        )
-        assert False, "Should have raised ResolutionAssertionError"
+        resolver._assert_geometry_preserved(parent_geom, child_geom, ["radius_bl_mm", "radius_br_mm"], "test")
+        raise AssertionError("Should have raised ResolutionAssertionError")
     except ResolutionAssertionError as e:
         assert "radius_bl_mm" in str(e)
         assert "25.4" in str(e)

@@ -1,35 +1,40 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Tuple
+from collections.abc import Mapping
+from typing import Any
 
 from shapely.geometry import Polygon
 from shapely.ops import orient
 
-from cam.types import Vec2
-from cam.primitives import rectangle, circle as circle_shape, polygon as polygon_prim, rounded_rect as rounded_rect_prim
-from cam.transforms import Transform2D, place
-from cam.shape import Shape2D
 from cam.model.setup import Setup
 from cam.ops.profile import profile_outline
 from cam.path.strategies import (
     onion_skin_then_finish,
     profile_outline_with_tabs,
 )
+from cam.primitives import circle as circle_shape
+from cam.primitives import polygon as polygon_prim
+from cam.primitives import rectangle
+from cam.primitives import rounded_rect as rounded_rect_prim
+from cam.shape import Shape2D
+from cam.transforms import Transform2D, place
+from cam.types import Vec2
+
 from .tools import ToolSelection, stepdown_for_tool
 
 
-def rect_shape(width: float, height: float, center: Tuple[float, float]) -> Shape2D:
+def rect_shape(width: float, height: float, center: tuple[float, float]) -> Shape2D:
     base = rectangle(width, height)
     cx, cy = center
     return place(base, Transform2D(tx=cx - width / 2.0, ty=cy - height / 2.0))
 
 
-def circle_shape_mm(diameter: float, center: Tuple[float, float]) -> Shape2D:
+def circle_shape_mm(diameter: float, center: tuple[float, float]) -> Shape2D:
     cx, cy = center
     return circle_shape(Vec2(cx, cy), diameter / 2.0)
 
 
-def offset_rect_shape(width: float, height: float, center: Tuple[float, float], offset: float) -> Shape2D | None:
+def offset_rect_shape(width: float, height: float, center: tuple[float, float], offset: float) -> Shape2D | None:
     width_expanded = width + 2.0 * offset
     height_expanded = height + 2.0 * offset
     if width_expanded <= 0.0 or height_expanded <= 0.0:
@@ -37,18 +42,18 @@ def offset_rect_shape(width: float, height: float, center: Tuple[float, float], 
     return rect_shape(width_expanded, height_expanded, center)
 
 
-def offset_circle_shape(diameter: float, center: Tuple[float, float], offset: float) -> Shape2D | None:
+def offset_circle_shape(diameter: float, center: tuple[float, float], offset: float) -> Shape2D | None:
     expanded = diameter + 2.0 * offset
     if expanded <= 0.0:
         return None
     return circle_shape_mm(expanded, center)
 
 
-def polygon_shape(points: list, center: Tuple[float, float]) -> Shape2D:
+def polygon_shape(points: list, center: tuple[float, float]) -> Shape2D:
     return polygon_prim(points, center)
 
 
-def offset_polygon_shape(points: list, center: Tuple[float, float], offset: float) -> Shape2D | None:
+def offset_polygon_shape(points: list, center: tuple[float, float], offset: float) -> Shape2D | None:
     if abs(offset) < 1e-9:
         return polygon_shape(points, center)
     abs_points = [(float(p[0]), float(p[1])) for p in points if isinstance(p, (tuple, list)) and len(p) >= 2]
@@ -56,21 +61,23 @@ def offset_polygon_shape(points: list, center: Tuple[float, float], offset: floa
         return None
 
     poly = Polygon(abs_points)
-    buffered = poly.buffer(offset, join_style='mitre', mitre_limit=2.0)
+    buffered = poly.buffer(offset, join_style="mitre", mitre_limit=2.0)
     buffered = orient(buffered, sign=1.0)
 
-    if buffered.is_empty or not hasattr(buffered, 'exterior'):
+    if buffered.is_empty or not hasattr(buffered, "exterior"):
         return None
 
     offset_points = list(buffered.exterior.coords[:-1])
     return polygon_prim(offset_points, center)
 
 
-def rounded_rect_shape(w: float, h: float, radii: Dict[str, float], center: Tuple[float, float]) -> Shape2D:
+def rounded_rect_shape(w: float, h: float, radii: dict[str, float], center: tuple[float, float]) -> Shape2D:
     return rounded_rect_prim(w, h, radii, center)
 
 
-def offset_rounded_rect_shape(w: float, h: float, radii: Dict[str, float], center: Tuple[float, float], offset: float) -> Shape2D | None:
+def offset_rounded_rect_shape(
+    w: float, h: float, radii: dict[str, float], center: tuple[float, float], offset: float
+) -> Shape2D | None:
     w2 = w + 2.0 * offset
     h2 = h + 2.0 * offset
     if w2 <= 0 or h2 <= 0:
@@ -87,7 +94,7 @@ def profile_moves_with_options(
     tool: ToolSelection,
     onion_skin_mm: float,
     tabs_opts: Mapping[str, Any] | None,
-) -> list[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     step_down = stepdown_for_tool(tool)
 
     tabs = tabs_opts if isinstance(tabs_opts, Mapping) else {}
@@ -131,10 +138,8 @@ def _profile_plain(
     depth_mm: float,
     tool: ToolSelection,
     **_: Any,
-) -> list[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     return profile_outline(shape, setup, depth_mm, step_down=stepdown_for_tool(tool))
-
-
 
 
 __all__ = [

@@ -1,12 +1,11 @@
-
-import json
 import sys
+
 from nesting.types import (
-    PartSpec,
-    SheetSpec,
     NestedPart,
-    SheetLayout,
     NestingResult,
+    PartSpec,
+    SheetLayout,
+    SheetSpec,
 )
 
 
@@ -49,27 +48,23 @@ def test_part_spec_area():
 def test_part_spec_validation():
     print("Running test_part_spec_validation...")
 
-
     try:
         PartSpec(name="bad", width_mm=-100, height_mm=100)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "width_mm must be positive" in str(e)
 
-
     try:
         PartSpec(name="bad", width_mm=100, height_mm=0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "height_mm must be positive" in str(e)
 
-
     try:
         PartSpec(name="bad", width_mm=100, height_mm=100, quantity=-1)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "quantity must be non-negative" in str(e)
-
 
     part = PartSpec(name="maybe", width_mm=100, height_mm=100, quantity=0)
     assert part.quantity == 0
@@ -82,7 +77,7 @@ def test_part_spec_immutable():
     part = PartSpec(name="door", width_mm=100, height_mm=100)
     try:
         part.width_mm = 200
-        assert False, "Should have raised AttributeError"
+        raise AssertionError("Should have raised AttributeError")
     except AttributeError:
         pass
     print("  PASSED")
@@ -108,6 +103,7 @@ def test_part_spec_json_roundtrip():
 def test_sheet_spec_basic():
     print("Running test_sheet_spec_basic...")
     import warnings
+
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         sheet = SheetSpec(width_mm=1220, height_mm=2440, thickness_mm=19)
@@ -145,20 +141,19 @@ def test_sheet_spec_validation():
 
     try:
         SheetSpec(width_mm=1000, height_mm=2000, thickness_mm=-1)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "thickness_mm must be positive" in str(e)
 
     try:
         SheetSpec(width_mm=1000, height_mm=2000, thickness_mm=19, margin_mm=-5)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "margin_mm must be non-negative" in str(e)
 
-
     try:
         SheetSpec(width_mm=100, height_mm=100, thickness_mm=19, margin_mm=60)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "no usable area" in str(e).lower()
 
@@ -393,7 +388,6 @@ def test_nesting_result_json_roundtrip():
     unplaced = PartSpec(name="huge", width_mm=9999, height_mm=9999)
     result = NestingResult(sheets=(layout,), unplaced_parts=(unplaced,))
 
-
     json_str = result.to_json()
     restored = NestingResult.from_json(json_str)
 
@@ -417,7 +411,6 @@ def test_recipe16_like_layout():
     door = PartSpec(name="cabinet_door", width_mm=457, height_mm=597, quantity=4)
     drawer = PartSpec(name="drawer_front", width_mm=254, height_mm=152, quantity=7)
 
-
     placements = []
 
     door_positions = [
@@ -429,12 +422,9 @@ def test_recipe16_like_layout():
     for i, (x, y) in enumerate(door_positions):
         placements.append(NestedPart(part_spec=door, x_mm=x, y_mm=y, instance_id=i))
 
-
     drawer_y_positions = [86, 244, 402, 560, 718, 876, 1034]
     for i, y in enumerate(drawer_y_positions):
-        placements.append(
-            NestedPart(part_spec=drawer, x_mm=1063, y_mm=y, instance_id=i)
-        )
+        placements.append(NestedPart(part_spec=drawer, x_mm=1063, y_mm=y, instance_id=i))
 
     layout = SheetLayout(
         sheet_spec=sheet_spec,
@@ -442,9 +432,7 @@ def test_recipe16_like_layout():
         sheet_index=0,
     )
 
-
     assert layout.part_count == 11
-
 
     door_area = 4 * 457 * 597
     drawer_area = 7 * 254 * 152
@@ -452,10 +440,8 @@ def test_recipe16_like_layout():
 
     assert layout.parts_area_mm2 == expected_area
 
-
     assert layout.utilization > 0.90
     assert layout.utilization < 0.95
-
 
     result = NestingResult(sheets=(layout,))
     assert result.total_sheets == 1

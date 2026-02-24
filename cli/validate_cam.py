@@ -1,22 +1,18 @@
-
-
 from __future__ import annotations
 
 import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
 
+from validation.core import Verdict
+from validation.regression import ComparisonConfig
 from validation.runner import (
     ValidationInput,
     ValidationOptions,
     validate,
     validate_recipe,
 )
-from validation.core import Verdict
-from validation.regression import ComparisonConfig
-
 
 EXIT_PASS = 0
 EXIT_WARN = 1
@@ -52,10 +48,10 @@ Exit codes:
         """,
     )
 
-
     input_group = parser.add_argument_group("Input (choose one mode)")
     input_group.add_argument(
-        "--recipe", "-r",
+        "--recipe",
+        "-r",
         metavar="DIR",
         help="Recipe directory with standard output/ structure",
     )
@@ -65,17 +61,18 @@ Exit codes:
         help="SVG file to validate",
     )
     input_group.add_argument(
-        "--gcode", "-g",
+        "--gcode",
+        "-g",
         metavar="FILE",
         nargs="+",
         help="G-code file(s) to validate (can specify multiple)",
     )
     input_group.add_argument(
-        "--pml", "-p",
+        "--pml",
+        "-p",
         metavar="FILE",
         help="PML source file (for intent assertions)",
     )
-
 
     options_group = parser.add_argument_group("Validation options")
     options_group.add_argument(
@@ -106,15 +103,16 @@ Exit codes:
         help="Skip regression comparison (even if golden provided)",
     )
 
-
     output_group = parser.add_argument_group("Output options")
     output_group.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         metavar="FILE",
         help="Output JSON file (default: stdout)",
     )
     output_group.add_argument(
-        "--quiet", "-q",
+        "--quiet",
+        "-q",
         action="store_true",
         help="Suppress status messages, output JSON only",
     )
@@ -131,7 +129,6 @@ Exit codes:
 
     args = parser.parse_args()
 
-
     if not args.recipe and not args.svg and not args.gcode:
         parser.error("At least one input required: --recipe, --svg, or --gcode")
 
@@ -145,6 +142,7 @@ Exit codes:
         if not args.quiet:
             print(f"Error: {e}", file=sys.stderr)
             import traceback
+
             traceback.print_exc(file=sys.stderr)
         return EXIT_FAIL
 
@@ -161,11 +159,9 @@ def run_validation(args: argparse.Namespace) -> int:
             golden_metrics = json.load(f)
         golden_file = str(golden_path)
 
-
     comparison_config = ComparisonConfig(
         default_tolerance_percent=args.tolerance,
     )
-
 
     options = ValidationOptions(
         extract_metrics=True,
@@ -174,31 +170,29 @@ def run_validation(args: argparse.Namespace) -> int:
         check_regressions=not args.metrics_only and not args.no_regressions and golden_metrics is not None,
     )
 
-
     ast = None
     if args.pml:
         pml_path = Path(args.pml)
         if not pml_path.exists():
             raise FileNotFoundError(f"PML file not found: {args.pml}")
         from pml import parse_pml
+
         with open(pml_path) as f:
             ast = parse_pml(f.read())
 
-
     if args.recipe:
-
         recipe_dir = Path(args.recipe)
         if not recipe_dir.exists():
             raise FileNotFoundError(f"Recipe directory not found: {args.recipe}")
         if not recipe_dir.is_dir():
             raise ValueError(f"Not a directory: {args.recipe}")
 
-
         if ast is None:
             for candidate in ["example.pml.yml", "source.pml.yml"]:
                 pml_path = recipe_dir / candidate
                 if pml_path.exists():
                     from pml import parse_pml
+
                     with open(pml_path) as f:
                         ast = parse_pml(f.read())
                     break
@@ -212,7 +206,6 @@ def run_validation(args: argparse.Namespace) -> int:
             options=options,
         )
     else:
-
         inputs = ValidationInput(
             source_file=args.pml,
             ast=ast,
@@ -223,21 +216,18 @@ def run_validation(args: argparse.Namespace) -> int:
             comparison_config=comparison_config,
         )
 
-
         if args.svg and not Path(args.svg).exists():
             raise FileNotFoundError(f"SVG file not found: {args.svg}")
-        for gcode_path in (args.gcode or []):
+        for gcode_path in args.gcode or []:
             if not Path(gcode_path).exists():
                 raise FileNotFoundError(f"G-code file not found: {gcode_path}")
 
         result = validate(inputs, options)
 
-
     if args.summary:
         output_summary(result, args)
     else:
         output_json(result, args)
-
 
     if result.verdict == Verdict.PASS:
         return EXIT_PASS
@@ -277,16 +267,14 @@ def output_summary(result, args: argparse.Namespace) -> None:
         "",
     ]
 
-
     if result.metrics:
         lines.append("Metrics extracted:")
         if "svg" in result.metrics:
             lines.append(f"  SVG: {result.metrics['svg'].get('layers', {}).get('count', 0)} layers")
         if "gcode" in result.metrics:
-            motion = result.metrics['gcode'].get('motion', {})
+            motion = result.metrics["gcode"].get("motion", {})
             lines.append(f"  G-code: {motion.get('g0_count', 0)} rapids, {motion.get('g1_count', 0)} feeds")
         lines.append("")
-
 
     inv = result.invariants
     if inv.total > 0:
@@ -298,7 +286,6 @@ def output_summary(result, args: argparse.Namespace) -> None:
                     lines.append(f"    - {r.id}: {r.description}")
         lines.append("")
 
-
     asrt = result.assertions
     if asrt.total > 0:
         lines.append(f"Assertions: {asrt.passed}/{asrt.total} passed, {asrt.failed} failures")
@@ -308,7 +295,6 @@ def output_summary(result, args: argparse.Namespace) -> None:
                 if r.status == Verdict.FAIL:
                     lines.append(f"    - {r.id}: {r.message}")
         lines.append("")
-
 
     reg = result.regressions
     if reg.compared:
@@ -326,10 +312,8 @@ def output_summary(result, args: argparse.Namespace) -> None:
                         lines.append(f"    - {r.metric_path}: {r.message}")
         lines.append("")
 
-
     if result.verdict_reason:
         lines.append(f"Verdict: {result.verdict_reason}")
-
 
     output = "\n".join(lines)
     if args.output:

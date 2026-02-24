@@ -4,20 +4,19 @@ import pytest
 
 from domains import Domain
 from generators import (
-    GridLinesParams,
-    MeasurementGridParams,
-    MeasurementEdgeParams,
     EngraveTextParams,
-    grid_lines_generator,
-    measurement_grid_generator,
-    measurement_edge_generator,
-    engrave_text_at_position,
+    GridLinesParams,
+    MeasurementEdgeParams,
+    MeasurementGridParams,
     engrave_number_label,
+    engrave_text_at_position,
+    grid_lines_generator,
+    measurement_edge_generator,
+    measurement_grid_generator,
 )
 
 
 class TestGridLinesGenerator:
-
     def test_metric_grid_produces_items(self):
         domain = Domain.from_rectangle(100, 100, center=(50, 50))
         params = GridLinesParams(unit="metric", depth_mm=0.3)
@@ -81,7 +80,6 @@ class TestGridLinesGenerator:
 
 
 class TestMeasurementGridGenerator:
-
     def test_metric_ticks_produced(self):
         domain = Domain.from_rectangle(100, 100, center=(50, 50))
         params = MeasurementGridParams(unit="metric", depth_mm=0.5)
@@ -142,7 +140,6 @@ class TestMeasurementGridGenerator:
 
 
 class TestMeasurementEdgeGenerator:
-
     def test_bottom_edge_ticks(self):
         domain = Domain.from_rectangle(100, 100, center=(50, 50))
         params = MeasurementEdgeParams(edges=("bottom",), unit="metric", depth_mm=0.3)
@@ -174,10 +171,16 @@ class TestMeasurementEdgeGenerator:
     def test_labels(self):
         domain = Domain.from_rectangle(100, 100, center=(50, 50))
         params_no = MeasurementEdgeParams(
-            edges=("bottom",), unit="metric", depth_mm=0.3, labels=False,
+            edges=("bottom",),
+            unit="metric",
+            depth_mm=0.3,
+            labels=False,
         )
         params_yes = MeasurementEdgeParams(
-            edges=("bottom",), unit="metric", depth_mm=0.3, labels=True,
+            edges=("bottom",),
+            unit="metric",
+            depth_mm=0.3,
+            labels=True,
         )
         items_no = measurement_edge_generator(domain, params_no)
         items_yes = measurement_edge_generator(domain, params_yes)
@@ -201,7 +204,6 @@ class TestMeasurementEdgeGenerator:
 
 
 class TestEngraveText:
-
     def test_basic_text(self):
         items = engrave_text_at_position(
             text="Hello",

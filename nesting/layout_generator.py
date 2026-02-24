@@ -1,15 +1,13 @@
-
 from __future__ import annotations
 
 from layout_ast.layout import LayoutAST, Sheet
 
-from .types import SheetLayout, NestingResult
 from .template_expander import placement_to_items
+from .types import NestingResult, SheetLayout
 
 
 def sheet_layout_to_ast(sheet_layout: SheetLayout) -> LayoutAST:
     sheet_spec = sheet_layout.sheet_spec
-
 
     sheet = Sheet(
         width_mm=sheet_spec.width_mm,
@@ -17,7 +15,6 @@ def sheet_layout_to_ast(sheet_layout: SheetLayout) -> LayoutAST:
         thickness_mm=sheet_spec.thickness_mm,
         margin_mm=sheet_spec.margin_mm,
     )
-
 
     all_items = []
     for placement in sheet_layout.placements:
@@ -39,14 +36,12 @@ def sheet_layout_to_pml(sheet_layout: SheetLayout) -> str:
     lines = []
     spec = sheet_layout.sheet_spec
 
-
     lines.append(f"sheet {spec.width_mm}mm {spec.height_mm}mm {spec.thickness_mm}mm margin {spec.margin_mm}mm")
     lines.append("")
     lines.append(f"# Sheet {sheet_layout.sheet_index + 1}")
     lines.append(f"# Utilization: {sheet_layout.utilization_percent:.1f}%")
     lines.append(f"# Parts: {sheet_layout.part_count}")
     lines.append("")
-
 
     for placement in sheet_layout.placements:
         part = placement.part_spec
@@ -57,10 +52,7 @@ def sheet_layout_to_pml(sheet_layout: SheetLayout) -> str:
         rotation_note = " (rotated)" if placement.rotated else ""
 
         lines.append(f"# {name}{rotation_note}")
-        lines.append(
-            f"rect {name} at {placement.x_mm}mm,{placement.y_mm}mm "
-            f"size {w}mm,{h}mm profile through outside"
-        )
+        lines.append(f"rect {name} at {placement.x_mm}mm,{placement.y_mm}mm size {w}mm,{h}mm profile through outside")
         lines.append("")
 
     return "\n".join(lines)
@@ -71,8 +63,8 @@ def nesting_result_to_pml(result: NestingResult) -> list[str]:
 
 
 __all__ = [
-    "sheet_layout_to_ast",
     "nesting_result_to_asts",
-    "sheet_layout_to_pml",
     "nesting_result_to_pml",
+    "sheet_layout_to_ast",
+    "sheet_layout_to_pml",
 ]

@@ -1,11 +1,11 @@
 from resolution.layout_resolver import (
-    resolve_layout,
     LayoutResolver,
     ResolutionAssertionError,
+    resolve_layout,
 )
 
 __all__ = [
-    "resolve_layout",
     "LayoutResolver",
     "ResolutionAssertionError",
+    "resolve_layout",
 ]

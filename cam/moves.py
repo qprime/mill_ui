@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union
 
 
 @dataclass(frozen=True)
@@ -39,20 +38,20 @@ class RetractMove:
     z: float
 
 
-Move = Union[CommentMove, SetRpmMove, SetFeedMove, RapidMove, CutMove, RetractMove]
+Move = CommentMove | SetRpmMove | SetFeedMove | RapidMove | CutMove | RetractMove
 
-MotionMove = Union[RapidMove, CutMove, RetractMove]
-XYMove = Union[RapidMove, CutMove]
+MotionMove = RapidMove | CutMove | RetractMove
+XYMove = RapidMove | CutMove
 
 
 __all__ = [
     "CommentMove",
-    "SetRpmMove",
-    "SetFeedMove",
-    "RapidMove",
     "CutMove",
-    "RetractMove",
-    "Move",
     "MotionMove",
+    "Move",
+    "RapidMove",
+    "RetractMove",
+    "SetFeedMove",
+    "SetRpmMove",
     "XYMove",
 ]

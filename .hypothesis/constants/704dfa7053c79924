@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/post/gcode.py
+# hypothesis_version: 6.151.9
+
+[0.0, 5.0, '(begin)', '(end)', 'G17', 'G21', 'G90', 'G94', 'M2', 'M5', 'back', 'comment', 'cut', 'feed', 'front', 'inch', 'kind', 'mm', 'rapid', 'retract', 'rpm', 'set_feed', 'set_rpm', 'text', 'x', 'y', 'z']

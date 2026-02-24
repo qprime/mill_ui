@@ -1,7 +1,6 @@
-
-from cam.shape import Shape2D
 from cam.model.setup import Setup
 from cam.native import core as native_core
+from cam.shape import Shape2D
 
 
 def profile_outline(shape: Shape2D, setup: Setup, depth_mm: float, step_down: float = 2.0):

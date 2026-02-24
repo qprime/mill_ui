@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from config.machine_loader import MachineConfig, Endmill
+from config.machine_loader import Endmill, MachineConfig
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import LayoutAST
 from validation.core import InvariantResult, Verdict
@@ -23,21 +23,13 @@ def check_job_fits_machine(
     failures = []
 
     if job_bounds.x_min < eff_x_min:
-        failures.append(
-            f"Job x_min ({job_bounds.x_min:.1f}) < effective envelope x_min ({eff_x_min:.1f})"
-        )
+        failures.append(f"Job x_min ({job_bounds.x_min:.1f}) < effective envelope x_min ({eff_x_min:.1f})")
     if job_bounds.x_max > eff_x_max:
-        failures.append(
-            f"Job x_max ({job_bounds.x_max:.1f}) > effective envelope x_max ({eff_x_max:.1f})"
-        )
+        failures.append(f"Job x_max ({job_bounds.x_max:.1f}) > effective envelope x_max ({eff_x_max:.1f})")
     if job_bounds.y_min < eff_y_min:
-        failures.append(
-            f"Job y_min ({job_bounds.y_min:.1f}) < effective envelope y_min ({eff_y_min:.1f})"
-        )
+        failures.append(f"Job y_min ({job_bounds.y_min:.1f}) < effective envelope y_min ({eff_y_min:.1f})")
     if job_bounds.y_max > eff_y_max:
-        failures.append(
-            f"Job y_max ({job_bounds.y_max:.1f}) > effective envelope y_max ({eff_y_max:.1f})"
-        )
+        failures.append(f"Job y_max ({job_bounds.y_max:.1f}) > effective envelope y_max ({eff_y_max:.1f})")
 
     status = Verdict.PASS if not failures else Verdict.FAIL
 
@@ -99,13 +91,9 @@ def check_mch_envelope_positive(machine: MachineConfig) -> InvariantResult:
     failures = []
 
     if m.envelope_x_max <= m.envelope_x_min:
-        failures.append(
-            f"envelope_x_max ({m.envelope_x_max}) <= envelope_x_min ({m.envelope_x_min})"
-        )
+        failures.append(f"envelope_x_max ({m.envelope_x_max}) <= envelope_x_min ({m.envelope_x_min})")
     if m.envelope_y_max <= m.envelope_y_min:
-        failures.append(
-            f"envelope_y_max ({m.envelope_y_max}) <= envelope_y_min ({m.envelope_y_min})"
-        )
+        failures.append(f"envelope_y_max ({m.envelope_y_max}) <= envelope_y_min ({m.envelope_y_min})")
 
     status = Verdict.PASS if not failures else Verdict.FAIL
 
@@ -249,10 +237,10 @@ def validate_machine_config(
 
 __all__ = [
     "check_job_fits_machine",
-    "check_sheet_fits_machine",
-    "check_mch_envelope_positive",
-    "check_mch_wasteboard_fits",
     "check_mch_effective_envelope_shrinks",
     "check_mch_endmill_positive",
+    "check_mch_envelope_positive",
+    "check_mch_wasteboard_fits",
+    "check_sheet_fits_machine",
     "validate_machine_config",
 ]

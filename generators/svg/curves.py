@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import math
@@ -36,23 +35,18 @@ def _flatten_cubic_recursive(
         result.append(p3)
         return
 
-
     if _is_cubic_flat(p0, p1, p2, p3, tolerance):
         result.append(p3)
         return
-
 
     q0 = _midpoint(p0, p1)
     q1 = _midpoint(p1, p2)
     q2 = _midpoint(p2, p3)
 
-
     r0 = _midpoint(q0, q1)
     r1 = _midpoint(q1, q2)
 
-
     s = _midpoint(r0, r1)
-
 
     _flatten_cubic_recursive(p0, q0, r0, s, tolerance, result, depth + 1)
     _flatten_cubic_recursive(s, r1, q2, p3, tolerance, result, depth + 1)
@@ -69,22 +63,16 @@ def _is_cubic_flat(
     dx = p3[0] - p0[0]
     dy = p3[1] - p0[1]
 
-
     chord_len_sq = dx * dx + dy * dy
 
     if chord_len_sq < 1e-12:
-
-
         d1 = _distance_sq(p0, p1)
         d2 = _distance_sq(p0, p2)
         return d1 < tolerance * tolerance and d2 < tolerance * tolerance
 
-
     d1 = abs((p1[0] - p0[0]) * dy - (p1[1] - p0[1]) * dx)
 
-
     d2 = abs((p2[0] - p0[0]) * dy - (p2[1] - p0[1]) * dx)
-
 
     max_dist = max(d1, d2) / math.sqrt(chord_len_sq)
 
@@ -118,16 +106,13 @@ def _flatten_quadratic_recursive(
         result.append(p2)
         return
 
-
     if _is_quadratic_flat(p0, p1, p2, tolerance):
         result.append(p2)
         return
 
-
     q0 = _midpoint(p0, p1)
     q1 = _midpoint(p1, p2)
     r = _midpoint(q0, q1)
-
 
     _flatten_quadratic_recursive(p0, q0, r, tolerance, result, depth + 1)
     _flatten_quadratic_recursive(r, q1, p2, tolerance, result, depth + 1)
@@ -146,9 +131,7 @@ def _is_quadratic_flat(
     chord_len_sq = dx * dx + dy * dy
 
     if chord_len_sq < 1e-12:
-
         return _distance_sq(p0, p1) < tolerance * tolerance
-
 
     d = abs((p1[0] - p0[0]) * dy - (p1[1] - p0[1]) * dx) / math.sqrt(chord_len_sq)
 
@@ -168,37 +151,27 @@ def flatten_arc(
     if tolerance <= 0:
         raise ValueError(f"Tolerance must be positive, got {tolerance}")
 
-
     if rx <= 0 or ry <= 0:
-
         return [p1]
 
     if _distance_sq(p0, p1) < 1e-12:
-
         return []
 
-
-    center_params = _arc_endpoint_to_center(
-        p0, rx, ry, x_axis_rotation, large_arc, sweep, p1
-    )
+    center_params = _arc_endpoint_to_center(p0, rx, ry, x_axis_rotation, large_arc, sweep, p1)
 
     if center_params is None:
-
         return [p1]
 
     cx, cy, rx_adj, ry_adj, theta1, dtheta = center_params
 
-
     avg_radius = (rx_adj + ry_adj) / 2
-
 
     if avg_radius > tolerance:
         segment_angle = 2 * math.acos(max(-1, min(1, 1 - tolerance / avg_radius)))
     else:
         segment_angle = math.pi / 2
 
-    num_segments = max(1, int(math.ceil(abs(dtheta) / segment_angle)))
-
+    num_segments = max(1, math.ceil(abs(dtheta) / segment_angle))
 
     result: list[Point2D] = []
     cos_phi = math.cos(x_axis_rotation)
@@ -208,20 +181,16 @@ def flatten_arc(
         t = i / num_segments
         theta = theta1 + t * dtheta
 
-
         cos_t = math.cos(theta)
         sin_t = math.sin(theta)
 
-
         x = rx_adj * cos_t
         y = ry_adj * sin_t
-
 
         px = cx + x * cos_phi - y * sin_phi
         py = cy + x * sin_phi + y * cos_phi
 
         result.append((px, py))
-
 
     if result:
         result[-1] = p1
@@ -244,12 +213,10 @@ def _arc_endpoint_to_center(
     cos_phi = math.cos(phi)
     sin_phi = math.sin(phi)
 
-
     dx = (x1 - x2) / 2
     dy = (y1 - y2) / 2
     x1p = cos_phi * dx + sin_phi * dy
     y1p = -sin_phi * dx + cos_phi * dy
-
 
     lambda_sq = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry)
     if lambda_sq > 1:
@@ -257,18 +224,15 @@ def _arc_endpoint_to_center(
         rx = rx * scale
         ry = ry * scale
 
-
     rx_sq = rx * rx
     ry_sq = ry * ry
     x1p_sq = x1p * x1p
     y1p_sq = y1p * y1p
 
-
     num = rx_sq * ry_sq - rx_sq * y1p_sq - ry_sq * x1p_sq
     denom = rx_sq * y1p_sq + ry_sq * x1p_sq
 
     if denom < 1e-12 or num < 0:
-
         return None
 
     factor = math.sqrt(num / denom)
@@ -278,12 +242,10 @@ def _arc_endpoint_to_center(
     cxp = factor * rx * y1p / ry
     cyp = -factor * ry * x1p / rx
 
-
     mx = (x1 + x2) / 2
     my = (y1 + y2) / 2
     cx = cos_phi * cxp - sin_phi * cyp + mx
     cy = sin_phi * cxp + cos_phi * cyp + my
-
 
     def angle(ux: float, uy: float, vx: float, vy: float) -> float:
         n = math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy)
@@ -295,11 +257,7 @@ def _arc_endpoint_to_center(
         return sign * math.acos(c)
 
     theta1 = angle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry)
-    dtheta = angle(
-        (x1p - cxp) / rx, (y1p - cyp) / ry,
-        (-x1p - cxp) / rx, (-y1p - cyp) / ry
-    )
-
+    dtheta = angle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry)
 
     if not sweep and dtheta > 0:
         dtheta -= 2 * math.pi
@@ -324,7 +282,7 @@ def _distance(p1: Point2D, p2: Point2D) -> float:
 
 
 __all__ = [
+    "flatten_arc",
     "flatten_cubic_bezier",
     "flatten_quadratic_bezier",
-    "flatten_arc",
 ]

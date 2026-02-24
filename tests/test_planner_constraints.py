@@ -1,34 +1,28 @@
 from __future__ import annotations
 
-import pytest
-
-from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from cam.moves import CutMove, RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.planner.capabilities import (
-    ConstraintSupport,
     PLANNER_CAPABILITIES,
+    ConstraintSupport,
     audit_constraints,
 )
-from adapters.ast_to_removal import ast_to_removal_intents
 from ir.removal_intent import (
-    RemovalIntent,
     Bounds2D,
-    DepthProfile,
     Constraints,
+    DepthProfile,
     KeepoutRegion,
+    RemovalIntent,
     TabConstraint,
-    Allowance,
 )
-from cam.moves import CutMove, RapidMove, SetRpmMove
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 from validation.toolpath_checks import (
     verify_toolpath_avoids_keepouts,
-    verify_passes_avoid_keepouts,
 )
 
 
 class TestConstraintAudit:
-
     def test_audit_no_constraints(self):
         intent = RemovalIntent(
             region_id="test",
@@ -104,7 +98,6 @@ class TestConstraintAudit:
 
 
 class TestToolpathKeepoutVerification:
-
     def test_no_keepouts_passes(self):
         moves = [
             CutMove(x=10, y=10, z=-5),
@@ -177,7 +170,6 @@ class TestToolpathKeepoutVerification:
 
 
 class TestPipelineKeepoutIntegration:
-
     def test_pipeline_with_keepout_pocket_outside(self):
         pml = """
 Sheet:
@@ -230,7 +222,6 @@ children:
 
 
 class TestPlannerCapabilitiesRegistry:
-
     def test_all_critical_constraints_have_capability(self):
         critical = ["constraints.keepouts"]
         for key in critical:
@@ -252,7 +243,6 @@ class TestPlannerCapabilitiesRegistry:
 
 
 class TestAdapterKeepoutExtraction:
-
     def test_keepouts_extracted_to_planner_input(self):
         from adapters.removal_to_planner import removal_intents_to_planner_input
 
@@ -265,7 +255,8 @@ class TestAdapterKeepoutExtraction:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            hint_type="pocket", shape="Rect",
+            hint_type="pocket",
+            shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 
@@ -289,14 +280,16 @@ class TestAdapterKeepoutExtraction:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            hint_type="pocket", shape="Rect",
+            hint_type="pocket",
+            shape="Rect",
         )
         intent2 = RemovalIntent(
             region_id="test2",
             bounds=Bounds2D(x_min=100, x_max=200, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            hint_type="pocket", shape="Rect",
+            hint_type="pocket",
+            shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent1, intent2])
 
@@ -304,7 +297,6 @@ class TestAdapterKeepoutExtraction:
 
 
 class TestTypedPlannerInput:
-
     def test_planner_input_from_intents(self):
         from adapters.removal_to_planner import removal_intents_to_planner_input
 
@@ -320,7 +312,8 @@ class TestTypedPlannerInput:
                 keepouts=(keepout,),
                 tabs=TabConstraint(count=4, height_mm=3, width_mm=10),
             ),
-            hint_type="profile", shape="Rect",
+            hint_type="profile",
+            shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 
@@ -345,7 +338,8 @@ class TestTypedPlannerInput:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(keepouts=(keepout,)),
-            hint_type="pocket", shape="Rect",
+            hint_type="pocket",
+            shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
         hints_dict = planner_input.to_hints_dict()
@@ -364,7 +358,8 @@ class TestTypedPlannerInput:
             bounds=Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100),
             depth_profile=DepthProfile.constant(z_top=0, z_bottom=-10),
             constraints=Constraints(tabs=TabConstraint(count=4, height_mm=3, width_mm=10)),
-            hint_type="profile", shape="Rect",
+            hint_type="profile",
+            shape="Rect",
         )
         planner_input = removal_intents_to_planner_input([intent])
 
@@ -377,10 +372,10 @@ class TestTypedPlannerInput:
 
 
 class TestConstraintCoverageEnforcement:
-
     def test_all_constraint_fields_documented(self):
-        from ir.removal_intent import Constraints
         import dataclasses
+
+        from ir.removal_intent import Constraints
 
         constraint_fields = {f.name for f in dataclasses.fields(Constraints)}
         documented = {
@@ -397,10 +392,7 @@ class TestConstraintCoverageEnforcement:
         )
 
     def test_all_constraint_fields_in_capabilities(self):
-        constraint_keys_in_caps = [
-            k for k in PLANNER_CAPABILITIES.keys()
-            if k.startswith("constraints.")
-        ]
+        constraint_keys_in_caps = [k for k in PLANNER_CAPABILITIES if k.startswith("constraints.")]
         expected = {
             "constraints.tabs",
             "constraints.keepouts",
@@ -410,6 +402,4 @@ class TestConstraintCoverageEnforcement:
             "constraints.safe_z_mm",
         }
         actual = set(constraint_keys_in_caps)
-        assert actual == expected, (
-            f"Constraint field(s) missing from PLANNER_CAPABILITIES: {expected - actual}"
-        )
+        assert actual == expected, f"Constraint field(s) missing from PLANNER_CAPABILITIES: {expected - actual}"

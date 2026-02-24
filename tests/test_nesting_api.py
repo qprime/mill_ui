@@ -1,6 +1,6 @@
-
 import sys
-from nesting.api import nest_parts, nest_and_generate
+
+from nesting.api import nest_and_generate, nest_parts
 
 
 def test_basic_nesting_api():
@@ -144,7 +144,6 @@ def test_nest_and_generate_ast():
     assert result["output_format"] == "ast"
     assert len(result["output"]) >= 1
 
-
     ast = result["output"][0]
     assert hasattr(ast, "sheet")
     assert hasattr(ast, "items")
@@ -168,7 +167,6 @@ def test_nest_and_generate_pml():
 
     assert result["output_format"] == "pml"
     assert len(result["output"]) >= 1
-
 
     pml = result["output"][0]
     assert isinstance(pml, str)
@@ -199,7 +197,6 @@ def test_user_example():
     print(f"  Total parts placed: {result['total_parts']}")
     print(f"  Utilization: {result['utilization_percent']:.1f}%")
 
-
     assert result["total_parts"] >= 35
     assert result["total_sheets"] >= 3
 
@@ -219,7 +216,7 @@ def test_invalid_output_format():
             kerf_mm=6,
             output_format="invalid",
         )
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "Invalid output_format" in str(e)
         assert "invalid" in str(e)
@@ -255,6 +252,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

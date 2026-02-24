@@ -6,22 +6,22 @@ import json
 import time
 from pathlib import Path
 
-from pml.yaml_parser import parse_nest_yaml
-from pml.nest_parser import nest_job_to_api_params
-from pml.formatter import format_pml
-from nesting import nest_and_generate, nest_parts
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
-from cam.model.stock import Stock
-from cam.model.material import Material
 from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
-
+from nesting import nest_and_generate, nest_parts
+from pml.formatter import format_pml
+from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_parser import parse_nest_yaml
 
 try:
     from export.blueprint_svg import render_blueprint_svg
+
     SVG_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     SVG_AVAILABLE = False
@@ -48,23 +48,21 @@ def main():
     print("Recipe 18: Nesting with MaxRects Algorithm")
     print("=" * 60)
 
-
     nest_pml_path = recipe_dir / "cabinet_job.nest.yml"
     print(f"\nReading {nest_pml_path.name}...")
 
     source = nest_pml_path.read_text()
     job = parse_nest_yaml(source)
 
-    print(f"\nJob specification:")
+    print("\nJob specification:")
     print(f"  Algorithm: {job.algorithm}")
     print(f"  Sheet: {job.sheet_width_mm}mm x {job.sheet_height_mm}mm x {job.sheet_thickness_mm}mm")
     print(f"  Kerf: {job.kerf_mm}mm, Margin: {job.margin_mm}mm")
 
-    print(f"\nParts to nest:")
+    print("\nParts to nest:")
     for part in job.parts:
         template_info = f" (template: {part.template})" if part.template else ""
         print(f"  - {part.quantity}x {part.name}: {part.width_mm}mm x {part.height_mm}mm{template_info}")
-
 
     print("\n--- Nesting ---")
     nest_start = time.perf_counter()
@@ -79,7 +77,6 @@ def main():
     print(f"  Total sheets: {result['total_sheets']}")
     print(f"  Utilization: {result['utilization'] * 100:.1f}%")
     print(f"  Nesting time: {nest_time * 1000:.1f}ms")
-
 
     validation_params = nest_job_to_api_params(job)
     validation_params["validate"] = True
@@ -96,7 +93,6 @@ def main():
     for warning in validation["warnings"]:
         print(f"    WARNING: {warning['message']}")
 
-
     print("\n--- Generated PML Layouts ---")
     asts = result["output"]
 
@@ -104,19 +100,16 @@ def main():
         sheet_name = f"sheet_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml.yml"
 
-
         pml_content = format_pml(ast)
 
-
         header = f"# {sheet_name}.pml.yml\n"
-        header += f"# Generated from cabinet_job.nest.yml\n"
+        header += "# Generated from cabinet_job.nest.yml\n"
         header += f"# Algorithm: {job.algorithm}\n"
         header += f"# Items: {len(ast.items)}\n"
         header += "\n"
 
         pml_path.write_text(header + pml_content)
         print(f"  {pml_path.name}: {len(ast.items)} items")
-
 
     print("\n--- CAM Processing ---")
 
@@ -136,16 +129,13 @@ def main():
         sheet_name = f"sheet_{sheet_idx + 1}"
         print(f"\n  Processing {sheet_name}...")
 
-
         ir_start = time.perf_counter()
         intents = ast_to_removal_intents(ast)
         ir_time = time.perf_counter() - ir_start
 
-
         hints_start = time.perf_counter()
         planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=job.kerf_mm, min_channel_width_mm=12.0)
         hints_time = time.perf_counter() - hints_start
-
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -167,7 +157,6 @@ def main():
         )
         plan_time = time.perf_counter() - plan_start
 
-
         gcode_start = time.perf_counter()
         sheet_gcode_files = {}
         total_moves = 0
@@ -183,7 +172,6 @@ def main():
             sheet_gcode_files[pass_name] = gcode
             total_moves += len(p.moves)
 
-
             gcode_path = output_dir / f"{sheet_name}-{pass_name}.nc"
             with open(gcode_path, "w") as f:
                 f.write(gcode)
@@ -195,7 +183,6 @@ def main():
         print(f"    Passes: {len(passes)}")
         print(f"    Moves: {total_moves}")
 
-
         if SVG_AVAILABLE:
             try:
                 svg_string = render_blueprint_svg(ast, theme="dark")
@@ -205,7 +192,6 @@ def main():
                 print(f"    SVG: {svg_path.name}")
             except Exception as e:
                 print(f"    SVG: failed ({e})")
-
 
         sheet_metrics = {
             "name": sheet_name,
@@ -224,16 +210,15 @@ def main():
         }
         metrics["sheets"].append(sheet_metrics)
 
-
     metrics_path = output_dir / "metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"\n--- Output ---")
+    print("\n--- Output ---")
     print(f"  Directory: {output_dir}")
     print(f"  PML files: {result['total_sheets']}")
     print(f"  G-code files: {sum(len(s['gcode_files']) for s in metrics['sheets'])}")
-    print(f"  Metrics: metrics.json")
+    print("  Metrics: metrics.json")
 
     print("\nDone!")
 

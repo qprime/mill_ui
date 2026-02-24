@@ -1,8 +1,7 @@
-
 import sys
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 
 def test_warning_collection_on_invalid_item():
@@ -31,7 +30,7 @@ def test_warning_collection_on_invalid_item():
                 feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="invalid_rect",
             ),
-        )
+        ),
     )
 
     warnings: list[str] = []
@@ -72,7 +71,7 @@ def test_no_warnings_when_all_valid():
                 feature=Feature(type="hole", depth_mm=0.0, is_through=True),
                 shape_id="hole1",
             ),
-        )
+        ),
     )
 
     warnings: list[str] = []
@@ -100,7 +99,7 @@ def test_warnings_none_by_default():
                 feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="rect1",
             ),
-        )
+        ),
     )
 
     # Should work without warnings parameter
@@ -131,7 +130,7 @@ def test_skips_non_shape_items():
                 feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id="rect1",
             ),
-        )
+        ),
     )
 
     warnings: list[str] = []
@@ -161,7 +160,7 @@ def test_unknown_feature_type_warning():
                 feature=Feature(type="unknown_feature", depth_mm=0.0, is_through=True),  # Unknown type
                 shape_id="bad_feature",
             ),
-        )
+        ),
     )
 
     warnings: list[str] = []
@@ -201,7 +200,7 @@ def test_multiple_warnings():
                 feature=Feature(type="hole", depth_mm=0.0, is_through=True),
                 shape_id="bad2",
             ),
-        )
+        ),
     )
 
     warnings: list[str] = []
@@ -233,6 +232,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

@@ -1,11 +1,10 @@
-
 from __future__ import annotations
 
 from typing import Any
 
-from .types import PartSpec, SheetSpec, NestingResult
-from .sheet_packer import pack_sheets, PackingAlgorithm, DEFAULT_ALGORITHM
 from .layout_generator import nesting_result_to_asts, nesting_result_to_pml
+from .sheet_packer import pack_sheets
+from .types import PartSpec, SheetSpec
 from .validation import validate_nesting_result
 
 _VALID_OUTPUT_FORMATS = ("ast", "pml")
@@ -40,13 +39,9 @@ def nest_parts(
     algorithm: str = "maxrects",
 ) -> dict[str, Any]:
     if algorithm not in _VALID_ALGORITHMS:
-        raise ValueError(
-            f"Invalid algorithm '{algorithm}'. "
-            f"Must be one of: {', '.join(_VALID_ALGORITHMS)}"
-        )
+        raise ValueError(f"Invalid algorithm '{algorithm}'. Must be one of: {', '.join(_VALID_ALGORITHMS)}")
 
     part_specs = _parts_from_dicts(parts)
-
 
     sheet_spec = SheetSpec(
         width_mm=sheet_width_mm,
@@ -57,9 +52,7 @@ def nest_parts(
         gap_margin_mm=gap_margin_mm,
     )
 
-
     result = pack_sheets(part_specs, sheet_spec, max_sheets=max_sheets, algorithm=algorithm)
-
 
     response = {
         "sheets": [sheet.to_dict() for sheet in result.sheets],
@@ -71,7 +64,6 @@ def nest_parts(
         "validation": None,
         "algorithm": algorithm,
     }
-
 
     if validate:
         val_result = validate_nesting_result(result)
@@ -96,16 +88,10 @@ def nest_and_generate(
     algorithm: str = "maxrects",
 ) -> dict[str, Any]:
     if output_format not in _VALID_OUTPUT_FORMATS:
-        raise ValueError(
-            f"Invalid output_format '{output_format}'. "
-            f"Must be one of: {', '.join(_VALID_OUTPUT_FORMATS)}"
-        )
+        raise ValueError(f"Invalid output_format '{output_format}'. Must be one of: {', '.join(_VALID_OUTPUT_FORMATS)}")
 
     if algorithm not in _VALID_ALGORITHMS:
-        raise ValueError(
-            f"Invalid algorithm '{algorithm}'. "
-            f"Must be one of: {', '.join(_VALID_ALGORITHMS)}"
-        )
+        raise ValueError(f"Invalid algorithm '{algorithm}'. Must be one of: {', '.join(_VALID_ALGORITHMS)}")
 
     part_specs = _parts_from_dicts(parts)
 
@@ -118,14 +104,9 @@ def nest_and_generate(
         gap_margin_mm=gap_margin_mm,
     )
 
-
     result = pack_sheets(part_specs, sheet_spec, algorithm=algorithm)
 
-
-    if output_format == "pml":
-        output = nesting_result_to_pml(result)
-    else:
-        output = nesting_result_to_asts(result)
+    output = nesting_result_to_pml(result) if output_format == "pml" else nesting_result_to_asts(result)
 
     return {
         "nesting_result": result,
@@ -137,4 +118,4 @@ def nest_and_generate(
     }
 
 
-__all__ = ["nest_parts", "nest_and_generate"]
+__all__ = ["nest_and_generate", "nest_parts"]

@@ -1,8 +1,8 @@
-
 from __future__ import annotations
-from cam.shape import Shape2D
+
 from cam.model.setup import Setup
 from cam.native import core as native_core
+from cam.shape import Shape2D
 
 
 def pocket_raster(

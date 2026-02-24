@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 
 
 def test_pml_parse_corner_cleanup():
@@ -44,7 +44,7 @@ children:
 def test_pml_format_corner_cleanup():
     print("Running test_pml_format_corner_cleanup...")
 
-    ast = LayoutAST(
+    LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
         items=(
             Item(
@@ -52,14 +52,10 @@ def test_pml_format_corner_cleanup():
                 type="Rect",
                 geometry=Geometry(data={"w_mm": 100, "h_mm": 80}),
                 placement=Placement(center_xy_mm=(100, 75)),
-                feature=Feature(
-                    type="pocket",
-                    depth_mm=6.0,
-                    corner_cleanup_tool_diameter_mm=3.175
-                ),
-                shape_id="panel"
+                feature=Feature(type="pocket", depth_mm=6.0, corner_cleanup_tool_diameter_mm=3.175),
+                shape_id="panel",
             ),
-        )
+        ),
     )
 
     pml = """
@@ -115,7 +111,13 @@ children:
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
-    assert abs(flat1.items[0].feature.corner_cleanup_tool_diameter_mm - flat2.items[0].feature.corner_cleanup_tool_diameter_mm) < 0.01
+    assert (
+        abs(
+            flat1.items[0].feature.corner_cleanup_tool_diameter_mm
+            - flat2.items[0].feature.corner_cleanup_tool_diameter_mm
+        )
+        < 0.01
+    )
     assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
     print("  ✓ PASS")
@@ -234,6 +236,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

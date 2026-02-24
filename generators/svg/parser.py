@@ -1,25 +1,21 @@
-
 from __future__ import annotations
 
 import math
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Iterator
 
 from domains.domain import Point2D
 from generators.svg.curves import (
+    flatten_arc,
     flatten_cubic_bezier,
     flatten_quadratic_bezier,
-    flatten_arc,
 )
-
 
 Polyline = list[Point2D]
 
 
 class SVGParseError(ValueError):
-
     def __init__(self, message: str, position: int | None = None):
         self.position = position
         if position is not None:
@@ -29,7 +25,6 @@ class SVGParseError(ValueError):
 
 @dataclass
 class ParseState:
-
     current: Point2D = (0.0, 0.0)
     subpath_start: Point2D = (0.0, 0.0)
     last_control: Point2D | None = None
@@ -59,8 +54,6 @@ def parse_svg_path(
             command = token
             i += 1
         else:
-
-
             if state.last_command in ("M", "m"):
                 command = "L" if state.last_command == "M" else "l"
             else:
@@ -69,17 +62,12 @@ def parse_svg_path(
             if not command:
                 raise SVGParseError(f"Unexpected number without command: {token}")
 
-
         try:
-            i, new_polylines = _execute_command(
-                command, tokens, i, state, current_polyline, tolerance
-            )
+            i, new_polylines = _execute_command(command, tokens, i, state, current_polyline, tolerance)
         except (IndexError, ValueError) as e:
             raise SVGParseError(f"Error parsing command '{command}': {e}") from e
 
-
         if new_polylines:
-
             for poly in new_polylines[:-1]:
                 if poly and len(poly) >= 2:
                     polylines.append(poly)
@@ -87,7 +75,6 @@ def parse_svg_path(
             current_polyline = new_polylines[-1] if new_polylines else []
 
         state.last_command = command
-
 
     if current_polyline and len(current_polyline) >= 2:
         polylines.append(current_polyline)
@@ -106,9 +93,7 @@ def parse_svg_file(
 
     root = tree.getroot()
 
-
     ns = {"svg": "http://www.w3.org/2000/svg"}
-
 
     paths = root.findall(".//path") + root.findall(".//svg:path", ns)
 
@@ -123,9 +108,7 @@ def parse_svg_file(
     return all_polylines
 
 
-_NUMBER_PATTERN = re.compile(
-    r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?"
-)
+_NUMBER_PATTERN = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")
 
 
 _COMMAND_PATTERN = re.compile(r"[MmZzLlHhVvCcSsQqTtAa]")
@@ -136,7 +119,6 @@ def _tokenize(path_data: str) -> list[str | float]:
     pos = 0
 
     while pos < len(path_data):
-
         while pos < len(path_data) and path_data[pos] in " \t\n\r,":
             pos += 1
 
@@ -145,23 +127,20 @@ def _tokenize(path_data: str) -> list[str | float]:
 
         char = path_data[pos]
 
-
         if char.isalpha():
             tokens.append(char)
             pos += 1
             continue
-
 
         match = _NUMBER_PATTERN.match(path_data, pos)
         if match:
             num_str = match.group()
             try:
                 tokens.append(float(num_str))
-            except ValueError:
-                raise SVGParseError(f"Invalid number: {num_str}", pos)
+            except ValueError as err:
+                raise SVGParseError(f"Invalid number: {num_str}", pos) from err
             pos = match.end()
             continue
-
 
         raise SVGParseError(f"Unexpected character: '{char}'", pos)
 
@@ -197,7 +176,6 @@ def _execute_command(
     cmd_upper = command.upper()
 
     if cmd_upper == "M":
-
         args, pos = _get_numbers(tokens, pos, 2)
         x, y = args[0], args[1]
 
@@ -205,16 +183,13 @@ def _execute_command(
             x += state.current[0]
             y += state.current[1]
 
-
         if current_polyline and len(current_polyline) >= 2:
             new_polylines.append(current_polyline)
-
 
         state.current = (x, y)
         state.subpath_start = (x, y)
         state.last_control = None
         new_polylines.append([state.current])
-
 
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 2)
@@ -227,7 +202,6 @@ def _execute_command(
             state.last_control = None
 
     elif cmd_upper == "L":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 2)
             x, y = args[0], args[1]
@@ -239,7 +213,6 @@ def _execute_command(
             state.last_control = None
 
     elif cmd_upper == "H":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 1)
             x = args[0]
@@ -250,7 +223,6 @@ def _execute_command(
             state.last_control = None
 
     elif cmd_upper == "V":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 1)
             y = args[0]
@@ -261,7 +233,6 @@ def _execute_command(
             state.last_control = None
 
     elif cmd_upper == "C":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 6)
             x1, y1, x2, y2, x, y = args
@@ -272,15 +243,12 @@ def _execute_command(
                 x2, y2 = x2 + cx, y2 + cy
                 x, y = x + cx, y + cy
 
-            points = flatten_cubic_bezier(
-                state.current, (x1, y1), (x2, y2), (x, y), tolerance
-            )
+            points = flatten_cubic_bezier(state.current, (x1, y1), (x2, y2), (x, y), tolerance)
             current_polyline.extend(points)
             state.current = (x, y)
             state.last_control = (x2, y2)
 
     elif cmd_upper == "S":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 4)
             x2, y2, x, y = args
@@ -290,22 +258,18 @@ def _execute_command(
                 x2, y2 = x2 + cx, y2 + cy
                 x, y = x + cx, y + cy
 
-
             if state.last_control and state.last_command.upper() in ("C", "S"):
                 x1 = 2 * state.current[0] - state.last_control[0]
                 y1 = 2 * state.current[1] - state.last_control[1]
             else:
                 x1, y1 = state.current
 
-            points = flatten_cubic_bezier(
-                state.current, (x1, y1), (x2, y2), (x, y), tolerance
-            )
+            points = flatten_cubic_bezier(state.current, (x1, y1), (x2, y2), (x, y), tolerance)
             current_polyline.extend(points)
             state.current = (x, y)
             state.last_control = (x2, y2)
 
     elif cmd_upper == "Q":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 4)
             x1, y1, x, y = args
@@ -315,15 +279,12 @@ def _execute_command(
                 x1, y1 = x1 + cx, y1 + cy
                 x, y = x + cx, y + cy
 
-            points = flatten_quadratic_bezier(
-                state.current, (x1, y1), (x, y), tolerance
-            )
+            points = flatten_quadratic_bezier(state.current, (x1, y1), (x, y), tolerance)
             current_polyline.extend(points)
             state.current = (x, y)
             state.last_control = (x1, y1)
 
     elif cmd_upper == "T":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 2)
             x, y = args
@@ -332,30 +293,24 @@ def _execute_command(
                 x += state.current[0]
                 y += state.current[1]
 
-
             if state.last_control and state.last_command.upper() in ("Q", "T"):
                 x1 = 2 * state.current[0] - state.last_control[0]
                 y1 = 2 * state.current[1] - state.last_control[1]
             else:
                 x1, y1 = state.current
 
-            points = flatten_quadratic_bezier(
-                state.current, (x1, y1), (x, y), tolerance
-            )
+            points = flatten_quadratic_bezier(state.current, (x1, y1), (x, y), tolerance)
             current_polyline.extend(points)
             state.current = (x, y)
             state.last_control = (x1, y1)
 
     elif cmd_upper == "A":
-
         while pos < len(tokens) and isinstance(tokens[pos], (int, float)):
             args, pos = _get_numbers(tokens, pos, 7)
             rx, ry, x_rot, large_arc_flag, sweep_flag, x, y = args
 
-
             large_arc = large_arc_flag != 0
             sweep = sweep_flag != 0
-
 
             x_rot_rad = math.radians(x_rot)
 
@@ -363,15 +318,12 @@ def _execute_command(
                 x += state.current[0]
                 y += state.current[1]
 
-            points = flatten_arc(
-                state.current, rx, ry, x_rot_rad, large_arc, sweep, (x, y), tolerance
-            )
+            points = flatten_arc(state.current, rx, ry, x_rot_rad, large_arc, sweep, (x, y), tolerance)
             current_polyline.extend(points)
             state.current = (x, y)
             state.last_control = None
 
     elif cmd_upper == "Z":
-
         if state.current != state.subpath_start:
             current_polyline.append(state.subpath_start)
         state.current = state.subpath_start
@@ -410,10 +362,7 @@ def scale_polylines(
     if scale_y is None:
         scale_y = scale_x
 
-    return [
-        [(x * scale_x, y * scale_y) for x, y in polyline]
-        for polyline in polylines
-    ]
+    return [[(x * scale_x, y * scale_y) for x, y in polyline] for polyline in polylines]
 
 
 def translate_polylines(
@@ -421,10 +370,7 @@ def translate_polylines(
     dx: float,
     dy: float,
 ) -> list[Polyline]:
-    return [
-        [(x + dx, y + dy) for x, y in polyline]
-        for polyline in polylines
-    ]
+    return [[(x + dx, y + dy) for x, y in polyline] for polyline in polylines]
 
 
 def center_polylines(polylines: list[Polyline]) -> list[Polyline]:
@@ -452,9 +398,7 @@ def normalize_polylines(
     current_height = y_max - y_min
 
     if current_width < 1e-10 or current_height < 1e-10:
-
         return center_polylines(polylines)
-
 
     scale_x = 1.0
     scale_y = 1.0
@@ -468,19 +412,18 @@ def normalize_polylines(
         scale = min(scale_x, scale_y)
         scale_x = scale_y = scale
 
-
     centered = center_polylines(polylines)
     return scale_polylines(centered, scale_x, scale_y)
 
 
 __all__ = [
-    "parse_svg_path",
-    "parse_svg_file",
-    "SVGParseError",
     "Polyline",
+    "SVGParseError",
+    "center_polylines",
+    "normalize_polylines",
+    "parse_svg_file",
+    "parse_svg_path",
     "polylines_bounds",
     "scale_polylines",
     "translate_polylines",
-    "center_polylines",
-    "normalize_polylines",
 ]

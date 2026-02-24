@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -10,7 +9,6 @@ if TYPE_CHECKING:
 
 from layout_ast.layout import Item
 
-
 GeneratorResult = list[Item]
 
 
@@ -19,23 +17,19 @@ LoopSelection = Literal["outer_only", "inner_only", "all_loops"] | list[int]
 
 @runtime_checkable
 class Generator(Protocol):
-
     def __call__(
         self,
         domain: Domain,
         params: Any,
         *,
         allow_empty: bool = False,
-    ) -> GeneratorResult:
-        ...
+    ) -> GeneratorResult: ...
 
 
 @dataclass(frozen=True)
 class BaseParams(ABC):
-
     @abstractmethod
-    def validate(self) -> None:
-        ...
+    def validate(self) -> None: ...
 
 
 def generate_shape_id(prefix: str, index: int = 0, suffix: str = "") -> str:
@@ -57,10 +51,7 @@ def validate_domain_for_generation(
     if domain.area_mm2 < min_area_mm2:
         if allow_empty:
             return False
-        raise ValueError(
-            f"{generator_name}: Domain area {domain.area_mm2:.4f}mm^2 is below "
-            f"minimum {min_area_mm2}mm^2"
-        )
+        raise ValueError(f"{generator_name}: Domain area {domain.area_mm2:.4f}mm^2 is below minimum {min_area_mm2}mm^2")
     return True
 
 
@@ -83,12 +74,12 @@ def resolve_major_spacing(unit: str, major_spacing_mm: float | None) -> float:
 
 
 __all__ = [
+    "BaseParams",
     "Generator",
     "GeneratorResult",
-    "BaseParams",
     "LoopSelection",
     "generate_shape_id",
-    "validate_domain_for_generation",
-    "resolve_minor_spacing",
     "resolve_major_spacing",
+    "resolve_minor_spacing",
+    "validate_domain_for_generation",
 ]

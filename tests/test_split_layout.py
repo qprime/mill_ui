@@ -1,6 +1,5 @@
-
-from pml.yaml_parser import parse_pml_yaml
 from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
@@ -40,16 +39,13 @@ children:
     assert ast.sheet.width_mm == 600
     assert ast.sheet.height_mm == 600
 
-
     flat = resolve_layout(ast)
-
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
     assert len(profile_items) == 1, f"Expected 1 profile, got {len(profile_items)}"
-    assert len(pocket_items) == 4, f"Expected 4 pockets (2×2 panes), got {len(pocket_items)}"
-
+    assert len(pocket_items) == 4, f"Expected 4 pockets (2x2 panes), got {len(pocket_items)}"
 
     first_pocket = pocket_items[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 230.0) < 0.01
@@ -98,23 +94,20 @@ children:
                         depth: 5mm
 """
 
-
     split_ast = parse_pml_yaml(pml_split)
     grid_ast = parse_pml_yaml(pml_grid)
 
     split_flat = resolve_layout(split_ast)
     grid_flat = resolve_layout(grid_ast)
 
-
     assert len(split_flat.items) == len(grid_flat.items)
-
 
     split_pockets = [item for item in split_flat.items if item.feature and item.feature.type == "pocket"]
     grid_pockets = [item for item in grid_flat.items if item.feature and item.feature.type == "pocket"]
 
     assert len(split_pockets) == len(grid_pockets) == 4
 
-    for sp, gp in zip(split_pockets, grid_pockets):
+    for sp, gp in zip(split_pockets, grid_pockets, strict=False):
         assert abs(sp.geometry.data["w_mm"] - gp.geometry.data["w_mm"]) < 0.01
         assert abs(sp.geometry.data["h_mm"] - gp.geometry.data["h_mm"]) < 0.01
 
@@ -145,10 +138,8 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
-    assert len(pockets) == 12, f"Expected 12 pockets (3×4 panes), got {len(pockets)}"
-
+    assert len(pockets) == 12, f"Expected 12 pockets (3x4 panes), got {len(pockets)}"
 
     first_pocket = pockets[0]
     assert abs(first_pocket.geometry.data["w_mm"] - 235.0) < 0.01
@@ -184,7 +175,6 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 4
 
@@ -215,24 +205,21 @@ children:
                         depth: 6mm
 """
 
-
     ast1 = parse_pml_yaml(original_pml)
     formatted_pml = format_pml_yaml(ast1)
     ast2 = parse_pml_yaml(formatted_pml)
-
 
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
     assert len(flat1.items) == len(flat2.items)
 
-
     pockets1 = [item for item in flat1.items if item.feature and item.feature.type == "pocket"]
     pockets2 = [item for item in flat2.items if item.feature and item.feature.type == "pocket"]
 
     assert len(pockets1) == len(pockets2) == 6
 
-    for p1, p2 in zip(pockets1, pockets2):
+    for p1, p2 in zip(pockets1, pockets2, strict=False):
         assert abs(p1.geometry.data["w_mm"] - p2.geometry.data["w_mm"]) < 0.01
         assert abs(p1.geometry.data["h_mm"] - p2.geometry.data["h_mm"]) < 0.01
 
@@ -272,13 +259,11 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
 
     assert len(profile_items) == 1
     assert len(pocket_items) == 4
-
 
     first_pane = pocket_items[0]
     assert abs(first_pane.geometry.data["w_mm"] - 320.0) < 0.01
@@ -310,7 +295,6 @@ children:
 
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
-
 
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 3
@@ -345,7 +329,6 @@ children:
 
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
-
 
     pockets = [item for item in flat.items if item.feature and item.feature.type == "pocket"]
     assert len(pockets) == 3

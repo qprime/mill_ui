@@ -1,19 +1,15 @@
-
 from __future__ import annotations
 
-import pytest
-
-from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from adapters.ast_to_removal import ast_to_removal_intents
 from cam.moves import RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.post.gcode import _apply_margin_offset
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 from validation.removal_checks import check_working_area_bounds
-from adapters.ast_to_removal import ast_to_removal_intents
 
 
 class TestSheetWorkingArea:
-
     def test_sheet_working_dimensions(self):
         pml = """
 Sheet:
@@ -58,7 +54,6 @@ children: []
 
 
 class TestMarginTransformGcode:
-
     def test_margin_offset_applied_to_moves(self):
         moves = [
             RapidMove(x=100.0, y=200.0, z=5.0),
@@ -92,7 +87,6 @@ class TestMarginTransformGcode:
 
 
 class TestResolverWorkingArea:
-
     def test_resolver_uses_working_area(self):
         pml = """
 Sheet:
@@ -129,7 +123,6 @@ children:
 
 
 class TestWorkingAreaValidation:
-
     def test_valid_coordinates_pass(self):
         pml = """
 Sheet:
@@ -262,7 +255,6 @@ children:
 
 
 class TestPipelineMarginIntegration:
-
     def test_pipeline_applies_margin_to_gcode(self):
         pml = """
 Sheet:
@@ -292,12 +284,11 @@ children:
         for name, gcode in result.gcode.items():
             if "profile" in name:
                 lines_with_coords = [
-                    l for l in gcode.split('\n')
-                    if ('X' in l or 'Y' in l) and ('G0' in l or 'G1' in l)
+                    ln for ln in gcode.split("\n") if ("X" in ln or "Y" in ln) and ("G0" in ln or "G1" in ln)
                 ]
                 assert lines_with_coords
                 first_line = lines_with_coords[0]
-                x_val = float(first_line.split('X')[1].split()[0].rstrip('YZ'))
-                y_val = float(first_line.split('Y')[1].split()[0].rstrip('XZ'))
+                x_val = float(first_line.split("X")[1].split()[0].rstrip("YZ"))
+                y_val = float(first_line.split("Y")[1].split()[0].rstrip("XZ"))
                 assert x_val >= 10.0
                 assert y_val >= 10.0

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from assembly.beam import (
-    BeamSpec,
     BeamRole,
-    FaceFeature,
-    EndFeature,
-    EdgeFeature,
+    BeamSpec,
     Chamfer,
+    EdgeFeature,
+    EndFeature,
+    FaceFeature,
     Fillet,
 )
 
@@ -146,10 +146,10 @@ def filleted_leg(
 
 
 __all__ = [
-    "post",
-    "rail",
-    "leg",
     "apron",
     "chamfered_post",
     "filleted_leg",
+    "leg",
+    "post",
+    "rail",
 ]

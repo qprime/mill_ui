@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import json
@@ -7,24 +6,17 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 RECIPE_DIR = Path(__file__).parent.parent / "docs" / "recipes" / "01_simple_profile"
 PML_FILE = RECIPE_DIR / "example.pml.yml"
 
 
 def _check_optional_deps() -> dict[str, bool]:
-    deps = {}
-    try:
-        import shapely
-        deps["shapely"] = True
-    except ImportError:
-        deps["shapely"] = False
-    try:
-        import numpy
-        deps["numpy"] = True
-    except ImportError:
-        deps["numpy"] = False
-    return deps
+    import importlib.util
+
+    return {
+        "shapely": importlib.util.find_spec("shapely") is not None,
+        "numpy": importlib.util.find_spec("numpy") is not None,
+    }
 
 
 OPTIONAL_DEPS = _check_optional_deps()
@@ -39,7 +31,7 @@ def _skip_if_missing(dep: str) -> bool:
 
 def _run_cli(args: list[str], check: bool = True) -> subprocess.CompletedProcess:
     result = subprocess.run(
-        [sys.executable] + args,
+        [sys.executable, *args],
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent.parent,
@@ -56,12 +48,18 @@ def test_export_blueprint_produces_svg():
         return None
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        result = _run_cli([
-            "-m", "cli.mill",
-            "--input", str(PML_FILE),
-            "--out", tmpdir,
-            "--theme", "dark",
-        ])
+        result = _run_cli(
+            [
+                "-m",
+                "cli.mill",
+                "--input",
+                str(PML_FILE),
+                "--out",
+                tmpdir,
+                "--theme",
+                "dark",
+            ]
+        )
 
         output_path = Path(tmpdir)
         svg_files = list(output_path.glob("*.svg"))
@@ -84,13 +82,18 @@ def test_convert_layout_pml_to_json():
     with tempfile.TemporaryDirectory() as tmpdir:
         json_file = Path(tmpdir) / "output.json"
 
-        result = _run_cli([
-            "-m", "cli.convert_layout",
-            "--from", "pml",
-            "--to", "json",
-            str(PML_FILE),
-            str(json_file),
-        ])
+        result = _run_cli(
+            [
+                "-m",
+                "cli.convert_layout",
+                "--from",
+                "pml",
+                "--to",
+                "json",
+                str(PML_FILE),
+                str(json_file),
+            ]
+        )
 
         assert json_file.exists(), f"JSON file not created. stderr: {result.stderr}"
 
@@ -113,21 +116,31 @@ def test_convert_layout_json_to_pml():
         json_file = Path(tmpdir) / "intermediate.json"
         pml_file = Path(tmpdir) / "roundtrip.pml.yml"
 
-        _run_cli([
-            "-m", "cli.convert_layout",
-            "--from", "pml",
-            "--to", "json",
-            str(PML_FILE),
-            str(json_file),
-        ])
+        _run_cli(
+            [
+                "-m",
+                "cli.convert_layout",
+                "--from",
+                "pml",
+                "--to",
+                "json",
+                str(PML_FILE),
+                str(json_file),
+            ]
+        )
 
-        _run_cli([
-            "-m", "cli.convert_layout",
-            "--from", "json",
-            "--to", "pml",
-            str(json_file),
-            str(pml_file),
-        ])
+        _run_cli(
+            [
+                "-m",
+                "cli.convert_layout",
+                "--from",
+                "json",
+                "--to",
+                "pml",
+                str(json_file),
+                str(pml_file),
+            ]
+        )
 
         assert pml_file.exists(), "PML roundtrip file not created"
 
@@ -143,11 +156,17 @@ def test_convert_layout_json_to_pml():
 def test_cli_missing_input_fails():
     print("Running test_cli_missing_input_fails...")
 
-    result = _run_cli([
-        "-m", "cli.mill",
-        "--input", "/nonexistent/path/to/file.pml.yml",
-        "--out", "/tmp",
-    ], check=False)
+    result = _run_cli(
+        [
+            "-m",
+            "cli.mill",
+            "--input",
+            "/nonexistent/path/to/file.pml.yml",
+            "--out",
+            "/tmp",
+        ],
+        check=False,
+    )
 
     assert result.returncode != 0, "CLI should fail with missing input"
     assert "not found" in result.stderr.lower() or "error" in result.stderr.lower()
@@ -164,11 +183,17 @@ def test_cli_invalid_format_fails():
         invalid_file = f.name
 
     try:
-        result = _run_cli([
-            "-m", "cli.mill",
-            "--input", invalid_file,
-            "--out", "/tmp",
-        ], check=False)
+        result = _run_cli(
+            [
+                "-m",
+                "cli.mill",
+                "--input",
+                invalid_file,
+                "--out",
+                "/tmp",
+            ],
+            check=False,
+        )
 
         assert result.returncode != 0, "CLI should fail with unsupported format"
         assert "unsupported" in result.stderr.lower() or "error" in result.stderr.lower()
@@ -200,6 +225,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

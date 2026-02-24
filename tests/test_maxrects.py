@@ -1,7 +1,7 @@
-
 import sys
-from nesting.maxrects import maxrects_pack, MaxRectsHeuristic
-from nesting.api import nest_parts, nest_and_generate
+
+from nesting.api import nest_and_generate, nest_parts
+from nesting.maxrects import MaxRectsHeuristic, maxrects_pack
 
 
 def test_maxrects_basic():
@@ -52,7 +52,6 @@ def test_maxrects_with_gap():
 def test_maxrects_rotation():
     print("Running test_maxrects_rotation...")
 
-
     parts = [
         (200, 100, True, "p1"),
     ]
@@ -65,13 +64,12 @@ def test_maxrects_rotation():
     )
 
     assert len(placements) == 1
-    assert placements[0].rotated == True
+    assert placements[0].rotated is True
     print("  PASSED")
 
 
 def test_maxrects_no_rotation():
     print("Running test_maxrects_no_rotation...")
-
 
     parts = [
         (200, 100, False, "p1"),
@@ -192,7 +190,6 @@ def test_maxrects_vs_guillotine():
     print(f"  Guillotine: {guillotine_result['total_sheets']} sheets, {guillotine_result['utilization_percent']:.1f}%")
     print(f"  MaxRects:   {maxrects_result['total_sheets']} sheets, {maxrects_result['utilization_percent']:.1f}%")
 
-
     assert maxrects_result["utilization_percent"] >= guillotine_result["utilization_percent"] - 5
 
     assert maxrects_result["total_sheets"] <= guillotine_result["total_sheets"]
@@ -235,7 +232,7 @@ def test_maxrects_invalid_algorithm():
             sheet_thickness_mm=19,
             algorithm="invalid_algo",
         )
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "Invalid algorithm" in str(e)
 
@@ -270,6 +267,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

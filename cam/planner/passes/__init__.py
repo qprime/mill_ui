@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import contextlib
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Any
 
 from cam.config import Config
 from cam.model.machine import Machine
@@ -9,7 +11,7 @@ from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.moves import Move, SetRpmMove
-from cam.planner.planner_input import PlannerInput, FeatureInput, TabsInput
+from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 
 from .merge_shared_edges import merge_rect_profiles
 from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
@@ -28,12 +30,11 @@ from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_fo
 
 @dataclass
 class PassRecord:
-
     op: str
     tool_selection: ToolSelection
     setup: Setup
     filename: str
-    moves: List[Move] = field(default_factory=list)
+    moves: list[Move] = field(default_factory=list)
     count: int = 0
 
     def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
@@ -43,9 +44,7 @@ class PassRecord:
             self.count += int(increment)
 
 
-
 class PassAccumulator:
-
     def __init__(
         self,
         *,
@@ -60,7 +59,7 @@ class PassAccumulator:
         self._stock = stock
         self._safe_z = float(safe_z)
         self._prime_spindle = prime_spindle
-        self._records: Dict[tuple[str, float, str, str | None], PassRecord] = {}
+        self._records: dict[tuple[str, float, str, str | None], PassRecord] = {}
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
         setup = Setup(
@@ -71,7 +70,7 @@ class PassAccumulator:
             safe_z=self._safe_z,
         )
         filename = _build_filename(operation, tool)
-        moves: List[Move] = []
+        moves: list[Move] = []
         if self._prime_spindle:
             moves.append(SetRpmMove(rpm=0))
         return PassRecord(
@@ -88,7 +87,7 @@ class PassAccumulator:
             self._records[key] = self._make_record(operation, tool)
         return self._records[key]
 
-    def passes(self) -> List[PassRecord]:
+    def passes(self) -> list[PassRecord]:
         return list(self._records.values())
 
 
@@ -113,8 +112,8 @@ def plan_passes(
     stock: Stock,
     safe_z: float | None = None,
     prime_spindle: bool = False,
-    profile_opts: Optional[Mapping[str, Any]] = None,
-) -> tuple[List[PassRecord], Dict[str, Any]]:
+    profile_opts: Mapping[str, Any] | None = None,
+) -> tuple[list[PassRecord], dict[str, Any]]:
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(
@@ -140,20 +139,19 @@ def plan_passes(
 
     profiles = planner_input.profiles
 
-    any_profile_has_tabs = tabs_enabled or any(
-        rec.tabs is not None
-        for rec in profiles
-    )
+    any_profile_has_tabs = tabs_enabled or any(rec.tabs is not None for rec in profiles)
 
     merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or any_profile_has_tabs)
 
-    def _tabs_for_feature(rec: FeatureInput) -> Optional[Dict[str, float]]:
+    def _tabs_for_feature(rec: FeatureInput) -> dict[str, float] | None:
         if rec.tabs is not None:
-            custom = _normalize_tabs({
-                "count": rec.tabs.count,
-                "height_mm": rec.tabs.height_mm,
-                "width_mm": rec.tabs.width_mm,
-            })
+            custom = _normalize_tabs(
+                {
+                    "count": rec.tabs.count,
+                    "height_mm": rec.tabs.height_mm,
+                    "width_mm": rec.tabs.width_mm,
+                }
+            )
             return custom if custom is not None else tabs_opts
         return tabs_opts
 
@@ -261,10 +259,10 @@ def plan_passes(
         height = float(sg.h_mm or 0.0)
         fallback_r = float(sg.radius_mm or 0.0)
         radii = {
-            'tl': float(sg.radius_tl_mm if sg.radius_tl_mm is not None else fallback_r),
-            'tr': float(sg.radius_tr_mm if sg.radius_tr_mm is not None else fallback_r),
-            'br': float(sg.radius_br_mm if sg.radius_br_mm is not None else fallback_r),
-            'bl': float(sg.radius_bl_mm if sg.radius_bl_mm is not None else fallback_r),
+            "tl": float(sg.radius_tl_mm if sg.radius_tl_mm is not None else fallback_r),
+            "tr": float(sg.radius_tr_mm if sg.radius_tr_mm is not None else fallback_r),
+            "br": float(sg.radius_br_mm if sg.radius_br_mm is not None else fallback_r),
+            "bl": float(sg.radius_bl_mm if sg.radius_bl_mm is not None else fallback_r),
         }
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
@@ -313,7 +311,7 @@ def _extract_positive_float(value: Any) -> float:
     return num if num > 0.0 else 0.0
 
 
-def _normalize_tabs(raw: Any) -> Optional[Dict[str, float]]:
+def _normalize_tabs(raw: Any) -> dict[str, float] | None:
     if not isinstance(raw, Mapping):
         return None
     try:
@@ -322,21 +320,21 @@ def _normalize_tabs(raw: Any) -> Optional[Dict[str, float]]:
         return None
     if count <= 0:
         return None
-    tabs: Dict[str, float] = {"count": float(count)}
+    tabs: dict[str, float] = {"count": float(count)}
     try:
         tabs["height_mm"] = float(raw.get("height_mm", 3.0))
     except (TypeError, ValueError):
         tabs["height_mm"] = 3.0
     if "width_mm" in raw:
-        try:
+        with contextlib.suppress(TypeError, ValueError):
             tabs["width_mm"] = float(raw.get("width_mm"))
-        except (TypeError, ValueError):
-            pass
     return tabs
 
 
-def _build_profile_summary(onion_skin_mm: float, tabs_opts: Optional[Mapping[str, float]], cut_through_mm: float) -> Optional[Dict[str, Any]]:
-    summary: Dict[str, Any] = {}
+def _build_profile_summary(
+    onion_skin_mm: float, tabs_opts: Mapping[str, float] | None, cut_through_mm: float
+) -> dict[str, Any] | None:
+    summary: dict[str, Any] = {}
     if onion_skin_mm > 0.0:
         summary["onion_skin_mm"] = onion_skin_mm
     if tabs_opts:
@@ -351,4 +349,4 @@ def _build_profile_summary(onion_skin_mm: float, tabs_opts: Optional[Mapping[str
     return summary or None
 
 
-__all__ = ["PassAccumulator", "PassRecord", "plan_passes"]
+__all__ = ["PassAccumulator", "PassRecord", "TabsInput", "normalize_tool_entries", "plan_passes"]

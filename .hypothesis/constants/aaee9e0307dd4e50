@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/params/__init__.py
+# hypothesis_version: 6.151.9
+
+['BeadParams', 'ChamferParams', 'EngraveTextParams', 'FlatPocketParams', 'GridLinesParams', 'GridParams', 'HoleGridParams', 'LinePatternParams', 'ProfileParams', 'RaisedPanelParams', 'WaveParams', 'XPanelParams']

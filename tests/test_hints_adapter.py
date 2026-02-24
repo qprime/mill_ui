@@ -1,13 +1,12 @@
-
 from __future__ import annotations
 
 import sys
 
 from adapters.hints_to_removal import (
-    profile_hint_to_removal_intent,
-    pocket_hint_to_removal_intent,
-    hole_hint_to_removal_intent,
     engrave_hint_to_removal_intent,
+    hole_hint_to_removal_intent,
+    pocket_hint_to_removal_intent,
+    profile_hint_to_removal_intent,
 )
 
 
@@ -338,6 +337,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

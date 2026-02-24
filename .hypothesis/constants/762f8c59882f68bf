@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/export/blueprint_pdf.py
+# hypothesis_version: 6.151.9
+
+['svg_to_pdf', 'utf-8']

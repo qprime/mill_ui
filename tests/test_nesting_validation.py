@@ -1,9 +1,9 @@
-
 import sys
-from nesting.types import PartSpec, SheetSpec, NestedPart, SheetLayout, NestingResult
+
+from nesting.types import NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
 from nesting.validation import (
-    validate_sheet_layout,
     validate_nesting_result,
+    validate_sheet_layout,
 )
 
 
@@ -11,7 +11,6 @@ def test_valid_layout_passes():
     print("Running test_valid_layout_passes...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
-
 
     layout = SheetLayout(
         sheet_spec=sheet_spec,
@@ -31,12 +30,9 @@ def test_out_of_bounds_error():
     sheet_spec = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
 
-
     layout = SheetLayout(
         sheet_spec=sheet_spec,
-        placements=(
-            NestedPart(part_spec=part, x_mm=50, y_mm=250, instance_id=0),
-        ),
+        placements=(NestedPart(part_spec=part, x_mm=50, y_mm=250, instance_id=0),),
     )
 
     result = validate_sheet_layout(layout)
@@ -49,7 +45,6 @@ def test_overlapping_error():
     print("Running test_overlapping_error...")
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=0)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
-
 
     layout = SheetLayout(
         sheet_spec=sheet_spec,
@@ -107,12 +102,9 @@ def test_low_utilization_warning():
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10)
     part = PartSpec(name="tiny", width_mm=50, height_mm=50)
 
-
     layout = SheetLayout(
         sheet_spec=sheet_spec,
-        placements=(
-            NestedPart(part_spec=part, x_mm=100, y_mm=100, instance_id=0),
-        ),
+        placements=(NestedPart(part_spec=part, x_mm=100, y_mm=100, instance_id=0),),
     )
 
     result = validate_sheet_layout(layout)
@@ -130,14 +122,11 @@ def test_unplaced_parts_warning():
 
     layout = SheetLayout(
         sheet_spec=sheet_spec,
-        placements=(
-            NestedPart(part_spec=placed_part, x_mm=250, y_mm=250, instance_id=0),
-        ),
+        placements=(NestedPart(part_spec=placed_part, x_mm=250, y_mm=250, instance_id=0),),
     )
 
     nesting = NestingResult(sheets=(layout,), unplaced_parts=(unplaced_part,))
     result = validate_nesting_result(nesting)
-
 
     assert any("could not place" in w["message"].lower() for w in result.warnings)
     print("  PASSED")
@@ -148,13 +137,11 @@ def test_multiple_sheets_validated():
     sheet_spec = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
 
-
     sheet1 = SheetLayout(
         sheet_spec=sheet_spec,
         placements=(NestedPart(part_spec=part, x_mm=250, y_mm=250, instance_id=0),),
         sheet_index=0,
     )
-
 
     sheet2 = SheetLayout(
         sheet_spec=sheet_spec,
@@ -164,7 +151,6 @@ def test_multiple_sheets_validated():
 
     nesting = NestingResult(sheets=(sheet1, sheet2))
     result = validate_nesting_result(nesting)
-
 
     assert not result.is_valid
     print("  PASSED")
@@ -349,6 +335,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

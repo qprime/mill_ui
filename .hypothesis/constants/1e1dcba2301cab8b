@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/pml/revision_header.py
+# hypothesis_version: 6.151.9
+
+['# generated:', '# mill_ui:', '--short', 'HEAD', 'git', 'rev-parse', 'unknown']

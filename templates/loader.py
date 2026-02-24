@@ -3,13 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from layout_ast.compositional import (
-    TemplateDef,
     CompositionalLayoutAST,
+    TemplateDef,
 )
-from layout_ast.layout import Sheet, Item
+from layout_ast.layout import Item, Sheet
 from pml.yaml_parser import parse_template_yaml, substitute_params
 from resolution.layout_resolver import LayoutResolver
-
 
 TEMPLATE_SEARCH_PATHS = [
     Path(__file__).parent,
@@ -51,8 +50,8 @@ def expand_template(
     template_def, raw_text = load_pml_template(template_name)
 
     resolved_params = {**template_def.params, **params}
-    resolved_params['outer_w'] = region_width
-    resolved_params['outer_h'] = region_height
+    resolved_params["outer_w"] = region_width
+    resolved_params["outer_h"] = region_height
 
     substituted_text = substitute_params(raw_text, resolved_params)
     substituted_def = parse_template_yaml(substituted_text, parse_body=True)
@@ -84,8 +83,8 @@ def clear_template_cache() -> None:
 
 
 __all__ = [
+    "clear_template_cache",
+    "expand_template",
     "find_template_file",
     "load_pml_template",
-    "expand_template",
-    "clear_template_cache",
 ]

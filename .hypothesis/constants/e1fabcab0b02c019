@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/engrave_text.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 'center', 'engrave_number_label', 'horizontal', 'label', 'left', 'rowmans', 'scalex', 'scaley', 'spacing', 'text', 'top', 'vertical']

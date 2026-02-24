@@ -1,20 +1,20 @@
 from __future__ import annotations
 
 import dataclasses
+
 import pytest
 
 from ir.removal_intent import (
     BevelSpec,
-    ChamferSpec,
-    ShapeGeometry,
     Bounds2D,
+    ChamferSpec,
     DepthProfile,
     RemovalIntent,
+    ShapeGeometry,
 )
 
 
 class TestBevelSpec:
-
     def test_basic_construction(self):
         bevel = BevelSpec(width_mm=10.0, angle_deg=45.0, inner_depth_mm=8.0)
         assert bevel.width_mm == 10.0
@@ -44,7 +44,6 @@ class TestBevelSpec:
 
 
 class TestChamferSpec:
-
     def test_basic_construction(self):
         chamfer = ChamferSpec(width_mm=3.0, angle_deg=45.0)
         assert chamfer.width_mm == 3.0
@@ -68,7 +67,6 @@ class TestChamferSpec:
 
 
 class TestShapeGeometry:
-
     def test_defaults_all_none(self):
         sg = ShapeGeometry()
         assert sg.w_mm is None
@@ -107,9 +105,12 @@ class TestShapeGeometry:
 
     def test_rounded_rect_selective(self):
         sg = ShapeGeometry(
-            w_mm=80.0, h_mm=60.0,
-            radius_tl_mm=15.0, radius_tr_mm=15.0,
-            radius_br_mm=0.0, radius_bl_mm=0.0,
+            w_mm=80.0,
+            h_mm=60.0,
+            radius_tl_mm=15.0,
+            radius_tr_mm=15.0,
+            radius_br_mm=0.0,
+            radius_bl_mm=0.0,
         )
         assert sg.radius_tl_mm == 15.0
         assert sg.radius_br_mm == 0.0
@@ -143,7 +144,6 @@ class TestShapeGeometry:
 
 
 class TestRemovalIntentTypedFields:
-
     def _base_intent(self, **kwargs) -> RemovalIntent:
         defaults = dict(
             region_id="test",

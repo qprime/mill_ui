@@ -1,13 +1,11 @@
-
 from __future__ import annotations
 
 import json
 import sys
 
-from pml import parse_pml, format_pml, PMLParseError
-from pml.yaml_parser import parse_pml_yaml
+from pml import PMLParseError, parse_pml
 from pml.yaml_formatter import format_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from pml.yaml_parser import parse_pml_yaml
 
 
 def test_pml_parse_minimal_layout():
@@ -281,7 +279,7 @@ Sheet:
         parse_pml(pml)
         print("  FAIL: Expected PMLParseError or ValueError")
         return False
-    except (PMLParseError, ValueError) as e:
+    except (PMLParseError, ValueError):
         pass
     print("  PASS")
     return True
@@ -430,7 +428,7 @@ children:
     assert ast1.project == ast2.project
     assert len(ast1.items) == len(ast2.items)
 
-    for item1, item2 in zip(ast1.items, ast2.items):
+    for item1, item2 in zip(ast1.items, ast2.items, strict=False):
         assert item1.kind == item2.kind
         assert item1.type == item2.type
         assert item1.shape_id == item2.shape_id
@@ -555,6 +553,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

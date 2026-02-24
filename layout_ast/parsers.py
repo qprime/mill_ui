@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import json
@@ -7,12 +6,12 @@ from typing import Any
 
 from core.constants import DepthMode
 from layout_ast.layout import (
-    LayoutAST,
-    Sheet,
-    Item,
-    Placement,
-    Geometry,
     Feature,
+    Geometry,
+    Item,
+    LayoutAST,
+    Placement,
+    Sheet,
 )
 
 
@@ -23,7 +22,6 @@ def parse_layout_json(path: str) -> LayoutAST:
 
     with path_obj.open("r", encoding="utf-8") as f:
         data = json.load(f)
-
 
     if "sheet" not in data:
         raise ValueError("Layout JSON missing required 'sheet' field")
@@ -36,10 +34,8 @@ def parse_layout_json(path: str) -> LayoutAST:
         show_dimensions=sheet_data.get("show_dimensions", True),
     )
 
-
     items_data = data.get("items", [])
     items = tuple(_parse_item(item_data) for item_data in items_data)
-
 
     project = data.get("project")
     kerf_width_mm = data.get("kerf_width_mm")
@@ -63,7 +59,6 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
     item_type = item_data["type"]
 
     if kind == "template":
-
         params = item_data.get("params")
         template_id = item_data.get("id")
         return Item(
@@ -73,20 +68,15 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
             id=template_id,
         )
     else:
-
-
         geometry_data = item_data.get("geometry", {})
         geometry = Geometry(data=geometry_data)
-
 
         placement_data = item_data["placement"]
         center_xy = placement_data["center_xy_mm"]
         placement = Placement(center_xy_mm=(float(center_xy[0]), float(center_xy[1])))
 
-
         feature_data = item_data["feature"]
         feature = _parse_feature(feature_data)
-
 
         shape_id = item_data.get("shape_id")
 

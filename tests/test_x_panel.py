@@ -1,14 +1,13 @@
-
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from domains import Domain
 from generators import XPanelParams
 from generators.area.x_panel import x_panel_generator
-from domains import Domain
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_x_panel_parse():
@@ -89,8 +88,8 @@ def test_x_panel_uniform_bar_width():
 
     top_points = top_item.geometry.data["points"]
     bottom_points = bottom_item.geometry.data["points"]
-    top_cx, top_cy = top_item.placement.center_xy_mm
-    bottom_cx, bottom_cy = bottom_item.placement.center_xy_mm
+    _top_cx, top_cy = top_item.placement.center_xy_mm
+    _bottom_cx, bottom_cy = bottom_item.placement.center_xy_mm
 
     top_apex_y = min(p[1] + top_cy for p in top_points)
     bottom_apex_y = max(p[1] + bottom_cy for p in bottom_points)
@@ -155,14 +154,14 @@ def test_x_panel_params_validation():
     try:
         params = XPanelParams(bar_width_mm=-10, depth_mm=4.0)
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "bar_width_mm must be positive" in str(e)
 
     try:
         params = XPanelParams(bar_width_mm=10, depth_mm=0)
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth_mm must be positive" in str(e)
 

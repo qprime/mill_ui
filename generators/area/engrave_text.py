@@ -42,9 +42,7 @@ def _get_text_lines(
     return [((x1, -y1), (x2, -y2)) for (x1, y1), (x2, y2) in raw_lines]
 
 
-def _get_text_bounds(
-    lines: list[tuple[tuple[float, float], tuple[float, float]]]
-) -> tuple[float, float, float, float]:
+def _get_text_bounds(lines: list[tuple[tuple[float, float], tuple[float, float]]]) -> tuple[float, float, float, float]:
     if not lines:
         return (0.0, 0.0, 0.0, 0.0)
 
@@ -64,10 +62,7 @@ def _transform_lines(
     rotation_rad: float = 0.0,
 ) -> list[tuple[tuple[float, float], tuple[float, float]]]:
     if rotation_rad == 0.0:
-        return [
-            ((x1 + offset_x, y1 + offset_y), (x2 + offset_x, y2 + offset_y))
-            for (x1, y1), (x2, y2) in lines
-        ]
+        return [((x1 + offset_x, y1 + offset_y), (x2 + offset_x, y2 + offset_y)) for (x1, y1), (x2, y2) in lines]
 
     cos_r = math.cos(rotation_rad)
     sin_r = math.sin(rotation_rad)
@@ -174,6 +169,6 @@ def engrave_number_label(
 
 
 __all__ = [
-    "engrave_text_at_position",
     "engrave_number_label",
+    "engrave_text_at_position",
 ]

@@ -118,12 +118,12 @@ def validate_notches_no_overlap(notches: list[NotchSpec]) -> None:
 
 
 __all__ = [
-    "Point2D",
-    "PanelRole",
+    "DadoSpec",
     "Edge",
     "NotchSpec",
-    "DadoSpec",
+    "PanelRole",
     "PanelSpec",
+    "Point2D",
     "validate_notch_fits_edge",
     "validate_notches_no_overlap",
 ]

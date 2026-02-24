@@ -1,8 +1,6 @@
-import pytest
-
 from assembly.core import Interface, InterfaceType
-from assembly.panel import PanelSpec, Edge, NotchSpec
 from assembly.joinery import Butt, Finger
+from assembly.panel import NotchSpec, PanelSpec
 
 
 class TestButtJoineryStrategy:

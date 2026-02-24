@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -13,7 +13,7 @@ class Point2D:
         if not isinstance(self.x, (int, float)) or not isinstance(self.y, (int, float)):
             raise ValueError(f"Point2D coordinates must be numeric, got x={self.x!r}, y={self.y!r}")
         if self.x != self.x or self.y != self.y:
-            raise ValueError(f"Point2D coordinates must not be NaN")
+            raise ValueError("Point2D coordinates must not be NaN")
 
 
 @dataclass(frozen=True)
@@ -62,8 +62,13 @@ class Polyline:
             raise ValueError("Polyline must have at least one point")
 
     @classmethod
-    def from_coords(cls, coords: Sequence[tuple[float, float]], closed: bool = False,
-                    style_token: str = "default", id: str | None = None) -> Polyline:
+    def from_coords(
+        cls,
+        coords: Sequence[tuple[float, float]],
+        closed: bool = False,
+        style_token: str = "default",
+        id: str | None = None,
+    ) -> Polyline:
         points = tuple(Point2D(x, y) for x, y in coords)
         return cls(points=points, closed=closed, style_token=style_token, id=id)
 
@@ -113,12 +118,12 @@ Shape = Rect | Line | Polyline | Circle | Text | Path
 
 
 __all__ = [
-    "Point2D",
-    "Rect",
-    "Line",
-    "Polyline",
     "Circle",
-    "Text",
+    "Line",
     "Path",
+    "Point2D",
+    "Polyline",
+    "Rect",
     "Shape",
+    "Text",
 ]

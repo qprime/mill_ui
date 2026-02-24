@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/x_panel.py
+# hypothesis_version: 6.151.9
+
+[1.0, 'Polygon', 'XPanelGenerator', 'bottom', 'left', 'pocket', 'points', 'right', 'shape', 'top', 'x_panel', 'x_panel_generator']

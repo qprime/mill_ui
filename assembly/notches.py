@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import math
 
-from shapely.geometry import MultiPolygon, Polygon, box
-from shapely.ops import unary_union, orient
+from shapely.geometry import MultiPolygon, box
+from shapely.ops import orient, unary_union
 
 from assembly.panel import Edge, NotchSpec
 from domains.domain import Point2D
@@ -42,9 +42,7 @@ def notch_to_polyline(
 ) -> list[Point2D]:
     n_verts = len(polygon)
     if notch.edge_index < 0 or notch.edge_index >= n_verts:
-        raise IndexError(
-            f"edge_index {notch.edge_index} out of range for polygon with {n_verts} vertices"
-        )
+        raise IndexError(f"edge_index {notch.edge_index} out of range for polygon with {n_verts} vertices")
 
     p0 = polygon[notch.edge_index]
     p1 = polygon[(notch.edge_index + 1) % n_verts]
@@ -150,7 +148,6 @@ def build_notched_polygon(
         if u_len <= 0.0 or depth <= 0.0:
             continue
 
-
         if edge_idx == 0:
             x_min = cx - half_w + u_start
             x_max = x_min + u_len
@@ -171,7 +168,6 @@ def build_notched_polygon(
             y_max = y_min + u_len
             x_min = cx - half_w
             x_max = x_min + depth
-
 
         x_min = max(cx - half_w, x_min)
         x_max = min(cx + half_w, x_max)
@@ -197,7 +193,7 @@ def build_notched_polygon(
     if isinstance(result, MultiPolygon):
         result = max(result.geoms, key=lambda g: g.area)
 
-    if not hasattr(result, 'exterior'):
+    if not hasattr(result, "exterior"):
         return tuple(base.exterior.coords[:-1])
 
     return tuple(result.exterior.coords[:-1])
@@ -215,10 +211,7 @@ def finger_joints_to_notches(
     if (width_mm is None) == (count is None):
         raise ValueError("Specify exactly one of width_mm or count")
 
-    if count is not None:
-        n = count
-    else:
-        n = round(edge_length / width_mm)
+    n = count if count is not None else round(edge_length / width_mm)
 
     n = max(3, n)
     if n % 2 == 0:
@@ -230,8 +223,6 @@ def finger_joints_to_notches(
     for i in range(n):
         is_notch = (i % 2 == 1) == (phase == 0)
         if is_notch:
-
-
             boundary_expansion = clearance_mm / 4
             u_start = i * finger_width - boundary_expansion
             u_end = (i + 1) * finger_width + boundary_expansion
@@ -251,9 +242,9 @@ def finger_joints_to_notches(
 
 
 __all__ = [
-    "validate_notch_fits_edge",
-    "validate_notches_no_overlap",
-    "notch_to_polyline",
     "build_notched_polygon",
     "finger_joints_to_notches",
+    "notch_to_polyline",
+    "validate_notch_fits_edge",
+    "validate_notches_no_overlap",
 ]

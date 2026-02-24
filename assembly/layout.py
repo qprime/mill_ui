@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, replace
-from typing import Iterator
 
 from assembly.panel import PanelSpec, Point2D
 
@@ -29,8 +29,10 @@ class PlacedPanel:
 
 def layout_panels(
     panels: list[PanelSpec],
-    config: LayoutConfig = LayoutConfig(),
+    config: LayoutConfig | None = None,
 ) -> list[PlacedPanel]:
+    if config is None:
+        config = LayoutConfig()
     sorted_panels = sorted(panels, key=lambda p: (-p.height_mm, -p.width_mm))
 
     placed: list[PlacedPanel] = []
@@ -67,7 +69,7 @@ def layout_panels(
 
 def panels_to_layout_ast(
     panels: list[PanelSpec],
-    config: LayoutConfig = LayoutConfig(),
+    config: LayoutConfig | None = None,
 ) -> Iterator[tuple[PanelSpec, Point2D]]:
     placed = layout_panels(panels, config)
     for p in placed:

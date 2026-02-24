@@ -1,19 +1,15 @@
-
-
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, TypeAlias
+from typing import Any
 
-
-MetricValue: TypeAlias = int | float | str | bool | list | dict | None
+type MetricValue = int | float | str | bool | list | dict | None
 
 
 class Verdict(Enum):
-
     PASS = "pass"
     WARN = "warn"
     FAIL = "fail"
@@ -31,7 +27,6 @@ class Verdict(Enum):
 
 @dataclass(frozen=True)
 class InvariantResult:
-
     id: str
     category: str
     artifact: str
@@ -64,7 +59,6 @@ class InvariantResult:
 
 @dataclass(frozen=True)
 class AssertionResult:
-
     id: str
     source: str
     intent: str
@@ -91,7 +85,6 @@ class AssertionResult:
 
 @dataclass(frozen=True)
 class RegressionResult:
-
     metric_path: str
     golden_value: MetricValue
     current_value: MetricValue
@@ -118,7 +111,6 @@ class RegressionResult:
 
 @dataclass
 class InvariantSummary:
-
     total: int = 0
     passed: int = 0
     warned: int = 0
@@ -154,7 +146,6 @@ class InvariantSummary:
 
 @dataclass
 class AssertionSummary:
-
     total: int = 0
     passed: int = 0
     failed: int = 0
@@ -182,7 +173,6 @@ class AssertionSummary:
 
 @dataclass
 class RegressionSummary:
-
     compared: bool = False
     golden_file: str | None = None
     total: int = 0
@@ -217,27 +207,23 @@ class RegressionSummary:
 
 @dataclass
 class CAMValidationResult:
-
     version: str = "1.0.0"
     timestamp: str = ""
     input_file: str = ""
     verdict: Verdict = Verdict.PASS
 
-
     metrics: dict[str, dict[str, Any]] = field(default_factory=dict)
-
 
     invariants: InvariantSummary = field(default_factory=InvariantSummary)
     assertions: AssertionSummary = field(default_factory=AssertionSummary)
     regressions: RegressionSummary = field(default_factory=RegressionSummary)
-
 
     execution_time_ms: float = 0.0
     verdict_reason: str = ""
 
     def __post_init__(self) -> None:
         if not self.timestamp:
-            self.timestamp = datetime.now(timezone.utc).isoformat()
+            self.timestamp = datetime.now(UTC).isoformat()
 
     def compute_verdict(self) -> Verdict:
         verdicts = [
@@ -307,7 +293,6 @@ class CAMValidationResult:
 
 @dataclass
 class ValidationIssue:
-
     message: str
     region_id: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -315,7 +300,6 @@ class ValidationIssue:
 
 @dataclass
 class ValidationResult:
-
     errors: list[ValidationIssue] = field(default_factory=list)
     warnings: list[ValidationIssue] = field(default_factory=list)
     suggestions: list[ValidationIssue] = field(default_factory=list)
@@ -364,13 +348,9 @@ class ValidationResult:
         artifact: str = "ir",
         description: str = "",
     ) -> InvariantResult:
-        failures = tuple(
-            f"{e.message}" + (f" (region: {e.region_id})" if e.region_id else "")
-            for e in self.errors
-        )
+        failures = tuple(f"{e.message}" + (f" (region: {e.region_id})" if e.region_id else "") for e in self.errors)
         failures += tuple(
-            f"[WARN] {w.message}" + (f" (region: {w.region_id})" if w.region_id else "")
-            for w in self.warnings
+            f"[WARN] {w.message}" + (f" (region: {w.region_id})" if w.region_id else "") for w in self.warnings
         )
 
         checked = len(self.errors) + len(self.warnings) + len(self.suggestions)
@@ -408,8 +388,10 @@ def normalize_metric_dict(d: dict[str, Any], precision: int = 4) -> dict[str, An
             result[k] = normalize_metric_dict(v, precision)
         elif isinstance(v, list):
             result[k] = [
-                round_metric(x, precision) if isinstance(x, float)
-                else normalize_metric_dict(x, precision) if isinstance(x, dict)
+                round_metric(x, precision)
+                if isinstance(x, float)
+                else normalize_metric_dict(x, precision)
+                if isinstance(x, dict)
                 else x
                 for x in v
             ]

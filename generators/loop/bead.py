@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -27,9 +26,7 @@ def _offset_boundary(
     from shapely.geometry import Polygon
     from shapely.ops import orient
 
-
     poly = Polygon(boundary)
-
 
     buffer_distance = -offset if is_outer else offset
 
@@ -38,14 +35,11 @@ def _offset_boundary(
     if result.is_empty or result.area < 0.01:
         return None
 
-
     result = orient(result, sign=1.0)
-
 
     if result.geom_type == "Polygon":
         coords = list(result.exterior.coords)[:-1]
         return tuple((float(x), float(y)) for x, y in coords)
-
 
     if result.geom_type == "MultiPolygon":
         largest = max(result.geoms, key=lambda g: g.area)
@@ -65,7 +59,6 @@ def bead_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,
@@ -73,7 +66,6 @@ def bead_generator(
         generator_name="BeadGenerator",
     ):
         return []
-
 
     try:
         loops = extract_loops(domain, params.loop_selection, "BeadGenerator")
@@ -85,15 +77,12 @@ def bead_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(
-            f"BeadGenerator: No loops match selection '{params.loop_selection}'"
-        )
+        raise ValueError(f"BeadGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 
     for loop_idx, boundary in loops:
-        is_outer = (loop_idx == 0)
-
+        is_outer = loop_idx == 0
 
         offset_boundary = _offset_boundary(
             boundary,
@@ -105,8 +94,7 @@ def bead_generator(
             if allow_empty:
                 continue
             raise ValueError(
-                f"BeadGenerator: offset {params.offset_mm}mm collapses loop {loop_idx}. "
-                f"Use a smaller offset value."
+                f"BeadGenerator: offset {params.offset_mm}mm collapses loop {loop_idx}. Use a smaller offset value."
             )
 
         cx = sum(p[0] for p in offset_boundary) / len(offset_boundary)
@@ -118,7 +106,6 @@ def bead_generator(
             "points": polygon_points,
             "width_mm": params.width_mm,
         }
-
 
         item = Item(
             kind="shape",
@@ -139,10 +126,7 @@ def bead_generator(
         items.append(item)
 
     if not items and not allow_empty:
-        raise ValueError(
-            f"BeadGenerator: Could not generate any bead items. "
-            f"Check offset parameter and domain size."
-        )
+        raise ValueError("BeadGenerator: Could not generate any bead items. Check offset parameter and domain size.")
 
     return items
 

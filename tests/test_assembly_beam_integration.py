@@ -1,9 +1,9 @@
 import pytest
 
-from assembly.core import Assembly, Interface, InterfaceType, MemberSpec
-from assembly.panel import PanelSpec, PanelRole
-from assembly.beam import BeamSpec, BeamRole
-from assembly.joinery import Butt, Finger, Captured
+from assembly.beam import BeamRole, BeamSpec
+from assembly.core import Assembly, Interface, InterfaceType
+from assembly.joinery import Butt, Captured
+from assembly.panel import PanelRole, PanelSpec
 
 
 class TestAssemblyWithBeams:
@@ -37,9 +37,7 @@ class TestAssemblyWithBeams:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"post": beam, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Butt()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Butt()),),
         )
         assembly.validate()
 
@@ -47,9 +45,7 @@ class TestAssemblyWithBeams:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "shelf", "right", Butt()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "shelf", "right", Butt()),),
         )
         with pytest.raises(ValueError, match="Unknown member"):
             assembly.validate()
@@ -100,9 +96,7 @@ class TestBeamToBeamInterface:
         rail = BeamSpec(name="rail", length_mm=400, width_mm=50, thickness_mm=19, layers=3)
         assembly = Assembly(
             members={"post": post, "rail": rail},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "rail", "right", Butt()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "rail", "right", Butt()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()
@@ -115,9 +109,7 @@ class TestBeamToPanelInterface:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"post": post, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Butt()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Butt()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()
@@ -128,9 +120,7 @@ class TestBeamToPanelInterface:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"post": post, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Captured()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "post", "left", "shelf", "right", Captured()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()
@@ -147,9 +137,7 @@ class TestOuterLayerSelection:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"beam": beam, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()
@@ -165,9 +153,7 @@ class TestOuterLayerSelection:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"beam": beam, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()
@@ -185,9 +171,7 @@ class TestOuterLayerSelection:
         panel = PanelSpec(name="shelf", width_mm=400, height_mm=300, thickness_mm=19)
         assembly = Assembly(
             members={"beam": beam, "shelf": panel},
-            interfaces=(
-                Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),
-            ),
+            interfaces=(Interface(InterfaceType.SIDE_TO_SIDE, "beam", "left", "shelf", "right", Captured()),),
             sheet_size=1000,
         )
         resolved = assembly.resolve()

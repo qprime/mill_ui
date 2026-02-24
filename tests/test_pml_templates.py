@@ -1,23 +1,22 @@
-
 import pytest
-from pathlib import Path
 
-from layout_ast.compositional import TemplateDef, Rect, Frame, PocketGen, ProfileGen
+from layout_ast.compositional import TemplateDef
+from pml.yaml_parser import (
+    PMLParseError as ParseError,
+)
 from pml.yaml_parser import (
     parse_template_yaml,
     substitute_params,
-    PMLParseError as ParseError,
 )
 from templates.loader import (
+    clear_template_cache,
+    expand_template,
     find_template_file,
     load_pml_template,
-    expand_template,
-    clear_template_cache,
 )
 
 
 class TestParseTemplateDef:
-
     def test_parse_simple_template(self):
         text = """
 Template:
@@ -90,7 +89,6 @@ children:
 
 
 class TestParameterSubstitution:
-
     def test_substitute_single_param(self):
         text = "width: ${width}"
         result = substitute_params(text, {"width": 50.0})
@@ -124,7 +122,6 @@ class TestParameterSubstitution:
 
 
 class TestStringParameters:
-
     def test_parse_template_with_string_param(self):
         text = """
 Template:
@@ -157,7 +154,6 @@ children:
 
 
 class TestTemplateLoader:
-
     def setup_method(self):
         clear_template_cache()
 
@@ -177,7 +173,7 @@ class TestTemplateLoader:
         assert path is None
 
     def test_load_pml_template_shaker(self):
-        template_def, raw_text = load_pml_template("shaker")
+        template_def, _raw_text = load_pml_template("shaker")
         assert template_def.name == "shaker"
         assert "stile_w" in template_def.params
         assert "rail_h" in template_def.params
@@ -192,7 +188,6 @@ class TestTemplateLoader:
 
 
 class TestExpandTemplate:
-
     def setup_method(self):
         clear_template_cache()
 
@@ -222,7 +217,7 @@ class TestExpandTemplate:
         )
         assert len(items) >= 2
 
-        pocket_item = [i for i in items if i.feature and i.feature.type == "pocket"][0]
+        pocket_item = next(i for i in items if i.feature and i.feature.type == "pocket")
         assert pocket_item.feature.depth_mm == 10.0
 
     def test_expand_template_nonexistent_raises(self):
@@ -238,7 +233,6 @@ class TestExpandTemplate:
 
 
 class TestShakerTemplate:
-
     def setup_method(self):
         clear_template_cache()
 
@@ -264,7 +258,7 @@ class TestShakerTemplate:
             sheet_thickness=19.0,
         )
 
-        profile_item = [i for i in items if i.feature and i.feature.type == "profile"][0]
+        profile_item = next(i for i in items if i.feature and i.feature.type == "profile")
         cx, cy = profile_item.placement.center_xy_mm
         assert cx == pytest.approx(200.0, rel=0.01)
         assert cy == pytest.approx(300.0, rel=0.01)
@@ -279,7 +273,7 @@ class TestShakerTemplate:
             sheet_thickness=19.0,
         )
 
-        pocket_item = [i for i in items if i.feature and i.feature.type == "pocket"][0]
+        pocket_item = next(i for i in items if i.feature and i.feature.type == "pocket")
         pocket_w = pocket_item.geometry.data.get("w_mm")
         pocket_h = pocket_item.geometry.data.get("h_mm")
 

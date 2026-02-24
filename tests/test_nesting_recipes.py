@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from pml.yaml_parser import parse_nest_yaml
-from pml.nest_parser import nest_job_to_api_params
 from nesting import nest_and_generate
+from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_parser import parse_nest_yaml
 
 
 def discover_nest_files() -> list[Path]:
@@ -58,7 +58,7 @@ NEST_FILES = discover_nest_files()
 @pytest.mark.skipif(not NEST_FILES, reason="No .nest.yml files found in docs/recipes/")
 @pytest.mark.parametrize("nest_path", NEST_FILES, ids=lambda p: p.stem)
 def test_nest_file(nest_path: Path):
-    success, message, metrics = _run_nest_file(nest_path)
+    success, message, _metrics = _run_nest_file(nest_path)
     if not success:
         pytest.fail(message)
 
@@ -86,7 +86,9 @@ def run_nesting_recipe_tests():
         success, message, metrics = _run_nest_file(nest_path)
 
         if success:
-            print(f"  ✓ PASS - {metrics['algorithm']}: {metrics['total_parts']} parts → {metrics['total_sheets']} sheets ({metrics['utilization']} util, {metrics['time_ms']}ms)")
+            print(
+                f"  ✓ PASS - {metrics['algorithm']}: {metrics['total_parts']} parts → {metrics['total_sheets']} sheets ({metrics['utilization']} util, {metrics['time_ms']}ms)"
+            )
             passed += 1
         else:
             print(f"  ✗ FAIL - {message}")
@@ -100,5 +102,6 @@ def run_nesting_recipe_tests():
 
 if __name__ == "__main__":
     import sys
+
     success = run_nesting_recipe_tests()
     sys.exit(0 if success else 1)

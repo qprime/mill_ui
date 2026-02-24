@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
+from generators.area.engrave_text import engrave_number_label
 from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
 from generators.params.area import MeasurementGridParams
-from generators.area.engrave_text import engrave_number_label
 from generators.utils import create_line_item, get_local_bounds, is_major_tick
 from layout_ast.layout import Item
 
@@ -130,7 +130,7 @@ def measurement_grid_generator(
             )
 
         if is_major:
-            value = int(round(x - x_origin))
+            value = round(x - x_origin)
             skip_corner = first_x_major and value == 0
             if value >= 0 and not skip_corner and should_label(value):
                 add_label((x, local_y_min - label_offset), value, "horizontal")
@@ -159,7 +159,7 @@ def measurement_grid_generator(
             )
 
         if is_major:
-            value = int(round(y - y_origin))
+            value = round(y - y_origin)
             skip_corner = first_y_major and value == 0
             if value >= 0 and not skip_corner and should_label(value):
                 add_label((local_x_min - label_offset, y), value, "vertical", "center", "bottom")

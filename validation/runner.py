@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 import time
@@ -8,51 +6,39 @@ from pathlib import Path
 from typing import Any
 
 from layout_ast.layout import LayoutAST
-
+from validation.assertions import check_assertions, derive_assertions
 from validation.core import (
     CAMValidationResult,
-    Verdict,
-    InvariantSummary,
-    AssertionSummary,
 )
-from validation.metrics import (
-    extract_svg_metrics,
-    extract_gcode_metrics,
-    SVGMetrics,
-    GCodeMetrics,
-)
-from validation.metrics.svg_metrics import extract_svg_metrics_from_file
-from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
 from validation.invariants import (
-    check_svg_invariants,
     check_gcode_invariants,
     check_gcode_invariants_from_content,
+    check_svg_invariants,
 )
-from validation.assertions import derive_assertions, check_assertions
-from validation.regression import compare_metrics, ComparisonConfig, GoldenStore
+from validation.metrics import (
+    GCodeMetrics,
+    SVGMetrics,
+    extract_svg_metrics,
+)
+from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
+from validation.metrics.svg_metrics import extract_svg_metrics_from_file
+from validation.regression import ComparisonConfig, compare_metrics
 
 
 @dataclass
 class ValidationInput:
-
-
     source_file: str | Path | None = None
 
-
     ast: LayoutAST | None = None
-
 
     svg_path: str | Path | None = None
     gcode_paths: list[str | Path] = field(default_factory=list)
 
-
     svg_content: str | None = None
     gcode_content: list[str] = field(default_factory=list)
 
-
     golden_metrics: dict[str, Any] | None = None
     golden_file: str | None = None
-
 
     sheet_width_mm: float | None = None
     sheet_height_mm: float | None = None
@@ -61,16 +47,12 @@ class ValidationInput:
 
 @dataclass
 class ValidationOptions:
-
-
     extract_metrics: bool = True
     check_invariants: bool = True
     check_assertions: bool = True
     check_regressions: bool = True
 
-
     svg_expected_layers: list[str] | None = None
-
 
     include_all_results: bool = True
 
@@ -88,21 +70,17 @@ def validate(
         input_file=str(inputs.source_file) if inputs.source_file else "",
     )
 
-
     svg_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     if options.extract_metrics:
         svg_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
 
-
         if svg_metrics:
             result.metrics.update(svg_metrics.to_dict())
         if gcode_metrics_list:
-
             merged_gcode = _merge_gcode_metrics(gcode_metrics_list)
             result.metrics["gcode"] = merged_gcode
-
 
     if options.check_invariants:
         _run_invariant_checks(
@@ -113,7 +91,6 @@ def validate(
             options,
         )
 
-
     if options.check_assertions and inputs.ast is not None:
         _run_assertion_checks(
             result,
@@ -122,7 +99,6 @@ def validate(
             gcode_metrics_list,
         )
 
-
     if options.check_regressions and inputs.golden_metrics is not None:
         _run_regression_checks(
             result,
@@ -130,7 +106,6 @@ def validate(
             inputs.golden_file,
             inputs.comparison_config,
         )
-
 
     result.execution_time_ms = (time.perf_counter() - start_time) * 1000
     result.compute_verdict()
@@ -149,24 +124,20 @@ def validate_recipe(
     recipe_dir = Path(recipe_dir)
     output_dir = recipe_dir / "output"
 
-
     source_file = None
     for candidate in ["example.pml.yml", "source.pml.yml"]:
         if (recipe_dir / candidate).exists():
             source_file = recipe_dir / candidate
             break
 
-
     svg_path = None
     gcode_paths: list[Path] = []
 
     if output_dir.exists():
-
         for svg_file in output_dir.glob("*.svg"):
             if not svg_file.name.startswith("."):
                 svg_path = svg_file
                 break
-
 
         for nc_file in sorted(output_dir.glob("*.nc")):
             if not nc_file.name.startswith("."):
@@ -199,12 +170,10 @@ def _extract_all_metrics(
     svg_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
-
     if inputs.svg_content:
         svg_metrics = extract_svg_metrics(inputs.svg_content)
     elif inputs.svg_path and Path(inputs.svg_path).exists():
         svg_metrics = extract_svg_metrics_from_file(inputs.svg_path)
-
 
     for gcode_path in inputs.gcode_paths:
         if Path(gcode_path).exists():
@@ -212,6 +181,7 @@ def _extract_all_metrics(
 
     for gcode_content in inputs.gcode_content:
         from validation.metrics.gcode_metrics import extract_gcode_metrics_from_content
+
         gcode_metrics_list.append(extract_gcode_metrics_from_content(gcode_content))
 
     return svg_metrics, gcode_metrics_list
@@ -224,26 +194,34 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
     if len(gcode_list) == 1:
         return gcode_list[0].to_dict().get("gcode", {})
 
-
     merged = gcode_list[0].to_dict().get("gcode", {})
 
     for gcode in gcode_list[1:]:
         other = gcode.to_dict().get("gcode", {})
 
-
         if "summary" in merged and "summary" in other:
-            for key in ["total_lines", "comment_lines", "motion_lines",
-                        "tool_change_lines", "spindle_lines", "feed_lines"]:
+            for key in [
+                "total_lines",
+                "comment_lines",
+                "motion_lines",
+                "tool_change_lines",
+                "spindle_lines",
+                "feed_lines",
+            ]:
                 if key in merged["summary"] and key in other["summary"]:
                     merged["summary"][key] += other["summary"][key]
 
-
         if "motion" in merged and "motion" in other:
-            for key in ["g0_count", "g1_count", "g2_count", "g3_count",
-                        "total_rapid_distance_mm", "total_feed_distance_mm"]:
+            for key in [
+                "g0_count",
+                "g1_count",
+                "g2_count",
+                "g3_count",
+                "total_rapid_distance_mm",
+                "total_feed_distance_mm",
+            ]:
                 if key in merged["motion"] and key in other["motion"]:
                     merged["motion"][key] += other["motion"][key]
-
 
         if "z_profile" in merged and "z_profile" in other:
             zp_merged = merged["z_profile"]
@@ -259,10 +237,8 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                 zp_merged["depth_count"] = len(depths)
             if "max_single_plunge_mm" in zp_merged and "max_single_plunge_mm" in zp_other:
                 zp_merged["max_single_plunge_mm"] = max(
-                    zp_merged["max_single_plunge_mm"],
-                    zp_other["max_single_plunge_mm"]
+                    zp_merged["max_single_plunge_mm"], zp_other["max_single_plunge_mm"]
                 )
-
 
         if "xy_bounds" in merged and "xy_bounds" in other:
             xy_merged = merged["xy_bounds"]
@@ -275,7 +251,6 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                 xy_merged["y_min"] = min(xy_merged["y_min"], xy_other["y_min"])
             if "y_max" in xy_merged and "y_max" in xy_other:
                 xy_merged["y_max"] = max(xy_merged["y_max"], xy_other["y_max"])
-
 
         if "tools" in merged and "tools" in other:
             tools_merged = merged["tools"]
@@ -291,31 +266,22 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                     set(tools_merged["spindle_speeds"]) | set(tools_other["spindle_speeds"])
                 )
 
-
         if "feeds" in merged and "feeds" in other:
             feeds_merged = merged["feeds"]
             feeds_other = other["feeds"]
             if "min_feed_rate" in feeds_merged and "min_feed_rate" in feeds_other:
-                feeds_merged["min_feed_rate"] = min(
-                    feeds_merged["min_feed_rate"],
-                    feeds_other["min_feed_rate"]
-                )
+                feeds_merged["min_feed_rate"] = min(feeds_merged["min_feed_rate"], feeds_other["min_feed_rate"])
             if "max_feed_rate" in feeds_merged and "max_feed_rate" in feeds_other:
-                feeds_merged["max_feed_rate"] = max(
-                    feeds_merged["max_feed_rate"],
-                    feeds_other["max_feed_rate"]
-                )
+                feeds_merged["max_feed_rate"] = max(feeds_merged["max_feed_rate"], feeds_other["max_feed_rate"])
             if "feed_rates_used" in feeds_merged and "feed_rates_used" in feeds_other:
                 feeds_merged["feed_rates_used"] = sorted(
                     set(feeds_merged["feed_rates_used"]) | set(feeds_other["feed_rates_used"])
                 )
 
-
         if "time_estimate" in merged and "time_estimate" in other:
             for key in ["rapid_time_s", "feed_time_s", "total_time_s"]:
                 if key in merged["time_estimate"] and key in other["time_estimate"]:
                     merged["time_estimate"][key] += other["time_estimate"][key]
-
 
         if "tabs" in merged and "tabs" in other:
             tabs_merged = merged["tabs"]
@@ -326,12 +292,10 @@ def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
                 tabs_merged["tab_heights_mm"] = tabs_merged["tab_heights_mm"] + tabs_other["tab_heights_mm"]
             if "max_cutting_depth_mm" in tabs_merged and "max_cutting_depth_mm" in tabs_other:
                 tabs_merged["max_cutting_depth_mm"] = min(
-                    tabs_merged["max_cutting_depth_mm"],
-                    tabs_other["max_cutting_depth_mm"]
+                    tabs_merged["max_cutting_depth_mm"], tabs_other["max_cutting_depth_mm"]
                 )
         elif "tabs" in other:
             merged["tabs"] = other["tabs"]
-
 
     merged["file_count"] = len(gcode_list)
 
@@ -361,7 +325,6 @@ def _run_invariant_checks(
             for inv_result in svg_results:
                 result.invariants.add(inv_result)
 
-
     gcode_kwargs: dict[str, Any] = {}
     if inputs.sheet_width_mm is not None:
         gcode_kwargs["sheet_width_mm"] = inputs.sheet_width_mm
@@ -373,7 +336,6 @@ def _run_invariant_checks(
             gcode_results = check_gcode_invariants(gcode_path, **gcode_kwargs)
             for inv_result in gcode_results:
                 result.invariants.add(inv_result)
-
 
     for gcode_content in inputs.gcode_content:
         gcode_results = check_gcode_invariants_from_content(gcode_content, **gcode_kwargs)
@@ -390,15 +352,12 @@ def _run_assertion_checks(
 
     assertions = derive_assertions(ast)
 
-
     svg_dict = svg_metrics.to_dict() if svg_metrics else None
-
 
     gcode_dict = None
     if gcode_metrics_list:
         merged = _merge_gcode_metrics(gcode_metrics_list)
         gcode_dict = {"gcode": merged}
-
 
     assertion_results = check_assertions(
         assertions,
@@ -422,7 +381,6 @@ def _run_regression_checks(
         config=config,
         golden_file=golden_file,
     )
-
 
     result.regressions.compared = summary.compared
     result.regressions.golden_file = summary.golden_file

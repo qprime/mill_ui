@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
+from generators.area.engrave_text import engrave_number_label
 from generators.core import (
     GeneratorResult,
     generate_shape_id,
     validate_domain_for_generation,
 )
 from generators.params.loop import MeasurementEdgeParams
-from generators.area.engrave_text import engrave_number_label
 from generators.utils import create_line_item, get_local_bounds, is_major_tick
 from layout_ast.layout import Item
 
@@ -138,7 +138,7 @@ def measurement_edge_generator(
                     )
 
             if is_major:
-                value = int(round(x - x_origin))
+                value = round(x - x_origin)
                 skip_label = first_major and has_left and value == 0
                 if value >= 0 and not skip_label and should_label(value):
                     if "bottom" in edges_set:
@@ -172,7 +172,7 @@ def measurement_edge_generator(
                     )
 
             if is_major:
-                value = int(round(y - y_origin))
+                value = round(y - y_origin)
                 skip_label = first_major and has_bottom and value == 0
                 if value >= 0 and not skip_label and should_label(value):
                     if "left" in edges_set:

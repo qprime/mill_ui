@@ -1,8 +1,6 @@
-import pytest
-
-from assembly.core import Assembly, InterfaceType
-from assembly.panel import PanelSpec, PanelRole, Edge
-from assembly.joinery import Butt, Finger, Captured, HalfLap
+from assembly.core import InterfaceType
+from assembly.joinery import Butt, Captured, Finger, HalfLap
+from assembly.panel import Edge, PanelRole, PanelSpec
 from assembly.primitives import box, carcass, cubby
 
 
@@ -226,10 +224,7 @@ class TestCarcassPrimitive:
             thickness=18,
             fixed_shelves=2,
         )
-        shelf_interfaces = [
-            i for i in assembly.interfaces
-            if "shelf" in i.panel_a or "shelf" in i.panel_b
-        ]
+        shelf_interfaces = [i for i in assembly.interfaces if "shelf" in i.panel_a or "shelf" in i.panel_b]
         assert all(i.type == InterfaceType.INTERNAL for i in shelf_interfaces)
 
     def test_shelf_joinery_default_is_captured(self):
@@ -240,14 +235,12 @@ class TestCarcassPrimitive:
             thickness=18,
             fixed_shelves=2,
         )
-        shelf_interfaces = [
-            i for i in assembly.interfaces
-            if "shelf" in i.panel_a or "shelf" in i.panel_b
-        ]
+        shelf_interfaces = [i for i in assembly.interfaces if "shelf" in i.panel_a or "shelf" in i.panel_b]
         assert all(isinstance(i.joinery, Captured) for i in shelf_interfaces)
 
     def test_perimeter_joinery_sets_top_and_bottom_defaults(self):
         from assembly.joinery import Finger
+
         assembly = carcass(
             width=600,
             length=400,
@@ -262,6 +255,7 @@ class TestCarcassPrimitive:
 
     def test_explicit_top_overrides_perimeter_joinery(self):
         from assembly.joinery import Finger
+
         assembly = carcass(
             width=600,
             length=400,
@@ -282,11 +276,13 @@ class TestCarcassPrimitive:
             back=Captured(),
         )
         back_top_interfaces = [
-            i for i in assembly.interfaces
+            i
+            for i in assembly.interfaces
             if i.type == InterfaceType.TOP and ("back" in i.panel_a or "back" in i.panel_b)
         ]
         back_bottom_interfaces = [
-            i for i in assembly.interfaces
+            i
+            for i in assembly.interfaces
             if i.type == InterfaceType.BOTTOM and ("back" in i.panel_a or "back" in i.panel_b)
         ]
         assert len(back_top_interfaces) == 1
@@ -473,10 +469,7 @@ class TestCubbyPrimitive:
             cols=3,
             perimeter_joinery=Finger(width_mm=15),
         )
-        perimeter_interfaces = [
-            i for i in assembly.interfaces
-            if i.type in (InterfaceType.TOP, InterfaceType.BOTTOM)
-        ]
+        perimeter_interfaces = [i for i in assembly.interfaces if i.type in (InterfaceType.TOP, InterfaceType.BOTTOM)]
         assert len(perimeter_interfaces) == 4
         assert all(isinstance(i.joinery, Finger) for i in perimeter_interfaces)
 
@@ -491,8 +484,7 @@ class TestCubbyPrimitive:
             internal_joinery=HalfLap(),
         )
         half_lap_interfaces = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+            i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == 1
 
@@ -506,8 +498,7 @@ class TestCubbyPrimitive:
             cols=3,
         )
         half_lap_interfaces = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+            i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == (3 - 1) * (3 - 1)
 
@@ -592,6 +583,7 @@ class TestPanelSpec:
     def test_with_notches_returns_new_panel(self):
         panel = PanelSpec("test", width_mm=100, height_mm=50, thickness_mm=6)
         from assembly.panel import NotchSpec
+
         notch = NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6)
         new_panel = panel.with_notches((notch,))
         assert len(new_panel.notches) == 1
@@ -600,6 +592,7 @@ class TestPanelSpec:
     def test_with_dados_returns_new_panel(self):
         panel = PanelSpec("test", width_mm=100, height_mm=50, thickness_mm=6)
         from assembly.panel import DadoSpec
+
         dado = DadoSpec(position_from_edge_mm=10, width_mm=6, depth_mm=3, edge="bottom")
         new_panel = panel.with_dados((dado,))
         assert len(new_panel.dados) == 1

@@ -1,20 +1,19 @@
-
 from __future__ import annotations
 
 import sys
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
-from resolution.layout_resolver import resolve_layout
 from layout_ast.compositional import (
-    ProfileGen,
-    PocketGen,
-    RaisedPanelGen,
     ChamferGen,
-    WaveGen,
+    PocketGen,
+    ProfileGen,
+    RaisedPanelGen,
+    SplitGrid,
     SplitHorizontal,
     SplitVertical,
-    SplitGrid,
+    WaveGen,
 )
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_parse_profile_gen_outside_through():
@@ -344,8 +343,7 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    pocket_items = [i for i in ast.items
-                    if i.shape_id and i.shape_id.startswith("generated_pocket")]
+    pocket_items = [i for i in ast.items if i.shape_id and i.shape_id.startswith("generated_pocket")]
     assert len(pocket_items) == 1
 
     pocket_item = pocket_items[0]
@@ -375,10 +373,8 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    border_items = [i for i in ast.items
-                    if i.shape_id and "_border" in i.shape_id]
-    field_items = [i for i in ast.items
-                   if i.shape_id and "_field" in i.shape_id]
+    border_items = [i for i in ast.items if i.shape_id and "_border" in i.shape_id]
+    field_items = [i for i in ast.items if i.shape_id and "_field" in i.shape_id]
 
     assert len(border_items) == 1, f"Expected 1 border item, got {len(border_items)}"
     assert len(field_items) == 1, f"Expected 1 field item, got {len(field_items)}"
@@ -416,10 +412,8 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    border_items = [i for i in ast.items
-                    if i.shape_id and "_border" in i.shape_id]
-    field_items = [i for i in ast.items
-                   if i.shape_id and "_field" in i.shape_id]
+    border_items = [i for i in ast.items if i.shape_id and "_border" in i.shape_id]
+    field_items = [i for i in ast.items if i.shape_id and "_field" in i.shape_id]
 
     assert len(border_items) == 4, f"Expected 4 border items, got {len(border_items)}"
     assert len(field_items) == 4, f"Expected 4 field items, got {len(field_items)}"
@@ -449,8 +443,7 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    wave_items = [i for i in ast.items
-                  if i.shape_id and "wave" in i.shape_id]
+    wave_items = [i for i in ast.items if i.shape_id and "wave" in i.shape_id]
     assert len(wave_items) >= 1, f"Expected wave items, got {len(wave_items)}"
 
     for item in wave_items:
@@ -525,8 +518,7 @@ children:
     ast = resolve_layout(comp_ast)
 
     profile_items = [i for i in ast.items if i.feature and i.feature.type == "profile"]
-    raised_items = [i for i in ast.items
-                    if i.shape_id and ("_border" in i.shape_id or "_field" in i.shape_id)]
+    raised_items = [i for i in ast.items if i.shape_id and ("_border" in i.shape_id or "_field" in i.shape_id)]
 
     assert len(profile_items) >= 1, "Should have at least one profile"
     assert len(raised_items) == 8, f"Should have 8 raised panel items (4 borders + 4 fields), got {len(raised_items)}"
@@ -588,7 +580,7 @@ children:
         parse_pml_yaml(pml)
         print("  FAIL: Expected PMLParseError")
         return False
-    except PMLParseError as e:
+    except PMLParseError:
         pass
     print("  PASS")
     return True
@@ -628,6 +620,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

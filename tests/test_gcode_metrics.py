@@ -21,13 +21,10 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from validation.metrics.gcode_metrics import (
-    GCodeMetrics,
+    DEFAULT_RAPID_RATE_MM_MIN,
     GCodeConfig,
     extract_gcode_metrics,
-    DEFAULT_RAPID_RATE_MM_MIN,
 )
-from validation.core import round_metric
-
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -99,8 +96,9 @@ def test_extract_gcode_metrics_pocket():
     metrics = extract_gcode_metrics(nc_path)
 
     # Pocket operations should have multiple Z depths
-    assert len(metrics.z_profile.unique_cutting_depths) > 0, \
+    assert len(metrics.z_profile.unique_cutting_depths) > 0, (
         f"Cutting depths: {metrics.z_profile.unique_cutting_depths}"
+    )
 
     # Should have feed rates
     assert len(metrics.feeds.feed_rates_used) > 0, f"Feed rates: {metrics.feeds.feed_rates_used}"
@@ -229,8 +227,7 @@ M2
 
         # Feed distance includes the plunge Z move (5mm + 1mm = 6mm) plus arcs
         # Allow tolerance for rounding
-        assert actual_feed_distance > expected_arc_distance, \
-            f"Feed distance {actual_feed_distance} should include arcs"
+        assert actual_feed_distance > expected_arc_distance, f"Feed distance {actual_feed_distance} should include arcs"
 
         print("PASS: test_arc_parsing_ij_format")
 
@@ -304,13 +301,14 @@ M2
         # Expected helix length: sqrt((2*pi*5)^2 + 10^2) ≈ 32.97mm
         xy_arc = 2 * math.pi * 5
         z_delta = 10
-        expected_helix = math.sqrt(xy_arc ** 2 + z_delta ** 2)
+        expected_helix = math.sqrt(xy_arc**2 + z_delta**2)
 
         # Feed distance should include the helix (main motion)
         # Allow 10% tolerance for floating point
         actual = metrics.motion.total_feed_distance_mm
-        assert abs(actual - expected_helix) < expected_helix * 0.1, \
+        assert abs(actual - expected_helix) < expected_helix * 0.1, (
             f"Helix distance: expected ~{expected_helix:.2f}, got {actual:.2f}"
+        )
 
         print("PASS: test_helical_arc_distance")
 
@@ -458,16 +456,15 @@ M2
         metrics = extract_gcode_metrics(nc_path)
 
         # Safe Z should be 25.0
-        assert abs(metrics.z_profile.safe_z_mm - 25.0) < 0.01, \
-            f"Safe Z: {metrics.z_profile.safe_z_mm}"
+        assert abs(metrics.z_profile.safe_z_mm - 25.0) < 0.01, f"Safe Z: {metrics.z_profile.safe_z_mm}"
 
         # Max plunge should be -9.0
-        assert abs(metrics.z_profile.max_plunge_z_mm - (-9.0)) < 0.01, \
+        assert abs(metrics.z_profile.max_plunge_z_mm - (-9.0)) < 0.01, (
             f"Max plunge: {metrics.z_profile.max_plunge_z_mm}"
+        )
 
         # Should have 3 cutting depths
-        assert metrics.z_profile.depth_count == 3, \
-            f"Depth count: {metrics.z_profile.depth_count}"
+        assert metrics.z_profile.depth_count == 3, f"Depth count: {metrics.z_profile.depth_count}"
 
         # Cutting depths should be -3, -6, -9
         depths = metrics.z_profile.unique_cutting_depths
@@ -603,18 +600,15 @@ M2
         metrics = extract_gcode_metrics(nc_path)
 
         # Should detect spindle speeds
-        assert 12000 in metrics.tools.spindle_speeds, \
-            f"Missing S12000 in {metrics.tools.spindle_speeds}"
-        assert 18000 in metrics.tools.spindle_speeds, \
-            f"Missing S18000 in {metrics.tools.spindle_speeds}"
+        assert 12000 in metrics.tools.spindle_speeds, f"Missing S12000 in {metrics.tools.spindle_speeds}"
+        assert 18000 in metrics.tools.spindle_speeds, f"Missing S18000 in {metrics.tools.spindle_speeds}"
 
         # Should detect tool numbers
         assert 1 in metrics.tools.tool_numbers
         assert 2 in metrics.tools.tool_numbers
 
         # Should count tool change
-        assert metrics.tools.tool_changes == 1, \
-            f"Tool changes: {metrics.tools.tool_changes}"
+        assert metrics.tools.tool_changes == 1, f"Tool changes: {metrics.tools.tool_changes}"
 
         print("PASS: test_spindle_tracking")
 
@@ -660,12 +654,9 @@ M2
     try:
         metrics = extract_gcode_metrics(nc_path)
 
-        assert metrics.operations.profile_passes >= 1, \
-            f"Profile passes: {metrics.operations.profile_passes}"
-        assert metrics.operations.pocket_passes >= 1, \
-            f"Pocket passes: {metrics.operations.pocket_passes}"
-        assert metrics.operations.bore_passes >= 1, \
-            f"Bore passes: {metrics.operations.bore_passes}"
+        assert metrics.operations.profile_passes >= 1, f"Profile passes: {metrics.operations.profile_passes}"
+        assert metrics.operations.pocket_passes >= 1, f"Pocket passes: {metrics.operations.pocket_passes}"
+        assert metrics.operations.bore_passes >= 1, f"Bore passes: {metrics.operations.bore_passes}"
 
         # Total passes should sum up
         assert metrics.operations.total_passes >= 3
@@ -685,7 +676,7 @@ def test_file_not_found():
     """Test FileNotFoundError for missing file."""
     try:
         extract_gcode_metrics("/nonexistent/file.nc")
-        assert False, "Should have raised FileNotFoundError"
+        raise AssertionError("Should have raised FileNotFoundError")
     except FileNotFoundError:
         pass  # Expected
 
@@ -700,7 +691,7 @@ def test_empty_file():
 
     try:
         extract_gcode_metrics(nc_path)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass  # Expected
 
@@ -740,7 +731,7 @@ def test_all_recipe_nc_files():
     if errors:
         for err in errors:
             print(f"ERROR: {err}")
-        assert False, f"Failed to parse {len(errors)} NC files"
+        raise AssertionError(f"Failed to parse {len(errors)} NC files")
 
     print(f"PASS: test_all_recipe_nc_files ({len(nc_files)} files)")
 
@@ -775,7 +766,6 @@ def run_tests():
 
     passed = 0
     failed = 0
-    skipped = 0
 
     for test_fn in tests:
         try:
@@ -788,9 +778,9 @@ def run_tests():
             print(f"ERROR: {test_fn.__name__}: {e}")
             failed += 1
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"G-code Metrics Tests: {passed} passed, {failed} failed")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     return failed == 0
 

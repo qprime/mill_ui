@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/loop/__init__.py
+# hypothesis_version: 6.151.9
+
+['bead_generator', 'chamfer_generator', 'profile_generator']

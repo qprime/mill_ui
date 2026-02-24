@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -55,20 +54,27 @@ class PartBounds:
 
 
 def _rects_intersect(
-    ax: float, ay: float, aw: float, ah: float,
-    bx: float, by: float, bw: float, bh: float,
+    ax: float,
+    ay: float,
+    aw: float,
+    ah: float,
+    bx: float,
+    by: float,
+    bw: float,
+    bh: float,
 ) -> bool:
-    return not (
-        ax + aw <= bx or
-        bx + bw <= ax or
-        ay + ah <= by or
-        by + bh <= ay
-    )
+    return not (ax + aw <= bx or bx + bw <= ax or ay + ah <= by or by + bh <= ay)
 
 
 def _split_rect_around_obstacle(
-    rect_x: float, rect_y: float, rect_w: float, rect_h: float,
-    obs_x: float, obs_y: float, obs_w: float, obs_h: float,
+    rect_x: float,
+    rect_y: float,
+    rect_w: float,
+    rect_h: float,
+    obs_x: float,
+    obs_y: float,
+    obs_w: float,
+    obs_h: float,
 ) -> list[tuple[float, float, float, float]]:
     rect_right = rect_x + rect_w
     rect_top = rect_y + rect_h
@@ -93,14 +99,20 @@ def _split_rect_around_obstacle(
 
 
 def _rect_contains(
-    outer_x: float, outer_y: float, outer_w: float, outer_h: float,
-    inner_x: float, inner_y: float, inner_w: float, inner_h: float,
+    outer_x: float,
+    outer_y: float,
+    outer_w: float,
+    outer_h: float,
+    inner_x: float,
+    inner_y: float,
+    inner_w: float,
+    inner_h: float,
 ) -> bool:
     return (
-        outer_x <= inner_x and
-        outer_y <= inner_y and
-        outer_x + outer_w >= inner_x + inner_w and
-        outer_y + outer_h >= inner_y + inner_h
+        outer_x <= inner_x
+        and outer_y <= inner_y
+        and outer_x + outer_w >= inner_x + inner_w
+        and outer_y + outer_h >= inner_y + inner_h
     )
 
 
@@ -118,7 +130,10 @@ def _prune_contained(rects: list[tuple[float, float, float, float]]) -> list[tup
 
 
 def _trim_rect_against_existing(
-    x: float, y: float, w: float, h: float,
+    x: float,
+    y: float,
+    w: float,
+    h: float,
     existing: list[tuple[float, float, float, float]],
     min_width: float,
     min_height: float,
@@ -196,8 +211,7 @@ def _remove_overlaps(
     for x, y, w, h in sorted_rects[1:]:
         if tool_clearance > 0:
             expanded_existing = [
-                (rx - tool_clearance, ry - tool_clearance,
-                 rw + 2 * tool_clearance, rh + 2 * tool_clearance)
+                (rx - tool_clearance, ry - tool_clearance, rw + 2 * tool_clearance, rh + 2 * tool_clearance)
                 for rx, ry, rw, rh in result
             ]
             trimmed = _trim_rect_against_existing(x, y, w, h, expanded_existing, min_width, min_height)
@@ -266,10 +280,7 @@ def _compute_guillotine_waste(
         return []
 
     def has_overlap(rx: float, ry: float, rw: float, rh: float) -> bool:
-        for part in parts:
-            if _rects_intersect(rx, ry, rw, rh, part.x, part.y, part.width, part.height):
-                return True
-        return False
+        return any(_rects_intersect(rx, ry, rw, rh, part.x, part.y, part.width, part.height) for part in parts)
 
     def find_blocking_part(rx: float, ry: float, rw: float, rh: float) -> PartBounds | None:
         for part in parts:
@@ -326,18 +337,14 @@ def compute_waste_rectangles(
     tool_clearance: float = 0,
 ) -> list[WasteRect]:
     if strategy == WasteStrategy.LARGEST:
-        return _compute_maxrects_waste(
-            sheet_width, sheet_height, margin, parts, min_width, min_height, tool_clearance
-        )
+        return _compute_maxrects_waste(sheet_width, sheet_height, margin, parts, min_width, min_height, tool_clearance)
     else:
-        return _compute_guillotine_waste(
-            sheet_width, sheet_height, margin, parts, min_width, min_height
-        )
+        return _compute_guillotine_waste(sheet_width, sheet_height, margin, parts, min_width, min_height)
 
 
 __all__ = [
-    "WasteStrategy",
-    "WasteRect",
     "PartBounds",
+    "WasteRect",
+    "WasteStrategy",
     "compute_waste_rectangles",
 ]

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence, Tuple
+from typing import Any
 
 from cam.model.tool import Tool
 from cam.planner.params import stepdown_for, stepover_for
@@ -9,7 +10,6 @@ from cam.planner.params import stepdown_for, stepover_for
 
 @dataclass(frozen=True)
 class ToolSelection:
-
     name: str
     diameter: float
     kind: str
@@ -43,12 +43,16 @@ def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
         depth_per_pass=(
             float(data["depth_per_pass"])
             if data.get("depth_per_pass") is not None
-            else float(data.get("depth_per_pass_mm", 0.0)) if data.get("depth_per_pass_mm") is not None else None
+            else float(data.get("depth_per_pass_mm", 0.0))
+            if data.get("depth_per_pass_mm") is not None
+            else None
         ),
         stepover_percent=(
             float(data["stepover_percent"])
             if data.get("stepover_percent") is not None
-            else float(data.get("step_over_percent", 0.0)) if data.get("step_over_percent") is not None else None
+            else float(data.get("step_over_percent", 0.0))
+            if data.get("step_over_percent") is not None
+            else None
         ),
     )
 
@@ -156,7 +160,7 @@ def tool_identity(tool: ToolSelection) -> dict[str, Any]:
     }
 
 
-def pass_key(operation: str, tool: ToolSelection) -> Tuple[str, float, str, str | None]:
+def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None]:
     return operation, float(tool.diameter), tool.kind, tool.rotation
 
 
@@ -164,10 +168,10 @@ __all__ = [
     "ToolSelection",
     "normalize_tool_entries",
     "pass_key",
+    "pick_tool_for_engrave",
+    "pick_tool_for_hole",
     "pick_tool_for_pocket",
     "pick_tool_for_profile",
-    "pick_tool_for_hole",
-    "pick_tool_for_engrave",
     "stepdown_for_tool",
     "stepover_for_tool",
     "tool_identity",

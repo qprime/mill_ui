@@ -4,8 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from config.machine_loader import load_machine_by_name, load_endmills, get_machines_dir
 from adapters.cnc_config_to_ir import machine_config_to_diagram_ir
+from config.machine_loader import get_machines_dir, load_endmills, load_machine_by_name
 from diagram_render import render_diagram_svg
 
 
@@ -40,7 +40,9 @@ def main():
         if machine.wasteboard:
             margins = machine.compute_margins()
             print(f"  Wasteboard: {machine.wasteboard.width_mm:.0f} x {machine.wasteboard.height_mm:.0f} mm")
-            print(f"  Margins: L={margins['left']:.0f} R={margins['right']:.0f} T={margins['top']:.0f} B={margins['bottom']:.0f} mm")
+            print(
+                f"  Margins: L={margins['left']:.0f} R={margins['right']:.0f} T={margins['top']:.0f} B={margins['bottom']:.0f} mm"
+            )
         eff = machine.effective_envelope(quarter_inch.radius_mm)
         print(f"  Effective: ({eff[0]:.1f}, {eff[1]:.1f}) to ({eff[2]:.1f}, {eff[3]:.1f}) mm")
         print()

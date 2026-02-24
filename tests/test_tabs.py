@@ -1,10 +1,9 @@
-
-from pml.yaml_parser import parse_pml_yaml
-from pml.yaml_formatter import format_pml_yaml
-from resolution.layout_resolver import resolve_layout
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.ast_to_removal import ast_to_removal_intents, item_to_removal_intent
 from ir.removal_intent import TabConstraint
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
+from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_pml_parse_profile_with_tabs():
@@ -132,15 +131,16 @@ def test_ast_construction_with_tabs():
                 placement=Placement(center_xy_mm=(225, 325)),
                 feature=Feature(
                     type="profile",
-                    depth_mm=0.0, is_through=True,
+                    depth_mm=0.0,
+                    is_through=True,
                     side="outside",
                     tab_count=4,
                     tab_height_mm=3.0,
                     tab_width_mm=10.0,
                 ),
-                shape_id="cutout"
+                shape_id="cutout",
             ),
-        )
+        ),
     )
 
     item = ast.items[0]
@@ -162,13 +162,14 @@ def test_ast_to_removal_intent_with_tabs():
         placement=Placement(center_xy_mm=(225, 325)),
         feature=Feature(
             type="profile",
-            depth_mm=0.0, is_through=True,
+            depth_mm=0.0,
+            is_through=True,
             side="outside",
             tab_count=4,
             tab_height_mm=3.0,
             tab_width_mm=10.0,
         ),
-        shape_id="cutout"
+        shape_id="cutout",
     )
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
@@ -197,13 +198,14 @@ def test_ast_to_removal_intent_with_tabs_no_width():
         placement=Placement(center_xy_mm=(225, 325)),
         feature=Feature(
             type="profile",
-            depth_mm=0.0, is_through=True,
+            depth_mm=0.0,
+            is_through=True,
             side="outside",
             tab_count=4,
             tab_height_mm=3.0,
             tab_width_mm=None,
         ),
-        shape_id="cutout"
+        shape_id="cutout",
     )
 
     intent = item_to_removal_intent(item, sheet_thickness_mm=19.0)
@@ -320,9 +322,9 @@ def run_all_tests():
         test_pml_roundtrip_with_tabs,
     ]
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Running Tab Tests")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     passed = 0
     failed = 0
@@ -337,17 +339,19 @@ def run_all_tests():
         except Exception as e:
             print(f"  ✗ ERROR: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(f"Results: {passed} passed, {failed} failed")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     return failed == 0
 
 
 if __name__ == "__main__":
     import sys
+
     success = run_all_tests()
     sys.exit(0 if success else 1)

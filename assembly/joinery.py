@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from assembly.core import EdgeName, InterfaceType, RemovalKind
-from assembly.panel import Edge, NotchSpec, DadoSpec, PanelSpec
+from assembly.panel import DadoSpec, Edge, NotchSpec, PanelSpec
 
 if TYPE_CHECKING:
     from assembly.core import Interface
@@ -46,10 +46,7 @@ def _finger_joints_to_notches(
     if width_mm is None and count is None:
         raise ValueError("Specify at least one of width_mm or count")
 
-    if count is not None:
-        n = count
-    else:
-        n = round(edge_length / width_mm)
+    n = count if count is not None else round(edge_length / width_mm)
 
     n = max(3, n)
     if n % 2 == 0:
@@ -99,11 +96,13 @@ class Finger:
     count: int | None = None
     clearance_mm: float = 0.12
     removal_kind: RemovalKind = RemovalKind.EDGE
-    valid_interfaces: frozenset[InterfaceType] = frozenset({
-        InterfaceType.SIDE_TO_SIDE,
-        InterfaceType.TOP,
-        InterfaceType.BOTTOM,
-    })
+    valid_interfaces: frozenset[InterfaceType] = frozenset(
+        {
+            InterfaceType.SIDE_TO_SIDE,
+            InterfaceType.TOP,
+            InterfaceType.BOTTOM,
+        }
+    )
 
     def apply(
         self,
@@ -154,13 +153,9 @@ class HalfLap:
         panel_b: PanelSpec,
     ) -> tuple[PanelSpec, PanelSpec]:
         if interface.position_along_edge_a_mm is None:
-            raise ValueError(
-                "HalfLap requires interface.position_along_edge_a_mm for INTERNAL interfaces"
-            )
+            raise ValueError("HalfLap requires interface.position_along_edge_a_mm for INTERNAL interfaces")
         if interface.position_along_edge_b_mm is None:
-            raise ValueError(
-                "HalfLap requires interface.position_along_edge_b_mm for INTERNAL interfaces"
-            )
+            raise ValueError("HalfLap requires interface.position_along_edge_b_mm for INTERNAL interfaces")
 
         edge_a = _edge_name_to_enum(interface.edge_a)
         edge_b = _edge_name_to_enum(interface.edge_b)
@@ -196,12 +191,14 @@ class Captured:
     fitment_mm: float = 0.2
     receiving: Literal["a", "b"] = "a"
     removal_kind: RemovalKind = RemovalKind.FACE
-    valid_interfaces: frozenset[InterfaceType] = frozenset({
-        InterfaceType.TOP,
-        InterfaceType.BOTTOM,
-        InterfaceType.SIDE_TO_SIDE,
-        InterfaceType.INTERNAL,
-    })
+    valid_interfaces: frozenset[InterfaceType] = frozenset(
+        {
+            InterfaceType.TOP,
+            InterfaceType.BOTTOM,
+            InterfaceType.SIDE_TO_SIDE,
+            InterfaceType.INTERNAL,
+        }
+    )
 
     def apply(
         self,
@@ -217,7 +214,9 @@ class Captured:
                 f"Use receiving='a' (default) for shelf/partition to side panel joints."
             )
 
-        position = interface.position_along_edge_a_mm if interface.position_along_edge_a_mm is not None else self.inset_mm
+        position = (
+            interface.position_along_edge_a_mm if interface.position_along_edge_a_mm is not None else self.inset_mm
+        )
 
         if self.receiving == "a":
             edge = interface.edge_a
@@ -246,9 +245,9 @@ class Captured:
 
 
 __all__ = [
-    "JoineryStrategy",
     "Butt",
+    "Captured",
     "Finger",
     "HalfLap",
-    "Captured",
+    "JoineryStrategy",
 ]

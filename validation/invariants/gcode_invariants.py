@@ -1,27 +1,23 @@
-
-
 from __future__ import annotations
 
 import math
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
 
 from validation.core import InvariantResult, Verdict
 from validation.metrics.gcode_metrics import (
-    GCodeMetrics,
-    TabMetrics,
-    extract_gcode_metrics,
-    detect_tabs_from_content,
+    F_PATTERN,
     G_CODE_PATTERN,
     M_CODE_PATTERN,
+    T_PATTERN,
     X_PATTERN,
     Y_PATTERN,
     Z_PATTERN,
-    F_PATTERN,
-    T_PATTERN,
+    GCodeMetrics,
+    TabMetrics,
+    extract_gcode_metrics,
 )
-
 
 GCODE_INVARIANT_IDS = [
     "GCODE_PARSEABLE",
@@ -69,11 +65,16 @@ def check_gcode_invariants(
         return extract_gcode_metrics(gcode_path)
 
     return _check_gcode_core(
-        parse_result, lines, resolve_metrics,
-        metrics=metrics, safe_z_mm=safe_z_mm,
+        parse_result,
+        lines,
+        resolve_metrics,
+        metrics=metrics,
+        safe_z_mm=safe_z_mm,
         max_stepdown_mm=max_stepdown_mm,
-        sheet_width_mm=sheet_width_mm, sheet_height_mm=sheet_height_mm,
-        margin_mm=margin_mm, jump_tolerance_mm=jump_tolerance_mm,
+        sheet_width_mm=sheet_width_mm,
+        sheet_height_mm=sheet_height_mm,
+        margin_mm=margin_mm,
+        jump_tolerance_mm=jump_tolerance_mm,
         jump_warn_threshold_mm=jump_warn_threshold_mm,
         jump_fail_threshold_mm=jump_fail_threshold_mm,
     )
@@ -95,14 +96,20 @@ def check_gcode_invariants_from_content(
 
     def resolve_metrics() -> GCodeMetrics:
         from validation.metrics.gcode_metrics import extract_gcode_metrics_from_content
+
         return extract_gcode_metrics_from_content(gcode_content)
 
     return _check_gcode_core(
-        parse_result, lines, resolve_metrics,
-        metrics=metrics, safe_z_mm=safe_z_mm,
+        parse_result,
+        lines,
+        resolve_metrics,
+        metrics=metrics,
+        safe_z_mm=safe_z_mm,
         max_stepdown_mm=max_stepdown_mm,
-        sheet_width_mm=sheet_width_mm, sheet_height_mm=sheet_height_mm,
-        margin_mm=margin_mm, jump_tolerance_mm=jump_tolerance_mm,
+        sheet_width_mm=sheet_width_mm,
+        sheet_height_mm=sheet_height_mm,
+        margin_mm=margin_mm,
+        jump_tolerance_mm=jump_tolerance_mm,
         jump_warn_threshold_mm=jump_warn_threshold_mm,
         jump_fail_threshold_mm=jump_fail_threshold_mm,
     )
@@ -143,14 +150,16 @@ def _check_gcode_core(
         try:
             metrics = resolve_metrics()
         except Exception as e:
-            results.append(InvariantResult(
-                id="GCODE_METRICS_ERROR",
-                category="structural",
-                artifact="gcode",
-                description="Metrics extraction failed",
-                status=Verdict.FAIL,
-                details={"error": str(e)},
-            ))
+            results.append(
+                InvariantResult(
+                    id="GCODE_METRICS_ERROR",
+                    category="structural",
+                    artifact="gcode",
+                    description="Metrics extraction failed",
+                    status=Verdict.FAIL,
+                    details={"error": str(e)},
+                )
+            )
             return results
 
     if safe_z_mm is None:
@@ -160,15 +169,11 @@ def _check_gcode_core(
     results.append(_check_no_negative_feed(lines, metrics))
     results.append(_check_z_monotonic_plunge(lines))
     results.append(_check_max_stepdown(lines, max_stepdown_mm))
-    results.append(_check_xy_within_bounds(
-        metrics, sheet_width_mm, sheet_height_mm, margin_mm
-    ))
+    results.append(_check_xy_within_bounds(metrics, sheet_width_mm, sheet_height_mm, margin_mm))
     results.append(_check_spindle_before_cut(lines))
     results.append(_check_tool_declared(lines))
     results.append(_check_ends_at_safe(lines, safe_z_mm))
-    results.append(_check_continuous_path(
-        lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm
-    ))
+    results.append(_check_continuous_path(lines, jump_tolerance_mm, jump_warn_threshold_mm, jump_fail_threshold_mm))
     results.append(_check_tab_pattern(metrics.tabs))
 
     return results
@@ -191,15 +196,9 @@ def _get_invariant_description(inv_id: str) -> str:
     return descriptions.get(inv_id, inv_id)
 
 
-_TOKEN_PATTERN = re.compile(
-    r"[GMXYZIJKRABCFSTNOQPLHDEUVW]\s*[+-]?\d*\.?\d+",
-    re.IGNORECASE
-)
+_TOKEN_PATTERN = re.compile(r"[GMXYZIJKRABCFSTNOQPLHDEUVW]\s*[+-]?\d*\.?\d+", re.IGNORECASE)
 
-_VALID_CHARS_PATTERN = re.compile(
-    r"^[GMTFSXYZIJKRABCDEHLNOPQRUVW\d.\-+\s()]+$",
-    re.IGNORECASE
-)
+_VALID_CHARS_PATTERN = re.compile(r"^[GMTFSXYZIJKRABCDEHLNOPQRUVW\d.\-+\s()]+$", re.IGNORECASE)
 
 
 def _check_parseable(gcode_path: Path) -> tuple[InvariantResult, list[str]]:
@@ -219,7 +218,7 @@ def _check_parseable(gcode_path: Path) -> tuple[InvariantResult, list[str]]:
                 [],
             )
 
-        with open(gcode_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(gcode_path, encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
 
         if not lines:
@@ -312,18 +311,17 @@ def _check_parseable_lines(lines: list[str]) -> tuple[InvariantResult, list[str]
 
         line_no_comment = line
         if "(" in line:
-            line_no_comment = line[:line.index("(")].strip()
+            line_no_comment = line[: line.index("(")].strip()
         if ";" in line_no_comment:
-            line_no_comment = line_no_comment[:line_no_comment.index(";")].strip()
+            line_no_comment = line_no_comment[: line_no_comment.index(";")].strip()
 
         if not _TOKEN_PATTERN.search(line_no_comment):
             if len(invalid_lines) < 5:
                 invalid_lines.append(f"Line {i}: No valid G-code token: {line[:50]}")
             continue
 
-        if not _VALID_CHARS_PATTERN.match(line_no_comment):
-            if len(invalid_lines) < 5:
-                invalid_lines.append(f"Line {i}: Invalid characters: {line[:50]}")
+        if not _VALID_CHARS_PATTERN.match(line_no_comment) and len(invalid_lines) < 5:
+            invalid_lines.append(f"Line {i}: Invalid characters: {line[:50]}")
 
     if invalid_lines:
         return (
@@ -366,36 +364,25 @@ def _check_safe_z_respected(lines: list[str], safe_z_mm: float) -> InvariantResu
         if not line or line.startswith("(") or line.startswith(";"):
             continue
 
-
         g_match = G_CODE_PATTERN.search(line)
         if g_match:
             g_code = int(g_match.group(1))
             if g_code in (0, 1, 2, 3):
                 motion_mode = g_code
 
-
         z_match = Z_PATTERN.search(line)
         if z_match:
             current_z = float(z_match.group(1))
 
+        has_motion = z_match is not None or X_PATTERN.search(line) is not None or Y_PATTERN.search(line) is not None
 
-        has_motion = (
-            z_match is not None or
-            X_PATTERN.search(line) is not None or
-            Y_PATTERN.search(line) is not None
-        )
-
-        is_rapid_line = (g_match and int(g_match.group(1)) == 0) or \
-                        (motion_mode == 0 and has_motion and not g_match)
+        is_rapid_line = (g_match and int(g_match.group(1)) == 0) or (motion_mode == 0 and has_motion and not g_match)
 
         if is_rapid_line:
             checked += 1
 
-            if current_z < safe_z_mm - 0.001:
-                if len(failures) < 5:
-                    failures.append(
-                        f"Line {i}: G0 rapid at Z={current_z:.3f} (safe_z={safe_z_mm})"
-                    )
+            if current_z < safe_z_mm - 0.001 and len(failures) < 5:
+                failures.append(f"Line {i}: G0 rapid at Z={current_z:.3f} (safe_z={safe_z_mm})")
 
     if checked == 0:
         return InvariantResult(
@@ -437,9 +424,8 @@ def _check_no_negative_feed(lines: list[str], metrics: GCodeMetrics) -> Invarian
         if f_match:
             checked += 1
             feed = float(f_match.group(1))
-            if feed <= 0:
-                if len(failures) < 5:
-                    failures.append(f"Line {i}: Invalid feed rate F{feed}")
+            if feed <= 0 and len(failures) < 5:
+                failures.append(f"Line {i}: Invalid feed rate F{feed}")
 
     if checked == 0:
         return InvariantResult(
@@ -473,7 +459,6 @@ def _check_z_monotonic_plunge(lines: list[str]) -> InvariantResult:
     failures: list[str] = []
 
     current_z = 0.0
-    plunge_start_z: float | None = None
     last_plunge_z: float | None = None
     in_plunge = False
 
@@ -482,7 +467,6 @@ def _check_z_monotonic_plunge(lines: list[str]) -> InvariantResult:
         if not line or line.startswith("(") or line.startswith(";"):
             continue
 
-
         g_match = G_CODE_PATTERN.search(line)
         is_feed_move = g_match and int(g_match.group(1)) in (1, 2, 3)
 
@@ -490,34 +474,24 @@ def _check_z_monotonic_plunge(lines: list[str]) -> InvariantResult:
         if z_match:
             new_z = float(z_match.group(1))
 
-
             if is_feed_move:
                 if new_z < current_z:
-
                     if not in_plunge:
                         in_plunge = True
-                        plunge_start_z = current_z
                         last_plunge_z = new_z
                         checked += 1
                     else:
-
-                        if new_z > last_plunge_z:
-                            if len(failures) < 5:
-                                failures.append(
-                                    f"Line {i}: Non-monotonic plunge Z={new_z:.3f} "
-                                    f"(previous Z={last_plunge_z:.3f})"
-                                )
+                        if new_z > last_plunge_z and len(failures) < 5:
+                            failures.append(
+                                f"Line {i}: Non-monotonic plunge Z={new_z:.3f} (previous Z={last_plunge_z:.3f})"
+                            )
                         last_plunge_z = new_z
                 elif new_z > current_z:
-
                     in_plunge = False
-                    plunge_start_z = None
                     last_plunge_z = None
-
 
             elif g_match and int(g_match.group(1)) == 0:
                 in_plunge = False
-                plunge_start_z = None
                 last_plunge_z = None
 
             current_z = new_z
@@ -559,7 +533,6 @@ def _check_max_stepdown(lines: list[str], max_stepdown_mm: float) -> InvariantRe
         if not line or line.startswith("(") or line.startswith(";"):
             continue
 
-
         g_match = G_CODE_PATTERN.search(line)
         is_feed_move = g_match and int(g_match.group(1)) == 1
 
@@ -568,16 +541,12 @@ def _check_max_stepdown(lines: list[str], max_stepdown_mm: float) -> InvariantRe
             new_z = float(z_match.group(1))
             stepdown = current_z - new_z
 
-
             if stepdown > 0 and is_feed_move:
                 checked += 1
                 max_observed_stepdown = max(max_observed_stepdown, stepdown)
 
-                if stepdown > max_stepdown_mm + 0.001:
-                    if len(failures) < 5:
-                        failures.append(
-                            f"Line {i}: Stepdown {stepdown:.3f}mm exceeds max {max_stepdown_mm}mm"
-                        )
+                if stepdown > max_stepdown_mm + 0.001 and len(failures) < 5:
+                    failures.append(f"Line {i}: Stepdown {stepdown:.3f}mm exceeds max {max_stepdown_mm}mm")
 
             current_z = new_z
 
@@ -620,15 +589,17 @@ def _check_xy_within_bounds(
     bounds = metrics.xy_bounds
     failures: list[str] = []
 
-
     x_min_allowed = -margin_mm
     x_max_allowed = sheet_width_mm + margin_mm
     y_min_allowed = -margin_mm
     y_max_allowed = sheet_height_mm + margin_mm
 
-
-    if (bounds.x_min == float("inf") or bounds.x_max == float("-inf") or
-        bounds.y_min == float("inf") or bounds.y_max == float("-inf")):
+    if (
+        bounds.x_min == float("inf")
+        or bounds.x_max == float("-inf")
+        or bounds.y_min == float("inf")
+        or bounds.y_max == float("-inf")
+    ):
         return InvariantResult(
             id="GCODE_XY_WITHIN_BOUNDS",
             category="safety",
@@ -639,7 +610,6 @@ def _check_xy_within_bounds(
             passed=0,
             details={"note": "No XY coordinates found"},
         )
-
 
     if bounds.x_min < x_min_allowed:
         failures.append(f"X_min ({bounds.x_min:.2f}) < allowed ({x_min_allowed:.2f})")
@@ -686,7 +656,6 @@ def _check_spindle_before_cut(lines: list[str]) -> InvariantResult:
         if not line_upper or line_upper.startswith("(") or line_upper.startswith(";"):
             continue
 
-
         m_match = M_CODE_PATTERN.search(line_upper)
         if m_match:
             m_code = int(m_match.group(1))
@@ -695,22 +664,15 @@ def _check_spindle_before_cut(lines: list[str]) -> InvariantResult:
             elif m_code == 5:
                 spindle_on = False
 
-
         z_match = Z_PATTERN.search(line_upper)
         if z_match:
             current_z = float(z_match.group(1))
 
-
         g_match = G_CODE_PATTERN.search(line_upper)
-        if g_match and int(g_match.group(1)) == 1:
-
-            if current_z < -0.001:
-                checked += 1
-                if not spindle_on:
-                    if len(failures) < 5:
-                        failures.append(
-                            f"Line {i}: G1 cutting move at Z={current_z:.3f} without spindle on"
-                        )
+        if g_match and int(g_match.group(1)) == 1 and current_z < -0.001:
+            checked += 1
+            if not spindle_on and len(failures) < 5:
+                failures.append(f"Line {i}: G1 cutting move at Z={current_z:.3f} without spindle on")
 
     if checked == 0:
         return InvariantResult(
@@ -749,7 +711,6 @@ def _check_tool_declared(lines: list[str]) -> InvariantResult:
         if not line or line.startswith("(") or line.startswith(";"):
             continue
 
-
         t_match = T_PATTERN.search(line)
         if t_match:
             tool_num = int(t_match.group(1))
@@ -757,13 +718,11 @@ def _check_tool_declared(lines: list[str]) -> InvariantResult:
             current_tool = tool_num
             checked += 1
 
-
         m_match = M_CODE_PATTERN.search(line)
         if m_match and int(m_match.group(1)) == 6:
             checked += 1
-            if current_tool is None:
-                if len(failures) < 5:
-                    failures.append(f"Line {i}: M6 tool change without prior tool declaration")
+            if current_tool is None and len(failures) < 5:
+                failures.append(f"Line {i}: M6 tool change without prior tool declaration")
 
     if checked == 0:
         return InvariantResult(
@@ -794,7 +753,6 @@ def _check_tool_declared(lines: list[str]) -> InvariantResult:
 
 def _check_ends_at_safe(lines: list[str], safe_z_mm: float) -> InvariantResult:
     final_z: float | None = None
-
 
     for line in lines:
         line = line.strip()
@@ -869,7 +827,6 @@ def _check_continuous_path(
         if not line or line.startswith("(") or line.startswith(";"):
             continue
 
-
         x_match = X_PATTERN.search(line)
         y_match = Y_PATTERN.search(line)
         z_match = Z_PATTERN.search(line)
@@ -879,10 +836,8 @@ def _check_continuous_path(
         new_y = float(y_match.group(1)) if y_match else current_y
         new_z = float(z_match.group(1)) if z_match else current_z
 
-
         is_feed_move = g_match and int(g_match.group(1)) in (1, 2, 3)
         is_rapid = g_match and int(g_match.group(1)) == 0
-
 
         if is_rapid:
             in_cut = False
@@ -891,23 +846,18 @@ def _check_continuous_path(
             current_z = new_z
             continue
 
-
         was_in_cut = in_cut
         if is_feed_move and new_z < -0.001:
             in_cut = True
         elif new_z >= -0.001:
             in_cut = False
 
-
         if in_cut and was_in_cut and is_feed_move:
-
             has_xy_motion = x_match is not None or y_match is not None
             has_z_motion = z_match is not None and abs(new_z - current_z) > 0.001
 
-
             if has_xy_motion and not has_z_motion:
-                xy_distance = math.sqrt((new_x - current_x)**2 + (new_y - current_y)**2)
-
+                xy_distance = math.sqrt((new_x - current_x) ** 2 + (new_y - current_y) ** 2)
 
                 is_arc = g_match and int(g_match.group(1)) in (2, 3)
 
@@ -915,17 +865,13 @@ def _check_continuous_path(
                     checked += 1
                     max_jump = max(max_jump, xy_distance)
 
-
                     if xy_distance > fail_threshold_mm:
                         if len(failures) < 5:
                             failures.append(
                                 f"Line {i}: XY jump of {xy_distance:.2f}mm during cut (exceeds {fail_threshold_mm}mm)"
                             )
-                    elif xy_distance > warn_threshold_mm:
-                        if len(warnings) < 5:
-                            warnings.append(
-                                f"Line {i}: Large XY move of {xy_distance:.2f}mm during cut"
-                            )
+                    elif xy_distance > warn_threshold_mm and len(warnings) < 5:
+                        warnings.append(f"Line {i}: Large XY move of {xy_distance:.2f}mm during cut")
 
         current_x = new_x
         current_y = new_y
@@ -942,7 +888,6 @@ def _check_continuous_path(
             passed=0,
             details={"note": "No cutting move sequences to check"},
         )
-
 
     if failures:
         status = Verdict.FAIL
@@ -1005,9 +950,7 @@ def _check_tab_pattern(
         max_height = max(tabs.tab_heights_mm)
 
         if max_height - min_height > height_tolerance_mm:
-            warnings.append(
-                f"Inconsistent tab heights: min={min_height:.2f}mm, max={max_height:.2f}mm"
-            )
+            warnings.append(f"Inconsistent tab heights: min={min_height:.2f}mm, max={max_height:.2f}mm")
 
         checked += 1
         avg_height = sum(tabs.tab_heights_mm) / len(tabs.tab_heights_mm)

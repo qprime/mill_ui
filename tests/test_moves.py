@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from cam.moves import (
@@ -60,7 +62,7 @@ def test_retract_move_construction():
 
 def test_frozen_dataclasses_immutable():
     m = RapidMove(x=1.0)
-    with pytest.raises(Exception):
+    with pytest.raises(dataclasses.FrozenInstanceError):
         m.x = 2.0  # type: ignore[misc]
 
 
@@ -116,10 +118,17 @@ def test_dict_to_move_comment_sparse():
 
 
 def test_dict_to_move_comment_dense():
-    m = _dict_to_move({
-        "kind": "comment", "text": "dense", "x": None, "y": None,
-        "z": None, "feed": None, "rpm": None,
-    })
+    m = _dict_to_move(
+        {
+            "kind": "comment",
+            "text": "dense",
+            "x": None,
+            "y": None,
+            "z": None,
+            "feed": None,
+            "rpm": None,
+        }
+    )
     assert isinstance(m, CommentMove)
     assert m.text == "dense"
 

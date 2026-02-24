@@ -1,8 +1,8 @@
 import pytest
 
 from assembly.core import Assembly, Interface, InterfaceType
-from assembly.panel import PanelSpec, PanelRole, Edge
 from assembly.joinery import Butt, Finger, HalfLap
+from assembly.panel import Edge, PanelSpec
 from assembly.primitives import box, cubby
 
 
@@ -34,9 +34,7 @@ class TestAssemblyValidation:
         panels = {
             "a": PanelSpec(name="a", width_mm=100, height_mm=50, thickness_mm=6.0),
         }
-        interfaces = (
-            Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", Butt()),
-        )
+        interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "a", "left", "b", "right", Butt()),)
         assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="Unknown member: b"):
             assembly.validate()
@@ -46,9 +44,7 @@ class TestAssemblyValidation:
             "a": PanelSpec(name="a", width_mm=100, height_mm=50, thickness_mm=6.0),
             "b": PanelSpec(name="b", width_mm=100, height_mm=50, thickness_mm=6.0),
         }
-        interfaces = (
-            Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", Finger(width_mm=12)),
-        )
+        interfaces = (Interface(InterfaceType.INTERNAL, "a", "bottom", "b", "top", Finger(width_mm=12)),)
         assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="not valid for INTERNAL"):
             assembly.validate()
@@ -84,7 +80,6 @@ class TestBoxAssembly:
         assert "bottom" in assembly.panels
 
     def test_default_box_has_6_panels(self):
-        from assembly.joinery import Captured
         assembly = box(
             width=200,
             length=150,
@@ -99,6 +94,7 @@ class TestBoxAssembly:
 
     def test_finger_joint_dimensions(self):
         from assembly.joinery import Captured
+
         assembly = box(
             width=200,
             length=150,
@@ -203,8 +199,7 @@ class TestCubbyAssembly:
             cols=2,
         )
         half_lap_interfaces = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+            i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == 1
         assert half_lap_interfaces[0].position_along_edge_a_mm is not None
@@ -230,8 +225,7 @@ class TestCubbyAssembly:
         )
 
         half_lap_interfaces = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+            i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == 4
 
@@ -268,8 +262,7 @@ class TestCubbyAssembly:
         )
 
         half_lap_interfaces = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
+            i for i in assembly.interfaces if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, HalfLap)
         ]
         assert len(half_lap_interfaces) == 2
 
@@ -298,6 +291,7 @@ class TestCubbyAssembly:
 
     def test_cubby_shelf_to_side_uses_captured_joinery(self):
         from assembly.joinery import Captured
+
         assembly = cubby(
             width=300,
             length=200,
@@ -307,15 +301,15 @@ class TestCubbyAssembly:
             cols=2,
         )
         shelf_to_side = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL
-            and isinstance(i.joinery, Captured)
-            and "shelf" in i.panel_b
+            i
+            for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, Captured) and "shelf" in i.panel_b
         ]
         assert len(shelf_to_side) == 2
 
     def test_cubby_partition_to_cap_uses_captured_joinery(self):
         from assembly.joinery import Captured
+
         assembly = cubby(
             width=300,
             length=200,
@@ -325,9 +319,8 @@ class TestCubbyAssembly:
             cols=2,
         )
         partition_to_cap = [
-            i for i in assembly.interfaces
-            if i.type == InterfaceType.INTERNAL
-            and isinstance(i.joinery, Captured)
-            and "partition" in i.panel_b
+            i
+            for i in assembly.interfaces
+            if i.type == InterfaceType.INTERNAL and isinstance(i.joinery, Captured) and "partition" in i.panel_b
         ]
         assert len(partition_to_cap) == 2

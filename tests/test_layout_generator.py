@@ -1,11 +1,11 @@
-
 import sys
-from nesting.types import PartSpec, SheetSpec, NestedPart, SheetLayout, NestingResult
+
 from nesting.layout_generator import (
-    sheet_layout_to_ast,
     nesting_result_to_asts,
+    sheet_layout_to_ast,
     sheet_layout_to_pml,
 )
+from nesting.types import NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
 
 
 def test_simple_sheet_to_ast():
@@ -17,11 +17,9 @@ def test_simple_sheet_to_ast():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     ast = sheet_layout_to_ast(layout)
 
-
     assert ast.sheet.width_mm == 1000
     assert ast.sheet.height_mm == 1000
     assert ast.sheet.thickness_mm == 19
-
 
     assert len(ast.items) >= 1
     item = ast.items[0]
@@ -45,9 +43,7 @@ def test_multiple_placements_to_ast():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=placements)
     ast = sheet_layout_to_ast(layout)
 
-
     assert len(ast.items) == 3
-
 
     positions = {item.placement.center_xy_mm for item in ast.items}
     assert (200, 200) in positions
@@ -148,7 +144,6 @@ def test_sheet_to_pml_simple():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
     pml = sheet_layout_to_pml(layout)
 
-
     assert "sheet 1000mm 1000mm 19mm" in pml
     assert "rect panel_0" in pml
     assert "500mm,500mm" in pml
@@ -188,9 +183,7 @@ def test_sheet_to_pml_rotated():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     pml = sheet_layout_to_pml(layout)
 
-
     assert "rotated" in pml.lower()
-
 
     assert "400mm,200mm" in pml
 
@@ -215,10 +208,7 @@ def test_unique_shape_ids():
     sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
     part = PartSpec(name="panel", width_mm=200, height_mm=200)
 
-    placements = tuple(
-        NestedPart(part_spec=part, x_mm=100 + i*200, y_mm=100, instance_id=i)
-        for i in range(5)
-    )
+    placements = tuple(NestedPart(part_spec=part, x_mm=100 + i * 200, y_mm=100, instance_id=i) for i in range(5))
 
     layout = SheetLayout(sheet_spec=sheet_spec, placements=placements)
     ast = sheet_layout_to_ast(layout)
@@ -259,6 +249,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

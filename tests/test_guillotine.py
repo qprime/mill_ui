@@ -1,10 +1,9 @@
-
 import sys
+
 from nesting.guillotine import (
     FreeRect,
-    PlacementResult,
-    guillotine_pack,
     _compute_utilization,
+    guillotine_pack,
 )
 
 
@@ -23,18 +22,13 @@ def test_free_rect_can_fit():
     print("Running test_free_rect_can_fit...")
     rect = FreeRect(x=0, y=0, width=100, height=200)
 
-
     assert rect.can_fit(100, 200, gap=0)
-
 
     assert rect.can_fit(50, 100, gap=0)
 
-
     assert not rect.can_fit(150, 100, gap=0)
 
-
     assert not rect.can_fit(50, 250, gap=0)
-
 
     assert rect.can_fit(90, 190, gap=10)
     assert not rect.can_fit(95, 195, gap=10)
@@ -45,7 +39,6 @@ def test_free_rect_can_fit():
 def test_free_rect_can_fit_rotated():
     print("Running test_free_rect_can_fit_rotated...")
     rect = FreeRect(x=0, y=0, width=100, height=200)
-
 
     assert not rect.can_fit(150, 50, gap=0)
     assert rect.can_fit_rotated(150, 50, gap=0)
@@ -80,7 +73,6 @@ def test_single_part_too_large():
 
 def test_single_part_fits_rotated():
     print("Running test_single_part_fits_rotated...")
-
 
     parts = [(150, 50, True, "rotatable")]
     placements = guillotine_pack(parts, bin_width=100, bin_height=200, gap=0)
@@ -138,7 +130,6 @@ def test_multiple_parts_stacked():
 def test_gap_between_parts():
     print("Running test_gap_between_parts...")
 
-
     parts = [
         (95, 100, True, "a"),
         (95, 100, True, "b"),
@@ -152,13 +143,11 @@ def test_gap_between_parts():
 def test_gap_prevents_fit():
     print("Running test_gap_prevents_fit...")
 
-
     parts = [
         (100, 100, True, "a"),
         (100, 100, True, "b"),
     ]
     placements = guillotine_pack(parts, bin_width=200, bin_height=110, gap=10)
-
 
     assert len(placements) == 1
     print("  PASSED")
@@ -172,10 +161,7 @@ def test_sorting_by_area():
         (200, 200, True, "big"),
         (50, 50, True, "small2"),
     ]
-    placements = guillotine_pack(
-        parts, bin_width=250, bin_height=250, gap=0, sort_by_area=True
-    )
-
+    placements = guillotine_pack(parts, bin_width=250, bin_height=250, gap=0, sort_by_area=True)
 
     assert len(placements) >= 2
 
@@ -187,19 +173,14 @@ def test_real_world_doors():
     print("Running test_real_world_doors...")
 
     door_w, door_h = 457, 597
-    parts = [
-        (door_w, door_h, True, f"door{i}") for i in range(4)
-    ]
-
+    parts = [(door_w, door_h, True, f"door{i}") for i in range(4)]
 
     usable_w = 1245 - 20
     usable_h = 1232 - 20
 
     placements = guillotine_pack(parts, bin_width=usable_w, bin_height=usable_h, gap=6)
 
-
     assert len(placements) == 4
-
 
     for i, p1 in enumerate(placements):
         for j, p2 in enumerate(placements):
@@ -211,12 +192,10 @@ def test_real_world_doors():
             w2 = door_h if p2.rotated else door_w
             h2 = door_w if p2.rotated else door_h
 
-
-            left1, right1 = p1.x - w1/2, p1.x + w1/2
-            left2, right2 = p2.x - w2/2, p2.x + w2/2
-            bottom1, top1 = p1.y - h1/2, p1.y + h1/2
-            bottom2, top2 = p2.y - h2/2, p2.y + h2/2
-
+            left1, right1 = p1.x - w1 / 2, p1.x + w1 / 2
+            left2, right2 = p2.x - w2 / 2, p2.x + w2 / 2
+            bottom1, top1 = p1.y - h1 / 2, p1.y + h1 / 2
+            bottom2, top2 = p2.y - h2 / 2, p2.y + h2 / 2
 
             overlaps_x = not (right1 <= left2 or right2 <= left1)
             overlaps_y = not (top1 <= bottom2 or top2 <= bottom1)
@@ -241,13 +220,10 @@ def test_real_world_mixed_sizes():
 
     placements = guillotine_pack(parts, bin_width=usable_w, bin_height=usable_h, gap=6)
 
-
     placed_doors = sum(1 for p in placements if "door" in p.metadata)
     placed_drawers = sum(1 for p in placements if "drawer" in p.metadata)
 
-
     assert placed_doors == 4, f"Expected 4 doors, got {placed_doors}"
-
 
     assert placed_drawers >= 3, f"Expected at least 3 drawers, got {placed_drawers}"
     print(f"  Placed {placed_doors} doors + {placed_drawers} drawers")
@@ -309,7 +285,6 @@ def test_placements_within_bounds():
     placements = guillotine_pack(parts, bin_width=bin_w, bin_height=bin_h, gap=5)
 
     for p in placements:
-
         for w, h, _, meta in parts:
             if meta == p.metadata:
                 actual_w = h if p.rotated else w
@@ -366,6 +341,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

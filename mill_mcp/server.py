@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import json
@@ -13,18 +12,17 @@ from mcp.server.fastmcp import FastMCP
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mill_mcp.config import ensure_output_dir
-
-from pml import parse_pml, PMLParseError, format_pml
-from pml.yaml_parser import parse_pml_yaml, parse_nest_yaml, NestParseError
-from pml.nest_parser import nest_job_to_api_params
-from resolution.layout_resolver import resolve_layout
+from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline
 from layout_ast.layout import LayoutAST
-from validation.removal_checks import check_overlap, check_depth_feasibility
-from validation.runner import validate_recipe, validate, ValidationInput, ValidationOptions
-from validation.regression import GoldenStore, ComparisonConfig
+from mill_mcp.config import ensure_output_dir
 from nesting import nest_and_generate
-from cam.pipeline import run_pipeline, DEFAULT_TOOL_DB
+from pml import PMLParseError, format_pml, parse_pml
+from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_parser import NestParseError, parse_nest_yaml, parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
+from validation.regression import ComparisonConfig, GoldenStore
+from validation.removal_checks import check_depth_feasibility, check_overlap
+from validation.runner import ValidationInput, ValidationOptions, validate, validate_recipe
 
 
 def _sanitize_job_name(name: str) -> str:
@@ -188,11 +186,13 @@ def _run_cam_pipeline(
         gcode_path.write_text(gcode)
 
         move_count = pipeline_result.metrics["output_size"]["files"].get(pass_name, {}).get("lines", 0)
-        results["outputs"]["gcode"].append({
-            "pass": pass_name,
-            "path": str(gcode_path),
-            "moves": move_count,
-        })
+        results["outputs"]["gcode"].append(
+            {
+                "pass": pass_name,
+                "path": str(gcode_path),
+                "moves": move_count,
+            }
+        )
         total_moves += move_count
 
     results["total_moves"] = pipeline_result.metrics["complexity"]["total_moves"]
@@ -335,6 +335,7 @@ def validate_pml(pml_text: str, compositional: bool = False) -> str:
         }
 
         from adapters.ast_to_removal import ast_to_removal_intents
+
         intents = ast_to_removal_intents(ast)
         results["info"]["intents"] = len(intents)
 
@@ -437,10 +438,12 @@ def get_docs(
                     return json.dumps({"error": f"File not found: {target_name}"})
 
             if list_only:
-                return json.dumps({
-                    "files": [relative_path(m) for m in matches],
-                    "total": len(matches),
-                })
+                return json.dumps(
+                    {
+                        "files": [relative_path(m) for m in matches],
+                        "total": len(matches),
+                    }
+                )
 
             contents = {}
             for m in matches:
@@ -454,11 +457,13 @@ def get_docs(
             matches = find_md_files(search_dir, recursive=False)
 
             if list_only:
-                return json.dumps({
-                    "section": section,
-                    "files": [relative_path(m) for m in matches],
-                    "total": len(matches),
-                })
+                return json.dumps(
+                    {
+                        "section": section,
+                        "files": [relative_path(m) for m in matches],
+                        "total": len(matches),
+                    }
+                )
 
             contents = {}
             for m in matches:
@@ -477,10 +482,13 @@ def get_docs(
                 if folder not in sections:
                     sections[folder] = []
                 sections[folder].append(rel)
-            return json.dumps({
-                "sections": sections,
-                "total": len(matches),
-            }, indent=2)
+            return json.dumps(
+                {
+                    "sections": sections,
+                    "total": len(matches),
+                },
+                indent=2,
+            )
 
         contents = {}
         for m in matches:
@@ -523,6 +531,7 @@ def validate_cam_recipe(
                 if pml_path.exists():
                     try:
                         from pml import parse_pml
+
                         pml_content = pml_path.read_text()
                         ast = parse_pml(pml_content)
                     except Exception:
@@ -568,7 +577,7 @@ def validate_cam_artifacts(
 
         if svg_path and not Path(svg_path).exists():
             return json.dumps({"error": f"SVG file not found: {svg_path}"})
-        for gcode_path in (gcode_paths or []):
+        for gcode_path in gcode_paths or []:
             if not Path(gcode_path).exists():
                 return json.dumps({"error": f"G-code file not found: {gcode_path}"})
 
@@ -598,12 +607,14 @@ def list_golden_baselines(store_path: str = "tests/golden") -> str:
     try:
         store = GoldenStore(store_path)
         if not store.exists():
-            return json.dumps({
-                "baselines": [],
-                "total": 0,
-                "store_path": store_path,
-                "message": "Golden store not found",
-            })
+            return json.dumps(
+                {
+                    "baselines": [],
+                    "total": 0,
+                    "store_path": store_path,
+                    "message": "Golden store not found",
+                }
+            )
 
         entries = store.list_entries()
         index = store.load_index()
@@ -611,18 +622,23 @@ def list_golden_baselines(store_path: str = "tests/golden") -> str:
         baselines = []
         for name in sorted(entries):
             entry = index.entries.get(name)
-            baselines.append({
-                "name": name,
-                "source_file": entry.source_file if entry else None,
-                "updated_at": entry.updated_at if entry else None,
-                "metrics_path": str(store.get_metrics_path(name)),
-            })
+            baselines.append(
+                {
+                    "name": name,
+                    "source_file": entry.source_file if entry else None,
+                    "updated_at": entry.updated_at if entry else None,
+                    "metrics_path": str(store.get_metrics_path(name)),
+                }
+            )
 
-        return json.dumps({
-            "baselines": baselines,
-            "total": len(baselines),
-            "store_path": store_path,
-        }, indent=2)
+        return json.dumps(
+            {
+                "baselines": baselines,
+                "total": len(baselines),
+                "store_path": store_path,
+            },
+            indent=2,
+        )
 
     except Exception as e:
         return json.dumps({"error": str(e)})

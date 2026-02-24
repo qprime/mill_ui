@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import math
@@ -10,26 +9,26 @@ if TYPE_CHECKING:
 from domains.domain import Point2D
 
 
+def _origin(domain: Domain) -> Point2D:
+    return domain.local_origin if domain.local_origin is not None else (0.0, 0.0)
+
+
 def local_to_sheet(
     point: Point2D,
     domain: Domain,
 ) -> Point2D:
     lx, ly = point
-    ox, oy = domain.local_origin
+    ox, oy = _origin(domain)
     rotation = domain.local_rotation_rad
 
-
     if rotation == 0.0:
-
         return (ox + lx, oy + ly)
 
     cos_r = math.cos(rotation)
     sin_r = math.sin(rotation)
 
-
     rx = lx * cos_r - ly * sin_r
     ry = lx * sin_r + ly * cos_r
-
 
     return (ox + rx, oy + ry)
 
@@ -39,17 +38,14 @@ def sheet_to_local(
     domain: Domain,
 ) -> Point2D:
     sx, sy = point
-    ox, oy = domain.local_origin
+    ox, oy = _origin(domain)
     rotation = domain.local_rotation_rad
-
 
     tx = sx - ox
     ty = sy - oy
 
     if rotation == 0.0:
-
         return (tx, ty)
-
 
     cos_r = math.cos(-rotation)
     sin_r = math.sin(-rotation)
@@ -67,11 +63,10 @@ def local_to_sheet_batch(
     if not points:
         return []
 
-    ox, oy = domain.local_origin
+    ox, oy = _origin(domain)
     rotation = domain.local_rotation_rad
 
     if rotation == 0.0:
-
         return [(ox + lx, oy + ly) for lx, ly in points]
 
     cos_r = math.cos(rotation)
@@ -93,11 +88,10 @@ def sheet_to_local_batch(
     if not points:
         return []
 
-    ox, oy = domain.local_origin
+    ox, oy = _origin(domain)
     rotation = domain.local_rotation_rad
 
     if rotation == 0.0:
-
         return [(sx - ox, sy - oy) for sx, sy in points]
 
     cos_r = math.cos(-rotation)
@@ -130,7 +124,6 @@ def compose_transforms(
     from_domain: Domain,
     to_domain: Domain,
 ) -> Point2D:
-
     sheet_point = local_to_sheet(point, from_domain)
     return sheet_to_local(sheet_point, to_domain)
 
@@ -146,6 +139,6 @@ def get_translation_between(
     from_domain: Domain,
     to_domain: Domain,
 ) -> Point2D:
-    fx, fy = from_domain.local_origin
-    tx, ty = to_domain.local_origin
+    fx, fy = _origin(from_domain)
+    tx, ty = _origin(to_domain)
     return (tx - fx, ty - fy)

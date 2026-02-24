@@ -29,4 +29,4 @@ class SVGConfig:
 DEFAULT_CONFIG = SVGConfig()
 
 
-__all__ = ["SVGConfig", "DEFAULT_CONFIG"]
+__all__ = ["DEFAULT_CONFIG", "SVGConfig"]

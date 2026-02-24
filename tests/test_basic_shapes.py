@@ -1,11 +1,9 @@
-
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
 from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
@@ -40,7 +38,6 @@ children:
     assert item.geometry.data["diameter_mm"] == 120.0
     assert item.feature.type == "pocket"
 
-
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
     print("  ✓ PASS")
@@ -69,7 +66,6 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "Circle"
-
 
     assert item.geometry.data["diameter_mm"] == 400.0
     assert item.placement.center_xy_mm == (200.0, 300.0)
@@ -106,7 +102,6 @@ children:
     item = flat.items[0]
     assert item.type == "Circle"
 
-
     assert item.geometry.data["diameter_mm"] == 300.0
 
     assert item.placement.center_xy_mm == (200.0, 300.0)
@@ -139,7 +134,6 @@ children:
     item = flat.items[0]
     assert item.type == "RoundedRect"
     assert item.shape_id == "badge"
-
 
     assert item.geometry.data["w_mm"] == 400.0
     assert item.geometry.data["h_mm"] == 600.0
@@ -177,7 +171,6 @@ children:
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.type == "RoundedRect"
-
 
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
@@ -330,7 +323,6 @@ children:
     formatted = format_pml_yaml(ast1)
     ast2 = parse_pml_yaml(formatted)
 
-
     flat1 = resolve_layout(ast1)
     flat2 = resolve_layout(ast2)
 
@@ -463,12 +455,10 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     circles = [item for item in flat.items if item.type == "Circle"]
     rects = [item for item in flat.items if item.type == "Rect"]
     rounded_rects = [item for item in flat.items if item.type == "RoundedRect"]
     lines = [item for item in flat.items if item.type == "Line"]
-
 
     assert len(flat.items) == 7
     assert len(circles) == 4
@@ -662,7 +652,6 @@ children:
     ast2 = parse_pml_yaml(formatted1)
     formatted2 = format_pml_yaml(ast2)
 
-
     assert formatted1 == formatted2
     assert "Circle:" in formatted1
     assert "RoundedRect:" in formatted1
@@ -772,6 +761,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

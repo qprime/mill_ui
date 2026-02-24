@@ -1,12 +1,12 @@
-
 from __future__ import annotations
 
 from dataclasses import replace
 
-from layout_ast.layout import Item, Placement as ASTPlacement, Geometry, Feature
-
-from .types import PartSpec, NestedPart
+from layout_ast.layout import Feature, Geometry, Item
+from layout_ast.layout import Placement as ASTPlacement
 from templates.loader import expand_template
+
+from .types import NestedPart, PartSpec
 
 
 def get_part_bounds(part_spec: PartSpec) -> tuple[float, float]:
@@ -87,7 +87,7 @@ def placement_to_items(
 
 
 __all__ = [
-    "get_part_bounds",
     "expand_part_to_items",
+    "get_part_bounds",
     "placement_to_items",
 ]

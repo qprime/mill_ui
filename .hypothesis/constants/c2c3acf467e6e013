@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/validation/invariants/__init__.py
+# hypothesis_version: 6.151.9
+
+['GCODE_INVARIANT_IDS', 'SVG_INVARIANT_IDS', 'check_svg_invariants']

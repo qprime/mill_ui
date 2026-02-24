@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/nesting/template_expander.py
+# hypothesis_version: 6.151.9
+
+[0.0, 'Rect', 'expand_part_to_items', 'get_part_bounds', 'h_mm', 'outside', 'placement_to_items', 'profile', 'shape', 'w_mm']

@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-import pytest
-
 from ir.removal_intent import (
-    Allowance,
-    Bounds2D,
     BevelSpec,
-    Constraints,
+    Bounds2D,
     DepthProfile,
     RemovalIntent,
 )
@@ -44,7 +40,6 @@ def _intent(
 
 
 class TestLinearGradientMode:
-
     def test_gradient_within_thickness(self):
         intent = _intent(mode="linear_gradient", z_bottom=-5.0)
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
@@ -65,7 +60,6 @@ class TestLinearGradientMode:
 
 
 class TestVCarveMode:
-
     def test_v_carve_matching_angle(self):
         intent = _intent(mode="v_carve", v_angle_deg=90.0)
         result = check_depth_profile(
@@ -114,7 +108,6 @@ class TestVCarveMode:
 
 
 class TestBevelGeometry:
-
     def test_bevel_achievable(self):
         intent = _intent(bevel=BevelSpec(width_mm=10.0, angle_deg=45.0, inner_depth_mm=9.0))
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)
@@ -144,7 +137,6 @@ class TestBevelGeometry:
 
 
 class TestConstantMode:
-
     def test_constant_no_checks(self):
         intent = _intent(mode="constant")
         result = check_depth_profile(intent, sheet_thickness_mm=12.0)

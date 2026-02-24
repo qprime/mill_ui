@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/validation/regression/golden_store.py
+# hypothesis_version: 6.151.9
+
+['1.0.0', 'created_at', 'entries', 'golden', 'index.json', 'metrics.json', 'recipe_name', 'source.pml.yml', 'tests', 'updated_at', 'version', 'w']

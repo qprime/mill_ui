@@ -3,13 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from xml.etree import ElementTree as ET
 
-from diagram_ir import DiagramIR, ViewportSpec, LayerIR
-from diagram_ir.shapes import Shape, Rect, Line, Polyline, Circle, Text, Path
+from diagram_ir import DiagramIR, LayerIR, ViewportSpec
 from diagram_ir.dimensions import (
-    place_on_rails,
-    PlacedDimension,
     DimensionRequest,
+    PlacedDimension,
+    place_on_rails,
 )
+from diagram_ir.shapes import Circle, Line, Path, Polyline, Rect, Shape, Text
 
 
 @dataclass(frozen=True)
@@ -127,10 +127,13 @@ def render_diagram_svg(
     bounds = diagram.bounds
     padding = _compute_padding(bounds, viewport)
 
-    if viewport.y_flip:
-        transform_y = lambda y: bounds.y_max - (y - bounds.y_min)
-    else:
-        transform_y = lambda y: y
+    def _transform_y_flip(y: float) -> float:
+        return bounds.y_max - (y - bounds.y_min)
+
+    def _transform_y_identity(y: float) -> float:
+        return y
+
+    transform_y = _transform_y_flip if viewport.y_flip else _transform_y_identity
 
     chrome_top = 40.0
     chrome_bottom = _estimate_notes_height(diagram.metadata)
@@ -188,8 +191,14 @@ def render_diagram_svg(
     if edge_profiles:
         sheet_thickness = float(diagram.metadata.get("sheet_thickness", "19"))
         _render_edge_callouts(
-            svg, viewbox_x, viewbox_y, viewbox_width,
-            edge_profiles, sheet_thickness, theme, diagram.layers,
+            svg,
+            viewbox_x,
+            viewbox_y,
+            viewbox_width,
+            edge_profiles,
+            sheet_thickness,
+            theme,
+            diagram.layers,
         )
     notes_top = drawing_bottom + chrome_right_height
     _render_notes_block(svg, notes_top, diagram.metadata, theme)
@@ -245,8 +254,7 @@ def _layer_name_to_class(name: str) -> str:
     return name.lower().replace("_", "-")
 
 
-def _render_shape(parent: ET.Element, shape: Shape, theme: DiagramTheme,
-                  transform_y, y_flip: bool) -> None:
+def _render_shape(parent: ET.Element, shape: Shape, theme: DiagramTheme, transform_y, y_flip: bool) -> None:
     style_attrs = theme.get_style(shape.style_token)
 
     if isinstance(shape, Rect):
@@ -440,13 +448,13 @@ def _line_elem(parent: ET.Element, x1: float, y1: float, x2: float, y2: float, s
 def _arrow(parent: ET.Element, x: float, y: float, direction: str, color: str) -> None:
     size = 3.0
     if direction == "left":
-        points = f"{x},{y} {x+size},{y-size} {x+size},{y+size}"
+        points = f"{x},{y} {x + size},{y - size} {x + size},{y + size}"
     elif direction == "right":
-        points = f"{x},{y} {x-size},{y-size} {x-size},{y+size}"
+        points = f"{x},{y} {x - size},{y - size} {x - size},{y + size}"
     elif direction == "up":
-        points = f"{x},{y} {x-size},{y+size} {x+size},{y+size}"
+        points = f"{x},{y} {x - size},{y + size} {x + size},{y + size}"
     elif direction == "down":
-        points = f"{x},{y} {x-size},{y-size} {x+size},{y-size}"
+        points = f"{x},{y} {x - size},{y - size} {x + size},{y - size}"
     else:
         return
     ET.SubElement(parent, "polygon", {"points": points, "fill": color})
@@ -589,8 +597,11 @@ def _render_notes_block(
     sheet_h = metadata.get("sheet_height", "")
     sheet_t = metadata.get("sheet_thickness", "")
     if sheet_w:
-        _text(x, y + line_num * line_height,
-              f"Sheet: {float(sheet_w):.1f} \u00d7 {float(sheet_h):.1f} \u00d7 {float(sheet_t):.1f}mm")
+        _text(
+            x,
+            y + line_num * line_height,
+            f"Sheet: {float(sheet_w):.1f} \u00d7 {float(sheet_h):.1f} \u00d7 {float(sheet_t):.1f}mm",
+        )
         line_num += 1
 
     feature_counts = metadata.get("feature_counts", "")
@@ -629,8 +640,7 @@ def _render_notes_block(
         for allow in edge_allowances:
             rough = allow["rough_allowance_mm"]
             finish = allow["finish_allowance_mm"]
-            _text(x + indent, y + line_num * line_height,
-                  f"\u2022 Rough: {rough:.2f}mm, Finish: {finish:.2f}mm")
+            _text(x + indent, y + line_num * line_height, f"\u2022 Rough: {rough:.2f}mm, Finish: {finish:.2f}mm")
             line_num += 1
 
 
@@ -651,8 +661,7 @@ def _find_shape_bounds(shape_id: str, layers: tuple[LayerIR, ...]) -> tuple[floa
             if isinstance(shape, Rect):
                 return (shape.x, shape.y, shape.width, shape.height)
             if isinstance(shape, Circle):
-                return (shape.cx - shape.radius, shape.cy - shape.radius,
-                        shape.radius * 2, shape.radius * 2)
+                return (shape.cx - shape.radius, shape.cy - shape.radius, shape.radius * 2, shape.radius * 2)
     return None
 
 
@@ -694,14 +703,18 @@ def _render_edge_callouts(
         box_x = start_x
         box_y = start_y + i * (box_height + box_spacing)
 
-        ET.SubElement(group, "rect", {
-            "x": str(box_x),
-            "y": str(box_y),
-            "width": str(box_width),
-            "height": str(box_height),
-            **{k: v for k, v in callout_style.items()},
-            "id": f"callout_{label}_box",
-        })
+        ET.SubElement(
+            group,
+            "rect",
+            {
+                "x": str(box_x),
+                "y": str(box_y),
+                "width": str(box_width),
+                "height": str(box_height),
+                **{k: v for k, v in callout_style.items()},
+                "id": f"callout_{label}_box",
+            },
+        )
 
         title_attrs = {
             "x": str(box_x + 8),
@@ -736,38 +749,60 @@ def _render_edge_callouts(
 
         if profile_type == "chamfer":
             _render_chamfer_section(
-                group, detail_x, detail_y, detail_w, detail_h,
-                sheet_thickness, profile.get("distance_mm", 0), scale,
-                detail_style, dim_style,
+                group,
+                detail_x,
+                detail_y,
+                detail_w,
+                detail_h,
+                sheet_thickness,
+                profile.get("distance_mm", 0),
+                scale,
+                detail_style,
+                dim_style,
             )
         elif profile_type == "fillet":
             _render_fillet_section(
-                group, detail_x, detail_y, detail_w, detail_h,
-                sheet_thickness, profile.get("radius_mm", 0), scale,
-                detail_style, dim_style,
+                group,
+                detail_x,
+                detail_y,
+                detail_w,
+                detail_h,
+                sheet_thickness,
+                profile.get("radius_mm", 0),
+                scale,
+                detail_style,
+                dim_style,
             )
 
         for item_id in items:
             bounds = _find_shape_bounds(item_id, layers)
             if bounds is None:
                 continue
-            sx, sy, sw, sh = bounds
+            sx, sy, sw, _sh = bounds
             marker_r = 7.0
             mx = sx + sw - marker_r - 2
             my = sy + marker_r + 2
-            ET.SubElement(group, "circle", {
-                "cx": str(mx),
-                "cy": str(my),
-                **{k: v for k, v in callout_style.items()},
-                "r": str(marker_r),
-            })
-            marker_text = ET.SubElement(group, "text", {
-                "x": str(mx),
-                "y": str(my),
-                "text-anchor": "middle",
-                "dominant-baseline": "central",
-                **{k: v for k, v in label_style.items()},
-            })
+            ET.SubElement(
+                group,
+                "circle",
+                {
+                    "cx": str(mx),
+                    "cy": str(my),
+                    **{k: v for k, v in callout_style.items()},
+                    "r": str(marker_r),
+                },
+            )
+            marker_text = ET.SubElement(
+                group,
+                "text",
+                {
+                    "x": str(mx),
+                    "y": str(my),
+                    "text-anchor": "middle",
+                    "dominant-baseline": "central",
+                    **{k: v for k, v in label_style.items()},
+                },
+            )
             marker_text.text = label
 
 
@@ -799,10 +834,14 @@ def _render_chamfer_section(
         f"Z"
     )
 
-    ET.SubElement(parent, "path", {
-        "d": path_d,
-        **{k: v for k, v in detail_style.items()},
-    })
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": path_d,
+            **{k: v for k, v in detail_style.items()},
+        },
+    )
 
     dim_x = x0 + d_s / 2
     dim_y = y0 - 3
@@ -856,10 +895,14 @@ def _render_fillet_section(
         f"Z"
     )
 
-    ET.SubElement(parent, "path", {
-        "d": path_d,
-        **{k: v for k, v in detail_style.items()},
-    })
+    ET.SubElement(
+        parent,
+        "path",
+        {
+            "d": path_d,
+            **{k: v for k, v in detail_style.items()},
+        },
+    )
 
     dim_x = x0 + r_s / 2 - 2
     dim_y = y0 - 3
@@ -977,13 +1020,17 @@ def _render_beam_assemblies(
                 sx = x + seg_start * scale
                 sw = (seg_end - seg_start) * scale
 
-                ET.SubElement(group, "rect", {
-                    "x": f"{sx:.2f}",
-                    "y": f"{ly:.2f}",
-                    "width": f"{sw:.2f}",
-                    "height": f"{layer_height - 2:.2f}",
-                    **{k: v for k, v in layer_style.items()},
-                })
+                ET.SubElement(
+                    group,
+                    "rect",
+                    {
+                        "x": f"{sx:.2f}",
+                        "y": f"{ly:.2f}",
+                        "width": f"{sw:.2f}",
+                        "height": f"{layer_height - 2:.2f}",
+                        **{k: v for k, v in layer_style.items()},
+                    },
+                )
 
                 seg_label = f"S{seg_idx} ({seg_length:.0f})"
                 seg_label_attrs = {
@@ -1002,13 +1049,17 @@ def _render_beam_assemblies(
                     splice_x = x + seg["end_mm"] * scale
                     splice_y1 = ly
                     splice_y2 = ly + layer_height - 2
-                    ET.SubElement(group, "line", {
-                        "x1": f"{splice_x:.2f}",
-                        "y1": f"{splice_y1:.2f}",
-                        "x2": f"{splice_x:.2f}",
-                        "y2": f"{splice_y2:.2f}",
-                        **{k: v for k, v in splice_style.items()},
-                    })
+                    ET.SubElement(
+                        group,
+                        "line",
+                        {
+                            "x1": f"{splice_x:.2f}",
+                            "y1": f"{splice_y1:.2f}",
+                            "x2": f"{splice_x:.2f}",
+                            "y2": f"{splice_y2:.2f}",
+                            **{k: v for k, v in splice_style.items()},
+                        },
+                    )
 
         if layer_count > 1 and any(len(ld.get("segments", [])) > 1 for ld in layers):
             stagger_y = diagram_y + layer_count * layer_height + 4
@@ -1026,10 +1077,10 @@ def _render_beam_assemblies(
 
 
 __all__ = [
-    "render_diagram_svg",
-    "StyleSpec",
-    "DiagramTheme",
     "DARK_DIAGRAM_THEME",
-    "PRINT_DIAGRAM_THEME",
     "DIAGRAM_THEMES",
+    "PRINT_DIAGRAM_THEME",
+    "DiagramTheme",
+    "StyleSpec",
+    "render_diagram_svg",
 ]

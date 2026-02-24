@@ -1,24 +1,22 @@
-
 import hashlib
 import sys
 from typing import Any
 
+from adapters.hints_to_removal import (
+    hole_hint_to_removal_intent,
+    pocket_hint_to_removal_intent,
+    profile_hint_to_removal_intent,
+)
+from adapters.removal_to_planner import removal_intents_to_planner_input
+from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
-from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
-from ir.removal_intent import ShapeGeometry
+from cam.planner.planner_input import FeatureInput, GeometryInput, PlannerInput
 from cam.post.gcode import write_gcode
-from cam.config import Config
-from adapters.hints_to_removal import (
-    profile_hint_to_removal_intent,
-    pocket_hint_to_removal_intent,
-    hole_hint_to_removal_intent,
-)
-from adapters.removal_to_planner import removal_intents_to_planner_input
-
+from ir.removal_intent import ShapeGeometry
 
 TOOL_DB = [
     {
@@ -72,7 +70,10 @@ def _generate_gcode(
 
 
 def _planner_input_from_hints(
-    profiles=None, pockets=None, holes=None, engraves=None,
+    profiles=None,
+    pockets=None,
+    holes=None,
+    engraves=None,
     kerf_width_mm=3.175,
 ) -> PlannerInput:
     def _to_feature(hint: dict[str, Any]) -> FeatureInput:
@@ -269,6 +270,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ✗ FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             results.append(False)
 

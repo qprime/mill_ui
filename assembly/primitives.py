@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal
 
 from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
-from assembly.joinery import Butt, Finger, Captured, HalfLap, JoineryStrategy
+from assembly.joinery import Butt, Captured, Finger, HalfLap, JoineryStrategy
 from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
@@ -12,11 +12,13 @@ def box(
     length: float,
     height: float,
     thickness: float,
-    side_joinery: JoineryStrategy = Finger(),
+    side_joinery: JoineryStrategy | None = None,
     perimeter_joinery: JoineryStrategy | None = None,
     top: JoineryStrategy | Literal["none"] | None = None,
     bottom: JoineryStrategy | Literal["none"] | None = None,
 ) -> Assembly:
+    if side_joinery is None:
+        side_joinery = Finger()
     default_cap_joinery = perimeter_joinery if perimeter_joinery is not None else Captured()
     if top is None:
         top = default_cap_joinery
@@ -107,7 +109,7 @@ def carcass(
     length: float,
     height: float,
     thickness: float,
-    side_joinery: JoineryStrategy = Butt(),
+    side_joinery: JoineryStrategy | None = None,
     cap_style: Literal["between_sides", "over_sides"] = "between_sides",
     perimeter_joinery: JoineryStrategy | None = None,
     top: JoineryStrategy | Literal["none"] | None = None,
@@ -116,13 +118,17 @@ def carcass(
     back_thickness: float | None = None,
     back_inset: float = 0.0,
     fixed_shelves: int = 0,
-    shelf_joinery: JoineryStrategy = Captured(),
+    shelf_joinery: JoineryStrategy | None = None,
     shelf_back_support: bool = False,
     toe_kick_height: float | None = None,
     toe_kick_setback: float | None = None,
     toe_kick_style: Literal["between_sides", "over_sides"] = "between_sides",
     toe_kick_cover: bool = True,
 ) -> Assembly:
+    if side_joinery is None:
+        side_joinery = Butt()
+    if shelf_joinery is None:
+        shelf_joinery = Captured()
     default_cap_joinery = perimeter_joinery if perimeter_joinery is not None else Butt()
     if top is None:
         top = default_cap_joinery
@@ -170,7 +176,9 @@ def carcass(
         interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
         interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
-    effective_toe_kick_setback = toe_kick_setback if toe_kick_setback is not None else (50.0 if toe_kick_height else 0.0)
+    effective_toe_kick_setback = (
+        toe_kick_setback if toe_kick_setback is not None else (50.0 if toe_kick_height else 0.0)
+    )
     effective_toe_kick_height = toe_kick_height if toe_kick_height is not None else 0.0
 
     if effective_toe_kick_height > 0:
@@ -194,8 +202,28 @@ def carcass(
         )
         panels["bottom"] = bottom_panel
         bottom_dado_position = effective_toe_kick_height if effective_toe_kick_height > 0 else None
-        interfaces.append(Interface(InterfaceType.BOTTOM, "left_side", "bottom", "bottom", "left", bottom, position_along_edge_a_mm=bottom_dado_position))
-        interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom, position_along_edge_a_mm=bottom_dado_position))
+        interfaces.append(
+            Interface(
+                InterfaceType.BOTTOM,
+                "left_side",
+                "bottom",
+                "bottom",
+                "left",
+                bottom,
+                position_along_edge_a_mm=bottom_dado_position,
+            )
+        )
+        interfaces.append(
+            Interface(
+                InterfaceType.BOTTOM,
+                "right_side",
+                "bottom",
+                "bottom",
+                "right",
+                bottom,
+                position_along_edge_a_mm=bottom_dado_position,
+            )
+        )
 
     if effective_toe_kick_height > 0 and toe_kick_cover:
         kick_cover_width = cap_width if toe_kick_style == "between_sides" else width
@@ -249,24 +277,48 @@ def carcass(
 
         for i in range(fixed_shelves):
             shelf = PanelSpec(
-                name=f"shelf_{i+1}",
+                name=f"shelf_{i + 1}",
                 width_mm=shelf_x,
                 height_mm=shelf_y,
                 thickness_mm=thickness,
                 role=PanelRole.SHELF,
             )
-            panels[f"shelf_{i+1}"] = shelf
+            panels[f"shelf_{i + 1}"] = shelf
             shelf_position = bottom_offset + (i + 1) * shelf_spacing - thickness / 2
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "left_side", "bottom", f"shelf_{i+1}", "left", shelf_joinery, position_along_edge_a_mm=shelf_position)
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "left_side",
+                    "bottom",
+                    f"shelf_{i + 1}",
+                    "left",
+                    shelf_joinery,
+                    position_along_edge_a_mm=shelf_position,
+                )
             )
             interfaces.append(
-                Interface(InterfaceType.INTERNAL, "right_side", "bottom", f"shelf_{i+1}", "right", shelf_joinery, position_along_edge_a_mm=shelf_position)
+                Interface(
+                    InterfaceType.INTERNAL,
+                    "right_side",
+                    "bottom",
+                    f"shelf_{i + 1}",
+                    "right",
+                    shelf_joinery,
+                    position_along_edge_a_mm=shelf_position,
+                )
             )
             if shelf_back_support and "back" in panels:
                 back_shelf_position = shelf_position - back_inset
                 interfaces.append(
-                    Interface(InterfaceType.INTERNAL, "back", "bottom", f"shelf_{i+1}", "top", shelf_joinery, position_along_edge_a_mm=back_shelf_position)
+                    Interface(
+                        InterfaceType.INTERNAL,
+                        "back",
+                        "bottom",
+                        f"shelf_{i + 1}",
+                        "top",
+                        shelf_joinery,
+                        position_along_edge_a_mm=back_shelf_position,
+                    )
                 )
 
     return Assembly(members=panels, interfaces=tuple(interfaces))
@@ -279,15 +331,23 @@ def cubby(
     thickness: float,
     rows: int,
     cols: int,
-    perimeter_joinery: JoineryStrategy = Finger(),
-    shelf_joinery: JoineryStrategy = Captured(),
-    partition_joinery: JoineryStrategy = Captured(),
-    internal_joinery: JoineryStrategy = HalfLap(),
+    perimeter_joinery: JoineryStrategy | None = None,
+    shelf_joinery: JoineryStrategy | None = None,
+    partition_joinery: JoineryStrategy | None = None,
+    internal_joinery: JoineryStrategy | None = None,
     back: JoineryStrategy | Literal["none"] | None = None,
     back_thickness: float | None = None,
     back_inset: float = 0.0,
     back_internal_support: bool = True,
 ) -> Assembly:
+    if perimeter_joinery is None:
+        perimeter_joinery = Finger()
+    if shelf_joinery is None:
+        shelf_joinery = Captured()
+    if partition_joinery is None:
+        partition_joinery = Captured()
+    if internal_joinery is None:
+        internal_joinery = HalfLap()
     cell_width = (width - 2 * thickness) / cols
     cell_height = (height - 2 * thickness) / rows
 
@@ -338,13 +398,13 @@ def cubby(
         shelf_y = length - back_inset if back_inset else length
         for i in range(rows - 1):
             shelf = PanelSpec(
-                name=f"shelf_{i+1}",
+                name=f"shelf_{i + 1}",
                 width_mm=width - 2 * thickness,
                 height_mm=shelf_y,
                 thickness_mm=thickness,
                 role=PanelRole.SHELF,
             )
-            panels[f"shelf_{i+1}"] = shelf
+            panels[f"shelf_{i + 1}"] = shelf
 
             shelf_position = (i + 1) * cell_height - thickness / 2
             interfaces.append(
@@ -352,7 +412,7 @@ def cubby(
                     InterfaceType.INTERNAL,
                     "left_side",
                     "bottom",
-                    f"shelf_{i+1}",
+                    f"shelf_{i + 1}",
                     "left",
                     shelf_joinery,
                     position_along_edge_a_mm=shelf_position,
@@ -363,7 +423,7 @@ def cubby(
                     InterfaceType.INTERNAL,
                     "right_side",
                     "bottom",
-                    f"shelf_{i+1}",
+                    f"shelf_{i + 1}",
                     "right",
                     shelf_joinery,
                     position_along_edge_a_mm=shelf_position,
@@ -374,13 +434,13 @@ def cubby(
         partition_y = length - back_inset if back_inset else length
         for j in range(cols - 1):
             partition = PanelSpec(
-                name=f"partition_{j+1}",
+                name=f"partition_{j + 1}",
                 width_mm=partition_y,
                 height_mm=height - 2 * thickness,
                 thickness_mm=thickness,
                 role=PanelRole.PARTITION,
             )
-            panels[f"partition_{j+1}"] = partition
+            panels[f"partition_{j + 1}"] = partition
 
             partition_position = (j + 1) * cell_width - thickness / 2
             interfaces.append(
@@ -388,7 +448,7 @@ def cubby(
                     InterfaceType.INTERNAL,
                     "top",
                     "left",
-                    f"partition_{j+1}",
+                    f"partition_{j + 1}",
                     "top",
                     partition_joinery,
                     position_along_edge_a_mm=partition_position,
@@ -399,7 +459,7 @@ def cubby(
                     InterfaceType.INTERNAL,
                     "bottom",
                     "left",
-                    f"partition_{j+1}",
+                    f"partition_{j + 1}",
                     "bottom",
                     partition_joinery,
                     position_along_edge_a_mm=partition_position,
@@ -413,9 +473,9 @@ def cubby(
             interfaces.append(
                 Interface(
                     InterfaceType.INTERNAL,
-                    f"shelf_{i+1}",
+                    f"shelf_{i + 1}",
                     "bottom",
-                    f"partition_{j+1}",
+                    f"partition_{j + 1}",
                     "left",
                     internal_joinery,
                     position_along_edge_a_mm=position_on_shelf,
@@ -449,7 +509,7 @@ def cubby(
                         InterfaceType.INTERNAL,
                         "back",
                         "bottom",
-                        f"shelf_{i+1}",
+                        f"shelf_{i + 1}",
                         "top",
                         shelf_joinery,
                         position_along_edge_a_mm=back_shelf_position,
@@ -463,7 +523,7 @@ def cubby(
                         InterfaceType.INTERNAL,
                         "back",
                         "left",
-                        f"partition_{j+1}",
+                        f"partition_{j + 1}",
                         "right",
                         partition_joinery,
                         position_along_edge_a_mm=back_partition_position,

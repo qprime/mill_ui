@@ -13,22 +13,21 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from layout_ast.layout import (
-    LayoutAST,
-    Sheet,
-    Item,
-    Geometry,
-    Placement,
     Feature,
+    Geometry,
+    Item,
+    LayoutAST,
+    Placement,
+    Sheet,
 )
-from validation.core import Verdict, CAMValidationResult
+from validation.core import CAMValidationResult, Verdict
 from validation.runner import (
-    validate,
-    validate_recipe,
     ValidationInput,
     ValidationOptions,
     _merge_gcode_metrics,
+    validate,
+    validate_recipe,
 )
-
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -62,7 +61,7 @@ def make_simple_profile_ast() -> LayoutAST:
 
 def make_minimal_svg() -> str:
     """Minimal valid SVG for testing."""
-    return '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 650" width="450mm" height="650mm">
+    return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 650" width="450mm" height="650mm">
         <rect x="0" y="0" width="450" height="650" fill="#1a1a1a"/>
         <g id="SHEET_OUTLINE"><rect x="0" y="0" width="450" height="650"/></g>
         <g id="PROFILE_CUTS"><rect x="125" y="250" width="200" height="150"/></g>
@@ -70,7 +69,7 @@ def make_minimal_svg() -> str:
         <g id="HOLES"/>
         <g id="DIMENSIONS"><text x="10" y="10">200mm</text></g>
         <g id="NOTES"><text x="10" y="20">Sheet: 450 x 650 x 19mm</text></g>
-    </svg>'''
+    </svg>"""
 
 
 # ============================================================================
@@ -264,6 +263,7 @@ def test_validate_recipe_with_golden_file():
     golden = {"svg": {"document": {"width_mm": 730.0}}}
 
     from validation.regression import ComparisonConfig
+
     config = ComparisonConfig(default_tolerance_percent=1.0)
 
     result = validate_recipe(
@@ -292,7 +292,6 @@ def test_merge_gcode_metrics_empty():
 
 def test_merge_gcode_metrics_single():
     """_merge_gcode_metrics passes through single file."""
-    from validation.metrics.gcode_metrics import GCodeMetrics
 
     # Create a mock metrics object
     class MockGCodeMetrics:
@@ -306,6 +305,7 @@ def test_merge_gcode_metrics_single():
 
 def test_merge_gcode_metrics_sums_counts():
     """_merge_gcode_metrics sums counts from multiple files."""
+
     class MockGCodeMetrics:
         def __init__(self, total_lines):
             self._total_lines = total_lines
@@ -348,10 +348,12 @@ def test_validate_recipe_simple_profile():
     # Recipe 01 should pass all invariants
     assert result.invariants.failed == 0
 
-    print(f"PASS: test_validate_recipe_simple_profile "
-          f"(verdict: {result.verdict.value}, "
-          f"{result.invariants.total} invariants, "
-          f"{result.invariants.warned} warnings)")
+    print(
+        f"PASS: test_validate_recipe_simple_profile "
+        f"(verdict: {result.verdict.value}, "
+        f"{result.invariants.total} invariants, "
+        f"{result.invariants.warned} warnings)"
+    )
 
 
 def test_validate_recipe_with_ast():
@@ -365,15 +367,16 @@ def test_validate_recipe_with_ast():
 
     # Parse PML to get AST
     from pml import parse_pml
+
     with open(pml_path) as f:
         ast = parse_pml(f.read())
 
     result = validate_recipe(recipe_dir, ast=ast)
 
     assert result.assertions.total > 0
-    print(f"PASS: test_validate_recipe_with_ast "
-          f"({result.assertions.total} assertions, "
-          f"{result.assertions.passed} passed)")
+    print(
+        f"PASS: test_validate_recipe_with_ast ({result.assertions.total} assertions, {result.assertions.passed} passed)"
+    )
 
 
 def test_validate_recipe_pocket():
@@ -389,9 +392,7 @@ def test_validate_recipe_pocket():
     assert isinstance(result, CAMValidationResult)
     assert result.invariants.failed == 0
 
-    print(f"PASS: test_validate_recipe_pocket "
-          f"(verdict: {result.verdict.value}, "
-          f"{result.invariants.total} invariants)")
+    print(f"PASS: test_validate_recipe_pocket (verdict: {result.verdict.value}, {result.invariants.total} invariants)")
 
 
 def test_validate_recipe_shaker_door():
@@ -407,9 +408,11 @@ def test_validate_recipe_shaker_door():
     assert isinstance(result, CAMValidationResult)
     assert result.invariants.failed == 0
 
-    print(f"PASS: test_validate_recipe_shaker_door "
-          f"(verdict: {result.verdict.value}, "
-          f"{result.invariants.total} invariants)")
+    print(
+        f"PASS: test_validate_recipe_shaker_door "
+        f"(verdict: {result.verdict.value}, "
+        f"{result.invariants.total} invariants)"
+    )
 
 
 def test_validate_recipe_multi_tool():
@@ -428,7 +431,7 @@ def test_validate_recipe_multi_tool():
         # Multi-tool recipes should have file_count > 1 or merged metrics
         print(f"  G-code: {gcode.get('summary', {}).get('total_lines', 'N/A')} lines")
 
-    print(f"PASS: test_validate_recipe_multi_tool")
+    print("PASS: test_validate_recipe_multi_tool")
 
 
 def test_validate_all_recipes():
@@ -439,8 +442,7 @@ def test_validate_all_recipes():
 
     for i in range(1, 19):
         recipe_name = f"{i:02d}_"
-        recipe_dirs = [d for d in os.listdir(RECIPE_DIR)
-                       if d.startswith(recipe_name)]
+        recipe_dirs = [d for d in os.listdir(RECIPE_DIR) if d.startswith(recipe_name)]
 
         if not recipe_dirs:
             skipped += 1
@@ -608,6 +610,7 @@ def run_tests() -> bool:
                 print(f"ERROR: {test.__name__}")
                 print(f"  {type(e).__name__}: {e}")
                 import traceback
+
                 traceback.print_exc()
                 failed += 1
 

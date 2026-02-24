@@ -6,3 +6,17 @@ pytest-cov
 
 # Optional: PDF export for blueprint drawings
 cairosvg>=2.7.0
+
+# Static analysis and formatting
+ruff
+mypy
+types-shapely
+
+# Property-based testing
+hypothesis>=6.0
+
+# Mutation testing (run manually, not in CI)
+mutmut>=3.0
+
+# Git hooks
+pre-commit

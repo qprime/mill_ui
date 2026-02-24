@@ -1,7 +1,24 @@
-
+import sys
 from pathlib import Path
 from pkgutil import extend_path
-import sys
+
+from .core import (
+    bore_helical,
+    create_stock,
+    detect_holes,
+    detect_planar,
+    drill_peck,
+    fit_arcs,
+    is_native_available,
+    link_keepdown,
+    load_step,
+    make_setup,
+    offset_inset,
+    offset_outset,
+    pocket_raster,
+    post_gcode,
+    profile_outline,
+)
 
 __path__ = extend_path(__path__, __name__)
 
@@ -13,38 +30,20 @@ for _entry in list(sys.path):
         if candidate_str not in __path__:
             __path__.append(candidate_str)
 
-from .core import (
-    is_native_available,
-    pocket_raster,
-    profile_outline,
-    drill_peck,
-    bore_helical,
-    post_gcode,
-    load_step,
-    make_setup,
-    detect_planar,
-    detect_holes,
-    offset_inset,
-    offset_outset,
-    create_stock,
-    link_keepdown,
-    fit_arcs,
-)
-
 __all__ = [
-    "is_native_available",
-    "pocket_raster",
-    "profile_outline",
-    "drill_peck",
     "bore_helical",
-    "post_gcode",
+    "create_stock",
+    "detect_holes",
+    "detect_planar",
+    "drill_peck",
+    "fit_arcs",
+    "is_native_available",
+    "link_keepdown",
     "load_step",
     "make_setup",
-    "detect_planar",
-    "detect_holes",
     "offset_inset",
     "offset_outset",
-    "create_stock",
-    "link_keepdown",
-    "fit_arcs",
+    "pocket_raster",
+    "post_gcode",
+    "profile_outline",
 ]

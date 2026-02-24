@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/planner/passes/summary.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-09, 0.5, 'cut_length_3d_mm', 'cut_length_xy_mm', 'description', 'filename', 'item_count', 'max_depth_mm', 'merged_seams', 'metrics', 'notes', 'operation', 'passes', 'plunge_travel_mm', 'profile_options', 'summarise_passes', 'tool']

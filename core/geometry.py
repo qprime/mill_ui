@@ -1,11 +1,11 @@
-
 from __future__ import annotations
 
 import math
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
-from ir.removal_intent import Bounds2D, ShapeGeometry
-from core.constants import ShapeType, GeometryKeys
+from core.constants import GeometryKeys, ShapeType
+from domains.domain import Bounds2D
+from ir.removal_intent import ShapeGeometry
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -24,7 +24,6 @@ def compute_shape_bounds(
     else:
         cx, cy = float(center_xy[0]), float(center_xy[1])
 
-
     if ShapeType.is_rect(shape_type) or shape_type == ShapeType.ROUNDED_RECT:
         w = float(geometry_data.get(GeometryKeys.W_MM, 0.0))
         h = float(geometry_data.get(GeometryKeys.H_MM, 0.0))
@@ -36,7 +35,6 @@ def compute_shape_bounds(
             y_max=cy + half_h,
         )
 
-
     if ShapeType.is_circle(shape_type):
         diameter = float(geometry_data.get(GeometryKeys.DIAMETER_MM, 0.0))
         radius = diameter / 2.0
@@ -46,7 +44,6 @@ def compute_shape_bounds(
             y_min=cy - radius,
             y_max=cy + radius,
         )
-
 
     if ShapeType.is_polygon(shape_type):
         points = geometry_data.get(GeometryKeys.POINTS, [])
@@ -67,7 +64,6 @@ def compute_shape_bounds(
             y_max=cy + 0.5,
         )
 
-
     if ShapeType.is_polyline(shape_type):
         points = geometry_data.get(GeometryKeys.POINTS, [])
         if points:
@@ -87,7 +83,6 @@ def compute_shape_bounds(
             y_max=cy + 0.5,
         )
 
-
     if ShapeType.is_line(shape_type):
         start = geometry_data.get("start", [])
         end = geometry_data.get("end", [])
@@ -106,7 +101,6 @@ def compute_shape_bounds(
             y_min=cy - 0.5,
             y_max=cy + 0.5,
         )
-
 
     return Bounds2D(
         x_min=cx - 0.5,
@@ -188,16 +182,14 @@ def clip_line_to_domain(
     if intersection.geom_type == "LineString":
         coords = list(intersection.coords)
         if len(coords) >= 2:
-            segments.append(
-                ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
-            )
+            segments.append(((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1])))
     elif intersection.geom_type == "MultiLineString":
-        for geom in intersection.geoms:
+        from shapely.geometry import MultiLineString as _MLS
+
+        for geom in cast(_MLS, intersection).geoms:
             coords = list(geom.coords)
             if len(coords) >= 2:
-                segments.append(
-                    ((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1]))
-                )
+                segments.append(((coords[0][0], coords[0][1]), (coords[-1][0], coords[-1][1])))
 
     return segments
 
@@ -205,8 +197,8 @@ def clip_line_to_domain(
 def extract_shape_geometry(
     shape: str,
     bounds: Bounds2D,
-    shape_geometry: "ShapeGeometry",
-) -> "ShapeGeometry":
+    shape_geometry: ShapeGeometry,
+) -> ShapeGeometry:
     if ShapeType.is_rect(shape):
         return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
     elif ShapeType.is_circle(shape):
@@ -248,5 +240,6 @@ def extract_polygon_points(
     geometry: dict[str, Any],
 ) -> list[list[float]] | None:
     if (ShapeType.is_polygon(shape) or ShapeType.is_polyline(shape)) and GeometryKeys.POINTS in geometry:
-        return geometry[GeometryKeys.POINTS]
+        result: list[list[float]] = geometry[GeometryKeys.POINTS]
+        return result
     return None

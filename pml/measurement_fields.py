@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 MEASUREMENT_DEFAULTS = {
     "minor_length": "3mm",
     "major_length": "6mm",
@@ -70,6 +69,6 @@ def format_measurement_fields(node, dim, default_depth: float) -> dict[str, Any]
 
 
 __all__ = [
-    "parse_measurement_fields",
     "format_measurement_fields",
+    "parse_measurement_fields",
 ]

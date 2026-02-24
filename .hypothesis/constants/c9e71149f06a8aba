@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/grid_lines.py
+# hypothesis_version: 6.151.9
+
+[0.001, 1.0, 'GridLinesGenerator', 'grid_lines', 'grid_lines_generator', 'horizontal', 'vertical', 'x_max', 'x_min', 'y_max', 'y_min']

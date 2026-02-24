@@ -1,12 +1,11 @@
-
 from __future__ import annotations
 
 from enum import Enum
 from typing import Any
 
-from .types import PartSpec, SheetSpec, NestedPart, SheetLayout, NestingResult
 from .guillotine import guillotine_pack
-from .maxrects import maxrects_pack, MaxRectsHeuristic
+from .maxrects import MaxRectsHeuristic, maxrects_pack
+from .types import NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
 
 
 class PackingAlgorithm(Enum):
@@ -29,14 +28,9 @@ def _part_fits_on_sheet(part: PartSpec, sheet: SheetSpec) -> bool:
     usable_w = sheet.usable_width_mm
     usable_h = sheet.usable_height_mm
 
-    if part.width_mm <= usable_w and part.height_mm <= usable_h:
-        return True
-
-    if part.allow_rotation:
-        if part.height_mm <= usable_w and part.width_mm <= usable_h:
-            return True
-
-    return False
+    return (part.width_mm <= usable_w and part.height_mm <= usable_h) or (
+        part.allow_rotation and part.height_mm <= usable_w and part.width_mm <= usable_h
+    )
 
 
 def _pack_single_sheet(
@@ -77,7 +71,6 @@ def pack_sheets(
     if isinstance(algorithm, str):
         algorithm = PackingAlgorithm(algorithm)
 
-
     too_large = []
     valid_parts = []
     for part in parts:
@@ -88,28 +81,21 @@ def pack_sheets(
         else:
             too_large.append(part)
 
-
     expanded = _expand_parts(valid_parts)
 
     if not expanded:
         return NestingResult(sheets=(), unplaced_parts=tuple(too_large))
 
-
     expanded.sort(key=lambda x: x[0].area_mm2, reverse=True)
-
 
     remaining = list(expanded)
     sheets = []
     sheet_index = 0
 
     while remaining and (max_sheets is None or sheet_index < max_sheets):
-
-
         pack_input = [
-            (part.width_mm, part.height_mm, part.allow_rotation, (part, inst_id))
-            for part, inst_id in remaining
+            (part.width_mm, part.height_mm, part.allow_rotation, (part, inst_id)) for part, inst_id in remaining
         ]
-
 
         placements = _pack_single_sheet(
             parts_input=pack_input,
@@ -120,9 +106,7 @@ def pack_sheets(
         )
 
         if not placements:
-
             break
-
 
         sheet_placements = []
         placed_keys = set()
@@ -144,7 +128,6 @@ def pack_sheets(
             )
             placed_keys.add((id(part_spec), inst_id))
 
-
         sheet_layout = SheetLayout(
             sheet_spec=sheet_spec,
             placements=tuple(sheet_placements),
@@ -152,20 +135,14 @@ def pack_sheets(
         )
         sheets.append(sheet_layout)
 
-
-        remaining = [
-            (part, inst_id)
-            for part, inst_id in remaining
-            if (id(part), inst_id) not in placed_keys
-        ]
+        remaining = [(part, inst_id) for part, inst_id in remaining if (id(part), inst_id) not in placed_keys]
 
         sheet_index += 1
-
 
     unplaced = list(too_large)
 
     remaining_by_spec = {}
-    for part, inst_id in remaining:
+    for part, _ in remaining:
         key = id(part)
         if key not in remaining_by_spec:
             remaining_by_spec[key] = (part, 0)
@@ -174,7 +151,6 @@ def pack_sheets(
 
     for spec, count in remaining_by_spec.values():
         if count > 0:
-
             unplaced.append(
                 PartSpec(
                     name=spec.name,
@@ -193,4 +169,4 @@ def pack_sheets(
     )
 
 
-__all__ = ["pack_sheets", "PackingAlgorithm", "DEFAULT_ALGORITHM"]
+__all__ = ["DEFAULT_ALGORITHM", "PackingAlgorithm", "pack_sheets"]

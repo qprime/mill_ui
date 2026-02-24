@@ -1,10 +1,10 @@
 import pytest
-import math
+
 from assembly.notches import (
+    finger_joints_to_notches,
+    notch_to_polyline,
     validate_notch_fits_edge,
     validate_notches_no_overlap,
-    notch_to_polyline,
-    finger_joints_to_notches,
 )
 from assembly.panel import Edge, NotchSpec
 

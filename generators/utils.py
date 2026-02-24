@@ -1,14 +1,12 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict
 
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import MultiPolygon, Polygon
 
 from domains.transforms import sheet_to_local
 from generators.core import (
     LoopSelection,
-    generate_shape_id,
 )
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
@@ -75,7 +73,6 @@ def iter_polygons(geom) -> list[Polygon]:
             if not poly.is_empty:
                 result.append(poly)
     elif hasattr(geom, "geoms"):
-
         for sub in geom.geoms:
             result.extend(iter_polygons(sub))
 
@@ -90,10 +87,7 @@ class LocalBounds(TypedDict):
 
 
 def get_local_bounds(domain: Domain) -> LocalBounds:
-    local_points = [
-        sheet_to_local(pt, domain)
-        for pt in domain.outer_boundary
-    ]
+    local_points = [sheet_to_local(pt, domain) for pt in domain.outer_boundary]
 
     xs = [p[0] for p in local_points]
     ys = [p[1] for p in local_points]
@@ -111,17 +105,14 @@ def extract_loops(
     selection: LoopSelection,
     generator_name: str,
 ) -> list[tuple[int, tuple[tuple[float, float], ...]]]:
-    all_loops = [domain.outer_boundary] + list(domain.inner_boundaries)
+    all_loops = [domain.outer_boundary, *domain.inner_boundaries]
     num_loops = len(all_loops)
 
     if selection == "outer_only":
         return [(0, domain.outer_boundary)]
 
     elif selection == "inner_only":
-        return [
-            (i + 1, inner)
-            for i, inner in enumerate(domain.inner_boundaries)
-        ]
+        return [(i + 1, inner) for i, inner in enumerate(domain.inner_boundaries)]
 
     elif selection == "all_loops":
         return [(i, loop) for i, loop in enumerate(all_loops)]
@@ -132,7 +123,7 @@ def extract_loops(
             if idx < 0 or idx >= num_loops:
                 raise ValueError(
                     f"{generator_name}: loop index {idx} out of range. "
-                    f"Domain has {num_loops} loops (0=outer, 1-{num_loops-1}=inner)"
+                    f"Domain has {num_loops} loops (0=outer, 1-{num_loops - 1}=inner)"
                 )
             result.append((idx, all_loops[idx]))
         return result
@@ -183,11 +174,11 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 __all__ = [
     "LocalBounds",
-    "shapely_to_item",
-    "iter_polygons",
-    "get_local_bounds",
-    "extract_loops",
-    "loop_type_suffix",
     "create_line_item",
+    "extract_loops",
+    "get_local_bounds",
     "is_major_tick",
+    "iter_polygons",
+    "loop_type_suffix",
+    "shapely_to_item",
 ]

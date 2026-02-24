@@ -1,16 +1,14 @@
-
 from __future__ import annotations
 
+from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
-from cam.planner.planner_input import PlannerInput, FeatureInput, GeometryInput
+from cam.planner.planner_input import FeatureInput, GeometryInput, PlannerInput
 from cam.post.gcode import write_gcode
-from cam.config import Config
 from ir.removal_intent import ShapeGeometry
-
 
 TOOL_DB = [
     {
@@ -47,9 +45,12 @@ def _feature(shape, geometry, center, depth, side=None, id="test"):
         radius_bl_mm=float(geometry["radius_bl_mm"]) if "radius_bl_mm" in geometry else None,
     )
     return FeatureInput(
-        id=id, shape=shape,
+        id=id,
+        shape=shape,
         geometry=GeometryInput(shape=shape, geometry=shape_geometry),
-        center_xy_mm=center, depth_mm=depth, start_depth_mm=0.0,
+        center_xy_mm=center,
+        depth_mm=depth,
+        start_depth_mm=0.0,
         side=side,
     )
 
@@ -60,12 +61,13 @@ def test_polygon_triangle_profile():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("Polygon", {"points": [(0, 0), (50, 0), (25, 43)]},
-                     (100, 100), 19.0, side="outside", id="triangle"),
+            _feature(
+                "Polygon", {"points": [(0, 0), (50, 0), (25, 43)]}, (100, 100), 19.0, side="outside", id="triangle"
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -89,16 +91,18 @@ def test_polygon_l_shape_profile():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("Polygon", {
-                "points": [
-                    (0, 0), (60, 0), (60, 30),
-                    (30, 30), (30, 60), (0, 60)
-                ]
-            }, (150, 100), 19.0, side="outside", id="l_shape"),
+            _feature(
+                "Polygon",
+                {"points": [(0, 0), (60, 0), (60, 30), (30, 30), (30, 60), (0, 60)]},
+                (150, 100),
+                19.0,
+                side="outside",
+                id="l_shape",
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -118,13 +122,22 @@ def test_roundedrect_uniform_radius_profile():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("RoundedRect", {
-                "w_mm": 200.0, "h_mm": 100.0, "radius_mm": 15.0,
-            }, (150, 100), 19.0, side="outside", id="rounded_panel"),
+            _feature(
+                "RoundedRect",
+                {
+                    "w_mm": 200.0,
+                    "h_mm": 100.0,
+                    "radius_mm": 15.0,
+                },
+                (150, 100),
+                19.0,
+                side="outside",
+                id="rounded_panel",
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -145,15 +158,25 @@ def test_roundedrect_selective_corners_profile():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("RoundedRect", {
-                "w_mm": 200.0, "h_mm": 100.0,
-                "radius_tl_mm": 20.0, "radius_tr_mm": 20.0,
-                "radius_br_mm": 0.0, "radius_bl_mm": 0.0,
-            }, (150, 100), 19.0, side="outside", id="table_top"),
+            _feature(
+                "RoundedRect",
+                {
+                    "w_mm": 200.0,
+                    "h_mm": 100.0,
+                    "radius_tl_mm": 20.0,
+                    "radius_tr_mm": 20.0,
+                    "radius_br_mm": 0.0,
+                    "radius_bl_mm": 0.0,
+                },
+                (150, 100),
+                19.0,
+                side="outside",
+                id="table_top",
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -173,12 +196,18 @@ def test_polygon_inside_cut():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("Polygon", {"points": [(0, 0), (80, 0), (80, 60), (0, 60)]},
-                     (150, 100), 19.0, side="inside", id="cutout"),
+            _feature(
+                "Polygon",
+                {"points": [(0, 0), (80, 0), (80, 60), (0, 60)]},
+                (150, 100),
+                19.0,
+                side="inside",
+                id="cutout",
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -198,13 +227,22 @@ def test_roundedrect_inside_cut():
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
         profiles=(
-            _feature("RoundedRect", {
-                "w_mm": 100.0, "h_mm": 60.0, "radius_mm": 10.0,
-            }, (150, 100), 19.0, side="inside", id="window_cutout"),
+            _feature(
+                "RoundedRect",
+                {
+                    "w_mm": 100.0,
+                    "h_mm": 60.0,
+                    "radius_mm": 10.0,
+                },
+                (150, 100),
+                19.0,
+                side="inside",
+                id="window_cutout",
+            ),
         ),
     )
 
-    passes, summary = plan_passes(
+    passes, _summary = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),

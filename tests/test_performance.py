@@ -41,31 +41,31 @@ from __future__ import annotations
 import math
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from domains import Domain, MultiDomain
+from domains import Domain
 from generators import (
+    BeadParams,
     FlatPocketParams,
+    GridParams,
     ProfileParams,
     WaveParams,
-    GridParams,
-    BeadParams,
+    bead_generator,
     flat_pocket_generator,
+    grid_generator,
     profile_generator,
     wave_generator,
-    grid_generator,
-    bead_generator,
 )
 from layout_ast.layout import LayoutAST, Sheet
-
 
 # =============================================================================
 # Benchmark Utilities
 # =============================================================================
+
 
 class BenchmarkResult:
     """Result of a benchmark run."""
@@ -75,7 +75,7 @@ class BenchmarkResult:
         self.iterations = iterations
         self.total_time = total_time
         self.avg_time = total_time / iterations
-        self.ops_per_sec = iterations / total_time if total_time > 0 else float('inf')
+        self.ops_per_sec = iterations / total_time if total_time > 0 else float("inf")
 
     def __str__(self) -> str:
         if self.avg_time < 0.001:
@@ -121,10 +121,13 @@ def benchmark(
 # Domain Construction Benchmarks
 # =============================================================================
 
+
 def bench_domain_rectangle_construction():
     """Benchmark simple rectangle domain construction."""
+
     def func():
         Domain.from_rectangle(100, 100, center=(50, 50))
+
     return benchmark("Domain.from_rectangle", func, iterations=1000)
 
 
@@ -140,6 +143,7 @@ def bench_domain_polygon_construction():
 
     def func():
         Domain.from_polygon(vertices)
+
     return benchmark("Domain.from_polygon (100 vertices)", func, iterations=100)
 
 
@@ -152,12 +156,11 @@ def bench_domain_with_holes_construction():
         for col in range(5):
             x = 20 + col * 35
             y = 50 + row * 100
-            holes.append([
-                (x, y), (x + 20, y), (x + 20, y + 20), (x, y + 20)
-            ])
+            holes.append([(x, y), (x + 20, y), (x + 20, y + 20), (x, y + 20)])
 
     def func():
         Domain.from_polygon(outer, holes=holes)
+
     return benchmark("Domain.from_polygon (10 holes)", func, iterations=100)
 
 
@@ -165,12 +168,14 @@ def bench_domain_with_holes_construction():
 # Domain Operation Benchmarks
 # =============================================================================
 
+
 def bench_domain_inset():
     """Benchmark inset operation."""
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
 
     def func():
         domain.inset(10)
+
     return benchmark("Domain.inset", func, iterations=500)
 
 
@@ -180,6 +185,7 @@ def bench_domain_offset():
 
     def func():
         domain.offset(10)
+
     return benchmark("Domain.offset", func, iterations=500)
 
 
@@ -190,6 +196,7 @@ def bench_domain_subtract():
 
     def func():
         outer.subtract(inner)
+
     return benchmark("Domain.subtract", func, iterations=500)
 
 
@@ -200,6 +207,7 @@ def bench_domain_intersect():
 
     def func():
         d1.intersect(d2)
+
     return benchmark("Domain.intersect", func, iterations=500)
 
 
@@ -207,20 +215,31 @@ def bench_complex_domain_inset():
     """Benchmark inset on complex polygon."""
     # Create irregular polygon
     vertices = [
-        (0, 0), (100, 0), (100, 50), (80, 50), (80, 100),
-        (100, 100), (100, 150), (0, 150), (0, 100), (20, 100),
-        (20, 50), (0, 50)
+        (0, 0),
+        (100, 0),
+        (100, 50),
+        (80, 50),
+        (80, 100),
+        (100, 100),
+        (100, 150),
+        (0, 150),
+        (0, 100),
+        (20, 100),
+        (20, 50),
+        (0, 50),
     ]
     domain = Domain.from_polygon(vertices)
 
     def func():
         domain.inset(5)
+
     return benchmark("Complex domain inset", func, iterations=200)
 
 
 # =============================================================================
 # Generator Benchmarks
 # =============================================================================
+
 
 def bench_flat_pocket_generator():
     """Benchmark flat pocket generator."""
@@ -229,6 +248,7 @@ def bench_flat_pocket_generator():
 
     def func():
         flat_pocket_generator(domain, params)
+
     return benchmark("flat_pocket_generator", func, iterations=500)
 
 
@@ -239,6 +259,7 @@ def bench_profile_generator():
 
     def func():
         profile_generator(domain, params)
+
     return benchmark("profile_generator", func, iterations=500)
 
 
@@ -253,6 +274,7 @@ def bench_wave_generator():
 
     def func():
         wave_generator(domain, params)
+
     return benchmark("wave_generator", func, iterations=100)
 
 
@@ -268,6 +290,7 @@ def bench_grid_generator():
 
     def func():
         grid_generator(domain, params)
+
     return benchmark("grid_generator", func, iterations=100)
 
 
@@ -278,6 +301,7 @@ def bench_bead_generator():
 
     def func():
         bead_generator(domain, params)
+
     return benchmark("bead_generator", func, iterations=200)
 
 
@@ -285,8 +309,10 @@ def bench_bead_generator():
 # End-to-End Pipeline Benchmarks
 # =============================================================================
 
+
 def bench_shaker_door_pipeline():
     """Benchmark a complete Shaker door from domains to AST."""
+
     def func():
         # Create domains
         outer = Domain.from_rectangle(400, 600, center=(200, 300))
@@ -315,6 +341,7 @@ def bench_shaker_door_pipeline():
 
 def bench_decorated_panel_pipeline():
     """Benchmark decorated panel with wave pattern."""
+
     def func():
         # Create domains
         outer = Domain.from_rectangle(300, 200, center=(150, 100))
@@ -373,6 +400,7 @@ def bench_full_pipeline_with_ir():
 # Stress Tests
 # =============================================================================
 
+
 def stress_test_many_vertices():
     """Stress test: domain with very many vertices."""
     # 1000-vertex polygon approximating a circle
@@ -408,9 +436,7 @@ def stress_test_many_holes():
         for col in range(5):
             x = 30 + col * 90
             y = 30 + row * 90
-            holes.append([
-                (x, y), (x + 40, y), (x + 40, y + 40), (x, y + 40)
-            ])
+            holes.append([(x, y), (x + 40, y), (x + 40, y + 40), (x, y + 40)])
 
     start = time.perf_counter()
     domain = Domain.from_polygon(outer, holes=holes)
@@ -435,7 +461,7 @@ def stress_test_chained_operations():
     domain = Domain.from_rectangle(1000, 1000, center=(500, 500))
 
     # Chain of operations
-    for i in range(10):
+    for _ in range(10):
         result = domain.inset(20)
         if result.is_empty:
             break
@@ -496,6 +522,7 @@ def stress_test_fine_wave():
 # Test Runner
 # =============================================================================
 
+
 def run_benchmarks():
     """Run all benchmarks and display results."""
     print("=" * 70)
@@ -503,30 +530,42 @@ def run_benchmarks():
     print("=" * 70)
 
     benchmarks = [
-        ("Domain Construction", [
-            bench_domain_rectangle_construction,
-            bench_domain_polygon_construction,
-            bench_domain_with_holes_construction,
-        ]),
-        ("Domain Operations", [
-            bench_domain_inset,
-            bench_domain_offset,
-            bench_domain_subtract,
-            bench_domain_intersect,
-            bench_complex_domain_inset,
-        ]),
-        ("Generators", [
-            bench_flat_pocket_generator,
-            bench_profile_generator,
-            bench_wave_generator,
-            bench_grid_generator,
-            bench_bead_generator,
-        ]),
-        ("End-to-End Pipelines", [
-            bench_shaker_door_pipeline,
-            bench_decorated_panel_pipeline,
-            bench_full_pipeline_with_ir,
-        ]),
+        (
+            "Domain Construction",
+            [
+                bench_domain_rectangle_construction,
+                bench_domain_polygon_construction,
+                bench_domain_with_holes_construction,
+            ],
+        ),
+        (
+            "Domain Operations",
+            [
+                bench_domain_inset,
+                bench_domain_offset,
+                bench_domain_subtract,
+                bench_domain_intersect,
+                bench_complex_domain_inset,
+            ],
+        ),
+        (
+            "Generators",
+            [
+                bench_flat_pocket_generator,
+                bench_profile_generator,
+                bench_wave_generator,
+                bench_grid_generator,
+                bench_bead_generator,
+            ],
+        ),
+        (
+            "End-to-End Pipelines",
+            [
+                bench_shaker_door_pipeline,
+                bench_decorated_panel_pipeline,
+                bench_full_pipeline_with_ir,
+            ],
+        ),
     ]
 
     for category, funcs in benchmarks:
@@ -588,10 +627,10 @@ def run_tests():
     for name, bench_func, threshold in thresholds:
         result = bench_func()
         if result.avg_time <= threshold:
-            print(f"PASS: {name} ({result.avg_time*1000:.2f}ms <= {threshold*1000:.0f}ms)")
+            print(f"PASS: {name} ({result.avg_time * 1000:.2f}ms <= {threshold * 1000:.0f}ms)")
             passed += 1
         else:
-            print(f"FAIL: {name} ({result.avg_time*1000:.2f}ms > {threshold*1000:.0f}ms)")
+            print(f"FAIL: {name} ({result.avg_time * 1000:.2f}ms > {threshold * 1000:.0f}ms)")
             failed += 1
 
     print("-" * 60)

@@ -15,13 +15,11 @@ import sys
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from validation.core import CAMValidationResult
 from validation.metrics.svg_metrics import (
-    SVGMetrics,
     extract_svg_metrics,
     extract_svg_metrics_from_file,
 )
-from validation.core import Verdict, CAMValidationResult
-
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -141,7 +139,7 @@ def test_svg_metrics_deterministic_from_string():
         return
 
     # Read file content
-    with open(svg_path, "r") as f:
+    with open(svg_path) as f:
         svg_content = f.read()
 
     # Extract from file and string
@@ -267,7 +265,7 @@ def test_svg_metrics_invalid_svg():
 
     try:
         extract_svg_metrics(invalid_svg)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "Invalid SVG" in str(e)
 
@@ -418,8 +416,7 @@ def test_svg_metrics_all_recipes():
 
         # Find all sheet_*.svg files (exclude macOS ._ files)
         sheet_svgs = sorted(
-            f for f in glob.glob(os.path.join(recipe_dir, "sheet_*.svg"))
-            if not os.path.basename(f).startswith("._")
+            f for f in glob.glob(os.path.join(recipe_dir, "sheet_*.svg")) if not os.path.basename(f).startswith("._")
         )
 
         if not sheet_svgs:

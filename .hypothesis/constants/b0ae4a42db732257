@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/ir/removal_intent.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 5.0, 180, 'allowance', 'angle_deg', 'bevel', 'bounds', 'chamfer', 'constant', 'constraints', 'count', 'depth_mm', 'depth_profile', 'distance_mm', 'edge_treatment', 'feature_type', 'finish_allowance_mm', 'height_mm', 'hint_type', 'inner_depth_mm', 'inside', 'islands', 'item_type', 'keepout', 'keepouts', 'kerf_compensation', 'linear_gradient', 'mode', 'on', 'original_id', 'outside', 'radius_mm', 'region_id', 'rough_allowance_mm', 'safe_z_mm', 'shape', 'shape_id', 'side', 'tabs', 'tolerance_mm', 'type', 'v_angle_deg', 'v_carve', 'width_mm', 'x_max', 'x_min', 'y_max', 'y_min', 'z_bottom', 'z_top']

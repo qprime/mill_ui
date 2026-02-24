@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/wave.py
+# hypothesis_version: 6.151.9
+
+[0.01, 1.0, 1000, 'Polyline', 'WaveGenerator', 'engrave', 'is_open', 'points', 'shape', 'wave', 'wave_generator', 'x_max', 'x_min', 'y_max', 'y_min']

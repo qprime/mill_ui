@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Literal, Any
+from typing import Any, Literal
 
 from assembly.panel import PanelSpec
-
 
 MachiningStage = Literal["segment", "strip"]
 
@@ -215,10 +214,7 @@ def compute_segments(
         min_segment_length = sheet_size * 0.1
 
     if length <= sheet_size:
-        return [
-            [Segment(start_mm=0.0, end_mm=length, layer=layer_idx, index=0)]
-            for layer_idx in range(layers)
-        ]
+        return [[Segment(start_mm=0.0, end_mm=length, layer=layer_idx, index=0)] for layer_idx in range(layers)]
 
     stagger = sheet_size / layers
 
@@ -231,21 +227,20 @@ def compute_segments(
 
         while pos < length:
             remaining = length - pos
-            if seg_idx == 0:
-                seg_len = min(sheet_size - layer_offset, remaining)
-            else:
-                seg_len = min(sheet_size, remaining)
+            seg_len = min(sheet_size - layer_offset, remaining) if seg_idx == 0 else min(sheet_size, remaining)
 
             next_remaining = remaining - seg_len
             if next_remaining > 0 and next_remaining < min_segment_length:
                 seg_len = remaining / 2.0
 
-            layer_segments.append(Segment(
-                start_mm=pos,
-                end_mm=pos + seg_len,
-                layer=layer_idx,
-                index=seg_idx,
-            ))
+            layer_segments.append(
+                Segment(
+                    start_mm=pos,
+                    end_mm=pos + seg_len,
+                    layer=layer_idx,
+                    index=seg_idx,
+                )
+            )
             pos += seg_len
             seg_idx += 1
 
@@ -293,9 +288,7 @@ def validate_stagger_minimum(
             butt_b = layer_b[0].end_mm
             stagger = abs(butt_a - butt_b)
             if stagger < min_stagger - tolerance:
-                raise ValueError(
-                    f"Stagger {stagger}mm < minimum {min_stagger}mm (BM-10 violation)"
-                )
+                raise ValueError(f"Stagger {stagger}mm < minimum {min_stagger}mm (BM-10 violation)")
 
 
 @dataclass(frozen=True)
@@ -370,12 +363,10 @@ class BeamSpec:
         for layer_idx in range(self.layer_count):
             if isinstance(self.layers, int):
                 layer_length = self.length_mm + self._tenon_extensions_for_layer(layer_idx)
-                layer_offset = 0.0
                 layer_segments = segments[layer_idx] if segments else None
             else:
                 layer_spec = self.layers[layer_idx]
                 layer_length = layer_spec.length_mm
-                layer_offset = layer_spec.offset_mm
                 layer_segments = None
 
             if layer_segments and len(layer_segments) > 1:
@@ -389,10 +380,7 @@ class BeamSpec:
                     )
                     panels.append(panel)
             else:
-                if self.layer_count == 1:
-                    panel_name = self.name
-                else:
-                    panel_name = f"{self.name}_L{layer_idx}"
+                panel_name = self.name if self.layer_count == 1 else f"{self.name}_L{layer_idx}"
 
                 panel = PanelSpec(
                     name=panel_name,
@@ -406,29 +394,29 @@ class BeamSpec:
 
 
 __all__ = [
-    "MachiningStage",
     "BeamRole",
-    "Cutout",
-    "LayerSpec",
-    "Segment",
-    "DrillHole",
-    "SquareMortise",
+    "BeamSpec",
     "CarvedDesign",
-    "GeometricPattern",
-    "FaceFeature",
-    "Tenon",
-    "EndCap",
-    "EndProfile",
-    "EndFeature",
-    "Fillet",
     "Chamfer",
-    "Rabbet",
-    "EdgeDado",
-    "EdgeNotch",
+    "Cutout",
+    "DrillHole",
     "EdgeContour",
+    "EdgeDado",
     "EdgeFeature",
+    "EdgeNotch",
+    "EndCap",
+    "EndFeature",
+    "EndProfile",
+    "FaceFeature",
+    "Fillet",
+    "GeometricPattern",
+    "LayerSpec",
+    "MachiningStage",
+    "Rabbet",
+    "Segment",
+    "SquareMortise",
+    "Tenon",
     "compute_segments",
     "validate_butts_never_align",
     "validate_stagger_minimum",
-    "BeamSpec",
 ]

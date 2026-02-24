@@ -12,21 +12,19 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from layout_ast.layout import (
-    LayoutAST,
-    Sheet,
-    Item,
-    Geometry,
-    Placement,
     Feature,
+    Geometry,
+    Item,
+    LayoutAST,
+    Placement,
+    Sheet,
+)
+from validation.assertions.intent_assertions import (
+    IntentAssertion,
+    check_assertions,
+    derive_assertions,
 )
 from validation.core import Verdict
-from validation.assertions.intent_assertions import (
-    derive_assertions,
-    check_assertions,
-    IntentAssertion,
-    ASSERTION_IDS,
-)
-
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -268,6 +266,7 @@ def test_check_returns_results():
     results = check_assertions(assertions, svg_metrics=svg_metrics)
     assert len(results) > 0
     from validation.core import AssertionResult
+
     assert all(isinstance(r, AssertionResult) for r in results)
     print("PASS: test_check_returns_results")
 
@@ -560,6 +559,7 @@ def test_simple_profile_recipe():
 
     # Parse PML to get AST
     from pml import parse_pml
+
     pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_simple_profile_recipe (PML file not found)")
@@ -578,10 +578,12 @@ def test_simple_profile_recipe():
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
+
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
 
     if os.path.exists(nc_path):
         from validation.metrics.gcode_metrics import extract_gcode_metrics
+
         gcode_metrics = extract_gcode_metrics(nc_path).to_dict()
 
     # Derive and check assertions
@@ -601,8 +603,7 @@ def test_simple_profile_recipe():
             print(f"    Actual: {f.actual}")
 
     # All assertions should pass (excluding WARN for missing metrics)
-    assert all(r.status != Verdict.FAIL for r in results), \
-        f"Recipe 01 has {len(failures)} assertion failures"
+    assert all(r.status != Verdict.FAIL for r in results), f"Recipe 01 has {len(failures)} assertion failures"
     print(f"PASS: test_simple_profile_recipe ({len(results)} assertions, {len(failures)} failures)")
 
 
@@ -614,6 +615,7 @@ def test_pocket_recipe():
         return
 
     from pml import parse_pml
+
     pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_pocket_recipe (PML file not found)")
@@ -631,10 +633,12 @@ def test_pocket_recipe():
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
+
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
 
     if os.path.exists(nc_path):
         from validation.metrics.gcode_metrics import extract_gcode_metrics
+
         gcode_metrics = extract_gcode_metrics(nc_path).to_dict()
 
     assertions = derive_assertions(ast)
@@ -651,8 +655,7 @@ def test_pocket_recipe():
             print(f"    Expected: {f.expected}")
             print(f"    Actual: {f.actual}")
 
-    assert all(r.status != Verdict.FAIL for r in results), \
-        f"Recipe 02 has {len(failures)} assertion failures"
+    assert all(r.status != Verdict.FAIL for r in results), f"Recipe 02 has {len(failures)} assertion failures"
     print(f"PASS: test_pocket_recipe ({len(results)} assertions, {len(failures)} failures)")
 
 
@@ -670,6 +673,7 @@ def test_shaker_door_recipe():
         return
 
     from pml import parse_pml
+
     pml_path = os.path.join(recipe_dir, "example.pml.yml")
     if not os.path.exists(pml_path):
         print("SKIP: test_shaker_door_recipe (PML file not found)")
@@ -686,6 +690,7 @@ def test_shaker_door_recipe():
 
     if os.path.exists(svg_path):
         from validation.metrics.svg_metrics import extract_svg_metrics_from_file
+
         svg_metrics = extract_svg_metrics_from_file(svg_path).to_dict()
 
     # Merge G-code metrics from all NC files in the output directory
@@ -693,6 +698,7 @@ def test_shaker_door_recipe():
     nc_files = sorted(glob.glob(os.path.join(output_dir, "*.nc")))
     if nc_files:
         from validation.metrics.gcode_metrics import extract_gcode_metrics
+
         merged_metrics = None
         for nc_path in nc_files:
             metrics = extract_gcode_metrics(nc_path).to_dict()
@@ -704,23 +710,14 @@ def test_shaker_door_recipe():
                 new_gcode = metrics.get("gcode", metrics)
 
                 # Merge xy_bounds (take combined extent)
-                gcode["xy_bounds"]["x_min"] = min(
-                    gcode["xy_bounds"]["x_min"], new_gcode["xy_bounds"]["x_min"]
-                )
-                gcode["xy_bounds"]["x_max"] = max(
-                    gcode["xy_bounds"]["x_max"], new_gcode["xy_bounds"]["x_max"]
-                )
-                gcode["xy_bounds"]["y_min"] = min(
-                    gcode["xy_bounds"]["y_min"], new_gcode["xy_bounds"]["y_min"]
-                )
-                gcode["xy_bounds"]["y_max"] = max(
-                    gcode["xy_bounds"]["y_max"], new_gcode["xy_bounds"]["y_max"]
-                )
+                gcode["xy_bounds"]["x_min"] = min(gcode["xy_bounds"]["x_min"], new_gcode["xy_bounds"]["x_min"])
+                gcode["xy_bounds"]["x_max"] = max(gcode["xy_bounds"]["x_max"], new_gcode["xy_bounds"]["x_max"])
+                gcode["xy_bounds"]["y_min"] = min(gcode["xy_bounds"]["y_min"], new_gcode["xy_bounds"]["y_min"])
+                gcode["xy_bounds"]["y_max"] = max(gcode["xy_bounds"]["y_max"], new_gcode["xy_bounds"]["y_max"])
 
                 # Merge z_profile (take deepest plunge)
                 gcode["z_profile"]["max_plunge_z_mm"] = min(
-                    gcode["z_profile"]["max_plunge_z_mm"],
-                    new_gcode["z_profile"]["max_plunge_z_mm"]
+                    gcode["z_profile"]["max_plunge_z_mm"], new_gcode["z_profile"]["max_plunge_z_mm"]
                 )
 
         gcode_metrics = merged_metrics
@@ -739,8 +736,7 @@ def test_shaker_door_recipe():
             print(f"    Expected: {f.expected}")
             print(f"    Actual: {f.actual}")
 
-    assert all(r.status != Verdict.FAIL for r in results), \
-        f"Recipe 03 has {len(failures)} assertion failures"
+    assert all(r.status != Verdict.FAIL for r in results), f"Recipe 03 has {len(failures)} assertion failures"
     print(f"PASS: test_shaker_door_recipe ({len(results)} assertions, {len(failures)} failures)")
 
 
@@ -796,6 +792,7 @@ def run_tests():
             failed += 1
         except Exception as e:
             import traceback
+
             print(f"ERROR: {test.__name__}: {e}")
             traceback.print_exc()
             failed += 1

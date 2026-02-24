@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from ir.removal_intent import Bounds2D
-from diagram_ir import DiagramIR, LayerIR, Rect, Circle, Line, Text, Polyline, Point2D
+from diagram_ir import Circle, DiagramIR, LayerIR, Line, Point2D, Polyline, Rect, Text
 from diagram_render.render_svg import (
-    render_diagram_svg,
+    DARK_DIAGRAM_THEME,
+    DIAGRAM_THEMES,
+    PRINT_DIAGRAM_THEME,
     DiagramTheme,
     StyleSpec,
-    DARK_DIAGRAM_THEME,
-    PRINT_DIAGRAM_THEME,
-    DIAGRAM_THEMES,
+    render_diagram_svg,
 )
+from ir.removal_intent import Bounds2D
 
 
 def _make_diagram(
-    bounds: Bounds2D = None,
-    layers: tuple = None,
+    bounds: Bounds2D | None = None,
+    layers: tuple | None = None,
 ) -> DiagramIR:
     if bounds is None:
         bounds = Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100)
@@ -345,34 +345,45 @@ def test_section_markers_on_shapes():
     svg = render_diagram_svg(diagram)
 
     assert "<circle" in svg
-    assert svg.count("dominant-baseline=\"central\"") >= 2
+    assert svg.count('dominant-baseline="central"') >= 2
 
 
 def _beam_structure_spliced():
-    return [{
-        "name": "long_rail",
-        "length_mm": 2000.0,
-        "width_mm": 100.0,
-        "thickness_mm": 19.0,
-        "layer_count": 3,
-        "total_thickness_mm": 57.0,
-        "role": "RAIL",
-        "layers": [
-            {"layer_index": 0, "segments": [
-                {"index": 0, "start_mm": 0.0, "end_mm": 1200.0, "length_mm": 1200.0},
-                {"index": 1, "start_mm": 1200.0, "end_mm": 2000.0, "length_mm": 800.0},
-            ]},
-            {"layer_index": 1, "segments": [
-                {"index": 0, "start_mm": 0.0, "end_mm": 800.0, "length_mm": 800.0},
-                {"index": 1, "start_mm": 800.0, "end_mm": 2000.0, "length_mm": 1200.0},
-            ]},
-            {"layer_index": 2, "segments": [
-                {"index": 0, "start_mm": 0.0, "end_mm": 400.0, "length_mm": 400.0},
-                {"index": 1, "start_mm": 400.0, "end_mm": 1600.0, "length_mm": 1200.0},
-                {"index": 2, "start_mm": 1600.0, "end_mm": 2000.0, "length_mm": 400.0},
-            ]},
-        ],
-    }]
+    return [
+        {
+            "name": "long_rail",
+            "length_mm": 2000.0,
+            "width_mm": 100.0,
+            "thickness_mm": 19.0,
+            "layer_count": 3,
+            "total_thickness_mm": 57.0,
+            "role": "RAIL",
+            "layers": [
+                {
+                    "layer_index": 0,
+                    "segments": [
+                        {"index": 0, "start_mm": 0.0, "end_mm": 1200.0, "length_mm": 1200.0},
+                        {"index": 1, "start_mm": 1200.0, "end_mm": 2000.0, "length_mm": 800.0},
+                    ],
+                },
+                {
+                    "layer_index": 1,
+                    "segments": [
+                        {"index": 0, "start_mm": 0.0, "end_mm": 800.0, "length_mm": 800.0},
+                        {"index": 1, "start_mm": 800.0, "end_mm": 2000.0, "length_mm": 1200.0},
+                    ],
+                },
+                {
+                    "layer_index": 2,
+                    "segments": [
+                        {"index": 0, "start_mm": 0.0, "end_mm": 400.0, "length_mm": 400.0},
+                        {"index": 1, "start_mm": 400.0, "end_mm": 1600.0, "length_mm": 1200.0},
+                        {"index": 2, "start_mm": 1600.0, "end_mm": 2000.0, "length_mm": 400.0},
+                    ],
+                },
+            ],
+        }
+    ]
 
 
 def test_beam_assembly_rendered():
@@ -412,20 +423,25 @@ def test_no_beam_assembly_when_empty():
 
 
 def test_beam_assembly_single_layer():
-    beam_data = [{
-        "name": "short_post",
-        "length_mm": 500.0,
-        "width_mm": 76.0,
-        "thickness_mm": 19.0,
-        "layer_count": 1,
-        "total_thickness_mm": 19.0,
-        "role": "POST",
-        "layers": [
-            {"layer_index": 0, "segments": [
-                {"index": 0, "start_mm": 0.0, "end_mm": 500.0, "length_mm": 500.0},
-            ]},
-        ],
-    }]
+    beam_data = [
+        {
+            "name": "short_post",
+            "length_mm": 500.0,
+            "width_mm": 76.0,
+            "thickness_mm": 19.0,
+            "layer_count": 1,
+            "total_thickness_mm": 19.0,
+            "role": "POST",
+            "layers": [
+                {
+                    "layer_index": 0,
+                    "segments": [
+                        {"index": 0, "start_mm": 0.0, "end_mm": 500.0, "length_mm": 500.0},
+                    ],
+                },
+            ],
+        }
+    ]
     diagram = DiagramIR(
         bounds=Bounds2D(x_min=0, x_max=200, y_min=0, y_max=200),
         layers=(),

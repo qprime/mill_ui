@@ -1,79 +1,71 @@
-
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-from validation.core import Verdict, RegressionResult, RegressionSummary
+from validation.core import RegressionResult, RegressionSummary, Verdict
 
-
-EXACT_MATCH_PATHS = frozenset({
-
-    "svg.layers.count",
-
-    "svg.paths.total_count",
-    "svg.paths.closed_count",
-    "svg.paths.open_count",
-    "svg.circles.count",
-    "svg.rects.count",
-    "svg.text_elements.count",
-
-    "gcode.summary.total_lines",
-    "gcode.summary.comment_lines",
-    "gcode.summary.motion_lines",
-    "gcode.summary.tool_change_lines",
-    "gcode.summary.spindle_lines",
-    "gcode.motion.g0_count",
-    "gcode.motion.g1_count",
-    "gcode.motion.g2_count",
-    "gcode.motion.g3_count",
-    "gcode.z_profile.depth_count",
-    "gcode.tools.tool_numbers",
-    "gcode.tools.tool_changes",
-    "gcode.operations.total_passes",
-})
-
-
-STRUCTURAL_MATCH_PATHS = frozenset({
-    "svg.layers.names",
-    "gcode.tools.tool_numbers",
-    "gcode.tools.spindle_speeds",
-    "gcode.feeds.feed_rates_used",
-    "gcode.z_profile.unique_cutting_depths",
-})
-
-
-EXCLUDED_PATHS = frozenset({
-    "svg.extraction_time_ms",
-    "gcode.extraction_time_ms",
-    "svg.version",
-    "gcode.version",
-})
-
-
-EXCLUDED_PREFIXES = (
-    "golden.",
+EXACT_MATCH_PATHS = frozenset(
+    {
+        "svg.layers.count",
+        "svg.paths.total_count",
+        "svg.paths.closed_count",
+        "svg.paths.open_count",
+        "svg.circles.count",
+        "svg.rects.count",
+        "svg.text_elements.count",
+        "gcode.summary.total_lines",
+        "gcode.summary.comment_lines",
+        "gcode.summary.motion_lines",
+        "gcode.summary.tool_change_lines",
+        "gcode.summary.spindle_lines",
+        "gcode.motion.g0_count",
+        "gcode.motion.g1_count",
+        "gcode.motion.g2_count",
+        "gcode.motion.g3_count",
+        "gcode.z_profile.depth_count",
+        "gcode.tools.tool_numbers",
+        "gcode.tools.tool_changes",
+        "gcode.operations.total_passes",
+    }
 )
 
 
+STRUCTURAL_MATCH_PATHS = frozenset(
+    {
+        "svg.layers.names",
+        "gcode.tools.tool_numbers",
+        "gcode.tools.spindle_speeds",
+        "gcode.feeds.feed_rates_used",
+        "gcode.z_profile.unique_cutting_depths",
+    }
+)
+
+
+EXCLUDED_PATHS = frozenset(
+    {
+        "svg.extraction_time_ms",
+        "gcode.extraction_time_ms",
+        "svg.version",
+        "gcode.version",
+    }
+)
+
+
+EXCLUDED_PREFIXES = ("golden.",)
+
+
 DEFAULT_TOLERANCES: dict[str, float] = {
-
     "position": 0.01,
-
     "area": 0.1,
     "volume": 0.1,
-
     "distance": 0.1,
-
     "time": 1.0,
-
     "default": 0.1,
 }
 
 
 TOLERANCE_CATEGORIES: dict[str, str] = {
-
     "bounds": "position",
     "x_min": "position",
     "x_max": "position",
@@ -90,16 +82,13 @@ TOLERANCE_CATEGORIES: dict[str, str] = {
     "safe_z": "position",
     "max_plunge": "position",
     "max_single_plunge": "position",
-
     "volume": "volume",
     "surface_area": "area",
     "area": "area",
-
     "distance": "distance",
     "length": "distance",
     "total_rapid": "distance",
     "total_feed": "distance",
-
     "time_": "time",
     "_time_s": "time",
 }
@@ -107,13 +96,10 @@ TOLERANCE_CATEGORIES: dict[str, str] = {
 
 @dataclass
 class ComparisonConfig:
-
     default_tolerance_percent: float = 0.1
     tolerance_overrides: dict[str, float] = field(default_factory=dict)
 
-
     fail_multiplier: float = 2.0
-
 
     near_zero_threshold: float = 0.01
     absolute_tolerance: float = 0.01
@@ -130,14 +116,12 @@ def compare_metrics(
 
     summary = RegressionSummary(compared=True, golden_file=golden_file)
 
-
     current_flat = _flatten_dict(current)
     golden_flat = _flatten_dict(golden)
 
     all_paths = set(current_flat.keys()) | set(golden_flat.keys())
 
     for path in sorted(all_paths):
-
         if _is_excluded(path):
             continue
 
@@ -163,8 +147,6 @@ def _flatten_dict(
         if isinstance(v, dict):
             items.extend(_flatten_dict(v, new_key, sep).items())
         elif isinstance(v, list):
-
-
             items.append((new_key, v))
             for i, item in enumerate(v):
                 if isinstance(item, dict):
@@ -187,9 +169,7 @@ def _is_excluded(path: str) -> bool:
         if path.startswith(prefix):
             return True
 
-    if "[" in path and "]" in path:
-        return True
-    return False
+    return "[" in path and "]" in path
 
 
 def _compare_values(
@@ -198,7 +178,6 @@ def _compare_values(
     golden: Any,
     config: ComparisonConfig,
 ) -> RegressionResult:
-
 
     if golden is None:
         return RegressionResult(
@@ -224,42 +203,33 @@ def _compare_values(
             message="Missing metric (was in golden baseline)",
         )
 
-
     if path in STRUCTURAL_MATCH_PATHS or _is_structural_path(path):
         return _compare_structural(path, current, golden)
-
 
     if path in EXACT_MATCH_PATHS or _is_exact_match_path(path):
         return _compare_exact(path, current, golden)
 
-
     if isinstance(golden, bool) or isinstance(current, bool):
         return _compare_exact(path, current, golden)
-
 
     if isinstance(golden, str) or isinstance(current, str):
         return _compare_exact(path, current, golden)
 
-
     if isinstance(golden, list) or isinstance(current, list):
         return _compare_lists(path, current, golden, config)
 
-
     if isinstance(golden, (int, float)) and isinstance(current, (int, float)):
         return _compare_numeric(path, current, golden, config)
-
 
     return _compare_exact(path, current, golden)
 
 
 def _is_exact_match_path(path: str) -> bool:
 
-    if "_count" in path or "count" == path.split(".")[-1]:
+    if "_count" in path or path.split(".")[-1] == "count":
         return True
 
-    if path.split(".")[-1].startswith("is_"):
-        return True
-    return False
+    return path.split(".")[-1].startswith("is_")
 
 
 def _is_structural_path(path: str) -> bool:
@@ -268,9 +238,7 @@ def _is_structural_path(path: str) -> bool:
         return True
     if "_names" in path:
         return True
-    if "_used" in path:
-        return True
-    return False
+    return "_used" in path
 
 
 def _normalize_for_comparison(value: Any) -> Any:
@@ -312,7 +280,6 @@ def _compare_structural(
         current_set = set(current) if isinstance(current, list) else {current}
         golden_set = set(golden) if isinstance(golden, list) else {golden}
     except TypeError:
-
         return _compare_exact(path, current, golden)
 
     matches = current_set == golden_set
@@ -359,7 +326,6 @@ def _compare_lists(
     if not isinstance(golden, list):
         golden = [golden] if golden is not None else []
 
-
     if len(current) != len(golden):
         return RegressionResult(
             metric_path=path,
@@ -372,11 +338,9 @@ def _compare_lists(
             message=f"List length mismatch: expected {len(golden)}, got {len(current)}",
         )
 
-
     if all(isinstance(x, (int, float)) for x in current + golden):
-
         max_delta_pct = 0.0
-        for c, g in zip(current, golden):
+        for c, g in zip(current, golden, strict=False):
             if g != 0:
                 delta_pct = abs((c - g) / g) * 100
             elif c != 0:
@@ -408,7 +372,6 @@ def _compare_lists(
             message=msg,
         )
     else:
-
         return _compare_exact(path, current, golden)
 
 
@@ -421,11 +384,9 @@ def _compare_numeric(
     delta = current - golden
     abs_delta = abs(delta)
 
-
     use_absolute = abs(golden) < config.near_zero_threshold
 
     if use_absolute:
-
         tolerance = config.absolute_tolerance
         delta_percent = None
 
@@ -439,7 +400,6 @@ def _compare_numeric(
             status = Verdict.FAIL
             msg = f"Significantly exceeds absolute tolerance ({abs_delta:.6f}mm >> {tolerance}mm)"
     else:
-
         delta_percent = abs(delta / golden) * 100
         tolerance = _get_tolerance(path, config)
 
@@ -469,7 +429,6 @@ def _get_tolerance(path: str, config: ComparisonConfig) -> float:
 
     if path in config.tolerance_overrides:
         return config.tolerance_overrides[path]
-
 
     path_lower = path.lower()
     for pattern, category in TOLERANCE_CATEGORIES.items():

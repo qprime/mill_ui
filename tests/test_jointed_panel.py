@@ -1,6 +1,7 @@
 import pytest
-from generators.panels import NotchedPanelParams, notched_panel_generator
+
 from assembly.panel import Edge, NotchSpec
+from generators.panels import NotchedPanelParams, notched_panel_generator
 
 
 class TestNotchedPanelParams:
@@ -15,9 +16,7 @@ class TestNotchedPanelParams:
         params = NotchedPanelParams(
             width_mm=100,
             height_mm=50,
-            notches=(
-                NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6),
-            ),
+            notches=(NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6),),
         )
         params.validate()
 
@@ -75,9 +74,7 @@ class TestNotchedPanelGenerator:
         assert items[0].feature.is_through
 
     def test_notched_panel_emits_profile_and_notch_items(self):
-        notches = (
-            NotchSpec(edge=Edge.BOTTOM, u_start_mm=20, u_len_mm=20, depth_mm=6),
-        )
+        notches = (NotchSpec(edge=Edge.BOTTOM, u_start_mm=20, u_len_mm=20, depth_mm=6),)
         params = NotchedPanelParams(
             width_mm=100,
             height_mm=50,
@@ -109,9 +106,7 @@ class TestNotchedPanelGenerator:
         assert len(pts) > 4
 
     def test_profile_polygon_includes_notch_inset_vertices(self):
-        notches = (
-            NotchSpec(edge=Edge.TOP, u_start_mm=10, u_len_mm=30, depth_mm=8),
-        )
+        notches = (NotchSpec(edge=Edge.TOP, u_start_mm=10, u_len_mm=30, depth_mm=8),)
         params = NotchedPanelParams(
             width_mm=100,
             height_mm=50,

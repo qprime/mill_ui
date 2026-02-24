@@ -1,0 +1,104 @@
+[project]
+name = "mill_ui"
+requires-python = ">=3.12"
+dependencies = [
+    "shapely>=2.0.0",
+    "mcp[cli]>=1.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "cairosvg>=2.7.0",
+    "ruff",
+    "mypy",
+    "hypothesis>=6.0",
+    "mutmut>=3.0",
+    "pre-commit",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=. --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail"
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+    ".venv/*",
+    "build/*",
+    "mill_mcp/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "F",      # pyflakes — unused imports, undefined names
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "I",      # isort — import sorting
+    "UP",     # pyupgrade — modern Python syntax
+    "B",      # flake8-bugbear — common bug patterns
+    "SIM",    # flake8-simplify — simplifiable code
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line length (let formatter handle it)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+explicit_package_bases = true
+exclude = ["^docs/"]
+
+# Modules not yet cleaned up — remove from this list as each is fixed
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+    "cli.*",
+    "mill_mcp.*",
+    "cam.*",
+    "adapters.*",
+    "generators.*",
+    "pml.*",
+    "resolution.*",
+    "diagram_ir.*",
+    "validation.*",
+    "assembly.*",
+    "nesting.*",
+    "diagram_render.*",
+    "config.*",
+    "export.*",
+    "layout_ast.*",
+    "templates.*",
+    "tools.*",
+]
+ignore_errors = true
+
+# Mutation testing (run manually, not in CI):
+#   mutmut run --paths-to-mutate=ir/
+#   mutmut run --paths-to-mutate=domains/
+#   mutmut results

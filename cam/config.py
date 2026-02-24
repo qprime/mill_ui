@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, fields, replace
-from pathlib import Path
-from typing import Any, Mapping, Sequence, Literal
 import json
 import math
 import os
-
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, fields, replace
+from pathlib import Path
+from typing import Any, Literal
 
 _PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_TOOL_DB_PATH = (_PACKAGE_ROOT / "cam" / "tools" / "tool_db.json").resolve()
@@ -16,7 +16,6 @@ _DEFAULT_PROJECT_ROOT = (_REPO_ROOT / "memories" / "cam_projects" / "sheet_layou
 
 @dataclass(frozen=True)
 class Config:
-
     tool_db_path: Path | None = _DEFAULT_TOOL_DB_PATH
     project_root: Path | None = _DEFAULT_PROJECT_ROOT
     material_name: str | None = "MDF"
@@ -83,9 +82,7 @@ class Config:
 
         env = environ or os.environ
         overrides = {
-            field: env.get(f"{prefix}{suffix}")
-            for field, suffix in _ENV_SUFFIXES.items()
-            if f"{prefix}{suffix}" in env
+            field: env.get(f"{prefix}{suffix}") for field, suffix in _ENV_SUFFIXES.items() if f"{prefix}{suffix}" in env
         }
         return (base or cls()).with_overrides(overrides)
 

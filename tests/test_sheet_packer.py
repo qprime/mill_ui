@@ -1,7 +1,7 @@
-
 import sys
-from nesting.types import PartSpec, SheetSpec, NestedPart, SheetLayout, NestingResult
+
 from nesting.sheet_packer import pack_sheets
+from nesting.types import PartSpec, SheetSpec
 
 
 def test_single_part_single_sheet():
@@ -33,12 +33,10 @@ def test_multiple_parts_single_sheet():
 def test_parts_require_multiple_sheets():
     print("Running test_parts_require_multiple_sheets...")
 
-
     parts = [PartSpec(name="large", width_mm=400, height_mm=400, quantity=4)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10, kerf_mm=0)
 
     result = pack_sheets(parts, sheet)
-
 
     assert result.total_sheets == 4
     assert result.total_parts == 4
@@ -55,7 +53,6 @@ def test_mixed_part_sizes():
     sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
 
     result = pack_sheets(parts, sheet)
-
 
     assert result.total_parts >= 10
     print(f"  Placed {result.total_parts} parts on {result.total_sheets} sheet(s)")
@@ -130,7 +127,6 @@ def test_placements_have_correct_coords():
     assert result.total_sheets == 1
     p = result.sheets[0].placements[0]
 
-
     assert p.x_mm == 70, f"Expected x=70, got {p.x_mm}"
     assert p.y_mm == 70, f"Expected y=70, got {p.y_mm}"
     print("  PASSED")
@@ -143,16 +139,14 @@ def test_utilization_calculated():
 
     result = pack_sheets(parts, sheet)
 
-
     assert result.total_sheets == 1
     util = result.sheets[0].utilization
-    assert 0.23 < util < 0.25, f"Expected ~24% utilization, got {util*100:.1f}%"
+    assert 0.23 < util < 0.25, f"Expected ~24% utilization, got {util * 100:.1f}%"
     print("  PASSED")
 
 
 def test_rotation_improves_packing():
     print("Running test_rotation_improves_packing...")
-
 
     parts = [PartSpec(name="long", width_mm=800, height_mm=200, quantity=2, allow_rotation=True)]
     sheet = SheetSpec(width_mm=1020, height_mm=520, thickness_mm=19, margin_mm=10, kerf_mm=6)
@@ -181,10 +175,8 @@ def test_recipe16_scenario():
 
     result = pack_sheets(parts, sheet)
 
-
     assert result.total_sheets >= 1
     assert result.total_sheets <= 2
-
 
     placed_doors = 0
     placed_drawers = 0
@@ -222,9 +214,7 @@ def test_user_example_scenario():
 
     result = pack_sheets(parts, sheet)
 
-
     assert result.total_sheets >= 3
-
 
     total_requested = 20 + 15 + 2
     assert result.total_parts >= total_requested - 2
@@ -245,7 +235,6 @@ def test_sheet_index_increments():
 
     result = pack_sheets(parts, sheet)
 
-
     assert result.total_sheets == 3
 
     for i, sheet_layout in enumerate(result.sheets):
@@ -261,12 +250,10 @@ def test_instance_ids_preserved():
 
     result = pack_sheets(parts, sheet)
 
-
     instance_ids = []
     for sheet_layout in result.sheets:
         for p in sheet_layout.placements:
             instance_ids.append(p.instance_id)
-
 
     assert sorted(instance_ids) == [0, 1, 2]
     print("  PASSED")
@@ -305,6 +292,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

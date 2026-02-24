@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from layout_ast.layout import LayoutAST, Sheet, Item, Geometry, Placement, Feature
 from adapters.layoutast_to_ir import (
-    layoutast_to_diagram_ir,
     FEATURE_HANDLERS,
-    register_feature,
+    layoutast_to_diagram_ir,
 )
-from diagram_ir import DiagramIR, Rect, Circle, Text, Polyline
+from diagram_ir import Circle, DiagramIR, Rect, Text
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 
 def _make_sheet(w: float = 200.0, h: float = 150.0, t: float = 12.0, m: float = 0.0) -> Sheet:
@@ -72,7 +71,7 @@ def test_sheet_outline_layer():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    sheet_layer = next((l for l in ir.layers if l.name == "SHEET_OUTLINE"), None)
+    sheet_layer = next((layer for layer in ir.layers if layer.name == "SHEET_OUTLINE"), None)
     assert sheet_layer is not None
     assert len(sheet_layer.items) >= 1
     assert any(isinstance(s, Rect) for s in sheet_layer.items)
@@ -86,7 +85,7 @@ def test_profile_layer():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    profile_layer = next((l for l in ir.layers if l.name == "PROFILE_CUTS"), None)
+    profile_layer = next((layer for layer in ir.layers if layer.name == "PROFILE_CUTS"), None)
     assert profile_layer is not None
     assert len(profile_layer.items) >= 1
 
@@ -103,7 +102,7 @@ def test_pocket_layer():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    pocket_layer = next((l for l in ir.layers if l.name == "POCKET_REGIONS"), None)
+    pocket_layer = next((layer for layer in ir.layers if layer.name == "POCKET_REGIONS"), None)
     assert pocket_layer is not None
     assert len(pocket_layer.items) >= 1
 
@@ -120,7 +119,7 @@ def test_hole_layer():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    hole_layer = next((l for l in ir.layers if l.name == "HOLES"), None)
+    hole_layer = next((layer for layer in ir.layers if layer.name == "HOLES"), None)
     assert hole_layer is not None
     assert len(hole_layer.items) >= 1
 
@@ -143,7 +142,7 @@ def test_label_layer():
     ast = LayoutAST(sheet=_make_sheet(), items=(item,))
     ir = layoutast_to_diagram_ir(ast)
 
-    label_layer = next((l for l in ir.layers if l.name == "LABELS"), None)
+    label_layer = next((layer for layer in ir.layers if layer.name == "LABELS"), None)
     assert label_layer is not None
     assert len(label_layer.items) >= 1
 
@@ -160,7 +159,7 @@ def test_y_origin_back():
 
     ir_back = layoutast_to_diagram_ir(ast, y_origin="back")
 
-    profile_layer = next((l for l in ir_back.layers if l.name == "PROFILE_CUTS"), None)
+    profile_layer = next((layer for layer in ir_back.layers if layer.name == "PROFILE_CUTS"), None)
     assert profile_layer is not None
 
     rect = next(s for s in profile_layer.items if isinstance(s, Rect))
@@ -172,7 +171,7 @@ def test_margin_zones():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    sheet_layer = next((l for l in ir.layers if l.name == "SHEET_OUTLINE"), None)
+    sheet_layer = next((layer for layer in ir.layers if layer.name == "SHEET_OUTLINE"), None)
     assert sheet_layer is not None
 
     margin_shapes = [s for s in sheet_layer.items if isinstance(s, Rect) and s.style_token == "margin-zone"]
@@ -232,8 +231,8 @@ def test_waste_shapes_separated():
 
     ir = layoutast_to_diagram_ir(ast)
 
-    profile_layer = next((l for l in ir.layers if l.name == "PROFILE_CUTS"), None)
-    waste_layer = next((l for l in ir.layers if l.name == "WASTE_CUTS"), None)
+    profile_layer = next((layer for layer in ir.layers if layer.name == "PROFILE_CUTS"), None)
+    waste_layer = next((layer for layer in ir.layers if layer.name == "WASTE_CUTS"), None)
 
     assert profile_layer is not None
     assert waste_layer is not None
@@ -346,20 +345,22 @@ def test_beam_structures_empty_by_default():
 
 
 def test_beam_structures_passed_through_config():
-    beam_data = [{
-        "name": "test_beam",
-        "length_mm": 1000.0,
-        "width_mm": 100.0,
-        "thickness_mm": 19.0,
-        "layer_count": 3,
-        "total_thickness_mm": 57.0,
-        "role": "RAIL",
-        "layers": [
-            {"layer_index": 0, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
-            {"layer_index": 1, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
-            {"layer_index": 2, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
-        ],
-    }]
+    beam_data = [
+        {
+            "name": "test_beam",
+            "length_mm": 1000.0,
+            "width_mm": 100.0,
+            "thickness_mm": 19.0,
+            "layer_count": 3,
+            "total_thickness_mm": 57.0,
+            "role": "RAIL",
+            "layers": [
+                {"layer_index": 0, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+                {"layer_index": 1, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+                {"layer_index": 2, "segments": [{"index": 0, "start_mm": 0.0, "end_mm": 1000.0, "length_mm": 1000.0}]},
+            ],
+        }
+    ]
     ast = LayoutAST(
         sheet=_make_sheet(),
         items=(_make_profile_item("rect1", 100.0, 80.0, 100.0, 75.0),),
@@ -386,7 +387,7 @@ def test_beam_labels_on_items():
         items=(item_with_label,),
     )
     ir = layoutast_to_diagram_ir(ast)
-    label_layers = [l for l in ir.layers if l.name == "LABELS"]
+    label_layers = [layer for layer in ir.layers if layer.name == "LABELS"]
     assert len(label_layers) == 1
     labels = label_layers[0].items
     assert len(labels) == 1

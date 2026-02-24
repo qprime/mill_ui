@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/planner/passes/merge_shared_edges.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-06, 0.5, 2.0, 1000.0, 'h', 'merge_rect_profiles', 'v']

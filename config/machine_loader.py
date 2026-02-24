@@ -17,13 +17,11 @@ class CNCMachine2D:
     def __post_init__(self):
         if self.envelope_x_max <= self.envelope_x_min:
             raise ValueError(
-                f"envelope_x_max ({self.envelope_x_max}) must be greater than "
-                f"envelope_x_min ({self.envelope_x_min})"
+                f"envelope_x_max ({self.envelope_x_max}) must be greater than envelope_x_min ({self.envelope_x_min})"
             )
         if self.envelope_y_max <= self.envelope_y_min:
             raise ValueError(
-                f"envelope_y_max ({self.envelope_y_max}) must be greater than "
-                f"envelope_y_min ({self.envelope_y_min})"
+                f"envelope_y_max ({self.envelope_y_max}) must be greater than envelope_y_min ({self.envelope_y_min})"
             )
 
     @property
@@ -99,21 +97,13 @@ class MachineConfig:
             wb = self.wasteboard
             m = self.machine
             if wb.x_min < m.envelope_x_min - 0.001:
-                raise ValueError(
-                    f"Wasteboard x_min ({wb.x_min}) is outside envelope x_min ({m.envelope_x_min})"
-                )
+                raise ValueError(f"Wasteboard x_min ({wb.x_min}) is outside envelope x_min ({m.envelope_x_min})")
             if wb.x_max > m.envelope_x_max + 0.001:
-                raise ValueError(
-                    f"Wasteboard x_max ({wb.x_max}) exceeds envelope x_max ({m.envelope_x_max})"
-                )
+                raise ValueError(f"Wasteboard x_max ({wb.x_max}) exceeds envelope x_max ({m.envelope_x_max})")
             if wb.y_min < m.envelope_y_min - 0.001:
-                raise ValueError(
-                    f"Wasteboard y_min ({wb.y_min}) is outside envelope y_min ({m.envelope_y_min})"
-                )
+                raise ValueError(f"Wasteboard y_min ({wb.y_min}) is outside envelope y_min ({m.envelope_y_min})")
             if wb.y_max > m.envelope_y_max + 0.001:
-                raise ValueError(
-                    f"Wasteboard y_max ({wb.y_max}) exceeds envelope y_max ({m.envelope_y_max})"
-                )
+                raise ValueError(f"Wasteboard y_max ({wb.y_max}) exceeds envelope y_max ({m.envelope_y_max})")
 
     def compute_margins(self) -> dict[str, float]:
         if self.wasteboard is None:
@@ -169,9 +159,7 @@ class Spindle:
 
     def __post_init__(self):
         if self.rpm_min >= self.rpm_max:
-            raise ValueError(
-                f"Spindle rpm_min ({self.rpm_min}) must be less than rpm_max ({self.rpm_max})"
-            )
+            raise ValueError(f"Spindle rpm_min ({self.rpm_min}) must be less than rpm_max ({self.rpm_max})")
         if self.rpm_min <= 0:
             raise ValueError(f"Spindle rpm_min must be positive, got {self.rpm_min}")
 
@@ -274,15 +262,15 @@ def load_machine_by_name(name: str) -> MachineConfig:
 
 __all__ = [
     "CNCMachine2D",
-    "Wasteboard2D",
-    "MachineDefaults",
-    "MachineConfig",
     "Endmill",
+    "MachineConfig",
+    "MachineDefaults",
     "Spindle",
-    "load_cnc_machine",
-    "load_endmills",
-    "load_spindles",
+    "Wasteboard2D",
     "get_machines_dir",
     "list_available_machines",
+    "load_cnc_machine",
+    "load_endmills",
     "load_machine_by_name",
+    "load_spindles",
 ]

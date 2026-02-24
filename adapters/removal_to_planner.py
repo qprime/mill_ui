@@ -1,22 +1,21 @@
-
 from __future__ import annotations
 
 from typing import Any
 
-from ir.removal_intent import RemovalIntent
+from cam.planner.planner_input import (
+    CornerCleanupInput,
+    FeatureInput,
+    GeometryInput,
+    KeepoutInput,
+    PlannerInput,
+    TabsInput,
+)
 from core.constants import (
     FeatureType,
     ShapeType,
 )
 from core.geometry import extract_shape_geometry
-from cam.planner.planner_input import (
-    PlannerInput,
-    FeatureInput,
-    CornerCleanupInput,
-    KeepoutInput,
-    TabsInput,
-    GeometryInput,
-)
+from ir.removal_intent import RemovalIntent
 
 
 def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
@@ -28,9 +27,7 @@ def _validate_corner_cleanup(intent: RemovalIntent) -> tuple[float, str]:
     shape = intent.shape or ShapeType.RECT
 
     if corner_tool_diameter is None or corner_tool_diameter <= 0.0:
-        raise ValueError(
-            f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}"
-        )
+        raise ValueError(f"corner_cleanup_tool_diameter_mm must be positive, got: {corner_tool_diameter}")
 
     if not ShapeType.is_rect(shape):
         raise ValueError(f"Corner cleanup only supported for rectangular pockets, got: {shape}")
@@ -39,7 +36,10 @@ def _validate_corner_cleanup(intent: RemovalIntent) -> tuple[float, str]:
 
 
 def _compute_corners(
-    cx: float, cy: float, w_mm: float, h_mm: float,
+    cx: float,
+    cy: float,
+    w_mm: float,
+    h_mm: float,
 ) -> tuple[tuple[float, float], ...]:
     half_w = w_mm / 2.0
     half_h = h_mm / 2.0
@@ -119,7 +119,8 @@ def _generate_corner_cleanup_input(
 
     cx, cy = feature.center_xy_mm
     corners = _compute_corners(
-        cx, cy,
+        cx,
+        cy,
         feature.geometry.geometry.w_mm or 0.0,
         feature.geometry.geometry.h_mm or 0.0,
     )
@@ -143,7 +144,10 @@ def removal_intents_to_planner_input(
     min_channel_width_mm: float = 6.0,
 ) -> PlannerInput:
     buckets: dict[str, list[FeatureInput]] = {
-        "profiles": [], "pockets": [], "holes": [], "engraves": [],
+        "profiles": [],
+        "pockets": [],
+        "holes": [],
+        "engraves": [],
     }
     corner_cleanups: list[CornerCleanupInput] = []
     all_keepouts: list[KeepoutInput] = []
@@ -151,17 +155,23 @@ def removal_intents_to_planner_input(
 
     for intent in intents:
         for keepout in intent.constraints.keepouts:
-            key = (round(keepout.bounds.x_min * 1000), round(keepout.bounds.x_max * 1000),
-                   round(keepout.bounds.y_min * 1000), round(keepout.bounds.y_max * 1000))
+            key = (
+                round(keepout.bounds.x_min * 1000),
+                round(keepout.bounds.x_max * 1000),
+                round(keepout.bounds.y_min * 1000),
+                round(keepout.bounds.y_max * 1000),
+            )
             if key not in seen_keepouts:
                 seen_keepouts.add(key)
-                all_keepouts.append(KeepoutInput(
-                    x_min=keepout.bounds.x_min,
-                    x_max=keepout.bounds.x_max,
-                    y_min=keepout.bounds.y_min,
-                    y_max=keepout.bounds.y_max,
-                    reason=keepout.reason,
-                ))
+                all_keepouts.append(
+                    KeepoutInput(
+                        x_min=keepout.bounds.x_min,
+                        x_max=keepout.bounds.x_max,
+                        y_min=keepout.bounds.y_min,
+                        y_max=keepout.bounds.y_max,
+                        reason=keepout.reason,
+                    )
+                )
 
         feature = _intent_to_feature_input(intent)
         hint_type = intent.hint_type or FeatureType.POCKET

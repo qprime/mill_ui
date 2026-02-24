@@ -1,9 +1,9 @@
 from config.machine_loader import (
     CNCMachine2D,
-    Wasteboard2D,
     Endmill,
-    Spindle,
     MachineConfig,
+    Spindle,
+    Wasteboard2D,
     load_cnc_machine,
     load_endmills,
     load_spindles,
@@ -11,10 +11,10 @@ from config.machine_loader import (
 
 __all__ = [
     "CNCMachine2D",
-    "Wasteboard2D",
     "Endmill",
-    "Spindle",
     "MachineConfig",
+    "Spindle",
+    "Wasteboard2D",
     "load_cnc_machine",
     "load_endmills",
     "load_spindles",

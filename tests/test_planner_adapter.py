@@ -1,12 +1,11 @@
-
 from __future__ import annotations
 
 import sys
 
 from adapters.hints_to_removal import (
-    profile_hint_to_removal_intent,
-    pocket_hint_to_removal_intent,
     hole_hint_to_removal_intent,
+    pocket_hint_to_removal_intent,
+    profile_hint_to_removal_intent,
 )
 from adapters.removal_to_planner import (
     removal_intent_to_hint,
@@ -32,12 +31,9 @@ def test_roundtrip_profile_through_cut():
         "side": "outside",
     }
 
-
     intent = profile_hint_to_removal_intent(original_hint, sheet_thickness_mm=19.1)
 
-
     reconstructed_hint = removal_intent_to_hint(intent)
-
 
     assert reconstructed_hint["id"] == original_hint["id"]
     assert reconstructed_hint["shape"] == original_hint["shape"]
@@ -191,15 +187,12 @@ def test_batch_conversion_to_hints_structure():
         "depth_mm": 12.0,
     }
 
-
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=12.0)
     pocket_intent = pocket_hint_to_removal_intent(pocket_hint)
     hole_intent = hole_hint_to_removal_intent(hole_hint)
 
-
     intents = [profile_intent, pocket_intent, hole_intent]
     hints = removal_intents_to_hints(intents, kerf_width_mm=3.175)
-
 
     assert hints["units"] == "mm"
     assert approx_eq(hints["kerf_width_mm"], 3.175)
@@ -208,14 +201,11 @@ def test_batch_conversion_to_hints_structure():
     assert len(hints["holes"]) == 1
     assert len(hints["engraves"]) == 0
 
-
     assert hints["profiles"][0]["id"] == "outer"
     assert hints["profiles"][0]["side"] == "outside"
 
-
     assert hints["pockets"][0]["id"] == "inner_pocket"
     assert approx_eq(hints["pockets"][0]["depth_mm"], 5.0)
-
 
     assert hints["holes"][0]["id"] == "mount"
     assert approx_eq(hints["holes"][0]["geometry"]["diameter_mm"], 6.0)
@@ -235,7 +225,6 @@ def test_geometry_preservation_rect():
 
     intent = pocket_hint_to_removal_intent(hint)
     reconstructed = removal_intent_to_hint(intent)
-
 
     assert approx_eq(reconstructed["geometry"]["w_mm"], hint["geometry"]["w_mm"], rel=1e-9)
     assert approx_eq(reconstructed["geometry"]["h_mm"], hint["geometry"]["h_mm"], rel=1e-9)
@@ -278,7 +267,6 @@ def test_depth_preservation():
 
     intent = pocket_hint_to_removal_intent(hint)
     reconstructed = removal_intent_to_hint(intent)
-
 
     assert approx_eq(reconstructed["depth_mm"], hint["depth_mm"], rel=1e-9)
     assert approx_eq(reconstructed["start_depth_mm"], hint["start_depth_mm"], rel=1e-9)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
@@ -8,8 +9,9 @@ from cam.ops.engrave import engrave_lines
 from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import offset_moves_z
-from cam.planner.planner_input import FeatureInput, CornerCleanupInput
-from .profile import circle_shape_mm, rect_shape
+from cam.planner.planner_input import CornerCleanupInput, FeatureInput
+
+from .profile import rect_shape
 from .tools import (
     ToolSelection,
     pick_tool_for_engrave,
@@ -21,15 +23,16 @@ from .tools import (
 
 if TYPE_CHECKING:
     from cam.config import Config
-    from . import PassAccumulator, PassRecord
+
+    from . import PassAccumulator
 
 
 def plan_pocket_passes(
     pockets: tuple[FeatureInput, ...],
     *,
-    accumulator: "PassAccumulator",
+    accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
-    config: "Config",
+    config: Config,
 ) -> None:
     for entry in pockets:
         sg = entry.geometry.geometry
@@ -103,7 +106,7 @@ def plan_pocket_passes(
 def plan_hole_passes(
     holes: tuple[FeatureInput, ...],
     *,
-    accumulator: "PassAccumulator",
+    accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in holes:
@@ -152,7 +155,7 @@ def plan_hole_passes(
 def plan_engrave_passes(
     engraves: tuple[FeatureInput, ...],
     *,
-    accumulator: "PassAccumulator",
+    accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in engraves:
@@ -174,21 +177,25 @@ def plan_engrave_passes(
             cx, cy = entry.center_xy_mm
             half_w = 0.5 * width
             half_h = 0.5 * height
-            lines.append([
-                (cx - half_w, cy - half_h),
-                (cx + half_w, cy - half_h),
-                (cx + half_w, cy + half_h),
-                (cx - half_w, cy + half_h),
-                (cx - half_w, cy - half_h),
-            ])
+            lines.append(
+                [
+                    (cx - half_w, cy - half_h),
+                    (cx + half_w, cy - half_h),
+                    (cx + half_w, cy + half_h),
+                    (cx - half_w, cy + half_h),
+                    (cx - half_w, cy - half_h),
+                ]
+            )
         elif shape_name == "line":
             start = sg.start or (0.0, 0.0)
             end = sg.end or (0.0, 0.0)
             cx, cy = entry.center_xy_mm
-            lines.append([
-                (float(start[0]) + cx, float(start[1]) + cy),
-                (float(end[0]) + cx, float(end[1]) + cy),
-            ])
+            lines.append(
+                [
+                    (float(start[0]) + cx, float(start[1]) + cy),
+                    (float(end[0]) + cx, float(end[1]) + cy),
+                ]
+            )
         else:
             continue
 
@@ -207,7 +214,7 @@ def plan_engrave_passes(
 def plan_corner_cleanup_passes(
     corner_cleanups: tuple[CornerCleanupInput, ...],
     *,
-    accumulator: "PassAccumulator",
+    accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in corner_cleanups:
@@ -261,8 +268,8 @@ def plan_corner_cleanup_passes(
 
 
 __all__ = [
+    "plan_corner_cleanup_passes",
     "plan_engrave_passes",
     "plan_hole_passes",
     "plan_pocket_passes",
-    "plan_corner_cleanup_passes",
 ]

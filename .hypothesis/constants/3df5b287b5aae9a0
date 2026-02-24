@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/loop/measurement_edge.py
+# hypothesis_version: 6.151.9
+
+[0.001, 0.8, 1.0, 'bottom', 'center', 'horizontal', 'left', 'measurement_edge', 'right', 'top', 'vertical', 'x_max', 'x_min', 'y_max', 'y_min']

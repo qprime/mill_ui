@@ -1,12 +1,13 @@
-
 import sys
+
 import pytest
-from nesting.types import PartSpec, NestedPart
+
 from nesting.template_expander import (
-    get_part_bounds,
     expand_part_to_items,
+    get_part_bounds,
     placement_to_items,
 )
+from nesting.types import NestedPart, PartSpec
 
 
 def test_get_part_bounds_simple():
@@ -183,6 +184,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

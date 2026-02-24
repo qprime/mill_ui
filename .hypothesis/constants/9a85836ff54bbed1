@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/config/__init__.py
+# hypothesis_version: 6.151.9
+
+['CNCMachine2D', 'Endmill', 'MachineConfig', 'Spindle', 'Wasteboard2D', 'load_cnc_machine', 'load_endmills', 'load_spindles']

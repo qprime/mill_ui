@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import math
@@ -13,7 +12,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import LinePatternParams
-from generators.utils import shapely_to_item, iter_polygons, get_local_bounds
+from generators.utils import get_local_bounds, iter_polygons, shapely_to_item
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -29,7 +28,6 @@ def line_pattern_generator(
 ) -> GeneratorResult:
 
     params.validate()
-
 
     if not validate_domain_for_generation(
         domain,
@@ -68,7 +66,7 @@ def _generate_local_coords(
     local_cy = (local_bounds["y_min"] + local_bounds["y_max"]) / 2
 
     half_extent = extent / 2
-    num_lines_per_side = int(math.ceil(half_extent / params.spacing_mm))
+    num_lines_per_side = math.ceil(half_extent / params.spacing_mm)
 
     items = []
     line_idx = 0
@@ -131,7 +129,7 @@ def _generate_sheet_coords(
     cx, cy = bounds.center
 
     half_extent = extent / 2
-    num_lines_per_side = int(math.ceil(half_extent / params.spacing_mm))
+    num_lines_per_side = math.ceil(half_extent / params.spacing_mm)
 
     items = []
     line_idx = 0

@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from core.constants import DepthMode
-from layout_ast.layout import LayoutAST, Item, Sheet
-from ir.removal_intent import Bounds2D
+from diagram_ir import Circle, DiagramIR, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
-from diagram_ir import DiagramIR, LayerIR, Rect, Line, Polyline, Circle, Text, Path, Point2D
-from diagram_ir.shapes import Shape
 from diagram_ir.geometry import rounded_rect_path
-
+from diagram_ir.shapes import Shape
+from ir.removal_intent import Bounds2D
+from layout_ast.layout import Item, LayoutAST, Sheet
 
 FEATURE_HANDLERS: dict[str, Callable[[Item, str, Callable, float], list[Shape]]] = {}
 
@@ -18,6 +17,7 @@ def register_feature(feature_type: str):
     def decorator(fn: Callable[[Item, str, Callable, float], list[Shape]]):
         FEATURE_HANDLERS[feature_type] = fn
         return fn
+
     return decorator
 
 
@@ -107,10 +107,8 @@ def layoutast_to_diagram_ir(
         layers.append(LayerIR(name="LABELS", items=tuple(label_shapes)))
 
     dims: tuple[DimensionRequest, ...] = ()
-    if show_dimensions and getattr(sheet, 'show_dimensions', True):
-        dim_requests = collect_dimension_requests(
-            ast, margin, 0, include_features={"profile", "pocket"}, y_flip=flip_y
-        )
+    if show_dimensions and getattr(sheet, "show_dimensions", True):
+        dim_requests = collect_dimension_requests(ast, margin, 0, include_features={"profile", "pocket"}, y_flip=flip_y)
         dims = tuple(dim_requests)
 
     metadata = {
@@ -203,20 +201,37 @@ def _build_sheet_layer(sheet: Sheet, margin: float) -> list:
 
     if margin > 0:
         shapes.append(
-            Rect(x=0, y=0, width=sheet.width_mm, height=margin,
-                 style_token="margin-zone", id="margin_bottom")
+            Rect(x=0, y=0, width=sheet.width_mm, height=margin, style_token="margin-zone", id="margin_bottom")
         )
         shapes.append(
-            Rect(x=0, y=sheet.height_mm - margin, width=sheet.width_mm, height=margin,
-                 style_token="margin-zone", id="margin_top")
+            Rect(
+                x=0,
+                y=sheet.height_mm - margin,
+                width=sheet.width_mm,
+                height=margin,
+                style_token="margin-zone",
+                id="margin_top",
+            )
         )
         shapes.append(
-            Rect(x=0, y=margin, width=margin, height=sheet.height_mm - 2 * margin,
-                 style_token="margin-zone", id="margin_left")
+            Rect(
+                x=0,
+                y=margin,
+                width=margin,
+                height=sheet.height_mm - 2 * margin,
+                style_token="margin-zone",
+                id="margin_left",
+            )
         )
         shapes.append(
-            Rect(x=sheet.width_mm - margin, y=margin, width=margin, height=sheet.height_mm - 2 * margin,
-                 style_token="margin-zone", id="margin_right")
+            Rect(
+                x=sheet.width_mm - margin,
+                y=margin,
+                width=margin,
+                height=sheet.height_mm - 2 * margin,
+                style_token="margin-zone",
+                id="margin_right",
+            )
         )
 
     return shapes
@@ -285,9 +300,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y, margin: float) -> list
         x = sx - w / 2
         y = flip_y(cy + h / 2)
         path_d = rounded_rect_path(x, y, w, h, radius_tl, radius_tr, radius_br, radius_bl)
-        return [
-            Path(d=path_d, style_token=style_token, id=shape_id)
-        ]
+        return [Path(d=path_d, style_token=style_token, id=shape_id)]
 
     elif shape_type == "Line":
         start = data.get("start", [0, 0])
@@ -328,10 +341,22 @@ def _build_hole_crosshairs(item: Item, flip_y, margin: float) -> list:
     cy_flipped = flip_y(cy)
     mark_size = 3
     return [
-        Line(x1=sx - mark_size, y1=cy_flipped, x2=sx + mark_size, y2=cy_flipped,
-             style_token="hole", id=f"{item.shape_id or 'hole'}_cross_h"),
-        Line(x1=sx, y1=cy_flipped - mark_size, x2=sx, y2=cy_flipped + mark_size,
-             style_token="hole", id=f"{item.shape_id or 'hole'}_cross_v"),
+        Line(
+            x1=sx - mark_size,
+            y1=cy_flipped,
+            x2=sx + mark_size,
+            y2=cy_flipped,
+            style_token="hole",
+            id=f"{item.shape_id or 'hole'}_cross_h",
+        ),
+        Line(
+            x1=sx,
+            y1=cy_flipped - mark_size,
+            x2=sx,
+            y2=cy_flipped + mark_size,
+            style_token="hole",
+            id=f"{item.shape_id or 'hole'}_cross_v",
+        ),
     ]
 
 
@@ -448,7 +473,13 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
         if not points:
             return []
         return _build_polygon_toolpath(
-            points, holes, cx, cy, offset, margin, flip_y,
+            points,
+            holes,
+            cx,
+            cy,
+            offset,
+            margin,
+            flip_y,
             item.shape_id or "item",
         )
 
@@ -470,9 +501,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
         x = sx - new_w / 2
         y = flip_y(cy + new_h / 2)
         path_d = rounded_rect_path(x, y, new_w, new_h, r_tl, r_tr, r_br, r_bl)
-        return [
-            Path(d=path_d, style_token="toolpath", id=f"{item.shape_id or 'item'}_toolpath")
-        ]
+        return [Path(d=path_d, style_token="toolpath", id=f"{item.shape_id or 'item'}_toolpath")]
 
     return []
 
@@ -487,9 +516,10 @@ def _build_polygon_toolpath(
     flip_y,
     shape_id: str,
 ) -> list:
-    from shapely.geometry import Polygon as ShapelyPolygon, MultiPolygon
-    from shapely.ops import orient
     from shapely import BufferJoinStyle
+    from shapely.geometry import MultiPolygon
+    from shapely.geometry import Polygon as ShapelyPolygon
+    from shapely.ops import orient
 
     abs_points = [(float(x) + cx, float(y) + cy) for x, y in points]
     abs_holes: list[list[tuple[float, float]]] = []
@@ -510,9 +540,7 @@ def _build_polygon_toolpath(
         if p.is_empty or not hasattr(p, "exterior"):
             continue
         coords = list(p.exterior.coords[:-1])
-        transformed = [
-            Point2D(margin + x, flip_y(y)) for x, y in coords
-        ]
+        transformed = [Point2D(margin + x, flip_y(y)) for x, y in coords]
         suffix = f"_toolpath_{i}" if len(polys) > 1 else "_toolpath"
         results.append(
             Polyline(
@@ -562,10 +590,7 @@ def _collect_depth_info(ast: LayoutAST) -> list[str]:
         ftype = item.feature.type
         if item.feature.is_through and ftype == "profile":
             continue
-        if item.feature.is_through:
-            depth_str = DepthMode.THROUGH
-        else:
-            depth_str = f"{float(item.feature.depth_mm):.1f}mm"
+        depth_str = DepthMode.THROUGH if item.feature.is_through else f"{float(item.feature.depth_mm):.1f}mm"
         if ftype not in depths_by_type:
             depths_by_type[ftype] = set()
         depths_by_type[ftype].add(depth_str)
@@ -660,4 +685,4 @@ def _collect_edge_allowances(ast: LayoutAST) -> list[dict]:
     return sorted(result, key=lambda a: (-a["rough_allowance_mm"], -a["finish_allowance_mm"]))
 
 
-__all__ = ["layoutast_to_diagram_ir", "FEATURE_HANDLERS", "register_feature"]
+__all__ = ["FEATURE_HANDLERS", "layoutast_to_diagram_ir", "register_feature"]

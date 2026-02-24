@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import replace
-from typing import Any, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cam.moves import (
     CommentMove,
     CutMove,
-    Move,
     MotionMove,
+    Move,
     RapidMove,
     RetractMove,
     SetFeedMove,
@@ -19,23 +20,23 @@ from cam.native import core as native_core
 if TYPE_CHECKING:
     from cam.model.machine import Machine
 
-DEFAULT_HEADER = ['(begin)', 'G90', 'G21', 'G17', 'G94']
-DEFAULT_FOOTER = ['M5', 'M2', '(end)']
+DEFAULT_HEADER = ["(begin)", "G90", "G21", "G17", "G94"]
+DEFAULT_FOOTER = ["M5", "M2", "(end)"]
 
 
 def _move_to_dict(m: Move) -> dict[str, Any]:
     if isinstance(m, CommentMove):
-        return {'kind': 'comment', 'text': m.text}
+        return {"kind": "comment", "text": m.text}
     if isinstance(m, SetRpmMove):
-        return {'kind': 'set_rpm', 'rpm': m.rpm}
+        return {"kind": "set_rpm", "rpm": m.rpm}
     if isinstance(m, SetFeedMove):
-        return {'kind': 'set_feed', 'feed': m.feed}
+        return {"kind": "set_feed", "feed": m.feed}
     if isinstance(m, RapidMove):
-        return {'kind': 'rapid', 'x': m.x, 'y': m.y, 'z': m.z}
+        return {"kind": "rapid", "x": m.x, "y": m.y, "z": m.z}
     if isinstance(m, CutMove):
-        return {'kind': 'cut', 'x': m.x, 'y': m.y, 'z': m.z, 'feed': m.feed}
+        return {"kind": "cut", "x": m.x, "y": m.y, "z": m.z, "feed": m.feed}
     if isinstance(m, RetractMove):
-        return {'kind': 'retract', 'z': m.z}
+        return {"kind": "retract", "z": m.z}
     raise ValueError(f"Unknown move type: {type(m)}")
 
 
@@ -57,9 +58,9 @@ def _apply_margin_offset(moves: list[Move], margin_mm: float) -> list[Move]:
         if isinstance(move, XYMove):
             kwargs: dict[str, Any] = {}
             if move.x is not None:
-                kwargs['x'] = move.x + margin_mm
+                kwargs["x"] = move.x + margin_mm
             if move.y is not None:
-                kwargs['y'] = move.y + margin_mm
+                kwargs["y"] = move.y + margin_mm
             offset_moves.append(replace(move, **kwargs) if kwargs else move)
         else:
             offset_moves.append(move)
@@ -80,21 +81,21 @@ def _extract_and_strip_first_rpm(moves: list[Move]) -> tuple[float | None, list[
 def write_gcode(
     moves: Sequence[Move],
     *,
-    unit: str = 'mm',
+    unit: str = "mm",
     prec: int = 3,
     safe_z: float = 5.0,
     header=None,
     footer=None,
     machine: Machine | None = None,
     sheet_height: float | None = None,
-    y_origin: str = 'back',
+    y_origin: str = "back",
     margin_mm: float = 0.0,
 ):
-    if unit not in ('mm', 'inch'):
+    if unit not in ("mm", "inch"):
         raise ValueError("unit must be 'mm' or 'inch'")
-    if y_origin not in ('front', 'back'):
+    if y_origin not in ("front", "back"):
         raise ValueError("y_origin must be 'front' or 'back'")
-    if y_origin == 'front' and sheet_height is None:
+    if y_origin == "front" and sheet_height is None:
         raise ValueError("sheet_height is required when y_origin='front'")
 
     effective_header = header
@@ -103,7 +104,7 @@ def write_gcode(
     if margin_mm != 0.0:
         effective_moves = _apply_margin_offset(effective_moves, margin_mm)
 
-    if y_origin == 'front' and sheet_height is not None:
+    if y_origin == "front" and sheet_height is not None:
         effective_moves = _flip_y_in_moves(effective_moves, sheet_height)
 
     if machine is not None and header is None:

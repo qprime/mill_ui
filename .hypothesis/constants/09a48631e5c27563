@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/assembly/panel.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-06, 'DadoSpec', 'Edge', 'NotchSpec', 'PanelRole', 'PanelSpec', 'Point2D', 'bottom', 'horizontal', 'left', 'rectangular', 'right', 'top', 'vertical']

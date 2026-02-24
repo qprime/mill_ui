@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/validation/runner.py
+# hypothesis_version: 6.151.9
+
+[1000, '*.nc', '*.svg', '.', 'comment_lines', 'depth_count', 'detected_count', 'example.pml.yml', 'feed_lines', 'feed_rates_used', 'feed_time_s', 'feeds', 'file_count', 'g0_count', 'g1_count', 'g2_count', 'g3_count', 'gcode', 'max_cutting_depth_mm', 'max_feed_rate', 'max_plunge_z_mm', 'max_single_plunge_mm', 'min_feed_rate', 'motion', 'motion_lines', 'output', 'rapid_time_s', 'safe_z_mm', 'sheet_height_mm', 'sheet_width_mm', 'source.pml.yml', 'spindle_lines', 'spindle_speeds', 'summary', 'tab_heights_mm', 'tabs', 'time_estimate', 'tool_change_lines', 'tool_changes', 'tool_numbers', 'tools', 'total_lines', 'total_time_s', 'x_max', 'x_min', 'xy_bounds', 'y_max', 'y_min', 'z_profile']

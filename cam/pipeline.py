@@ -3,31 +3,31 @@ from __future__ import annotations
 import shutil
 import time
 from dataclasses import dataclass, replace
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
-from layout_ast.layout import LayoutAST
-from ir.removal_intent import RemovalIntent, Bounds2D
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
+from cam.config import Config
+from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.stock import Stock
+from cam.moves import CutMove, RapidMove
+from cam.planner.capabilities import audit_constraints
+from cam.planner.passes import PassRecord, plan_passes
+from cam.planner.passes.tools import normalize_tool_entries
+from cam.post.gcode import write_gcode
+from config.machine_loader import Endmill, MachineConfig
+from ir.removal_intent import Bounds2D, RemovalIntent
+from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
-    check_overlap,
     check_depth_feasibility,
-    check_working_area_bounds,
+    check_overlap,
     check_toolpath_clearance,
+    check_working_area_bounds,
 )
 from validation.toolpath_checks import verify_passes_avoid_keepouts
-from cam.planner.capabilities import audit_constraints
-from cam.config import Config
-from cam.model.stock import Stock
-from cam.model.material import Material
-from cam.model.machine import Machine
-from cam.moves import CutMove, RapidMove
-from cam.planner.passes import PassRecord, plan_passes
-from cam.planner.passes.tools import ToolSelection, normalize_tool_entries
-from cam.post.gcode import write_gcode
-from config.machine_loader import MachineConfig, Endmill
-
 
 DEFAULT_TOOL_DB = [
     {
@@ -93,11 +93,7 @@ def run_pipeline(
     endmill: Endmill | None = None,
     validate_machine_bounds: bool = True,
 ) -> PipelineResult:
-    tools: list[ToolSelection]
-    if tool_db is None:
-        tools = normalize_tool_entries(DEFAULT_TOOL_DB)
-    else:
-        tools = normalize_tool_entries(tool_db)
+    tools = normalize_tool_entries(DEFAULT_TOOL_DB) if tool_db is None else normalize_tool_entries(tool_db)
 
     errors: list[str] = []
     warnings: list[str] = []
@@ -266,6 +262,7 @@ def run_pipeline(
         svg_start = time.perf_counter()
         try:
             from export.blueprint_svg import render_blueprint_svg
+
             ast_with_kerf = replace(ast, kerf_width_mm=float(kerf_mm))
             svg_string = render_blueprint_svg(ast_with_kerf, intents, theme=svg_theme, y_origin=y_origin)
         except Exception as e:
@@ -371,12 +368,12 @@ def write_pipeline_outputs(
         outputs["svg"] = svg_path
 
     import json
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     metrics_with_build = dict(result.metrics)
     if build_params:
         metrics_with_build["build"] = build_params
-    metrics_with_build["timestamp"] = datetime.now(timezone.utc).isoformat()
+    metrics_with_build["timestamp"] = datetime.now(UTC).isoformat()
 
     metrics_path = output_dir / "metrics.json"
     metrics_path.write_text(json.dumps(metrics_with_build, indent=2))

@@ -5,8 +5,8 @@ from dataclasses import replace
 from cam.moves import (
     CommentMove,
     CutMove,
-    Move,
     MotionMove,
+    Move,
     RapidMove,
     RetractMove,
     SetFeedMove,

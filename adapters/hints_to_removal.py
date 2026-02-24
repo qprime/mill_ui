@@ -1,29 +1,28 @@
-
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
-from ir.removal_intent import (
-    RemovalIntent,
-    Bounds2D,
-    Allowance,
-    Constraints,
-    TabConstraint,
-    Island,
-    EdgeTreatment,
-    DepthProfile,
-    ShapeGeometry,
-)
-from layout_ast.layout import Item
 from core.constants import (
-    HintKeys,
-    GeometryKeys,
-    TabKeys,
     FeatureType,
-    ShapeType,
+    GeometryKeys,
+    HintKeys,
     Side,
+    TabKeys,
 )
 from core.geometry import compute_shape_bounds
+from ir.removal_intent import (
+    Allowance,
+    Bounds2D,
+    Constraints,
+    DepthProfile,
+    EdgeTreatment,
+    Island,
+    RemovalIntent,
+    ShapeGeometry,
+    TabConstraint,
+)
+from layout_ast.layout import Item
 
 
 def _make_region_id(prefix: str, hint_id: str | None) -> str:
@@ -39,9 +38,7 @@ def profile_hint_to_removal_intent(
     hint_id = hint.get(HintKeys.ID, "")
     region_id = _make_region_id(region_id_prefix, hint_id)
 
-
     depth_mm = float(hint.get(HintKeys.DEPTH_MM, sheet_thickness_mm))
-
 
     bounds = _geometry_to_bounds(
         hint.get(HintKeys.SHAPE, ""),
@@ -49,10 +46,8 @@ def profile_hint_to_removal_intent(
         hint.get(HintKeys.CENTER_XY_MM),
     )
 
-
     side = hint.get(HintKeys.SIDE, Side.OUTSIDE).lower()
     allowance = _side_to_allowance(side)
-
 
     tabs_data = hint.get(HintKeys.TABS)
     constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
@@ -132,30 +127,26 @@ def pocket_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "pocket",
 ) -> RemovalIntent:
-    return _simple_hint_to_removal_intent(
-        hint, FeatureType.POCKET, region_id_prefix, _pocket_extra_kwargs
-    )
+    return _simple_hint_to_removal_intent(hint, FeatureType.POCKET, region_id_prefix, _pocket_extra_kwargs)
 
 
 def hole_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "hole",
 ) -> RemovalIntent:
-    return _simple_hint_to_removal_intent(
-        hint, FeatureType.HOLE, region_id_prefix, _hole_extra_kwargs
-    )
+    return _simple_hint_to_removal_intent(hint, FeatureType.HOLE, region_id_prefix, _hole_extra_kwargs)
 
 
 def engrave_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "engrave",
 ) -> RemovalIntent:
-    return _simple_hint_to_removal_intent(
-        hint, FeatureType.ENGRAVE, region_id_prefix, _engrave_extra_kwargs
-    )
+    return _simple_hint_to_removal_intent(hint, FeatureType.ENGRAVE, region_id_prefix, _engrave_extra_kwargs)
 
 
-def _geometry_to_bounds(shape: str, geometry: dict[str, Any], center_xy: tuple[float, float] | list[float] | None) -> Bounds2D:
+def _geometry_to_bounds(
+    shape: str, geometry: dict[str, Any], center_xy: tuple[float, float] | list[float] | None
+) -> Bounds2D:
     return compute_shape_bounds(shape, geometry, center_xy)
 
 
@@ -187,16 +178,12 @@ def _side_to_allowance(side: str) -> Allowance:
     side_lower = side.lower()
 
     if side_lower == Side.OUTSIDE:
-
         return Allowance(outside=0.0)
     elif side_lower == Side.INSIDE:
-
         return Allowance(inside=0.0)
     elif side_lower == Side.ON:
-
         return Allowance(on=0.0)
     else:
-
         return Allowance(outside=0.0)
 
 
@@ -224,30 +211,21 @@ def simple_item_to_removal_intent(
     if not item.feature:
         raise ValueError(f"Item {item.shape_id} has no feature")
 
-
     region_id = _make_region_id(region_id_prefix, item.shape_id)
-
 
     depth_mm = float(item.feature.depth_mm) if item.feature.depth_mm is not None else 0.0
 
-
     cx, cy = item.placement.center_xy_mm
     bounds = _item_geometry_to_bounds(item.type, item.geometry.data, cx, cy)
-
 
     allowance = Allowance()
     if item.feature.type == FeatureType.PROFILE and item.feature.side:
         allowance = _side_to_allowance(item.feature.side)
 
-
     islands = _extract_islands_from_geometry(item.geometry.data)
     edge_treatment = _extract_edge_treatment_from_geometry(item.geometry.data)
 
-    constraints = Constraints(
-        islands=tuple(islands) if islands else (),
-        edge_treatment=edge_treatment
-    )
-
+    constraints = Constraints(islands=tuple(islands) if islands else (), edge_treatment=edge_treatment)
 
     shape_geometry = _geometry_dict_to_shape_geometry(item.type, item.geometry.data)
 

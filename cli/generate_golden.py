@@ -1,15 +1,11 @@
-
-
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
-from typing import Any
 
-from validation.runner import validate_recipe, ValidationOptions
 from validation.regression import GoldenStore, create_golden_from_recipe
+from validation.runner import ValidationOptions, validate_recipe
 
 
 def main() -> int:
@@ -36,10 +32,10 @@ Examples:
         """,
     )
 
-
     action_group = parser.add_argument_group("Actions")
     action_group.add_argument(
-        "--recipe", "-r",
+        "--recipe",
+        "-r",
         metavar="DIR",
         help="Generate golden for a single recipe directory",
     )
@@ -49,42 +45,46 @@ Examples:
         help="Generate golden for all recipes in a directory",
     )
     action_group.add_argument(
-        "--list", "-l",
+        "--list",
+        "-l",
         action="store_true",
         help="List existing golden baselines",
     )
 
-
     options_group = parser.add_argument_group("Options")
     options_group.add_argument(
-        "--store", "-s",
+        "--store",
+        "-s",
         metavar="DIR",
         default="tests/golden",
         help="Golden store directory (default: tests/golden)",
     )
     options_group.add_argument(
-        "--update", "-u",
+        "--update",
+        "-u",
         action="store_true",
         help="Update existing golden (otherwise skip if exists)",
     )
     options_group.add_argument(
-        "--force", "-f",
+        "--force",
+        "-f",
         action="store_true",
         help="Generate even if invariant checks fail (skips broken recipes on errors)",
     )
     options_group.add_argument(
-        "--dry-run", "-n",
+        "--dry-run",
+        "-n",
         action="store_true",
         help="Show what would be done without actually doing it",
     )
     options_group.add_argument(
-        "--quiet", "-q",
+        "--quiet",
+        "-q",
         action="store_true",
         help="Suppress status messages",
     )
 
     args = parser.parse_args()
-
 
     if not args.recipe and not args.all_recipes and not args.list:
         parser.error("One of --recipe, --all-recipes, or --list is required")
@@ -103,6 +103,7 @@ Examples:
         if not args.quiet:
             print(f"Error: {e}", file=sys.stderr)
             import traceback
+
             traceback.print_exc(file=sys.stderr)
         return 1
 
@@ -141,13 +142,10 @@ def generate_all(store: GoldenStore, args: argparse.Namespace) -> int:
         print(f"Error: Recipes directory not found: {args.all_recipes}", file=sys.stderr)
         return 1
 
-
     recipe_dirs = []
     for item in sorted(recipes_dir.iterdir()):
-        if item.is_dir() and not item.name.startswith("."):
-
-            if (item / "output").exists():
-                recipe_dirs.append(item)
+        if item.is_dir() and not item.name.startswith(".") and (item / "output").exists():
+            recipe_dirs.append(item)
 
     if not recipe_dirs:
         print(f"No recipe directories found in: {args.all_recipes}", file=sys.stderr)
@@ -155,7 +153,6 @@ def generate_all(store: GoldenStore, args: argparse.Namespace) -> int:
 
     if not args.quiet:
         print(f"Found {len(recipe_dirs)} recipes")
-
 
     if not args.dry_run:
         store.initialize()
@@ -167,13 +164,11 @@ def generate_all(store: GoldenStore, args: argparse.Namespace) -> int:
     for recipe_dir in recipe_dirs:
         name = recipe_dir.name
 
-
         if store.has_entry(name) and store.get_metrics_path(name).exists() and not args.update:
             if not args.quiet:
                 print(f"  SKIP {name} (exists, use --update to overwrite)")
             skipped += 1
             continue
-
 
         result = generate_recipe(store, recipe_dir, name, args)
         if result == 0:
@@ -201,13 +196,11 @@ def generate_single(store: GoldenStore, args: argparse.Namespace) -> int:
 
     name = recipe_dir.name
 
-
     if store.has_entry(name) and store.get_metrics_path(name).exists() and not args.update:
         if not args.quiet:
             print(f"Golden baseline already exists for: {name}")
             print("Use --update to overwrite")
         return 0
-
 
     if not args.dry_run:
         store.initialize()
@@ -228,7 +221,6 @@ def generate_recipe(
             return 0
         print(f"  {action} {name}...", end=" ", flush=True)
 
-
     options = ValidationOptions(
         extract_metrics=True,
         check_invariants=True,
@@ -243,13 +235,11 @@ def generate_recipe(
             print(f"FAIL (validation error: {e})")
         return 1
 
-
     if result.invariants.failed > 0 and not args.force:
         if not args.quiet:
             print(f"FAIL ({result.invariants.failed} invariant failures)")
-            print(f"      Use --force to generate anyway")
+            print("      Use --force to generate anyway")
         return 1
-
 
     source_pml = None
     for candidate in ["example.pml.yml", "source.pml.yml"]:
@@ -257,7 +247,6 @@ def generate_recipe(
         if pml_path.exists():
             source_pml = pml_path
             break
-
 
     create_golden_from_recipe(
         store=store,

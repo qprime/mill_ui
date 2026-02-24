@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from config.machine_loader import MachineConfig, Endmill
-from ir.removal_intent import Bounds2D
+from config.machine_loader import Endmill, MachineConfig
+from diagram_ir import Circle, DiagramIR, LayerIR, Line, Rect
 from diagram_ir.dimensions import DimensionRequest
-from diagram_ir import DiagramIR, LayerIR, Rect, Line, Circle
+from ir.removal_intent import Bounds2D
 
 
 def machine_config_to_diagram_ir(

@@ -18,21 +18,21 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from domains import Domain, MultiDomain
+from domains import Domain
 from generators import (
-    WaveParams,
-    GridParams,
     BeadParams,
-    wave_generator,
-    grid_generator,
+    GridParams,
+    WaveParams,
     bead_generator,
+    grid_generator,
+    wave_generator,
 )
 from layout_ast.layout import LayoutAST, Sheet
-
 
 # =============================================================================
 # Test Helpers
 # =============================================================================
+
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
     """Check if two floats are approximately equal within tolerance."""
@@ -42,6 +42,7 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 # =============================================================================
 # WaveParams Validation Tests
 # =============================================================================
+
 
 def test_wave_params_valid():
     """Test valid WaveParams construction."""
@@ -65,14 +66,14 @@ def test_wave_params_invalid_amplitude():
     params = WaveParams(amplitude_mm=0.0, wavelength_mm=30.0, depth_mm=3.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "amplitude" in str(e).lower()
 
     params_neg = WaveParams(amplitude_mm=-5.0, wavelength_mm=30.0, depth_mm=3.0)
     try:
         params_neg.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "amplitude" in str(e).lower()
 
@@ -82,7 +83,7 @@ def test_wave_params_invalid_wavelength():
     params = WaveParams(amplitude_mm=10.0, wavelength_mm=0.0, depth_mm=3.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "wavelength" in str(e).lower()
 
@@ -92,7 +93,7 @@ def test_wave_params_invalid_depth():
     params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=-1.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
 
@@ -102,7 +103,7 @@ def test_wave_params_invalid_wave_count():
     params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, wave_count=0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "wave_count" in str(e).lower()
 
@@ -110,6 +111,7 @@ def test_wave_params_invalid_wave_count():
 # =============================================================================
 # GridParams Validation Tests
 # =============================================================================
+
 
 def test_grid_params_valid():
     """Test valid GridParams construction."""
@@ -137,14 +139,14 @@ def test_grid_params_invalid_spacing():
     params = GridParams(spacing_x_mm=0.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing_x" in str(e).lower()
 
     params_y = GridParams(spacing_x_mm=25.0, spacing_y_mm=-5.0, line_width_mm=3.0, depth_mm=2.0)
     try:
         params_y.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing_y" in str(e).lower()
 
@@ -154,7 +156,7 @@ def test_grid_params_invalid_line_width():
     params = GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=0.0, depth_mm=2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "line_width" in str(e).lower()
 
@@ -164,7 +166,7 @@ def test_grid_params_invalid_depth():
     params = GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=-2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
 
@@ -172,6 +174,7 @@ def test_grid_params_invalid_depth():
 # =============================================================================
 # BeadParams Validation Tests
 # =============================================================================
+
 
 def test_bead_params_valid():
     """Test valid BeadParams construction."""
@@ -199,7 +202,7 @@ def test_bead_params_invalid_width():
     params = BeadParams(width_mm=0.0, depth_mm=3.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "width" in str(e).lower()
 
@@ -209,7 +212,7 @@ def test_bead_params_invalid_depth():
     params = BeadParams(width_mm=6.0, depth_mm=-1.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
 
@@ -219,7 +222,7 @@ def test_bead_params_invalid_loop_selection():
     params = BeadParams(width_mm=6.0, depth_mm=3.0, loop_selection="invalid")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop_selection" in str(e).lower()
 
@@ -227,6 +230,7 @@ def test_bead_params_invalid_loop_selection():
 # =============================================================================
 # Wave Generator Tests
 # =============================================================================
+
 
 def test_wave_simple_rectangle():
     """Test wave pattern on simple rectangular domain."""
@@ -291,7 +295,7 @@ def test_wave_amplitude_too_large():
 
     try:
         wave_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "amplitude" in str(e).lower()
 
@@ -317,6 +321,7 @@ def test_wave_small_domain():
 # =============================================================================
 # Grid Generator Tests
 # =============================================================================
+
 
 def test_grid_simple_rectangle():
     """Test grid pattern on simple rectangular domain."""
@@ -404,7 +409,7 @@ def test_grid_spacing_too_large():
 
     try:
         grid_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing" in str(e).lower() or "domain" in str(e).lower()
 
@@ -426,6 +431,7 @@ def test_grid_spacing_too_large_allow_empty():
 # =============================================================================
 # Bead Generator Tests
 # =============================================================================
+
 
 def test_bead_simple_rectangle():
     """Test bead on simple rectangular domain."""
@@ -518,7 +524,7 @@ def test_bead_invalid_loop_index():
 
     try:
         bead_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop index" in str(e).lower() or "out of range" in str(e).lower()
 
@@ -548,7 +554,7 @@ def test_bead_offset_too_large():
 
     try:
         bead_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "offset" in str(e).lower() or "collapse" in str(e).lower()
 
@@ -565,6 +571,7 @@ def test_bead_offset_too_large_allow_empty():
 # =============================================================================
 # Determinism Tests
 # =============================================================================
+
 
 def test_wave_generator_determinism():
     """Test that wave generator produces identical output for same input."""
@@ -614,6 +621,7 @@ def test_bead_generator_determinism():
 # Integration Tests
 # =============================================================================
 
+
 def test_combined_generators_on_same_domain():
     """Test using multiple generators on the same domain."""
     domain = Domain.from_rectangle(200, 150, center=(100, 75))
@@ -634,7 +642,7 @@ def test_combined_generators_on_same_domain():
         BeadParams(width_mm=6.0, depth_mm=3.0, offset_mm=10.0),
     )
 
-    all_items = wave_items + grid_items + bead_items
+    wave_items + grid_items + bead_items
 
     # Should have items from all generators
     assert len(wave_items) > 0
@@ -700,15 +708,13 @@ def test_end_to_end_stage5_to_ast():
 # Test Runner
 # =============================================================================
 
+
 def run_tests():
     """Run all tests and report results."""
     import traceback
 
     # Collect all test functions
-    tests = [
-        (name, func) for name, func in globals().items()
-        if name.startswith("test_") and callable(func)
-    ]
+    tests = [(name, func) for name, func in globals().items() if name.startswith("test_") and callable(func)]
 
     passed = 0
     failed = 0

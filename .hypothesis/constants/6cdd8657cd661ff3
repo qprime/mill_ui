@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/nesting/types.py
+# hypothesis_version: 6.151.9
+
+[0.0, 6.35, 10.0, 100, 'gap_margin_mm', 'geometry_points', 'height_mm', 'instance_id', 'kerf_mm', 'margin_mm', 'overall_utilization', 'part_spec', 'placements', 'rotated', 'sheet_index', 'sheet_spec', 'sheets', 'thickness_mm', 'total_parts', 'total_sheets', 'unplaced_parts', 'utilization', 'waste_area_mm2', 'width_mm', 'x_mm', 'y_mm']

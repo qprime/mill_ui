@@ -31,6 +31,13 @@ build_*.log
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
+
+# Mutation testing
+.mutmut-cache/
+
+# mypy
+.mypy_cache/
 
 # OS
 .DS_Store

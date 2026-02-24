@@ -9,7 +9,6 @@ This test module covers Stage 1 of the domain/generator system:
 
 from __future__ import annotations
 
-import json
 import math
 import sys
 from pathlib import Path
@@ -17,12 +16,12 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from domains import Domain, MultiDomain, Bounds2D
-
+from domains import Bounds2D, Domain, MultiDomain
 
 # =============================================================================
 # Test Helpers
 # =============================================================================
+
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
     """Check if two floats are approximately equal within tolerance."""
@@ -32,10 +31,10 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 def bounds_approx_equal(b1: Bounds2D, b2: Bounds2D, tolerance: float = 0.01) -> bool:
     """Check if two bounds are approximately equal."""
     return (
-        approx_equal(b1.x_min, b2.x_min, tolerance) and
-        approx_equal(b1.x_max, b2.x_max, tolerance) and
-        approx_equal(b1.y_min, b2.y_min, tolerance) and
-        approx_equal(b1.y_max, b2.y_max, tolerance)
+        approx_equal(b1.x_min, b2.x_min, tolerance)
+        and approx_equal(b1.x_max, b2.x_max, tolerance)
+        and approx_equal(b1.y_min, b2.y_min, tolerance)
+        and approx_equal(b1.y_max, b2.y_max, tolerance)
     )
 
 
@@ -47,6 +46,7 @@ def point_approx_equal(p1: tuple[float, float], p2: tuple[float, float], toleran
 # =============================================================================
 # Domain Construction Tests
 # =============================================================================
+
 
 def test_domain_from_vertices_simple_triangle():
     """Test creating a domain from triangle vertices."""
@@ -65,10 +65,7 @@ def test_domain_from_vertices_square():
 
     assert len(domain.outer_boundary) == 4
     assert approx_equal(domain.area_mm2, 10000.0)
-    assert bounds_approx_equal(
-        domain.bounds,
-        Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100)
-    )
+    assert bounds_approx_equal(domain.bounds, Bounds2D(x_min=0, x_max=100, y_min=0, y_max=100))
 
 
 def test_domain_from_rectangle():
@@ -77,19 +74,17 @@ def test_domain_from_rectangle():
 
     assert len(domain.outer_boundary) == 4
     assert approx_equal(domain.area_mm2, 5000.0)
-    assert bounds_approx_equal(
-        domain.bounds,
-        Bounds2D(x_min=150, x_max=250, y_min=125, y_max=175)
-    )
+    assert bounds_approx_equal(domain.bounds, Bounds2D(x_min=150, x_max=250, y_min=125, y_max=175))
     assert point_approx_equal(domain.local_origin, (200, 150))
 
 
 def test_domain_from_rectangle_rotated():
     """Test rectangular constructor with rotation."""
     domain = Domain.from_rectangle(
-        width_mm=100, height_mm=50,
+        width_mm=100,
+        height_mm=50,
         center=(0, 0),
-        rotation_rad=math.pi / 4  # 45 degrees
+        rotation_rad=math.pi / 4,  # 45 degrees
     )
 
     assert len(domain.outer_boundary) == 4
@@ -102,10 +97,7 @@ def test_domain_from_rectangle_at_origin():
     """Test rectangular constructor at origin."""
     domain = Domain.from_rectangle(width_mm=100, height_mm=100)
 
-    assert bounds_approx_equal(
-        domain.bounds,
-        Bounds2D(x_min=-50, x_max=50, y_min=-50, y_max=50)
-    )
+    assert bounds_approx_equal(domain.bounds, Bounds2D(x_min=-50, x_max=50, y_min=-50, y_max=50))
     assert point_approx_equal(domain.centroid, (0, 0))
 
 
@@ -164,11 +156,12 @@ def test_domain_centroid_as_default_origin():
 # Domain Validation Tests
 # =============================================================================
 
+
 def test_domain_invalid_too_few_vertices():
     """Test that domains with < 3 vertices raise an error."""
     try:
         Domain.from_polygon([(0, 0), (100, 0)])
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "at least 3 points" in str(e).lower()
 
@@ -180,7 +173,7 @@ def test_domain_invalid_inner_not_contained():
 
     try:
         Domain.from_polygon(outer, holes=[inner])
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         # Error can mention "contained" or "invalid" or "splits" - all valid rejections
         msg = str(e).lower()
@@ -195,7 +188,7 @@ def test_domain_invalid_overlapping_holes():
 
     try:
         Domain.from_polygon(outer, holes=[hole1, hole2])
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         # Error can mention "overlap" or "invalid" or "splits" - all valid rejections
         msg = str(e).lower()
@@ -206,7 +199,7 @@ def test_domain_invalid_zero_width_rectangle():
     """Test that zero-width rectangle raises error."""
     try:
         Domain.from_rectangle(width_mm=0, height_mm=100)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
@@ -215,7 +208,7 @@ def test_domain_invalid_negative_dimensions():
     """Test that negative dimensions raise error."""
     try:
         Domain.from_rectangle(width_mm=-100, height_mm=100)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
@@ -223,6 +216,7 @@ def test_domain_invalid_negative_dimensions():
 # =============================================================================
 # Domain Properties Tests
 # =============================================================================
+
 
 def test_domain_bounds():
     """Test bounds computation."""
@@ -251,10 +245,7 @@ def test_domain_centroid():
 
 def test_domain_with_origin_at_centroid():
     """Test with_origin_at_centroid method."""
-    domain = Domain.from_rectangle(
-        width_mm=100, height_mm=100,
-        center=(0, 0)
-    )
+    domain = Domain.from_rectangle(width_mm=100, height_mm=100, center=(0, 0))
     # Move origin elsewhere
     shifted = Domain(
         outer_boundary=domain.outer_boundary,
@@ -271,6 +262,7 @@ def test_domain_with_origin_at_centroid():
 # Inset Operation Tests
 # =============================================================================
 
+
 def test_inset_simple_rectangle():
     """Test insetting a simple rectangle."""
     domain = Domain.from_rectangle(width_mm=100, height_mm=100, center=(50, 50))
@@ -281,10 +273,7 @@ def test_inset_simple_rectangle():
 
     inner = result.domains[0]
     assert approx_equal(inner.area_mm2, 6400.0)  # (100-20) * (100-20)
-    assert bounds_approx_equal(
-        inner.bounds,
-        Bounds2D(x_min=10, x_max=90, y_min=10, y_max=90)
-    )
+    assert bounds_approx_equal(inner.bounds, Bounds2D(x_min=10, x_max=90, y_min=10, y_max=90))
 
 
 def test_inset_zero_distance():
@@ -320,7 +309,7 @@ def test_inset_negative_distance_raises():
     domain = Domain.from_rectangle(width_mm=100, height_mm=100)
     try:
         domain.inset(-10)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "non-negative" in str(e).lower()
 
@@ -345,6 +334,7 @@ def test_inset_expands_holes():
 # =============================================================================
 # Offset Operation Tests
 # =============================================================================
+
 
 def test_offset_simple_rectangle():
     """Test offsetting a simple rectangle."""
@@ -371,7 +361,7 @@ def test_offset_negative_distance_raises():
     domain = Domain.from_rectangle(width_mm=100, height_mm=100)
     try:
         domain.offset(-10)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "non-negative" in str(e).lower()
 
@@ -411,6 +401,7 @@ def test_offset_removes_small_hole():
 # =============================================================================
 # Subtract Operation Tests
 # =============================================================================
+
 
 def test_subtract_creates_hole():
     """Test subtracting a smaller domain creates a hole."""
@@ -480,6 +471,7 @@ def test_subtract_splits_domain():
 # Intersect Operation Tests
 # =============================================================================
 
+
 def test_intersect_full_overlap():
     """Test intersecting identical domains returns full domain."""
     domain1 = Domain.from_rectangle(width_mm=100, height_mm=100, center=(50, 50))
@@ -528,12 +520,10 @@ def test_intersect_contained():
 # Origin and Rotation Inheritance Tests
 # =============================================================================
 
+
 def test_operation_preserves_origin():
     """Test that operations preserve local_origin from source domain."""
-    domain = Domain.from_rectangle(
-        width_mm=100, height_mm=100,
-        center=(200, 150)
-    )
+    domain = Domain.from_rectangle(width_mm=100, height_mm=100, center=(200, 150))
     # Custom origin
     domain_with_origin = Domain(
         outer_boundary=domain.outer_boundary,
@@ -552,9 +542,10 @@ def test_operation_preserves_origin():
 def test_operation_preserves_rotation():
     """Test that operations preserve local_rotation from source domain."""
     domain = Domain.from_rectangle(
-        width_mm=100, height_mm=100,
+        width_mm=100,
+        height_mm=100,
         center=(0, 0),
-        rotation_rad=math.pi / 6  # 30 degrees
+        rotation_rad=math.pi / 6,  # 30 degrees
     )
 
     result = domain.offset(10)
@@ -566,6 +557,7 @@ def test_operation_preserves_rotation():
 # =============================================================================
 # MultiDomain Tests
 # =============================================================================
+
 
 def test_multidomain_iteration():
     """Test iterating over MultiDomain."""
@@ -606,6 +598,7 @@ def test_multidomain_is_empty():
 # JSON Serialization Tests
 # =============================================================================
 
+
 def test_domain_json_roundtrip_simple():
     """Test JSON serialization round-trip for simple domain."""
     domain = Domain.from_rectangle(width_mm=100, height_mm=50, center=(200, 150))
@@ -633,11 +626,7 @@ def test_domain_json_roundtrip_with_holes():
 
 def test_domain_json_roundtrip_with_origin_rotation():
     """Test JSON serialization preserves origin and rotation."""
-    domain = Domain.from_rectangle(
-        width_mm=100, height_mm=100,
-        center=(50, 50),
-        rotation_rad=math.pi / 4
-    )
+    domain = Domain.from_rectangle(width_mm=100, height_mm=100, center=(50, 50), rotation_rad=math.pi / 4)
 
     json_str = domain.to_json()
     restored = Domain.from_json(json_str)
@@ -702,6 +691,7 @@ def test_domain_from_dict_wrapper_format():
 # Edge Case Tests
 # =============================================================================
 
+
 def test_very_small_domain():
     """Test operations on very small domain."""
     domain = Domain.from_rectangle(width_mm=1, height_mm=1, center=(0, 0))
@@ -725,9 +715,7 @@ def test_very_large_domain():
 def test_l_shaped_domain():
     """Test operations on an L-shaped domain."""
     # L-shape
-    vertices = [
-        (0, 0), (100, 0), (100, 50), (50, 50), (50, 100), (0, 100)
-    ]
+    vertices = [(0, 0), (100, 0), (100, 50), (50, 50), (50, 100), (0, 100)]
     domain = Domain.from_polygon(vertices)
 
     # L has area 100*50 + 50*50 = 7500
@@ -741,9 +729,7 @@ def test_l_shaped_domain():
 def test_concave_domain():
     """Test operations on a concave domain."""
     # Arrow/chevron shape pointing right
-    vertices = [
-        (0, 0), (50, 25), (0, 50), (10, 25)
-    ]
+    vertices = [(0, 0), (50, 25), (0, 50), (10, 25)]
     domain = Domain.from_polygon(vertices)
 
     # Should be valid and have positive area
@@ -753,6 +739,7 @@ def test_concave_domain():
 # =============================================================================
 # Additional Tests for Review Findings
 # =============================================================================
+
 
 def test_split_result_all_domains_processable():
     """HIGH: Verify all domains from split result can be processed without dropping geometry."""
@@ -812,12 +799,14 @@ def test_default_join_style_is_mitre():
     result_mitre = domain.inset(10, join_style="mitre")
 
     # Default should match mitre exactly
-    assert approx_equal(result_default[0].area_mm2, result_mitre[0].area_mm2, tolerance=0.001), \
+    assert approx_equal(result_default[0].area_mm2, result_mitre[0].area_mm2, tolerance=0.001), (
         f"Default ({result_default[0].area_mm2}) should match mitre ({result_mitre[0].area_mm2})"
+    )
 
     # Mitre produces exactly 80x80 = 6400 for rectangle (sharp corners, not rounded)
-    assert approx_equal(result_mitre[0].area_mm2, 6400.0, tolerance=0.01), \
+    assert approx_equal(result_mitre[0].area_mm2, 6400.0, tolerance=0.01), (
         f"Mitre should produce 6400, got {result_mitre[0].area_mm2}"
+    )
 
     # Verify all three join styles are accepted
     result_round = domain.inset(10, join_style="round")
@@ -917,6 +906,7 @@ def test_multidomain_empty_serialization():
 # Stage 9: Split Operations Tests
 # =============================================================================
 
+
 def test_split_horizontal_basic():
     """Test horizontal split into 3 rows."""
     domain = Domain.from_rectangle(100, 300, center=(50, 150))
@@ -959,7 +949,7 @@ def test_split_horizontal_gap_too_large():
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     try:
         domain.split_horizontal(3, gap_mm=60)  # 2 gaps of 60 = 120 > 100
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "gap" in str(e).lower()
 
@@ -969,7 +959,7 @@ def test_split_horizontal_invalid_n():
     domain = Domain.from_rectangle(100, 100)
     try:
         domain.split_horizontal(0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "n must be >= 1" in str(e)
 
@@ -1006,7 +996,7 @@ def test_split_grid_basic():
     result = domain.split_grid(rows=2, cols=3)
 
     assert len(result) == 6
-    # Each cell should be 100mm × 100mm
+    # Each cell should be 100mm x 100mm
     for d in result:
         assert approx_equal(d.bounds.width, 100.0)
         assert approx_equal(d.bounds.height, 100.0)
@@ -1018,7 +1008,7 @@ def test_split_grid_with_gap():
     result = domain.split_grid(rows=2, cols=3, gap_mm=10)
 
     assert len(result) == 6
-    # Each cell should be (300 - 2*10) / 3 = 93.33mm × (200 - 10) / 2 = 95mm
+    # Each cell should be (300 - 2*10) / 3 = 93.33mm x (200 - 10) / 2 = 95mm
     for d in result:
         assert approx_equal(d.bounds.width, 280 / 3)
         assert approx_equal(d.bounds.height, 95.0)
@@ -1059,7 +1049,8 @@ def test_split_grid_single_cell():
 def test_split_preserves_origin_rotation():
     """Test that split operations preserve local_origin and local_rotation."""
     domain = Domain.from_rectangle(
-        200, 200,
+        200,
+        200,
         center=(100, 100),
         rotation_rad=0.5,
     )
@@ -1087,9 +1078,7 @@ def test_split_on_complex_domain():
     intersects the grid cells.
     """
     # L-shape: 100x50 base + 50x50 left tower = 7500 mm²
-    vertices = [
-        (0, 0), (100, 0), (100, 50), (50, 50), (50, 100), (0, 100)
-    ]
+    vertices = [(0, 0), (100, 0), (100, 50), (50, 50), (50, 100), (0, 100)]
     domain = Domain.from_polygon(vertices)
 
     # Horizontal split into 2 rows - each row is 50mm tall
@@ -1122,7 +1111,7 @@ def test_split_total_area_preserved():
     # Area should be less by gap amounts
     h_expected = original_area - 2 * 20 * 200  # 2 horizontal gaps, 200mm wide
     v_expected = original_area - 1 * 15 * 300  # 1 vertical gap, 300mm tall
-    g_expected = original_area - (2 * 10 * 300) - (1 * 10 * 200)  # 2 v-gaps + 1 h-gap
+    original_area - (2 * 10 * 300) - (1 * 10 * 200)  # 2 v-gaps + 1 h-gap
 
     h_actual = sum(d.area_mm2 for d in h_result)
     v_actual = sum(d.area_mm2 for d in v_result)
@@ -1138,6 +1127,7 @@ def test_split_total_area_preserved():
 # Stage 11: Local-Coordinate Split Operations Tests
 # =============================================================================
 
+
 def test_split_horizontal_local_coords_default_false():
     """Test that local_coords=False (default) preserves existing behavior."""
     domain = Domain.from_rectangle(100, 300, center=(50, 150))
@@ -1148,7 +1138,7 @@ def test_split_horizontal_local_coords_default_false():
     result_explicit = domain.split_horizontal(3, local_coords=False)
 
     assert len(result_default) == len(result_explicit)
-    for d1, d2 in zip(result_default, result_explicit):
+    for d1, d2 in zip(result_default, result_explicit, strict=False):
         assert approx_equal(d1.area_mm2, d2.area_mm2)
         assert bounds_approx_equal(d1.bounds, d2.bounds)
 
@@ -1161,7 +1151,7 @@ def test_split_vertical_local_coords_default_false():
     result_explicit = domain.split_vertical(3, local_coords=False)
 
     assert len(result_default) == len(result_explicit)
-    for d1, d2 in zip(result_default, result_explicit):
+    for d1, d2 in zip(result_default, result_explicit, strict=False):
         assert approx_equal(d1.area_mm2, d2.area_mm2)
 
 
@@ -1173,7 +1163,7 @@ def test_split_grid_local_coords_default_false():
     result_explicit = domain.split_grid(2, 3, local_coords=False)
 
     assert len(result_default) == len(result_explicit)
-    for d1, d2 in zip(result_default, result_explicit):
+    for d1, d2 in zip(result_default, result_explicit, strict=False):
         assert approx_equal(d1.area_mm2, d2.area_mm2)
 
 
@@ -1186,7 +1176,7 @@ def test_split_horizontal_local_coords_unrotated():
     result_true = domain.split_horizontal(3, local_coords=True)
 
     assert len(result_false) == len(result_true)
-    for d1, d2 in zip(result_false, result_true):
+    for d1, d2 in zip(result_false, result_true, strict=False):
         assert approx_equal(d1.area_mm2, d2.area_mm2)
 
 
@@ -1346,8 +1336,7 @@ def test_local_coords_vs_sheet_coords_different_for_rotated():
     # The centroids should differ due to different split orientations
     # For a 45-degree rotation, the difference should be noticeable
     centroid_diff = math.sqrt(
-        (sheet_centroid_0[0] - local_centroid_0[0])**2 +
-        (sheet_centroid_0[1] - local_centroid_0[1])**2
+        (sheet_centroid_0[0] - local_centroid_0[0]) ** 2 + (sheet_centroid_0[1] - local_centroid_0[1]) ** 2
     )
     # With a 45-degree rotated 100x200 rectangle split in half,
     # the centroids will be in notably different positions
@@ -1411,6 +1400,7 @@ def test_to_local_domain_and_back():
 # Stage 13: Domain Factory Methods and Utilities
 # =============================================================================
 
+
 def test_from_arch_basic():
     """Test creating an arch-topped domain."""
     arch = Domain.from_arch(
@@ -1460,21 +1450,21 @@ def test_from_arch_validation():
     # Radius too large (> half width)
     try:
         Domain.from_arch(width_mm=200, height_mm=400, arch_radius_mm=150)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "radius" in str(e).lower()
 
     # Radius larger than height
     try:
         Domain.from_arch(width_mm=200, height_mm=50, arch_radius_mm=100)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "radius" in str(e).lower()
 
     # Invalid dimensions
     try:
         Domain.from_arch(width_mm=-100, height_mm=400, arch_radius_mm=50)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
@@ -1567,21 +1557,21 @@ def test_split_horizontal_with_gaps_validation():
     # n < 1
     try:
         domain.split_horizontal_with_gaps(0, gap_mm=10)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "n must be >= 1" in str(e)
 
     # gap <= 0
     try:
         domain.split_horizontal_with_gaps(3, gap_mm=0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
     # gap too large
     try:
         domain.split_horizontal_with_gaps(5, gap_mm=30)  # 4 gaps * 30 = 120 > 100
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "exceeds" in str(e).lower()
 
@@ -1614,6 +1604,7 @@ def test_split_horizontal_with_gaps_local_coords():
 # =============================================================================
 # Stage 13: arc_points Utility Tests
 # =============================================================================
+
 
 def test_arc_points_basic():
     """Test basic arc_points generation."""
@@ -1674,14 +1665,14 @@ def test_arc_points_validation():
     # segments < 1
     try:
         arc_points((0, 0), 10, 0, 90, segments=0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "segments" in str(e).lower()
 
     # negative radius
     try:
         arc_points((0, 0), -10, 0, 90, segments=4)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "radius" in str(e).lower()
 
@@ -1690,15 +1681,12 @@ def test_arc_points_validation():
 # Test Runner
 # =============================================================================
 
+
 def run_tests():
     """Run all tests and report results."""
-    import traceback
 
     # Collect all test functions
-    tests = [
-        (name, func) for name, func in globals().items()
-        if name.startswith("test_") and callable(func)
-    ]
+    tests = [(name, func) for name, func in globals().items() if name.startswith("test_") and callable(func)]
 
     passed = 0
     failed = 0

@@ -3,15 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from assembly.notches import build_notched_polygon
+from assembly.panel import NotchSpec
 from generators.core import (
     BaseParams,
     GeneratorResult,
     generate_shape_id,
 )
-from layout_ast.layout import Item, Geometry, Placement, Feature
-from assembly.notches import build_notched_polygon
-from assembly.panel import NotchSpec
-
+from layout_ast.layout import Feature, Geometry, Item, Placement
 
 EdgeName = Literal["top", "bottom", "left", "right"]
 
@@ -33,13 +32,9 @@ class NotchedPanelParams(BaseParams):
 
     def validate(self) -> None:
         if self.width_mm <= 0:
-            raise ValueError(
-                f"NotchedPanelParams: width_mm must be positive, got {self.width_mm}"
-            )
+            raise ValueError(f"NotchedPanelParams: width_mm must be positive, got {self.width_mm}")
         if self.height_mm <= 0:
-            raise ValueError(
-                f"NotchedPanelParams: height_mm must be positive, got {self.height_mm}"
-            )
+            raise ValueError(f"NotchedPanelParams: height_mm must be positive, got {self.height_mm}")
 
 
 def notched_panel_generator(
@@ -57,7 +52,6 @@ def notched_panel_generator(
         shape_id = f"{shape_id_prefix}_{params.part_name.lower()}"
 
     items: list[Item] = []
-
 
     outer = build_notched_polygon(
         width_mm=params.width_mm,

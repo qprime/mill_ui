@@ -1,8 +1,7 @@
-
-from pml.yaml_parser import parse_pml_yaml
-from pml.yaml_formatter import format_pml_yaml
-from resolution.layout_resolver import resolve_layout
 from adapters.hints_to_removal import simple_item_to_removal_intent
+from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 
 def test_spline_parsing_and_roundtrip():
@@ -22,25 +21,20 @@ children:
             depth: 0.8mm
 """
 
-
     ast1 = parse_pml_yaml(original_pml)
     assert ast1.root is not None
 
-
     formatted_pml = format_pml_yaml(ast1)
 
-
     ast2 = parse_pml_yaml(formatted_pml)
-
 
     spline1 = ast1.root.children[0]
     spline2 = ast2.root.children[0]
 
     assert len(spline1.points) == len(spline2.points)
-    for (x1, y1), (x2, y2) in zip(spline1.points, spline2.points):
+    for (x1, y1), (x2, y2) in zip(spline1.points, spline2.points, strict=False):
         assert abs(x1 - x2) < 0.01
         assert abs(y1 - y2) < 0.01
-
 
     assert spline1.feature.type == spline2.feature.type == "engrave"
     assert abs(spline1.feature.depth_mm - spline2.feature.depth_mm) < 0.01
@@ -110,25 +104,20 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-
     spline_items = [item for item in flat.items if item.shape_id == "decorative"]
     assert len(spline_items) == 1
     spline_item = spline_items[0]
 
-
     removal = simple_item_to_removal_intent(spline_item, region_id_prefix="test_spline")
-
 
     assert removal.region_id == "test_spline_decorative"
     assert removal.depth_profile.z_top == 0.0
     assert abs(removal.depth_profile.z_bottom - (-0.8)) < 0.01
 
-
     assert removal.bounds.x_min >= 0.0
     assert removal.bounds.x_max <= 400.0
     assert removal.bounds.y_min >= 0.0
     assert removal.bounds.y_max <= 400.0
-
 
     assert removal.feature_type == "engrave"
 
@@ -150,20 +139,19 @@ children:
             depth: 0.5mm
 """
 
-
     ast1 = parse_pml_yaml(pml)
     flat1 = resolve_layout(ast1)
-    spline1 = [item for item in flat1.items if item.shape_id == "wave"][0]
+    spline1 = next(item for item in flat1.items if item.shape_id == "wave")
 
     ast2 = parse_pml_yaml(pml)
     flat2 = resolve_layout(ast2)
-    spline2 = [item for item in flat2.items if item.shape_id == "wave"][0]
+    spline2 = next(item for item in flat2.items if item.shape_id == "wave")
 
     points1 = spline1.geometry.data["points"]
     points2 = spline2.geometry.data["points"]
 
     assert len(points1) == len(points2)
-    for (x1, y1), (x2, y2) in zip(points1, points2):
+    for (x1, y1), (x2, y2) in zip(points1, points2, strict=False):
         assert abs(x1 - x2) < 0.01
         assert abs(y1 - y2) < 0.01
 
@@ -203,13 +191,12 @@ children:
             depth: 1mm
 """
 
-
     ast_coarse = parse_pml_yaml(pml_coarse)
     flat_coarse = resolve_layout(ast_coarse)
-    points_coarse = [item for item in flat_coarse.items if item.shape_id == "curve"][0].geometry.data["points"]
+    points_coarse = next(item for item in flat_coarse.items if item.shape_id == "curve").geometry.data["points"]
 
     ast_fine = parse_pml_yaml(pml_fine)
     flat_fine = resolve_layout(ast_fine)
-    points_fine = [item for item in flat_fine.items if item.shape_id == "curve"][0].geometry.data["points"]
+    points_fine = next(item for item in flat_fine.items if item.shape_id == "curve").geometry.data["points"]
 
     assert len(points_fine) > len(points_coarse)

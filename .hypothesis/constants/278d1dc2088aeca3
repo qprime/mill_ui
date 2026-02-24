@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/nesting/api.py
+# hypothesis_version: 6.151.9
+
+[0.0, 10.0, 'algorithm', 'allow_rotation', 'ast', 'errors', 'guillotine', 'height_mm', 'is_valid', 'maxrects', 'name', 'nest_and_generate', 'nest_parts', 'nesting_result', 'output', 'output_format', 'pml', 'quantity', 'sheets', 'template', 'template_params', 'total_parts', 'total_sheets', 'unplaced', 'utilization', 'utilization_percent', 'validation', 'warnings', 'width_mm']

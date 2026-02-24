@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from shapely.geometry import Point
 
+from core.constants import DepthMode
 from domains.transforms import local_to_sheet
 from generators.core import (
     GeneratorResult,
@@ -13,7 +14,6 @@ from generators.core import (
 )
 from generators.params.area import HoleGridParams
 from generators.utils import get_local_bounds
-from core.constants import DepthMode
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -35,9 +35,7 @@ def hole_grid_generator(
         if not inset_result.domains:
             if allow_empty:
                 return []
-            raise ValueError(
-                f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm"
-            )
+            raise ValueError(f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm")
         if len(inset_result.domains) != 1:
             raise ValueError(
                 f"HoleGridGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
@@ -56,10 +54,7 @@ def hole_grid_generator(
     hole_radius = params.diameter_mm / 2
     local_bounds = get_local_bounds(effective_domain)
 
-    if params.pattern == "hexagonal":
-        row_spacing = params.spacing_mm * math.sqrt(3) / 2
-    else:
-        row_spacing = params.spacing_mm
+    row_spacing = params.spacing_mm * math.sqrt(3) / 2 if params.pattern == "hexagonal" else params.spacing_mm
 
     grid_points = _generate_grid_points(
         local_bounds,
@@ -95,7 +90,6 @@ def hole_grid_generator(
     return items
 
 
-
 def _generate_grid_points(
     bounds: dict[str, float],
     col_spacing: float,
@@ -127,10 +121,7 @@ def _generate_grid_points(
     y = y_start
 
     while y <= y_max + row_spacing:
-        if pattern in ("hexagonal", "offset") and row % 2 == 1:
-            row_x_offset = col_spacing / 2
-        else:
-            row_x_offset = 0
+        row_x_offset = col_spacing / 2 if pattern in ("hexagonal", "offset") and row % 2 == 1 else 0
 
         x = x_start + row_x_offset
         while x <= x_max + col_spacing:

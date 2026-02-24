@@ -1,11 +1,11 @@
-
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 from typing import Literal
 
-from layout_ast.layout import Item, LayoutAST
 from ir.removal_intent import Bounds2D
+from layout_ast.layout import Item, LayoutAST
 
 Orientation = Literal["horizontal", "vertical"]
 DimensionPlacement = Literal["shape_relative", "sheet_edge"]
@@ -13,7 +13,6 @@ DimensionPlacement = Literal["shape_relative", "sheet_edge"]
 
 @dataclass(frozen=True)
 class DimensionRequest:
-
     orientation: Orientation
     a: float
     b: float
@@ -23,7 +22,6 @@ class DimensionRequest:
 
 @dataclass(frozen=True)
 class PlacedDimension:
-
     orientation: Orientation
     a: float
     b: float
@@ -33,7 +31,6 @@ class PlacedDimension:
 
 
 class _IntervalAllocator:
-
     def __init__(self) -> None:
         self._levels: list[list[tuple[float, float]]] = []
 
@@ -143,7 +140,9 @@ def place_dimensions_on_rails(
     requests = collect_dimension_requests(
         ast, offset_x, offset_y, include_features=include_features, deduplicate=deduplicate, y_flip=y_flip
     )
-    return place_on_rails(requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin, placement_mode=placement_mode)
+    return place_on_rails(
+        requests, ast.sheet.width_mm, offset_x, offset_y, margin=margin, placement_mode=placement_mode
+    )
 
 
 def _collect_dimension_requests(
@@ -325,7 +324,7 @@ def _hole_spacing_requests_for_group(
             continue
         pts_sorted = sorted(pts, key=lambda p: p[0])
         y_anchor = sum(p[1] for p in pts_sorted) / len(pts_sorted)
-        for (x1, _), (x2, _) in zip(pts_sorted, pts_sorted[1:]):
+        for (x1, _), (x2, _) in itertools.pairwise(pts_sorted):
             dx = abs(x2 - x1)
             if dx < 1e-6:
                 continue
@@ -354,7 +353,7 @@ def _hole_spacing_requests_for_group(
             continue
         pts_sorted = sorted(pts, key=lambda p: p[1])
         x_anchor = sum(p[0] for p in pts_sorted) / len(pts_sorted)
-        for (_, y1), (_, y2) in zip(pts_sorted, pts_sorted[1:]):
+        for (_, y1), (_, y2) in itertools.pairwise(pts_sorted):
             dy = abs(y2 - y1)
             if dy < 1e-6:
                 continue
@@ -544,11 +543,11 @@ def _overlaps(a1: float, a2: float, b1: float, b2: float, padding: float) -> boo
 
 
 __all__ = [
-    "DimensionRequest",
-    "PlacedDimension",
     "DimensionPlacement",
+    "DimensionRequest",
     "Orientation",
+    "PlacedDimension",
     "collect_dimension_requests",
-    "place_on_rails",
     "place_dimensions_on_rails",
+    "place_on_rails",
 ]

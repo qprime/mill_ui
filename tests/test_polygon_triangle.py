@@ -1,9 +1,8 @@
-
 from __future__ import annotations
 
+from layout_ast.compositional import Polygon, Triangle
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from layout_ast.compositional import Polygon, Triangle
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
@@ -206,7 +205,7 @@ children:
         (half_base, -half_height),
         (0, half_height),
     ]
-    for actual, expected in zip(points, expected_relative_points):
+    for actual, expected in zip(points, expected_relative_points, strict=False):
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
 
@@ -275,7 +274,7 @@ children:
         (half_base, -half_height),
         (0, half_height),
     ]
-    for actual, expected in zip(points, expected_relative_points):
+    for actual, expected in zip(points, expected_relative_points, strict=False):
         assert approx_equal(actual[0], expected[0])
         assert approx_equal(actual[1], expected[1])
 

@@ -15,12 +15,11 @@ import sys
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from validation.invariants.svg_invariants import (
-    check_svg_invariants,
-    SVG_INVARIANT_IDS,
-)
 from validation.core import Verdict
-
+from validation.invariants.svg_invariants import (
+    SVG_INVARIANT_IDS,
+    check_svg_invariants,
+)
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -53,7 +52,7 @@ def test_valid_simple_profile_svg():
         print(f"SKIP: {svg_path} not found")
         return
 
-    with open(svg_path, "r", encoding="utf-8") as f:
+    with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
 
     results = check_svg_invariants(svg_content)
@@ -65,9 +64,7 @@ def test_valid_simple_profile_svg():
 
     # All should pass (or warn, which is acceptable)
     for r in results:
-        assert r.status in (Verdict.PASS, Verdict.WARN), (
-            f"{r.id} failed: {r.failures}"
-        )
+        assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures}"
 
     print("PASS: test_valid_simple_profile_svg")
 
@@ -80,16 +77,14 @@ def test_valid_shaker_door_svg():
         print(f"SKIP: {svg_path} not found")
         return
 
-    with open(svg_path, "r", encoding="utf-8") as f:
+    with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
 
     results = check_svg_invariants(svg_content)
 
     # All should pass (or warn)
     failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, (
-        f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-    )
+    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
     print("PASS: test_valid_shaker_door_svg")
 
@@ -102,15 +97,13 @@ def test_valid_multiple_depths_svg():
         print(f"SKIP: {svg_path} not found")
         return
 
-    with open(svg_path, "r", encoding="utf-8") as f:
+    with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
 
     results = check_svg_invariants(svg_content)
 
     failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, (
-        f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-    )
+    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
     print("PASS: test_valid_multiple_depths_svg")
 
@@ -631,16 +624,14 @@ def test_all_recipe_svgs_pass():
             skipped += 1
             continue
 
-        with open(svg_path, "r", encoding="utf-8") as f:
+        with open(svg_path, encoding="utf-8") as f:
             svg_content = f.read()
 
         results = check_svg_invariants(svg_content)
 
         failures = [r for r in results if r.status == Verdict.FAIL]
         if failures:
-            failed_svgs.append(
-                (filename, [(f.id, f.failures) for f in failures])
-            )
+            failed_svgs.append((filename, [(f.id, f.failures) for f in failures]))
         else:
             passed += 1
 
@@ -648,7 +639,7 @@ def test_all_recipe_svgs_pass():
         print(f"FAIL: {len(failed_svgs)} recipe SVGs failed invariants:")
         for filename, fails in failed_svgs:
             print(f"  {filename}: {fails}")
-        assert False, f"{len(failed_svgs)} recipe SVGs failed invariants"
+        raise AssertionError(f"{len(failed_svgs)} recipe SVGs failed invariants")
 
     print(f"PASS: test_all_recipe_svgs_pass ({passed} passed, {skipped} skipped)")
 
@@ -676,16 +667,14 @@ def test_nesting_output_svgs():
             skipped += 1
             continue
 
-        with open(svg_path, "r", encoding="utf-8") as f:
+        with open(svg_path, encoding="utf-8") as f:
             svg_content = f.read()
 
         results = check_svg_invariants(svg_content)
 
         failures = [r for r in results if r.status == Verdict.FAIL]
         if failures:
-            failed_svgs.append(
-                (filename, [(f.id, f.failures) for f in failures])
-            )
+            failed_svgs.append((filename, [(f.id, f.failures) for f in failures]))
         else:
             passed += 1
 
@@ -693,7 +682,7 @@ def test_nesting_output_svgs():
         print(f"FAIL: {len(failed_svgs)} nesting SVGs failed invariants:")
         for filename, fails in failed_svgs:
             print(f"  {filename}: {fails}")
-        assert False, f"{len(failed_svgs)} nesting SVGs failed invariants"
+        raise AssertionError(f"{len(failed_svgs)} nesting SVGs failed invariants")
 
     print(f"PASS: test_nesting_output_svgs ({passed} passed, {skipped} skipped)")
 
@@ -812,9 +801,9 @@ def run_all_tests():
             print(f"FAIL: {test.__name__}: {e}")
             failed += 1
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"SVG Invariant Tests: {passed} passed, {failed} failed")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     return failed == 0
 

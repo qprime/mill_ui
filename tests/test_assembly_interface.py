@@ -1,8 +1,8 @@
 import pytest
 
 from assembly.core import Assembly, Interface, InterfaceType, RemovalKind
-from assembly.panel import PanelSpec, PanelRole, Edge, NotchSpec, DadoSpec
-from assembly.joinery import Butt, Finger, HalfLap, Captured
+from assembly.joinery import Butt, Captured, Finger, HalfLap
+from assembly.panel import PanelRole, PanelSpec
 
 
 class TestInterfaceTypeValidation:
@@ -88,9 +88,7 @@ class TestAssemblyValidation:
         panels = {
             "front": PanelSpec("front", 100, 50, 6),
         }
-        interfaces = (
-            Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "front", "right", Butt()),
-        )
+        interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "nonexistent", "left", "front", "right", Butt()),)
         assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="Unknown member: nonexistent"):
             assembly.validate()
@@ -99,9 +97,7 @@ class TestAssemblyValidation:
         panels = {
             "front": PanelSpec("front", 100, 50, 6),
         }
-        interfaces = (
-            Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "nonexistent", "right", Butt()),
-        )
+        interfaces = (Interface(InterfaceType.SIDE_TO_SIDE, "front", "left", "nonexistent", "right", Butt()),)
         assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="Unknown member: nonexistent"):
             assembly.validate()
@@ -111,9 +107,7 @@ class TestAssemblyValidation:
             "shelf": PanelSpec("shelf", 100, 50, 6, role=PanelRole.SHELF),
             "partition": PanelSpec("partition", 50, 80, 6, role=PanelRole.PARTITION),
         }
-        interfaces = (
-            Interface(InterfaceType.INTERNAL, "shelf", "bottom", "partition", "top", Finger(width_mm=12)),
-        )
+        interfaces = (Interface(InterfaceType.INTERNAL, "shelf", "bottom", "partition", "top", Finger(width_mm=12)),)
         assembly = Assembly(members=panels, interfaces=interfaces)
         with pytest.raises(ValueError, match="not valid for INTERNAL"):
             assembly.validate()

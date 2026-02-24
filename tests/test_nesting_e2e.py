@@ -1,19 +1,17 @@
-
 from __future__ import annotations
 
 import sys
 
-from nesting import nest_and_generate
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
-from cam.model.stock import Stock
-from cam.model.material import Material
 from cam.model.machine import Machine
+from cam.model.material import Material
+from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
 from cam.post.gcode import write_gcode
-
+from nesting import nest_and_generate
 
 TEST_TOOL_DB = [
     {
@@ -29,7 +27,6 @@ TEST_TOOL_DB = [
 
 def test_simple_rect_through_cam():
     print("Running test_simple_rect_through_cam...")
-
 
     parts = [{"name": "panel", "width_mm": 200, "height_mm": 150}]
 
@@ -48,20 +45,16 @@ def test_simple_rect_through_cam():
 
     ast = asts[0]
 
-
     assert ast.sheet.width_mm == 500
     assert ast.sheet.height_mm == 500
     assert ast.sheet.thickness_mm == 19
     assert len(ast.items) >= 1
 
-
     intents = ast_to_removal_intents(ast)
     assert len(intents) >= 1
 
-
     planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
     assert len(planner_input.profiles) + len(planner_input.pockets) + len(planner_input.holes) >= 1
-
 
     stock = Stock(width=500, height=500, thickness=19)
     material = Material(name="MDF")
@@ -79,13 +72,11 @@ def test_simple_rect_through_cam():
 
     assert len(passes) >= 1
 
-
     for p in passes:
         gcode = write_gcode(
             p.moves,
             safe_z=p.setup.safe_z,
         )
-
 
         assert len(gcode) > 0
         assert "G" in gcode
@@ -118,7 +109,6 @@ def test_multiple_parts_through_cam():
     total_gcode_lines = 0
 
     for ast in asts:
-
         intents = ast_to_removal_intents(ast)
         planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
@@ -146,7 +136,6 @@ def test_multiple_parts_through_cam():
                 safe_z=p.setup.safe_z,
             )
             total_gcode_lines += gcode.count("\n")
-
 
     assert total_gcode_lines > 20
 
@@ -188,7 +177,6 @@ def test_template_parts_through_cam():
     assert "profile" in feature_types
     assert "pocket" in feature_types
 
-
     intents = ast_to_removal_intents(ast)
     planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
@@ -210,9 +198,7 @@ def test_template_parts_through_cam():
         safe_z=6.0,
     )
 
-
     assert len(passes) >= 1
-
 
     for p in passes:
         gcode = write_gcode(
@@ -228,7 +214,6 @@ def test_template_parts_through_cam():
 def test_multi_sheet_through_cam():
     print("Running test_multi_sheet_through_cam...")
 
-
     parts = [
         {"name": "large_panel", "width_mm": 400, "height_mm": 400, "quantity": 5},
     ]
@@ -242,14 +227,12 @@ def test_multi_sheet_through_cam():
         output_format="ast",
     )
 
-
     assert result["total_sheets"] >= 2
     asts = result["output"]
     assert len(asts) >= 2
 
-
     sheet_gcodes = []
-    for i, ast in enumerate(asts):
+    for _, ast in enumerate(asts):
         intents = ast_to_removal_intents(ast)
         planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
@@ -281,7 +264,6 @@ def test_multi_sheet_through_cam():
 
         sheet_gcodes.append(sheet_gcode)
         assert len(sheet_gcode) > 0
-
 
     assert len(sheet_gcodes) >= 2
 
@@ -328,10 +310,8 @@ def test_gcode_basic_invariants():
 
         lines = [line.strip() for line in gcode.split("\n") if line.strip()]
 
-
         has_g0_or_g1 = any("G0" in line or "G1" in line for line in lines)
         assert has_g0_or_g1, "G-code should contain G0 or G1 moves"
-
 
         has_coordinates = any("X" in line or "Y" in line or "Z" in line for line in lines)
         assert has_coordinates, "G-code should contain X, Y, or Z coordinates"
@@ -362,6 +342,7 @@ def run_all_tests():
         except Exception as e:
             print(f"  FAILED: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

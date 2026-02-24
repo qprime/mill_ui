@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cli/introspect.py
+# hypothesis_version: 6.151.9
+
+['depth_mm', 'dump_ast', 'dump_removal_intent']

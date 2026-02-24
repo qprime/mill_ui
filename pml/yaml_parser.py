@@ -1,64 +1,63 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
 
 from core.constants import DepthMode
 from layout_ast.compositional import (
-    Panel,
-    Inset,
-    Frame,
-    Grid,
-    Cell,
-    Split,
-    ComponentDef,
-    UseComponent,
-    Place,
-    Rect,
-    Circle,
-    RoundedRect,
-    Line,
-    Polyline,
-    SplinePath,
-    Keepout,
-    Edge,
-    CompositionalLayoutAST,
-    ProfileGen,
-    PocketGen,
-    RaisedPanelGen,
-    ChamferGen,
-    WaveGen,
-    SplitHorizontal,
-    SplitVertical,
-    SplitGrid,
-    LinesGen,
-    ConcentricBorderGen,
-    SplitHorizontalGaps,
-    AtPosition,
-    Subtract,
     Arch,
-    Polygon,
-    Triangle,
-    XPanelGen,
-    HoleGridGen,
-    TemplateDef,
-    MeasurementGridGen,
-    GridLinesGen,
-    MeasurementEdgeGen,
-    EngraveTextGen,
-    WasteCuts,
     AssemblyDecl,
-    InterfaceConfig,
+    AtPosition,
     BeamDecl,
     BeamFeatureDecl,
     BeamLayerDecl,
+    Cell,
+    ChamferGen,
+    Circle,
+    ComponentDef,
+    CompositionalLayoutAST,
+    ConcentricBorderGen,
+    Edge,
+    EngraveTextGen,
+    Frame,
+    Grid,
+    GridLinesGen,
+    HoleGridGen,
+    Inset,
+    InterfaceConfig,
+    Keepout,
+    Line,
+    LinesGen,
+    MeasurementEdgeGen,
+    MeasurementGridGen,
+    Panel,
+    Place,
+    PocketGen,
+    Polygon,
+    Polyline,
+    ProfileGen,
+    RaisedPanelGen,
+    Rect,
+    RoundedRect,
+    SplinePath,
+    Split,
+    SplitGrid,
+    SplitHorizontal,
+    SplitHorizontalGaps,
+    SplitVertical,
+    Subtract,
+    TemplateDef,
+    Triangle,
+    UseComponent,
+    WasteCuts,
+    WaveGen,
+    XPanelGen,
 )
-from layout_ast.layout import Sheet, Feature
+from layout_ast.layout import Feature, Sheet
 from pml.measurement_fields import parse_measurement_fields
-from pml.nest_parser import NestJob, NestPart, NestParseError
+from pml.nest_parser import NestJob, NestParseError, NestPart
 
 
 class PMLParseError(Exception):
@@ -72,7 +71,7 @@ def parse_dimension(value: Any) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     if isinstance(value, str):
-        match = re.match(r'^(-?[\d.]+)\s*mm$', value.strip())
+        match = re.match(r"^(-?[\d.]+)\s*mm$", value.strip())
         if match:
             return float(match.group(1))
         try:
@@ -114,10 +113,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
     depth = data.get("depth", "through")
     is_through = DepthMode.is_through(depth)
 
-    if is_through:
-        depth_mm = sheet_thickness_mm
-    else:
-        depth_mm = float(parse_dimension(depth))
+    depth_mm = sheet_thickness_mm if is_through else float(parse_dimension(depth))
 
     return Feature(
         type=feature_type,
@@ -135,7 +131,7 @@ def parse_node(data: dict, path: str = "") -> Any:
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
 
-    keys = [k for k in data.keys() if k not in ("id", "children", "feature")]
+    keys = [k for k in data if k not in ("id", "children", "feature")]
     type_keys = [k for k in keys if k[0].isupper()]
 
     if len(type_keys) == 0:
@@ -246,13 +242,13 @@ def parse_node(data: dict, path: str = "") -> Any:
         return SplinePath(points=points, feature=feature, tolerance_mm=tolerance_mm, id=node_id, label=node_label)
 
     elif node_type == "Keepout":
+
         def contains_keepout(nodes: tuple) -> bool:
             for node in nodes:
                 if isinstance(node, Keepout):
                     return True
-                if hasattr(node, 'children') and node.children:
-                    if contains_keepout(node.children):
-                        return True
+                if hasattr(node, "children") and node.children and contains_keepout(node.children):
+                    return True
             return False
 
         if contains_keepout(children):
@@ -265,8 +261,12 @@ def parse_node(data: dict, path: str = "") -> Any:
             raise PMLParseError("Edge requires 'treatment' key", path)
         return Edge(
             treatment_type=treatment,
-            rough_allowance_mm=parse_dimension(node_data["rough_allowance"]) if "rough_allowance" in node_data else None,
-            finish_allowance_mm=parse_dimension(node_data["finish_allowance"]) if "finish_allowance" in node_data else None,
+            rough_allowance_mm=parse_dimension(node_data["rough_allowance"])
+            if "rough_allowance" in node_data
+            else None,
+            finish_allowance_mm=parse_dimension(node_data["finish_allowance"])
+            if "finish_allowance" in node_data
+            else None,
             radius_mm=parse_dimension(node_data["radius"]) if "radius" in node_data else None,
             distance_mm=parse_dimension(node_data["distance"]) if "distance" in node_data else None,
             id=node_id,
@@ -542,9 +542,8 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         grid_raw = node_data.get("grid")
         grid = None
-        if grid_raw:
-            if isinstance(grid_raw, list) and len(grid_raw) == 2:
-                grid = (int(grid_raw[0]), int(grid_raw[1]))
+        if grid_raw and isinstance(grid_raw, list) and len(grid_raw) == 2:
+            grid = (int(grid_raw[0]), int(grid_raw[1]))
 
         shelf_joinery_raw = node_data.get("shelf_joinery", "captured")
         shelf_joinery: str | InterfaceConfig = "captured"
@@ -562,9 +561,27 @@ def parse_node(data: dict, path: str = "") -> Any:
 
         return AssemblyDecl(
             type=assembly_type,
-            width_mm=parse_dimension(node_data.get("width") or node_data.get("dimensions", [0])[0] if isinstance(node_data.get("dimensions"), list) else node_data["width"]),
-            depth_mm=parse_dimension(node_data.get("depth") or (node_data.get("dimensions", [0, 0])[1] if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1 else node_data["depth"])),
-            height_mm=parse_dimension(node_data.get("height") or (node_data.get("dimensions", [0, 0, 0])[2] if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2 else node_data["height"])),
+            width_mm=parse_dimension(
+                node_data.get("width") or node_data.get("dimensions", [0])[0]
+                if isinstance(node_data.get("dimensions"), list)
+                else node_data["width"]
+            ),
+            depth_mm=parse_dimension(
+                node_data.get("depth")
+                or (
+                    node_data.get("dimensions", [0, 0])[1]
+                    if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1
+                    else node_data["depth"]
+                )
+            ),
+            height_mm=parse_dimension(
+                node_data.get("height")
+                or (
+                    node_data.get("dimensions", [0, 0, 0])[2]
+                    if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2
+                    else node_data["height"]
+                )
+            ),
             thickness_mm=parse_dimension(node_data["thickness"]),
             joinery=node_data.get("joinery", "finger"),
             finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
@@ -580,22 +597,38 @@ def parse_node(data: dict, path: str = "") -> Any:
             show_dimensions=node_data.get("show_dimensions", True),
             cap_style=node_data.get("cap_style", "between_sides"),
             back=back,
-            back_thickness_mm=parse_dimension(node_data["back_thickness"]) if "back_thickness" in node_data else (parse_dimension(back_raw["thickness"]) if isinstance(back_raw, dict) and "thickness" in back_raw else None),
-            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm")) if "back_inset" in node_data else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
+            back_thickness_mm=parse_dimension(node_data["back_thickness"])
+            if "back_thickness" in node_data
+            else (
+                parse_dimension(back_raw["thickness"])
+                if isinstance(back_raw, dict) and "thickness" in back_raw
+                else None
+            ),
+            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm"))
+            if "back_inset" in node_data
+            else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
             back_joinery=node_data.get("back_joinery"),
-            back_rabbet_depth_mm=parse_dimension(node_data["back_rabbet_depth"]) if "back_rabbet_depth" in node_data else None,
+            back_rabbet_depth_mm=parse_dimension(node_data["back_rabbet_depth"])
+            if "back_rabbet_depth" in node_data
+            else None,
             back_internal_support=node_data.get("back_internal_support", True),
             fixed_shelves=node_data.get("fixed_shelves", 0),
             shelf_joinery=shelf_joinery,
-            shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"]) if "shelf_dado_depth" in node_data else None,
+            shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"])
+            if "shelf_dado_depth" in node_data
+            else None,
             shelf_back_support=node_data.get("shelf_back_support", False),
             vertical_partitions=node_data.get("vertical_partitions", 0),
             partition_joinery=partition_joinery,
-            partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"]) if "partition_dado_depth" in node_data else None,
+            partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"])
+            if "partition_dado_depth" in node_data
+            else None,
             grid=grid,
             perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),
             internal_joinery=node_data.get("internal_joinery", "half_lap"),
-            toe_kick_height_mm=parse_dimension(node_data["toe_kick_height"]) if "toe_kick_height" in node_data else None,
+            toe_kick_height_mm=parse_dimension(node_data["toe_kick_height"])
+            if "toe_kick_height" in node_data
+            else None,
             toe_kick_depth_mm=parse_dimension(node_data["toe_kick_depth"]) if "toe_kick_depth" in node_data else None,
             toe_kick_style=node_data.get("toe_kick_style", "open"),
             toe_kick_cover=node_data.get("toe_kick_cover", False),
@@ -632,24 +665,37 @@ def parse_node(data: dict, path: str = "") -> Any:
                         }
                         for c in layer_data["cutouts"]
                     )
-                parsed_layers.append(BeamLayerDecl(
-                    length_mm=parse_dimension(layer_data["length"]),
-                    offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
-                    cutouts=cutouts,
-                ))
+                parsed_layers.append(
+                    BeamLayerDecl(
+                        length_mm=parse_dimension(layer_data["length"]),
+                        offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
+                        cutouts=cutouts,
+                    )
+                )
             layers = tuple(parsed_layers)
         else:
             layers = 1
 
         def parse_beam_feature(feat_data: dict, feat_path: str) -> BeamFeatureDecl:
-            feat_keys = [k for k in feat_data.keys() if k[0].isupper()]
+            feat_keys = [k for k in feat_data if k[0].isupper()]
             if len(feat_keys) != 1:
                 raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
             feat_type = feat_keys[0]
             feat_params = feat_data[feat_type] or {}
             parsed_params = {}
-            dimension_keys = {"x", "y", "width", "height", "depth", "diameter",
-                              "radius", "extension", "position", "start", "end"}
+            dimension_keys = {
+                "x",
+                "y",
+                "width",
+                "height",
+                "depth",
+                "diameter",
+                "radius",
+                "extension",
+                "position",
+                "start",
+                "end",
+            }
             literal_values = {"left", "right", "top", "bottom", "front", "back"}
             for key, value in feat_params.items():
                 if key in dimension_keys and value is not None:
@@ -666,8 +712,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             for i, f in enumerate(node_data.get("face_features", []))
         )
         end_features = tuple(
-            parse_beam_feature(f, f"{path}.end_features[{i}]")
-            for i, f in enumerate(node_data.get("end_features", []))
+            parse_beam_feature(f, f"{path}.end_features[{i}]") for i, f in enumerate(node_data.get("end_features", []))
         )
         edge_features = tuple(
             parse_beam_feature(f, f"{path}.edge_features[{i}]")
@@ -789,21 +834,21 @@ def parse_nest_yaml(source: str) -> NestJob:
         sheet_height = parse_dimension(sheet_block.get("height"))
         sheet_thickness = parse_dimension(sheet_block.get("thickness"))
     except (ValueError, TypeError) as e:
-        raise NestParseError(f"Invalid sheet dimensions: {e}")
+        raise NestParseError(f"Invalid sheet dimensions: {e}") from e
 
     kerf_mm = 6.35
     if "kerf" in nest_block:
         try:
             kerf_mm = parse_dimension(nest_block["kerf"])
         except ValueError as e:
-            raise NestParseError(f"Invalid kerf: {e}")
+            raise NestParseError(f"Invalid kerf: {e}") from e
 
     margin_mm = 10.0
     if "margin" in nest_block:
         try:
             margin_mm = parse_dimension(nest_block["margin"])
         except ValueError as e:
-            raise NestParseError(f"Invalid margin: {e}")
+            raise NestParseError(f"Invalid margin: {e}") from e
 
     parts_list = nest_block.get("parts", [])
     if not parts_list:
@@ -822,7 +867,7 @@ def parse_nest_yaml(source: str) -> NestJob:
             width = parse_dimension(part_data.get("width"))
             height = parse_dimension(part_data.get("height"))
         except (ValueError, TypeError) as e:
-            raise NestParseError(f"Invalid dimensions for part '{name}': {e}")
+            raise NestParseError(f"Invalid dimensions for part '{name}': {e}") from e
 
         quantity = part_data.get("quantity", 1)
         if not isinstance(quantity, int) or quantity < 1:
@@ -840,20 +885,22 @@ def parse_nest_yaml(source: str) -> NestJob:
                     try:
                         template_params[k] = parse_dimension(v)
                     except ValueError as e:
-                        raise NestParseError(f"Invalid template param '{k}' for part '{name}': {e}")
+                        raise NestParseError(f"Invalid template param '{k}' for part '{name}': {e}") from e
             elif isinstance(template_block, str):
                 template = template_block
             else:
                 raise NestParseError(f"Invalid template for part '{name}'")
 
-        parts.append(NestPart(
-            name=name,
-            width_mm=width,
-            height_mm=height,
-            quantity=quantity,
-            template=template,
-            template_params=template_params,
-        ))
+        parts.append(
+            NestPart(
+                name=name,
+                width_mm=width,
+                height_mm=height,
+                quantity=quantity,
+                template=template,
+                template_params=template_params,
+            )
+        )
 
     return NestJob(
         algorithm=algorithm,
@@ -876,7 +923,7 @@ def substitute_params(text: str, params: dict[str, Any]) -> str:
             return value
         return f"{value}mm"
 
-    return re.sub(r'\$\{(\w+)\}', replace_match, text)
+    return re.sub(r"\$\{(\w+)\}", replace_match, text)
 
 
 def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
@@ -913,8 +960,8 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
 __all__ = [
     "PMLParseError",
     "parse_dimension",
-    "parse_pml_yaml",
     "parse_nest_yaml",
+    "parse_pml_yaml",
     "parse_template_yaml",
     "substitute_params",
 ]

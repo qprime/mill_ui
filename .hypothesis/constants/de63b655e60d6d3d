@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/concentric_border.py
+# hypothesis_version: 6.151.9
+
+[0.01, 1.0, 'border', 'pocket']

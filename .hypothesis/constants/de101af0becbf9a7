@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/svg/params.py
+# hypothesis_version: 6.151.9
+
+[0.1, 1.0, 'SVGPathParams', 'engrave', 'fill', 'fit', 'none', 'pocket', 'profile']

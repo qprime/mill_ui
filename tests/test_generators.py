@@ -13,42 +13,44 @@ import math
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from domains import Domain, MultiDomain
+from domains import Domain
 from generators import (
-    Generator,
+    ChamferParams,
     FlatPocketParams,
+    Generator,
+    HoleGridParams,
     ProfileParams,
     RaisedPanelParams,
-    ChamferParams,
-    HoleGridParams,
-    flat_pocket_generator,
-    profile_generator,
-    raised_panel_generator,
+    bead_generator,
     chamfer_generator,
-    hole_grid_generator,
+    concentric_border_generator,
+    flat_pocket_generator,
     generate_shape_id,
-    validate_domain_for_generation,
-    wave_generator,
     grid_generator,
     grid_lines_generator,
-    measurement_grid_generator,
+    hole_grid_generator,
     line_pattern_generator,
-    concentric_border_generator,
-    x_panel_generator,
     measurement_edge_generator,
-    bead_generator,
-    svg_stamp_generator,
+    measurement_grid_generator,
     notched_panel_generator,
+    profile_generator,
+    raised_panel_generator,
+    svg_stamp_generator,
+    validate_domain_for_generation,
+    wave_generator,
+    x_panel_generator,
 )
 from layout_ast.layout import LayoutAST, Sheet
-
 
 # =============================================================================
 # Test Helpers
 # =============================================================================
+
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
     """Check if two floats are approximately equal within tolerance."""
@@ -68,6 +70,7 @@ def point_approx_equal(
 # Parameter Validation Tests
 # =============================================================================
 
+
 def test_flat_pocket_params_valid():
     """Test valid FlatPocketParams construction."""
     params = FlatPocketParams(depth_mm=6.0)
@@ -82,14 +85,14 @@ def test_flat_pocket_params_invalid_depth():
     params = FlatPocketParams(depth_mm=0.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
     params_neg = FlatPocketParams(depth_mm=-5.0)
     try:
         params_neg.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
@@ -99,7 +102,7 @@ def test_flat_pocket_params_invalid_allowance():
     params = FlatPocketParams(depth_mm=6.0, allowance_mm=-1.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "non-negative" in str(e).lower()
 
@@ -130,7 +133,7 @@ def test_profile_params_invalid_side():
     params = ProfileParams(side="invalid", depth="through")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "side" in str(e).lower()
 
@@ -140,7 +143,7 @@ def test_profile_params_invalid_depth():
     params = ProfileParams(side="outside", depth=-5.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
@@ -150,7 +153,7 @@ def test_profile_params_invalid_loop_selection():
     params = ProfileParams(side="outside", depth="through", loop_selection="invalid")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop_selection" in str(e).lower()
 
@@ -164,7 +167,7 @@ def test_profile_params_invalid_tab_config():
     )
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "tab_count" in str(e).lower()
 
@@ -172,6 +175,7 @@ def test_profile_params_invalid_tab_config():
 # =============================================================================
 # FlatPocket Generator Tests
 # =============================================================================
+
 
 def test_flat_pocket_simple_rectangle():
     """Test flat pocket on simple rectangular domain."""
@@ -244,7 +248,7 @@ def test_flat_pocket_allowance_too_large():
 
     try:
         flat_pocket_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "allowance" in str(e).lower()
 
@@ -266,7 +270,7 @@ def test_flat_pocket_empty_domain():
 
     try:
         flat_pocket_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "area" in str(e).lower() or "domain" in str(e).lower()
 
@@ -283,6 +287,7 @@ def test_flat_pocket_empty_domain_allow_empty():
 # =============================================================================
 # Profile Generator Tests
 # =============================================================================
+
 
 def test_profile_simple_rectangle():
     """Test profile on simple rectangular domain."""
@@ -410,7 +415,7 @@ def test_profile_invalid_loop_index():
 
     try:
         profile_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop index" in str(e).lower() or "out of range" in str(e).lower()
 
@@ -436,6 +441,7 @@ def test_profile_inner_only_no_holes():
 # =============================================================================
 # Utility Function Tests
 # =============================================================================
+
 
 def test_generate_shape_id_basic():
     """Test shape ID generation."""
@@ -464,7 +470,7 @@ def test_validate_domain_for_generation():
     # Should fail
     try:
         validate_domain_for_generation(domain, min_area_mm2=100000.0)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass
 
@@ -480,6 +486,7 @@ def test_validate_domain_for_generation():
 # =============================================================================
 # End-to-End Integration Tests
 # =============================================================================
+
 
 def test_end_to_end_domain_to_ast():
     """Test complete flow: Domain -> Generator -> AST."""
@@ -534,7 +541,7 @@ def test_end_to_end_domain_to_ir():
 
     # Convert to RemovalIntent
     warnings = []
-    intents = ast_to_removal_intents(ast, warnings=warnings)
+    ast_to_removal_intents(ast, warnings=warnings)
 
     # Note: Polygon type may not be fully supported by hints_to_removal
     # This test verifies the pipeline runs without crashing
@@ -548,12 +555,13 @@ def test_end_to_end_shaker_style_door():
     """Test recreating a Shaker-style door with domains and generators."""
     # Outer dimensions
     outer_w, outer_h = 400.0, 600.0
-    stile_w, rail_h = 50.0, 50.0
+    stile_w, _rail_h = 50.0, 50.0
     panel_recess = 6.0
 
     # Create domains
     outer_domain = Domain.from_rectangle(
-        outer_w, outer_h,
+        outer_w,
+        outer_h,
         center=(outer_w / 2, outer_h / 2),
     )
 
@@ -649,6 +657,7 @@ def test_generator_determinism():
 # Stage 9: Raised Panel Generator Tests
 # =============================================================================
 
+
 def test_raised_panel_params_valid():
     """Test valid RaisedPanelParams construction."""
     params = RaisedPanelParams(
@@ -676,7 +685,7 @@ def test_raised_panel_params_invalid_border_width():
     )
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "border_width" in str(e).lower()
 
@@ -690,7 +699,7 @@ def test_raised_panel_params_invalid_field_deeper():
     )
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "field_depth" in str(e).lower()
 
@@ -750,7 +759,7 @@ def test_raised_panel_domain_too_small():
 
     try:
         raised_panel_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "border_width" in str(e).lower()
 
@@ -772,6 +781,7 @@ def test_raised_panel_allow_empty():
 # Stage 9: Chamfer Generator Tests
 # =============================================================================
 
+
 def test_chamfer_params_valid():
     """Test valid ChamferParams construction."""
     params = ChamferParams(width_mm=5.0, depth_mm=3.0)
@@ -790,7 +800,7 @@ def test_chamfer_params_invalid_width():
     params = ChamferParams(width_mm=0.0, depth_mm=3.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "width" in str(e).lower()
 
@@ -877,13 +887,14 @@ def test_chamfer_inner_only_no_holes():
 # Stage 9: Integration Tests
 # =============================================================================
 
+
 def test_split_with_raised_panels():
     """Test creating multi-panel door with split and raised panels."""
     # 4-panel door layout
     door = Domain.from_rectangle(500, 700, center=(250, 350))
     panel_region = door.inset(65).domains[0]
 
-    # Split into 2×2 grid
+    # Split into 2x2 grid
     panels = panel_region.split_grid(rows=2, cols=2, gap_mm=35)
     assert len(panels) == 4
 
@@ -900,7 +911,7 @@ def test_split_with_raised_panels():
         )
         all_items.extend(items)
 
-    # Should have 2 items per panel × 4 panels = 8 items
+    # Should have 2 items per panel x 4 panels = 8 items
     assert len(all_items) == 8
 
     # Verify we have equal numbers of border and field items
@@ -960,9 +971,11 @@ def test_six_panel_door():
 # Stage 13: Line Pattern Generator Tests
 # =============================================================================
 
+
 def test_line_pattern_params_valid():
     """Test valid LinePatternParams construction."""
     from generators import LinePatternParams
+
     params = LinePatternParams(angle_deg=45, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
     params.validate()  # Should not raise
 
@@ -978,7 +991,7 @@ def test_line_pattern_params_invalid():
     params = LinePatternParams(spacing_mm=0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing" in str(e).lower()
 
@@ -986,14 +999,14 @@ def test_line_pattern_params_invalid():
     params = LinePatternParams(line_width_mm=-1)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "line_width" in str(e).lower()
 
 
 def test_line_pattern_horizontal():
     """Test horizontal line pattern (0 degrees)."""
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
@@ -1008,7 +1021,7 @@ def test_line_pattern_horizontal():
 
 def test_line_pattern_diagonal():
     """Test diagonal line pattern (45 degrees)."""
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
     domain = Domain.from_rectangle(200, 200, center=(100, 100))
     params = LinePatternParams(angle_deg=45, spacing_mm=25.0, line_width_mm=4.0, depth_mm=3.0)
@@ -1022,7 +1035,7 @@ def test_line_pattern_diagonal():
 
 def test_line_pattern_vertical():
     """Test vertical line pattern (90 degrees)."""
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = LinePatternParams(angle_deg=90, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
@@ -1034,7 +1047,7 @@ def test_line_pattern_vertical():
 
 def test_line_pattern_allow_empty():
     """Test line pattern with tiny domain returns empty with allow_empty."""
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
     # Domain smaller than min_area_mm2 threshold (1.0)
     domain = Domain.from_rectangle(0.5, 0.5, center=(0.25, 0.25))
@@ -1046,7 +1059,7 @@ def test_line_pattern_allow_empty():
 
 def test_line_pattern_local_coords_unrotated():
     """Test local_coords=True on unrotated domain matches sheet coords."""
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
@@ -1059,12 +1072,9 @@ def test_line_pattern_local_coords_unrotated():
 
 def test_line_pattern_local_coords_rotated():
     """Test local_coords=True respects domain rotation."""
-    import math
-    from generators import line_pattern_generator, LinePatternParams
+    from generators import LinePatternParams, line_pattern_generator
 
-    domain = Domain.from_rectangle(
-        100, 100, center=(50, 50), rotation_rad=math.pi / 4
-    )
+    domain = Domain.from_rectangle(100, 100, center=(50, 50), rotation_rad=math.pi / 4)
     params = LinePatternParams(angle_deg=0, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
 
     items_sheet = line_pattern_generator(domain, params, local_coords=False)
@@ -1082,9 +1092,11 @@ def test_line_pattern_local_coords_rotated():
 # Stage 13: Concentric Border Generator Tests
 # =============================================================================
 
+
 def test_concentric_border_params_valid():
     """Test valid ConcentricBorderParams construction."""
     from generators import ConcentricBorderParams
+
     params = ConcentricBorderParams(insets_mm=(10.0, 20.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
     params.validate()  # Should not raise
 
@@ -1097,7 +1109,7 @@ def test_concentric_border_params_invalid():
     params = ConcentricBorderParams(insets_mm=(), groove_width_mm=3.0, depth_mm=2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "insets" in str(e).lower()
 
@@ -1105,14 +1117,14 @@ def test_concentric_border_params_invalid():
     params = ConcentricBorderParams(insets_mm=(-5.0,), groove_width_mm=3.0, depth_mm=2.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
 
 def test_concentric_border_simple():
     """Test concentric border on simple rectangle."""
-    from generators import concentric_border_generator, ConcentricBorderParams
+    from generators import ConcentricBorderParams, concentric_border_generator
 
     domain = Domain.from_rectangle(200, 200, center=(100, 100))
     params = ConcentricBorderParams(insets_mm=(15.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
@@ -1127,7 +1139,7 @@ def test_concentric_border_simple():
 
 def test_concentric_border_single_inset():
     """Test concentric border with single inset."""
-    from generators import concentric_border_generator, ConcentricBorderParams
+    from generators import ConcentricBorderParams, concentric_border_generator
 
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=3.0, depth_mm=2.0)
@@ -1139,7 +1151,7 @@ def test_concentric_border_single_inset():
 
 def test_concentric_border_matches_recipe_25_pattern():
     """Test that concentric border matches Recipe 25 pattern."""
-    from generators import concentric_border_generator, ConcentricBorderParams
+    from generators import ConcentricBorderParams, concentric_border_generator
 
     # Match Recipe 25 parameters
     PANEL_WIDTH = 350
@@ -1165,7 +1177,7 @@ def test_concentric_border_matches_recipe_25_pattern():
 
 def test_concentric_border_allow_empty():
     """Test concentric border returns empty when inset exceeds domain."""
-    from generators import concentric_border_generator, ConcentricBorderParams
+    from generators import ConcentricBorderParams, concentric_border_generator
 
     domain = Domain.from_rectangle(50, 50, center=(25, 25))
     params = ConcentricBorderParams(insets_mm=(100.0,), groove_width_mm=3.0, depth_mm=2.0)
@@ -1176,7 +1188,7 @@ def test_concentric_border_allow_empty():
 
 def test_concentric_border_skips_overflow_ring():
     """Test that rings are skipped when groove width overflows available space."""
-    from generators import concentric_border_generator, ConcentricBorderParams
+    from generators import ConcentricBorderParams, concentric_border_generator
 
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = ConcentricBorderParams(
@@ -1194,10 +1206,12 @@ def test_concentric_border_skips_overflow_ring():
 # Stage 13: Utility Tests
 # =============================================================================
 
+
 def test_shapely_to_item():
     """Test shapely_to_item utility."""
-    from generators.utils import shapely_to_item
     from shapely.geometry import Polygon
+
+    from generators.utils import shapely_to_item
 
     poly = Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
     item = shapely_to_item(poly, "pocket", 5.0, "test_001")
@@ -1211,8 +1225,9 @@ def test_shapely_to_item():
 
 def test_shapely_to_item_with_hole():
     """Test shapely_to_item with polygon containing holes."""
-    from generators.utils import shapely_to_item
     from shapely.geometry import Polygon
+
+    from generators.utils import shapely_to_item
 
     outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
     hole = [(30, 30), (70, 30), (70, 70), (30, 70)]
@@ -1226,8 +1241,9 @@ def test_shapely_to_item_with_hole():
 
 def test_iter_polygons():
     """Test iter_polygons utility."""
+    from shapely.geometry import MultiPolygon, Polygon
+
     from generators.utils import iter_polygons
-    from shapely.geometry import Polygon, MultiPolygon
 
     # Single polygon
     single = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
@@ -1235,10 +1251,12 @@ def test_iter_polygons():
     assert len(result) == 1
 
     # MultiPolygon
-    mp = MultiPolygon([
-        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
-        Polygon([(2, 0), (3, 0), (3, 1), (2, 1)]),
-    ])
+    mp = MultiPolygon(
+        [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            Polygon([(2, 0), (3, 0), (3, 1), (2, 1)]),
+        ]
+    )
     result = iter_polygons(mp)
     assert len(result) == 2
 
@@ -1246,6 +1264,7 @@ def test_iter_polygons():
 # =============================================================================
 # Hole Grid Generator Tests
 # =============================================================================
+
 
 def test_hole_grid_params_valid():
     """Test valid HoleGridParams construction."""
@@ -1271,7 +1290,7 @@ def test_hole_grid_params_invalid_spacing():
     params = HoleGridParams(spacing_mm=0.0, diameter_mm=5.0, depth_mm=10.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing" in str(e).lower()
 
@@ -1281,7 +1300,7 @@ def test_hole_grid_params_invalid_diameter():
     params = HoleGridParams(spacing_mm=50.0, diameter_mm=-1.0, depth_mm=10.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "diameter" in str(e).lower()
 
@@ -1291,7 +1310,7 @@ def test_hole_grid_params_diameter_exceeds_spacing():
     params = HoleGridParams(spacing_mm=10.0, diameter_mm=15.0, depth_mm=10.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "overlap" in str(e).lower()
 
@@ -1301,7 +1320,7 @@ def test_hole_grid_params_invalid_depth():
     params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=-5.0)
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
 
@@ -1311,7 +1330,7 @@ def test_hole_grid_params_invalid_pattern():
     params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")
     try:
         params.validate()
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "pattern" in str(e).lower()
 
@@ -1426,7 +1445,7 @@ def test_hole_grid_domain_too_small():
 
     try:
         hole_grid_generator(domain, params)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "area" in str(e).lower() or "small" in str(e).lower()
 
@@ -1500,7 +1519,6 @@ def test_hole_grid_determinism():
 # Test Runner
 # =============================================================================
 
-import pytest
 
 ALL_GENERATORS = [
     flat_pocket_generator,
@@ -1524,9 +1542,7 @@ ALL_GENERATORS = [
 
 @pytest.mark.parametrize("gen", ALL_GENERATORS, ids=lambda g: g.__name__)
 def test_generator_satisfies_protocol(gen):
-    assert isinstance(gen, Generator), (
-        f"{gen.__name__} does not satisfy the Generator protocol"
-    )
+    assert isinstance(gen, Generator), f"{gen.__name__} does not satisfy the Generator protocol"
 
 
 def run_tests():
@@ -1534,10 +1550,7 @@ def run_tests():
     import traceback
 
     # Collect all test functions
-    tests = [
-        (name, func) for name, func in globals().items()
-        if name.startswith("test_") and callable(func)
-    ]
+    tests = [(name, func) for name, func in globals().items() if name.startswith("test_") and callable(func)]
 
     passed = 0
     failed = 0

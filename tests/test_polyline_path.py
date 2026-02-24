@@ -1,9 +1,7 @@
-
-from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
 from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import PMLParseError as ParseError
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from layout_ast.compositional import Polyline
-from layout_ast.layout import Feature
 
 
 def test_polyline_inside_rect():
@@ -32,7 +30,7 @@ children:
     items = flat.items
     assert len(items) == 2
 
-    polyline_item = [item for item in items if item.type == "Polyline"][0]
+    polyline_item = next(item for item in items if item.type == "Polyline")
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -70,7 +68,7 @@ children:
     flat = resolve_layout(ast)
 
     items = flat.items
-    polyline_item = [item for item in items if item.type == "Polyline"][0]
+    polyline_item = next(item for item in items if item.type == "Polyline")
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -106,7 +104,7 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-    polyline_item = [item for item in flat.items if item.type == "Polyline"][0]
+    polyline_item = next(item for item in flat.items if item.type == "Polyline")
     points = polyline_item.geometry.data["points"]
     cx, cy = polyline_item.placement.center_xy_mm
 
@@ -165,8 +163,8 @@ children:
     try:
         ast = parse_pml_yaml(pml)
 
-        flat = resolve_layout(ast)
-        assert False, "Should have raised ValueError"
+        resolve_layout(ast)
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "out of range" in str(e).lower()
 
@@ -190,8 +188,8 @@ children:
 
     try:
         ast = parse_pml_yaml(pml)
-        flat = resolve_layout(ast)
-        assert False, "Should have raised ValueError"
+        resolve_layout(ast)
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "out of range" in str(e).lower()
 
@@ -215,8 +213,8 @@ children:
 
     try:
         ast = parse_pml_yaml(pml)
-        flat = resolve_layout(ast)
-        assert False, "Should have raised ValueError"
+        resolve_layout(ast)
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "out of range" in str(e).lower()
 
@@ -240,8 +238,8 @@ children:
 
     try:
         ast = parse_pml_yaml(pml)
-        flat = resolve_layout(ast)
-        assert False, "Should have raised ValueError"
+        resolve_layout(ast)
+        raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "out of range" in str(e).lower()
 
@@ -265,8 +263,8 @@ children:
 
     try:
         ast = parse_pml_yaml(pml)
-        flat = resolve_layout(ast)
-        assert False, "Should have raised ValueError or ParseError"
+        resolve_layout(ast)
+        raise AssertionError("Should have raised ValueError or ParseError")
     except (ValueError, ParseError) as e:
         assert "2 points" in str(e).lower() or "at least 2" in str(e).lower()
 
@@ -302,7 +300,7 @@ children:
 
     assert len(points1) == len(points2) == 3
 
-    for (x1, y1), (x2, y2) in zip(points1, points2):
+    for (x1, y1), (x2, y2) in zip(points1, points2, strict=False):
         assert abs((x1 + cx1) - (x2 + cx2)) < 0.01
         assert abs((y1 + cy1) - (y2 + cy2)) < 0.01
 

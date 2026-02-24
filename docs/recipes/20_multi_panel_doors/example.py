@@ -5,19 +5,18 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from domains import Domain
 from generators import (
-    profile_generator,
-    flat_pocket_generator,
-    raised_panel_generator,
-    chamfer_generator,
-    ProfileParams,
-    FlatPocketParams,
-    RaisedPanelParams,
     ChamferParams,
+    FlatPocketParams,
+    ProfileParams,
+    RaisedPanelParams,
+    chamfer_generator,
+    flat_pocket_generator,
+    profile_generator,
+    raised_panel_generator,
 )
 from layout_ast.layout import LayoutAST, Sheet
 
@@ -28,13 +27,11 @@ def example_1_two_panel_door():
     door = Domain.from_rectangle(400, 600, center=(200, 300))
     panel_region = door.inset(50).domains[0]
 
-
     panels = panel_region.split_horizontal(2, gap_mm=30)
 
     print(f"Created {len(panels)} panels")
     for i, panel in enumerate(panels):
         print(f"  Panel {i}: bounds = {panel.bounds}, area = {panel.area_mm2:.1f} mm²")
-
 
     profile_items = profile_generator(door, ProfileParams(side="outside", depth="through"))
     pocket_items = []
@@ -53,20 +50,21 @@ def example_1_two_panel_door():
 def example_2_six_panel_door():
     print("\n=== Example 2: Six-Panel Door ===")
 
-
     door = Domain.from_rectangle(610, 2032, center=(305, 1016))
     panel_region = door.inset(75).domains[0]
-
 
     panels = panel_region.split_grid(rows=3, cols=2, gap_mm=30)
 
     print(f"Created {len(panels)} panels")
     panel_names = [
-        "bottom-left", "bottom-right",
-        "middle-left", "middle-right",
-        "top-left", "top-right",
+        "bottom-left",
+        "bottom-right",
+        "middle-left",
+        "middle-right",
+        "top-left",
+        "top-right",
     ]
-    for i, (panel, name) in enumerate(zip(panels, panel_names)):
+    for i, (panel, name) in enumerate(zip(panels, panel_names, strict=False)):
         print(f"  Panel {i} ({name}): area = {panel.area_mm2:.1f} mm²")
 
     profile_items = profile_generator(door, ProfileParams(side="outside", depth="through"))
@@ -182,7 +180,6 @@ def example_6_french_doors():
 
     sheet = Domain.from_rectangle(900, 600, center=(450, 300))
 
-
     doors = sheet.split_vertical(2, gap_mm=20)
     print(f"Created {len(doors)} doors")
 
@@ -210,26 +207,23 @@ def example_7_split_operations_demo():
     print("\n=== Example 7: Split Operations Demo ===")
 
     domain = Domain.from_rectangle(300, 400, center=(150, 200))
-    print(f"Original domain: {domain.bounds.width}mm × {domain.bounds.height}mm")
-
+    print(f"Original domain: {domain.bounds.width}mm x {domain.bounds.height}mm")
 
     h_split = domain.split_horizontal(3, gap_mm=10)
-    print(f"\nsplit_horizontal(3, gap_mm=10):")
-    print(f"  Expected height each: (400 - 2×10) / 3 = {(400 - 20) / 3:.1f}mm")
+    print("\nsplit_horizontal(3, gap_mm=10):")
+    print(f"  Expected height each: (400 - 2x10) / 3 = {(400 - 20) / 3:.1f}mm")
     for i, d in enumerate(h_split):
         print(f"  Row {i}: y=[{d.bounds.y_min:.1f}, {d.bounds.y_max:.1f}], height={d.bounds.height:.1f}mm")
 
-
     v_split = domain.split_vertical(2, gap_mm=20)
-    print(f"\nsplit_vertical(2, gap_mm=20):")
-    print(f"  Expected width each: (300 - 1×20) / 2 = {(300 - 20) / 2:.1f}mm")
+    print("\nsplit_vertical(2, gap_mm=20):")
+    print(f"  Expected width each: (300 - 1x20) / 2 = {(300 - 20) / 2:.1f}mm")
     for i, d in enumerate(v_split):
         print(f"  Col {i}: x=[{d.bounds.x_min:.1f}, {d.bounds.x_max:.1f}], width={d.bounds.width:.1f}mm")
 
-
     g_split = domain.split_grid(rows=2, cols=3, gap_mm=15)
-    print(f"\nsplit_grid(rows=2, cols=3, gap_mm=15):")
-    print(f"  Expected cell: {(300 - 2 * 15) / 3:.1f}mm × {(400 - 1 * 15) / 2:.1f}mm")
+    print("\nsplit_grid(rows=2, cols=3, gap_mm=15):")
+    print(f"  Expected cell: {(300 - 2 * 15) / 3:.1f}mm x {(400 - 1 * 15) / 2:.1f}mm")
     print(f"  Generated {len(g_split)} cells")
     for i, d in enumerate(g_split):
         row = i // 3

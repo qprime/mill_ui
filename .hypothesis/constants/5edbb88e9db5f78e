@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/native/__init__.py
+# hypothesis_version: 6.151.9
+
+['bore_helical', 'cam', 'create_stock', 'detect_holes', 'detect_planar', 'drill_peck', 'fit_arcs', 'is_native_available', 'link_keepdown', 'load_step', 'make_setup', 'mill_ui', 'native', 'offset_inset', 'offset_outset', 'pocket_raster', 'post_gcode', 'profile_outline', 'skills']

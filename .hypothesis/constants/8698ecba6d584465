@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/loop/profile.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 'Polygon', 'ProfileGenerator', 'depth_mm', 'is_through', 'points', 'profile', 'profile_generator', 'shape', 'side', 'tab_count', 'tab_height_mm', 'tab_width_mm', 'type']

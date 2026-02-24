@@ -1,13 +1,12 @@
-
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError
-from pml.yaml_formatter import format_pml_yaml
 from pml import format_pml
+from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
 
 
 def main():
@@ -65,7 +64,6 @@ Examples:
         sys.exit(1)
 
     try:
-
         if args.input_file:
             input_path = Path(args.input_file)
             if not input_path.exists():
@@ -78,7 +76,7 @@ Examples:
             print("Parsing PML YAML from stdin...", file=sys.stderr)
 
         comp_ast = parse_pml_yaml(input_text)
-        print(f"✓ Parse successful", file=sys.stderr)
+        print("✓ Parse successful", file=sys.stderr)
 
         if args.resolve:
             from resolution.layout_resolver import resolve_layout
@@ -113,6 +111,7 @@ Examples:
     except Exception as e:
         print(f"✗ Error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 

@@ -1,15 +1,16 @@
-
 from __future__ import annotations
 
 import json
 import math
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any, Iterator, Literal
+from typing import Any, Literal
 
-from shapely.geometry import Polygon, MultiPolygon, GeometryCollection
+from shapely import BufferJoinStyle
+from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 from shapely.validation import make_valid
-
 
 Point2D = tuple[float, float]
 Boundary = tuple[Point2D, ...]
@@ -18,7 +19,9 @@ Boundary = tuple[Point2D, ...]
 JoinStyle = Literal["mitre", "round", "bevel"]
 
 
-def _normalize_boundary(coords: list[list[float]] | tuple[tuple[float, ...], ...]) -> tuple[Point2D, ...]:
+def _normalize_boundary(
+    coords: list[list[float]] | list[tuple[float, float]] | tuple[tuple[float, ...], ...] | tuple[Point2D, ...],
+) -> tuple[Point2D, ...]:
     result = []
     for point in coords:
         if len(point) < 2:
@@ -27,9 +30,10 @@ def _normalize_boundary(coords: list[list[float]] | tuple[tuple[float, ...], ...
     return tuple(result)
 
 
-def _shapely_join_style(style: JoinStyle) -> int:
+def _shapely_join_style(style: JoinStyle) -> BufferJoinStyle:
     from shapely import BufferJoinStyle
-    mapping = {
+
+    mapping: dict[str, BufferJoinStyle] = {
         "mitre": BufferJoinStyle.mitre,
         "round": BufferJoinStyle.round,
         "bevel": BufferJoinStyle.bevel,
@@ -70,80 +74,59 @@ class Bounds2D:
 
 @dataclass(frozen=True)
 class Domain:
-
     outer_boundary: Boundary
     inner_boundaries: tuple[Boundary, ...] = field(default_factory=tuple)
     local_origin: Point2D | None = None
     local_rotation_rad: float = 0.0
-
 
     _polygon: Polygon | None = field(default=None, repr=False, compare=False, hash=False)
 
     def __post_init__(self) -> None:
 
         if len(self.outer_boundary) < 3:
-            raise ValueError(
-                f"Outer boundary must have at least 3 points, got {len(self.outer_boundary)}"
-            )
-
+            raise ValueError(f"Outer boundary must have at least 3 points, got {len(self.outer_boundary)}")
 
         for i, inner in enumerate(self.inner_boundaries):
             if len(inner) < 3:
-                raise ValueError(
-                    f"Inner boundary {i} must have at least 3 points, got {len(inner)}"
-                )
-
+                raise ValueError(f"Inner boundary {i} must have at least 3 points, got {len(inner)}")
 
         poly = self._build_polygon()
 
         if not poly.is_valid:
-
-            poly = make_valid(poly)
-            if not poly.is_valid:
-                raise ValueError(f"Domain geometry is invalid: {poly.is_valid}")
-            if not isinstance(poly, Polygon):
-                raise ValueError(
-                    "Domain geometry becomes invalid after normalization (splits into multiple regions)"
-                )
-
+            valid_geom = make_valid(poly)
+            if not valid_geom.is_valid:
+                raise ValueError(f"Domain geometry is invalid: {valid_geom.is_valid}")
+            if not isinstance(valid_geom, Polygon):
+                raise ValueError("Domain geometry becomes invalid after normalization (splits into multiple regions)")
+            poly = valid_geom
 
         poly = orient(poly, sign=1.0)
 
-
         outer_coords = tuple((float(x), float(y)) for x, y in poly.exterior.coords[:-1])
         inner_coords = tuple(
-            tuple((float(x), float(y)) for x, y in interior.coords[:-1])
-            for interior in poly.interiors
+            tuple((float(x), float(y)) for x, y in interior.coords[:-1]) for interior in poly.interiors
         )
 
-
-        object.__setattr__(self, 'outer_boundary', outer_coords)
-        object.__setattr__(self, 'inner_boundaries', inner_coords)
-        object.__setattr__(self, '_polygon', poly)
-
+        object.__setattr__(self, "outer_boundary", outer_coords)
+        object.__setattr__(self, "inner_boundaries", inner_coords)
+        object.__setattr__(self, "_polygon", poly)
 
         outer_ring = Polygon(self.outer_boundary)
         for i, inner in enumerate(self.inner_boundaries):
             inner_poly = Polygon(inner)
             if not outer_ring.contains(inner_poly):
-                raise ValueError(
-                    f"Inner boundary {i} is not fully contained within outer boundary"
-                )
-
+                raise ValueError(f"Inner boundary {i} is not fully contained within outer boundary")
 
         for i in range(len(self.inner_boundaries)):
             for j in range(i + 1, len(self.inner_boundaries)):
                 inner_i = Polygon(self.inner_boundaries[i])
                 inner_j = Polygon(self.inner_boundaries[j])
                 if inner_i.intersects(inner_j) and not inner_i.touches(inner_j):
-                    raise ValueError(
-                        f"Inner boundaries {i} and {j} overlap"
-                    )
-
+                    raise ValueError(f"Inner boundaries {i} and {j} overlap")
 
         if self.local_origin is None:
             centroid = self._centroid
-            object.__setattr__(self, 'local_origin', centroid)
+            object.__setattr__(self, "local_origin", centroid)
 
     def _build_polygon(self) -> Polygon:
         if self.inner_boundaries:
@@ -153,7 +136,8 @@ class Domain:
     @property
     def polygon(self) -> Polygon:
         if self._polygon is None:
-            object.__setattr__(self, '_polygon', self._build_polygon())
+            object.__setattr__(self, "_polygon", self._build_polygon())
+        assert self._polygon is not None
         return self._polygon
 
     @property
@@ -187,7 +171,6 @@ class Domain:
             local_rotation_rad=self.local_rotation_rad,
         )
 
-
     def inset(
         self,
         distance: float,
@@ -198,7 +181,6 @@ class Domain:
             raise ValueError(f"Inset distance must be non-negative, got {distance}")
         if distance == 0:
             return MultiDomain(domains=(self,))
-
 
         result = self.polygon.buffer(
             -distance,
@@ -219,7 +201,6 @@ class Domain:
         if distance == 0:
             return MultiDomain(domains=(self,))
 
-
         result = self.polygon.buffer(
             distance,
             join_style=_shapely_join_style(join_style),
@@ -236,14 +217,11 @@ class Domain:
         result = self.polygon.intersection(other.polygon)
         return self._geometry_to_multidomain(result)
 
-
     def _transform_point_to_local(self, point: Point2D) -> Point2D:
-        ox, oy = self.local_origin
+        ox, oy = self.local_origin if self.local_origin is not None else (0.0, 0.0)
         px, py = point
 
-
         dx, dy = px - ox, py - oy
-
 
         if self.local_rotation_rad != 0:
             cos_r = math.cos(-self.local_rotation_rad)
@@ -256,9 +234,8 @@ class Domain:
         return (lx, ly)
 
     def _transform_point_to_sheet(self, local_point: Point2D) -> Point2D:
-        ox, oy = self.local_origin
+        ox, oy = self.local_origin if self.local_origin is not None else (0.0, 0.0)
         lx, ly = local_point
-
 
         if self.local_rotation_rad != 0:
             cos_r = math.cos(self.local_rotation_rad)
@@ -267,7 +244,6 @@ class Domain:
             dy = lx * sin_r + ly * cos_r
         else:
             dx, dy = lx, ly
-
 
         return (ox + dx, oy + dy)
 
@@ -279,10 +255,7 @@ class Domain:
 
     def _to_local_domain(self) -> Domain:
         local_outer = self._transform_boundary_to_local(self.outer_boundary)
-        local_inners = tuple(
-            self._transform_boundary_to_local(inner)
-            for inner in self.inner_boundaries
-        )
+        local_inners = tuple(self._transform_boundary_to_local(inner) for inner in self.inner_boundaries)
 
         return Domain(
             outer_boundary=local_outer,
@@ -293,10 +266,7 @@ class Domain:
 
     def _from_local_domain(self, local_domain: Domain) -> Domain:
         sheet_outer = self._transform_boundary_to_sheet(local_domain.outer_boundary)
-        sheet_inners = tuple(
-            self._transform_boundary_to_sheet(inner)
-            for inner in local_domain.inner_boundaries
-        )
+        sheet_inners = tuple(self._transform_boundary_to_sheet(inner) for inner in local_domain.inner_boundaries)
 
         return Domain(
             outer_boundary=sheet_outer,
@@ -304,7 +274,6 @@ class Domain:
             local_origin=self.local_origin,
             local_rotation_rad=self.local_rotation_rad,
         )
-
 
     def split_horizontal(
         self,
@@ -316,7 +285,6 @@ class Domain:
             raise ValueError(f"split_horizontal: n must be >= 1, got {n}")
         if gap_mm < 0:
             raise ValueError(f"split_horizontal: gap_mm must be non-negative, got {gap_mm}")
-
 
         if local_coords and self.local_rotation_rad != 0:
             local_domain = self._to_local_domain()
@@ -332,24 +300,19 @@ class Domain:
         total_gap = gap_mm * (n - 1)
 
         if total_gap >= bounds.height:
-            raise ValueError(
-                f"split_horizontal: total gap {total_gap}mm exceeds domain height {bounds.height}mm"
-            )
-
+            raise ValueError(f"split_horizontal: total gap {total_gap}mm exceeds domain height {bounds.height}mm")
 
         available_height = bounds.height - total_gap
         cell_height = available_height / n
 
         domains = []
         for i in range(n):
-
             y_min = bounds.y_min + i * (cell_height + gap_mm)
             y_max = y_min + cell_height
             cell_center = (
                 (bounds.x_min + bounds.x_max) / 2,
                 (y_min + y_max) / 2,
             )
-
 
             cell = Domain.from_rectangle(
                 width_mm=bounds.width,
@@ -358,9 +321,7 @@ class Domain:
             )
             intersection = self.intersect(cell)
 
-
             for d in intersection:
-
                 domain_with_origin = Domain(
                     outer_boundary=d.outer_boundary,
                     inner_boundaries=d.inner_boundaries,
@@ -382,7 +343,6 @@ class Domain:
         if gap_mm < 0:
             raise ValueError(f"split_vertical: gap_mm must be non-negative, got {gap_mm}")
 
-
         if local_coords and self.local_rotation_rad != 0:
             local_domain = self._to_local_domain()
             local_result = local_domain.split_vertical(n, gap_mm, local_coords=False)
@@ -397,17 +357,13 @@ class Domain:
         total_gap = gap_mm * (n - 1)
 
         if total_gap >= bounds.width:
-            raise ValueError(
-                f"split_vertical: total gap {total_gap}mm exceeds domain width {bounds.width}mm"
-            )
-
+            raise ValueError(f"split_vertical: total gap {total_gap}mm exceeds domain width {bounds.width}mm")
 
         available_width = bounds.width - total_gap
         cell_width = available_width / n
 
         domains = []
         for i in range(n):
-
             x_min = bounds.x_min + i * (cell_width + gap_mm)
             x_max = x_min + cell_width
             cell_center = (
@@ -415,14 +371,12 @@ class Domain:
                 (bounds.y_min + bounds.y_max) / 2,
             )
 
-
             cell = Domain.from_rectangle(
                 width_mm=cell_width,
                 height_mm=bounds.height,
                 center=cell_center,
             )
             intersection = self.intersect(cell)
-
 
             for d in intersection:
                 domain_with_origin = Domain(
@@ -449,7 +403,6 @@ class Domain:
         if gap_mm < 0:
             raise ValueError(f"split_grid: gap_mm must be non-negative, got {gap_mm}")
 
-
         if local_coords and self.local_rotation_rad != 0:
             local_domain = self._to_local_domain()
             local_result = local_domain.split_grid(rows, cols, gap_mm, local_coords=False)
@@ -465,24 +418,17 @@ class Domain:
         total_v_gap = gap_mm * (rows - 1)
 
         if total_h_gap >= bounds.width:
-            raise ValueError(
-                f"split_grid: total horizontal gap {total_h_gap}mm exceeds domain width {bounds.width}mm"
-            )
+            raise ValueError(f"split_grid: total horizontal gap {total_h_gap}mm exceeds domain width {bounds.width}mm")
         if total_v_gap >= bounds.height:
-            raise ValueError(
-                f"split_grid: total vertical gap {total_v_gap}mm exceeds domain height {bounds.height}mm"
-            )
-
+            raise ValueError(f"split_grid: total vertical gap {total_v_gap}mm exceeds domain height {bounds.height}mm")
 
         cell_width = (bounds.width - total_h_gap) / cols
         cell_height = (bounds.height - total_v_gap) / rows
 
         domains = []
 
-
         for row in range(rows):
             for col in range(cols):
-
                 x_min = bounds.x_min + col * (cell_width + gap_mm)
                 y_min = bounds.y_min + row * (cell_height + gap_mm)
                 cell_center = (
@@ -490,14 +436,12 @@ class Domain:
                     y_min + cell_height / 2,
                 )
 
-
                 cell = Domain.from_rectangle(
                     width_mm=cell_width,
                     height_mm=cell_height,
                     center=cell_center,
                 )
                 intersection = self.intersect(cell)
-
 
                 for d in intersection:
                     domain_with_origin = Domain(
@@ -521,7 +465,6 @@ class Domain:
         if gap_mm <= 0:
             raise ValueError(f"split_horizontal_with_gaps: gap_mm must be positive, got {gap_mm}")
 
-
         if local_coords and self.local_rotation_rad != 0:
             local_domain = self._to_local_domain()
             local_cells, local_gaps = local_domain.split_horizontal_with_gaps(n, gap_mm, local_coords=False)
@@ -542,7 +485,6 @@ class Domain:
                 f"split_horizontal_with_gaps: total gap {total_gap}mm exceeds domain height {bounds.height}mm"
             )
 
-
         available_height = bounds.height - total_gap
         cell_height = available_height / n
 
@@ -550,7 +492,6 @@ class Domain:
         gaps = []
 
         for i in range(n):
-
             y_min = bounds.y_min + i * (cell_height + gap_mm)
             y_max = y_min + cell_height
             cell_center = (
@@ -558,14 +499,12 @@ class Domain:
                 (y_min + y_max) / 2,
             )
 
-
             cell = Domain.from_rectangle(
                 width_mm=bounds.width,
                 height_mm=cell_height,
                 center=cell_center,
             )
             cell_intersection = self.intersect(cell)
-
 
             for d in cell_intersection:
                 domain_with_origin = Domain(
@@ -575,7 +514,6 @@ class Domain:
                     local_rotation_rad=self.local_rotation_rad,
                 )
                 cells.append(domain_with_origin)
-
 
             if i < n - 1:
                 gap_y_min = y_max
@@ -603,10 +541,9 @@ class Domain:
 
         return MultiDomain(domains=tuple(cells)), MultiDomain(domains=tuple(gaps))
 
-    def _geometry_to_multidomain(self, geom) -> MultiDomain:
+    def _geometry_to_multidomain(self, geom: BaseGeometry) -> MultiDomain:
         if geom.is_empty:
             return MultiDomain(domains=())
-
 
         polygons: list[Polygon] = []
         if isinstance(geom, Polygon):
@@ -614,7 +551,6 @@ class Domain:
         elif isinstance(geom, MultiPolygon):
             polygons.extend(geom.geoms)
         elif isinstance(geom, GeometryCollection):
-
             for g in geom.geoms:
                 if isinstance(g, Polygon):
                     polygons.append(g)
@@ -624,24 +560,17 @@ class Domain:
             if not polygons:
                 return MultiDomain(domains=())
         else:
-
             return MultiDomain(domains=())
-
 
         domains = []
         for poly in polygons:
             if poly.is_empty or poly.area < 1e-10:
                 continue
 
-
             poly = orient(poly, sign=1.0)
 
             outer = tuple((float(x), float(y)) for x, y in poly.exterior.coords[:-1])
-            inners = tuple(
-                tuple((float(x), float(y)) for x, y in interior.coords[:-1])
-                for interior in poly.interiors
-            )
-
+            inners = tuple(tuple((float(x), float(y)) for x, y in interior.coords[:-1]) for interior in poly.interiors)
 
             domain = Domain(
                 outer_boundary=outer,
@@ -652,7 +581,6 @@ class Domain:
             domains.append(domain)
 
         return MultiDomain(domains=tuple(domains))
-
 
     @classmethod
     def from_rectangle(
@@ -670,14 +598,12 @@ class Domain:
         cx, cy = center
         half_w, half_h = width_mm / 2, height_mm / 2
 
-
         corners = [
             (-half_w, -half_h),
             (half_w, -half_h),
             (half_w, half_h),
             (-half_w, half_h),
         ]
-
 
         if rotation_rad != 0:
             cos_r = math.cos(rotation_rad)
@@ -688,7 +614,6 @@ class Domain:
                 ry = x * sin_r + y * cos_r
                 rotated.append((rx, ry))
             corners = rotated
-
 
         boundary = tuple((cx + x, cy + y) for x, y in corners)
 
@@ -715,27 +640,19 @@ class Domain:
         if arch_radius_mm <= 0:
             raise ValueError(f"Arch radius must be positive, got {arch_radius_mm}")
         if arch_radius_mm > width_mm / 2:
-            raise ValueError(
-                f"Arch radius ({arch_radius_mm}) cannot exceed half width ({width_mm / 2})"
-            )
+            raise ValueError(f"Arch radius ({arch_radius_mm}) cannot exceed half width ({width_mm / 2})")
         if arch_radius_mm > height_mm:
-            raise ValueError(
-                f"Arch radius ({arch_radius_mm}) cannot exceed height ({height_mm})"
-            )
+            raise ValueError(f"Arch radius ({arch_radius_mm}) cannot exceed height ({height_mm})")
         if arc_segments < 4:
             raise ValueError(f"arc_segments must be >= 4, got {arc_segments}")
 
-
         points: list[Point2D] = []
-
 
         points.append((0.0, 0.0))
         points.append((width_mm, 0.0))
 
-
         arch_start_y = height_mm - arch_radius_mm
         points.append((width_mm, arch_start_y))
-
 
         arch_center_x = width_mm / 2
         arch_center_y = arch_start_y
@@ -746,9 +663,7 @@ class Domain:
             y = arch_center_y + arch_radius_mm * math.sin(angle)
             points.append((x, y))
 
-
         points.append((0.0, arch_start_y))
-
 
         if center is not None:
             cx, cy = center
@@ -758,7 +673,6 @@ class Domain:
             points = [(x + offset_x, y + offset_y) for x, y in points]
             local_origin = center
         else:
-
             local_origin = (width_mm / 2, height_mm / 2)
 
         return cls(
@@ -786,14 +700,10 @@ class Domain:
             local_rotation_rad=local_rotation_rad,
         )
 
-
     def to_dict(self) -> dict[str, Any]:
         return {
             "outer_boundary": [[x, y] for x, y in self.outer_boundary],
-            "inner_boundaries": [
-                [[x, y] for x, y in inner]
-                for inner in self.inner_boundaries
-            ],
+            "inner_boundaries": [[[x, y] for x, y in inner] for inner in self.inner_boundaries],
             "local_origin": list(self.local_origin) if self.local_origin else None,
             "local_rotation_rad": self.local_rotation_rad,
             "computed": {
@@ -818,10 +728,7 @@ class Domain:
             data = data["domain"]
 
         outer = _normalize_boundary(data["outer_boundary"])
-        inners = tuple(
-            _normalize_boundary(inner)
-            for inner in data.get("inner_boundaries", [])
-        )
+        inners = tuple(_normalize_boundary(inner) for inner in data.get("inner_boundaries", []))
 
         local_origin = None
         if data.get("local_origin"):
@@ -843,7 +750,6 @@ class Domain:
 
 @dataclass(frozen=True)
 class MultiDomain:
-
     domains: tuple[Domain, ...] = field(default_factory=tuple)
 
     @property

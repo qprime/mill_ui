@@ -4,15 +4,21 @@ import argparse
 import sys
 from pathlib import Path
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
-from pml.revision_header import update_file_header, format_pml_header
-from resolution.layout_resolver import resolve_layout
-from layout_ast.layout import LayoutAST
-from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
+from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline, write_pipeline_outputs
 from cli.project import (
-    add_project_arg, resolve_input_path, resolve_output_dir, get_project_dir,
-    parse_sheet_dimensions, DEFAULT_MARGIN_MM, DEFAULT_KERF_MM,
+    DEFAULT_KERF_MM,
+    DEFAULT_MARGIN_MM,
+    add_project_arg,
+    get_project_dir,
+    parse_sheet_dimensions,
+    resolve_input_path,
+    resolve_output_dir,
 )
+from layout_ast.layout import LayoutAST
+from pml.revision_header import format_pml_header, update_file_header
+from pml.yaml_parser import PMLParseError as ParseError
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout
 
 RECIPE_DEFAULTS = {
     "kerf": 3.175,
@@ -218,12 +224,12 @@ def _run_and_write(
     )
 
     if result.errors:
-        print(f"\nErrors:", file=sys.stderr)
+        print("\nErrors:", file=sys.stderr)
         for error in result.errors:
             print(f"  - {error}", file=sys.stderr)
 
     if result.warnings:
-        print(f"\nWarnings:", file=sys.stderr)
+        print("\nWarnings:", file=sys.stderr)
         for warning in result.warnings:
             print(f"  - {warning}", file=sys.stderr)
 
@@ -242,8 +248,8 @@ def _run_and_write(
         build_params=build_params,
     )
 
-    print(f"  Outputs:", file=sys.stderr)
-    for key, path in outputs.items():
+    print("  Outputs:", file=sys.stderr)
+    for _, path in outputs.items():
         print(f"    {path.name}", file=sys.stderr)
 
     print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
@@ -270,10 +276,14 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
     is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
     _run_and_write(
-        ast, output_dir, input_path.stem, input_path,
+        ast,
+        output_dir,
+        input_path.stem,
+        input_path,
         kerf_mm=args.kerf if args.kerf is not None else DEFAULT_KERF_MM,
         theme=args.theme if args.theme is not None else "dark",
-        y_origin=args.y_origin, generate_svg=not args.no_svg,
+        y_origin=args.y_origin,
+        generate_svg=not args.no_svg,
         update_header=is_pml,
     )
 
@@ -299,14 +309,20 @@ def process_recipe(recipe_dir: Path, args) -> None:
     print(f"  Items: {len(ast.items)}", file=sys.stderr)
 
     import shutil
+
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     _run_and_write(
-        ast, output_dir, recipe_dir.name, source,
-        kerf_mm=kerf, theme=theme,
-        y_origin=args.y_origin, generate_svg=not args.no_svg,
+        ast,
+        output_dir,
+        recipe_dir.name,
+        source,
+        kerf_mm=kerf,
+        theme=theme,
+        y_origin=args.y_origin,
+        generate_svg=not args.no_svg,
     )
 
 
@@ -450,6 +466,7 @@ Output files:
                 print(f"Error: Refusing to clean dangerous directory: {output_dir}", file=sys.stderr)
                 sys.exit(1)
             import shutil
+
             shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -462,6 +479,7 @@ Output files:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 

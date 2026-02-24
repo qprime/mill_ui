@@ -156,7 +156,7 @@ class PlannerInput:
         }
 
     @classmethod
-    def from_hints_dict(cls, hints: dict[str, Any]) -> "PlannerInput":
+    def from_hints_dict(cls, hints: dict[str, Any]) -> PlannerInput:
         def parse_keepout(k: dict[str, Any]) -> KeepoutInput:
             return KeepoutInput(
                 x_min=float(k.get("x_min", 0.0)),
@@ -181,7 +181,9 @@ class PlannerInput:
             if points_raw is not None:
                 points = tuple((float(p[0]), float(p[1])) for p in points_raw)
             start_raw = g.get("start")
-            start: tuple[float, float] | None = (float(start_raw[0]), float(start_raw[1])) if start_raw is not None else None
+            start: tuple[float, float] | None = (
+                (float(start_raw[0]), float(start_raw[1])) if start_raw is not None else None
+            )
             end_raw = g.get("end")
             end: tuple[float, float] | None = (float(end_raw[0]), float(end_raw[1])) if end_raw is not None else None
             geom = ShapeGeometry(

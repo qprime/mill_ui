@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Sequence
+import contextlib
+from collections.abc import Sequence
 
-from layout_ast.layout import LayoutAST
 from ir.removal_intent import RemovalIntent
+from layout_ast.layout import LayoutAST
 
 
 def render_blueprint_svg(
@@ -13,20 +14,18 @@ def render_blueprint_svg(
     y_origin: str = "back",
 ) -> str:
     from adapters.layoutast_to_ir import layoutast_to_diagram_ir
+    from diagram_ir.diagram import ViewportSpec
     from diagram_render import render_diagram_svg
     from diagram_render.render_svg import DIAGRAM_THEMES
-    from diagram_ir.diagram import ViewportSpec
 
     kerf_width = 0.0
-    try:
+    with contextlib.suppress(TypeError, ValueError):
         kerf_width = float(layout_ast.kerf_width_mm or 0.0)
-    except (TypeError, ValueError):
-        pass
 
     diagram_ir = layoutast_to_diagram_ir(
         ast=layout_ast,
         y_origin=y_origin,
-        show_dimensions=getattr(layout_ast.sheet, 'show_dimensions', True),
+        show_dimensions=getattr(layout_ast.sheet, "show_dimensions", True),
         show_toolpaths=True,
         kerf_width_mm=kerf_width,
     )

@@ -1,14 +1,10 @@
-
-
 from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-from typing import Any
 
 from validation.core import InvariantResult, Verdict
-from validation.metrics.svg_metrics import SVGMetrics, SVG_NS, SEMANTIC_LAYERS
-
+from validation.metrics.svg_metrics import SVG_NS, SVGMetrics
 
 SVG_INVARIANT_IDS = [
     "SVG_VALID_XML",
@@ -30,16 +26,13 @@ def _is_polyline_closed(points: str, tolerance: float = 0.01) -> bool:
     if not points:
         return False
 
-
     coords = re.split(r"[\s,]+", points.strip())
     if len(coords) < 4:
         return False
 
     try:
-
         first_x, first_y = float(coords[0]), float(coords[1])
         last_x, last_y = float(coords[-2]), float(coords[-1])
-
 
         dist = ((last_x - first_x) ** 2 + (last_y - first_y) ** 2) ** 0.5
         return dist < tolerance
@@ -57,52 +50,43 @@ def check_svg_invariants(
     if isinstance(svg_content, bytes):
         svg_content = svg_content.decode("utf-8")
 
-
     xml_result, root = _check_valid_xml(svg_content)
     results.append(xml_result)
 
     if root is None:
-
         return results
-
 
     if metrics is None:
         from validation.metrics.svg_metrics import extract_svg_metrics
+
         try:
             metrics = extract_svg_metrics(svg_content)
         except Exception as e:
-
-            results.append(InvariantResult(
-                id="SVG_METRICS_ERROR",
-                category="structural",
-                artifact="svg",
-                description="Metrics extraction failed",
-                status=Verdict.FAIL,
-                details={"error": str(e)},
-            ))
+            results.append(
+                InvariantResult(
+                    id="SVG_METRICS_ERROR",
+                    category="structural",
+                    artifact="svg",
+                    description="Metrics extraction failed",
+                    status=Verdict.FAIL,
+                    details={"error": str(e)},
+                )
+            )
             return results
-
 
     results.append(_check_has_viewbox(root, metrics))
 
-
     results.append(_check_positive_dimensions(metrics))
-
 
     results.append(_check_paths_valid(root))
 
-
     results.append(_check_closed_profiles(root, metrics))
-
 
     results.append(_check_closed_pockets(root, metrics))
 
-
     results.append(_check_no_empty_layers(metrics, expected_layers))
 
-
     results.append(_check_dimensions_present(metrics))
-
 
     results.append(_check_bounds_within_viewbox(metrics))
 
@@ -212,24 +196,21 @@ def _check_paths_valid(root: ET.Element) -> InvariantResult:
         d = path.get("d", "")
 
         if not d or not d.strip():
-            failures.append(f"Path has empty d attribute")
+            failures.append("Path has empty d attribute")
             continue
 
-
         d_clean = d.strip()
-        if not d_clean[0].upper() == "M":
+        if d_clean[0].upper() != "M":
             failures.append(f"Path d attribute doesn't start with M: {d_clean[:20]}...")
             continue
 
-
         if re.search(r"[^MmLlHhVvCcSsQqTtAaZz0-9.,\s\-+eE]", d_clean):
-            failures.append(f"Path has invalid characters in d attribute")
+            failures.append("Path has invalid characters in d attribute")
             continue
 
         passed += 1
 
     if checked == 0:
-
         return InvariantResult(
             id="SVG_PATHS_VALID",
             category="structural",
@@ -357,7 +338,6 @@ def _check_no_empty_layers(
     expected_layers: list[str] | None = None,
 ) -> InvariantResult:
     if expected_layers is None:
-
         expected_layers = ["SHEET_OUTLINE"]
 
     checked = 0
@@ -368,7 +348,6 @@ def _check_no_empty_layers(
         checked += 1
 
         if layer_name not in metrics.layers:
-
             failures.append(f"Expected layer '{layer_name}' is missing from document")
             continue
 
@@ -408,7 +387,6 @@ def _check_no_empty_layers(
 def _check_dimensions_present(metrics: SVGMetrics) -> InvariantResult:
     dim_count = len(metrics.text.dimension_labels)
 
-
     dim_layer_count = metrics.layers.get("DIMENSIONS", None)
     dim_layer_elements = dim_layer_count.element_count if dim_layer_count else 0
 
@@ -436,16 +414,13 @@ def _check_dimensions_present(metrics: SVGMetrics) -> InvariantResult:
             checked=1,
             failed=1,
             failures=("No dimension annotations found",),
-            details={
-                "note": "SVG has no dimension labels or DIMENSIONS layer content"
-            },
+            details={"note": "SVG has no dimension labels or DIMENSIONS layer content"},
         )
 
 
 def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
     vb = metrics.document.viewbox
     bounds = metrics.bounds
-
 
     vb_x_min = vb[0]
     vb_y_min = vb[1]
@@ -454,9 +429,7 @@ def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
 
     failures: list[str] = []
 
-
     if bounds.x_min == 0 and bounds.x_max == 0 and bounds.y_min == 0 and bounds.y_max == 0:
-
         return InvariantResult(
             id="SVG_BOUNDS_WITHIN_VIEWBOX",
             category="structural",
@@ -467,7 +440,6 @@ def _check_bounds_within_viewbox(metrics: SVGMetrics) -> InvariantResult:
             passed=0,
             details={"note": "No content bounds detected"},
         )
-
 
     tolerance = 0.1
 

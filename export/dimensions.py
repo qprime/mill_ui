@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import Literal
@@ -19,15 +18,12 @@ def _render_horizontal(parent: ET.Element, dim: PlacedDimension, stroke_color: s
     y_anchor = dim.anchor
     y_dim = dim.rail
 
-
     _line(parent, x1, y_anchor, x1, y_dim, stroke_color)
     _line(parent, x2, y_anchor, x2, y_dim, stroke_color)
-
 
     _line(parent, x1, y_dim, x2, y_dim, stroke_color)
     _arrow(parent, x1, y_dim, "left", stroke_color)
     _arrow(parent, x2, y_dim, "right", stroke_color)
-
 
     ET.SubElement(
         parent,
@@ -47,15 +43,12 @@ def _render_vertical(parent: ET.Element, dim: PlacedDimension, stroke_color: str
     x_anchor = dim.anchor
     x_dim = dim.rail
 
-
     _line(parent, x_anchor, y1, x_dim, y1, stroke_color)
     _line(parent, x_anchor, y2, x_dim, y2, stroke_color)
-
 
     _line(parent, x_dim, y1, x_dim, y2, stroke_color)
     _arrow(parent, x_dim, y1, "up", stroke_color)
     _arrow(parent, x_dim, y2, "down", stroke_color)
-
 
     mid_y = (y1 + y2) / 2.0
     ET.SubElement(
@@ -90,13 +83,13 @@ def _line(parent: ET.Element, x1: float, y1: float, x2: float, y2: float, stroke
 def _arrow(parent: ET.Element, x: float, y: float, direction: str, color: str) -> None:
     size = 3.0
     if direction == "left":
-        points = f"{x},{y} {x+size},{y-size} {x+size},{y+size}"
+        points = f"{x},{y} {x + size},{y - size} {x + size},{y + size}"
     elif direction == "right":
-        points = f"{x},{y} {x-size},{y-size} {x-size},{y+size}"
+        points = f"{x},{y} {x - size},{y - size} {x - size},{y + size}"
     elif direction == "up":
-        points = f"{x},{y} {x-size},{y+size} {x+size},{y+size}"
+        points = f"{x},{y} {x - size},{y + size} {x + size},{y + size}"
     elif direction == "down":
-        points = f"{x},{y} {x-size},{y-size} {x+size},{y-size}"
+        points = f"{x},{y} {x - size},{y - size} {x + size},{y - size}"
     else:
         return
 
@@ -118,15 +111,11 @@ def render_gap_dimension(
         _render_vertical_gap_arrow(parent, start, end, position, label, color)
 
 
-def _render_horizontal_gap_arrow(
-    parent: ET.Element, x1: float, x2: float, y: float, label: str, color: str
-) -> None:
+def _render_horizontal_gap_arrow(parent: ET.Element, x1: float, x2: float, y: float, label: str, color: str) -> None:
     mid_x = (x1 + x2) / 2.0
     arrow_size = 3.0
 
-
     _line(parent, x1, y, x2, y, color)
-
 
     ET.SubElement(
         parent,
@@ -139,7 +128,6 @@ def _render_horizontal_gap_arrow(
         },
     )
 
-
     ET.SubElement(
         parent,
         "path",
@@ -150,7 +138,6 @@ def _render_horizontal_gap_arrow(
             "fill": color,
         },
     )
-
 
     ET.SubElement(
         parent,
@@ -164,15 +151,11 @@ def _render_horizontal_gap_arrow(
     ).text = label
 
 
-def _render_vertical_gap_arrow(
-    parent: ET.Element, y1: float, y2: float, x: float, label: str, color: str
-) -> None:
+def _render_vertical_gap_arrow(parent: ET.Element, y1: float, y2: float, x: float, label: str, color: str) -> None:
     mid_y = (y1 + y2) / 2.0
     arrow_size = 3.0
 
-
     _line(parent, x, y1, x, y2, color)
-
 
     ET.SubElement(
         parent,
@@ -185,7 +168,6 @@ def _render_vertical_gap_arrow(
         },
     )
 
-
     ET.SubElement(
         parent,
         "path",
@@ -196,7 +178,6 @@ def _render_vertical_gap_arrow(
             "fill": color,
         },
     )
-
 
     ET.SubElement(
         parent,
@@ -213,6 +194,6 @@ def _render_vertical_gap_arrow(
 
 
 __all__ = [
-    "render_placed_dimension",
     "render_gap_dimension",
+    "render_placed_dimension",
 ]

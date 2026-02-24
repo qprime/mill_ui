@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/panels/jointed_panel.py
+# hypothesis_version: 6.151.9
+
+[0.0, 'NotchedPanelParams', 'Polygon', 'bottom', 'left', 'outer', 'outside', 'panel', 'points', 'profile', 'right', 'shape', 'top']

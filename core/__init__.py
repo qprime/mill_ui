@@ -1,13 +1,12 @@
-
 from core.constants import (
-    HintKeys,
-    GeometryKeys,
+    DepthMode,
     FeatureType,
+    GeometryKeys,
+    HintKeys,
+    MetadataKeys,
     ShapeType,
     Side,
-    DepthMode,
     TabKeys,
-    MetadataKeys,
 )
 from core.geometry import (
     compute_shape_bounds,
@@ -15,14 +14,14 @@ from core.geometry import (
 )
 
 __all__ = [
-    "HintKeys",
-    "GeometryKeys",
+    "DepthMode",
     "FeatureType",
+    "GeometryKeys",
+    "HintKeys",
+    "MetadataKeys",
     "ShapeType",
     "Side",
-    "DepthMode",
     "TabKeys",
-    "MetadataKeys",
     "compute_shape_bounds",
     "compute_shape_bounds_dict",
 ]

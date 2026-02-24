@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/assembly/primitives.py
+# hypothesis_version: 6.151.9
+
+[0.0, 50.0, 'back', 'between_sides', 'bottom', 'box', 'carcass', 'cubby', 'front', 'left', 'left_side', 'none', 'over_sides', 'right', 'right_side', 'toe_kick_cover', 'top']

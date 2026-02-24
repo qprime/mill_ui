@@ -16,12 +16,11 @@ import tempfile
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from validation.invariants.gcode_invariants import (
-    check_gcode_invariants,
-    GCODE_INVARIANT_IDS,
-)
 from validation.core import Verdict
-
+from validation.invariants.gcode_invariants import (
+    GCODE_INVARIANT_IDS,
+    check_gcode_invariants,
+)
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -63,9 +62,7 @@ def test_valid_simple_profile_gcode():
 
     # All should pass (or warn, which is acceptable)
     for r in results:
-        assert r.status in (Verdict.PASS, Verdict.WARN), (
-            f"{r.id} failed: {r.failures} {r.details}"
-        )
+        assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures} {r.details}"
 
     print("PASS: test_valid_simple_profile_gcode")
 
@@ -82,9 +79,7 @@ def test_valid_shaker_door_gcode():
 
     # All should pass (or warn)
     failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, (
-        f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-    )
+    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
     print("PASS: test_valid_shaker_door_gcode")
 
@@ -100,9 +95,7 @@ def test_valid_multiple_depths_gcode():
     results = check_gcode_invariants(nc_path)
 
     failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, (
-        f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-    )
+    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
     print("PASS: test_valid_multiple_depths_gcode")
 
@@ -339,12 +332,7 @@ M30
 
     try:
         # 100mm sheet with 10mm margin should fail for X=-100, X=500, Y=500
-        results = check_gcode_invariants(
-            temp_path,
-            sheet_width_mm=100.0,
-            sheet_height_mm=100.0,
-            margin_mm=10.0
-        )
+        results = check_gcode_invariants(temp_path, sheet_width_mm=100.0, sheet_height_mm=100.0, margin_mm=10.0)
 
         bounds_result = next(r for r in results if r.id == "GCODE_XY_WITHIN_BOUNDS")
         assert bounds_result.status == Verdict.FAIL
@@ -643,8 +631,10 @@ def test_all_recipe_gcodes_pass():
         failures = [r for r in results if r.status == Verdict.FAIL]
         if failures:
             failed_gcodes.append(
-                (f"{recipe_num:02d}_{recipe_name}/{filename}",
-                 [(f.id, f.failures[:2] if f.failures else str(f.details)[:100]) for f in failures])
+                (
+                    f"{recipe_num:02d}_{recipe_name}/{filename}",
+                    [(f.id, f.failures[:2] if f.failures else str(f.details)[:100]) for f in failures],
+                )
             )
         else:
             passed += 1
@@ -653,7 +643,7 @@ def test_all_recipe_gcodes_pass():
         print(f"FAIL: {len(failed_gcodes)} recipe G-codes failed invariants:")
         for filename, fails in failed_gcodes:
             print(f"  {filename}: {fails}")
-        assert False, f"{len(failed_gcodes)} recipe G-codes failed invariants"
+        raise AssertionError(f"{len(failed_gcodes)} recipe G-codes failed invariants")
 
     print(f"PASS: test_all_recipe_gcodes_pass ({passed} passed, {skipped} skipped)")
 
@@ -906,12 +896,13 @@ def run_all_tests():
         except Exception as e:
             print(f"FAIL: {test.__name__}: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"G-code Invariant Tests: {passed} passed, {failed} failed")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     return failed == 0
 

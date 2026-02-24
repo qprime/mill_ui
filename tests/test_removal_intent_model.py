@@ -1,17 +1,16 @@
-
 from __future__ import annotations
 
 import sys
 
 from ir.removal_intent import (
-    RemovalIntent,
-    Bounds2D,
     Allowance,
+    Bounds2D,
     Constraints,
-    TabConstraint,
-    KeepoutRegion,
-    Island,
     DepthProfile,
+    Island,
+    KeepoutRegion,
+    RemovalIntent,
+    TabConstraint,
 )
 
 
@@ -265,7 +264,6 @@ def test_removal_intent_to_dict():
 
     data = intent.to_dict()
 
-
     assert data["region_id"] == "profile_1"
     assert data["bounds"]["x_min"] == 0.0
     assert data["bounds"]["x_max"] == 100.0
@@ -286,7 +284,6 @@ def test_removal_intent_depth_calculation():
     print("Running test_removal_intent_depth_calculation...")
     bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
 
-
     intent1 = RemovalIntent(
         region_id="standard",
         bounds=bounds,
@@ -294,14 +291,12 @@ def test_removal_intent_depth_calculation():
     )
     assert intent1.depth_mm() == 10.0
 
-
     intent2 = RemovalIntent(
         region_id="elevated",
         bounds=bounds,
         depth_profile=DepthProfile.constant(z_top=5.0, z_bottom=-5.0),
     )
     assert intent2.depth_mm() == 10.0
-
 
     intent3 = RemovalIntent(
         region_id="shallow",
@@ -321,7 +316,6 @@ def test_removal_intent_immutability():
         bounds=bounds,
         depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-10.0),
     )
-
 
     try:
         intent.depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-5.0)

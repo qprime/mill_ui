@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import json
@@ -36,12 +35,9 @@ def test_dump_ast_minimal_layout():
         temp_path = f.name
 
     try:
-
         ast_json = dump_ast(temp_path)
 
-
         ast_data = json.loads(ast_json)
-
 
         assert "sheet" in ast_data
         assert ast_data["sheet"]["width_mm"] == 200.0
@@ -76,11 +72,9 @@ def test_dump_ast_deterministic():
         temp_path = f.name
 
     try:
-
         output1 = dump_ast(temp_path)
         output2 = dump_ast(temp_path)
         output3 = dump_ast(temp_path)
-
 
         assert output1 == output2 == output3
 
@@ -111,12 +105,9 @@ def test_dump_removal_intent_profile():
         temp_path = f.name
 
     try:
-
         removal_json = dump_removal_intent(temp_path)
 
-
         removal_data = json.loads(removal_json)
-
 
         assert isinstance(removal_data, list)
         assert len(removal_data) == 1
@@ -249,9 +240,7 @@ def test_dump_removal_intent_multiple_operations():
         removal_json = dump_removal_intent(temp_path)
         removal_data = json.loads(removal_json)
 
-
         assert len(removal_data) == 3
-
 
         region_ids = {r["region_id"] for r in removal_data}
         assert "profile_outer" in region_ids
@@ -290,7 +279,6 @@ def test_dump_removal_intent_bounds_calculation():
         intent = removal_data[0]
         bounds = intent["bounds"]
 
-
         assert approx_eq(bounds["x_min"], 100.0)
         assert approx_eq(bounds["x_max"], 200.0)
         assert approx_eq(bounds["y_min"], 70.0)
@@ -322,19 +310,15 @@ def test_dump_ast_parses_successfully():
         temp_path = f.name
 
     try:
-
         ast_json = dump_ast(temp_path)
 
-
-        ast_data = json.loads(ast_json)
-
+        json.loads(ast_json)
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f2:
             f2.write(ast_json)
             temp_path2 = f2.name
 
         try:
-
             ast_json2 = dump_ast(temp_path2)
             assert ast_json == ast_json2
 
@@ -349,7 +333,15 @@ def test_dump_ast_parses_successfully():
 
 def test_dump_removal_intent_real_template():
     print("Running test_dump_removal_intent_real_template...")
-    layout_path = Path(__file__).parent.parent.parent.parent.parent / "memories" / "cam_projects" / "sheet_layouts" / "cnc_clamp_v1" / "input" / "layout.json"
+    layout_path = (
+        Path(__file__).parent.parent.parent.parent.parent
+        / "memories"
+        / "cam_projects"
+        / "sheet_layouts"
+        / "cnc_clamp_v1"
+        / "input"
+        / "layout.json"
+    )
 
     if not layout_path.exists():
         print("  SKIP: ClampBar layout not found")
@@ -358,9 +350,7 @@ def test_dump_removal_intent_real_template():
     removal_json = dump_removal_intent(str(layout_path))
     removal_data = json.loads(removal_json)
 
-
     assert len(removal_data) > 0
-
 
     region_ids = [r["region_id"] for r in removal_data]
     has_profile = any("profile_" in rid for rid in region_ids)

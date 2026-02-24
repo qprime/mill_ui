@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,7 +8,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import ConcentricBorderParams
-from generators.utils import shapely_to_item, iter_polygons
+from generators.utils import iter_polygons, shapely_to_item
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -25,7 +24,6 @@ def concentric_border_generator(
 
     params.validate()
 
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,
@@ -38,7 +36,6 @@ def concentric_border_generator(
     ring_idx = 0
 
     for inset in params.insets_mm:
-
         outer_result = domain.inset(inset)
         if outer_result.is_empty:
             if allow_empty:
@@ -48,20 +45,16 @@ def concentric_border_generator(
                 f"Domain bounds: {domain.bounds.width:.1f}mm x {domain.bounds.height:.1f}mm"
             )
 
-
         inner_inset = inset + params.groove_width_mm
         inner_result = domain.inset(inner_inset)
 
-
         for outer_domain in outer_result:
-
             if inner_result.is_empty:
                 continue
 
             ring_polygon = outer_domain.polygon
             for inner_domain in inner_result:
                 ring_polygon = ring_polygon.difference(inner_domain.polygon)
-
 
             for poly in iter_polygons(ring_polygon):
                 if poly.area < 0.01:

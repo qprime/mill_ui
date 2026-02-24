@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/area/flat.py
+# hypothesis_version: 6.151.9
+
+[0.01, 'FlatPocketGenerator', 'Polygon', 'flat', 'holes', 'pocket', 'points', 'shape']

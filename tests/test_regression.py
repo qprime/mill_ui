@@ -7,30 +7,28 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import sys
 import tempfile
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from validation.core import Verdict, RegressionResult, RegressionSummary
+from validation.core import Verdict
 from validation.regression.comparator import (
-    compare_metrics,
     ComparisonConfig,
-    _flatten_dict,
-    _compare_numeric,
     _compare_exact,
+    _compare_numeric,
     _compare_structural,
+    _flatten_dict,
     _get_tolerance,
+    compare_metrics,
 )
 from validation.regression.golden_store import (
-    GoldenStore,
-    GoldenIndex,
     GoldenEntry,
+    GoldenIndex,
+    GoldenStore,
     create_golden_from_recipe,
 )
-
 
 # Path to recipe outputs
 RECIPE_DIR = os.path.join(
@@ -479,8 +477,8 @@ def test_recipe_metrics_self_comparison():
         print("SKIP: test_recipe_metrics_self_comparison (recipe outputs not found)")
         return
 
-    from validation.metrics.svg_metrics import extract_svg_metrics_from_file
     from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
+    from validation.metrics.svg_metrics import extract_svg_metrics_from_file
 
     # Each to_dict() returns {"svg": {...}}, {"gcode": {...}}
     # Merge them into one dict
@@ -510,9 +508,11 @@ def test_all_recipes_against_golden():
 
     store = GoldenStore(golden_store_path)
     # Golden store is required - fail if missing (Stage 11 exit criteria)
-    assert store.exists(), f"Golden store not found at {golden_store_path} - run 'python -m cli.generate_golden --all-recipes docs/recipes'"
+    assert store.exists(), (
+        f"Golden store not found at {golden_store_path} - run 'python -m cli.generate_golden --all-recipes docs/recipes'"
+    )
 
-    from validation.runner import validate_recipe, ValidationOptions
+    from validation.runner import ValidationOptions, validate_recipe
 
     entries = store.list_entries()
     assert len(entries) > 0, "Golden store is empty - run 'python -m cli.generate_golden --all-recipes docs/recipes'"
@@ -567,7 +567,7 @@ def test_all_recipes_against_golden():
         for name, issues in failures:
             print(f"  {name}:")
             for issue in issues[:3]:  # Show first 3
-                if hasattr(issue, 'metric_path'):
+                if hasattr(issue, "metric_path"):
                     print(f"    - {issue.metric_path}: {issue.message}")
                 else:
                     print(f"    - {issue}")

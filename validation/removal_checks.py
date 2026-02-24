@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import math
@@ -17,23 +16,18 @@ def check_depth_profile(
     result = ValidationResult()
     profile = intent.depth_profile
 
-
-    if profile.mode == "linear_gradient":
-        if abs(profile.z_bottom) > sheet_thickness_mm:
-            result.add_error(
-                f"Gradient depth ({abs(profile.z_bottom):.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
-                region_id=intent.region_id,
-                gradient_depth_mm=abs(profile.z_bottom),
-                sheet_thickness_mm=sheet_thickness_mm,
-            )
-
+    if profile.mode == "linear_gradient" and abs(profile.z_bottom) > sheet_thickness_mm:
+        result.add_error(
+            f"Gradient depth ({abs(profile.z_bottom):.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
+            region_id=intent.region_id,
+            gradient_depth_mm=abs(profile.z_bottom),
+            sheet_thickness_mm=sheet_thickness_mm,
+        )
 
     if profile.mode == "v_carve":
         v_angle = profile.v_angle_deg
 
-
         if available_v_angles is not None:
-
             matching = [a for a in available_v_angles if abs(a - v_angle) < 1.0]
             if not matching:
                 result.add_error(
@@ -44,7 +38,6 @@ def check_depth_profile(
                     available_angles=available_v_angles,
                 )
 
-
         if abs(profile.z_bottom) > sheet_thickness_mm:
             result.add_warning(
                 f"V-carve depth ({abs(profile.z_bottom):.2f}mm) may exceed material",
@@ -53,13 +46,11 @@ def check_depth_profile(
                 sheet_thickness_mm=sheet_thickness_mm,
             )
 
-
     bevel_data = intent.bevel
     if bevel_data:
         bevel_width = bevel_data.width_mm
         bevel_angle = bevel_data.angle_deg
         inner_depth = bevel_data.inner_depth_mm
-
 
         if bevel_angle > 0 and bevel_angle < 90:
             expected_depth = bevel_width * math.tan(math.radians(bevel_angle))
@@ -123,10 +114,10 @@ def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
     profile, pocket = match
 
     return (
-        abs(pocket.bounds.x_min - profile.bounds.x_min) < 1.0 or
-        abs(pocket.bounds.x_max - profile.bounds.x_max) < 1.0 or
-        abs(pocket.bounds.y_min - profile.bounds.y_min) < 1.0 or
-        abs(pocket.bounds.y_max - profile.bounds.y_max) < 1.0
+        abs(pocket.bounds.x_min - profile.bounds.x_min) < 1.0
+        or abs(pocket.bounds.x_max - profile.bounds.x_max) < 1.0
+        or abs(pocket.bounds.y_min - profile.bounds.y_min) < 1.0
+        or abs(pocket.bounds.y_max - profile.bounds.y_max) < 1.0
     )
 
 
@@ -137,10 +128,10 @@ def _is_hole_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
     profile, hole = match
 
     return (
-        hole.bounds.x_min >= profile.bounds.x_min and
-        hole.bounds.x_max <= profile.bounds.x_max and
-        hole.bounds.y_min >= profile.bounds.y_min and
-        hole.bounds.y_max <= profile.bounds.y_max
+        hole.bounds.x_min >= profile.bounds.x_min
+        and hole.bounds.x_max <= profile.bounds.x_max
+        and hole.bounds.y_min >= profile.bounds.y_min
+        and hole.bounds.y_max <= profile.bounds.y_max
     )
 
 
@@ -168,7 +159,6 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
 def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) -> ValidationResult:
     result = ValidationResult()
 
-
     profile = intent.depth_profile
     if profile.z_top < profile.z_bottom:
         result.add_error(
@@ -182,7 +172,6 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
             region_id=intent.region_id,
         )
 
-
     depth = intent.depth_mm()
     if abs(profile.z_bottom) > sheet_thickness_mm:
         result.add_warning(
@@ -191,7 +180,6 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
             depth_mm=depth,
             sheet_thickness_mm=sheet_thickness_mm,
         )
-
 
     if 0 < depth < 0.5:
         result.add_suggestion(
@@ -206,14 +194,11 @@ def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) ->
 def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any]] | None = None) -> ValidationResult:
     result = ValidationResult()
 
-
     bounds = intent.bounds
     width = bounds.width
     height = bounds.height
 
-
     if not available_tools:
-
         if width < 1.0 or height < 1.0:
             result.add_warning(
                 f"Very small feature detected: {width:.2f}mm x {height:.2f}mm - may require micro tooling",
@@ -224,12 +209,9 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
         return result
 
-
     min_feature_size = min(width, height)
 
-    suitable_tools = [
-        tool for tool in available_tools if tool.get("diameter_mm", float("inf")) <= min_feature_size
-    ]
+    suitable_tools = [tool for tool in available_tools if tool.get("diameter_mm", float("inf")) <= min_feature_size]
 
     if not suitable_tools:
         result.add_error(
@@ -248,7 +230,9 @@ def check_toolability(intent: RemovalIntent, available_tools: list[dict[str, Any
 
 
 def _regions_overlap(a: RemovalIntent, b: RemovalIntent) -> bool:
-    z_overlap = not (a.depth_profile.z_top <= b.depth_profile.z_bottom or b.depth_profile.z_top <= a.depth_profile.z_bottom)
+    z_overlap = not (
+        a.depth_profile.z_top <= b.depth_profile.z_bottom or b.depth_profile.z_top <= a.depth_profile.z_bottom
+    )
 
     x_overlap = not (a.bounds.x_max <= b.bounds.x_min or b.bounds.x_max <= a.bounds.x_min)
     y_overlap = not (a.bounds.y_max <= b.bounds.y_min or b.bounds.y_max <= a.bounds.y_min)
@@ -262,13 +246,10 @@ def check_toolpath_clearance(
 ) -> ValidationResult:
     result = ValidationResult()
 
-    outside_profiles = [
-        i for i in intents
-        if i.side == "outside" and i.hint_type == "profile"
-    ]
+    outside_profiles = [i for i in intents if i.side == "outside" and i.hint_type == "profile"]
 
     for i, a in enumerate(outside_profiles):
-        for b in outside_profiles[i + 1:]:
+        for b in outside_profiles[i + 1 :]:
             if not _same_z_range(a, b):
                 continue
 
@@ -291,10 +272,7 @@ def check_toolpath_clearance(
 
 
 def _same_z_range(a: RemovalIntent, b: RemovalIntent) -> bool:
-    return not (
-        a.depth_profile.z_top <= b.depth_profile.z_bottom or
-        b.depth_profile.z_top <= a.depth_profile.z_bottom
-    )
+    return not (a.depth_profile.z_top <= b.depth_profile.z_bottom or b.depth_profile.z_top <= a.depth_profile.z_bottom)
 
 
 def _min_gap_between(a: Bounds2D, b: Bounds2D) -> float:

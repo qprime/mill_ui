@@ -5,57 +5,54 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+from core.constants import DepthMode
 from layout_ast.compositional import (
-    Panel,
-    Inset,
+    Arch,
+    AssemblyDecl,
+    AtPosition,
+    BeamDecl,
+    BeamFeatureDecl,
+    Cell,
+    ChamferGen,
+    Circle,
+    CompositionalLayoutAST,
+    ConcentricBorderGen,
+    Edge,
+    EngraveTextGen,
     Frame,
     Grid,
-    Cell,
-    Split,
-    ComponentDef,
-    UseComponent,
-    Place,
-    Rect,
-    Circle,
-    RoundedRect,
-    Line,
-    Polyline,
-    SplinePath,
-    Keepout,
-    Edge,
-    CompositionalLayoutAST,
-    ProfileGen,
-    PocketGen,
-    RaisedPanelGen,
-    ChamferGen,
-    WaveGen,
-    SplitHorizontal,
-    SplitVertical,
-    SplitGrid,
-    LinesGen,
-    ConcentricBorderGen,
-    SplitHorizontalGaps,
-    AtPosition,
-    Subtract,
-    Arch,
-    Polygon,
-    Triangle,
-    XPanelGen,
-    HoleGridGen,
-    TemplateDef,
-    MeasurementGridGen,
     GridLinesGen,
-    MeasurementEdgeGen,
-    EngraveTextGen,
-    WasteCuts,
-    AssemblyDecl,
+    HoleGridGen,
+    Inset,
     InterfaceConfig,
-    BeamDecl,
-    BeamLayerDecl,
-    BeamFeatureDecl,
+    Keepout,
+    Line,
+    LinesGen,
+    MeasurementEdgeGen,
+    MeasurementGridGen,
+    Panel,
+    Place,
+    PocketGen,
+    Polygon,
+    Polyline,
+    ProfileGen,
+    RaisedPanelGen,
+    Rect,
+    RoundedRect,
+    SplinePath,
+    Split,
+    SplitGrid,
+    SplitHorizontal,
+    SplitHorizontalGaps,
+    SplitVertical,
+    Subtract,
+    Triangle,
+    UseComponent,
+    WasteCuts,
+    WaveGen,
+    XPanelGen,
 )
-from core.constants import DepthMode
-from layout_ast.layout import Sheet, Feature
+from layout_ast.layout import Feature
 from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import NestJob
 
@@ -112,8 +109,19 @@ def _format_interface_value(val: str | InterfaceConfig | None) -> Any:
 
 
 def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
-    dimension_keys = {"x_mm", "y_mm", "width_mm", "height_mm", "depth_mm", "diameter_mm",
-                      "radius_mm", "extension_mm", "position_mm", "start_mm", "end_mm"}
+    dimension_keys = {
+        "x_mm",
+        "y_mm",
+        "width_mm",
+        "height_mm",
+        "depth_mm",
+        "diameter_mm",
+        "radius_mm",
+        "extension_mm",
+        "position_mm",
+        "start_mm",
+        "end_mm",
+    }
     params: dict[str, Any] = {}
     for key, value in feat.params.items():
         if key in dimension_keys and isinstance(value, (int, float)):
@@ -277,23 +285,27 @@ def format_node(node: Any) -> dict[str, Any]:
         return {"Pocket": {"depth": dim(node.depth_mm)}}
 
     elif isinstance(node, RaisedPanelGen):
-        return {"RaisedPanel": {
-            "border_width": dim(node.border_width_mm),
-            "border_depth": dim(node.border_depth_mm),
-            "field_depth": dim(node.field_depth_mm),
-        }}
+        return {
+            "RaisedPanel": {
+                "border_width": dim(node.border_width_mm),
+                "border_depth": dim(node.border_depth_mm),
+                "field_depth": dim(node.field_depth_mm),
+            }
+        }
 
     elif isinstance(node, ChamferGen):
         return {"Chamfer": {"width": dim(node.width_mm), "depth": dim(node.depth_mm)}}
 
     elif isinstance(node, WaveGen):
-        return {"Wave": {
-            "count": node.wave_count,
-            "amplitude": dim(node.amplitude_mm),
-            "wavelength": dim(node.wavelength_mm),
-            "groove": dim(node.groove_width_mm),
-            "depth": dim(node.depth_mm),
-        }}
+        return {
+            "Wave": {
+                "count": node.wave_count,
+                "amplitude": dim(node.amplitude_mm),
+                "wavelength": dim(node.wavelength_mm),
+                "groove": dim(node.groove_width_mm),
+                "depth": dim(node.depth_mm),
+            }
+        }
 
     elif isinstance(node, XPanelGen):
         return {"XPanel": {"bar_width": dim(node.bar_width_mm), "depth": dim(node.depth_mm)}}
@@ -329,19 +341,23 @@ def format_node(node: Any) -> dict[str, Any]:
         return {"SplitHorizontalGaps": result}
 
     elif isinstance(node, LinesGen):
-        return {"Lines": {
-            "angle": node.angle_deg,
-            "spacing": dim(node.spacing_mm),
-            "width": dim(node.line_width_mm),
-            "depth": dim(node.depth_mm),
-        }}
+        return {
+            "Lines": {
+                "angle": node.angle_deg,
+                "spacing": dim(node.spacing_mm),
+                "width": dim(node.line_width_mm),
+                "depth": dim(node.depth_mm),
+            }
+        }
 
     elif isinstance(node, ConcentricBorderGen):
-        return {"ConcentricBorder": {
-            "insets": [dim(i) for i in node.insets_mm],
-            "groove": dim(node.groove_width_mm),
-            "depth": dim(node.depth_mm),
-        }}
+        return {
+            "ConcentricBorder": {
+                "insets": [dim(i) for i in node.insets_mm],
+                "groove": dim(node.groove_width_mm),
+                "depth": dim(node.depth_mm),
+            }
+        }
 
     elif isinstance(node, Subtract):
         result: dict[str, Any] = {"inner_inset": dim(node.inner_inset_mm)}
@@ -469,10 +485,7 @@ def format_node(node: Any) -> dict[str, Any]:
         if node.clearance_mm != 0.12:
             result["clearance"] = dim(node.clearance_mm)
         if node.interfaces is not None:
-            result["interfaces"] = {
-                name: _format_interface_value(val)
-                for name, val in node.interfaces.items()
-            }
+            result["interfaces"] = {name: _format_interface_value(val) for name, val in node.interfaces.items()}
         if node.top is not None:
             result["top"] = _format_interface_value(node.top)
         if node.bottom != "captured":
@@ -718,6 +731,6 @@ def format_nest_yaml(job: NestJob) -> str:
 
 
 __all__ = [
-    "format_pml_yaml",
     "format_nest_yaml",
+    "format_pml_yaml",
 ]

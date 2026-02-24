@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/nesting/waste_decomposition.py
+# hypothesis_version: 6.151.9
+
+['PartBounds', 'WasteRect', 'WasteStrategy', 'largest', 'simple']

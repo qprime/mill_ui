@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/cam/planner/passes/tools.py
+# hypothesis_version: 6.151.9
+
+[0.0, 2.0, 3.0, 100.0, 300.0, 2000.0, 18000.0, 'ToolSelection', 'ball', 'compression', 'depth_per_pass', 'depth_per_pass_mm', 'diameter', 'diameter_mm', 'feed_rate_mm_min', 'feed_xy', 'feed_z', 'flat', 'kind', 'name', 'pass_key', 'pick_tool_for_hole', 'pick_tool_for_pocket', 'plunge_rate_mm_min', 'rotation', 'rpm', 'step_over_percent', 'stepdown_for_tool', 'stepover_for_tool', 'stepover_percent', 'tool', 'tool_id', 'tool_identity', 'type', 'upcut', 'v']

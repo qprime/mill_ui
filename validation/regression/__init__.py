@@ -1,35 +1,31 @@
-
-
 from validation.regression.comparator import (
-    compare_metrics,
-    ComparisonConfig,
-    metrics_to_comparable_dict,
-    EXACT_MATCH_PATHS,
-    STRUCTURAL_MATCH_PATHS,
-    EXCLUDED_PATHS,
     DEFAULT_TOLERANCES,
+    EXACT_MATCH_PATHS,
+    EXCLUDED_PATHS,
+    STRUCTURAL_MATCH_PATHS,
+    ComparisonConfig,
+    compare_metrics,
+    metrics_to_comparable_dict,
 )
 from validation.regression.golden_store import (
-    GoldenStore,
-    GoldenIndex,
     GoldenEntry,
-    get_default_golden_store,
+    GoldenIndex,
+    GoldenStore,
     create_golden_from_recipe,
+    get_default_golden_store,
 )
 
 __all__ = [
-
-    "compare_metrics",
-    "ComparisonConfig",
-    "metrics_to_comparable_dict",
-    "EXACT_MATCH_PATHS",
-    "STRUCTURAL_MATCH_PATHS",
-    "EXCLUDED_PATHS",
     "DEFAULT_TOLERANCES",
-
-    "GoldenStore",
-    "GoldenIndex",
+    "EXACT_MATCH_PATHS",
+    "EXCLUDED_PATHS",
+    "STRUCTURAL_MATCH_PATHS",
+    "ComparisonConfig",
     "GoldenEntry",
-    "get_default_golden_store",
+    "GoldenIndex",
+    "GoldenStore",
+    "compare_metrics",
     "create_golden_from_recipe",
+    "get_default_golden_store",
+    "metrics_to_comparable_dict",
 ]

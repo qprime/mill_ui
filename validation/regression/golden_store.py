@@ -1,17 +1,14 @@
-
-
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 
 @dataclass
 class GoldenEntry:
-
     recipe_name: str
     source_file: str
     created_at: str = ""
@@ -20,7 +17,7 @@ class GoldenEntry:
     notes: str = ""
 
     def __post_init__(self) -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         if not self.created_at:
             self.created_at = now
         if not self.updated_at:
@@ -29,14 +26,13 @@ class GoldenEntry:
 
 @dataclass
 class GoldenIndex:
-
     version: str = "1.0.0"
     created_at: str = ""
     updated_at: str = ""
     entries: dict[str, GoldenEntry] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         if not self.created_at:
             self.created_at = now
         if not self.updated_at:
@@ -47,9 +43,7 @@ class GoldenIndex:
             "version": self.version,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
-            "entries": {
-                name: asdict(entry) for name, entry in self.entries.items()
-            },
+            "entries": {name: asdict(entry) for name, entry in self.entries.items()},
         }
 
     @classmethod
@@ -65,7 +59,6 @@ class GoldenIndex:
 
 
 class GoldenStore:
-
     def __init__(self, base_path: str | Path) -> None:
         self.base_path = Path(base_path)
         self._index: GoldenIndex | None = None
@@ -99,7 +92,7 @@ class GoldenStore:
     def _save_index(self) -> None:
         if self._index is None:
             return
-        self._index.updated_at = datetime.now(timezone.utc).isoformat()
+        self._index.updated_at = datetime.now(UTC).isoformat()
         with open(self.index_path, "w") as f:
             json.dump(self._index.to_dict(), f, indent=2)
 
@@ -137,17 +130,14 @@ class GoldenStore:
     ) -> None:
         index = self.load_index()
 
-
         entry_dir = self.get_entry_path(name)
         entry_dir.mkdir(parents=True, exist_ok=True)
-
 
         metrics_path = entry_dir / "metrics.json"
         with open(metrics_path, "w") as f:
             json.dump(metrics, f, indent=2)
 
-
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         if name in index.entries:
             index.entries[name].updated_at = now
             if source_file:
@@ -169,12 +159,11 @@ class GoldenStore:
         if name not in index.entries:
             return False
 
-
         entry_dir = self.get_entry_path(name)
         if entry_dir.exists():
             import shutil
-            shutil.rmtree(entry_dir)
 
+            shutil.rmtree(entry_dir)
 
         del index.entries[name]
         self._save_index()
@@ -190,13 +179,13 @@ class GoldenStore:
 
         dest_path = entry_dir / "source.pml.yml"
         import shutil
+
         shutil.copy2(source_path, dest_path)
 
 
 def get_default_golden_store() -> GoldenStore:
 
     current = Path.cwd()
-
 
     candidates = [
         current / "tests" / "golden",
@@ -207,7 +196,6 @@ def get_default_golden_store() -> GoldenStore:
     for candidate in candidates:
         if candidate.parent.exists():
             return GoldenStore(candidate)
-
 
     return GoldenStore(current / "tests" / "golden")
 
@@ -223,7 +211,7 @@ def create_golden_from_recipe(
         metrics = {
             "golden": {
                 "recipe_name": recipe_name,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
             **metrics,
         }

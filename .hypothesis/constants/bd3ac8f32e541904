@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/validation/machine_checks.py
+# hypothesis_version: 6.151.9
+
+['JOB_FITS_MACHINE', 'MCH_ENDMILL_POSITIVE', 'MCH_WASTEBOARD_FITS', 'bit_radius_mm', 'diameter_mm', 'effective_envelope', 'endmill', 'job', 'job_bounds', 'machine_config', 'machine_name', 'name', 'none', 'safety', 'structural', 'wasteboard', 'x_max', 'x_min', 'y_max', 'y_min']

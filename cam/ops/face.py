@@ -1,10 +1,10 @@
-
 from cam.model.setup import Setup
-from cam.path.toolpath import move_comment, move_set_rpm, move_set_feed, move_rapid, move_cut, move_retract
+from cam.path.toolpath import move_comment, move_cut, move_rapid, move_retract, move_set_feed, move_set_rpm
+
 
 def face_zigzag(width: float, height: float, setup: Setup, step: float = 10.0, depth_mm: float = 0.5):
     moves = []
-    moves.append(move_comment('face_zigzag'))
+    moves.append(move_comment("face_zigzag"))
     moves.append(move_set_rpm(setup.tool.rpm))
     moves.append(move_set_feed(setup.tool.feed_xy))
     y = 0.0

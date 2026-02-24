@@ -1,8 +1,7 @@
-
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Any
 
 
@@ -34,20 +33,10 @@ class FreeRect:
         return self.can_fit(part_h, part_w, gap)
 
     def intersects(self, other: FreeRect) -> bool:
-        return not (
-            self.right <= other.x or
-            other.right <= self.x or
-            self.top <= other.y or
-            other.top <= self.y
-        )
+        return not (self.right <= other.x or other.right <= self.x or self.top <= other.y or other.top <= self.y)
 
     def contains(self, other: FreeRect) -> bool:
-        return (
-            self.x <= other.x and
-            self.y <= other.y and
-            self.right >= other.right and
-            self.top >= other.top
-        )
+        return self.x <= other.x and self.y <= other.y and self.right >= other.right and self.top >= other.top
 
 
 @dataclass
@@ -60,7 +49,6 @@ class PlacementResult:
 
 @dataclass(frozen=True)
 class PartSpec:
-
     name: str
     width_mm: float
     height_mm: float
@@ -96,9 +84,7 @@ class PartSpec:
     def from_dict(cls, data: dict[str, Any]) -> PartSpec:
         data = dict(data)
         if data.get("geometry_points"):
-            data["geometry_points"] = tuple(
-                tuple(p) for p in data["geometry_points"]
-            )
+            data["geometry_points"] = tuple(tuple(p) for p in data["geometry_points"])
         return cls(**data)
 
 
@@ -107,7 +93,6 @@ DEFAULT_KERF_MM = 6.35
 
 @dataclass(frozen=True)
 class SheetSpec:
-
     width_mm: float
     height_mm: float
     thickness_mm: float
@@ -127,27 +112,25 @@ class SheetSpec:
         if self.gap_margin_mm < 0:
             raise ValueError(f"gap_margin_mm must be non-negative, got {self.gap_margin_mm}")
 
-
         if self.kerf_mm is None:
             import warnings
+
             warnings.warn(
-                f"kerf_mm not specified, defaulting to {DEFAULT_KERF_MM}mm (1/4\" endmill). "
+                f'kerf_mm not specified, defaulting to {DEFAULT_KERF_MM}mm (1/4" endmill). '
                 "Set kerf_mm explicitly to suppress this warning.",
                 UserWarning,
                 stacklevel=2,
             )
 
-            object.__setattr__(self, 'kerf_mm', DEFAULT_KERF_MM)
+            object.__setattr__(self, "kerf_mm", DEFAULT_KERF_MM)
         elif self.kerf_mm < 0:
             raise ValueError(f"kerf_mm must be non-negative, got {self.kerf_mm}")
-
 
         usable_w = self.width_mm - 2 * self.margin_mm
         usable_h = self.height_mm - 2 * self.margin_mm
         if usable_w <= 0 or usable_h <= 0:
             raise ValueError(
-                f"Margins ({self.margin_mm}mm) leave no usable area on "
-                f"{self.width_mm}x{self.height_mm}mm sheet"
+                f"Margins ({self.margin_mm}mm) leave no usable area on {self.width_mm}x{self.height_mm}mm sheet"
             )
 
     @property
@@ -187,7 +170,6 @@ class SheetSpec:
 
 @dataclass(frozen=True)
 class NestedPart:
-
     part_spec: PartSpec
     x_mm: float
     y_mm: float
@@ -267,7 +249,6 @@ class NestedPart:
 
 @dataclass(frozen=True)
 class SheetLayout:
-
     sheet_spec: SheetSpec
     placements: tuple[NestedPart, ...]
     sheet_index: int = 0
@@ -278,9 +259,7 @@ class SheetLayout:
 
     @property
     def parts_area_mm2(self) -> float:
-        return sum(
-            p.effective_width_mm * p.effective_height_mm for p in self.placements
-        )
+        return sum(p.effective_width_mm * p.effective_height_mm for p in self.placements)
 
     @property
     def utilization(self) -> float:
@@ -311,7 +290,6 @@ class SheetLayout:
 
 @dataclass(frozen=True)
 class NestingResult:
-
     sheets: tuple[SheetLayout, ...]
     unplaced_parts: tuple[PartSpec, ...] = ()
 
@@ -359,9 +337,7 @@ class NestingResult:
     def from_dict(cls, data: dict[str, Any]) -> NestingResult:
         return cls(
             sheets=tuple(SheetLayout.from_dict(s) for s in data["sheets"]),
-            unplaced_parts=tuple(
-                PartSpec.from_dict(p) for p in data.get("unplaced_parts", [])
-            ),
+            unplaced_parts=tuple(PartSpec.from_dict(p) for p in data.get("unplaced_parts", [])),
         )
 
     def to_json(self, indent: int = 2) -> str:

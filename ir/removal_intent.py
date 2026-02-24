@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -43,7 +42,7 @@ class DepthProfile:
     gradient_direction_deg: float | None = None
     v_angle_deg: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         valid_modes = ("constant", "linear_gradient", "v_carve")
         if self.mode not in valid_modes:
             raise ValueError(f"Invalid depth mode '{self.mode}'. Must be one of: {valid_modes}")
@@ -53,14 +52,18 @@ class DepthProfile:
             raise ValueError("gradient_direction_deg required for linear_gradient mode")
         if self.mode == "v_carve" and self.v_angle_deg is None:
             raise ValueError("v_angle_deg required for v_carve mode")
-        if self.mode == "v_carve" and (self.v_angle_deg <= 0 or self.v_angle_deg >= 180):
+        if (
+            self.mode == "v_carve"
+            and self.v_angle_deg is not None
+            and (self.v_angle_deg <= 0 or self.v_angle_deg >= 180)
+        ):
             raise ValueError(f"v_angle_deg must be between 0 and 180, got {self.v_angle_deg}")
 
     def depth_mm(self) -> float:
         return self.z_top - self.z_bottom
 
     @classmethod
-    def constant(cls, z_top: float, z_bottom: float) -> "DepthProfile":
+    def constant(cls, z_top: float, z_bottom: float) -> DepthProfile:
         return cls(mode="constant", z_top=z_top, z_bottom=z_bottom)
 
     @classmethod
@@ -69,7 +72,7 @@ class DepthProfile:
         z_top: float,
         z_bottom: float,
         direction_deg: float,
-    ) -> "DepthProfile":
+    ) -> DepthProfile:
         return cls(
             mode="linear_gradient",
             z_top=z_top,
@@ -78,7 +81,7 @@ class DepthProfile:
         )
 
     @classmethod
-    def v_carve(cls, z_top: float, z_bottom: float, v_angle_deg: float) -> "DepthProfile":
+    def v_carve(cls, z_top: float, z_bottom: float, v_angle_deg: float) -> DepthProfile:
         return cls(
             mode="v_carve",
             z_top=z_top,
@@ -193,7 +196,9 @@ class RemovalIntent:
                     "count": self.constraints.tabs.count,
                     "height_mm": self.constraints.tabs.height_mm,
                     "width_mm": self.constraints.tabs.width_mm,
-                } if self.constraints.tabs else None,
+                }
+                if self.constraints.tabs
+                else None,
                 "keepouts": len(self.constraints.keepouts),
                 "islands": len(self.constraints.islands),
                 "edge_treatment": {
@@ -202,7 +207,9 @@ class RemovalIntent:
                     "distance_mm": self.constraints.edge_treatment.distance_mm,
                     "rough_allowance_mm": self.constraints.edge_treatment.rough_allowance_mm,
                     "finish_allowance_mm": self.constraints.edge_treatment.finish_allowance_mm,
-                } if self.constraints.edge_treatment else None,
+                }
+                if self.constraints.edge_treatment
+                else None,
                 "tolerance_mm": self.constraints.tolerance_mm,
                 "safe_z_mm": self.constraints.safe_z_mm,
             },

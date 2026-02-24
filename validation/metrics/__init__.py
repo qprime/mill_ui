@@ -1,17 +1,17 @@
+from validation.metrics.gcode_metrics import (
+    GCodeConfig,
+    GCodeMetrics,
+    extract_gcode_metrics,
+)
 from validation.metrics.svg_metrics import (
     SVGMetrics,
     extract_svg_metrics,
 )
-from validation.metrics.gcode_metrics import (
-    GCodeMetrics,
-    GCodeConfig,
-    extract_gcode_metrics,
-)
 
 __all__ = [
-    "SVGMetrics",
-    "extract_svg_metrics",
-    "GCodeMetrics",
     "GCodeConfig",
+    "GCodeMetrics",
+    "SVGMetrics",
     "extract_gcode_metrics",
+    "extract_svg_metrics",
 ]

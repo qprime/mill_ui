@@ -1,13 +1,12 @@
-
 from __future__ import annotations
 
 import sys
 
-from ir.removal_intent import RemovalIntent, Bounds2D, Allowance, Constraints, DepthProfile, KeepoutRegion, Island
+from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
-    check_overlap,
     check_depth_feasibility,
+    check_overlap,
     check_toolability,
     check_toolpath_clearance,
     check_working_area_bounds,
@@ -163,7 +162,7 @@ def test_check_depth_feasibility_inverted_z():
             z_top=-6.0,
             z_bottom=0.0,
         )
-        assert False, "Expected ValueError for inverted Z values"
+        raise AssertionError("Expected ValueError for inverted Z values")
     except ValueError as e:
         assert "z_bottom" in str(e) and "z_top" in str(e)
 
@@ -548,6 +547,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  FAIL: {e}")
             import traceback
+
             traceback.print_exc()
             failed += 1
 

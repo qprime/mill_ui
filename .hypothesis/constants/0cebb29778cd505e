@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/generators/params/loop.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.3, 1.0, 3.0, 3.175, 4.0, 6.0, 10.0, 'BeadParams', 'ChamferParams', 'EdgeSelection', 'EngraveTextParams', 'ProfileParams', 'TextAlignment', 'TextOrientation', 'WaveParams', 'all_loops', 'bottom', 'center', 'custom', 'horizontal', 'imperial', 'inner_only', 'inside', 'left', 'metric', 'on', 'outer_only', 'outside', 'right', 'rowmans', 'through', 'top', 'vertical']

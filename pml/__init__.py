@@ -1,9 +1,10 @@
-from .yaml_parser import parse_pml_yaml, PMLParseError
-from .yaml_formatter import format_pml_yaml
-from .formatter import format_pml as format_flat_pml
-from resolution.layout_resolver import resolve_layout
-from layout_ast.layout import LayoutAST
 from layout_ast.compositional import CompositionalLayoutAST
+from layout_ast.layout import LayoutAST
+from resolution.layout_resolver import resolve_layout
+
+from .formatter import format_pml as format_flat_pml
+from .yaml_formatter import format_pml_yaml
+from .yaml_parser import PMLParseError, parse_pml_yaml
 
 
 def parse_compositional_pml(text: str):
@@ -24,4 +25,4 @@ def format_pml(ast) -> str:
         raise TypeError(f"Expected LayoutAST or CompositionalLayoutAST, got {type(ast)}")
 
 
-__all__ = ["parse_pml", "parse_compositional_pml", "format_pml", "PMLParseError", "parse_pml_yaml", "format_pml_yaml"]
+__all__ = ["PMLParseError", "format_pml", "format_pml_yaml", "parse_compositional_pml", "parse_pml", "parse_pml_yaml"]

@@ -1,0 +1,4 @@
+# file: /home/squinlan/Code/mill_ui/diagram_ir/diagram.py
+# hypothesis_version: 6.151.9
+
+[0.1, 10.0, 'DiagramIR', 'LayerIR', 'ViewportSpec', 'default', 'id', 'style_token', 'unnamed', 'validate_diagram_ir']

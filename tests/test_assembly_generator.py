@@ -1,8 +1,5 @@
-import pytest
-
-from assembly.core import Assembly, Interface, InterfaceType
-from assembly.panel import PanelSpec, PanelRole, NotchSpec
-from assembly.joinery import Butt, Finger, Captured
+from assembly.joinery import Butt, Captured, Finger
+from assembly.panel import NotchSpec
 from assembly.primitives import box, carcass
 
 

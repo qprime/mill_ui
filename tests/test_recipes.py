@@ -9,12 +9,13 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
-from pml.yaml_parser import parse_pml_yaml, PMLParseError as ParseError
+from adapters.ast_to_removal import ast_to_removal_intents
+from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline
 from pml import parse_pml
 from pml.revision_header import update_file_header
+from pml.yaml_parser import PMLParseError as ParseError
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
-from cam.pipeline import run_pipeline, write_pipeline_outputs, DEFAULT_TOOL_DB
-from adapters.ast_to_removal import ast_to_removal_intents
 
 
 def discover_recipe_pml_files() -> list[Path]:
@@ -28,7 +29,7 @@ def discover_recipe_pml_files() -> list[Path]:
 
 def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
     parse_start = time.perf_counter()
-    with open(pml_path, "r") as f:
+    with open(pml_path) as f:
         pml_source = f.read()
 
     try:
@@ -37,7 +38,7 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
     except ParseError:
         ast = parse_pml(pml_source)
 
-    parse_time = time.perf_counter() - parse_start
+    time.perf_counter() - parse_start
 
     result = run_pipeline(
         ast,
@@ -62,6 +63,7 @@ def write_outputs(
     pml_path: Path,
 ):
     import shutil
+
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -107,13 +109,13 @@ def compare_outputs(
             diffs.append(f"Missing expected file: {expected_path}")
             continue
 
-        with open(expected_path, "r") as f:
+        with open(expected_path) as f:
             expected_gcode = f.read()
 
         if generated_gcode != expected_gcode:
-            gen_lines = generated_gcode.split('\n')
-            exp_lines = expected_gcode.split('\n')
-            diff_count = sum(1 for g, e in zip(gen_lines, exp_lines) if g != e)
+            gen_lines = generated_gcode.split("\n")
+            exp_lines = expected_gcode.split("\n")
+            diff_count = sum(1 for g, e in zip(gen_lines, exp_lines, strict=False) if g != e)
             diff_count += abs(len(gen_lines) - len(exp_lines))
             diffs.append(
                 f"{pass_name}.nc differs: {diff_count} lines changed "
@@ -146,9 +148,7 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
 
         if not all_match:
             diff_summary = "\n  ".join(diffs)
-            raise AssertionError(
-                f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}"
-            )
+            raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
 
         metrics_path = output_dir / "metrics.json"
         with open(metrics_path, "w") as f:
@@ -214,6 +214,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"  FAILED: {e}\n")
                 import traceback
+
                 traceback.print_exc()
 
         print("Done!")

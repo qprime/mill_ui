@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -6,12 +5,11 @@ from typing import Any
 
 from shapely.geometry import Polygon
 
-from .types import SheetLayout, NestingResult, NestedPart
+from .types import NestedPart, NestingResult, SheetLayout
 
 
 @dataclass
 class NestingValidationResult:
-
     errors: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[dict[str, Any]] = field(default_factory=list)
 
@@ -46,9 +44,7 @@ def _bounds_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -> bo
     return overlap_x and overlap_y
 
 
-def _get_overlap_location(
-    p1: NestedPart, p2: NestedPart
-) -> tuple[float, float] | None:
+def _get_overlap_location(p1: NestedPart, p2: NestedPart) -> tuple[float, float] | None:
     poly1 = Polygon(p1.get_geometry_points())
     poly2 = Polygon(p2.get_geometry_points())
 
@@ -81,19 +77,13 @@ def _geometries_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -
 
 
 def _placement_in_bounds(p: NestedPart, sheet_width: float, sheet_height: float, margin: float) -> bool:
-    l, b, r, t = p.bounds
-    return (
-        l >= margin
-        and b >= margin
-        and r <= sheet_width - margin
-        and t <= sheet_height - margin
-    )
+    left, b, r, t = p.bounds
+    return left >= margin and b >= margin and r <= sheet_width - margin and t <= sheet_height - margin
 
 
 def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
     result = NestingValidationResult()
     spec = layout.sheet_spec
-
 
     for p in layout.placements:
         if not _placement_in_bounds(p, spec.width_mm, spec.height_mm, spec.margin_mm):
@@ -104,10 +94,9 @@ def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
                 bounds=p.bounds,
             )
 
-
     placements = list(layout.placements)
     for i, p1 in enumerate(placements):
-        for p2 in placements[i + 1:]:
+        for p2 in placements[i + 1 :]:
             if _geometries_overlap(p1, p2):
                 overlap_loc = _get_overlap_location(p1, p2)
                 loc_str = f" at ({overlap_loc[0]}, {overlap_loc[1]})mm" if overlap_loc else ""
@@ -118,7 +107,6 @@ def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
                     part2=f"{p2.part_spec.name}_{p2.instance_id}",
                     overlap_location=overlap_loc,
                 )
-
 
     if layout.utilization < 0.5:
         result.add_warning(
@@ -132,12 +120,10 @@ def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:
 def validate_nesting_result(result: NestingResult) -> NestingValidationResult:
     validation = NestingValidationResult()
 
-
     for sheet in result.sheets:
         sheet_result = validate_sheet_layout(sheet)
         validation.errors.extend(sheet_result.errors)
         validation.warnings.extend(sheet_result.warnings)
-
 
     if result.unplaced_parts:
         for part in result.unplaced_parts:
@@ -152,6 +138,6 @@ def validate_nesting_result(result: NestingResult) -> NestingValidationResult:
 
 __all__ = [
     "NestingValidationResult",
-    "validate_sheet_layout",
     "validate_nesting_result",
+    "validate_sheet_layout",
 ]

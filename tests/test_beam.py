@@ -3,20 +3,20 @@ from __future__ import annotations
 import pytest
 
 from assembly.beam import (
-    BeamSpec,
     BeamRole,
+    BeamSpec,
+    Chamfer,
     Cutout,
+    DrillHole,
+    EdgeDado,
+    Fillet,
     LayerSpec,
     Segment,
+    SquareMortise,
+    Tenon,
     compute_segments,
     validate_butts_never_align,
     validate_stagger_minimum,
-    DrillHole,
-    SquareMortise,
-    Tenon,
-    Chamfer,
-    Fillet,
-    EdgeDado,
 )
 
 
@@ -246,7 +246,7 @@ class TestBeamSpecExpand:
         panels1 = beam.expand(sheet_size=1200)
         panels2 = beam.expand(sheet_size=1200)
         assert len(panels1) == len(panels2)
-        for p1, p2 in zip(panels1, panels2):
+        for p1, p2 in zip(panels1, panels2, strict=False):
             assert p1.name == p2.name
             assert p1.width_mm == p2.width_mm
             assert p1.height_mm == p2.height_mm
@@ -296,9 +296,7 @@ class TestFeatureDataclasses:
         assert hole.depth_mm is None
 
     def test_square_mortise(self):
-        mortise = SquareMortise(
-            x_mm=200, y_mm=38, width_mm=38, height_mm=50, depth_mm=19
-        )
+        mortise = SquareMortise(x_mm=200, y_mm=38, width_mm=38, height_mm=50, depth_mm=19)
         assert mortise.width_mm == 38
         assert mortise.depth_mm == 19
 
@@ -364,9 +362,7 @@ class TestBeamSpecWithFeatures:
             width_mm=100,
             thickness_mm=19,
             layers=3,
-            end_features=(
-                Tenon(end="right", extension_mm=38, width_mm=100, height_mm=19),
-            ),
+            end_features=(Tenon(end="right", extension_mm=38, width_mm=100, height_mm=19),),
         )
         assert len(beam.end_features) == 1
 
@@ -461,9 +457,7 @@ class TestExpandWithTenons:
             width_mm=76,
             thickness_mm=19,
             layers=3,
-            end_features=(
-                Tenon(end="left", extension_mm=25, width_mm=76, height_mm=19, layers="outer"),
-            ),
+            end_features=(Tenon(end="left", extension_mm=25, width_mm=76, height_mm=19, layers="outer"),),
         )
         panels = beam.expand(sheet_size=1200)
         assert len(panels) == 3
@@ -478,9 +472,7 @@ class TestExpandWithTenons:
             width_mm=76,
             thickness_mm=19,
             layers=3,
-            end_features=(
-                Tenon(end="left", extension_mm=20, width_mm=76, height_mm=19, layers="all"),
-            ),
+            end_features=(Tenon(end="left", extension_mm=20, width_mm=76, height_mm=19, layers="all"),),
         )
         panels = beam.expand(sheet_size=1200)
         assert len(panels) == 3
@@ -507,9 +499,7 @@ class TestExpandWithTenons:
             width_mm=76,
             thickness_mm=19,
             layers=1,
-            end_features=(
-                Tenon(end="left", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
-            ),
+            end_features=(Tenon(end="left", extension_mm=38, width_mm=76, height_mm=19, layers="center"),),
         )
         panels = beam.expand(sheet_size=1200)
         assert len(panels) == 1

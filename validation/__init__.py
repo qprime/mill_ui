@@ -10,6 +10,7 @@ from .core import (
 from .removal_checks import (
     check_depth_feasibility,
     check_depth_profile,
+    check_edge_feature,
     check_overlap,
     check_toolability,
     check_toolpath_clearance,
@@ -34,6 +35,7 @@ __all__ = [
     "Verdict",
     "check_depth_feasibility",
     "check_depth_profile",
+    "check_edge_feature",
     "check_overlap",
     "check_toolability",
     "check_toolpath_clearance",

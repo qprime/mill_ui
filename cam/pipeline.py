@@ -23,6 +23,7 @@ from ir.removal_intent import Bounds2D, RemovalIntent
 from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
     check_depth_feasibility,
+    check_edge_feature,
     check_overlap,
     check_toolpath_clearance,
     check_working_area_bounds,
@@ -124,12 +125,24 @@ def run_pipeline(
         for issue in overlap_result.warnings:
             warnings.append(issue.message)
 
+    effective_tool_db: list[dict[str, Any]] = tool_db if tool_db is not None else DEFAULT_TOOL_DB
+    v_angles: list[float] | None = [
+        float(t["v_angle_deg"]) for t in effective_tool_db if t.get("kind") == "v" and t.get("v_angle_deg") is not None
+    ] or None
+
     for intent in intents:
         depth_result = check_depth_feasibility(intent, ast.sheet.thickness_mm)
         if depth_result.has_issues():
             for issue in depth_result.errors:
                 errors.append(issue.message)
             for issue in depth_result.warnings:
+                warnings.append(issue.message)
+
+        edge_result = check_edge_feature(intent, ast.sheet.thickness_mm, available_v_angles=v_angles)
+        if edge_result.has_issues():
+            for issue in edge_result.errors:
+                errors.append(issue.message)
+            for issue in edge_result.warnings:
                 warnings.append(issue.message)
 
     tool_radius = kerf_mm / 2.0

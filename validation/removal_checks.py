@@ -4,7 +4,7 @@ import math
 from typing import Any
 
 from core.constants import FeatureType
-from ir.removal_intent import BevelSpec, Bounds2D, RemovalIntent
+from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent
 from validation.core import ValidationResult
 
 
@@ -66,6 +66,104 @@ def check_depth_profile(
                     bevel_angle_deg=bevel_angle,
                     bevel_width_mm=bevel_width,
                 )
+
+    return result
+
+
+def check_edge_feature(
+    intent: RemovalIntent,
+    sheet_thickness_mm: float,
+    available_v_angles: list[float] | None = None,
+) -> ValidationResult:
+    result = ValidationResult()
+
+    spec = intent.edge_feature
+    if spec is None:
+        return result
+
+    if isinstance(spec, BevelSpec):
+        width = spec.width_mm
+        angle = spec.angle_deg
+        inner_depth = spec.inner_depth_mm
+
+        if width <= 0.0:
+            result.add_error(
+                f"Bevel width must be positive, got {width:.2f}mm",
+                region_id=intent.region_id,
+                bevel_width_mm=width,
+            )
+
+        if angle <= 0.0 or angle >= 90.0:
+            result.add_warning(
+                f"Bevel angle {angle:.1f}° outside practical range (0°, 90°)",
+                region_id=intent.region_id,
+                bevel_angle_deg=angle,
+            )
+
+        if inner_depth < 0.0:
+            result.add_error(
+                f"Bevel inner depth must be non-negative, got {inner_depth:.2f}mm",
+                region_id=intent.region_id,
+                inner_depth_mm=inner_depth,
+            )
+
+        if inner_depth > sheet_thickness_mm:
+            result.add_error(
+                f"Bevel inner depth ({inner_depth:.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
+                region_id=intent.region_id,
+                inner_depth_mm=inner_depth,
+                sheet_thickness_mm=sheet_thickness_mm,
+            )
+
+    elif isinstance(spec, ChamferSpec):
+        width = spec.width_mm
+        angle = spec.angle_deg
+
+        if width <= 0.0:
+            result.add_error(
+                f"Chamfer width must be positive, got {width:.2f}mm",
+                region_id=intent.region_id,
+                chamfer_width_mm=width,
+            )
+
+        if angle <= 0.0 or angle >= 90.0:
+            result.add_warning(
+                f"Chamfer angle {angle:.1f}° outside practical range (0°, 90°)",
+                region_id=intent.region_id,
+                chamfer_angle_deg=angle,
+            )
+
+        if 0.0 < angle < 90.0:
+            cut_depth = width * math.tan(math.radians(angle))
+            if cut_depth > sheet_thickness_mm:
+                result.add_error(
+                    f"Chamfer cut depth ({cut_depth:.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
+                    region_id=intent.region_id,
+                    chamfer_cut_depth_mm=cut_depth,
+                    sheet_thickness_mm=sheet_thickness_mm,
+                )
+
+    if available_v_angles is not None and len(available_v_angles) > 0 and isinstance(spec, (BevelSpec, ChamferSpec)):
+        desired_included = spec.angle_deg * 2.0
+        matching = [a for a in available_v_angles if abs(a - desired_included) < 5.0]
+        if not matching:
+            result.add_warning(
+                f"No V-bit with included angle near {desired_included:.0f}° available. Available: {available_v_angles}",
+                region_id=intent.region_id,
+                desired_angle=desired_included,
+                available_angles=available_v_angles,
+            )
+
+    bounds = intent.bounds
+    feature_width = min(bounds.width, bounds.height)
+    if isinstance(spec, (BevelSpec, ChamferSpec)) and spec.width_mm > feature_width / 2.0:
+        result.add_warning(
+            f"Edge feature width ({spec.width_mm:.2f}mm) exceeds half the feature size "
+            f"({feature_width:.2f}mm) — tool clearance may be insufficient",
+            region_id=intent.region_id,
+            edge_width_mm=spec.width_mm,
+            feature_size_mm=feature_width,
+        )
 
     return result
 

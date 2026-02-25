@@ -5,7 +5,7 @@ from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
-from cam.moves import CommentMove, Move
+from cam.moves import CommentMove, CutMove, Move
 from cam.path.strategies import pocket_then_finish_profile
 from cam.primitives import rectangle
 from cam.transforms import Transform2D, place
@@ -43,8 +43,8 @@ def _has_no_finish_comment(moves: list[Move]) -> bool:
 @patch("cam.path.strategies.profile_outline")
 def test_pocket_cleanup_enabled_by_default(mock_profile, mock_raster):
 
-    mock_raster.return_value = [{"kind": "comment", "text": "raster_moves"}]
-    mock_profile.return_value = [{"kind": "comment", "text": "profile_moves"}]
+    mock_raster.return_value = [CommentMove(text="raster_moves")]
+    mock_profile.return_value = [CommentMove(text="profile_moves")]
 
     shape = rectangle(100, 100)
     shape = place(shape, Transform2D(tx=50, ty=50))
@@ -70,8 +70,8 @@ def test_pocket_cleanup_enabled_by_default(mock_profile, mock_raster):
 @patch("cam.path.strategies.profile_outline")
 def test_pocket_cleanup_disabled(mock_profile, mock_raster):
 
-    mock_raster.return_value = [{"kind": "comment", "text": "raster_moves"}]
-    mock_profile.return_value = [{"kind": "comment", "text": "profile_moves"}]
+    mock_raster.return_value = [CommentMove(text="raster_moves")]
+    mock_profile.return_value = [CommentMove(text="profile_moves")]
 
     shape = rectangle(100, 100)
     shape = place(shape, Transform2D(tx=50, ty=50))
@@ -97,8 +97,8 @@ def test_pocket_cleanup_disabled(mock_profile, mock_raster):
 @patch("cam.path.strategies.profile_outline")
 def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
 
-    mock_raster.return_value = [{"kind": "comment", "text": "raster_moves"}]
-    mock_profile.return_value = [{"kind": "comment", "text": "profile_moves"}]
+    mock_raster.return_value = [CommentMove(text="raster_moves")]
+    mock_profile.return_value = [CommentMove(text="profile_moves")]
 
     shape = rectangle(100, 100)
     shape = place(shape, Transform2D(tx=50, ty=50))
@@ -128,11 +128,11 @@ def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
 @patch("cam.path.strategies.profile_outline")
 def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
 
-    mock_raster.return_value = [{"kind": "comment", "text": "raster"}, {"kind": "cut", "x": 10, "y": 10}]
+    mock_raster.return_value = [CommentMove(text="raster"), CutMove(x=10, y=10)]
     mock_profile.return_value = [
-        {"kind": "comment", "text": "profile"},
-        {"kind": "cut", "x": 20, "y": 20},
-        {"kind": "cut", "x": 30, "y": 30},
+        CommentMove(text="profile"),
+        CutMove(x=20, y=20),
+        CutMove(x=30, y=30),
     ]
 
     shape = rectangle(100, 100)

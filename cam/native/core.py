@@ -21,11 +21,14 @@ except Exception:
 def _dict_to_move(d: dict) -> Move:
     kind = d.get("kind", "")
     if kind == "comment":
-        return CommentMove(text=str(d.get("text") or ""))
+        text = d.get("text")
+        return CommentMove(text=str(text) if text is not None else "")
     if kind == "set_rpm":
-        return SetRpmMove(rpm=float(d.get("rpm") or 0.0))
+        rpm = d.get("rpm")
+        return SetRpmMove(rpm=float(rpm) if rpm is not None else 0.0)
     if kind == "set_feed":
-        return SetFeedMove(feed=float(d.get("feed") or 0.0))
+        feed = d.get("feed")
+        return SetFeedMove(feed=float(feed) if feed is not None else 0.0)
     if kind == "rapid":
         return RapidMove(
             x=None if d.get("x") is None else float(d["x"]),
@@ -40,7 +43,8 @@ def _dict_to_move(d: dict) -> Move:
             feed=None if d.get("feed") is None else float(d["feed"]),
         )
     if kind == "retract":
-        return RetractMove(z=float(d.get("z") or 0.0))
+        z = d.get("z")
+        return RetractMove(z=float(z) if z is not None else 0.0)
     raise ValueError(f"Unknown move kind: {kind!r}")
 
 

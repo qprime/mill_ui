@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from cam.model.setup import Setup
+from cam.moves import Move
 from cam.native import core as native_core
 from cam.shape import Shape2D
 
@@ -12,7 +13,7 @@ def pocket_raster(
     depth_mm: float,
     stepover: float,
     stepdown: float | None = None,
-):
+) -> list[Move]:
     return native_core.pocket_raster(
         shape,
         setup,

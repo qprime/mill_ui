@@ -7,11 +7,12 @@ from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
 from cam.ops.engrave import engrave_lines
 from cam.ops.pocket_region import pocket_region_rect_raster
+from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, FeatureInput
 
-from .profile import rect_shape
+from .profile import offset_rect_shape, rect_shape
 from .tools import (
     ToolSelection,
     pick_tool_for_engrave,
@@ -24,7 +25,49 @@ from .tools import (
 if TYPE_CHECKING:
     from cam.config import Config
 
-    from . import PassAccumulator
+    from . import PassAccumulator, PassRecord
+
+
+def _pocket_with_allowance(
+    width: float,
+    height: float,
+    center: tuple[float, float],
+    *,
+    record: PassRecord,
+    depth: float,
+    start_depth: float,
+    step_over: float,
+    step_down: float,
+    cleanup_offset_mm: float,
+    rough_allowance_mm: float,
+    finish_allowance_mm: float,
+    tool: ToolSelection,
+    accumulator: PassAccumulator,
+) -> None:
+    from cam.ops.pocket import pocket_raster
+
+    tool_r = 0.5 * tool.diameter
+    cut_depth = depth - start_depth
+
+    rough_shape = offset_rect_shape(width, height, center, -(tool_r + cleanup_offset_mm + rough_allowance_mm))
+    if rough_shape is not None:
+        rough_moves = pocket_raster(
+            rough_shape, record.setup, depth_mm=cut_depth, stepover=step_over, stepdown=step_down
+        )
+        record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
+
+    rough_profile_shape = offset_rect_shape(width, height, center, -(tool_r + rough_allowance_mm))
+    if rough_profile_shape is not None:
+        rough_profile_moves = profile_outline(
+            rough_profile_shape, record.setup, depth_mm=cut_depth, step_down=step_down
+        )
+        record.add_moves(offset_moves_z(rough_profile_moves, start_depth), increment=1)
+
+    finish_record = accumulator.get_record("finish", tool)
+    finish_shape = offset_rect_shape(width, height, center, -(tool_r + finish_allowance_mm))
+    if finish_shape is not None:
+        finish_moves = profile_outline(finish_shape, finish_record.setup, depth_mm=cut_depth, step_down=step_down)
+        finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
 
 
 def plan_pocket_passes(
@@ -59,24 +102,46 @@ def plan_pocket_passes(
         step_down = stepdown_for_tool(tool)
 
         center = entry.center_xy_mm
+        et = entry.edge_treatment
+        has_allowance = et is not None and et.type == "allowance"
 
         if shape_name == "rect":
             width = float(sg.w_mm or 0.0)
             height = float(sg.h_mm or 0.0)
             shape = rect_shape(width, height, center)
-            record.add_moves(
-                pocket_then_finish_profile(
-                    shape,
-                    setup,
-                    total_depth_mm=depth,
-                    stepover_mm=step_over,
-                    step_down_mm=step_down,
+            if has_allowance:
+                assert et is not None
+                rough_allow = et.rough_allowance_mm or 0.0
+                finish_allow = et.finish_allowance_mm or 0.0
+                _pocket_with_allowance(
+                    width,
+                    height,
+                    center,
+                    record=record,
+                    depth=depth,
+                    start_depth=start_depth,
+                    step_over=step_over,
+                    step_down=step_down,
                     cleanup_offset_mm=config.cleanup_offset_mm,
-                    start_depth_mm=start_depth,
-                    finish_perimeter=config.pocket_finish_perimeter,
-                ),
-                increment=1,
-            )
+                    rough_allowance_mm=rough_allow,
+                    finish_allowance_mm=finish_allow,
+                    tool=tool,
+                    accumulator=accumulator,
+                )
+            else:
+                record.add_moves(
+                    pocket_then_finish_profile(
+                        shape,
+                        setup,
+                        total_depth_mm=depth,
+                        stepover_mm=step_over,
+                        step_down_mm=step_down,
+                        cleanup_offset_mm=config.cleanup_offset_mm,
+                        start_depth_mm=start_depth,
+                        finish_perimeter=config.pocket_finish_perimeter,
+                    ),
+                    increment=1,
+                )
         elif shape_name == "circle":
             diameter = float(sg.diameter_mm or 0.0)
             moves = pocket_circle_concentric(
@@ -108,19 +173,39 @@ def plan_pocket_passes(
             width = max(xs) - min(xs)
             height = max(ys) - min(ys)
             shape = rect_shape(width, height, center)
-            record.add_moves(
-                pocket_then_finish_profile(
-                    shape,
-                    setup,
-                    total_depth_mm=depth,
-                    stepover_mm=step_over,
-                    step_down_mm=step_down,
+            if has_allowance:
+                assert et is not None
+                rough_allow = et.rough_allowance_mm or 0.0
+                finish_allow = et.finish_allowance_mm or 0.0
+                _pocket_with_allowance(
+                    width,
+                    height,
+                    center,
+                    record=record,
+                    depth=depth,
+                    start_depth=start_depth,
+                    step_over=step_over,
+                    step_down=step_down,
                     cleanup_offset_mm=config.cleanup_offset_mm,
-                    start_depth_mm=start_depth,
-                    finish_perimeter=config.pocket_finish_perimeter,
-                ),
-                increment=1,
-            )
+                    rough_allowance_mm=rough_allow,
+                    finish_allowance_mm=finish_allow,
+                    tool=tool,
+                    accumulator=accumulator,
+                )
+            else:
+                record.add_moves(
+                    pocket_then_finish_profile(
+                        shape,
+                        setup,
+                        total_depth_mm=depth,
+                        stepover_mm=step_over,
+                        step_down_mm=step_down,
+                        cleanup_offset_mm=config.cleanup_offset_mm,
+                        start_depth_mm=start_depth,
+                        finish_perimeter=config.pocket_finish_perimeter,
+                    ),
+                    increment=1,
+                )
         else:
             continue
 

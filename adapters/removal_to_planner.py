@@ -5,6 +5,7 @@ from typing import Any
 from cam.planner.planner_input import (
     CornerCleanupInput,
     EdgeFeatureInput,
+    EdgeTreatmentInput,
     FeatureInput,
     GeometryInput,
     KeepoutInput,
@@ -94,6 +95,10 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
     side = intent.side if hint_type == FeatureType.PROFILE else None
     start_depth_mm = abs(intent.depth_profile.z_top) if intent.depth_profile.z_top != 0.0 else 0.0
 
+    edge_treatment: EdgeTreatmentInput | None = None
+    if intent.constraints.edge_treatment is not None:
+        edge_treatment = EdgeTreatmentInput.from_edge_treatment(intent.constraints.edge_treatment)
+
     return FeatureInput(
         id=intent.original_id if intent.original_id is not None else intent.region_id,
         shape=shape,
@@ -105,6 +110,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         tabs=tabs,
         keepouts=keepouts,
         corner_cleanup_tool_diameter_mm=intent.corner_cleanup_tool_diameter_mm,
+        edge_treatment=edge_treatment,
     )
 
 

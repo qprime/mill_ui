@@ -11,6 +11,7 @@ from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.moves import Move, SetRpmMove
+from cam.ops.profile import profile_outline
 from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 from cam.shape import Shape2D
 
@@ -20,6 +21,7 @@ from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_p
 from .profile import (
     circle_shape_mm,
     offset_polygon_shape,
+    offset_rect_shape,
     offset_rounded_rect_shape,
     polygon_shape,
     profile_moves_with_options,
@@ -27,7 +29,7 @@ from .profile import (
     rounded_rect_shape,
 )
 from .summary import summarise_passes
-from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile
+from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile, stepdown_for_tool
 
 
 @dataclass
@@ -178,11 +180,70 @@ def plan_passes(
     else:
         for rec in rect_profiles:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-            record = accumulator.get_record("profile", profile_tool)
             width = float(rec.geometry.geometry.w_mm or 0.0)
             height = float(rec.geometry.geometry.h_mm or 0.0)
-            shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
             depth = max(0.0, rec.depth_mm) + cut_through_mm
+            et = rec.edge_treatment
+            if et is not None and et.type == "allowance":
+                rough_allow = et.rough_allowance_mm or 0.0
+                finish_allow = et.finish_allowance_mm or 0.0
+                tool_r = 0.5 * profile_tool.diameter
+                rough_record = accumulator.get_record("profile", profile_tool)
+                rough_shape = offset_rect_shape(width, height, rec.center_xy_mm, tool_r + rough_allow)
+                if rough_shape is not None:
+                    step_down = stepdown_for_tool(profile_tool)
+                    rough_moves = profile_outline(rough_shape, rough_record.setup, depth, step_down=step_down)
+                    rough_record.add_moves(rough_moves, increment=1)
+                finish_record = accumulator.get_record("finish", profile_tool)
+                finish_shape = offset_rect_shape(width, height, rec.center_xy_mm, tool_r + finish_allow)
+                if finish_shape is not None:
+                    step_down = stepdown_for_tool(profile_tool)
+                    finish_moves = profile_outline(finish_shape, finish_record.setup, depth, step_down=step_down)
+                    finish_record.add_moves(finish_moves, increment=1)
+            else:
+                record = accumulator.get_record("profile", profile_tool)
+                shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
+                record.add_moves(
+                    profile_moves_with_options(
+                        shape,
+                        setup=record.setup,
+                        depth_mm=depth,
+                        tool=profile_tool,
+                        onion_skin_mm=onion_skin_mm,
+                        tabs_opts=_tabs_for_feature(rec),
+                    ),
+                    increment=1,
+                )
+
+    for rec in circle_profiles:
+        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        diameter = float(rec.geometry.geometry.diameter_mm or 0.0)
+        radius = 0.5 * diameter
+        side = (rec.side or "on").lower()
+        tool_radius = 0.5 * profile_tool.diameter
+        depth = max(0.0, rec.depth_mm) + cut_through_mm
+        et = rec.edge_treatment
+        if et is not None and et.type == "allowance":
+            rough_allow = et.rough_allowance_mm or 0.0
+            finish_allow = et.finish_allowance_mm or 0.0
+            sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
+            step_down = stepdown_for_tool(profile_tool)
+            for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
+                r = radius + sign * (tool_radius + allow)
+                if r <= 0.0:
+                    continue
+                s = circle_shape_mm(r * 2.0, rec.center_xy_mm)
+                rec_pass = accumulator.get_record(label, profile_tool)
+                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+        else:
+            if side == "outside":
+                radius += tool_radius
+            elif side == "inside":
+                radius -= tool_radius
+            if radius <= 0.0:
+                continue
+            record = accumulator.get_record("profile", profile_tool)
+            shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
             record.add_moves(
                 profile_moves_with_options(
                     shape,
@@ -195,70 +256,60 @@ def plan_passes(
                 increment=1,
             )
 
-    for rec in circle_profiles:
-        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-        record = accumulator.get_record("profile", profile_tool)
-        diameter = float(rec.geometry.geometry.diameter_mm or 0.0)
-        radius = 0.5 * diameter
-        side = (rec.side or "on").lower()
-        tool_radius = 0.5 * profile_tool.diameter
-        if side == "outside":
-            radius += tool_radius
-        elif side == "inside":
-            radius -= tool_radius
-        if radius <= 0.0:
-            continue
-        shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
-        depth = max(0.0, rec.depth_mm) + cut_through_mm
-        record.add_moves(
-            profile_moves_with_options(
-                shape,
-                setup=record.setup,
-                depth_mm=depth,
-                tool=profile_tool,
-                onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_feature(rec),
-            ),
-            increment=1,
-        )
-
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-        record = accumulator.get_record("profile", profile_tool)
         raw_points = rec.geometry.geometry.points
         points = [list(p) for p in raw_points] if raw_points is not None else []
         if not points:
             continue
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
-        offset = 0.0
-        if side == "outside":
-            offset = tool_radius
-        elif side == "inside":
-            offset = -tool_radius
-        shape_poly: Shape2D | None
-        if offset != 0.0:
-            shape_poly = offset_polygon_shape(points, rec.center_xy_mm, offset)
-        else:
-            shape_poly = polygon_shape(points, rec.center_xy_mm)
-        if shape_poly is None:
-            continue
         depth = max(0.0, rec.depth_mm) + cut_through_mm
-        record.add_moves(
-            profile_moves_with_options(
-                shape_poly,
-                setup=record.setup,
-                depth_mm=depth,
-                tool=profile_tool,
-                onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_feature(rec),
-            ),
-            increment=1,
-        )
+        et = rec.edge_treatment
+        if et is not None and et.type == "allowance":
+            rough_allow = et.rough_allowance_mm or 0.0
+            finish_allow = et.finish_allowance_mm or 0.0
+            sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
+            step_down = stepdown_for_tool(profile_tool)
+            for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
+                off = sign * (tool_radius + allow)
+                s: Shape2D | None = (
+                    offset_polygon_shape(points, rec.center_xy_mm, off)
+                    if abs(off) > 1e-9
+                    else polygon_shape(points, rec.center_xy_mm)
+                )
+                if s is None:
+                    continue
+                rec_pass = accumulator.get_record(label, profile_tool)
+                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+        else:
+            record = accumulator.get_record("profile", profile_tool)
+            offset = 0.0
+            if side == "outside":
+                offset = tool_radius
+            elif side == "inside":
+                offset = -tool_radius
+            shape_poly: Shape2D | None
+            if offset != 0.0:
+                shape_poly = offset_polygon_shape(points, rec.center_xy_mm, offset)
+            else:
+                shape_poly = polygon_shape(points, rec.center_xy_mm)
+            if shape_poly is None:
+                continue
+            record.add_moves(
+                profile_moves_with_options(
+                    shape_poly,
+                    setup=record.setup,
+                    depth_mm=depth,
+                    tool=profile_tool,
+                    onion_skin_mm=onion_skin_mm,
+                    tabs_opts=_tabs_for_feature(rec),
+                ),
+                increment=1,
+            )
 
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-        record = accumulator.get_record("profile", profile_tool)
         sg = rec.geometry.geometry
         width = float(sg.w_mm or 0.0)
         height = float(sg.h_mm or 0.0)
@@ -271,30 +322,49 @@ def plan_passes(
         }
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
-        offset = 0.0
-        if side == "outside":
-            offset = tool_radius
-        elif side == "inside":
-            offset = -tool_radius
-        shape_rr: Shape2D | None
-        if offset != 0.0:
-            shape_rr = offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, offset)
-        else:
-            shape_rr = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
-        if shape_rr is None:
-            continue
         depth = max(0.0, rec.depth_mm) + cut_through_mm
-        record.add_moves(
-            profile_moves_with_options(
-                shape_rr,
-                setup=record.setup,
-                depth_mm=depth,
-                tool=profile_tool,
-                onion_skin_mm=onion_skin_mm,
-                tabs_opts=_tabs_for_feature(rec),
-            ),
-            increment=1,
-        )
+        et = rec.edge_treatment
+        if et is not None and et.type == "allowance":
+            rough_allow = et.rough_allowance_mm or 0.0
+            finish_allow = et.finish_allowance_mm or 0.0
+            sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
+            step_down = stepdown_for_tool(profile_tool)
+            for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
+                off = sign * (tool_radius + allow)
+                s: Shape2D | None = (
+                    offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, off)
+                    if abs(off) > 1e-9
+                    else rounded_rect_shape(width, height, radii, rec.center_xy_mm)
+                )
+                if s is None:
+                    continue
+                rec_pass = accumulator.get_record(label, profile_tool)
+                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+        else:
+            record = accumulator.get_record("profile", profile_tool)
+            offset = 0.0
+            if side == "outside":
+                offset = tool_radius
+            elif side == "inside":
+                offset = -tool_radius
+            shape_rr: Shape2D | None
+            if offset != 0.0:
+                shape_rr = offset_rounded_rect_shape(width, height, radii, rec.center_xy_mm, offset)
+            else:
+                shape_rr = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
+            if shape_rr is None:
+                continue
+            record.add_moves(
+                profile_moves_with_options(
+                    shape_rr,
+                    setup=record.setup,
+                    depth_mm=depth,
+                    tool=profile_tool,
+                    onion_skin_mm=onion_skin_mm,
+                    tabs_opts=_tabs_for_feature(rec),
+                ),
+                increment=1,
+            )
 
     pass_records = accumulator.passes()
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import replace
 from typing import Any
 
 from core.constants import (
@@ -49,12 +50,15 @@ def profile_hint_to_removal_intent(
     side = hint.get(HintKeys.SIDE, Side.OUTSIDE).lower()
     allowance = _side_to_allowance(side)
 
-    tabs_data = hint.get(HintKeys.TABS)
-    constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
-
     geometry = hint.get(HintKeys.GEOMETRY, {})
     shape = hint.get(HintKeys.SHAPE, "")
     shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
+
+    tabs_data = hint.get(HintKeys.TABS)
+    edge_treatment = _extract_edge_treatment_from_geometry(geometry)
+    constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
+    if edge_treatment is not None:
+        constraints = replace(constraints, edge_treatment=edge_treatment)
 
     return RemovalIntent(
         region_id=region_id,
@@ -91,6 +95,8 @@ def _simple_hint_to_removal_intent(
     if extra_fn:
         extra_kwargs = extra_fn(hint)
 
+    edge_treatment = _extract_edge_treatment_from_geometry(geometry)
+
     return RemovalIntent(
         region_id=region_id,
         bounds=bounds,
@@ -103,7 +109,7 @@ def _simple_hint_to_removal_intent(
         original_id=hint_id,
         shape_geometry=shape_geometry,
         allowance=Allowance(),
-        constraints=Constraints(),
+        constraints=Constraints(edge_treatment=edge_treatment),
         **extra_kwargs,
     )
 

@@ -28,7 +28,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | constraints.tabs | HONORED | — | Profiles only |
 | constraints.keepouts | HONORED | CRITICAL | Toolpath avoids keepout bounds |
 | constraints.islands | NOT_IMPLEMENTED | — | Not yet passed to planner |
-| constraints.edge_treatment | NOT_IMPLEMENTED | — | Not yet passed to planner |
+| constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
 | edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
@@ -75,7 +75,7 @@ Constraint Audit:
   tabs: HONORED (3 intents)
   keepouts: HONORED (2 regions)
   islands: NOT_IMPLEMENTED (1 intent) [warning]
-  edge_treatment: NOT_IMPLEMENTED (0 intents)
+  edge_treatment: HONORED (1 intent)
 ```
 
 If safety-critical constraints are present but not honored, the build fails with an error.

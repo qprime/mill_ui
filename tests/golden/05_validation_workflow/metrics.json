@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "05_validation_workflow",
-    "created_at": "2026-02-24T23:38:09.307851+00:00"
+    "created_at": "2026-02-25T00:15:00.924065+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.43,
+    "extraction_time_ms": 0.48,
     "document": {
       "width_mm": 353.175,
       "height_mm": 389.175,
@@ -308,7 +308,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.728,
+    "extraction_time_ms": 9.055,
     "summary": {
       "total_lines": 2244,
       "comment_lines": 16,

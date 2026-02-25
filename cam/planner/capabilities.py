@@ -49,7 +49,8 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         ConstraintSupport.NOT_IMPLEMENTED,
     ),
     "constraints.edge_treatment": ConstraintStatus(
-        ConstraintSupport.NOT_IMPLEMENTED,
+        ConstraintSupport.HONORED,
+        note="Allowance type splits pocket/profile into rough+finish passes",
     ),
     "edge_feature": ConstraintStatus(
         ConstraintSupport.HONORED,

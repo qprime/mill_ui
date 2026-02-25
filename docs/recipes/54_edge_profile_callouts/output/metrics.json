@@ -1,13 +1,19 @@
 {
   "timing": {
-    "ir_ms": 0.02,
-    "hints_ms": 0.01,
-    "plan_ms": 0.85,
-    "gcode_ms": 1.34,
-    "svg_ms": 0.38,
-    "total_ms": 2.6
+    "ir_ms": 0.07,
+    "hints_ms": 0.04,
+    "plan_ms": 1.85,
+    "gcode_ms": 2.23,
+    "svg_ms": 1.02,
+    "total_ms": 5.21
   },
-  "constraint_audit": {},
+  "constraint_audit": {
+    "edge_treatment": {
+      "status": "honored",
+      "count": 2,
+      "safety_critical": false
+    }
+  },
   "complexity": {
     "total_moves": 504,
     "rapid_moves": 96,

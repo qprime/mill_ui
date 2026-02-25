@@ -3,7 +3,38 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from ir.removal_intent import EdgeFeatureSpec, ShapeGeometry
+from ir.removal_intent import EdgeFeatureSpec, EdgeTreatment, ShapeGeometry
+
+
+@dataclass(frozen=True)
+class EdgeTreatmentInput:
+    type: str
+    radius_mm: float | None = None
+    distance_mm: float | None = None
+    rough_allowance_mm: float | None = None
+    finish_allowance_mm: float | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"type": self.type}
+        if self.radius_mm is not None:
+            result["radius_mm"] = self.radius_mm
+        if self.distance_mm is not None:
+            result["distance_mm"] = self.distance_mm
+        if self.rough_allowance_mm is not None:
+            result["rough_allowance_mm"] = self.rough_allowance_mm
+        if self.finish_allowance_mm is not None:
+            result["finish_allowance_mm"] = self.finish_allowance_mm
+        return result
+
+    @classmethod
+    def from_edge_treatment(cls, et: EdgeTreatment) -> EdgeTreatmentInput:
+        return cls(
+            type=et.type,
+            radius_mm=et.radius_mm,
+            distance_mm=et.distance_mm,
+            rough_allowance_mm=et.rough_allowance_mm,
+            finish_allowance_mm=et.finish_allowance_mm,
+        )
 
 
 @dataclass(frozen=True)
@@ -84,6 +115,7 @@ class FeatureInput:
     tabs: TabsInput | None = None
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
     corner_cleanup_tool_diameter_mm: float | None = None
+    edge_treatment: EdgeTreatmentInput | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -103,6 +135,8 @@ class FeatureInput:
             result["keepouts"] = [k.to_dict() for k in self.keepouts]
         if self.corner_cleanup_tool_diameter_mm is not None:
             result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
+        if self.edge_treatment is not None:
+            result["edge_treatment"] = self.edge_treatment.to_dict()
         return result
 
 
@@ -250,6 +284,21 @@ class PlannerInput:
             )
             return GeometryInput(shape=shape, geometry=geom)
 
+        def parse_edge_treatment(et_raw: dict[str, Any] | None) -> EdgeTreatmentInput | None:
+            if et_raw is None:
+                return None
+            return EdgeTreatmentInput(
+                type=str(et_raw.get("type", "")),
+                radius_mm=float(et_raw["radius_mm"]) if et_raw.get("radius_mm") is not None else None,
+                distance_mm=float(et_raw["distance_mm"]) if et_raw.get("distance_mm") is not None else None,
+                rough_allowance_mm=(
+                    float(et_raw["rough_allowance_mm"]) if et_raw.get("rough_allowance_mm") is not None else None
+                ),
+                finish_allowance_mm=(
+                    float(et_raw["finish_allowance_mm"]) if et_raw.get("finish_allowance_mm") is not None else None
+                ),
+            )
+
         def parse_feature(f: dict[str, Any]) -> FeatureInput:
             shape = str(f.get("shape", "Rect"))
             geometry = parse_geometry(f.get("geometry", {}), shape)
@@ -267,6 +316,7 @@ class PlannerInput:
                 tabs=parse_tabs(f.get("tabs")),
                 keepouts=keepouts,
                 corner_cleanup_tool_diameter_mm=f.get("corner_cleanup_tool_diameter_mm"),
+                edge_treatment=parse_edge_treatment(f.get("edge_treatment")),
             )
 
         def parse_corner_cleanup(c: dict[str, Any]) -> CornerCleanupInput:

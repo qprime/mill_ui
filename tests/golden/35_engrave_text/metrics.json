@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "35_engrave_text",
-    "created_at": "2026-02-24T23:38:11.763570+00:00"
+    "created_at": "2026-02-25T00:15:03.873286+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.5,
+    "extraction_time_ms": 5.3,
     "document": {
       "width_mm": 473.175,
       "height_mm": 363.175,
@@ -222,7 +222,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 27.2356,
+    "extraction_time_ms": 32.5483,
     "summary": {
       "total_lines": 9422,
       "comment_lines": 1570,

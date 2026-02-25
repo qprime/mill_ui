@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.16,
-    "hints_ms": 0.05,
-    "plan_ms": 6.19,
-    "gcode_ms": 5.33,
-    "svg_ms": 1.91,
-    "total_ms": 13.63
+    "ir_ms": 0.05,
+    "hints_ms": 0.02,
+    "plan_ms": 3.0,
+    "gcode_ms": 3.96,
+    "svg_ms": 0.71,
+    "total_ms": 7.74
   },
   "constraint_audit": {
     "edge_feature": {

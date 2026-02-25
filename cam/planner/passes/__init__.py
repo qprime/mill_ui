@@ -63,7 +63,7 @@ class PassAccumulator:
         self._stock = stock
         self._safe_z = float(safe_z)
         self._prime_spindle = prime_spindle
-        self._records: dict[tuple[str, float, str, str | None], PassRecord] = {}
+        self._records: dict[tuple[str, float, str, str | None, float | None], PassRecord] = {}
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
         setup = Setup(

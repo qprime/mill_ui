@@ -205,6 +205,8 @@ class EdgeFeatureInput:
                     "width_mm": self.edge_feature.width_mm,
                     "angle_deg": self.edge_feature.angle_deg,
                 }
+            else:
+                raise TypeError(f"Unknown EdgeFeatureSpec type: {type(self.edge_feature)}")
         return result
 
 

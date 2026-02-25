@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import EdgeFeatureInput
+from cam.shape import Shape2D
 from ir.removal_intent import BevelSpec, ChamferSpec
 
 from .profile import (
@@ -85,7 +86,7 @@ def plan_edge_feature_passes(
         record.add_moves(moves, increment=1)
 
 
-def _build_offset_shape(entry: EdgeFeatureInput, offset: float):
+def _build_offset_shape(entry: EdgeFeatureInput, offset: float) -> Shape2D | None:
     shape_type = entry.shape.lower()
     geom = entry.geometry.geometry
 

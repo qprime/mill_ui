@@ -15,6 +15,7 @@ from cam.ops.face import face_zigzag
 from cam.ops.pocket_region import _interval_subtract
 from cam.planner.params import stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator
+from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
 from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges
 from cam.planner.passes.pocket import (
     plan_engrave_passes,
@@ -24,6 +25,8 @@ from cam.planner.passes.pocket import (
 from cam.planner.passes.tools import (
     ToolSelection,
     normalize_tool_entries,
+    pass_key,
+    pick_tool_for_edge,
     pick_tool_for_engrave,
     pick_tool_for_hole,
     pick_tool_for_pocket,
@@ -31,8 +34,8 @@ from cam.planner.passes.tools import (
     stepdown_for_tool,
     stepover_for_tool,
 )
-from cam.planner.planner_input import FeatureInput, GeometryInput
-from ir.removal_intent import ShapeGeometry
+from cam.planner.planner_input import EdgeFeatureInput, FeatureInput, GeometryInput
+from ir.removal_intent import BevelSpec, ChamferSpec, ShapeGeometry
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
 FLAT_6MM = {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280}
@@ -48,9 +51,29 @@ FLAT_6MM_UPCUT = {
 FLAT_12MM = {"name": "12mm_flat", "diameter": 12.0, "kind": "flat", "rpm": 10000, "feed_xy": 800, "feed_z": 250}
 BALL_2MM = {"name": "2mm_ball", "diameter": 2.0, "kind": "ball", "rpm": 20000, "feed_xy": 600, "feed_z": 200}
 V_1MM = {"name": "1mm_v", "diameter": 1.0, "kind": "v", "rpm": 22000, "feed_xy": 500, "feed_z": 150}
+VBIT_90 = {
+    "name": "90deg_v",
+    "diameter": 12.7,
+    "kind": "v",
+    "rpm": 16000,
+    "feed_xy": 1200,
+    "feed_z": 400,
+    "v_angle_deg": 90,
+}
+VBIT_60 = {
+    "name": "60deg_v",
+    "diameter": 12.7,
+    "kind": "v",
+    "rpm": 16000,
+    "feed_xy": 1200,
+    "feed_z": 400,
+    "v_angle_deg": 60,
+}
 
 ALL_TOOLS = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM, BALL_2MM, V_1MM])
 FLAT_ONLY = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_12MM])
+TOOLS_WITH_VBIT = normalize_tool_entries([FLAT_3MM, FLAT_6MM, VBIT_90])
+TOOLS_WITH_TWO_VBITS = normalize_tool_entries([FLAT_3MM, VBIT_60, VBIT_90])
 
 
 def _setup(tool_diameter=6.0):
@@ -518,3 +541,175 @@ class TestPlanEngravePasses:
         assert len(records) == 1
         zs = [m.z for m in records[0].moves if isinstance(m, CutMove) and m.z is not None]
         assert zs[0] == pytest.approx(-0.3)
+
+
+def _edge_feature(shape, geometry, center, depth, edge_feature, side="outside", start_depth=0.0, id="test_edge"):
+    points_raw = geometry.get("points")
+    points = tuple((float(p[0]), float(p[1])) for p in points_raw) if points_raw else None
+    start_raw = geometry.get("start")
+    start = (float(start_raw[0]), float(start_raw[1])) if start_raw else None
+    end_raw = geometry.get("end")
+    end = (float(end_raw[0]), float(end_raw[1])) if end_raw else None
+    shape_geometry = ShapeGeometry(
+        w_mm=float(geometry["w_mm"]) if "w_mm" in geometry else None,
+        h_mm=float(geometry["h_mm"]) if "h_mm" in geometry else None,
+        diameter_mm=float(geometry["diameter_mm"]) if "diameter_mm" in geometry else None,
+        points=points,
+        start=start,
+        end=end,
+    )
+    return EdgeFeatureInput(
+        id=id,
+        shape=shape,
+        geometry=GeometryInput(shape=shape, geometry=shape_geometry),
+        center_xy_mm=center,
+        depth_mm=depth,
+        start_depth_mm=start_depth,
+        side=side,
+        edge_feature=edge_feature,
+    )
+
+
+class TestVbitGeometry:
+    def test_45_degree_chamfer(self):
+        assert vbit_cut_depth(10.0, 45.0) == pytest.approx(10.0)
+
+    def test_30_degree_chamfer(self):
+        assert vbit_cut_depth(10.0, 30.0) == pytest.approx(5.7735, abs=0.001)
+
+    def test_60_degree_chamfer(self):
+        assert vbit_cut_depth(10.0, 60.0) == pytest.approx(17.3205, abs=0.001)
+
+    def test_zero_angle_returns_width(self):
+        assert vbit_cut_depth(10.0, 0.0) == pytest.approx(10.0)
+
+    def test_90_angle_returns_width(self):
+        assert vbit_cut_depth(10.0, 90.0) == pytest.approx(10.0)
+
+    def test_negative_angle_returns_width(self):
+        assert vbit_cut_depth(10.0, -5.0) == pytest.approx(10.0)
+
+    def test_90_degree_vbit(self):
+        assert vbit_effective_radius(10.0, 90.0) == pytest.approx(10.0)
+
+    def test_60_degree_vbit(self):
+        assert vbit_effective_radius(10.0, 60.0) == pytest.approx(5.7735, abs=0.001)
+
+    def test_120_degree_vbit(self):
+        assert vbit_effective_radius(10.0, 120.0) == pytest.approx(17.3205, abs=0.001)
+
+
+class TestPickToolForEdge:
+    def test_selects_closest_angle(self):
+        tool = pick_tool_for_edge(TOOLS_WITH_TWO_VBITS, angle_deg=90.0)
+        assert tool.v_angle_deg == 90.0
+
+    def test_no_vbits_raises(self):
+        with pytest.raises(ValueError, match="V-bit"):
+            pick_tool_for_edge(FLAT_ONLY, angle_deg=90.0)
+
+    def test_single_vbit(self):
+        tool = pick_tool_for_edge(TOOLS_WITH_VBIT, angle_deg=60.0)
+        assert tool.v_angle_deg == 90.0
+
+    def test_ignores_flat_tools(self):
+        tool = pick_tool_for_edge(TOOLS_WITH_VBIT, angle_deg=90.0)
+        assert tool.kind == "v"
+
+
+class TestPlanEdgeFeaturePasses:
+    def test_chamfer_produces_edge_record(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        records = acc.passes()
+        assert len(records) == 1
+        assert records[0].op == "edge"
+        assert len(records[0].moves) > 0
+
+    def test_bevel_produces_edge_record(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect",
+                {"w_mm": 50.0, "h_mm": 30.0},
+                (100.0, 75.0),
+                6.0,
+                BevelSpec(width_mm=2.0, angle_deg=45.0, inner_depth_mm=1.0),
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        records = acc.passes()
+        assert len(records) == 1
+        assert records[0].op == "edge"
+        assert len(records[0].moves) > 0
+
+    def test_no_vbit_skips(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
+        assert len(acc.passes()) == 0
+
+    def test_none_spec_skips(self):
+        acc = _accumulator()
+        entries = (_edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, None),)
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        assert len(acc.passes()) == 0
+
+    def test_inside_offset_negative(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect",
+                {"w_mm": 50.0, "h_mm": 30.0},
+                (100.0, 75.0),
+                6.0,
+                ChamferSpec(width_mm=2.0, angle_deg=45.0),
+                side="inside",
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        records = acc.passes()
+        assert len(records) == 1
+        assert len(records[0].moves) > 0
+
+    def test_outside_offset_positive(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect",
+                {"w_mm": 50.0, "h_mm": 30.0},
+                (100.0, 75.0),
+                6.0,
+                ChamferSpec(width_mm=2.0, angle_deg=45.0),
+                side="outside",
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        records = acc.passes()
+        assert len(records) == 1
+        assert len(records[0].moves) > 0
+
+
+class TestPassKey:
+    def test_different_v_angles_different_keys(self):
+        tool_90 = ToolSelection(
+            name="v90", diameter=12.7, kind="v", rpm=16000, feed_xy=1200, feed_z=400, v_angle_deg=90.0
+        )
+        tool_60 = ToolSelection(
+            name="v60", diameter=12.7, kind="v", rpm=16000, feed_xy=1200, feed_z=400, v_angle_deg=60.0
+        )
+        assert pass_key("edge", tool_90) != pass_key("edge", tool_60)
+
+    def test_flat_tools_unaffected(self):
+        tool = ToolSelection(name="flat", diameter=6.0, kind="flat", rpm=14000, feed_xy=900, feed_z=280)
+        key = pass_key("profile", tool)
+        assert key == ("profile", 6.0, "flat", None, None)

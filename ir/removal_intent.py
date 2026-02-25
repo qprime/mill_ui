@@ -236,6 +236,8 @@ class RemovalIntent:
                     "width_mm": self.edge_feature.width_mm,
                     "angle_deg": self.edge_feature.angle_deg,
                 }
+            else:
+                raise TypeError(f"Unknown EdgeFeatureSpec type: {type(self.edge_feature)}")
         if self.item_type is not None:
             result["item_type"] = self.item_type
         if self.feature_type is not None:

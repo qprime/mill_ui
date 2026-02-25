@@ -188,8 +188,8 @@ def tool_identity(tool: ToolSelection) -> dict[str, Any]:
     return result
 
 
-def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None]:
-    return operation, float(tool.diameter), tool.kind, tool.rotation
+def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None, float | None]:
+    return operation, float(tool.diameter), tool.kind, tool.rotation, tool.v_angle_deg
 
 
 __all__ = [

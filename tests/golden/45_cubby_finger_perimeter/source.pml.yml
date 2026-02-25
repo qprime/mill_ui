@@ -1,5 +1,5 @@
-# mill_ui: 0c62937b
-# generated: 2026-02-24
+# mill_ui: c89c9490
+# generated: 2026-02-25
 
 # 2x2 Cubby grid with finger joint perimeter
 # Finger joints on perimeter, captured dados for internal
@@ -10,6 +10,7 @@ Sheet:
   thickness: 18mm
   margin: 15mm
   show_dimensions: true
+  material: mdf
 children:
 - Assembly:
     type: cubby

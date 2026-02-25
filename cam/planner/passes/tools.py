@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 from cam.model.tool import Tool, ToolKind
 from cam.planner.params import stepdown_for, stepover_for
+from layout_ast.layout import FeedsOverride
 
 
 @dataclass(frozen=True)
@@ -192,8 +193,28 @@ def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str 
     return operation, float(tool.diameter), tool.kind, tool.rotation, tool.v_angle_deg
 
 
+def apply_feeds_override(tool: ToolSelection, override: FeedsOverride | None) -> ToolSelection:
+    if override is None:
+        return tool
+    kwargs: dict[str, Any] = {}
+    if override.rpm is not None:
+        kwargs["rpm"] = override.rpm
+    if override.feed_xy is not None:
+        kwargs["feed_xy"] = override.feed_xy
+    if override.feed_z is not None:
+        kwargs["feed_z"] = override.feed_z
+    if override.depth_per_pass is not None:
+        kwargs["depth_per_pass"] = override.depth_per_pass
+    if override.stepover_percent is not None:
+        kwargs["stepover_percent"] = override.stepover_percent
+    if not kwargs:
+        return tool
+    return replace(tool, **kwargs)
+
+
 __all__ = [
     "ToolSelection",
+    "apply_feeds_override",
     "normalize_tool_entries",
     "pass_key",
     "pick_tool_for_edge",

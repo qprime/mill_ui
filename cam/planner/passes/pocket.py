@@ -15,6 +15,7 @@ from cam.planner.planner_input import CornerCleanupInput, FeatureInput
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
     ToolSelection,
+    apply_feeds_override,
     pick_tool_for_engrave,
     pick_tool_for_hole,
     pick_tool_for_pocket,
@@ -91,6 +92,7 @@ def plan_pocket_passes(
             required_width_mm=required_width,
             cleanup_offset_mm=config.cleanup_offset_mm,
         )
+        tool = apply_feeds_override(tool, entry.feeds_override)
         record = accumulator.get_record("pocket", tool)
         setup = record.setup
         depth = entry.depth_mm
@@ -224,6 +226,7 @@ def plan_hole_passes(
         depth = entry.depth_mm
 
         tool = pick_tool_for_hole(tool_db, hole_diameter_mm=diameter)
+        tool = apply_feeds_override(tool, entry.feeds_override)
         tool_diameter = float(tool.diameter)
         eps = 0.05
 
@@ -310,6 +313,7 @@ def plan_engrave_passes(
             continue
 
         tool = pick_tool_for_engrave(tool_db)
+        tool = apply_feeds_override(tool, entry.feeds_override)
         record = accumulator.get_record("engrave", tool)
         depth = entry.depth_mm or 0.3
         record.add_moves(

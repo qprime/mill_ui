@@ -1,4 +1,4 @@
-# mill_ui: edc310ba
+# mill_ui: c89c9490
 # generated: 2026-02-25
 
 # Frameless cabinet with finger-jointed back panel
@@ -9,6 +9,7 @@ Sheet:
   thickness: 18mm
   margin: 10mm
   show_dimensions: false
+  material: mdf
 children:
 - Assembly:
     type: carcass

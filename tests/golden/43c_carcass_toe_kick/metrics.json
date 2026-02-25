@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "43c_carcass_toe_kick",
-    "created_at": "2026-02-25T00:38:58.951679+00:00"
+    "created_at": "2026-02-25T16:18:56.036178+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.43,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 1467.175,
@@ -475,7 +475,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.4855,
+    "extraction_time_ms": 1.7795,
     "summary": {
       "total_lines": 1096,
       "comment_lines": 34,

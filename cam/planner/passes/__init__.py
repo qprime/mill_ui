@@ -29,7 +29,14 @@ from .profile import (
     rounded_rect_shape,
 )
 from .summary import summarise_passes
-from .tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_profile, stepdown_for_tool
+from .tools import (
+    ToolSelection,
+    apply_feeds_override,
+    normalize_tool_entries,
+    pass_key,
+    pick_tool_for_profile,
+    stepdown_for_tool,
+)
 
 
 @dataclass
@@ -180,6 +187,7 @@ def plan_passes(
     else:
         for rec in rect_profiles:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+            profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
             width = float(rec.geometry.geometry.w_mm or 0.0)
             height = float(rec.geometry.geometry.h_mm or 0.0)
             depth = max(0.0, rec.depth_mm) + cut_through_mm
@@ -217,6 +225,7 @@ def plan_passes(
 
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         diameter = float(rec.geometry.geometry.diameter_mm or 0.0)
         radius = 0.5 * diameter
         side = (rec.side or "on").lower()
@@ -258,6 +267,7 @@ def plan_passes(
 
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         raw_points = rec.geometry.geometry.points
         points = [list(p) for p in raw_points] if raw_points is not None else []
         if not points:
@@ -310,6 +320,7 @@ def plan_passes(
 
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         sg = rec.geometry.geometry
         width = float(sg.w_mm or 0.0)
         height = float(sg.h_mm or 0.0)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import replace
 from typing import Any
 
 from adapters.hints_to_removal import (
@@ -83,18 +84,30 @@ def item_to_removal_intent(
                 TabKeys.HEIGHT_MM: item.feature.tab_height_mm,
                 TabKeys.WIDTH_MM: item.feature.tab_width_mm,
             }
-        return profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
+        intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
+        if item.feature.feeds_override is not None:
+            intent = replace(intent, feeds_override=item.feature.feeds_override)
+        return intent
 
     elif item.feature.type == FeatureType.POCKET:
         if item.feature.corner_cleanup_tool_diameter_mm is not None:
             hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = item.feature.corner_cleanup_tool_diameter_mm
-        return pocket_hint_to_removal_intent(hint)
+        intent = pocket_hint_to_removal_intent(hint)
+        if item.feature.feeds_override is not None:
+            intent = replace(intent, feeds_override=item.feature.feeds_override)
+        return intent
 
     elif item.feature.type == FeatureType.HOLE:
-        return hole_hint_to_removal_intent(hint)
+        intent = hole_hint_to_removal_intent(hint)
+        if item.feature.feeds_override is not None:
+            intent = replace(intent, feeds_override=item.feature.feeds_override)
+        return intent
 
     elif item.feature.type == FeatureType.ENGRAVE:
-        return engrave_hint_to_removal_intent(hint)
+        intent = engrave_hint_to_removal_intent(hint)
+        if item.feature.feeds_override is not None:
+            intent = replace(intent, feeds_override=item.feature.feeds_override)
+        return intent
 
     elif item.feature.type == FeatureType.BEVEL:
         bevel_width = item.feature.bevel_width_mm or 0.0
@@ -164,6 +177,7 @@ def _build_edge_feature_intent(
         edge_feature=edge_feature,
         allowance=Allowance(),
         constraints=Constraints(),
+        feeds_override=item.feature.feeds_override,
     )
 
 

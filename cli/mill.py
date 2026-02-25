@@ -14,6 +14,7 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
+from config.machine_loader import Endmill, FeedsEntry, load_endmills, load_feeds
 from layout_ast.layout import LayoutAST
 from pml.revision_header import format_pml_header, update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -213,15 +214,22 @@ def _run_and_write(
     y_origin: str,
     generate_svg: bool,
     update_header: bool = True,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
 ) -> None:
-    result = run_pipeline(
-        ast,
-        kerf_mm=kerf_mm,
-        tool_db=DEFAULT_TOOL_DB,
-        generate_svg=generate_svg,
-        svg_theme=theme,
-        y_origin=y_origin,
-    )
+    pipeline_kwargs: dict = {
+        "kerf_mm": kerf_mm,
+        "generate_svg": generate_svg,
+        "svg_theme": theme,
+        "y_origin": y_origin,
+    }
+    if endmills is not None and feeds is not None:
+        pipeline_kwargs["endmills"] = endmills
+        pipeline_kwargs["feeds"] = feeds
+    else:
+        pipeline_kwargs["tool_db"] = DEFAULT_TOOL_DB
+
+    result = run_pipeline(ast, **pipeline_kwargs)
 
     if result.errors:
         print("\nErrors:", file=sys.stderr)
@@ -258,6 +266,22 @@ def _run_and_write(
         update_file_header(source_path)
 
 
+def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
+    endmills_path = Path(args.endmills) if args.endmills else Path("machines/endmills.yml")
+    feeds_path = Path(args.feeds) if args.feeds else Path("machines/feeds.yml")
+
+    if not endmills_path.exists() or not feeds_path.exists():
+        return None, None
+
+    try:
+        endmills_list = load_endmills(endmills_path)
+        feeds_list = load_feeds(feeds_path)
+        return endmills_list, feeds_list
+    except Exception as e:
+        print(f"Warning: Could not load endmill/feeds library: {e}", file=sys.stderr)
+        return None, None
+
+
 def process_file(input_path: Path, output_dir: Path, args) -> None:
     input_name = input_path.name.lower()
     if input_name.endswith(".json"):
@@ -274,6 +298,8 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
     print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
     print(f"  Items: {len(ast.items)}", file=sys.stderr)
 
+    endmills_list, feeds_list = _load_tool_library(args)
+
     is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
     _run_and_write(
         ast,
@@ -285,6 +311,8 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
         update_header=is_pml,
+        endmills=endmills_list,
+        feeds=feeds_list,
     )
 
 
@@ -406,6 +434,16 @@ Output files:
         default="back",
         choices=["front", "back"],
         help="Y=0 reference: back (lower-left origin) or front (default: back)",
+    )
+    parser.add_argument(
+        "--endmills",
+        default=None,
+        help="Path to endmills YAML (default: machines/endmills.yml)",
+    )
+    parser.add_argument(
+        "--feeds",
+        default=None,
+        help="Path to feeds YAML (default: machines/feeds.yml)",
     )
 
     init_group = parser.add_argument_group("project initialization")

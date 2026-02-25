@@ -1,5 +1,5 @@
-# mill_ui: 0c62937b
-# generated: 2026-02-24
+# mill_ui: c89c9490
+# generated: 2026-02-25
 
 # Box with "plug" top and bottom
 # The top and bottom panels have rabbets around their perimeter (receiving: b)
@@ -12,6 +12,7 @@ Sheet:
   thickness: 6mm
   margin: 10mm
   show_dimensions: false
+  material: mdf
 children:
 - Assembly:
     type: box

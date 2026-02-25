@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ir.removal_intent import EdgeFeatureSpec, EdgeTreatment, ShapeGeometry
+from layout_ast.layout import FeedsOverride
 
 
 @dataclass(frozen=True)
@@ -116,6 +117,7 @@ class FeatureInput:
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
     corner_cleanup_tool_diameter_mm: float | None = None
     edge_treatment: EdgeTreatmentInput | None = None
+    feeds_override: FeedsOverride | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {

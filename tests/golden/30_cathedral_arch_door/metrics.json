@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-02-25T00:38:58.059876+00:00"
+    "created_at": "2026-02-25T16:18:54.972268+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.44,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 653.175,
       "height_mm": 979.175,
@@ -236,7 +236,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6326,
+    "extraction_time_ms": 0.782,
     "summary": {
       "total_lines": 1574,
       "comment_lines": 12,

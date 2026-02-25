@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -164,6 +165,93 @@ class Spindle:
             raise ValueError(f"Spindle rpm_min must be positive, got {self.rpm_min}")
 
 
+@dataclass(frozen=True)
+class FeedsEntry:
+    endmill: str
+    material: str
+    chipload: float
+    rpm: float
+    depth_per_pass: float
+    plunge_factor: float
+    stepover_percent: float | None = None
+
+    def __post_init__(self):
+        if self.chipload <= 0:
+            raise ValueError(f"Chipload must be positive, got {self.chipload}")
+        if self.rpm <= 0:
+            raise ValueError(f"RPM must be positive, got {self.rpm}")
+        if self.depth_per_pass <= 0:
+            raise ValueError(f"depth_per_pass must be positive, got {self.depth_per_pass}")
+        if self.plunge_factor <= 0 or self.plunge_factor > 1.0:
+            raise ValueError(f"plunge_factor must be in (0, 1.0], got {self.plunge_factor}")
+
+
+_ENDMILL_TYPE_TO_KIND: dict[str, str] = {
+    "upcut_spiral": "flat",
+    "downcut_spiral": "flat",
+    "compression": "flat",
+    "straight": "flat",
+    "v_bit": "v",
+    "ball": "ball",
+    "engraving": "ball",
+}
+
+_ENDMILL_TYPE_TO_ROTATION: dict[str, str | None] = {
+    "upcut_spiral": "upcut",
+    "downcut_spiral": "downcut",
+    "compression": "compression",
+    "straight": None,
+    "v_bit": None,
+    "ball": None,
+    "engraving": None,
+}
+
+
+def resolve_tool_selection(endmill: Endmill, feeds: FeedsEntry) -> dict[str, Any]:
+    feed_xy = feeds.rpm * endmill.flutes * feeds.chipload
+    feed_z = feed_xy * feeds.plunge_factor
+    kind = _ENDMILL_TYPE_TO_KIND.get(endmill.type, "flat")
+    rotation = _ENDMILL_TYPE_TO_ROTATION.get(endmill.type)
+
+    result: dict[str, Any] = {
+        "name": endmill.name,
+        "diameter": endmill.diameter_mm,
+        "kind": kind,
+        "rpm": feeds.rpm,
+        "feed_xy": feed_xy,
+        "feed_z": feed_z,
+        "depth_per_pass": feeds.depth_per_pass,
+        "rotation": rotation,
+    }
+    if feeds.stepover_percent is not None:
+        result["stepover_percent"] = feeds.stepover_percent
+    if endmill.v_angle_deg is not None:
+        result["v_angle_deg"] = endmill.v_angle_deg
+    return result
+
+
+def build_tool_db(
+    endmills: list[Endmill],
+    feeds: list[FeedsEntry],
+    material: str,
+) -> list[dict[str, Any]]:
+    feeds_by_key = {(f.endmill, f.material.lower()): f for f in feeds}
+    mat = material.lower()
+
+    result: list[dict[str, Any]] = []
+    for em in endmills:
+        entry = feeds_by_key.get((em.name, mat))
+        if entry is not None:
+            result.append(resolve_tool_selection(em, entry))
+
+    if not result:
+        available = sorted({f.material for f in feeds})
+        raise ValueError(
+            f"No endmills have feeds entries for material {material!r}. Available materials in feeds: {available}"
+        )
+    return result
+
+
 def load_cnc_machine(path: Path | str) -> MachineConfig:
     path = Path(path)
     yaml = YAML(typ="safe")
@@ -241,6 +329,28 @@ def load_spindles(path: Path | str) -> list[Spindle]:
     return spindles
 
 
+def load_feeds(path: Path | str) -> list[FeedsEntry]:
+    path = Path(path)
+    yaml = YAML(typ="safe")
+    with path.open() as f:
+        data = yaml.load(f)
+
+    entries = []
+    for item in data.get("feeds", []):
+        entry = FeedsEntry(
+            endmill=item.get("endmill", ""),
+            material=item.get("material", ""),
+            chipload=float(item.get("chipload", 0)),
+            rpm=float(item.get("rpm", 0)),
+            depth_per_pass=float(item.get("depth_per_pass", 0)),
+            plunge_factor=float(item.get("plunge_factor", 0)),
+            stepover_percent=float(item["stepover_percent"]) if "stepover_percent" in item else None,
+        )
+        entries.append(entry)
+
+    return entries
+
+
 def get_machines_dir() -> Path:
     return Path(__file__).parent.parent / "machines"
 
@@ -263,14 +373,18 @@ def load_machine_by_name(name: str) -> MachineConfig:
 __all__ = [
     "CNCMachine2D",
     "Endmill",
+    "FeedsEntry",
     "MachineConfig",
     "MachineDefaults",
     "Spindle",
     "Wasteboard2D",
+    "build_tool_db",
     "get_machines_dir",
     "list_available_machines",
     "load_cnc_machine",
     "load_endmills",
+    "load_feeds",
     "load_machine_by_name",
     "load_spindles",
+    "resolve_tool_selection",
 ]

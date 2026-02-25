@@ -55,7 +55,7 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import Feature, Sheet
+from layout_ast.layout import Feature, FeedsOverride, Sheet
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import NestJob, NestParseError, NestPart
 
@@ -112,6 +112,18 @@ def parse_children(children_data: list[dict] | None, path: str = "") -> tuple[An
     return tuple(parse_node(child, f"{path}.children[{i}]") for i, child in enumerate(children_data))
 
 
+def _parse_feeds_override(data: dict | None) -> FeedsOverride | None:
+    if not data:
+        return None
+    return FeedsOverride(
+        rpm=float(data["rpm"]) if "rpm" in data else None,
+        feed_xy=float(data["feed_xy"]) if "feed_xy" in data else None,
+        feed_z=float(data["feed_z"]) if "feed_z" in data else None,
+        depth_per_pass=float(data["depth_per_pass"]) if "depth_per_pass" in data else None,
+        stepover_percent=float(data["stepover_percent"]) if "stepover_percent" in data else None,
+    )
+
+
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
     feature_type = data.get("type")
     if feature_type is None:
@@ -131,6 +143,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,
+        feeds_override=_parse_feeds_override(data.get("feeds")),
     )
 
 
@@ -324,10 +337,14 @@ def parse_node(data: dict, path: str = "") -> Any:
             tab_count=node_data.get("tab_count"),
             tab_height_mm=parse_dimension(node_data["tab_height"]) if "tab_height" in node_data else None,
             tab_width_mm=parse_dimension(node_data["tab_width"]) if "tab_width" in node_data else None,
+            feeds_override=_parse_feeds_override(node_data.get("feeds")),
         )
 
     elif node_type == "Pocket":
-        return PocketGen(depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")))
+        return PocketGen(
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")),
+            feeds_override=_parse_feeds_override(node_data.get("feeds")),
+        )
 
     elif node_type == "RaisedPanel":
         return RaisedPanelGen(
@@ -789,6 +806,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         thickness_mm=parse_dimension(_require(sheet_block, "thickness", "Sheet")),
         margin_mm=margin_mm,
         show_dimensions=sheet_block.get("show_dimensions", True),
+        material=str(sheet_block.get("material", "mdf")),
     )
 
     project = data.get("project")

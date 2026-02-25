@@ -1,0 +1,56 @@
+feeds:
+  - endmill: "1/4 upcut spiral"
+    material: mdf
+    chipload: 0.05
+    rpm: 18000
+    depth_per_pass: 3.0
+    plunge_factor: 0.33
+
+  - endmill: "1/8 upcut spiral"
+    material: mdf
+    chipload: 0.03
+    rpm: 20000
+    depth_per_pass: 1.5
+    plunge_factor: 0.33
+
+  - endmill: "1/8 downcut spiral"
+    material: mdf
+    chipload: 0.03
+    rpm: 20000
+    depth_per_pass: 1.5
+    plunge_factor: 0.33
+
+  - endmill: "1/4 compression"
+    material: mdf
+    chipload: 0.05
+    rpm: 18000
+    depth_per_pass: 3.0
+    plunge_factor: 0.33
+
+  - endmill: "1/2 straight"
+    material: mdf
+    chipload: 0.06
+    rpm: 14000
+    depth_per_pass: 4.0
+    plunge_factor: 0.25
+
+  - endmill: "60 degree v-bit"
+    material: mdf
+    chipload: 0.03
+    rpm: 18000
+    depth_per_pass: 1.0
+    plunge_factor: 0.25
+
+  - endmill: "90 degree v-bit"
+    material: mdf
+    chipload: 0.03
+    rpm: 18000
+    depth_per_pass: 1.0
+    plunge_factor: 0.25
+
+  - endmill: "1mm engraving bit"
+    material: mdf
+    chipload: 0.02
+    rpm: 20000
+    depth_per_pass: 0.5
+    plunge_factor: 0.25

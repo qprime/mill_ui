@@ -77,6 +77,7 @@ Sheet:                              # Required
   physical_height: 2420mm           # or 'height' for backward compat
   thickness: 19mm
   margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
+  material: mdf                     # Optional, default "mdf" — used for feeds/speeds lookup
 components:                         # Optional reusable components
   my_component:
     params: {width: 100mm}
@@ -1012,6 +1013,43 @@ Or as generator children:
 | `pocket` | Clear enclosed area |
 | `hole` | Drill/bore operation |
 | `engrave` | Shallow surface marking |
+
+### Feed Overrides
+
+Features can optionally override resolved feeds/speeds. This lets operators slow down a specific cut without changing the global feeds table.
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 6mm
+      feeds:
+        rpm: 14000
+        feed_xy: 600
+        feed_z: 200
+```
+
+Or on generator children:
+
+```yaml
+- Rect:
+    children:
+      - Profile:
+          side: outside
+          depth: through
+          feeds:
+            rpm: 14000
+```
+
+All fields in the `feeds:` block are optional — only specified fields override the material-resolved defaults:
+
+| Field | Description |
+|-------|-------------|
+| `rpm` | Spindle speed override |
+| `feed_xy` | XY feed rate override (mm/min) |
+| `feed_z` | Plunge feed rate override (mm/min) |
+| `depth_per_pass` | Depth per pass override (mm) |
+| `stepover_percent` | Stepover percentage override |
 
 ## Components
 

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "56_spliced_tenoned_rail",
-    "created_at": "2026-02-25T00:38:59.451075+00:00"
+    "created_at": "2026-02-25T16:18:56.634960+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.02,
+    "extraction_time_ms": 1.26,
     "document": {
       "width_mm": 1353.175,
       "height_mm": 1114.175,
@@ -429,7 +429,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.3701,
+    "extraction_time_ms": 7.5729,
     "summary": {
       "total_lines": 1966,
       "comment_lines": 34,

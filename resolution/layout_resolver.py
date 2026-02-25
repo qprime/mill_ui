@@ -100,6 +100,7 @@ def _feature_from_profile_gen(node: ProfileGen) -> Feature:
         tab_count=node.tab_count,
         tab_height_mm=node.tab_height_mm,
         tab_width_mm=node.tab_width_mm,
+        feeds_override=node.feeds_override,
     )
 
 
@@ -674,6 +675,7 @@ class LayoutResolver:
             feature=Feature(
                 type="pocket",
                 depth_mm=node.depth_mm,
+                feeds_override=node.feeds_override,
             ),
             shape_id=self._next_shape_id("generated_pocket"),
         )

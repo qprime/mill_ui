@@ -1,11 +1,12 @@
-# mill_ui: 0c62937b
-# generated: 2026-02-24
+# mill_ui: c89c9490
+# generated: 2026-02-25
 
 Sheet:
   width: 500mm
   height: 300mm
   thickness: 19mm
   margin: 10mm
+  material: mdf
 children:
 - Rect:
     id: chamfer_panel

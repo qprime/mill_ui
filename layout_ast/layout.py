@@ -11,6 +11,7 @@ class Sheet:
     thickness_mm: float
     margin_mm: float = 0.0
     show_dimensions: bool = True
+    material: str = "mdf"
 
     @property
     def working_width_mm(self) -> float:
@@ -32,6 +33,15 @@ class Geometry:
 
 
 @dataclass(frozen=True)
+class FeedsOverride:
+    rpm: float | None = None
+    feed_xy: float | None = None
+    feed_z: float | None = None
+    depth_per_pass: float | None = None
+    stepover_percent: float | None = None
+
+
+@dataclass(frozen=True)
 class Feature:
     type: str
     depth_mm: float
@@ -49,6 +59,8 @@ class Feature:
 
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
+
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)

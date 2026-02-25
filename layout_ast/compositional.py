@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from layout_ast.layout import FeedsOverride
+
 
 @dataclass(frozen=True)
 class Panel:
@@ -163,11 +165,13 @@ class ProfileGen:
     tab_count: int | None = None
     tab_height_mm: float | None = None
     tab_width_mm: float | None = None
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)
 class PocketGen:
     depth_mm: float
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)

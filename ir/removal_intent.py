@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from domains.domain import Bounds2D
+from layout_ast.layout import FeedsOverride
 
 
 @dataclass(frozen=True)
@@ -171,6 +172,7 @@ class RemovalIntent:
     shape_id: str | None = None
     allowance: Allowance = field(default_factory=Allowance)
     constraints: Constraints = field(default_factory=Constraints)
+    feeds_override: FeedsOverride | None = None
 
     def depth_mm(self) -> float:
         return self.depth_profile.depth_mm()

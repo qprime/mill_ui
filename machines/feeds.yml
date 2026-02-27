@@ -1,4 +1,6 @@
 feeds:
+  # --- existing tools ---
+
   - endmill: "1/4 upcut spiral"
     material: mdf
     chipload: 0.05
@@ -53,4 +55,77 @@ feeds:
     chipload: 0.02
     rpm: 20000
     depth_per_pass: 0.5
+    plunge_factor: 0.25
+
+  # --- 2026-02-25 inventory ---
+
+  - endmill: "1/8 ball nose 2F"
+    material: mdf
+    chipload: 0.03
+    rpm: 18000
+    depth_per_pass: 1.0
+    plunge_factor: 0.33
+
+  - endmill: "1/2 ball nose 4F TiAlN"
+    material: mdf
+    chipload: 0.04
+    rpm: 14000
+    depth_per_pass: 2.0
+    plunge_factor: 0.25
+
+  - endmill: "tapered ball nose R1/32 ZrN"
+    material: mdf
+    chipload: 0.01
+    rpm: 20000
+    depth_per_pass: 0.5
+    plunge_factor: 0.25
+
+  - endmill: "1/4 downcut SpeTool"
+    material: mdf
+    chipload: 0.04
+    rpm: 16000
+    depth_per_pass: 2.0
+    plunge_factor: 0.25
+
+  # mfr spec: 200 IPM / 18000 RPM / 0.375" DOC / 50% plunge
+  - endmill: "3/8 rougher 3F"
+    material: mdf
+    chipload: 0.08
+    rpm: 18000
+    depth_per_pass: 6.0
+    plunge_factor: 0.50
+
+  - endmill: "1/2 upcut 2F SE"
+    material: mdf
+    chipload: 0.05
+    rpm: 14000
+    depth_per_pass: 3.5
+    plunge_factor: 0.25
+
+  - endmill: "1/4 ball nose 2F WEXWE"
+    material: mdf
+    chipload: 0.04
+    rpm: 16000
+    depth_per_pass: 2.0
+    plunge_factor: 0.25
+
+  - endmill: "1/8 ball nose long reach WEXWE"
+    material: mdf
+    chipload: 0.02
+    rpm: 18000
+    depth_per_pass: 1.0
+    plunge_factor: 0.25
+
+  - endmill: "1/8 downcut plunge"
+    material: mdf
+    chipload: 0.03
+    rpm: 18000
+    depth_per_pass: 1.5
+    plunge_factor: 0.33
+
+  - endmill: "1 inch surfacing bit"
+    material: mdf
+    chipload: 0.10
+    rpm: 12000
+    depth_per_pass: 1.0
     plunge_factor: 0.25

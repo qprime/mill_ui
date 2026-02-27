@@ -1,0 +1,28 @@
+name: "Sienci AltMill MK2 4x4"
+
+envelope:
+  x_min: 0
+  x_max: 1265
+  y_min: 0
+  y_max: 1251
+
+table:
+  rail_spacing_mm: 1314.5
+  surface_width_mm: 1257.3
+  surface_height_mm: 1470
+
+spoilboard:
+  width_mm: 1257.3
+  height_mm: 1251
+  offset_x: 0
+  offset_y: 0
+
+soft_limits:
+  x_max_mm: 1261
+  y_max_mm: 1246
+  z_max_mm: 139
+
+defaults:
+  safe_z_mm: 10.0
+  feed_rate_mm_min: 5000
+  plunge_rate_mm_min: 2000

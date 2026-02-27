@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, Wasteboard2D
+from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, Spoilboard2D
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import LayoutAST, Sheet
 from validation.core import Verdict
@@ -11,7 +11,7 @@ from validation.machine_checks import (
     check_mch_effective_envelope_shrinks,
     check_mch_endmill_positive,
     check_mch_envelope_positive,
-    check_mch_wasteboard_fits,
+    check_mch_spoilboard_fits,
     check_sheet_fits_machine,
     validate_machine_config,
 )
@@ -149,14 +149,14 @@ class TestCheckMchEnvelopePositive:
         assert result.status == Verdict.PASS
 
 
-class TestCheckMchWasteboardFits:
-    def test_no_wasteboard(self):
+class TestCheckMchSpoilboardFits:
+    def test_no_spoilboard(self):
         mc = _machine()
-        result = check_mch_wasteboard_fits(mc)
+        result = check_mch_spoilboard_fits(mc)
         assert result.status == Verdict.PASS
         assert result.checked == 0
 
-    def test_wasteboard_inside(self):
+    def test_spoilboard_inside(self):
         mc = MachineConfig(
             machine=CNCMachine2D(
                 name="test",
@@ -165,18 +165,18 @@ class TestCheckMchWasteboardFits:
                 envelope_y_min=0,
                 envelope_y_max=1000,
             ),
-            wasteboard=Wasteboard2D(
+            spoilboard=Spoilboard2D(
                 width_mm=800,
                 height_mm=800,
                 offset_x=100,
                 offset_y=100,
             ),
         )
-        result = check_mch_wasteboard_fits(mc)
+        result = check_mch_spoilboard_fits(mc)
         assert result.status == Verdict.PASS
         assert result.failed == 0
 
-    def test_wasteboard_at_envelope(self):
+    def test_spoilboard_at_envelope(self):
         mc = MachineConfig(
             machine=CNCMachine2D(
                 name="test",
@@ -185,14 +185,14 @@ class TestCheckMchWasteboardFits:
                 envelope_y_min=0,
                 envelope_y_max=1000,
             ),
-            wasteboard=Wasteboard2D(
+            spoilboard=Spoilboard2D(
                 width_mm=1000,
                 height_mm=1000,
                 offset_x=0,
                 offset_y=0,
             ),
         )
-        result = check_mch_wasteboard_fits(mc)
+        result = check_mch_spoilboard_fits(mc)
         assert result.status == Verdict.PASS
 
 
@@ -234,7 +234,7 @@ class TestValidateMachineConfig:
         assert len(results) == 4
         assert all(r.status == Verdict.PASS for r in results)
 
-    def test_with_wasteboard(self):
+    def test_with_spoilboard(self):
         mc = MachineConfig(
             machine=CNCMachine2D(
                 name="test",
@@ -243,7 +243,7 @@ class TestValidateMachineConfig:
                 envelope_y_min=0,
                 envelope_y_max=1000,
             ),
-            wasteboard=Wasteboard2D(
+            spoilboard=Spoilboard2D(
                 width_mm=800,
                 height_mm=800,
                 offset_x=100,

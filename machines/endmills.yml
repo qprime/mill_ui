@@ -1,4 +1,6 @@
 endmills:
+  # --- existing tools (pre-inventory) ---
+
   - name: "1/4 upcut spiral"
     diameter_mm: 6.35
     flute_length_mm: 25.4
@@ -56,3 +58,75 @@ endmills:
     shank_diameter_mm: 3.175
     flutes: 1
     type: engraving
+
+  # --- 2026-02-25 inventory (caliper-verified) ---
+
+  - name: "1/8 ball nose 2F"
+    diameter_mm: 3.19
+    flute_length_mm: 22.0
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: ball
+
+  - name: "1/2 ball nose 4F TiAlN"
+    diameter_mm: 12.7
+    flute_length_mm: 34.0
+    shank_diameter_mm: 12.7
+    flutes: 4
+    type: ball
+
+  - name: "tapered ball nose R1/32 ZrN"
+    diameter_mm: 1.6
+    flute_length_mm: 26.0
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: ball
+
+  - name: "1/4 downcut SpeTool"
+    diameter_mm: 6.35
+    flute_length_mm: 25.0
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: downcut_spiral
+
+  - name: "3/8 rougher 3F"
+    diameter_mm: 9.525
+    flute_length_mm: 31.75
+    shank_diameter_mm: 9.525
+    flutes: 3
+    type: upcut_spiral
+
+  - name: "1/2 upcut 2F SE"
+    diameter_mm: 12.7
+    flute_length_mm: 26.0
+    shank_diameter_mm: 12.7
+    flutes: 2
+    type: upcut_spiral
+
+  - name: "1/4 ball nose 2F WEXWE"
+    diameter_mm: 6.35
+    flute_length_mm: 25.4
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: ball
+
+  - name: "1/8 ball nose long reach WEXWE"
+    diameter_mm: 3.175
+    flute_length_mm: 25.4
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: ball
+
+  - name: "1/8 downcut plunge"
+    diameter_mm: 3.175
+    flute_length_mm: 20.64
+    shank_diameter_mm: 6.35
+    flutes: 2
+    type: downcut_spiral
+
+  - name: "1 inch surfacing bit"
+    diameter_mm: 25.4
+    flute_length_mm: 10.2
+    shank_diameter_mm: 6.35
+    flutes: 1
+    type: straight

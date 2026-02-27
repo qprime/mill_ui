@@ -8,12 +8,43 @@ from ruamel.yaml import YAML
 
 
 @dataclass(frozen=True)
+class SoftLimits:
+    x_max_mm: float
+    y_max_mm: float
+    z_max_mm: float
+
+    def __post_init__(self):
+        if self.x_max_mm <= 0:
+            raise ValueError(f"Soft limit x_max must be positive, got {self.x_max_mm}")
+        if self.y_max_mm <= 0:
+            raise ValueError(f"Soft limit y_max must be positive, got {self.y_max_mm}")
+        if self.z_max_mm <= 0:
+            raise ValueError(f"Soft limit z_max must be positive, got {self.z_max_mm}")
+
+
+@dataclass(frozen=True)
+class Table2D:
+    surface_width_mm: float
+    surface_height_mm: float
+    rail_spacing_mm: float
+
+    def __post_init__(self):
+        if self.surface_width_mm <= 0:
+            raise ValueError(f"Table surface_width must be positive, got {self.surface_width_mm}")
+        if self.surface_height_mm <= 0:
+            raise ValueError(f"Table surface_height must be positive, got {self.surface_height_mm}")
+        if self.rail_spacing_mm <= 0:
+            raise ValueError(f"Table rail_spacing must be positive, got {self.rail_spacing_mm}")
+
+
+@dataclass(frozen=True)
 class CNCMachine2D:
     name: str
     envelope_x_min: float
     envelope_x_max: float
     envelope_y_min: float
     envelope_y_max: float
+    soft_limits: SoftLimits | None = None
 
     def __post_init__(self):
         if self.envelope_x_max <= self.envelope_x_min:
@@ -43,7 +74,7 @@ class CNCMachine2D:
 
 
 @dataclass(frozen=True)
-class Wasteboard2D:
+class Spoilboard2D:
     width_mm: float
     height_mm: float
     offset_x: float
@@ -51,9 +82,9 @@ class Wasteboard2D:
 
     def __post_init__(self):
         if self.width_mm <= 0:
-            raise ValueError(f"Wasteboard width must be positive, got {self.width_mm}")
+            raise ValueError(f"Spoilboard width must be positive, got {self.width_mm}")
         if self.height_mm <= 0:
-            raise ValueError(f"Wasteboard height must be positive, got {self.height_mm}")
+            raise ValueError(f"Spoilboard height must be positive, got {self.height_mm}")
 
     @property
     def x_min(self) -> float:
@@ -90,27 +121,28 @@ class MachineDefaults:
 @dataclass(frozen=True)
 class MachineConfig:
     machine: CNCMachine2D
-    wasteboard: Wasteboard2D | None = None
+    table: Table2D | None = None
+    spoilboard: Spoilboard2D | None = None
     defaults: MachineDefaults = field(default_factory=MachineDefaults)
 
     def __post_init__(self):
-        if self.wasteboard is not None:
-            wb = self.wasteboard
+        if self.spoilboard is not None:
+            wb = self.spoilboard
             m = self.machine
             if wb.x_min < m.envelope_x_min - 0.001:
-                raise ValueError(f"Wasteboard x_min ({wb.x_min}) is outside envelope x_min ({m.envelope_x_min})")
+                raise ValueError(f"Spoilboard x_min ({wb.x_min}) is outside envelope x_min ({m.envelope_x_min})")
             if wb.x_max > m.envelope_x_max + 0.001:
-                raise ValueError(f"Wasteboard x_max ({wb.x_max}) exceeds envelope x_max ({m.envelope_x_max})")
+                raise ValueError(f"Spoilboard x_max ({wb.x_max}) exceeds envelope x_max ({m.envelope_x_max})")
             if wb.y_min < m.envelope_y_min - 0.001:
-                raise ValueError(f"Wasteboard y_min ({wb.y_min}) is outside envelope y_min ({m.envelope_y_min})")
+                raise ValueError(f"Spoilboard y_min ({wb.y_min}) is outside envelope y_min ({m.envelope_y_min})")
             if wb.y_max > m.envelope_y_max + 0.001:
-                raise ValueError(f"Wasteboard y_max ({wb.y_max}) exceeds envelope y_max ({m.envelope_y_max})")
+                raise ValueError(f"Spoilboard y_max ({wb.y_max}) exceeds envelope y_max ({m.envelope_y_max})")
 
     def compute_margins(self) -> dict[str, float]:
-        if self.wasteboard is None:
+        if self.spoilboard is None:
             return {"left": 0, "right": 0, "top": 0, "bottom": 0}
 
-        wb = self.wasteboard
+        wb = self.spoilboard
         m = self.machine
         return {
             "left": wb.x_min - m.envelope_x_min,
@@ -260,8 +292,17 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
 
     name = data.get("name", path.stem)
     envelope = data.get("envelope", {})
-    wasteboard_data = data.get("wasteboard")
+    spoilboard_data = data.get("spoilboard")
     defaults_data = data.get("defaults", {})
+    soft_limits_data = data.get("soft_limits")
+
+    soft_limits = None
+    if soft_limits_data:
+        soft_limits = SoftLimits(
+            x_max_mm=float(soft_limits_data.get("x_max_mm", 0)),
+            y_max_mm=float(soft_limits_data.get("y_max_mm", 0)),
+            z_max_mm=float(soft_limits_data.get("z_max_mm", 0)),
+        )
 
     machine = CNCMachine2D(
         name=name,
@@ -269,15 +310,25 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
         envelope_x_max=float(envelope.get("x_max", 0)),
         envelope_y_min=float(envelope.get("y_min", 0)),
         envelope_y_max=float(envelope.get("y_max", 0)),
+        soft_limits=soft_limits,
     )
 
-    wasteboard = None
-    if wasteboard_data:
-        wasteboard = Wasteboard2D(
-            width_mm=float(wasteboard_data.get("width_mm", 0)),
-            height_mm=float(wasteboard_data.get("height_mm", 0)),
-            offset_x=float(wasteboard_data.get("offset_x", 0)),
-            offset_y=float(wasteboard_data.get("offset_y", 0)),
+    table_data = data.get("table")
+    table = None
+    if table_data:
+        table = Table2D(
+            surface_width_mm=float(table_data.get("surface_width_mm", 0)),
+            surface_height_mm=float(table_data.get("surface_height_mm", 0)),
+            rail_spacing_mm=float(table_data.get("rail_spacing_mm", 0)),
+        )
+
+    spoilboard = None
+    if spoilboard_data:
+        spoilboard = Spoilboard2D(
+            width_mm=float(spoilboard_data.get("width_mm", 0)),
+            height_mm=float(spoilboard_data.get("height_mm", 0)),
+            offset_x=float(spoilboard_data.get("offset_x", 0)),
+            offset_y=float(spoilboard_data.get("offset_y", 0)),
         )
 
     defaults = MachineDefaults(
@@ -286,7 +337,7 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
         plunge_rate_mm_min=float(defaults_data.get("plunge_rate_mm_min", 500.0)),
     )
 
-    return MachineConfig(machine=machine, wasteboard=wasteboard, defaults=defaults)
+    return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, defaults=defaults)
 
 
 def load_endmills(path: Path | str) -> list[Endmill]:
@@ -376,8 +427,10 @@ __all__ = [
     "FeedsEntry",
     "MachineConfig",
     "MachineDefaults",
+    "SoftLimits",
     "Spindle",
-    "Wasteboard2D",
+    "Spoilboard2D",
+    "Table2D",
     "build_tool_db",
     "get_machines_dir",
     "list_available_machines",

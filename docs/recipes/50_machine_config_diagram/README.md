@@ -1,13 +1,13 @@
 # Recipe 50: Machine Config Diagram
 
 This recipe demonstrates the machine configuration visualization system. It generates
-SVG diagrams showing the CNC machine envelope, wasteboard, effective cutting area,
+SVG diagrams showing the CNC machine envelope, spoilboard, effective cutting area,
 and key dimensions.
 
 ## Purpose
 
 - Visualize CNC machine work envelope
-- Show wasteboard placement and margins
+- Show spoilboard placement and margins
 - Display effective envelope (accounting for tool radius)
 - Provide dimensional reference for job planning
 
@@ -28,7 +28,7 @@ from diagram_render import render_diagram_svg
 from pathlib import Path
 
 # Load machine and endmill
-machine = load_machine_by_name("shapeoko_xxl")
+machine = load_machine_by_name("altmill_4x4")
 endmills = load_endmills(Path("machines/endmills.yml"))
 endmill = endmills[0]  # 1/4" upcut spiral
 
@@ -52,7 +52,7 @@ The generated diagram includes these layers:
 | Layer | Description |
 |-------|-------------|
 | `ENVELOPE` | Machine travel envelope (outer boundary) |
-| `WASTEBOARD` | Wasteboard surface area |
+| `SPOILBOARD` | Spoilboard surface area |
 | `EFFECTIVE_ENVELOPE` | Usable area after tool radius compensation |
 | `ORIGIN_MARKER` | Machine origin (0,0) indicator |
 | `CENTERLINES` | Envelope center reference lines |

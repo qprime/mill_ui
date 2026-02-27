@@ -8,6 +8,8 @@ from adapters.cnc_config_to_ir import machine_config_to_diagram_ir
 from config.machine_loader import get_machines_dir, load_endmills, load_machine_by_name
 from diagram_render import render_diagram_svg
 
+T_TRACK_WIDTH_MM = 40.0
+
 
 def main():
     recipe_dir = Path(__file__).parent
@@ -17,35 +19,58 @@ def main():
     endmills = load_endmills(get_machines_dir() / "endmills.yml")
     quarter_inch = next((e for e in endmills if "1/4" in e.name and "upcut" in e.name), endmills[0])
 
-    machines = ["default", "shapeoko_xxl", "onefinity_woodworker"]
+    altmill = load_machine_by_name("altmill_4x4")
+    diagram = machine_config_to_diagram_ir(
+        altmill,
+        show_dimensions=False,
+        show_centerlines=True,
+        t_track_width_mm=T_TRACK_WIDTH_MM,
+    )
 
-    for machine_name in machines:
-        machine = load_machine_by_name(machine_name)
+    svg_dark = render_diagram_svg(diagram, theme="dark")
+    (output_dir / "altmill_4x4_dark.svg").write_text(svg_dark)
 
-        diagram = machine_config_to_diagram_ir(
-            machine,
-            endmill=quarter_inch,
-            show_dimensions=True,
-            show_centerlines=True,
-        )
+    svg_print = render_diagram_svg(diagram, theme="print")
+    (output_dir / "altmill_4x4_print.svg").write_text(svg_print)
 
-        svg_dark = render_diagram_svg(diagram, theme="dark")
-        (output_dir / f"{machine_name}_dark.svg").write_text(svg_dark)
+    wb = altmill.spoilboard
+    sb_w = wb.width_mm - 2 * T_TRACK_WIDTH_MM
+    sb_h = wb.height_mm - 2 * T_TRACK_WIDTH_MM
+    margins = altmill.compute_margins()
 
-        svg_print = render_diagram_svg(diagram, theme="print")
-        (output_dir / f"{machine_name}_print.svg").write_text(svg_print)
+    print(f"Generated diagrams for {altmill.machine.name}")
+    print(f"  Envelope: {altmill.machine.envelope_width:.0f} x {altmill.machine.envelope_height:.0f} mm")
+    print(f"  Spoilboard: {wb.width_mm:.1f} x {wb.height_mm:.0f} mm")
+    print(
+        f"  Margins: L={margins['left']:.0f} R={margins['right']:.0f} T={margins['top']:.0f} B={margins['bottom']:.0f} mm"
+    )
+    print(f"  T-track perimeter: {T_TRACK_WIDTH_MM:.0f} mm")
+    print(f"  Spoilboard (inside t-track): {sb_w:.1f} x {sb_h:.0f} mm")
+    print()
 
-        print(f"Generated diagrams for {machine.machine.name}")
-        print(f"  Envelope: {machine.machine.envelope_width:.0f} x {machine.machine.envelope_height:.0f} mm")
-        if machine.wasteboard:
-            margins = machine.compute_margins()
-            print(f"  Wasteboard: {machine.wasteboard.width_mm:.0f} x {machine.wasteboard.height_mm:.0f} mm")
-            print(
-                f"  Margins: L={margins['left']:.0f} R={margins['right']:.0f} T={margins['top']:.0f} B={margins['bottom']:.0f} mm"
-            )
-        eff = machine.effective_envelope(quarter_inch.radius_mm)
-        print(f"  Effective: ({eff[0]:.1f}, {eff[1]:.1f}) to ({eff[2]:.1f}, {eff[3]:.1f}) mm")
-        print()
+    genmitsu = load_machine_by_name("genmitsu_4040_pro")
+    diagram_g = machine_config_to_diagram_ir(
+        genmitsu,
+        endmill=quarter_inch,
+        show_dimensions=True,
+        show_centerlines=True,
+    )
+
+    svg_dark = render_diagram_svg(diagram_g, theme="dark")
+    (output_dir / "genmitsu_4040_pro_dark.svg").write_text(svg_dark)
+
+    svg_print = render_diagram_svg(diagram_g, theme="print")
+    (output_dir / "genmitsu_4040_pro_print.svg").write_text(svg_print)
+
+    print(f"Generated diagrams for {genmitsu.machine.name}")
+    print(f"  Envelope: {genmitsu.machine.envelope_width:.0f} x {genmitsu.machine.envelope_height:.0f} mm")
+    if genmitsu.spoilboard:
+        gm = genmitsu.compute_margins()
+        print(f"  Spoilboard: {genmitsu.spoilboard.width_mm:.0f} x {genmitsu.spoilboard.height_mm:.0f} mm")
+        print(f"  Margins: L={gm['left']:.0f} R={gm['right']:.0f} T={gm['top']:.0f} B={gm['bottom']:.0f} mm")
+    eff_g = genmitsu.effective_envelope(quarter_inch.radius_mm)
+    print(f"  Effective envelope: ({eff_g[0]:.1f}, {eff_g[1]:.1f}) to ({eff_g[2]:.1f}, {eff_g[3]:.1f}) mm")
+    print()
 
 
 if __name__ == "__main__":

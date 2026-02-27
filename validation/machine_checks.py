@@ -110,41 +110,41 @@ def check_mch_envelope_positive(machine: MachineConfig) -> InvariantResult:
     )
 
 
-def check_mch_wasteboard_fits(machine: MachineConfig) -> InvariantResult:
-    if machine.wasteboard is None:
+def check_mch_spoilboard_fits(machine: MachineConfig) -> InvariantResult:
+    if machine.spoilboard is None:
         return InvariantResult(
-            id="MCH_WASTEBOARD_FITS",
+            id="MCH_SPOILBOARD_FITS",
             category="structural",
             artifact="machine_config",
-            description="Wasteboard bounds fall within or equal to envelope",
+            description="Spoilboard bounds fall within or equal to envelope",
             status=Verdict.PASS,
             checked=0,
             passed=0,
             failed=0,
             failures=(),
-            details={"wasteboard": "none"},
+            details={"spoilboard": "none"},
         )
 
-    wb = machine.wasteboard
+    wb = machine.spoilboard
     m = machine.machine
     failures = []
 
     if wb.x_min < m.envelope_x_min:
-        failures.append(f"wasteboard x_min ({wb.x_min}) < envelope x_min ({m.envelope_x_min})")
+        failures.append(f"spoilboard x_min ({wb.x_min}) < envelope x_min ({m.envelope_x_min})")
     if wb.x_max > m.envelope_x_max:
-        failures.append(f"wasteboard x_max ({wb.x_max}) > envelope x_max ({m.envelope_x_max})")
+        failures.append(f"spoilboard x_max ({wb.x_max}) > envelope x_max ({m.envelope_x_max})")
     if wb.y_min < m.envelope_y_min:
-        failures.append(f"wasteboard y_min ({wb.y_min}) < envelope y_min ({m.envelope_y_min})")
+        failures.append(f"spoilboard y_min ({wb.y_min}) < envelope y_min ({m.envelope_y_min})")
     if wb.y_max > m.envelope_y_max:
-        failures.append(f"wasteboard y_max ({wb.y_max}) > envelope y_max ({m.envelope_y_max})")
+        failures.append(f"spoilboard y_max ({wb.y_max}) > envelope y_max ({m.envelope_y_max})")
 
     status = Verdict.PASS if not failures else Verdict.FAIL
 
     return InvariantResult(
-        id="MCH_WASTEBOARD_FITS",
+        id="MCH_SPOILBOARD_FITS",
         category="structural",
         artifact="machine_config",
-        description="Wasteboard bounds fall within or equal to envelope",
+        description="Spoilboard bounds fall within or equal to envelope",
         status=status,
         checked=4,
         passed=4 - len(failures),
@@ -225,7 +225,7 @@ def validate_machine_config(
 ) -> list[InvariantResult]:
     results = [
         check_mch_envelope_positive(machine),
-        check_mch_wasteboard_fits(machine),
+        check_mch_spoilboard_fits(machine),
     ]
 
     if endmill:
@@ -240,7 +240,7 @@ __all__ = [
     "check_mch_effective_envelope_shrinks",
     "check_mch_endmill_positive",
     "check_mch_envelope_positive",
-    "check_mch_wasteboard_fits",
+    "check_mch_spoilboard_fits",
     "check_sheet_fits_machine",
     "validate_machine_config",
 ]

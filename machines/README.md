@@ -10,14 +10,13 @@ machines/
 ├── endmills.yml        # Endmill/bit library
 ├── spindles.yml        # Spindle specifications
 └── cnc/                # CNC machine definitions
-    ├── default.yml
-    ├── shapeoko_xxl.yml
-    └── onefinity_woodworker.yml
+    ├── altmill_4x4.yml
+    └── genmitsu_4040_pro.yml
 ```
 
 ## CNC Machine Schema
 
-Machine configuration files define the physical envelope and wasteboard of a CNC router.
+Machine configuration files define the physical envelope and spoilboard of a CNC router.
 
 ### Schema
 
@@ -30,9 +29,9 @@ envelope:                      # Machine travel envelope (mm)
   y_min: 0                     # Minimum Y position
   y_max: 800                   # Maximum Y position
 
-wasteboard:                    # Optional: wasteboard dimensions
-  width_mm: 750                # Wasteboard width
-  height_mm: 750               # Wasteboard height
+spoilboard:                    # Optional: spoilboard dimensions
+  width_mm: 750                # Spoilboard width
+  height_mm: 750               # Spoilboard height
   offset_x: 25                 # X offset from envelope origin
   offset_y: 25                 # Y offset from envelope origin
 
@@ -53,9 +52,9 @@ All dimensions use millimeters (mm). The coordinate system follows the project c
 
 The machine loader computes:
 - **Envelope dimensions**: `envelope_width = x_max - x_min`
-- **Margins**: Distance from envelope edge to wasteboard edge
+- **Margins**: Distance from envelope edge to spoilboard edge
 - **Effective envelope**: Envelope inset by tool radius (for clearance)
-- **Center positions**: Geometric center of envelope and wasteboard
+- **Center positions**: Geometric center of envelope and spoilboard
 
 ### Invariants
 
@@ -64,7 +63,7 @@ Machine configs are validated against these invariants:
 | ID | Rule |
 |----|------|
 | `MCH_ENVELOPE_POSITIVE` | `envelope_x_max > envelope_x_min`, same for Y |
-| `MCH_WASTEBOARD_FITS` | Wasteboard bounds ≤ envelope bounds |
+| `MCH_SPOILBOARD_FITS` | Spoilboard bounds ≤ envelope bounds |
 | `MCH_EFFECTIVE_ENVELOPE_SHRINKS` | Effective envelope ≤ envelope (inset by bit radius) |
 
 ## Endmill Schema
@@ -133,13 +132,13 @@ from config.machine_loader import (
 from pathlib import Path
 
 # Load by path
-machine = load_cnc_machine(Path("machines/cnc/shapeoko_xxl.yml"))
+machine = load_cnc_machine(Path("machines/cnc/altmill_4x4.yml"))
 
 # Load by name (searches machines/cnc/ directory)
-machine = load_machine_by_name("shapeoko_xxl")
+machine = load_machine_by_name("altmill_4x4")
 
 # List available machines
-print(list_available_machines())  # ['default', 'onefinity_woodworker', 'shapeoko_xxl']
+print(list_available_machines())  # ['altmill_4x4', 'genmitsu_4040_pro']
 
 # Load tool libraries
 endmills = load_endmills(Path("machines/endmills.yml"))
@@ -208,7 +207,7 @@ for error in result.errors:
      y_min: 0
      y_max: 1000
 
-   wasteboard:
+   spoilboard:
      width_mm: 950
      height_mm: 950
      offset_x: 25

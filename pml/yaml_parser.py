@@ -55,7 +55,7 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import Feature, FeedsOverride, Sheet
+from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, Sheet
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import NestJob, NestParseError, NestPart
 
@@ -134,12 +134,24 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
 
     depth_mm = sheet_thickness_mm if is_through else float(parse_dimension(depth))
 
+    dogbone: DogboneSpec | None = None
+    dogbone_raw = data.get("dogbone")
+    if dogbone_raw is True:
+        dogbone = DogboneSpec()
+    elif isinstance(dogbone_raw, dict):
+        dogbone = DogboneSpec(
+            style=dogbone_raw.get("style", "dogbone"),
+            diameter_mm=parse_dimension(dogbone_raw["diameter"]) if "diameter" in dogbone_raw else None,
+            overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
+        )
+
     return Feature(
         type=feature_type,
         depth_mm=depth_mm,
         side=data.get("side"),
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=parse_dimension(data["corner_cleanup"]) if "corner_cleanup" in data else None,
+        dogbone=dogbone,
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,

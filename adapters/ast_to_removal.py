@@ -93,6 +93,8 @@ def item_to_removal_intent(
         if item.feature.corner_cleanup_tool_diameter_mm is not None:
             hint[HintKeys.CORNER_CLEANUP_TOOL_DIAMETER_MM] = item.feature.corner_cleanup_tool_diameter_mm
         intent = pocket_hint_to_removal_intent(hint)
+        if item.feature.dogbone is not None:
+            intent = replace(intent, dogbone=item.feature.dogbone)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent

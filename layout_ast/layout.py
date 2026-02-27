@@ -42,12 +42,29 @@ class FeedsOverride:
 
 
 @dataclass(frozen=True)
+class DogboneSpec:
+    style: str = "dogbone"
+    diameter_mm: float | None = None
+    overcut_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        valid_styles = ("dogbone", "t-bone_x", "t-bone_y")
+        if self.style not in valid_styles:
+            raise ValueError(f"Invalid dogbone style '{self.style}'. Must be one of: {valid_styles}")
+        if self.diameter_mm is not None and self.diameter_mm <= 0.0:
+            raise ValueError(f"dogbone diameter_mm must be positive, got {self.diameter_mm}")
+        if self.overcut_mm < 0.0:
+            raise ValueError(f"dogbone overcut_mm must be >= 0, got {self.overcut_mm}")
+
+
+@dataclass(frozen=True)
 class Feature:
     type: str
     depth_mm: float
     side: str | None = None
     is_through: bool = False
     corner_cleanup_tool_diameter_mm: float | None = None
+    dogbone: DogboneSpec | None = None
 
     tab_count: int | None = None
     tab_height_mm: float | None = None

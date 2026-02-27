@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -10,7 +11,7 @@ from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import offset_moves_z
-from cam.planner.planner_input import CornerCleanupInput, FeatureInput
+from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
 
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
@@ -378,8 +379,111 @@ def plan_corner_cleanup_passes(
             record.add_moves(moves, increment=1)
 
 
+_SQRT2_INV = 1.0 / math.sqrt(2.0)
+
+
+def _dogbone_center(
+    corner: tuple[float, float],
+    pocket_center: tuple[float, float],
+    style: str,
+    tool_radius: float,
+) -> tuple[float, float]:
+    cx, cy = corner
+    px, py = pocket_center
+
+    if style == "dogbone":
+        dx = -1.0 if cx > px else 1.0
+        dy = -1.0 if cy > py else 1.0
+        return (cx + dx * tool_radius * _SQRT2_INV, cy + dy * tool_radius * _SQRT2_INV)
+    elif style == "t-bone_x":
+        dx = -1.0 if cx > px else 1.0
+        return (cx + dx * tool_radius, cy)
+    elif style == "t-bone_y":
+        dy = -1.0 if cy > py else 1.0
+        return (cx, cy + dy * tool_radius)
+    else:
+        raise ValueError(f"Unknown dogbone style: {style}")
+
+
+def plan_dogbone_passes(
+    dogbones: tuple[DogboneInput, ...],
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+) -> None:
+    for entry in dogbones:
+        if entry.tool_diameter_mm is not None:
+            tool = None
+            for t in tool_db:
+                if abs(t.diameter - entry.tool_diameter_mm) < 0.01:
+                    tool = t
+                    break
+            if tool is None:
+                raise ValueError(
+                    f"Dogbone tool with diameter {entry.tool_diameter_mm}mm not found in tool_db. "
+                    f"Available tools: {[t.diameter for t in tool_db]}"
+                )
+        else:
+            flat_tools = [t for t in tool_db if t.kind == "flat"]
+            if not flat_tools:
+                raise ValueError("No flat tools available in tool_db for dogbone fillet")
+            tool = min(flat_tools, key=lambda t: t.diameter)
+
+        record = accumulator.get_record("dogbone", tool)
+        setup = record.setup
+
+        depth = entry.depth_mm
+        start_depth = entry.start_depth_mm
+        if depth <= start_depth:
+            continue
+        effective_depth = depth - start_depth
+
+        corners = entry.corners
+        if not corners:
+            continue
+
+        step_over = stepover_for_tool(tool)
+        step_down = stepdown_for_tool(tool)
+
+        tool_radius = 0.5 * tool.diameter
+        bore_diameter = tool.diameter + 2.0 * entry.overcut_mm
+        pocket_center = _pocket_center_from_corners(corners)
+
+        fillet_centers = []
+        for corner_xy in corners:
+            fillet_centers.append(_dogbone_center(corner_xy, pocket_center, entry.style, tool_radius))
+
+        if bore_diameter - tool.diameter < 0.01:
+            peck = min(step_down, 2.5)
+            moves = drill_peck(fillet_centers, setup, depth_mm=effective_depth, peck=peck)
+            moves = offset_moves_z(moves, start_depth)
+            record.add_moves(moves, increment=len(fillet_centers))
+        else:
+            for center in fillet_centers:
+                moves = pocket_circle_concentric(
+                    center,
+                    bore_diameter,
+                    setup,
+                    depth_mm=effective_depth,
+                    stepover_mm=step_over,
+                    stepdown_mm=step_down,
+                    finish=True,
+                )
+                moves = offset_moves_z(moves, start_depth)
+                record.add_moves(moves, increment=1)
+
+
+def _pocket_center_from_corners(
+    corners: tuple[tuple[float, float], ...],
+) -> tuple[float, float]:
+    xs = [c[0] for c in corners]
+    ys = [c[1] for c in corners]
+    return ((min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0)
+
+
 __all__ = [
     "plan_corner_cleanup_passes",
+    "plan_dogbone_passes",
     "plan_engrave_passes",
     "plan_hole_passes",
     "plan_pocket_passes",

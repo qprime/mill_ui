@@ -145,4 +145,5 @@ class HintCollectionKeys:
     HOLES = "holes"
     ENGRAVES = "engraves"
     CORNER_CLEANUPS = "corner_cleanups"
+    DOGBONES = "dogbones"
     KEEPOUTS = "keepouts"

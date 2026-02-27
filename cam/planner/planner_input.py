@@ -169,6 +169,30 @@ class CornerCleanupInput:
 
 
 @dataclass(frozen=True)
+class DogboneInput:
+    id: str
+    pocket_id: str
+    corners: tuple[tuple[float, float], ...]
+    style: str
+    tool_diameter_mm: float | None
+    depth_mm: float
+    start_depth_mm: float = 0.0
+    overcut_mm: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "pocket_id": self.pocket_id,
+            "corners": list(self.corners),
+            "style": self.style,
+            "tool_diameter_mm": self.tool_diameter_mm,
+            "depth_mm": self.depth_mm,
+            "start_depth_mm": self.start_depth_mm,
+            "overcut_mm": self.overcut_mm,
+        }
+
+
+@dataclass(frozen=True)
 class EdgeFeatureInput:
     id: str
     shape: str
@@ -222,6 +246,7 @@ class PlannerInput:
     holes: tuple[FeatureInput, ...] = field(default_factory=tuple)
     engraves: tuple[FeatureInput, ...] = field(default_factory=tuple)
     corner_cleanups: tuple[CornerCleanupInput, ...] = field(default_factory=tuple)
+    dogbones: tuple[DogboneInput, ...] = field(default_factory=tuple)
     edge_features: tuple[EdgeFeatureInput, ...] = field(default_factory=tuple)
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
 
@@ -235,6 +260,7 @@ class PlannerInput:
             "holes": [h.to_dict() for h in self.holes],
             "engraves": [e.to_dict() for e in self.engraves],
             "corner_cleanups": [c.to_dict() for c in self.corner_cleanups],
+            "dogbones": [d.to_dict() for d in self.dogbones],
             "keepouts": [k.to_dict() for k in self.keepouts],
         }
         if self.edge_features:
@@ -373,11 +399,26 @@ class PlannerInput:
                 edge_feature=edge_feature,
             )
 
+        def parse_dogbone(d: dict[str, Any]) -> DogboneInput:
+            corners_raw = d.get("corners", [])
+            corners = tuple((float(p[0]), float(p[1])) for p in corners_raw)
+            return DogboneInput(
+                id=str(d.get("id", "")),
+                pocket_id=str(d.get("pocket_id", "")),
+                corners=corners,
+                style=str(d.get("style", "dogbone")),
+                tool_diameter_mm=float(d["tool_diameter_mm"]) if d.get("tool_diameter_mm") is not None else None,
+                depth_mm=float(d.get("depth_mm", 0.0)),
+                start_depth_mm=float(d.get("start_depth_mm", 0.0)),
+                overcut_mm=float(d.get("overcut_mm", 0.0)),
+            )
+
         profiles = tuple(parse_feature(p) for p in hints.get("profiles", []))
         pockets = tuple(parse_feature(p) for p in hints.get("pockets", []))
         holes = tuple(parse_feature(h) for h in hints.get("holes", []))
         engraves = tuple(parse_feature(e) for e in hints.get("engraves", []))
         corner_cleanups = tuple(parse_corner_cleanup(c) for c in hints.get("corner_cleanups", []))
+        dogbones = tuple(parse_dogbone(d) for d in hints.get("dogbones", []))
         edge_features = tuple(parse_edge_feature_input(ef) for ef in hints.get("edge_features", []))
         keepouts = tuple(parse_keepout(k) for k in hints.get("keepouts", []))
 
@@ -390,6 +431,7 @@ class PlannerInput:
             holes=holes,
             engraves=engraves,
             corner_cleanups=corner_cleanups,
+            dogbones=dogbones,
             edge_features=edge_features,
             keepouts=keepouts,
         )

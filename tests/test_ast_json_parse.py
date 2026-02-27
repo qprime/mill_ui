@@ -153,7 +153,6 @@ def test_parse_empty_items():
 
 
 def test_parse_missing_sheet():
-    from typing import Any
     print("Running test_parse_missing_sheet...")
     layout_data: dict[str, Any] = {
         "items": [],

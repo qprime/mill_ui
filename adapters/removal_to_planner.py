@@ -4,6 +4,7 @@ from typing import Any
 
 from cam.planner.planner_input import (
     CornerCleanupInput,
+    DogboneInput,
     EdgeFeatureInput,
     EdgeTreatmentInput,
     FeatureInput,
@@ -142,6 +143,40 @@ def _generate_corner_cleanup_input(
     )
 
 
+def _validate_dogbone(intent: RemovalIntent) -> str:
+    shape = intent.shape or ShapeType.RECT
+    if not ShapeType.is_rect(shape):
+        raise ValueError(f"Dogbone fillets only supported for rectangular pockets, got: {shape}")
+    return shape
+
+
+def _generate_dogbone_input(
+    intent: RemovalIntent,
+    feature: FeatureInput,
+) -> DogboneInput:
+    _validate_dogbone(intent)
+    assert intent.dogbone is not None
+
+    cx, cy = feature.center_xy_mm
+    corners = _compute_corners(
+        cx,
+        cy,
+        feature.geometry.geometry.w_mm or 0.0,
+        feature.geometry.geometry.h_mm or 0.0,
+    )
+
+    return DogboneInput(
+        id=f"{feature.id}_dogbone",
+        pocket_id=feature.id,
+        corners=corners,
+        style=intent.dogbone.style,
+        tool_diameter_mm=intent.dogbone.diameter_mm,
+        depth_mm=feature.depth_mm,
+        start_depth_mm=feature.start_depth_mm,
+        overcut_mm=intent.dogbone.overcut_mm,
+    )
+
+
 def _intent_to_edge_feature_input(intent: RemovalIntent) -> EdgeFeatureInput:
     shape = intent.shape or ShapeType.RECT
     depth_mm = intent.depth_mm()
@@ -176,6 +211,7 @@ def removal_intents_to_planner_input(
     }
     edge_features: list[EdgeFeatureInput] = []
     corner_cleanups: list[CornerCleanupInput] = []
+    dogbones: list[DogboneInput] = []
     all_keepouts: list[KeepoutInput] = []
     seen_keepouts: set[tuple[int, int, int, int]] = set()
 
@@ -212,6 +248,9 @@ def removal_intents_to_planner_input(
             if bucket == "pockets" and intent.corner_cleanup_tool_diameter_mm is not None:
                 corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
 
+            if bucket == "pockets" and intent.dogbone is not None:
+                dogbones.append(_generate_dogbone_input(intent, feature))
+
     return PlannerInput(
         units="mm",
         kerf_width_mm=float(kerf_width_mm),
@@ -221,6 +260,7 @@ def removal_intents_to_planner_input(
         holes=tuple(buckets["holes"]),
         engraves=tuple(buckets["engraves"]),
         corner_cleanups=tuple(corner_cleanups),
+        dogbones=tuple(dogbones),
         edge_features=tuple(edge_features),
         keepouts=tuple(all_keepouts),
     )

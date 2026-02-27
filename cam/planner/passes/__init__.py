@@ -17,7 +17,13 @@ from cam.shape import Shape2D
 
 from .edge import plan_edge_feature_passes
 from .merge_shared_edges import merge_rect_profiles
-from .pocket import plan_corner_cleanup_passes, plan_engrave_passes, plan_hole_passes, plan_pocket_passes
+from .pocket import (
+    plan_corner_cleanup_passes,
+    plan_dogbone_passes,
+    plan_engrave_passes,
+    plan_hole_passes,
+    plan_pocket_passes,
+)
 from .profile import (
     circle_shape_mm,
     offset_polygon_shape,
@@ -139,6 +145,7 @@ def plan_passes(
     plan_hole_passes(planner_input.holes, accumulator=accumulator, tool_db=tool_db)
     plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
     plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
+    plan_dogbone_passes(planner_input.dogbones, accumulator=accumulator, tool_db=tool_db)
 
     plan_edge_feature_passes(planner_input.edge_features, accumulator=accumulator, tool_db=tool_db)
 

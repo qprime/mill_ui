@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from domains.domain import Bounds2D
-from layout_ast.layout import FeedsOverride
+from layout_ast.layout import DogboneSpec, FeedsOverride
 
 
 @dataclass(frozen=True)
@@ -166,6 +166,7 @@ class RemovalIntent:
     original_id: str | None = None
     shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
     corner_cleanup_tool_diameter_mm: float | None = None
+    dogbone: DogboneSpec | None = None
     edge_feature: EdgeFeatureSpec | None = None
     item_type: str | None = None
     feature_type: str | None = None
@@ -224,6 +225,12 @@ class RemovalIntent:
             result["original_id"] = self.original_id
         if self.corner_cleanup_tool_diameter_mm is not None:
             result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
+        if self.dogbone is not None:
+            result["dogbone"] = {
+                "style": self.dogbone.style,
+                "diameter_mm": self.dogbone.diameter_mm,
+                "overcut_mm": self.dogbone.overcut_mm,
+            }
         if self.edge_feature is not None:
             if isinstance(self.edge_feature, BevelSpec):
                 result["edge_feature"] = {
@@ -256,6 +263,7 @@ __all__ = [
     "ChamferSpec",
     "Constraints",
     "DepthProfile",
+    "DogboneSpec",
     "EdgeFeatureSpec",
     "EdgeTreatment",
     "Island",

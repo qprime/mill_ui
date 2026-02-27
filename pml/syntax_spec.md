@@ -1014,6 +1014,41 @@ Or as generator children:
 | `hole` | Drill/bore operation |
 | `engrave` | Shallow surface marking |
 
+### Dogbone Fillets
+
+Pocket features can specify dogbone fillets to provide clearance at internal corners for mating parts. CNC routers leave tool-radius fillets at internal corners; dogbone bores at each corner allow square parts to fit.
+
+Simple form (default style, auto tool selection):
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 9.5mm
+      dogbone: true
+```
+
+Explicit parameters:
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 9.5mm
+      dogbone:
+        style: t-bone_x       # dogbone | t-bone_x | t-bone_y
+        diameter: 3.175mm      # tool diameter (default: smallest flat tool)
+        overcut: 0.5mm         # extend past corner (default: 0)
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `style` | no | `dogbone` | Fillet style: `dogbone` (diagonal), `t-bone_x` (X-axis), `t-bone_y` (Y-axis) |
+| `diameter` | no | smallest flat tool | Tool diameter for the bore |
+| `overcut` | no | `0` | Extra material removal beyond tool radius |
+
+Only supported on rectangular pockets.
+
 ### Feed Overrides
 
 Features can optionally override resolved feeds/speeds. This lets operators slow down a specific cut without changing the global feeds table.

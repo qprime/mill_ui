@@ -77,6 +77,7 @@ class PassAccumulator:
         self._safe_z = float(safe_z)
         self._prime_spindle = prime_spindle
         self._records: dict[tuple[str, float, str, str | None, float | None], PassRecord] = {}
+        self._feature_tools: dict[str, ToolSelection] = {}
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
         setup = Setup(
@@ -103,6 +104,12 @@ class PassAccumulator:
         if key not in self._records:
             self._records[key] = self._make_record(operation, tool)
         return self._records[key]
+
+    def set_feature_tool(self, feature_id: str, tool: ToolSelection) -> None:
+        self._feature_tools[feature_id] = tool
+
+    def get_feature_tool(self, feature_id: str) -> ToolSelection | None:
+        return self._feature_tools.get(feature_id)
 
     def passes(self) -> list[PassRecord]:
         return list(self._records.values())

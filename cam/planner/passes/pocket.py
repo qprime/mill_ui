@@ -94,6 +94,7 @@ def plan_pocket_passes(
             cleanup_offset_mm=config.cleanup_offset_mm,
         )
         tool = apply_feeds_override(tool, entry.feeds_override)
+        accumulator.set_feature_tool(entry.id, tool)
         record = accumulator.get_record("pocket", tool)
         setup = record.setup
         depth = entry.depth_mm
@@ -434,10 +435,14 @@ def plan_dogbone_passes(
                     f"Available tools: {[t.diameter for t in tool_db]}"
                 )
         else:
-            flat_tools = [t for t in tool_db if t.kind == "flat"]
-            if not flat_tools:
-                raise ValueError("No flat tools available in tool_db for dogbone fillet")
-            tool = min(flat_tools, key=lambda t: t.diameter)
+            parent_tool = accumulator.get_feature_tool(entry.pocket_id)
+            if parent_tool is not None:
+                tool = parent_tool
+            else:
+                flat_tools = [t for t in tool_db if t.kind == "flat"]
+                if not flat_tools:
+                    raise ValueError("No flat tools available in tool_db for dogbone fillet")
+                tool = min(flat_tools, key=lambda t: t.diameter)
 
         record = accumulator.get_record("dogbone", tool)
         setup = record.setup

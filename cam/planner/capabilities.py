@@ -68,6 +68,14 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         ConstraintSupport.VALIDATED_ONLY,
         note="Applied upstream by generators or via global kerf_width_mm",
     ),
+    "dogbone": ConstraintStatus(
+        ConstraintSupport.HONORED,
+        note="Rectangular pocket and assembly joinery internal corners",
+    ),
+    "corner_cleanup": ConstraintStatus(
+        ConstraintSupport.HONORED,
+        note="Secondary tool pass for pocket internal corners",
+    ),
 }
 
 
@@ -120,6 +128,8 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         "linear_gradient": 0,
         "allowance_nonzero": 0,
         "edge_feature": 0,
+        "dogbone": 0,
+        "corner_cleanup": 0,
     }
 
     for intent in intents:
@@ -148,6 +158,10 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
             counts["allowance_nonzero"] += 1
         if intent.edge_feature is not None:
             counts["edge_feature"] += 1
+        if intent.dogbone is not None:
+            counts["dogbone"] += 1
+        if intent.corner_cleanup_tool_diameter_mm is not None:
+            counts["corner_cleanup"] += 1
 
     entries: list[ConstraintAuditEntry] = []
     errors: list[str] = []
@@ -164,6 +178,8 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         ("linear_gradient", "depth_profile.mode.linear_gradient"),
         ("allowance_nonzero", "allowance"),
         ("edge_feature", "edge_feature"),
+        ("dogbone", "dogbone"),
+        ("corner_cleanup", "corner_cleanup"),
     ]
 
     for count_key, capability_key in constraint_mapping:

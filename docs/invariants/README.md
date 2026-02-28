@@ -35,6 +35,7 @@ These invariants block common "improvements" that break the system. Do NOT refac
 | DS-2 | USE_REPLACE | LLMs forget frozen semantics; mutation corrupts shared state |
 | DS-9 | PARAMS_IN_GEOMETRY | LLMs create parameter classes; all shape params live in Geometry.data dict |
 | DM-10 | OPERATIONS_RETURN_MULTIDOMAIN | LLMs return single Domain; algebraic ops always return MultiDomain |
+| PL-8 | NO_PASSTHROUGH_GEOMETRY | LLMs thread computed geometry through semantic layers; Feature/RemovalIntent carry *what*, not *how* |
 
 **Policy:** If a change "needs" to violate one of these, the invariant must be amended explicitly first—not worked around locally.
 

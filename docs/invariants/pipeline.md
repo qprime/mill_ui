@@ -15,6 +15,7 @@
 | PL-5 | HARD | DETERMINISTIC | Pipeline is deterministic |
 | PL-6 | STRUCTURAL | LAYOUT_TOPDOWN | Layout managers subdivide regions top-down |
 | PL-7 | STRUCTURAL | SHAPES_EMIT_ABSOLUTE | Shapes emit items with absolute coordinates |
+| PL-8 | HARD | NO_PASSTHROUGH_GEOMETRY | Do not add computed planner-geometry fields to Feature or RemovalIntent. See "Known Exception" below. |
 
 ---
 
@@ -91,6 +92,23 @@ intents = ast_to_removal_intents(ast)
 hints = removal_intents_to_hints(intents)
 gcode = plan_and_generate(hints)
 ```
+
+---
+
+## No Pass-Through Geometry on Semantic Dataclasses (PL-8)
+
+`Feature` and `RemovalIntent` are semantic dataclasses. They describe *what* to machine, not *how*. Do not add fields that carry computed planner-level geometry (absolute corner coordinates, tool-specific offsets, reference points) through these layers.
+
+**Known exception:** `dogbone_corners` and `dogbone_reference_point` on `Feature` and `RemovalIntent` exist because the resolver has geometric context (panel placement, notch edge, cursor position) that the adapter lacks. These fields are consumed by exactly one path in `removal_to_planner.py` to build `DogboneInput` for 2-corner assembly notch dogbones. This is a contained exception — do not use it as a pattern for new fields.
+
+**Wrong:**
+```python
+@dataclass(frozen=True)
+class Feature:
+    my_computed_corners: tuple[tuple[float, float], ...] | None = None
+```
+
+**Right:** Compute planner geometry in the adapter from bounds, shape, and semantic metadata already on RemovalIntent. If the adapter lacks sufficient context, raise the design question rather than threading geometry through semantic layers.
 
 ---
 

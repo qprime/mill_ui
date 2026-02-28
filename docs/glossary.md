@@ -171,4 +171,4 @@ Canonical identifiers — do not rename or reinterpret.
 | Safe Z | Height above stock for rapid moves without collision |
 | Stepover | Lateral distance between adjacent pocket passes |
 | Stock | Raw material workpiece |
-| Wasteboard | Sacrificial surface beneath the workpiece |
+| Spoilboard | Sacrificial surface beneath the workpiece |

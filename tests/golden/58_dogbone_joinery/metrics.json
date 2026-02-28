@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "58_dogbone_joinery",
-    "created_at": "2026-02-28T15:05:40.568055+00:00"
+    "created_at": "2026-02-28T19:10:02.007775+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -462,22 +462,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7591,
+    "extraction_time_ms": 1.1728,
     "summary": {
-      "total_lines": 1177,
-      "comment_lines": 39,
-      "motion_lines": 973,
+      "total_lines": 1283,
+      "comment_lines": 41,
+      "motion_lines": 1077,
       "tool_change_lines": 0,
       "spindle_lines": 9,
-      "feed_lines": 729
+      "feed_lines": 777
     },
     "motion": {
-      "g0_count": 379,
-      "g1_count": 594,
+      "g0_count": 435,
+      "g1_count": 642,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 13223.2172,
-      "total_feed_distance_mm": 126836.97
+      "total_rapid_distance_mm": 16649.1653,
+      "total_feed_distance_mm": 127387.466
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -529,9 +529,11 @@
     "operations": {
       "profile_passes": 0,
       "pocket_passes": 0,
-      "bore_passes": 4,
-      "total_passes": 4,
+      "bore_passes": 6,
+      "total_passes": 6,
       "operation_names": [
+        "drill_peck",
+        "drill_peck",
         "drill_peck",
         "drill_peck",
         "drill_peck",
@@ -539,9 +541,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 158.6787,
-      "feed_time_s": 13630.4291,
-      "total_time_s": 13789.1078
+      "rapid_time_s": 199.79,
+      "feed_time_s": 13740.5283,
+      "total_time_s": 13940.318299999999
     },
     "tabs": {
       "detected_count": 0,

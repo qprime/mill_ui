@@ -65,6 +65,8 @@ class Feature:
     is_through: bool = False
     corner_cleanup_tool_diameter_mm: float | None = None
     dogbone: DogboneSpec | None = None
+    dogbone_corners: tuple[tuple[float, float], ...] | None = None
+    dogbone_reference_point: tuple[float, float] | None = None
 
     tab_count: int | None = None
     tab_height_mm: float | None = None

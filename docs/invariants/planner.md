@@ -31,7 +31,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
-| dogbone | HONORED | — | Rectangular pockets and assembly dados: bore at each corner per style |
+| dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
 | edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
 | allowance.inside/outside/on | VALIDATED_ONLY | — | May be applied upstream by generators |
 | allowance.kerf_compensation | VALIDATED_ONLY | — | Applied via global kerf_width_mm |

@@ -382,6 +382,14 @@ def plan_corner_cleanup_passes(
 _SQRT2_INV = 1.0 / math.sqrt(2.0)
 
 
+def _axis_direction(corner_val: float, ref_val: float) -> float:
+    if corner_val > ref_val + 1e-9:
+        return -1.0
+    elif corner_val < ref_val - 1e-9:
+        return 1.0
+    return 0.0
+
+
 def _dogbone_center(
     corner: tuple[float, float],
     pocket_center: tuple[float, float],
@@ -392,14 +400,16 @@ def _dogbone_center(
     px, py = pocket_center
 
     if style == "dogbone":
-        dx = -1.0 if cx > px else 1.0
-        dy = -1.0 if cy > py else 1.0
-        return (cx + dx * tool_radius * _SQRT2_INV, cy + dy * tool_radius * _SQRT2_INV)
+        dx = _axis_direction(cx, px)
+        dy = _axis_direction(cy, py)
+        if dx != 0.0 and dy != 0.0:
+            return (cx + dx * tool_radius * _SQRT2_INV, cy + dy * tool_radius * _SQRT2_INV)
+        return (cx + dx * tool_radius, cy + dy * tool_radius)
     elif style == "t-bone_x":
-        dx = -1.0 if cx > px else 1.0
+        dx = _axis_direction(cx, px)
         return (cx + dx * tool_radius, cy)
     elif style == "t-bone_y":
-        dy = -1.0 if cy > py else 1.0
+        dy = _axis_direction(cy, py)
         return (cx, cy + dy * tool_radius)
     else:
         raise ValueError(f"Unknown dogbone style: {style}")
@@ -447,7 +457,9 @@ def plan_dogbone_passes(
 
         tool_radius = 0.5 * tool.diameter
         bore_diameter = tool.diameter + 2.0 * entry.overcut_mm
-        pocket_center = _pocket_center_from_corners(corners)
+        pocket_center = (
+            entry.reference_point if entry.reference_point is not None else _pocket_center_from_corners(corners)
+        )
 
         fillet_centers = []
         for corner_xy in corners:

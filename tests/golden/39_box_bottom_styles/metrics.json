@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "39_box_bottom_styles",
-    "created_at": "2026-02-25T16:18:55.609969+00:00"
+    "created_at": "2026-02-28T19:10:00.831902+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.64,
+    "extraction_time_ms": 1.33,
     "document": {
       "width_mm": 1373.175,
-      "height_mm": 1023.175,
+      "height_mm": 1455.175,
       "viewbox": [
         -21.587,
         -61.587,
         1373.175,
-        1023.175
+        1455.175
       ]
     },
     "layers": {
@@ -50,18 +50,18 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 10,
+          "element_count": 46,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 10,
+          "text_count": 46,
           "elements": []
         },
         "POCKET_REGIONS": {
-          "element_count": 4,
-          "rect_count": 4,
+          "element_count": 40,
+          "rect_count": 40,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
@@ -86,6 +86,126 @@
             {
               "element_type": "rect",
               "bounds": [
+                16.35,
+                761.39,
+                22.35,
+                772.576
+              ],
+              "center": [
+                19.35,
+                766.983
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                16.35,
+                739.168,
+                22.35,
+                750.354
+              ],
+              "center": [
+                19.35,
+                744.761
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                16.35,
+                716.946,
+                22.35,
+                728.132
+              ],
+              "center": [
+                19.35,
+                722.539
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                16.35,
+                694.724,
+                22.35,
+                705.91
+              ],
+              "center": [
+                19.35,
+                700.317
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                210.35,
+                761.39,
+                216.35,
+                772.576
+              ],
+              "center": [
+                213.35,
+                766.983
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                210.35,
+                739.168,
+                216.35,
+                750.354
+              ],
+              "center": [
+                213.35,
+                744.761
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                210.35,
+                716.946,
+                216.35,
+                728.132
+              ],
+              "center": [
+                213.35,
+                722.539
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                210.35,
+                694.724,
+                216.35,
+                705.91
+              ],
+              "center": [
+                213.35,
+                700.317
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
                 226.35,
                 777.45,
                 426.35,
@@ -97,6 +217,126 @@
               ],
               "width": 200.0,
               "height": 6.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                420.35,
+                761.39,
+                426.35,
+                772.576
+              ],
+              "center": [
+                423.35,
+                766.983
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                420.35,
+                739.168,
+                426.35,
+                750.354
+              ],
+              "center": [
+                423.35,
+                744.761
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                420.35,
+                716.946,
+                426.35,
+                728.132
+              ],
+              "center": [
+                423.35,
+                722.539
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                420.35,
+                694.724,
+                426.35,
+                705.91
+              ],
+              "center": [
+                423.35,
+                700.317
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                226.35,
+                761.39,
+                232.35,
+                772.576
+              ],
+              "center": [
+                229.35,
+                766.983
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                226.35,
+                739.168,
+                232.35,
+                750.354
+              ],
+              "center": [
+                229.35,
+                744.761
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                226.35,
+                716.946,
+                232.35,
+                728.132
+              ],
+              "center": [
+                229.35,
+                722.539
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                226.35,
+                694.724,
+                232.35,
+                705.91
+              ],
+              "center": [
+                229.35,
+                700.317
+              ],
+              "width": 6.0,
+              "height": 11.186
             },
             {
               "element_type": "rect",
@@ -116,6 +356,156 @@
             {
               "element_type": "rect",
               "bounds": [
+                568.35,
+                772.501,
+                574.35,
+                783.65
+              ],
+              "center": [
+                571.35,
+                778.0755
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                568.35,
+                750.279,
+                574.35,
+                761.465
+              ],
+              "center": [
+                571.35,
+                755.872
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                568.35,
+                728.057,
+                574.35,
+                739.243
+              ],
+              "center": [
+                571.35,
+                733.65
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                568.35,
+                705.835,
+                574.35,
+                717.021
+              ],
+              "center": [
+                571.35,
+                711.428
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                568.35,
+                683.65,
+                574.35,
+                694.799
+              ],
+              "center": [
+                571.35,
+                689.2245
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                436.35,
+                772.501,
+                442.35,
+                783.65
+              ],
+              "center": [
+                439.35,
+                778.0755
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                436.35,
+                750.279,
+                442.35,
+                761.465
+              ],
+              "center": [
+                439.35,
+                755.872
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                436.35,
+                728.057,
+                442.35,
+                739.243
+              ],
+              "center": [
+                439.35,
+                733.65
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                436.35,
+                705.835,
+                442.35,
+                717.021
+              ],
+              "center": [
+                439.35,
+                711.428
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                436.35,
+                683.65,
+                442.35,
+                694.799
+              ],
+              "center": [
+                439.35,
+                689.2245
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
                 584.35,
                 777.45,
                 722.35,
@@ -127,6 +517,156 @@
               ],
               "width": 138.0,
               "height": 6.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                584.35,
+                772.501,
+                590.35,
+                783.65
+              ],
+              "center": [
+                587.35,
+                778.0755
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                584.35,
+                750.279,
+                590.35,
+                761.465
+              ],
+              "center": [
+                587.35,
+                755.872
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                584.35,
+                728.057,
+                590.35,
+                739.243
+              ],
+              "center": [
+                587.35,
+                733.65
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                584.35,
+                705.835,
+                590.35,
+                717.021
+              ],
+              "center": [
+                587.35,
+                711.428
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                584.35,
+                683.65,
+                590.35,
+                694.799
+              ],
+              "center": [
+                587.35,
+                689.2245
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                716.35,
+                772.501,
+                722.35,
+                783.65
+              ],
+              "center": [
+                719.35,
+                778.0755
+              ],
+              "width": 6.0,
+              "height": 11.149
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                716.35,
+                750.279,
+                722.35,
+                761.465
+              ],
+              "center": [
+                719.35,
+                755.872
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                716.35,
+                728.057,
+                722.35,
+                739.243
+              ],
+              "center": [
+                719.35,
+                733.65
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                716.35,
+                705.835,
+                722.35,
+                717.021
+              ],
+              "center": [
+                719.35,
+                711.428
+              ],
+              "width": 6.0,
+              "height": 11.186
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                716.35,
+                683.65,
+                722.35,
+                694.799
+              ],
+              "center": [
+                719.35,
+                689.2245
+              ],
+              "width": 6.0,
+              "height": 11.149
             }
           ]
         },
@@ -315,8 +855,8 @@
       }
     },
     "paths": {
-      "total_count": 19,
-      "closed_count": 19,
+      "total_count": 55,
+      "closed_count": 55,
       "open_count": 0,
       "total_length_mm": 5133.976,
       "by_layer": {
@@ -331,8 +871,8 @@
           "length_mm": 2593.976
         },
         "POCKET_REGIONS": {
-          "count": 4,
-          "closed": 4,
+          "count": 40,
+          "closed": 40,
           "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
@@ -349,25 +889,61 @@
       "y_max": 800.0
     },
     "text_elements": {
-      "count": 23,
+      "count": 59,
       "dimension_labels": [
         "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm",
-        "\u2022 pocket: 3.0mm"
+        "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "depth_annotations": [
-        "\u2022 pocket: 3.0mm"
+        "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 1200.0 \u00d7 800.0 \u00d7 6.0mm",
-        "Features: 5 profiles, 4 pockets",
+        "Features: 5 profiles, 40 pockets",
         "Depths:",
-        "\u2022 pocket: 3.0mm",
-        "Parts (4):",
-        "\u2022 assembly_back_dado_3",
+        "\u2022 pocket: 3.0mm, 6.0mm",
+        "Parts (40):",
+        "\u2022 assembly_back_dado_11",
+        "\u2022 assembly_back_notch_dogbone_12",
+        "\u2022 assembly_back_notch_dogbone_13",
+        "\u2022 assembly_back_notch_dogbone_14",
+        "\u2022 assembly_back_notch_dogbone_15",
+        "\u2022 assembly_back_notch_dogbone_16",
+        "\u2022 assembly_back_notch_dogbone_17",
+        "\u2022 assembly_back_notch_dogbone_18",
+        "\u2022 assembly_back_notch_dogbone_19",
         "\u2022 assembly_front_dado_1",
-        "\u2022 assembly_left_side_dado_5",
-        "\u2022 assembly_right_side_dado_7"
+        "\u2022 assembly_front_notch_dogbone_2",
+        "\u2022 assembly_front_notch_dogbone_3",
+        "\u2022 assembly_front_notch_dogbone_4",
+        "\u2022 assembly_front_notch_dogbone_5",
+        "\u2022 assembly_front_notch_dogbone_6",
+        "\u2022 assembly_front_notch_dogbone_7",
+        "\u2022 assembly_front_notch_dogbone_8",
+        "\u2022 assembly_front_notch_dogbone_9",
+        "\u2022 assembly_left_side_dado_21",
+        "\u2022 assembly_left_side_notch_dogbone_22",
+        "\u2022 assembly_left_side_notch_dogbone_23",
+        "\u2022 assembly_left_side_notch_dogbone_24",
+        "\u2022 assembly_left_side_notch_dogbone_25",
+        "\u2022 assembly_left_side_notch_dogbone_26",
+        "\u2022 assembly_left_side_notch_dogbone_27",
+        "\u2022 assembly_left_side_notch_dogbone_28",
+        "\u2022 assembly_left_side_notch_dogbone_29",
+        "\u2022 assembly_left_side_notch_dogbone_30",
+        "\u2022 assembly_left_side_notch_dogbone_31",
+        "\u2022 assembly_right_side_dado_33",
+        "\u2022 assembly_right_side_notch_dogbone_34",
+        "\u2022 assembly_right_side_notch_dogbone_35",
+        "\u2022 assembly_right_side_notch_dogbone_36",
+        "\u2022 assembly_right_side_notch_dogbone_37",
+        "\u2022 assembly_right_side_notch_dogbone_38",
+        "\u2022 assembly_right_side_notch_dogbone_39",
+        "\u2022 assembly_right_side_notch_dogbone_40",
+        "\u2022 assembly_right_side_notch_dogbone_41",
+        "\u2022 assembly_right_side_notch_dogbone_42",
+        "\u2022 assembly_right_side_notch_dogbone_43"
       ]
     },
     "circles": {
@@ -375,8 +951,152 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 10,
+      "count": 46,
       "dimensions": [
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.149
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
+        [
+          6.0,
+          11.186
+        ],
         [
           10.0,
           780.0
@@ -422,22 +1142,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6796,
+    "extraction_time_ms": 2.6951,
     "summary": {
-      "total_lines": 865,
-      "comment_lines": 25,
-      "motion_lines": 774,
+      "total_lines": 1647,
+      "comment_lines": 67,
+      "motion_lines": 1503,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 730
+      "spindle_lines": 9,
+      "feed_lines": 1051
     },
     "motion": {
-      "g0_count": 90,
-      "g1_count": 684,
+      "g0_count": 499,
+      "g1_count": 1004,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1947.6924000000001,
-      "total_feed_distance_mm": 18557.456
+      "total_rapid_distance_mm": 8670.1564,
+      "total_feed_distance_mm": 21668.576
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -474,33 +1194,57 @@
       ]
     },
     "operations": {
-      "profile_passes": 8,
-      "pocket_passes": 8,
-      "bore_passes": 0,
-      "total_passes": 16,
+      "profile_passes": 0,
+      "pocket_passes": 0,
+      "bore_passes": 40,
+      "total_passes": 40,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=1.587 so=1.270",
-        "pocket_raster so=1.270 sd=1.587 depth=3.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 23.3723,
-      "feed_time_s": 1855.7456000000002,
-      "total_time_s": 1879.1179
+      "rapid_time_s": 104.0419,
+      "feed_time_s": 2477.9696000000004,
+      "total_time_s": 2582.0114999999996
     },
     "tabs": {
       "detected_count": 0,
@@ -508,6 +1252,6 @@
       "max_cutting_depth_mm": -6.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 2
+    "file_count": 3
   }
 }

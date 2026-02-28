@@ -178,9 +178,10 @@ class DogboneInput:
     depth_mm: float
     start_depth_mm: float = 0.0
     overcut_mm: float = 0.0
+    reference_point: tuple[float, float] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result: dict[str, Any] = {
             "id": self.id,
             "pocket_id": self.pocket_id,
             "corners": list(self.corners),
@@ -190,6 +191,9 @@ class DogboneInput:
             "start_depth_mm": self.start_depth_mm,
             "overcut_mm": self.overcut_mm,
         }
+        if self.reference_point is not None:
+            result["reference_point"] = list(self.reference_point)
+        return result
 
 
 @dataclass(frozen=True)
@@ -402,6 +406,8 @@ class PlannerInput:
         def parse_dogbone(d: dict[str, Any]) -> DogboneInput:
             corners_raw = d.get("corners", [])
             corners = tuple((float(p[0]), float(p[1])) for p in corners_raw)
+            ref_raw = d.get("reference_point")
+            reference_point = (float(ref_raw[0]), float(ref_raw[1])) if ref_raw is not None else None
             return DogboneInput(
                 id=str(d.get("id", "")),
                 pocket_id=str(d.get("pocket_id", "")),
@@ -411,6 +417,7 @@ class PlannerInput:
                 depth_mm=float(d.get("depth_mm", 0.0)),
                 start_depth_mm=float(d.get("start_depth_mm", 0.0)),
                 overcut_mm=float(d.get("overcut_mm", 0.0)),
+                reference_point=reference_point,
             )
 
         profiles = tuple(parse_feature(p) for p in hints.get("profiles", []))

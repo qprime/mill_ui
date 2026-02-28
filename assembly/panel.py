@@ -34,6 +34,7 @@ class NotchSpec:
     depth_mm: float
     shape: str = "rectangular"
     shape_params: dict[str, Any] = field(default_factory=dict)
+    dogbone: DogboneSpec | None = None
 
     def __post_init__(self) -> None:
         if self.u_start_mm < 0:

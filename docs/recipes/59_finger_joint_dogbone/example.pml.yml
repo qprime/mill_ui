@@ -1,0 +1,21 @@
+# mill_ui: 616ff4c1
+# generated: 2026-02-28
+
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 12mm
+  margin: 10mm
+  show_dimensions: false
+  material: plywood
+children:
+- Assembly:
+    type: box
+    width: 200mm
+    depth: 150mm
+    height: 120mm
+    thickness: 12mm
+    joinery: finger
+    bottom: none
+    top: none
+    show_labels: true

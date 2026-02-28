@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "52_spliced_rail",
-    "created_at": "2026-02-25T16:18:56.503236+00:00"
+    "created_at": "2026-02-28T19:10:01.871386+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.23,
+    "extraction_time_ms": 1.07,
     "document": {
       "width_mm": 1353.175,
       "height_mm": 1114.175,
@@ -429,7 +429,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.6139,
+    "extraction_time_ms": 6.5043,
     "summary": {
       "total_lines": 1966,
       "comment_lines": 34,

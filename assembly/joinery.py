@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from assembly.core import EdgeName, InterfaceType, RemovalKind
@@ -43,6 +43,7 @@ def _finger_joints_to_notches(
     width_mm: float | None = None,
     count: int | None = None,
     clearance_mm: float = 0.12,
+    dogbone: DogboneSpec | None = None,
 ) -> list[NotchSpec]:
     if width_mm is None and count is None:
         raise ValueError("Specify at least one of width_mm or count")
@@ -75,6 +76,7 @@ def _finger_joints_to_notches(
                 u_start_mm=u_start,
                 u_len_mm=u_end - u_start,
                 depth_mm=depth_mm,
+                dogbone=dogbone,
             )
             notches.append(notch)
 
@@ -100,6 +102,7 @@ class Finger:
     width_mm: float | None = 12.0
     count: int | None = None
     clearance_mm: float = 0.12
+    dogbone: DogboneSpec | None = field(default_factory=DogboneSpec)
     removal_kind: RemovalKind = RemovalKind.EDGE
     valid_interfaces: frozenset[InterfaceType] = frozenset(
         {
@@ -127,6 +130,7 @@ class Finger:
             width_mm=self.width_mm,
             count=self.count,
             clearance_mm=self.clearance_mm,
+            dogbone=self.dogbone,
         )
 
         notches_b = _finger_joints_to_notches(
@@ -137,6 +141,7 @@ class Finger:
             width_mm=self.width_mm,
             count=self.count,
             clearance_mm=self.clearance_mm,
+            dogbone=self.dogbone,
         )
 
         return (
@@ -148,6 +153,7 @@ class Finger:
 @dataclass(frozen=True)
 class HalfLap:
     fitment_mm: float = 0.2
+    dogbone: DogboneSpec | None = field(default_factory=DogboneSpec)
     removal_kind: RemovalKind = RemovalKind.EDGE
     valid_interfaces: frozenset[InterfaceType] = frozenset({InterfaceType.INTERNAL})
 
@@ -173,6 +179,7 @@ class HalfLap:
             u_start_mm=interface.position_along_edge_a_mm,
             u_len_mm=panel_b.thickness_mm + self.fitment_mm,
             depth_mm=depth_a,
+            dogbone=self.dogbone,
         )
 
         notch_b = NotchSpec(
@@ -180,6 +187,7 @@ class HalfLap:
             u_start_mm=interface.position_along_edge_b_mm,
             u_len_mm=panel_a.thickness_mm + self.fitment_mm,
             depth_mm=depth_b,
+            dogbone=self.dogbone,
         )
 
         return (
@@ -195,7 +203,7 @@ class Captured:
     inset_mm: float = 0.0
     fitment_mm: float = 0.2
     receiving: Literal["a", "b"] = "a"
-    dogbone: DogboneSpec | None = None
+    dogbone: DogboneSpec | None = field(default_factory=DogboneSpec)
     removal_kind: RemovalKind = RemovalKind.FACE
     valid_interfaces: frozenset[InterfaceType] = frozenset(
         {

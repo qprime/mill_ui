@@ -167,6 +167,8 @@ class RemovalIntent:
     shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
     corner_cleanup_tool_diameter_mm: float | None = None
     dogbone: DogboneSpec | None = None
+    dogbone_corners: tuple[tuple[float, float], ...] | None = None
+    dogbone_reference_point: tuple[float, float] | None = None
     edge_feature: EdgeFeatureSpec | None = None
     item_type: str | None = None
     feature_type: str | None = None

@@ -1051,7 +1051,15 @@ Only supported on rectangular pockets (including assembly dados).
 
 #### Assembly Joinery Dogbone
 
-Joinery interface configs that produce captured dados can include `dogbone`:
+All joinery strategies that produce internal corners (`Captured`, `Finger`, `HalfLap`) emit dogbone bores automatically using the default diagonal style. No PML configuration is needed for default behavior.
+
+Three-way semantics on interface configs:
+
+| PML | Meaning |
+|-----|---------|
+| *(absent)* | Use strategy default (dogbone on) |
+| `dogbone: false` | Explicitly suppress dogbone on this interface |
+| `dogbone: { style: t-bone_x }` | Override style |
 
 ```yaml
 - Assembly:
@@ -1060,17 +1068,16 @@ Joinery interface configs that produce captured dados can include `dogbone`:
     depth: 350mm
     height: 500mm
     thickness: 18mm
-    bottom:
-      joinery: captured
-      dogbone: true
     shelf_joinery:
       joinery: captured
       dogbone:
         style: t-bone_x
-        diameter: 3.175mm
+    bottom:
+      joinery: captured
+      dogbone: false
 ```
 
-The `dogbone` parameter on an interface config accepts the same forms as on a feature: `true` for defaults, or a dict with `style`, `diameter`, and `overcut`.
+The `dogbone` parameter on an interface config accepts: `false` to suppress, or a dict with `style`, `diameter`, and `overcut` to override.
 
 ### Feed Overrides
 

@@ -1,8 +1,8 @@
 # Recipe 58: Dogbone Joinery
 
-Demonstrates dogbone fillets on assembly joinery dados for CNC router corner clearance.
+Demonstrates automatic dogbone fillets on assembly joinery for CNC router corner clearance.
 
 **Key concepts:**
-- `dogbone: true` on `shelf_joinery` and `bottom` interface configs
-- Dogbones applied to captured dado slots so shelves fit flush
-- Uses carcass assembly with fixed shelf
+- Dogbone fillets are automatic for all corner-producing joinery (Captured, Finger, HalfLap)
+- No `dogbone: true` needed — strategies emit dogbone bores by default
+- Use `dogbone: false` on an interface to suppress, or `dogbone: { style: t-bone_x }` to override

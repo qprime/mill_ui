@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "54_edge_profile_callouts",
-    "created_at": "2026-02-25T16:18:56.593241+00:00"
+    "created_at": "2026-02-28T19:10:01.950768+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.44,
+    "extraction_time_ms": 0.38,
     "document": {
       "width_mm": 673.175,
       "height_mm": 505.175,
@@ -334,7 +334,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9533,
+    "extraction_time_ms": 1.6808,
     "summary": {
       "total_lines": 502,
       "comment_lines": 10,

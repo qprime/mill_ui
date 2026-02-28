@@ -157,13 +157,18 @@ def _generate_dogbone_input(
     _validate_dogbone(intent)
     assert intent.dogbone is not None
 
-    cx, cy = feature.center_xy_mm
-    corners = _compute_corners(
-        cx,
-        cy,
-        feature.geometry.geometry.w_mm or 0.0,
-        feature.geometry.geometry.h_mm or 0.0,
-    )
+    if intent.dogbone_corners is not None:
+        corners = intent.dogbone_corners
+        reference_point = intent.dogbone_reference_point
+    else:
+        cx, cy = feature.center_xy_mm
+        corners = _compute_corners(
+            cx,
+            cy,
+            feature.geometry.geometry.w_mm or 0.0,
+            feature.geometry.geometry.h_mm or 0.0,
+        )
+        reference_point = None
 
     return DogboneInput(
         id=f"{feature.id}_dogbone",
@@ -174,6 +179,7 @@ def _generate_dogbone_input(
         depth_mm=feature.depth_mm,
         start_depth_mm=feature.start_depth_mm,
         overcut_mm=intent.dogbone.overcut_mm,
+        reference_point=reference_point,
     )
 
 
@@ -241,6 +247,9 @@ def removal_intents_to_planner_input(
 
         if bucket == "edge_features":
             edge_features.append(_intent_to_edge_feature_input(intent))
+        elif intent.dogbone_corners is not None and intent.dogbone is not None:
+            feature = _intent_to_feature_input(intent)
+            dogbones.append(_generate_dogbone_input(intent, feature))
         else:
             feature = _intent_to_feature_input(intent)
             buckets[bucket].append(feature)

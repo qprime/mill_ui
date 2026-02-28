@@ -1,0 +1,20 @@
+# mill_ui: 616ff4c1
+# generated: 2026-02-28
+
+Sheet:
+  width: 1600mm
+  height: 1200mm
+  thickness: 18mm
+  margin: 10mm
+  show_dimensions: false
+  material: mdf
+children:
+- Assembly:
+    type: cubby
+    width: 400mm
+    depth: 300mm
+    height: 500mm
+    thickness: 18mm
+    columns: 2
+    rows: 2
+    show_labels: true

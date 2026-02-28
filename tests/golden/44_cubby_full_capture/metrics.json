@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "44_cubby_full_capture",
-    "created_at": "2026-02-25T16:18:56.193491+00:00"
+    "created_at": "2026-02-28T19:10:01.537965+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.76,
+    "extraction_time_ms": 1.78,
     "document": {
       "width_mm": 2183.175,
-      "height_mm": 1789.175,
+      "height_mm": 1837.175,
       "viewbox": [
         -26.587,
         -66.588,
         2183.175,
-        1789.175
+        1837.175
       ]
     },
     "layers": {
@@ -31,13 +31,13 @@
       ],
       "by_layer": {
         "DIMENSIONS": {
-          "element_count": 132,
+          "element_count": 156,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 66,
-          "polygon_count": 44,
-          "text_count": 22,
+          "line_count": 78,
+          "polygon_count": 52,
+          "text_count": 26,
           "elements": []
         },
         "LABELS": {
@@ -61,18 +61,18 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 23,
+          "element_count": 27,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 23,
+          "text_count": 27,
           "elements": []
         },
         "POCKET_REGIONS": {
-          "element_count": 17,
-          "rect_count": 17,
+          "element_count": 21,
+          "rect_count": 21,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
@@ -288,6 +288,66 @@
               ],
               "width": 18.2,
               "height": 400.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                294.35,
+                868.65,
+                312.55,
+                968.65
+              ],
+              "center": [
+                303.45,
+                918.65
+              ],
+              "width": 18.2,
+              "height": 100.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                868.35,
+                868.65,
+                886.55,
+                968.65
+              ],
+              "center": [
+                877.45,
+                918.65
+              ],
+              "width": 18.2,
+              "height": 100.0
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1169.35,
+                838.117,
+                1269.35,
+                856.317
+              ],
+              "center": [
+                1219.35,
+                847.217
+              ],
+              "width": 100.0,
+              "height": 18.2
+            },
+            {
+              "element_type": "rect",
+              "bounds": [
+                1169.35,
+                716.783,
+                1269.35,
+                734.983
+              ],
+              "center": [
+                1219.35,
+                725.883
+              ],
+              "width": 100.0,
+              "height": 18.2
             },
             {
               "element_type": "rect",
@@ -560,8 +620,8 @@
       }
     },
     "paths": {
-      "total_count": 38,
-      "closed_count": 38,
+      "total_count": 42,
+      "closed_count": 42,
       "open_count": 0,
       "total_length_mm": 19500.203,
       "by_layer": {
@@ -576,8 +636,8 @@
           "length_mm": 9788.203
         },
         "POCKET_REGIONS": {
-          "count": 17,
-          "closed": 17,
+          "count": 21,
+          "closed": 21,
           "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
@@ -594,11 +654,15 @@
       "y_max": 1400.0
     },
     "text_elements": {
-      "count": 61,
+      "count": 69,
       "dimension_labels": [
+        "100.0mm",
+        "100.0mm",
         "100.0mm",
         "103.1mm",
         "112.1mm",
+        "18.2mm",
+        "18.2mm",
         "18.2mm",
         "18.2mm",
         "18.2mm",
@@ -619,21 +683,21 @@
         "600.0mm",
         "600.0mm",
         "Sheet: 2000.0 \u00d7 1400.0 \u00d7 18.0mm",
-        "\u2022 pocket: 9.0mm"
+        "\u2022 pocket: 100.0mm, 9.0mm"
       ],
       "depth_annotations": [
-        "\u2022 pocket: 9.0mm"
+        "\u2022 pocket: 100.0mm, 9.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 2000.0 \u00d7 1400.0 \u00d7 18.0mm",
-        "Features: 8 profiles, 17 pockets",
+        "Features: 8 profiles, 21 pockets",
         "Depths:",
-        "\u2022 pocket: 9.0mm",
-        "Parts (17):",
-        "\u2022 assembly_back_dado_22",
-        "\u2022 assembly_back_dado_23",
-        "\u2022 assembly_back_dado_24",
+        "\u2022 pocket: 100.0mm, 9.0mm",
+        "Parts (21):",
+        "\u2022 assembly_back_dado_26",
+        "\u2022 assembly_back_dado_27",
+        "\u2022 assembly_back_dado_28",
         "\u2022 assembly_bottom_dado_6",
         "\u2022 assembly_bottom_dado_7",
         "\u2022 assembly_bottom_dado_8",
@@ -641,9 +705,13 @@
         "\u2022 assembly_left_side_dado_11",
         "\u2022 assembly_left_side_dado_12",
         "\u2022 assembly_left_side_dado_13",
+        "\u2022 assembly_partition_1_notch_dogbone_23",
+        "\u2022 assembly_partition_1_notch_dogbone_24",
         "\u2022 assembly_right_side_dado_15",
         "\u2022 assembly_right_side_dado_16",
         "\u2022 assembly_right_side_dado_17",
+        "\u2022 assembly_shelf_1_notch_dogbone_19",
+        "\u2022 assembly_shelf_2_notch_dogbone_21",
         "\u2022 assembly_top_dado_1",
         "\u2022 assembly_top_dado_2",
         "\u2022 assembly_top_dado_3",
@@ -655,7 +723,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 23,
+      "count": 27,
       "dimensions": [
         [
           15.0,
@@ -671,6 +739,14 @@
         ],
         [
           18.2,
+          100.0
+        ],
+        [
+          18.2,
+          100.0
+        ],
+        [
+          18.2,
           200.0
         ],
         [
@@ -704,6 +780,14 @@
         [
           18.2,
           400.0
+        ],
+        [
+          100.0,
+          18.2
+        ],
+        [
+          100.0,
+          18.2
         ],
         [
           200.0,
@@ -754,27 +838,79 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 38.7289,
+    "extraction_time_ms": 6.6105,
     "summary": {
-      "total_lines": 10967,
-      "comment_lines": 80,
-      "motion_lines": 8819,
+      "total_lines": 12902,
+      "comment_lines": 103,
+      "motion_lines": 10720,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 6773
+      "spindle_lines": 9,
+      "feed_lines": 7686
     },
     "motion": {
-      "g0_count": 4094,
-      "g1_count": 4725,
+      "g0_count": 5083,
+      "g1_count": 5637,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 53547.2015,
-      "total_feed_distance_mm": 250904.141
+      "total_rapid_distance_mm": 104585.12370000001,
+      "total_feed_distance_mm": 284210.421
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -18.0,
+      "max_plunge_z_mm": -100.0,
       "unique_cutting_depths": [
+        -100.0,
+        -98.425,
+        -96.838,
+        -95.25,
+        -93.663,
+        -92.075,
+        -90.488,
+        -88.9,
+        -87.313,
+        -85.725,
+        -84.138,
+        -82.55,
+        -80.963,
+        -79.375,
+        -77.788,
+        -76.2,
+        -74.612,
+        -73.025,
+        -71.437,
+        -69.85,
+        -68.262,
+        -66.675,
+        -65.087,
+        -63.5,
+        -61.912,
+        -60.325,
+        -58.737,
+        -57.15,
+        -55.562,
+        -53.975,
+        -52.387,
+        -50.8,
+        -49.212,
+        -47.625,
+        -46.037,
+        -44.45,
+        -42.862,
+        -41.275,
+        -39.687,
+        -38.1,
+        -36.512,
+        -34.925,
+        -33.337,
+        -31.75,
+        -30.162,
+        -28.575,
+        -26.987,
+        -25.4,
+        -23.812,
+        -22.225,
+        -20.637,
+        -19.05,
         -18.0,
         -17.463,
         -15.875,
@@ -791,8 +927,8 @@
         -3.0,
         -1.587
       ],
-      "depth_count": 15,
-      "max_single_plunge_mm": 24.0
+      "depth_count": 67,
+      "max_single_plunge_mm": 106.0
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -819,92 +955,45 @@
       ]
     },
     "operations": {
-      "profile_passes": 34,
-      "pocket_passes": 34,
-      "bore_passes": 0,
-      "total_passes": 68,
+      "profile_passes": 0,
+      "pocket_passes": 0,
+      "bore_passes": 21,
+      "total_passes": 21,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 642.5664,
-      "feed_time_s": 27691.6408,
-      "total_time_s": 28334.207199999997
+      "rapid_time_s": 1255.0215,
+      "feed_time_s": 34352.8968,
+      "total_time_s": 35607.9183
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -18.0,
+      "max_cutting_depth_mm": -100.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 2
+    "file_count": 3
   }
 }

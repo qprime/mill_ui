@@ -1573,6 +1573,7 @@ class LayoutResolver:
         default_clearance: float,
     ):
         from layout_ast.compositional import InterfaceConfig
+        from layout_ast.layout import DogboneSpec
 
         if config is None:
             return None
@@ -1586,12 +1587,22 @@ class LayoutResolver:
         else:
             joinery_name = "butt"
 
+        dogbone_resolved: DogboneSpec | None = DogboneSpec()
+        if isinstance(config, InterfaceConfig):
+            if config.dogbone is False:
+                dogbone_resolved = None
+            elif config.dogbone is True or config.dogbone is None:
+                dogbone_resolved = DogboneSpec()
+            elif isinstance(config.dogbone, DogboneSpec):
+                dogbone_resolved = config.dogbone
+
         if joinery_name == "finger":
             if isinstance(config, InterfaceConfig):
                 return Finger(
                     width_mm=config.finger_width_mm or default_finger_width,
                     count=config.finger_count or default_finger_count,
                     clearance_mm=config.clearance_mm or default_clearance,
+                    dogbone=dogbone_resolved,
                 )
             return Finger(
                 width_mm=default_finger_width,
@@ -1600,19 +1611,16 @@ class LayoutResolver:
             )
         elif joinery_name == "captured" or joinery_name == "dado":
             if isinstance(config, InterfaceConfig):
-                dogbone = config.dogbone
-                if dogbone is True:
-                    from layout_ast.layout import DogboneSpec
-
-                    dogbone = DogboneSpec()
                 return Captured(
                     dado_depth_mm=config.dado_depth_mm,
                     inset_mm=config.inset_mm,
                     receiving=config.receiving,  # type: ignore[arg-type]
-                    dogbone=dogbone,  # type: ignore[arg-type]
+                    dogbone=dogbone_resolved,
                 )
             return Captured()
         elif joinery_name == "half_lap":
+            if isinstance(config, InterfaceConfig):
+                return HalfLap(dogbone=dogbone_resolved)
             return HalfLap()
         else:
             return Butt()
@@ -1964,6 +1972,60 @@ class LayoutResolver:
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_dado"),
                 )
                 items.append(dado_item)
+
+            for notch in spec.notches:
+                if notch.dogbone is None:
+                    continue
+                edge_idx = notch.edge_index
+                u_start = notch.u_start_mm
+                u_len = notch.u_len_mm
+                depth = notch.depth_mm
+
+                if edge_idx == 0:
+                    c1 = (x_cursor + u_start, y_cursor + depth)
+                    c2 = (x_cursor + u_start + u_len, y_cursor + depth)
+                    notch_center = (x_cursor + u_start + u_len / 2, y_cursor + depth / 2)
+                    notch_w = u_len
+                    notch_h = depth
+                elif edge_idx == 1:
+                    c1 = (x_cursor + panel_width - depth, y_cursor + u_start)
+                    c2 = (x_cursor + panel_width - depth, y_cursor + u_start + u_len)
+                    notch_center = (x_cursor + panel_width - depth / 2, y_cursor + u_start + u_len / 2)
+                    notch_w = depth
+                    notch_h = u_len
+                elif edge_idx == 2:
+                    c1 = (x_cursor + u_start, y_cursor + panel_height - depth)
+                    c2 = (x_cursor + u_start + u_len, y_cursor + panel_height - depth)
+                    notch_center = (x_cursor + u_start + u_len / 2, y_cursor + panel_height - depth / 2)
+                    notch_w = u_len
+                    notch_h = depth
+                else:
+                    c1 = (x_cursor + depth, y_cursor + u_start)
+                    c2 = (x_cursor + depth, y_cursor + u_start + u_len)
+                    notch_center = (x_cursor + depth / 2, y_cursor + u_start + u_len / 2)
+                    notch_w = depth
+                    notch_h = u_len
+
+                notch_item = Item(
+                    kind="shape",
+                    type="Rect",
+                    geometry=Geometry(
+                        data={
+                            "w_mm": notch_w,
+                            "h_mm": notch_h,
+                        }
+                    ),
+                    placement=Placement(center_xy_mm=notch_center),
+                    feature=Feature(
+                        type="pocket",
+                        depth_mm=depth,
+                        dogbone=notch.dogbone,
+                        dogbone_corners=(c1, c2),
+                        dogbone_reference_point=panel_center,
+                    ),
+                    shape_id=self._next_shape_id(f"assembly_{spec.name}_notch_dogbone"),
+                )
+                items.append(notch_item)
 
             x_cursor += panel_width + gap
             row_height = max(row_height, panel_height)

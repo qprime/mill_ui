@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "43c_carcass_toe_kick",
-    "created_at": "2026-02-25T16:18:56.036178+00:00"
+    "created_at": "2026-02-28T19:10:01.382693+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.52,
+    "extraction_time_ms": 0.44,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 1467.175,
@@ -475,22 +475,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.7795,
+    "extraction_time_ms": 1.1448,
     "summary": {
-      "total_lines": 1096,
-      "comment_lines": 34,
-      "motion_lines": 896,
+      "total_lines": 1428,
+      "comment_lines": 42,
+      "motion_lines": 1209,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 752
+      "spindle_lines": 9,
+      "feed_lines": 897
     },
     "motion": {
-      "g0_count": 290,
-      "g1_count": 606,
+      "g0_count": 459,
+      "g1_count": 750,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 9314.2736,
-      "total_feed_distance_mm": 135683.19
+      "total_rapid_distance_mm": 17306.1598,
+      "total_feed_distance_mm": 137334.678
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -540,41 +540,23 @@
       ]
     },
     "operations": {
-      "profile_passes": 12,
-      "pocket_passes": 12,
-      "bore_passes": 0,
-      "total_passes": 24,
+      "profile_passes": 0,
+      "pocket_passes": 0,
+      "bore_passes": 6,
+      "total_passes": 6,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=9.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck",
+        "drill_peck"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 111.7713,
-      "feed_time_s": 14404.9522,
-      "total_time_s": 14516.7235
+      "rapid_time_s": 207.6739,
+      "feed_time_s": 14735.249800000001,
+      "total_time_s": 14942.9237
     },
     "tabs": {
       "detected_count": 0,
@@ -582,6 +564,6 @@
       "max_cutting_depth_mm": -18.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 2
+    "file_count": 3
   }
 }

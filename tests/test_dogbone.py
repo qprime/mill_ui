@@ -349,6 +349,54 @@ class TestDogbonePlanner:
         assert "dogbone" not in ops
 
 
+class TestDogboneAxisAligned:
+    def test_corner_shares_x_with_reference(self):
+        r = 1.5875
+        reference = (50.0, 75.0)
+        corner = (50.0, 35.0)
+        result = _dogbone_center(corner, reference, "dogbone", r)
+        assert result[0] == pytest.approx(50.0)
+        assert result[1] == pytest.approx(35.0 + r)
+
+    def test_corner_shares_y_with_reference(self):
+        r = 1.5875
+        reference = (100.0, 35.0)
+        corner = (50.0, 35.0)
+        result = _dogbone_center(corner, reference, "dogbone", r)
+        assert result[0] == pytest.approx(50.0 + r)
+        assert result[1] == pytest.approx(35.0)
+
+    def test_tbone_x_shares_x_with_reference(self):
+        r = 1.5875
+        reference = (50.0, 75.0)
+        corner = (50.0, 35.0)
+        result = _dogbone_center(corner, reference, "t-bone_x", r)
+        assert result[0] == pytest.approx(50.0)
+        assert result[1] == pytest.approx(35.0)
+
+    def test_tbone_y_shares_y_with_reference(self):
+        r = 1.5875
+        reference = (100.0, 35.0)
+        corner = (50.0, 35.0)
+        result = _dogbone_center(corner, reference, "t-bone_y", r)
+        assert result[0] == pytest.approx(50.0)
+        assert result[1] == pytest.approx(35.0)
+
+    def test_notch_two_corners_axis_aligned(self):
+        r = 1.5875
+        reference = (100.0, 75.0)
+        left_corner = (50.0, 75.0)
+        right_corner = (150.0, 75.0)
+
+        left = _dogbone_center(left_corner, reference, "dogbone", r)
+        assert left[0] == pytest.approx(50.0 + r)
+        assert left[1] == pytest.approx(75.0)
+
+        right = _dogbone_center(right_corner, reference, "dogbone", r)
+        assert right[0] == pytest.approx(150.0 - r)
+        assert right[1] == pytest.approx(75.0)
+
+
 class TestDogboneRoundtrip:
     def test_planner_input_roundtrip(self):
         ast = _make_pocket_ast(dogbone=DogboneSpec(style="t-bone_x", diameter_mm=3.175, overcut_mm=0.5))
@@ -365,3 +413,31 @@ class TestDogboneRoundtrip:
         assert db.tool_diameter_mm == 3.175
         assert db.overcut_mm == 0.5
         assert len(db.corners) == 4
+
+    def test_roundtrip_with_reference_point(self):
+        from cam.planner.planner_input import DogboneInput, PlannerInput
+
+        db_input = DogboneInput(
+            id="notch_dogbone",
+            pocket_id="notch_pocket",
+            corners=((10.0, 5.0), (20.0, 5.0)),
+            style="dogbone",
+            tool_diameter_mm=3.175,
+            depth_mm=9.0,
+            reference_point=(15.0, 25.0),
+        )
+        planner_input = PlannerInput(
+            units="mm",
+            kerf_width_mm=3.175,
+            min_channel_width_mm=6.0,
+            dogbones=(db_input,),
+        )
+
+        hints = planner_input.to_hints_dict()
+        restored = PlannerInput.from_hints_dict(hints)
+        assert len(restored.dogbones) == 1
+        db = restored.dogbones[0]
+        assert db.reference_point == (15.0, 25.0)
+        assert len(db.corners) == 2
+        assert db.style == "dogbone"
+        assert db.tool_diameter_mm == 3.175

@@ -97,7 +97,9 @@ def parse_dimension_or_through(value: Any) -> float | str:
 def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
     dogbone_raw = data.get("dogbone")
     dogbone: DogboneSpec | bool | None = None
-    if dogbone_raw is True:
+    if dogbone_raw is False:
+        dogbone = False
+    elif dogbone_raw is True:
         dogbone = True
     elif isinstance(dogbone_raw, dict):
         dogbone = DogboneSpec(

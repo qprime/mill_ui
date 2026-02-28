@@ -1,31 +1,32 @@
 {
   "golden": {
     "recipe_name": "50_machine_config_diagram",
-    "created_at": "2026-02-25T16:18:56.462033+00:00"
+    "created_at": "2026-02-28T19:10:01.836439+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.24,
+    "extraction_time_ms": 0.25,
     "document": {
-      "width_mm": 820.0,
-      "height_mm": 820.0,
+      "width_mm": 584.0,
+      "height_mm": 523.5,
       "viewbox": [
         -10.0,
-        -10.0,
-        820.0,
-        820.0
+        -50.0,
+        584.0,
+        523.5
       ]
     },
     "layers": {
-      "count": 7,
+      "count": 8,
       "names": [
         "CENTERLINES",
         "DIMENSIONS",
         "EFFECTIVE_ENVELOPE",
         "ENVELOPE",
+        "LEGEND",
         "NOTES",
-        "ORIGIN_MARKER",
-        "WASTEBOARD"
+        "SPOILBOARD",
+        "TITLE_BLOCK"
       ],
       "by_layer": {
         "CENTERLINES": {
@@ -68,27 +69,27 @@
           "text_count": 0,
           "elements": []
         },
+        "LEGEND": {
+          "element_count": 11,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 4,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
         "NOTES": {
-          "element_count": 2,
+          "element_count": 1,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 2,
+          "text_count": 1,
           "elements": []
         },
-        "ORIGIN_MARKER": {
-          "element_count": 3,
-          "rect_count": 0,
-          "circle_count": 1,
-          "path_count": 0,
-          "line_count": 2,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "WASTEBOARD": {
+        "SPOILBOARD": {
           "element_count": 1,
           "rect_count": 1,
           "circle_count": 0,
@@ -96,6 +97,16 @@
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
+          "elements": []
+        },
+        "TITLE_BLOCK": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
           "elements": []
         }
       }
@@ -109,47 +120,47 @@
     },
     "bounds": {
       "x_min": 0.0,
-      "x_max": 810.0,
-      "y_min": 0.0,
-      "y_max": 810.0
+      "x_max": 457.0,
+      "y_min": -18.0,
+      "y_max": 413.5
     },
     "text_elements": {
-      "count": 8,
+      "count": 15,
       "dimension_labels": [
-        "25mm",
-        "25mm",
-        "750mm",
-        "750mm",
-        "800mm",
-        "800mm",
-        "Bit: 1/4 upcut spiral (\u23006.35mm)"
+        "17mm",
+        "2mm",
+        "400mm",
+        "400mm",
+        "404mm",
+        "434mm"
       ],
       "depth_annotations": [],
       "notes_text": [
-        "Machine: Default CNC Router",
-        "Bit: 1/4 upcut spiral (\u23006.35mm)"
+        "NOTES"
       ]
     },
     "circles": {
-      "count": 1,
-      "radii_mm": [
-        12.0
-      ]
+      "count": 0,
+      "radii_mm": []
     },
     "rects": {
-      "count": 3,
+      "count": 4,
       "dimensions": [
         [
-          750.0,
-          750.0
+          15.0,
+          8.0
         ],
         [
-          793.65,
-          793.65
+          400.0,
+          400.0
         ],
         [
-          800.0,
-          800.0
+          427.65,
+          397.15
+        ],
+        [
+          434.0,
+          403.5
         ]
       ]
     }

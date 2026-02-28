@@ -1,4 +1,4 @@
-# mill_ui: f433e279
+# mill_ui: 616ff4c1
 # generated: 2026-02-28
 
 Sheet:
@@ -16,11 +16,7 @@ children:
     height: 500mm
     thickness: 18mm
     top: captured
-    bottom:
-      joinery: captured
-      dogbone: true
+    bottom: captured
     fixed_shelves: 1
-    shelf_joinery:
-      joinery: captured
-      dogbone: true
+    shelf_joinery: captured
     show_labels: true

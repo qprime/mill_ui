@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from layout_ast.layout import FeedsOverride
+from layout_ast.layout import DogboneSpec, FeedsOverride
 
 
 @dataclass(frozen=True)
@@ -383,6 +383,7 @@ class InterfaceConfig:
     dado_depth_mm: float | None = None
     inset_mm: float = 0.0
     receiving: str = "a"
+    dogbone: DogboneSpec | bool | None = None
 
 
 @dataclass(frozen=True)

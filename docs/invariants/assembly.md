@@ -24,6 +24,8 @@
 | AJ-14 | HARD | NOTCH_FITS_EDGE | u_start + u_len <= edge_length |
 | AJ-15 | HARD | NOTCHES_NO_OVERLAP | Adjacent notches cannot overlap |
 | AJ-16 | HARD | TOE_KICK_DADO_POSITION | bottom dado position_along_edge_a_mm = toe_kick_height (no thickness offset) |
+| AJ-17 | STRUCTURAL | DOGBONE_CAPTURED_ONLY | Dogbone fillets only on Captured strategy (dado-producing joinery) |
+| AJ-18 | HARD | DOGBONE_DEPTH_MATCHES_DADO | Dogbone bore depth must equal parent dado depth |
 
 ---
 

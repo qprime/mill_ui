@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Any, Literal
 
 from domains.domain import Point2D
+from layout_ast.layout import DogboneSpec
 
 
 class PanelRole(Enum):
@@ -54,6 +55,7 @@ class DadoSpec:
     depth_mm: float
     edge: Literal["top", "bottom", "left", "right"]
     orientation: Literal["horizontal", "vertical"] = "horizontal"
+    dogbone: DogboneSpec | None = None
 
 
 @dataclass(frozen=True)

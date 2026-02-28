@@ -1,0 +1,26 @@
+# mill_ui: f433e279
+# generated: 2026-02-28
+
+Sheet:
+  width: 2440mm
+  height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+  show_dimensions: false
+  material: mdf
+children:
+- Assembly:
+    type: carcass
+    width: 400mm
+    depth: 350mm
+    height: 500mm
+    thickness: 18mm
+    top: captured
+    bottom:
+      joinery: captured
+      dogbone: true
+    fixed_shelves: 1
+    shelf_joinery:
+      joinery: captured
+      dogbone: true
+    show_labels: true

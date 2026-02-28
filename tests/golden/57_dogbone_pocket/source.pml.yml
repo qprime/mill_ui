@@ -1,0 +1,32 @@
+# mill_ui: f433e279
+# generated: 2026-02-28
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: slot_default
+    feature:
+      type: pocket
+      depth: 9.5mm
+      dogbone: true
+    at:
+      x: 75mm
+      y: 100mm
+      width: 80mm
+      height: 19mm
+- Rect:
+    id: slot_tbone_x
+    feature:
+      type: pocket
+      depth: 9.5mm
+      dogbone:
+        style: t-bone_x
+    at:
+      x: 225mm
+      y: 100mm
+      width: 80mm
+      height: 19mm

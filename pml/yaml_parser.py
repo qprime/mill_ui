@@ -95,6 +95,17 @@ def parse_dimension_or_through(value: Any) -> float | str:
 
 
 def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
+    dogbone_raw = data.get("dogbone")
+    dogbone: DogboneSpec | bool | None = None
+    if dogbone_raw is True:
+        dogbone = True
+    elif isinstance(dogbone_raw, dict):
+        dogbone = DogboneSpec(
+            style=dogbone_raw.get("style", "dogbone"),
+            diameter_mm=parse_dimension(dogbone_raw["diameter"]) if "diameter" in dogbone_raw else None,
+            overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
+        )
+
     return InterfaceConfig(
         joinery=data.get("joinery", default_joinery),
         finger_width_mm=parse_dimension(data["finger_width"]) if "finger_width" in data else None,
@@ -103,6 +114,7 @@ def _parse_interface_config(data: dict, default_joinery: str = "butt") -> Interf
         dado_depth_mm=parse_dimension(data["dado_depth"]) if "dado_depth" in data else None,
         inset_mm=parse_dimension(data.get("inset", "0mm")),
         receiving=data.get("receiving", "a"),
+        dogbone=dogbone,
     )
 
 

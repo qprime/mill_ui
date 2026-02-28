@@ -1600,10 +1600,16 @@ class LayoutResolver:
             )
         elif joinery_name == "captured" or joinery_name == "dado":
             if isinstance(config, InterfaceConfig):
+                dogbone = config.dogbone
+                if dogbone is True:
+                    from layout_ast.layout import DogboneSpec
+
+                    dogbone = DogboneSpec()
                 return Captured(
                     dado_depth_mm=config.dado_depth_mm,
                     inset_mm=config.inset_mm,
                     receiving=config.receiving,  # type: ignore[arg-type]
+                    dogbone=dogbone,  # type: ignore[arg-type]
                 )
             return Captured()
         elif joinery_name == "half_lap":
@@ -1953,6 +1959,7 @@ class LayoutResolver:
                     feature=Feature(
                         type="pocket",
                         depth_mm=dado.depth_mm,
+                        dogbone=dado.dogbone,
                     ),
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_dado"),
                 )

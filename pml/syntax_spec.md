@@ -1047,7 +1047,30 @@ Explicit parameters:
 | `diameter` | no | smallest flat tool | Tool diameter for the bore |
 | `overcut` | no | `0` | Extra material removal beyond tool radius |
 
-Only supported on rectangular pockets.
+Only supported on rectangular pockets (including assembly dados).
+
+#### Assembly Joinery Dogbone
+
+Joinery interface configs that produce captured dados can include `dogbone`:
+
+```yaml
+- Assembly:
+    type: carcass
+    width: 400mm
+    depth: 350mm
+    height: 500mm
+    thickness: 18mm
+    bottom:
+      joinery: captured
+      dogbone: true
+    shelf_joinery:
+      joinery: captured
+      dogbone:
+        style: t-bone_x
+        diameter: 3.175mm
+```
+
+The `dogbone` parameter on an interface config accepts the same forms as on a feature: `true` for defaults, or a dict with `style`, `diameter`, and `overcut`.
 
 ### Feed Overrides
 

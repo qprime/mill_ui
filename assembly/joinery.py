@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from assembly.core import EdgeName, InterfaceType, RemovalKind
 from assembly.panel import DadoSpec, Edge, NotchSpec, PanelSpec
+from layout_ast.layout import DogboneSpec
 
 if TYPE_CHECKING:
     from assembly.core import Interface
@@ -194,6 +195,7 @@ class Captured:
     inset_mm: float = 0.0
     fitment_mm: float = 0.2
     receiving: Literal["a", "b"] = "a"
+    dogbone: DogboneSpec | None = None
     removal_kind: RemovalKind = RemovalKind.FACE
     valid_interfaces: frozenset[InterfaceType] = frozenset(
         {
@@ -232,6 +234,7 @@ class Captured:
                 depth_mm=depth,
                 edge=edge,
                 orientation=_dado_orientation(edge),
+                dogbone=self.dogbone,
             )
             return (panel_a.with_dados((dado,)), panel_b)
         else:
@@ -244,6 +247,7 @@ class Captured:
                 depth_mm=depth,
                 edge=edge,
                 orientation=_dado_orientation(edge),
+                dogbone=self.dogbone,
             )
             return (panel_a, panel_b.with_dados((dado,)))
 

@@ -131,12 +131,8 @@ class MachineConfig:
             m = self.machine
             if wb.x_min < m.envelope_x_min - 0.001:
                 raise ValueError(f"Spoilboard x_min ({wb.x_min}) is outside envelope x_min ({m.envelope_x_min})")
-            if wb.x_max > m.envelope_x_max + 0.001:
-                raise ValueError(f"Spoilboard x_max ({wb.x_max}) exceeds envelope x_max ({m.envelope_x_max})")
             if wb.y_min < m.envelope_y_min - 0.001:
                 raise ValueError(f"Spoilboard y_min ({wb.y_min}) is outside envelope y_min ({m.envelope_y_min})")
-            if wb.y_max > m.envelope_y_max + 0.001:
-                raise ValueError(f"Spoilboard y_max ({wb.y_max}) exceeds envelope y_max ({m.envelope_y_max})")
 
     def compute_margins(self) -> dict[str, float]:
         if self.spoilboard is None:

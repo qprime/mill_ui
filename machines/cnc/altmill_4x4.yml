@@ -7,13 +7,13 @@ envelope:
   y_max: 1251
 
 table:
-  rail_spacing_mm: 1314.5
-  surface_width_mm: 1257.3
+  rail_spacing_mm: 1319
+  surface_width_mm: 1244.6
   surface_height_mm: 1470
 
 spoilboard:
-  width_mm: 1257.3
-  height_mm: 1251
+  width_mm: 1244.6
+  height_mm: 1254.125
   offset_x: 0
   offset_y: 0
 

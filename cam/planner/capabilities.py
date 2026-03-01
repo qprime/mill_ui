@@ -76,6 +76,10 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         ConstraintSupport.HONORED,
         note="Secondary tool pass for pocket internal corners",
     ),
+    "rest": ConstraintStatus(
+        ConstraintSupport.HONORED,
+        note="Two-tool rest pocketing: rough with large tool, finish corners with small tool",
+    ),
 }
 
 
@@ -130,6 +134,7 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         "edge_feature": 0,
         "dogbone": 0,
         "corner_cleanup": 0,
+        "rest": 0,
     }
 
     for intent in intents:
@@ -162,6 +167,8 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
             counts["dogbone"] += 1
         if intent.corner_cleanup_tool_diameter_mm is not None:
             counts["corner_cleanup"] += 1
+        if intent.rest is not None:
+            counts["rest"] += 1
 
     entries: list[ConstraintAuditEntry] = []
     errors: list[str] = []
@@ -180,6 +187,7 @@ def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
         ("edge_feature", "edge_feature"),
         ("dogbone", "dogbone"),
         ("corner_cleanup", "corner_cleanup"),
+        ("rest", "rest"),
     ]
 
     for count_key, capability_key in constraint_mapping:

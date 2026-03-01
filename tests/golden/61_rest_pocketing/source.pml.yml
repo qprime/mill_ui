@@ -1,0 +1,33 @@
+# mill_ui: 15c608f8
+# generated: 2026-02-28
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: rest_simple
+    feature:
+      type: pocket
+      depth: 9.5mm
+      rest_tool: 3.175mm
+    at:
+      x: 75mm
+      y: 100mm
+      width: 80mm
+      height: 60mm
+- Rect:
+    id: rest_explicit
+    feature:
+      type: pocket
+      depth: 9.5mm
+      rest:
+        tool: 3.175mm
+        rough_allowance: 0.3mm
+    at:
+      x: 225mm
+      y: 100mm
+      width: 80mm
+      height: 60mm

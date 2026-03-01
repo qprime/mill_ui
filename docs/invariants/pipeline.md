@@ -99,7 +99,13 @@ gcode = plan_and_generate(hints)
 
 `Feature` and `RemovalIntent` are semantic dataclasses. They describe *what* to machine, not *how*. Do not add fields that carry computed planner-level geometry (absolute corner coordinates, tool-specific offsets, reference points) through these layers.
 
-**Known exception:** `dogbone_corners` and `dogbone_reference_point` on `Feature` and `RemovalIntent` exist because the resolver has geometric context (panel placement, notch edge, cursor position) that the adapter lacks. These fields are consumed by exactly one path in `removal_to_planner.py` to build `DogboneInput` for 2-corner assembly notch dogbones. This is a contained exception — do not use it as a pattern for new fields.
+**Known exceptions:**
+
+1. `dogbone_corners` and `dogbone_reference_point` on `Feature` and `RemovalIntent` exist because the resolver has geometric context (panel placement, notch edge, cursor position) that the adapter lacks. These fields are consumed by exactly one path in `removal_to_planner.py` to build `DogboneInput` for 2-corner assembly notch dogbones.
+
+2. `RestSpec.tool_diameter_mm` on `Feature` and `RemovalIntent` constrains the removal geometry — it determines which corner regions get machined (areas the rough tool can't reach are defined by the rough/rest tool diameter relationship). This is analogous to `corner_cleanup_tool_diameter_mm`, which exists on Feature/RemovalIntent because the tool diameter defines the bore geometry at each corner.
+
+These are contained exceptions — do not use them as a pattern for new fields.
 
 **Wrong:**
 ```python

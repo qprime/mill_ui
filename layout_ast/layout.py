@@ -58,6 +58,21 @@ class DogboneSpec:
 
 
 @dataclass(frozen=True)
+class RestSpec:
+    tool_diameter_mm: float
+    rough_allowance_mm: float = 0.5
+    finish_allowance_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.tool_diameter_mm <= 0.0:
+            raise ValueError(f"rest tool_diameter_mm must be positive, got {self.tool_diameter_mm}")
+        if self.rough_allowance_mm < 0.0:
+            raise ValueError(f"rest rough_allowance_mm must be >= 0, got {self.rough_allowance_mm}")
+        if self.finish_allowance_mm < 0.0:
+            raise ValueError(f"rest finish_allowance_mm must be >= 0, got {self.finish_allowance_mm}")
+
+
+@dataclass(frozen=True)
 class Feature:
     type: str
     depth_mm: float
@@ -67,6 +82,7 @@ class Feature:
     dogbone: DogboneSpec | None = None
     dogbone_corners: tuple[tuple[float, float], ...] | None = None
     dogbone_reference_point: tuple[float, float] | None = None
+    rest: RestSpec | None = None
 
     tab_count: int | None = None
     tab_height_mm: float | None = None

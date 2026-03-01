@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "43_cubby_grid",
-    "created_at": "2026-02-28T19:10:01.363733+00:00"
+    "created_at": "2026-03-01T01:26:52.652539+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.38,
+    "extraction_time_ms": 1.42,
     "document": {
       "width_mm": 2183.175,
       "height_mm": 1529.175,
@@ -644,22 +644,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.712,
+    "extraction_time_ms": 1.8487,
     "summary": {
-      "total_lines": 8497,
-      "comment_lines": 65,
-      "motion_lines": 7013,
+      "total_lines": 8351,
+      "comment_lines": 67,
+      "motion_lines": 6854,
       "tool_change_lines": 0,
-      "spindle_lines": 9,
-      "feed_lines": 5091
+      "spindle_lines": 12,
+      "feed_lines": 5012
     },
     "motion": {
-      "g0_count": 3311,
-      "g1_count": 3702,
+      "g0_count": 3232,
+      "g1_count": 3622,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 65584.6715,
-      "total_feed_distance_mm": 212312.673
+      "total_rapid_distance_mm": 64625.788400000005,
+      "total_feed_distance_mm": 211480.19299999997
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -726,14 +726,17 @@
         -9.525,
         -9.0,
         -7.938,
+        -7.5,
         -6.35,
         -6.0,
+        -5.0,
         -4.762,
         -3.175,
         -3.0,
+        -2.5,
         -1.587
       ],
-      "depth_count": 67,
+      "depth_count": 70,
       "max_single_plunge_mm": 106.0
     },
     "xy_bounds": {
@@ -763,27 +766,17 @@
     "operations": {
       "profile_passes": 0,
       "pocket_passes": 0,
-      "bore_passes": 12,
-      "total_passes": 12,
+      "bore_passes": 2,
+      "total_passes": 2,
       "operation_names": [
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
         "drill_peck",
         "drill_peck"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 787.0161,
-      "feed_time_s": 24692.4029,
-      "total_time_s": 25479.419
+      "rapid_time_s": 775.5094,
+      "feed_time_s": 24602.706899999997,
+      "total_time_s": 25378.2163
     },
     "tabs": {
       "detected_count": 0,
@@ -791,6 +784,6 @@
       "max_cutting_depth_mm": -100.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 3
+    "file_count": 4
   }
 }

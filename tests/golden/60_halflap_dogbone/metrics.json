@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "60_halflap_dogbone",
-    "created_at": "2026-02-28T19:10:02.231148+00:00"
+    "created_at": "2026-03-01T01:26:53.505298+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.43,
+    "extraction_time_ms": 4.37,
     "document": {
       "width_mm": 1773.175,
       "height_mm": 2647.175,
@@ -2475,22 +2475,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 21.1506,
+    "extraction_time_ms": 20.2467,
     "summary": {
-      "total_lines": 13918,
-      "comment_lines": 134,
-      "motion_lines": 13187,
+      "total_lines": 13868,
+      "comment_lines": 136,
+      "motion_lines": 13124,
       "tool_change_lines": 0,
-      "spindle_lines": 9,
-      "feed_lines": 9527
+      "spindle_lines": 12,
+      "feed_lines": 9496
     },
     "motion": {
-      "g0_count": 4227,
-      "g1_count": 8960,
+      "g0_count": 4196,
+      "g1_count": 8928,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 96899.8749,
-      "total_feed_distance_mm": 246940.066
+      "total_rapid_distance_mm": 96744.65879999999,
+      "total_feed_distance_mm": 246607.074
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -2589,14 +2589,17 @@
         -9.525,
         -9.0,
         -7.938,
+        -7.5,
         -6.35,
         -6.0,
+        -5.0,
         -4.762,
         -3.175,
         -3.0,
+        -2.5,
         -1.587
       ],
-      "depth_count": 99,
+      "depth_count": 102,
       "max_single_plunge_mm": 156.0
     },
     "xy_bounds": {
@@ -2626,13 +2629,9 @@
     "operations": {
       "profile_passes": 0,
       "pocket_passes": 0,
-      "bore_passes": 106,
-      "total_passes": 106,
+      "bore_passes": 102,
+      "total_passes": 102,
       "operation_names": [
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
-        "drill_peck",
         "drill_peck",
         "drill_peck",
         "drill_peck",
@@ -2738,9 +2737,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 1162.7985,
-      "feed_time_s": 32403.9556,
-      "total_time_s": 33566.7541
+      "rapid_time_s": 1160.9359,
+      "feed_time_s": 32368.0772,
+      "total_time_s": 33529.0131
     },
     "tabs": {
       "detected_count": 0,
@@ -2748,6 +2747,6 @@
       "max_cutting_depth_mm": -150.0,
       "tabs_at_max_depth": true
     },
-    "file_count": 3
+    "file_count": 4
   }
 }

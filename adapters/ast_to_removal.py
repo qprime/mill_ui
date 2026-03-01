@@ -99,6 +99,8 @@ def item_to_removal_intent(
             intent = replace(intent, dogbone_corners=item.feature.dogbone_corners)
         if item.feature.dogbone_reference_point is not None:
             intent = replace(intent, dogbone_reference_point=item.feature.dogbone_reference_point)
+        if item.feature.rest is not None:
+            intent = replace(intent, rest=item.feature.rest)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent

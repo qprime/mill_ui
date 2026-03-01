@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ir.removal_intent import EdgeFeatureSpec, EdgeTreatment, ShapeGeometry
-from layout_ast.layout import FeedsOverride
+from layout_ast.layout import FeedsOverride, RestSpec
 
 
 @dataclass(frozen=True)
@@ -115,7 +115,7 @@ class FeatureInput:
     side: str | None = None
     tabs: TabsInput | None = None
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
-    corner_cleanup_tool_diameter_mm: float | None = None
+    rest: RestSpec | None = None
     edge_treatment: EdgeTreatmentInput | None = None
     feeds_override: FeedsOverride | None = None
 
@@ -135,8 +135,12 @@ class FeatureInput:
             result["tabs"] = self.tabs.to_dict()
         if self.keepouts:
             result["keepouts"] = [k.to_dict() for k in self.keepouts]
-        if self.corner_cleanup_tool_diameter_mm is not None:
-            result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
+        if self.rest is not None:
+            result["rest"] = {
+                "tool_diameter_mm": self.rest.tool_diameter_mm,
+                "rough_allowance_mm": self.rest.rough_allowance_mm,
+                "finish_allowance_mm": self.rest.finish_allowance_mm,
+            }
         if self.edge_treatment is not None:
             result["edge_treatment"] = self.edge_treatment.to_dict()
         return result
@@ -333,6 +337,15 @@ class PlannerInput:
                 ),
             )
 
+        def parse_rest(r: dict[str, Any] | None) -> RestSpec | None:
+            if r is None:
+                return None
+            return RestSpec(
+                tool_diameter_mm=float(r.get("tool_diameter_mm", 0.0)),
+                rough_allowance_mm=float(r.get("rough_allowance_mm", 0.5)),
+                finish_allowance_mm=float(r.get("finish_allowance_mm", 0.0)),
+            )
+
         def parse_feature(f: dict[str, Any]) -> FeatureInput:
             shape = str(f.get("shape", "Rect"))
             geometry = parse_geometry(f.get("geometry", {}), shape)
@@ -349,7 +362,7 @@ class PlannerInput:
                 side=f.get("side"),
                 tabs=parse_tabs(f.get("tabs")),
                 keepouts=keepouts,
-                corner_cleanup_tool_diameter_mm=f.get("corner_cleanup_tool_diameter_mm"),
+                rest=parse_rest(f.get("rest")),
                 edge_treatment=parse_edge_treatment(f.get("edge_treatment")),
             )
 

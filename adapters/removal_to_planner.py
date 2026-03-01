@@ -110,7 +110,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         side=side,
         tabs=tabs,
         keepouts=keepouts,
-        corner_cleanup_tool_diameter_mm=intent.corner_cleanup_tool_diameter_mm,
+        rest=intent.rest,
         edge_treatment=edge_treatment,
         feeds_override=intent.feeds_override,
     )

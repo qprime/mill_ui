@@ -1,21 +1,27 @@
 {
   "timing": {
-    "ir_ms": 3.84,
-    "hints_ms": 1.19,
-    "plan_ms": 67.9,
-    "gcode_ms": 46.92,
-    "svg_ms": 7.22,
-    "total_ms": 127.07
+    "ir_ms": 3.94,
+    "hints_ms": 1.22,
+    "plan_ms": 39.08,
+    "gcode_ms": 74.67,
+    "svg_ms": 7.2,
+    "total_ms": 126.11
   },
-  "constraint_audit": {},
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 92,
+      "safety_critical": false
+    }
+  },
   "complexity": {
-    "total_moves": 9976,
+    "total_moves": 9880,
     "rapid_moves": 340,
-    "cut_moves": 6798,
+    "cut_moves": 6750,
     "rapid_ratio": 0.034
   },
   "fidelity": {
-    "tool_changes": 3,
+    "tool_changes": 4,
     "passes": [
       {
         "name": "pocket",
@@ -24,8 +30,13 @@
       },
       {
         "name": "dogbone",
+        "tool_diameter_mm": 9.525,
+        "move_count": 234
+      },
+      {
+        "name": "dogbone",
         "tool_diameter_mm": 3.175,
-        "move_count": 4888
+        "move_count": 4558
       },
       {
         "name": "profile",
@@ -35,16 +46,20 @@
     ]
   },
   "output_size": {
-    "total_bytes": 205631,
-    "total_lines": 9798,
+    "total_bytes": 204370,
+    "total_lines": 9716,
     "files": {
       "pocket-9.53mm": {
         "bytes": 8909,
         "lines": 452
       },
+      "dogbone-9.53mm": {
+        "bytes": 3507,
+        "lines": 236
+      },
       "dogbone-3.17mm": {
-        "bytes": 69667,
-        "lines": 4718
+        "bytes": 64899,
+        "lines": 4400
       },
       "profile-3.17mm": {
         "bytes": 127055,

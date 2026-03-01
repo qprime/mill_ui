@@ -1014,6 +1014,67 @@ Or as generator children:
 | `hole` | Drill/bore operation |
 | `engrave` | Shallow surface marking |
 
+### Rest Pocketing
+
+Two-stage pocket machining: a large tool clears bulk material (rough pass), then a smaller tool clears remaining unmachined corners and profiles the perimeter (rest pass). Produces better surface finish and faster cycle times for deep or wide pockets.
+
+Simple form (default allowances: rough 0.5mm, finish 0mm):
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 12mm
+      rest_tool: 6mm
+    at:
+      x: 100mm
+      y: 100mm
+      width: 200mm
+      height: 150mm
+```
+
+Explicit form:
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 12mm
+      rest:
+        tool: 6mm
+        rough_allowance: 0.5mm
+        finish_allowance: 0.0mm
+    at:
+      x: 100mm
+      y: 100mm
+      width: 200mm
+      height: 150mm
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `tool` / `rest_tool` | yes | — | Finish tool diameter |
+| `rough_allowance` | no | `0.5mm` | Stock left by rough pass on all walls |
+| `finish_allowance` | no | `0mm` | Final surface allowance after rest pass |
+
+Only supported on rectangular pocket shapes (Rect, Polygon). Cannot specify both `rest` and `rest_tool`. Mutually exclusive with `edge_treatment: {type: allowance}` — rest pocketing subsumes the allowance pattern by adding a tool change between passes.
+
+The rough pass uses the standard `pocket` operation name. Only the rest pass introduces `pocket_rest`. Operator workflow: run `pocket-*.nc`, tool change, run `pocket_rest-*.nc`.
+
+### Corner Cleanup
+
+Pocket features can specify a secondary tool pass at each corner for better corner access:
+
+```yaml
+- Rect:
+    feature:
+      type: pocket
+      depth: 6mm
+      corner_cleanup: 3.175mm
+```
+
+The `corner_cleanup` value is the diameter of the cleanup tool. A circular bore pocket is cut at each rectangular corner using this smaller tool.
+
 ### Dogbone Fillets
 
 Pocket features can specify dogbone fillets to provide clearance at internal corners for mating parts. CNC routers leave tool-radius fillets at internal corners; dogbone bores at each corner allow square parts to fit.

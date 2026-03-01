@@ -17,6 +17,7 @@ from .profile import offset_rect_shape, rect_shape
 from .tools import (
     ToolSelection,
     apply_feeds_override,
+    pick_tool_by_diameter,
     pick_tool_for_engrave,
     pick_tool_for_hole,
     pick_tool_for_pocket,
@@ -72,6 +73,138 @@ def _pocket_with_allowance(
         finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
 
 
+def _extract_rect_dims(entry: FeatureInput) -> tuple[float, float]:
+    sg = entry.geometry.geometry
+    shape_name = entry.shape.lower()
+    if shape_name == "rect":
+        return float(sg.w_mm or 0.0), float(sg.h_mm or 0.0)
+    elif shape_name == "polygon":
+        pts = sg.points or ()
+        if not pts:
+            return 0.0, 0.0
+        xs = [float(p[0]) for p in pts]
+        ys = [float(p[1]) for p in pts]
+        return max(xs) - min(xs), max(ys) - min(ys)
+    raise ValueError(f"Cannot extract rect dims from shape '{shape_name}'")
+
+
+def _plan_rest_pocket(
+    entry: FeatureInput,
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+    config: Config,
+) -> None:
+    from cam.ops.pocket import pocket_raster
+
+    assert entry.rest is not None
+    rest = entry.rest
+    shape_name = entry.shape.lower()
+
+    if shape_name not in ("rect", "polygon"):
+        raise ValueError(
+            f"Rest pocketing only supported for rectangular pockets, got shape '{entry.shape}' on feature '{entry.id}'"
+        )
+
+    et = entry.edge_treatment
+    if et is not None and et.type == "allowance":
+        raise ValueError(
+            f"Cannot combine 'rest' and 'edge_treatment: allowance' on feature '{entry.id}'. "
+            f"Rest pocketing subsumes edge_treatment allowance — use rest alone."
+        )
+
+    width, height = _extract_rect_dims(entry)
+    min_dim = min(width, height)
+
+    if rest.tool_diameter_mm >= min_dim:
+        raise ValueError(
+            f"Rest tool diameter ({rest.tool_diameter_mm}mm) must be less than "
+            f"pocket minimum dimension ({min_dim}mm) on feature '{entry.id}'"
+        )
+
+    rough_tool = pick_tool_for_pocket(
+        tool_db,
+        required_width_mm=min_dim,
+        cleanup_offset_mm=config.cleanup_offset_mm,
+    )
+    rough_tool = apply_feeds_override(rough_tool, entry.feeds_override)
+    accumulator.set_feature_tool(entry.id, rough_tool)
+
+    finish_tool = pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat")
+    finish_tool = apply_feeds_override(finish_tool, entry.feeds_override)
+
+    if finish_tool.diameter >= rough_tool.diameter:
+        raise ValueError(
+            f"Rest finish tool ({finish_tool.diameter}mm) must be smaller than "
+            f"rough tool ({rough_tool.diameter}mm) on feature '{entry.id}'"
+        )
+
+    center = entry.center_xy_mm
+    depth = entry.depth_mm
+    start_depth = max(0.0, entry.start_depth_mm)
+    cut_depth = depth - start_depth
+    if cut_depth <= 0.0:
+        return
+
+    rough_tool_r = 0.5 * rough_tool.diameter
+    finish_tool_r = 0.5 * finish_tool.diameter
+    rough_step_over = stepover_for_tool(rough_tool)
+    rough_step_down = stepdown_for_tool(rough_tool)
+    finish_step_over = stepover_for_tool(finish_tool)
+    finish_step_down = stepdown_for_tool(finish_tool)
+
+    rough_record = accumulator.get_record("pocket", rough_tool)
+    rough_wall_offset = rough_tool_r + config.cleanup_offset_mm + rest.rough_allowance_mm
+    rough_shape = offset_rect_shape(width, height, center, -rough_wall_offset)
+    if rough_shape is not None:
+        rough_moves = pocket_raster(
+            rough_shape, rough_record.setup, depth_mm=cut_depth, stepover=rough_step_over, stepdown=rough_step_down
+        )
+        rough_record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
+
+    rough_profile_shape = offset_rect_shape(width, height, center, -(rough_tool_r + rest.rough_allowance_mm))
+    if rough_profile_shape is not None:
+        rough_profile_moves = profile_outline(
+            rough_profile_shape, rough_record.setup, depth_mm=cut_depth, step_down=rough_step_down
+        )
+        rough_record.add_moves(offset_moves_z(rough_profile_moves, start_depth), increment=1)
+
+    rest_record = accumulator.get_record("pocket_rest", finish_tool)
+
+    half_w = 0.5 * width
+    half_h = 0.5 * height
+    cx, cy = center
+    corner_size = rough_tool_r + finish_tool_r
+    for corner_cx, corner_cy in [
+        (cx - half_w + 0.5 * corner_size, cy - half_h + 0.5 * corner_size),
+        (cx + half_w - 0.5 * corner_size, cy - half_h + 0.5 * corner_size),
+        (cx + half_w - 0.5 * corner_size, cy + half_h - 0.5 * corner_size),
+        (cx - half_w + 0.5 * corner_size, cy + half_h - 0.5 * corner_size),
+    ]:
+        corner_shape = offset_rect_shape(
+            corner_size,
+            corner_size,
+            (corner_cx, corner_cy),
+            -(finish_tool_r + rest.finish_allowance_mm),
+        )
+        if corner_shape is not None:
+            corner_moves = pocket_raster(
+                corner_shape,
+                rest_record.setup,
+                depth_mm=cut_depth,
+                stepover=finish_step_over,
+                stepdown=finish_step_down,
+            )
+            rest_record.add_moves(offset_moves_z(corner_moves, start_depth), increment=0)
+
+    finish_profile_shape = offset_rect_shape(width, height, center, -(finish_tool_r + rest.finish_allowance_mm))
+    if finish_profile_shape is not None:
+        finish_profile_moves = profile_outline(
+            finish_profile_shape, rest_record.setup, depth_mm=cut_depth, step_down=finish_step_down
+        )
+        rest_record.add_moves(offset_moves_z(finish_profile_moves, start_depth), increment=1)
+
+
 def plan_pocket_passes(
     pockets: tuple[FeatureInput, ...],
     *,
@@ -80,6 +213,10 @@ def plan_pocket_passes(
     config: Config,
 ) -> None:
     for entry in pockets:
+        if entry.rest is not None:
+            _plan_rest_pocket(entry, accumulator=accumulator, tool_db=tool_db, config=config)
+            continue
+
         sg = entry.geometry.geometry
         shape_name = entry.shape.lower()
         required_width = None
@@ -335,17 +472,7 @@ def plan_corner_cleanup_passes(
         if corner_tool_diameter <= 0.0:
             continue
 
-        tool = None
-        for t in tool_db:
-            if abs(t.diameter - corner_tool_diameter) < 0.01:
-                tool = t
-                break
-
-        if tool is None:
-            raise ValueError(
-                f"Corner cleanup tool with diameter {corner_tool_diameter}mm not found in tool_db. "
-                f"Available tools: {[t.diameter for t in tool_db]}"
-            )
+        tool = pick_tool_by_diameter(tool_db, corner_tool_diameter)
 
         record = accumulator.get_record("corner_cleanup", tool)
         setup = record.setup
@@ -424,16 +551,7 @@ def plan_dogbone_passes(
 ) -> None:
     for entry in dogbones:
         if entry.tool_diameter_mm is not None:
-            tool = None
-            for t in tool_db:
-                if abs(t.diameter - entry.tool_diameter_mm) < 0.01:
-                    tool = t
-                    break
-            if tool is None:
-                raise ValueError(
-                    f"Dogbone tool with diameter {entry.tool_diameter_mm}mm not found in tool_db. "
-                    f"Available tools: {[t.diameter for t in tool_db]}"
-                )
+            tool = pick_tool_by_diameter(tool_db, entry.tool_diameter_mm)
         else:
             parent_tool = accumulator.get_feature_tool(entry.pocket_id)
             if parent_tool is not None:

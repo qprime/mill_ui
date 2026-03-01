@@ -77,6 +77,19 @@ def format_feature(feature: Feature) -> dict[str, Any]:
     if feature.corner_cleanup_tool_diameter_mm is not None:
         result["corner_cleanup"] = dim(feature.corner_cleanup_tool_diameter_mm)
 
+    if feature.rest is not None:
+        rest_spec = feature.rest
+        has_non_defaults = rest_spec.rough_allowance_mm != 0.5 or rest_spec.finish_allowance_mm != 0.0
+        if has_non_defaults:
+            rest_dict: dict[str, Any] = {"tool": dim(rest_spec.tool_diameter_mm)}
+            if rest_spec.rough_allowance_mm != 0.5:
+                rest_dict["rough_allowance"] = dim(rest_spec.rough_allowance_mm)
+            if rest_spec.finish_allowance_mm != 0.0:
+                rest_dict["finish_allowance"] = dim(rest_spec.finish_allowance_mm)
+            result["rest"] = rest_dict
+        else:
+            result["rest_tool"] = dim(rest_spec.tool_diameter_mm)
+
     if feature.tab_count is not None:
         result["tab_count"] = feature.tab_count
     if feature.tab_height_mm is not None:

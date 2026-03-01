@@ -240,7 +240,7 @@ class TestDogbonePlanner:
         assert "pocket" in ops
         assert "dogbone" in ops
 
-    def test_dogbone_uses_smallest_tool_when_no_diameter(self):
+    def test_dogbone_inherits_parent_pocket_tool_when_no_diameter(self):
         ast = _make_pocket_ast(dogbone=DogboneSpec())
         intents = ast_to_removal_intents(ast)
         planner_input = removal_intents_to_planner_input(intents)
@@ -259,8 +259,9 @@ class TestDogbonePlanner:
             stock=stock,
         )
 
+        pocket_pass = next(p for p in passes if p.op == "pocket")
         dogbone_pass = next(p for p in passes if p.op == "dogbone")
-        assert dogbone_pass.tool_selection.diameter == 3.175
+        assert dogbone_pass.tool_selection.diameter == pocket_pass.tool_selection.diameter
 
     def test_dogbone_uses_explicit_diameter(self):
         ast = _make_pocket_ast(dogbone=DogboneSpec(diameter_mm=6.35))

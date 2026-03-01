@@ -55,7 +55,7 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, Sheet
+from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, RestSpec, Sheet
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import NestJob, NestParseError, NestPart
 
@@ -159,6 +159,22 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
             overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
         )
 
+    rest: RestSpec | None = None
+    rest_raw = data.get("rest")
+    rest_tool_raw = data.get("rest_tool")
+    if rest_raw is not None and rest_tool_raw is not None:
+        raise PMLParseError("Cannot specify both 'rest' and 'rest_tool'", path)
+    if isinstance(rest_raw, dict):
+        rest = RestSpec(
+            tool_diameter_mm=parse_dimension(_require(rest_raw, "tool", path + ".rest")),
+            rough_allowance_mm=parse_dimension(rest_raw["rough_allowance"]) if "rough_allowance" in rest_raw else 0.5,
+            finish_allowance_mm=parse_dimension(rest_raw["finish_allowance"])
+            if "finish_allowance" in rest_raw
+            else 0.0,
+        )
+    elif rest_tool_raw is not None:
+        rest = RestSpec(tool_diameter_mm=parse_dimension(rest_tool_raw))
+
     return Feature(
         type=feature_type,
         depth_mm=depth_mm,
@@ -166,6 +182,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=parse_dimension(data["corner_cleanup"]) if "corner_cleanup" in data else None,
         dogbone=dogbone,
+        rest=rest,
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,

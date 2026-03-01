@@ -1,13 +1,19 @@
 {
   "timing": {
-    "ir_ms": 1.74,
+    "ir_ms": 1.83,
     "hints_ms": 0.58,
-    "plan_ms": 8.07,
-    "gcode_ms": 7.77,
+    "plan_ms": 8.14,
+    "gcode_ms": 8.22,
     "svg_ms": 3.63,
-    "total_ms": 21.79
+    "total_ms": 22.4
   },
-  "constraint_audit": {},
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 40,
+      "safety_critical": false
+    }
+  },
   "complexity": {
     "total_moves": 1711,
     "rapid_moves": 132,

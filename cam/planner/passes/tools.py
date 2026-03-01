@@ -162,6 +162,25 @@ def pick_tool_for_engrave(tool_db: Sequence[ToolSelection]) -> ToolSelection:
     return fallback[0]
 
 
+def pick_tool_by_diameter(
+    tool_db: Sequence[ToolSelection],
+    diameter_mm: float,
+    *,
+    tolerance_mm: float = 0.01,
+    kind: str | None = None,
+) -> ToolSelection:
+    for t in tool_db:
+        if kind is not None and t.kind != kind:
+            continue
+        if abs(t.diameter - diameter_mm) < tolerance_mm:
+            return t
+    kind_msg = f" of kind '{kind}'" if kind else ""
+    raise ValueError(
+        f"Tool with diameter {diameter_mm}mm{kind_msg} not found in tool_db. "
+        f"Available tools: {[t.diameter for t in tool_db]}"
+    )
+
+
 def stepdown_for_tool(tool: ToolSelection) -> float:
     if tool.depth_per_pass is not None and tool.depth_per_pass > 0.0:
         return float(tool.depth_per_pass)
@@ -217,6 +236,7 @@ __all__ = [
     "apply_feeds_override",
     "normalize_tool_entries",
     "pass_key",
+    "pick_tool_by_diameter",
     "pick_tool_for_edge",
     "pick_tool_for_engrave",
     "pick_tool_for_hole",

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from domains.domain import Bounds2D
-from layout_ast.layout import DogboneSpec, FeedsOverride
+from layout_ast.layout import DogboneSpec, FeedsOverride, RestSpec
 
 
 @dataclass(frozen=True)
@@ -169,6 +169,7 @@ class RemovalIntent:
     dogbone: DogboneSpec | None = None
     dogbone_corners: tuple[tuple[float, float], ...] | None = None
     dogbone_reference_point: tuple[float, float] | None = None
+    rest: RestSpec | None = None
     edge_feature: EdgeFeatureSpec | None = None
     item_type: str | None = None
     feature_type: str | None = None
@@ -227,6 +228,12 @@ class RemovalIntent:
             result["original_id"] = self.original_id
         if self.corner_cleanup_tool_diameter_mm is not None:
             result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
+        if self.rest is not None:
+            result["rest"] = {
+                "tool_diameter_mm": self.rest.tool_diameter_mm,
+                "rough_allowance_mm": self.rest.rough_allowance_mm,
+                "finish_allowance_mm": self.rest.finish_allowance_mm,
+            }
         if self.dogbone is not None:
             result["dogbone"] = {
                 "style": self.dogbone.style,
@@ -271,6 +278,7 @@ __all__ = [
     "Island",
     "KeepoutRegion",
     "RemovalIntent",
+    "RestSpec",
     "ShapeGeometry",
     "TabConstraint",
 ]

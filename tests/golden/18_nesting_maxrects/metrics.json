@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "18_nesting_maxrects",
-    "created_at": "2026-02-28T19:09:59.867646+00:00"
+    "created_at": "2026-03-01T01:26:51.163319+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -538,7 +538,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 20.5562,
+    "extraction_time_ms": 20.5573,
     "summary": {
       "total_lines": 48308,
       "comment_lines": 220,

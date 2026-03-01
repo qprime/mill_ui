@@ -212,8 +212,6 @@ class EdgeFeatureInput:
     edge_feature: EdgeFeatureSpec | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        from ir.removal_intent import BevelSpec, ChamferSpec
-
         result: dict[str, Any] = {
             "id": self.id,
             "shape": self.shape,
@@ -226,21 +224,7 @@ class EdgeFeatureInput:
         if self.side is not None:
             result["side"] = self.side
         if self.edge_feature is not None:
-            if isinstance(self.edge_feature, BevelSpec):
-                result["edge_feature"] = {
-                    "type": "bevel",
-                    "width_mm": self.edge_feature.width_mm,
-                    "angle_deg": self.edge_feature.angle_deg,
-                    "inner_depth_mm": self.edge_feature.inner_depth_mm,
-                }
-            elif isinstance(self.edge_feature, ChamferSpec):
-                result["edge_feature"] = {
-                    "type": "chamfer",
-                    "width_mm": self.edge_feature.width_mm,
-                    "angle_deg": self.edge_feature.angle_deg,
-                }
-            else:
-                raise TypeError(f"Unknown EdgeFeatureSpec type: {type(self.edge_feature)}")
+            result["edge_feature"] = self.edge_feature.to_dict()
         return result
 
 

@@ -13,11 +13,26 @@ class BevelSpec:
     angle_deg: float
     inner_depth_mm: float
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": "bevel",
+            "width_mm": self.width_mm,
+            "angle_deg": self.angle_deg,
+            "inner_depth_mm": self.inner_depth_mm,
+        }
+
 
 @dataclass(frozen=True)
 class ChamferSpec:
     width_mm: float
     angle_deg: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": "chamfer",
+            "width_mm": self.width_mm,
+            "angle_deg": self.angle_deg,
+        }
 
 
 EdgeFeatureSpec = BevelSpec | ChamferSpec
@@ -241,21 +256,7 @@ class RemovalIntent:
                 "overcut_mm": self.dogbone.overcut_mm,
             }
         if self.edge_feature is not None:
-            if isinstance(self.edge_feature, BevelSpec):
-                result["edge_feature"] = {
-                    "type": "bevel",
-                    "width_mm": self.edge_feature.width_mm,
-                    "angle_deg": self.edge_feature.angle_deg,
-                    "inner_depth_mm": self.edge_feature.inner_depth_mm,
-                }
-            elif isinstance(self.edge_feature, ChamferSpec):
-                result["edge_feature"] = {
-                    "type": "chamfer",
-                    "width_mm": self.edge_feature.width_mm,
-                    "angle_deg": self.edge_feature.angle_deg,
-                }
-            else:
-                raise TypeError(f"Unknown EdgeFeatureSpec type: {type(self.edge_feature)}")
+            result["edge_feature"] = self.edge_feature.to_dict()
         if self.item_type is not None:
             result["item_type"] = self.item_type
         if self.feature_type is not None:

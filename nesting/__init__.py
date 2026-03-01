@@ -26,6 +26,7 @@ from .types import (
     PlacementResult,
     SheetLayout,
     SheetSpec,
+    WasteRect,
 )
 from .validation import (
     NestingValidationResult,
@@ -34,7 +35,6 @@ from .validation import (
 )
 from .waste_decomposition import (
     PartBounds,
-    WasteRect,
     WasteStrategy,
     compute_waste_rectangles,
 )

@@ -2,16 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core.geometry import clip_line_to_domain
-from domains.transforms import local_to_sheet_batch
-from generators.area.engrave_text import engrave_number_label
 from generators.core import (
     GeneratorResult,
-    generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.measurement_helpers import (
+    compute_label_offset,
+    create_engraved_line,
+    create_label_items,
+    should_label,
+    validate_items_generated,
+)
 from generators.params.loop import MeasurementEdgeParams
-from generators.utils import create_line_item, get_local_bounds, is_major_tick
+from generators.utils import get_local_bounds, is_major_tick
 from layout_ast.layout import Item
 
 if TYPE_CHECKING:
@@ -49,71 +52,18 @@ def measurement_edge_generator(
     items: list[Item] = []
     item_index = 0
 
-    def add_tick(
-        start_local: tuple[float, float],
-        end_local: tuple[float, float],
-        suffix: str,
-    ) -> None:
-        nonlocal item_index
-        sheet_points = local_to_sheet_batch([start_local, end_local], domain)
-        sheet_start, sheet_end = sheet_points[0], sheet_points[1]
-
-        clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
-
-        for seg_start, seg_end in clipped:
-            item = create_line_item(
-                start=seg_start,
-                end=seg_end,
-                depth_mm=params.depth_mm,
-                shape_id=generate_shape_id(shape_id_prefix, item_index, suffix),
-            )
-            items.append(item)
-            item_index += 1
-
     x_origin = local_x_min
     y_origin = local_y_min
 
     edges_set = set(params.edges)
 
-    if params.label_offset_mm is not None:
-        label_offset = params.label_offset_mm
-    else:
-        label_offset = major_length + params.label_height_mm * 0.8
+    label_offset = compute_label_offset(major_length, params.label_height_mm, params.label_offset_mm)
     label_index = 0
 
     has_left = "left" in edges_set
     has_bottom = "bottom" in edges_set
 
     label_spacing = int(major_spacing) * params.label_interval
-
-    def should_label(value: int) -> bool:
-        if value < params.label_start:
-            return False
-        return (value - params.label_start) % label_spacing == 0
-
-    def add_label(
-        local_pos: tuple[float, float],
-        value: int,
-        orientation: str,
-        alignment: str = "center",
-        vertical_alignment: str = "center",
-    ) -> None:
-        nonlocal label_index
-        if not params.labels:
-            return
-        sheet_pos = local_to_sheet_batch([local_pos], domain)[0]
-        label_items = engrave_number_label(
-            value=value,
-            position=sheet_pos,
-            height_mm=params.label_height_mm,
-            depth_mm=params.depth_mm,
-            alignment=alignment,
-            vertical_alignment=vertical_alignment,
-            orientation=orientation,
-            shape_id_prefix=f"{shape_id_prefix}_label_{label_index}",
-        )
-        items.extend(label_items)
-        label_index += 1
 
     if "bottom" in edges_set or "top" in edges_set:
         x = x_origin
@@ -124,27 +74,66 @@ def measurement_edge_generator(
                 tick_length = major_length if is_major else minor_length
 
                 if "bottom" in edges_set:
-                    add_tick(
+                    new_items = create_engraved_line(
                         (x, local_y_min),
                         (x, local_y_min + tick_length),
                         "bottom",
+                        domain,
+                        params.depth_mm,
+                        shape_id_prefix,
+                        item_index,
                     )
+                    items.extend(new_items)
+                    item_index += len(new_items)
 
                 if "top" in edges_set:
-                    add_tick(
+                    new_items = create_engraved_line(
                         (x, local_y_max),
                         (x, local_y_max - tick_length),
                         "top",
+                        domain,
+                        params.depth_mm,
+                        shape_id_prefix,
+                        item_index,
                     )
+                    items.extend(new_items)
+                    item_index += len(new_items)
 
             if is_major:
                 value = round(x - x_origin)
                 skip_label = first_major and has_left and value == 0
-                if value >= 0 and not skip_label and should_label(value):
+                if (
+                    value >= 0
+                    and not skip_label
+                    and params.labels
+                    and should_label(value, params.label_start, label_spacing)
+                ):
                     if "bottom" in edges_set:
-                        add_label((x, local_y_min - label_offset), value, "horizontal")
+                        new_items = create_label_items(
+                            (x, local_y_min - label_offset),
+                            value,
+                            "horizontal",
+                            domain,
+                            params.depth_mm,
+                            params.label_height_mm,
+                            shape_id_prefix,
+                            label_index,
+                        )
+                        items.extend(new_items)
+                        label_index += 1
                     if "top" in edges_set:
-                        add_label((x, local_y_max + label_offset), value, "horizontal")
+                        new_items = create_label_items(
+                            (x, local_y_max + label_offset),
+                            value,
+                            "horizontal",
+                            domain,
+                            params.depth_mm,
+                            params.label_height_mm,
+                            shape_id_prefix,
+                            label_index,
+                        )
+                        items.extend(new_items)
+                        label_index += 1
                 first_major = False
 
             x += minor_spacing
@@ -158,36 +147,75 @@ def measurement_edge_generator(
                 tick_length = major_length if is_major else minor_length
 
                 if "left" in edges_set:
-                    add_tick(
+                    new_items = create_engraved_line(
                         (local_x_min, y),
                         (local_x_min + tick_length, y),
                         "left",
+                        domain,
+                        params.depth_mm,
+                        shape_id_prefix,
+                        item_index,
                     )
+                    items.extend(new_items)
+                    item_index += len(new_items)
 
                 if "right" in edges_set:
-                    add_tick(
+                    new_items = create_engraved_line(
                         (local_x_max, y),
                         (local_x_max - tick_length, y),
                         "right",
+                        domain,
+                        params.depth_mm,
+                        shape_id_prefix,
+                        item_index,
                     )
+                    items.extend(new_items)
+                    item_index += len(new_items)
 
             if is_major:
                 value = round(y - y_origin)
                 skip_label = first_major and has_bottom and value == 0
-                if value >= 0 and not skip_label and should_label(value):
+                if (
+                    value >= 0
+                    and not skip_label
+                    and params.labels
+                    and should_label(value, params.label_start, label_spacing)
+                ):
                     if "left" in edges_set:
-                        add_label((local_x_min - label_offset, y), value, "vertical", "center", "bottom")
+                        new_items = create_label_items(
+                            (local_x_min - label_offset, y),
+                            value,
+                            "vertical",
+                            domain,
+                            params.depth_mm,
+                            params.label_height_mm,
+                            shape_id_prefix,
+                            label_index,
+                            "center",
+                            "bottom",
+                        )
+                        items.extend(new_items)
+                        label_index += 1
                     if "right" in edges_set:
-                        add_label((local_x_max + label_offset, y), value, "vertical", "center", "top")
+                        new_items = create_label_items(
+                            (local_x_max + label_offset, y),
+                            value,
+                            "vertical",
+                            domain,
+                            params.depth_mm,
+                            params.label_height_mm,
+                            shape_id_prefix,
+                            label_index,
+                            "center",
+                            "top",
+                        )
+                        items.extend(new_items)
+                        label_index += 1
                 first_major = False
 
             y += minor_spacing
 
-    if not items and not allow_empty:
-        raise ValueError(
-            "MeasurementEdgeGenerator: Could not generate any tick marks. "
-            "Domain may be too small for the specified spacing."
-        )
+    validate_items_generated(items, allow_empty, "MeasurementEdgeGenerator")
 
     return items
 

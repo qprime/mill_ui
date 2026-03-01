@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core.geometry import clip_line_to_domain
-from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
-    generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.measurement_helpers import create_engraved_line
 from generators.params.area import GridLinesParams
-from generators.utils import create_line_item, get_local_bounds, is_major_tick
+from generators.utils import get_local_bounds, is_major_tick
 from layout_ast.layout import Item
 
 if TYPE_CHECKING:
@@ -46,27 +44,6 @@ def grid_lines_generator(
     items: list[Item] = []
     item_index = 0
 
-    def add_line(
-        start_local: tuple[float, float],
-        end_local: tuple[float, float],
-        suffix: str,
-    ) -> None:
-        nonlocal item_index
-        sheet_points = local_to_sheet_batch([start_local, end_local], domain)
-        sheet_start, sheet_end = sheet_points[0], sheet_points[1]
-
-        clipped = clip_line_to_domain(sheet_start, sheet_end, domain)
-
-        for seg_start, seg_end in clipped:
-            item = create_line_item(
-                start=seg_start,
-                end=seg_end,
-                depth_mm=params.depth_mm,
-                shape_id=generate_shape_id(shape_id_prefix, item_index, suffix),
-            )
-            items.append(item)
-            item_index += 1
-
     x_origin = local_x_min
     y_origin = local_y_min
 
@@ -77,22 +54,34 @@ def grid_lines_generator(
     while x < local_x_max - 0.001:
         is_major = is_major_tick(x, x_origin, major_spacing)
         if is_major or params.minor_lines:
-            add_line(
+            new_items = create_engraved_line(
                 (x, local_y_min),
                 (x, local_y_max),
                 "vertical",
+                domain,
+                params.depth_mm,
+                shape_id_prefix,
+                item_index,
             )
+            items.extend(new_items)
+            item_index += len(new_items)
         x += spacing
 
     y = y_origin + spacing
     while y < local_y_max - 0.001:
         is_major = is_major_tick(y, y_origin, major_spacing)
         if is_major or params.minor_lines:
-            add_line(
+            new_items = create_engraved_line(
                 (local_x_min, y),
                 (local_x_max, y),
                 "horizontal",
+                domain,
+                params.depth_mm,
+                shape_id_prefix,
+                item_index,
             )
+            items.extend(new_items)
+            item_index += len(new_items)
         y += spacing
 
     if not items and not allow_empty:

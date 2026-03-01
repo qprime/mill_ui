@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from assembly.core import EdgeName, InterfaceType, RemovalKind
+from assembly.notches import _compute_finger_notch_ranges
 from assembly.panel import DadoSpec, Edge, NotchSpec, PanelSpec
 from layout_ast.layout import DogboneSpec
 
@@ -45,42 +46,21 @@ def _finger_joints_to_notches(
     clearance_mm: float = 0.12,
     dogbone: DogboneSpec | None = None,
 ) -> list[NotchSpec]:
-    if width_mm is None and count is None:
-        raise ValueError("Specify at least one of width_mm or count")
+    if (width_mm is None) == (count is None):
+        raise ValueError("Specify exactly one of width_mm or count")
 
-    if count is not None:
-        n = count
-    else:
-        assert width_mm is not None
-        n = round(edge_length / width_mm)
+    ranges = _compute_finger_notch_ranges(edge_length, phase, width_mm, count, clearance_mm)
 
-    n = max(3, n)
-    if n % 2 == 0:
-        n += 1
-
-    finger_width = edge_length / n
-
-    notches: list[NotchSpec] = []
-    for i in range(n):
-        is_notch = (i % 2 == 1) == (phase == 0)
-        if is_notch:
-            boundary_expansion = clearance_mm / 4
-            u_start = i * finger_width - boundary_expansion
-            u_end = (i + 1) * finger_width + boundary_expansion
-            u_start = max(0.0, u_start)
-            u_end = min(edge_length, u_end)
-            if u_end - u_start <= 1e-9:
-                continue
-            notch = NotchSpec(
-                edge=edge,
-                u_start_mm=u_start,
-                u_len_mm=u_end - u_start,
-                depth_mm=depth_mm,
-                dogbone=dogbone,
-            )
-            notches.append(notch)
-
-    return notches
+    return [
+        NotchSpec(
+            edge=edge,
+            u_start_mm=u_start,
+            u_len_mm=u_len,
+            depth_mm=depth_mm,
+            dogbone=dogbone,
+        )
+        for u_start, u_len in ranges
+    ]
 
 
 @dataclass(frozen=True)
@@ -122,13 +102,16 @@ class Finger:
         edge_b = _edge_name_to_enum(interface.edge_b)
         edge_length = panel_a.edge_length(edge_a)
 
+        width = None if self.count is not None else self.width_mm
+        count = self.count if self.count is not None else None
+
         notches_a = _finger_joints_to_notches(
             edge=edge_a,
             edge_length=edge_length,
             depth_mm=panel_b.thickness_mm,
             phase=0,
-            width_mm=self.width_mm,
-            count=self.count,
+            width_mm=width,
+            count=count,
             clearance_mm=self.clearance_mm,
             dogbone=self.dogbone,
         )
@@ -138,8 +121,8 @@ class Finger:
             edge_length=edge_length,
             depth_mm=panel_a.thickness_mm,
             phase=1,
-            width_mm=self.width_mm,
-            count=self.count,
+            width_mm=width,
+            count=count,
             clearance_mm=self.clearance_mm,
             dogbone=self.dogbone,
         )

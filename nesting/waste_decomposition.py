@@ -3,38 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from nesting.types import WasteRect
+
 
 class WasteStrategy(Enum):
     LARGEST = "largest"
     SIMPLE = "simple"
-
-
-@dataclass(frozen=True)
-class WasteRect:
-    x: float
-    y: float
-    width: float
-    height: float
-
-    @property
-    def area(self) -> float:
-        return self.width * self.height
-
-    @property
-    def right(self) -> float:
-        return self.x + self.width
-
-    @property
-    def top(self) -> float:
-        return self.y + self.height
-
-    @property
-    def center_x(self) -> float:
-        return self.x + self.width / 2
-
-    @property
-    def center_y(self) -> float:
-        return self.y + self.height / 2
 
 
 @dataclass(frozen=True)

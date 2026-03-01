@@ -202,18 +202,13 @@ def build_notched_polygon(
     return tuple(cast(tuple[float, float], c) for c in geom.exterior.coords[:-1])
 
 
-def finger_joints_to_notches(
-    edge_index: int,
+def _compute_finger_notch_ranges(
     edge_length: float,
-    depth_mm: float,
     phase: int,
-    width_mm: float | None = None,
-    count: int | None = None,
-    clearance_mm: float = 0.12,
-) -> list[NotchSpec]:
-    if (width_mm is None) == (count is None):
-        raise ValueError("Specify exactly one of width_mm or count")
-
+    width_mm: float | None,
+    count: int | None,
+    clearance_mm: float,
+) -> list[tuple[float, float]]:
     if count is not None:
         n = count
     else:
@@ -226,7 +221,7 @@ def finger_joints_to_notches(
 
     finger_width = edge_length / n
 
-    notches: list[NotchSpec] = []
+    ranges: list[tuple[float, float]] = []
     for i in range(n):
         is_notch = (i % 2 == 1) == (phase == 0)
         if is_notch:
@@ -237,15 +232,34 @@ def finger_joints_to_notches(
             u_end = min(edge_length, u_end)
             if u_end - u_start <= 1e-9:
                 continue
-            notch = NotchSpec(
-                edge=Edge(edge_index),
-                u_start_mm=u_start,
-                u_len_mm=u_end - u_start,
-                depth_mm=depth_mm,
-            )
-            notches.append(notch)
+            ranges.append((u_start, u_end - u_start))
 
-    return notches
+    return ranges
+
+
+def finger_joints_to_notches(
+    edge_index: int,
+    edge_length: float,
+    depth_mm: float,
+    phase: int,
+    width_mm: float | None = None,
+    count: int | None = None,
+    clearance_mm: float = 0.12,
+) -> list[NotchSpec]:
+    if (width_mm is None) == (count is None):
+        raise ValueError("Specify exactly one of width_mm or count")
+
+    ranges = _compute_finger_notch_ranges(edge_length, phase, width_mm, count, clearance_mm)
+
+    return [
+        NotchSpec(
+            edge=Edge(edge_index),
+            u_start_mm=u_start,
+            u_len_mm=u_len,
+            depth_mm=depth_mm,
+        )
+        for u_start, u_len in ranges
+    ]
 
 
 __all__ = [

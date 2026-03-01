@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 
-@dataclass
+@dataclass(frozen=True)
 class FreeRect:
     x: float
     y: float
@@ -39,12 +39,40 @@ class FreeRect:
         return self.x <= other.x and self.y <= other.y and self.right >= other.right and self.top >= other.top
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlacementResult:
     x: float
     y: float
     rotated: bool
     metadata: Any
+
+
+@dataclass(frozen=True)
+class WasteRect:
+    x: float
+    y: float
+    width: float
+    height: float
+
+    @property
+    def area(self) -> float:
+        return self.width * self.height
+
+    @property
+    def right(self) -> float:
+        return self.x + self.width
+
+    @property
+    def top(self) -> float:
+        return self.y + self.height
+
+    @property
+    def center_x(self) -> float:
+        return self.x + self.width / 2
+
+    @property
+    def center_y(self) -> float:
+        return self.y + self.height / 2
 
 
 @dataclass(frozen=True)

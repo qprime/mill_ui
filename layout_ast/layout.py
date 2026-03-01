@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+VALID_GCODE_OUTPUT_MODES = ("per-operation", "per-tool")
+
 
 @dataclass(frozen=True)
 class Sheet:
@@ -12,6 +14,11 @@ class Sheet:
     margin_mm: float = 0.0
     show_dimensions: bool = True
     material: str = "mdf"
+    gcode_output: str = "per-operation"
+
+    def __post_init__(self) -> None:
+        if self.gcode_output not in VALID_GCODE_OUTPUT_MODES:
+            raise ValueError(f"Invalid gcode_output '{self.gcode_output}'. Must be one of: {VALID_GCODE_OUTPUT_MODES}")
 
     @property
     def working_width_mm(self) -> float:

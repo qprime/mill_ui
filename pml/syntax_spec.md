@@ -78,6 +78,7 @@ Sheet:                              # Required
   thickness: 19mm
   margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
   material: mdf                     # Optional, default "mdf" — used for feeds/speeds lookup
+  gcode_output: per-tool            # Optional, default "per-operation"
 components:                         # Optional reusable components
   my_component:
     params: {width: 100mm}
@@ -134,6 +135,25 @@ Bare numbers without `mm` are also accepted:
 ```yaml
 width: 100        # Interpreted as 100mm
 ```
+
+## G-code Output Modes
+
+Controls how G-code files are grouped. Set on the Sheet block:
+
+```yaml
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+  gcode_output: per-tool    # or per-operation (default)
+```
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `per-operation` | One file per operation+tool (e.g. `pocket-9.53mm.nc`, `profile-3.18mm.nc`) | Production runs, maximum control between operations |
+| `per-tool` | One file per tool diameter (e.g. `9.53mm.nc`, `3.18mm.nc`) | One-offs, fewer files, fewer operator mistakes |
+
+In `per-tool` mode, all operations sharing the same tool are concatenated into a single G-code file. The planner's internal operation ordering (pockets before profiles) is preserved within each file.
 
 ## Node Types
 

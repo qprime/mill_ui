@@ -673,6 +673,8 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
     }
     if ast.sheet.margin_mm:
         data["Sheet"]["margin"] = dim(ast.sheet.margin_mm)
+    if ast.sheet.gcode_output != "per-operation":
+        data["Sheet"]["gcode_output"] = ast.sheet.gcode_output
 
     if ast.components:
         data["components"] = {}

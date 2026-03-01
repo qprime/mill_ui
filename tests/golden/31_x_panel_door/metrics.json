@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "31_x_panel_door",
-    "created_at": "2026-03-01T01:26:51.618740+00:00"
+    "created_at": "2026-03-01T03:03:52.812789+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.33,
+    "extraction_time_ms": 0.32,
     "document": {
       "width_mm": 553.175,
       "height_mm": 743.175,
@@ -276,7 +276,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 11.2045,
+    "extraction_time_ms": 10.9955,
     "summary": {
       "total_lines": 3672,
       "comment_lines": 24,

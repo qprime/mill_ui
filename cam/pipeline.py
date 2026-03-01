@@ -261,27 +261,57 @@ def run_pipeline(
     total_cut_moves = 0
 
     margin_mm = ast.sheet.margin_mm
+    gcode_output = ast.sheet.gcode_output
 
-    for p in passes:
-        gcode = write_gcode(
-            p.moves,
-            safe_z=p.setup.safe_z,
-            machine=machine,
-            sheet_height=ast.sheet.height_mm,
-            y_origin=y_origin,
-            margin_mm=margin_mm,
-        )
+    if gcode_output == "per-tool":
+        tool_groups: dict[float, list[PassRecord]] = {}
+        for p in passes:
+            d = p.setup.tool.diameter
+            tool_groups.setdefault(d, []).append(p)
 
-        tool_diameter = p.setup.tool.diameter
-        pass_name = f"{p.op}-{tool_diameter:.2f}mm"
-        gcode_dict[pass_name] = gcode
+        for diameter, group in tool_groups.items():
+            merged_moves: list = []
+            for p in group:
+                merged_moves.extend(p.moves)
+            setup = group[0].setup
+            gcode = write_gcode(
+                merged_moves,
+                safe_z=setup.safe_z,
+                machine=machine,
+                sheet_height=ast.sheet.height_mm,
+                y_origin=y_origin,
+                margin_mm=margin_mm,
+            )
+            pass_name = f"{diameter:.2f}mm"
+            gcode_dict[pass_name] = gcode
 
-        total_moves += len(p.moves)
-        for move in p.moves:
-            if isinstance(move, RapidMove):
-                total_rapid_moves += 1
-            elif isinstance(move, CutMove):
-                total_cut_moves += 1
+            for move in merged_moves:
+                total_moves += 1
+                if isinstance(move, RapidMove):
+                    total_rapid_moves += 1
+                elif isinstance(move, CutMove):
+                    total_cut_moves += 1
+    else:
+        for p in passes:
+            gcode = write_gcode(
+                p.moves,
+                safe_z=p.setup.safe_z,
+                machine=machine,
+                sheet_height=ast.sheet.height_mm,
+                y_origin=y_origin,
+                margin_mm=margin_mm,
+            )
+
+            tool_diameter = p.setup.tool.diameter
+            pass_name = f"{p.op}-{tool_diameter:.2f}mm"
+            gcode_dict[pass_name] = gcode
+
+            total_moves += len(p.moves)
+            for move in p.moves:
+                if isinstance(move, RapidMove):
+                    total_rapid_moves += 1
+                elif isinstance(move, CutMove):
+                    total_cut_moves += 1
 
     _gcode_ms = (time.perf_counter() - gcode_start) * 1000
 

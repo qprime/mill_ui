@@ -850,6 +850,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         margin_mm=margin_mm,
         show_dimensions=sheet_block.get("show_dimensions", True),
         material=str(sheet_block.get("material", "mdf")),
+        gcode_output=str(sheet_block.get("gcode_output", "per-operation")),
     )
 
     project = data.get("project")

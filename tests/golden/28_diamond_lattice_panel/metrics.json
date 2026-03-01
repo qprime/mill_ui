@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "28_diamond_lattice_panel",
-    "created_at": "2026-03-01T01:26:51.535582+00:00"
+    "created_at": "2026-03-01T03:03:52.731171+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.73,
+    "extraction_time_ms": 1.65,
     "document": {
       "width_mm": 553.175,
       "height_mm": 543.175,
@@ -854,7 +854,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 39.2331,
+    "extraction_time_ms": 38.673,
     "summary": {
       "total_lines": 12394,
       "comment_lines": 192,

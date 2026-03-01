@@ -1,0 +1,21 @@
+# mill_ui: e30e156e
+# generated: 2026-02-28
+
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+  material: mdf
+  gcode_output: per-tool
+children:
+- Rect:
+    id: door
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 50mm
+        children:
+        - Pocket:
+            depth: 6mm

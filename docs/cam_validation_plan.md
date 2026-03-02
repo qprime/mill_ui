@@ -52,9 +52,10 @@ Artifacts (SVG/NC) → Metric Extractors → Metric Signature
 
 ```
 validation/
-├── core.py                 # Verdict, CAMValidationResult
-├── results.py              # IR-level ValidationResult
+├── core.py                 # Verdict, CAMValidationResult, ValidationResult
 ├── removal_checks.py       # IR-level validation
+├── machine_checks.py       # Machine config validation
+├── toolpath_checks.py      # Toolpath validation
 ├── runner.py               # Pipeline orchestrator
 ├── metrics/
 │   ├── svg_metrics.py      # SVGMetrics, extract_svg_metrics

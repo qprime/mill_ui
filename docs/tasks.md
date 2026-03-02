@@ -216,7 +216,7 @@ panel_domain = panel_result.domains[0]
 
 profile_items = profile_generator(
     outer_domain,
-    ProfileParams(side="outside", depth_mm=0.0, is_through=True),
+    ProfileParams(side="outside", depth="through"),
 )
 
 pocket_items = flat_pocket_generator(
@@ -268,16 +268,13 @@ python -m cli.nest job.nest.yml -o output/ --export-svg
 **Activate venv first:** `source .venv/bin/activate`
 
 ```bash
-# All core tests (PML, Edge, Resolution, Removal Intent)
-./run_tests.sh
+# Full test suite
+python -m pytest tests/ -x
 
-# IR-level tests (fast, no native backend required)
-python -m tests.run_edge_tests
+# Recipe validation
+python -m tests.test_recipes
 
-# CAM/G-code equivalence tests (requires native backend)
-python -m tests.run_gcode_equivalence_tests
-
-# Recipe validation tests
+# Validate specific recipe
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 ```
 

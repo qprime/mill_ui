@@ -1,4 +1,8 @@
-# Documentation Rules
+---
+description: Ensure documentation stays in sync with code changes. Use when modifying pipeline stages, data models, PML syntax, layout managers, shapes, validation, domain/generator APIs, capabilities, or CLI commands.
+---
+
+# Update Documentation
 
 When code changes, update affected documentation in the same commit.
 
@@ -14,14 +18,5 @@ When code changes, update affected documentation in the same commit.
 | Validation logic | docs/cam_validation_plan.md |
 | Domain/generator API | docs/domain_generator.md |
 | New capability | CLAUDE.md Capabilities table |
-| New pattern/pitfall | CLAUDE.md, docs/patterns.md |
+| New pattern/pitfall | docs/patterns.md |
 | CLI commands | README.md Quick Commands |
-
-## Validation
-
-```bash
-python scripts/check_doc_links.py       # Broken links
-python scripts/validate_pml_examples.py # PML code blocks
-```
-
-CI fails on broken links or invalid code examples.

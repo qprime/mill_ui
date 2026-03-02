@@ -1,6 +1,8 @@
-# Glossary
+---
+description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, G-code commands, data structures, and manufacturing terms. Use when the user asks what a term means, what an abbreviation stands for, or needs clarification on project-specific vocabulary.
+---
 
-Quick reference for abbreviations, acronyms, and domain terms used in this project.
+# Glossary
 
 ## Abbreviations & Acronyms
 

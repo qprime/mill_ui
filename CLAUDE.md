@@ -1,6 +1,6 @@
 # CLAUDE.md — mill_ui
 
-**Status:** Active | **As-Of:** 2026-02-01
+**Status:** Active | **As-Of:** 2026-03-01
 
 ## Agent Constraints
 
@@ -11,16 +11,6 @@ Do not use EnterPlanMode. Just do the work.
 You are an experienced, meticulous, and fastidious senior software engineer with roots in pre-millennium engineering culture through modern day. You value discipline, correctness, and understanding before acting.
 
 Once a design decision is implemented or explicitly specified, do not reopen, reinterpret, or "improve" it. If a conflict or limitation is discovered, stop and raise an explicit error rather than revising earlier decisions.
-
-## Specialized Personas
-
-If the task fits a specialized persona, load it before proceeding.
-
-| Persona | Use When |
-|---------|----------|
-| [cam_engineer.md](docs/personas/cam_engineer.md) | Development work (features, fixes, refactors) |
-| [architectural_audit.md](docs/personas/architectural_audit.md) | Finding design problems, inconsistencies, drift |
-| [debugging.md](docs/personas/debugging.md) | Investigating bugs, tracing issues |
 
 ---
 
@@ -37,7 +27,6 @@ or reinterpret them based on geometric similarity.
 
 Joinery strategies operate only on the data provided by the interface.
 They must not infer topology, panel roles, or geometry beyond explicit inputs.
-
 
 ## Mental Model
 
@@ -113,7 +102,8 @@ Check before implementing — these already exist:
 - Add comments to code
 - Add generators without corresponding PML syntax
 - Create projects that require Python build scripts instead of PML/nest files
-- Put recipes in the system configured "projects" folder.  See docs/tasks.md for running/implementing recipes.
+- Put recipes in the system configured "projects" folder. See docs/tasks.md for running/implementing recipes.
+
 ## PML-First Principle
 
 All machining features must be expressible in PML. Python-level generators are implementation details—incomplete without corresponding PML syntax.
@@ -135,80 +125,14 @@ All machining features must be expressible in PML. Python-level generators are i
 - `.nest.yml` = bin-packing optimization (part sizes, quantities, sheet dimensions, algorithm choice)
 - `.nest.yml` references templates for part content; templates should be PML with parameters (not Python)
 
-## File Orientation
-
-| Path | Purpose |
-|------|---------|
-| `layout_ast/layout.py` | AST dataclass definitions |
-| `layout_ast/compositional.py` | CompositionalLayoutAST node types |
-| `ir/removal_intent.py` | RemovalIntent IR spec |
-| `adapters/ast_to_removal.py` | AST → IR conversion |
-| `adapters/removal_to_planner.py` | IR → planner hints/input conversion |
-| `adapters/layoutast_to_ir.py` | AST → DiagramIR for visualization |
-| `assembly/` | Box, carcass, cubby, beam assembly with joinery |
-| `cam/pipeline.py` | Shared pipeline orchestration |
-| `cam/planner/passes/` | Planner pass strategies (profile, pocket, hole) |
-| `cam/post/gcode.py` | G-code post-processor |
-| `config/machine_loader.py` | CNC machine configuration |
-| `core/geometry.py` | Shared geometry utilities |
-| `diagram_ir/` | DiagramIR intermediate representation |
-| `diagram_render/render_svg.py` | SVG renderer for DiagramIR |
-| `domains/` | Domain type and algebraic operations |
-| `export/blueprint_svg.py` | Blueprint SVG export |
-| `export/blueprint_pdf.py` | Blueprint PDF export |
-| `generators/` | Pattern generators (area/loop) |
-| `mill_mcp/server.py` | MCP server for IDE integration |
-| `pml/` | PML YAML parser and formatter |
-| `resolution/layout_resolver.py` | Compositional → flat layout resolution |
-| `templates/` | Parametric component templates |
-| `validation/` | IR and CAM artifact validation |
-| `tests/` | Test modules |
-
 ## Invariants (MANDATORY)
 
-Global axioms: [docs/invariants/README.md](docs/invariants/README.md) — must be respected across all subsystems.
-
-Before modifying any subsystem, read its invariant file:
-
-| Subsystem | Invariant File |
-|-----------|----------------|
-| layout_ast/* | [docs/invariants/data_structures.md](docs/invariants/data_structures.md) |
-| domains/* | [docs/invariants/domains.md](docs/invariants/domains.md) |
-| generators/* | [docs/invariants/generators.md](docs/invariants/generators.md) |
-| assembly/* | [docs/invariants/assembly.md](docs/invariants/assembly.md) |
-| pml/* | [docs/invariants/pml.md](docs/invariants/pml.md) |
-| validation/* | [docs/invariants/validation.md](docs/invariants/validation.md) |
-| ir/* | [docs/invariants/pipeline.md](docs/invariants/pipeline.md) |
-| cam/planner/* | [docs/invariants/planner.md](docs/invariants/planner.md) |
-| cam/* | [docs/invariants/gcode.md](docs/invariants/gcode.md) |
-| nesting/* | [docs/invariants/nesting.md](docs/invariants/nesting.md) |
-| assembly/beams* | [docs/invariants/beams.md](docs/invariants/beams.md) |
-| assembly/beds* | [docs/invariants/beds.md](docs/invariants/beds.md) |
-| templates/* | [docs/invariants/components.md](docs/invariants/components.md) |
-| All geometry | [docs/invariants/coordinates.md](docs/invariants/coordinates.md) |
-
-## Supplementary Docs
-
-Load these when the task requires them:
-
-| Doc | When to load |
-|-----|--------------|
-| [docs/tasks.md](docs/tasks.md) | Common operations, code examples, running tests |
-| [docs/patterns.md](docs/patterns.md) | Adding new shapes, templates, generators, validators |
-| [README.md](README.md) | Architecture, contracts, and normative requirements |
-| [docs/domain_generator.md](docs/domain_generator.md) | Domain/generator API reference |
-| [docs/cam_validation_plan.md](docs/cam_validation_plan.md) | Validation system architecture |
-| [docs/compositional_layout.md](docs/compositional_layout.md) | Frame/inset/grid/split syntax |
-| [docs/shape_primitives.md](docs/shape_primitives.md) | Supported shape types and parameters |
-| [docs/layout_primitives.md](docs/layout_primitives.md) | Layout manager properties |
-| [pml/syntax_spec.md](pml/syntax_spec.md) | PML language syntax |
-| [pml/nest_syntax_spec.md](pml/nest_syntax_spec.md) | Nesting job syntax |
-| [docs/recipes/](docs/recipes/) | Worked examples (01-55) |
+Global axioms: [docs/invariants/README.md](docs/invariants/README.md) — must be respected across all subsystems. Before modifying any subsystem, read its invariant file. Use the `/check-invariants` skill for the full subsystem-to-file mapping.
 
 ## When Stuck
 
 - **Architecture:** [README.md](README.md)
 - **Examples:** [docs/tasks.md](docs/tasks.md)
-- **Extending:** [docs/patterns.md](docs/patterns.md)
+- **Extending:** `/extend` skill
 - **Geometry questions:** [docs/invariants/coordinates.md](docs/invariants/coordinates.md)
 - **Ask the user** only after investigating—and only if the choice genuinely requires their input

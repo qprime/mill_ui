@@ -8,9 +8,6 @@ from adapters.cnc_config_to_ir import machine_config_to_diagram_ir
 from config.machine_loader import get_machines_dir, load_endmills, load_machine_by_name
 from diagram_render import render_diagram_svg
 
-T_TRACK_WIDTH_MM = 40.0
-
-
 def main():
     recipe_dir = Path(__file__).parent
     output_dir = recipe_dir / "output"
@@ -24,7 +21,6 @@ def main():
         altmill,
         show_dimensions=False,
         show_centerlines=True,
-        t_track_width_mm=T_TRACK_WIDTH_MM,
     )
 
     svg_dark = render_diagram_svg(diagram, theme="dark")
@@ -34,8 +30,7 @@ def main():
     (output_dir / "altmill_4x4_print.svg").write_text(svg_print)
 
     wb = altmill.spoilboard
-    sb_w = wb.width_mm - 2 * T_TRACK_WIDTH_MM
-    sb_h = wb.height_mm - 2 * T_TRACK_WIDTH_MM
+    tt = altmill.t_track
     margins = altmill.compute_margins()
 
     print(f"Generated diagrams for {altmill.machine.name}")
@@ -44,8 +39,8 @@ def main():
     print(
         f"  Margins: L={margins['left']:.0f} R={margins['right']:.0f} T={margins['top']:.0f} B={margins['bottom']:.0f} mm"
     )
-    print(f"  T-track perimeter: {T_TRACK_WIDTH_MM:.0f} mm")
-    print(f"  Spoilboard (inside t-track): {sb_w:.1f} x {sb_h:.0f} mm")
+    if tt:
+        print(f"  T-track: L={tt.left_mm} R={tt.right_mm} F={tt.front_mm} B={tt.back_mm} mm")
     print()
 
     genmitsu = load_machine_by_name("genmitsu_4040_pro")

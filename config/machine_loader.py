@@ -112,6 +112,14 @@ class Spoilboard2D:
 
 
 @dataclass(frozen=True)
+class TTrack:
+    left_mm: float = 0.0
+    right_mm: float = 0.0
+    front_mm: float = 0.0
+    back_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class MachineDefaults:
     safe_z_mm: float = 5.0
     feed_rate_mm_min: float = 1500.0
@@ -123,6 +131,7 @@ class MachineConfig:
     machine: CNCMachine2D
     table: Table2D | None = None
     spoilboard: Spoilboard2D | None = None
+    t_track: TTrack | None = None
     defaults: MachineDefaults = field(default_factory=MachineDefaults)
 
     def __post_init__(self):
@@ -327,13 +336,23 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
             offset_y=float(spoilboard_data.get("offset_y", 0)),
         )
 
+    t_track_data = data.get("t_track")
+    t_track = None
+    if t_track_data:
+        t_track = TTrack(
+            left_mm=float(t_track_data.get("left_mm", 0)),
+            right_mm=float(t_track_data.get("right_mm", 0)),
+            front_mm=float(t_track_data.get("front_mm", 0)),
+            back_mm=float(t_track_data.get("back_mm", 0)),
+        )
+
     defaults = MachineDefaults(
         safe_z_mm=float(defaults_data.get("safe_z_mm", 5.0)),
         feed_rate_mm_min=float(defaults_data.get("feed_rate_mm_min", 1500.0)),
         plunge_rate_mm_min=float(defaults_data.get("plunge_rate_mm_min", 500.0)),
     )
 
-    return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, defaults=defaults)
+    return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, t_track=t_track, defaults=defaults)
 
 
 def load_endmills(path: Path | str) -> list[Endmill]:

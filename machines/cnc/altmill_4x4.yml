@@ -17,6 +17,12 @@ spoilboard:
   offset_x: 0
   offset_y: 0
 
+t_track:
+  left_mm: 19
+  right_mm: 19
+  front_mm: 19
+  back_mm: 19
+
 soft_limits:
   x_max_mm: 1261
   y_max_mm: 1246

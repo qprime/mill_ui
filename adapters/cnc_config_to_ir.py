@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from config.machine_loader import Endmill, MachineConfig
+from config.machine_loader import Endmill, MachineConfig, TTrack
 from diagram_ir import DiagramIR, LayerIR, Line, Rect
 from diagram_ir.dimensions import DimensionRequest
 from ir.removal_intent import Bounds2D
@@ -11,11 +11,11 @@ def machine_config_to_diagram_ir(
     endmill: Endmill | None = None,
     show_dimensions: bool = True,
     show_centerlines: bool = True,
-    t_track_width_mm: float = 0.0,
 ) -> DiagramIR:
     machine = config.machine
     spoilboard = config.spoilboard
     table = config.table
+    tt = config.t_track
 
     bounds_x_min = machine.envelope_x_min
     bounds_x_max = machine.envelope_x_max
@@ -46,12 +46,11 @@ def machine_config_to_diagram_ir(
         bounds_y_min = min(bounds_y_min, table_y)
         bounds_y_max = max(bounds_y_max, table_y + table.surface_height_mm)
 
-    if spoilboard and t_track_width_mm > 0:
-        tw = t_track_width_mm
-        bounds_x_min = min(bounds_x_min, spoilboard.x_min - tw)
-        bounds_x_max = max(bounds_x_max, spoilboard.x_max + tw)
-        bounds_y_min = min(bounds_y_min, spoilboard.y_min - tw)
-        bounds_y_max = max(bounds_y_max, spoilboard.y_max + tw)
+    if spoilboard and tt is not None:
+        bounds_x_min = min(bounds_x_min, spoilboard.x_min - tt.left_mm)
+        bounds_x_max = max(bounds_x_max, spoilboard.x_max + tt.right_mm)
+        bounds_y_min = min(bounds_y_min, spoilboard.y_min - tt.front_mm)
+        bounds_y_max = max(bounds_y_max, spoilboard.y_max + tt.back_mm)
 
     bounds = Bounds2D(
         x_min=bounds_x_min,
@@ -114,14 +113,13 @@ def machine_config_to_diagram_ir(
         ]
         layers.append(LayerIR(name="SOFT_LIMITS", items=tuple(soft_limit_shapes)))
 
-    if spoilboard and t_track_width_mm > 0:
-        tw = t_track_width_mm
+    if spoilboard and tt is not None:
         wb = spoilboard
         t_track_shapes = [
-            Rect(x=wb.x_min - tw, y=wb.y_min, width=tw, height=wb.height_mm, style_token="t-track", id="ttrack_left"),
-            Rect(x=wb.x_max, y=wb.y_min, width=tw, height=wb.height_mm, style_token="t-track", id="ttrack_right"),
-            Rect(x=wb.x_min, y=wb.y_min - tw, width=wb.width_mm, height=tw, style_token="t-track", id="ttrack_front"),
-            Rect(x=wb.x_min, y=wb.y_max, width=wb.width_mm, height=tw, style_token="t-track", id="ttrack_back"),
+            Rect(x=wb.x_min - tt.left_mm, y=wb.y_min, width=tt.left_mm, height=wb.height_mm, style_token="t-track", id="ttrack_left"),
+            Rect(x=wb.x_max, y=wb.y_min, width=tt.right_mm, height=wb.height_mm, style_token="t-track", id="ttrack_right"),
+            Rect(x=wb.x_min, y=wb.y_min - tt.front_mm, width=wb.width_mm, height=tt.front_mm, style_token="t-track", id="ttrack_front"),
+            Rect(x=wb.x_min, y=wb.y_max, width=wb.width_mm, height=tt.back_mm, style_token="t-track", id="ttrack_back"),
         ]
         layers.append(LayerIR(name="T_TRACK", items=tuple(t_track_shapes)))
 
@@ -244,8 +242,8 @@ def machine_config_to_diagram_ir(
     if endmill:
         metadata["endmill_name"] = endmill.name
         metadata["endmill_diameter"] = str(endmill.diameter_mm)
-    if t_track_width_mm > 0:
-        metadata["t_track_width"] = str(t_track_width_mm)
+    if tt is not None:
+        metadata["t_track"] = f"L={tt.left_mm} R={tt.right_mm} F={tt.front_mm} B={tt.back_mm}"
 
     return DiagramIR(
         bounds=bounds,

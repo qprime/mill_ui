@@ -84,6 +84,8 @@ def item_to_removal_intent(
                 TabKeys.HEIGHT_MM: item.feature.tab_height_mm,
                 TabKeys.WIDTH_MM: item.feature.tab_width_mm,
             }
+        if item.feature.onion_skin_mm is not None:
+            hint[HintKeys.ONION_SKIN_MM] = item.feature.onion_skin_mm
         intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)

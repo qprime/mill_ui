@@ -167,8 +167,11 @@ def plan_passes(
     profiles = planner_input.profiles
 
     any_profile_has_tabs = tabs_enabled or any(rec.tabs is not None for rec in profiles)
+    any_profile_has_onion_skin = onion_skin_mm > 0.0 or any(
+        rec.onion_skin_mm is not None and rec.onion_skin_mm > 0.0 for rec in profiles
+    )
 
-    merge_enabled = config.merge_epsilon_mm > 0.0 and not (onion_skin_mm > 0.0 or any_profile_has_tabs)
+    merge_enabled = config.merge_epsilon_mm > 0.0 and not (any_profile_has_onion_skin or any_profile_has_tabs)
 
     def _tabs_for_feature(rec: FeatureInput) -> dict[str, float] | None:
         if rec.tabs is not None:
@@ -181,6 +184,11 @@ def plan_passes(
             )
             return custom if custom is not None else tabs_opts
         return tabs_opts
+
+    def _onion_skin_for_feature(rec: FeatureInput) -> float:
+        if rec.onion_skin_mm is not None:
+            return rec.onion_skin_mm
+        return onion_skin_mm
 
     rect_profiles = [rec for rec in profiles if rec.shape.lower() == "rect"]
     circle_profiles = [rec for rec in profiles if rec.shape.lower() == "circle"]
@@ -231,7 +239,7 @@ def plan_passes(
                         setup=record.setup,
                         depth_mm=depth,
                         tool=profile_tool,
-                        onion_skin_mm=onion_skin_mm,
+                        onion_skin_mm=_onion_skin_for_feature(rec),
                         tabs_opts=_tabs_for_feature(rec),
                     ),
                     increment=1,
@@ -273,7 +281,7 @@ def plan_passes(
                     setup=record.setup,
                     depth_mm=depth,
                     tool=profile_tool,
-                    onion_skin_mm=onion_skin_mm,
+                    onion_skin_mm=_onion_skin_for_feature(rec),
                     tabs_opts=_tabs_for_feature(rec),
                 ),
                 increment=1,
@@ -326,7 +334,7 @@ def plan_passes(
                     setup=record.setup,
                     depth_mm=depth,
                     tool=profile_tool,
-                    onion_skin_mm=onion_skin_mm,
+                    onion_skin_mm=_onion_skin_for_feature(rec),
                     tabs_opts=_tabs_for_feature(rec),
                 ),
                 increment=1,
@@ -385,7 +393,7 @@ def plan_passes(
                     setup=record.setup,
                     depth_mm=depth,
                     tool=profile_tool,
-                    onion_skin_mm=onion_skin_mm,
+                    onion_skin_mm=_onion_skin_for_feature(rec),
                     tabs_opts=_tabs_for_feature(rec),
                 ),
                 increment=1,

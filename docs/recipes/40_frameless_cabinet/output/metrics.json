@@ -3,9 +3,9 @@
     "ir_ms": 0.3,
     "hints_ms": 0.15,
     "plan_ms": 5.29,
-    "gcode_ms": 5.32,
-    "svg_ms": 1.58,
-    "total_ms": 12.65
+    "gcode_ms": 5.35,
+    "svg_ms": 1.57,
+    "total_ms": 12.66
   },
   "constraint_audit": {
     "dogbone": {

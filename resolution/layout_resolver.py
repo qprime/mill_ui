@@ -100,6 +100,7 @@ def _feature_from_profile_gen(node: ProfileGen) -> Feature:
         tab_count=node.tab_count,
         tab_height_mm=node.tab_height_mm,
         tab_width_mm=node.tab_width_mm,
+        onion_skin_mm=node.onion_skin_mm,
         feeds_override=node.feeds_override,
     )
 

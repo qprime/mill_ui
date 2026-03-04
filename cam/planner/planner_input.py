@@ -114,6 +114,7 @@ class FeatureInput:
     start_depth_mm: float = 0.0
     side: str | None = None
     tabs: TabsInput | None = None
+    onion_skin_mm: float | None = None
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
     rest: RestSpec | None = None
     edge_treatment: EdgeTreatmentInput | None = None
@@ -133,6 +134,8 @@ class FeatureInput:
             result["side"] = self.side
         if self.tabs is not None:
             result["tabs"] = self.tabs.to_dict()
+        if self.onion_skin_mm is not None:
+            result["onion_skin_mm"] = self.onion_skin_mm
         if self.keepouts:
             result["keepouts"] = [k.to_dict() for k in self.keepouts]
         if self.rest is not None:

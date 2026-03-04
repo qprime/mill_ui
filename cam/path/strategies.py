@@ -49,6 +49,7 @@ def onion_skin_then_finish(
     skin_mm: float = 0.5,
     step_down_mm: float | None = None,
     spring_pass: bool = False,
+    cut_through_mm: float = 0.2,
 ) -> list[Move]:
     total = abs(float(total_depth_mm))
     skin = max(0.0, float(skin_mm))
@@ -60,12 +61,13 @@ def onion_skin_then_finish(
         return moves
 
     rough_depth = max(0.0, total - skin)
-    moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={total:.3f}"))
+    finish_depth = total + max(0.0, float(cut_through_mm))
+    moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={finish_depth:.3f}"))
     if rough_depth > 0:
         moves += profile_outline(shape, setup, depth_mm=rough_depth, step_down=sd)
-    moves += _finish_profile_pass(shape, setup, depth_mm=total)
+    moves += _finish_profile_pass(shape, setup, depth_mm=finish_depth)
     if spring_pass:
-        moves += _finish_profile_pass(shape, setup, depth_mm=total)
+        moves += _finish_profile_pass(shape, setup, depth_mm=finish_depth)
     return moves
 
 

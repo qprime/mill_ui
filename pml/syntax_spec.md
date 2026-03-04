@@ -348,11 +348,12 @@ Cut around shape boundary:
 
 ```yaml
 - Profile:
-    side: outside   # outside | inside | on
-    depth: through  # or specific depth like 10mm
-    tab_count: 4    # Optional holding tabs
+    side: outside       # outside | inside | on
+    depth: through      # or specific depth like 10mm
+    tab_count: 4        # Optional holding tabs (mutually exclusive with onion_skin_mm)
     tab_height: 3mm
-    tab_width: 10mm # Optional, auto-calculated if omitted
+    tab_width: 10mm     # Optional, auto-calculated if omitted
+    onion_skin_mm: 0.3  # Optional onion skin holding (mutually exclusive with tabs)
 ```
 
 #### Pocket

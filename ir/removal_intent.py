@@ -163,6 +163,7 @@ class EdgeTreatment:
 @dataclass(frozen=True)
 class Constraints:
     tabs: TabConstraint | None = None
+    onion_skin_mm: float | None = None
     keepouts: tuple[KeepoutRegion, ...] = field(default_factory=tuple)
     islands: tuple[Island, ...] = field(default_factory=tuple)
     edge_treatment: EdgeTreatment | None = None
@@ -222,6 +223,7 @@ class RemovalIntent:
                 }
                 if self.constraints.tabs
                 else None,
+                "onion_skin_mm": self.constraints.onion_skin_mm,
                 "keepouts": len(self.constraints.keepouts),
                 "islands": len(self.constraints.islands),
                 "edge_treatment": {

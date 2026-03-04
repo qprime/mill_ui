@@ -55,8 +55,11 @@ def profile_hint_to_removal_intent(
     shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
 
     tabs_data = hint.get(HintKeys.TABS)
+    onion_skin_mm = hint.get(HintKeys.ONION_SKIN_MM)
     edge_treatment = _extract_edge_treatment_from_geometry(geometry)
     constraints = _tabs_to_constraints(tabs_data) if tabs_data else Constraints()
+    if onion_skin_mm is not None:
+        constraints = replace(constraints, onion_skin_mm=float(onion_skin_mm))
     if edge_treatment is not None:
         constraints = replace(constraints, edge_treatment=edge_treatment)
 

@@ -36,6 +36,7 @@ class ProfileParams(BaseParams):
     tab_count: int = 0
     tab_width_mm: float = 10.0
     tab_height_mm: float = 3.0
+    onion_skin_mm: float | None = None
 
     def validate(self) -> None:
         valid_sides = ("outside", "inside", "on")
@@ -61,6 +62,11 @@ class ProfileParams(BaseParams):
                 raise ValueError(
                     f"ProfileParams: tab_height_mm must be positive when tabs enabled, got {self.tab_height_mm}"
                 )
+
+        if self.onion_skin_mm is not None and self.onion_skin_mm <= 0.0:
+            raise ValueError(f"ProfileParams: onion_skin_mm must be positive when set, got {self.onion_skin_mm}")
+        if self.onion_skin_mm is not None and self.tab_count > 0:
+            raise ValueError("ProfileParams: onion_skin_mm and tabs cannot be combined")
 
 
 @dataclass(frozen=True)

@@ -380,6 +380,7 @@ def parse_node(data: dict, path: str = "") -> Any:
             tab_count=node_data.get("tab_count"),
             tab_height_mm=parse_dimension(node_data["tab_height"]) if "tab_height" in node_data else None,
             tab_width_mm=parse_dimension(node_data["tab_width"]) if "tab_width" in node_data else None,
+            onion_skin_mm=parse_dimension(node_data["onion_skin_mm"]) if "onion_skin_mm" in node_data else None,
             feeds_override=_parse_feeds_override(node_data.get("feeds")),
         )
 

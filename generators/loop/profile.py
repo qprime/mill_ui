@@ -75,6 +75,9 @@ def profile_generator(
             feature_kwargs["tab_width_mm"] = params.tab_width_mm
             feature_kwargs["tab_height_mm"] = params.tab_height_mm
 
+        if params.onion_skin_mm is not None:
+            feature_kwargs["onion_skin_mm"] = params.onion_skin_mm
+
         item = Item(
             kind="shape",
             type="Polygon",

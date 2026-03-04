@@ -380,6 +380,7 @@ class TestConstraintCoverageEnforcement:
         constraint_fields = {f.name for f in dataclasses.fields(Constraints)}
         documented = {
             "tabs",
+            "onion_skin_mm",
             "keepouts",
             "islands",
             "edge_treatment",
@@ -395,6 +396,7 @@ class TestConstraintCoverageEnforcement:
         constraint_keys_in_caps = [k for k in PLANNER_CAPABILITIES if k.startswith("constraints.")]
         expected = {
             "constraints.tabs",
+            "constraints.onion_skin_mm",
             "constraints.keepouts",
             "constraints.islands",
             "constraints.edge_treatment",

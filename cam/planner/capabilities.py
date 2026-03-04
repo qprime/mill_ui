@@ -40,6 +40,10 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         ConstraintSupport.HONORED,
         note="Profiles only",
     ),
+    "constraints.onion_skin_mm": ConstraintStatus(
+        ConstraintSupport.HONORED,
+        note="Profiles only; mutually exclusive with tabs",
+    ),
     "constraints.keepouts": ConstraintStatus(
         ConstraintSupport.HONORED,
         safety_critical=True,

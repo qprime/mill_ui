@@ -165,6 +165,7 @@ class ProfileGen:
     tab_count: int | None = None
     tab_height_mm: float | None = None
     tab_width_mm: float | None = None
+    onion_skin_mm: float | None = None
     feeds_override: FeedsOverride | None = None
 
 

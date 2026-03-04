@@ -109,6 +109,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         start_depth_mm=start_depth_mm,
         side=side,
         tabs=tabs,
+        onion_skin_mm=intent.constraints.onion_skin_mm,
         keepouts=keepouts,
         rest=intent.rest,
         edge_treatment=edge_treatment,

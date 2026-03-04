@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "55_tenoned_rail",
-    "created_at": "2026-03-04T18:46:04.309987+00:00"
+    "created_at": "2026-03-04T18:53:48.169967+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.38,
+    "extraction_time_ms": 0.39,
     "document": {
       "width_mm": 953.175,
       "height_mm": 854.175,
@@ -281,28 +281,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.308,
+    "extraction_time_ms": 2.6175,
     "summary": {
-      "total_lines": 746,
+      "total_lines": 806,
       "comment_lines": 14,
-      "motion_lines": 577,
+      "motion_lines": 625,
       "tool_change_lines": 0,
       "spindle_lines": 3,
-      "feed_lines": 433
+      "feed_lines": 469
     },
     "motion": {
-      "g0_count": 289,
-      "g1_count": 288,
+      "g0_count": 313,
+      "g1_count": 312,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 55616.0181,
-      "total_feed_distance_mm": 52845.312
+      "total_rapid_distance_mm": 60127.0181,
+      "total_feed_distance_mm": 57356.312
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -315,8 +316,8 @@
         -3.175,
         -1.587
       ],
-      "depth_count": 12,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 13,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -360,14 +361,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 667.3922,
-      "feed_time_s": 5284.5312,
-      "total_time_s": 5951.9234
+      "rapid_time_s": 721.5242,
+      "feed_time_s": 5735.6312,
+      "total_time_s": 6457.1554
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     }
   }

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "54_edge_profile_callouts",
-    "created_at": "2026-03-04T18:46:04.300428+00:00"
+    "created_at": "2026-03-04T18:53:48.159279+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.37,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 673.175,
       "height_mm": 505.175,
@@ -334,28 +334,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.5575,
+    "extraction_time_ms": 1.782,
     "summary": {
-      "total_lines": 502,
+      "total_lines": 542,
       "comment_lines": 10,
-      "motion_lines": 385,
+      "motion_lines": 417,
       "tool_change_lines": 0,
       "spindle_lines": 3,
-      "feed_lines": 289
+      "feed_lines": 313
     },
     "motion": {
-      "g0_count": 193,
-      "g1_count": 192,
+      "g0_count": 209,
+      "g1_count": 208,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 12464.7285,
-      "total_feed_distance_mm": 12126.208
+      "total_rapid_distance_mm": 13546.7285,
+      "total_feed_distance_mm": 13208.208
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -368,8 +369,8 @@
         -3.175,
         -1.587
       ],
-      "depth_count": 12,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 13,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -409,14 +410,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 149.5767,
-      "feed_time_s": 1212.6208,
-      "total_time_s": 1362.1975
+      "rapid_time_s": 162.5607,
+      "feed_time_s": 1320.8208,
+      "total_time_s": 1483.3815
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     }
   }

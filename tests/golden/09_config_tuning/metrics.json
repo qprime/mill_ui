@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "09_config_tuning",
-    "created_at": "2026-03-04T18:46:00.648695+00:00"
+    "created_at": "2026-03-04T18:53:44.381352+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -201,7 +201,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7401,
+    "extraction_time_ms": 0.7737,
     "summary": {
       "total_lines": 224,
       "comment_lines": 6,

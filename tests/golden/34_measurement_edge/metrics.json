@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "34_measurement_edge",
-    "created_at": "2026-03-04T18:46:02.879311+00:00"
+    "created_at": "2026-03-04T18:53:46.679827+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.67,
+    "extraction_time_ms": 2.71,
     "document": {
       "width_mm": 773.175,
       "height_mm": 563.175,
@@ -222,7 +222,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.0358,
+    "extraction_time_ms": 16.796,
     "summary": {
       "total_lines": 5786,
       "comment_lines": 964,

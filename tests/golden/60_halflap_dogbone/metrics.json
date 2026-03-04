@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "60_halflap_dogbone",
-    "created_at": "2026-03-04T18:46:04.573940+00:00"
+    "created_at": "2026-03-04T18:53:48.443005+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.38,
+    "extraction_time_ms": 4.41,
     "document": {
       "width_mm": 1773.175,
       "height_mm": 2647.175,
@@ -2475,7 +2475,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 20.1006,
+    "extraction_time_ms": 22.871,
     "summary": {
       "total_lines": 13868,
       "comment_lines": 136,
@@ -2489,8 +2489,8 @@
       "g1_count": 8928,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 96744.65879999999,
-      "total_feed_distance_mm": 246607.074
+      "total_rapid_distance_mm": 96745.8588,
+      "total_feed_distance_mm": 246608.274
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -2580,6 +2580,7 @@
         -22.225,
         -20.637,
         -19.05,
+        -18.2,
         -18.0,
         -17.463,
         -15.875,
@@ -2599,7 +2600,7 @@
         -2.5,
         -1.587
       ],
-      "depth_count": 102,
+      "depth_count": 103,
       "max_single_plunge_mm": 156.0
     },
     "xy_bounds": {
@@ -2737,9 +2738,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 1160.9359,
-      "feed_time_s": 32368.0772,
-      "total_time_s": 33529.0131
+      "rapid_time_s": 1160.9503,
+      "feed_time_s": 32368.1972,
+      "total_time_s": 33529.1475
     },
     "tabs": {
       "detected_count": 0,

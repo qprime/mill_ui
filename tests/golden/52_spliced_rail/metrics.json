@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "52_spliced_rail",
-    "created_at": "2026-03-04T18:46:04.228033+00:00"
+    "created_at": "2026-03-04T18:53:48.081638+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.02,
+    "extraction_time_ms": 1.01,
     "document": {
       "width_mm": 1353.175,
       "height_mm": 1114.175,
@@ -429,28 +429,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.1275,
+    "extraction_time_ms": 6.874,
     "summary": {
-      "total_lines": 1966,
+      "total_lines": 2126,
       "comment_lines": 34,
-      "motion_lines": 1537,
+      "motion_lines": 1665,
       "tool_change_lines": 0,
       "spindle_lines": 3,
-      "feed_lines": 1153
+      "feed_lines": 1249
     },
     "motion": {
-      "g0_count": 769,
-      "g1_count": 768,
+      "g0_count": 833,
+      "g1_count": 832,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 179811.5757,
-      "total_feed_distance_mm": 169464.808
+      "total_rapid_distance_mm": 194219.5737,
+      "total_feed_distance_mm": 183872.806
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -463,8 +464,8 @@
         -3.175,
         -1.587
       ],
-      "depth_count": 12,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 13,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -528,14 +529,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 2157.7389,
-      "feed_time_s": 16946.4808,
-      "total_time_s": 19104.2197
+      "rapid_time_s": 2330.6349,
+      "feed_time_s": 18387.2806,
+      "total_time_s": 20717.9155
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     }
   }

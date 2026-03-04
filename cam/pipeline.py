@@ -244,6 +244,7 @@ def run_pipeline(
         machine=machine,
         stock=stock,
         safe_z=safe_z,
+        profile_opts={"cut_through_mm": 0.2},
     )
     _plan_ms = (time.perf_counter() - plan_start) * 1000
 

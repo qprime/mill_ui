@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "32_waste_cuts",
-    "created_at": "2026-03-04T18:46:02.750836+00:00"
+    "created_at": "2026-03-04T18:53:46.548118+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.28,
+    "extraction_time_ms": 0.27,
     "document": {
       "width_mm": 1383.175,
       "height_mm": 973.175,
@@ -289,30 +289,31 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9961,
+    "extraction_time_ms": 1.2702,
     "summary": {
-      "total_lines": 276,
+      "total_lines": 326,
       "comment_lines": 4,
-      "motion_lines": 237,
+      "motion_lines": 285,
       "tool_change_lines": 0,
       "spindle_lines": 3,
-      "feed_lines": 213
+      "feed_lines": 259
     },
     "motion": {
-      "g0_count": 49,
-      "g1_count": 188,
+      "g0_count": 53,
+      "g1_count": 232,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1219.5975,
-      "total_feed_distance_mm": 56318.088
+      "total_rapid_distance_mm": 1270.0975,
+      "total_feed_distance_mm": 61065.582
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
-        -16.0,
+        -16.2,
         -15.875,
         -14.288,
         -12.7,
@@ -324,8 +325,8 @@
         -3.175,
         -1.587
       ],
-      "depth_count": 13,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 14,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -354,14 +355,14 @@
       "bore_passes": 0,
       "total_passes": 2,
       "operation_names": [
-        "profile_with_tabs depth=19.000 tabs=4",
-        "profile_with_tabs depth=19.000 tabs=4"
+        "profile_with_tabs depth=19.200 tabs=4",
+        "profile_with_tabs depth=19.200 tabs=4"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 14.6352,
-      "feed_time_s": 5631.8088,
-      "total_time_s": 5646.444
+      "rapid_time_s": 15.2412,
+      "feed_time_s": 6106.5582,
+      "total_time_s": 6121.7994
     },
     "tabs": {
       "detected_count": 8,
@@ -375,7 +376,7 @@
         3.0,
         3.0
       ],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     }
   }

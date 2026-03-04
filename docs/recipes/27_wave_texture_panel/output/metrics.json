@@ -1,18 +1,18 @@
 {
   "timing": {
-    "ir_ms": 7.8,
-    "hints_ms": 1.6,
-    "plan_ms": 25.04,
-    "gcode_ms": 34.02,
-    "svg_ms": 53.67,
-    "total_ms": 122.12
+    "ir_ms": 7.88,
+    "hints_ms": 1.64,
+    "plan_ms": 25.15,
+    "gcode_ms": 63.77,
+    "svg_ms": 24.41,
+    "total_ms": 122.84
   },
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 9298,
-    "rapid_moves": 206,
-    "cut_moves": 8194,
-    "rapid_ratio": 0.022
+    "total_moves": 9318,
+    "rapid_moves": 210,
+    "cut_moves": 8202,
+    "rapid_ratio": 0.023
   },
   "fidelity": {
     "tool_changes": 2,
@@ -25,21 +25,21 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 252
+        "move_count": 272
       }
     ]
   },
   "output_size": {
-    "total_bytes": 241435,
-    "total_lines": 9002,
+    "total_bytes": 241791,
+    "total_lines": 9022,
     "files": {
       "engrave-12.70mm": {
         "bytes": 237032,
         "lines": 8744
       },
       "profile-3.17mm": {
-        "bytes": 4403,
-        "lines": 258
+        "bytes": 4759,
+        "lines": 278
       }
     }
   }

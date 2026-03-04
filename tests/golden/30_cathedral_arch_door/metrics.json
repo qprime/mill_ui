@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-03-04T18:46:02.703959+00:00"
+    "created_at": "2026-03-04T18:53:46.497791+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -236,28 +236,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6176,
+    "extraction_time_ms": 0.6522,
     "summary": {
-      "total_lines": 1574,
+      "total_lines": 1621,
       "comment_lines": 12,
-      "motion_lines": 1352,
+      "motion_lines": 1398,
       "tool_change_lines": 0,
       "spindle_lines": 7,
-      "feed_lines": 1173
+      "feed_lines": 1218
     },
     "motion": {
-      "g0_count": 361,
-      "g1_count": 991,
+      "g0_count": 363,
+      "g1_count": 1035,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 3091.6763,
-      "total_feed_distance_mm": 90351.1276
+      "total_rapid_distance_mm": 3116.9263,
+      "total_feed_distance_mm": 92772.91279999999
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -274,8 +275,8 @@
         -2.0,
         -1.587
       ],
-      "depth_count": 16,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 17,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": -1.588,
@@ -314,14 +315,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 37.1002,
-      "feed_time_s": 10340.5113,
-      "total_time_s": 10377.611499999999
+      "rapid_time_s": 37.4032,
+      "feed_time_s": 10582.6898,
+      "total_time_s": 10620.093
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     },
     "file_count": 3

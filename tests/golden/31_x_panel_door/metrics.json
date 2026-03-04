@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "31_x_panel_door",
-    "created_at": "2026-03-04T18:46:02.746137+00:00"
+    "created_at": "2026-03-04T18:53:46.542638+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.33,
     "document": {
       "width_mm": 553.175,
       "height_mm": 743.175,
@@ -276,28 +276,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 10.596,
+    "extraction_time_ms": 11.3706,
     "summary": {
-      "total_lines": 3672,
+      "total_lines": 3692,
       "comment_lines": 24,
-      "motion_lines": 2906,
+      "motion_lines": 2922,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 2186
+      "feed_lines": 2198
     },
     "motion": {
-      "g0_count": 1442,
-      "g1_count": 1464,
+      "g0_count": 1450,
+      "g1_count": 1472,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 37762.2841,
-      "total_feed_distance_mm": 129277.704
+      "total_rapid_distance_mm": 39863.2841,
+      "total_feed_distance_mm": 131378.704
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -312,8 +313,8 @@
         -3.0,
         -1.587
       ],
-      "depth_count": 14,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 15,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": -1.587,
@@ -364,14 +365,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 453.1474,
-      "feed_time_s": 15677.6283,
-      "total_time_s": 16130.7757
+      "rapid_time_s": 478.3594,
+      "feed_time_s": 15887.7283,
+      "total_time_s": 16366.0877
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     },
     "file_count": 2

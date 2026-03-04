@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "03_shaker_door_template",
-    "created_at": "2026-03-04T18:46:00.480738+00:00"
+    "created_at": "2026-03-04T18:53:44.210052+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.32,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 603.175,
       "height_mm": 829.175,
@@ -256,28 +256,29 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.7164,
+    "extraction_time_ms": 4.7578,
     "summary": {
-      "total_lines": 1582,
+      "total_lines": 1602,
       "comment_lines": 12,
-      "motion_lines": 1240,
+      "motion_lines": 1256,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 932
+      "feed_lines": 944
     },
     "motion": {
-      "g0_count": 618,
-      "g1_count": 622,
+      "g0_count": 626,
+      "g1_count": 630,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 29793.4198,
-      "total_feed_distance_mm": 105450.71599999999
+      "total_rapid_distance_mm": 31894.4198,
+      "total_feed_distance_mm": 107551.71599999999
     },
     "z_profile": {
       "safe_z_mm": 6.0,
-      "max_plunge_z_mm": -19.0,
+      "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
-        -19.0,
+        -19.2,
+        -19.05,
         -17.463,
         -15.875,
         -14.288,
@@ -292,8 +293,8 @@
         -3.0,
         -1.587
       ],
-      "depth_count": 14,
-      "max_single_plunge_mm": 25.0
+      "depth_count": 15,
+      "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -332,14 +333,14 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 357.521,
-      "feed_time_s": 12667.9035,
-      "total_time_s": 13025.424500000001
+      "rapid_time_s": 382.733,
+      "feed_time_s": 12878.0035,
+      "total_time_s": 13260.7365
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
-      "max_cutting_depth_mm": -19.0,
+      "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
     },
     "file_count": 2

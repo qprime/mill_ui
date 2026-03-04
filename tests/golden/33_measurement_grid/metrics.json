@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "33_measurement_grid",
-    "created_at": "2026-03-04T18:46:02.815167+00:00"
+    "created_at": "2026-03-04T18:53:46.615436+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.83,
+    "extraction_time_ms": 2.82,
     "document": {
       "width_mm": 453.175,
       "height_mm": 343.175,
@@ -146,7 +146,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.7755,
+    "extraction_time_ms": 17.7616,
     "summary": {
       "total_lines": 6038,
       "comment_lines": 1006,

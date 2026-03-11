@@ -1,0 +1,89 @@
+# mill_ui: 9d6f2097
+# generated: 2026-03-11
+
+Sheet:
+  width: 300mm
+  height: 250mm
+  thickness: 19mm
+  material: mdf
+  cut_through_mm: 0.2
+children:
+- Rect:
+    id: cal:part
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 150mm
+      y: 125mm
+      width: 200mm
+      height: 150mm
+- Rect:
+    id: cal:pocket_3mm
+    feature:
+      type: pocket
+      depth: 3mm
+    at:
+      x: 100mm
+      y: 170mm
+      width: 30mm
+      height: 30mm
+- Rect:
+    id: cal:pocket_6mm
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 150mm
+      y: 170mm
+      width: 30mm
+      height: 30mm
+- Rect:
+    id: cal:pocket_10mm
+    feature:
+      type: pocket
+      depth: 10mm
+    at:
+      x: 200mm
+      y: 170mm
+      width: 30mm
+      height: 30mm
+- Rect:
+    id: cal:window
+    feature:
+      type: profile
+      depth: through
+      side: inside
+    at:
+      x: 100mm
+      y: 100mm
+      width: 50mm
+      height: 50mm
+- Circle:
+    id: cal:hole_6mm
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: through
+    at:
+      x: 165mm
+      y: 80mm
+- Circle:
+    id: cal:hole_8mm
+    diameter: 8mm
+    feature:
+      type: hole
+      depth: through
+    at:
+      x: 195mm
+      y: 80mm
+- Circle:
+    id: cal:hole_10mm
+    diameter: 10mm
+    feature:
+      type: hole
+      depth: through
+    at:
+      x: 225mm
+      y: 80mm

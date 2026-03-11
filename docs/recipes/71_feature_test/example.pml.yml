@@ -1,0 +1,131 @@
+# mill_ui: 9d6f2097
+# generated: 2026-03-11
+
+Sheet:
+  width: 550mm
+  height: 400mm
+  thickness: 19mm
+  margin: 10mm
+  material: mdf
+  cut_through_mm: 0.2
+children:
+- RoundedRect:
+    id: feat:rounded
+    radius: 10mm
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Pocket:
+        depth: 4mm
+    - Chamfer:
+        width: 5mm
+        depth: 3mm
+    at:
+      x: 100mm
+      y: 295mm
+      width: 130mm
+      height: 120mm
+- Rect:
+    id: feat:holegrid
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - HoleGrid:
+        spacing: 25mm
+        diameter: 6mm
+        depth: through
+        pattern: rectangular
+        inset: 15mm
+        align: center
+    at:
+      x: 270mm
+      y: 295mm
+      width: 130mm
+      height: 120mm
+- Rect:
+    id: feat:wave
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Wave:
+        count: 4
+        amplitude: 8mm
+        wavelength: 30mm
+        groove: 3mm
+        depth: 2mm
+    at:
+      x: 440mm
+      y: 295mm
+      width: 130mm
+      height: 120mm
+- Rect:
+    id: feat:frame_engrave
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Frame:
+        width: 15mm
+        children:
+        - Rect:
+            id: feat:inner_panel
+            children:
+            - EngraveText:
+                text: MILL_UI
+                height: 8mm
+                alignment: center
+    at:
+      x: 100mm
+      y: 145mm
+      width: 130mm
+      height: 120mm
+- Rect:
+    id: feat:dogbone
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    children:
+    - Rect:
+        id: feat:dogbone_pocket
+        feature:
+          type: pocket
+          depth: 6mm
+          dogbone: true
+        at:
+          x: 270mm
+          y: 145mm
+          width: 60mm
+          height: 40mm
+    at:
+      x: 270mm
+      y: 145mm
+      width: 130mm
+      height: 120mm
+- Rect:
+    id: feat:tabbed
+    feature:
+      type: profile
+      depth: through
+      side: outside
+      tab_count: 4
+      tab_height: 3mm
+    children:
+    - Triangle:
+        base: 60mm
+        height: 50mm
+        feature:
+          type: pocket
+          depth: 5mm
+    at:
+      x: 440mm
+      y: 145mm
+      width: 130mm
+      height: 120mm

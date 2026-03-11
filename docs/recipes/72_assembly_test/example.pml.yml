@@ -1,15 +1,13 @@
 # mill_ui: 9d6f2097
 # generated: 2026-03-11
 
-# Box with dado-captured bottom
-
 Sheet:
-  width: 1200mm
-  height: 800mm
+  width: 800mm
+  height: 600mm
   thickness: 6mm
   margin: 10mm
-  show_dimensions: false
   material: mdf
+  show_dimensions: false
 children:
 - Assembly:
     type: box
@@ -20,7 +18,7 @@ children:
     joinery: finger
     finger_width: 12mm
     clearance: 0.15mm
-    bottom: dado
-    top: none
+    bottom: butt
+    top: captured
     show_labels: true
-    show_edge_colors: false
+    show_edge_colors: true

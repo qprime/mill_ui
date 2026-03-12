@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "04_custom_template",
-    "created_at": "2026-03-04T18:53:44.269990+00:00"
+    "created_at": "2026-03-12T19:50:35.856208+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -349,21 +349,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.2796,
+    "extraction_time_ms": 15.2658,
     "summary": {
-      "total_lines": 3974,
+      "total_lines": 3980,
       "comment_lines": 18,
-      "motion_lines": 3802,
+      "motion_lines": 3808,
       "tool_change_lines": 0,
       "spindle_lines": 9,
       "feed_lines": 3729
     },
     "motion": {
-      "g0_count": 197,
+      "g0_count": 203,
       "g1_count": 3605,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 15023.2359,
+      "total_rapid_distance_mm": 15986.8948,
       "total_feed_distance_mm": 25898.863699999998
     },
     "z_profile": {
@@ -839,9 +839,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 180.2788,
+      "rapid_time_s": 191.8427,
       "feed_time_s": 2905.9375,
-      "total_time_s": 3086.2163
+      "total_time_s": 3097.7802
     },
     "tabs": {
       "detected_count": 0,

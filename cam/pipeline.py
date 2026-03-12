@@ -192,8 +192,11 @@ def run_pipeline(
             for failure in machine_result.failures:
                 warnings.append(f"Machine bounds: {failure}")
 
+    park_z_mm: float | None = None
     if machine_config is not None and safe_z == 6.0:
         safe_z = machine_config.defaults.safe_z_mm
+    if machine_config is not None:
+        park_z_mm = machine_config.defaults.park_z_mm
 
     if constraint_audit.has_errors():
         constraint_summary = {
@@ -282,6 +285,7 @@ def run_pipeline(
                 sheet_height=ast.sheet.height_mm,
                 y_origin=y_origin,
                 margin_mm=margin_mm,
+                park_z_mm=park_z_mm,
             )
             pass_name = f"{diameter:.2f}mm"
             gcode_dict[pass_name] = gcode
@@ -301,6 +305,7 @@ def run_pipeline(
                 sheet_height=ast.sheet.height_mm,
                 y_origin=y_origin,
                 margin_mm=margin_mm,
+                park_z_mm=park_z_mm,
             )
 
             tool_diameter = p.setup.tool.diameter

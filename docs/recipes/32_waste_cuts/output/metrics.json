@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.03,
-    "hints_ms": 0.02,
-    "plan_ms": 0.37,
-    "gcode_ms": 1.1,
-    "svg_ms": 0.34,
-    "total_ms": 1.84
+    "ir_ms": 0.06,
+    "hints_ms": 0.03,
+    "plan_ms": 0.96,
+    "gcode_ms": 1.66,
+    "svg_ms": 0.86,
+    "total_ms": 3.58
   },
   "constraint_audit": {
     "tabs": {
@@ -31,12 +31,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 7141,
-    "total_lines": 326,
+    "total_bytes": 7170,
+    "total_lines": 328,
     "files": {
       "profile-3.17mm": {
-        "bytes": 7141,
-        "lines": 326
+        "bytes": 7170,
+        "lines": 328
       }
     }
   }

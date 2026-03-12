@@ -634,7 +634,7 @@ class _GCodeParser:
             cutting_depths = [z for z in sorted_z if z < 0]
             safe_z_values = [z for z in sorted_z if z > 0]
 
-            self.metrics.z_profile.safe_z_mm = max(safe_z_values) if safe_z_values else 0.0
+            self.metrics.z_profile.safe_z_mm = min(safe_z_values) if safe_z_values else 0.0
             self.metrics.z_profile.max_plunge_z_mm = min(sorted_z) if sorted_z else 0.0
 
             tolerance = self.config.z_tolerance

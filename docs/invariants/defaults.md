@@ -9,6 +9,7 @@
 | Parameter | Default | Canonical Location |
 |-----------|---------|-------------------|
 | safe_z_mm | 5.0 mm | ir/removal_intent.py (Constraints), cam/config.py, validation/invariants/gcode_invariants.py |
+| park_z_mm | 100.0 mm | config/machine_loader.py (MachineDefaults), cam/post/gcode.py (DEFAULT_PARK_Z_MM) |
 | max_stepdown_mm | 25.0 mm | validation/invariants/gcode_invariants.py |
 
 **Note:** safe_z_mm is defined in multiple places for different contexts but uses the same canonical value (5.0mm).

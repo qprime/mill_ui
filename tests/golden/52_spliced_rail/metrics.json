@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "52_spliced_rail",
-    "created_at": "2026-03-04T18:53:48.081638+00:00"
+    "created_at": "2026-03-12T19:50:39.650923+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.01,
+    "extraction_time_ms": 1.16,
     "document": {
       "width_mm": 1353.175,
       "height_mm": 1114.175,
@@ -429,21 +429,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.874,
+    "extraction_time_ms": 6.8356,
     "summary": {
-      "total_lines": 2126,
+      "total_lines": 2128,
       "comment_lines": 34,
-      "motion_lines": 1665,
+      "motion_lines": 1667,
       "tool_change_lines": 0,
       "spindle_lines": 3,
       "feed_lines": 1249
     },
     "motion": {
-      "g0_count": 833,
+      "g0_count": 835,
       "g1_count": 832,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 194219.5737,
+      "total_rapid_distance_mm": 195190.4416,
       "total_feed_distance_mm": 183872.806
     },
     "z_profile": {
@@ -529,9 +529,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 2330.6349,
+      "rapid_time_s": 2342.2853,
       "feed_time_s": 18387.2806,
-      "total_time_s": 20717.9155
+      "total_time_s": 20729.5659
     },
     "tabs": {
       "detected_count": 0,

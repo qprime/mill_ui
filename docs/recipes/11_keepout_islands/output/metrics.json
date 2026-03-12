@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.02,
-    "hints_ms": 0.01,
-    "plan_ms": 1.82,
-    "gcode_ms": 2.44,
-    "svg_ms": 0.27,
-    "total_ms": 4.56
+    "ir_ms": 0.04,
+    "hints_ms": 0.03,
+    "plan_ms": 3.7,
+    "gcode_ms": 3.46,
+    "svg_ms": 0.71,
+    "total_ms": 7.94
   },
   "constraint_audit": {},
   "complexity": {
@@ -25,12 +25,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 18782,
-    "total_lines": 1064,
+    "total_bytes": 18811,
+    "total_lines": 1066,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 18782,
-        "lines": 1064
+        "bytes": 18811,
+        "lines": 1066
       }
     }
   }

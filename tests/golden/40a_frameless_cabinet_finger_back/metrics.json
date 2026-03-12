@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40a_frameless_cabinet_finger_back",
-    "created_at": "2026-03-04T18:53:47.273415+00:00"
+    "created_at": "2026-03-12T19:50:38.842337+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.59,
+    "extraction_time_ms": 3.77,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 2499.175,
@@ -2195,21 +2195,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.9899,
+    "extraction_time_ms": 15.1509,
     "summary": {
-      "total_lines": 9716,
+      "total_lines": 9724,
       "comment_lines": 130,
-      "motion_lines": 9398,
+      "motion_lines": 9406,
       "tool_change_lines": 0,
       "spindle_lines": 12,
       "feed_lines": 6898
     },
     "motion": {
-      "g0_count": 2648,
+      "g0_count": 2656,
       "g1_count": 6750,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 55436.2511,
+      "total_rapid_distance_mm": 60937.0559,
       "total_feed_distance_mm": 217761.85
     },
     "z_profile": {
@@ -2358,9 +2358,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 665.235,
+      "rapid_time_s": 731.2446,
       "feed_time_s": 26124.2451,
-      "total_time_s": 26789.4801
+      "total_time_s": 26855.4897
     },
     "tabs": {
       "detected_count": 0,

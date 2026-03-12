@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "36_sparse_ruler_labels",
-    "created_at": "2026-03-04T18:53:46.841117+00:00"
+    "created_at": "2026-03-12T19:50:38.408602+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.42,
+    "extraction_time_ms": 2.46,
     "document": {
       "width_mm": 473.175,
       "height_mm": 363.175,
@@ -222,21 +222,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.9001,
+    "extraction_time_ms": 14.8802,
     "summary": {
-      "total_lines": 5144,
+      "total_lines": 5146,
       "comment_lines": 857,
-      "motion_lines": 3421,
+      "motion_lines": 3423,
       "tool_change_lines": 0,
       "spindle_lines": 3,
       "feed_lines": 2566
     },
     "motion": {
-      "g0_count": 1711,
+      "g0_count": 1713,
       "g1_count": 1710,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 7109.18,
+      "total_rapid_distance_mm": 7430.793,
       "total_feed_distance_mm": 5386.5
     },
     "z_profile": {
@@ -277,9 +277,9 @@
       "operation_names": []
     },
     "time_estimate": {
-      "rapid_time_s": 85.3102,
+      "rapid_time_s": 89.1695,
       "feed_time_s": 403.9875,
-      "total_time_s": 489.2977
+      "total_time_s": 493.157
     },
     "tabs": {
       "detected_count": 0,

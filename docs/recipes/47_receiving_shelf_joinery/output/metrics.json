@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.24,
-    "hints_ms": 0.11,
-    "plan_ms": 16.97,
-    "gcode_ms": 26.0,
-    "svg_ms": 1.55,
-    "total_ms": 44.87
+    "ir_ms": 0.55,
+    "hints_ms": 0.26,
+    "plan_ms": 28.95,
+    "gcode_ms": 35.12,
+    "svg_ms": 3.8,
+    "total_ms": 68.68
   },
   "constraint_audit": {
     "dogbone": {
@@ -46,24 +46,24 @@
     ]
   },
   "output_size": {
-    "total_bytes": 154641,
-    "total_lines": 8351,
+    "total_bytes": 154757,
+    "total_lines": 8359,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 123674,
-        "lines": 6654
+        "bytes": 123703,
+        "lines": 6656
       },
       "dogbone-9.53mm": {
-        "bytes": 5831,
-        "lines": 384
+        "bytes": 5860,
+        "lines": 386
       },
       "dogbone-3.17mm": {
-        "bytes": 7509,
-        "lines": 524
+        "bytes": 7538,
+        "lines": 526
       },
       "profile-3.17mm": {
-        "bytes": 17627,
-        "lines": 789
+        "bytes": 17656,
+        "lines": 791
       }
     }
   }

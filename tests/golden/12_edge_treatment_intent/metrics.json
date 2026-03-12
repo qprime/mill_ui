@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "12_edge_treatment_intent",
-    "created_at": "2026-03-04T18:53:44.877287+00:00"
+    "created_at": "2026-03-12T19:50:36.453188+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.23,
+    "extraction_time_ms": 0.21,
     "document": {
       "width_mm": 453.175,
       "height_mm": 391.175,
@@ -204,21 +204,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.139,
+    "extraction_time_ms": 0.1287,
     "summary": {
-      "total_lines": 562,
+      "total_lines": 566,
       "comment_lines": 7,
-      "motion_lines": 430,
+      "motion_lines": 434,
       "tool_change_lines": 0,
       "spindle_lines": 5,
       "feed_lines": 326
     },
     "motion": {
-      "g0_count": 210,
+      "g0_count": 214,
       "g1_count": 220,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 1761.6826,
+      "total_rapid_distance_mm": 1964.0014999999999,
       "total_feed_distance_mm": 33723.6
     },
     "z_profile": {
@@ -262,9 +262,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 21.1402,
+      "rapid_time_s": 23.568,
       "feed_time_s": 4259.8232,
-      "total_time_s": 4280.9633
+      "total_time_s": 4283.3911
     },
     "tabs": {
       "detected_count": 0,

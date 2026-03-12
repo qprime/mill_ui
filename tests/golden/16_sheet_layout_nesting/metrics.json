@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-03-04T18:53:45.086423+00:00"
+    "created_at": "2026-03-12T19:50:36.662070+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.07,
+    "extraction_time_ms": 1.08,
     "document": {
       "width_mm": 1398.175,
       "height_mm": 1651.175,
@@ -700,21 +700,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 21.0352,
+    "extraction_time_ms": 20.9998,
     "summary": {
-      "total_lines": 8320,
+      "total_lines": 8324,
       "comment_lines": 59,
-      "motion_lines": 6822,
+      "motion_lines": 6826,
       "tool_change_lines": 0,
       "spindle_lines": 6,
       "feed_lines": 5405
     },
     "motion": {
-      "g0_count": 2836,
+      "g0_count": 2840,
       "g1_count": 3986,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 31838.3161,
+      "total_rapid_distance_mm": 34763.2451,
       "total_feed_distance_mm": 596400.8319999999
     },
     "z_profile": {
@@ -819,9 +819,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 382.0598,
+      "rapid_time_s": 417.1589,
       "feed_time_s": 70374.4443,
-      "total_time_s": 70756.504
+      "total_time_s": 70791.60320000001
     },
     "tabs": {
       "detected_count": 52,

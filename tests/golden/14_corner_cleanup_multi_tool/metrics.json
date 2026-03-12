@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "14_corner_cleanup_multi_tool",
-    "created_at": "2026-03-04T18:53:44.981821+00:00"
+    "created_at": "2026-03-12T19:50:36.557856+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -256,21 +256,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 13.233,
+    "extraction_time_ms": 13.2807,
     "summary": {
-      "total_lines": 4904,
+      "total_lines": 4910,
       "comment_lines": 22,
-      "motion_lines": 4501,
+      "motion_lines": 4507,
       "tool_change_lines": 0,
       "spindle_lines": 9,
       "feed_lines": 4153
     },
     "motion": {
-      "g0_count": 699,
+      "g0_count": 705,
       "g1_count": 3802,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 33493.458399999996,
+      "total_rapid_distance_mm": 35225.4608,
       "total_feed_distance_mm": 108195.13259999998
     },
     "z_profile": {
@@ -337,9 +337,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 401.92150000000004,
+      "rapid_time_s": 422.70550000000003,
       "feed_time_s": 12942.345200000002,
-      "total_time_s": 13344.2666
+      "total_time_s": 13365.0507
     },
     "tabs": {
       "detected_count": 0,

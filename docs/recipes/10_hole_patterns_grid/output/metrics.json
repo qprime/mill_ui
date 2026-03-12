@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.19,
-    "hints_ms": 0.1,
-    "plan_ms": 65.17,
-    "gcode_ms": 98.73,
-    "svg_ms": 0.85,
-    "total_ms": 165.05
+    "ir_ms": 0.53,
+    "hints_ms": 0.31,
+    "plan_ms": 158.19,
+    "gcode_ms": 129.36,
+    "svg_ms": 2.57,
+    "total_ms": 290.95
   },
   "constraint_audit": {},
   "complexity": {
@@ -25,12 +25,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 983327,
-    "total_lines": 31598,
+    "total_bytes": 983356,
+    "total_lines": 31600,
     "files": {
       "bore-3.17mm": {
-        "bytes": 983327,
-        "lines": 31598
+        "bytes": 983356,
+        "lines": 31600
       }
     }
   }

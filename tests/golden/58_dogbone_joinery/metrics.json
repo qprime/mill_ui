@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "58_dogbone_joinery",
-    "created_at": "2026-03-04T18:53:48.217058+00:00"
+    "created_at": "2026-03-12T19:50:39.787063+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.38,
+    "extraction_time_ms": 0.41,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 1467.175,
@@ -462,21 +462,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8125,
+    "extraction_time_ms": 0.8297,
     "summary": {
-      "total_lines": 1187,
+      "total_lines": 1193,
       "comment_lines": 41,
-      "motion_lines": 981,
+      "motion_lines": 987,
       "tool_change_lines": 0,
       "spindle_lines": 9,
       "feed_lines": 729
     },
     "motion": {
-      "g0_count": 387,
+      "g0_count": 393,
       "g1_count": 594,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 16074.579600000001,
+      "total_rapid_distance_mm": 19136.3161,
       "total_feed_distance_mm": 126888.978
     },
     "z_profile": {
@@ -544,9 +544,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 192.895,
+      "rapid_time_s": 229.6357,
       "feed_time_s": 13686.8107,
-      "total_time_s": 13879.7057
+      "total_time_s": 13916.446399999999
     },
     "tabs": {
       "detected_count": 0,

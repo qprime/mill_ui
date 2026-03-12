@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 DEFAULT_HEADER = ["(begin)", "G90", "G21", "G17", "G94"]
 DEFAULT_FOOTER = ["M5", "M2", "(end)"]
+DEFAULT_PARK_Z_MM = 100.0
 
 
 def _move_to_dict(m: Move) -> dict[str, Any]:
@@ -89,6 +90,7 @@ def write_gcode(
     sheet_height: float | None = None,
     y_origin: str = "back",
     margin_mm: float = 0.0,
+    park_z_mm: float | None = None,
 ):
     if unit not in ("mm", "inch"):
         raise ValueError("unit must be 'mm' or 'inch'")
@@ -115,6 +117,12 @@ def write_gcode(
             first_rpm=first_rpm,
         )
 
+    park_z = park_z_mm if park_z_mm is not None else DEFAULT_PARK_Z_MM
+    park_footer = [
+        f"G0 Z{park_z:.{prec}f}",
+        f"G0 X{0.0:.{prec}f} Y{0.0:.{prec}f}",
+    ] + (footer or DEFAULT_FOOTER)
+
     move_dicts = [_move_to_dict(m) for m in effective_moves]
 
     return native_core.post_gcode(
@@ -123,5 +131,5 @@ def write_gcode(
         prec=prec,
         safe_z=safe_z,
         header=None if effective_header is None else effective_header,
-        footer=None if footer is None else footer,
+        footer=park_footer,
     )

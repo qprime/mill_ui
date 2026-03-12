@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "21_simple_shaker_door",
-    "created_at": "2026-03-04T18:53:46.104114+00:00"
+    "created_at": "2026-03-12T19:50:37.671602+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -241,21 +241,21 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.3393,
+    "extraction_time_ms": 4.345,
     "summary": {
-      "total_lines": 1602,
+      "total_lines": 1606,
       "comment_lines": 12,
-      "motion_lines": 1256,
+      "motion_lines": 1260,
       "tool_change_lines": 0,
       "spindle_lines": 6,
       "feed_lines": 944
     },
     "motion": {
-      "g0_count": 626,
+      "g0_count": 630,
       "g1_count": 630,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 31826.4,
+      "total_rapid_distance_mm": 32814.2763,
       "total_feed_distance_mm": 107551.71599999999
     },
     "z_profile": {
@@ -318,9 +318,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 381.91679999999997,
+      "rapid_time_s": 393.7713,
       "feed_time_s": 12878.0035,
-      "total_time_s": 13259.9203
+      "total_time_s": 13271.7748
     },
     "tabs": {
       "detected_count": 0,

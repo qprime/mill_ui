@@ -22,7 +22,7 @@ from cam.transforms import Transform2D, place
 from cam.types import Vec2
 
 
-def _finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> list[Move]:
+def finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> list[Move]:
     pts = shape.points
     if not pts:
         return []
@@ -51,24 +51,45 @@ def onion_skin_then_finish(
     spring_pass: bool = False,
     cut_through_mm: float = 0.2,
 ) -> list[Move]:
+    rough_moves, finish_depth = onion_skin_rough(
+        shape,
+        setup,
+        total_depth_mm,
+        skin_mm=skin_mm,
+        step_down_mm=step_down_mm,
+        cut_through_mm=cut_through_mm,
+    )
+    moves = list(rough_moves)
+    moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    if spring_pass:
+        moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    return moves
+
+
+def onion_skin_rough(
+    shape: Shape2D,
+    setup: Setup,
+    total_depth_mm: float,
+    *,
+    skin_mm: float = 0.5,
+    step_down_mm: float | None = None,
+    cut_through_mm: float = 0.2,
+) -> tuple[list[Move], float]:
     total = abs(float(total_depth_mm))
     skin = max(0.0, float(skin_mm))
     sd = step_down_mm or stepdown_for(tool_diameter=setup.tool.diameter, cap_mm=3.0)
 
-    moves: list[Move] = []
     if skin <= 0.0:
-        moves += profile_outline(shape, setup, depth_mm=total, step_down=sd)
-        return moves
+        moves = profile_outline(shape, setup, depth_mm=total, step_down=sd)
+        return moves, total + max(0.0, float(cut_through_mm))
 
     rough_depth = max(0.0, total - skin)
     finish_depth = total + max(0.0, float(cut_through_mm))
-    moves.append(move_comment(f"onion_skin_then_finish rough={rough_depth:.3f} finish={finish_depth:.3f}"))
+    moves: list[Move] = []
+    moves.append(move_comment(f"onion_skin_rough rough={rough_depth:.3f} finish_depth={finish_depth:.3f}"))
     if rough_depth > 0:
         moves += profile_outline(shape, setup, depth_mm=rough_depth, step_down=sd)
-    moves += _finish_profile_pass(shape, setup, depth_mm=finish_depth)
-    if spring_pass:
-        moves += _finish_profile_pass(shape, setup, depth_mm=finish_depth)
-    return moves
+    return moves, finish_depth
 
 
 def _segment_length(a: Vec2, b: Vec2) -> float:

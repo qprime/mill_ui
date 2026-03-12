@@ -371,6 +371,220 @@ class TestTypedPlannerInput:
         assert profile.tabs.width_mm == 10.0
 
 
+class TestOnionSkinPassOrdering:
+    def _extract_comments(self, pml_str: str) -> list[str]:
+        ast = parse_pml_yaml(pml_str)
+        flat = resolve_layout(ast)
+        result = run_pipeline(flat, generate_svg=False)
+        from cam.moves import CommentMove
+
+        comments = []
+        for pr in result.passes:
+            for m in pr.moves:
+                if isinstance(m, CommentMove):
+                    comments.append(m.text)
+        return comments
+
+    def test_single_part_rough_then_finish(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: part1
+      w: 50mm
+      h: 50mm
+      x: 100mm
+      y: 100mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+"""
+        comments = self._extract_comments(pml)
+        rough_idxs = [i for i, c in enumerate(comments) if "onion_skin_rough" in c]
+        finish_idxs = [i for i, c in enumerate(comments) if "finish_profile_pass" in c]
+        assert len(rough_idxs) >= 1
+        assert len(finish_idxs) >= 1
+        assert max(rough_idxs) < min(finish_idxs)
+
+    def test_multiple_parts_all_rough_before_finish(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: part1
+      w: 50mm
+      h: 50mm
+      x: 50mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+  - Rect:
+      id: part2
+      w: 50mm
+      h: 50mm
+      x: 150mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+  - Rect:
+      id: part3
+      w: 50mm
+      h: 50mm
+      x: 250mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+"""
+        comments = self._extract_comments(pml)
+        rough_idxs = [i for i, c in enumerate(comments) if "onion_skin_rough" in c]
+        finish_idxs = [i for i, c in enumerate(comments) if "finish_profile_pass" in c]
+        assert len(rough_idxs) == 3
+        assert len(finish_idxs) == 3
+        assert max(rough_idxs) < min(finish_idxs)
+
+    def test_finish_order_matches_rough_order(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: part_a
+      w: 40mm
+      h: 40mm
+      x: 50mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+  - Rect:
+      id: part_b
+      w: 60mm
+      h: 60mm
+      x: 150mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+"""
+        comments = self._extract_comments(pml)
+        rough_idxs = [i for i, c in enumerate(comments) if "onion_skin_rough" in c]
+        finish_idxs = [i for i, c in enumerate(comments) if "finish_profile_pass" in c]
+        assert len(rough_idxs) == 2
+        assert len(finish_idxs) == 2
+        assert max(rough_idxs) < min(finish_idxs)
+
+    def test_no_onion_skin_unchanged(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: part1
+      w: 50mm
+      h: 50mm
+      x: 100mm
+      y: 100mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+"""
+        comments = self._extract_comments(pml)
+        assert not any("onion_skin_rough" in c for c in comments)
+        assert not any("finish_profile_pass" in c for c in comments)
+
+    def test_mixed_onion_and_plain(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: onion_part
+      w: 50mm
+      h: 50mm
+      x: 50mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+  - Rect:
+      id: plain_part
+      w: 50mm
+      h: 50mm
+      x: 200mm
+      y: 50mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+"""
+        comments = self._extract_comments(pml)
+        rough_idxs = [i for i, c in enumerate(comments) if "onion_skin_rough" in c]
+        finish_idxs = [i for i, c in enumerate(comments) if "finish_profile_pass" in c]
+        assert len(rough_idxs) == 1
+        assert len(finish_idxs) == 1
+        assert max(rough_idxs) < min(finish_idxs)
+
+    def test_onion_skin_then_finish_backward_compat(self):
+        from cam.model.machine import Machine as MachineModel
+        from cam.model.material import Material as MaterialModel
+        from cam.model.setup import Setup as SetupModel
+        from cam.model.stock import Stock as StockModel
+        from cam.model.tool import Tool as ToolModel
+        from cam.moves import CommentMove
+        from cam.path.strategies import onion_skin_then_finish
+        from cam.primitives import rectangle
+
+        tool = ToolModel(name="test", diameter=6.35, rpm=18000, feed_xy=1500, feed_z=500)
+        stock = StockModel(width=200, height=200, thickness=19)
+        material = MaterialModel(name="mdf")
+        machine = MachineModel(name="test")
+        setup = SetupModel(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+        shape = rectangle(50, 50)
+
+        moves = onion_skin_then_finish(shape, setup, 19.0, skin_mm=0.3)
+        comments = [m.text for m in moves if isinstance(m, CommentMove)]
+        rough_idxs = [i for i, c in enumerate(comments) if "onion_skin_rough" in c]
+        finish_idxs = [i for i, c in enumerate(comments) if "finish_profile_pass" in c]
+        assert len(rough_idxs) >= 1
+        assert len(finish_idxs) >= 1
+        assert max(rough_idxs) < min(finish_idxs)
+
+
 class TestConstraintCoverageEnforcement:
     def test_all_constraint_fields_documented(self):
         import dataclasses

@@ -29,6 +29,8 @@ from .profile import (
     offset_polygon_shape,
     offset_rect_shape,
     offset_rounded_rect_shape,
+    onion_skin_finish_moves,
+    onion_skin_rough_moves,
     polygon_shape,
     profile_moves_with_options,
     rect_shape,
@@ -195,6 +197,36 @@ def plan_passes(
     polygon_profiles = [rec for rec in profiles if rec.shape.lower() == "polygon"]
     rounded_rect_profiles = [rec for rec in profiles if rec.shape.lower() == "roundedrect"]
 
+    deferred_finishes: list[tuple[Shape2D, PassRecord, float]] = []
+
+    def _add_profile_moves(
+        rec: FeatureInput, shape: Shape2D, record: PassRecord, depth: float, tool: ToolSelection
+    ) -> None:
+        skin = _onion_skin_for_feature(rec)
+        if skin > 0.0:
+            rough_moves, finish_depth = onion_skin_rough_moves(
+                shape,
+                setup=record.setup,
+                depth_mm=depth,
+                tool=tool,
+                onion_skin_mm=skin,
+                cut_through_mm=cut_through_mm,
+            )
+            record.add_moves(rough_moves, increment=1)
+            deferred_finishes.append((shape, record, finish_depth))
+        else:
+            record.add_moves(
+                profile_moves_with_options(
+                    shape,
+                    setup=record.setup,
+                    depth_mm=depth,
+                    tool=tool,
+                    onion_skin_mm=0.0,
+                    tabs_opts=_tabs_for_feature(rec),
+                ),
+                increment=1,
+            )
+
     merged_seams = 0
     if merge_enabled and rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -233,17 +265,7 @@ def plan_passes(
             else:
                 record = accumulator.get_record("profile", profile_tool)
                 shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
-                record.add_moves(
-                    profile_moves_with_options(
-                        shape,
-                        setup=record.setup,
-                        depth_mm=depth,
-                        tool=profile_tool,
-                        onion_skin_mm=_onion_skin_for_feature(rec),
-                        tabs_opts=_tabs_for_feature(rec),
-                    ),
-                    increment=1,
-                )
+                _add_profile_moves(rec, shape, record, depth, profile_tool)
 
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -275,17 +297,7 @@ def plan_passes(
                 continue
             record = accumulator.get_record("profile", profile_tool)
             shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
-            record.add_moves(
-                profile_moves_with_options(
-                    shape,
-                    setup=record.setup,
-                    depth_mm=depth,
-                    tool=profile_tool,
-                    onion_skin_mm=_onion_skin_for_feature(rec),
-                    tabs_opts=_tabs_for_feature(rec),
-                ),
-                increment=1,
-            )
+            _add_profile_moves(rec, shape, record, depth, profile_tool)
 
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -328,17 +340,7 @@ def plan_passes(
                 shape_poly = polygon_shape(points, rec.center_xy_mm)
             if shape_poly is None:
                 continue
-            record.add_moves(
-                profile_moves_with_options(
-                    shape_poly,
-                    setup=record.setup,
-                    depth_mm=depth,
-                    tool=profile_tool,
-                    onion_skin_mm=_onion_skin_for_feature(rec),
-                    tabs_opts=_tabs_for_feature(rec),
-                ),
-                increment=1,
-            )
+            _add_profile_moves(rec, shape_poly, record, depth, profile_tool)
 
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -387,17 +389,12 @@ def plan_passes(
                 shape_rr = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
             if shape_rr is None:
                 continue
-            record.add_moves(
-                profile_moves_with_options(
-                    shape_rr,
-                    setup=record.setup,
-                    depth_mm=depth,
-                    tool=profile_tool,
-                    onion_skin_mm=_onion_skin_for_feature(rec),
-                    tabs_opts=_tabs_for_feature(rec),
-                ),
-                increment=1,
-            )
+            _add_profile_moves(rec, shape_rr, record, depth, profile_tool)
+
+    for shape_def, deferred_record, finish_depth in deferred_finishes:
+        deferred_record.add_moves(
+            onion_skin_finish_moves(shape_def, setup=deferred_record.setup, finish_depth=finish_depth)
+        )
 
     pass_records = accumulator.passes()
 

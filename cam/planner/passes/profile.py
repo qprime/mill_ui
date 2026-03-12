@@ -10,6 +10,8 @@ from cam.model.setup import Setup
 from cam.moves import Move
 from cam.ops.profile import profile_outline
 from cam.path.strategies import (
+    finish_profile_pass,
+    onion_skin_rough,
     onion_skin_then_finish,
     profile_outline_with_tabs,
 )
@@ -132,6 +134,39 @@ def profile_moves_with_options(
     return profile_outline(shape, setup, depth_mm, step_down=step_down)
 
 
+def onion_skin_rough_moves(
+    shape: Shape2D,
+    *,
+    setup: Setup,
+    depth_mm: float,
+    tool: ToolSelection,
+    onion_skin_mm: float,
+    cut_through_mm: float = 0.2,
+) -> tuple[list[Move], float]:
+    step_down = stepdown_for_tool(tool)
+    return onion_skin_rough(
+        shape,
+        setup,
+        total_depth_mm=depth_mm,
+        skin_mm=onion_skin_mm,
+        step_down_mm=step_down,
+        cut_through_mm=cut_through_mm,
+    )
+
+
+def onion_skin_finish_moves(
+    shape: Shape2D,
+    *,
+    setup: Setup,
+    finish_depth: float,
+    spring_pass: bool = False,
+) -> list[Move]:
+    moves = finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    if spring_pass:
+        moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    return moves
+
+
 def _profile_plain(
     shape: Shape2D,
     setup: Setup,
@@ -149,6 +184,8 @@ __all__ = [
     "offset_polygon_shape",
     "offset_rect_shape",
     "offset_rounded_rect_shape",
+    "onion_skin_finish_moves",
+    "onion_skin_rough_moves",
     "polygon_shape",
     "profile_moves_with_options",
     "rect_shape",

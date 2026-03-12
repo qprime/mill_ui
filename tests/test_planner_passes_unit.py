@@ -31,11 +31,12 @@ from cam.planner.passes.tools import (
     pick_tool_for_hole,
     pick_tool_for_pocket,
     pick_tool_for_profile,
+    pick_tool_for_roundover,
     stepdown_for_tool,
     stepover_for_tool,
 )
 from cam.planner.planner_input import EdgeFeatureInput, FeatureInput, GeometryInput
-from ir.removal_intent import BevelSpec, ChamferSpec, ShapeGeometry
+from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec, ShapeGeometry
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
 FLAT_6MM = {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280}
@@ -69,11 +70,31 @@ VBIT_60 = {
     "feed_z": 400,
     "v_angle_deg": 60,
 }
+ROUNDOVER_6MM = {
+    "name": "6mm_roundover",
+    "diameter": 25.4,
+    "kind": "roundover",
+    "rpm": 16000,
+    "feed_xy": 1500,
+    "feed_z": 500,
+    "roundover_radius_mm": 6.0,
+}
+ROUNDOVER_10MM = {
+    "name": "10mm_roundover",
+    "diameter": 25.4,
+    "kind": "roundover",
+    "rpm": 16000,
+    "feed_xy": 1500,
+    "feed_z": 500,
+    "roundover_radius_mm": 10.0,
+}
 
 ALL_TOOLS = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM, BALL_2MM, V_1MM])
 FLAT_ONLY = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_12MM])
 TOOLS_WITH_VBIT = normalize_tool_entries([FLAT_3MM, FLAT_6MM, VBIT_90])
 TOOLS_WITH_TWO_VBITS = normalize_tool_entries([FLAT_3MM, VBIT_60, VBIT_90])
+TOOLS_WITH_ROUNDOVER = normalize_tool_entries([FLAT_3MM, FLAT_6MM, ROUNDOVER_6MM])
+TOOLS_WITH_TWO_ROUNDOVERS = normalize_tool_entries([FLAT_3MM, ROUNDOVER_6MM, ROUNDOVER_10MM])
 
 
 def _setup(tool_diameter=6.0):
@@ -712,4 +733,73 @@ class TestPassKey:
     def test_flat_tools_unaffected(self):
         tool = ToolSelection(name="flat", diameter=6.0, kind="flat", rpm=14000, feed_xy=900, feed_z=280)
         key = pass_key("profile", tool)
-        assert key == ("profile", 6.0, "flat", None, None)
+        assert key == ("profile", 6.0, "flat", None, None, None)
+
+    def test_different_roundover_radii_different_keys(self):
+        tool_6 = ToolSelection(
+            name="r6", diameter=25.4, kind="roundover", rpm=16000, feed_xy=1500, feed_z=500, roundover_radius_mm=6.0
+        )
+        tool_10 = ToolSelection(
+            name="r10", diameter=25.4, kind="roundover", rpm=16000, feed_xy=1500, feed_z=500, roundover_radius_mm=10.0
+        )
+        assert pass_key("edge", tool_6) != pass_key("edge", tool_10)
+
+
+class TestPickToolForRoundover:
+    def test_selects_closest_radius(self):
+        tool = pick_tool_for_roundover(TOOLS_WITH_TWO_ROUNDOVERS, radius_mm=6.0)
+        assert tool.roundover_radius_mm == 6.0
+
+    def test_no_roundover_bits_raises(self):
+        with pytest.raises(ValueError, match="roundover bit"):
+            pick_tool_for_roundover(FLAT_ONLY, radius_mm=6.0)
+
+    def test_single_roundover_bit(self):
+        tool = pick_tool_for_roundover(TOOLS_WITH_ROUNDOVER, radius_mm=6.0)
+        assert tool.roundover_radius_mm == 6.0
+
+    def test_ignores_flat_tools(self):
+        tool = pick_tool_for_roundover(TOOLS_WITH_ROUNDOVER, radius_mm=6.0)
+        assert tool.kind == "roundover"
+
+    def test_radius_mismatch_raises(self):
+        with pytest.raises(ValueError, match="No roundover bit with radius near"):
+            pick_tool_for_roundover(TOOLS_WITH_ROUNDOVER, radius_mm=20.0)
+
+
+class TestPlanRoundoverPasses:
+    def test_roundover_produces_edge_record(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=6.0)),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_ROUNDOVER)
+        records = acc.passes()
+        assert len(records) == 1
+        assert records[0].op == "edge"
+        assert len(records[0].moves) > 0
+
+    def test_no_roundover_bit_skips(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=6.0)),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
+        assert len(acc.passes()) == 0
+
+    def test_roundover_inside_offset(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect",
+                {"w_mm": 50.0, "h_mm": 30.0},
+                (100.0, 75.0),
+                6.0,
+                RoundoverSpec(radius_mm=6.0),
+                side="inside",
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_ROUNDOVER)
+        records = acc.passes()
+        assert len(records) == 1
+        assert len(records[0].moves) > 0

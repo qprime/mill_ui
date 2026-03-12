@@ -10,6 +10,7 @@ from ir.removal_intent import (
     ChamferSpec,
     DepthProfile,
     RemovalIntent,
+    RoundoverSpec,
     ShapeGeometry,
 )
 
@@ -64,6 +65,32 @@ class TestChamferSpec:
         a = ChamferSpec(width_mm=3.0, angle_deg=45.0)
         b = ChamferSpec(width_mm=3.0, angle_deg=45.0)
         assert a == b
+
+
+class TestRoundoverSpec:
+    def test_basic_construction(self):
+        spec = RoundoverSpec(radius_mm=6.0)
+        assert spec.radius_mm == 6.0
+
+    def test_frozen(self):
+        spec = RoundoverSpec(radius_mm=6.0)
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            spec.radius_mm = 8.0  # type: ignore[misc]
+
+    def test_replace(self):
+        spec = RoundoverSpec(radius_mm=6.0)
+        modified = dataclasses.replace(spec, radius_mm=10.0)
+        assert modified.radius_mm == 10.0
+
+    def test_equality(self):
+        a = RoundoverSpec(radius_mm=6.0)
+        b = RoundoverSpec(radius_mm=6.0)
+        assert a == b
+
+    def test_to_dict(self):
+        spec = RoundoverSpec(radius_mm=6.0)
+        d = spec.to_dict()
+        assert d == {"type": "roundover", "radius_mm": 6.0}
 
 
 class TestShapeGeometry:
@@ -194,6 +221,13 @@ class TestRemovalIntentTypedFields:
         assert intent.edge_feature is not None
         assert isinstance(intent.edge_feature, ChamferSpec)
         assert intent.edge_feature.width_mm == 4.0
+
+    def test_edge_feature_roundover(self):
+        roundover = RoundoverSpec(radius_mm=6.0)
+        intent = self._base_intent(edge_feature=roundover)
+        assert intent.edge_feature is not None
+        assert isinstance(intent.edge_feature, RoundoverSpec)
+        assert intent.edge_feature.radius_mm == 6.0
 
     def test_item_type_field(self):
         intent = self._base_intent(item_type="Rect")

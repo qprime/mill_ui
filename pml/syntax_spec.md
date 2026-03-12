@@ -421,6 +421,15 @@ Beveled edge treatment:
     depth: 3mm
 ```
 
+#### Roundover
+
+Rounded (fillet) edge using a roundover bit:
+
+```yaml
+- Roundover:
+    radius: 6mm
+```
+
 #### SplitGrid
 
 Divide region into grid, apply children to all cells:

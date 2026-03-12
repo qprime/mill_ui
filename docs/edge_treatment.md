@@ -12,24 +12,24 @@ The codebase has two separate mechanisms for edge work. This split is intentiona
 
 ### 1. Edge Features (standalone machining operations)
 
-Generators (`generators/loop/chamfer.py`, `generators/area/raised_panel.py`) produce items with `feature.type == "bevel"` or `feature.type == "chamfer"`. The adapter converts these to `RemovalIntent` with `EdgeFeatureSpec` (a `BevelSpec | ChamferSpec` union on `RemovalIntent.edge_feature`). These are **standalone machining operations** — boundary-following V-bit passes with angled depth.
+Generators (`generators/loop/chamfer.py`, `generators/area/raised_panel.py`) and the PML resolver (`resolution/layout_resolver.py`) produce items with `feature.type == "bevel"`, `"chamfer"`, or `"roundover"`. The adapter converts these to `RemovalIntent` with `EdgeFeatureSpec` (a `BevelSpec | ChamferSpec | RoundoverSpec` union on `RemovalIntent.edge_feature`). These are **standalone machining operations** — boundary-following passes with computed offset and depth.
 
 | Layer | Location |
 |-------|----------|
-| IR type | `ir/removal_intent.py` — `EdgeFeatureSpec = BevelSpec \| ChamferSpec` |
+| IR type | `ir/removal_intent.py` — `EdgeFeatureSpec = BevelSpec \| ChamferSpec \| RoundoverSpec` |
 | Adapter | `adapters/ast_to_removal.py` — `_build_edge_feature_intent()` |
 | Planner routing | `adapters/removal_to_planner.py` — routes to `edge_features` bucket |
 | Planner input | `cam/planner/planner_input.py` — `EdgeFeatureInput` |
 | Planner pass | `cam/planner/passes/edge.py` — `plan_edge_feature_passes()` |
-| Tool selection | `cam/planner/passes/tools.py` — `pick_tool_for_edge()` |
+| Tool selection | `cam/planner/passes/tools.py` — `pick_tool_for_edge()`, `pick_tool_for_roundover()` |
 | Validation | `validation/removal_checks.py` — `check_edge_feature()` |
 
 **Dispatch path:**
 ```
-RemovalIntent.edge_feature (BevelSpec | ChamferSpec)
+RemovalIntent.edge_feature (BevelSpec | ChamferSpec | RoundoverSpec)
   → _classify_feature() → "edge_features"
   → PlannerInput.edge_features (EdgeFeatureInput objects)
-  → plan_edge_feature_passes() → V-bit toolpath in edge-*.nc
+  → plan_edge_feature_passes() → V-bit or roundover bit toolpath in edge-*.nc
 ```
 
 ### 2. Edge Treatment Constraints (per-feature modifiers)
@@ -63,6 +63,7 @@ Constraints.edge_treatment (type: "allowance")
 |------|------|-------------|
 | bevel | `BevelSpec(width_mm, angle_deg, inner_depth_mm)` | Angled cut on panel edge |
 | chamfer | `ChamferSpec(width_mm, angle_deg)` | Angled cut on panel edge |
+| roundover | `RoundoverSpec(radius_mm)` | Quarter-circle rounded edge |
 
 ### Edge treatments (on Constraints.edge_treatment)
 
@@ -128,6 +129,8 @@ Implemented in `cam/planner/passes/edge.py`: `vbit_cut_depth()` and `vbit_effect
 | Non-negative inner depth (bevel) | Error | `inner_depth_mm < 0` |
 | Depth within sheet (bevel) | Error | `inner_depth_mm > sheet_thickness_mm` |
 | Cut depth within sheet (chamfer) | Error | Computed cut depth > sheet_thickness_mm |
+| Positive radius (roundover) | Error | `radius_mm <= 0` |
+| Radius within sheet (roundover) | Error | `radius_mm > sheet_thickness_mm` |
 | V-bit availability | Warning | No V-bit with matching included angle |
 | Tool clearance | Warning | Edge width > half the feature size |
 
@@ -146,6 +149,7 @@ Implemented in `cam/planner/passes/edge.py`: `vbit_cut_depth()` and `vbit_effect
 | Capability | Status |
 |------------|--------|
 | Edge feature (bevel/chamfer) V-bit toolpath | Honored |
+| Edge feature (roundover) roundover bit toolpath | Honored |
 | Edge treatment allowance (rough/finish splitting) | Honored |
 | Edge treatment fillet | Not implemented |
 | Edge feature validation | Honored |
@@ -157,27 +161,49 @@ Implemented in `cam/planner/passes/edge.py`: `vbit_cut_depth()` and `vbit_effect
 | File | Purpose |
 |------|---------|
 | `layout_ast/compositional.py` | Edge node definition |
-| `ir/removal_intent.py` | `BevelSpec`, `ChamferSpec`, `EdgeFeatureSpec`, `EdgeTreatment` |
+| `ir/removal_intent.py` | `BevelSpec`, `ChamferSpec`, `RoundoverSpec`, `EdgeFeatureSpec`, `EdgeTreatment` |
 | `pml/yaml_parser.py` | Edge parsing |
 | `resolution/layout_resolver.py` | Edge extraction logic |
 | `adapters/ast_to_removal.py` | AST → RemovalIntent with edge_feature |
 | `adapters/hints_to_removal.py` | Item → RemovalIntent with edge treatment |
 | `adapters/removal_to_planner.py` | Routes edge features to planner |
 | `cam/planner/planner_input.py` | `EdgeFeatureInput` dataclass |
-| `cam/planner/passes/edge.py` | V-bit toolpath generation |
-| `cam/planner/passes/tools.py` | `pick_tool_for_edge()` |
+| `cam/planner/passes/edge.py` | V-bit and roundover toolpath generation |
+| `cam/planner/passes/tools.py` | `pick_tool_for_edge()`, `pick_tool_for_roundover()` |
 | `cam/planner/capabilities.py` | Capability audit |
 | `validation/removal_checks.py` | `check_edge_feature()` validation |
 
 ---
 
+## Roundover Bit Geometry
+
+A CNC roundover bit (no bearing) has a concave quarter-circle cutting profile. For a bit with cutting radius `R`:
+
+| Parameter | Value |
+|-----------|-------|
+| Cut depth | `R` |
+| Toolpath offset from boundary | `R` (positive for outside, negative for inside) |
+
+Implemented in `cam/planner/passes/edge.py`: `_plan_roundover_pass()`.
+
+---
+
 ## Adding New Edge Feature Types
 
-To add a new edge feature type (e.g. `roundover`):
+To add a new edge feature type:
 
-1. Define `RoundoverSpec` in `ir/removal_intent.py`
-2. Add to union: `EdgeFeatureSpec = BevelSpec | ChamferSpec | RoundoverSpec`
-3. Add generator in `generators/loop/roundover.py`
-4. Add adapter branch in `adapters/ast_to_removal.py`
-5. Add validation branch in `validation/removal_checks.py`
-6. Add planner handler in `cam/planner/passes/edge.py`
+1. Define spec dataclass in `ir/removal_intent.py`
+2. Add to `EdgeFeatureSpec` union
+3. Add `FeatureType` constant in `core/constants.py`
+4. Add `Feature` field in `layout_ast/layout.py`
+5. Add AST gen node in `layout_ast/compositional.py`
+6. Add PML parser support in `pml/yaml_parser.py`
+7. Add resolver handler in `resolution/layout_resolver.py`
+8. Add adapter branch in `adapters/ast_to_removal.py`
+9. Add routing in `adapters/removal_to_planner.py`
+10. Add planner_input parsing in `cam/planner/planner_input.py`
+11. Add generator in `generators/loop/`
+12. Add tool selection in `cam/planner/passes/tools.py`
+13. Add planner handler in `cam/planner/passes/edge.py`
+14. Add validation branch in `validation/removal_checks.py`
+15. Add tool to `DEFAULT_TOOL_DB` in `cam/pipeline.py`

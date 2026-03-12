@@ -403,7 +403,7 @@ class PlannerInput:
             )
 
         def parse_edge_feature_input(ef: dict[str, Any]) -> EdgeFeatureInput:
-            from ir.removal_intent import BevelSpec, ChamferSpec
+            from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec
 
             shape = str(ef.get("shape", "Rect"))
             geometry = parse_geometry(ef.get("geometry", {}), shape)
@@ -422,6 +422,10 @@ class PlannerInput:
                     edge_feature = ChamferSpec(
                         width_mm=float(ef_spec_raw.get("width_mm", 0.0)),
                         angle_deg=float(ef_spec_raw.get("angle_deg", 45.0)),
+                    )
+                elif ef_type == "roundover":
+                    edge_feature = RoundoverSpec(
+                        radius_mm=float(ef_spec_raw.get("radius_mm", 0.0)),
                     )
             return EdgeFeatureInput(
                 id=str(ef.get("id", "")),

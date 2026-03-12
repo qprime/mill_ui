@@ -35,7 +35,18 @@ class ChamferSpec:
         }
 
 
-EdgeFeatureSpec = BevelSpec | ChamferSpec
+@dataclass(frozen=True)
+class RoundoverSpec:
+    radius_mm: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": "roundover",
+            "radius_mm": self.radius_mm,
+        }
+
+
+EdgeFeatureSpec = BevelSpec | ChamferSpec | RoundoverSpec
 
 
 @dataclass(frozen=True)
@@ -282,6 +293,7 @@ __all__ = [
     "KeepoutRegion",
     "RemovalIntent",
     "RestSpec",
+    "RoundoverSpec",
     "ShapeGeometry",
     "TabConstraint",
 ]

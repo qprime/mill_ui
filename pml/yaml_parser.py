@@ -41,6 +41,7 @@ from layout_ast.compositional import (
     RaisedPanelGen,
     Rect,
     RoundedRect,
+    RoundoverGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -402,6 +403,11 @@ def parse_node(data: dict, path: str = "") -> Any:
         return ChamferGen(
             width_mm=parse_dimension(_require(node_data, "width", f"{path}.Chamfer")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Chamfer")),
+        )
+
+    elif node_type == "Roundover":
+        return RoundoverGen(
+            radius_mm=parse_dimension(_require(node_data, "radius", f"{path}.Roundover")),
         )
 
     elif node_type == "Wave":

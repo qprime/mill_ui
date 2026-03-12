@@ -34,6 +34,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. Mutually exclusive with edge_treatment allowance. |
 | dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
 | edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
+| edge_feature (roundover) | HONORED | — | Roundover bit boundary-following pass |
 | allowance.inside/outside/on | VALIDATED_ONLY | — | May be applied upstream by generators |
 | allowance.kerf_compensation | VALIDATED_ONLY | — | Applied via global kerf_width_mm |
 

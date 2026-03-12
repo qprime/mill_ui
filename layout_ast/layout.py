@@ -103,6 +103,8 @@ class Feature:
     chamfer_width_mm: float | None = None
     chamfer_angle_deg: float | None = None
 
+    roundover_radius_mm: float | None = None
+
     feeds_override: FeedsOverride | None = None
 
 

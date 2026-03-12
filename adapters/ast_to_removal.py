@@ -26,6 +26,7 @@ from ir.removal_intent import (
     DepthProfile,
     EdgeFeatureSpec,
     RemovalIntent,
+    RoundoverSpec,
 )
 from layout_ast.layout import Feature, Item, LayoutAST
 
@@ -146,6 +147,19 @@ def item_to_removal_intent(
             calculated_depth,
             side=side,
             edge_feature=ChamferSpec(width_mm=chamfer_width, angle_deg=chamfer_angle),
+        )
+
+    elif item.feature.type == FeatureType.ROUNDOVER:
+        roundover_radius = item.feature.roundover_radius_mm or 0.0
+        side = item.feature.side or "outside"
+
+        return _build_edge_feature_intent(
+            hint,
+            item,
+            FeatureType.ROUNDOVER,
+            roundover_radius,
+            side=side,
+            edge_feature=RoundoverSpec(radius_mm=roundover_radius),
         )
 
     else:

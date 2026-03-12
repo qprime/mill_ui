@@ -64,6 +64,15 @@ DEFAULT_TOOL_DB = [
         "feed_z": 400,
         "v_angle_deg": 90,
     },
+    {
+        "name": "6mm_roundover",
+        "diameter": 25.4,
+        "kind": "roundover",
+        "rpm": 16000,
+        "feed_xy": 1500,
+        "feed_z": 500,
+        "roundover_radius_mm": 6.0,
+    },
 ]
 
 

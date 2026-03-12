@@ -21,6 +21,7 @@ class ToolSelection:
     depth_per_pass: float | None = None
     stepover_percent: float | None = None
     v_angle_deg: float | None = None
+    roundover_radius_mm: float | None = None
 
     def as_model(self) -> Tool:
         return Tool(
@@ -31,10 +32,11 @@ class ToolSelection:
             feed_xy=self.feed_xy,
             feed_z=self.feed_z,
             v_angle_deg=self.v_angle_deg,
+            roundover_radius_mm=self.roundover_radius_mm,
         )
 
 
-_VALID_KINDS: frozenset[ToolKind] = frozenset({"flat", "ball", "v"})
+_VALID_KINDS: frozenset[ToolKind] = frozenset({"flat", "ball", "v", "roundover"})
 
 
 def _parse_kind(data: Mapping[str, Any]) -> ToolKind:
@@ -68,6 +70,7 @@ def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
             else None
         ),
         v_angle_deg=float(data["v_angle_deg"]) if data.get("v_angle_deg") is not None else None,
+        roundover_radius_mm=float(data["roundover_radius_mm"]) if data.get("roundover_radius_mm") is not None else None,
     )
 
 
@@ -153,6 +156,23 @@ def pick_tool_for_edge(
     return candidates[0]
 
 
+def pick_tool_for_roundover(
+    tool_db: Sequence[ToolSelection],
+    *,
+    radius_mm: float,
+) -> ToolSelection:
+    candidates = [t for t in tool_db if t.kind == "roundover" and t.roundover_radius_mm is not None]
+    if not candidates:
+        raise ValueError("Tool database does not contain a roundover bit")
+    candidates.sort(key=lambda t: abs((t.roundover_radius_mm or 0.0) - radius_mm))
+    best = candidates[0]
+    if abs((best.roundover_radius_mm or 0.0) - radius_mm) > 0.5:
+        raise ValueError(
+            f"No roundover bit with radius near {radius_mm:.2f}mm (closest: {best.roundover_radius_mm:.2f}mm)"
+        )
+    return best
+
+
 def pick_tool_for_engrave(tool_db: Sequence[ToolSelection]) -> ToolSelection:
     candidates = _ball_or_v_tools(tool_db)
     if candidates:
@@ -205,11 +225,13 @@ def tool_identity(tool: ToolSelection) -> dict[str, Any]:
     }
     if tool.v_angle_deg is not None:
         result["v_angle_deg"] = tool.v_angle_deg
+    if tool.roundover_radius_mm is not None:
+        result["roundover_radius_mm"] = tool.roundover_radius_mm
     return result
 
 
-def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None, float | None]:
-    return operation, float(tool.diameter), tool.kind, tool.rotation, tool.v_angle_deg
+def pass_key(operation: str, tool: ToolSelection) -> tuple[str, float, str, str | None, float | None, float | None]:
+    return operation, float(tool.diameter), tool.kind, tool.rotation, tool.v_angle_deg, tool.roundover_radius_mm
 
 
 def apply_feeds_override(tool: ToolSelection, override: FeedsOverride | None) -> ToolSelection:
@@ -242,6 +264,7 @@ __all__ = [
     "pick_tool_for_hole",
     "pick_tool_for_pocket",
     "pick_tool_for_profile",
+    "pick_tool_for_roundover",
     "stepdown_for_tool",
     "stepover_for_tool",
     "tool_identity",

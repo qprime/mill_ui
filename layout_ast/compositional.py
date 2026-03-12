@@ -189,6 +189,11 @@ class ChamferGen:
 
 
 @dataclass(frozen=True)
+class RoundoverGen:
+    radius_mm: float
+
+
+@dataclass(frozen=True)
 class WaveGen:
     wave_count: int
     amplitude_mm: float

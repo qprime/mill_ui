@@ -4,7 +4,7 @@ import math
 from typing import Any
 
 from core.constants import FeatureType
-from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent
+from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
 
@@ -142,6 +142,24 @@ def check_edge_feature(
                     chamfer_cut_depth_mm=cut_depth,
                     sheet_thickness_mm=sheet_thickness_mm,
                 )
+
+    elif isinstance(spec, RoundoverSpec):
+        radius = spec.radius_mm
+
+        if radius <= 0.0:
+            result.add_error(
+                f"Roundover radius must be positive, got {radius:.2f}mm",
+                region_id=intent.region_id,
+                roundover_radius_mm=radius,
+            )
+
+        if radius > sheet_thickness_mm:
+            result.add_error(
+                f"Roundover radius ({radius:.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
+                region_id=intent.region_id,
+                roundover_radius_mm=radius,
+                sheet_thickness_mm=sheet_thickness_mm,
+            )
 
     if available_v_angles is not None and len(available_v_angles) > 0 and isinstance(spec, (BevelSpec, ChamferSpec)):
         desired_included = spec.angle_deg * 2.0

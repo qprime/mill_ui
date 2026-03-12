@@ -64,6 +64,7 @@ from layout_ast.compositional import (
     Rect,
     ResolvedRegion,
     RoundedRect,
+    RoundoverGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -746,6 +747,32 @@ class LayoutResolver:
         )
         items.append(chamfer_item)
 
+    def _handle_roundover_gen(
+        self,
+        node: RoundoverGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        roundover_item = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(
+                data={
+                    "w_mm": region.width,
+                    "h_mm": region.height,
+                }
+            ),
+            placement=Placement(center_xy_mm=region.center),
+            feature=Feature(
+                type="roundover",
+                depth_mm=node.radius_mm,
+                roundover_radius_mm=node.radius_mm,
+            ),
+            shape_id=self._next_shape_id("generated_roundover"),
+        )
+        items.append(roundover_item)
+
     def _handle_x_panel_gen(
         self,
         node: XPanelGen,
@@ -1360,6 +1387,20 @@ class LayoutResolver:
                         shape_id=self._next_shape_id("subtract_chamfer"),
                     )
                     items.append(chamfer_item)
+                elif isinstance(child, RoundoverGen):
+                    roundover_item = Item(
+                        kind="shape",
+                        type="Polygon",
+                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
+                        placement=Placement(center_xy_mm=(cx, cy)),
+                        feature=Feature(
+                            type="roundover",
+                            depth_mm=child.radius_mm,
+                            roundover_radius_mm=child.radius_mm,
+                        ),
+                        shape_id=self._next_shape_id("subtract_roundover"),
+                    )
+                    items.append(roundover_item)
                 else:
                     self._resolve_node(child, ring_region, items, params)
 
@@ -2444,6 +2485,7 @@ class LayoutResolver:
                 PocketGen: LayoutResolver._handle_pocket_gen,
                 RaisedPanelGen: LayoutResolver._handle_raised_panel_gen,
                 ChamferGen: LayoutResolver._handle_chamfer_gen,
+                RoundoverGen: LayoutResolver._handle_roundover_gen,
                 WaveGen: LayoutResolver._handle_wave_gen,
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,

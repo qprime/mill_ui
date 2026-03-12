@@ -58,7 +58,7 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
     ),
     "edge_feature": ConstraintStatus(
         ConstraintSupport.HONORED,
-        note="Bevel and chamfer edge features produce V-bit toolpaths",
+        note="Bevel/chamfer produce V-bit toolpaths; roundover uses roundover bit",
     ),
     "constraints.tolerance_mm": ConstraintStatus(
         ConstraintSupport.NOT_IMPLEMENTED,

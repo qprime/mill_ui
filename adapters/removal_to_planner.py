@@ -63,7 +63,7 @@ def _classify_feature(hint_type: str, side: str | None) -> str:
         return "holes"
     if hint_type == FeatureType.ENGRAVE:
         return "engraves"
-    if hint_type in (FeatureType.BEVEL, FeatureType.CHAMFER):
+    if hint_type in (FeatureType.BEVEL, FeatureType.CHAMFER, FeatureType.ROUNDOVER):
         return "edge_features"
     return "pockets"
 

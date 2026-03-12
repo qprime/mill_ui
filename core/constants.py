@@ -56,6 +56,7 @@ class MetadataKeys:
 
     BEVEL = "bevel"
     CHAMFER = "chamfer"
+    ROUNDOVER = "roundover"
     WIDTH_MM = "width_mm"
     ANGLE_DEG = "angle_deg"
     INNER_DEPTH_MM = "inner_depth_mm"
@@ -69,6 +70,7 @@ class FeatureType:
 
     BEVEL = "bevel"
     CHAMFER = "chamfer"
+    ROUNDOVER = "roundover"
 
 
 class ShapeType:

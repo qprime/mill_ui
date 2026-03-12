@@ -1,0 +1,27 @@
+# mill_ui: 5b15e5ac
+# generated: 2026-03-12
+
+Sheet:
+  width: 400mm
+  height: 300mm
+  thickness: 19mm
+  material: mdf
+Surface:
+  depth: 0.5mm
+  passes: 2
+  stepover: 70%
+  direction: x
+  cool_every: 5
+  cool_dwell: 3s
+children:
+- Rect:
+    id: part
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 200mm
+      y: 150mm
+      width: 150mm
+      height: 100mm

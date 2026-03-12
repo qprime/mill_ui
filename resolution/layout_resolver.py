@@ -71,6 +71,7 @@ from layout_ast.compositional import (
     SplitHorizontalGaps,
     SplitVertical,
     Subtract,
+    SurfaceDecl,
     Triangle,
     UseComponent,
     WasteCuts,
@@ -2365,6 +2366,9 @@ class LayoutResolver:
         items: list[Item] = []
         self._resolve_node(self.ast.root, sheet_region, items, params={})
 
+        if self.ast.surface is not None:
+            items.extend(self._desugar_surface(self.ast.surface))
+
         config: dict = {}
         if self._beam_structures:
             config["beam_structures"] = self._beam_structures
@@ -2376,6 +2380,44 @@ class LayoutResolver:
             kerf_width_mm=self.ast.kerf_width_mm,
             config=config,
         )
+
+    def _desugar_surface(self, surface: SurfaceDecl) -> list[Item]:
+        sheet = self.ast.sheet
+        working_w = sheet.working_width_mm
+        working_h = sheet.working_height_mm
+        margin = surface.margin_mm
+
+        rect_w = working_w + 2 * margin
+        rect_h = working_h + 2 * margin
+        cx = working_w / 2.0
+        cy = working_h / 2.0
+
+        items: list[Item] = []
+        for k in range(surface.passes):
+            pass_params = {
+                "surface_cooling": {
+                    "stepover_pct": surface.stepover_pct,
+                    "direction": surface.direction,
+                    "cool_every": surface.cool_every,
+                    "cool_dwell_s": surface.cool_dwell_s,
+                    "start_depth_mm": k * surface.depth_mm,
+                },
+            }
+            items.append(
+                Item(
+                    kind="shape",
+                    type="Rect",
+                    geometry=Geometry(data={"w_mm": rect_w, "h_mm": rect_h}),
+                    placement=Placement(center_xy_mm=(cx, cy)),
+                    feature=Feature(
+                        type="pocket",
+                        depth_mm=(k + 1) * surface.depth_mm,
+                    ),
+                    params=pass_params,
+                    shape_id=f"surface_pass_{k}",
+                )
+            )
+        return items
 
     _NODE_HANDLERS: dict[type, NodeHandler] | None = None
 

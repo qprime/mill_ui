@@ -38,7 +38,12 @@ class RetractMove:
     z: float
 
 
-Move = CommentMove | SetRpmMove | SetFeedMove | RapidMove | CutMove | RetractMove
+@dataclass(frozen=True)
+class DwellMove:
+    seconds: float
+
+
+Move = CommentMove | SetRpmMove | SetFeedMove | RapidMove | CutMove | RetractMove | DwellMove
 
 MotionMove = RapidMove | CutMove | RetractMove
 XYMove = RapidMove | CutMove
@@ -47,6 +52,7 @@ XYMove = RapidMove | CutMove
 __all__ = [
     "CommentMove",
     "CutMove",
+    "DwellMove",
     "MotionMove",
     "Move",
     "RapidMove",

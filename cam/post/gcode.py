@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from cam.moves import (
     CommentMove,
     CutMove,
+    DwellMove,
     Move,
     RapidMove,
     RetractMove,
@@ -37,6 +38,8 @@ def _move_to_dict(m: Move) -> dict[str, Any]:
         return {"kind": "cut", "x": m.x, "y": m.y, "z": m.z, "feed": m.feed}
     if isinstance(m, RetractMove):
         return {"kind": "retract", "z": m.z}
+    if isinstance(m, DwellMove):
+        return {"kind": "dwell", "seconds": m.seconds}
     raise ValueError(f"Unknown move type: {type(m)}")
 
 

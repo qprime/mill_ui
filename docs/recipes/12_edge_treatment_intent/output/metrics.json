@@ -2,10 +2,10 @@
   "timing": {
     "ir_ms": 0.04,
     "hints_ms": 0.03,
-    "plan_ms": 2.03,
-    "gcode_ms": 1.78,
+    "plan_ms": 2.09,
+    "gcode_ms": 1.8,
     "svg_ms": 0.66,
-    "total_ms": 4.54
+    "total_ms": 4.62
   },
   "constraint_audit": {
     "edge_treatment": {

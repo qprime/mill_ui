@@ -5,6 +5,7 @@ from dataclasses import replace
 from cam.moves import (
     CommentMove,
     CutMove,
+    DwellMove,
     MotionMove,
     Move,
     RapidMove,
@@ -36,6 +37,10 @@ def move_cut(x=None, y=None, z=None, feed=None) -> CutMove:
 
 def move_retract(z: float) -> RetractMove:
     return RetractMove(z=z)
+
+
+def move_dwell(seconds: float) -> DwellMove:
+    return DwellMove(seconds=seconds)
 
 
 def offset_moves_z(moves: list[Move], offset: float) -> list[Move]:

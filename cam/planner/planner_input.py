@@ -105,6 +105,27 @@ class GeometryInput:
 
 
 @dataclass(frozen=True)
+class SurfaceCooling:
+    stepover_pct: float = 70.0
+    direction: str = "x"
+    cool_every: int = 0
+    cool_dwell_s: float = 0.0
+    start_depth_mm: float = 0.0
+
+
+def _parse_surface_cooling(sc: dict[str, Any] | None) -> SurfaceCooling | None:
+    if sc is None:
+        return None
+    return SurfaceCooling(
+        stepover_pct=float(sc.get("stepover_pct", 70.0)),
+        direction=str(sc.get("direction", "x")),
+        cool_every=int(sc.get("cool_every", 0)),
+        cool_dwell_s=float(sc.get("cool_dwell_s", 0.0)),
+        start_depth_mm=float(sc.get("start_depth_mm", 0.0)),
+    )
+
+
+@dataclass(frozen=True)
 class FeatureInput:
     id: str
     shape: str
@@ -119,6 +140,7 @@ class FeatureInput:
     rest: RestSpec | None = None
     edge_treatment: EdgeTreatmentInput | None = None
     feeds_override: FeedsOverride | None = None
+    surface_cooling: SurfaceCooling | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -146,6 +168,14 @@ class FeatureInput:
             }
         if self.edge_treatment is not None:
             result["edge_treatment"] = self.edge_treatment.to_dict()
+        if self.surface_cooling is not None:
+            result["surface_cooling"] = {
+                "stepover_pct": self.surface_cooling.stepover_pct,
+                "direction": self.surface_cooling.direction,
+                "cool_every": self.surface_cooling.cool_every,
+                "cool_dwell_s": self.surface_cooling.cool_dwell_s,
+                "start_depth_mm": self.surface_cooling.start_depth_mm,
+            }
         return result
 
 
@@ -351,6 +381,7 @@ class PlannerInput:
                 keepouts=keepouts,
                 rest=parse_rest(f.get("rest")),
                 edge_treatment=parse_edge_treatment(f.get("edge_treatment")),
+                surface_cooling=_parse_surface_cooling(f.get("surface_cooling")),
             )
 
         def parse_corner_cleanup(c: dict[str, Any]) -> CornerCleanupInput:

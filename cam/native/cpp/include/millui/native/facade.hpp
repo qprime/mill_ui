@@ -47,12 +47,13 @@ struct PostConfig {
 };
 
 struct PathMove {
-  std::string kind;  // comment|set_rpm|set_feed|rapid|cut|retract
+  std::string kind;  // comment|set_rpm|set_feed|rapid|cut|retract|dwell
   double x = std::numeric_limits<double>::quiet_NaN();
   double y = std::numeric_limits<double>::quiet_NaN();
   double z = std::numeric_limits<double>::quiet_NaN();
   double feed = std::numeric_limits<double>::quiet_NaN();
   double rpm = std::numeric_limits<double>::quiet_NaN();
+  double seconds = std::numeric_limits<double>::quiet_NaN();
   std::string text;
 };
 using Path = std::vector<PathMove>;

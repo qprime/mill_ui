@@ -205,6 +205,44 @@ def _plan_rest_pocket(
         rest_record.add_moves(offset_moves_z(finish_profile_moves, start_depth), increment=1)
 
 
+def _plan_surface_pass(
+    entry: FeatureInput,
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+) -> None:
+    from cam.ops.face import face_zigzag
+
+    sc = entry.surface_cooling
+    assert sc is not None
+
+    sg = entry.geometry.geometry
+    width = float(sg.w_mm or 0.0)
+    height = float(sg.h_mm or 0.0)
+
+    tool = pick_tool_for_pocket(tool_db, required_width_mm=min(width, height), cleanup_offset_mm=0.0)
+    tool = apply_feeds_override(tool, entry.feeds_override)
+    accumulator.set_feature_tool(entry.id, tool)
+    record = accumulator.get_record("surface", tool)
+
+    step_mm = tool.diameter * (sc.stepover_pct / 100.0)
+    cut_depth = entry.depth_mm - sc.start_depth_mm
+    if cut_depth <= 0.0:
+        return
+
+    moves = face_zigzag(
+        width,
+        height,
+        record.setup,
+        step=step_mm,
+        depth_mm=cut_depth,
+        direction=sc.direction,
+        cool_every=sc.cool_every,
+        cool_dwell_s=sc.cool_dwell_s,
+    )
+    record.add_moves(offset_moves_z(moves, sc.start_depth_mm), increment=1)
+
+
 def plan_pocket_passes(
     pockets: tuple[FeatureInput, ...],
     *,
@@ -213,6 +251,10 @@ def plan_pocket_passes(
     config: Config,
 ) -> None:
     for entry in pockets:
+        if entry.surface_cooling is not None:
+            _plan_surface_pass(entry, accumulator=accumulator, tool_db=tool_db)
+            continue
+
         if entry.rest is not None:
             _plan_rest_pocket(entry, accumulator=accumulator, tool_db=tool_db, config=config)
             continue

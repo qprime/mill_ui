@@ -5,6 +5,7 @@ from collections.abc import Iterable, Sequence
 from cam.moves import (
     CommentMove,
     CutMove,
+    DwellMove,
     Move,
     RapidMove,
     RetractMove,
@@ -45,6 +46,9 @@ def _dict_to_move(d: dict) -> Move:
     if kind == "retract":
         z = d.get("z")
         return RetractMove(z=float(z) if z is not None else 0.0)
+    if kind == "dwell":
+        seconds = d.get("seconds")
+        return DwellMove(seconds=float(seconds) if seconds is not None else 0.0)
     raise ValueError(f"Unknown move kind: {kind!r}")
 
 

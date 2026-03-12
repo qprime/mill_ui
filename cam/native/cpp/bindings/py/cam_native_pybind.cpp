@@ -83,6 +83,7 @@ py::dict move_to_dict(const PathMove& mv) {
   d["z"] = has(mv.z) ? py::cast(mv.z) : py::none();
   d["feed"] = has(mv.feed) ? py::cast(mv.feed) : py::none();
   d["rpm"] = has(mv.rpm) ? py::cast(mv.rpm) : py::none();
+  d["seconds"] = has(mv.seconds) ? py::cast(mv.seconds) : py::none();
   if (!mv.text.empty()) {
     d["text"] = mv.text;
   } else {
@@ -114,6 +115,7 @@ Paths paths_from_flat_list(const py::sequence& seq) {
     if (d.contains("z") && !d["z"].is_none()) mv.z = d["z"].cast<double>();
     if (d.contains("feed") && !d["feed"].is_none()) mv.feed = d["feed"].cast<double>();
     if (d.contains("rpm") && !d["rpm"].is_none()) mv.rpm = d["rpm"].cast<double>();
+    if (d.contains("seconds") && !d["seconds"].is_none()) mv.seconds = d["seconds"].cast<double>();
     if (d.contains("text") && !d["text"].is_none()) mv.text = py::str(d["text"]);
     path.push_back(std::move(mv));
   }

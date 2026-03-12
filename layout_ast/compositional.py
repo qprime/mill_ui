@@ -516,9 +516,21 @@ class BeamDecl:
 
 
 @dataclass(frozen=True)
+class SurfaceDecl:
+    depth_mm: float
+    passes: int = 1
+    stepover_pct: float = 70.0
+    direction: str = "x"
+    margin_mm: float = 0.0
+    cool_every: int = 0
+    cool_dwell_s: float = 0.0
+
+
+@dataclass(frozen=True)
 class CompositionalLayoutAST:
     sheet: Any
     components: dict[str, ComponentDef] = field(default_factory=dict)
     root: Any = None
     project: str | None = None
     kerf_width_mm: float | None = None
+    surface: SurfaceDecl | None = None

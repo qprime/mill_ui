@@ -123,6 +123,10 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
         const double z = has(move.z) ? move.z : cfg.safe_z;
         lines.emplace_back(g0(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), z, cfg.prec));
         current_z = z;
+      } else if (move.kind == "dwell") {
+        if (has(move.seconds) && move.seconds > 0.0) {
+          lines.emplace_back("G4 P" + fmt_num(move.seconds, cfg.prec));
+        }
       } else {
         lines.emplace_back("(unhandled move kind: " + move.kind + ")");
       }

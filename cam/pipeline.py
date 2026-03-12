@@ -89,6 +89,37 @@ class PipelineTiming:
     total_ms: float = 0.0
 
 
+def _attach_surface_cooling(planner_input, ast: LayoutAST):
+    from dataclasses import replace as _replace
+
+    from cam.planner.planner_input import SurfaceCooling
+
+    surface_map: dict[str, dict] = {}
+    for item in ast.items:
+        if item.params and "surface_cooling" in item.params:
+            surface_map[item.shape_id or ""] = item.params["surface_cooling"]
+
+    if not surface_map:
+        return planner_input
+
+    new_pockets = []
+    for pocket in planner_input.pockets:
+        sc_data = surface_map.get(pocket.id)
+        if sc_data is not None:
+            cooling = SurfaceCooling(
+                stepover_pct=sc_data["stepover_pct"],
+                direction=sc_data["direction"],
+                cool_every=sc_data["cool_every"],
+                cool_dwell_s=sc_data["cool_dwell_s"],
+                start_depth_mm=sc_data.get("start_depth_mm", 0.0),
+            )
+            new_pockets.append(_replace(pocket, surface_cooling=cooling))
+        else:
+            new_pockets.append(pocket)
+
+    return _replace(planner_input, pockets=tuple(new_pockets))
+
+
 def run_pipeline(
     ast: LayoutAST,
     *,
@@ -120,13 +151,15 @@ def run_pipeline(
     intents = ast_to_removal_intents(ast)
     _ir_ms = (time.perf_counter() - ir_start) * 1000
 
+    non_surface_intents = [i for i in intents if "surface_pass_" not in i.region_id]
+
     constraint_audit = audit_constraints(intents)
     for error in constraint_audit.errors:
         errors.append(f"Constraint audit: {error}")
     for warning in constraint_audit.warnings:
         warnings.append(f"Constraint audit: {warning}")
 
-    overlap_result = check_overlap(intents)
+    overlap_result = check_overlap(non_surface_intents)
     if overlap_result.has_issues():
         for issue in overlap_result.errors:
             errors.append(issue.message)
@@ -154,7 +187,7 @@ def run_pipeline(
 
     tool_radius = kerf_mm / 2.0
     bounds_result = check_working_area_bounds(
-        intents,
+        non_surface_intents,
         ast.sheet.working_width_mm,
         ast.sheet.working_height_mm,
         tool_radius_mm=tool_radius,
@@ -228,6 +261,7 @@ def run_pipeline(
         kerf_width_mm=kerf_mm,
         min_channel_width_mm=min_channel_width_mm,
     )
+    planner_input = _attach_surface_cooling(planner_input, ast)
     _hints_ms = (time.perf_counter() - hints_start) * 1000
 
     stock = Stock(

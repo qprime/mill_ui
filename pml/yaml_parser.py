@@ -48,6 +48,7 @@ from layout_ast.compositional import (
     SplitHorizontalGaps,
     SplitVertical,
     Subtract,
+    SurfaceDecl,
     TemplateDef,
     Triangle,
     UseComponent,
@@ -807,6 +808,49 @@ def parse_node(data: dict, path: str = "") -> Any:
         raise PMLParseError(f"Unknown node type: {node_type}", path)
 
 
+def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
+    if block is None:
+        return None
+    depth_mm = parse_dimension(_require(block, "depth", "Surface"))
+    if depth_mm <= 0.0:
+        raise PMLParseError("Surface depth must be > 0", "Surface")
+    passes = int(block.get("passes", 1))
+    if passes < 1:
+        raise PMLParseError("Surface passes must be >= 1", "Surface")
+    stepover_raw = block.get("stepover", "70%")
+    if isinstance(stepover_raw, str) and stepover_raw.endswith("%"):
+        stepover_pct = float(stepover_raw[:-1])
+    else:
+        stepover_pct = float(stepover_raw)
+    if stepover_pct <= 0.0 or stepover_pct > 100.0:
+        raise PMLParseError("Surface stepover must be > 0% and <= 100%", "Surface")
+    direction = str(block.get("direction", "x"))
+    if direction not in ("x", "y"):
+        raise PMLParseError(f"Surface direction must be 'x' or 'y', got '{direction}'", "Surface")
+    margin_mm = parse_dimension(block.get("margin", "0mm"))
+    if margin_mm < 0.0:
+        raise PMLParseError("Surface margin must be >= 0", "Surface")
+    cool_every = int(block.get("cool_every", 0))
+    if cool_every < 0:
+        raise PMLParseError("Surface cool_every must be >= 0", "Surface")
+    cool_dwell_raw = block.get("cool_dwell", "0s")
+    if isinstance(cool_dwell_raw, str) and cool_dwell_raw.endswith("s"):
+        cool_dwell_s = float(cool_dwell_raw[:-1])
+    else:
+        cool_dwell_s = float(cool_dwell_raw)
+    if cool_dwell_s < 0.0:
+        raise PMLParseError("Surface cool_dwell must be >= 0", "Surface")
+    return SurfaceDecl(
+        depth_mm=depth_mm,
+        passes=passes,
+        stepover_pct=stepover_pct,
+        direction=direction,
+        margin_mm=margin_mm,
+        cool_every=cool_every,
+        cool_dwell_s=cool_dwell_s,
+    )
+
+
 def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     yaml = YAML()
     yaml.preserve_quotes = True
@@ -857,6 +901,8 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     project = data.get("project")
     kerf_width_mm = parse_dimension(data["kerf"]) if "kerf" in data else None
 
+    surface = _parse_surface_block(data.get("Surface"))
+
     components: dict[str, ComponentDef] = {}
     components_block = data.get("components", {})
     for name, comp_data in components_block.items():
@@ -882,6 +928,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         root=root,
         project=project,
         kerf_width_mm=kerf_width_mm,
+        surface=surface,
     )
 
 

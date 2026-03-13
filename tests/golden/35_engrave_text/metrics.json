@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "35_engrave_text",
-    "created_at": "2026-03-12T22:16:22.541054+00:00"
+    "created_at": "2026-03-13T18:52:50.337366+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.4,
+    "extraction_time_ms": 4.56,
     "document": {
       "width_mm": 473.175,
       "height_mm": 363.175,
@@ -222,7 +222,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 26.0848,
+    "extraction_time_ms": 27.5977,
     "summary": {
       "total_lines": 9424,
       "comment_lines": 1570,
@@ -256,18 +256,18 @@
       "y_max": 168.5
     },
     "feeds": {
-      "min_feed_rate": 400.0,
-      "max_feed_rate": 1200.0,
+      "min_feed_rate": 100.0,
+      "max_feed_rate": 400.0,
       "feed_rates_used": [
-        400.0,
-        1200.0
+        100.0,
+        400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        16000
+        20000
       ]
     },
     "operations": {
@@ -279,8 +279,8 @@
     },
     "time_estimate": {
       "rapid_time_s": 147.8396,
-      "feed_time_s": 741.465,
-      "total_time_s": 889.3046
+      "feed_time_s": 2372.688,
+      "total_time_s": 2520.5276
     },
     "tabs": {
       "detected_count": 0,

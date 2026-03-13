@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "61_rest_pocketing",
-    "created_at": "2026-03-12T22:16:24.175467+00:00"
+    "created_at": "2026-03-13T18:52:51.947298+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.24,
+    "extraction_time_ms": 0.23,
     "document": {
       "width_mm": 453.175,
       "height_mm": 379.175,
@@ -221,22 +221,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9594,
+    "extraction_time_ms": 1.2199,
     "summary": {
-      "total_lines": 1446,
+      "total_lines": 1626,
       "comment_lines": 18,
-      "motion_lines": 1138,
+      "motion_lines": 1282,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 866
+      "feed_lines": 974
     },
     "motion": {
-      "g0_count": 542,
-      "g1_count": 596,
+      "g0_count": 614,
+      "g1_count": 668,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 5779.3706999999995,
-      "total_feed_distance_mm": 16012.720000000001
+      "total_rapid_distance_mm": 6174.7833,
+      "total_feed_distance_mm": 13783.0
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -244,13 +244,13 @@
       "unique_cutting_depths": [
         -9.5,
         -9.0,
-        -7.938,
-        -6.35,
+        -7.5,
+        -7.0,
         -6.0,
-        -4.762,
-        -3.175,
+        -4.5,
+        -3.5,
         -3.0,
-        -1.587
+        -1.5
       ],
       "depth_count": 9,
       "max_single_plunge_mm": 15.5
@@ -262,21 +262,21 @@
       "y_max": 128.413
     },
     "feeds": {
-      "min_feed_rate": 250.0,
-      "max_feed_rate": 900.0,
+      "min_feed_rate": 350.0,
+      "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        250.0,
-        300.0,
-        700.0,
-        900.0
+        350.0,
+        396.0,
+        1200.0,
+        1400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        10000,
-        14000
+        14000,
+        20000
       ]
     },
     "operations": {
@@ -285,16 +285,16 @@
       "bore_passes": 0,
       "total_passes": 4,
       "operation_names": [
-        "pocket_raster so=3.810 sd=3.000 depth=9.500",
+        "pocket_raster so=5.080 sd=3.500 depth=9.500",
         "profile_outline",
-        "pocket_raster so=3.810 sd=3.000 depth=9.500",
+        "pocket_raster so=5.080 sd=3.500 depth=9.500",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 69.3524,
-      "feed_time_s": 1878.7933,
-      "total_time_s": 1948.1457
+      "rapid_time_s": 74.09740000000001,
+      "feed_time_s": 995.6108,
+      "total_time_s": 1069.7082
     },
     "tabs": {
       "detected_count": 0,

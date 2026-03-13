@@ -206,4 +206,4 @@ To add a new edge feature type:
 12. Add tool selection in `cam/planner/passes/tools.py`
 13. Add planner handler in `cam/planner/passes/edge.py`
 14. Add validation branch in `validation/removal_checks.py`
-15. Add tool to `DEFAULT_TOOL_DB` in `cam/pipeline.py`
+15. Add tool to `machines/endmills.yml` and feeds entry to `machines/feeds.yml`

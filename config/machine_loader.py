@@ -423,6 +423,19 @@ def load_feeds(path: Path | str) -> list[FeedsEntry]:
     return entries
 
 
+def load_machine_tool_db(material: str = "mdf") -> list[dict[str, Any]]:
+    machines_dir = get_machines_dir()
+    endmills_path = machines_dir / "endmills.yml"
+    feeds_path = machines_dir / "feeds.yml"
+    if not endmills_path.exists():
+        raise FileNotFoundError(f"Endmill library not found: {endmills_path}")
+    if not feeds_path.exists():
+        raise FileNotFoundError(f"Feeds library not found: {feeds_path}")
+    endmills = load_endmills(endmills_path)
+    feeds = load_feeds(feeds_path)
+    return build_tool_db(endmills, feeds, material)
+
+
 def get_machines_dir() -> Path:
     return Path(__file__).parent.parent / "machines"
 
@@ -459,6 +472,7 @@ __all__ = [
     "load_endmills",
     "load_feeds",
     "load_machine_by_name",
+    "load_machine_tool_db",
     "load_spindles",
     "resolve_tool_selection",
 ]

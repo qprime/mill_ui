@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "09_config_tuning",
-    "created_at": "2026-03-12T22:16:20.148113+00:00"
+    "created_at": "2026-03-13T18:52:48.037523+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -201,52 +201,52 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7419,
+    "extraction_time_ms": 0.6014,
     "summary": {
-      "total_lines": 226,
+      "total_lines": 176,
       "comment_lines": 6,
-      "motion_lines": 169,
+      "motion_lines": 129,
       "tool_change_lines": 0,
       "spindle_lines": 3,
-      "feed_lines": 127
+      "feed_lines": 97
     },
     "motion": {
-      "g0_count": 83,
-      "g1_count": 86,
+      "g0_count": 63,
+      "g1_count": 66,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 930.2723,
-      "total_feed_distance_mm": 4482.846
+      "total_rapid_distance_mm": 827.0476,
+      "total_feed_distance_mm": 3371.3
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -6.0,
       "unique_cutting_depths": [
         -6.0,
-        -3.0
+        -3.5
       ],
       "depth_count": 2,
       "max_single_plunge_mm": 12.0
     },
     "xy_bounds": {
       "x_min": 0.0,
-      "x_max": 145.238,
+      "x_max": 143.65,
       "y_min": 0.0,
-      "y_max": 110.237
+      "y_max": 108.65
     },
     "feeds": {
-      "min_feed_rate": 250.0,
-      "max_feed_rate": 700.0,
+      "min_feed_rate": 350.0,
+      "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        250.0,
-        700.0
+        350.0,
+        1400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        10000
+        14000
       ]
     },
     "operations": {
@@ -255,16 +255,16 @@
       "bore_passes": 0,
       "total_passes": 4,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=6.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=6.000",
         "BEGIN finish profile pass",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 11.1633,
-      "feed_time_s": 566.2542,
-      "total_time_s": 577.4175
+      "rapid_time_s": 9.9246,
+      "feed_time_s": 231.1749,
+      "total_time_s": 241.0994
     },
     "tabs": {
       "detected_count": 0,

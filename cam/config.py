@@ -9,14 +9,12 @@ from pathlib import Path
 from typing import Any, Literal
 
 _PACKAGE_ROOT = Path(__file__).resolve().parents[1]
-_DEFAULT_TOOL_DB_PATH = (_PACKAGE_ROOT / "cam" / "tools" / "tool_db.json").resolve()
 _REPO_ROOT = _PACKAGE_ROOT.parent.parent
 _DEFAULT_PROJECT_ROOT = (_REPO_ROOT / "memories" / "cam_projects" / "sheet_layouts").resolve()
 
 
 @dataclass(frozen=True)
 class Config:
-    tool_db_path: Path | None = _DEFAULT_TOOL_DB_PATH
     project_root: Path | None = _DEFAULT_PROJECT_ROOT
     material_name: str | None = "MDF"
     safe_z_mm: float = 5.0
@@ -32,7 +30,6 @@ class Config:
     def as_dict(self) -> dict[str, Any]:
 
         return {
-            "tool_db_path": str(self.tool_db_path) if self.tool_db_path else None,
             "project_root": str(self.project_root) if self.project_root else None,
             "material_name": self.material_name,
             "safe_z_mm": float(self.safe_z_mm),
@@ -100,7 +97,7 @@ class Config:
 
 
 _CONFIG_FIELD_NAMES = tuple(field.name for field in fields(Config))
-_OPTIONAL_FIELDS = {"tool_db_path", "project_root", "material_name"}
+_OPTIONAL_FIELDS = {"project_root", "material_name"}
 _TOLERANCE_FIELDS = {
     "merge_epsilon_mm",
     "colinear_epsilon_deg",
@@ -110,7 +107,6 @@ _TOLERANCE_FIELDS = {
     "default_margin_mm",
 }
 _ENV_SUFFIXES = {
-    "tool_db_path": "TOOL_DB",
     "project_root": "PROJECT_ROOT",
     "material_name": "MATERIAL",
     "safe_z_mm": "SAFE_Z",
@@ -192,7 +188,6 @@ def _normalise_bool(value: Any) -> bool:
 
 
 _NORMALISERS = {
-    "tool_db_path": _normalise_path,
     "project_root": _normalise_path,
     "material_name": _normalise_material,
     "safe_z_mm": _non_negative_float,

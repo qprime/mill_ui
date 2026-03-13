@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "51_basic_beam",
-    "created_at": "2026-03-12T22:16:23.775464+00:00"
+    "created_at": "2026-03-13T18:52:51.546647+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -279,7 +279,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.5505,
+    "extraction_time_ms": 2.5857,
     "summary": {
       "total_lines": 808,
       "comment_lines": 14,
@@ -293,26 +293,26 @@
       "g1_count": 312,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 50370.9191,
-      "total_feed_distance_mm": 47580.312
+      "total_rapid_distance_mm": 50289.0071,
+      "total_feed_distance_mm": 47498.4
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
         -19.2,
-        -19.05,
-        -17.463,
-        -15.875,
-        -14.288,
-        -12.7,
-        -11.113,
-        -9.525,
-        -7.938,
-        -6.35,
-        -4.762,
-        -3.175,
-        -1.587
+        -18.0,
+        -16.5,
+        -15.0,
+        -13.5,
+        -12.0,
+        -10.5,
+        -9.0,
+        -7.5,
+        -6.0,
+        -4.5,
+        -3.0,
+        -1.5
       ],
       "depth_count": 13,
       "max_single_plunge_mm": 25.2
@@ -324,18 +324,18 @@
       "y_max": 255.938
     },
     "feeds": {
-      "min_feed_rate": 300.0,
-      "max_feed_rate": 900.0,
+      "min_feed_rate": 396.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
-        300.0,
-        900.0
+        396.0,
+        1200.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        14000
+        20000
       ]
     },
     "operations": {
@@ -359,9 +359,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 604.451,
-      "feed_time_s": 4758.0312,
-      "total_time_s": 5362.4822
+      "rapid_time_s": 603.4681,
+      "feed_time_s": 3571.3083,
+      "total_time_s": 4174.7764
     },
     "tabs": {
       "detected_count": 0,

@@ -18,7 +18,13 @@ from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
 from cam.post.gcode import write_gcode
-from config.machine_loader import Endmill, FeedsEntry, MachineConfig, build_tool_db
+from config.machine_loader import (
+    Endmill,
+    FeedsEntry,
+    MachineConfig,
+    build_tool_db,
+    load_machine_tool_db,
+)
 from ir.removal_intent import Bounds2D, RemovalIntent
 from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
@@ -29,51 +35,6 @@ from validation.removal_checks import (
     check_working_area_bounds,
 )
 from validation.toolpath_checks import verify_passes_avoid_keepouts
-
-DEFAULT_TOOL_DB = [
-    {
-        "name": "1_8_endmill",
-        "diameter": 3.175,
-        "kind": "flat",
-        "rpm": 14000,
-        "feed_xy": 900,
-        "feed_z": 300,
-    },
-    {
-        "name": "1_4_endmill",
-        "diameter": 6.35,
-        "kind": "flat",
-        "rpm": 12000,
-        "feed_xy": 800,
-        "feed_z": 280,
-    },
-    {
-        "name": "3_8_endmill",
-        "diameter": 9.525,
-        "kind": "flat",
-        "rpm": 10000,
-        "feed_xy": 700,
-        "feed_z": 250,
-    },
-    {
-        "name": "90_degree_vbit",
-        "diameter": 12.7,
-        "kind": "v",
-        "rpm": 16000,
-        "feed_xy": 1200,
-        "feed_z": 400,
-        "v_angle_deg": 90,
-    },
-    {
-        "name": "6mm_roundover",
-        "diameter": 25.4,
-        "kind": "roundover",
-        "rpm": 16000,
-        "feed_xy": 1500,
-        "feed_z": 500,
-        "roundover_radius_mm": 6.0,
-    },
-]
 
 
 @dataclass(frozen=True)
@@ -150,7 +111,7 @@ def run_pipeline(
     elif endmills is not None and feeds is not None:
         effective_tool_db = build_tool_db(endmills, feeds, ast.sheet.material)
     else:
-        effective_tool_db = DEFAULT_TOOL_DB
+        effective_tool_db = load_machine_tool_db(ast.sheet.material)
     tools = normalize_tool_entries(effective_tool_db)
 
     errors: list[str] = []

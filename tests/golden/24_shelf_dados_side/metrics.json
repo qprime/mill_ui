@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-03-12T22:16:21.914150+00:00"
+    "created_at": "2026-03-13T18:52:49.754132+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.3,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 753.175,
       "height_mm": 943.175,
@@ -317,46 +317,45 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.6512,
+    "extraction_time_ms": 1.0259,
     "summary": {
-      "total_lines": 776,
+      "total_lines": 586,
       "comment_lines": 28,
-      "motion_lines": 594,
+      "motion_lines": 439,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 458
+      "feed_lines": 338
     },
     "motion": {
-      "g0_count": 270,
-      "g1_count": 324,
+      "g0_count": 200,
+      "g1_count": 239,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 41531.563700000006,
-      "total_feed_distance_mm": 97720.62
+      "total_rapid_distance_mm": 40892.6326,
+      "total_feed_distance_mm": 73246.3
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
         -19.2,
-        -19.05,
-        -17.463,
-        -15.875,
-        -14.288,
-        -12.7,
-        -11.113,
+        -18.0,
+        -16.5,
+        -15.0,
+        -13.5,
+        -12.0,
+        -10.5,
         -10.0,
-        -9.525,
         -9.0,
-        -7.938,
-        -6.35,
+        -7.5,
+        -7.0,
         -6.0,
-        -4.762,
-        -3.175,
+        -4.5,
+        -3.5,
         -3.0,
-        -1.587
+        -1.5
       ],
-      "depth_count": 17,
+      "depth_count": 16,
       "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
@@ -366,21 +365,21 @@
       "y_max": 801.587
     },
     "feeds": {
-      "min_feed_rate": 250.0,
-      "max_feed_rate": 900.0,
+      "min_feed_rate": 350.0,
+      "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        250.0,
-        300.0,
-        700.0,
-        900.0
+        350.0,
+        396.0,
+        1200.0,
+        1400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        10000,
-        14000
+        14000,
+        20000
       ]
     },
     "operations": {
@@ -389,32 +388,32 @@
       "bore_passes": 0,
       "total_passes": 20,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=10.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=10.000",
         "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=10.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=10.000",
         "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=10.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=10.000",
         "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=10.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=10.000",
         "BEGIN finish profile pass",
         "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.000 so=3.810",
-        "pocket_raster so=3.810 sd=3.000 depth=10.000",
+        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
+        "pocket_raster so=5.080 sd=3.500 depth=10.000",
         "BEGIN finish profile pass",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 498.3788,
-      "feed_time_s": 11362.4966,
-      "total_time_s": 11860.8754
+      "rapid_time_s": 490.71160000000003,
+      "feed_time_s": 5269.1146,
+      "total_time_s": 5759.8261999999995
     },
     "tabs": {
       "detected_count": 0,

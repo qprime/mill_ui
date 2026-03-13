@@ -12,7 +12,7 @@ from mcp.server.fastmcp import FastMCP
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline
+from cam.pipeline import run_pipeline
 from layout_ast.layout import LayoutAST
 from mill_mcp.config import ensure_output_dir
 from nesting import nest_and_generate
@@ -163,7 +163,6 @@ def _run_cam_pipeline(
         ast,
         kerf_mm=kerf_mm,
         min_channel_width_mm=12.0,
-        tool_db=DEFAULT_TOOL_DB,
         generate_svg=True,
         svg_theme="dark",
     )

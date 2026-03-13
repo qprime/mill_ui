@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "73_surface_facing",
-    "created_at": "2026-03-12T22:16:24.612326+00:00"
+    "created_at": "2026-03-13T18:52:52.469154+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.31,
+    "extraction_time_ms": 0.3,
     "document": {
       "width_mm": 553.175,
       "height_mm": 491.175,
@@ -275,40 +275,40 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8994,
+    "extraction_time_ms": 0.9119,
     "summary": {
-      "total_lines": 764,
+      "total_lines": 650,
       "comment_lines": 10,
-      "motion_lines": 574,
+      "motion_lines": 486,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 428
+      "feed_lines": 362
     },
     "motion": {
-      "g0_count": 290,
-      "g1_count": 284,
+      "g0_count": 246,
+      "g1_count": 240,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 10317.7248,
-      "total_feed_distance_mm": 43991.604
+      "total_rapid_distance_mm": 9736.5601,
+      "total_feed_distance_mm": 35015.8
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
         -19.2,
-        -19.05,
-        -17.463,
-        -15.875,
-        -14.288,
-        -12.7,
-        -11.113,
-        -9.525,
-        -7.938,
-        -6.35,
-        -4.762,
-        -3.175,
-        -1.587,
+        -18.0,
+        -16.5,
+        -15.0,
+        -13.5,
+        -12.0,
+        -10.5,
+        -9.0,
+        -7.5,
+        -6.0,
+        -4.5,
+        -3.0,
+        -1.5,
         -1.0,
         -0.5
       ],
@@ -322,21 +322,21 @@
       "y_max": 293.37
     },
     "feeds": {
-      "min_feed_rate": 250.0,
-      "max_feed_rate": 900.0,
+      "min_feed_rate": 350.0,
+      "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        250.0,
-        300.0,
-        700.0,
-        900.0
+        350.0,
+        396.0,
+        1200.0,
+        1400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        10000,
-        14000
+        14000,
+        20000
       ]
     },
     "operations": {
@@ -352,9 +352,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 123.81269999999999,
-      "feed_time_s": 5362.5157,
-      "total_time_s": 5486.3284
+      "rapid_time_s": 116.8388,
+      "feed_time_s": 2449.76,
+      "total_time_s": 2566.5987
     },
     "tabs": {
       "detected_count": 0,

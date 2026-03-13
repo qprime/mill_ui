@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "39a_plug_top_bottom",
-    "created_at": "2026-03-12T22:16:22.872715+00:00"
+    "created_at": "2026-03-13T18:52:50.693813+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.51,
+    "extraction_time_ms": 1.56,
     "document": {
       "width_mm": 1373.175,
       "height_mm": 1503.175,
@@ -1235,22 +1235,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.8307,
+    "extraction_time_ms": 3.0033,
     "summary": {
-      "total_lines": 6090,
+      "total_lines": 6266,
       "comment_lines": 88,
-      "motion_lines": 5065,
+      "motion_lines": 5235,
       "tool_change_lines": 0,
       "spindle_lines": 9,
-      "feed_lines": 3699
+      "feed_lines": 3863
     },
     "motion": {
-      "g0_count": 2273,
-      "g1_count": 2792,
+      "g0_count": 2285,
+      "g1_count": 2950,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 24415.6115,
-      "total_feed_distance_mm": 36687.744
+      "total_rapid_distance_mm": 24405.6755,
+      "total_feed_distance_mm": 40546.013999999996
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -1258,12 +1258,11 @@
       "unique_cutting_depths": [
         -6.2,
         -6.0,
-        -4.762,
-        -3.175,
+        -4.5,
         -3.0,
-        -1.587
+        -1.5
       ],
-      "depth_count": 6,
+      "depth_count": 5,
       "max_single_plunge_mm": 12.2
     },
     "xy_bounds": {
@@ -1273,18 +1272,18 @@
       "y_max": 155.938
     },
     "feeds": {
-      "min_feed_rate": 300.0,
-      "max_feed_rate": 900.0,
+      "min_feed_rate": 396.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
-        300.0,
-        900.0
+        396.0,
+        1200.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        14000
+        20000
       ]
     },
     "operations": {
@@ -1340,9 +1339,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 292.9874,
-      "feed_time_s": 4006.4255999999996,
-      "total_time_s": 4299.4130000000005
+      "rapid_time_s": 292.8681,
+      "feed_time_s": 3303.1999,
+      "total_time_s": 3596.0681000000004
     },
     "tabs": {
       "detected_count": 0,

@@ -539,7 +539,7 @@ class TestPipelineWithFeeds:
         assert not result.errors
         assert len(result.passes) > 0
 
-    def test_pipeline_fallback_to_default(self):
+    def test_pipeline_loads_machine_library(self):
         from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement
 
         ast = LayoutAST(
@@ -559,8 +559,10 @@ class TestPipelineWithFeeds:
         result = run_pipeline(ast, kerf_mm=6.35)
         assert not result.errors
         assert len(result.passes) > 0
+        tool = result.passes[0].setup.tool
+        assert tool.feed_xy == 1800.0
 
-    def test_pipeline_material_flows_to_material_model(self):
+    def test_pipeline_unknown_material_raises(self):
         from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement
 
         ast = LayoutAST(
@@ -577,5 +579,5 @@ class TestPipelineWithFeeds:
             ),
         )
 
-        result = run_pipeline(ast, kerf_mm=6.35)
-        assert not result.errors
+        with pytest.raises(ValueError, match="plywood"):
+            run_pipeline(ast, kerf_mm=6.35)

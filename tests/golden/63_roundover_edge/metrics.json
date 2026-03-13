@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "63_roundover_edge",
-    "created_at": "2026-03-12T22:16:24.199293+00:00"
+    "created_at": "2026-03-13T18:52:51.967362+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.19,
+    "extraction_time_ms": 0.21,
     "document": {
       "width_mm": 453.175,
       "height_mm": 543.175,
@@ -197,90 +197,87 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.1277,
+    "extraction_time_ms": 0.9049,
     "summary": {
-      "total_lines": 312,
-      "comment_lines": 9,
-      "motion_lines": 228,
+      "total_lines": 280,
+      "comment_lines": 6,
+      "motion_lines": 211,
       "tool_change_lines": 0,
-      "spindle_lines": 5,
-      "feed_lines": 170
+      "spindle_lines": 3,
+      "feed_lines": 157
     },
     "motion": {
-      "g0_count": 114,
-      "g1_count": 114,
+      "g0_count": 107,
+      "g1_count": 104,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 19931.6076,
-      "total_feed_distance_mm": 22001.104
+      "total_rapid_distance_mm": 19766.333,
+      "total_feed_distance_mm": 19056.8
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -19.2,
       "unique_cutting_depths": [
         -19.2,
-        -19.05,
-        -17.463,
-        -15.875,
-        -14.288,
-        -12.7,
-        -11.113,
-        -9.525,
-        -7.938,
-        -6.35,
+        -18.0,
+        -16.5,
+        -15.0,
+        -13.5,
+        -12.0,
+        -10.5,
+        -9.0,
+        -7.5,
         -6.0,
-        -4.762,
-        -3.175,
+        -4.5,
         -3.0,
-        -1.587
+        -1.5
       ],
-      "depth_count": 15,
+      "depth_count": 13,
       "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
-      "x_min": -6.0,
-      "x_max": 306.0,
-      "y_min": -6.0,
-      "y_max": 406.0
+      "x_min": -1.587,
+      "x_max": 301.587,
+      "y_min": -1.587,
+      "y_max": 401.587
     },
     "feeds": {
-      "min_feed_rate": 300.0,
-      "max_feed_rate": 1500.0,
+      "min_feed_rate": 396.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
-        300.0,
-        500.0,
-        900.0,
-        1500.0
+        396.0,
+        1200.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        14000,
-        16000
+        20000
       ]
     },
     "operations": {
-      "profile_passes": 1,
+      "profile_passes": 4,
       "pocket_passes": 0,
       "bore_passes": 0,
-      "total_passes": 1,
+      "total_passes": 4,
       "operation_names": [
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 239.17919999999998,
-      "feed_time_s": 2083.4304,
-      "total_time_s": 2322.6096000000002
+      "rapid_time_s": 237.196,
+      "feed_time_s": 1432.8421,
+      "total_time_s": 1670.0381
     },
     "tabs": {
       "detected_count": 0,
       "tab_heights_mm": [],
       "max_cutting_depth_mm": -19.2,
       "tabs_at_max_depth": true
-    },
-    "file_count": 2
+    }
   }
 }

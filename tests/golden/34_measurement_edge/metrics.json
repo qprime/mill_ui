@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "34_measurement_edge",
-    "created_at": "2026-03-12T22:16:22.439579+00:00"
+    "created_at": "2026-03-13T18:52:50.231328+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.71,
+    "extraction_time_ms": 2.69,
     "document": {
       "width_mm": 773.175,
       "height_mm": 563.175,
@@ -222,7 +222,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.0362,
+    "extraction_time_ms": 16.6772,
     "summary": {
       "total_lines": 5788,
       "comment_lines": 964,
@@ -255,18 +255,18 @@
       "y_max": 390.0
     },
     "feeds": {
-      "min_feed_rate": 400.0,
-      "max_feed_rate": 1200.0,
+      "min_feed_rate": 100.0,
+      "max_feed_rate": 400.0,
       "feed_rates_used": [
-        400.0,
-        1200.0
+        100.0,
+        400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        16000
+        20000
       ]
     },
     "operations": {
@@ -278,8 +278,8 @@
     },
     "time_estimate": {
       "rapid_time_s": 104.8959,
-      "feed_time_s": 454.545,
-      "total_time_s": 559.4409
+      "feed_time_s": 1454.544,
+      "total_time_s": 1559.4399
     },
     "tabs": {
       "detected_count": 0,

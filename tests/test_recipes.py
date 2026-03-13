@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline
+from cam.pipeline import run_pipeline
 from pml import parse_pml
 from pml.revision_header import update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -44,7 +44,6 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         ast,
         kerf_mm=3.175,
         min_channel_width_mm=6.0,
-        tool_db=DEFAULT_TOOL_DB,
         generate_svg=True,
         svg_theme="dark",
     )

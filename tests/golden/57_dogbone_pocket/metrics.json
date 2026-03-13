@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "57_dogbone_pocket",
-    "created_at": "2026-03-12T22:16:23.915987+00:00"
+    "created_at": "2026-03-13T18:52:51.687467+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -221,57 +221,56 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.3169,
+    "extraction_time_ms": 0.3253,
     "summary": {
-      "total_lines": 298,
+      "total_lines": 222,
       "comment_lines": 14,
-      "motion_lines": 230,
+      "motion_lines": 168,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 154
+      "feed_lines": 106
     },
     "motion": {
-      "g0_count": 110,
-      "g1_count": 120,
+      "g0_count": 82,
+      "g1_count": 86,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 2380.0025,
-      "total_feed_distance_mm": 3758.564
+      "total_rapid_distance_mm": 2129.3706,
+      "total_feed_distance_mm": 2300.8
     },
     "z_profile": {
       "safe_z_mm": 6.0,
       "max_plunge_z_mm": -9.5,
       "unique_cutting_depths": [
         -9.5,
-        -9.0,
         -7.5,
-        -6.0,
+        -7.0,
         -5.0,
-        -3.0,
+        -3.5,
         -2.5
       ],
-      "depth_count": 7,
+      "depth_count": 6,
       "max_single_plunge_mm": 15.5
     },
     "xy_bounds": {
       "x_min": 0.0,
-      "x_max": 260.238,
+      "x_max": 258.65,
       "y_min": 0.0,
       "y_max": 109.5
     },
     "feeds": {
-      "min_feed_rate": 250.0,
-      "max_feed_rate": 700.0,
+      "min_feed_rate": 350.0,
+      "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        250.0,
-        700.0
+        350.0,
+        1400.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        10000
+        14000
       ]
     },
     "operations": {
@@ -285,9 +284,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 28.5601,
-      "feed_time_s": 518.8755,
-      "total_time_s": 547.4355
+      "rapid_time_s": 25.552500000000002,
+      "feed_time_s": 197.67770000000002,
+      "total_time_s": 223.23020000000002
     },
     "tabs": {
       "detected_count": 0,

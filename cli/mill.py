@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from cam.pipeline import DEFAULT_TOOL_DB, run_pipeline, write_pipeline_outputs
+from cam.pipeline import run_pipeline, write_pipeline_outputs
 from cli.project import (
     DEFAULT_KERF_MM,
     DEFAULT_MARGIN_MM,
@@ -226,8 +226,6 @@ def _run_and_write(
     if endmills is not None and feeds is not None:
         pipeline_kwargs["endmills"] = endmills
         pipeline_kwargs["feeds"] = feeds
-    else:
-        pipeline_kwargs["tool_db"] = DEFAULT_TOOL_DB
 
     result = run_pipeline(ast, **pipeline_kwargs)
 

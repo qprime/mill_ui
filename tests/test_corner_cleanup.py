@@ -4,7 +4,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
@@ -70,7 +69,6 @@ def test_corner_cleanup_planner():
     ]
 
     config = Config(safe_z_mm=6.0)
-    material = Material(name="MDF")
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
@@ -78,7 +76,6 @@ def test_corner_cleanup_planner():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(tool_db),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -130,7 +127,6 @@ def test_corner_cleanup_tool_not_found():
     ]
 
     config = Config()
-    material = Material(name="MDF")
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
@@ -139,7 +135,6 @@ def test_corner_cleanup_tool_not_found():
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(tool_db),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -200,7 +195,6 @@ def test_corner_cleanup_without_flag():
     ]
 
     config = Config()
-    material = Material(name="MDF")
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
@@ -208,7 +202,6 @@ def test_corner_cleanup_without_flag():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(tool_db),
-        material=material,
         machine=machine,
         stock=stock,
     )

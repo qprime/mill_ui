@@ -4,7 +4,6 @@ import pytest
 
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
@@ -101,7 +100,6 @@ def _setup(tool_diameter=6.0):
     return Setup(
         stock=Stock(width=300, height=200, thickness=19),
         tool=Tool(name="t", diameter=tool_diameter),
-        material=Material(),
         machine=Machine(),
         safe_z=5.0,
     )
@@ -109,7 +107,6 @@ def _setup(tool_diameter=6.0):
 
 def _accumulator():
     return PassAccumulator(
-        material=Material(),
         machine=Machine(),
         stock=Stock(width=300, height=200, thickness=19),
         safe_z=5.0,

@@ -129,3 +129,47 @@ feeds:
     rpm: 12000
     depth_per_pass: 1.0
     plunge_factor: 0.25
+
+  # --- plywood ---
+
+  - endmill: "1/4 upcut spiral"
+    material: plywood
+    chipload: 0.04
+    rpm: 18000
+    depth_per_pass: 2.0
+    plunge_factor: 0.25
+
+  - endmill: "1/4 compression"
+    material: plywood
+    chipload: 0.04
+    rpm: 18000
+    depth_per_pass: 3.0
+    plunge_factor: 0.25
+
+  - endmill: "1/4 downcut SpeTool"
+    material: plywood
+    chipload: 0.03
+    rpm: 16000
+    depth_per_pass: 1.5
+    plunge_factor: 0.20
+
+  - endmill: "3/8 rougher 3F"
+    material: plywood
+    chipload: 0.06
+    rpm: 18000
+    depth_per_pass: 4.5
+    plunge_factor: 0.40
+
+  - endmill: "1/2 upcut 2F SE"
+    material: plywood
+    chipload: 0.05
+    rpm: 16000
+    depth_per_pass: 3.0
+    plunge_factor: 0.25
+
+  - endmill: "1 inch surfacing bit"
+    material: plywood
+    chipload: 0.08
+    rpm: 12000
+    depth_per_pass: 0.8
+    plunge_factor: 0.20

@@ -10,7 +10,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
@@ -142,7 +141,6 @@ def main():
             height=ast.sheet.height_mm,
             thickness=ast.sheet.thickness_mm,
         )
-        material = Material(name="MDF")
         machine = Machine(name="default_grbl")
 
         plan_start = time.perf_counter()
@@ -150,7 +148,6 @@ def main():
             planner_input,
             config=Config(),
             tool_db=TOOL_DB,
-            material=material,
             machine=machine,
             stock=stock,
             safe_z=6.0,

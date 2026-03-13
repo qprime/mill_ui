@@ -561,7 +561,6 @@ children:
 
     def test_onion_skin_then_finish_backward_compat(self):
         from cam.model.machine import Machine as MachineModel
-        from cam.model.material import Material as MaterialModel
         from cam.model.setup import Setup as SetupModel
         from cam.model.stock import Stock as StockModel
         from cam.model.tool import Tool as ToolModel
@@ -571,9 +570,8 @@ children:
 
         tool = ToolModel(name="test", diameter=6.35, rpm=18000, feed_xy=1500, feed_z=500)
         stock = StockModel(width=200, height=200, thickness=19)
-        material = MaterialModel(name="mdf")
         machine = MachineModel(name="test")
-        setup = SetupModel(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+        setup = SetupModel(stock=stock, tool=tool, machine=machine, safe_z=5.0)
         shape = rectangle(50, 50)
 
         moves = onion_skin_then_finish(shape, setup, 19.0, skin_mm=0.3)

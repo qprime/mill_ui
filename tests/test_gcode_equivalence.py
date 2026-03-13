@@ -10,7 +10,6 @@ from adapters.hints_to_removal import (
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
@@ -45,14 +44,12 @@ def _hash_gcode(gcode: str) -> str:
 def _generate_gcode(
     planner_input: PlannerInput,
     stock: Stock,
-    material: Material,
     machine: Machine,
 ) -> str:
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=6.0,
@@ -110,7 +107,6 @@ def test_profile_gcode_equivalence():
     print("Running test_profile_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     profile_hint = {
@@ -123,12 +119,12 @@ def test_profile_gcode_equivalence():
     }
 
     planner_input_v1 = _planner_input_from_hints(profiles=[profile_hint])
-    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
     intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
     planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -142,7 +138,6 @@ def test_pocket_gcode_equivalence():
     print("Running test_pocket_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     pocket_hint = {
@@ -154,12 +149,12 @@ def test_pocket_gcode_equivalence():
     }
 
     planner_input_v1 = _planner_input_from_hints(pockets=[pocket_hint])
-    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
     intent = pocket_hint_to_removal_intent(pocket_hint)
     planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -173,7 +168,6 @@ def test_hole_gcode_equivalence():
     print("Running test_hole_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     hole_hint = {
@@ -185,12 +179,12 @@ def test_hole_gcode_equivalence():
     }
 
     planner_input_v1 = _planner_input_from_hints(holes=[hole_hint])
-    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
     intent = hole_hint_to_removal_intent(hole_hint)
     planner_input_v2 = removal_intents_to_planner_input([intent], kerf_width_mm=3.175)
-    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
@@ -204,7 +198,6 @@ def test_mixed_operations_gcode_equivalence():
     print("Running test_mixed_operations_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=400.0, height=300.0, thickness=sheet_thickness)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     profile_hint = {
@@ -235,7 +228,7 @@ def test_mixed_operations_gcode_equivalence():
         pockets=[pocket_hint],
         holes=[hole_hint],
     )
-    gcode_v1 = _generate_gcode(planner_input_v1, stock, material, machine)
+    gcode_v1 = _generate_gcode(planner_input_v1, stock, machine)
     hash_v1 = _hash_gcode(gcode_v1)
 
     profile_intent = profile_hint_to_removal_intent(profile_hint, sheet_thickness_mm=sheet_thickness)
@@ -245,7 +238,7 @@ def test_mixed_operations_gcode_equivalence():
         [profile_intent, pocket_intent, hole_intent],
         kerf_width_mm=3.175,
     )
-    gcode_v2 = _generate_gcode(planner_input_v2, stock, material, machine)
+    gcode_v2 = _generate_gcode(planner_input_v2, stock, machine)
     hash_v2 = _hash_gcode(gcode_v2)
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"

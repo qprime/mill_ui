@@ -7,7 +7,6 @@ from typing import Any
 
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.moves import Move, SetRpmMove
@@ -67,13 +66,11 @@ class PassAccumulator:
     def __init__(
         self,
         *,
-        material: Material,
         machine: Machine,
         stock: Stock,
         safe_z: float,
         prime_spindle: bool,
     ) -> None:
-        self._material = material
         self._machine = machine
         self._stock = stock
         self._safe_z = float(safe_z)
@@ -85,7 +82,6 @@ class PassAccumulator:
         setup = Setup(
             stock=self._stock,
             tool=tool.as_model(),
-            material=self._material,
             machine=self._machine,
             safe_z=self._safe_z,
         )
@@ -133,7 +129,6 @@ def plan_passes(
     *,
     config: Config,
     tool_db: Sequence[ToolSelection],
-    material: Material,
     machine: Machine,
     stock: Stock,
     safe_z: float | None = None,
@@ -143,7 +138,6 @@ def plan_passes(
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=safe_z_value,

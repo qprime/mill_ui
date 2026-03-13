@@ -19,6 +19,11 @@ class Sheet:
     def __post_init__(self) -> None:
         if self.gcode_output not in VALID_GCODE_OUTPUT_MODES:
             raise ValueError(f"Invalid gcode_output '{self.gcode_output}'. Must be one of: {VALID_GCODE_OUTPUT_MODES}")
+        from config.machine_loader import available_materials
+
+        valid = available_materials()
+        if self.material.lower() not in valid:
+            raise ValueError(f"Unknown material {self.material!r}. Available materials in feeds.yml: {sorted(valid)}")
 
     @property
     def working_width_mm(self) -> float:

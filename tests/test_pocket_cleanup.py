@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
@@ -14,9 +13,8 @@ from cam.transforms import Transform2D, place
 def _create_test_setup():
     tool = Tool(name="6mm_flat", diameter=6.0, rpm=18000, feed_xy=2000, feed_z=300)
     stock = Stock(width=200.0, height=200.0, thickness=19.0)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
-    return Setup(stock=stock, tool=tool, material=material, machine=machine, safe_z=5.0)
+    return Setup(stock=stock, tool=tool, machine=machine, safe_z=5.0)
 
 
 def _count_comments_with_text(moves: list[Move], text: str) -> int:

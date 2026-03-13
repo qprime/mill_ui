@@ -32,6 +32,7 @@
 |-----------|---------|----------|
 | margin_mm | 10.0 mm | nesting/types.py (SheetSpec) |
 | margin_mm | 0.0 mm | layout_ast/layout.py (Sheet) |
+| material | "mdf" | layout_ast/layout.py (Sheet) — validated against feeds.yml via `available_materials()` |
 | layout_gap_mm | 10.0 mm | layout_ast/compositional.py (Assembly) |
 
 ---

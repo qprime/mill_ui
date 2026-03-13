@@ -169,6 +169,14 @@ class TestBuildToolDb:
         assert len(result) == 1
         assert result[0]["name"] == "bit_a"
 
+    def test_plywood_tools_resolve(self):
+        from config.machine_loader import load_endmills, load_feeds
+
+        endmills = load_endmills("machines/endmills.yml")
+        feeds = load_feeds("machines/feeds.yml")
+        result = build_tool_db(endmills, feeds, "plywood")
+        assert len(result) == 6
+
 
 class TestLoadFeeds:
     def test_load_feeds_yml(self, tmp_path):
@@ -199,6 +207,45 @@ class TestLoadFeeds:
         for entry in entries:
             assert entry.chipload > 0
             assert entry.rpm > 0
+
+
+class TestAvailableMaterials:
+    def test_returns_materials_from_feeds(self):
+        from config.machine_loader import available_materials
+
+        feeds = [
+            _feeds_entry(endmill="bit_a", material="mdf"),
+            _feeds_entry(endmill="bit_b", material="plywood"),
+        ]
+        result = available_materials(feeds)
+        assert result == frozenset({"mdf", "plywood"})
+
+    def test_case_normalized(self):
+        from config.machine_loader import available_materials
+
+        feeds = [_feeds_entry(endmill="bit_a", material="MDF")]
+        result = available_materials(feeds)
+        assert "mdf" in result
+
+    def test_loads_real_feeds_yml(self):
+        from config.machine_loader import available_materials
+
+        result = available_materials()
+        assert "mdf" in result
+        assert "plywood" in result
+
+
+class TestSheetMaterialValidation:
+    def test_valid_material_accepted(self):
+        Sheet(width_mm=100, height_mm=100, thickness_mm=19, material="mdf")
+        Sheet(width_mm=100, height_mm=100, thickness_mm=19, material="plywood")
+
+    def test_invalid_material_raises(self):
+        with pytest.raises(ValueError, match="Unknown material 'oak'"):
+            Sheet(width_mm=100, height_mm=100, thickness_mm=19, material="oak")
+
+    def test_material_case_insensitive(self):
+        Sheet(width_mm=100, height_mm=100, thickness_mm=19, material="MDF")
 
 
 class TestMaterialInPML:
@@ -563,21 +610,5 @@ class TestPipelineWithFeeds:
         assert tool.feed_xy == 1800.0
 
     def test_pipeline_unknown_material_raises(self):
-        from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement
-
-        ast = LayoutAST(
-            sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0, material="plywood"),
-            items=(
-                Item(
-                    kind="shape",
-                    type="Rect",
-                    geometry=Geometry(data={"w_mm": 200, "h_mm": 150}),
-                    placement=Placement(center_xy_mm=(225, 325)),
-                    feature=Feature(type="profile", depth_mm=19.0, side="outside", is_through=True),
-                    shape_id="test_rect",
-                ),
-            ),
-        )
-
-        with pytest.raises(ValueError, match="plywood"):
-            run_pipeline(ast, kerf_mm=6.35)
+        with pytest.raises(ValueError, match="Unknown material 'oak'"):
+            Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0, material="oak")

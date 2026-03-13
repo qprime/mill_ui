@@ -6,7 +6,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries, pick_tool_by_diameter
@@ -123,7 +122,6 @@ class TestRestPlannerPasses:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=400, height=300, thickness=19)
 
@@ -131,7 +129,6 @@ class TestRestPlannerPasses:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -174,7 +171,6 @@ class TestRestPlannerPasses:
         intents = ast_to_removal_intents(ast)
         planner_input = removal_intents_to_planner_input(intents)
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=400, height=300, thickness=19)
 
@@ -183,7 +179,6 @@ class TestRestPlannerPasses:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )
@@ -205,7 +200,6 @@ class TestRestPlannerPasses:
         intents = ast_to_removal_intents(small_ast)
         planner_input = removal_intents_to_planner_input(intents)
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=200, thickness=19)
 
@@ -214,7 +208,6 @@ class TestRestPlannerPasses:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )
@@ -236,7 +229,6 @@ class TestRestPlannerPasses:
         intents = ast_to_removal_intents(circle_ast)
         planner_input = removal_intents_to_planner_input(intents)
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=200, thickness=19)
 
@@ -245,7 +237,6 @@ class TestRestPlannerPasses:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )
@@ -267,7 +258,6 @@ class TestRestPlannerPasses:
         intents = ast_to_removal_intents(rr_ast)
         planner_input = removal_intents_to_planner_input(intents)
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=200, thickness=19)
 
@@ -276,7 +266,6 @@ class TestRestPlannerPasses:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )
@@ -315,7 +304,6 @@ class TestRestAndEdgeTreatmentExclusion:
         )
         planner_input = PlannerInput(pockets=(entry,))
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=400, height=300, thickness=19)
 
@@ -324,7 +312,6 @@ class TestRestAndEdgeTreatmentExclusion:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )

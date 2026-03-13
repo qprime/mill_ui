@@ -77,7 +77,7 @@ Sheet:                              # Required
   physical_height: 2420mm           # or 'height' for backward compat
   thickness: 19mm
   margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
-  material: mdf                     # Optional, default "mdf" — used for feeds/speeds lookup
+  material: mdf                     # Optional, default "mdf" — validated against feeds.yml (data-driven)
   gcode_output: per-tool            # Optional, default "per-operation"
 Surface:                              # Optional — full-sheet facing passes
   depth: 0.5mm

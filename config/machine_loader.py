@@ -436,6 +436,12 @@ def load_machine_tool_db(material: str = "mdf") -> list[dict[str, Any]]:
     return build_tool_db(endmills, feeds, material)
 
 
+def available_materials(feeds: list[FeedsEntry] | None = None) -> frozenset[str]:
+    if feeds is None:
+        feeds = load_feeds(get_machines_dir() / "feeds.yml")
+    return frozenset(f.material.lower() for f in feeds)
+
+
 def get_machines_dir() -> Path:
     return Path(__file__).parent.parent / "machines"
 
@@ -465,6 +471,7 @@ __all__ = [
     "Spindle",
     "Spoilboard2D",
     "Table2D",
+    "available_materials",
     "build_tool_db",
     "get_machines_dir",
     "list_available_machines",

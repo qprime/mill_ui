@@ -6,7 +6,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
@@ -57,14 +56,12 @@ def test_simple_rect_through_cam():
     assert len(planner_input.profiles) + len(planner_input.pockets) + len(planner_input.holes) >= 1
 
     stock = Stock(width=500, height=500, thickness=19)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=6.0,
@@ -117,14 +114,12 @@ def test_multiple_parts_through_cam():
             height=ast.sheet.height_mm,
             thickness=ast.sheet.thickness_mm,
         )
-        material = Material(name="MDF")
         machine = Machine(name="default_grbl")
 
         passes, _ = plan_passes(
             planner_input,
             config=Config(),
             tool_db=normalize_tool_entries(TEST_TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
             safe_z=6.0,
@@ -185,14 +180,12 @@ def test_template_parts_through_cam():
         height=ast.sheet.height_mm,
         thickness=ast.sheet.thickness_mm,
     )
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=6.0,
@@ -241,14 +234,12 @@ def test_multi_sheet_through_cam():
             height=ast.sheet.height_mm,
             thickness=ast.sheet.thickness_mm,
         )
-        material = Material(name="MDF")
         machine = Machine(name="default_grbl")
 
         passes, _ = plan_passes(
             planner_input,
             config=Config(),
             tool_db=normalize_tool_entries(TEST_TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
             safe_z=6.0,
@@ -289,14 +280,12 @@ def test_gcode_basic_invariants():
     planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
 
     stock = Stock(width=300, height=300, thickness=19)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
 
     passes, _ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=6.0,

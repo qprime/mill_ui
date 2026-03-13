@@ -11,7 +11,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
@@ -239,7 +238,6 @@ def run_pipeline(
         height=ast.sheet.height_mm,
         thickness=ast.sheet.thickness_mm,
     )
-    material = Material(name=ast.sheet.material)
     machine = Machine(name="default_grbl")
 
     plan_start = time.perf_counter()
@@ -247,7 +245,6 @@ def run_pipeline(
         planner_input,
         config=Config(),
         tool_db=tools,
-        material=material,
         machine=machine,
         stock=stock,
         safe_z=safe_z,

@@ -8,7 +8,6 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.pocket import _dogbone_center
@@ -223,7 +222,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -231,7 +229,6 @@ class TestDogbonePlanner:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -246,7 +243,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -254,7 +250,6 @@ class TestDogbonePlanner:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -269,7 +264,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -277,7 +271,6 @@ class TestDogbonePlanner:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -291,7 +284,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -300,7 +292,6 @@ class TestDogbonePlanner:
                 planner_input,
                 config=config,
                 tool_db=normalize_tool_entries(TOOL_DB),
-                material=material,
                 machine=machine,
                 stock=stock,
             )
@@ -311,7 +302,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -319,7 +309,6 @@ class TestDogbonePlanner:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )
@@ -333,7 +322,6 @@ class TestDogbonePlanner:
         planner_input = removal_intents_to_planner_input(intents)
 
         config = Config(safe_z_mm=6.0)
-        material = Material(name="MDF")
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
@@ -341,7 +329,6 @@ class TestDogbonePlanner:
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
-            material=material,
             machine=machine,
             stock=stock,
         )

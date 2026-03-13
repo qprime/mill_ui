@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from cam.config import Config
 from cam.model.machine import Machine
-from cam.model.material import Material
 from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.planner.passes.tools import normalize_tool_entries
@@ -24,10 +23,9 @@ TOOL_DB = [
 
 def _make_test_fixtures():
     stock = Stock(width=300.0, height=200.0, thickness=19.0)
-    material = Material(name="MDF")
     machine = Machine(name="default_grbl")
     config = Config()
-    return stock, material, machine, config
+    return stock, machine, config
 
 
 def _feature(shape, geometry, center, depth, side=None, id="test"):
@@ -56,7 +54,7 @@ def _feature(shape, geometry, center, depth, side=None, id="test"):
 
 
 def test_polygon_triangle_profile():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -71,7 +69,6 @@ def test_polygon_triangle_profile():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -86,7 +83,7 @@ def test_polygon_triangle_profile():
 
 
 def test_polygon_l_shape_profile():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -106,7 +103,6 @@ def test_polygon_l_shape_profile():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -117,7 +113,7 @@ def test_polygon_l_shape_profile():
 
 
 def test_roundedrect_uniform_radius_profile():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -141,7 +137,6 @@ def test_roundedrect_uniform_radius_profile():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -153,7 +148,7 @@ def test_roundedrect_uniform_radius_profile():
 
 
 def test_roundedrect_selective_corners_profile():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -180,7 +175,6 @@ def test_roundedrect_selective_corners_profile():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -191,7 +185,7 @@ def test_roundedrect_selective_corners_profile():
 
 
 def test_polygon_inside_cut():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -211,7 +205,6 @@ def test_polygon_inside_cut():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )
@@ -222,7 +215,7 @@ def test_polygon_inside_cut():
 
 
 def test_roundedrect_inside_cut():
-    stock, material, machine, config = _make_test_fixtures()
+    stock, machine, config = _make_test_fixtures()
 
     planner_input = PlannerInput(
         kerf_width_mm=3.175,
@@ -246,7 +239,6 @@ def test_roundedrect_inside_cut():
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
-        material=material,
         machine=machine,
         stock=stock,
     )

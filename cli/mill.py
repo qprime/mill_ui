@@ -14,7 +14,7 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
-from config.machine_loader import Endmill, FeedsEntry, load_endmills, load_feeds
+from config.machine_loader import Endmill, FeedsEntry, get_machines_dir, load_endmills, load_feeds
 from layout_ast.layout import LayoutAST
 from pml.revision_header import format_pml_header, update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -265,8 +265,9 @@ def _run_and_write(
 
 
 def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
-    endmills_path = Path(args.endmills) if args.endmills else Path("machines/endmills.yml")
-    feeds_path = Path(args.feeds) if args.feeds else Path("machines/feeds.yml")
+    machines_dir = get_machines_dir()
+    endmills_path = Path(args.endmills) if args.endmills else machines_dir / "endmills.yml"
+    feeds_path = Path(args.feeds) if args.feeds else machines_dir / "feeds.yml"
 
     if not endmills_path.exists() or not feeds_path.exists():
         return None, None

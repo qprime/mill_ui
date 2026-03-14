@@ -23,6 +23,7 @@ Load this document when you need code examples for standard operations.
 | [Run Tests](#task-9-run-tests) | Verify changes with IR and CAM tests |
 | [Generate G-code](#task-10-generate-g-code) | Export CNC-ready G-code from PML |
 | [Control Dimension Placement](#task-11-control-dimension-label-placement) | Configure dimension label positioning in SVG |
+| [Multi-Sheet Assembly](#task-12-multi-sheet-assembly) | Generate output when assembly exceeds one sheet |
 
 ---
 
@@ -374,3 +375,67 @@ placed = place_on_rails(
 - `"sheet_edge"` — All dimension labels appear at the sheet edges (top for horizontal dimensions, right for vertical dimensions)
 
 **Key point:** Use `"shape_relative"` for layouts with shapes spread across the sheet. Use `"sheet_edge"` for simpler layouts or when you prefer all dimensions grouped at the edges.
+
+---
+
+## Task 12: Multi-Sheet Assembly
+
+**Use case:** Generate G-code and SVG when an assembly's panels exceed a single sheet.
+
+**CLI:**
+```bash
+source .venv/bin/activate
+
+# Automatic — if panels overflow, multiple sheet outputs are generated
+python -m cli.mill --recipe docs/recipes/74_multi_sheet_assembly
+```
+
+Output for a 3-sheet assembly:
+```
+output/
+  74_multi_sheet_assembly_sheet_1.rough.nc
+  74_multi_sheet_assembly_sheet_1.svg
+  74_multi_sheet_assembly_sheet_2.rough.nc
+  74_multi_sheet_assembly_sheet_2.svg
+  74_multi_sheet_assembly_sheet_3.rough.nc
+  74_multi_sheet_assembly_sheet_3.svg
+  manifest.json
+```
+
+**Programmatic:**
+```python
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout_multi
+from cam.pipeline import run_pipeline, write_pipeline_outputs
+from pathlib import Path
+
+pml = """
+Sheet:
+  width: 500mm
+  height: 500mm
+  thickness: 6mm
+  margin: 10mm
+  material: mdf
+children:
+- Assembly:
+    type: box
+    width: 400mm
+    depth: 300mm
+    height: 200mm
+    thickness: 6mm
+    joinery: finger
+    bottom: captured
+    top: none
+    show_labels: true
+"""
+
+comp_ast = parse_pml_yaml(pml)
+asts = resolve_layout_multi(comp_ast)
+
+for i, ast in enumerate(asts):
+    suffix = f"_sheet_{i + 1}" if len(asts) > 1 else ""
+    result = run_pipeline(ast, kerf_mm=3.175)
+    write_pipeline_outputs(result, output_dir=Path("output"), job_name=f"box{suffix}")
+```
+
+**Key point:** Use `resolve_layout_multi()` instead of `resolve_layout()`. The latter raises `ValueError` when the assembly requires multiple sheets. Partitioning is automatic — no PML syntax change needed. Mixed content (shapes + overflowing assembly) is an error.

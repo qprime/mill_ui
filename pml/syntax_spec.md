@@ -834,6 +834,40 @@ Grid of cubbies with perimeter and internal joinery:
 | back_thickness | no | - | Back panel thickness (enables captured back) |
 | back_inset | no | 0mm | Back panel setback from rear edge |
 
+##### Multi-Sheet Partitioning
+
+When an assembly's panels exceed the sheet's working area, the system automatically partitions panels across multiple sheets. No PML syntax change is needed — partitioning is triggered by panel dimensions vs sheet size.
+
+Each sheet produces its own G-code and SVG output with `_sheet_N` suffixed filenames plus a `manifest.json` listing all sheets. Panel labels (`show_labels: true`) are essential for identifying which panel belongs where across sheets.
+
+```yaml
+# This box's panels won't fit on a 500×500mm sheet — automatic 3-sheet output
+Sheet:
+  width: 500mm
+  height: 500mm
+  thickness: 6mm
+  margin: 10mm
+  material: mdf
+children:
+- Assembly:
+    type: box
+    width: 400mm
+    depth: 300mm
+    height: 200mm
+    thickness: 6mm
+    joinery: finger
+    finger_width: 12mm
+    bottom: captured
+    top: none
+    show_labels: true
+```
+
+**Constraints:**
+- Assembly panels are never rotated (joinery is edge-specific)
+- Mixed content (shapes + overflowing assembly) is an error — move the assembly to its own PML file
+- Beam assemblies do not support multi-sheet partitioning
+- Panels too large for a single sheet produce a hard error
+
 ### Utility Nodes
 
 #### AtPosition

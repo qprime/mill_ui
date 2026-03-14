@@ -83,6 +83,7 @@ Check before implementing — these already exist:
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
 | Assembly system | `assembly/` (box, carcass, cubby with interface-first joinery) |
+| Multi-sheet assembly | `assembly/partitioner.py`, `resolution/layout_resolver.py:resolve_layout_multi()` |
 | Beam assembly | `assembly/beam.py`, `assembly/beam_primitives.py` |
 | Blueprint SVG export | `export/blueprint_svg.py` |
 | Blueprint PDF export | `export/blueprint_pdf.py` |

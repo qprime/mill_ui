@@ -19,7 +19,7 @@ from layout_ast.layout import LayoutAST
 from pml.revision_header import format_pml_header, update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import resolve_layout_multi
 
 RECIPE_DEFAULTS = {
     "kerf": 3.175,
@@ -284,35 +284,63 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
 def process_file(input_path: Path, output_dir: Path, args) -> None:
     input_name = input_path.name.lower()
     if input_name.endswith(".json"):
-        ast = LayoutAST.from_json(str(input_path))
+        asts = [LayoutAST.from_json(str(input_path))]
     elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
         input_text = input_path.read_text(encoding="utf-8")
         comp_ast = parse_pml_yaml(input_text)
-        ast = resolve_layout(comp_ast)
+        asts = resolve_layout_multi(comp_ast)
     else:
         print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
         return
 
-    print(f"Compiling: {input_path.name}", file=sys.stderr)
-    print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
-    print(f"  Items: {len(ast.items)}", file=sys.stderr)
-
     endmills_list, feeds_list = _load_tool_library(args)
-
     is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
-    _run_and_write(
-        ast,
-        output_dir,
-        input_path.stem,
-        input_path,
-        kerf_mm=args.kerf if args.kerf is not None else DEFAULT_KERF_MM,
-        theme=args.theme if args.theme is not None else "dark",
-        y_origin=args.y_origin,
-        generate_svg=not args.no_svg,
-        update_header=is_pml,
-        endmills=endmills_list,
-        feeds=feeds_list,
-    )
+    kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
+    theme = args.theme if args.theme is not None else "dark"
+    multi_sheet = len(asts) > 1
+
+    for sheet_idx, ast in enumerate(asts):
+        job_name = f"{input_path.stem}_sheet_{sheet_idx + 1}" if multi_sheet else input_path.stem
+
+        print(
+            f"Compiling: {input_path.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
+            file=sys.stderr,
+        )
+        print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
+        print(f"  Items: {len(ast.items)}", file=sys.stderr)
+
+        _run_and_write(
+            ast,
+            output_dir,
+            job_name,
+            input_path,
+            kerf_mm=kerf_mm,
+            theme=theme,
+            y_origin=args.y_origin,
+            generate_svg=not args.no_svg,
+            update_header=is_pml and not multi_sheet,
+            endmills=endmills_list,
+            feeds=feeds_list,
+        )
+
+    if multi_sheet:
+        import json
+
+        manifest = {
+            "source": input_path.name,
+            "total_sheets": len(asts),
+            "sheets": [
+                {
+                    "sheet_index": i + 1,
+                    "job_name": f"{input_path.stem}_sheet_{i + 1}",
+                    "items": len(a.items),
+                }
+                for i, a in enumerate(asts)
+            ],
+        }
+        manifest_path = output_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+        print(f"\nGenerated {len(asts)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
@@ -330,12 +358,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     input_text = source.read_text(encoding="utf-8")
     comp_ast = parse_pml_yaml(input_text)
-    ast = resolve_layout(comp_ast)
-
-    print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
-    print(f"  Source: {source.name}", file=sys.stderr)
-    print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
-    print(f"  Items: {len(ast.items)}", file=sys.stderr)
+    asts = resolve_layout_multi(comp_ast)
 
     import shutil
 
@@ -343,16 +366,28 @@ def process_recipe(recipe_dir: Path, args) -> None:
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    _run_and_write(
-        ast,
-        output_dir,
-        recipe_dir.name,
-        source,
-        kerf_mm=kerf,
-        theme=theme,
-        y_origin=args.y_origin,
-        generate_svg=not args.no_svg,
-    )
+    multi_sheet = len(asts) > 1
+    for sheet_idx, ast in enumerate(asts):
+        job_name = f"{recipe_dir.name}_sheet_{sheet_idx + 1}" if multi_sheet else recipe_dir.name
+
+        print(
+            f"Recipe: {recipe_dir.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
+            file=sys.stderr,
+        )
+        print(f"  Source: {source.name}", file=sys.stderr)
+        print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
+        print(f"  Items: {len(ast.items)}", file=sys.stderr)
+
+        _run_and_write(
+            ast,
+            output_dir,
+            job_name,
+            source,
+            kerf_mm=kerf,
+            theme=theme,
+            y_origin=args.y_origin,
+            generate_svg=not args.no_svg,
+        )
 
 
 def main():

@@ -5,6 +5,7 @@ from dataclasses import replace
 from typing import Any
 
 from assembly.joinery import Butt, Captured, Finger, HalfLap
+from assembly.panel import PanelSpec
 from assembly.primitives import box, carcass, cubby
 from core.geometry import compute_shape_bounds_dict
 from domains import Domain
@@ -1863,24 +1864,46 @@ class LayoutResolver:
 
         panel_specs = assembly.resolve()
 
-        edge_name_map = {0: "bottom", 1: "right", 2: "top", 3: "left"}
-
         tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
         edge_clearance = 2 * tool_radius
 
-        gap = node.layout_gap_mm
-        x_cursor = region.x_min + edge_clearance
-        y_cursor = region.y_min + edge_clearance
+        items.extend(
+            self._panels_to_items(
+                panel_specs,
+                region,
+                gap_mm=node.layout_gap_mm,
+                edge_clearance_mm=edge_clearance,
+                show_labels=node.show_labels,
+                show_edge_colors=node.show_edge_colors,
+            )
+        )
+
+    def _panels_to_items(
+        self,
+        panel_specs: list[PanelSpec],
+        region: ResolvedRegion,
+        *,
+        gap_mm: float,
+        edge_clearance_mm: float,
+        show_labels: bool,
+        show_edge_colors: bool,
+    ) -> list[Item]:
+        edge_name_map = {0: "bottom", 1: "right", 2: "top", 3: "left"}
+
+        result_items: list[Item] = []
+
+        x_cursor = region.x_min + edge_clearance_mm
+        y_cursor = region.y_min + edge_clearance_mm
         row_height = 0.0
-        x_max_with_clearance = region.x_max - edge_clearance
+        x_max_with_clearance = region.x_max - edge_clearance_mm
 
         for spec in panel_specs:
             panel_width = spec.width_mm
             panel_height = spec.height_mm
 
             if x_cursor + panel_width > x_max_with_clearance:
-                x_cursor = region.x_min + edge_clearance
-                y_cursor += row_height + gap
+                x_cursor = region.x_min + edge_clearance_mm
+                y_cursor += row_height + gap_mm
                 row_height = 0.0
 
             panel_center = (
@@ -1895,7 +1918,7 @@ class LayoutResolver:
                 part_name=spec.name,
             )
 
-            panel_label = spec.name.upper().replace("_", " ") if node.show_labels else None
+            panel_label = spec.name.upper().replace("_", " ") if show_labels else None
             panel_items = notched_panel_generator(
                 panel_params,
                 center=panel_center,
@@ -1903,7 +1926,7 @@ class LayoutResolver:
                 label=panel_label,
             )
 
-            if node.show_edge_colors and panel_items:
+            if show_edge_colors and panel_items:
                 edge_colors = {
                     "top": "#5ab9ea",
                     "bottom": "#ff9500",
@@ -1977,7 +2000,7 @@ class LayoutResolver:
                 )
                 panel_items = [updated_item, *panel_items[1:]]
 
-            items.extend(panel_items)
+            result_items.extend(panel_items)
 
             for dado in spec.dados:
                 if dado.orientation == "vertical":
@@ -2014,7 +2037,7 @@ class LayoutResolver:
                     ),
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_dado"),
                 )
-                items.append(dado_item)
+                result_items.append(dado_item)
 
             for notch in spec.notches:
                 if notch.dogbone is None:
@@ -2068,10 +2091,12 @@ class LayoutResolver:
                     ),
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_notch_dogbone"),
                 )
-                items.append(notch_item)
+                result_items.append(notch_item)
 
-            x_cursor += panel_width + gap
+            x_cursor += panel_width + gap_mm
             row_height = max(row_height, panel_height)
+
+        return result_items
 
     def _handle_beam_decl(
         self,
@@ -2528,5 +2553,309 @@ class LayoutResolver:
 
 
 def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> LayoutAST:
+    results = resolve_layout_multi(ast, validate=validate)
+    if len(results) > 1:
+        raise ValueError(
+            f"Assembly requires {len(results)} sheets but resolve_layout() "
+            f"returns a single LayoutAST. Use resolve_layout_multi()."
+        )
+    return results[0]
+
+
+def _find_assembly_node(root: Any) -> AssemblyDecl | None:
+    if isinstance(root, AssemblyDecl):
+        return root
+    children = getattr(root, "children", ())
+    for child in children:
+        if isinstance(child, AssemblyDecl):
+            return child
+    return None
+
+
+def _has_non_assembly_content(root: Any) -> bool:
+    children = getattr(root, "children", None)
+    if children is None:
+        return not isinstance(root, AssemblyDecl)
+    return any(not isinstance(child, AssemblyDecl) for child in children)
+
+
+def _has_beam_content(root: Any) -> bool:
+    if isinstance(root, BeamDecl):
+        return True
+    children = getattr(root, "children", ())
+    return any(isinstance(child, BeamDecl) for child in children)
+
+
+def resolve_layout_multi(
+    ast: CompositionalLayoutAST,
+    validate: bool = True,
+) -> list[LayoutAST]:
+    from assembly.partitioner import partition_panels
+
     resolver = LayoutResolver(ast, validate=validate)
-    return resolver.resolve()
+    single_result = resolver.resolve()
+
+    assembly_node = _find_assembly_node(ast.root)
+    if assembly_node is None:
+        return [single_result]
+
+    working_w = ast.sheet.working_width_mm
+    working_h = ast.sheet.working_height_mm
+
+    tool_radius = (ast.kerf_width_mm or 6.35) / 2.0
+    edge_clearance = 2 * tool_radius
+    gap = assembly_node.layout_gap_mm
+
+    assembly_obj = _build_assembly_from_node(assembly_node, resolver)
+    panel_specs = assembly_obj.resolve()
+
+    partition = partition_panels(
+        panel_specs,
+        usable_width_mm=working_w,
+        usable_height_mm=working_h,
+        gap_mm=gap,
+        edge_clearance_mm=edge_clearance,
+    )
+
+    if partition.unplaceable:
+        names = [p.name for p in partition.unplaceable]
+        dims = [f"{p.width_mm}x{p.height_mm}mm" for p in partition.unplaceable]
+        raise ValueError(
+            f"Panels too large for sheet ({working_w}x{working_h}mm working area): "
+            + ", ".join(f"{n} ({d})" for n, d in zip(names, dims, strict=True))
+        )
+
+    if len(partition.sheets) <= 1:
+        return [single_result]
+
+    if _has_non_assembly_content(ast.root):
+        raise ValueError(
+            f"Assembly requires {len(partition.sheets)} sheets but PML contains "
+            f"non-assembly items. Move the assembly to its own PML file."
+        )
+
+    if _has_beam_content(ast.root):
+        raise ValueError("Multi-sheet partitioning is not supported for beam assemblies.")
+
+    sheet_region = ResolvedRegion(
+        x_min=0.0,
+        y_min=0.0,
+        x_max=working_w,
+        y_max=working_h,
+    )
+
+    results: list[LayoutAST] = []
+    for sheet_panels in partition.sheets:
+        sheet_resolver = LayoutResolver(ast, validate=validate)
+
+        panel_items = sheet_resolver._panels_to_items(
+            list(sheet_panels),
+            sheet_region,
+            gap_mm=gap,
+            edge_clearance_mm=edge_clearance,
+            show_labels=assembly_node.show_labels,
+            show_edge_colors=assembly_node.show_edge_colors,
+        )
+
+        results.append(
+            LayoutAST(
+                sheet=ast.sheet,
+                items=tuple(panel_items),
+                project=ast.project,
+                kerf_width_mm=ast.kerf_width_mm,
+                config={},
+            )
+        )
+
+    return results
+
+
+def _build_assembly_from_node(
+    node: AssemblyDecl,
+    resolver: LayoutResolver,
+) -> Any:
+    from layout_ast.compositional import InterfaceConfig
+
+    assembly_type = node.type
+
+    default_finger_width = node.finger_width_mm or 12.0
+    default_finger_count = node.finger_count
+    default_clearance = node.clearance_mm
+
+    side_joinery = resolver._build_joinery_from_config(
+        node.joinery,
+        default_finger_width,
+        default_finger_count,
+        default_clearance,
+    )
+
+    top_joinery = resolver._build_joinery_from_config(
+        node.top,
+        default_finger_width,
+        default_finger_count,
+        default_clearance,
+    )
+
+    bottom_joinery = resolver._build_joinery_from_config(
+        node.bottom,
+        default_finger_width,
+        default_finger_count,
+        default_clearance,
+    )
+
+    if assembly_type == "box":
+        box_perimeter_joinery_raw = resolver._build_joinery_from_config(
+            node.perimeter_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        box_perimeter_joinery = None if box_perimeter_joinery_raw == "none" else box_perimeter_joinery_raw
+        return box(
+            width=node.width_mm,
+            length=node.depth_mm,
+            height=node.height_mm,
+            thickness=node.thickness_mm,
+            side_joinery=side_joinery or Finger(),
+            perimeter_joinery=box_perimeter_joinery,
+            top=top_joinery,
+            bottom=bottom_joinery,
+        )
+    elif assembly_type == "carcass":
+        perimeter_joinery_raw = resolver._build_joinery_from_config(
+            node.perimeter_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        perimeter_joinery = None if perimeter_joinery_raw == "none" else perimeter_joinery_raw
+
+        shelf_joinery_raw = resolver._build_joinery_from_config(
+            node.shelf_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
+
+        partition_joinery_raw = resolver._build_joinery_from_config(
+            node.partition_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
+
+        back_joinery = resolver._build_joinery_from_config(
+            node.back,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+
+        return carcass(
+            width=node.width_mm,
+            length=node.depth_mm,
+            height=node.height_mm,
+            thickness=node.thickness_mm,
+            side_joinery=side_joinery or Butt(),
+            cap_style=node.cap_style,  # type: ignore[arg-type]
+            perimeter_joinery=perimeter_joinery,
+            top=top_joinery,
+            bottom=bottom_joinery,
+            back=back_joinery,
+            back_thickness=node.back_thickness_mm,
+            back_inset=node.back_inset_mm,
+            fixed_shelves=node.fixed_shelves,
+            shelf_joinery=shelf_joinery,
+            shelf_back_support=node.shelf_back_support,
+            toe_kick_height=node.toe_kick_height_mm,
+            toe_kick_setback=node.toe_kick_depth_mm,
+            toe_kick_style=node.toe_kick_style,  # type: ignore[arg-type]
+            toe_kick_cover=node.toe_kick_cover,
+        )
+    elif assembly_type == "cubby":
+        grid = node.grid or (2, 2)
+        perimeter_joinery_raw = resolver._build_joinery_from_config(
+            node.perimeter_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        perimeter_joinery = Butt() if perimeter_joinery_raw == "none" else (perimeter_joinery_raw or Finger())
+
+        shelf_joinery_raw = resolver._build_joinery_from_config(
+            node.shelf_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
+
+        partition_joinery_raw = resolver._build_joinery_from_config(
+            node.partition_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
+
+        internal_joinery_raw = resolver._build_joinery_from_config(
+            node.internal_joinery,
+            default_finger_width,
+            default_finger_count,
+            default_clearance,
+        )
+        internal_joinery = Butt() if internal_joinery_raw == "none" else (internal_joinery_raw or HalfLap())
+
+        back_rabbet_width = node.back_thickness_mm or node.thickness_mm
+        back_rabbet_depth = node.back_rabbet_depth_mm or (node.thickness_mm / 2)
+
+        back_joinery = None
+        back_config = node.back if node.back is not None else node.back_joinery
+        if isinstance(back_config, InterfaceConfig):
+            back_joinery = resolver._build_joinery_from_config(
+                back_config,
+                default_finger_width,
+                default_finger_count,
+                default_clearance,
+            )
+        elif isinstance(back_config, str) and back_config.lower() == "captured":
+            back_joinery = Captured(
+                dado_depth_mm=back_rabbet_depth,
+                dado_width_mm=back_rabbet_width,
+            )
+        elif node.back_thickness_mm:
+            back_joinery = (
+                resolver._build_joinery_from_config(
+                    back_config,
+                    default_finger_width,
+                    default_finger_count,
+                    default_clearance,
+                )
+                or Butt()
+            )
+        elif node.back_rabbet_depth_mm:
+            back_joinery = Captured(
+                dado_depth_mm=back_rabbet_depth,
+                dado_width_mm=back_rabbet_width,
+            )
+
+        return cubby(
+            width=node.width_mm,
+            length=node.depth_mm,
+            height=node.height_mm,
+            thickness=node.thickness_mm,
+            rows=grid[1],
+            cols=grid[0],
+            perimeter_joinery=perimeter_joinery,
+            shelf_joinery=shelf_joinery,
+            partition_joinery=partition_joinery,
+            internal_joinery=internal_joinery,
+            back=back_joinery,
+            back_thickness=node.back_thickness_mm,
+            back_inset=node.back_inset_mm,
+            back_internal_support=node.back_internal_support,
+        )
+    else:
+        raise ValueError(f"Unsupported assembly type: {assembly_type}")

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import sys
-import time
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -15,7 +14,7 @@ from pml import parse_pml
 from pml.revision_header import update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import resolve_layout_multi
 
 
 def discover_recipe_pml_files() -> list[Path]:
@@ -28,29 +27,38 @@ def discover_recipe_pml_files() -> list[Path]:
 
 
 def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
-    parse_start = time.perf_counter()
     with open(pml_path) as f:
         pml_source = f.read()
 
     try:
         comp_ast = parse_pml_yaml(pml_source)
-        ast = resolve_layout(comp_ast)
+        asts = resolve_layout_multi(comp_ast)
     except ParseError:
-        ast = parse_pml(pml_source)
+        asts = [parse_pml(pml_source)]
 
-    time.perf_counter() - parse_start
+    combined_gcode: dict[str, str] = {}
+    last_metrics: dict[str, Any] = {}
+    all_asts = asts
 
-    result = run_pipeline(
-        ast,
-        kerf_mm=3.175,
-        min_channel_width_mm=6.0,
-        generate_svg=True,
-        svg_theme="dark",
-    )
+    for sheet_idx, ast in enumerate(all_asts):
+        result = run_pipeline(
+            ast,
+            kerf_mm=3.175,
+            min_channel_width_mm=6.0,
+            generate_svg=True,
+            svg_theme="dark",
+        )
 
-    metrics = result.metrics
+        if len(all_asts) > 1:
+            prefix = f"sheet_{sheet_idx + 1}."
+            for pass_name, gcode in result.gcode.items():
+                combined_gcode[f"{prefix}{pass_name}"] = gcode
+        else:
+            combined_gcode = result.gcode
 
-    return ast, result.gcode, metrics
+        last_metrics = result.metrics
+
+    return all_asts[-1], combined_gcode, last_metrics
 
 
 def write_outputs(

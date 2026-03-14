@@ -3,9 +3,9 @@
     "ir_ms": 0.02,
     "hints_ms": 0.02,
     "plan_ms": 0.39,
-    "gcode_ms": 0.42,
+    "gcode_ms": 0.41,
     "svg_ms": 0.26,
-    "total_ms": 1.11
+    "total_ms": 1.1
   },
   "constraint_audit": {},
   "complexity": {

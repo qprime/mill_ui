@@ -68,6 +68,10 @@ from assembly.panel import (
     validate_notch_fits_edge,
     validate_notches_no_overlap,
 )
+from assembly.partitioner import (
+    PartitionResult,
+    partition_panels,
+)
 from assembly.primitives import (
     box,
     carcass,
@@ -109,6 +113,7 @@ __all__ = [
     "NotchSpec",
     "PanelRole",
     "PanelSpec",
+    "PartitionResult",
     "PlacedPanel",
     "Rabbet",
     "RemovalKind",
@@ -128,6 +133,7 @@ __all__ = [
     "leg",
     "notch_to_polyline",
     "panels_to_layout_ast",
+    "partition_panels",
     "post",
     "rail",
     "validate_butts_never_align",

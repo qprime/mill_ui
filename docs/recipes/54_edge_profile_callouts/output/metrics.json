@@ -3,9 +3,9 @@
     "ir_ms": 0.04,
     "hints_ms": 0.02,
     "plan_ms": 1.03,
-    "gcode_ms": 1.5,
+    "gcode_ms": 1.48,
     "svg_ms": 0.39,
-    "total_ms": 2.99
+    "total_ms": 2.96
   },
   "constraint_audit": {
     "edge_treatment": {

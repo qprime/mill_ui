@@ -1,24 +1,25 @@
 # mill_ui: 93b82b2f
 # generated: 2026-03-14
 
+# Multi-sheet assembly: box too large for a single sheet
+
 Sheet:
-  width: 800mm
-  height: 600mm
+  width: 500mm
+  height: 500mm
   thickness: 6mm
   margin: 10mm
   material: mdf
-  show_dimensions: false
 children:
 - Assembly:
     type: box
-    width: 200mm
-    depth: 150mm
-    height: 100mm
+    width: 400mm
+    depth: 300mm
+    height: 200mm
     thickness: 6mm
     joinery: finger
     finger_width: 12mm
     clearance: 0.15mm
-    bottom: butt
-    top: captured
+    bottom: captured
+    top: none
     show_labels: true
     show_edge_colors: true

@@ -1880,6 +1880,35 @@ class LayoutResolver:
         else:
             raise ValueError(f"Unsupported assembly type: {assembly_type}")
 
+    @staticmethod
+    def _row_wrap_positions(
+        panel_specs: list[PanelSpec],
+        region: ResolvedRegion,
+        *,
+        gap_mm: float,
+        edge_clearance_mm: float,
+    ) -> list[tuple[PanelSpec, float, float]]:
+        positions: list[tuple[PanelSpec, float, float]] = []
+        x_cursor = region.x_min + edge_clearance_mm
+        y_cursor = region.y_min + edge_clearance_mm
+        row_height = 0.0
+        x_max_with_clearance = region.x_max - edge_clearance_mm
+
+        for spec in panel_specs:
+            panel_width = spec.width_mm
+            panel_height = spec.height_mm
+
+            if x_cursor + panel_width > x_max_with_clearance:
+                x_cursor = region.x_min + edge_clearance_mm
+                y_cursor += row_height + gap_mm
+                row_height = 0.0
+
+            positions.append((spec, x_cursor, y_cursor))
+            x_cursor += panel_width + gap_mm
+            row_height = max(row_height, panel_height)
+
+        return positions
+
     def _panels_to_items(
         self,
         panel_specs: list[PanelSpec],
@@ -1894,19 +1923,14 @@ class LayoutResolver:
 
         result_items: list[Item] = []
 
-        x_cursor = region.x_min + edge_clearance_mm
-        y_cursor = region.y_min + edge_clearance_mm
-        row_height = 0.0
-        x_max_with_clearance = region.x_max - edge_clearance_mm
-
-        for spec in panel_specs:
+        for spec, x_cursor, y_cursor in self._row_wrap_positions(
+            panel_specs,
+            region,
+            gap_mm=gap_mm,
+            edge_clearance_mm=edge_clearance_mm,
+        ):
             panel_width = spec.width_mm
             panel_height = spec.height_mm
-
-            if x_cursor + panel_width > x_max_with_clearance:
-                x_cursor = region.x_min + edge_clearance_mm
-                y_cursor += row_height + gap_mm
-                row_height = 0.0
 
             panel_center = (
                 x_cursor + panel_width / 2,
@@ -2094,9 +2118,6 @@ class LayoutResolver:
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_notch_dogbone"),
                 )
                 result_items.append(notch_item)
-
-            x_cursor += panel_width + gap_mm
-            row_height = max(row_height, panel_height)
 
         return result_items
 
@@ -2379,19 +2400,14 @@ class LayoutResolver:
                 )
         self._beam_structures.append(beam_structure)
 
-        x_cursor = region.x_min + edge_clearance
-        y_cursor = region.y_min + edge_clearance
-        row_height = 0.0
-        x_max_with_clearance = region.x_max - edge_clearance
-
-        for spec in panel_specs:
+        for spec, x_cursor, y_cursor in self._row_wrap_positions(
+            panel_specs,
+            region,
+            gap_mm=gap,
+            edge_clearance_mm=edge_clearance,
+        ):
             panel_width = spec.width_mm
             panel_height = spec.height_mm
-
-            if x_cursor + panel_width > x_max_with_clearance:
-                x_cursor = region.x_min + edge_clearance
-                y_cursor += row_height + gap
-                row_height = 0.0
 
             panel_center = (
                 x_cursor + panel_width / 2,
@@ -2419,9 +2435,6 @@ class LayoutResolver:
                 label=panel_label,
             )
             items.append(panel_item)
-
-            x_cursor += panel_width + gap
-            row_height = max(row_height, panel_height)
 
     def resolve(self) -> LayoutAST:
         sheet_region = ResolvedRegion(

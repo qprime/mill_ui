@@ -1,11 +1,11 @@
 {
   "timing": {
     "ir_ms": 0.07,
-    "hints_ms": 0.05,
-    "plan_ms": 1.18,
-    "gcode_ms": 2.03,
-    "svg_ms": 1.07,
-    "total_ms": 4.39
+    "hints_ms": 0.04,
+    "plan_ms": 0.96,
+    "gcode_ms": 1.73,
+    "svg_ms": 0.89,
+    "total_ms": 3.68
   },
   "constraint_audit": {
     "tabs": {

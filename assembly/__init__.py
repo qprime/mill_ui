@@ -48,12 +48,6 @@ from assembly.joinery import (
     HalfLap,
     JoineryStrategy,
 )
-from assembly.layout import (
-    LayoutConfig,
-    PlacedPanel,
-    layout_panels,
-    panels_to_layout_ast,
-)
 from assembly.notches import (
     build_notched_polygon,
     finger_joints_to_notches,
@@ -107,14 +101,12 @@ __all__ = [
     "InterfaceType",
     "JoineryStrategy",
     "LayerSpec",
-    "LayoutConfig",
     "MachiningStage",
     "MemberSpec",
     "NotchSpec",
     "PanelRole",
     "PanelSpec",
     "PartitionResult",
-    "PlacedPanel",
     "Rabbet",
     "RemovalKind",
     "Segment",
@@ -129,10 +121,8 @@ __all__ = [
     "cubby",
     "filleted_leg",
     "finger_joints_to_notches",
-    "layout_panels",
     "leg",
     "notch_to_polyline",
-    "panels_to_layout_ast",
     "partition_panels",
     "post",
     "rail",

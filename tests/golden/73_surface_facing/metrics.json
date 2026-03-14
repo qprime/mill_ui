@@ -1,296 +1,26 @@
 {
   "golden": {
     "recipe_name": "73_surface_facing",
-    "created_at": "2026-03-13T18:52:52.469154+00:00"
-  },
-  "svg": {
-    "version": "1.0.0",
-    "extraction_time_ms": 0.3,
-    "document": {
-      "width_mm": 553.175,
-      "height_mm": 491.175,
-      "viewbox": [
-        -11.588,
-        -51.587,
-        553.175,
-        491.175
-      ]
-    },
-    "layers": {
-      "count": 9,
-      "names": [
-        "DIMENSIONS",
-        "LABELS",
-        "LEGEND",
-        "NOTES",
-        "POCKET_REGIONS",
-        "PROFILE_CUTS",
-        "PROFILE_TOOLPATHS",
-        "SHEET_OUTLINE",
-        "TITLE_BLOCK"
-      ],
-      "by_layer": {
-        "DIMENSIONS": {
-          "element_count": 24,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 12,
-          "polygon_count": 8,
-          "text_count": 4,
-          "elements": []
-        },
-        "LABELS": {
-          "element_count": 1,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 1,
-          "elements": []
-        },
-        "LEGEND": {
-          "element_count": 11,
-          "rect_count": 1,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 4,
-          "polygon_count": 0,
-          "text_count": 6,
-          "elements": []
-        },
-        "NOTES": {
-          "element_count": 9,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 9,
-          "elements": []
-        },
-        "POCKET_REGIONS": {
-          "element_count": 2,
-          "rect_count": 2,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": [
-            {
-              "element_type": "rect",
-              "bounds": [
-                0.0,
-                0.0,
-                400.0,
-                300.0
-              ],
-              "center": [
-                200.0,
-                150.0
-              ],
-              "width": 400.0,
-              "height": 300.0
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                0.0,
-                0.0,
-                400.0,
-                300.0
-              ],
-              "center": [
-                200.0,
-                150.0
-              ],
-              "width": 400.0,
-              "height": 300.0
-            }
-          ]
-        },
-        "PROFILE_CUTS": {
-          "element_count": 1,
-          "rect_count": 1,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": [
-            {
-              "element_type": "rect",
-              "bounds": [
-                125.0,
-                100.0,
-                275.0,
-                200.0
-              ],
-              "center": [
-                200.0,
-                150.0
-              ],
-              "width": 150.0,
-              "height": 100.0
-            }
-          ]
-        },
-        "PROFILE_TOOLPATHS": {
-          "element_count": 1,
-          "rect_count": 1,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": []
-        },
-        "SHEET_OUTLINE": {
-          "element_count": 1,
-          "rect_count": 1,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": [
-            {
-              "element_type": "rect",
-              "bounds": [
-                0.0,
-                0.0,
-                400.0,
-                300.0
-              ],
-              "center": [
-                200.0,
-                150.0
-              ],
-              "width": 400.0,
-              "height": 300.0
-            }
-          ]
-        },
-        "TITLE_BLOCK": {
-          "element_count": 2,
-          "rect_count": 0,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 2,
-          "elements": []
-        }
-      }
-    },
-    "paths": {
-      "total_count": 4,
-      "closed_count": 4,
-      "open_count": 0,
-      "total_length_mm": 0.0,
-      "by_layer": {
-        "PROFILE_CUTS": {
-          "count": 1,
-          "closed": 1,
-          "length_mm": 0.0
-        },
-        "POCKET_REGIONS": {
-          "count": 2,
-          "closed": 2,
-          "length_mm": 0.0
-        },
-        "SHEET_OUTLINE": {
-          "count": 1,
-          "closed": 1,
-          "length_mm": 0.0
-        }
-      }
-    },
-    "bounds": {
-      "x_min": 0.0,
-      "x_max": 424.5875,
-      "y_min": -19.5875,
-      "y_max": 300.0
-    },
-    "text_elements": {
-      "count": 22,
-      "dimension_labels": [
-        "100.0mm",
-        "150.0mm",
-        "300.0mm",
-        "400.0mm",
-        "Sheet: 400.0 \u00d7 300.0 \u00d7 19.0mm",
-        "\u2022 pocket: 0.5mm, 1.0mm"
-      ],
-      "depth_annotations": [
-        "\u2022 pocket: 0.5mm, 1.0mm"
-      ],
-      "notes_text": [
-        "NOTES",
-        "Sheet: 400.0 \u00d7 300.0 \u00d7 19.0mm",
-        "Features: 1 profile, 2 pockets",
-        "Depths:",
-        "\u2022 pocket: 0.5mm, 1.0mm",
-        "Parts (3):",
-        "\u2022 part",
-        "\u2022 surface_pass_0",
-        "\u2022 surface_pass_1"
-      ]
-    },
-    "circles": {
-      "count": 0,
-      "radii_mm": []
-    },
-    "rects": {
-      "count": 6,
-      "dimensions": [
-        [
-          15.0,
-          8.0
-        ],
-        [
-          150.0,
-          100.0
-        ],
-        [
-          153.175,
-          103.175
-        ],
-        [
-          400.0,
-          300.0
-        ],
-        [
-          400.0,
-          300.0
-        ],
-        [
-          400.0,
-          300.0
-        ]
-      ]
-    }
+    "created_at": "2026-03-14T20:31:23.202257+00:00"
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9119,
+    "extraction_time_ms": 1.1407,
     "summary": {
-      "total_lines": 650,
+      "total_lines": 474,
       "comment_lines": 10,
-      "motion_lines": 486,
+      "motion_lines": 350,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 362
+      "feed_lines": 260
     },
     "motion": {
-      "g0_count": 246,
-      "g1_count": 240,
+      "g0_count": 178,
+      "g1_count": 172,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 9736.5601,
-      "total_feed_distance_mm": 35015.8
+      "total_rapid_distance_mm": 9884.2302,
+      "total_feed_distance_mm": 21186.3
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -319,23 +49,22 @@
       "x_min": 0.0,
       "x_max": 400.0,
       "y_min": 0.0,
-      "y_max": 293.37
+      "y_max": 284.48
     },
     "feeds": {
-      "min_feed_rate": 350.0,
-      "max_feed_rate": 1400.0,
+      "min_feed_rate": 300.0,
+      "max_feed_rate": 1200.0,
       "feed_rates_used": [
-        350.0,
+        300.0,
         396.0,
-        1200.0,
-        1400.0
+        1200.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        14000,
+        12000,
         20000
       ]
     },
@@ -352,9 +81,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 116.8388,
-      "feed_time_s": 2449.76,
-      "total_time_s": 2566.5987
+      "rapid_time_s": 118.61080000000001,
+      "feed_time_s": 1659.5029,
+      "total_time_s": 1778.1136000000001
     },
     "tabs": {
       "detected_count": 0,

@@ -67,6 +67,7 @@ class FeatureType:
     POCKET = "pocket"
     HOLE = "hole"
     ENGRAVE = "engrave"
+    SURFACE = "surface"
 
     BEVEL = "bevel"
     CHAMFER = "chamfer"

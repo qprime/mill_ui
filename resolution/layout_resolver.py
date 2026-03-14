@@ -2478,7 +2478,7 @@ class LayoutResolver:
                     geometry=Geometry(data={"w_mm": rect_w, "h_mm": rect_h}),
                     placement=Placement(center_xy_mm=(cx, cy)),
                     feature=Feature(
-                        type="pocket",
+                        type="surface",
                         depth_mm=(k + 1) * surface.depth_mm,
                     ),
                     params=pass_params,

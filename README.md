@@ -228,6 +228,7 @@ Rectangle, Circle, RoundedRect, Polygon, Polyline, Triangle, Arch, Line, SplineP
 |---------|-------------|
 | profile | Through-cut or partial depth. Side: inside, outside, on. |
 | pocket | Partial-depth depression. |
+| surface | Full-sheet surface facing with cooling pauses. |
 | hole | Through-hole (subtractive). |
 | engrave | Surface carving. |
 | bevel | Angled edge cut with width, angle, and inner depth. |

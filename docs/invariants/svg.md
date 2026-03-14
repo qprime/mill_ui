@@ -54,6 +54,7 @@ Defined in `adapters/layoutast_to_ir.py`:
 | hole | HOLES |
 | engrave | ENGRAVE_PATHS |
 | notch | PROFILE_CUTS |
+| surface | (none — excluded from diagram) |
 | waste | WASTE_CUTS |
 
 ---

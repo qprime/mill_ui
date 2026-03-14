@@ -182,6 +182,11 @@ def _handle_engrave(item: Item, style_token: str, flip_y: Callable, margin: floa
     return _item_to_shapes(item, style_token, flip_y, margin)
 
 
+@register_feature("surface")  # type: ignore[untyped-decorator]
+def _handle_surface(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return []
+
+
 @register_feature("notch")  # type: ignore[untyped-decorator]
 def _handle_notch(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _build_notch_shapes(item, flip_y, margin)

@@ -173,6 +173,14 @@ def pick_tool_for_roundover(
     return best
 
 
+def pick_tool_for_surface(tool_db: Sequence[ToolSelection]) -> ToolSelection:
+    candidates = _flat_tools(tool_db)
+    if not candidates:
+        raise ValueError("No flat tools available for surfacing")
+    candidates.sort(key=lambda t: -t.diameter)
+    return candidates[0]
+
+
 def pick_tool_for_engrave(tool_db: Sequence[ToolSelection]) -> ToolSelection:
     candidates = _ball_or_v_tools(tool_db)
     if candidates:
@@ -265,6 +273,7 @@ __all__ = [
     "pick_tool_for_pocket",
     "pick_tool_for_profile",
     "pick_tool_for_roundover",
+    "pick_tool_for_surface",
     "stepdown_for_tool",
     "stepover_for_tool",
     "tool_identity",

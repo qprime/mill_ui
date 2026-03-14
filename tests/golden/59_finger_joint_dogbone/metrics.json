@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "59_finger_joint_dogbone",
-    "created_at": "2026-03-13T18:52:51.745720+00:00"
+    "created_at": "2026-03-14T20:31:22.309017+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.44,
+    "extraction_time_ms": 1.71,
     "document": {
       "width_mm": 773.175,
       "height_mm": 1103.175,
@@ -1209,22 +1209,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 5.0069,
+    "extraction_time_ms": 4.9345,
     "summary": {
-      "total_lines": 3340,
+      "total_lines": 2596,
       "comment_lines": 52,
-      "motion_lines": 3230,
+      "motion_lines": 2494,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 2398
+      "feed_lines": 1846
     },
     "motion": {
-      "g0_count": 870,
-      "g1_count": 2360,
+      "g0_count": 678,
+      "g1_count": 1816,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 13748.7306,
-      "total_feed_distance_mm": 38498.09
+      "total_rapid_distance_mm": 11508.148799999999,
+      "total_feed_distance_mm": 30192.0
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -1232,36 +1232,34 @@
       "unique_cutting_depths": [
         -12.2,
         -12.0,
-        -10.5,
-        -9.0,
-        -7.5,
+        -10.0,
+        -8.0,
         -6.0,
-        -4.5,
-        -3.0,
-        -1.5
+        -4.0,
+        -2.0
       ],
-      "depth_count": 9,
+      "depth_count": 7,
       "max_single_plunge_mm": 18.2
     },
     "xy_bounds": {
       "x_min": 0.0,
-      "x_max": 563.938,
+      "x_max": 565.525,
       "y_min": 0.0,
-      "y_max": 267.938
+      "y_max": 269.525
     },
     "feeds": {
-      "min_feed_rate": 396.0,
-      "max_feed_rate": 1200.0,
+      "min_feed_rate": 360.0,
+      "max_feed_rate": 1440.0,
       "feed_rates_used": [
-        396.0,
-        1200.0
+        360.0,
+        1440.0
       ]
     },
     "tools": {
       "tool_numbers": [],
       "tool_changes": 0,
       "spindle_speeds": [
-        20000
+        18000
       ]
     },
     "operations": {
@@ -1317,9 +1315,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 164.9848,
-      "feed_time_s": 3579.706,
-      "total_time_s": 3744.6908000000003
+      "rapid_time_s": 138.0978,
+      "feed_time_s": 2699.2,
+      "total_time_s": 2837.2978
     },
     "tabs": {
       "detected_count": 0,

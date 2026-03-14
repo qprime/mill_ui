@@ -1,5 +1,5 @@
-# mill_ui: 7e37b498
-# generated: 2026-03-13
+# mill_ui: aa8f8bf4
+# generated: 2026-03-14
 
 Sheet:
   width: 600mm
@@ -7,7 +7,7 @@ Sheet:
   thickness: 12mm
   margin: 10mm
   show_dimensions: false
-  material: mdf
+  material: plywood
 children:
 - Assembly:
     type: box

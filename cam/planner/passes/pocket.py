@@ -21,6 +21,7 @@ from .tools import (
     pick_tool_for_engrave,
     pick_tool_for_hole,
     pick_tool_for_pocket,
+    pick_tool_for_surface,
     stepdown_for_tool,
     stepover_for_tool,
 )
@@ -220,7 +221,7 @@ def _plan_surface_pass(
     width = float(sg.w_mm or 0.0)
     height = float(sg.h_mm or 0.0)
 
-    tool = pick_tool_for_pocket(tool_db, required_width_mm=min(width, height), cleanup_offset_mm=0.0)
+    tool = pick_tool_for_surface(tool_db)
     tool = apply_feeds_override(tool, entry.feeds_override)
     accumulator.set_feature_tool(entry.id, tool)
     record = accumulator.get_record("surface", tool)

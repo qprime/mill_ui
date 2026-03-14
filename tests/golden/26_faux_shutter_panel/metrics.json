@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "26_faux_shutter_panel",
-    "created_at": "2026-03-13T18:52:49.784750+00:00"
+    "created_at": "2026-03-14T20:31:19.955252+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.42,
     "document": {
       "width_mm": 403.175,
       "height_mm": 755.175,
@@ -453,7 +453,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7791,
+    "extraction_time_ms": 0.9497,
     "summary": {
       "total_lines": 876,
       "comment_lines": 70,

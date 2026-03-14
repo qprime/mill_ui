@@ -1676,6 +1676,24 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        assembly = self._build_assembly(node)
+        panel_specs = assembly.resolve()
+
+        tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
+        edge_clearance = 2 * tool_radius
+
+        items.extend(
+            self._panels_to_items(
+                panel_specs,
+                region,
+                gap_mm=node.layout_gap_mm,
+                edge_clearance_mm=edge_clearance,
+                show_labels=node.show_labels,
+                show_edge_colors=node.show_edge_colors,
+            )
+        )
+
+    def _build_assembly(self, node: AssemblyDecl) -> Any:
         from layout_ast.compositional import InterfaceConfig
 
         assembly_type = node.type
@@ -1713,7 +1731,7 @@ class LayoutResolver:
                 default_clearance,
             )
             box_perimeter_joinery = None if box_perimeter_joinery_raw == "none" else box_perimeter_joinery_raw
-            assembly = box(
+            return box(
                 width=node.width_mm,
                 length=node.depth_mm,
                 height=node.height_mm,
@@ -1755,7 +1773,7 @@ class LayoutResolver:
                 default_clearance,
             )
 
-            assembly = carcass(
+            return carcass(
                 width=node.width_mm,
                 length=node.depth_mm,
                 height=node.height_mm,
@@ -1843,7 +1861,7 @@ class LayoutResolver:
                     dado_width_mm=back_rabbet_width,
                 )
 
-            assembly = cubby(
+            return cubby(
                 width=node.width_mm,
                 length=node.depth_mm,
                 height=node.height_mm,
@@ -1861,22 +1879,6 @@ class LayoutResolver:
             )
         else:
             raise ValueError(f"Unsupported assembly type: {assembly_type}")
-
-        panel_specs = assembly.resolve()
-
-        tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
-        edge_clearance = 2 * tool_radius
-
-        items.extend(
-            self._panels_to_items(
-                panel_specs,
-                region,
-                gap_mm=node.layout_gap_mm,
-                edge_clearance_mm=edge_clearance,
-                show_labels=node.show_labels,
-                show_edge_colors=node.show_edge_colors,
-            )
-        )
 
     def _panels_to_items(
         self,
@@ -2592,22 +2594,20 @@ def resolve_layout_multi(
 ) -> list[LayoutAST]:
     from assembly.partitioner import partition_panels
 
-    resolver = LayoutResolver(ast, validate=validate)
-    single_result = resolver.resolve()
-
     assembly_node = _find_assembly_node(ast.root)
     if assembly_node is None:
-        return [single_result]
+        resolver = LayoutResolver(ast, validate=validate)
+        return [resolver.resolve()]
+
+    resolver = LayoutResolver(ast, validate=validate)
+    assembly_obj = resolver._build_assembly(assembly_node)
+    panel_specs = assembly_obj.resolve()
 
     working_w = ast.sheet.working_width_mm
     working_h = ast.sheet.working_height_mm
-
     tool_radius = (ast.kerf_width_mm or 6.35) / 2.0
     edge_clearance = 2 * tool_radius
     gap = assembly_node.layout_gap_mm
-
-    assembly_obj = _build_assembly_from_node(assembly_node, resolver)
-    panel_specs = assembly_obj.resolve()
 
     partition = partition_panels(
         panel_specs,
@@ -2626,7 +2626,7 @@ def resolve_layout_multi(
         )
 
     if len(partition.sheets) <= 1:
-        return [single_result]
+        return [resolver.resolve()]
 
     if _has_non_assembly_content(ast.root):
         raise ValueError(
@@ -2668,194 +2668,3 @@ def resolve_layout_multi(
         )
 
     return results
-
-
-def _build_assembly_from_node(
-    node: AssemblyDecl,
-    resolver: LayoutResolver,
-) -> Any:
-    from layout_ast.compositional import InterfaceConfig
-
-    assembly_type = node.type
-
-    default_finger_width = node.finger_width_mm or 12.0
-    default_finger_count = node.finger_count
-    default_clearance = node.clearance_mm
-
-    side_joinery = resolver._build_joinery_from_config(
-        node.joinery,
-        default_finger_width,
-        default_finger_count,
-        default_clearance,
-    )
-
-    top_joinery = resolver._build_joinery_from_config(
-        node.top,
-        default_finger_width,
-        default_finger_count,
-        default_clearance,
-    )
-
-    bottom_joinery = resolver._build_joinery_from_config(
-        node.bottom,
-        default_finger_width,
-        default_finger_count,
-        default_clearance,
-    )
-
-    if assembly_type == "box":
-        box_perimeter_joinery_raw = resolver._build_joinery_from_config(
-            node.perimeter_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        box_perimeter_joinery = None if box_perimeter_joinery_raw == "none" else box_perimeter_joinery_raw
-        return box(
-            width=node.width_mm,
-            length=node.depth_mm,
-            height=node.height_mm,
-            thickness=node.thickness_mm,
-            side_joinery=side_joinery or Finger(),
-            perimeter_joinery=box_perimeter_joinery,
-            top=top_joinery,
-            bottom=bottom_joinery,
-        )
-    elif assembly_type == "carcass":
-        perimeter_joinery_raw = resolver._build_joinery_from_config(
-            node.perimeter_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        perimeter_joinery = None if perimeter_joinery_raw == "none" else perimeter_joinery_raw
-
-        shelf_joinery_raw = resolver._build_joinery_from_config(
-            node.shelf_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
-
-        partition_joinery_raw = resolver._build_joinery_from_config(
-            node.partition_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
-
-        back_joinery = resolver._build_joinery_from_config(
-            node.back,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-
-        return carcass(
-            width=node.width_mm,
-            length=node.depth_mm,
-            height=node.height_mm,
-            thickness=node.thickness_mm,
-            side_joinery=side_joinery or Butt(),
-            cap_style=node.cap_style,  # type: ignore[arg-type]
-            perimeter_joinery=perimeter_joinery,
-            top=top_joinery,
-            bottom=bottom_joinery,
-            back=back_joinery,
-            back_thickness=node.back_thickness_mm,
-            back_inset=node.back_inset_mm,
-            fixed_shelves=node.fixed_shelves,
-            shelf_joinery=shelf_joinery,
-            shelf_back_support=node.shelf_back_support,
-            toe_kick_height=node.toe_kick_height_mm,
-            toe_kick_setback=node.toe_kick_depth_mm,
-            toe_kick_style=node.toe_kick_style,  # type: ignore[arg-type]
-            toe_kick_cover=node.toe_kick_cover,
-        )
-    elif assembly_type == "cubby":
-        grid = node.grid or (2, 2)
-        perimeter_joinery_raw = resolver._build_joinery_from_config(
-            node.perimeter_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        perimeter_joinery = Butt() if perimeter_joinery_raw == "none" else (perimeter_joinery_raw or Finger())
-
-        shelf_joinery_raw = resolver._build_joinery_from_config(
-            node.shelf_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
-
-        partition_joinery_raw = resolver._build_joinery_from_config(
-            node.partition_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
-
-        internal_joinery_raw = resolver._build_joinery_from_config(
-            node.internal_joinery,
-            default_finger_width,
-            default_finger_count,
-            default_clearance,
-        )
-        internal_joinery = Butt() if internal_joinery_raw == "none" else (internal_joinery_raw or HalfLap())
-
-        back_rabbet_width = node.back_thickness_mm or node.thickness_mm
-        back_rabbet_depth = node.back_rabbet_depth_mm or (node.thickness_mm / 2)
-
-        back_joinery = None
-        back_config = node.back if node.back is not None else node.back_joinery
-        if isinstance(back_config, InterfaceConfig):
-            back_joinery = resolver._build_joinery_from_config(
-                back_config,
-                default_finger_width,
-                default_finger_count,
-                default_clearance,
-            )
-        elif isinstance(back_config, str) and back_config.lower() == "captured":
-            back_joinery = Captured(
-                dado_depth_mm=back_rabbet_depth,
-                dado_width_mm=back_rabbet_width,
-            )
-        elif node.back_thickness_mm:
-            back_joinery = (
-                resolver._build_joinery_from_config(
-                    back_config,
-                    default_finger_width,
-                    default_finger_count,
-                    default_clearance,
-                )
-                or Butt()
-            )
-        elif node.back_rabbet_depth_mm:
-            back_joinery = Captured(
-                dado_depth_mm=back_rabbet_depth,
-                dado_width_mm=back_rabbet_width,
-            )
-
-        return cubby(
-            width=node.width_mm,
-            length=node.depth_mm,
-            height=node.height_mm,
-            thickness=node.thickness_mm,
-            rows=grid[1],
-            cols=grid[0],
-            perimeter_joinery=perimeter_joinery,
-            shelf_joinery=shelf_joinery,
-            partition_joinery=partition_joinery,
-            internal_joinery=internal_joinery,
-            back=back_joinery,
-            back_thickness=node.back_thickness_mm,
-            back_inset=node.back_inset_mm,
-            back_internal_support=node.back_internal_support,
-        )
-    else:
-        raise ValueError(f"Unsupported assembly type: {assembly_type}")

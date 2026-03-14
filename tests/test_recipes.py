@@ -37,8 +37,9 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         asts = [parse_pml(pml_source)]
 
     combined_gcode: dict[str, str] = {}
-    last_metrics: dict[str, Any] = {}
     all_asts = asts
+    multi_sheet = len(all_asts) > 1
+    sheet_metrics: list[dict[str, Any]] = []
 
     for sheet_idx, ast in enumerate(all_asts):
         result = run_pipeline(
@@ -49,16 +50,25 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
             svg_theme="dark",
         )
 
-        if len(all_asts) > 1:
+        if multi_sheet:
             prefix = f"sheet_{sheet_idx + 1}."
             for pass_name, gcode in result.gcode.items():
                 combined_gcode[f"{prefix}{pass_name}"] = gcode
         else:
             combined_gcode = result.gcode
 
-        last_metrics = result.metrics
+        sheet_metrics.append(result.metrics)
 
-    return all_asts[-1], combined_gcode, last_metrics
+    if multi_sheet:
+        metrics: dict[str, Any] = {
+            "total_sheets": len(all_asts),
+            "sheets": sheet_metrics,
+            "timing": {"total_ms": sum(m["timing"]["total_ms"] for m in sheet_metrics)},
+        }
+    else:
+        metrics = sheet_metrics[0]
+
+    return all_asts[-1], combined_gcode, metrics
 
 
 def write_outputs(

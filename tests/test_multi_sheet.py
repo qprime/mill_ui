@@ -99,14 +99,13 @@ class TestResolveLayoutMulti:
 
         from resolution.layout_resolver import (
             LayoutResolver,
-            _build_assembly_from_node,
             _find_assembly_node,
         )
 
         node = _find_assembly_node(comp_ast.root)
         assert node is not None
         resolver = LayoutResolver(comp_ast)
-        panel_specs = _build_assembly_from_node(node, resolver).resolve()
+        panel_specs = resolver._build_assembly(node).resolve()
 
         profile_items = sum(
             1 for ast in results for item in ast.items if item.feature and item.feature.type == "profile"

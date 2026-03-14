@@ -389,6 +389,25 @@ def process_recipe(recipe_dir: Path, args) -> None:
             generate_svg=not args.no_svg,
         )
 
+    if multi_sheet:
+        import json
+
+        manifest = {
+            "source": source.name,
+            "total_sheets": len(asts),
+            "sheets": [
+                {
+                    "sheet_index": i + 1,
+                    "job_name": f"{recipe_dir.name}_sheet_{i + 1}",
+                    "items": len(a.items),
+                }
+                for i, a in enumerate(asts)
+            ],
+        }
+        manifest_path = output_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+        print(f"\nGenerated {len(asts)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
+
 
 def main():
     parser = argparse.ArgumentParser(

@@ -19,7 +19,7 @@ from nesting import nest_and_generate
 from pml import PMLParseError, format_pml, parse_pml
 from pml.nest_parser import nest_job_to_api_params
 from pml.yaml_parser import NestParseError, parse_nest_yaml, parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import resolve_layout_multi
 from validation.regression import ComparisonConfig, GoldenStore
 from validation.removal_checks import check_depth_feasibility, check_overlap
 from validation.runner import ValidationInput, ValidationOptions, validate, validate_recipe
@@ -48,16 +48,25 @@ def _safe_job_dir(output_dir: Path, job_name: str, timestamp: str) -> Path:
 _COMPOSITIONAL_KEYWORDS = ("component", "frame", "inset", "grid", "split")
 
 
+def _resolve_single(comp_ast: Any) -> LayoutAST:
+    results = resolve_layout_multi(comp_ast)
+    if len(results) > 1:
+        raise ValueError(
+            f"Assembly requires {len(results)} sheets. Multi-sheet assemblies are not yet supported via MCP."
+        )
+    return results[0]
+
+
 def _parse_pml_auto(pml_text: str, compositional: bool = False) -> LayoutAST:
     if compositional:
         comp_ast = parse_pml_yaml(pml_text)
-        return resolve_layout(comp_ast)
+        return _resolve_single(comp_ast)
     try:
         return cast(LayoutAST, parse_pml(pml_text))
     except PMLParseError:
         if any(kw in pml_text for kw in _COMPOSITIONAL_KEYWORDS):
             comp_ast = parse_pml_yaml(pml_text)
-            return resolve_layout(comp_ast)
+            return _resolve_single(comp_ast)
         raise
 
 

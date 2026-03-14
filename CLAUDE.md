@@ -92,6 +92,7 @@ Check before implementing — these already exist:
 | Machine configuration | `config/machine_loader.py` |
 | Layout resolution | `resolution/layout_resolver.py` |
 | MCP server | `mill_mcp/server.py` |
+| Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |
 
 ## Don't

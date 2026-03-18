@@ -18,6 +18,7 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
+from layout_ast.layout import LayoutAST
 from nesting import nest_and_generate, nest_parts
 from pml.formatter import format_pml
 from pml.nest_parser import nest_job_to_api_params
@@ -110,15 +111,11 @@ def init_project(args) -> None:
     print(f"  Kerf: {kerf}mm", file=sys.stderr)
 
 
-def run_export_svg(pml_path: Path, output_dir: Path, theme: str) -> Path:
+def run_export_svg(ast: LayoutAST, pml_path: Path, output_dir: Path, theme: str) -> Path:
     from adapters.ast_to_removal import ast_to_removal_intents
     from export.blueprint_svg import render_blueprint_svg
-    from pml import parse_pml
 
-    pml_text = pml_path.read_text(encoding="utf-8")
-    ast = parse_pml(pml_text)
     removal_intents = ast_to_removal_intents(ast)
-
     svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=theme)
 
     svg_path = output_dir / f"{pml_path.stem}.blueprint.{theme}.svg"
@@ -288,7 +285,7 @@ Output files:
             print(f"  {pml_path.name}: {len(ast.items)} items")
 
         if args.export_svg:
-            svg_path = run_export_svg(pml_path, output_dir, args.theme)
+            svg_path = run_export_svg(ast, pml_path, output_dir, args.theme)
             svg_files.append(svg_path.name)
             if args.verbose:
                 print(f"  {svg_path.name}")

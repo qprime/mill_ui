@@ -56,8 +56,26 @@ def _format_shape(item: Item) -> str:
     elif item.type == "RoundedRect":
         w = item.geometry.data.get("w_mm", 0.0)
         h = item.geometry.data.get("h_mm", 0.0)
-        radius = item.geometry.data.get("corner_radius_mm", 0.0)
+        data = item.geometry.data
+        has_per_corner = "radius_tl_mm" in data
+        if has_per_corner:
+            rtl = data["radius_tl_mm"]
+            rtr = data["radius_tr_mm"]
+            rbl = data["radius_bl_mm"]
+            rbr = data["radius_br_mm"]
+            if rtl == rtr == rbl == rbr:
+                return f"roundedrect {shape_id} at {cx:.2f}mm,{cy:.2f}mm size {w:.2f}mm,{h:.2f}mm radius {rtl:.2f}mm {feature_str}"
+            rounded_corners = sorted(c for c, r in [("tl", rtl), ("tr", rtr), ("bl", rbl), ("br", rbr)] if r > 0)
+            radius = max(rtl, rtr, rbl, rbr)
+            corners_str = " ".join(rounded_corners)
+            return f"roundedrect {shape_id} at {cx:.2f}mm,{cy:.2f}mm size {w:.2f}mm,{h:.2f}mm radius {radius:.2f}mm corners {corners_str} {feature_str}"
+        radius = data.get("corner_radius_mm", data.get("radius_mm", 0.0))
         return f"roundedrect {shape_id} at {cx:.2f}mm,{cy:.2f}mm size {w:.2f}mm,{h:.2f}mm radius {radius:.2f}mm {feature_str}"
+
+    elif item.type == "Polygon":
+        points = item.geometry.data.get("points", [])
+        points_str = " ".join(f"({p[0]:.2f}mm,{p[1]:.2f}mm)" for p in points)
+        return f"polygon {shape_id} at {cx:.2f}mm,{cy:.2f}mm points {points_str} {feature_str}"
 
     else:
         return f"# Unknown shape type: {item.type}"

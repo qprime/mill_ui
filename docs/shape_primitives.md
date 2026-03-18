@@ -207,6 +207,14 @@ Resolution:
 
 ---
 
+## Nest Job Availability
+
+Shape primitives `Rect`, `RoundedRect`, `Circle`, `Polygon`, and `Triangle` are available in `.nest.yml` files via the `shape` field on part definitions. Packing is always by bounding box. See [Nest Syntax Spec](../pml/nest_syntax_spec.md#parts-with-shape-primitives) for syntax and examples.
+
+`Line` and `Polyline` are open paths and are not supported as nest parts.
+
+---
+
 ## Files
 
 | File | Purpose |
@@ -215,3 +223,4 @@ Resolution:
 | resolution/layout_resolver.py | Shape resolution logic |
 | pml/yaml_parser.py | PML YAML parsing |
 | pml/yaml_formatter.py | PML YAML formatting |
+| nesting/template_expander.py | Shape dispatch for nest parts (`_build_geometry_data`) |

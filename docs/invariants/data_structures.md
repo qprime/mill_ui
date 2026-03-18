@@ -50,7 +50,7 @@ class Rectangle:
 
 **Correct:**
 ```python
-Item(type="rect", geometry=Geometry(data={"w_mm": 100, "h_mm": 50}))
+Item(type="Rect", geometry=Geometry(data={"w_mm": 100, "h_mm": 50}))
 ```
 
 **Why:** This keeps the type system flat and extensible. New shapes don't require new classes.

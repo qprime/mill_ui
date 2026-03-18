@@ -399,6 +399,256 @@ Nest:
     print("  PASSED")
 
 
+def test_parse_shape_rounded_rect():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: coaster
+      width: 100mm
+      height: 100mm
+      quantity: 10
+      shape:
+        type: RoundedRect
+        radius: 10mm
+"""
+    job = parse_nest_yaml(source)
+    part = job.parts[0]
+    assert part.shape == "RoundedRect"
+    assert part.shape_params["radius_mm"] == 10.0
+    assert "corners" not in part.shape_params
+
+
+def test_parse_shape_rounded_rect_selective_corners():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: edge_strip
+      width: 228.6mm
+      height: 863.6mm
+      quantity: 2
+      shape:
+        type: RoundedRect
+        radius: 12.7mm
+        corners: [tl, bl]
+"""
+    job = parse_nest_yaml(source)
+    part = job.parts[0]
+    assert part.shape == "RoundedRect"
+    assert part.shape_params["radius_mm"] == 12.7
+    assert part.shape_params["corners"] == ("bl", "tl")
+
+
+def test_parse_shape_circle():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: disc
+      width: 200mm
+      height: 200mm
+      quantity: 4
+      shape:
+        type: Circle
+"""
+    job = parse_nest_yaml(source)
+    part = job.parts[0]
+    assert part.shape == "Circle"
+    assert part.shape_params == {}
+
+
+def test_parse_shape_circle_nonsquare_error():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: disc
+      width: 200mm
+      height: 150mm
+      shape:
+        type: Circle
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Should have raised NestParseError")
+    except NestParseError as e:
+        assert "width == height" in str(e)
+
+
+def test_parse_shape_omitted():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+"""
+    job = parse_nest_yaml(source)
+    part = job.parts[0]
+    assert part.shape is None
+    assert part.shape_params == {}
+
+
+def test_parse_shape_and_template_error():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: door
+      width: 400mm
+      height: 600mm
+      template: shaker
+      shape:
+        type: RoundedRect
+        radius: 10mm
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Should have raised NestParseError")
+    except NestParseError as e:
+        assert "mutually exclusive" in str(e)
+
+
+def test_parse_shape_unknown_type():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+      shape:
+        type: Hexagon
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Should have raised NestParseError")
+    except NestParseError as e:
+        assert "Hexagon" in str(e)
+
+
+def test_parse_shape_rounded_rect_missing_radius():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+      shape:
+        type: RoundedRect
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Should have raised NestParseError")
+    except NestParseError as e:
+        assert "radius" in str(e).lower()
+
+
+def test_parse_shape_polygon_points_exceed_bounds():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: gusset
+      width: 50mm
+      height: 50mm
+      shape:
+        type: Polygon
+        points: [[-100, -100], [100, -100], [0, 100]]
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Should have raised NestParseError")
+    except NestParseError as e:
+        assert "exceeds" in str(e).lower()
+        assert "bounding box" in str(e).lower()
+
+
+def test_parse_shape_polygon_points_within_bounds():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: gusset
+      width: 100mm
+      height: 100mm
+      shape:
+        type: Polygon
+        points: [[-50, -50], [50, -50], [0, 50]]
+"""
+    job = parse_nest_yaml(source)
+    part = job.parts[0]
+    assert part.shape == "Polygon"
+    assert len(part.shape_params["points"]) == 3
+
+
+def test_nest_job_to_api_params_with_shape():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1000mm
+    height: 2000mm
+    thickness: 19mm
+  parts:
+    - name: coaster
+      width: 100mm
+      height: 100mm
+      quantity: 10
+      shape:
+        type: RoundedRect
+        radius: 10mm
+"""
+    job = parse_nest_yaml(source)
+    params = nest_job_to_api_params(job)
+    part_dict = params["parts"][0]
+    assert part_dict["shape"] == "RoundedRect"
+    assert part_dict["shape_params"]["radius_mm"] == 10.0
+
+
 def run_all_tests():
     print("=" * 60)
     print("Nest YAML Parser Tests")
@@ -416,6 +666,17 @@ def run_all_tests():
         test_error_missing_sheet,
         test_error_no_parts,
         test_simple_template_reference,
+        test_parse_shape_rounded_rect,
+        test_parse_shape_rounded_rect_selective_corners,
+        test_parse_shape_circle,
+        test_parse_shape_circle_nonsquare_error,
+        test_parse_shape_omitted,
+        test_parse_shape_and_template_error,
+        test_parse_shape_unknown_type,
+        test_parse_shape_rounded_rect_missing_radius,
+        test_parse_shape_polygon_points_exceed_bounds,
+        test_parse_shape_polygon_points_within_bounds,
+        test_nest_job_to_api_params_with_shape,
     ]
 
     passed = 0

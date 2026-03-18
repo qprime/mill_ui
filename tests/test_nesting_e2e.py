@@ -308,6 +308,119 @@ def test_gcode_basic_invariants():
     print("  PASSED")
 
 
+def test_rounded_rect_end_to_end():
+    parts = [
+        {
+            "name": "coaster",
+            "width_mm": 100,
+            "height_mm": 100,
+            "quantity": 2,
+            "shape": "RoundedRect",
+            "shape_params": {"radius_mm": 10.0},
+        }
+    ]
+    result = nest_and_generate(
+        parts=parts,
+        sheet_width_mm=500,
+        sheet_height_mm=500,
+        sheet_thickness_mm=19,
+        kerf_mm=6.35,
+        output_format="ast",
+    )
+    assert result["total_sheets"] >= 1
+    ast = result["output"][0]
+    rr_items = [i for i in ast.items if i.type == "RoundedRect"]
+    assert len(rr_items) >= 1
+    assert rr_items[0].geometry.data["radius_tl_mm"] == 10.0
+
+
+def test_mixed_shapes_end_to_end():
+    parts = [
+        {"name": "panel", "width_mm": 200, "height_mm": 150},
+        {
+            "name": "disc",
+            "width_mm": 100,
+            "height_mm": 100,
+            "shape": "Circle",
+        },
+    ]
+    result = nest_and_generate(
+        parts=parts,
+        sheet_width_mm=500,
+        sheet_height_mm=500,
+        sheet_thickness_mm=19,
+        kerf_mm=6.35,
+        output_format="ast",
+    )
+    ast = result["output"][0]
+    types = {i.type for i in ast.items}
+    assert "Rect" in types
+    assert "Circle" in types
+
+
+def test_selective_corners_format_pml():
+    from pml.formatter import format_pml
+
+    parts = [
+        {
+            "name": "strip",
+            "width_mm": 200,
+            "height_mm": 100,
+            "shape": "RoundedRect",
+            "shape_params": {"radius_mm": 12.7, "corners": ("bl", "tl")},
+        }
+    ]
+    result = nest_and_generate(
+        parts=parts,
+        sheet_width_mm=500,
+        sheet_height_mm=500,
+        sheet_thickness_mm=19,
+        kerf_mm=6.35,
+        output_format="ast",
+    )
+    ast = result["output"][0]
+    pml_text = format_pml(ast)
+    assert "roundedrect" in pml_text
+    assert "corners" in pml_text
+    assert "bl" in pml_text
+    assert "tl" in pml_text
+
+
+def test_ast_and_pml_paths_equivalent():
+    from pml.formatter import format_pml
+
+    parts = [
+        {
+            "name": "coaster",
+            "width_mm": 100,
+            "height_mm": 100,
+            "shape": "RoundedRect",
+            "shape_params": {"radius_mm": 10.0},
+        }
+    ]
+    ast_result = nest_and_generate(
+        parts=parts,
+        sheet_width_mm=500,
+        sheet_height_mm=500,
+        sheet_thickness_mm=19,
+        kerf_mm=6.35,
+        output_format="ast",
+    )
+    pml_result = nest_and_generate(
+        parts=parts,
+        sheet_width_mm=500,
+        sheet_height_mm=500,
+        sheet_thickness_mm=19,
+        kerf_mm=6.35,
+        output_format="pml",
+    )
+
+    ast_pml = format_pml(ast_result["output"][0])
+    direct_pml = pml_result["output"][0]
+
+    assert ast_pml == direct_pml
+
+
 def run_all_tests():
     print("=" * 60)
     print("Nesting End-to-End Tests (Phase 8)")
@@ -319,6 +432,10 @@ def run_all_tests():
         test_template_parts_through_cam,
         test_multi_sheet_through_cam,
         test_gcode_basic_invariants,
+        test_rounded_rect_end_to_end,
+        test_mixed_shapes_end_to_end,
+        test_selective_corners_format_pml,
+        test_ast_and_pml_paths_equivalent,
     ]
 
     passed = 0

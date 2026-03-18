@@ -124,6 +124,7 @@ Each part specifies:
 | `height` | Yes | Part height in millimeters |
 | `quantity` | No | Number of copies (default: 1) |
 | `template` | No | Template to apply to part |
+| `shape` | No | Shape primitive (mutually exclusive with `template`) |
 
 ### Basic Parts
 
@@ -185,6 +186,79 @@ parts:
 | `rail_h` | 57mm | Rail (horizontal frame) height |
 | `panel_recess` | 6mm | Panel pocket depth |
 | `panel_style` | pocket | Panel generator type |
+
+### Parts with Shape Primitives
+
+The `shape` field specifies a shape primitive instead of the default `Rect`. It is mutually exclusive with `template`.
+
+**Supported shapes:**
+
+| `type` | Additional fields | Notes |
+|--------|-------------------|-------|
+| `Rect` | *(none)* | Default behavior, equivalent to omitting `shape` |
+| `RoundedRect` | `radius` (required), `corners` (optional) | Corners: `tl`, `tr`, `bl`, `br`. Default: all corners |
+| `Circle` | *(none)* | `width` must equal `height` (bounding box is square) |
+| `Polygon` | `points` (required) | List of `[x, y]` coordinate pairs (min 3) relative to center |
+| `Triangle` | *(none)* | Isoceles triangle centered in bounding box |
+
+**RoundedRect with all corners:**
+```yaml
+parts:
+  - name: coaster
+    width: 100mm
+    height: 100mm
+    quantity: 10
+    shape:
+      type: RoundedRect
+      radius: 10mm
+```
+
+**RoundedRect with selective corners:**
+```yaml
+parts:
+  - name: edge_strip
+    width: 228.6mm
+    height: 863.6mm
+    quantity: 2
+    shape:
+      type: RoundedRect
+      radius: 12.7mm
+      corners: [tl, bl]
+```
+
+**Circle:**
+```yaml
+parts:
+  - name: disc
+    width: 200mm
+    height: 200mm
+    quantity: 4
+    shape:
+      type: Circle
+```
+
+**Polygon:**
+```yaml
+parts:
+  - name: gusset
+    width: 100mm
+    height: 100mm
+    quantity: 6
+    shape:
+      type: Polygon
+      points: [[-50, -50], [50, -50], [50, 50]]
+```
+
+**Triangle:**
+```yaml
+parts:
+  - name: bracket
+    width: 100mm
+    height: 80mm
+    quantity: 4
+    shape:
+      type: Triangle
+```
 
 ## Complete Example
 

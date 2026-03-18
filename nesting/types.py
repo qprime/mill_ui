@@ -85,6 +85,8 @@ class PartSpec:
     template_params: dict[str, Any] | None = None
     allow_rotation: bool = True
     geometry_points: tuple[tuple[float, float], ...] | None = None
+    shape: str | None = None
+    shape_params: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.width_mm <= 0:
@@ -113,6 +115,9 @@ class PartSpec:
         data = dict(data)
         if data.get("geometry_points"):
             data["geometry_points"] = tuple(tuple(p) for p in data["geometry_points"])
+        sp = data.get("shape_params")
+        if sp and "corners" in sp:
+            data["shape_params"] = {**sp, "corners": tuple(sorted(sp["corners"]))}
         return cls(**data)
 
 

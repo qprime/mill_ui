@@ -61,6 +61,8 @@ from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, RestSpec, She
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import NestJob, NestParseError, NestPart
 
+_VALID_SHAPE_TYPES = ("Rect", "RoundedRect", "Circle", "Polygon", "Triangle")
+
 
 class PMLParseError(Exception):
     def __init__(self, message: str, path: str = ""):
@@ -1023,6 +1025,71 @@ def parse_nest_yaml(source: str) -> NestJob:
             else:
                 raise NestParseError(f"Invalid template for part '{name}'")
 
+        shape: str | None = None
+        shape_params: dict[str, Any] = {}
+
+        shape_block = part_data.get("shape")
+        if shape_block is not None:
+            if template is not None:
+                raise NestParseError(f"Part '{name}' has both 'shape' and 'template' — they are mutually exclusive")
+            if not isinstance(shape_block, dict):
+                raise NestParseError(f"Invalid shape for part '{name}': expected a mapping")
+            shape_type = shape_block.get("type")
+            if shape_type not in _VALID_SHAPE_TYPES:
+                raise NestParseError(
+                    f"Invalid shape type '{shape_type}' for part '{name}'. "
+                    f"Must be one of: {', '.join(_VALID_SHAPE_TYPES)}"
+                )
+            shape = shape_type
+
+            if shape == "RoundedRect":
+                radius_raw = shape_block.get("radius")
+                if radius_raw is None:
+                    raise NestParseError(f"RoundedRect shape for part '{name}' requires 'radius'")
+                try:
+                    radius_mm = parse_dimension(radius_raw)
+                except (ValueError, TypeError) as e:
+                    raise NestParseError(f"Invalid radius for part '{name}': {e}") from e
+                shape_params["radius_mm"] = radius_mm
+                corners_raw = shape_block.get("corners")
+                if corners_raw is not None:
+                    valid_corners = {"tl", "tr", "bl", "br"}
+                    if not isinstance(corners_raw, list):
+                        raise NestParseError(f"Invalid corners for part '{name}': expected a list")
+                    for c in corners_raw:
+                        if c not in valid_corners:
+                            raise NestParseError(
+                                f"Invalid corner '{c}' for part '{name}'. Must be one of: tl, tr, bl, br"
+                            )
+                    shape_params["corners"] = tuple(sorted(corners_raw))
+
+            elif shape == "Circle":
+                if abs(width - height) > 0.01:
+                    raise NestParseError(
+                        f"Circle shape for part '{name}' requires width == height, got {width}mm x {height}mm"
+                    )
+
+            elif shape == "Polygon":
+                points_raw = shape_block.get("points")
+                if points_raw is None:
+                    raise NestParseError(f"Polygon shape for part '{name}' requires 'points'")
+                if not isinstance(points_raw, list) or len(points_raw) < 3:
+                    raise NestParseError(f"Polygon shape for part '{name}' requires at least 3 points")
+                points = []
+                for pt in points_raw:
+                    if not isinstance(pt, list) or len(pt) != 2:
+                        raise NestParseError(f"Invalid point {pt} for part '{name}': expected [x, y]")
+                    points.append([float(pt[0]), float(pt[1])])
+                half_w = width / 2
+                half_h = height / 2
+                for pt in points:
+                    if abs(pt[0]) > half_w + 0.01 or abs(pt[1]) > half_h + 0.01:
+                        raise NestParseError(
+                            f"Polygon point [{pt[0]}, {pt[1]}] for part '{name}' exceeds "
+                            f"bounding box ±{half_w}mm x ±{half_h}mm"
+                        )
+                shape_params["points"] = points
+
         parts.append(
             NestPart(
                 name=name,
@@ -1031,6 +1098,8 @@ def parse_nest_yaml(source: str) -> NestJob:
                 quantity=quantity,
                 template=template,
                 template_params=template_params,
+                shape=shape,
+                shape_params=shape_params,
             )
         )
 

@@ -11,19 +11,36 @@ _VALID_OUTPUT_FORMATS = ("ast", "pml")
 _VALID_ALGORITHMS = ("guillotine", "maxrects")
 
 
+def _geometry_points_for_polygon(shape_params: dict[str, Any]) -> tuple[tuple[float, float], ...] | None:
+    points = shape_params.get("points")
+    if points is None:
+        return None
+    return tuple(tuple(pt) for pt in points)
+
+
 def _parts_from_dicts(parts: list[dict[str, Any]]) -> list[PartSpec]:
-    return [
-        PartSpec(
-            name=p["name"],
-            width_mm=float(p["width_mm"]),
-            height_mm=float(p["height_mm"]),
-            quantity=int(p.get("quantity", 1)),
-            template=p.get("template"),
-            template_params=p.get("template_params"),
-            allow_rotation=p.get("allow_rotation", True),
+    result = []
+    for p in parts:
+        shape = p.get("shape")
+        shape_params = p.get("shape_params")
+        geometry_points = None
+        if shape == "Polygon" and shape_params:
+            geometry_points = _geometry_points_for_polygon(shape_params)
+        result.append(
+            PartSpec(
+                name=p["name"],
+                width_mm=float(p["width_mm"]),
+                height_mm=float(p["height_mm"]),
+                quantity=int(p.get("quantity", 1)),
+                template=p.get("template"),
+                template_params=p.get("template_params"),
+                allow_rotation=p.get("allow_rotation", True),
+                geometry_points=geometry_points,
+                shape=shape,
+                shape_params=shape_params,
+            )
         )
-        for p in parts
-    ]
+    return result
 
 
 def nest_parts(

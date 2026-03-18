@@ -303,6 +303,37 @@ def test_rotated_polygon_overlap():
     print("  PASSED")
 
 
+def test_polygon_from_shape_uses_geometry_points():
+    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=6)
+    tri_up = PartSpec(
+        name="tri_up",
+        width_mm=100,
+        height_mm=100,
+        shape="Polygon",
+        shape_params={"points": [[-50, -50], [50, -50], [0, 50]]},
+        geometry_points=((-50, -50), (50, -50), (0, 50)),
+    )
+    tri_down = PartSpec(
+        name="tri_down",
+        width_mm=100,
+        height_mm=100,
+        shape="Polygon",
+        shape_params={"points": [[-50, 50], [50, 50], [0, -50]]},
+        geometry_points=((-50, 50), (50, 50), (0, -50)),
+    )
+
+    layout = SheetLayout(
+        sheet_spec=sheet_spec,
+        placements=(
+            NestedPart(part_spec=tri_up, x_mm=200, y_mm=200, instance_id=0),
+            NestedPart(part_spec=tri_down, x_mm=250, y_mm=200, instance_id=0),
+        ),
+    )
+
+    result = validate_sheet_layout(layout)
+    assert result.is_valid, f"Polygon parts with shape field should use geometry_points: {result.summary()}"
+
+
 def run_all_tests():
     print("=" * 60)
     print("Phase 6: Nesting Validation Tests")
@@ -323,6 +354,7 @@ def run_all_tests():
         test_triangles_bounding_box_overlap_but_no_geometry_overlap,
         test_polygon_overlap_with_location,
         test_rotated_polygon_overlap,
+        test_polygon_from_shape_uses_geometry_points,
     ]
 
     passed = 0

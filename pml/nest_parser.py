@@ -19,6 +19,8 @@ class NestPart:
     quantity: int = 1
     template: str | None = None
     template_params: dict[str, float] = field(default_factory=dict)
+    shape: str | None = None
+    shape_params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,9 @@ def nest_job_to_api_params(job: NestJob) -> dict[str, Any]:
         if part.template:
             part_dict["template"] = part.template
             part_dict["template_params"] = part.template_params
+        if part.shape:
+            part_dict["shape"] = part.shape
+            part_dict["shape_params"] = part.shape_params
         parts.append(part_dict)
 
     return {

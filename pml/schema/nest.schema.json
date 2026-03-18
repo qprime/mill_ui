@@ -87,6 +87,41 @@
             }
           ],
           "description": "Template to apply to this part"
+        },
+        "shape": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["Rect", "RoundedRect", "Circle", "Polygon", "Triangle"],
+              "description": "Shape primitive type"
+            },
+            "radius": {
+              "$ref": "#/$defs/dimension",
+              "description": "Corner radius (RoundedRect only)"
+            },
+            "corners": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["tl", "tr", "bl", "br"]
+              },
+              "description": "Which corners to round (RoundedRect only, default: all)"
+            },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "minItems": 3,
+              "description": "Polygon vertex coordinates as [x, y] pairs"
+            }
+          },
+          "description": "Shape primitive (mutually exclusive with template)"
         }
       }
     }

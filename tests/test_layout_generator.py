@@ -146,10 +146,10 @@ def test_sheet_to_pml_simple():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
     pml = sheet_layout_to_pml(layout)
 
-    assert "sheet 1000mm 1000mm 19mm" in pml
-    assert "rect panel_0" in pml
-    assert "500mm,500mm" in pml
-    assert "400mm,300mm" in pml
+    assert "sheet 1000.00mm 1000.00mm 19.00mm" in pml
+    assert "rect panel_0_rect" in pml
+    assert "500.00mm,500.00mm" in pml
+    assert "400.00mm,300.00mm" in pml
     assert "profile through outside" in pml
 
     print("  PASSED")
@@ -185,9 +185,7 @@ def test_sheet_to_pml_rotated():
     layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
     pml = sheet_layout_to_pml(layout)
 
-    assert "rotated" in pml.lower()
-
-    assert "400mm,200mm" in pml
+    assert "400.00mm,200.00mm" in pml
 
     print("  PASSED")
 

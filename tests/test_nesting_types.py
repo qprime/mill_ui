@@ -449,6 +449,75 @@ def test_recipe16_like_layout():
     print("  PASSED")
 
 
+def test_part_spec_shape_serialization():
+    original = PartSpec(
+        name="coaster",
+        width_mm=100,
+        height_mm=100,
+        shape="RoundedRect",
+        shape_params={"radius_mm": 10.0, "corners": ("bl", "tl")},
+    )
+    data = original.to_dict()
+    restored = PartSpec.from_dict(data)
+    assert restored.shape == "RoundedRect"
+    assert restored.shape_params is not None
+    assert restored.shape_params["radius_mm"] == 10.0
+    assert restored.shape_params["corners"] == ("bl", "tl")
+
+
+def test_part_spec_shape_params_json_safe():
+    import json
+
+    part = PartSpec(
+        name="coaster",
+        width_mm=100,
+        height_mm=100,
+        shape="RoundedRect",
+        shape_params={"radius_mm": 10.0, "corners": ("bl", "tl")},
+    )
+    data = part.to_dict()
+    json_str = json.dumps(data)
+    assert "radius_mm" in json_str
+
+
+def test_part_spec_corners_normalized_after_json_round_trip():
+    import json
+
+    original = PartSpec(
+        name="strip",
+        width_mm=200,
+        height_mm=100,
+        shape="RoundedRect",
+        shape_params={"radius_mm": 12.7, "corners": ("bl", "tl")},
+    )
+    data = original.to_dict()
+    json_str = json.dumps(data)
+    restored_data = json.loads(json_str)
+    restored = PartSpec.from_dict(restored_data)
+    assert restored.shape_params is not None
+    assert isinstance(restored.shape_params["corners"], tuple)
+    assert restored.shape_params["corners"] == ("bl", "tl")
+
+
+def test_polygon_geometry_points_populated():
+    from nesting.api import _parts_from_dicts
+
+    parts = _parts_from_dicts(
+        [
+            {
+                "name": "gusset",
+                "width_mm": 100,
+                "height_mm": 100,
+                "shape": "Polygon",
+                "shape_params": {"points": [[-50, -50], [50, -50], [0, 50]]},
+            }
+        ]
+    )
+    assert parts[0].geometry_points is not None
+    assert len(parts[0].geometry_points) == 3
+    assert parts[0].geometry_points[0] == (-50, -50)
+
+
 def run_all_tests():
     print("=" * 60)
     print("Phase 1: Nesting Data Structures Tests")
@@ -479,6 +548,10 @@ def run_all_tests():
         test_nesting_result_unplaced_parts,
         test_nesting_result_json_roundtrip,
         test_recipe16_like_layout,
+        test_part_spec_shape_serialization,
+        test_part_spec_shape_params_json_safe,
+        test_part_spec_corners_normalized_after_json_round_trip,
+        test_polygon_geometry_points_populated,
     ]
 
     passed = 0

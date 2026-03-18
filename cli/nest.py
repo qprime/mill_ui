@@ -151,7 +151,7 @@ Output files:
     parser.add_argument(
         "-o", "--output", default=None, help="Output directory (default: project/output or current directory)"
     )
-    parser.add_argument("--prefix", default="sheet", help="Prefix for output files (default: sheet)")
+    parser.add_argument("--prefix", default=None, help="Prefix for output files (default: derived from input filename)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     export_group = parser.add_argument_group("export options")
@@ -265,8 +265,14 @@ Output files:
     output_files = []
     svg_files = []
 
+    if args.prefix is not None:
+        prefix = args.prefix
+    else:
+        stem = input_path.stem
+        prefix = stem.removesuffix(".nest") if stem.endswith(".nest") else stem
+
     for sheet_idx, ast in enumerate(asts):
-        sheet_name = f"{args.prefix}_{sheet_idx + 1}"
+        sheet_name = f"{prefix}_sheet_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml.yml"
 
         pml_content = format_pml(ast)
@@ -314,7 +320,7 @@ Output files:
     if svg_files:
         manifest["output_files"]["svg"] = svg_files
 
-    manifest_path = output_dir / "manifest.json"
+    manifest_path = output_dir / f"{prefix}_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2))
 
     if args.verbose:

@@ -145,6 +145,7 @@ def expand_part_to_items(
                 placement=ASTPlacement(center_xy_mm=(cx, cy)),
                 feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
                 shape_id=f"{shape_id_prefix}{item_type.lower()}",
+                label=part_spec.name,
             )
         ]
 

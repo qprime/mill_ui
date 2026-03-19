@@ -54,7 +54,7 @@ from layout_ast.compositional import (
 )
 from layout_ast.layout import Feature
 from pml.measurement_fields import format_measurement_fields
-from pml.nest_parser import NestJob
+from pml.nest_parser import HoldingSpec, NestJob
 
 
 def dim(value: float) -> str:
@@ -706,6 +706,19 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
     return stream.getvalue()
 
 
+def _holding_to_dict(holding: HoldingSpec) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if holding.onion_skin_mm is not None:
+        result["onion_skin"] = dim(holding.onion_skin_mm)
+    if holding.tab_count is not None:
+        result["tab_count"] = holding.tab_count
+    if holding.tab_height_mm is not None:
+        result["tab_height"] = dim(holding.tab_height_mm)
+    if holding.tab_width_mm is not None:
+        result["tab_width"] = dim(holding.tab_width_mm)
+    return result
+
+
 def format_nest_yaml(job: NestJob) -> str:
     data: dict[str, Any] = {
         "Nest": {
@@ -722,6 +735,8 @@ def format_nest_yaml(job: NestJob) -> str:
         data["Nest"]["kerf"] = dim(job.kerf_mm)
     if job.margin_mm != 10.0:
         data["Nest"]["margin"] = dim(job.margin_mm)
+    if job.holding is not None:
+        data["Nest"]["holding"] = _holding_to_dict(job.holding)
 
     parts_list: list[dict[str, Any]] = []
     for part in job.parts:
@@ -740,6 +755,8 @@ def format_nest_yaml(job: NestJob) -> str:
                 }
             else:
                 part_data["template"] = part.template
+        if part.holding is not None and part.holding != job.holding:
+            part_data["holding"] = _holding_to_dict(part.holding)
         parts_list.append(part_data)
 
     data["Nest"]["parts"] = parts_list

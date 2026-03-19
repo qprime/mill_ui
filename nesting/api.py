@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from pml.nest_parser import HoldingSpec
+
 from .layout_generator import nesting_result_to_asts, nesting_result_to_pml
 from .sheet_packer import pack_sheets
 from .types import PartSpec, SheetSpec
@@ -16,6 +18,12 @@ def _geometry_points_for_polygon(shape_params: dict[str, Any]) -> tuple[tuple[fl
     if points is None:
         return None
     return tuple(tuple(pt) for pt in points)
+
+
+def _holding_from_dict(raw: dict[str, Any] | None) -> HoldingSpec | None:
+    if raw is None:
+        return None
+    return HoldingSpec.from_dict(raw)
 
 
 def _parts_from_dicts(parts: list[dict[str, Any]]) -> list[PartSpec]:
@@ -38,6 +46,7 @@ def _parts_from_dicts(parts: list[dict[str, Any]]) -> list[PartSpec]:
                 geometry_points=geometry_points,
                 shape=shape,
                 shape_params=shape_params,
+                holding=_holding_from_dict(p.get("holding")),
             )
         )
     return result

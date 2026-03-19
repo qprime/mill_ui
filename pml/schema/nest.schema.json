@@ -37,6 +37,10 @@
           "$ref": "#/$defs/dimension",
           "description": "Sheet edge margin (default: 10mm)"
         },
+        "holding": {
+          "$ref": "#/$defs/holding",
+          "description": "Default holding strategy for non-template parts"
+        },
         "parts": {
           "type": "array",
           "items": {
@@ -88,6 +92,10 @@
           ],
           "description": "Template to apply to this part"
         },
+        "holding": {
+          "$ref": "#/$defs/holding",
+          "description": "Part-level holding strategy override"
+        },
         "shape": {
           "type": "object",
           "required": ["type"],
@@ -124,6 +132,34 @@
           "description": "Shape primitive (mutually exclusive with template)"
         }
       }
+    },
+    "holding": {
+      "type": "object",
+      "description": "Holding strategy — onion skin and tabs are mutually exclusive",
+      "properties": {
+        "onion_skin": {
+          "$ref": "#/$defs/dimension",
+          "description": "Onion skin thickness (thin layer holding part to sheet)"
+        },
+        "tab_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of tabs"
+        },
+        "tab_height": {
+          "$ref": "#/$defs/dimension",
+          "description": "Tab height (required with tab_count)"
+        },
+        "tab_width": {
+          "$ref": "#/$defs/dimension",
+          "description": "Tab width (optional, auto-calculated if omitted)"
+        }
+      },
+      "oneOf": [
+        {"required": ["onion_skin"]},
+        {"required": ["tab_count", "tab_height"]}
+      ],
+      "additionalProperties": false
     }
   }
 }

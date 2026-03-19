@@ -4,6 +4,8 @@ import json
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from pml.nest_parser import HoldingSpec
+
 
 @dataclass(frozen=True)
 class FreeRect:
@@ -87,6 +89,7 @@ class PartSpec:
     geometry_points: tuple[tuple[float, float], ...] | None = None
     shape: str | None = None
     shape_params: dict[str, Any] | None = None
+    holding: HoldingSpec | None = None
 
     def __post_init__(self) -> None:
         if self.width_mm <= 0:
@@ -118,6 +121,9 @@ class PartSpec:
         sp = data.get("shape_params")
         if sp and "corners" in sp:
             data["shape_params"] = {**sp, "corners": tuple(sorted(sp["corners"]))}
+        holding = data.get("holding")
+        if isinstance(holding, dict):
+            data["holding"] = HoldingSpec.from_dict(holding)
         return cls(**data)
 
 

@@ -59,7 +59,7 @@ from layout_ast.compositional import (
 )
 from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, RestSpec, Sheet
 from pml.measurement_fields import parse_measurement_fields
-from pml.nest_parser import NestJob, NestParseError, NestPart
+from pml.nest_parser import HoldingSpec, NestJob, NestParseError, NestPart
 
 _VALID_SHAPE_TYPES = ("Rect", "RoundedRect", "Circle", "Polygon", "Triangle")
 
@@ -948,6 +948,45 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     )
 
 
+_VALID_HOLDING_KEYS = {"onion_skin", "tab_count", "tab_height", "tab_width"}
+
+
+def _parse_holding_block(block: dict[str, Any], path: str) -> HoldingSpec:
+    unknown = set(block.keys()) - _VALID_HOLDING_KEYS
+    if unknown:
+        raise NestParseError(
+            f"Unknown key(s) in {path}: {', '.join(sorted(unknown))}. "
+            f"Valid keys: {', '.join(sorted(_VALID_HOLDING_KEYS))}"
+        )
+    kwargs: dict[str, Any] = {}
+    if "onion_skin" in block:
+        try:
+            kwargs["onion_skin_mm"] = parse_dimension(block["onion_skin"])
+        except (ValueError, TypeError) as e:
+            raise NestParseError(f"Invalid onion_skin in {path}: {e}") from e
+    if "tab_count" in block:
+        val = block["tab_count"]
+        if not isinstance(val, int):
+            raise NestParseError(f"Invalid tab_count in {path}: expected integer")
+        kwargs["tab_count"] = val
+    if "tab_height" in block:
+        try:
+            kwargs["tab_height_mm"] = parse_dimension(block["tab_height"])
+        except (ValueError, TypeError) as e:
+            raise NestParseError(f"Invalid tab_height in {path}: {e}") from e
+    if "tab_width" in block:
+        try:
+            kwargs["tab_width_mm"] = parse_dimension(block["tab_width"])
+        except (ValueError, TypeError) as e:
+            raise NestParseError(f"Invalid tab_width in {path}: {e}") from e
+    if not kwargs:
+        raise NestParseError(f"Empty holding block in {path}")
+    try:
+        return HoldingSpec(**kwargs)
+    except ValueError as e:
+        raise NestParseError(f"Invalid holding in {path}: {e}") from e
+
+
 def parse_nest_yaml(source: str) -> NestJob:
     yaml = YAML()
     yaml.preserve_quotes = True
@@ -991,6 +1030,13 @@ def parse_nest_yaml(source: str) -> NestJob:
             margin_mm = parse_dimension(nest_block["margin"])
         except ValueError as e:
             raise NestParseError(f"Invalid margin: {e}") from e
+
+    job_holding: HoldingSpec | None = None
+    holding_block = nest_block.get("holding")
+    if holding_block is not None:
+        if not isinstance(holding_block, dict):
+            raise NestParseError("Invalid holding: expected a mapping")
+        job_holding = _parse_holding_block(holding_block, "Nest.holding")
 
     parts_list = nest_block.get("parts", [])
     if not parts_list:
@@ -1098,6 +1144,14 @@ def parse_nest_yaml(source: str) -> NestJob:
                         )
                 shape_params["points"] = points
 
+        part_holding: HoldingSpec | None = None
+        part_holding_block = part_data.get("holding")
+        if part_holding_block is not None:
+            if not isinstance(part_holding_block, dict):
+                raise NestParseError(f"Invalid holding for part '{name}': expected a mapping")
+            part_holding = _parse_holding_block(part_holding_block, f"parts['{name}'].holding")
+        resolved_holding = part_holding if part_holding is not None else job_holding
+
         parts.append(
             NestPart(
                 name=name,
@@ -1108,6 +1162,7 @@ def parse_nest_yaml(source: str) -> NestJob:
                 template_params=template_params,
                 shape=shape,
                 shape_params=shape_params,
+                holding=resolved_holding,
             )
         )
 
@@ -1118,6 +1173,7 @@ def parse_nest_yaml(source: str) -> NestJob:
         sheet_thickness_mm=sheet_thickness,
         kerf_mm=kerf_mm,
         margin_mm=margin_mm,
+        holding=job_holding,
         parts=parts,
     )
 

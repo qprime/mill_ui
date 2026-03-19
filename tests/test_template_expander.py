@@ -385,6 +385,61 @@ def test_expand_shape_id_suffix():
         )
 
 
+def test_holding_onion_skin_on_feature():
+    from pml.nest_parser import HoldingSpec
+
+    holding = HoldingSpec(onion_skin_mm=0.3)
+    part = PartSpec(name="panel", width_mm=200, height_mm=300, holding=holding)
+    items = expand_part_to_items(
+        part_spec=part,
+        center_xy=(100, 150),
+        rotated=False,
+        sheet_thickness_mm=19,
+    )
+    assert len(items) == 1
+    feature = items[0].feature
+    assert feature is not None
+    assert feature.onion_skin_mm == 0.3
+    assert feature.tab_count is None
+    assert feature.is_through is True
+
+
+def test_holding_tabs_on_feature():
+    from pml.nest_parser import HoldingSpec
+
+    holding = HoldingSpec(tab_count=4, tab_height_mm=3.0, tab_width_mm=10.0)
+    part = PartSpec(name="panel", width_mm=200, height_mm=300, holding=holding)
+    items = expand_part_to_items(
+        part_spec=part,
+        center_xy=(100, 150),
+        rotated=False,
+        sheet_thickness_mm=19,
+    )
+    assert len(items) == 1
+    feature = items[0].feature
+    assert feature is not None
+    assert feature.tab_count == 4
+    assert feature.tab_height_mm == 3.0
+    assert feature.tab_width_mm == 10.0
+    assert feature.onion_skin_mm is None
+    assert feature.is_through is True
+
+
+def test_holding_none_produces_bare_through():
+    part = PartSpec(name="panel", width_mm=200, height_mm=300)
+    items = expand_part_to_items(
+        part_spec=part,
+        center_xy=(100, 150),
+        rotated=False,
+        sheet_thickness_mm=19,
+    )
+    feature = items[0].feature
+    assert feature is not None
+    assert feature.is_through is True
+    assert feature.onion_skin_mm is None
+    assert feature.tab_count is None
+
+
 def run_all_tests():
     print("=" * 60)
     print("Template Expander Tests")
@@ -408,6 +463,9 @@ def run_all_tests():
         test_expand_triangle,
         test_triangle_normalizes_to_polygon,
         test_expand_shape_id_suffix,
+        test_holding_onion_skin_on_feature,
+        test_holding_tabs_on_feature,
+        test_holding_none_produces_bare_through,
     ]
 
     passed = 0

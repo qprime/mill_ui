@@ -60,12 +60,16 @@ Nest:                           # Required root key
   kerf: 6.35mm                  # Optional, default 6.35mm
   margin: 10mm                  # Optional, default 10mm
 
+  holding:                      # Optional default holding strategy
+    onion_skin: 0.3mm           #   OR tab_count / tab_height / tab_width
+
   parts:                        # Required list of parts
     - name: part_name
       width: 400mm
       height: 600mm
       quantity: 20
       template: shaker          # Optional template
+      holding:                  # Optional per-part override
 ```
 
 ## Algorithms
@@ -113,6 +117,74 @@ kerf: 6.35mm    # Cutter width for spacing between parts (default: 6.35mm / 1/4"
 margin: 10mm    # No-cut zone around sheet edges (default: 10mm)
 ```
 
+## Holding Strategies
+
+Holding strategies keep parts attached to the stock sheet during cutting. Two strategies are available — **onion skin** and **tabs** — and they are mutually exclusive.
+
+A job-level `holding` block sets the default for all non-template parts. Per-part `holding` overrides the job default. Template parts carry their own features and are never affected by holding settings.
+
+### Onion Skin
+
+Leaves a thin layer of material under the part. Snap off after the job.
+
+```yaml
+Nest:
+  algorithm: guillotine
+  holding:
+    onion_skin: 0.3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+      quantity: 4
+```
+
+### Tabs
+
+Discrete bridges hold the part at multiple points. Cut free with a hand tool.
+
+```yaml
+Nest:
+  algorithm: maxrects
+  holding:
+    tab_count: 4
+    tab_height: 3mm
+    tab_width: 10mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+      quantity: 4
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `onion_skin` | Yes (onion skin mode) | Thickness of material layer left under part |
+| `tab_count` | Yes (tab mode) | Number of tabs around the profile |
+| `tab_height` | Yes (tab mode) | Height of each tab |
+| `tab_width` | No | Width of each tab (auto-calculated if omitted) |
+
+### Per-Part Override
+
+```yaml
+  parts:
+    - name: large_panel
+      width: 600mm
+      height: 400mm
+      quantity: 2
+      holding:
+        tab_count: 6
+        tab_height: 3mm
+```
+
 ## Parts
 
 Each part specifies:
@@ -125,6 +197,7 @@ Each part specifies:
 | `quantity` | No | Number of copies (default: 1) |
 | `template` | No | Template to apply to part |
 | `shape` | No | Shape primitive (mutually exclusive with `template`) |
+| `holding` | No | Per-part holding strategy override (see Holding Strategies) |
 
 ### Basic Parts
 

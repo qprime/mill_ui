@@ -137,13 +137,30 @@ def expand_part_to_items(
 
         item_type, geometry_data = _build_geometry_data(shape, shape_params, w, h)
 
+        holding = part_spec.holding
+        feature_kwargs: dict[str, Any] = {
+            "type": "profile",
+            "depth_mm": 0.0,
+            "is_through": True,
+            "side": "outside",
+        }
+        if holding is not None:
+            if holding.onion_skin_mm is not None:
+                feature_kwargs["onion_skin_mm"] = holding.onion_skin_mm
+            if holding.tab_count is not None:
+                feature_kwargs["tab_count"] = holding.tab_count
+            if holding.tab_height_mm is not None:
+                feature_kwargs["tab_height_mm"] = holding.tab_height_mm
+            if holding.tab_width_mm is not None:
+                feature_kwargs["tab_width_mm"] = holding.tab_width_mm
+
         return [
             Item(
                 kind="shape",
                 type=item_type,
                 geometry=Geometry(data=geometry_data),
                 placement=ASTPlacement(center_xy_mm=(cx, cy)),
-                feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
+                feature=Feature(**feature_kwargs),
                 shape_id=f"{shape_id_prefix}{item_type.lower()}",
                 label=part_spec.name,
             )

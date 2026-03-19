@@ -649,6 +649,276 @@ Nest:
     assert part_dict["shape_params"]["radius_mm"] == 10.0
 
 
+def test_holding_onion_skin_job_level():
+    source = """
+Nest:
+  algorithm: guillotine
+  holding:
+    onion_skin: 0.3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+      quantity: 4
+"""
+    job = parse_nest_yaml(source)
+    assert job.holding is not None
+    assert job.holding.onion_skin_mm == 0.3
+    assert job.holding.tab_count is None
+    for part in job.parts:
+        assert part.holding is not None
+        assert part.holding.onion_skin_mm == 0.3
+
+
+def test_holding_tabs_job_level():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding:
+    tab_count: 4
+    tab_height: 3mm
+    tab_width: 10mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+      quantity: 2
+"""
+    job = parse_nest_yaml(source)
+    assert job.holding is not None
+    assert job.holding.tab_count == 4
+    assert job.holding.tab_height_mm == 3.0
+    assert job.holding.tab_width_mm == 10.0
+    assert job.holding.onion_skin_mm is None
+    assert job.parts[0].holding == job.holding
+
+
+def test_holding_tabs_without_width():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding:
+    tab_count: 4
+    tab_height: 3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    job = parse_nest_yaml(source)
+    assert job.holding is not None
+    assert job.holding.tab_width_mm is None
+
+
+def test_holding_per_part_override():
+    source = """
+Nest:
+  algorithm: guillotine
+  holding:
+    onion_skin: 0.3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: small
+      width: 200mm
+      height: 100mm
+      quantity: 4
+    - name: large
+      width: 600mm
+      height: 400mm
+      quantity: 2
+      holding:
+        tab_count: 6
+        tab_height: 3mm
+"""
+    job = parse_nest_yaml(source)
+    small = job.parts[0]
+    large = job.parts[1]
+    assert small.holding is not None
+    assert small.holding.onion_skin_mm == 0.3
+    assert large.holding is not None
+    assert large.holding.tab_count == 6
+    assert large.holding.tab_height_mm == 3.0
+    assert large.holding.onion_skin_mm is None
+
+
+def test_holding_mutual_exclusivity_error():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding:
+    onion_skin: 0.3mm
+    tab_count: 4
+    tab_height: 3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Expected NestParseError")
+    except NestParseError:
+        pass
+
+
+def test_holding_empty_block_error():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding: {}
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Expected NestParseError")
+    except NestParseError:
+        pass
+
+
+def test_holding_tabs_missing_required_fields():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding:
+    tab_count: 4
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Expected NestParseError for missing tab_height")
+    except NestParseError:
+        pass
+
+
+def test_holding_api_params_propagation():
+    source = """
+Nest:
+  algorithm: guillotine
+  holding:
+    onion_skin: 0.5mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    job = parse_nest_yaml(source)
+    params = nest_job_to_api_params(job)
+    part = params["parts"][0]
+    assert part["holding"]["onion_skin_mm"] == 0.5
+
+
+def test_holding_no_default():
+    source = """
+Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    job = parse_nest_yaml(source)
+    assert job.holding is None
+    assert job.parts[0].holding is None
+
+
+def test_holding_unknown_key_error():
+    source = """
+Nest:
+  algorithm: maxrects
+  holding:
+    onion_skn: 0.3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: shelf
+      width: 400mm
+      height: 200mm
+"""
+    try:
+        parse_nest_yaml(source)
+        raise AssertionError("Expected NestParseError for unknown key")
+    except NestParseError as e:
+        assert "onion_skn" in str(e)
+
+
+def test_holding_roundtrip():
+    from pml.yaml_formatter import format_nest_yaml
+
+    source = """
+Nest:
+  algorithm: guillotine
+  holding:
+    onion_skin: 0.3mm
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 19mm
+  parts:
+    - name: small
+      width: 200mm
+      height: 100mm
+    - name: large
+      width: 600mm
+      height: 400mm
+      holding:
+        tab_count: 6
+        tab_height: 3mm
+"""
+    job = parse_nest_yaml(source)
+    yaml_out = format_nest_yaml(job)
+    job2 = parse_nest_yaml(yaml_out)
+    assert job2.holding is not None
+    assert job2.holding.onion_skin_mm == 0.3
+    assert job2.parts[0].holding is not None
+    assert job2.parts[0].holding.onion_skin_mm == 0.3
+    assert job2.parts[1].holding is not None
+    assert job2.parts[1].holding.tab_count == 6
+    assert job2.parts[1].holding.tab_height_mm == 3.0
+
+
 def run_all_tests():
     print("=" * 60)
     print("Nest YAML Parser Tests")
@@ -677,6 +947,17 @@ def run_all_tests():
         test_parse_shape_polygon_points_exceed_bounds,
         test_parse_shape_polygon_points_within_bounds,
         test_nest_job_to_api_params_with_shape,
+        test_holding_onion_skin_job_level,
+        test_holding_tabs_job_level,
+        test_holding_tabs_without_width,
+        test_holding_per_part_override,
+        test_holding_mutual_exclusivity_error,
+        test_holding_empty_block_error,
+        test_holding_tabs_missing_required_fields,
+        test_holding_api_params_propagation,
+        test_holding_no_default,
+        test_holding_unknown_key_error,
+        test_holding_roundtrip,
     ]
 
     passed = 0

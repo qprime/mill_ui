@@ -104,7 +104,7 @@ children:
         assert "✓ Resolved to" in result.stderr
         assert "sheet" in result.stdout.lower()
 
-        assert "at " in result.stdout or "placement" in result.stdout.lower()
+        assert "at:" in result.stdout or "at " in result.stdout
 
     finally:
         Path(input_file).unlink()

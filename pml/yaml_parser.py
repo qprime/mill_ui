@@ -511,7 +511,15 @@ def parse_node(data: dict, path: str = "") -> Any:
         points = tuple(
             (parse_dimension(p[0]), parse_dimension(p[1])) for p in _require(node_data, "points", f"{path}.Polygon")
         )
-        return Polygon(points=points, children=children, feature=feature, id=node_id, label=node_label)
+        at_data = node_data.get("at") if isinstance(node_data, dict) else None
+        polygon = Polygon(points=points, children=children, feature=feature, id=node_id, label=node_label)
+        if at_data:
+            return AtPosition(
+                x_mm=parse_dimension(at_data.get("x")),
+                y_mm=parse_dimension(at_data.get("y")),
+                child=polygon,
+            )
+        return polygon
 
     elif node_type == "Triangle":
         return Triangle(

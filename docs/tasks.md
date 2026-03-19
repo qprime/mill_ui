@@ -240,16 +240,17 @@ ast = LayoutAST(
 **Use case:** Optimize part placement on sheet material.
 
 ```python
-from pml.yaml_parser import parse_nest_yaml
-from pml.nest_parser import nest_job_to_api_params
 from nesting import nest_and_generate
-from pml.formatter import format_pml
+from pml.lifter import lift_layout_ast
+from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_formatter import format_pml_yaml
+from pml.yaml_parser import parse_nest_yaml
 
 job = parse_nest_yaml(open("job.nest.yml").read())
 result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
 
 for i, ast in enumerate(result["output"]):
-    pml_text = format_pml(ast)
+    pml_text = format_pml_yaml(lift_layout_ast(ast))
     open(f"sheet_{i+1}.pml.yml", "w").write(pml_text)
 ```
 

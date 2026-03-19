@@ -356,10 +356,10 @@ def test_acceptance_4_instances_frame_grid_pocket():
     assert flat.project == "acceptance_test_grid_panels"
 
     pml_output = format_pml(flat)
-    assert "sheet 1200.00mm 1200.00mm 19.00mm" in pml_output
-    assert "project acceptance_test_grid_panels" in pml_output
-    assert "profile through outside" in pml_output
-    assert "pocket 5.00mm" in pml_output
+    assert "width: 1200mm" in pml_output
+    assert "project: acceptance_test_grid_panels" in pml_output
+    assert "type: profile" in pml_output
+    assert "type: pocket" in pml_output
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
     pocket_items = [item for item in flat.items if item.feature and item.feature.type == "pocket"]

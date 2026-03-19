@@ -1311,13 +1311,3 @@ JSON Schema files for IDE validation:
 - `pml/schema/nest.schema.json` - Nesting job schema
 
 Configure your IDE to use these schemas for `.pml.yml` files.
-
-## Migration from Legacy Format
-
-The legacy indent-based PML format has been replaced with YAML. Existing files can be converted using:
-
-```bash
-python -m pml.convert_to_yaml path/to/file.pml.yml --dry-run  # Preview
-python -m pml.convert_to_yaml path/to/file.pml.yml            # Convert in place
-python -m pml.convert_to_yaml --all-recipes                   # Convert all recipes
-```

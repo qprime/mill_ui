@@ -359,7 +359,8 @@ def test_mixed_shapes_end_to_end():
 
 
 def test_selective_corners_format_pml():
-    from pml.formatter import format_pml
+    from pml.lifter import lift_layout_ast
+    from pml.yaml_formatter import format_pml_yaml
 
     parts = [
         {
@@ -379,15 +380,18 @@ def test_selective_corners_format_pml():
         output_format="ast",
     )
     ast = result["output"][0]
-    pml_text = format_pml(ast)
-    assert "roundedrect" in pml_text
+    pml_text = format_pml_yaml(lift_layout_ast(ast))
+    assert "RoundedRect" in pml_text
     assert "corners" in pml_text
     assert "bl" in pml_text
     assert "tl" in pml_text
 
 
 def test_ast_and_pml_paths_equivalent():
-    from pml.formatter import format_pml
+    from pml.lifter import lift_layout_ast
+    from pml.yaml_formatter import format_pml_yaml
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
 
     parts = [
         {
@@ -398,7 +402,7 @@ def test_ast_and_pml_paths_equivalent():
             "shape_params": {"radius_mm": 10.0},
         }
     ]
-    ast_result = nest_and_generate(
+    result = nest_and_generate(
         parts=parts,
         sheet_width_mm=500,
         sheet_height_mm=500,
@@ -406,19 +410,19 @@ def test_ast_and_pml_paths_equivalent():
         kerf_mm=6.35,
         output_format="ast",
     )
-    pml_result = nest_and_generate(
-        parts=parts,
-        sheet_width_mm=500,
-        sheet_height_mm=500,
-        sheet_thickness_mm=19,
-        kerf_mm=6.35,
-        output_format="pml",
-    )
 
-    ast_pml = format_pml(ast_result["output"][0])
-    direct_pml = pml_result["output"][0]
+    ast = result["output"][0]
+    pml_text = format_pml_yaml(lift_layout_ast(ast))
 
-    assert ast_pml == direct_pml
+    round_tripped = resolve_layout(parse_pml_yaml(pml_text))
+
+    assert len(round_tripped.items) == len(ast.items)
+    for orig, rt in zip(ast.items, round_tripped.items, strict=True):
+        assert orig.type == rt.type
+        assert orig.feature is not None
+        assert rt.feature is not None
+        assert orig.feature.type == rt.feature.type
+        assert orig.feature.is_through == rt.feature.is_through
 
 
 def run_all_tests():

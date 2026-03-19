@@ -20,9 +20,10 @@ from cli.project import (
 )
 from layout_ast.layout import LayoutAST
 from nesting import nest_and_generate, nest_parts
-from pml.formatter import format_pml
+from pml.lifter import lift_layout_ast
 from pml.nest_parser import nest_job_to_api_params
 from pml.revision_header import format_pml_header
+from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import NestParseError, parse_nest_yaml
 
 
@@ -275,7 +276,7 @@ Output files:
         sheet_name = f"{prefix}_sheet_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml.yml"
 
-        pml_content = format_pml(ast)
+        pml_content = format_pml_yaml(lift_layout_ast(ast))
 
         header = format_pml_header()
         header += f"# {sheet_name}.pml.yml\n"

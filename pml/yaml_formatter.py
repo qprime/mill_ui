@@ -175,6 +175,10 @@ def format_node(node: Any) -> dict[str, Any]:
             if node.height_mm is not None:
                 rr_data["at"]["height"] = dim(node.height_mm)
             return {"RoundedRect": rr_data}
+        elif node.child and isinstance(node.child, Polygon):
+            poly_data = format_polygon_node(node.child)
+            poly_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
+            return {"Polygon": poly_data}
         else:
             result = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             if node.width_mm is not None:
@@ -393,14 +397,7 @@ def format_node(node: Any) -> dict[str, Any]:
         return {"Arch": result}
 
     elif isinstance(node, Polygon):
-        result: dict[str, Any] = {"points": [[dim(p[0]), dim(p[1])] for p in node.points]}
-        if node.feature:
-            result["feature"] = format_feature(node.feature)
-        if node.id:
-            result["id"] = node.id
-        if node.children:
-            result["children"] = [format_node(c) for c in node.children]
-        return {"Polygon": result}
+        return {"Polygon": format_polygon_node(node)}
 
     elif isinstance(node, Triangle):
         result: dict[str, Any] = {"base": dim(node.base_mm), "height": dim(node.height_mm)}
@@ -650,6 +647,17 @@ def format_rounded_rect_node(node: RoundedRect) -> dict[str, Any]:
         result["id"] = node.id
     if node.corners:
         result["corners"] = list(node.corners)
+    if node.feature:
+        result["feature"] = format_feature(node.feature)
+    if node.children:
+        result["children"] = [format_node(c) for c in node.children]
+    return result
+
+
+def format_polygon_node(node: Polygon) -> dict[str, Any]:
+    result: dict[str, Any] = {"points": [[dim(p[0]), dim(p[1])] for p in node.points]}
+    if node.id:
+        result["id"] = node.id
     if node.feature:
         result["feature"] = format_feature(node.feature)
     if node.children:

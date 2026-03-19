@@ -4,8 +4,8 @@
     "hints_ms": 0.03,
     "plan_ms": 0.53,
     "gcode_ms": 0.62,
-    "svg_ms": 0.64,
-    "total_ms": 1.86
+    "svg_ms": 0.66,
+    "total_ms": 1.89
   },
   "constraint_audit": {
     "tabs": {

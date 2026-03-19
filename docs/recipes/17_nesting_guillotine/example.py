@@ -14,8 +14,9 @@ from cam.model.stock import Stock
 from cam.planner.passes import plan_passes
 from cam.post.gcode import write_gcode
 from nesting import nest_and_generate, nest_parts
-from pml.formatter import format_pml
+from pml.lifter import lift_layout_ast
 from pml.nest_parser import nest_job_to_api_params
+from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_nest_yaml
 
 try:
@@ -99,7 +100,7 @@ def main():
         sheet_name = f"sheet_{sheet_idx + 1}"
         pml_path = output_dir / f"{sheet_name}.pml.yml"
 
-        pml_content = format_pml(ast)
+        pml_content = format_pml_yaml(lift_layout_ast(ast))
 
         header = f"# {sheet_name}.pml.yml\n"
         header += "# Generated from cabinet_job.nest.yml\n"

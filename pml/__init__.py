@@ -1,8 +1,6 @@
-from layout_ast.compositional import CompositionalLayoutAST
-from layout_ast.layout import LayoutAST
 from resolution.layout_resolver import resolve_layout
 
-from .formatter import format_pml as format_flat_pml
+from .lifter import lift_layout_ast
 from .yaml_formatter import format_pml_yaml
 from .yaml_parser import PMLParseError, parse_pml_yaml
 
@@ -17,8 +15,11 @@ def parse_pml(text: str):
 
 
 def format_pml(ast) -> str:
+    from layout_ast.compositional import CompositionalLayoutAST
+    from layout_ast.layout import LayoutAST
+
     if isinstance(ast, LayoutAST):
-        return format_flat_pml(ast)
+        return format_pml_yaml(lift_layout_ast(ast))
     elif isinstance(ast, CompositionalLayoutAST):
         return format_pml_yaml(ast)
     else:

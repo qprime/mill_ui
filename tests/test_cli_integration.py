@@ -145,7 +145,7 @@ def test_convert_layout_json_to_pml():
         assert pml_file.exists(), "PML roundtrip file not created"
 
         pml_content = pml_file.read_text()
-        assert "sheet" in pml_content, "PML missing 'sheet' declaration"
+        assert "Sheet" in pml_content, "PML missing 'Sheet' declaration"
         assert "450" in pml_content, "PML missing sheet width"
         assert "650" in pml_content, "PML missing sheet height"
 

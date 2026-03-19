@@ -170,8 +170,8 @@ def test_nest_and_generate_pml():
 
     pml = result["output"][0]
     assert isinstance(pml, str)
-    assert "sheet" in pml
-    assert "rect" in pml
+    assert "Sheet" in pml
+    assert "Rect" in pml
 
     print("  PASSED")
 

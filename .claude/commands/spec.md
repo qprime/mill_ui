@@ -16,6 +16,15 @@ Draft a GitHub issue implementation specification for: $ARGUMENTS
 
 ---
 
+## Title
+
+Start with an action verb. Describe what the change *does*, not what's missing or broken.
+
+- **Good:** "Add holding strategies (onion skin, tabs) to nest jobs"
+- **Bad:** "Nest jobs don't support holding strategies (onion skin, tabs)"
+- **Good:** "Migrate nest CLI output from dead flat format to YAML"
+- **Bad:** "Nest CLI outputs dead indent-based PML format, mill CLI can't consume it"
+
 ## Section Template
 
 ### Summary

@@ -14,6 +14,12 @@ Once a design decision is implemented or explicitly specified, do not reopen, re
 
 ---
 
+## How This Is Actually Used
+
+The primary interface to this system is natural language via Claude Code — not a GUI, not hand-authored PML. The user describes what they want to build in conversation, the AI generates PML, the user reviews SVG blueprints, and they iterate together until the output is ready for the CNC. When a conversation reveals a missing capability, it becomes a GitHub issue that feeds back into development.
+
+The compiler architecture, declarative PML, validation layer, and SVG output all exist to support this LLM-as-interface workflow. See [user_workflow.md](../.claude/projects/-home-squinlan-Code-mill-ui/memory/user_workflow.md) for details.
+
 ## What This Is
 
 CAM system that generates G-code for CNC routers. Converts panel layouts (PML/JSON) through a semantic IR layer (RemovalIntent) to toolpaths.

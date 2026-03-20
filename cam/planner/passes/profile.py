@@ -10,7 +10,6 @@ from cam.model.setup import Setup
 from cam.moves import Move
 from cam.ops.profile import profile_outline
 from cam.path.strategies import (
-    finish_profile_pass,
     onion_skin_rough,
     onion_skin_then_finish,
     profile_outline_with_tabs,
@@ -161,9 +160,13 @@ def onion_skin_finish_moves(
     finish_depth: float,
     spring_pass: bool = False,
 ) -> list[Move]:
-    moves = finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    from cam.path.toolpath import move_comment
+
+    moves: list[Move] = [move_comment("finish_profile_pass")]
+    moves += profile_outline(shape, setup, depth_mm=finish_depth, step_down=finish_depth)
     if spring_pass:
-        moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+        moves.append(move_comment("finish_profile_pass"))
+        moves += profile_outline(shape, setup, depth_mm=finish_depth, step_down=finish_depth)
     return moves
 
 

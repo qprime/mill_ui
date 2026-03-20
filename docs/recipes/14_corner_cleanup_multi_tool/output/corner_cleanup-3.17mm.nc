@@ -764,6 +764,7 @@ G0 Z6.000
 (profile_outline)
 M3 S20000
 G0 X76.588 Y75.000 Z6.000
+(ramp fallback: path too short)
 G1 Z-6.000 F396.0
 F1200.0
 G1 X76.580 Y75.156 F1200.0
@@ -1586,6 +1587,7 @@ G1 X376.587 Y75.000 F1200.0
 G0 Z6.000
 (profile_outline)
 G0 X376.587 Y75.000 Z6.000
+(ramp fallback: path too short)
 G1 Z-6.000 F396.0
 F1200.0
 G1 X376.580 Y75.156 F1200.0
@@ -2408,6 +2410,7 @@ G1 X376.587 Y575.000 F1200.0
 G0 Z6.000
 (profile_outline)
 G0 X376.587 Y575.000 Z6.000
+(ramp fallback: path too short)
 G1 Z-6.000 F396.0
 F1200.0
 G1 X376.580 Y575.156 F1200.0
@@ -3230,6 +3233,7 @@ G1 X76.588 Y575.000 F1200.0
 G0 Z6.000
 (profile_outline)
 G0 X76.588 Y575.000 Z6.000
+(ramp fallback: path too short)
 G1 Z-6.000 F396.0
 F1200.0
 G1 X76.580 Y575.156 F1200.0

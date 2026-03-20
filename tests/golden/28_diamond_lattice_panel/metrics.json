@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "28_diamond_lattice_panel",
-    "created_at": "2026-03-14T20:31:20.237952+00:00"
+    "created_at": "2026-03-20T23:01:56.090324+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 2.08,
+    "extraction_time_ms": 1.74,
     "document": {
       "width_mm": 553.175,
       "height_mm": 543.175,
@@ -854,22 +854,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 35.4706,
+    "extraction_time_ms": 30.5976,
     "summary": {
-      "total_lines": 9398,
-      "comment_lines": 192,
-      "motion_lines": 7376,
+      "total_lines": 9414,
+      "comment_lines": 204,
+      "motion_lines": 7460,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 5564
+      "feed_lines": 5568
     },
     "motion": {
       "g0_count": 3622,
-      "g1_count": 3754,
+      "g1_count": 3838,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 59603.9443,
-      "total_feed_distance_mm": 514552.61199999996
+      "total_rapid_distance_mm": 485386.4757,
+      "total_feed_distance_mm": 84407.2587
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -887,9 +887,10 @@
         -6.0,
         -4.5,
         -3.0,
+        -1.917,
         -1.5
       ],
-      "depth_count": 13,
+      "depth_count": 14,
       "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
@@ -1109,9 +1110,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 715.2473,
-      "feed_time_s": 35426.9008,
-      "total_time_s": 36142.148199999996
+      "rapid_time_s": 5824.6377,
+      "feed_time_s": 5931.2194,
+      "total_time_s": 11755.8572
     },
     "tabs": {
       "detected_count": 0,

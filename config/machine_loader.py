@@ -125,10 +125,13 @@ class MachineDefaults:
     feed_rate_mm_min: float = 1500.0
     plunge_rate_mm_min: float = 500.0
     park_z_mm: float = 100.0
+    ramp_angle_deg: float = 3.0
 
     def __post_init__(self):
         if self.park_z_mm < self.safe_z_mm:
             raise ValueError(f"park_z_mm ({self.park_z_mm}) must be >= safe_z_mm ({self.safe_z_mm})")
+        if self.ramp_angle_deg < 0.0:
+            raise ValueError(f"ramp_angle_deg must be >= 0, got {self.ramp_angle_deg}")
 
 
 @dataclass(frozen=True)
@@ -356,6 +359,7 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
         feed_rate_mm_min=float(defaults_data.get("feed_rate_mm_min", 1500.0)),
         plunge_rate_mm_min=float(defaults_data.get("plunge_rate_mm_min", 500.0)),
         park_z_mm=float(defaults_data.get("park_z_mm", 100.0)),
+        ramp_angle_deg=float(defaults_data.get("ramp_angle_deg", 3.0)),
     )
 
     return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, t_track=t_track, defaults=defaults)

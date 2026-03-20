@@ -16,3 +16,4 @@ defaults:
   safe_z_mm: 5.0
   feed_rate_mm_min: 1500
   plunge_rate_mm_min: 500
+  ramp_angle_deg: 3.0

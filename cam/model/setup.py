@@ -11,3 +11,4 @@ class Setup:
     tool: Tool
     machine: Machine
     safe_z: float = 5.0
+    ramp_angle_deg: float = 3.0

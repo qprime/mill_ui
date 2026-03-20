@@ -96,15 +96,27 @@ def pocket_raster(shape, setup, *, depth_mm: float, stepover_mm: float, stepdown
     _require_native()
     face = _planar_face_dict(shape, depth_mm, setup.safe_z)
     step_down_arg = None if stepdown_mm is None else float(stepdown_mm)
-    return [_dict_to_move(d) for d in _native.plan_pocket(face, setup.tool, float(stepover_mm), step_down_arg)]
+    ramp = float(setup.ramp_angle_deg)
+    return [
+        _dict_to_move(d)
+        for d in _native.plan_pocket(face, setup.tool, float(stepover_mm), step_down_arg, ramp_angle_deg=ramp)
+    ]
 
 
 def profile_outline(shape, setup, *, depth_mm: float, stepdown_mm: float) -> list[Move]:
     _require_native()
     boundary = _poly_from_shape(shape)
+    ramp = float(setup.ramp_angle_deg)
     return [
         _dict_to_move(d)
-        for d in _native.plan_profile(boundary, setup.tool, float(depth_mm), float(stepdown_mm), float(setup.safe_z))
+        for d in _native.plan_profile(
+            boundary,
+            setup.tool,
+            float(depth_mm),
+            float(stepdown_mm),
+            float(setup.safe_z),
+            ramp_angle_deg=ramp,
+        )
     ]
 
 

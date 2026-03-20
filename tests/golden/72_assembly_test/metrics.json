@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "72_assembly_test",
-    "created_at": "2026-03-14T20:31:23.194032+00:00"
+    "created_at": "2026-03-20T23:01:58.598470+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.69,
+    "extraction_time_ms": 1.47,
     "document": {
       "width_mm": 973.175,
       "height_mm": 1255.175,
@@ -1155,22 +1155,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.2221,
+    "extraction_time_ms": 2.6789,
     "summary": {
-      "total_lines": 1862,
+      "total_lines": 1918,
       "comment_lines": 68,
-      "motion_lines": 1707,
+      "motion_lines": 1809,
       "tool_change_lines": 0,
       "spindle_lines": 9,
-      "feed_lines": 1239
+      "feed_lines": 1295
     },
     "motion": {
       "g0_count": 525,
-      "g1_count": 1182,
+      "g1_count": 1284,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 11570.6545,
-      "total_feed_distance_mm": 28265.032000000003
+      "total_rapid_distance_mm": 12883.1329,
+      "total_feed_distance_mm": 28618.6626
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -1178,12 +1178,22 @@
       "unique_cutting_depths": [
         -6.2,
         -6.0,
+        -5.399,
+        -4.814,
         -4.5,
+        -3.899,
+        -3.314,
         -3.0,
-        -1.5
+        -2.399,
+        -1.814,
+        -1.659,
+        -1.5,
+        -0.899,
+        -0.314,
+        -0.159
       ],
-      "depth_count": 5,
-      "max_single_plunge_mm": 12.2
+      "depth_count": 15,
+      "max_single_plunge_mm": 12.0
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -1255,9 +1265,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 138.8478,
-      "feed_time_s": 2359.6675,
-      "total_time_s": 2498.5153
+      "rapid_time_s": 154.5975,
+      "feed_time_s": 2386.2562,
+      "total_time_s": 2540.8539
     },
     "tabs": {
       "detected_count": 0,

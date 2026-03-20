@@ -70,11 +70,13 @@ class PassAccumulator:
         stock: Stock,
         safe_z: float,
         prime_spindle: bool,
+        ramp_angle_deg: float = 3.0,
     ) -> None:
         self._machine = machine
         self._stock = stock
         self._safe_z = float(safe_z)
         self._prime_spindle = prime_spindle
+        self._ramp_angle_deg = float(ramp_angle_deg)
         self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
 
@@ -84,6 +86,7 @@ class PassAccumulator:
             tool=tool.as_model(),
             machine=self._machine,
             safe_z=self._safe_z,
+            ramp_angle_deg=self._ramp_angle_deg,
         )
         filename = _build_filename(operation, tool)
         moves: list[Move] = []
@@ -142,6 +145,7 @@ def plan_passes(
         stock=stock,
         safe_z=safe_z_value,
         prime_spindle=prime_spindle,
+        ramp_angle_deg=float(config.ramp_angle_deg),
     )
 
     plan_pocket_passes(planner_input.pockets, accumulator=accumulator, tool_db=tool_db, config=config)

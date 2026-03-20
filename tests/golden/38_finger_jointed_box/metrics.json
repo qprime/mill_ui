@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "38_finger_jointed_box",
-    "created_at": "2026-03-14T20:31:20.908751+00:00"
+    "created_at": "2026-03-20T23:01:56.658142+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.6,
+    "extraction_time_ms": 1.34,
     "document": {
       "width_mm": 973.175,
       "height_mm": 1255.175,
@@ -1142,22 +1142,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.1337,
+    "extraction_time_ms": 2.6748,
     "summary": {
-      "total_lines": 1821,
+      "total_lines": 1873,
       "comment_lines": 67,
-      "motion_lines": 1672,
+      "motion_lines": 1765,
       "tool_change_lines": 0,
       "spindle_lines": 9,
-      "feed_lines": 1209
+      "feed_lines": 1261
     },
     "motion": {
       "g0_count": 515,
-      "g1_count": 1157,
+      "g1_count": 1250,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 10850.8503,
-      "total_feed_distance_mm": 24890.306
+      "total_rapid_distance_mm": 12163.3367,
+      "total_feed_distance_mm": 25018.430500000002
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -1165,12 +1165,22 @@
       "unique_cutting_depths": [
         -6.2,
         -6.0,
+        -5.399,
+        -4.814,
         -4.5,
+        -3.899,
+        -3.314,
         -3.0,
-        -1.5
+        -2.399,
+        -1.814,
+        -1.659,
+        -1.5,
+        -0.899,
+        -0.314,
+        -0.159
       ],
-      "depth_count": 5,
-      "max_single_plunge_mm": 12.2
+      "depth_count": 15,
+      "max_single_plunge_mm": 12.0
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -1242,9 +1252,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 130.2101,
-      "feed_time_s": 2105.9287,
-      "total_time_s": 2236.1389
+      "rapid_time_s": 145.96,
+      "feed_time_s": 2115.5621,
+      "total_time_s": 2261.5221
     },
     "tabs": {
       "detected_count": 0,

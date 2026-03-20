@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-03-14T20:31:19.918387+00:00"
+    "created_at": "2026-03-20T23:01:55.817138+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.34,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 753.175,
       "height_mm": 943.175,
@@ -317,22 +317,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.2692,
+    "extraction_time_ms": 1.3745,
     "summary": {
-      "total_lines": 586,
+      "total_lines": 621,
       "comment_lines": 28,
-      "motion_lines": 439,
+      "motion_lines": 504,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 338
+      "feed_lines": 373
     },
     "motion": {
       "g0_count": 200,
-      "g1_count": 239,
+      "g1_count": 304,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 40892.6326,
-      "total_feed_distance_mm": 73246.3
+      "total_rapid_distance_mm": 49618.7624,
+      "total_feed_distance_mm": 66121.75510000001
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -348,14 +348,17 @@
         -10.0,
         -9.0,
         -7.5,
+        -7.33,
         -7.0,
         -6.0,
         -4.5,
+        -3.83,
         -3.5,
         -3.0,
-        -1.5
+        -1.5,
+        -0.33
       ],
-      "depth_count": 16,
+      "depth_count": 19,
       "max_single_plunge_mm": 25.2
     },
     "xy_bounds": {
@@ -411,9 +414,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 490.71160000000003,
-      "feed_time_s": 5269.1146,
-      "total_time_s": 5759.8261999999995
+      "rapid_time_s": 595.4251,
+      "feed_time_s": 4780.5743999999995,
+      "total_time_s": 5375.9995
     },
     "tabs": {
       "detected_count": 0,

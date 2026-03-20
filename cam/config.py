@@ -26,6 +26,7 @@ class Config:
     cleanup_offset_mm: float = 0.25
     pocket_finish_perimeter: bool = True
     default_margin_mm: float = 10.0
+    ramp_angle_deg: float = 3.0
 
     def as_dict(self) -> dict[str, Any]:
 
@@ -41,6 +42,7 @@ class Config:
             "cleanup_offset_mm": float(self.cleanup_offset_mm),
             "pocket_finish_perimeter": bool(self.pocket_finish_perimeter),
             "default_margin_mm": float(self.default_margin_mm),
+            "ramp_angle_deg": float(self.ramp_angle_deg),
         }
 
     def with_overrides(self, overrides: Mapping[str, Any]) -> Config:
@@ -118,6 +120,7 @@ _ENV_SUFFIXES = {
     "cleanup_offset_mm": "CLEANUP_OFFSET_MM",
     "pocket_finish_perimeter": "POCKET_FINISH_PERIMETER",
     "default_margin_mm": "DEFAULT_MARGIN",
+    "ramp_angle_deg": "RAMP_ANGLE",
 }
 
 
@@ -199,6 +202,7 @@ _NORMALISERS = {
     "cleanup_offset_mm": _non_negative_float,
     "pocket_finish_perimeter": _normalise_bool,
     "default_margin_mm": _non_negative_float,
+    "ramp_angle_deg": _non_negative_float,
 }
 
 

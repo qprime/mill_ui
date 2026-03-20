@@ -22,25 +22,6 @@ from cam.transforms import Transform2D, place
 from cam.types import Vec2
 
 
-def finish_profile_pass(shape: Shape2D, setup: Setup, depth_mm: float) -> list[Move]:
-    pts = shape.points
-    if not pts:
-        return []
-    target_z = -abs(float(depth_mm))
-    m: list[Move] = []
-    m.append(move_comment("finish_profile_pass"))
-    m.append(move_set_rpm(setup.tool.rpm))
-    m.append(move_set_feed(setup.tool.feed_xy))
-    p0 = pts[0]
-    m.append(move_rapid(x=p0.x, y=p0.y, z=setup.safe_z))
-    m.append(move_cut(z=target_z, feed=setup.tool.feed_z))
-    m.append(move_set_feed(setup.tool.feed_xy))
-    for p in pts[1:]:
-        m.append(move_cut(x=p.x, y=p.y))
-    m.append(move_retract(setup.safe_z))
-    return m
-
-
 def onion_skin_then_finish(
     shape: Shape2D,
     setup: Setup,
@@ -60,9 +41,11 @@ def onion_skin_then_finish(
         cut_through_mm=cut_through_mm,
     )
     moves = list(rough_moves)
-    moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+    moves.append(move_comment("finish_profile_pass"))
+    moves += profile_outline(shape, setup, depth_mm=finish_depth, step_down=finish_depth)
     if spring_pass:
-        moves += finish_profile_pass(shape, setup, depth_mm=finish_depth)
+        moves.append(move_comment("finish_profile_pass"))
+        moves += profile_outline(shape, setup, depth_mm=finish_depth, step_down=finish_depth)
     return moves
 
 
@@ -98,6 +81,54 @@ def _segment_length(a: Vec2, b: Vec2) -> float:
 
 def _lerp_vec(a: Vec2, b: Vec2, t: float) -> Vec2:
     return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
+
+
+def _ramp_entry_moves(
+    pts: list[Vec2], target_z: float, prev_z: float, ramp_angle_deg: float, setup: Setup
+) -> list[Move]:
+    start = pts[0]
+    step_down = abs(target_z - prev_z)
+    if ramp_angle_deg <= 0 or step_down < 1e-9 or len(pts) < 2:
+        return [
+            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
+            move_cut(z=target_z, feed=setup.tool.feed_z),
+        ]
+    ramp_dist = step_down / math.tan(math.radians(ramp_angle_deg))
+    closed = len(pts) >= 2 and abs(pts[0].x - pts[-1].x) < 1e-9 and abs(pts[0].y - pts[-1].y) < 1e-9
+    if not closed:
+        return [
+            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
+            move_cut(z=target_z, feed=setup.tool.feed_z),
+        ]
+    rev_pts = list(reversed(pts))
+    avail = sum(_segment_length(rev_pts[i], rev_pts[i + 1]) for i in range(len(rev_pts) - 1))
+    if avail < ramp_dist - 1e-9:
+        return [
+            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
+            move_cut(z=target_z, feed=setup.tool.feed_z),
+        ]
+    ramp_start = rev_pts[0]
+    moves: list[Move] = [
+        move_rapid(x=ramp_start.x, y=ramp_start.y, z=setup.safe_z),
+        move_cut(x=ramp_start.x, y=ramp_start.y, z=prev_z, feed=setup.tool.feed_xy),
+    ]
+    remaining = ramp_dist
+    z = prev_z
+    for i in range(len(rev_pts) - 1):
+        sl = _segment_length(rev_pts[i], rev_pts[i + 1])
+        if sl < 1e-9:
+            continue
+        use = min(sl, remaining)
+        frac = use / sl
+        pt = _lerp_vec(rev_pts[i], rev_pts[i + 1], frac)
+        dz = step_down * (use / ramp_dist)
+        z -= dz
+        moves.append(move_cut(x=pt.x, y=pt.y, z=z, feed=setup.tool.feed_xy))
+        remaining -= use
+        if remaining < 1e-9:
+            break
+    moves.append(move_cut(x=start.x, y=start.y, z=target_z, feed=setup.tool.feed_xy))
+    return moves
 
 
 def _tab_windows(perimeter: float, count: int, width: float) -> list[tuple[float, float]]:
@@ -165,10 +196,11 @@ def profile_outline_with_tabs(
     tab_height = max(0.0, float(tab_height_mm))
     tab_z = min(0.0, target + tab_height)
 
+    ramp_angle = float(setup.ramp_angle_deg)
+
     while z > target + 1e-9:
         z_next = max(target, z - sd)
-        moves.append(move_rapid(x=start_point.x, y=start_point.y, z=setup.safe_z))
-        moves.append(move_cut(z=z_next, feed=setup.tool.feed_z))
+        moves += _ramp_entry_moves(pts, z_next, z, ramp_angle, setup)
         moves.append(move_set_feed(setup.tool.feed_xy))
 
         tab_active = tab_windows and z_next < tab_z + 1e-9

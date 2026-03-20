@@ -39,13 +39,13 @@ std::vector<Polygon> offset_outset(const Polygon& poly, double radius_mm) {
 }
 
 Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
-                  double safe_z_mm) {
-  return algo::plan_pocket(face, tool, step_over_mm, step_down_mm, safe_z_mm);
+                  double safe_z_mm, double ramp_angle_deg) {
+  return algo::plan_pocket(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm, double step_down_mm,
-                   double safe_z_mm) {
-  return algo::plan_profile(boundary, tool, total_depth_mm, step_down_mm, safe_z_mm);
+                   double safe_z_mm, double ramp_angle_deg) {
+  return algo::plan_profile(boundary, tool, total_depth_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
 }
 
 Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_mm, double safe_z_mm) {

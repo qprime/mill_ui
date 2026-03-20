@@ -1,5 +1,6 @@
 #include "millui/native/algo/plan_2d.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <optional>
@@ -90,10 +91,70 @@ Bounds bounds_of(const Polygon& poly) {
   return b;
 }
 
+double seg_length(const Vec2& a, const Vec2& b) {
+  return std::hypot(b.x - a.x, b.y - a.y);
+}
+
+void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
+                         double prev_z, double target_z,
+                         double ramp_angle_deg, double safe_z,
+                         double feed_xy, double feed_z) {
+  if (path_len == 0) return;
+
+  double step_down = std::abs(target_z - prev_z);
+  double ramp_dist = 0.0;
+  if (ramp_angle_deg > kEps && step_down > kEps) {
+    ramp_dist = step_down / std::tan(ramp_angle_deg * M_PI / 180.0);
+  }
+
+  const Vec2& end_point = path[path_len - 1];
+
+  if (ramp_dist < kEps || path_len < 2) {
+    moves.push_back(make_rapid(end_point.x, end_point.y, safe_z));
+    moves.push_back(make_cut(std::nullopt, std::nullopt, target_z, feed_z));
+    return;
+  }
+
+  double avail = 0.0;
+  for (size_t i = 0; i + 1 < path_len; ++i) {
+    avail += seg_length(path[i], path[i + 1]);
+  }
+
+  if (avail < ramp_dist - kEps) {
+    moves.push_back(make_rapid(end_point.x, end_point.y, safe_z));
+    moves.push_back(make_comment("ramp fallback: path too short"));
+    moves.push_back(make_cut(std::nullopt, std::nullopt, target_z, feed_z));
+    return;
+  }
+
+  const Vec2& ramp_start = path[0];
+  moves.push_back(make_rapid(ramp_start.x, ramp_start.y, safe_z));
+  if (std::abs(prev_z) > kEps) {
+    moves.push_back(make_cut(ramp_start.x, ramp_start.y, prev_z, feed_z));
+  }
+
+  double remaining = ramp_dist;
+  double z = prev_z;
+  for (size_t i = 0; i + 1 < path_len && remaining > kEps; ++i) {
+    double sl = seg_length(path[i], path[i + 1]);
+    if (sl < kEps) continue;
+    double use = std::min(sl, remaining);
+    double frac = use / sl;
+    double nx = path[i].x + (path[i + 1].x - path[i].x) * frac;
+    double ny = path[i].y + (path[i + 1].y - path[i].y) * frac;
+    double dz = step_down * (use / ramp_dist);
+    z -= dz;
+    moves.push_back(make_cut(nx, ny, z, feed_xy));
+    remaining -= use;
+  }
+
+  moves.push_back(make_cut(end_point.x, end_point.y, target_z, feed_xy));
+}
+
 }  // namespace
 
 Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
-                  double safe_z_mm) {
+                  double safe_z_mm, double ramp_angle_deg) {
   const Bounds b = bounds_of(face.outer);
   const double safe_z = safe_z_mm;
   const double depth = -std::abs(face.depth);
@@ -124,16 +185,18 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
   }
 
   int direction = 1;
+  double prev_z = 0.0;
   for (double layer_z : z_levels) {
     double y = b.miny;
     while (y <= b.maxy + kEps) {
       double x_start = direction == 1 ? b.minx : b.maxx;
       double x_end = direction == 1 ? b.maxx : b.minx;
-      moves.push_back(make_rapid(x_start, y, safe_z));
-      moves.push_back(make_cut(std::nullopt, std::nullopt, layer_z, tool.feed_z));
+      Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
+      emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z, ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
       moves.push_back(make_set_feed(tool.feed_xy));
       moves.push_back(make_cut(x_end, y, std::nullopt));
       moves.push_back(make_retract(safe_z));
+      prev_z = layer_z;
       y += step_over;
       direction *= -1;
     }
@@ -143,7 +206,7 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm, double step_down_mm,
-                   double safe_z) {
+                   double safe_z, double ramp_angle_deg) {
   const double depth_target = -std::abs(total_depth_mm);
 
   Paths paths(1);
@@ -154,21 +217,42 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
   moves.push_back(make_set_feed(tool.feed_xy));
 
   const double step_down = step_down_mm <= 0.0 ? 2.0 : step_down_mm;
+
+  bool closed = boundary.size() >= 2 &&
+                std::abs(boundary.front().x - boundary.back().x) < kEps &&
+                std::abs(boundary.front().y - boundary.back().y) < kEps;
+  double use_ramp = (ramp_angle_deg > kEps && closed) ? ramp_angle_deg : 0.0;
+
   double z = 0.0;
+  double prev_z = 0.0;
   while (z > depth_target) {
     z = std::max(z - step_down, depth_target);
     if (boundary.empty()) {
       break;
     }
-    const Vec2& start = boundary.front();
-    moves.push_back(make_rapid(start.x, start.y, safe_z));
-    moves.push_back(make_cut(std::nullopt, std::nullopt, z, tool.feed_z));
+
+    if (use_ramp > kEps) {
+      std::vector<Vec2> rev_path;
+      rev_path.reserve(boundary.size());
+      for (std::size_t i = boundary.size() - 1; i >= 1; --i) {
+        rev_path.push_back(boundary[i]);
+      }
+      rev_path.push_back(boundary[0]);
+      emit_ramp_or_plunge(moves, rev_path.data(), rev_path.size(),
+                          prev_z, z, use_ramp, safe_z, tool.feed_xy, tool.feed_z);
+    } else {
+      const Vec2& start = boundary.front();
+      moves.push_back(make_rapid(start.x, start.y, safe_z));
+      moves.push_back(make_cut(std::nullopt, std::nullopt, z, tool.feed_z));
+    }
+
     moves.push_back(make_set_feed(tool.feed_xy));
     for (std::size_t i = 1; i < boundary.size(); ++i) {
       const Vec2& p = boundary[i];
       moves.push_back(make_cut(p.x, p.y, std::nullopt));
     }
     moves.push_back(make_retract(safe_z));
+    prev_z = z;
   }
 
   return paths;

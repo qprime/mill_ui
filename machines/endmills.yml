@@ -128,5 +128,5 @@ endmills:
     diameter_mm: 25.4
     flute_length_mm: 10.2
     shank_diameter_mm: 6.35
-    flutes: 1
+    flutes: 4
     type: straight

@@ -159,41 +159,6 @@ class LayoutResolver:
         self._validate = validate
         self._beam_structures: list[dict] = []
 
-    def _assert_shape_context(
-        self,
-        parent_type: str,
-        child_item: Item,
-        context_desc: str,
-    ) -> None:
-        if not self._validate:
-            return
-
-        if child_item.feature and child_item.feature.type == "profile" and child_item.type != parent_type:
-            raise ResolutionAssertionError(
-                f"Shape context mismatch in {context_desc}: "
-                f"parent is {parent_type} but profile item is {child_item.type}"
-            )
-
-    def _assert_geometry_preserved(
-        self,
-        parent_geometry: dict[str, Any],
-        child_geometry: dict[str, Any],
-        keys: list[str],
-        context_desc: str,
-    ) -> None:
-        if not self._validate:
-            return
-
-        for key in keys:
-            if key in parent_geometry:
-                parent_val = parent_geometry[key]
-                child_val = child_geometry.get(key)
-                if child_val != parent_val:
-                    raise ResolutionAssertionError(
-                        f"Geometry mismatch in {context_desc}: "
-                        f"{key} was {parent_val} in parent but {child_val} in child"
-                    )
-
     def _next_shape_id(self, prefix: str) -> str:
         shape_id = f"{prefix}_{self._shape_counter}"
         self._shape_counter += 1
@@ -257,8 +222,9 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         inset_region = region.inset(node.amount_mm)
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for child in node.children:
-            self._resolve_node(child, inset_region, items, params)
+            self._resolve_node(child, inset_region, items, child_params)
 
     def _handle_frame(
         self,
@@ -268,8 +234,9 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         inner_region = region.inset(node.width_mm)
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for child in node.children:
-            self._resolve_node(child, inner_region, items, params)
+            self._resolve_node(child, inner_region, items, child_params)
 
     def _handle_grid(
         self,
@@ -285,12 +252,13 @@ class LayoutResolver:
         if not cell_content:
             cell_content = [Cell(children=node.children)]
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for cell_region in cells:
             for cell_node in cell_content:
                 content_region = cell_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else cell_region
 
                 for child in cell_node.children:
-                    self._resolve_node(child, content_region, items, params)
+                    self._resolve_node(child, content_region, items, child_params)
 
     def _handle_split(
         self,
@@ -306,12 +274,13 @@ class LayoutResolver:
         if not cell_content:
             cell_content = [Cell(children=node.children)]
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for pane_region in panes:
             for cell_node in cell_content:
                 content_region = pane_region.inset(cell_node.inset_mm) if cell_node.inset_mm > 0 else pane_region
 
                 for child in cell_node.children:
-                    self._resolve_node(child, content_region, items, params)
+                    self._resolve_node(child, content_region, items, child_params)
 
     def _handle_cell(
         self,
@@ -346,15 +315,16 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         if isinstance(node.layout, Grid):
             cells = region.subdivide_grid(node.layout.rows, node.layout.cols, node.layout.gap_mm)
 
             for idx, child in enumerate(node.children):
                 if idx < len(cells):
-                    self._resolve_node(child, cells[idx], items, params)
+                    self._resolve_node(child, cells[idx], items, child_params)
         else:
             for child in node.children:
-                self._resolve_node(child, region, items, params)
+                self._resolve_node(child, region, items, child_params)
 
     def _handle_rect(
         self,
@@ -389,7 +359,8 @@ class LayoutResolver:
         )
         items.append(rect_item)
 
-        child_params = {**params}
+        domain = Domain.from_rectangle(region.width, region.height, center=region.center)
+        child_params = {**params, "domain": domain, "domain_center": region.center}
         if edge_treatment:
             child_params["edge_treatment"] = edge_treatment
 
@@ -433,9 +404,18 @@ class LayoutResolver:
         )
         items.append(circle_item)
 
+        if node.diameter_mm is not None:
+            circle_diameter = node.diameter_mm
+        elif node.radius_mm is not None:
+            circle_diameter = node.radius_mm * 2
+        else:
+            circle_diameter = min(region.width, region.height)
+        domain = Domain.from_circle(circle_diameter, center=region.center)
+        child_params = {**params, "domain": domain, "domain_center": region.center}
+
         for child in node.children:
             if not isinstance(child, (Keepout, Edge)):
-                self._resolve_node(child, region, items, params)
+                self._resolve_node(child, region, items, child_params)
 
     def _handle_rounded_rect(
         self,
@@ -483,21 +463,17 @@ class LayoutResolver:
         )
         items.append(rounded_rect_item)
 
-        items_before = len(items)
-        child_params = {**params, "shape_context": {"type": "RoundedRect", "geometry_data": geometry_data}}
+        domain = Domain.from_rounded_rect(
+            region.width,
+            region.height,
+            node.radius_mm,
+            center=region.center,
+            corners=tuple(node.corners) if node.corners else None,
+        )
+        child_params = {**params, "domain": domain, "domain_center": region.center}
         for child in node.children:
             if not isinstance(child, (Keepout, Edge)):
                 self._resolve_node(child, region, items, child_params)
-
-        for child_item in items[items_before:]:
-            self._assert_shape_context("RoundedRect", child_item, f"RoundedRect({node.id})")
-            if child_item.type == "RoundedRect" and child_item.feature and child_item.geometry:
-                self._assert_geometry_preserved(
-                    geometry_data,
-                    child_item.geometry.data,
-                    ["radius_tl_mm", "radius_tr_mm", "radius_bl_mm", "radius_br_mm"],
-                    f"RoundedRect({node.id}) -> {child_item.feature.type}",
-                )
 
     def _handle_line(
         self,
@@ -634,28 +610,36 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        shape_context = params.get("shape_context")
-        if shape_context:
-            shape_type = shape_context["type"]
-            geometry_data = {**shape_context["geometry_data"]}
-            geometry_data["w_mm"] = region.width
-            geometry_data["h_mm"] = region.height
+        domain = params.get("domain")
+        if domain:
+            cx, cy = params["domain_center"]
+            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in domain.outer_boundary]
+            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in domain.inner_boundaries]
+            geometry_data: dict[str, Any] = {"points": relative_points, "holes": holes}
+            edge_treatment = params.get("edge_treatment")
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
+            profile_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data=geometry_data),
+                placement=Placement(center_xy_mm=(cx, cy)),
+                feature=_feature_from_profile_gen(node),
+                shape_id=self._next_shape_id("generated_profile"),
+            )
         else:
-            shape_type = "Rect"
             geometry_data = {"w_mm": region.width, "h_mm": region.height}
-
-        edge_treatment = params.get("edge_treatment")
-        if edge_treatment:
-            geometry_data["edge_treatment"] = edge_treatment
-
-        profile_item = Item(
-            kind="shape",
-            type=shape_type,
-            geometry=Geometry(data=geometry_data),
-            placement=Placement(center_xy_mm=region.center),
-            feature=_feature_from_profile_gen(node),
-            shape_id=self._next_shape_id("generated_profile"),
-        )
+            edge_treatment = params.get("edge_treatment")
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
+            profile_item = Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(data=geometry_data),
+                placement=Placement(center_xy_mm=region.center),
+                feature=_feature_from_profile_gen(node),
+                shape_id=self._next_shape_id("generated_profile"),
+            )
         items.append(profile_item)
 
     def _handle_pocket_gen(
@@ -665,24 +649,44 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        geometry_data = {"w_mm": region.width, "h_mm": region.height}
-
-        edge_treatment = params.get("edge_treatment")
-        if edge_treatment:
-            geometry_data["edge_treatment"] = edge_treatment
-
-        pocket_item = Item(
-            kind="shape",
-            type="Rect",
-            geometry=Geometry(data=geometry_data),
-            placement=Placement(center_xy_mm=region.center),
-            feature=Feature(
-                type="pocket",
-                depth_mm=node.depth_mm,
-                feeds_override=node.feeds_override,
-            ),
-            shape_id=self._next_shape_id("generated_pocket"),
-        )
+        domain = params.get("domain")
+        if domain:
+            cx, cy = params["domain_center"]
+            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in domain.outer_boundary]
+            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in domain.inner_boundaries]
+            geometry_data: dict[str, Any] = {"points": relative_points, "holes": holes}
+            edge_treatment = params.get("edge_treatment")
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
+            pocket_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data=geometry_data),
+                placement=Placement(center_xy_mm=(cx, cy)),
+                feature=Feature(
+                    type="pocket",
+                    depth_mm=node.depth_mm,
+                    feeds_override=node.feeds_override,
+                ),
+                shape_id=self._next_shape_id("generated_pocket"),
+            )
+        else:
+            geometry_data = {"w_mm": region.width, "h_mm": region.height}
+            edge_treatment = params.get("edge_treatment")
+            if edge_treatment:
+                geometry_data["edge_treatment"] = edge_treatment
+            pocket_item = Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(data=geometry_data),
+                placement=Placement(center_xy_mm=region.center),
+                feature=Feature(
+                    type="pocket",
+                    depth_mm=node.depth_mm,
+                    feeds_override=node.feeds_override,
+                ),
+                shape_id=self._next_shape_id("generated_pocket"),
+            )
         items.append(pocket_item)
 
     def _handle_raised_panel_gen(
@@ -692,12 +696,13 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = params.get("domain")
+        if not domain:
+            domain = Domain.from_rectangle(
+                width_mm=region.width,
+                height_mm=region.height,
+                center=region.center,
+            )
 
         generator_params = RaisedPanelParams(
             border_width_mm=node.border_width_mm,
@@ -728,24 +733,43 @@ class LayoutResolver:
 
         chamfer_angle = math.degrees(math.atan2(node.depth_mm, node.width_mm))
 
-        chamfer_item = Item(
-            kind="shape",
-            type="Rect",
-            geometry=Geometry(
-                data={
-                    "w_mm": region.width,
-                    "h_mm": region.height,
-                }
-            ),
-            placement=Placement(center_xy_mm=region.center),
-            feature=Feature(
-                type="chamfer",
-                depth_mm=node.depth_mm,
-                chamfer_width_mm=node.width_mm,
-                chamfer_angle_deg=chamfer_angle,
-            ),
-            shape_id=self._next_shape_id("generated_chamfer"),
-        )
+        domain = params.get("domain")
+        if domain:
+            cx, cy = params["domain_center"]
+            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in domain.outer_boundary]
+            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in domain.inner_boundaries]
+            chamfer_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": relative_points, "holes": holes}),
+                placement=Placement(center_xy_mm=(cx, cy)),
+                feature=Feature(
+                    type="chamfer",
+                    depth_mm=node.depth_mm,
+                    chamfer_width_mm=node.width_mm,
+                    chamfer_angle_deg=chamfer_angle,
+                ),
+                shape_id=self._next_shape_id("generated_chamfer"),
+            )
+        else:
+            chamfer_item = Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(
+                    data={
+                        "w_mm": region.width,
+                        "h_mm": region.height,
+                    }
+                ),
+                placement=Placement(center_xy_mm=region.center),
+                feature=Feature(
+                    type="chamfer",
+                    depth_mm=node.depth_mm,
+                    chamfer_width_mm=node.width_mm,
+                    chamfer_angle_deg=chamfer_angle,
+                ),
+                shape_id=self._next_shape_id("generated_chamfer"),
+            )
         items.append(chamfer_item)
 
     def _handle_roundover_gen(
@@ -755,23 +779,41 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        roundover_item = Item(
-            kind="shape",
-            type="Rect",
-            geometry=Geometry(
-                data={
-                    "w_mm": region.width,
-                    "h_mm": region.height,
-                }
-            ),
-            placement=Placement(center_xy_mm=region.center),
-            feature=Feature(
-                type="roundover",
-                depth_mm=node.radius_mm,
-                roundover_radius_mm=node.radius_mm,
-            ),
-            shape_id=self._next_shape_id("generated_roundover"),
-        )
+        domain = params.get("domain")
+        if domain:
+            cx, cy = params["domain_center"]
+            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in domain.outer_boundary]
+            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in domain.inner_boundaries]
+            roundover_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": relative_points, "holes": holes}),
+                placement=Placement(center_xy_mm=(cx, cy)),
+                feature=Feature(
+                    type="roundover",
+                    depth_mm=node.radius_mm,
+                    roundover_radius_mm=node.radius_mm,
+                ),
+                shape_id=self._next_shape_id("generated_roundover"),
+            )
+        else:
+            roundover_item = Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(
+                    data={
+                        "w_mm": region.width,
+                        "h_mm": region.height,
+                    }
+                ),
+                placement=Placement(center_xy_mm=region.center),
+                feature=Feature(
+                    type="roundover",
+                    depth_mm=node.radius_mm,
+                    roundover_radius_mm=node.radius_mm,
+                ),
+                shape_id=self._next_shape_id("generated_roundover"),
+            )
         items.append(roundover_item)
 
     def _handle_x_panel_gen(
@@ -1161,6 +1203,7 @@ class LayoutResolver:
             )
         cell_height = available_height / n
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         num_children = len(node.children)
         for i in range(n):
             y_min = region.y_min + i * (cell_height + gap_mm)
@@ -1173,10 +1216,10 @@ class LayoutResolver:
             )
 
             if num_children == n:
-                self._resolve_node(node.children[i], cell_region, items, params)
+                self._resolve_node(node.children[i], cell_region, items, child_params)
             else:
                 for child in node.children:
-                    self._resolve_node(child, cell_region, items, params)
+                    self._resolve_node(child, cell_region, items, child_params)
 
     def _handle_split_vertical(
         self,
@@ -1201,6 +1244,7 @@ class LayoutResolver:
             )
         cell_width = available_width / n
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         num_children = len(node.children)
         for i in range(n):
             x_min = region.x_min + i * (cell_width + gap_mm)
@@ -1213,10 +1257,10 @@ class LayoutResolver:
             )
 
             if num_children == n:
-                self._resolve_node(node.children[i], cell_region, items, params)
+                self._resolve_node(node.children[i], cell_region, items, child_params)
             else:
                 for child in node.children:
-                    self._resolve_node(child, cell_region, items, params)
+                    self._resolve_node(child, cell_region, items, child_params)
 
     def _handle_split_grid(
         self,
@@ -1255,6 +1299,7 @@ class LayoutResolver:
         cell_width = available_width / cols
         cell_height = available_height / rows
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for row in range(rows):
             for col in range(cols):
                 x_min = region.x_min + col * (cell_width + gap_mm)
@@ -1267,7 +1312,7 @@ class LayoutResolver:
                 )
 
                 for child in node.children:
-                    self._resolve_node(child, cell_region, items, params)
+                    self._resolve_node(child, cell_region, items, child_params)
 
     def _handle_split_horizontal_gaps(
         self,
@@ -1294,6 +1339,7 @@ class LayoutResolver:
         remaining_height = region.height - total_gap_space
         slat_height = remaining_height / (n + 1)
 
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         for i in range(n):
             gap_y_min = region.y_min + (i + 1) * slat_height + i * gap_mm
             gap_y_max = gap_y_min + gap_mm
@@ -1306,7 +1352,7 @@ class LayoutResolver:
             )
 
             for child in node.children:
-                self._resolve_node(child, gap_region, items, params)
+                self._resolve_node(child, gap_region, items, child_params)
 
     def _handle_at_position(
         self,
@@ -1328,7 +1374,8 @@ class LayoutResolver:
             y_max=node.y_mm + height / 2,
         )
 
-        self._resolve_node(node.child, child_region, items, params)
+        child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
+        self._resolve_node(node.child, child_region, items, child_params)
 
     def _handle_subtract(
         self,
@@ -1352,58 +1399,13 @@ class LayoutResolver:
                 y_max=ring_bounds.y_max,
             )
 
-            cx, cy = ring_region.center
-            polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in ring_domain.outer_boundary]
-            holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in ring_domain.inner_boundaries]
-
+            child_params = {
+                **params,
+                "domain": ring_domain,
+                "domain_center": ring_region.center,
+            }
             for child in node.children:
-                if isinstance(child, PocketGen):
-                    pocket_item = Item(
-                        kind="shape",
-                        type="Polygon",
-                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
-                        placement=Placement(center_xy_mm=(cx, cy)),
-                        feature=Feature(
-                            type="pocket",
-                            depth_mm=child.depth_mm,
-                        ),
-                        shape_id=self._next_shape_id("subtract_pocket"),
-                    )
-                    items.append(pocket_item)
-                elif isinstance(child, ChamferGen):
-                    import math
-
-                    chamfer_angle = math.degrees(math.atan2(child.depth_mm, child.width_mm))
-                    chamfer_item = Item(
-                        kind="shape",
-                        type="Polygon",
-                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
-                        placement=Placement(center_xy_mm=(cx, cy)),
-                        feature=Feature(
-                            type="chamfer",
-                            depth_mm=child.depth_mm,
-                            chamfer_width_mm=child.width_mm,
-                            chamfer_angle_deg=chamfer_angle,
-                        ),
-                        shape_id=self._next_shape_id("subtract_chamfer"),
-                    )
-                    items.append(chamfer_item)
-                elif isinstance(child, RoundoverGen):
-                    roundover_item = Item(
-                        kind="shape",
-                        type="Polygon",
-                        geometry=Geometry(data={"points": polygon_points, "holes": holes}),
-                        placement=Placement(center_xy_mm=(cx, cy)),
-                        feature=Feature(
-                            type="roundover",
-                            depth_mm=child.radius_mm,
-                            roundover_radius_mm=child.radius_mm,
-                        ),
-                        shape_id=self._next_shape_id("subtract_roundover"),
-                    )
-                    items.append(roundover_item)
-                else:
-                    self._resolve_node(child, ring_region, items, params)
+                self._resolve_node(child, ring_region, items, child_params)
 
     def _handle_arch(
         self,
@@ -1436,18 +1438,9 @@ class LayoutResolver:
             )
             items.append(arch_item)
 
+        child_params = {**params, "domain": arch_domain, "domain_center": arch_region.center}
         for child in node.children:
-            if isinstance(child, ProfileGen):
-                profile_item = Item(
-                    kind="shape",
-                    type="Polygon",
-                    geometry=Geometry(data={"points": relative_points, "holes": []}),
-                    placement=Placement(center_xy_mm=arch_region.center),
-                    feature=_feature_from_profile_gen(child),
-                    shape_id=self._next_shape_id("arch_profile"),
-                )
-                items.append(profile_item)
-            elif isinstance(child, Frame):
+            if isinstance(child, Frame):
                 inset_domain = arch_domain.inset(child.width_mm).domains[0]
                 inset_bounds = inset_domain.bounds
                 inset_region = ResolvedRegion(
@@ -1478,9 +1471,10 @@ class LayoutResolver:
                         except ValueError:
                             pass
                     else:
-                        self._resolve_node(frame_child, inset_region, items, params)
+                        stripped = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
+                        self._resolve_node(frame_child, inset_region, items, stripped)
             else:
-                self._resolve_node(child, arch_region, items, params)
+                self._resolve_node(child, arch_region, items, child_params)
 
     def _handle_polygon(
         self,
@@ -1517,32 +1511,10 @@ class LayoutResolver:
             y_max=max(ys),
         )
 
+        domain = Domain.from_polygon(abs_points)
+        child_params = {**params, "domain": domain, "domain_center": bounds_center}
         for child in node.children:
-            if isinstance(child, ProfileGen):
-                profile_item = Item(
-                    kind="shape",
-                    type="Polygon",
-                    geometry=Geometry(data={"points": relative_points, "holes": []}),
-                    placement=Placement(center_xy_mm=bounds_center),
-                    feature=_feature_from_profile_gen(child),
-                    shape_id=self._next_shape_id("polygon_profile"),
-                )
-                items.append(profile_item)
-            elif isinstance(child, PocketGen):
-                pocket_item = Item(
-                    kind="shape",
-                    type="Polygon",
-                    geometry=Geometry(data={"points": relative_points, "holes": []}),
-                    placement=Placement(center_xy_mm=bounds_center),
-                    feature=Feature(
-                        type="pocket",
-                        depth_mm=child.depth_mm,
-                    ),
-                    shape_id=self._next_shape_id("polygon_pocket"),
-                )
-                items.append(pocket_item)
-            else:
-                self._resolve_node(child, polygon_region, items, params)
+            self._resolve_node(child, polygon_region, items, child_params)
 
     def _handle_triangle(
         self,
@@ -1582,32 +1554,11 @@ class LayoutResolver:
             y_max=cy + half_height,
         )
 
+        abs_points = [(cx + rx, cy + ry) for rx, ry in relative_points]
+        domain = Domain.from_polygon(abs_points)
+        child_params = {**params, "domain": domain, "domain_center": triangle_center}
         for child in node.children:
-            if isinstance(child, ProfileGen):
-                profile_item = Item(
-                    kind="shape",
-                    type="Polygon",
-                    geometry=Geometry(data={"points": relative_points, "holes": []}),
-                    placement=Placement(center_xy_mm=triangle_center),
-                    feature=_feature_from_profile_gen(child),
-                    shape_id=self._next_shape_id("triangle_profile"),
-                )
-                items.append(profile_item)
-            elif isinstance(child, PocketGen):
-                pocket_item = Item(
-                    kind="shape",
-                    type="Polygon",
-                    geometry=Geometry(data={"points": relative_points, "holes": []}),
-                    placement=Placement(center_xy_mm=triangle_center),
-                    feature=Feature(
-                        type="pocket",
-                        depth_mm=child.depth_mm,
-                    ),
-                    shape_id=self._next_shape_id("triangle_pocket"),
-                )
-                items.append(pocket_item)
-            else:
-                self._resolve_node(child, triangle_region, items, params)
+            self._resolve_node(child, triangle_region, items, child_params)
 
     def _build_joinery_from_config(
         self,

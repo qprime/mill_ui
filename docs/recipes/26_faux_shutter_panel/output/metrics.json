@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.17,
-    "hints_ms": 0.08,
-    "plan_ms": 1.91,
-    "gcode_ms": 2.08,
-    "svg_ms": 0.41,
-    "total_ms": 4.65
+    "ir_ms": 0.21,
+    "hints_ms": 0.11,
+    "plan_ms": 2.16,
+    "gcode_ms": 2.09,
+    "svg_ms": 0.64,
+    "total_ms": 5.2
   },
   "constraint_audit": {
     "edge_feature": {
@@ -15,10 +15,10 @@
     }
   },
   "complexity": {
-    "total_moves": 824,
-    "rapid_moves": 88,
-    "cut_moves": 452,
-    "rapid_ratio": 0.107
+    "total_moves": 648,
+    "rapid_moves": 37,
+    "cut_moves": 426,
+    "rapid_ratio": 0.057
   },
   "fidelity": {
     "tool_changes": 3,
@@ -36,13 +36,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 272
+        "move_count": 96
       }
     ]
   },
   "output_size": {
-    "total_bytes": 18314,
-    "total_lines": 768,
+    "total_bytes": 15958,
+    "total_lines": 584,
     "files": {
       "pocket-9.53mm": {
         "bytes": 7543,
@@ -53,8 +53,8 @@
         "lines": 220
       },
       "profile-3.17mm": {
-        "bytes": 4893,
-        "lines": 280
+        "bytes": 2537,
+        "lines": 96
       }
     }
   }

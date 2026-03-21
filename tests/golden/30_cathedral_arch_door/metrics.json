@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "30_cathedral_arch_door",
-    "created_at": "2026-03-21T18:17:48.653454+00:00"
+    "created_at": "2026-03-21T20:14:15.107739+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.43,
+    "extraction_time_ms": 0.42,
     "document": {
       "width_mm": 653.175,
-      "height_mm": 979.175,
+      "height_mm": 955.175,
       "viewbox": [
         -11.588,
         -51.587,
         653.175,
-        979.175
+        955.175
       ]
     },
     "layers": {
@@ -50,13 +50,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 8,
+          "element_count": 6,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 8,
+          "text_count": 6,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -190,7 +190,7 @@
       "y_max": 800.0
     },
     "text_elements": {
-      "count": 22,
+      "count": 20,
       "dimension_labels": [
         "330.0mm",
         "463.3mm",
@@ -211,9 +211,7 @@
         "Features: 1 profile, 1 bevel, 1 pocket",
         "Depths:",
         "\u2022 bevel: 6.0mm",
-        "\u2022 pocket: 2.0mm",
-        "Parts (1):",
-        "\u2022 arch_profile_0"
+        "\u2022 pocket: 2.0mm"
       ]
     },
     "circles": {
@@ -236,7 +234,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.4595,
+    "extraction_time_ms": 1.3878,
     "summary": {
       "total_lines": 2364,
       "comment_lines": 10,

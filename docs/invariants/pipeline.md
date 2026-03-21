@@ -16,6 +16,7 @@
 | PL-6 | STRUCTURAL | LAYOUT_TOPDOWN | Layout managers subdivide regions top-down |
 | PL-7 | STRUCTURAL | SHAPES_EMIT_ABSOLUTE | Shapes emit items with absolute coordinates |
 | PL-8 | HARD | NO_PASSTHROUGH_GEOMETRY | Do not add computed planner-geometry fields to Feature or RemovalIntent. See "Known Exception" below. |
+| PL-9 | STRUCTURAL | DOMAIN_VIA_PARAMS | Shape handlers pass true geometry to children via `params["domain"]` (Domain) and `params["domain_center"]` (Point2D). Domain-aware child handlers consume these when present, falling back to ResolvedRegion (Rect) when absent. Shape handlers must not special-case child types to pass geometry — all children receive the same params. Structural nodes (Frame, Inset, Grid, Split) strip domain from params before dispatching children. |
 
 ---
 
@@ -115,6 +116,49 @@ class Feature:
 ```
 
 **Right:** Compute planner geometry in the adapter from bounds, shape, and semantic metadata already on RemovalIntent. If the adapter lacks sufficient context, raise the design question rather than threading geometry through semantic layers.
+
+---
+
+## Domain Propagation (PL-9)
+
+Shape handlers (`_handle_rect`, `_handle_circle`, `_handle_polygon`, etc.) construct a `Domain`
+from their true geometry and pass it to children via `params["domain"]`. Children that need
+shape geometry pull the domain from params rather than being special-cased inside the parent handler.
+
+**Convention:**
+- `params["domain"]`: `Domain` — the parent shape's true geometry
+- `params["domain_center"]`: `Point2D` — the center used for computing relative points and placement
+
+**Contract:**
+- Shape handlers MUST set both keys before dispatching children
+- Domain-aware handlers (ProfileGen, PocketGen, ChamferGen, RoundoverGen, etc.) MUST check for
+  `params.get("domain")` and emit Polygon Items with true geometry when present
+- When `params["domain"]` is absent (structural parent like Frame, Inset, Grid), handlers
+  fall back to ResolvedRegion and emit Rect Items — preserving backward compatibility
+- Shape handlers MUST NOT use isinstance checks on children to pass geometry.
+  All children receive the same params; each child decides whether to consume the domain.
+- Structural nodes (Frame, Inset, Grid, Split, SplitHorizontal, SplitVertical, SplitGrid,
+  SplitHorizontalGaps, AtPosition) MUST strip `domain` and `domain_center` from params
+  before dispatching children, since they change the region.
+
+**Wrong:**
+Shape handler special-cases a child type:
+```python
+for child in node.children:
+    if isinstance(child, PocketGen):
+        # hand-build polygon Item from shape geometry
+    else:
+        self._resolve_node(child, region, items, params)
+```
+
+**Right:**
+Shape handler passes domain, all children dispatched uniformly:
+```python
+domain = Domain.from_polygon(abs_points)
+child_params = {**params, "domain": domain, "domain_center": bounds_center}
+for child in node.children:
+    self._resolve_node(child, region, items, child_params)
+```
 
 ---
 

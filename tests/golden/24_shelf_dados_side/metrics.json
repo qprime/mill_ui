@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-03-21T18:17:48.453844+00:00"
+    "created_at": "2026-03-21T20:14:14.918871+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.28,
+    "extraction_time_ms": 0.3,
     "document": {
       "width_mm": 753.175,
       "height_mm": 943.175,
@@ -147,15 +147,15 @@
         },
         "PROFILE_CUTS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": [
             {
-              "element_type": "rect",
+              "element_type": "path",
               "bounds": [
                 0.0,
                 0.0,
@@ -165,17 +165,15 @@
               "center": [
                 300.0,
                 400.0
-              ],
-              "width": 600.0,
-              "height": 800.0
+              ]
             }
           ]
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -220,15 +218,20 @@
       }
     },
     "paths": {
-      "total_count": 7,
-      "closed_count": 7,
+      "total_count": 8,
+      "closed_count": 8,
       "open_count": 0,
-      "total_length_mm": 0.0,
+      "total_length_mm": 4009.522,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 1,
           "closed": 1,
-          "length_mm": 0.0
+          "length_mm": 2000.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 2009.522
         },
         "POCKET_REGIONS": {
           "count": 5,
@@ -243,10 +246,10 @@
       }
     },
     "bounds": {
-      "x_min": -1.587,
+      "x_min": 0.0,
       "x_max": 624.5875,
       "y_min": -19.5875,
-      "y_max": 801.588
+      "y_max": 800.0
     },
     "text_elements": {
       "count": 17,
@@ -274,7 +277,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 9,
+      "count": 7,
       "dimensions": [
         [
           15.0,
@@ -303,36 +306,28 @@
         [
           600.0,
           800.0
-        ],
-        [
-          600.0,
-          800.0
-        ],
-        [
-          603.175,
-          803.175
         ]
       ]
     }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.721,
+    "extraction_time_ms": 0.6885,
     "summary": {
-      "total_lines": 451,
-      "comment_lines": 18,
-      "motion_lines": 359,
+      "total_lines": 267,
+      "comment_lines": 15,
+      "motion_lines": 231,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 273
+      "spindle_lines": 5,
+      "feed_lines": 195
     },
     "motion": {
-      "g0_count": 140,
-      "g1_count": 219,
+      "g0_count": 38,
+      "g1_count": 193,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 48270.4639,
-      "total_feed_distance_mm": 64085.5126
+      "total_rapid_distance_mm": 9833.8251,
+      "total_feed_distance_mm": 64127.8885
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -356,7 +351,7 @@
         -1.5
       ],
       "depth_count": 16,
-      "max_single_plunge_mm": 25.2
+      "max_single_plunge_mm": 13.0
     },
     "xy_bounds": {
       "x_min": -1.587,
@@ -369,7 +364,6 @@
       "max_feed_rate": 1400.0,
       "feed_rates_used": [
         350.0,
-        396.0,
         1200.0,
         1400.0
       ]
@@ -401,9 +395,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 579.2455,
-      "feed_time_s": 4640.9463,
-      "total_time_s": 5220.1919
+      "rapid_time_s": 118.0059,
+      "feed_time_s": 3704.6419,
+      "total_time_s": 3822.6479
     },
     "tabs": {
       "detected_count": 0,

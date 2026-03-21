@@ -130,10 +130,12 @@ children:
     ast = parse_pml_yaml(pml)
     flat = resolve_layout(ast)
 
-    polygon_items = [item for item in flat.items if item.type == "Polygon"]
-    assert len(polygon_items) == 4
+    x_panel_items = [
+        item for item in flat.items if item.type == "Polygon" and item.feature and item.feature.type == "pocket"
+    ]
+    assert len(x_panel_items) == 4
 
-    for item in polygon_items:
+    for item in x_panel_items:
         assert item.geometry is not None
         assert item.placement is not None
         points = item.geometry.data["points"]

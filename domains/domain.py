@@ -20,7 +20,10 @@ JoinStyle = Literal["mitre", "round", "bevel"]
 
 
 def _normalize_boundary(
-    coords: Sequence[tuple[float, float]] | Sequence[tuple[int, int]] | list[list[float]] | tuple[tuple[float, ...], ...],
+    coords: Sequence[tuple[float, float]]
+    | Sequence[tuple[int, int]]
+    | list[list[float]]
+    | tuple[tuple[float, ...], ...],
 ) -> tuple[Point2D, ...]:
     result = []
     for point in coords:
@@ -698,6 +701,97 @@ class Domain:
             inner_boundaries=inners,
             local_origin=local_origin,
             local_rotation_rad=local_rotation_rad,
+        )
+
+    @classmethod
+    def from_circle(
+        cls,
+        diameter_mm: float,
+        center: Point2D = (0.0, 0.0),
+        segments: int = 80,
+    ) -> Domain:
+        if diameter_mm <= 0:
+            raise ValueError(f"Diameter must be positive, got {diameter_mm}")
+        if segments < 8:
+            raise ValueError(f"segments must be >= 8, got {segments}")
+
+        radius = diameter_mm / 2
+        cx, cy = center
+        points: list[Point2D] = []
+        for i in range(segments):
+            angle = 2 * math.pi * i / segments
+            x = cx + radius * math.cos(angle)
+            y = cy + radius * math.sin(angle)
+            points.append((x, y))
+
+        return cls(
+            outer_boundary=tuple(points),
+            inner_boundaries=(),
+            local_origin=center,
+            local_rotation_rad=0.0,
+        )
+
+    @classmethod
+    def from_rounded_rect(
+        cls,
+        width_mm: float,
+        height_mm: float,
+        radius_mm: float,
+        center: Point2D = (0.0, 0.0),
+        corners: tuple[str, ...] | None = None,
+        arc_segments: int = 16,
+    ) -> Domain:
+        if width_mm <= 0:
+            raise ValueError(f"Width must be positive, got {width_mm}")
+        if height_mm <= 0:
+            raise ValueError(f"Height must be positive, got {height_mm}")
+        if radius_mm < 0:
+            raise ValueError(f"Radius must be non-negative, got {radius_mm}")
+        if radius_mm == 0:
+            return cls.from_rectangle(width_mm, height_mm, center=center)
+        max_radius = min(width_mm, height_mm) / 2
+        if radius_mm > max_radius:
+            raise ValueError(f"Radius ({radius_mm}) cannot exceed half the smaller dimension ({max_radius})")
+
+        all_corners = ("tl", "tr", "br", "bl")
+        rounded = set(corners) if corners else set(all_corners)
+
+        cx, cy = center
+        hw, hh = width_mm / 2, height_mm / 2
+        r = radius_mm
+
+        points: list[Point2D] = []
+
+        corner_specs = [
+            ("bl", (cx - hw + r, cy - hh + r), math.pi, 3 * math.pi / 2),
+            ("br", (cx + hw - r, cy - hh + r), 3 * math.pi / 2, 2 * math.pi),
+            ("tr", (cx + hw - r, cy + hh - r), 0.0, math.pi / 2),
+            ("tl", (cx - hw + r, cy + hh - r), math.pi / 2, math.pi),
+        ]
+
+        for corner_name, (arc_cx, arc_cy), start_angle, end_angle in corner_specs:
+            if corner_name in rounded:
+                for i in range(arc_segments + 1):
+                    t = i / arc_segments
+                    angle = start_angle + t * (end_angle - start_angle)
+                    x = arc_cx + r * math.cos(angle)
+                    y = arc_cy + r * math.sin(angle)
+                    points.append((x, y))
+            else:
+                if corner_name == "bl":
+                    points.append((cx - hw, cy - hh))
+                elif corner_name == "br":
+                    points.append((cx + hw, cy - hh))
+                elif corner_name == "tr":
+                    points.append((cx + hw, cy + hh))
+                elif corner_name == "tl":
+                    points.append((cx - hw, cy + hh))
+
+        return cls(
+            outer_boundary=tuple(points),
+            inner_boundaries=(),
+            local_origin=center,
+            local_rotation_rad=0.0,
         )
 
     def to_dict(self) -> dict[str, Any]:

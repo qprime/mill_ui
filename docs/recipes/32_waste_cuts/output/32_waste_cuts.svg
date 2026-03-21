@@ -38,10 +38,10 @@
     <rect x="1185.000" y="15.000" width="15.000" height="770.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <rect x="115.000" y="135.000" width="600.000" height="500.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+    <path d="M 115.000 635.000 L 715.000 635.000 L 715.000 135.000 L 115.000 135.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <rect x="113.413" y="133.413" width="603.175" height="503.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+    <path d="M 113.412 636.587 L 716.587 636.587 L 716.587 133.413 L 113.412 133.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
   </g>
   <g id="WASTE_CUTS" class="waste-cuts">
     <rect x="721.350" y="21.350" width="457.300" height="757.300" stroke="#ff9500" fill="none" stroke-width="2" stroke-dasharray="8,4" id="waste_0_1" />

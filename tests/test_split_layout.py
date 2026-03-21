@@ -3,6 +3,16 @@ from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
+def _item_dims(item):
+    data = item.geometry.data
+    if "w_mm" in data:
+        return data["w_mm"], data["h_mm"]
+    points = data["points"]
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    return max(xs) - min(xs), max(ys) - min(ys)
+
+
 def test_basic_split_2x2():
     pml = """
 Sheet:
@@ -49,8 +59,9 @@ children:
 
     first_pocket = pocket_items[0]
     assert first_pocket.geometry is not None
-    assert abs(first_pocket.geometry.data["w_mm"] - 230.0) < 0.01
-    assert abs(first_pocket.geometry.data["h_mm"] - 225.0) < 0.01
+    w, h = _item_dims(first_pocket)
+    assert abs(w - 230.0) < 0.01
+    assert abs(h - 225.0) < 0.01
 
 
 def test_split_zero_rails_behaves_like_grid():
@@ -111,8 +122,10 @@ children:
     for sp, gp in zip(split_pockets, grid_pockets, strict=False):
         assert sp.geometry is not None
         assert gp.geometry is not None
-        assert abs(sp.geometry.data["w_mm"] - gp.geometry.data["w_mm"]) < 0.01
-        assert abs(sp.geometry.data["h_mm"] - gp.geometry.data["h_mm"]) < 0.01
+        sw, sh = _item_dims(sp)
+        gw, gh = _item_dims(gp)
+        assert abs(sw - gw) < 0.01
+        assert abs(sh - gh) < 0.01
 
 
 def test_split_pane_size_calculation():
@@ -146,8 +159,9 @@ children:
 
     first_pocket = pockets[0]
     assert first_pocket.geometry is not None
-    assert abs(first_pocket.geometry.data["w_mm"] - 235.0) < 0.01
-    assert abs(first_pocket.geometry.data["h_mm"] - 246.67) < 0.01
+    w, h = _item_dims(first_pocket)
+    assert abs(w - 235.0) < 0.01
+    assert abs(h - 246.67) < 0.01
 
 
 def test_split_inside_inset():
@@ -184,8 +198,9 @@ children:
 
     first_pocket = pockets[0]
     assert first_pocket.geometry is not None
-    assert abs(first_pocket.geometry.data["w_mm"] - 185.0) < 0.01
-    assert abs(first_pocket.geometry.data["h_mm"] - 180.0) < 0.01
+    w, h = _item_dims(first_pocket)
+    assert abs(w - 185.0) < 0.01
+    assert abs(h - 180.0) < 0.01
 
 
 def test_split_roundtrip_preserves_rail_mullion():
@@ -227,8 +242,10 @@ children:
     for p1, p2 in zip(pockets1, pockets2, strict=False):
         assert p1.geometry is not None
         assert p2.geometry is not None
-        assert abs(p1.geometry.data["w_mm"] - p2.geometry.data["w_mm"]) < 0.01
-        assert abs(p1.geometry.data["h_mm"] - p2.geometry.data["h_mm"]) < 0.01
+        w1, h1 = _item_dims(p1)
+        w2, h2 = _item_dims(p2)
+        assert abs(w1 - w2) < 0.01
+        assert abs(h1 - h2) < 0.01
 
 
 def test_french_door_acceptance():
@@ -274,8 +291,9 @@ children:
 
     first_pane = pocket_items[0]
     assert first_pane.geometry is not None
-    assert abs(first_pane.geometry.data["w_mm"] - 320.0) < 0.01
-    assert abs(first_pane.geometry.data["h_mm"] - 515.0) < 0.01
+    w, h = _item_dims(first_pane)
+    assert abs(w - 320.0) < 0.01
+    assert abs(h - 515.0) < 0.01
 
 
 def test_split_single_row():
@@ -309,8 +327,9 @@ children:
 
     first_pocket = pockets[0]
     assert first_pocket.geometry is not None
-    assert abs(first_pocket.geometry.data["w_mm"] - 180.0) < 0.01
-    assert abs(first_pocket.geometry.data["h_mm"] - 200.0) < 0.01
+    w, h = _item_dims(first_pocket)
+    assert abs(w - 180.0) < 0.01
+    assert abs(h - 200.0) < 0.01
 
 
 def test_split_single_column():
@@ -344,5 +363,6 @@ children:
 
     first_pocket = pockets[0]
     assert first_pocket.geometry is not None
-    assert abs(first_pocket.geometry.data["w_mm"] - 200.0) < 0.01
-    assert abs(first_pocket.geometry.data["h_mm"] - 173.33) < 0.01
+    w, h = _item_dims(first_pocket)
+    assert abs(w - 200.0) < 0.01
+    assert abs(h - 173.33) < 0.01

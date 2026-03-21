@@ -93,8 +93,12 @@ def test_expand_shaker_template():
     assert profile.placement is not None
     assert profile.placement.center_xy_mm == (500, 500)
     assert profile.geometry is not None
-    assert profile.geometry.data["w_mm"] == 400
-    assert profile.geometry.data["h_mm"] == 600
+    assert "points" in profile.geometry.data
+    profile_points = profile.geometry.data["points"]
+    profile_xs = [p[0] for p in profile_points]
+    profile_ys = [p[1] for p in profile_points]
+    assert abs((max(profile_xs) - min(profile_xs)) - 400) < 0.01
+    assert abs((max(profile_ys) - min(profile_ys)) - 600) < 0.01
 
     pocket = pocket_items[0]
     assert pocket.geometry is not None

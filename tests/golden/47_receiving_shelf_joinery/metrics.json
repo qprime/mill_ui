@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "47_receiving_shelf_joinery",
-    "created_at": "2026-03-21T18:17:49.967615+00:00"
+    "created_at": "2026-03-21T20:14:16.421967+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.32,
+    "extraction_time_ms": 1.34,
     "document": {
       "width_mm": 2183.175,
       "height_mm": 1529.175,
@@ -642,7 +642,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9199,
+    "extraction_time_ms": 1.9038,
     "summary": {
       "total_lines": 2745,
       "comment_lines": 47,

@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "32_waste_cuts",
-    "created_at": "2026-03-21T18:17:48.674383+00:00"
+    "created_at": "2026-03-21T20:14:15.126971+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -61,15 +61,15 @@
         },
         "PROFILE_CUTS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": [
             {
-              "element_type": "rect",
+              "element_type": "path",
               "bounds": [
                 115.0,
                 135.0,
@@ -79,17 +79,15 @@
               "center": [
                 415.0,
                 385.0
-              ],
-              "width": 600.0,
-              "height": 500.0
+              ]
             }
           ]
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -204,15 +202,20 @@
       }
     },
     "paths": {
-      "total_count": 6,
-      "closed_count": 6,
+      "total_count": 7,
+      "closed_count": 7,
       "open_count": 0,
-      "total_length_mm": 0.0,
+      "total_length_mm": 3409.524,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 1,
           "closed": 1,
-          "length_mm": 0.0
+          "length_mm": 1700.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 1709.524
         },
         "SHEET_OUTLINE": {
           "count": 5,
@@ -250,7 +253,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 8,
+      "count": 6,
       "dimensions": [
         [
           15.0,
@@ -263,14 +266,6 @@
         [
           457.3,
           757.3
-        ],
-        [
-          600.0,
-          500.0
-        ],
-        [
-          603.175,
-          503.175
         ],
         [
           1200.0,
@@ -289,7 +284,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.4984,
+    "extraction_time_ms": 1.4567,
     "summary": {
       "total_lines": 354,
       "comment_lines": 4,

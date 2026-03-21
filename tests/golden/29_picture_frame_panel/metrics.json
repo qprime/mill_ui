@@ -1,19 +1,19 @@
 {
   "golden": {
     "recipe_name": "29_picture_frame_panel",
-    "created_at": "2026-03-21T18:17:48.618615+00:00"
+    "created_at": "2026-03-21T20:14:15.073062+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.35,
+    "extraction_time_ms": 0.34,
     "document": {
       "width_mm": 453.175,
-      "height_mm": 579.175,
+      "height_mm": 555.175,
       "viewbox": [
         -11.588,
         -51.587,
         453.175,
-        579.175
+        555.175
       ]
     },
     "layers": {
@@ -50,13 +50,13 @@
           "elements": []
         },
         "NOTES": {
-          "element_count": 8,
+          "element_count": 6,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 8,
+          "text_count": 6,
           "elements": []
         },
         "POCKET_REGIONS": {
@@ -85,15 +85,15 @@
         },
         "PROFILE_CUTS": {
           "element_count": 2,
-          "rect_count": 2,
+          "rect_count": 1,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": [
             {
-              "element_type": "rect",
+              "element_type": "path",
               "bounds": [
                 0.0,
                 0.0,
@@ -103,9 +103,7 @@
               "center": [
                 150.0,
                 200.0
-              ],
-              "width": 300.0,
-              "height": 400.0
+              ]
             },
             {
               "element_type": "rect",
@@ -126,9 +124,9 @@
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 2,
-          "rect_count": 2,
+          "rect_count": 1,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -173,20 +171,25 @@
       }
     },
     "paths": {
-      "total_count": 4,
-      "closed_count": 4,
+      "total_count": 5,
+      "closed_count": 5,
       "open_count": 0,
-      "total_length_mm": 800.0,
+      "total_length_mm": 2809.522,
       "by_layer": {
+        "PROFILE_CUTS": {
+          "count": 2,
+          "closed": 2,
+          "length_mm": 1000.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 1009.522
+        },
         "POCKET_REGIONS": {
           "count": 1,
           "closed": 1,
           "length_mm": 800.0
-        },
-        "PROFILE_CUTS": {
-          "count": 2,
-          "closed": 2,
-          "length_mm": 0.0
         },
         "SHEET_OUTLINE": {
           "count": 1,
@@ -196,13 +199,13 @@
       }
     },
     "bounds": {
-      "x_min": -1.588,
+      "x_min": 0.0,
       "x_max": 324.5875,
       "y_min": -19.5875,
-      "y_max": 401.588
+      "y_max": 400.0
     },
     "text_elements": {
-      "count": 22,
+      "count": 20,
       "dimension_labels": [
         "200.0mm",
         "200.0mm",
@@ -216,8 +219,7 @@
       ],
       "depth_annotations": [
         "Features: 2 profiles, 1 pocket, 1 chamfer",
-        "\u2022 pocket: 5.0mm",
-        "\u2022 subtract_pocket_2"
+        "\u2022 pocket: 5.0mm"
       ],
       "notes_text": [
         "NOTES",
@@ -225,9 +227,7 @@
         "Features: 2 profiles, 1 pocket, 1 chamfer",
         "Depths:",
         "\u2022 chamfer: 3.0mm",
-        "\u2022 pocket: 5.0mm",
-        "Parts (1):",
-        "\u2022 subtract_pocket_2"
+        "\u2022 pocket: 5.0mm"
       ]
     },
     "circles": {
@@ -235,7 +235,7 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 6,
+      "count": 4,
       "dimensions": [
         [
           15.0,
@@ -252,36 +252,28 @@
         [
           300.0,
           400.0
-        ],
-        [
-          300.0,
-          400.0
-        ],
-        [
-          303.175,
-          403.175
         ]
       ]
     }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.1634,
+    "extraction_time_ms": 0.1612,
     "summary": {
-      "total_lines": 794,
-      "comment_lines": 17,
-      "motion_lines": 642,
+      "total_lines": 611,
+      "comment_lines": 14,
+      "motion_lines": 514,
       "tool_change_lines": 0,
       "spindle_lines": 7,
-      "feed_lines": 526
+      "feed_lines": 448
     },
     "motion": {
-      "g0_count": 223,
-      "g1_count": 419,
+      "g0_count": 121,
+      "g1_count": 393,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 35153.4403,
-      "total_feed_distance_mm": 59208.9244
+      "total_rapid_distance_mm": 15655.3054,
+      "total_feed_distance_mm": 59251.37820000001
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -344,9 +336,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 421.8413,
-      "feed_time_s": 4463.1751,
-      "total_time_s": 4885.0163
+      "rapid_time_s": 187.8637,
+      "feed_time_s": 4466.3670999999995,
+      "total_time_s": 4654.2307
     },
     "tabs": {
       "detected_count": 0,

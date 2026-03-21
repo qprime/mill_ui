@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "63_roundover_edge",
-    "created_at": "2026-03-21T18:17:50.423617+00:00"
+    "created_at": "2026-03-21T20:14:16.872124+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -60,15 +60,15 @@
         },
         "PROFILE_CUTS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
           "elements": [
             {
-              "element_type": "rect",
+              "element_type": "path",
               "bounds": [
                 0.0,
                 0.0,
@@ -78,17 +78,15 @@
               "center": [
                 150.0,
                 200.0
-              ],
-              "width": 300.0,
-              "height": 400.0
+              ]
             }
           ]
         },
         "PROFILE_TOOLPATHS": {
           "element_count": 1,
-          "rect_count": 1,
+          "rect_count": 0,
           "circle_count": 0,
-          "path_count": 0,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -133,15 +131,20 @@
       }
     },
     "paths": {
-      "total_count": 2,
-      "closed_count": 2,
+      "total_count": 3,
+      "closed_count": 3,
       "open_count": 0,
-      "total_length_mm": 0.0,
+      "total_length_mm": 2009.522,
       "by_layer": {
         "PROFILE_CUTS": {
           "count": 1,
           "closed": 1,
-          "length_mm": 0.0
+          "length_mm": 1000.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 1009.522
         },
         "SHEET_OUTLINE": {
           "count": 1,
@@ -151,10 +154,10 @@
       }
     },
     "bounds": {
-      "x_min": -1.588,
+      "x_min": 0.0,
       "x_max": 324.5875,
       "y_min": -19.5875,
-      "y_max": 401.588
+      "y_max": 400.0
     },
     "text_elements": {
       "count": 14,
@@ -178,41 +181,33 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 3,
+      "count": 1,
       "dimensions": [
         [
           300.0,
           400.0
-        ],
-        [
-          300.0,
-          400.0
-        ],
-        [
-          303.175,
-          403.175
         ]
       ]
     }
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9641,
+    "extraction_time_ms": 0.4208,
     "summary": {
-      "total_lines": 280,
-      "comment_lines": 6,
-      "motion_lines": 211,
+      "total_lines": 96,
+      "comment_lines": 3,
+      "motion_lines": 83,
       "tool_change_lines": 0,
-      "spindle_lines": 3,
-      "feed_lines": 157
+      "spindle_lines": 2,
+      "feed_lines": 79
     },
     "motion": {
-      "g0_count": 107,
-      "g1_count": 104,
+      "g0_count": 5,
+      "g1_count": 78,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 19766.333,
-      "total_feed_distance_mm": 19056.8
+      "total_rapid_distance_mm": 129.6915,
+      "total_feed_distance_mm": 19099.2538
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -233,19 +228,18 @@
         -1.5
       ],
       "depth_count": 13,
-      "max_single_plunge_mm": 25.2
+      "max_single_plunge_mm": 7.5
     },
     "xy_bounds": {
-      "x_min": -1.587,
+      "x_min": -1.588,
       "x_max": 301.587,
-      "y_min": -1.587,
+      "y_min": -1.588,
       "y_max": 401.587
     },
     "feeds": {
-      "min_feed_rate": 396.0,
+      "min_feed_rate": 1200.0,
       "max_feed_rate": 1200.0,
       "feed_rates_used": [
-        396.0,
         1200.0
       ]
     },
@@ -257,21 +251,18 @@
       ]
     },
     "operations": {
-      "profile_passes": 4,
+      "profile_passes": 1,
       "pocket_passes": 0,
       "bore_passes": 0,
-      "total_passes": 4,
+      "total_passes": 1,
       "operation_names": [
-        "profile_outline",
-        "profile_outline",
-        "profile_outline",
         "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 237.196,
-      "feed_time_s": 1432.8421,
-      "total_time_s": 1670.0381
+      "rapid_time_s": 1.5563,
+      "feed_time_s": 954.9627,
+      "total_time_s": 956.519
     },
     "tabs": {
       "detected_count": 0,

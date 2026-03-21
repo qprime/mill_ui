@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "72_assembly_test",
-    "created_at": "2026-03-21T18:17:50.936170+00:00"
+    "created_at": "2026-03-21T20:14:17.388148+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.42,
+    "extraction_time_ms": 1.4,
     "document": {
       "width_mm": 973.175,
       "height_mm": 1255.175,
@@ -1155,7 +1155,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.683,
+    "extraction_time_ms": 3.7768,
     "summary": {
       "total_lines": 2018,
       "comment_lines": 60,

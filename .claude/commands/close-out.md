@@ -27,7 +27,7 @@ python -m tests.test_recipes
 pre-commit run --all-files
 ```
 
-If any step fails, stop and fix the issue before continuing. Do not proceed to Phase 2 with failures.
+**ALL tests and recipes must pass. Zero failures, zero errors, no exceptions.** Do not classify any failure as "pre-existing" or "not part of this change" — if it fails, it blocks the commit. Fix it or raise it to the user. Do not proceed to Phase 2 with any failures.
 
 If recipes need regeneration (new recipe added or output format changed):
 ```bash
@@ -35,7 +35,7 @@ python -m tests.test_recipes --regen_recipes
 python -m cli.generate_golden --all-recipes docs/recipes --update --force
 ```
 
-Report the results: test count, pass/fail, any pre-existing failures (deselected).
+Report the results: test count, pass/fail. Zero failures required.
 
 ---
 
@@ -65,7 +65,7 @@ Draft an implementation summary as a GitHub issue comment. Use this exact struct
 - Any deviations from the original spec and why
 
 ### Test Results
-<N> passed, <N> failed (if any — describe), <N> deselected (if any — describe)
+<N> passed, zero failures
 ```
 
 Present this to the user before posting.
@@ -138,7 +138,7 @@ Present the final summary to the user:
 ```
 ## Final Summary
 
-Committed as `<hash>` — all hooks pass (ruff, ruff format, mypy), <N> tests pass, zero failures.
+Committed as `<hash>` — all hooks pass (ruff, ruff format, mypy), <N> tests pass, zero failures, all recipes valid.
 
 ### What shipped
 <2-3 sentence summary of the deliverable>

@@ -54,7 +54,7 @@ class NestPart:
     height_mm: float
     quantity: int = 1
     template: str | None = None
-    template_params: dict[str, float] = field(default_factory=dict)
+    template_params: dict[str, Any] = field(default_factory=dict)
     shape: str | None = None
     shape_params: dict[str, Any] = field(default_factory=dict)
     holding: HoldingSpec | None = None

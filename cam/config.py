@@ -25,6 +25,7 @@ class Config:
     min_overlap_mm: float = 1.0
     cleanup_offset_mm: float = 0.25
     pocket_finish_perimeter: bool = True
+    pocket_strategy: Literal["spiral", "raster"] = "spiral"
     default_margin_mm: float = 10.0
     ramp_angle_deg: float = 3.0
 
@@ -41,6 +42,7 @@ class Config:
             "min_overlap_mm": float(self.min_overlap_mm),
             "cleanup_offset_mm": float(self.cleanup_offset_mm),
             "pocket_finish_perimeter": bool(self.pocket_finish_perimeter),
+            "pocket_strategy": self.pocket_strategy,
             "default_margin_mm": float(self.default_margin_mm),
             "ramp_angle_deg": float(self.ramp_angle_deg),
         }
@@ -119,6 +121,7 @@ _ENV_SUFFIXES = {
     "min_overlap_mm": "MIN_OVERLAP_MM",
     "cleanup_offset_mm": "CLEANUP_OFFSET_MM",
     "pocket_finish_perimeter": "POCKET_FINISH_PERIMETER",
+    "pocket_strategy": "POCKET_STRATEGY",
     "default_margin_mm": "DEFAULT_MARGIN",
     "ramp_angle_deg": "RAMP_ANGLE",
 }
@@ -179,6 +182,13 @@ def _z_reference(value: Any) -> Literal["top", "bottom"]:
     return "top" if text == "top" else "bottom"
 
 
+def _normalise_pocket_strategy(value: Any) -> Literal["spiral", "raster"]:
+    text = str(value).strip().lower()
+    if text not in {"spiral", "raster"}:
+        raise ValueError(f"pocket_strategy must be 'spiral' or 'raster', got {value!r}")
+    return "spiral" if text == "spiral" else "raster"
+
+
 def _normalise_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -201,6 +211,7 @@ _NORMALISERS = {
     "min_overlap_mm": _non_negative_float,
     "cleanup_offset_mm": _non_negative_float,
     "pocket_finish_perimeter": _normalise_bool,
+    "pocket_strategy": _normalise_pocket_strategy,
     "default_margin_mm": _non_negative_float,
     "ramp_angle_deg": _non_negative_float,
 }

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40a_frameless_cabinet_finger_back",
-    "created_at": "2026-03-21T16:33:14.808194+00:00"
+    "created_at": "2026-03-21T18:17:49.389550+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.72,
+    "extraction_time_ms": 3.76,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 2499.175,
@@ -2195,22 +2195,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.1657,
+    "extraction_time_ms": 1.1721,
     "summary": {
-      "total_lines": 11766,
-      "comment_lines": 130,
-      "motion_lines": 11592,
+      "total_lines": 11688,
+      "comment_lines": 118,
+      "motion_lines": 11526,
       "tool_change_lines": 0,
       "spindle_lines": 12,
-      "feed_lines": 11132
+      "feed_lines": 11078
     },
     "motion": {
-      "g0_count": 464,
-      "g1_count": 11128,
+      "g0_count": 452,
+      "g1_count": 11074,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 28915.8453,
-      "total_feed_distance_mm": 234391.1489
+      "total_rapid_distance_mm": 31530.0384,
+      "total_feed_distance_mm": 232513.1814
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -2238,7 +2238,6 @@
         -8.443,
         -8.0,
         -7.5,
-        -7.288,
         -7.0,
         -6.943,
         -6.5,
@@ -2248,7 +2247,6 @@
         -4.5,
         -4.0,
         -3.943,
-        -3.788,
         -3.5,
         -3.0,
         -2.5,
@@ -2256,10 +2254,9 @@
         -2.0,
         -1.5,
         -0.943,
-        -0.5,
-        -0.288
+        -0.5
       ],
-      "depth_count": 42,
+      "depth_count": 39,
       "max_single_plunge_mm": 17.5
     },
     "xy_bounds": {
@@ -2301,9 +2298,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 346.9901,
-      "feed_time_s": 16911.447,
-      "total_time_s": 17258.4371
+      "rapid_time_s": 378.36039999999997,
+      "feed_time_s": 16782.6721,
+      "total_time_s": 17161.0325
     },
     "tabs": {
       "detected_count": 0,

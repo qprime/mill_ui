@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "08_svg_visualization",
-    "created_at": "2026-03-21T16:33:11.930040+00:00"
+    "created_at": "2026-03-21T18:17:46.802890+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -255,22 +255,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7654,
+    "extraction_time_ms": 0.4832,
     "summary": {
-      "total_lines": 495,
-      "comment_lines": 12,
-      "motion_lines": 375,
+      "total_lines": 394,
+      "comment_lines": 10,
+      "motion_lines": 311,
       "tool_change_lines": 0,
-      "spindle_lines": 6,
-      "feed_lines": 279
+      "spindle_lines": 5,
+      "feed_lines": 251
     },
     "motion": {
-      "g0_count": 184,
-      "g1_count": 191,
+      "g0_count": 114,
+      "g1_count": 197,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 17266.204899999997,
-      "total_feed_distance_mm": 12174.2495
+      "total_rapid_distance_mm": 11231.678899999999,
+      "total_feed_distance_mm": 16355.093099999998
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -319,21 +319,19 @@
       ]
     },
     "operations": {
-      "profile_passes": 2,
+      "profile_passes": 0,
       "pocket_passes": 2,
       "bore_passes": 0,
-      "total_passes": 4,
+      "total_passes": 2,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=6.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=6.000"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 207.1944,
-      "feed_time_s": 902.4056,
-      "total_time_s": 1109.6
+      "rapid_time_s": 134.7801,
+      "feed_time_s": 1189.092,
+      "total_time_s": 1323.8721
     },
     "tabs": {
       "detected_count": 0,

@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-03-21T16:33:13.691986+00:00"
+    "created_at": "2026-03-21T18:17:48.465007+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -265,22 +265,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.9614,
+    "extraction_time_ms": 1.9302,
     "summary": {
-      "total_lines": 1457,
-      "comment_lines": 20,
-      "motion_lines": 1141,
+      "total_lines": 731,
+      "comment_lines": 14,
+      "motion_lines": 643,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 851
+      "feed_lines": 581
     },
     "motion": {
-      "g0_count": 566,
-      "g1_count": 575,
+      "g0_count": 116,
+      "g1_count": 527,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 87738.5809,
-      "total_feed_distance_mm": 28424.7491
+      "total_rapid_distance_mm": 23808.2902,
+      "total_feed_distance_mm": 86173.4829
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -311,10 +311,9 @@
       "y_max": 451.587
     },
     "feeds": {
-      "min_feed_rate": 350.0,
+      "min_feed_rate": 396.0,
       "max_feed_rate": 1400.0,
       "feed_rates_used": [
-        350.0,
         396.0,
         1200.0,
         1400.0
@@ -329,29 +328,23 @@
       ]
     },
     "operations": {
-      "profile_passes": 6,
+      "profile_passes": 0,
       "pocket_passes": 6,
       "bore_passes": 0,
-      "total_passes": 12,
+      "total_passes": 6,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=2.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=2.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=2.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=2.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=2.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=2.000"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 1052.863,
-      "feed_time_s": 2092.4187,
-      "total_time_s": 3145.2817
+      "rapid_time_s": 285.6995,
+      "feed_time_s": 4393.3315,
+      "total_time_s": 4679.031
     },
     "tabs": {
       "detected_count": 0,

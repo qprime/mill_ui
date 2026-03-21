@@ -13,6 +13,7 @@ def pocket_raster(
     depth_mm: float,
     stepover: float,
     stepdown: float | None = None,
+    strategy: str = "spiral",
 ) -> list[Move]:
     return native_core.pocket_raster(
         shape,
@@ -20,4 +21,5 @@ def pocket_raster(
         depth_mm=float(depth_mm),
         stepover_mm=float(stepover),
         stepdown_mm=None if stepdown is None else float(stepdown),
+        strategy=strategy,
     )

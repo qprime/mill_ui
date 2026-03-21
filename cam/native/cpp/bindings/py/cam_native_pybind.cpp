@@ -227,13 +227,16 @@ PYBIND11_MODULE(_native, m) {
   });
 
   m.def("plan_pocket", [](const py::dict& face_dict, const py::object& tool_obj, double step_over_mm,
-                           std::optional<double> step_down_mm, double ramp_angle_deg) {
+                           std::optional<double> step_down_mm, double ramp_angle_deg,
+                           const std::string& strategy) {
     PlanarFace face = face_from_dict(face_dict);
     Tool tool = tool_from_py(tool_obj);
     double step_down = step_down_mm.value_or(0.0);
-    return paths_to_flat_list(millui::native::plan_pocket(face, tool, step_over_mm, step_down, face.safe_z, ramp_angle_deg));
+    auto strat = (strategy == "raster") ? PocketStrategy::Raster : PocketStrategy::Spiral;
+    return paths_to_flat_list(millui::native::plan_pocket(face, tool, step_over_mm, step_down, face.safe_z, ramp_angle_deg, strat));
   }, py::arg("face"), py::arg("tool"), py::arg("step_over_mm"),
-     py::arg("step_down_mm") = py::none(), py::arg("ramp_angle_deg") = 0.0);
+     py::arg("step_down_mm") = py::none(), py::arg("ramp_angle_deg") = 0.0,
+     py::arg("strategy") = "spiral");
 
   m.def("plan_profile", [](const py::sequence& boundary, const py::object& tool_obj, double total_depth_mm,
                             double step_down_mm, double safe_z_mm, double ramp_angle_deg) {

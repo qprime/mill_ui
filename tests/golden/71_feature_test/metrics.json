@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "71_feature_test",
-    "created_at": "2026-03-21T16:33:16.615092+00:00"
+    "created_at": "2026-03-21T18:17:50.906364+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.75,
+    "extraction_time_ms": 1.71,
     "document": {
       "width_mm": 723.175,
       "height_mm": 731.175,
@@ -701,22 +701,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 87.4872,
+    "extraction_time_ms": 85.7138,
     "summary": {
-      "total_lines": 24234,
-      "comment_lines": 145,
-      "motion_lines": 23702,
+      "total_lines": 24021,
+      "comment_lines": 139,
+      "motion_lines": 23561,
       "tool_change_lines": 0,
       "spindle_lines": 16,
-      "feed_lines": 23597
+      "feed_lines": 23528
     },
     "motion": {
-      "g0_count": 434,
-      "g1_count": 23268,
+      "g0_count": 296,
+      "g1_count": 23265,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 22014.4516,
-      "total_feed_distance_mm": 60225.4868
+      "total_rapid_distance_mm": 15048.4987,
+      "total_feed_distance_mm": 64115.0637
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -1306,7 +1306,6 @@
         -5.0,
         -4.975,
         -4.95,
-        -4.931,
         -4.925,
         -4.9,
         -4.875,
@@ -1426,7 +1425,6 @@
         -2.025,
         -2.0,
         -1.975,
-        -1.955,
         -1.95,
         -1.925,
         -1.9,
@@ -1448,7 +1446,6 @@
         -1.5,
         -1.475,
         -1.45,
-        -1.431,
         -1.425,
         -1.4,
         -1.375,
@@ -1507,7 +1504,7 @@
         -0.05,
         -0.025
       ],
-      "depth_count": 784,
+      "depth_count": 781,
       "max_single_plunge_mm": 24.0
     },
     "xy_bounds": {
@@ -1560,9 +1557,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 264.1734,
-      "feed_time_s": 4829.622600000001,
-      "total_time_s": 5093.7958
+      "rapid_time_s": 180.582,
+      "feed_time_s": 5096.3364,
+      "total_time_s": 5276.9182
     },
     "tabs": {
       "detected_count": 4,

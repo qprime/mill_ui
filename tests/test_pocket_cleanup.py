@@ -54,6 +54,7 @@ def test_pocket_cleanup_enabled_by_default(mock_profile, mock_raster):
         setup,
         total_depth_mm=10.0,
         finish_perimeter=True,
+        pocket_strategy="raster",
     )
 
     assert _has_rough_pocket_comment(moves), "Should have rough pocket comment"
@@ -81,6 +82,7 @@ def test_pocket_cleanup_disabled(mock_profile, mock_raster):
         setup,
         total_depth_mm=10.0,
         finish_perimeter=False,
+        pocket_strategy="raster",
     )
 
     assert _has_no_finish_comment(moves), "Should have 'no finish' comment"
@@ -109,6 +111,7 @@ def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
         total_depth_mm=10.0,
         cleanup_offset_mm=0.5,
         finish_perimeter=True,
+        pocket_strategy="raster",
     )
 
     assert _has_rough_pocket_comment(moves), "Should have rough pocket comment"
@@ -143,6 +146,7 @@ def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
         setup,
         total_depth_mm=10.0,
         finish_perimeter=True,
+        pocket_strategy="raster",
     )
 
     mock_raster.reset_mock()
@@ -153,6 +157,7 @@ def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
         setup,
         total_depth_mm=10.0,
         finish_perimeter=False,
+        pocket_strategy="raster",
     )
 
     assert len(moves_with_finish) > len(moves_without_finish), (

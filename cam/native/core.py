@@ -92,14 +92,18 @@ def _holes_from_points(points: Iterable[tuple[float, float]], depth_mm: float, t
     return holes
 
 
-def pocket_raster(shape, setup, *, depth_mm: float, stepover_mm: float, stepdown_mm: float | None) -> list[Move]:
+def pocket_raster(
+    shape, setup, *, depth_mm: float, stepover_mm: float, stepdown_mm: float | None, strategy: str = "spiral"
+) -> list[Move]:
     _require_native()
     face = _planar_face_dict(shape, depth_mm, setup.safe_z)
     step_down_arg = None if stepdown_mm is None else float(stepdown_mm)
     ramp = float(setup.ramp_angle_deg)
     return [
         _dict_to_move(d)
-        for d in _native.plan_pocket(face, setup.tool, float(stepover_mm), step_down_arg, ramp_angle_deg=ramp)
+        for d in _native.plan_pocket(
+            face, setup.tool, float(stepover_mm), step_down_arg, ramp_angle_deg=ramp, strategy=strategy
+        )
     ]
 
 

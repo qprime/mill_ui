@@ -278,6 +278,7 @@ def pocket_then_finish_profile(
     cleanup_offset_mm: float = 0.25,
     start_depth_mm: float = 0.0,
     finish_perimeter: bool = True,
+    pocket_strategy: str = "spiral",
 ) -> list[Move]:
 
     xs = [p.x for p in shape.points]
@@ -302,7 +303,10 @@ def pocket_then_finish_profile(
 
     moves: list[Move] = []
 
-    if finish_perimeter:
+    if pocket_strategy == "spiral":
+        moves.append(move_comment(f"BEGIN spiral pocket sd={sd:.3f} so={so:.3f}"))
+        moves += pocket_raster(shape, setup, depth_mm=cut_depth, stepover=so, stepdown=sd, strategy="spiral")
+    elif finish_perimeter:
         shrink = tool_r + float(cleanup_offset_mm)
         w_rough = max(0.0, w - 2.0 * shrink)
         h_rough = max(0.0, h - 2.0 * shrink)
@@ -310,12 +314,7 @@ def pocket_then_finish_profile(
             rough = rectangle(w_rough, h_rough)
             rough = place(rough, Transform2D(tx=cx - 0.5 * w_rough, ty=cy - 0.5 * h_rough))
             moves.append(move_comment(f"BEGIN rough pocket cleanup={cleanup_offset_mm:.3f}mm sd={sd:.3f} so={so:.3f}"))
-            moves += pocket_raster(rough, setup, depth_mm=cut_depth, stepover=so, stepdown=sd)
-    else:
-        moves.append(move_comment(f"BEGIN pocket (no finish) sd={sd:.3f} so={so:.3f}"))
-        moves += pocket_raster(shape, setup, depth_mm=cut_depth, stepover=so, stepdown=sd)
-
-    if finish_perimeter:
+            moves += pocket_raster(rough, setup, depth_mm=cut_depth, stepover=so, stepdown=sd, strategy="raster")
         w_fin = max(0.0, w - tool_d)
         h_fin = max(0.0, h - tool_d)
         if w_fin > 0.0 and h_fin > 0.0:
@@ -323,5 +322,8 @@ def pocket_then_finish_profile(
             finish = place(finish, Transform2D(tx=cx - 0.5 * w_fin, ty=cy - 0.5 * h_fin))
             moves.append(move_comment("BEGIN finish profile pass"))
             moves += profile_outline(finish, setup, depth_mm=cut_depth, step_down=sd)
+    else:
+        moves.append(move_comment(f"BEGIN pocket (no finish) sd={sd:.3f} so={so:.3f}"))
+        moves += pocket_raster(shape, setup, depth_mm=cut_depth, stepover=so, stepdown=sd, strategy="raster")
 
     return offset_moves_z(moves, start)

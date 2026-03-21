@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "13_split_layout_french_door",
-    "created_at": "2026-03-21T16:33:12.457386+00:00"
+    "created_at": "2026-03-21T18:17:47.309300+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.33,
+    "extraction_time_ms": 0.34,
     "document": {
       "width_mm": 653.175,
       "height_mm": 879.175,
@@ -312,22 +312,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.6081,
+    "extraction_time_ms": 3.2106,
     "summary": {
-      "total_lines": 2572,
-      "comment_lines": 24,
-      "motion_lines": 2042,
+      "total_lines": 1052,
+      "comment_lines": 16,
+      "motion_lines": 962,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 1530
+      "feed_lines": 890
     },
     "motion": {
-      "g0_count": 998,
-      "g1_count": 1044,
+      "g0_count": 126,
+      "g1_count": 836,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 117705.2713,
-      "total_feed_distance_mm": 45610.8832
+      "total_rapid_distance_mm": 36121.4189,
+      "total_feed_distance_mm": 113693.67050000001
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -377,33 +377,25 @@
       ]
     },
     "operations": {
-      "profile_passes": 8,
+      "profile_passes": 0,
       "pocket_passes": 8,
       "bore_passes": 0,
-      "total_passes": 16,
+      "total_passes": 8,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 1412.4633,
-      "feed_time_s": 3339.7084999999997,
-      "total_time_s": 4752.1718
+      "rapid_time_s": 433.45709999999997,
+      "feed_time_s": 8008.2425,
+      "total_time_s": 8441.6996
     },
     "tabs": {
       "detected_count": 0,

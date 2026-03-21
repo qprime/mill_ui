@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-03-21T16:33:12.610433+00:00"
+    "created_at": "2026-03-21T18:17:47.423507+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.06,
+    "extraction_time_ms": 1.08,
     "document": {
       "width_mm": 1398.175,
       "height_mm": 1651.175,
@@ -700,22 +700,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 16.2112,
+    "extraction_time_ms": 7.9205,
     "summary": {
-      "total_lines": 6833,
-      "comment_lines": 59,
-      "motion_lines": 5848,
+      "total_lines": 3896,
+      "comment_lines": 37,
+      "motion_lines": 3837,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 4588
+      "feed_lines": 3503
     },
     "motion": {
-      "g0_count": 2166,
-      "g1_count": 3682,
+      "g0_count": 336,
+      "g1_count": 3501,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 297153.0263,
-      "total_feed_distance_mm": 231851.5624
+      "total_rapid_distance_mm": 15062.049200000001,
+      "total_feed_distance_mm": 480342.9824
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -735,11 +735,10 @@
         -4.5,
         -4.0,
         -3.5,
-        -3.317,
         -3.0,
         -1.5
       ],
-      "depth_count": 17,
+      "depth_count": 16,
       "max_single_plunge_mm": 24.0
     },
     "xy_bounds": {
@@ -766,61 +765,39 @@
       ]
     },
     "operations": {
-      "profile_passes": 22,
+      "profile_passes": 0,
       "pocket_passes": 22,
       "bore_passes": 0,
-      "total_passes": 44,
+      "total_passes": 22,
       "operation_names": [
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=6.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=6.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=6.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=6.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline",
-        "BEGIN rough pocket cleanup=0.250mm sd=3.500 so=5.080",
-        "pocket_raster so=5.080 sd=3.500 depth=4.000",
-        "BEGIN finish profile pass",
-        "profile_outline"
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000",
+        "BEGIN spiral pocket sd=3.500 so=5.080",
+        "pocket_spiral so=5.080 sd=3.500 depth=4.000"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 3565.8363999999997,
-      "feed_time_s": 12257.1906,
-      "total_time_s": 15823.027
+      "rapid_time_s": 180.7446,
+      "feed_time_s": 29296.6023,
+      "total_time_s": 29477.3469
     },
     "tabs": {
       "detected_count": 52,

@@ -154,10 +154,138 @@ void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
   moves.push_back(make_cut(end_point.x, end_point.y, target_z, feed_xy));
 }
 
-}  // namespace
+double shoelace_area(const Polygon& poly) {
+  double area = 0.0;
+  size_t n = poly.size();
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = (i + 1) % n;
+    area += poly[i].x * poly[j].y;
+    area -= poly[j].x * poly[i].y;
+  }
+  return 0.5 * area;
+}
 
-Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
-                  double safe_z_mm, double ramp_angle_deg) {
+bool is_convex(const Polygon& poly) {
+  size_t n = poly.size();
+  if (n < 3) return false;
+
+  bool has_pos = false;
+  bool has_neg = false;
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = (i + 1) % n;
+    size_t k = (i + 2) % n;
+    double dx1 = poly[j].x - poly[i].x;
+    double dy1 = poly[j].y - poly[i].y;
+    double dx2 = poly[k].x - poly[j].x;
+    double dy2 = poly[k].y - poly[j].y;
+    double cross = dx1 * dy2 - dy1 * dx2;
+    if (cross > kEps) has_pos = true;
+    if (cross < -kEps) has_neg = true;
+    if (has_pos && has_neg) return false;
+  }
+  return true;
+}
+
+Polygon ensure_cw(const Polygon& poly) {
+  if (shoelace_area(poly) > 0.0) {
+    Polygon rev(poly.rbegin(), poly.rend());
+    return rev;
+  }
+  return poly;
+}
+
+Polygon strip_closing_vertex(const Polygon& poly) {
+  if (poly.size() >= 2 &&
+      std::abs(poly.front().x - poly.back().x) < kEps &&
+      std::abs(poly.front().y - poly.back().y) < kEps) {
+    return Polygon(poly.begin(), poly.end() - 1);
+  }
+  return poly;
+}
+
+Polygon inset_convex(const Polygon& poly, double offset) {
+  size_t n = poly.size();
+  if (n < 3 || offset < kEps) return poly;
+
+  double area = shoelace_area(poly);
+  double winding = (area > 0.0) ? -1.0 : 1.0;
+
+  struct ShiftedEdge {
+    Vec2 p0, p1;
+  };
+  std::vector<ShiftedEdge> edges(n);
+
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = (i + 1) % n;
+    double dx = poly[j].x - poly[i].x;
+    double dy = poly[j].y - poly[i].y;
+    double len = std::hypot(dx, dy);
+    if (len < kEps) {
+      edges[i] = {{poly[i].x, poly[i].y}, {poly[j].x, poly[j].y}};
+      continue;
+    }
+    double nx = winding * dy / len;
+    double ny = winding * (-dx) / len;
+    double sx = offset * nx;
+    double sy = offset * ny;
+    edges[i] = {
+        {poly[i].x + sx, poly[i].y + sy},
+        {poly[j].x + sx, poly[j].y + sy}};
+  }
+
+  Polygon result(n);
+  for (size_t i = 0; i < n; ++i) {
+    size_t prev = (i + n - 1) % n;
+    const auto& e0 = edges[prev];
+    const auto& e1 = edges[i];
+
+    double d0x = e0.p1.x - e0.p0.x;
+    double d0y = e0.p1.y - e0.p0.y;
+    double d1x = e1.p1.x - e1.p0.x;
+    double d1y = e1.p1.y - e1.p0.y;
+
+    double denom = d0x * d1y - d0y * d1x;
+    if (std::abs(denom) < kEps) {
+      result[i] = e1.p0;
+      continue;
+    }
+
+    double dx = e1.p0.x - e0.p0.x;
+    double dy = e1.p0.y - e0.p0.y;
+    double t = (dx * d1y - dy * d1x) / denom;
+    result[i] = {e0.p0.x + t * d0x, e0.p0.y + t * d0y};
+  }
+
+  double result_area = shoelace_area(result);
+  if ((area > 0.0 && result_area <= kEps) || (area < 0.0 && result_area >= -kEps)) {
+    return {};
+  }
+  if (std::abs(result_area) >= std::abs(area) - kEps) {
+    return {};
+  }
+  if (!is_convex(result)) {
+    return {};
+  }
+  return result;
+}
+
+size_t longest_edge_index(const Polygon& poly) {
+  size_t n = poly.size();
+  size_t best = 0;
+  double best_len = 0.0;
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = (i + 1) % n;
+    double len = seg_length(poly[i], poly[j]);
+    if (len > best_len) {
+      best_len = len;
+      best = i;
+    }
+  }
+  return best;
+}
+
+Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
+                         double safe_z_mm, double ramp_angle_deg) {
   const Bounds b = bounds_of(face.outer);
   const double safe_z = safe_z_mm;
   const double depth = -std::abs(face.depth);
@@ -206,6 +334,138 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
   }
 
   return paths;
+}
+
+Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double depth_val,
+                         double step_over_mm, double step_down_mm,
+                         double safe_z_mm, double ramp_angle_deg) {
+  const double safe_z = safe_z_mm;
+  const double depth = -std::abs(depth_val);
+  const double tool_d = tool.diameter <= 0.0 ? 3.0 : tool.diameter;
+  const double tool_r = 0.5 * tool_d;
+  const double default_step_down = std::min(3.0, 0.5 * tool_d);
+  const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
+  const double step_over = std::max(0.1, step_over_mm);
+
+  Polygon outer_raw = ensure_cw(outer_stripped);
+
+  Polygon outermost = inset_convex(outer_raw, tool_r);
+  if (outermost.empty()) {
+    return Paths(1);
+  }
+
+  Paths paths(1);
+  Path& moves = paths.front();
+  moves.reserve(256);
+
+  moves.push_back(make_comment(
+      "pocket_spiral so=" + fmt3(step_over) + " sd=" + fmt3(step_down) +
+      " depth=" + fmt3(std::abs(depth))));
+  moves.push_back(make_set_rpm(tool.rpm));
+  moves.push_back(make_set_feed(tool.feed_xy));
+
+  std::vector<Polygon> rings;
+  {
+    Polygon ring = outermost;
+    double accumulated_offset = 0.0;
+    while (!ring.empty()) {
+      rings.push_back(ring);
+      accumulated_offset += step_over;
+      ring = inset_convex(outermost, accumulated_offset);
+    }
+  }
+
+  std::vector<double> z_levels;
+  {
+    double z = 0.0;
+    while (z > depth + kEps) {
+      double z_next = std::max(depth, z - step_down);
+      z_levels.push_back(z_next);
+      z = z_next;
+      if (std::abs(z - depth) < kEps) break;
+    }
+  }
+
+  double prev_z = 0.0;
+  for (double layer_z : z_levels) {
+    const Polygon& first_ring = rings[0];
+    size_t n0 = first_ring.size();
+    size_t ramp_edge = longest_edge_index(first_ring);
+    size_t ramp_start_idx = ramp_edge;
+    size_t ramp_end_idx = (ramp_edge + 1) % n0;
+    Vec2 ramp_path[2] = {first_ring[ramp_start_idx], first_ring[ramp_end_idx]};
+    emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z,
+                        ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
+    moves.push_back(make_set_feed(tool.feed_xy));
+
+    for (size_t ring_idx = 0; ring_idx < rings.size(); ++ring_idx) {
+      const Polygon& ring = rings[ring_idx];
+      size_t n = ring.size();
+
+      size_t start_vertex = (ring_idx == 0) ? (ramp_end_idx + 1) % n : 0;
+
+      bool has_next = (ring_idx + 1 < rings.size());
+
+      if (!has_next) {
+        for (size_t step = 0; step < n; ++step) {
+          size_t vi = (start_vertex + step) % n;
+          moves.push_back(make_cut(ring[vi].x, ring[vi].y, std::nullopt));
+        }
+        moves.push_back(make_cut(ring[start_vertex % n].x, ring[start_vertex % n].y, std::nullopt));
+      } else {
+        size_t edges_to_full = (ring_idx == 0) ? n - 1 : n;
+        for (size_t step = 0; step < edges_to_full; ++step) {
+          size_t vi = (start_vertex + step) % n;
+          size_t vi_next = (start_vertex + step + 1) % n;
+
+          bool is_last_edge = (step == edges_to_full - 1);
+          if (!is_last_edge) {
+            moves.push_back(make_cut(ring[vi_next].x, ring[vi_next].y, std::nullopt));
+          } else {
+            const Vec2& A = ring[vi];
+            const Vec2& B = ring[vi_next];
+            const Vec2& T = rings[ring_idx + 1][0];
+
+            double dx = B.x - A.x;
+            double dy = B.y - A.y;
+            double len2 = dx * dx + dy * dy;
+            double t_param = 0.0;
+            if (len2 > kEps) {
+              t_param = std::clamp(((T.x - A.x) * dx + (T.y - A.y) * dy) / len2, 0.0, 1.0);
+            }
+            Vec2 P = {A.x + t_param * dx, A.y + t_param * dy};
+            moves.push_back(make_cut(P.x, P.y, std::nullopt));
+            moves.push_back(make_cut(T.x, T.y, std::nullopt));
+          }
+        }
+      }
+    }
+
+    moves.push_back(make_retract(safe_z));
+    prev_z = layer_z;
+  }
+
+  return paths;
+}
+
+}  // namespace
+
+Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
+                  double safe_z_mm, double ramp_angle_deg, PocketStrategy strategy) {
+  Polygon outer = strip_closing_vertex(face.outer);
+  if (strategy == PocketStrategy::Spiral && is_convex(outer)) {
+    return plan_pocket_spiral(outer, tool, face.depth, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
+  }
+
+  if (strategy == PocketStrategy::Spiral) {
+    Paths paths = plan_pocket_raster(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
+    if (!paths.empty() && !paths.front().empty()) {
+      paths.front().insert(paths.front().begin(), make_comment("spiral fallback: concave polygon"));
+    }
+    return paths;
+  }
+
+  return plan_pocket_raster(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm, double step_down_mm,

@@ -2,10 +2,10 @@
   "timing": {
     "ir_ms": 0.06,
     "hints_ms": 0.02,
-    "plan_ms": 3.31,
-    "gcode_ms": 4.2,
-    "svg_ms": 0.68,
-    "total_ms": 8.27
+    "plan_ms": 4.94,
+    "gcode_ms": 6.74,
+    "svg_ms": 0.65,
+    "total_ms": 12.41
   },
   "constraint_audit": {
     "edge_feature": {
@@ -15,10 +15,10 @@
     }
   },
   "complexity": {
-    "total_moves": 1558,
-    "rapid_moves": 125,
-    "cut_moves": 1151,
-    "rapid_ratio": 0.08
+    "total_moves": 2346,
+    "rapid_moves": 3,
+    "cut_moves": 2309,
+    "rapid_ratio": 0.001
   },
   "fidelity": {
     "tool_changes": 3,
@@ -26,7 +26,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 628
+        "move_count": 1416
       },
       {
         "name": "edge",
@@ -41,12 +41,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 37791,
-    "total_lines": 1574,
+    "total_bytes": 67141,
+    "total_lines": 2364,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 11744,
-        "lines": 638
+        "bytes": 41094,
+        "lines": 1428
       },
       "edge-12.70mm": {
         "bytes": 8976,

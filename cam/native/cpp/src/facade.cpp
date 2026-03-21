@@ -39,8 +39,8 @@ std::vector<Polygon> offset_outset(const Polygon& poly, double radius_mm) {
 }
 
 Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
-                  double safe_z_mm, double ramp_angle_deg) {
-  return algo::plan_pocket(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
+                  double safe_z_mm, double ramp_angle_deg, PocketStrategy strategy) {
+  return algo::plan_pocket(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg, strategy);
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm, double step_down_mm,

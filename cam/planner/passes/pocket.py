@@ -12,6 +12,7 @@ from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
+from cam.primitives import polygon as polygon_prim
 
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
@@ -47,6 +48,7 @@ def _pocket_with_allowance(
     finish_allowance_mm: float,
     tool: ToolSelection,
     accumulator: PassAccumulator,
+    pocket_strategy: str = "spiral",
 ) -> None:
     from cam.ops.pocket import pocket_raster
 
@@ -56,7 +58,12 @@ def _pocket_with_allowance(
     rough_shape = offset_rect_shape(width, height, center, -(tool_r + cleanup_offset_mm + rough_allowance_mm))
     if rough_shape is not None:
         rough_moves = pocket_raster(
-            rough_shape, record.setup, depth_mm=cut_depth, stepover=step_over, stepdown=step_down
+            rough_shape,
+            record.setup,
+            depth_mm=cut_depth,
+            stepover=step_over,
+            stepdown=step_down,
+            strategy=pocket_strategy,
         )
         record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
 
@@ -159,7 +166,12 @@ def _plan_rest_pocket(
     rough_shape = offset_rect_shape(width, height, center, -rough_wall_offset)
     if rough_shape is not None:
         rough_moves = pocket_raster(
-            rough_shape, rough_record.setup, depth_mm=cut_depth, stepover=rough_step_over, stepdown=rough_step_down
+            rough_shape,
+            rough_record.setup,
+            depth_mm=cut_depth,
+            stepover=rough_step_over,
+            stepdown=rough_step_down,
+            strategy=config.pocket_strategy,
         )
         rough_record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
 
@@ -195,6 +207,7 @@ def _plan_rest_pocket(
                 depth_mm=cut_depth,
                 stepover=finish_step_over,
                 stepdown=finish_step_down,
+                strategy=config.pocket_strategy,
             )
             rest_record.add_moves(offset_moves_z(corner_moves, start_depth), increment=0)
 
@@ -311,6 +324,7 @@ def plan_pocket_passes(
                     finish_allowance_mm=finish_allow,
                     tool=tool,
                     accumulator=accumulator,
+                    pocket_strategy=config.pocket_strategy,
                 )
             else:
                 record.add_moves(
@@ -323,6 +337,7 @@ def plan_pocket_passes(
                         cleanup_offset_mm=config.cleanup_offset_mm,
                         start_depth_mm=start_depth,
                         finish_perimeter=config.pocket_finish_perimeter,
+                        pocket_strategy=config.pocket_strategy,
                     ),
                     increment=1,
                 )
@@ -352,11 +367,11 @@ def plan_pocket_passes(
             pts = sg.points or ()
             if not pts:
                 continue
+            shape = polygon_prim(list(pts), center=center)
             xs = [float(p[0]) for p in pts]
             ys = [float(p[1]) for p in pts]
             width = max(xs) - min(xs)
             height = max(ys) - min(ys)
-            shape = rect_shape(width, height, center)
             if has_allowance:
                 assert et is not None
                 rough_allow = et.rough_allowance_mm or 0.0
@@ -375,6 +390,7 @@ def plan_pocket_passes(
                     finish_allowance_mm=finish_allow,
                     tool=tool,
                     accumulator=accumulator,
+                    pocket_strategy=config.pocket_strategy,
                 )
             else:
                 record.add_moves(
@@ -387,6 +403,7 @@ def plan_pocket_passes(
                         cleanup_offset_mm=config.cleanup_offset_mm,
                         start_depth_mm=start_depth,
                         finish_perimeter=config.pocket_finish_perimeter,
+                        pocket_strategy=config.pocket_strategy,
                     ),
                     increment=1,
                 )

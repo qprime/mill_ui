@@ -75,7 +75,7 @@ def _lift_item(item: Item) -> AtPosition | None:
         )
         return AtPosition(x_mm=cx, y_mm=cy, child=polygon)
 
-    return None
+    raise ValueError(f"Unknown shape type: {item.type!r}")
 
 
 def lift_layout_ast(ast: LayoutAST) -> CompositionalLayoutAST:

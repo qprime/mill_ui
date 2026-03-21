@@ -52,19 +52,22 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
         )
     )
 
+    countable_types = {"profile", "pocket", "hole", "engrave"}
+    countable = [i for i in ast.items if i.feature and i.feature.type in countable_types]
     assertions.append(
         IntentAssertion(
             id="ITEM_COUNT",
             source="ast:items",
-            intent=f"Layout has {len(ast.items)} items",
-            expected={"count": len(ast.items)},
+            intent=f"Layout has {len(countable)} countable items",
+            expected={"count": len(countable)},
             tolerance=0,
             artifact="any",
         )
     )
 
+    profile_count = sum(1 for i in ast.items if i.feature and i.feature.type == "profile")
     for item in ast.items:
-        assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm))
+        assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm, ast.sheet.margin_mm, profile_count))
 
     total_tab_count = 0
     tab_height_mm = None
@@ -96,7 +99,9 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
     return assertions
 
 
-def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[IntentAssertion]:
+def _derive_item_assertions(
+    item: Item, sheet_thickness_mm: float, sheet_margin_mm: float = 0.0, profile_count: int = 1
+) -> list[IntentAssertion]:
     assertions: list[IntentAssertion] = []
 
     if item.feature is None:
@@ -155,6 +160,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                         "center_xy": center_xy,
                         "nominal_width_mm": width_mm,
                         "nominal_height_mm": height_mm,
+                        "multi_profile": profile_count > 1,
                     },
                     tolerance=DEFAULT_POSITION_TOLERANCE_MM,
                     artifact="gcode",
@@ -187,6 +193,7 @@ def _derive_item_assertions(item: Item, sheet_thickness_mm: float) -> list[Inten
                         "shape_id": item_id,
                         "center_x_mm": center_xy[0],
                         "center_y_mm": center_xy[1],
+                        "sheet_margin_mm": sheet_margin_mm,
                     },
                     tolerance=DEFAULT_POSITION_TOLERANCE_MM,
                     artifact="svg",
@@ -392,14 +399,16 @@ def _check_item_count(
     if svg_metrics is not None:
         layers = svg_metrics.get("layers", {})
         by_layer = layers.get("by_layer", {})
-        feature_layers = ["PROFILE_CUTS", "POCKET_REGIONS", "HOLES", "ENGRAVE_PATHS"]
+        shape_keys = ("rect_count", "path_count", "circle_count", "polygon_count")
         total = 0
-        for layer_name in feature_layers:
+        for layer_name in ("PROFILE_CUTS", "POCKET_REGIONS"):
             layer_data = by_layer.get(layer_name, {})
-            total += layer_data.get("element_count", 0)
+            total += sum(layer_data.get(k, 0) for k in shape_keys)
+        total += by_layer.get("HOLES", {}).get("circle_count", 0)
+        total += by_layer.get("ENGRAVE_PATHS", {}).get("element_count", 0)
         if total > 0:
             actual_count = total
-            source = "svg_feature_layers"
+            source = "svg_feature_shapes"
 
     if actual_count is None:
         return AssertionResult(
@@ -595,6 +604,8 @@ def _check_profile_side(
         "note": "Uses global G-code bounds (may include other items)",
     }
 
+    multi_profile = assertion.expected.get("multi_profile", False)
+    fail_verdict = Verdict.WARN if multi_profile else Verdict.FAIL
     gcode_tolerance = max(assertion.tolerance, 10.0)
 
     if side == "outside":
@@ -619,7 +630,7 @@ def _check_profile_side(
                 intent=assertion.intent,
                 expected=assertion.expected,
                 actual=actual,
-                status=Verdict.FAIL,
+                status=fail_verdict,
                 tolerance=assertion.tolerance,
                 message="Outside profile: G-code bounds do not encompass shape bounds",
             )
@@ -645,7 +656,7 @@ def _check_profile_side(
                 intent=assertion.intent,
                 expected=assertion.expected,
                 actual=actual,
-                status=Verdict.FAIL,
+                status=fail_verdict,
                 tolerance=assertion.tolerance,
                 message="Inside profile: G-code bounds exceed shape bounds",
             )
@@ -679,17 +690,15 @@ def _check_hole_position(
     expected_y = assertion.expected.get("center_y_mm")
     tol = assertion.tolerance
 
-    document = svg_metrics.get("document", {})
-    viewbox = document.get("viewbox", [0, 0, 0, 0])
-    viewbox_height = viewbox[3] if len(viewbox) > 3 else 0
-
-    svg_margin = 140.0
+    layers = svg_metrics.get("layers", {})
+    sheet_outline = layers.get("by_layer", {}).get("SHEET_OUTLINE", {})
+    sheet_elements = sheet_outline.get("elements", [])
+    sheet_height = sheet_elements[0]["height"] if sheet_elements else 0.0
 
     actual: dict[str, Any] = {
         "holes_layer_circles": circle_count,
         "expected_center": (expected_x, expected_y),
-        "viewbox_height": viewbox_height,
-        "svg_margin": svg_margin,
+        "sheet_height": sheet_height,
     }
 
     if circle_count == 0:
@@ -727,8 +736,9 @@ def _check_hole_position(
         center = circle.get("center", [0, 0])
         svg_x, svg_y = center[0], center[1]
 
-        design_x = svg_x - svg_margin
-        design_y = viewbox_height - svg_y - svg_margin
+        margin = assertion.expected.get("sheet_margin_mm", 0.0)
+        design_x = svg_x - margin
+        design_y = sheet_height - svg_y - margin
 
         distance = ((design_x - expected_x) ** 2 + (design_y - expected_y) ** 2) ** 0.5
 

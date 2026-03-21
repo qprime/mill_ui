@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "06_multiple_depths",
-    "created_at": "2026-03-21T15:00:56.366454+00:00"
+    "created_at": "2026-03-21T16:33:11.915098+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -349,7 +349,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.3543,
+    "extraction_time_ms": 15.0524,
     "summary": {
       "total_lines": 3850,
       "comment_lines": 18,

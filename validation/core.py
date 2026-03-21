@@ -151,16 +151,24 @@ class AssertionSummary:
     failed: int = 0
     results: list[AssertionResult] = field(default_factory=list)
 
+    warned: int = 0
+
     def add(self, result: AssertionResult) -> None:
         self.results.append(result)
         self.total += 1
         if result.status == Verdict.PASS:
             self.passed += 1
+        elif result.status == Verdict.WARN:
+            self.warned += 1
         else:
             self.failed += 1
 
     def verdict(self) -> Verdict:
-        return Verdict.FAIL if self.failed > 0 else Verdict.PASS
+        if self.failed > 0:
+            return Verdict.FAIL
+        if self.warned > 0:
+            return Verdict.WARN
+        return Verdict.PASS
 
     def to_dict(self) -> dict[str, Any]:
         return {

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "57_dogbone_pocket",
-    "created_at": "2026-03-21T15:01:00.076200+00:00"
+    "created_at": "2026-03-21T16:33:15.791544+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.23,
+    "extraction_time_ms": 0.25,
     "document": {
       "width_mm": 453.175,
       "height_mm": 379.175,
@@ -221,22 +221,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.3339,
+    "extraction_time_ms": 0.4346,
     "summary": {
-      "total_lines": 224,
+      "total_lines": 248,
       "comment_lines": 14,
-      "motion_lines": 182,
+      "motion_lines": 206,
       "tool_change_lines": 0,
       "spindle_lines": 6,
-      "feed_lines": 116
+      "feed_lines": 164
     },
     "motion": {
-      "g0_count": 74,
-      "g1_count": 108,
+      "g0_count": 50,
+      "g1_count": 156,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 2455.8478999999998,
-      "total_feed_distance_mm": 2489.9467
+      "total_rapid_distance_mm": 2191.8478999999998,
+      "total_feed_distance_mm": 2561.9467
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -246,13 +246,16 @@
         -7.5,
         -7.33,
         -7.0,
+        -6.5,
         -5.0,
+        -4.0,
         -3.83,
         -3.5,
         -2.5,
+        -1.5,
         -0.33
       ],
-      "depth_count": 9,
+      "depth_count": 12,
       "max_single_plunge_mm": 15.5
     },
     "xy_bounds": {
@@ -287,9 +290,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 29.4702,
-      "feed_time_s": 210.64780000000002,
-      "total_time_s": 240.118
+      "rapid_time_s": 26.3022,
+      "feed_time_s": 222.9906,
+      "total_time_s": 249.2928
     },
     "tabs": {
       "detected_count": 0,

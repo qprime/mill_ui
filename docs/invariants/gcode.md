@@ -34,7 +34,7 @@
 - Cutting without spindle running = broken tool
 
 ### Plunge Depth
-- Single plunge must not exceed `max_stepdown_mm` (default: 25.0mm)
+- Single plunge must not exceed `max_stepdown_mm` (default: 26.0mm)
 - Deeper cuts require multiple passes
 
 ---

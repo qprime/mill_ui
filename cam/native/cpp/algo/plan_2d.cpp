@@ -269,7 +269,8 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
   return paths;
 }
 
-Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_mm, double safe_z) {
+Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_mm, double safe_z,
+                 double retract_clearance_mm) {
   Paths paths(1);
   Path& moves = paths.front();
   moves.reserve(holes.size() * 8);
@@ -279,6 +280,7 @@ Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_m
   moves.push_back(make_set_feed(tool.feed_z));
 
   const double peck = peck_mm <= 0.0 ? 3.0 : peck_mm;
+  const double r_plane = retract_clearance_mm;
   for (const auto& hole : holes) {
     moves.push_back(make_rapid(hole.x, hole.y, safe_z));
     double z = 0.0;
@@ -286,12 +288,20 @@ Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_m
     while (z > depth + kEps) {
       double z_next = std::max(depth, z - peck);
       moves.push_back(make_cut(std::nullopt, std::nullopt, z_next));
-      moves.push_back(make_retract(safe_z));
       z = z_next;
       if (std::abs(z - depth) < kEps) {
         break;
       }
+      moves.push_back(make_cut(std::nullopt, std::nullopt, r_plane, tool.feed_z));
+      double reentry_target = z + 1.0;
+      double reentry_z = r_plane;
+      constexpr double kMaxReentryStep = 25.0;
+      while (reentry_z > reentry_target + kEps) {
+        reentry_z = std::max(reentry_target, reentry_z - kMaxReentryStep);
+        moves.push_back(make_cut(std::nullopt, std::nullopt, reentry_z, tool.feed_z));
+      }
     }
+    moves.push_back(make_retract(safe_z));
   }
 
   return paths;

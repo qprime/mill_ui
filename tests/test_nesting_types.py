@@ -45,6 +45,55 @@ def test_part_spec_area():
     print("  PASSED")
 
 
+def test_part_spec_area_circle():
+    import math
+
+    part = PartSpec(name="disc", width_mm=200, height_mm=200, shape="Circle")
+    expected = math.pi / 4 * 200 * 200
+    assert abs(part.area_mm2 - expected) < 0.01
+    assert abs(part.total_area_mm2 - expected) < 0.01
+
+
+def test_part_spec_area_polygon():
+    points = ((0.0, 0.0), (100.0, 0.0), (100.0, 100.0), (0.0, 100.0))
+    part = PartSpec(
+        name="square_poly",
+        width_mm=100,
+        height_mm=100,
+        shape="Polygon",
+        geometry_points=points,
+    )
+    assert abs(part.area_mm2 - 10000) < 0.01
+
+
+def test_part_spec_area_triangle():
+    points = ((0.0, 0.0), (100.0, 0.0), (50.0, 100.0))
+    part = PartSpec(
+        name="tri",
+        width_mm=100,
+        height_mm=100,
+        shape="Triangle",
+        geometry_points=points,
+    )
+    assert abs(part.area_mm2 - 5000) < 0.01
+
+
+def test_part_spec_area_rounded_rect():
+    part = PartSpec(name="panel", width_mm=100, height_mm=200, shape="RoundedRect")
+    assert part.area_mm2 == 20000
+
+
+def test_sheet_layout_utilization_circle():
+    import math
+
+    sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, kerf_mm=6)
+    circle_part = PartSpec(name="disc", width_mm=200, height_mm=200, shape="Circle")
+    placement = NestedPart(part_spec=circle_part, x_mm=100, y_mm=100)
+    layout = SheetLayout(sheet_spec=sheet, placements=(placement,))
+    expected_area = math.pi / 4 * 200 * 200
+    assert abs(layout.parts_area_mm2 - expected_area) < 0.01
+
+
 def test_part_spec_validation():
     print("Running test_part_spec_validation...")
 

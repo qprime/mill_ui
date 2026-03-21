@@ -77,6 +77,16 @@ class WasteRect:
         return self.y + self.height / 2
 
 
+def _shoelace_area(points: tuple[tuple[float, float], ...]) -> float:
+    n = len(points)
+    area = 0.0
+    for i in range(n):
+        x0, y0 = points[i]
+        x1, y1 = points[(i + 1) % n]
+        area += x0 * y1 - x1 * y0
+    return abs(area) / 2
+
+
 @dataclass(frozen=True)
 class PartSpec:
     name: str
@@ -101,6 +111,14 @@ class PartSpec:
 
     @property
     def area_mm2(self) -> float:
+        import math
+
+        shape = self.shape or "Rect"
+        if shape == "Circle":
+            diameter = min(self.width_mm, self.height_mm)
+            return math.pi / 4 * diameter * diameter
+        if shape in ("Polygon", "Triangle") and self.geometry_points:
+            return _shoelace_area(self.geometry_points)
         return self.width_mm * self.height_mm
 
     @property
@@ -299,7 +317,7 @@ class SheetLayout:
 
     @property
     def parts_area_mm2(self) -> float:
-        return sum(p.effective_width_mm * p.effective_height_mm for p in self.placements)
+        return sum(p.part_spec.area_mm2 for p in self.placements)
 
     @property
     def utilization(self) -> float:

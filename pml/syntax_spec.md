@@ -150,26 +150,26 @@ The `Surface` top-level key adds full-width raster facing passes — for spoilbo
 
 ```yaml
 Surface:
-  depth: 0.5mm          # Required — depth per pass
+  depth-per-pass: 0.5mm # Required — depth per pass
   passes: 2             # Optional, default 1 — number of stacked passes
   stepover: 70%         # Optional, default 70% — tool diameter percentage
   direction: x          # Optional, default "x" — raster direction ("x" or "y")
   cool_every: 5         # Optional, default 0 — retract every N rows (0 = disabled)
   cool_dwell: 3s        # Optional, default 0s — dwell time at safe-z per cooling retract
-  margin: 5mm           # Optional, default 0mm — overscan beyond working area
+  margin-overrun: 5mm   # Optional, default 0mm — overscan beyond working area
 ```
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `depth` | dimension | *required* | Material removal per pass |
-| `passes` | integer | 1 | Number of stacked passes (each removes `depth` more) |
+| `depth-per-pass` | dimension | *required* | Material removal per pass |
+| `passes` | integer | 1 | Number of stacked passes (each removes `depth-per-pass` more) |
 | `stepover` | percentage | 70% | Tool diameter overlap between rows |
 | `direction` | `x` or `y` | `x` | Raster sweep direction |
 | `cool_every` | integer | 0 | Insert cooling retract every N rows (0 = disabled) |
 | `cool_dwell` | duration | 0s | Dwell time at safe-z during cooling retracts |
-| `margin` | dimension | 0mm | Overscan beyond working area edges |
+| `margin-overrun` | dimension | 0mm | Overscan beyond working area edges |
 
-Multi-pass example: with `depth: 0.5mm` and `passes: 3`, pass 0 cuts 0→0.5mm, pass 1 cuts 0.5→1.0mm, pass 2 cuts 1.0→1.5mm. Surface items are exempt from working-area bounds validation (overscan is intentional).
+Multi-pass example: with `depth-per-pass: 0.5mm` and `passes: 3`, pass 0 cuts 0→0.5mm, pass 1 cuts 0.5→1.0mm, pass 2 cuts 1.0→1.5mm. Surface items are exempt from working-area bounds validation (overscan is intentional).
 
 ## G-code Output Modes
 

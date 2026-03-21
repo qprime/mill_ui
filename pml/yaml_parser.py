@@ -827,9 +827,9 @@ def parse_node(data: dict, path: str = "") -> Any:
 def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     if block is None:
         return None
-    depth_mm = parse_dimension(_require(block, "depth", "Surface"))
+    depth_mm = parse_dimension(_require(block, "depth-per-pass", "Surface"))
     if depth_mm <= 0.0:
-        raise PMLParseError("Surface depth must be > 0", "Surface")
+        raise PMLParseError("Surface depth-per-pass must be > 0", "Surface")
     passes = int(block.get("passes", 1))
     if passes < 1:
         raise PMLParseError("Surface passes must be >= 1", "Surface")
@@ -843,9 +843,9 @@ def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     direction = str(block.get("direction", "x"))
     if direction not in ("x", "y"):
         raise PMLParseError(f"Surface direction must be 'x' or 'y', got '{direction}'", "Surface")
-    margin_mm = parse_dimension(block.get("margin", "0mm"))
+    margin_mm = parse_dimension(block.get("margin-overrun", "0mm"))
     if margin_mm < 0.0:
-        raise PMLParseError("Surface margin must be >= 0", "Surface")
+        raise PMLParseError("Surface margin-overrun must be >= 0", "Surface")
     cool_every = int(block.get("cool_every", 0))
     if cool_every < 0:
         raise PMLParseError("Surface cool_every must be >= 0", "Surface")

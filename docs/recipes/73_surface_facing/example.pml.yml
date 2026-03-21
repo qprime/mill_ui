@@ -1,4 +1,4 @@
-# mill_ui: 5df0d808
+# mill_ui: e57e8eda
 # generated: 2026-03-20
 
 Sheet:
@@ -7,7 +7,7 @@ Sheet:
   thickness: 19mm
   material: mdf
 Surface:
-  depth: 0.5mm
+  depth-per-pass: 0.5mm
   passes: 2
   stepover: 70%
   direction: x

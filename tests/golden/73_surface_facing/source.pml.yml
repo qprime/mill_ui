@@ -7,7 +7,7 @@ Sheet:
   thickness: 19mm
   material: mdf
 Surface:
-  depth: 0.5mm
+  depth-per-pass: 0.5mm
   passes: 2
   stepover: 70%
   direction: x

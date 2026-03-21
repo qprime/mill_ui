@@ -946,6 +946,156 @@ def test_svg_complex_path():
 
 
 # =============================================================================
+# File-based SVG tests
+# =============================================================================
+
+
+def test_extract_path_data_valid(tmp_path):
+    svg_file = tmp_path / "test.svg"
+    svg_file.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg"><path d="M 0 0 L 100 0 L 100 100 Z"/><path d="M 10 10 L 50 10"/></svg>'
+    )
+    from generators.svg.parser import extract_path_data
+
+    result = extract_path_data(str(svg_file))
+    assert "M 0 0 L 100 0 L 100 100 Z" in result
+    assert "M 10 10 L 50 10" in result
+
+
+def test_extract_path_data_no_paths(tmp_path):
+    import pytest
+
+    svg_file = tmp_path / "empty.svg"
+    svg_file.write_text('<svg xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100"/></svg>')
+    from generators.svg.parser import extract_path_data
+
+    with pytest.raises(SVGParseError):
+        extract_path_data(str(svg_file))
+
+
+def test_extract_path_data_missing_file():
+    import pytest
+
+    from generators.svg.parser import extract_path_data
+
+    with pytest.raises(FileNotFoundError):
+        extract_path_data("/nonexistent/path/logo.svg")
+
+
+def test_extract_path_data_malformed_xml(tmp_path):
+    import pytest
+
+    svg_file = tmp_path / "bad.svg"
+    svg_file.write_text("<svg><not closed")
+    from generators.svg.parser import extract_path_data
+
+    with pytest.raises(SVGParseError):
+        extract_path_data(str(svg_file))
+
+
+def test_parse_svg_file_uses_extract(tmp_path):
+    from generators.svg.parser import parse_svg_file
+
+    svg_file = tmp_path / "star.svg"
+    svg_file.write_text('<svg xmlns="http://www.w3.org/2000/svg"><path d="M 0 0 L 100 0 L 100 100 Z"/></svg>')
+    polylines = parse_svg_file(str(svg_file))
+    assert len(polylines) >= 1
+    assert len(polylines[0]) >= 3
+
+
+def test_svg_stamp_file_resolver(tmp_path):
+    from dataclasses import replace as dc_replace
+
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    svg_file = tmp_path / "shape.svg"
+    svg_file.write_text('<svg xmlns="http://www.w3.org/2000/svg"><path d="M 0 0 L 50 0 L 50 50 L 0 50 Z"/></svg>')
+
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    at:
+      x: 100mm
+      y: 100mm
+      width: 80mm
+      height: 80mm
+    children:
+      - SvgStamp:
+          path: "shape.svg"
+          depth: 0.5mm
+"""
+    ast = parse_pml_yaml(pml)
+    ast = dc_replace(ast, source_dir=str(tmp_path))
+    layout = resolve_layout(ast)
+    svg_items = [i for i in layout.items if i.shape_id and "svg" in i.shape_id]
+    assert len(svg_items) >= 1
+
+
+def test_svg_stamp_missing_source_dir():
+    import pytest
+
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    at:
+      x: 100mm
+      y: 100mm
+      width: 80mm
+      height: 80mm
+    children:
+      - SvgStamp:
+          path: "logo.svg"
+          depth: 0.5mm
+"""
+    ast = parse_pml_yaml(pml)
+    with pytest.raises(ValueError, match="source directory"):
+        resolve_layout(ast)
+
+
+def test_svg_stamp_missing_file(tmp_path):
+    from dataclasses import replace as dc_replace
+
+    import pytest
+
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    at:
+      x: 100mm
+      y: 100mm
+      width: 80mm
+      height: 80mm
+    children:
+      - SvgStamp:
+          path: "nonexistent.svg"
+          depth: 0.5mm
+"""
+    ast = parse_pml_yaml(pml)
+    ast = dc_replace(ast, source_dir=str(tmp_path))
+    with pytest.raises(ValueError, match="not found"):
+        resolve_layout(ast)
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 

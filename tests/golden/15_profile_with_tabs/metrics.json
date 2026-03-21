@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "15_profile_with_tabs",
-    "created_at": "2026-03-21T21:19:30.352344+00:00"
+    "created_at": "2026-03-21T21:40:04.608248+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.23,
+    "extraction_time_ms": 0.24,
     "document": {
       "width_mm": 753.175,
       "height_mm": 543.175,
@@ -207,7 +207,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9149,
+    "extraction_time_ms": 0.9385,
     "summary": {
       "total_lines": 184,
       "comment_lines": 3,

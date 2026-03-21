@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "08_svg_visualization",
-    "created_at": "2026-03-21T21:19:29.677622+00:00"
+    "created_at": "2026-03-21T21:40:03.932393+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -255,7 +255,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.5831,
+    "extraction_time_ms": 0.5749,
     "summary": {
       "total_lines": 394,
       "comment_lines": 10,

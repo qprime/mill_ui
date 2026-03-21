@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 from dataclasses import replace
 from typing import Any
@@ -32,6 +33,7 @@ from generators.area.x_panel import x_panel_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.svg.params import SVGPathParams
+from generators.svg.parser import SVGParseError, extract_path_data
 from generators.svg.stamp import svg_stamp_generator
 from layout_ast.compositional import (
     Arch,
@@ -93,19 +95,6 @@ from layout_ast.layout import (
 )
 
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
-
-
-def _read_svg_path_data(file_path: str) -> str:
-    import xml.etree.ElementTree as ET
-
-    tree = ET.parse(file_path)
-    root = tree.getroot()
-    ns = {"svg": "http://www.w3.org/2000/svg"}
-    paths = root.findall(".//path") + root.findall(".//svg:path", ns)
-    segments = [p.get("d", "") for p in paths if p.get("d")]
-    if not segments:
-        raise ValueError(f"No <path> elements found in SVG file: {file_path}")
-    return " ".join(segments)
 
 
 def _feature_from_profile_gen(node: ProfileGen) -> Feature:
@@ -1212,11 +1201,16 @@ class LayoutResolver:
 
         svg_path_data = node.svg_path
         if svg_path_data.lower().endswith(".svg"):
-            import os
-
-            source_dir = self.ast.source_dir or ""
-            file_path = os.path.join(source_dir, svg_path_data) if source_dir else svg_path_data
-            svg_path_data = _read_svg_path_data(file_path)
+            if not self.ast.source_dir:
+                raise ValueError(
+                    f"SvgStamp references file '{svg_path_data}' but no source directory is available. "
+                    "Use inline SVG path data or run from a PML file."
+                )
+            file_path = os.path.join(self.ast.source_dir, svg_path_data)
+            try:
+                svg_path_data = extract_path_data(file_path)
+            except FileNotFoundError:
+                raise ValueError(f"SvgStamp: SVG file not found: {file_path}") from None
 
         is_through = node.depth == "through"
         depth_mm = self.ast.sheet.thickness_mm if is_through else float(node.depth)
@@ -1235,7 +1229,7 @@ class LayoutResolver:
         try:
             generated_items = svg_stamp_generator(domain, generator_params, allow_empty=True)
             items.extend(generated_items)
-        except ValueError:
+        except (ValueError, SVGParseError):
             pass
 
     def _handle_split_horizontal(

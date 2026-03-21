@@ -82,30 +82,27 @@ def parse_svg_path(
     return polylines
 
 
-def parse_svg_file(
-    file_path: str,
-    tolerance: float = 0.1,
-) -> list[Polyline]:
+def extract_path_data(file_path: str) -> str:
     try:
         tree = ET.parse(file_path)
     except ET.ParseError as e:
         raise SVGParseError(f"Invalid SVG file: {e}") from e
 
     root = tree.getroot()
-
     ns = {"svg": "http://www.w3.org/2000/svg"}
-
     paths = root.findall(".//path") + root.findall(".//svg:path", ns)
+    segments = [p.get("d", "") for p in paths if p.get("d")]
+    if not segments:
+        raise SVGParseError(f"No <path> elements found in SVG file: {file_path}")
+    return " ".join(segments)
 
-    all_polylines: list[Polyline] = []
 
-    for path_elem in paths:
-        d = path_elem.get("d")
-        if d:
-            polylines = parse_svg_path(d, tolerance)
-            all_polylines.extend(polylines)
-
-    return all_polylines
+def parse_svg_file(
+    file_path: str,
+    tolerance: float = 0.1,
+) -> list[Polyline]:
+    combined = extract_path_data(file_path)
+    return parse_svg_path(combined, tolerance)
 
 
 _NUMBER_PATTERN = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")
@@ -420,6 +417,7 @@ __all__ = [
     "Polyline",
     "SVGParseError",
     "center_polylines",
+    "extract_path_data",
     "normalize_polylines",
     "parse_svg_file",
     "parse_svg_path",

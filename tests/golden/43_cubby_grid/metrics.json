@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "43_cubby_grid",
-    "created_at": "2026-03-21T21:19:32.657582+00:00"
+    "created_at": "2026-03-21T21:40:07.383389+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.41,
+    "extraction_time_ms": 1.76,
     "document": {
       "width_mm": 2183.175,
       "height_mm": 1529.175,
@@ -644,7 +644,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9336,
+    "extraction_time_ms": 2.3437,
     "summary": {
       "total_lines": 2745,
       "comment_lines": 47,

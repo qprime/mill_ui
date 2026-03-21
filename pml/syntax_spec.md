@@ -664,6 +664,8 @@ Inline path data example:
     scale: fit
 ```
 
+SvgStamp is a leaf node — it does not accept children.
+
 SVG files must contain `<path>` elements. Non-path elements (`<rect>`, `<circle>`, etc.) require "Object to Path" conversion in the design tool.
 
 ### Assembly Generators

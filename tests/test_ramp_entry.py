@@ -81,12 +81,19 @@ class TestProfileRampEntry:
         setup = _setup(3.0)
         shape = _rect_shape(200.0, 200.0)
         moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
-        retracts = [i for i, m in enumerate(moves) if isinstance(m, RetractMove)]
-        assert len(retracts) == 3
-        for pass_idx in range(3):
-            start = 0 if pass_idx == 0 else retracts[pass_idx - 1] + 1
-            pass_moves = moves[start : retracts[pass_idx]]
-            assert _has_xyz_ramp(pass_moves)
+        ramp_cuts = [
+            m
+            for m in moves
+            if isinstance(m, CutMove) and m.x is not None and m.y is not None and m.z is not None and m.z < 0
+        ]
+        target_depths = {-3.0, -6.0, -9.0}
+        reached_depths = set()
+        for c in ramp_cuts:
+            assert c.z is not None
+            for d in target_depths:
+                if abs(c.z - d) < 0.01:
+                    reached_depths.add(d)
+        assert reached_depths == target_depths
 
     def test_profile_open_boundary_fallback(self):
         from cam.types import Vec2 as V
@@ -171,6 +178,79 @@ class TestRampExplicitXYZ:
                 assert c.x is not None
                 assert c.y is not None
                 assert c.z is not None
+
+
+class TestProfileKeepdown:
+    def test_keepdown_no_intermediate_retracts(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        retracts = [m for m in moves if isinstance(m, RetractMove)]
+        assert len(retracts) == 1
+
+    def test_keepdown_final_retract_present(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        non_meta = [
+            m for m in moves if not isinstance(m, CommentMove) and not hasattr(m, "rpm") and not hasattr(m, "feed")
+        ]
+        last_move = non_meta[-1]
+        assert isinstance(last_move, RetractMove)
+
+    def test_keepdown_z_progression(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        ramp_cuts = [
+            m
+            for m in moves
+            if isinstance(m, CutMove) and m.x is not None and m.y is not None and m.z is not None and m.z < 0
+        ]
+        z_values: list[float] = []
+        for c in ramp_cuts:
+            assert c.z is not None
+            z_values.append(c.z)
+        for i in range(1, len(z_values)):
+            assert z_values[i] <= z_values[i - 1] + 0.01
+
+    def test_keepdown_no_rapids_between_passes(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        rapids = [m for m in moves if isinstance(m, RapidMove)]
+        assert len(rapids) == 1
+
+    def test_keepdown_disabled_when_no_ramp(self):
+        setup = _setup(0.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        retracts = [m for m in moves if isinstance(m, RetractMove)]
+        assert len(retracts) == 3
+
+    def test_keepdown_disabled_for_open_boundary(self):
+        from cam.types import Vec2 as V
+
+        open_pts = [V(0.0, 0.0), V(100.0, 0.0), V(100.0, 80.0), V(0.0, 80.0)]
+        shape = Shape2D(open_pts)
+        setup = _setup(3.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        retracts = [m for m in moves if isinstance(m, RetractMove)]
+        assert len(retracts) == 3
+
+    def test_keepdown_single_pass_still_retracts(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=3.0, step_down=3.0)
+        retracts = [m for m in moves if isinstance(m, RetractMove)]
+        assert len(retracts) == 1
+
+    def test_keepdown_invariant_ends_at_safe(self):
+        setup = _setup(3.0)
+        shape = _rect_shape(200.0, 200.0)
+        moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
+        retract_moves = [m for m in moves if isinstance(m, RetractMove)]
+        assert retract_moves[-1].z == setup.safe_z
 
 
 class TestRampWithHoldingStrategies:

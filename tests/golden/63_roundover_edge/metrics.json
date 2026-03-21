@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "63_roundover_edge",
-    "created_at": "2026-03-20T23:01:58.089010+00:00"
+    "created_at": "2026-03-21T15:01:00.354024+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2,
+    "extraction_time_ms": 0.19,
     "document": {
       "width_mm": 453.175,
       "height_mm": 543.175,
@@ -197,7 +197,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.946,
+    "extraction_time_ms": 0.9655,
     "summary": {
       "total_lines": 280,
       "comment_lines": 6,

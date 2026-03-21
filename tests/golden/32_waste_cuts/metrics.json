@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "32_waste_cuts",
-    "created_at": "2026-03-20T23:01:56.171751+00:00"
+    "created_at": "2026-03-21T15:00:58.471168+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.27,
+    "extraction_time_ms": 0.29,
     "document": {
       "width_mm": 1383.175,
       "height_mm": 973.175,
@@ -289,7 +289,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.4739,
+    "extraction_time_ms": 1.5016,
     "summary": {
       "total_lines": 354,
       "comment_lines": 4,

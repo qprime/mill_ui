@@ -98,7 +98,8 @@ double seg_length(const Vec2& a, const Vec2& b) {
 void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
                          double prev_z, double target_z,
                          double ramp_angle_deg, double safe_z,
-                         double feed_xy, double feed_z) {
+                         double feed_xy, double feed_z,
+                         bool keepdown = false) {
   if (path_len == 0) return;
 
   double step_down = std::abs(target_z - prev_z);
@@ -128,9 +129,11 @@ void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
   }
 
   const Vec2& ramp_start = path[0];
-  moves.push_back(make_rapid(ramp_start.x, ramp_start.y, safe_z));
-  if (std::abs(prev_z) > kEps) {
-    moves.push_back(make_cut(ramp_start.x, ramp_start.y, prev_z, feed_z));
+  if (!keepdown) {
+    moves.push_back(make_rapid(ramp_start.x, ramp_start.y, safe_z));
+    if (std::abs(prev_z) > kEps) {
+      moves.push_back(make_cut(ramp_start.x, ramp_start.y, prev_z, feed_z));
+    }
   }
 
   double remaining = ramp_dist;
@@ -231,6 +234,10 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
       break;
     }
 
+    bool can_keepdown = use_ramp > kEps && std::abs(prev_z) > kEps;
+    bool is_last_pass = std::max(z - step_down, depth_target) >= depth_target - kEps
+                        && std::abs(z - depth_target) < kEps;
+
     if (use_ramp > kEps) {
       std::vector<Vec2> rev_path;
       rev_path.reserve(boundary.size());
@@ -239,7 +246,8 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
       }
       rev_path.push_back(boundary[0]);
       emit_ramp_or_plunge(moves, rev_path.data(), rev_path.size(),
-                          prev_z, z, use_ramp, safe_z, tool.feed_xy, tool.feed_z);
+                          prev_z, z, use_ramp, safe_z, tool.feed_xy, tool.feed_z,
+                          can_keepdown);
     } else {
       const Vec2& start = boundary.front();
       moves.push_back(make_rapid(start.x, start.y, safe_z));
@@ -251,7 +259,10 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
       const Vec2& p = boundary[i];
       moves.push_back(make_cut(p.x, p.y, std::nullopt));
     }
-    moves.push_back(make_retract(safe_z));
+
+    if (is_last_pass || !(use_ramp > kEps)) {
+      moves.push_back(make_retract(safe_z));
+    }
     prev_z = z;
   }
 

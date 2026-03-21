@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "58_dogbone_joinery",
-    "created_at": "2026-03-20T23:01:57.822592+00:00"
+    "created_at": "2026-03-21T15:01:00.090872+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.4,
+    "extraction_time_ms": 0.41,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 1467.175,
@@ -462,22 +462,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8399,
+    "extraction_time_ms": 0.8299,
     "summary": {
-      "total_lines": 1155,
+      "total_lines": 939,
       "comment_lines": 41,
-      "motion_lines": 1081,
+      "motion_lines": 865,
       "tool_change_lines": 0,
       "spindle_lines": 9,
-      "feed_lines": 753
+      "feed_lines": 681
     },
     "motion": {
-      "g0_count": 331,
-      "g1_count": 750,
+      "g0_count": 187,
+      "g1_count": 678,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 18531.3535,
-      "total_feed_distance_mm": 126958.4196
+      "total_rapid_distance_mm": 17451.3535,
+      "total_feed_distance_mm": 125878.4196
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -505,7 +505,7 @@
         -0.288
       ],
       "depth_count": 20,
-      "max_single_plunge_mm": 24.0
+      "max_single_plunge_mm": 15.0
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -518,7 +518,6 @@
       "max_feed_rate": 1400.0,
       "feed_rates_used": [
         350.0,
-        396.0,
         1200.0,
         1400.0
       ]
@@ -546,9 +545,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 222.3763,
-      "feed_time_s": 9519.8904,
-      "total_time_s": 9742.266599999999
+      "rapid_time_s": 209.41629999999998,
+      "feed_time_s": 6815.0607,
+      "total_time_s": 7024.4771
     },
     "tabs": {
       "detected_count": 0,

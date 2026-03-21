@@ -29,6 +29,8 @@ On clear directives with known implementation paths, execute directly.
 
 Only ask the user when multiple valid approaches exist and the choice affects their workflow.
 
+**When tests or recipes fail unexpectedly:** Stop. Do not attempt to make the test pass. Analyze *why* the failure occurred — trace actual vs expected values back through the pipeline to find the root cause. If the failure reveals a flaw in your implementation, fix the implementation. If the failure reveals a flaw in the test's assumptions, raise it to the user. Never modify a test just to make it green.
+
 ## Do
 
 - Check the Capabilities table in CLAUDE.md before implementing anything
@@ -52,7 +54,7 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 
 ## Output Expectations
 
-- Working code that passes existing tests
+- Working code — if existing tests fail, diagnose before fixing
 - PML examples demonstrating new features
 - Recipe updates if adding capabilities
 - Clean, minimal diffs that do exactly what was asked

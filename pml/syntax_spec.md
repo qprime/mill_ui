@@ -895,6 +895,41 @@ Ring by subtracting inner from outer:
       - Pocket: {depth: 5mm}
 ```
 
+#### Shell
+
+Contour-following hollow border on any closed shape. Insets the parent shape by `wall` and removes the interior as a profile (through-cut) or pocket. Children are applied to the resulting ring (wall face).
+
+```yaml
+- Polygon:
+    points: [[0,0], [200,0], [200,150], [100,200], [0,150]]
+    children:
+    - Profile: {side: outside, depth: through}
+    - Shell:
+        wall: 15mm
+        interior: profile
+```
+
+Pocket interior with wall chamfer:
+
+```yaml
+- Circle:
+    diameter: 200mm
+    children:
+    - Shell:
+        wall: 20mm
+        interior: pocket
+        depth: 8mm
+        children:
+        - Chamfer: {width: 3mm, depth: 2mm}
+```
+
+| Key | Type | Required | Default | Description |
+|-----|------|----------|---------|-------------|
+| `wall` | dimension | yes | — | Wall thickness |
+| `interior` | string | yes | — | `"profile"` (through-cut) or `"pocket"` (flat-bottom) |
+| `depth` | dimension/string | no | `through` | Depth for interior removal. Required when `interior: pocket` |
+| `children` | list | no | — | Operations applied to wall ring (Chamfer, Roundover, Pocket, etc.) |
+
 #### Place
 
 Container with optional layout manager for positioning children:

@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "73_surface_facing",
-    "created_at": "2026-03-21T20:14:17.395415+00:00"
+    "created_at": "2026-03-21T20:40:44.920804+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -212,7 +212,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9657,
+    "extraction_time_ms": 0.9594,
     "summary": {
       "total_lines": 474,
       "comment_lines": 10,

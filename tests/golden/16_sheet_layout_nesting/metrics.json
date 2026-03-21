@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "16_sheet_layout_nesting",
-    "created_at": "2026-03-21T20:14:13.899931+00:00"
+    "created_at": "2026-03-21T20:40:41.340352+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -700,7 +700,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.8427,
+    "extraction_time_ms": 7.8747,
     "summary": {
       "total_lines": 3896,
       "comment_lines": 37,

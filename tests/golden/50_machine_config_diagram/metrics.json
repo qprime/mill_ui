@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "50_machine_config_diagram",
-    "created_at": "2026-03-21T20:14:16.423354+00:00"
+    "created_at": "2026-03-21T20:40:43.867660+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.26,
+    "extraction_time_ms": 0.25,
     "document": {
       "width_mm": 584.0,
       "height_mm": 523.5,

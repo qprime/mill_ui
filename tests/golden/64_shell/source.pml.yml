@@ -1,0 +1,34 @@
+# mill_ui: 74980d2f
+# generated: 2026-03-21
+
+Sheet:
+  width: 500mm
+  height: 400mm
+  thickness: 19mm
+  material: mdf
+children:
+- Polygon:
+    points: [[50,50], [250,50], [250,200], [150,300], [50,200]]
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Shell:
+        wall: 15mm
+        interior: profile
+- Circle:
+    at:
+      x: 400mm
+      y: 200mm
+      width: 150mm
+      height: 150mm
+    diameter: 150mm
+    children:
+    - Shell:
+        wall: 20mm
+        interior: pocket
+        depth: 8mm
+        children:
+        - Chamfer:
+            width: 3mm
+            depth: 2mm

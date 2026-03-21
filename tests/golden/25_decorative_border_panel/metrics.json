@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "25_decorative_border_panel",
-    "created_at": "2026-03-21T20:14:14.928045+00:00"
+    "created_at": "2026-03-21T20:40:42.370821+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.38,
+    "extraction_time_ms": 0.37,
     "document": {
       "width_mm": 503.175,
       "height_mm": 593.175,
@@ -260,7 +260,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.9392,
+    "extraction_time_ms": 1.9095,
     "summary": {
       "total_lines": 547,
       "comment_lines": 11,

@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "23_chamfered_cabinet_panel",
-    "created_at": "2026-03-21T20:14:14.913777+00:00"
+    "created_at": "2026-03-21T20:40:42.356603+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -233,7 +233,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.1606,
+    "extraction_time_ms": 0.1563,
     "summary": {
       "total_lines": 446,
       "comment_lines": 10,

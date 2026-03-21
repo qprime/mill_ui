@@ -42,6 +42,7 @@ from layout_ast.compositional import (
     Rect,
     RoundedRect,
     RoundoverGen,
+    ShellGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -493,6 +494,16 @@ def parse_node(data: dict, path: str = "") -> Any:
     elif node_type == "Subtract":
         return Subtract(
             inner_inset_mm=parse_dimension(_require(node_data, "inner_inset", f"{path}.Subtract")),
+            children=children,
+        )
+
+    elif node_type == "Shell":
+        depth_raw = node_data.get("depth", "through")
+        depth = parse_dimension_or_through(depth_raw)
+        return ShellGen(
+            wall_mm=parse_dimension(_require(node_data, "wall", f"{path}.Shell")),
+            interior=_require(node_data, "interior", f"{path}.Shell"),
+            depth=depth,
             children=children,
         )
 

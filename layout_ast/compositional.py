@@ -209,6 +209,14 @@ class XPanelGen:
 
 
 @dataclass(frozen=True)
+class ShellGen:
+    wall_mm: float
+    interior: str
+    depth: str | float
+    children: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True)
 class SplitHorizontal:
     n: int
     gap_mm: float = 0.0

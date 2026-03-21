@@ -1,11 +1,11 @@
 {
   "timing": {
-    "ir_ms": 0.77,
-    "hints_ms": 0.24,
-    "plan_ms": 5.86,
-    "gcode_ms": 7.48,
-    "svg_ms": 1.56,
-    "total_ms": 15.91
+    "ir_ms": 0.68,
+    "hints_ms": 0.21,
+    "plan_ms": 5.05,
+    "gcode_ms": 6.37,
+    "svg_ms": 1.33,
+    "total_ms": 13.65
   },
   "constraint_audit": {
     "dogbone": {

@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "24_shelf_dados_side",
-    "created_at": "2026-03-21T20:14:14.918871+00:00"
+    "created_at": "2026-03-21T20:40:42.361657+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -312,7 +312,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.6885,
+    "extraction_time_ms": 0.6918,
     "summary": {
       "total_lines": 267,
       "comment_lines": 15,

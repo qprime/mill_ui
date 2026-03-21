@@ -66,6 +66,7 @@ from layout_ast.compositional import (
     ResolvedRegion,
     RoundedRect,
     RoundoverGen,
+    ShellGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -1377,6 +1378,107 @@ class LayoutResolver:
         child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         self._resolve_node(node.child, child_region, items, child_params)
 
+    def _dispatch_children_on_ring_domain(
+        self,
+        ring_domain: Domain,
+        children: tuple[Any, ...],
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        ring_bounds = ring_domain.bounds
+        ring_region = ResolvedRegion(
+            x_min=ring_bounds.x_min,
+            y_min=ring_bounds.y_min,
+            x_max=ring_bounds.x_max,
+            y_max=ring_bounds.y_max,
+        )
+
+        child_params = {
+            **params,
+            "domain": ring_domain,
+            "domain_center": ring_region.center,
+        }
+        for child in children:
+            self._resolve_node(child, ring_region, items, child_params)
+
+    def _handle_shell_gen(
+        self,
+        node: ShellGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        if node.wall_mm <= 0:
+            raise ValueError(f"Shell: wall must be positive, got {node.wall_mm}")
+        if node.interior not in ("profile", "pocket"):
+            raise ValueError(f"Shell: interior must be 'profile' or 'pocket', got '{node.interior}'")
+        if node.interior == "pocket":
+            if node.depth == "through":
+                raise ValueError("Shell: interior=pocket requires numeric depth, not 'through'")
+            if not isinstance(node.depth, (int, float)) or node.depth <= 0:
+                raise ValueError(f"Shell: pocket depth must be positive, got {node.depth}")
+        for child in node.children:
+            if isinstance(child, ShellGen):
+                raise ValueError("Shell: nested Shell is not supported")
+
+        domain = params.get("domain")
+        if not domain:
+            domain = Domain.from_rectangle(region.width, region.height, center=region.center)
+
+        inner_multi = domain.inset(node.wall_mm)
+        if inner_multi.is_empty:
+            bounds = domain.bounds
+            raise ValueError(
+                f"Shell: wall {node.wall_mm}mm exceeds shape capacity. "
+                f"Domain bounds: {bounds.width:.1f}mm x {bounds.height:.1f}mm"
+            )
+        if len(inner_multi.domains) != 1:
+            raise ValueError(
+                f"Shell: wall inset produced {len(inner_multi.domains)} disjoint regions. "
+                f"Concave shapes with thick walls may split — reduce wall thickness or simplify shape."
+            )
+
+        inner_domain = inner_multi.domains[0]
+        inner_center = inner_domain.centroid
+        cx, cy = inner_center
+        inner_relative = [[pt[0] - cx, pt[1] - cy] for pt in inner_domain.outer_boundary]
+        inner_holes = [[[pt[0] - cx, pt[1] - cy] for pt in hole] for hole in inner_domain.inner_boundaries]
+
+        if node.interior == "profile":
+            depth_value = node.depth
+            is_through = depth_value == "through"
+            depth_mm = 0.0 if is_through else float(depth_value)
+            interior_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": inner_relative, "holes": inner_holes}),
+                placement=Placement(center_xy_mm=inner_center),
+                feature=Feature(
+                    type="profile",
+                    depth_mm=depth_mm,
+                    side="inside",
+                    is_through=is_through,
+                ),
+                shape_id=self._next_shape_id("shell_interior"),
+            )
+        else:
+            interior_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": inner_relative, "holes": inner_holes}),
+                placement=Placement(center_xy_mm=inner_center),
+                feature=Feature(
+                    type="pocket",
+                    depth_mm=float(node.depth),
+                ),
+                shape_id=self._next_shape_id("shell_interior"),
+            )
+        items.append(interior_item)
+
+        ring_domains = domain.subtract(inner_domain)
+        for ring_domain in ring_domains:
+            self._dispatch_children_on_ring_domain(ring_domain, node.children, items, params)
+
     def _handle_subtract(
         self,
         node: Subtract,
@@ -1391,21 +1493,7 @@ class LayoutResolver:
         ring_domains = outer.subtract(inner)
 
         for ring_domain in ring_domains:
-            ring_bounds = ring_domain.bounds
-            ring_region = ResolvedRegion(
-                x_min=ring_bounds.x_min,
-                y_min=ring_bounds.y_min,
-                x_max=ring_bounds.x_max,
-                y_max=ring_bounds.y_max,
-            )
-
-            child_params = {
-                **params,
-                "domain": ring_domain,
-                "domain_center": ring_region.center,
-            }
-            for child in node.children:
-                self._resolve_node(child, ring_region, items, child_params)
+            self._dispatch_children_on_ring_domain(ring_domain, node.children, items, params)
 
     def _handle_arch(
         self,
@@ -2486,6 +2574,7 @@ class LayoutResolver:
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,
+                ShellGen: LayoutResolver._handle_shell_gen,
                 Arch: LayoutResolver._handle_arch,
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,

@@ -372,6 +372,17 @@ class EngraveTextGen:
 
 
 @dataclass(frozen=True)
+class SvgStampGen:
+    svg_path: str
+    depth: str | float
+    feature_type: str = "engrave"
+    scale_mode: str = "fit"
+    svg_unit_mm: float = 1.0
+    center: bool = True
+    invert_y: bool = True
+
+
+@dataclass(frozen=True)
 class TemplateDef:
     name: str
     params: dict[str, float | str] = field(default_factory=dict)
@@ -547,3 +558,4 @@ class CompositionalLayoutAST:
     project: str | None = None
     kerf_width_mm: float | None = None
     surface: SurfaceDecl | None = None
+    source_dir: str | None = None

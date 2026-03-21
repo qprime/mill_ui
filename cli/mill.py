@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 from cam.pipeline import run_pipeline, write_pipeline_outputs
@@ -288,6 +289,7 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
     elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
         input_text = input_path.read_text(encoding="utf-8")
         comp_ast = parse_pml_yaml(input_text)
+        comp_ast = replace(comp_ast, source_dir=str(input_path.parent.resolve()))
         asts = resolve_layout_multi(comp_ast)
     else:
         print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
@@ -358,6 +360,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     input_text = source.read_text(encoding="utf-8")
     comp_ast = parse_pml_yaml(input_text)
+    comp_ast = replace(comp_ast, source_dir=str(source.parent.resolve()))
     asts = resolve_layout_multi(comp_ast)
 
     import shutil

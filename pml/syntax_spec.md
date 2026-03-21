@@ -639,6 +639,33 @@ Text engraving:
     orientation: horizontal
 ```
 
+#### SvgStamp
+
+Mill vector artwork from SVG files or inline path data:
+
+```yaml
+- SvgStamp:
+    path: "logo.svg"          # SVG file path (relative to PML file) or inline SVG path data
+    depth: 0.3mm              # Required. Machining depth, or "through"
+    feature: engrave           # engrave | pocket | profile (default: engrave)
+    scale: fit                 # fit | fill | none (default: fit)
+    svg_unit: 1.0             # SVG-unit-to-mm factor, only used when scale: none (default: 1.0)
+    center: true              # Center artwork within domain (default: true)
+    invert_y: true            # Flip Y axis for SVG y-down → CNC y-up (default: true)
+```
+
+Inline path data example:
+
+```yaml
+- SvgStamp:
+    path: "M 0 0 L 100 0 L 100 60 L 0 60 Z"
+    depth: through
+    feature: profile
+    scale: fit
+```
+
+SVG files must contain `<path>` elements. Non-path elements (`<rect>`, `<circle>`, etc.) require "Object to Path" conversion in the design tool.
+
 ### Assembly Generators
 
 #### Assembly

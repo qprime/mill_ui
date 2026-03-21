@@ -1,0 +1,53 @@
+# mill_ui: 4f1cce98
+# generated: 2026-03-21
+
+Sheet:
+  width: 600mm
+  height: 400mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: engraved_star
+    at:
+      x: 100mm
+      y: 200mm
+      width: 150mm
+      height: 150mm
+    children:
+      - Profile:
+          side: outside
+          depth: through
+      - SvgStamp:
+          path: "M 75 0 L 93 56 L 150 56 L 103 90 L 121 147 L 75 113 L 29 147 L 47 90 L 0 56 L 57 56 Z"
+          depth: 0.3mm
+
+- Rect:
+    id: pocketed_arrow
+    at:
+      x: 300mm
+      y: 200mm
+      width: 150mm
+      height: 150mm
+    children:
+      - Profile:
+          side: outside
+          depth: through
+      - SvgStamp:
+          path: "M 50 0 L 100 40 L 75 40 L 75 100 L 25 100 L 25 40 L 0 40 Z"
+          depth: 4mm
+          feature: pocket
+
+- Rect:
+    id: profile_cutout
+    at:
+      x: 500mm
+      y: 200mm
+      width: 100mm
+      height: 100mm
+    children:
+      - SvgStamp:
+          path: "M 0 0 C 33 66 66 66 100 0 L 100 100 L 0 100 Z"
+          depth: through
+          feature: profile
+          scale: fit

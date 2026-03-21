@@ -51,6 +51,7 @@ from layout_ast.compositional import (
     SplitVertical,
     Subtract,
     SurfaceDecl,
+    SvgStampGen,
     TemplateDef,
     Triangle,
     UseComponent,
@@ -211,6 +212,18 @@ def parse_node(data: dict, path: str = "") -> Any:
     node_data = data[node_type]
     if node_data is None:
         node_data = {}
+
+    if node_type == "SvgStamp":
+        depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))
+        return SvgStampGen(
+            svg_path=_require(node_data, "path", f"{path}.SvgStamp"),
+            depth=depth,
+            feature_type=node_data.get("feature", "engrave"),
+            scale_mode=node_data.get("scale", "fit"),
+            svg_unit_mm=float(node_data.get("svg_unit", 1.0)),
+            center=node_data.get("center", True),
+            invert_y=node_data.get("invert_y", True),
+        )
 
     children_data = node_data.get("children") if isinstance(node_data, dict) else None
     children = parse_children(children_data, f"{path}.{node_type}")

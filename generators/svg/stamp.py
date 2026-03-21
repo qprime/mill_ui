@@ -109,6 +109,7 @@ def svg_stamp_generator(
                 type=params.feature_type,
                 depth_mm=params.depth_mm,
                 side=feature_side,
+                is_through=params.is_through,
             ),
             shape_id=generate_shape_id("svg", i),
         )

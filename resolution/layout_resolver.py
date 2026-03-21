@@ -31,6 +31,8 @@ from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
+from generators.svg.params import SVGPathParams
+from generators.svg.stamp import svg_stamp_generator
 from layout_ast.compositional import (
     Arch,
     AssemblyDecl,
@@ -75,6 +77,7 @@ from layout_ast.compositional import (
     SplitVertical,
     Subtract,
     SurfaceDecl,
+    SvgStampGen,
     Triangle,
     UseComponent,
     WasteCuts,
@@ -90,6 +93,19 @@ from layout_ast.layout import (
 )
 
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
+
+
+def _read_svg_path_data(file_path: str) -> str:
+    import xml.etree.ElementTree as ET
+
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    ns = {"svg": "http://www.w3.org/2000/svg"}
+    paths = root.findall(".//path") + root.findall(".//svg:path", ns)
+    segments = [p.get("d", "") for p in paths if p.get("d")]
+    if not segments:
+        raise ValueError(f"No <path> elements found in SVG file: {file_path}")
+    return " ".join(segments)
 
 
 def _feature_from_profile_gen(node: ProfileGen) -> Feature:
@@ -1177,6 +1193,47 @@ class LayoutResolver:
                 orientation=node.orientation,
                 shape_id_prefix=shape_id_prefix,
             )
+            items.extend(generated_items)
+        except ValueError:
+            pass
+
+    def _handle_svg_stamp_gen(
+        self,
+        node: SvgStampGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        svg_path_data = node.svg_path
+        if svg_path_data.lower().endswith(".svg"):
+            import os
+
+            source_dir = self.ast.source_dir or ""
+            file_path = os.path.join(source_dir, svg_path_data) if source_dir else svg_path_data
+            svg_path_data = _read_svg_path_data(file_path)
+
+        is_through = node.depth == "through"
+        depth_mm = self.ast.sheet.thickness_mm if is_through else float(node.depth)
+
+        generator_params = SVGPathParams(
+            svg_path=svg_path_data,
+            depth_mm=depth_mm,
+            feature_type=node.feature_type,  # type: ignore[arg-type]
+            scale_mode=node.scale_mode,  # type: ignore[arg-type]
+            svg_unit_mm=node.svg_unit_mm,
+            center=node.center,
+            invert_y=node.invert_y,
+            is_through=is_through,
+        )
+
+        try:
+            generated_items = svg_stamp_generator(domain, generator_params, allow_empty=True)
             items.extend(generated_items)
         except ValueError:
             pass
@@ -2584,6 +2641,7 @@ class LayoutResolver:
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,
                 GridLinesGen: LayoutResolver._handle_grid_lines_gen,
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
+                SvgStampGen: LayoutResolver._handle_svg_stamp_gen,
                 WasteCuts: LayoutResolver._handle_waste_cuts,
                 AssemblyDecl: LayoutResolver._handle_assembly,
                 BeamDecl: LayoutResolver._handle_beam_decl,

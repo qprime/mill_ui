@@ -16,6 +16,7 @@ class SVGPathParams(BaseParams):
     svg_unit_mm: float = 1.0
     center: bool = True
     invert_y: bool = True
+    is_through: bool = False
 
     def validate(self) -> None:
         if not self.svg_path or not self.svg_path.strip():

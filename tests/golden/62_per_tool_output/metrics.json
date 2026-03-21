@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "62_per_tool_output",
-    "created_at": "2026-03-21T20:40:44.318526+00:00"
+    "created_at": "2026-03-21T21:19:33.387162+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.27,
+    "extraction_time_ms": 0.3,
     "document": {
       "width_mm": 553.175,
       "height_mm": 743.175,
@@ -236,7 +236,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.3393,
+    "extraction_time_ms": 1.3183,
     "summary": {
       "total_lines": 410,
       "comment_lines": 7,

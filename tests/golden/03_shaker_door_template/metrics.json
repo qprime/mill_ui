@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "03_shaker_door_template",
-    "created_at": "2026-03-21T20:40:40.560810+00:00"
+    "created_at": "2026-03-21T21:19:29.487157+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.47,
+    "extraction_time_ms": 0.35,
     "document": {
       "width_mm": 603.175,
       "height_mm": 829.175,
@@ -256,7 +256,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.3976,
+    "extraction_time_ms": 1.5781,
     "summary": {
       "total_lines": 594,
       "comment_lines": 10,

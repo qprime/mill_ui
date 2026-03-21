@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "60_halflap_dogbone",
-    "created_at": "2026-03-21T20:40:44.294580+00:00"
+    "created_at": "2026-03-21T21:19:33.363009+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.43,
+    "extraction_time_ms": 4.54,
     "document": {
       "width_mm": 1773.175,
       "height_mm": 2647.175,
@@ -2475,7 +2475,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.806,
+    "extraction_time_ms": 0.8104,
     "summary": {
       "total_lines": 15492,
       "comment_lines": 128,

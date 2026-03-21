@@ -117,8 +117,8 @@ class TestConvexGeometry:
         moves = native_core.pocket_raster(
             shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
         )
-        assert _has_comment(moves, "spiral fallback: concave polygon")
-        assert _has_comment(moves, "pocket_raster")
+        assert _has_comment(moves, "concave polygon: raster clipped to boundary")
+        assert _has_comment(moves, "pocket_raster_clipped")
 
     def test_inset_rectangle(self):
         moves = native_core.pocket_raster(
@@ -341,19 +341,19 @@ class TestPocketSpiralConvexPolygon:
 
 
 class TestConcaveFallback:
-    def test_concave_falls_back(self):
+    def test_concave_uses_clipped_raster(self):
         shape = polygon(_l_shape_pts())
         moves = native_core.pocket_raster(
             shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
         )
-        assert _has_comment(moves, "pocket_raster")
+        assert _has_comment(moves, "pocket_raster_clipped")
 
-    def test_concave_emits_fallback_comment(self):
+    def test_concave_emits_clipped_comment(self):
         shape = polygon(_l_shape_pts())
         moves = native_core.pocket_raster(
             shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
         )
-        assert _has_comment(moves, "spiral fallback: concave polygon")
+        assert _has_comment(moves, "concave polygon: raster clipped to boundary")
 
     def test_concave_still_produces_moves(self):
         shape = polygon(_l_shape_pts())

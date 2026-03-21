@@ -284,6 +284,121 @@ size_t longest_edge_index(const Polygon& poly) {
   return best;
 }
 
+std::vector<double> scanline_intersections(const Polygon& poly, double y) {
+  std::vector<double> xs;
+  size_t n = poly.size();
+  for (size_t i = 0; i < n; ++i) {
+    size_t j = (i + 1) % n;
+    const Vec2& a = poly[i];
+    const Vec2& b = poly[j];
+
+    if (std::abs(a.y - b.y) < kEps) continue;
+
+    double y_min = std::min(a.y, b.y);
+    double y_max = std::max(a.y, b.y);
+
+    if (y < y_min - kEps || y > y_max + kEps) continue;
+    if (std::abs(y - y_max) < kEps) continue;
+
+    double t = (y - a.y) / (b.y - a.y);
+    t = std::clamp(t, 0.0, 1.0);
+    xs.push_back(a.x + t * (b.x - a.x));
+  }
+  std::sort(xs.begin(), xs.end());
+  return xs;
+}
+
+Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool, double depth_val,
+                                  double step_over_mm, double step_down_mm,
+                                  double safe_z_mm, double ramp_angle_deg) {
+  Polygon poly = ensure_cw(outer_stripped);
+  const Bounds b = bounds_of(poly);
+  const double safe_z = safe_z_mm;
+  const double depth = -std::abs(depth_val);
+  const double tool_d = tool.diameter <= 0.0 ? 3.0 : tool.diameter;
+  const double tool_r = 0.5 * tool_d;
+  const double default_step_down = std::min(3.0, 0.5 * tool_d);
+  const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
+  const double step_over = std::max(0.1, step_over_mm);
+
+  Paths paths(1);
+  Path& moves = paths.front();
+  moves.reserve(128);
+
+  moves.push_back(make_comment(
+      "pocket_raster_clipped so=" + fmt3(step_over) + " sd=" + fmt3(step_down) +
+      " depth=" + fmt3(std::abs(depth))));
+  moves.push_back(make_set_rpm(tool.rpm));
+  moves.push_back(make_set_feed(tool.feed_xy));
+
+  std::vector<double> z_levels;
+  double z = 0.0;
+  while (z > depth + kEps) {
+    double z_next = std::max(depth, z - step_down);
+    z_levels.push_back(z_next);
+    z = z_next;
+    if (std::abs(z - depth) < kEps) break;
+  }
+
+  int direction = 1;
+  double prev_z = 0.0;
+  for (double layer_z : z_levels) {
+    double y = b.miny + tool_r;
+    double y_max = b.maxy - tool_r;
+    while (y <= y_max + kEps) {
+      auto xs = scanline_intersections(poly, y);
+
+      for (size_t k = 0; k + 1 < xs.size(); k += 2) {
+        double x_left = xs[k] + tool_r;
+        double x_right = xs[k + 1] - tool_r;
+        if (x_right < x_left + kEps) continue;
+
+        double x_start = direction == 1 ? x_left : x_right;
+        double x_end = direction == 1 ? x_right : x_left;
+
+        if (std::abs(prev_z - layer_z) < kEps) {
+          moves.push_back(make_rapid(x_start, y, safe_z));
+          moves.push_back(make_cut(std::nullopt, std::nullopt, layer_z, tool.feed_z));
+        } else {
+          Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
+          emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z,
+                              ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
+        }
+        moves.push_back(make_set_feed(tool.feed_xy));
+        moves.push_back(make_cut(x_end, y, std::nullopt));
+        moves.push_back(make_retract(safe_z));
+        prev_z = layer_z;
+      }
+
+      y += step_over;
+      direction *= -1;
+    }
+  }
+
+  size_t n = poly.size();
+  if (n >= 3) {
+    Polygon inset = inset_convex(poly, tool_r);
+    const Polygon& profile_poly = inset.empty() ? poly : inset;
+    size_t pn = profile_poly.size();
+
+    moves.push_back(make_comment("finish_perimeter_clipped"));
+
+    for (double layer_z : z_levels) {
+      const Vec2& start = profile_poly[0];
+      moves.push_back(make_rapid(start.x, start.y, safe_z));
+      moves.push_back(make_cut(std::nullopt, std::nullopt, layer_z, tool.feed_z));
+      moves.push_back(make_set_feed(tool.feed_xy));
+      for (size_t i = 1; i < pn; ++i) {
+        moves.push_back(make_cut(profile_poly[i].x, profile_poly[i].y, std::nullopt));
+      }
+      moves.push_back(make_cut(profile_poly[0].x, profile_poly[0].y, std::nullopt));
+      moves.push_back(make_retract(safe_z));
+    }
+  }
+
+  return paths;
+}
+
 Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_over_mm, double step_down_mm,
                          double safe_z_mm, double ramp_angle_deg) {
   const Bounds b = bounds_of(face.outer);
@@ -458,9 +573,9 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
   }
 
   if (strategy == PocketStrategy::Spiral) {
-    Paths paths = plan_pocket_raster(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
+    Paths paths = plan_pocket_raster_clipped(outer, tool, face.depth, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
     if (!paths.empty() && !paths.front().empty()) {
-      paths.front().insert(paths.front().begin(), make_comment("spiral fallback: concave polygon"));
+      paths.front().insert(paths.front().begin(), make_comment("concave polygon: raster clipped to boundary"));
     }
     return paths;
   }

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "59_finger_joint_dogbone",
-    "created_at": "2026-03-21T21:40:07.979996+00:00"
+    "created_at": "2026-03-26T16:46:03.335754+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.8,
+    "extraction_time_ms": 1.49,
     "document": {
       "width_mm": 773.175,
       "height_mm": 1103.175,
@@ -1209,7 +1209,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 7.444,
+    "extraction_time_ms": 6.1915,
     "summary": {
       "total_lines": 3012,
       "comment_lines": 52,

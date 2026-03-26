@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "57_dogbone_pocket",
-    "created_at": "2026-03-21T21:40:07.910834+00:00"
+    "created_at": "2026-03-26T16:46:03.277217+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.26,
+    "extraction_time_ms": 0.22,
     "document": {
       "width_mm": 453.175,
       "height_mm": 379.175,
@@ -221,7 +221,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.5477,
+    "extraction_time_ms": 0.4342,
     "summary": {
       "total_lines": 192,
       "comment_lines": 10,

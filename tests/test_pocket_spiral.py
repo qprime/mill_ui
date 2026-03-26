@@ -340,6 +340,128 @@ class TestPocketSpiralConvexPolygon:
         assert len(_retract_moves(moves)) == 1
 
 
+def _small_tool_setup(ramp_angle_deg: float = 3.0) -> Setup:
+    tool = Tool(name="2mm_flat", diameter=2.0, rpm=18000, feed_xy=2000, feed_z=300)
+    stock = Stock(width=200.0, height=200.0, thickness=19.0)
+    machine = Machine(name="default_grbl")
+    return Setup(stock=stock, tool=tool, machine=machine, safe_z=5.0, ramp_angle_deg=ramp_angle_deg)
+
+
+class TestSpiralSliverPass:
+    def test_elongated_rect_clears_center(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        assert _has_comment(moves, "pocket_spiral")
+        cuts = _cut_moves(moves)
+        xy_cuts = [(c.x, c.y) for c in cuts if c.x is not None and c.y is not None]
+        center_y = 5.0
+        center_cuts = [p for p in xy_cuts if abs(p[1] - center_y) < 0.5]
+        assert len(center_cuts) >= 2
+        xs = [p[0] for p in center_cuts]
+        assert max(xs) - min(xs) > 30.0
+
+    def test_elongated_rect_continuous(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        in_layer = False
+        for m in moves:
+            if isinstance(m, CutMove) and m.z is not None and m.z < 0:
+                in_layer = True
+            if in_layer and isinstance(m, RetractMove):
+                in_layer = False
+            if in_layer:
+                assert not isinstance(m, RapidMove), "Rapid move found within a cutting layer"
+
+    def test_elongated_rect_one_retract_per_layer(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        retracts = _retract_moves(moves)
+        assert len(retracts) == 1
+
+    def test_elongated_vertical_rect(self):
+        shape = place(rectangle(10.0, 100.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        assert _has_comment(moves, "pocket_spiral")
+        cuts = _cut_moves(moves)
+        xy_cuts = [(c.x, c.y) for c in cuts if c.x is not None and c.y is not None]
+        center_x = 5.0
+        center_cuts = [p for p in xy_cuts if abs(p[0] - center_x) < 0.5]
+        assert len(center_cuts) >= 2
+        ys = [p[1] for p in center_cuts]
+        assert max(ys) - min(ys) > 30.0
+
+    def test_large_tool_no_sliver(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves_without = native_core.pocket_raster(
+            shape, _setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        cuts = _cut_moves(moves_without)
+        xy_cuts = [(c.x, c.y) for c in cuts if c.x is not None and c.y is not None]
+        center_y = 5.0
+        center_cuts = [p for p in xy_cuts if abs(p[1] - center_y) < 0.1]
+        assert len(center_cuts) == 0
+
+    def test_sliver_within_pocket_bounds(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=5.0, ty=5.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        cuts = _cut_moves(moves)
+        for c in cuts:
+            if c.x is not None:
+                assert c.x >= 5.0 - 0.1
+                assert c.x <= 105.0 + 0.1
+            if c.y is not None:
+                assert c.y >= 5.0 - 0.1
+                assert c.y <= 15.0 + 0.1
+
+    def test_multi_depth_sliver(self):
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, _small_tool_setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
+        )
+        retracts = _retract_moves(moves)
+        assert len(retracts) == 3
+
+    def test_short_dim_at_threshold_no_sliver(self):
+        tool = Tool(name="4mm_flat", diameter=4.0, rpm=18000, feed_xy=2000, feed_z=300)
+        stock = Stock(width=200.0, height=200.0, thickness=19.0)
+        machine = Machine(name="default_grbl")
+        setup = Setup(stock=stock, tool=tool, machine=machine, safe_z=5.0, ramp_angle_deg=3.0)
+        shape = place(rectangle(100.0, 12.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, setup, depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        cuts = _cut_moves(moves)
+        xy_cuts = [(c.x, c.y) for c in cuts if c.x is not None and c.y is not None]
+        center_y = 6.0
+        center_cuts = [p for p in xy_cuts if abs(p[1] - center_y) < 0.1]
+        assert len(center_cuts) == 0
+
+    def test_short_dim_just_above_threshold(self):
+        tool = Tool(name="1mm_flat", diameter=1.0, rpm=18000, feed_xy=2000, feed_z=300)
+        stock = Stock(width=200.0, height=200.0, thickness=19.0)
+        machine = Machine(name="default_grbl")
+        setup = Setup(stock=stock, tool=tool, machine=machine, safe_z=5.0, ramp_angle_deg=3.0)
+        shape = place(rectangle(100.0, 10.0), Transform2D(tx=0.0, ty=0.0))
+        moves = native_core.pocket_raster(
+            shape, setup, depth_mm=3.0, stepover_mm=3.0, stepdown_mm=3.0, strategy="spiral"
+        )
+        cuts = _cut_moves(moves)
+        xy_cuts = [(c.x, c.y) for c in cuts if c.x is not None and c.y is not None]
+        center_y = 5.0
+        center_cuts = [p for p in xy_cuts if abs(p[1] - center_y) < 0.5]
+        assert len(center_cuts) >= 2
+
+
 class TestConcaveFallback:
     def test_concave_uses_clipped_raster(self):
         shape = polygon(_l_shape_pts())

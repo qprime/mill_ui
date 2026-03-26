@@ -490,6 +490,29 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
     }
   }
 
+  Vec2 sliver_a{}, sliver_b{};
+  bool has_sliver = false;
+  {
+    const Polygon& last_ring = rings.back();
+    Bounds lb = bounds_of(last_ring);
+    double w = lb.maxx - lb.minx;
+    double h = lb.maxy - lb.miny;
+    double short_dim = std::min(w, h);
+    double long_dim = std::max(w, h);
+    if (long_dim > kEps && short_dim > 2.0 * tool_r + kEps) {
+      double cx = 0.5 * (lb.minx + lb.maxx);
+      double cy = 0.5 * (lb.miny + lb.maxy);
+      if (w >= h) {
+        sliver_a = {lb.minx, cy};
+        sliver_b = {lb.maxx, cy};
+      } else {
+        sliver_a = {cx, lb.miny};
+        sliver_b = {cx, lb.maxy};
+      }
+      has_sliver = true;
+    }
+  }
+
   std::vector<double> z_levels;
   {
     double z = 0.0;
@@ -554,6 +577,17 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
           }
         }
       }
+    }
+
+    if (has_sliver) {
+      const Polygon& last_ring = rings.back();
+      const Vec2& ring_end = last_ring[0];
+      double da = std::hypot(sliver_a.x - ring_end.x, sliver_a.y - ring_end.y);
+      double db = std::hypot(sliver_b.x - ring_end.x, sliver_b.y - ring_end.y);
+      const Vec2& near = da <= db ? sliver_a : sliver_b;
+      const Vec2& far  = da <= db ? sliver_b : sliver_a;
+      moves.push_back(make_cut(near.x, near.y, std::nullopt));
+      moves.push_back(make_cut(far.x, far.y, std::nullopt));
     }
 
     moves.push_back(make_retract(safe_z));

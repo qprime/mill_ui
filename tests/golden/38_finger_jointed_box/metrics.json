@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "38_finger_jointed_box",
-    "created_at": "2026-03-21T21:40:06.734220+00:00"
+    "created_at": "2026-03-26T16:46:02.291276+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.67,
+    "extraction_time_ms": 1.37,
     "document": {
       "width_mm": 973.175,
       "height_mm": 1255.175,
@@ -1142,7 +1142,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 4.4599,
+    "extraction_time_ms": 3.6701,
     "summary": {
       "total_lines": 1985,
       "comment_lines": 59,

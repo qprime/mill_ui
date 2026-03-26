@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "02_pocket_with_cleanup",
-    "created_at": "2026-03-21T21:40:03.730247+00:00"
+    "created_at": "2026-03-26T16:45:59.725932+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.26,
+    "extraction_time_ms": 0.31,
     "document": {
       "width_mm": 353.175,
       "height_mm": 317.175,
@@ -201,7 +201,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.4804,
+    "extraction_time_ms": 0.6782,
     "summary": {
       "total_lines": 94,
       "comment_lines": 4,

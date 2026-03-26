@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "61_rest_pocketing",
-    "created_at": "2026-03-21T21:40:08.253516+00:00"
+    "created_at": "2026-03-26T16:46:03.566033+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.28,
+    "extraction_time_ms": 0.24,
     "document": {
       "width_mm": 453.175,
       "height_mm": 379.175,
@@ -221,7 +221,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.0564,
+    "extraction_time_ms": 0.8713,
     "summary": {
       "total_lines": 1108,
       "comment_lines": 78,

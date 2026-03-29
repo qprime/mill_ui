@@ -26,14 +26,14 @@
 | CS-11 | HARD | THICKNESS_IS_Z | "Thickness" refers to material thickness along Z axis |
 | CS-12 | HARD | DEPTH_IS_NEGATIVE_Z | "Depth" refers to distance along negative Z into material |
 | CS-13 | HARD | WORKING_AREA_COORDS | All part coordinates relative to working area origin (0,0) |
-| CS-14 | HARD | MARGIN_AT_EXPORT | Margin applied only at G-code/SVG export, not internal coords |
+| CS-14 | HARD | MARGIN_AT_EXPORT | Margin applied only at export, not internal coords (see scope below) |
 | CS-15 | STRUCTURAL | NORMALIZED_TO_ABSOLUTE | Compositional AST uses 0.0-1.0 coords, resolved to absolute |
 
 ---
 
 ## Working-Area Coordinate System
 
-PML specifies physical sheet dimensions (`physical_width`, `physical_height` or `width`, `height`) and margin. The working area is derived as `physical - 2*margin`. All part coordinates are relative to working area origin (0,0). The margin defines a physical offset applied only at G-code/SVG export.
+PML specifies physical sheet dimensions (`physical_width`, `physical_height` or `width`, `height`) and margin. The working area is derived as `physical - 2*margin`. All part coordinates are relative to working area origin (0,0). The margin defines a physical offset applied only at export time.
 
 **Wrong:**
 ```python
@@ -48,6 +48,12 @@ item_x = offset  # margin applied at export
 **Why:** The margin zone is a physical no-cut zone reserved for clamps. No cutting operation may encroach on this zone—including tool paths for outside profiles.
 
 **Tool clearance:** Outside profile cuts require part edges to be at least one tool diameter from working area boundaries.
+
+### CS-14 Scope
+
+**CAM pipeline** (`cam/post/gcode.py`): Margin is applied at G-code export via `_apply_margin_offset()`. Internal coordinates (RemovalIntent, planner, passes) remain in working-area space. This is the canonical CS-14 path.
+
+**Diagram/SVG pipeline** (`adapters/layoutast_to_ir.py`): The adapter converts working-area coordinates to sheet-space during DiagramIR generation, baking margin into shape positions (e.g. `sx = margin + cx`, `flip_y` includes margin offset). This is intentional — the DiagramIR represents physical sheet layout for blueprint rendering, so coordinates must be in sheet space. The margin transform happens once in the adapter rather than at final SVG export.
 
 ---
 

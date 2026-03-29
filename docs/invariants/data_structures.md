@@ -15,8 +15,8 @@
 | DS-5 | STRUCTURAL | BOUNDARIES_TUPLE | Domain boundaries are tuples of tuples |
 | DS-6 | STRUCTURAL | NOTCHES_TUPLE | PanelSpec.notches is tuple (immutable) |
 | DS-7 | STRUCTURAL | DADOS_TUPLE | PanelSpec.dados is tuple (immutable) |
-| DS-8 | HARD | NO_SHAPE_CLASSES | No separate Rect/Circle classes; shape identity is Item.type |
-| DS-9 | HARD | PARAMS_IN_GEOMETRY | Shape parameters live in Geometry.data dict |
+| DS-8 | HARD | NO_SHAPE_CLASSES | No separate shape classes in flat LayoutAST; shape identity is Item.type |
+| DS-9 | HARD | PARAMS_IN_GEOMETRY | Shape parameters live in Geometry.data dict (flat LayoutAST only) |
 
 ---
 
@@ -37,9 +37,11 @@ new_item = replace(item, geometry=Geometry(data={**item.geometry.data, "w_mm": 1
 
 ---
 
-## Shape Representation
+## Shape Representation (DS-8 / DS-9 Scope)
 
-Shapes do NOT have their own classes. Shape identity is determined by `Item.type` and parameters live in `Geometry.data`.
+**Applies to:** `layout_ast/layout.py` (flat `LayoutAST.Item`) only.
+
+In the flat IR, shapes do NOT have their own classes. Shape identity is determined by `Item.type` and parameters live in `Geometry.data`.
 
 **Wrong:**
 ```python
@@ -53,7 +55,11 @@ class Rectangle:
 Item(type="Rect", geometry=Geometry(data={"w_mm": 100, "h_mm": 50}))
 ```
 
-**Why:** This keeps the type system flat and extensible. New shapes don't require new classes.
+**Why:** This keeps the flat IR type system extensible. New shapes don't require new classes.
+
+**Not subject to DS-8/DS-9:**
+- `layout_ast/compositional.py` — typed shape dataclasses (Rect, Circle, RoundedRect, Polygon, etc.) are intentional; resolved to flat Items by `resolution/layout_resolver.py`
+- `diagram_ir/shapes.py` — rendering primitives for SVG/blueprint output, a separate concern from the machining IR
 
 ---
 

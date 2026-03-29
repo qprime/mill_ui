@@ -29,6 +29,7 @@ description: Step-by-step patterns for extending the system — adding shapes, t
 
 **Files to modify:**
 - `adapters/hints_to_removal.py` — extend `_geometry_to_bounds()` and `_item_geometry_to_bounds()`
+- `core/geometry.py` — bounds calculation logic via `compute_shape_bounds()`
 
 **Test location:** `tests/test_removal_intent_model.py`
 
@@ -52,14 +53,12 @@ def _item_geometry_to_bounds(item_type, geometry_data, cx, cy):
 **When:** Reusable parametric component (cabinet door, mounting plate, etc.).
 
 **Steps:**
-1. Create class in `templates/`
-2. Implement `expand_to_ast(params, sheet_thickness_mm) -> LayoutAST`
-3. Register in `templates/__init__.py`
-4. Add tests
+1. Create PML template file `{name}.pml.yml` in `templates/`
+2. Discovery is automatic via `templates/loader.py:find_template_file()` (matches by lowercased name)
+3. Add tests
 
 **Files to modify:**
-- `templates/new_template.py` (create)
-- `templates/__init__.py` (register)
+- `templates/{name}.pml.yml` (create)
 
 **Test location:** `tests/test_templates.py` or add to existing test module
 
@@ -70,13 +69,14 @@ def _item_geometry_to_bounds(item_type, geometry_data, cx, cy):
 **When:** New pattern or operation type (spiral, zigzag, circle grid, etc.).
 
 **Steps:**
-1. Create parameter dataclass in `generators/base.py`
+1. Create parameter dataclass in `generators/params/area.py` or `generators/params/loop.py`
 2. Implement generator function in `generators/area/` or `generators/loop/`
 3. Export from `generators/__init__.py`
 4. Add tests
 
 **Files to modify:**
-- `generators/base.py` (parameter class)
+- `generators/params/area.py` or `generators/params/loop.py` (parameter class)
+- `generators/core.py` (base classes)
 - `generators/area/new_generator.py` or `generators/loop/new_generator.py` (create)
 - `generators/__init__.py` (export)
 

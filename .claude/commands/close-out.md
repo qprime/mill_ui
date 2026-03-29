@@ -23,8 +23,8 @@ python -m pytest tests/ -x
 # 2. Recipe validation
 python -m tests.test_recipes
 
-# 3. Pre-commit checks (ruff, ruff-format, mypy)
-pre-commit run --all-files
+# 3. Lint and type checks
+ruff check . && ruff format --check . && mypy .
 ```
 
 **ALL tests and recipes must pass. Zero failures, zero errors, no exceptions.** Do not classify any failure as "pre-existing" or "not part of this change" — if it fails, it blocks the commit. Fix it or raise it to the user. Do not proceed to Phase 2 with any failures.
@@ -124,7 +124,7 @@ After all phases pass with a clean verdict:
 2. Commit with this format:
    - Subject: imperative mood, describes the change, ends with `(closes #N)` if closing an issue
    - Body: categorized bullet points of specific changes
-   - Trailer: `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+   - Trailer: `Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>`
 3. Run `git status` to confirm clean state
 
 Do NOT push unless the user explicitly asks.
@@ -138,7 +138,7 @@ Present the final summary to the user:
 ```
 ## Final Summary
 
-Committed as `<hash>` — all hooks pass (ruff, ruff format, mypy), <N> tests pass, zero failures, all recipes valid.
+Committed as `<hash>` — all checks pass (ruff, ruff format, mypy), <N> tests pass, zero failures, all recipes valid.
 
 ### What shipped
 <2-3 sentence summary of the deliverable>

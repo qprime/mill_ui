@@ -120,20 +120,17 @@ Canonical identifiers — do not rename or reinterpret.
 |----------|-------------|
 | Butt | Edge-to-face, no interlock |
 | Captured | Floating tenon in captured groove |
-| Dado | Groove slot cut into panel |
 | Finger | Interlocking fingers (box corners) |
 | HalfLap | 50% depth overlap on both sides |
-| Miter | 45-degree angled joint |
-| Rabbet | Recessed edge ledge |
 
 ## Assembly Types
 
 | Type | Module | Description |
 |------|--------|-------------|
 | Beam | `assembly/beam.py` | Laminated/spliced linear member |
-| Box | `assembly/box.py` | 4-part box with joinery |
-| Carcass | `assembly/carcass.py` | Cabinet frame structure |
-| Cubby | `assembly/cubby.py` | Multi-compartment frame |
+| Box | `assembly/primitives.py` | 4-part box with joinery |
+| Carcass | `assembly/primitives.py` | Cabinet frame structure |
+| Cubby | `assembly/primitives.py` | Multi-compartment frame |
 
 ## Nesting Algorithms
 

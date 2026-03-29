@@ -27,7 +27,7 @@ CAM system that generates G-code for CNC routers. Converts panel layouts (PML/JS
 Interfaces are authoritative and explicit: each interface describes a single
 (panel_a, edge_a) ↔ (panel_b, edge_b) relationship.
 
-Joinery strategy names (e.g. HalfLap, Dado, Finger, Captured) are
+Joinery strategy names (e.g. Butt, HalfLap, Finger, Captured) are
 canonical identifiers, not descriptive nouns. Do not substitute, rename,
 or reinterpret them based on geometric similarity.
 

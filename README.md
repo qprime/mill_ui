@@ -123,7 +123,7 @@ Profiles support **tabs** (holding bridges) to keep parts attached during throug
 
 Define multi-panel projects (box, carcass, cubby, beam) with interface-first joinery. The system resolves panel interfaces into machining features automatically:
 
-- **Joinery strategies:** HalfLap, Dado, Finger, Captured
+- **Joinery strategies:** Butt, Finger, HalfLap, Captured
 - **Multi-sheet partitioning:** When panels exceed a single sheet, `assembly/partitioner.py` distributes them across multiple sheets
 
 ### Nesting

@@ -35,6 +35,7 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | F | Feed rate (mm/min) |
 | G0 | Rapid positioning (no cutting) |
 | G1 | Linear interpolated cut |
+| G4 | Dwell/pause (P = seconds) |
 | M3 | Spindle start (clockwise) |
 | M5 | Spindle stop |
 | S | Spindle speed (RPM) |
@@ -46,8 +47,8 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | Parse | `pml/yaml_parser.py` | PML YAML → CompositionalLayoutAST |
 | Resolve | `resolution/layout_resolver.py` | CompositionalLayoutAST → LayoutAST |
 | AST→IR | `adapters/ast_to_removal.py` | LayoutAST → list[RemovalIntent] |
-| IR→Hints | `adapters/removal_to_planner.py` | RemovalIntent → planner hints |
-| Plan | `cam/planner/passes/` | hints → PassRecord list |
+| IR→Planner | `adapters/removal_to_planner.py` | RemovalIntent → PlannerInput via `removal_intents_to_planner_input()` |
+| Plan | `cam/planner/passes/` | PlannerInput → PassRecord list |
 | Post | `cam/post/gcode.py` | Move list → G-code string |
 | Export | `export/blueprint_svg.py` | DiagramIR → SVG blueprint |
 
@@ -59,8 +60,13 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | CompositionalLayoutAST | `layout_ast/compositional.py` | Hierarchical AST with relative positioning |
 | DiagramIR | `diagram_ir/diagram.py` | Intermediate representation for visualization |
 | Domain | `domains/domain.py` | 2D bounded region supporting algebraic ops |
+| Feature | `layout_ast/layout.py` | Machining feature attached to an Item (type, depth, constraints) |
+| Item | `layout_ast/layout.py` | Single shape/feature entry in a LayoutAST |
 | LayoutAST | `layout_ast/layout.py` | Flat AST with absolute coordinates |
 | MultiDomain | `domains/domain.py` | List of disjoint Domain regions |
+| PassRecord | `cam/planner/passes/__init__.py` | Single planner pass result (tool, moves, G-code file) |
+| PipelineResult | `cam/pipeline.py` | Full pipeline output (AST, intents, passes, G-code, SVG, metrics) |
+| PlannerInput | `cam/planner/planner_input.py` | Typed input to the CAM planner (replaces untyped hints dict) |
 | RemovalIntent | `ir/removal_intent.py` | Semantic encoding of what to machine |
 
 ## Machining Features
@@ -73,6 +79,7 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | Hole | Through-hole removal |
 | Pocket | Clearing an enclosed area to a depth |
 | Profile | Cutting around a boundary (inside/outside/on) |
+| Surface | Facing pass to flatten stock surface (with optional cooling dwells) |
 | Tab | Holding bridge left during profile cuts |
 
 ## Depth Modes
@@ -95,7 +102,7 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | Keepout | No-machining exclusion zone |
 | Panel | Simple container |
 | Place | Manual positioning |
-| RaisedPanel | Decorative beveled panel |
+| RaisedPanel | Decorative beveled panel (generator: `RaisedPanelGen`) |
 | Split | Window-pane division (rail/mullion) |
 
 ## Shape Types
@@ -154,6 +161,7 @@ Canonical identifiers — do not rename or reinterpret.
 |-------|--------|---------|
 | CommentMove | (comment) | Inline annotation |
 | CutMove | G1 | Linear cutting feed |
+| DwellMove | G4 | Pause/dwell for cooling |
 | RapidMove | G0 | Fast non-cutting travel |
 | RetractMove | G0 Z | Z-only retract |
 | SetFeedMove | F | Set feed rate |

@@ -27,10 +27,21 @@ Read the invariant file that matches the files you are modifying:
 | `pml/*` | `docs/invariants/pml.md` |
 | `validation/*` | `docs/invariants/validation.md` |
 | `ir/*` | `docs/invariants/pipeline.md` |
+| `adapters/*` | `docs/invariants/pipeline.md` |
+| `resolution/*` | `docs/invariants/pipeline.md`, `docs/invariants/coordinates.md` |
 | `cam/planner/*` | `docs/invariants/planner.md` |
 | `cam/*` | `docs/invariants/gcode.md` |
 | `nesting/*` | `docs/invariants/nesting.md` |
 | `templates/*` | `docs/invariants/components.md` |
+| `core/*` | `docs/invariants/coordinates.md`, `docs/invariants/bounds_geometry.md` |
+| `export/*` | `docs/invariants/svg.md` |
+| `diagram_render/*` | `docs/invariants/svg.md` |
+| `diagram_ir/*` | `docs/invariants/svg.md` |
+| `cli/*` | `docs/invariants/pipeline.md` |
+| `config/*` | `docs/invariants/coordinates.md` |
+| `mill_mcp/*` | `docs/invariants/pipeline.md` |
+| `machines/*` | `docs/invariants/defaults.md` |
+| `tools/*` | `docs/invariants/defaults.md` |
 | All geometry | `docs/invariants/coordinates.md` |
 
 ## How to Use

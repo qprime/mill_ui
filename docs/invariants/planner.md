@@ -26,12 +26,14 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | depth_profile.mode (v_carve) | NOT_IMPLEMENTED | — | v_angle_deg not passed |
 | depth_profile.mode (linear_gradient) | NOT_IMPLEMENTED | — | gradient_direction_deg not passed |
 | constraints.tabs | HONORED | — | Profiles only |
+| constraints.onion_skin_mm | HONORED | — | Profiles only; mutually exclusive with tabs |
 | constraints.keepouts | HONORED | CRITICAL | Toolpath avoids keepout bounds |
 | constraints.islands | NOT_IMPLEMENTED | — | Not yet passed to planner |
 | constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
 | rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. Mutually exclusive with edge_treatment allowance. |
+| corner_cleanup | HONORED | — | Secondary tool pass for rectangular pocket internal corners |
 | dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
 | edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
 | edge_feature (roundover) | HONORED | — | Roundover bit boundary-following pass |

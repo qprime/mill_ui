@@ -64,3 +64,28 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 When committing, always include updated `docs/recipes/**/*.pml.yml` files. The `# mill_ui: <hash>` header at the top of each recipe tracks which commit the recipe last passed against — these updates are part of the implementation, not noise to be excluded.
 
 Run `python -m tests.test_recipes --regen_recipes` before committing to update all recipe headers, then stage the recipe files along with your implementation changes.
+
+## Issue Comment on Completion
+
+After completing a round of implementation that is associated with a GitHub issue, **automatically** post a summary comment to that issue. Do not ask — just post it.
+
+**When this applies:** The work is tied to a GitHub issue (referenced in the conversation, commit message, or task context).
+
+**What to post:** A concise implementation summary using this structure:
+
+```
+## Implementation Summary
+
+<1-2 sentence description of what was implemented.>
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `path/to/file.py` | Description of change |
+
+### Notes
+- Key decisions or non-obvious choices (omit section if none)
+```
+
+**How:** Use `gh issue comment <number> --body "..."` to post the comment immediately after committing.

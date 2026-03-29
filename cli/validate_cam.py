@@ -147,7 +147,7 @@ Exit codes:
         return EXIT_FAIL
 
 
-def run_validation(args: argparse.Namespace) -> int:
+def run_validation(args: argparse.Namespace) -> int:  # noqa: C901 — validation orchestrator
 
     golden_metrics = None
     golden_file = None
@@ -252,7 +252,7 @@ def output_json(result, args: argparse.Namespace) -> None:
         print(json_str)
 
 
-def output_summary(result, args: argparse.Namespace) -> None:
+def output_summary(result, args: argparse.Namespace) -> None:  # noqa: C901 — summary formatter
     verdict_symbols = {
         Verdict.PASS: "PASS",
         Verdict.WARN: "WARN",

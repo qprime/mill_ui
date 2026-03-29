@@ -403,7 +403,7 @@ def get_syntax_spec(format: str = "all") -> str:
 
 
 @mcp.tool()
-def get_docs(
+def get_docs(  # noqa: C901 — doc lookup dispatcher
     name: str | None = None,
     section: str | None = None,
     list_only: bool = False,

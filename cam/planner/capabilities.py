@@ -124,7 +124,7 @@ class ConstraintAuditResult:
         return "\n".join(lines)
 
 
-def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:
+def audit_constraints(intents: list[RemovalIntent]) -> ConstraintAuditResult:  # noqa: C901 — constraint collector
     counts: dict[str, int] = {
         "tabs": 0,
         "keepouts": 0,

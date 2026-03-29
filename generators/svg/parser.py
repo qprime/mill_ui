@@ -160,7 +160,7 @@ def _get_numbers(tokens: list, start: int, count: int) -> tuple[list[float], int
     return numbers, pos
 
 
-def _execute_command(
+def _execute_command(  # noqa: C901 — SVG command dispatcher
     command: str,
     tokens: list,
     pos: int,

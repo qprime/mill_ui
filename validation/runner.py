@@ -187,7 +187,7 @@ def _extract_all_metrics(
     return svg_metrics, gcode_metrics_list
 
 
-def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:
+def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:  # noqa: C901 — metric aggregation
     if not gcode_list:
         return {}
 

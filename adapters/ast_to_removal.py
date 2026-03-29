@@ -56,7 +56,7 @@ def ast_to_removal_intents(
     return intents
 
 
-def item_to_removal_intent(
+def item_to_removal_intent(  # noqa: C901 — feature-type dispatcher
     item: Item,
     sheet_thickness_mm: float,
 ) -> RemovalIntent:

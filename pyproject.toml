@@ -50,12 +50,16 @@ select = [
     "I",      # isort — import sorting
     "UP",     # pyupgrade — modern Python syntax
     "B",      # flake8-bugbear — common bug patterns
+    "C901",   # mccabe — function complexity
     "SIM",    # flake8-simplify — simplifiable code
     "RUF",    # ruff-specific rules
 ]
 ignore = [
     "E501",   # line length (let formatter handle it)
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
 
 [tool.ruff.format]
 quote-style = "double"

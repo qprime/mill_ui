@@ -104,7 +104,7 @@ def box(
     return Assembly(members=panels, interfaces=tuple(interfaces))
 
 
-def carcass(
+def carcass(  # noqa: C901 — conditional builder (defer refactor)
     width: float,
     length: float,
     height: float,

@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from domains import Domain
 
 
-def measurement_edge_generator(
+def measurement_edge_generator(  # noqa: C901 — edge-type dispatcher
     domain: Domain,
     params: MeasurementEdgeParams,
     *,

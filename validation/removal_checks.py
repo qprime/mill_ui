@@ -70,7 +70,7 @@ def check_depth_profile(
     return result
 
 
-def check_edge_feature(
+def check_edge_feature(  # noqa: C901 — edge validation dispatcher
     intent: RemovalIntent,
     sheet_thickness_mm: float,
     available_v_angles: list[float] | None = None,

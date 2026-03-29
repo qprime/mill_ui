@@ -8,6 +8,7 @@ from adapters.cnc_config_to_ir import machine_config_to_diagram_ir
 from config.machine_loader import get_machines_dir, load_endmills, load_machine_by_name
 from diagram_render import render_diagram_svg
 
+
 def main():
     recipe_dir = Path(__file__).parent
     output_dir = recipe_dir / "output"

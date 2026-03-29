@@ -40,8 +40,6 @@ from layout_ast.compositional import (
     AssemblyDecl,
     AtPosition,
     BeamDecl,
-    BeamFeatureDecl,
-    BeamLayerDecl,
     Cell,
     ChamferGen,
     Circle,
@@ -151,6 +149,216 @@ def sample_catmull_rom_spline(
     sampled_points.append(control_points[-1])
 
     return sampled_points
+
+
+def _convert_beam_layer(layer_decl):
+    from assembly.beam import Cutout, LayerSpec
+
+    cutouts = tuple(
+        Cutout(
+            start_mm=c["start_mm"],
+            length_mm=c["length_mm"],
+            width_mm=c.get("width_mm"),
+            offset_from_edge_mm=c.get("offset_from_edge_mm", 0.0),
+        )
+        for c in layer_decl.cutouts
+    )
+    return LayerSpec(
+        length_mm=layer_decl.length_mm,
+        offset_mm=layer_decl.offset_mm,
+        cutouts=cutouts,
+    )
+
+
+def _convert_beam_face_feature(feat):
+    from assembly.beam import CarvedDesign, DrillHole, GeometricPattern, SquareMortise
+
+    p = feat.params
+    if feat.feature_type == "DrillHole":
+        return DrillHole(
+            x_mm=p["x_mm"],
+            y_mm=p["y_mm"],
+            diameter_mm=p["diameter_mm"],
+            depth_mm=p.get("depth_mm"),
+            face=p.get("face", "front"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "SquareMortise":
+        return SquareMortise(
+            x_mm=p["x_mm"],
+            y_mm=p["y_mm"],
+            width_mm=p["width_mm"],
+            height_mm=p["height_mm"],
+            depth_mm=p["depth_mm"],
+            face=p.get("face", "front"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "CarvedDesign":
+        return CarvedDesign(
+            x_mm=p["x_mm"],
+            y_mm=p["y_mm"],
+            design=p["design"],
+            depth_mm=p["depth_mm"],
+            face=p.get("face", "front"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "GeometricPattern":
+        return GeometricPattern(
+            x_mm=p["x_mm"],
+            y_mm=p["y_mm"],
+            pattern_type=p["pattern_type"],
+            params=p.get("params", {}),
+            depth_mm=p.get("depth_mm", 1.0),
+            face=p.get("face", "front"),
+            stage=p.get("stage", "strip"),
+        )
+    raise ValueError(f"Unknown face feature type: {feat.feature_type}")
+
+
+def _convert_beam_end_feature(feat):
+    from assembly.beam import EndCap, EndProfile, Tenon
+
+    p = feat.params
+    if feat.feature_type == "Tenon":
+        return Tenon(
+            end=p["end"],
+            extension_mm=p["extension_mm"],
+            width_mm=p["width_mm"],
+            height_mm=p["height_mm"],
+            center_offset_mm=p.get("center_offset_mm", 0.0),
+            layers=p.get("layers", "center"),
+        )
+    elif feat.feature_type == "EndCap":
+        return EndCap(
+            end=p["end"],
+            profile=p["profile"],
+            params=p.get("params", {}),
+        )
+    elif feat.feature_type == "EndProfile":
+        return EndProfile(
+            end=p["end"],
+            contour=tuple(tuple(pt) for pt in p["contour"]),
+        )
+    raise ValueError(f"Unknown end feature type: {feat.feature_type}")
+
+
+def _convert_beam_edge_feature(feat):
+    from assembly.beam import Chamfer, EdgeContour, EdgeDado, EdgeNotch, Fillet, Rabbet
+
+    p = feat.params
+    if feat.feature_type == "Fillet":
+        return Fillet(
+            edge=p["edge"],
+            radius_mm=p["radius_mm"],
+            start_mm=p.get("start_mm", 0.0),
+            end_mm=p.get("end_mm"),
+            layers=p.get("layers", "outer"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "Chamfer":
+        return Chamfer(
+            edge=p["edge"],
+            width_mm=p["width_mm"],
+            angle_deg=p.get("angle_deg", 45.0),
+            start_mm=p.get("start_mm", 0.0),
+            end_mm=p.get("end_mm"),
+            layers=p.get("layers", "outer"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "Rabbet":
+        return Rabbet(
+            edge=p["edge"],
+            width_mm=p["width_mm"],
+            depth_mm=p["depth_mm"],
+            start_mm=p.get("start_mm", 0.0),
+            end_mm=p.get("end_mm"),
+            layers=p.get("layers", "outer"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "EdgeDado":
+        return EdgeDado(
+            edge=p["edge"],
+            position_mm=p["position_mm"],
+            width_mm=p["width_mm"],
+            depth_mm=p["depth_mm"],
+            layers=p.get("layers", "all"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "EdgeNotch":
+        return EdgeNotch(
+            edge=p["edge"],
+            position_mm=p["position_mm"],
+            width_mm=p["width_mm"],
+            depth_mm=p["depth_mm"],
+            layers=p.get("layers", "all"),
+            stage=p.get("stage", "strip"),
+        )
+    elif feat.feature_type == "EdgeContour":
+        return EdgeContour(
+            edge=p["edge"],
+            contour=tuple(tuple(pt) for pt in p["contour"]),
+            layers=p.get("layers", "outer"),
+            stage=p.get("stage", "strip"),
+        )
+    raise ValueError(f"Unknown edge feature type: {feat.feature_type}")
+
+
+def _build_beam_structure(beam_spec, max_layer_length, segments, left_exts, right_exts, max_left):
+    beam_structure: dict[str, Any] = {
+        "name": beam_spec.name,
+        "length_mm": max_layer_length,
+        "width_mm": beam_spec.width_mm,
+        "thickness_mm": beam_spec.thickness_mm,
+        "layer_count": beam_spec.layer_count,
+        "total_thickness_mm": beam_spec.total_thickness,
+        "role": beam_spec.role.name if beam_spec.role else None,
+        "layers": [],
+    }
+    if segments:
+        for layer_idx, layer_segs in enumerate(segments):
+            left_ext = left_exts[layer_idx]
+            right_ext = right_exts[layer_idx]
+            adjusted_segs = []
+            seg_count = len(layer_segs)
+            for si, s in enumerate(layer_segs):
+                s_start = s.start_mm + max_left
+                s_end = s.end_mm + max_left
+                s_len = s.length
+                if si == 0:
+                    s_start -= left_ext
+                    s_len += left_ext
+                if si == seg_count - 1:
+                    s_end += right_ext
+                    s_len += right_ext
+                adjusted_segs.append(
+                    {
+                        "index": s.index,
+                        "start_mm": s_start,
+                        "end_mm": s_end,
+                        "length_mm": s_len,
+                    }
+                )
+            layer_data = {
+                "layer_index": layer_idx,
+                "segments": adjusted_segs,
+            }
+            beam_structure["layers"].append(layer_data)
+    elif isinstance(beam_spec.layers, tuple):
+        for layer_idx, layer_spec in enumerate(beam_spec.layers):
+            beam_structure["layers"].append(
+                {
+                    "layer_index": layer_idx,
+                    "segments": [
+                        {
+                            "index": 0,
+                            "start_mm": layer_spec.offset_mm,
+                            "end_mm": layer_spec.offset_mm + layer_spec.length_mm,
+                            "length_mm": layer_spec.length_mm,
+                        }
+                    ],
+                }
+            )
+    return beam_structure
 
 
 class ResolutionAssertionError(Exception):
@@ -1999,7 +2207,7 @@ class LayoutResolver:
 
         return positions
 
-    def _panels_to_items(
+    def _panels_to_items(  # noqa: C901 — panel layout dispatcher
         self,
         panel_specs: list[PanelSpec],
         region: ResolvedRegion,
@@ -2218,175 +2426,17 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        from assembly.beam import (
-            BeamRole,
-            BeamSpec,
-            CarvedDesign,
-            Chamfer,
-            Cutout,
-            DrillHole,
-            EdgeContour,
-            EdgeDado,
-            EdgeNotch,
-            EndCap,
-            EndProfile,
-            Fillet,
-            GeometricPattern,
-            LayerSpec,
-            Rabbet,
-            SquareMortise,
-            Tenon,
-        )
+        from assembly.beam import BeamRole, BeamSpec
 
-        def convert_layer(layer_decl: BeamLayerDecl) -> LayerSpec:
-            cutouts = tuple(
-                Cutout(
-                    start_mm=c["start_mm"],
-                    length_mm=c["length_mm"],
-                    width_mm=c.get("width_mm"),
-                    offset_from_edge_mm=c.get("offset_from_edge_mm", 0.0),
-                )
-                for c in layer_decl.cutouts
-            )
-            return LayerSpec(
-                length_mm=layer_decl.length_mm,
-                offset_mm=layer_decl.offset_mm,
-                cutouts=cutouts,
-            )
-
-        def convert_face_feature(feat: BeamFeatureDecl):
-            p = feat.params
-            if feat.feature_type == "DrillHole":
-                return DrillHole(
-                    x_mm=p["x_mm"],
-                    y_mm=p["y_mm"],
-                    diameter_mm=p["diameter_mm"],
-                    depth_mm=p.get("depth_mm"),
-                    face=p.get("face", "front"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "SquareMortise":
-                return SquareMortise(
-                    x_mm=p["x_mm"],
-                    y_mm=p["y_mm"],
-                    width_mm=p["width_mm"],
-                    height_mm=p["height_mm"],
-                    depth_mm=p["depth_mm"],
-                    face=p.get("face", "front"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "CarvedDesign":
-                return CarvedDesign(
-                    x_mm=p["x_mm"],
-                    y_mm=p["y_mm"],
-                    design=p["design"],
-                    depth_mm=p["depth_mm"],
-                    face=p.get("face", "front"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "GeometricPattern":
-                return GeometricPattern(
-                    x_mm=p["x_mm"],
-                    y_mm=p["y_mm"],
-                    pattern_type=p["pattern_type"],
-                    params=p.get("params", {}),
-                    depth_mm=p.get("depth_mm", 1.0),
-                    face=p.get("face", "front"),
-                    stage=p.get("stage", "strip"),
-                )
-            raise ValueError(f"Unknown face feature type: {feat.feature_type}")
-
-        def convert_end_feature(feat: BeamFeatureDecl):
-            p = feat.params
-            if feat.feature_type == "Tenon":
-                return Tenon(
-                    end=p["end"],
-                    extension_mm=p["extension_mm"],
-                    width_mm=p["width_mm"],
-                    height_mm=p["height_mm"],
-                    center_offset_mm=p.get("center_offset_mm", 0.0),
-                    layers=p.get("layers", "center"),
-                )
-            elif feat.feature_type == "EndCap":
-                return EndCap(
-                    end=p["end"],
-                    profile=p["profile"],
-                    params=p.get("params", {}),
-                )
-            elif feat.feature_type == "EndProfile":
-                return EndProfile(
-                    end=p["end"],
-                    contour=tuple(tuple(pt) for pt in p["contour"]),
-                )
-            raise ValueError(f"Unknown end feature type: {feat.feature_type}")
-
-        def convert_edge_feature(feat: BeamFeatureDecl):
-            p = feat.params
-            if feat.feature_type == "Fillet":
-                return Fillet(
-                    edge=p["edge"],
-                    radius_mm=p["radius_mm"],
-                    start_mm=p.get("start_mm", 0.0),
-                    end_mm=p.get("end_mm"),
-                    layers=p.get("layers", "outer"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "Chamfer":
-                return Chamfer(
-                    edge=p["edge"],
-                    width_mm=p["width_mm"],
-                    angle_deg=p.get("angle_deg", 45.0),
-                    start_mm=p.get("start_mm", 0.0),
-                    end_mm=p.get("end_mm"),
-                    layers=p.get("layers", "outer"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "Rabbet":
-                return Rabbet(
-                    edge=p["edge"],
-                    width_mm=p["width_mm"],
-                    depth_mm=p["depth_mm"],
-                    start_mm=p.get("start_mm", 0.0),
-                    end_mm=p.get("end_mm"),
-                    layers=p.get("layers", "outer"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "EdgeDado":
-                return EdgeDado(
-                    edge=p["edge"],
-                    position_mm=p["position_mm"],
-                    width_mm=p["width_mm"],
-                    depth_mm=p["depth_mm"],
-                    layers=p.get("layers", "all"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "EdgeNotch":
-                return EdgeNotch(
-                    edge=p["edge"],
-                    position_mm=p["position_mm"],
-                    width_mm=p["width_mm"],
-                    depth_mm=p["depth_mm"],
-                    layers=p.get("layers", "all"),
-                    stage=p.get("stage", "strip"),
-                )
-            elif feat.feature_type == "EdgeContour":
-                return EdgeContour(
-                    edge=p["edge"],
-                    contour=tuple(tuple(pt) for pt in p["contour"]),
-                    layers=p.get("layers", "outer"),
-                    stage=p.get("stage", "strip"),
-                )
-            raise ValueError(f"Unknown edge feature type: {feat.feature_type}")
-
-        layers = node.layers if isinstance(node.layers, int) else tuple(convert_layer(ld) for ld in node.layers)
+        layers = node.layers if isinstance(node.layers, int) else tuple(_convert_beam_layer(ld) for ld in node.layers)
 
         role = None
         if node.role:
             role = BeamRole[node.role.upper()]
 
-        face_features = tuple(convert_face_feature(f) for f in node.face_features)
-        end_features = tuple(convert_end_feature(f) for f in node.end_features)
-        edge_features = tuple(convert_edge_feature(f) for f in node.edge_features)
+        face_features = tuple(_convert_beam_face_feature(f) for f in node.face_features)
+        end_features = tuple(_convert_beam_end_feature(f) for f in node.end_features)
+        edge_features = tuple(_convert_beam_edge_feature(f) for f in node.edge_features)
 
         beam_spec = BeamSpec(
             name=node.name,
@@ -2434,60 +2484,14 @@ class LayoutResolver:
         if isinstance(beam_spec.layers, tuple):
             max_layer_length = max(ls.length_mm for ls in beam_spec.layers)
 
-        beam_structure: dict[str, Any] = {
-            "name": beam_spec.name,
-            "length_mm": max_layer_length,
-            "width_mm": beam_spec.width_mm,
-            "thickness_mm": beam_spec.thickness_mm,
-            "layer_count": beam_spec.layer_count,
-            "total_thickness_mm": beam_spec.total_thickness,
-            "role": beam_spec.role.name if beam_spec.role else None,
-            "layers": [],
-        }
-        if segments:
-            for layer_idx, layer_segs in enumerate(segments):
-                left_ext = left_exts[layer_idx]
-                right_ext = right_exts[layer_idx]
-                adjusted_segs = []
-                seg_count = len(layer_segs)
-                for si, s in enumerate(layer_segs):
-                    s_start = s.start_mm + max_left
-                    s_end = s.end_mm + max_left
-                    s_len = s.length
-                    if si == 0:
-                        s_start -= left_ext
-                        s_len += left_ext
-                    if si == seg_count - 1:
-                        s_end += right_ext
-                        s_len += right_ext
-                    adjusted_segs.append(
-                        {
-                            "index": s.index,
-                            "start_mm": s_start,
-                            "end_mm": s_end,
-                            "length_mm": s_len,
-                        }
-                    )
-                layer_data = {
-                    "layer_index": layer_idx,
-                    "segments": adjusted_segs,
-                }
-                beam_structure["layers"].append(layer_data)
-        elif isinstance(beam_spec.layers, tuple):
-            for layer_idx, layer_spec in enumerate(beam_spec.layers):
-                beam_structure["layers"].append(
-                    {
-                        "layer_index": layer_idx,
-                        "segments": [
-                            {
-                                "index": 0,
-                                "start_mm": layer_spec.offset_mm,
-                                "end_mm": layer_spec.offset_mm + layer_spec.length_mm,
-                                "length_mm": layer_spec.length_mm,
-                            }
-                        ],
-                    }
-                )
+        beam_structure = _build_beam_structure(
+            beam_spec,
+            max_layer_length,
+            segments,
+            left_exts,
+            right_exts,
+            max_left,
+        )
         self._beam_structures.append(beam_structure)
 
         for spec, x_cursor, y_cursor in self._row_wrap_positions(

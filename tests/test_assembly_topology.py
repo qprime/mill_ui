@@ -231,8 +231,12 @@ class TestCubbyAssembly:
         ]
         assert len(half_lap_interfaces) == 4
 
-        positions_a = sorted([i.position_along_edge_a_mm for i in half_lap_interfaces if i.position_along_edge_a_mm is not None])
-        positions_b = sorted([i.position_along_edge_b_mm for i in half_lap_interfaces if i.position_along_edge_b_mm is not None])
+        positions_a = sorted(
+            [i.position_along_edge_a_mm for i in half_lap_interfaces if i.position_along_edge_a_mm is not None]
+        )
+        positions_b = sorted(
+            [i.position_along_edge_b_mm for i in half_lap_interfaces if i.position_along_edge_b_mm is not None]
+        )
 
         expected_partition_1_pos = cell_width - thickness / 2
         expected_partition_2_pos = 2 * cell_width - thickness / 2

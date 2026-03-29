@@ -258,7 +258,7 @@ def _extract_document_metrics(root: ET.Element) -> DocumentMetrics:
     return metrics
 
 
-def _extract_layer_metrics(
+def _extract_layer_metrics(  # noqa: C901 — SVG layer metric collector
     root: ET.Element,
 ) -> tuple[dict[str, LayerMetrics], list[str]]:
     layers: dict[str, LayerMetrics] = {}

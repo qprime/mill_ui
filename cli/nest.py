@@ -124,7 +124,7 @@ def run_export_svg(ast: LayoutAST, pml_path: Path, output_dir: Path, theme: str)
     return svg_path
 
 
-def main():
+def main():  # noqa: C901 — CLI entry point
     parser = argparse.ArgumentParser(
         description="Run nesting from .nest.yml file and output PML layouts",
         formatter_class=argparse.RawDescriptionHelpFormatter,

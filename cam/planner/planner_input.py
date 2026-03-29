@@ -293,7 +293,7 @@ class PlannerInput:
         return result
 
     @classmethod
-    def from_hints_dict(cls, hints: dict[str, Any]) -> PlannerInput:
+    def from_hints_dict(cls, hints: dict[str, Any]) -> PlannerInput:  # noqa: C901 — deserialization dispatcher
         def parse_keepout(k: dict[str, Any]) -> KeepoutInput:
             return KeepoutInput(
                 x_min=float(k.get("x_min", 0.0)),

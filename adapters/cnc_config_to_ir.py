@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from config.machine_loader import Endmill, MachineConfig, TTrack
+from config.machine_loader import Endmill, MachineConfig
 from diagram_ir import DiagramIR, LayerIR, Line, Rect
 from diagram_ir.dimensions import DimensionRequest
 from ir.removal_intent import Bounds2D
 
 
-def machine_config_to_diagram_ir(
+def machine_config_to_diagram_ir(  # noqa: C901 — adapter dispatcher
     config: MachineConfig,
     endmill: Endmill | None = None,
     show_dimensions: bool = True,
@@ -116,9 +116,25 @@ def machine_config_to_diagram_ir(
     if spoilboard and tt is not None:
         wb = spoilboard
         t_track_shapes = [
-            Rect(x=wb.x_min - tt.left_mm, y=wb.y_min, width=tt.left_mm, height=wb.height_mm, style_token="t-track", id="ttrack_left"),
-            Rect(x=wb.x_max, y=wb.y_min, width=tt.right_mm, height=wb.height_mm, style_token="t-track", id="ttrack_right"),
-            Rect(x=wb.x_min, y=wb.y_min - tt.front_mm, width=wb.width_mm, height=tt.front_mm, style_token="t-track", id="ttrack_front"),
+            Rect(
+                x=wb.x_min - tt.left_mm,
+                y=wb.y_min,
+                width=tt.left_mm,
+                height=wb.height_mm,
+                style_token="t-track",
+                id="ttrack_left",
+            ),
+            Rect(
+                x=wb.x_max, y=wb.y_min, width=tt.right_mm, height=wb.height_mm, style_token="t-track", id="ttrack_right"
+            ),
+            Rect(
+                x=wb.x_min,
+                y=wb.y_min - tt.front_mm,
+                width=wb.width_mm,
+                height=tt.front_mm,
+                style_token="t-track",
+                id="ttrack_front",
+            ),
             Rect(x=wb.x_min, y=wb.y_max, width=wb.width_mm, height=tt.back_mm, style_token="t-track", id="ttrack_back"),
         ]
         layers.append(LayerIR(name="T_TRACK", items=tuple(t_track_shapes)))

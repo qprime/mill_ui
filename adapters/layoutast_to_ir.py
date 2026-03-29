@@ -21,7 +21,7 @@ def register_feature(feature_type: str):
     return decorator
 
 
-def layoutast_to_diagram_ir(
+def layoutast_to_diagram_ir(  # noqa: C901 — adapter dispatcher
     ast: LayoutAST,
     y_origin: str = "back",
     show_dimensions: bool = True,

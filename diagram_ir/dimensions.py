@@ -303,7 +303,7 @@ def _hole_centers_grouped_by_parent(
     return result
 
 
-def _hole_spacing_requests_for_group(
+def _hole_spacing_requests_for_group(  # noqa: C901 — spacing logic
     centers: list[tuple[float, float]],
     seen_h_spacings: set[int],
     seen_v_spacings: set[int],

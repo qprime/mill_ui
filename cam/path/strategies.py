@@ -146,7 +146,7 @@ def _tab_windows(perimeter: float, count: int, width: float) -> list[tuple[float
     return windows
 
 
-def profile_outline_with_tabs(
+def profile_outline_with_tabs(  # noqa: C901 — tab geometry dispatcher
     shape: Shape2D,
     setup: Setup,
     *,

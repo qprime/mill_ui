@@ -145,7 +145,7 @@ def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
     return {feat.feature_type: params if params else None}
 
 
-def format_node(node: Any) -> dict[str, Any]:
+def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type dispatcher
     if isinstance(node, Panel):
         result: dict[str, Any] = {}
         if node.id:

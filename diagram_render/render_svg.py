@@ -272,7 +272,7 @@ def _layer_name_to_class(name: str) -> str:
     return name.lower().replace("_", "-")
 
 
-def _render_shape(parent: ET.Element, shape: Shape, theme: DiagramTheme, transform_y, y_flip: bool) -> None:
+def _render_shape(parent: ET.Element, shape: Shape, theme: DiagramTheme, transform_y, y_flip: bool) -> None:  # noqa: C901 — shape-type dispatcher
     style_attrs = theme.get_style(shape.style_token)
 
     if isinstance(shape, Rect):

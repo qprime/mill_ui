@@ -127,7 +127,7 @@ def _build_filename(operation: str, tool: ToolSelection) -> str:
     return "-".join(bits).replace(" ", "_") + ".nc"
 
 
-def plan_passes(
+def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     planner_input: PlannerInput,
     *,
     config: Config,

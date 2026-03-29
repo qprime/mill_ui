@@ -8,11 +8,7 @@ from ruamel.yaml import YAML
 from core.constants import DepthMode
 from layout_ast.compositional import (
     Arch,
-    AssemblyDecl,
     AtPosition,
-    BeamDecl,
-    BeamFeatureDecl,
-    BeamLayerDecl,
     Cell,
     ChamferGen,
     Circle,
@@ -196,7 +192,209 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
     )
 
 
-def parse_node(data: dict, path: str = "") -> Any:
+def _parse_joinery_field(raw: Any, default_joinery: str = "butt") -> str | InterfaceConfig | None:
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        return raw
+    if isinstance(raw, dict):
+        return _parse_interface_config(raw, default_joinery=default_joinery)
+    return None
+
+
+def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
+    from layout_ast.compositional import AssemblyDecl
+
+    assembly_type = node_data.get("type", "box")
+
+    interfaces_raw = node_data.get("interfaces")
+    interfaces: dict[str, str | InterfaceConfig] | None = None
+    if interfaces_raw:
+        interfaces = {}
+        for iface_name, iface_data in interfaces_raw.items():
+            if isinstance(iface_data, str):
+                interfaces[iface_name] = iface_data
+            elif isinstance(iface_data, dict):
+                interfaces[iface_name] = _parse_interface_config(iface_data)
+
+    top = _parse_joinery_field(node_data.get("top"))
+    bottom = _parse_joinery_field(node_data.get("bottom", "captured"), default_joinery="captured")
+    back_raw = node_data.get("back")
+    back = _parse_joinery_field(back_raw, default_joinery="captured")
+
+    grid_raw = node_data.get("grid")
+    grid = None
+    if grid_raw and isinstance(grid_raw, list) and len(grid_raw) == 2:
+        grid = (int(grid_raw[0]), int(grid_raw[1]))
+
+    shelf_joinery: str | InterfaceConfig = (
+        _parse_joinery_field(node_data.get("shelf_joinery", "captured"), default_joinery="captured") or "captured"
+    )
+    partition_joinery: str | InterfaceConfig = (
+        _parse_joinery_field(node_data.get("partition_joinery", "captured"), default_joinery="captured") or "captured"
+    )
+
+    return AssemblyDecl(
+        type=assembly_type,
+        width_mm=parse_dimension(
+            node_data.get("width") or node_data.get("dimensions", [0])[0]
+            if isinstance(node_data.get("dimensions"), list)
+            else _require(node_data, "width", f"{path}.Assembly")
+        ),
+        depth_mm=parse_dimension(
+            node_data.get("depth")
+            or (
+                node_data.get("dimensions", [0, 0])[1]
+                if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1
+                else _require(node_data, "depth", f"{path}.Assembly")
+            )
+        ),
+        height_mm=parse_dimension(
+            node_data.get("height")
+            or (
+                node_data.get("dimensions", [0, 0, 0])[2]
+                if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2
+                else _require(node_data, "height", f"{path}.Assembly")
+            )
+        ),
+        thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Assembly")),
+        joinery=node_data.get("joinery", "finger"),
+        finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
+        finger_count=node_data.get("finger_count"),
+        clearance_mm=parse_dimension(node_data.get("clearance", "0.12mm")),
+        interfaces=interfaces,
+        top=top,
+        bottom=bottom,
+        children=children,
+        layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
+        show_labels=node_data.get("show_labels", False),
+        show_edge_colors=node_data.get("show_edge_colors", False),
+        show_dimensions=node_data.get("show_dimensions", True),
+        cap_style=node_data.get("cap_style", "between_sides"),
+        back=back,
+        back_thickness_mm=parse_dimension(node_data["back_thickness"])
+        if "back_thickness" in node_data
+        else (
+            parse_dimension(back_raw["thickness"]) if isinstance(back_raw, dict) and "thickness" in back_raw else None
+        ),
+        back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm"))
+        if "back_inset" in node_data
+        else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
+        back_joinery=node_data.get("back_joinery"),
+        back_rabbet_depth_mm=parse_dimension(node_data["back_rabbet_depth"])
+        if "back_rabbet_depth" in node_data
+        else None,
+        back_internal_support=node_data.get("back_internal_support", True),
+        fixed_shelves=node_data.get("fixed_shelves", 0),
+        shelf_joinery=shelf_joinery,
+        shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"]) if "shelf_dado_depth" in node_data else None,
+        shelf_back_support=node_data.get("shelf_back_support", False),
+        vertical_partitions=node_data.get("vertical_partitions", 0),
+        partition_joinery=partition_joinery,
+        partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"])
+        if "partition_dado_depth" in node_data
+        else None,
+        grid=grid,
+        perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),
+        internal_joinery=node_data.get("internal_joinery", "half_lap"),
+        toe_kick_height_mm=parse_dimension(node_data["toe_kick_height"]) if "toe_kick_height" in node_data else None,
+        toe_kick_depth_mm=parse_dimension(node_data["toe_kick_depth"]) if "toe_kick_depth" in node_data else None,
+        toe_kick_style=node_data.get("toe_kick_style", "open"),
+        toe_kick_cover=node_data.get("toe_kick_cover", False),
+    )
+
+
+def _parse_beam_feature(feat_data: dict, feat_path: str):
+    from layout_ast.compositional import BeamFeatureDecl
+
+    feat_keys = [k for k in feat_data if k[0].isupper()]
+    if len(feat_keys) != 1:
+        raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
+    feat_type = feat_keys[0]
+    feat_params = feat_data[feat_type] or {}
+    parsed_params: dict[str, Any] = {}
+    dimension_keys = {
+        "x",
+        "y",
+        "width",
+        "height",
+        "depth",
+        "diameter",
+        "radius",
+        "extension",
+        "position",
+        "start",
+        "end",
+    }
+    literal_values = {"left", "right", "top", "bottom", "front", "back"}
+    for key, value in feat_params.items():
+        if key in dimension_keys and value is not None:
+            if isinstance(value, str) and value in literal_values:
+                parsed_params[key] = value
+            else:
+                parsed_params[f"{key}_mm"] = parse_dimension(value)
+        else:
+            parsed_params[key] = value
+    return BeamFeatureDecl(feature_type=feat_type, params=parsed_params)
+
+
+def _parse_beam_node(node_data: dict, path: str) -> Any:
+    from layout_ast.compositional import BeamDecl, BeamLayerDecl
+
+    layers_raw = node_data.get("layers", 1)
+    layers: int | tuple[BeamLayerDecl, ...]
+    if isinstance(layers_raw, int):
+        layers = layers_raw
+    elif isinstance(layers_raw, list):
+        parsed_layers = []
+        for layer_data in layers_raw:
+            cutouts: tuple[()] | tuple[dict, ...] = ()
+            if "cutouts" in layer_data:
+                cutouts = tuple(
+                    {
+                        "start_mm": parse_dimension(_require(c, "start", f"{path}.Beam.layer.cutout")),
+                        "length_mm": parse_dimension(_require(c, "length", f"{path}.Beam.layer.cutout")),
+                        "width_mm": parse_dimension(c["width"]) if "width" in c else None,
+                        "offset_from_edge_mm": parse_dimension(c.get("offset", "0mm")),
+                    }
+                    for c in layer_data["cutouts"]
+                )
+            parsed_layers.append(
+                BeamLayerDecl(
+                    length_mm=parse_dimension(_require(layer_data, "length", f"{path}.Beam.layer")),
+                    offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
+                    cutouts=cutouts,
+                )
+            )
+        layers = tuple(parsed_layers)
+    else:
+        layers = 1
+
+    face_features = tuple(
+        _parse_beam_feature(f, f"{path}.face_features[{i}]") for i, f in enumerate(node_data.get("face_features", []))
+    )
+    end_features = tuple(
+        _parse_beam_feature(f, f"{path}.end_features[{i}]") for i, f in enumerate(node_data.get("end_features", []))
+    )
+    edge_features = tuple(
+        _parse_beam_feature(f, f"{path}.edge_features[{i}]") for i, f in enumerate(node_data.get("edge_features", []))
+    )
+
+    return BeamDecl(
+        name=node_data.get("name", "beam"),
+        length_mm=parse_dimension(_require(node_data, "length", f"{path}.Beam")),
+        width_mm=parse_dimension(_require(node_data, "width", f"{path}.Beam")),
+        thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Beam")),
+        layers=layers,
+        role=node_data.get("role"),
+        face_features=face_features,
+        end_features=end_features,
+        edge_features=edge_features,
+        show_labels=node_data.get("show_labels", False),
+    )
+
+
+def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
 
@@ -612,138 +810,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Assembly":
-        assembly_type = node_data.get("type", "box")
-
-        interfaces_raw = node_data.get("interfaces")
-        interfaces: dict[str, str | InterfaceConfig] | None = None
-        if interfaces_raw:
-            interfaces = {}
-            for iface_name, iface_data in interfaces_raw.items():
-                if isinstance(iface_data, str):
-                    interfaces[iface_name] = iface_data
-                elif isinstance(iface_data, dict):
-                    interfaces[iface_name] = _parse_interface_config(iface_data)
-
-        top_raw = node_data.get("top")
-        top: str | InterfaceConfig | None = None
-        if top_raw is None:
-            top = None
-        elif isinstance(top_raw, str):
-            top = top_raw
-        elif isinstance(top_raw, dict):
-            top = _parse_interface_config(top_raw)
-
-        bottom_raw = node_data.get("bottom", "captured")
-        bottom: str | InterfaceConfig | None = "captured"
-        if bottom_raw is None:
-            bottom = None
-        elif isinstance(bottom_raw, str):
-            bottom = bottom_raw
-        elif isinstance(bottom_raw, dict):
-            bottom = _parse_interface_config(bottom_raw, default_joinery="captured")
-
-        back_raw = node_data.get("back")
-        back: str | InterfaceConfig | None = None
-        if back_raw is None:
-            back = None
-        elif isinstance(back_raw, str):
-            back = back_raw
-        elif isinstance(back_raw, dict):
-            back = _parse_interface_config(back_raw, default_joinery="captured")
-
-        grid_raw = node_data.get("grid")
-        grid = None
-        if grid_raw and isinstance(grid_raw, list) and len(grid_raw) == 2:
-            grid = (int(grid_raw[0]), int(grid_raw[1]))
-
-        shelf_joinery_raw = node_data.get("shelf_joinery", "captured")
-        shelf_joinery: str | InterfaceConfig = "captured"
-        if isinstance(shelf_joinery_raw, str):
-            shelf_joinery = shelf_joinery_raw
-        elif isinstance(shelf_joinery_raw, dict):
-            shelf_joinery = _parse_interface_config(shelf_joinery_raw, default_joinery="captured")
-
-        partition_joinery_raw = node_data.get("partition_joinery", "captured")
-        partition_joinery: str | InterfaceConfig = "captured"
-        if isinstance(partition_joinery_raw, str):
-            partition_joinery = partition_joinery_raw
-        elif isinstance(partition_joinery_raw, dict):
-            partition_joinery = _parse_interface_config(partition_joinery_raw, default_joinery="captured")
-
-        return AssemblyDecl(
-            type=assembly_type,
-            width_mm=parse_dimension(
-                node_data.get("width") or node_data.get("dimensions", [0])[0]
-                if isinstance(node_data.get("dimensions"), list)
-                else _require(node_data, "width", f"{path}.Assembly")
-            ),
-            depth_mm=parse_dimension(
-                node_data.get("depth")
-                or (
-                    node_data.get("dimensions", [0, 0])[1]
-                    if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1
-                    else _require(node_data, "depth", f"{path}.Assembly")
-                )
-            ),
-            height_mm=parse_dimension(
-                node_data.get("height")
-                or (
-                    node_data.get("dimensions", [0, 0, 0])[2]
-                    if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2
-                    else _require(node_data, "height", f"{path}.Assembly")
-                )
-            ),
-            thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Assembly")),
-            joinery=node_data.get("joinery", "finger"),
-            finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
-            finger_count=node_data.get("finger_count"),
-            clearance_mm=parse_dimension(node_data.get("clearance", "0.12mm")),
-            interfaces=interfaces,
-            top=top,
-            bottom=bottom,
-            children=children,
-            layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
-            show_labels=node_data.get("show_labels", False),
-            show_edge_colors=node_data.get("show_edge_colors", False),
-            show_dimensions=node_data.get("show_dimensions", True),
-            cap_style=node_data.get("cap_style", "between_sides"),
-            back=back,
-            back_thickness_mm=parse_dimension(node_data["back_thickness"])
-            if "back_thickness" in node_data
-            else (
-                parse_dimension(back_raw["thickness"])
-                if isinstance(back_raw, dict) and "thickness" in back_raw
-                else None
-            ),
-            back_inset_mm=parse_dimension(node_data.get("back_inset", "0mm"))
-            if "back_inset" in node_data
-            else (parse_dimension(back_raw.get("inset", "0mm")) if isinstance(back_raw, dict) else 0.0),
-            back_joinery=node_data.get("back_joinery"),
-            back_rabbet_depth_mm=parse_dimension(node_data["back_rabbet_depth"])
-            if "back_rabbet_depth" in node_data
-            else None,
-            back_internal_support=node_data.get("back_internal_support", True),
-            fixed_shelves=node_data.get("fixed_shelves", 0),
-            shelf_joinery=shelf_joinery,
-            shelf_dado_depth_mm=parse_dimension(node_data["shelf_dado_depth"])
-            if "shelf_dado_depth" in node_data
-            else None,
-            shelf_back_support=node_data.get("shelf_back_support", False),
-            vertical_partitions=node_data.get("vertical_partitions", 0),
-            partition_joinery=partition_joinery,
-            partition_dado_depth_mm=parse_dimension(node_data["partition_dado_depth"])
-            if "partition_dado_depth" in node_data
-            else None,
-            grid=grid,
-            perimeter_joinery=node_data.get("perimeter_joinery", node_data.get("joinery", "finger")),
-            internal_joinery=node_data.get("internal_joinery", "half_lap"),
-            toe_kick_height_mm=parse_dimension(node_data["toe_kick_height"])
-            if "toe_kick_height" in node_data
-            else None,
-            toe_kick_depth_mm=parse_dimension(node_data["toe_kick_depth"]) if "toe_kick_depth" in node_data else None,
-            toe_kick_style=node_data.get("toe_kick_style", "open"),
-            toe_kick_cover=node_data.get("toe_kick_cover", False),
-        )
+        return _parse_assembly_node(node_data, children, path)
 
     elif node_type == "UseComponent":
         return UseComponent(
@@ -759,90 +826,7 @@ def parse_node(data: dict, path: str = "") -> Any:
         )
 
     elif node_type == "Beam":
-        layers_raw = node_data.get("layers", 1)
-        layers: int | tuple[BeamLayerDecl, ...]
-        if isinstance(layers_raw, int):
-            layers = layers_raw
-        elif isinstance(layers_raw, list):
-            parsed_layers = []
-            for layer_data in layers_raw:
-                cutouts: tuple[()] | tuple[dict, ...] = ()
-                if "cutouts" in layer_data:
-                    cutouts = tuple(
-                        {
-                            "start_mm": parse_dimension(_require(c, "start", f"{path}.Beam.layer.cutout")),
-                            "length_mm": parse_dimension(_require(c, "length", f"{path}.Beam.layer.cutout")),
-                            "width_mm": parse_dimension(c["width"]) if "width" in c else None,
-                            "offset_from_edge_mm": parse_dimension(c.get("offset", "0mm")),
-                        }
-                        for c in layer_data["cutouts"]
-                    )
-                parsed_layers.append(
-                    BeamLayerDecl(
-                        length_mm=parse_dimension(_require(layer_data, "length", f"{path}.Beam.layer")),
-                        offset_mm=parse_dimension(layer_data.get("offset", "0mm")),
-                        cutouts=cutouts,
-                    )
-                )
-            layers = tuple(parsed_layers)
-        else:
-            layers = 1
-
-        def parse_beam_feature(feat_data: dict, feat_path: str) -> BeamFeatureDecl:
-            feat_keys = [k for k in feat_data if k[0].isupper()]
-            if len(feat_keys) != 1:
-                raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
-            feat_type = feat_keys[0]
-            feat_params = feat_data[feat_type] or {}
-            parsed_params: dict[str, Any] = {}
-            dimension_keys = {
-                "x",
-                "y",
-                "width",
-                "height",
-                "depth",
-                "diameter",
-                "radius",
-                "extension",
-                "position",
-                "start",
-                "end",
-            }
-            literal_values = {"left", "right", "top", "bottom", "front", "back"}
-            for key, value in feat_params.items():
-                if key in dimension_keys and value is not None:
-                    if isinstance(value, str) and value in literal_values:
-                        parsed_params[key] = value
-                    else:
-                        parsed_params[f"{key}_mm"] = parse_dimension(value)
-                else:
-                    parsed_params[key] = value
-            return BeamFeatureDecl(feature_type=feat_type, params=parsed_params)
-
-        face_features = tuple(
-            parse_beam_feature(f, f"{path}.face_features[{i}]")
-            for i, f in enumerate(node_data.get("face_features", []))
-        )
-        end_features = tuple(
-            parse_beam_feature(f, f"{path}.end_features[{i}]") for i, f in enumerate(node_data.get("end_features", []))
-        )
-        edge_features = tuple(
-            parse_beam_feature(f, f"{path}.edge_features[{i}]")
-            for i, f in enumerate(node_data.get("edge_features", []))
-        )
-
-        return BeamDecl(
-            name=node_data.get("name", "beam"),
-            length_mm=parse_dimension(_require(node_data, "length", f"{path}.Beam")),
-            width_mm=parse_dimension(_require(node_data, "width", f"{path}.Beam")),
-            thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Beam")),
-            layers=layers,
-            role=node_data.get("role"),
-            face_features=face_features,
-            end_features=end_features,
-            edge_features=edge_features,
-            show_labels=node_data.get("show_labels", False),
-        )
+        return _parse_beam_node(node_data, path)
 
     else:
         raise PMLParseError(f"Unknown node type: {node_type}", path)
@@ -1011,7 +995,7 @@ def _parse_holding_block(block: dict[str, Any], path: str) -> HoldingSpec:
         raise NestParseError(f"Invalid holding in {path}: {e}") from e
 
 
-def parse_nest_yaml(source: str) -> NestJob:
+def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parser
     yaml = YAML()
     yaml.preserve_quotes = True
     try:

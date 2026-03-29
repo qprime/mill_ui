@@ -89,7 +89,7 @@ def _attach_surface_cooling(planner_input, ast: LayoutAST):
     return _replace(planner_input, pockets=tuple(new_pockets))
 
 
-def run_pipeline(
+def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     ast: LayoutAST,
     *,
     kerf_mm: float = 6.35,

@@ -1,5 +1,5 @@
 ---
-description: Run the full post-implementation close-out workflow — verification, summary, code review, and commit. Use after finishing an implementation task, when the user says "close it out", "wrap it up", or when implementation work is complete and ready for review.
+description: Run the full post-implementation close-out workflow — verification, summary, code review, and commit. Only use when the user explicitly asks — e.g. "close it out", "wrap it up", "/close-out". Never auto-trigger after implementation.
 ---
 
 # /close-out — Implementation Close-Out

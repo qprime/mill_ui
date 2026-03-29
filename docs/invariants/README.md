@@ -116,7 +116,7 @@ assert parse_pml(format_pml(ast1)) == ast1
 | Soft failure | Return empty + flag | Optional operation, absence acceptable |
 | Never allowed | Silent partial output | — |
 
-Error messages MUST include: what failed, what constraint was violated, actual vs expected.
+Error messages MUST include: what failed, what constraint was violated, actual vs expected. See [error_conventions.md](../dev_docs/error_conventions.md) for format details.
 
 ---
 

@@ -37,6 +37,19 @@ python -m cli.generate_golden --all-recipes docs/recipes --update --force
 
 Report the results: test count, pass/fail. Zero failures required.
 
+### Recipe cleanup
+
+After verification passes, restore recipe output files to their committed state **unless** this implementation intentionally changed recipes (new recipe added, output format changed, or recipe regeneration was part of the work). Incidental recipe dirtiness from test runs must not leak into the commit.
+
+```bash
+git checkout -- docs/recipes/
+```
+
+If recipe files ARE part of the implementation:
+1. Regenerate with `python -m tests.test_recipes --regen_recipes`
+2. Update golden metrics with `python -m cli.generate_golden --all-recipes docs/recipes --update --force`
+3. Stage the recipe files explicitly in Phase 5
+
 ---
 
 ## Phase 2: Implementation Summary

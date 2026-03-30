@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 
 from cam.model.setup import Setup
 from cam.moves import Move
@@ -84,7 +85,7 @@ def _lerp_vec(a: Vec2, b: Vec2, t: float) -> Vec2:
 
 
 def _ramp_entry_moves(
-    pts: list[Vec2], target_z: float, prev_z: float, ramp_angle_deg: float, setup: Setup
+    pts: Sequence[Vec2], target_z: float, prev_z: float, ramp_angle_deg: float, setup: Setup
 ) -> list[Move]:
     start = pts[0]
     step_down = abs(target_z - prev_z)

@@ -14,11 +14,11 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import HoleGridParams
-from generators.utils import LocalBounds, get_local_bounds
+from generators.utils import get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
-    from domains import Domain
+    from domains.domain import Bounds2D, Domain
 
 
 def hole_grid_generator(
@@ -90,14 +90,14 @@ def hole_grid_generator(
 
 
 def _generate_grid_points(
-    bounds: LocalBounds,
+    bounds: Bounds2D,
     col_spacing: float,
     row_spacing: float,
     pattern: str,
     align: str,
 ) -> list[tuple[float, float]]:
-    x_min, x_max = bounds["x_min"], bounds["x_max"]
-    y_min, y_max = bounds["y_min"], bounds["y_max"]
+    x_min, x_max = bounds.x_min, bounds.x_max
+    y_min, y_max = bounds.y_min, bounds.y_max
 
     width = x_max - x_min
     height = y_max - y_min

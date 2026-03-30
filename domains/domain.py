@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -73,6 +73,15 @@ class Bounds2D:
             (self.x_min + self.x_max) / 2,
             (self.y_min + self.y_max) / 2,
         )
+
+    @classmethod
+    def from_points(cls, pts: Iterable[tuple[float, float]]) -> Bounds2D:
+        pts_list = list(pts)
+        if not pts_list:
+            raise ValueError("Cannot compute bounds from empty point sequence")
+        xs = [p[0] for p in pts_list]
+        ys = [p[1] for p in pts_list]
+        return cls(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
 
 
 @dataclass(frozen=True)

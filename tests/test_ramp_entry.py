@@ -99,7 +99,7 @@ class TestProfileRampEntry:
         from cam.types import Vec2 as V
 
         open_pts = [V(0.0, 0.0), V(100.0, 0.0), V(100.0, 80.0), V(0.0, 80.0)]
-        shape = Shape2D(open_pts)
+        shape = Shape2D(tuple(open_pts))
         setup = _setup(3.0)
         moves = profile_outline(shape, setup, depth_mm=3.0, step_down=3.0)
         assert _has_z_only_plunge(moves)
@@ -232,7 +232,7 @@ class TestProfileKeepdown:
         from cam.types import Vec2 as V
 
         open_pts = [V(0.0, 0.0), V(100.0, 0.0), V(100.0, 80.0), V(0.0, 80.0)]
-        shape = Shape2D(open_pts)
+        shape = Shape2D(tuple(open_pts))
         setup = _setup(3.0)
         moves = profile_outline(shape, setup, depth_mm=9.0, step_down=3.0)
         retracts = [m for m in moves if isinstance(m, RetractMove)]

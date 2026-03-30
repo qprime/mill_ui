@@ -109,8 +109,8 @@ def wave_generator(
     wave_spacing = params.tool_width_mm
 
     local_bounds = get_local_bounds(domain)
-    local_y_min, local_y_max = local_bounds["y_min"], local_bounds["y_max"]
-    local_x_min, local_x_max = local_bounds["x_min"], local_bounds["x_max"]
+    local_y_min, local_y_max = local_bounds.y_min, local_bounds.y_max
+    local_x_min, local_x_max = local_bounds.x_min, local_bounds.x_max
 
     domain_width = local_x_max - local_x_min
     if params.wave_count is not None and params.wave_count > 0:

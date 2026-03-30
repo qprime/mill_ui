@@ -4,7 +4,7 @@ from cam.types import Vec2
 
 def rectangle(w: float, h: float, origin: Vec2 | None = None) -> Shape2D:
     ox, oy = (origin.x, origin.y) if origin else (0.0, 0.0)
-    pts = [Vec2(ox, oy), Vec2(ox + w, oy), Vec2(ox + w, oy + h), Vec2(ox, oy + h), Vec2(ox, oy)]
+    pts = (Vec2(ox, oy), Vec2(ox + w, oy), Vec2(ox + w, oy + h), Vec2(ox, oy + h), Vec2(ox, oy))
     return Shape2D(pts)
 
 
@@ -16,17 +16,17 @@ def circle(center: Vec2, r: float, segments: int = 64) -> Shape2D:
         for i in range(segments)
     ]
     pts.append(pts[0])
-    return Shape2D(pts)
+    return Shape2D(tuple(pts))
 
 
 def polygon(points: list[tuple], center: tuple[float, float] = (0.0, 0.0)) -> Shape2D:
     cx, cy = center
     pts = [Vec2(float(p[0]) + cx, float(p[1]) + cy) for p in points if isinstance(p, (tuple, list)) and len(p) >= 2]
     if len(pts) < 3:
-        return Shape2D([])
+        return Shape2D(())
     if pts[0].x != pts[-1].x or pts[0].y != pts[-1].y:
         pts.append(pts[0])
-    return Shape2D(pts)
+    return Shape2D(tuple(pts))
 
 
 def rounded_rect(
@@ -63,4 +63,4 @@ def rounded_rect(
     arc(ox + w - r_tr, oy + h - r_tr, r_tr, 0, math.pi / 2)
     arc(ox + r_tl, oy + h - r_tl, r_tl, math.pi / 2, math.pi)
     pts.append(pts[0])
-    return Shape2D(pts)
+    return Shape2D(tuple(pts))

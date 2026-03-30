@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from shapely.geometry import MultiPolygon, Polygon
 
+from domains.domain import Bounds2D
 from domains.transforms import sheet_to_local
 from generators.core import (
     GeneratorSkipError,
@@ -80,25 +81,9 @@ def iter_polygons(geom) -> list[Polygon]:
     return result
 
 
-class LocalBounds(TypedDict):
-    x_min: float
-    x_max: float
-    y_min: float
-    y_max: float
-
-
-def get_local_bounds(domain: Domain) -> LocalBounds:
+def get_local_bounds(domain: Domain) -> Bounds2D:
     local_points = [sheet_to_local(pt, domain) for pt in domain.outer_boundary]
-
-    xs = [p[0] for p in local_points]
-    ys = [p[1] for p in local_points]
-
-    return {
-        "x_min": min(xs),
-        "x_max": max(xs),
-        "y_min": min(ys),
-        "y_max": max(ys),
-    }
+    return Bounds2D.from_points(local_points)
 
 
 def extract_loops(
@@ -174,7 +159,6 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 
 __all__ = [
-    "LocalBounds",
     "create_line_item",
     "extract_loops",
     "get_local_bounds",

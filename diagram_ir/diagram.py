@@ -43,38 +43,47 @@ class DiagramIR:
     def _validate_shapes_in_bounds(self) -> None:
         for layer in self.layers:
             for shape in layer.items:
-                shape_bounds = _get_shape_bounds(shape)
-                if shape_bounds is None:
+                sb = _get_shape_bounds(shape)
+                if sb is None:
                     continue
-                x_min, y_min, x_max, y_max = shape_bounds
                 if (
-                    x_min < self.bounds.x_min - 0.1
-                    or x_max > self.bounds.x_max + 0.1
-                    or y_min < self.bounds.y_min - 0.1
-                    or y_max > self.bounds.y_max + 0.1
+                    sb.x_min < self.bounds.x_min - 0.1
+                    or sb.x_max > self.bounds.x_max + 0.1
+                    or sb.y_min < self.bounds.y_min - 0.1
+                    or sb.y_max > self.bounds.y_max + 0.1
                 ):
                     shape_id = getattr(shape, "id", None) or "unnamed"
                     raise ValueError(
                         f"Shape '{shape_id}' in layer '{layer.name}' exceeds diagram bounds. "
-                        f"Shape bounds: ({x_min:.1f}, {y_min:.1f}) to ({x_max:.1f}, {y_max:.1f}), "
+                        f"Shape bounds: ({sb.x_min:.1f}, {sb.y_min:.1f}) to ({sb.x_max:.1f}, {sb.y_max:.1f}), "
                         f"Diagram bounds: ({self.bounds.x_min:.1f}, {self.bounds.y_min:.1f}) to "
                         f"({self.bounds.x_max:.1f}, {self.bounds.y_max:.1f})"
                     )
 
 
-def _get_shape_bounds(shape: Shape) -> tuple[float, float, float, float] | None:
+def _get_shape_bounds(shape: Shape) -> Bounds2D | None:
     if isinstance(shape, Rect):
-        return (shape.x, shape.y, shape.x + shape.width, shape.y + shape.height)
+        return Bounds2D(x_min=shape.x, x_max=shape.x + shape.width, y_min=shape.y, y_max=shape.y + shape.height)
     elif isinstance(shape, Line):
-        return (min(shape.x1, shape.x2), min(shape.y1, shape.y2), max(shape.x1, shape.x2), max(shape.y1, shape.y2))
+        return Bounds2D(
+            x_min=min(shape.x1, shape.x2),
+            x_max=max(shape.x1, shape.x2),
+            y_min=min(shape.y1, shape.y2),
+            y_max=max(shape.y1, shape.y2),
+        )
     elif isinstance(shape, Circle):
-        return (shape.cx - shape.radius, shape.cy - shape.radius, shape.cx + shape.radius, shape.cy + shape.radius)
+        return Bounds2D(
+            x_min=shape.cx - shape.radius,
+            x_max=shape.cx + shape.radius,
+            y_min=shape.cy - shape.radius,
+            y_max=shape.cy + shape.radius,
+        )
     elif isinstance(shape, Polyline):
         if not shape.points:
             return None
         xs = [p.x for p in shape.points]
         ys = [p.y for p in shape.points]
-        return (min(xs), min(ys), max(xs), max(ys))
+        return Bounds2D(x_min=min(xs), x_max=max(xs), y_min=min(ys), y_max=max(ys))
     elif isinstance(shape, (Text, Path)):
         return None
     return None

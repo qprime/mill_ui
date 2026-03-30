@@ -32,10 +32,10 @@ def grid_lines_generator(
         return []
 
     local_bounds = get_local_bounds(domain)
-    local_x_min = local_bounds["x_min"]
-    local_x_max = local_bounds["x_max"]
-    local_y_min = local_bounds["y_min"]
-    local_y_max = local_bounds["y_max"]
+    local_x_min = local_bounds.x_min
+    local_x_max = local_bounds.x_max
+    local_y_min = local_bounds.y_min
+    local_y_max = local_bounds.y_max
 
     major_spacing = params.get_major_spacing()
     minor_spacing = params.get_minor_spacing() if params.minor_lines else None

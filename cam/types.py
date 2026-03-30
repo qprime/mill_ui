@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from dataclasses import dataclass
 
 
@@ -18,29 +17,6 @@ class Vec2:
 
     def as_tuple(self) -> tuple[float, float]:
         return (self.x, self.y)
-
-
-@dataclass(frozen=True)
-class Bounds:
-    minx: float
-    miny: float
-    maxx: float
-    maxy: float
-
-    @staticmethod
-    def from_points(pts: Iterable[Vec2]) -> "Bounds":
-        xs = [p.x for p in pts]
-        ys = [p.y for p in pts]
-        return Bounds(min(xs), min(ys), max(xs), max(ys))
-
-    def expand(self, m: float) -> "Bounds":
-        return Bounds(self.minx - m, self.miny - m, self.maxx + m, self.maxy + m)
-
-    def width(self) -> float:
-        return self.maxx - self.minx
-
-    def height(self) -> float:
-        return self.maxy - self.miny
 
 
 @dataclass(frozen=True)

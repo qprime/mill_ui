@@ -34,10 +34,10 @@ def grid_generator(
         return []
 
     local_bounds = get_local_bounds(domain)
-    local_x_min = local_bounds["x_min"]
-    local_x_max = local_bounds["x_max"]
-    local_y_min = local_bounds["y_min"]
-    local_y_max = local_bounds["y_max"]
+    local_x_min = local_bounds.x_min
+    local_x_max = local_bounds.x_max
+    local_y_min = local_bounds.y_min
+    local_y_max = local_bounds.y_max
 
     domain_width = local_x_max - local_x_min
     domain_height = local_y_max - local_y_min

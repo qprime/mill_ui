@@ -48,8 +48,8 @@ def _generate_local_coords(
     shape_id_prefix: str,
 ) -> GeneratorResult:
     local_bounds = get_local_bounds(domain)
-    local_width = local_bounds["x_max"] - local_bounds["x_min"]
-    local_height = local_bounds["y_max"] - local_bounds["y_min"]
+    local_width = local_bounds.x_max - local_bounds.x_min
+    local_height = local_bounds.y_max - local_bounds.y_min
 
     angle_rad = math.radians(params.angle_deg)
     dx = math.cos(angle_rad)
@@ -60,8 +60,8 @@ def _generate_local_coords(
     diagonal = math.sqrt(local_width**2 + local_height**2)
     extent = diagonal + params.spacing_mm
 
-    local_cx = (local_bounds["x_min"] + local_bounds["x_max"]) / 2
-    local_cy = (local_bounds["y_min"] + local_bounds["y_max"]) / 2
+    local_cx = (local_bounds.x_min + local_bounds.x_max) / 2
+    local_cy = (local_bounds.y_min + local_bounds.y_max) / 2
 
     half_extent = extent / 2
     num_lines_per_side = math.ceil(half_extent / params.spacing_mm)

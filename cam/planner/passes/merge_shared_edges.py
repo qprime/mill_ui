@@ -25,10 +25,10 @@ class _Edge:
     a: float
     b: float
     rect_id: str
-    minx: float
-    miny: float
-    maxx: float
-    maxy: float
+    x_min: float
+    y_min: float
+    x_max: float
+    y_max: float
 
     @property
     def length(self) -> float:
@@ -36,13 +36,13 @@ class _Edge:
 
 
 def _rect_edges(cx: float, cy: float, w: float, h: float, rect_id: str) -> list[_Edge]:
-    minx, miny = cx - w / 2.0, cy - h / 2.0
-    maxx, maxy = cx + w / 2.0, cy + h / 2.0
+    x_min, y_min = cx - w / 2.0, cy - h / 2.0
+    x_max, y_max = cx + w / 2.0, cy + h / 2.0
     return [
-        _Edge("v", minx, miny, maxy, rect_id, minx, miny, maxx, maxy),
-        _Edge("v", maxx, miny, maxy, rect_id, minx, miny, maxx, maxy),
-        _Edge("h", miny, minx, maxx, rect_id, minx, miny, maxx, maxy),
-        _Edge("h", maxy, minx, maxx, rect_id, minx, miny, maxx, maxy),
+        _Edge("v", x_min, y_min, y_max, rect_id, x_min, y_min, x_max, y_max),
+        _Edge("v", x_max, y_min, y_max, rect_id, x_min, y_min, x_max, y_max),
+        _Edge("h", y_min, x_min, x_max, rect_id, x_min, y_min, x_max, y_max),
+        _Edge("h", y_max, x_min, x_max, rect_id, x_min, y_min, x_max, y_max),
     ]
 
 
@@ -95,12 +95,12 @@ def _find_and_cut_seams(
                     x = 0.5 * (a.coord + b.coord)
                     y0 = max(min(a.a, a.b), min(b.a, b.b))
                     y1 = min(max(a.a, a.b), max(b.a, b.b))
-                    seam_shape = Shape2D([Vec2(x, y0), Vec2(x, y1)])
+                    seam_shape = Shape2D((Vec2(x, y0), Vec2(x, y1)))
                 else:
                     y = 0.5 * (a.coord + b.coord)
                     x0 = max(min(a.a, a.b), min(b.a, b.b))
                     x1 = min(max(a.a, a.b), max(b.a, b.b))
-                    seam_shape = Shape2D([Vec2(x0, y), Vec2(x1, y)])
+                    seam_shape = Shape2D((Vec2(x0, y), Vec2(x1, y)))
 
                 depth = max(rect_depths[a.rect_id], rect_depths[b.rect_id]) + cut_through_mm
                 moves = profile_outline(seam_shape, setup, depth_mm=depth, step_down=step_down)
@@ -148,17 +148,17 @@ def _cut_unpaired_edges(
         if edge.orient == "v":
             x_off = (
                 edge.coord - tool_radius
-                if math.isclose(edge.coord, edge.minx, abs_tol=merge_tol)
+                if math.isclose(edge.coord, edge.x_min, abs_tol=merge_tol)
                 else edge.coord + tool_radius
             )
-            seam_shape = Shape2D([Vec2(x_off, edge.a), Vec2(x_off, edge.b)])
+            seam_shape = Shape2D((Vec2(x_off, edge.a), Vec2(x_off, edge.b)))
         else:
             y_off = (
                 edge.coord - tool_radius
-                if math.isclose(edge.coord, edge.miny, abs_tol=merge_tol)
+                if math.isclose(edge.coord, edge.y_min, abs_tol=merge_tol)
                 else edge.coord + tool_radius
             )
-            seam_shape = Shape2D([Vec2(edge.a, y_off), Vec2(edge.b, y_off)])
+            seam_shape = Shape2D((Vec2(edge.a, y_off), Vec2(edge.b, y_off)))
         moves = profile_outline(seam_shape, setup, depth_mm=rect_depth, step_down=step_down)
         record.add_moves(moves, increment=1)
 

@@ -228,7 +228,8 @@ def _plan_surface_pass(
     from cam.ops.face import face_zigzag
 
     sc = entry.surface_cooling
-    assert sc is not None
+    if sc is None:
+        raise ValueError(f"surface_cooling is required for surface facing entry {entry.id}")
 
     sg = entry.geometry.geometry
     width = float(sg.w_mm or 0.0)

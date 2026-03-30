@@ -481,7 +481,8 @@ def _check_z_monotonic_plunge(lines: list[str]) -> InvariantResult:
                         last_plunge_z = new_z
                         checked += 1
                     else:
-                        assert last_plunge_z is not None
+                        if last_plunge_z is None:
+                            raise RuntimeError(f"Line {i}: in_plunge is True but last_plunge_z is None")
                         if new_z > last_plunge_z and len(failures) < 5:
                             failures.append(
                                 f"Line {i}: Non-monotonic plunge Z={new_z:.3f} (previous Z={last_plunge_z:.3f})"

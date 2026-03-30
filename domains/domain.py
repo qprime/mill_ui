@@ -140,7 +140,8 @@ class Domain:
     def polygon(self) -> Polygon:
         if self._polygon is None:
             object.__setattr__(self, "_polygon", self._build_polygon())
-        assert self._polygon is not None
+        if self._polygon is None:
+            raise RuntimeError("Domain polygon construction failed")
         return self._polygon
 
     @property

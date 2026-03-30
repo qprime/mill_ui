@@ -192,7 +192,8 @@ class SheetSpec:
 
     @property
     def gap_mm(self) -> float:
-        assert self.kerf_mm is not None
+        if self.kerf_mm is None:
+            raise ValueError("kerf_mm must be set before computing gap_mm")
         return self.kerf_mm + self.gap_margin_mm
 
     @property

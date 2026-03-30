@@ -212,7 +212,8 @@ def _compute_finger_notch_ranges(
     if count is not None:
         n = count
     else:
-        assert width_mm is not None
+        if width_mm is None:
+            raise ValueError("Either width_mm or count must be provided")
         n = round(edge_length / width_mm)
 
     n = max(3, n)

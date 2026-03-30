@@ -181,7 +181,8 @@ def _collect_dimension_requests(
         h = bounds.y_max - bounds.y_min
 
         if deduplicate:
-            assert item.feature is not None
+            if item.feature is None:
+                raise ValueError(f"Shape item missing feature for deduplication: {item.shape_id}")
             size_key = (item.feature.type, item.type, round(w), round(h))
             if size_key in dimensioned_sizes:
                 continue

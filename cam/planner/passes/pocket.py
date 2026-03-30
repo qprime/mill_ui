@@ -300,16 +300,15 @@ def plan_pocket_passes(
 
         center = entry.center_xy_mm
         et = entry.edge_treatment
-        has_allowance = et is not None and et.type == "allowance"
+        allowance_et = et if et is not None and et.type == "allowance" else None
 
         if shape_name == "rect":
             width = float(sg.w_mm or 0.0)
             height = float(sg.h_mm or 0.0)
             shape = rect_shape(width, height, center)
-            if has_allowance:
-                assert et is not None
-                rough_allow = et.rough_allowance_mm or 0.0
-                finish_allow = et.finish_allowance_mm or 0.0
+            if allowance_et is not None:
+                rough_allow = allowance_et.rough_allowance_mm or 0.0
+                finish_allow = allowance_et.finish_allowance_mm or 0.0
                 _pocket_with_allowance(
                     width,
                     height,
@@ -372,10 +371,9 @@ def plan_pocket_passes(
             ys = [float(p[1]) for p in pts]
             width = max(xs) - min(xs)
             height = max(ys) - min(ys)
-            if has_allowance:
-                assert et is not None
-                rough_allow = et.rough_allowance_mm or 0.0
-                finish_allow = et.finish_allowance_mm or 0.0
+            if allowance_et is not None:
+                rough_allow = allowance_et.rough_allowance_mm or 0.0
+                finish_allow = allowance_et.finish_allowance_mm or 0.0
                 _pocket_with_allowance(
                     width,
                     height,

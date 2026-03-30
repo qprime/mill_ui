@@ -110,7 +110,8 @@ def expand_part_to_items(
 
         result = []
         for i, item in enumerate(items):
-            assert item.placement is not None
+            if item.placement is None:
+                raise ValueError(f"Template item {i} missing placement")
             item_cx, item_cy = item.placement.center_xy_mm
 
             offset_x = item_cx - template_center_x

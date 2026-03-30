@@ -30,11 +30,15 @@ class NotchedPanelParams(BaseParams):
     part_name: str | None = None
     sheet_thickness_mm: float | None = None
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.width_mm <= 0:
             raise ValueError(f"NotchedPanelParams: width_mm must be positive, got {self.width_mm}")
         if self.height_mm <= 0:
             raise ValueError(f"NotchedPanelParams: height_mm must be positive, got {self.height_mm}")
+        if self.sheet_thickness_mm is not None and self.sheet_thickness_mm <= 0:
+            raise ValueError(
+                f"NotchedPanelParams: sheet_thickness_mm must be positive when set, got {self.sheet_thickness_mm}"
+            )
 
 
 def notched_panel_generator(
@@ -45,8 +49,6 @@ def notched_panel_generator(
     shape_id_prefix: str = "panel",
     label: str | None = None,
 ) -> GeneratorResult:
-    params.validate()
-
     shape_id = shape_id_prefix
     if params.part_name:
         shape_id = f"{shape_id_prefix}_{params.part_name.lower()}"

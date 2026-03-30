@@ -26,9 +26,6 @@ def profile_generator(
     sheet_thickness_mm: float | None = None,
     label: str | None = None,
 ) -> GeneratorResult:
-
-    params.validate()
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,

@@ -27,8 +27,6 @@ def svg_stamp_generator(
     *,
     allow_empty: bool = False,
 ) -> GeneratorResult:
-    params.validate()
-
     if not validate_domain_for_generation(domain, allow_empty=allow_empty, generator_name="svg_stamp_generator"):
         return []
 

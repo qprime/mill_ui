@@ -74,11 +74,11 @@ class TestGridLinesGenerator:
 
     def test_param_validation_custom_no_spacing(self):
         with pytest.raises(ValueError, match="spacing_mm required"):
-            GridLinesParams(unit="custom", depth_mm=0.3).validate()
+            GridLinesParams(unit="custom", depth_mm=0.3)
 
     def test_param_validation_negative_depth(self):
         with pytest.raises(ValueError, match="positive"):
-            GridLinesParams(unit="metric", depth_mm=-1.0).validate()
+            GridLinesParams(unit="metric", depth_mm=-1.0)
 
 
 class TestMeasurementGridGenerator:
@@ -203,7 +203,7 @@ class TestMeasurementEdgeGenerator:
 
     def test_param_validation_no_edges(self):
         with pytest.raises(ValueError, match="at least one edge"):
-            MeasurementEdgeParams(edges=(), depth_mm=0.3).validate()
+            MeasurementEdgeParams(edges=(), depth_mm=0.3)
 
 
 class TestEngraveText:
@@ -286,12 +286,12 @@ class TestEngraveText:
 
     def test_param_validation_empty_text(self):
         with pytest.raises(ValueError, match="not be empty"):
-            EngraveTextParams(text="").validate()
+            EngraveTextParams(text="")
 
     def test_param_validation_negative_height(self):
         with pytest.raises(ValueError, match="positive"):
-            EngraveTextParams(text="X", height_mm=-1.0).validate()
+            EngraveTextParams(text="X", height_mm=-1.0)
 
     def test_param_validation_invalid_alignment(self):
         with pytest.raises(ValueError, match="alignment"):
-            EngraveTextParams(text="X", alignment="middle").validate()  # type: ignore[arg-type]
+            EngraveTextParams(text="X", alignment="middle")  # type: ignore[arg-type]

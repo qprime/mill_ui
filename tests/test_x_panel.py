@@ -161,15 +161,13 @@ def test_x_panel_too_small_domain():
 
 def test_x_panel_params_validation():
     try:
-        params = XPanelParams(bar_width_mm=-10, depth_mm=4.0)
-        params.validate()
+        XPanelParams(bar_width_mm=-10, depth_mm=4.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "bar_width_mm must be positive" in str(e)
 
     try:
-        params = XPanelParams(bar_width_mm=10, depth_mm=0)
-        params.validate()
+        XPanelParams(bar_width_mm=10, depth_mm=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth_mm must be positive" in str(e)

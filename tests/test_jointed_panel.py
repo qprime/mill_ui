@@ -7,18 +7,27 @@ from generators.panels import NotchedPanelParams, notched_panel_generator
 class TestNotchedPanelParams:
     def test_validation_positive_dimensions(self):
         with pytest.raises(ValueError, match="width_mm must be positive"):
-            NotchedPanelParams(width_mm=0, height_mm=50).validate()
+            NotchedPanelParams(width_mm=0, height_mm=50)
 
         with pytest.raises(ValueError, match="height_mm must be positive"):
-            NotchedPanelParams(width_mm=100, height_mm=-1).validate()
+            NotchedPanelParams(width_mm=100, height_mm=-1)
+
+    def test_validation_sheet_thickness(self):
+        with pytest.raises(ValueError, match="sheet_thickness_mm must be positive"):
+            NotchedPanelParams(width_mm=100, height_mm=50, sheet_thickness_mm=0)
+
+        with pytest.raises(ValueError, match="sheet_thickness_mm must be positive"):
+            NotchedPanelParams(width_mm=100, height_mm=50, sheet_thickness_mm=-1)
+
+        NotchedPanelParams(width_mm=100, height_mm=50, sheet_thickness_mm=6)
+        NotchedPanelParams(width_mm=100, height_mm=50, sheet_thickness_mm=None)
 
     def test_valid_params(self):
-        params = NotchedPanelParams(
+        NotchedPanelParams(
             width_mm=100,
             height_mm=50,
             notches=(NotchSpec(edge=Edge.BOTTOM, u_start_mm=10, u_len_mm=20, depth_mm=6),),
         )
-        params.validate()
 
 
 class TestNotchedPanelGenerator:

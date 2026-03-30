@@ -27,9 +27,6 @@ def line_pattern_generator(
     shape_id_prefix: str = "line_pattern",
     local_coords: bool = False,
 ) -> GeneratorResult:
-
-    params.validate()
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,

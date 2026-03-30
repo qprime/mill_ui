@@ -23,9 +23,6 @@ def chamfer_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "chamfer",
 ) -> GeneratorResult:
-
-    params.validate()
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=0.01,

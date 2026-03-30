@@ -28,8 +28,6 @@ def hole_grid_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "hole",
 ) -> GeneratorResult:
-    params.validate()
-
     effective_domain = domain
     if params.inset_mm > 0:
         inset_result = domain.inset(params.inset_mm)

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
@@ -31,9 +30,8 @@ class Generator(Protocol):
 
 
 @dataclass(frozen=True)
-class BaseParams(ABC):
-    @abstractmethod
-    def validate(self) -> None: ...
+class BaseParams:
+    pass
 
 
 def generate_shape_id(prefix: str, index: int = 0, suffix: str = "") -> str:

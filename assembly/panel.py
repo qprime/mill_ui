@@ -58,6 +58,20 @@ class DadoSpec:
     orientation: Literal["horizontal", "vertical"] = "horizontal"
     dogbone: DogboneSpec | None = None
 
+    def __post_init__(self) -> None:
+        if self.position_from_edge_mm < 0:
+            raise ValueError(f"DadoSpec: position_from_edge_mm must be non-negative, got {self.position_from_edge_mm}")
+        if self.width_mm <= 0:
+            raise ValueError(f"DadoSpec: width_mm must be positive, got {self.width_mm}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"DadoSpec: depth_mm must be positive, got {self.depth_mm}")
+        valid_edges = ("top", "bottom", "left", "right")
+        if self.edge not in valid_edges:
+            raise ValueError(f"DadoSpec: edge must be one of {valid_edges}, got '{self.edge}'")
+        valid_orientations = ("horizontal", "vertical")
+        if self.orientation not in valid_orientations:
+            raise ValueError(f"DadoSpec: orientation must be one of {valid_orientations}, got '{self.orientation}'")
+
 
 @dataclass(frozen=True)
 class PanelSpec:

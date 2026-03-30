@@ -73,25 +73,20 @@ def point_approx_equal(
 
 def test_flat_pocket_params_valid():
     """Test valid FlatPocketParams construction."""
-    params = FlatPocketParams(depth_mm=6.0)
-    params.validate()  # Should not raise
-
-    params_with_allowance = FlatPocketParams(depth_mm=6.0, allowance_mm=2.0)
-    params_with_allowance.validate()
+    FlatPocketParams(depth_mm=6.0)
+    FlatPocketParams(depth_mm=6.0, allowance_mm=2.0)
 
 
 def test_flat_pocket_params_invalid_depth():
     """Test FlatPocketParams rejects non-positive depth."""
-    params = FlatPocketParams(depth_mm=0.0)
     try:
-        params.validate()
+        FlatPocketParams(depth_mm=0.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
 
-    params_neg = FlatPocketParams(depth_mm=-5.0)
     try:
-        params_neg.validate()
+        FlatPocketParams(depth_mm=-5.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
@@ -99,9 +94,8 @@ def test_flat_pocket_params_invalid_depth():
 
 def test_flat_pocket_params_invalid_allowance():
     """Test FlatPocketParams rejects negative allowance."""
-    params = FlatPocketParams(depth_mm=6.0, allowance_mm=-1.0)
     try:
-        params.validate()
+        FlatPocketParams(depth_mm=6.0, allowance_mm=-1.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "non-negative" in str(e).lower()
@@ -109,30 +103,22 @@ def test_flat_pocket_params_invalid_allowance():
 
 def test_profile_params_valid():
     """Test valid ProfileParams construction."""
-    params = ProfileParams(side="outside", depth="through")
-    params.validate()
-
-    params_inside = ProfileParams(side="inside", depth=6.0)
-    params_inside.validate()
-
-    params_on = ProfileParams(side="on", depth=3.5, loop_selection="all_loops")
-    params_on.validate()
-
-    params_with_tabs = ProfileParams(
+    ProfileParams(side="outside", depth="through")
+    ProfileParams(side="inside", depth=6.0)
+    ProfileParams(side="on", depth=3.5, loop_selection="all_loops")
+    ProfileParams(
         side="outside",
         depth="through",
         tab_count=4,
         tab_width_mm=15.0,
         tab_height_mm=4.0,
     )
-    params_with_tabs.validate()
 
 
 def test_profile_params_invalid_side():
     """Test ProfileParams rejects invalid side."""
-    params = ProfileParams(side="invalid", depth="through")  # type: ignore[arg-type]
     try:
-        params.validate()
+        ProfileParams(side="invalid", depth="through")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "side" in str(e).lower()
@@ -140,9 +126,8 @@ def test_profile_params_invalid_side():
 
 def test_profile_params_invalid_depth():
     """Test ProfileParams rejects invalid depth."""
-    params = ProfileParams(side="outside", depth=-5.0)
     try:
-        params.validate()
+        ProfileParams(side="outside", depth=-5.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
@@ -150,9 +135,8 @@ def test_profile_params_invalid_depth():
 
 def test_profile_params_invalid_loop_selection():
     """Test ProfileParams rejects invalid loop selection."""
-    params = ProfileParams(side="outside", depth="through", loop_selection="invalid")  # type: ignore[arg-type]
     try:
-        params.validate()
+        ProfileParams(side="outside", depth="through", loop_selection="invalid")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop_selection" in str(e).lower()
@@ -160,13 +144,12 @@ def test_profile_params_invalid_loop_selection():
 
 def test_profile_params_invalid_tab_config():
     """Test ProfileParams rejects invalid tab configuration."""
-    params = ProfileParams(
-        side="outside",
-        depth="through",
-        tab_count=-1,
-    )
     try:
-        params.validate()
+        ProfileParams(
+            side="outside",
+            depth="through",
+            tab_count=-1,
+        )
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "tab_count" in str(e).lower()
@@ -680,31 +663,27 @@ def test_generator_determinism():
 
 def test_raised_panel_params_valid():
     """Test valid RaisedPanelParams construction."""
-    params = RaisedPanelParams(
+    RaisedPanelParams(
         border_width_mm=25.0,
         border_depth_mm=6.0,
         field_depth_mm=2.0,
     )
-    params.validate()  # Should not raise
-
-    params_with_angle = RaisedPanelParams(
+    RaisedPanelParams(
         border_width_mm=20.0,
         border_depth_mm=8.0,
         field_depth_mm=1.0,
         angle_degrees=20.0,
     )
-    params_with_angle.validate()
 
 
 def test_raised_panel_params_invalid_border_width():
     """Test RaisedPanelParams rejects non-positive border width."""
-    params = RaisedPanelParams(
-        border_width_mm=0.0,
-        border_depth_mm=6.0,
-        field_depth_mm=2.0,
-    )
     try:
-        params.validate()
+        RaisedPanelParams(
+            border_width_mm=0.0,
+            border_depth_mm=6.0,
+            field_depth_mm=2.0,
+        )
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "border_width" in str(e).lower()
@@ -712,13 +691,12 @@ def test_raised_panel_params_invalid_border_width():
 
 def test_raised_panel_params_invalid_field_deeper():
     """Test RaisedPanelParams rejects field deeper than border."""
-    params = RaisedPanelParams(
-        border_width_mm=25.0,
-        border_depth_mm=6.0,
-        field_depth_mm=8.0,  # > border_depth
-    )
     try:
-        params.validate()
+        RaisedPanelParams(
+            border_width_mm=25.0,
+            border_depth_mm=6.0,
+            field_depth_mm=8.0,  # > border_depth
+        )
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "field_depth" in str(e).lower()
@@ -809,22 +787,18 @@ def test_raised_panel_allow_empty():
 
 def test_chamfer_params_valid():
     """Test valid ChamferParams construction."""
-    params = ChamferParams(width_mm=5.0, depth_mm=3.0)
-    params.validate()  # Should not raise
-
-    params_inner = ChamferParams(
+    ChamferParams(width_mm=5.0, depth_mm=3.0)
+    ChamferParams(
         width_mm=3.0,
         depth_mm=2.0,
         loop_selection="inner_only",
     )
-    params_inner.validate()
 
 
 def test_chamfer_params_invalid_width():
     """Test ChamferParams rejects non-positive width."""
-    params = ChamferParams(width_mm=0.0, depth_mm=3.0)
     try:
-        params.validate()
+        ChamferParams(width_mm=0.0, depth_mm=3.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "width" in str(e).lower()
@@ -1006,29 +980,22 @@ def test_line_pattern_params_valid():
     """Test valid LinePatternParams construction."""
     from generators import LinePatternParams
 
-    params = LinePatternParams(angle_deg=45, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
-    params.validate()  # Should not raise
-
-    params_default = LinePatternParams()
-    params_default.validate()
+    LinePatternParams(angle_deg=45, spacing_mm=20.0, line_width_mm=3.0, depth_mm=2.0)
+    LinePatternParams()
 
 
 def test_line_pattern_params_invalid():
     """Test LinePatternParams validation."""
     from generators import LinePatternParams
 
-    # Invalid spacing
-    params = LinePatternParams(spacing_mm=0)
     try:
-        params.validate()
+        LinePatternParams(spacing_mm=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing" in str(e).lower()
 
-    # Invalid line width
-    params = LinePatternParams(line_width_mm=-1)
     try:
-        params.validate()
+        LinePatternParams(line_width_mm=-1)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "line_width" in str(e).lower()
@@ -1130,26 +1097,21 @@ def test_concentric_border_params_valid():
     """Test valid ConcentricBorderParams construction."""
     from generators import ConcentricBorderParams
 
-    params = ConcentricBorderParams(insets_mm=(10.0, 20.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
-    params.validate()  # Should not raise
+    ConcentricBorderParams(insets_mm=(10.0, 20.0, 30.0), groove_width_mm=3.0, depth_mm=2.0)
 
 
 def test_concentric_border_params_invalid():
     """Test ConcentricBorderParams validation."""
     from generators import ConcentricBorderParams
 
-    # Empty insets
-    params = ConcentricBorderParams(insets_mm=(), groove_width_mm=3.0, depth_mm=2.0)
     try:
-        params.validate()
+        ConcentricBorderParams(insets_mm=(), groove_width_mm=3.0, depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "insets" in str(e).lower()
 
-    # Negative inset
-    params = ConcentricBorderParams(insets_mm=(-5.0,), groove_width_mm=3.0, depth_mm=2.0)
     try:
-        params.validate()
+        ConcentricBorderParams(insets_mm=(-5.0,), groove_width_mm=3.0, depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "positive" in str(e).lower()
@@ -1306,13 +1268,9 @@ def test_iter_polygons():
 
 def test_hole_grid_params_valid():
     """Test valid HoleGridParams construction."""
-    params = HoleGridParams(spacing_mm=50.0, diameter_mm=6.35, depth_mm=12.0)
-    params.validate()
-
-    params_through = HoleGridParams(spacing_mm=25.0, diameter_mm=5.0, depth_mm="through")
-    params_through.validate()
-
-    params_hex = HoleGridParams(
+    HoleGridParams(spacing_mm=50.0, diameter_mm=6.35, depth_mm=12.0)
+    HoleGridParams(spacing_mm=25.0, diameter_mm=5.0, depth_mm="through")
+    HoleGridParams(
         spacing_mm=30.0,
         diameter_mm=8.0,
         depth_mm=10.0,
@@ -1320,14 +1278,12 @@ def test_hole_grid_params_valid():
         inset_mm=5.0,
         align="corner",
     )
-    params_hex.validate()
 
 
 def test_hole_grid_params_invalid_spacing():
     """Test HoleGridParams rejects non-positive spacing."""
-    params = HoleGridParams(spacing_mm=0.0, diameter_mm=5.0, depth_mm=10.0)
     try:
-        params.validate()
+        HoleGridParams(spacing_mm=0.0, diameter_mm=5.0, depth_mm=10.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing" in str(e).lower()
@@ -1335,9 +1291,8 @@ def test_hole_grid_params_invalid_spacing():
 
 def test_hole_grid_params_invalid_diameter():
     """Test HoleGridParams rejects non-positive diameter."""
-    params = HoleGridParams(spacing_mm=50.0, diameter_mm=-1.0, depth_mm=10.0)
     try:
-        params.validate()
+        HoleGridParams(spacing_mm=50.0, diameter_mm=-1.0, depth_mm=10.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "diameter" in str(e).lower()
@@ -1345,9 +1300,8 @@ def test_hole_grid_params_invalid_diameter():
 
 def test_hole_grid_params_diameter_exceeds_spacing():
     """Test HoleGridParams rejects diameter >= spacing."""
-    params = HoleGridParams(spacing_mm=10.0, diameter_mm=15.0, depth_mm=10.0)
     try:
-        params.validate()
+        HoleGridParams(spacing_mm=10.0, diameter_mm=15.0, depth_mm=10.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "overlap" in str(e).lower()
@@ -1355,9 +1309,8 @@ def test_hole_grid_params_diameter_exceeds_spacing():
 
 def test_hole_grid_params_invalid_depth():
     """Test HoleGridParams rejects invalid depth."""
-    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=-5.0)
     try:
-        params.validate()
+        HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=-5.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
@@ -1365,9 +1318,8 @@ def test_hole_grid_params_invalid_depth():
 
 def test_hole_grid_params_invalid_pattern():
     """Test HoleGridParams rejects invalid pattern."""
-    params = HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")  # type: ignore[arg-type]
     try:
-        params.validate()
+        HoleGridParams(spacing_mm=50.0, diameter_mm=5.0, depth_mm=10.0, pattern="invalid")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "pattern" in str(e).lower()

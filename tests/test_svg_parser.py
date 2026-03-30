@@ -479,16 +479,15 @@ def test_normalize_polylines():
 
 def test_svg_path_params_valid():
     """Test valid SVGPathParams construction."""
-    params = SVGPathParams(
+    SVGPathParams(
         svg_path="M0,0 L100,100",
         depth_mm=2.0,
     )
-    params.validate()  # Should not raise
 
 
 def test_svg_path_params_full():
     """Test SVGPathParams with all options."""
-    params = SVGPathParams(
+    SVGPathParams(
         svg_path="M0,0 C50,50 100,0 100,100",
         depth_mm=3.0,
         tolerance=0.05,
@@ -497,14 +496,12 @@ def test_svg_path_params_full():
         center=False,
         invert_y=False,
     )
-    params.validate()
 
 
 def test_svg_path_params_empty_path():
     """SVGPathParams should reject empty path."""
-    params = SVGPathParams(svg_path="", depth_mm=2.0)
     try:
-        params.validate()
+        SVGPathParams(svg_path="", depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "empty" in str(e).lower()
@@ -512,9 +509,8 @@ def test_svg_path_params_empty_path():
 
 def test_svg_path_params_invalid_depth():
     """SVGPathParams should reject non-positive depth."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=0)
     try:
-        params.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
@@ -522,9 +518,8 @@ def test_svg_path_params_invalid_depth():
 
 def test_svg_path_params_invalid_tolerance():
     """SVGPathParams should reject non-positive tolerance."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, tolerance=-0.1)
     try:
-        params.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, tolerance=-0.1)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "tolerance" in str(e).lower()
@@ -532,9 +527,8 @@ def test_svg_path_params_invalid_tolerance():
 
 def test_svg_path_params_invalid_feature():
     """SVGPathParams should reject invalid feature type."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, feature_type="invalid")  # type: ignore[arg-type]
     try:
-        params.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, feature_type="invalid")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "feature" in str(e).lower()
@@ -542,9 +536,8 @@ def test_svg_path_params_invalid_feature():
 
 def test_svg_path_params_invalid_scale():
     """SVGPathParams should reject invalid scale mode."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, scale_mode="stretch")  # type: ignore[arg-type]
     try:
-        params.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, scale_mode="stretch")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "scale" in str(e).lower()
@@ -552,16 +545,14 @@ def test_svg_path_params_invalid_scale():
 
 def test_svg_path_params_invalid_svg_unit_mm():
     """SVGPathParams should reject non-positive svg_unit_mm."""
-    params = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=0)
     try:
-        params.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "svg_unit_mm" in str(e).lower()
 
-    params2 = SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=-1.0)
     try:
-        params2.validate()
+        SVGPathParams(svg_path="M0,0 L10,10", depth_mm=2.0, svg_unit_mm=-1.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "svg_unit_mm" in str(e).lower()

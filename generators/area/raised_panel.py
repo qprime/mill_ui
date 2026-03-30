@@ -22,9 +22,6 @@ def raised_panel_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "raised_panel",
 ) -> GeneratorResult:
-
-    params.validate()
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,

@@ -28,8 +28,6 @@ def measurement_edge_generator(  # noqa: C901 — edge-type dispatcher
     allow_empty: bool = False,
     shape_id_prefix: str = "measurement_edge",
 ) -> GeneratorResult:
-    params.validate()
-
     if not validate_domain_for_generation(
         domain,
         min_area_mm2=1.0,

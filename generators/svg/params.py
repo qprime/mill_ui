@@ -18,7 +18,7 @@ class SVGPathParams(BaseParams):
     invert_y: bool = True
     is_through: bool = False
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.svg_path or not self.svg_path.strip():
             raise ValueError("SVGPathParams: svg_path cannot be empty")
 

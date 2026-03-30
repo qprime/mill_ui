@@ -21,7 +21,8 @@ class MeasurementParamsBase(BaseParams):
     label_interval: int = 1
     label_start: int = 0
 
-    def _validate_common(self, name: str) -> None:
+    def __post_init__(self) -> None:
+        name = type(self).__name__
         valid_units = ("metric", "imperial", "custom")
         if self.unit not in valid_units:
             raise ValueError(f"{name}: unit must be one of {valid_units}, got '{self.unit}'")
@@ -56,9 +57,6 @@ class MeasurementParamsBase(BaseParams):
 
     def get_major_spacing(self) -> float:
         return resolve_major_spacing(self.unit, self.major_spacing_mm)
-
-    def validate(self) -> None:
-        self._validate_common(type(self).__name__)
 
 
 __all__ = ["MeasurementParamsBase"]

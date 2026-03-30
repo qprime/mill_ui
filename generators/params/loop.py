@@ -38,7 +38,7 @@ class ProfileParams(BaseParams):
     tab_height_mm: float = 3.0
     onion_skin_mm: float | None = None
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         valid_sides = ("outside", "inside", "on")
         if self.side not in valid_sides:
             raise ValueError(f"ProfileParams: side must be one of {valid_sides}, got '{self.side}'")
@@ -79,7 +79,7 @@ class WaveParams(BaseParams):
     tool_width_mm: float = 3.175
     wave_count: int | None = None
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.amplitude_mm <= 0:
             raise ValueError(f"WaveParams: amplitude_mm must be positive, got {self.amplitude_mm}")
         if self.wavelength_mm <= 0:
@@ -98,7 +98,7 @@ class ChamferParams(BaseParams):
     depth_mm: float
     loop_selection: LoopSelection = "outer_only"
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.width_mm <= 0:
             raise ValueError(f"ChamferParams: width_mm must be positive, got {self.width_mm}")
         if self.depth_mm <= 0:
@@ -118,7 +118,7 @@ class BeadParams(BaseParams):
     offset_mm: float = 0.0
     loop_selection: LoopSelection = "outer_only"
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.width_mm <= 0:
             raise ValueError(f"BeadParams: width_mm must be positive, got {self.width_mm}")
         if self.depth_mm <= 0:
@@ -132,7 +132,7 @@ class MeasurementEdgeParams(MeasurementParamsBase):
     edges: tuple[EdgeSelection, ...] = ()
     depth_mm: float = 0.3
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.edges:
             raise ValueError("MeasurementEdgeParams: edges must contain at least one edge")
 
@@ -141,7 +141,7 @@ class MeasurementEdgeParams(MeasurementParamsBase):
             if edge not in valid_edges:
                 raise ValueError(f"MeasurementEdgeParams: edge must be one of {valid_edges}, got '{edge}'")
 
-        self._validate_common("MeasurementEdgeParams")
+        super().__post_init__()
 
 
 @dataclass(frozen=True)
@@ -154,7 +154,7 @@ class EngraveTextParams(BaseParams):
     orientation: TextOrientation = "horizontal"
     spacing_factor: float = 1.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.text:
             raise ValueError("EngraveTextParams: text must not be empty")
         if self.height_mm <= 0:

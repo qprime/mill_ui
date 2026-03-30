@@ -46,10 +46,8 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 
 def test_wave_params_valid():
     """Test valid WaveParams construction."""
-    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0)
-    params.validate()  # Should not raise
-
-    params_full = WaveParams(
+    WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0)
+    WaveParams(
         amplitude_mm=5.0,
         wavelength_mm=20.0,
         depth_mm=2.0,
@@ -58,21 +56,18 @@ def test_wave_params_valid():
         tool_width_mm=6.0,
         wave_count=5,
     )
-    params_full.validate()
 
 
 def test_wave_params_invalid_amplitude():
     """Test WaveParams rejects non-positive amplitude."""
-    params = WaveParams(amplitude_mm=0.0, wavelength_mm=30.0, depth_mm=3.0)
     try:
-        params.validate()
+        WaveParams(amplitude_mm=0.0, wavelength_mm=30.0, depth_mm=3.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "amplitude" in str(e).lower()
 
-    params_neg = WaveParams(amplitude_mm=-5.0, wavelength_mm=30.0, depth_mm=3.0)
     try:
-        params_neg.validate()
+        WaveParams(amplitude_mm=-5.0, wavelength_mm=30.0, depth_mm=3.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "amplitude" in str(e).lower()
@@ -80,9 +75,8 @@ def test_wave_params_invalid_amplitude():
 
 def test_wave_params_invalid_wavelength():
     """Test WaveParams rejects non-positive wavelength."""
-    params = WaveParams(amplitude_mm=10.0, wavelength_mm=0.0, depth_mm=3.0)
     try:
-        params.validate()
+        WaveParams(amplitude_mm=10.0, wavelength_mm=0.0, depth_mm=3.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "wavelength" in str(e).lower()
@@ -90,9 +84,8 @@ def test_wave_params_invalid_wavelength():
 
 def test_wave_params_invalid_depth():
     """Test WaveParams rejects non-positive depth."""
-    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=-1.0)
     try:
-        params.validate()
+        WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=-1.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
@@ -100,9 +93,8 @@ def test_wave_params_invalid_depth():
 
 def test_wave_params_invalid_wave_count():
     """Test WaveParams rejects non-positive wave_count."""
-    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, wave_count=0)
     try:
-        params.validate()
+        WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, wave_count=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "wave_count" in str(e).lower()
@@ -115,15 +107,13 @@ def test_wave_params_invalid_wave_count():
 
 def test_grid_params_valid():
     """Test valid GridParams construction."""
-    params = GridParams(
+    GridParams(
         spacing_x_mm=25.0,
         spacing_y_mm=25.0,
         line_width_mm=3.0,
         depth_mm=2.0,
     )
-    params.validate()  # Should not raise
-
-    params_offset = GridParams(
+    GridParams(
         spacing_x_mm=20.0,
         spacing_y_mm=30.0,
         line_width_mm=6.0,
@@ -131,21 +121,18 @@ def test_grid_params_valid():
         offset_x_mm=5.0,
         offset_y_mm=10.0,
     )
-    params_offset.validate()
 
 
 def test_grid_params_invalid_spacing():
     """Test GridParams rejects non-positive spacing."""
-    params = GridParams(spacing_x_mm=0.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=2.0)
     try:
-        params.validate()
+        GridParams(spacing_x_mm=0.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing_x" in str(e).lower()
 
-    params_y = GridParams(spacing_x_mm=25.0, spacing_y_mm=-5.0, line_width_mm=3.0, depth_mm=2.0)
     try:
-        params_y.validate()
+        GridParams(spacing_x_mm=25.0, spacing_y_mm=-5.0, line_width_mm=3.0, depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "spacing_y" in str(e).lower()
@@ -153,9 +140,8 @@ def test_grid_params_invalid_spacing():
 
 def test_grid_params_invalid_line_width():
     """Test GridParams rejects non-positive line_width."""
-    params = GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=0.0, depth_mm=2.0)
     try:
-        params.validate()
+        GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=0.0, depth_mm=2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "line_width" in str(e).lower()
@@ -163,9 +149,8 @@ def test_grid_params_invalid_line_width():
 
 def test_grid_params_invalid_depth():
     """Test GridParams rejects non-positive depth."""
-    params = GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=-2.0)
     try:
-        params.validate()
+        GridParams(spacing_x_mm=25.0, spacing_y_mm=25.0, line_width_mm=3.0, depth_mm=-2.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
@@ -178,30 +163,24 @@ def test_grid_params_invalid_depth():
 
 def test_bead_params_valid():
     """Test valid BeadParams construction."""
-    params = BeadParams(width_mm=6.0, depth_mm=3.0)
-    params.validate()  # Should not raise
-
-    params_offset = BeadParams(
+    BeadParams(width_mm=6.0, depth_mm=3.0)
+    BeadParams(
         width_mm=8.0,
         depth_mm=4.0,
         offset_mm=15.0,
         loop_selection="all_loops",
     )
-    params_offset.validate()
-
-    params_explicit = BeadParams(
+    BeadParams(
         width_mm=5.0,
         depth_mm=2.0,
         loop_selection=[0, 1],
     )
-    params_explicit.validate()
 
 
 def test_bead_params_invalid_width():
     """Test BeadParams rejects non-positive width."""
-    params = BeadParams(width_mm=0.0, depth_mm=3.0)
     try:
-        params.validate()
+        BeadParams(width_mm=0.0, depth_mm=3.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "width" in str(e).lower()
@@ -209,9 +188,8 @@ def test_bead_params_invalid_width():
 
 def test_bead_params_invalid_depth():
     """Test BeadParams rejects non-positive depth."""
-    params = BeadParams(width_mm=6.0, depth_mm=-1.0)
     try:
-        params.validate()
+        BeadParams(width_mm=6.0, depth_mm=-1.0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth" in str(e).lower()
@@ -219,9 +197,8 @@ def test_bead_params_invalid_depth():
 
 def test_bead_params_invalid_loop_selection():
     """Test BeadParams rejects invalid loop_selection."""
-    params = BeadParams(width_mm=6.0, depth_mm=3.0, loop_selection="invalid")  # type: ignore[arg-type]
     try:
-        params.validate()
+        BeadParams(width_mm=6.0, depth_mm=3.0, loop_selection="invalid")  # type: ignore[arg-type]
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "loop_selection" in str(e).lower()

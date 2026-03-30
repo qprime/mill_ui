@@ -597,3 +597,56 @@ class TestPanelSpec:
         new_panel = panel.with_dados((dado,))
         assert len(new_panel.dados) == 1
         assert len(panel.dados) == 0
+
+
+class TestDadoSpecValidation:
+    def test_valid_construction(self):
+        from assembly.panel import DadoSpec
+
+        DadoSpec(position_from_edge_mm=0, width_mm=6, depth_mm=3, edge="bottom")
+        DadoSpec(position_from_edge_mm=25, width_mm=12, depth_mm=6, edge="top", orientation="vertical")
+
+    def test_negative_position(self):
+        from assembly.panel import DadoSpec
+
+        try:
+            DadoSpec(position_from_edge_mm=-1, width_mm=6, depth_mm=3, edge="bottom")
+            raise AssertionError("Should have raised ValueError")
+        except ValueError as e:
+            assert "position_from_edge_mm" in str(e)
+
+    def test_non_positive_width(self):
+        from assembly.panel import DadoSpec
+
+        try:
+            DadoSpec(position_from_edge_mm=10, width_mm=0, depth_mm=3, edge="bottom")
+            raise AssertionError("Should have raised ValueError")
+        except ValueError as e:
+            assert "width_mm must be positive" in str(e)
+
+    def test_non_positive_depth(self):
+        from assembly.panel import DadoSpec
+
+        try:
+            DadoSpec(position_from_edge_mm=10, width_mm=6, depth_mm=-1, edge="bottom")
+            raise AssertionError("Should have raised ValueError")
+        except ValueError as e:
+            assert "depth_mm must be positive" in str(e)
+
+    def test_invalid_edge(self):
+        from assembly.panel import DadoSpec
+
+        try:
+            DadoSpec(position_from_edge_mm=10, width_mm=6, depth_mm=3, edge="front")  # type: ignore[arg-type]
+            raise AssertionError("Should have raised ValueError")
+        except ValueError as e:
+            assert "edge" in str(e).lower()
+
+    def test_invalid_orientation(self):
+        from assembly.panel import DadoSpec
+
+        try:
+            DadoSpec(position_from_edge_mm=10, width_mm=6, depth_mm=3, edge="bottom", orientation="diagonal")  # type: ignore[arg-type]
+            raise AssertionError("Should have raised ValueError")
+        except ValueError as e:
+            assert "orientation" in str(e).lower()

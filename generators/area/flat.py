@@ -22,9 +22,6 @@ def flat_pocket_generator(
     allow_empty: bool = False,
     shape_id_prefix: str = "pocket",
 ) -> GeneratorResult:
-
-    params.validate()
-
     if params.allowance_mm > 0:
         inset_result = domain.inset(params.allowance_mm)
         if inset_result.is_empty:

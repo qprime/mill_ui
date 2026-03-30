@@ -12,7 +12,7 @@ class FlatPocketParams(BaseParams):
     depth_mm: float
     allowance_mm: float = 0.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.depth_mm <= 0:
             raise ValueError(f"FlatPocketParams: depth_mm must be positive, got {self.depth_mm}")
         if self.allowance_mm < 0:
@@ -28,7 +28,7 @@ class GridParams(BaseParams):
     offset_x_mm: float = 0.0
     offset_y_mm: float = 0.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.spacing_x_mm <= 0:
             raise ValueError(f"GridParams: spacing_x_mm must be positive, got {self.spacing_x_mm}")
         if self.spacing_y_mm <= 0:
@@ -46,7 +46,7 @@ class RaisedPanelParams(BaseParams):
     field_depth_mm: float
     angle_degrees: float = 15.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.border_width_mm <= 0:
             raise ValueError(f"RaisedPanelParams: border_width_mm must be positive, got {self.border_width_mm}")
         if self.border_depth_mm <= 0:
@@ -69,7 +69,7 @@ class LinePatternParams(BaseParams):
     line_width_mm: float = 4.0
     depth_mm: float = 3.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.spacing_mm <= 0:
             raise ValueError(f"LinePatternParams: spacing_mm must be positive, got {self.spacing_mm}")
         if self.line_width_mm <= 0:
@@ -84,7 +84,7 @@ class ConcentricBorderParams(BaseParams):
     groove_width_mm: float = 3.0
     depth_mm: float = 2.0
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.insets_mm:
             raise ValueError("ConcentricBorderParams: insets_mm must contain at least one value")
         for i, inset in enumerate(self.insets_mm):
@@ -101,7 +101,7 @@ class XPanelParams(BaseParams):
     bar_width_mm: float
     depth_mm: float
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.bar_width_mm <= 0:
             raise ValueError(f"XPanelParams: bar_width_mm must be positive, got {self.bar_width_mm}")
         if self.depth_mm <= 0:
@@ -116,7 +116,7 @@ class GridLinesParams(BaseParams):
     depth_mm: float = 0.3
     minor_lines: bool = False
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         valid_units = ("metric", "imperial", "custom")
         if self.unit not in valid_units:
             raise ValueError(f"GridLinesParams: unit must be one of {valid_units}, got '{self.unit}'")
@@ -161,7 +161,7 @@ class HoleGridParams(BaseParams):
     inset_mm: float = 0.0
     align: Literal["center", "corner"] = "center"
 
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.spacing_mm <= 0:
             raise ValueError(f"HoleGridParams: spacing_mm must be positive, got {self.spacing_mm}")
         if self.diameter_mm <= 0:

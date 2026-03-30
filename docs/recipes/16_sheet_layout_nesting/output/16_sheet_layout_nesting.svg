@@ -28,7 +28,12 @@
 .callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
-.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
   <rect x="-11.5875" y="-51.5875" width="1398.1750000000002" height="1651.1750000000002" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="1245.000" height="1232.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
@@ -156,7 +161,7 @@
     <text x="1274.5875" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
     <line x1="1254.5875" y1="-3.5874999999999986" x2="1269.5875" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
     <text x="1274.5875" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="1254.5875" y="9.412500000000001" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <rect x="1254.5875" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="1274.5875" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
     <line x1="1254.5875" y1="28.4125" x2="1269.5875" y2="28.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
     <text x="1274.5875" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
@@ -164,33 +169,33 @@
     <text x="1274.5875" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="1253.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="1265.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1245.0 × 1232.0 × 19.0mm</text>
-    <text x="20" y="1277.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 11 pockets, 11 profiles</text>
-    <text x="20" y="1289.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="1301.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm, 6.0mm</text>
-    <text x="20" y="1313.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (22):</text>
-    <text x="30" y="1325.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door1</text>
-    <text x="30" y="1337.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door1_panel</text>
-    <text x="30" y="1349.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door2</text>
-    <text x="30" y="1361.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door2_panel</text>
-    <text x="30" y="1373.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door3</text>
-    <text x="30" y="1385.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door3_panel</text>
-    <text x="30" y="1397.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door4</text>
-    <text x="30" y="1409.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door4_panel</text>
-    <text x="30" y="1421.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer1</text>
-    <text x="30" y="1433.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer1_panel</text>
-    <text x="30" y="1445.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer2</text>
-    <text x="30" y="1457.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer2_panel</text>
-    <text x="30" y="1469.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer3</text>
-    <text x="30" y="1481.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer3_panel</text>
-    <text x="30" y="1493.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer4</text>
-    <text x="30" y="1505.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer4_panel</text>
-    <text x="30" y="1517.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer5</text>
-    <text x="30" y="1529.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer5_panel</text>
-    <text x="30" y="1541.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer6</text>
-    <text x="30" y="1553.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer6_panel</text>
-    <text x="30" y="1565.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer7</text>
-    <text x="30" y="1577.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer7_panel</text>
+    <text x="20.0" y="1253.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="1265.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1245.0 × 1232.0 × 19.0mm</text>
+    <text x="20.0" y="1277.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 11 pockets, 11 profiles</text>
+    <text x="20.0" y="1289.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="1301.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm, 6.0mm</text>
+    <text x="20.0" y="1313.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (22):</text>
+    <text x="30.0" y="1325.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door1</text>
+    <text x="30.0" y="1337.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door1_panel</text>
+    <text x="30.0" y="1349.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door2</text>
+    <text x="30.0" y="1361.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door2_panel</text>
+    <text x="30.0" y="1373.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door3</text>
+    <text x="30.0" y="1385.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door3_panel</text>
+    <text x="30.0" y="1397.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door4</text>
+    <text x="30.0" y="1409.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door4_panel</text>
+    <text x="30.0" y="1421.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer1</text>
+    <text x="30.0" y="1433.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer1_panel</text>
+    <text x="30.0" y="1445.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer2</text>
+    <text x="30.0" y="1457.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer2_panel</text>
+    <text x="30.0" y="1469.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer3</text>
+    <text x="30.0" y="1481.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer3_panel</text>
+    <text x="30.0" y="1493.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer4</text>
+    <text x="30.0" y="1505.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer4_panel</text>
+    <text x="30.0" y="1517.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer5</text>
+    <text x="30.0" y="1529.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer5_panel</text>
+    <text x="30.0" y="1541.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer6</text>
+    <text x="30.0" y="1553.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer6_panel</text>
+    <text x="30.0" y="1565.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer7</text>
+    <text x="30.0" y="1577.5875" fill="#cccccc" font-family="monospace" font-size="10px">• drawer7_panel</text>
   </g>
 </svg>

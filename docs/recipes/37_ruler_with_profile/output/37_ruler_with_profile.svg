@@ -28,7 +28,12 @@
 .callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
-.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
   <rect x="-21.5875" y="-61.5875" width="873.175" height="461.17499999999995" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="700.000" height="250.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
@@ -2366,14 +2371,14 @@
     <text x="739.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="281.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="293.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 700.0 × 250.0 × 18.0mm</text>
-    <text x="20" y="305.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 profiles, 2280 engraves</text>
-    <text x="20" y="317.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="329.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.3mm</text>
-    <text x="20" y="341.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (3):</text>
-    <text x="30" y="353.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_a</text>
-    <text x="30" y="365.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_b</text>
-    <text x="30" y="377.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_c</text>
+    <text x="20.0" y="281.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="293.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 700.0 × 250.0 × 18.0mm</text>
+    <text x="20.0" y="305.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 profiles, 2280 engraves</text>
+    <text x="20.0" y="317.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="329.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.3mm</text>
+    <text x="20.0" y="341.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (3):</text>
+    <text x="30.0" y="353.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_a</text>
+    <text x="30.0" y="365.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_b</text>
+    <text x="30.0" y="377.5875" fill="#cccccc" font-family="monospace" font-size="10px">• part_c</text>
   </g>
 </svg>

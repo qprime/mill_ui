@@ -28,7 +28,12 @@
 .callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
-.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
   <rect x="-11.5875" y="-51.5875" width="603.175" height="829.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="450.000" height="650.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
@@ -82,7 +87,7 @@
     <text x="479.5875" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
     <line x1="459.5875" y1="-3.5874999999999986" x2="474.5875" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
     <text x="479.5875" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="459.5875" y="9.412500000000001" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <rect x="459.5875" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="479.5875" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
     <line x1="459.5875" y1="28.4125" x2="474.5875" y2="28.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
     <text x="479.5875" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
@@ -90,13 +95,13 @@
     <text x="479.5875" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="671.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="683.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 450.0 × 650.0 × 19.0mm</text>
-    <text x="20" y="695.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 pocket, 1 profile</text>
-    <text x="20" y="707.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 6.0mm</text>
-    <text x="20" y="731.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (2):</text>
-    <text x="30" y="743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door</text>
-    <text x="30" y="755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• panel</text>
+    <text x="20.0" y="671.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="683.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 450.0 × 650.0 × 19.0mm</text>
+    <text x="20.0" y="695.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 pocket, 1 profile</text>
+    <text x="20.0" y="707.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 6.0mm</text>
+    <text x="20.0" y="731.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (2):</text>
+    <text x="30.0" y="743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• door</text>
+    <text x="30.0" y="755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• panel</text>
   </g>
 </svg>

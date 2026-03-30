@@ -21,7 +21,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-3 | HARD | THEME_STYLES_VALID | All StyleSpec values are valid (hex colors, positive widths) |
 | SVG-4 | HARD | IR_BOUNDS_CONTAIN_SHAPES | All shapes in DiagramIR fall within declared bounds |
 | SVG-5 | HARD | SINGLE_RENDER_PATH | Only one LayoutAST->SVG conversion path exists |
-| SVG-6 | HARD | CONFIG_NOT_HARDCODED | All layout constants come from SVGConfig, not inline literals |
+| SVG-6 | HARD | CONFIG_NOT_HARDCODED | All layout constants are named module-level constants, not inline literals |
 | SVG-7 | HARD | VALID_XML_OUTPUT | Output is well-formed XML with proper escaping |
 | SVG-8 | HARD | VIEWBOX_CONTAINS_CONTENT | All rendered elements fit within SVG viewBox |
 | SVG-9 | HARD | DETERMINISTIC_OUTPUT | Same LayoutAST always produces identical SVG |
@@ -81,9 +81,25 @@ Defined in `diagram_render/render_svg.py` DiagramTheme:
 | legend | Legend text |
 | title | Title block text |
 | margin-zone | Sheet margin areas |
+| table | Machine table surface |
+| envelope | Machine envelope boundary |
+| spoilboard | Spoilboard area |
+| effective-envelope | Effective work envelope |
+| origin | Machine origin marker |
+| centerline | Centerline construction |
+| soft-limit | Soft limit lines |
+| t-track | T-track areas |
 | section-label | Edge profile callout title text |
 | callout-box | Edge profile callout box outline |
 | callout-detail | Edge profile cross-section geometry |
+| callout-ref-text | Callout reference/items text |
+| callout-dim-text | Callout dimension annotations |
+| beam-assembly | Beam assembly outlines |
+| beam-layer | Beam layer fills |
+| beam-splice | Beam splice joints |
+| beam-dim-text | Beam assembly dimension text |
+| beam-segment-text | Beam segment and layer labels |
+| title-subtitle | Title block subtitle text |
 
 ---
 

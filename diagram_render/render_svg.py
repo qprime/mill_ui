@@ -73,6 +73,11 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "beam-assembly": {"stroke": "#e8e8e8", "fill": "none", "stroke-width": "1"},
         "beam-layer": {"stroke": "#6496c8", "fill": "#6496c8", "fill-opacity": "0.15", "stroke-width": "1"},
         "beam-splice": {"stroke": "#ff9500", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
+        "title-subtitle": {"fill": "#cccccc", "font-family": "monospace", "font-size": "9px"},
+        "callout-ref-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "7px"},
+        "callout-dim-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "8px"},
+        "beam-dim-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "8px"},
+        "beam-segment-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "7px"},
     },
 )
 
@@ -110,6 +115,11 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "beam-assembly": {"stroke": "#000000", "fill": "none", "stroke-width": "1"},
         "beam-layer": {"stroke": "#333333", "fill": "#e0e0e0", "fill-opacity": "0.3", "stroke-width": "1"},
         "beam-splice": {"stroke": "#cc6600", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
+        "title-subtitle": {"fill": "#000000", "font-family": "monospace", "font-size": "9px"},
+        "callout-ref-text": {"fill": "#333333", "font-family": "monospace", "font-size": "7px"},
+        "callout-dim-text": {"fill": "#333333", "font-family": "monospace", "font-size": "8px"},
+        "beam-dim-text": {"fill": "#333333", "font-family": "monospace", "font-size": "8px"},
+        "beam-segment-text": {"fill": "#333333", "font-family": "monospace", "font-size": "7px"},
     },
 )
 
@@ -120,13 +130,37 @@ DIAGRAM_THEMES = {
 
 _CHROME_TOP = 40.0
 _CHROME_RIGHT = 140.0
+_CHROME_RIGHT_HEIGHT_THRESHOLD = 160.0
+
+_DIMENSION_TEXT_OFFSET = 5.0
+_ARROWHEAD_SIZE = 3.0
+
+_TITLE_X_OFFSET = 10.0
+_TITLE_Y_OFFSET = 14.0
+_TITLE_UNITS_Y_OFFSET = 14.0
+
+_LEGEND_OFFSET = 132.0
+_LEGEND_LINE_HEIGHT = 16.0
+_LEGEND_SWATCH_WIDTH = 15.0
+
+_NOTES_X = 20.0
+_NOTES_INDENT = 10.0
 _NOTES_LINE_HEIGHT = 12.0
 _NOTES_Y_OFFSET = 10.0
 _NOTES_PADDING = 20.0
 _NOTES_MIN_HEIGHT = 60.0
+
+_CALLOUT_BOX_WIDTH = 100.0
 _CALLOUT_BOX_HEIGHT = 70.0
 _CALLOUT_BOX_SPACING = 15.0
+_CALLOUT_SCALE = 3.0
+_CALLOUT_START_Y_OFFSET = 180.0
 _CALLOUT_MARGIN = 20.0
+_CALLOUT_MARKER_RADIUS = 7.0
+
+_BEAM_X = 20.0
+_BEAM_Y_OFFSET = 10.0
+_BEAM_DIAGRAM_WIDTH = 350.0
 _BEAM_LAYER_HEIGHT = 14.0
 _BEAM_HEADER_HEIGHT = 20.0
 _BEAM_SPACING = 15.0
@@ -160,7 +194,7 @@ def render_diagram_svg(
     chrome_bottom += beam_assembly_h
     callout_h = _estimate_callout_height(diagram.metadata)
     chrome_right = _CHROME_RIGHT
-    chrome_right_height = max(0.0, callout_h - 160.0)
+    chrome_right_height = max(0.0, callout_h - _CHROME_RIGHT_HEIGHT_THRESHOLD)
 
     viewbox_x = bounds.x_min - padding
     viewbox_y = bounds.y_min - padding - chrome_top
@@ -417,7 +451,7 @@ def _render_placed_dimension(
 
         text_attrs = {
             "x": str((x1 + x2) / 2.0),
-            "y": str(y_dim - 5.0),
+            "y": str(y_dim - _DIMENSION_TEXT_OFFSET),
             "text-anchor": "middle",
             "dominant-baseline": "middle",
             **{k: v for k, v in text_style.items()},
@@ -437,11 +471,11 @@ def _render_placed_dimension(
 
         mid_y = (y1 + y2) / 2.0
         text_attrs = {
-            "x": str(x_dim + 5.0),
+            "x": str(x_dim + _DIMENSION_TEXT_OFFSET),
             "y": str(mid_y),
             "text-anchor": "middle",
             "dominant-baseline": "middle",
-            "transform": f"rotate(-90 {x_dim + 5.0} {mid_y})",
+            "transform": f"rotate(-90 {x_dim + _DIMENSION_TEXT_OFFSET} {mid_y})",
             **{k: v for k, v in text_style.items()},
         }
         text_elem = ET.SubElement(parent, "text", text_attrs)
@@ -464,7 +498,7 @@ def _line_elem(parent: ET.Element, x1: float, y1: float, x2: float, y2: float, s
 
 
 def _arrow(parent: ET.Element, x: float, y: float, direction: str, color: str) -> None:
-    size = 3.0
+    size = _ARROWHEAD_SIZE
     if direction == "left":
         points = f"{x},{y} {x + size},{y - size} {x + size},{y + size}"
     elif direction == "right":
@@ -503,8 +537,8 @@ def _render_title_block(
     theme: DiagramTheme,
 ) -> None:
     group = ET.SubElement(svg, "g", {"id": "TITLE_BLOCK", "class": "title-block"})
-    x = viewbox_x + 10
-    y = viewbox_y + 14
+    x = viewbox_x + _TITLE_X_OFFSET
+    y = viewbox_y + _TITLE_Y_OFFSET
 
     title_style = theme.get_style("title")
     title_attrs = {
@@ -515,12 +549,11 @@ def _render_title_block(
     title = ET.SubElement(group, "text", title_attrs)
     title.text = "BLUEPRINT PROOF DRAWING"
 
-    notes_style = theme.get_style("notes")
+    subtitle_style = theme.get_style("title-subtitle")
     units_attrs = {
         "x": str(x),
-        "y": str(y + 14),
-        **{k: v for k, v in notes_style.items()},
-        "font-size": "9px",
+        "y": str(y + _TITLE_UNITS_Y_OFFSET),
+        **{k: v for k, v in subtitle_style.items()},
     }
     units = ET.SubElement(group, "text", units_attrs)
     units.text = "Units: millimeters (mm)"
@@ -534,10 +567,10 @@ def _render_legend(
     layer_names: set[str],
     theme: DiagramTheme,
 ) -> None:
-    x = viewbox_x + viewbox_width - 132
-    y = viewbox_y + 14
-    line_height = 16
-    swatch_width = 15
+    x = viewbox_x + viewbox_width - _LEGEND_OFFSET
+    y = viewbox_y + _TITLE_Y_OFFSET
+    line_height = _LEGEND_LINE_HEIGHT
+    swatch_width = _LEGEND_SWATCH_WIDTH
 
     group = ET.SubElement(svg, "g", {"id": "LEGEND", "class": "legend"})
 
@@ -596,10 +629,10 @@ def _render_notes_block(
     metadata: dict,
     theme: DiagramTheme,
 ) -> None:
-    x = 20
+    x = _NOTES_X
     y = drawing_bottom + _NOTES_Y_OFFSET
     line_height = _NOTES_LINE_HEIGHT
-    indent = 10
+    indent = _NOTES_INDENT
 
     group = ET.SubElement(svg, "g", {"id": "NOTES", "class": "notes"})
     notes_style = theme.get_style("notes")
@@ -703,20 +736,20 @@ def _render_edge_callouts(
 
     group = ET.SubElement(svg, "g", {"id": "EDGE_CALLOUTS", "class": "edge-callouts"})
 
-    box_width = 100.0
+    box_width = _CALLOUT_BOX_WIDTH
     box_height = _CALLOUT_BOX_HEIGHT
     box_spacing = _CALLOUT_BOX_SPACING
-    scale = 3.0
+    scale = _CALLOUT_SCALE
 
     start_x = viewbox_x + viewbox_width - box_width - _CALLOUT_MARGIN
-    start_y = viewbox_y + 180.0
+    start_y = viewbox_y + _CALLOUT_START_Y_OFFSET
 
     section_labels = "ABCDEFGH"
 
     callout_style = theme.get_style("callout-box")
     detail_style = theme.get_style("callout-detail")
     label_style = theme.get_style("section-label")
-    dim_style = theme.get_style("dimension-text")
+    dim_style = theme.get_style("callout-dim-text")
 
     for i, profile in enumerate(edge_profiles):
         if i >= len(section_labels):
@@ -755,12 +788,12 @@ def _render_edge_callouts(
             items_text = ", ".join(items[:3])
             if len(items) > 3:
                 items_text += f" (+{len(items) - 3})"
+            ref_style = theme.get_style("callout-ref-text")
             ref_attrs = {
                 "x": str(box_x + 8),
                 "y": str(box_y + box_height - 6),
                 "text-anchor": "start",
-                **{k: v for k, v in dim_style.items()},
-                "font-size": "7px",
+                **{k: v for k, v in ref_style.items()},
             }
             ref_elem = ET.SubElement(group, "text", ref_attrs)
             ref_elem.text = items_text
@@ -802,7 +835,7 @@ def _render_edge_callouts(
             if bounds is None:
                 continue
             sx, sy, sw, _sh = bounds
-            marker_r = 7.0
+            marker_r = _CALLOUT_MARKER_RADIUS
             mx = sx + sw - marker_r - 2
             my = sy + marker_r + 2
             ET.SubElement(
@@ -873,7 +906,6 @@ def _render_chamfer_section(
         "y": str(dim_y),
         "text-anchor": "middle",
         **{k: v for k, v in dim_style.items()},
-        "font-size": "8px",
     }
     dim_elem = ET.SubElement(parent, "text", dim_attrs)
     dim_elem.text = f"{distance:.1f}"
@@ -884,7 +916,6 @@ def _render_chamfer_section(
         "text-anchor": "start",
         "dominant-baseline": "middle",
         **{k: v for k, v in dim_style.items()},
-        "font-size": "8px",
     }
     t_elem = ET.SubElement(parent, "text", t_attrs)
     t_elem.text = f"{thickness:.0f}"
@@ -934,7 +965,6 @@ def _render_fillet_section(
         "y": str(dim_y),
         "text-anchor": "middle",
         **{k: v for k, v in dim_style.items()},
-        "font-size": "8px",
     }
     dim_elem = ET.SubElement(parent, "text", dim_attrs)
     dim_elem.text = f"R{radius:.1f}"
@@ -945,7 +975,6 @@ def _render_fillet_section(
         "text-anchor": "start",
         "dominant-baseline": "middle",
         **{k: v for k, v in dim_style.items()},
-        "font-size": "8px",
     }
     t_elem = ET.SubElement(parent, "text", t_attrs)
     t_elem.text = f"{thickness:.0f}"
@@ -969,18 +998,18 @@ def _render_beam_assemblies(
     theme: DiagramTheme,
 ) -> None:
     group = ET.SubElement(svg, "g", {"id": "BEAM_ASSEMBLIES", "class": "beam-assemblies"})
-    x = 20.0
-    y = top_y + 10.0
+    x = _BEAM_X
+    y = top_y + _BEAM_Y_OFFSET
     layer_height = _BEAM_LAYER_HEIGHT
     header_height = _BEAM_HEADER_HEIGHT
     beam_spacing = _BEAM_SPACING
-    diagram_width = 350.0
+    diagram_width = _BEAM_DIAGRAM_WIDTH
 
     notes_style = theme.get_style("notes")
-    label_style = theme.get_style("label")
+    beam_seg_style = theme.get_style("beam-segment-text")
     layer_style = theme.get_style("beam-layer")
     splice_style = theme.get_style("beam-splice")
-    dim_style = theme.get_style("dimension-text")
+    beam_dim_style = theme.get_style("beam-dim-text")
 
     for beam in beam_structures:
         name = beam.get("name", "beam")
@@ -1006,8 +1035,7 @@ def _render_beam_assemblies(
         dims_attrs = {
             "x": str(x),
             "y": str(y + 12),
-            **{k: v for k, v in dim_style.items()},
-            "font-size": "8px",
+            **{k: v for k, v in beam_dim_style.items()},
         }
         dims_elem = ET.SubElement(group, "text", dims_attrs)
         dims_elem.text = dims_text
@@ -1025,8 +1053,7 @@ def _render_beam_assemblies(
                 "y": str(ly + layer_height / 2 + 1),
                 "text-anchor": "end",
                 "dominant-baseline": "middle",
-                **{k: v for k, v in label_style.items()},
-                "font-size": "7px",
+                **{k: v for k, v in beam_seg_style.items()},
             }
             label_elem = ET.SubElement(group, "text", label_attrs)
             label_elem.text = f"L{layer_idx}"
@@ -1058,8 +1085,7 @@ def _render_beam_assemblies(
                     "y": f"{ly + layer_height / 2:.2f}",
                     "text-anchor": "middle",
                     "dominant-baseline": "middle",
-                    **{k: v for k, v in dim_style.items()},
-                    "font-size": "7px",
+                    **{k: v for k, v in beam_seg_style.items()},
                 }
                 seg_label_elem = ET.SubElement(group, "text", seg_label_attrs)
                 seg_label_elem.text = seg_label
@@ -1087,8 +1113,7 @@ def _render_beam_assemblies(
                 "x": str(x + diagram_width / 2),
                 "y": str(stagger_y),
                 "text-anchor": "middle",
-                **{k: v for k, v in dim_style.items()},
-                "font-size": "7px",
+                **{k: v for k, v in beam_seg_style.items()},
             }
             stagger_elem = ET.SubElement(group, "text", stagger_attrs)
             stagger_elem.text = "butt joints staggered (BM-9)"

@@ -28,7 +28,12 @@
 .callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
-.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
   <rect x="-10.0" y="-50.0" width="350.0" height="290.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="200.000" height="150.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
@@ -64,10 +69,10 @@
     <text x="228.0" y="17.0" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="170.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="182.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 200.0 × 150.0 × 12.0mm</text>
-    <text x="20" y="194.0" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile</text>
-    <text x="20" y="206.0" fill="#cccccc" font-family="monospace" font-size="10px">Parts (1):</text>
-    <text x="30" y="218.0" fill="#cccccc" font-family="monospace" font-size="10px">• simple_rect</text>
+    <text x="20.0" y="170.0" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="182.0" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 200.0 × 150.0 × 12.0mm</text>
+    <text x="20.0" y="194.0" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile</text>
+    <text x="20.0" y="206.0" fill="#cccccc" font-family="monospace" font-size="10px">Parts (1):</text>
+    <text x="30.0" y="218.0" fill="#cccccc" font-family="monospace" font-size="10px">• simple_rect</text>
   </g>
 </svg>

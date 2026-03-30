@@ -28,7 +28,12 @@
 .callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
-.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
   <rect x="-11.5875" y="-51.5875" width="373.175" height="423.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="220.000" height="160.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
@@ -112,7 +117,7 @@
     <text x="249.58750000000003" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
     <line x1="229.58750000000003" y1="-3.5874999999999986" x2="244.58750000000003" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
     <text x="249.58750000000003" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="229.58750000000003" y="9.412500000000001" width="15" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <rect x="229.58750000000003" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="249.58750000000003" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
     <line x1="229.58750000000003" y1="28.4125" x2="244.58750000000003" y2="28.4125" stroke="#e8e8e8" stroke-width="1.5" />
     <text x="249.58750000000003" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
@@ -122,20 +127,20 @@
     <text x="249.58750000000003" y="63.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20" y="181.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20" y="193.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 220.0 × 160.0 × 19.0mm</text>
-    <text x="20" y="205.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile, 1 pocket, 4 holes</text>
-    <text x="20" y="217.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30" y="229.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
-    <text x="30" y="241.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
-    <text x="20" y="253.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
-    <text x="30" y="265.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀6.0mm</text>
-    <text x="20" y="277.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (6):</text>
-    <text x="30" y="289.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:1</text>
-    <text x="30" y="301.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:2</text>
-    <text x="30" y="313.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:3</text>
-    <text x="30" y="325.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:4</text>
-    <text x="30" y="337.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:outer</text>
-    <text x="30" y="349.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:recess</text>
+    <text x="20.0" y="181.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="193.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 220.0 × 160.0 × 19.0mm</text>
+    <text x="20.0" y="205.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 profile, 1 pocket, 4 holes</text>
+    <text x="20.0" y="217.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="229.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
+    <text x="30.0" y="241.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
+    <text x="20.0" y="253.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
+    <text x="30.0" y="265.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀6.0mm</text>
+    <text x="20.0" y="277.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (6):</text>
+    <text x="30.0" y="289.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:1</text>
+    <text x="30.0" y="301.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:2</text>
+    <text x="30.0" y="313.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:3</text>
+    <text x="30.0" y="325.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole:4</text>
+    <text x="30.0" y="337.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:outer</text>
+    <text x="30.0" y="349.5875" fill="#cccccc" font-family="monospace" font-size="10px">• plate:recess</text>
   </g>
 </svg>

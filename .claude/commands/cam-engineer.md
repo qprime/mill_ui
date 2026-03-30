@@ -52,6 +52,16 @@ Only ask the user when multiple valid approaches exist and the choice affects th
 - Over-engineer or add unnecessary abstraction
 - "Improve" working patterns that you don't fully understand
 
+## Writing Tests
+
+Read `docs/invariants/testing.md` before adding or modifying tests. Key rules:
+
+- **Check for existing coverage first.** Before creating a test file, `grep` the test directory for imports of the module you're testing. If another file already tests it, add your tests there.
+- **Test at IR level.** Assert on `RemovalIntent` fields, not G-code strings or full pipeline output.
+- **Test project logic, not Python.** Do not write tests for `frozen`, `replace()`, `==`, or other stdlib guarantees. Only test `__post_init__` validation or custom behavior.
+- **No hand-rolled runners.** No `if __name__ == "__main__"` blocks, no `print("PASS")`, no `return True` from test functions. Tests are collected by pytest.
+- **No recipe-loop duplication.** If `validate_recipe()` already exercises a code path, do not add another test that loops all recipes to re-exercise it.
+
 ## Output Expectations
 
 - Working code — if existing tests fail, diagnose before fixing

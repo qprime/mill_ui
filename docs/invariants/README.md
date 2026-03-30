@@ -60,6 +60,7 @@ Before modifying a subsystem, read its invariant file.
 | G-Code | [gcode.md](gcode.md) | Machine output |
 | Nesting | [nesting.md](nesting.md) | Bin packing |
 | SVG | [svg.md](svg.md) | Blueprint SVG generation |
+| Testing | [testing.md](testing.md) | Test structure, deduplication, anti-patterns |
 | Beams | [beams.md](beams.md) | Beam lamination, splicing, features |
 | Beds | [beds.md](beds.md) | Bed/frame assemblies |
 | Components | [components.md](components.md) | Reusable component templates |

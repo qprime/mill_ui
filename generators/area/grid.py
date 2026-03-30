@@ -6,6 +6,7 @@ from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -47,7 +48,7 @@ def grid_generator(
     if domain_width < params.spacing_x_mm and domain_height < params.spacing_y_mm:
         if allow_empty:
             return []
-        raise ValueError(
+        raise GeneratorSkipError(
             f"GridGenerator: Domain size ({domain_width:.1f}mm x {domain_height:.1f}mm) "
             f"is smaller than grid spacing ({params.spacing_x_mm}mm x {params.spacing_y_mm}mm). "
             f"Reduce spacing or use a larger domain."
@@ -112,7 +113,7 @@ def grid_generator(
         y += params.spacing_y_mm
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             "GridGenerator: Could not generate any grid lines for domain. "
             "Domain may be too small or grid parameters incompatible."
         )

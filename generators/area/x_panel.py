@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -42,7 +43,7 @@ def x_panel_generator(
     if w <= params.bar_width_mm * 2 or h <= params.bar_width_mm * 2:
         if allow_empty:
             return []
-        raise ValueError(f"XPanelGenerator: Domain {w}x{h}mm too small for bar_width {params.bar_width_mm}mm")
+        raise GeneratorSkipError(f"XPanelGenerator: Domain {w}x{h}mm too small for bar_width {params.bar_width_mm}mm")
 
     cx = x0 + w / 2
     cy = y0 + h / 2

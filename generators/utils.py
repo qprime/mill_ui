@@ -6,6 +6,7 @@ from shapely.geometry import MultiPolygon, Polygon
 
 from domains.transforms import sheet_to_local
 from generators.core import (
+    GeneratorSkipError,
     LoopSelection,
 )
 from layout_ast.layout import Feature, Geometry, Item, Placement
@@ -121,7 +122,7 @@ def extract_loops(
         result = []
         for idx in selection:
             if idx < 0 or idx >= num_loops:
-                raise ValueError(
+                raise GeneratorSkipError(
                     f"{generator_name}: loop index {idx} out of range. "
                     f"Domain has {num_loops} loops (0=outer, 1-{num_loops - 1}=inner)"
                 )

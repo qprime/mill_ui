@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from core.geometry import clip_line_to_domain
 from domains.transforms import local_to_sheet_batch
 from generators.area.engrave_text import engrave_number_label
-from generators.core import generate_shape_id
+from generators.core import GeneratorSkipError, generate_shape_id
 from generators.utils import create_line_item
 from layout_ast.layout import Item
 
@@ -87,7 +87,7 @@ def validate_items_generated(
     generator_name: str,
 ) -> None:
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             f"{generator_name}: Could not generate any tick marks. Domain may be too small for the specified spacing."
         )
 

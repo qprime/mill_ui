@@ -8,6 +8,7 @@ from shapely.geometry import LineString
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -100,7 +101,7 @@ def _generate_local_coords(
             line_idx += 1
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             f"LinePatternGenerator: No lines fit within domain. "
             f"Domain bounds: {local_width:.1f}mm x {local_height:.1f}mm, "
             f"spacing: {params.spacing_mm}mm"
@@ -160,7 +161,7 @@ def _generate_sheet_coords(
             line_idx += 1
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             f"LinePatternGenerator: No lines fit within domain. "
             f"Domain bounds: {bounds.width:.1f}mm x {bounds.height:.1f}mm, "
             f"spacing: {params.spacing_mm}mm"

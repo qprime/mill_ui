@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -37,7 +38,7 @@ def raised_panel_generator(
     if field_result.is_empty:
         if allow_empty:
             return []
-        raise ValueError(
+        raise GeneratorSkipError(
             f"RaisedPanelGenerator: border_width {params.border_width_mm}mm exceeds "
             f"half of domain minimum dimension. Domain bounds: "
             f"{domain.bounds.width}mm x {domain.bounds.height}mm"

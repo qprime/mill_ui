@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -102,7 +103,7 @@ def wave_generator(
     if params.amplitude_mm * 2 > min_dimension:
         if allow_empty:
             return []
-        raise ValueError(
+        raise GeneratorSkipError(
             f"WaveGenerator: amplitude {params.amplitude_mm}mm exceeds half of minimum "
             f"domain dimension {min_dimension}mm. Maximum amplitude for this domain "
             f"is {min_dimension / 2}mm."
@@ -180,7 +181,7 @@ def wave_generator(
         y += wave_spacing
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             "WaveGenerator: Could not generate any wave lines for domain. "
             "Domain may be too small or wave parameters incompatible."
         )

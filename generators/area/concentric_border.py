@@ -6,6 +6,7 @@ from shapely.geometry import Polygon
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -42,7 +43,7 @@ def concentric_border_generator(
         if outer_result.is_empty:
             if allow_empty:
                 continue
-            raise ValueError(
+            raise GeneratorSkipError(
                 f"ConcentricBorderGenerator: inset {inset}mm exceeds domain size. "
                 f"Domain bounds: {domain.bounds.width:.1f}mm x {domain.bounds.height:.1f}mm"
             )
@@ -72,7 +73,7 @@ def concentric_border_generator(
                 ring_idx += 1
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             f"ConcentricBorderGenerator: No borders fit within domain. "
             f"Domain bounds: {domain.bounds.width:.1f}mm x {domain.bounds.height:.1f}mm, "
             f"smallest inset: {min(params.insets_mm)}mm"

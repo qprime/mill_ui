@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -35,7 +36,7 @@ def chamfer_generator(
 
     try:
         loops = extract_loops(domain, params.loop_selection, "ChamferGenerator")
-    except ValueError:
+    except GeneratorSkipError:
         if allow_empty:
             return []
         raise
@@ -43,7 +44,7 @@ def chamfer_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(f"ChamferGenerator: No loops match selection '{params.loop_selection}'")
+        raise GeneratorSkipError(f"ChamferGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 

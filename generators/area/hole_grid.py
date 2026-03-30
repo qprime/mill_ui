@@ -9,6 +9,7 @@ from core.constants import DepthMode
 from domains.transforms import local_to_sheet
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -35,7 +36,7 @@ def hole_grid_generator(
         if not inset_result.domains:
             if allow_empty:
                 return []
-            raise ValueError(f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm")
+            raise GeneratorSkipError(f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm")
         if len(inset_result.domains) != 1:
             raise ValueError(
                 f"HoleGridGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
@@ -81,7 +82,7 @@ def hole_grid_generator(
             item_index += 1
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             f"HoleGridGenerator: Could not fit any holes in domain. "
             f"Domain may be too small for diameter={params.diameter_mm}mm, "
             f"spacing={params.spacing_mm}mm"

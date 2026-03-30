@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -36,14 +37,14 @@ def svg_stamp_generator(
     if not polylines:
         if allow_empty:
             return []
-        raise ValueError("svg_stamp_generator: SVG path produced no geometry")
+        raise GeneratorSkipError("svg_stamp_generator: SVG path produced no geometry")
 
     polylines = [p for p in polylines if len(p) >= 2]
 
     if not polylines:
         if allow_empty:
             return []
-        raise ValueError("svg_stamp_generator: SVG path produced no valid polylines")
+        raise GeneratorSkipError("svg_stamp_generator: SVG path produced no valid polylines")
 
     x_min, y_min, x_max, y_max = polylines_bounds(polylines)
     svg_width = x_max - x_min
@@ -52,7 +53,7 @@ def svg_stamp_generator(
     if svg_width < 1e-10 or svg_height < 1e-10:
         if allow_empty:
             return []
-        raise ValueError("svg_stamp_generator: SVG has degenerate dimensions")
+        raise GeneratorSkipError("svg_stamp_generator: SVG has degenerate dimensions")
 
     domain_bounds = domain.bounds
 
@@ -116,7 +117,7 @@ def svg_stamp_generator(
         items.append(item)
 
     if not items and not allow_empty:
-        raise ValueError("svg_stamp_generator: No valid Items produced from SVG")
+        raise GeneratorSkipError("svg_stamp_generator: No valid Items produced from SVG")
 
     return items
 

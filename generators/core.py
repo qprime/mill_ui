@@ -12,6 +12,10 @@ from layout_ast.layout import Item
 GeneratorResult = list[Item]
 
 
+class GeneratorSkipError(ValueError):
+    pass
+
+
 LoopSelection = Literal["outer_only", "inner_only", "all_loops"] | list[int]
 
 
@@ -51,7 +55,9 @@ def validate_domain_for_generation(
     if domain.area_mm2 < min_area_mm2:
         if allow_empty:
             return False
-        raise ValueError(f"{generator_name}: Domain area {domain.area_mm2:.4f}mm^2 is below minimum {min_area_mm2}mm^2")
+        raise GeneratorSkipError(
+            f"{generator_name}: Domain area {domain.area_mm2:.4f}mm^2 is below minimum {min_area_mm2}mm^2"
+        )
     return True
 
 
@@ -77,6 +83,7 @@ __all__ = [
     "BaseParams",
     "Generator",
     "GeneratorResult",
+    "GeneratorSkipError",
     "LoopSelection",
     "generate_shape_id",
     "resolve_major_spacing",

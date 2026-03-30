@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -69,7 +70,7 @@ def bead_generator(
 
     try:
         loops = extract_loops(domain, params.loop_selection, "BeadGenerator")
-    except ValueError:
+    except GeneratorSkipError:
         if allow_empty:
             return []
         raise
@@ -77,7 +78,7 @@ def bead_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(f"BeadGenerator: No loops match selection '{params.loop_selection}'")
+        raise GeneratorSkipError(f"BeadGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 
@@ -93,7 +94,7 @@ def bead_generator(
         if offset_boundary is None:
             if allow_empty:
                 continue
-            raise ValueError(
+            raise GeneratorSkipError(
                 f"BeadGenerator: offset {params.offset_mm}mm collapses loop {loop_idx}. Use a smaller offset value."
             )
 
@@ -126,7 +127,9 @@ def bead_generator(
         items.append(item)
 
     if not items and not allow_empty:
-        raise ValueError("BeadGenerator: Could not generate any bead items. Check offset parameter and domain size.")
+        raise GeneratorSkipError(
+            "BeadGenerator: Could not generate any bead items. Check offset parameter and domain size."
+        )
 
     return items
 

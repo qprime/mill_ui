@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 from core.constants import DepthMode
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -38,7 +39,7 @@ def profile_generator(
 
     try:
         loops = extract_loops(domain, params.loop_selection, "ProfileGenerator")
-    except ValueError:
+    except GeneratorSkipError:
         if allow_empty:
             return []
         raise
@@ -46,7 +47,7 @@ def profile_generator(
     if not loops:
         if allow_empty:
             return []
-        raise ValueError(f"ProfileGenerator: No loops match selection '{params.loop_selection}'")
+        raise GeneratorSkipError(f"ProfileGenerator: No loops match selection '{params.loop_selection}'")
 
     items: list[Item] = []
 

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     validate_domain_for_generation,
 )
 from generators.measurement_helpers import create_engraved_line
@@ -85,7 +86,7 @@ def grid_lines_generator(
         y += spacing
 
     if not items and not allow_empty:
-        raise ValueError(
+        raise GeneratorSkipError(
             "GridLinesGenerator: Could not generate any grid lines. Domain may be too small for the specified spacing."
         )
 

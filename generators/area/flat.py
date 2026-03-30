@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
+    GeneratorSkipError,
     generate_shape_id,
     validate_domain_for_generation,
 )
@@ -29,7 +30,7 @@ def flat_pocket_generator(
         if inset_result.is_empty:
             if allow_empty:
                 return []
-            raise ValueError(
+            raise GeneratorSkipError(
                 f"FlatPocketGenerator: allowance {params.allowance_mm}mm exceeds domain size. "
                 f"Domain bounds: {domain.bounds.width}mm x {domain.bounds.height}mm"
             )

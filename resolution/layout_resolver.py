@@ -12,6 +12,7 @@ from core.geometry import compute_shape_bounds_dict
 from domains import Domain
 from generators import (
     ConcentricBorderParams,
+    GeneratorSkipError,
     GridLinesParams,
     HoleGridParams,
     LinePatternParams,
@@ -933,7 +934,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_chamfer_gen(
@@ -1057,7 +1058,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_hole_grid_gen(
@@ -1091,7 +1092,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_waste_cuts(
@@ -1191,7 +1192,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_lines_gen(
@@ -1223,7 +1224,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_concentric_border_gen(
@@ -1254,7 +1255,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_measurement_grid_gen(
@@ -1294,7 +1295,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_measurement_edge_gen(
@@ -1335,7 +1336,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_grid_lines_gen(
@@ -1368,7 +1369,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_engrave_text_gen(
@@ -1391,7 +1392,7 @@ class LayoutResolver:
                 shape_id_prefix=shape_id_prefix,
             )
             items.extend(generated_items)
-        except ValueError:
+        except GeneratorSkipError:
             pass
 
     def _handle_svg_stamp_gen(
@@ -1437,7 +1438,7 @@ class LayoutResolver:
         try:
             generated_items = svg_stamp_generator(domain, generator_params, allow_empty=True)
             items.extend(generated_items)
-        except (ValueError, SVGParseError):
+        except (GeneratorSkipError, SVGParseError):
             pass
 
     def _handle_split_horizontal(
@@ -1815,7 +1816,7 @@ class LayoutResolver:
                                 shape_id_prefix=shape_id_prefix,
                             )
                             items.extend(generated_items)
-                        except ValueError:
+                        except GeneratorSkipError:
                             pass
                     else:
                         stripped = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}

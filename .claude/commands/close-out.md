@@ -1,12 +1,12 @@
 ---
-description: Run the full post-implementation close-out workflow — verification, summary, code review, and commit. Only use when the user explicitly asks — e.g. "close it out", "wrap it up", "/close-out". Never auto-trigger after implementation.
+description: Run the full post-implementation close-out workflow — verification, summary, and commit. Only use when the user explicitly asks — e.g. "close it out", "wrap it up", "/close-out". Never auto-trigger after implementation.
 ---
 
 # /close-out — Implementation Close-Out
 
 Close out the implementation for: $ARGUMENTS
 
-This skill runs the full verification, summary, and review cycle after an implementation is complete. Follow every phase in order.
+This skill runs the full verification, summary, and commit cycle after an implementation is complete. Follow every phase in order.
 
 ---
 
@@ -85,51 +85,7 @@ Present this to the user before posting.
 
 ---
 
-## Phase 3: Code Review
-
-Perform a self-review of all changes. Read every modified file. Check against:
-
-1. **Correctness** — Does the implementation match the spec? Any off-by-one errors, missing edge cases, or silent failures?
-2. **Invariant compliance** — For each relevant invariant file, verify compliance. Build a table:
-   ```
-   | Invariant | Status |
-   |-----------|--------|
-   | XX-N (NAME) | Compliant / Exception (documented) |
-   ```
-3. **Test coverage** — Are all test cases from the spec implemented? Any gaps?
-4. **Style** — No comments in code, no unnecessary abstractions, frozen dataclasses not mutated
-
-Rate findings by severity:
-
-```
-| # | Severity | File:Line | Finding |
-|---|----------|-----------|---------|
-| 1 | Bug      | path:123  | Description |
-| 2 | Smell    | path:45   | Description |
-| 3 | Test gap | —         | Description |
-```
-
-**Verdict:** "Clean — ready to commit" or "Needs resolution — N issues"
-
-If issues are found, fix them, re-run Phase 1, and update the summary.
-
----
-
-## Phase 4: Review Response *(only if Phase 3 found issues)*
-
-For each finding that was fixed:
-
-```
-### C-N: <Finding title> — Fixed
-
-<1-2 sentences describing the fix.>
-```
-
-Re-run verification and report updated test counts.
-
----
-
-## Phase 5: Commit
+## Phase 3: Commit
 
 After all phases pass with a clean verdict:
 
@@ -144,7 +100,7 @@ Do NOT push unless the user explicitly asks.
 
 ---
 
-## Phase 6: Final Summary
+## Phase 4: Final Summary
 
 Present the final summary to the user:
 
@@ -169,4 +125,4 @@ Committed as `<hash>` — all checks pass (ruff, ruff format, mypy), <N> tests p
 
 ## Posting to GitHub *(if user requests)*
 
-Post the Implementation Summary (Phase 2) and Code Review (Phase 3) as separate comments on the issue. Use `gh issue comment <number> --body "..."`.
+Post the Implementation Summary (Phase 2) as a comment on the issue. Use `gh issue comment <number> --body "..."`.

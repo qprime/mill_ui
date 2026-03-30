@@ -213,7 +213,7 @@ def _convert_beam_face_feature(feat):
             face=p.get("face", "front"),
             stage=p.get("stage", "strip"),
         )
-    raise ValueError(f"Unknown face feature type: {feat.feature_type}")
+    raise ResolutionAssertionError(f"Unknown face feature type: {feat.feature_type}")
 
 
 def _convert_beam_end_feature(feat):
@@ -240,7 +240,7 @@ def _convert_beam_end_feature(feat):
             end=p["end"],
             contour=tuple(tuple(pt) for pt in p["contour"]),
         )
-    raise ValueError(f"Unknown end feature type: {feat.feature_type}")
+    raise ResolutionAssertionError(f"Unknown end feature type: {feat.feature_type}")
 
 
 def _convert_beam_edge_feature(feat):
@@ -301,7 +301,7 @@ def _convert_beam_edge_feature(feat):
             layers=p.get("layers", "outer"),
             stage=p.get("stage", "strip"),
         )
-    raise ValueError(f"Unknown edge feature type: {feat.feature_type}")
+    raise ResolutionAssertionError(f"Unknown edge feature type: {feat.feature_type}")
 
 
 def _build_beam_structure(beam_spec, max_layer_length, segments, left_exts, right_exts, max_left):
@@ -515,7 +515,7 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         if node.component_name not in self.components:
-            raise ValueError(f"Unknown component: {node.component_name}")
+            raise ResolutionAssertionError(f"Unknown component: {node.component_name}")
 
         comp_def = self.components[node.component_name]
 
@@ -704,7 +704,7 @@ class LayoutResolver:
             start_xy = (region.center[0], region.y_min)
             end_xy = (region.center[0], region.y_max)
         else:
-            raise ValueError(f"Unknown line orientation: {node.orientation}")
+            raise ResolutionAssertionError(f"Unknown line orientation: {node.orientation}")
 
         cx = (start_xy[0] + end_xy[0]) / 2
         cy = (start_xy[1] + end_xy[1]) / 2
@@ -2177,7 +2177,7 @@ class LayoutResolver:
                 back_internal_support=node.back_internal_support,
             )
         else:
-            raise ValueError(f"Unsupported assembly type: {assembly_type}")
+            raise ResolutionAssertionError(f"Unsupported assembly type: {assembly_type}")
 
     @staticmethod
     def _row_wrap_positions(
@@ -2667,7 +2667,7 @@ class LayoutResolver:
 def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> LayoutAST:
     results = resolve_layout_multi(ast, validate=validate)
     if len(results) > 1:
-        raise ValueError(
+        raise ResolutionAssertionError(
             f"Assembly requires {len(results)} sheets but resolve_layout() "
             f"returns a single LayoutAST. Use resolve_layout_multi()."
         )
@@ -2730,7 +2730,7 @@ def resolve_layout_multi(
     if partition.unplaceable:
         names = [p.name for p in partition.unplaceable]
         dims = [f"{p.width_mm}x{p.height_mm}mm" for p in partition.unplaceable]
-        raise ValueError(
+        raise ResolutionAssertionError(
             f"Panels too large for sheet ({working_w}x{working_h}mm working area): "
             + ", ".join(f"{n} ({d})" for n, d in zip(names, dims, strict=True))
         )
@@ -2739,13 +2739,13 @@ def resolve_layout_multi(
         return [resolver.resolve()]
 
     if _has_non_assembly_content(ast.root):
-        raise ValueError(
+        raise ResolutionAssertionError(
             f"Assembly requires {len(partition.sheets)} sheets but PML contains "
             f"non-assembly items. Move the assembly to its own PML file."
         )
 
     if _has_beam_content(ast.root):
-        raise ValueError("Multi-sheet partitioning is not supported for beam assemblies.")
+        raise ResolutionAssertionError("Multi-sheet partitioning is not supported for beam assemblies.")
 
     sheet_region = ResolvedRegion(
         x_min=0.0,

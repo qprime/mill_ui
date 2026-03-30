@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout, resolve_layout_multi
+from resolution.layout_resolver import ResolutionAssertionError, resolve_layout, resolve_layout_multi
 
 SMALL_BOX_PML = """\
 Sheet:
@@ -136,7 +136,7 @@ children:
 
     def test_resolve_layout_raises_on_multi_sheet(self):
         comp_ast = parse_pml_yaml(LARGE_BOX_PML)
-        with pytest.raises(ValueError, match="Use resolve_layout_multi"):
+        with pytest.raises(ResolutionAssertionError, match="Use resolve_layout_multi"):
             resolve_layout(comp_ast)
 
     def test_resolve_layout_delegates_single_sheet(self):
@@ -179,7 +179,7 @@ children:
 
     def test_mixed_content_multi_sheet_error(self):
         comp_ast = parse_pml_yaml(MIXED_CONTENT_OVERFLOW_PML)
-        with pytest.raises(ValueError, match="non-assembly items"):
+        with pytest.raises(ResolutionAssertionError, match="non-assembly items"):
             resolve_layout_multi(comp_ast)
 
     def test_shape_ids_per_sheet_isolated(self):

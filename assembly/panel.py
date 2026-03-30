@@ -93,33 +93,6 @@ class PanelSpec:
         return replace(self, dados=self.dados + dados)
 
 
-def validate_notch_fits_edge(notch: NotchSpec, edge_length: float) -> None:
-    if notch.u_start_mm + notch.u_len_mm > edge_length + 1e-6:
-        raise ValueError(
-            f"Notch exceeds edge length: u_start={notch.u_start_mm}mm + "
-            f"u_len={notch.u_len_mm}mm = {notch.u_start_mm + notch.u_len_mm}mm > "
-            f"edge_length={edge_length}mm"
-        )
-
-
-def validate_notches_no_overlap(notches: list[NotchSpec]) -> None:
-    by_edge: dict[Edge, list[NotchSpec]] = {}
-    for n in notches:
-        by_edge.setdefault(n.edge, []).append(n)
-
-    for edge, edge_notches in by_edge.items():
-        sorted_notches = sorted(edge_notches, key=lambda x: x.u_start_mm)
-        for i in range(len(sorted_notches) - 1):
-            a = sorted_notches[i]
-            b = sorted_notches[i + 1]
-            if a.u_start_mm + a.u_len_mm > b.u_start_mm + 1e-6:
-                raise ValueError(
-                    f"Overlapping notches on edge {edge.name}: "
-                    f"[{a.u_start_mm}, {a.u_start_mm + a.u_len_mm}] overlaps "
-                    f"[{b.u_start_mm}, {b.u_start_mm + b.u_len_mm}]"
-                )
-
-
 __all__ = [
     "DadoSpec",
     "Edge",
@@ -127,6 +100,4 @@ __all__ = [
     "PanelRole",
     "PanelSpec",
     "Point2D",
-    "validate_notch_fits_edge",
-    "validate_notches_no_overlap",
 ]

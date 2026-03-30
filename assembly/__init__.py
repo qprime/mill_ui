@@ -52,6 +52,8 @@ from assembly.notches import (
     build_notched_polygon,
     finger_joints_to_notches,
     notch_to_polyline,
+    validate_notch_fits_edge,
+    validate_notches_no_overlap,
 )
 from assembly.panel import (
     DadoSpec,
@@ -59,8 +61,6 @@ from assembly.panel import (
     NotchSpec,
     PanelRole,
     PanelSpec,
-    validate_notch_fits_edge,
-    validate_notches_no_overlap,
 )
 from assembly.partitioner import (
     PartitionResult,

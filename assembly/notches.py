@@ -21,18 +21,18 @@ def validate_notch_fits_edge(notch: NotchSpec, edge_length: float) -> None:
 
 
 def validate_notches_no_overlap(notches: list[NotchSpec]) -> None:
-    by_edge: dict[int, list[NotchSpec]] = {}
+    by_edge: dict[Edge, list[NotchSpec]] = {}
     for n in notches:
-        by_edge.setdefault(n.edge_index, []).append(n)
+        by_edge.setdefault(n.edge, []).append(n)
 
-    for edge_idx, edge_notches in by_edge.items():
+    for edge, edge_notches in by_edge.items():
         sorted_notches = sorted(edge_notches, key=lambda x: x.u_start_mm)
         for i in range(len(sorted_notches) - 1):
             a = sorted_notches[i]
             b = sorted_notches[i + 1]
             if a.u_start_mm + a.u_len_mm > b.u_start_mm + 1e-6:
                 raise ValueError(
-                    f"Overlapping notches on edge {edge_idx}: "
+                    f"Overlapping notches on edge {edge.name}: "
                     f"[{a.u_start_mm}, {a.u_start_mm + a.u_len_mm}] overlaps "
                     f"[{b.u_start_mm}, {b.u_start_mm + b.u_len_mm}]"
                 )

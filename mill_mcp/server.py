@@ -19,7 +19,7 @@ from nesting import nest_and_generate
 from pml import PMLParseError, format_pml, parse_pml
 from pml.nest_parser import nest_job_to_api_params
 from pml.yaml_parser import NestParseError, parse_nest_yaml, parse_pml_yaml
-from resolution.layout_resolver import resolve_layout_multi
+from resolution.layout_resolver import ResolutionAssertionError, resolve_layout_multi
 from validation.regression import ComparisonConfig, GoldenStore
 from validation.removal_checks import check_depth_feasibility, check_overlap
 from validation.runner import ValidationInput, ValidationOptions, validate, validate_recipe
@@ -51,7 +51,7 @@ _COMPOSITIONAL_KEYWORDS = ("component", "frame", "inset", "grid", "split")
 def _resolve_single(comp_ast: Any) -> LayoutAST:
     results = resolve_layout_multi(comp_ast)
     if len(results) > 1:
-        raise ValueError(
+        raise ResolutionAssertionError(
             f"Assembly requires {len(results)} sheets. Multi-sheet assemblies are not yet supported via MCP."
         )
     return results[0]

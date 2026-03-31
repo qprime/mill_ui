@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from domains import Domain
+    from domains.domain import MultiDomain
 
 from layout_ast.layout import Item
 
@@ -59,6 +60,27 @@ def validate_domain_for_generation(
     return True
 
 
+def require_single_inset_domain(
+    inset_result: MultiDomain,
+    *,
+    allow_empty: bool,
+    generator_name: str,
+    empty_message: str = "",
+) -> Domain | None:
+    if inset_result.is_empty:
+        if allow_empty:
+            return None
+        raise GeneratorSkipError(empty_message or f"{generator_name}: inset collapsed domain to empty")
+    if len(inset_result.domains) != 1:
+        if allow_empty:
+            return None
+        raise GeneratorSkipError(
+            f"{generator_name}: inset produced {len(inset_result.domains)} disjoint regions, "
+            f"expected exactly 1. Domain may have complex geometry."
+        )
+    return inset_result.domains[0]
+
+
 def resolve_minor_spacing(unit: str, minor_spacing_mm: float | None) -> float:
     if unit == "metric":
         return 1.0
@@ -84,6 +106,7 @@ __all__ = [
     "GeneratorSkipError",
     "LoopSelection",
     "generate_shape_id",
+    "require_single_inset_domain",
     "resolve_major_spacing",
     "resolve_minor_spacing",
     "validate_domain_for_generation",

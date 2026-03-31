@@ -19,6 +19,7 @@ from generators import (
     ChamferParams,
     FlatPocketParams,
     Generator,
+    GeneratorSkipError,
     HoleGridParams,
     ProfileParams,
     RaisedPanelParams,
@@ -60,6 +61,24 @@ def point_approx_equal(
 ) -> bool:
     """Check if two points are approximately equal."""
     return approx_equal(p1[0], p2[0], tolerance) and approx_equal(p1[1], p2[1], tolerance)
+
+
+def _make_dumbbell_domain() -> Domain:
+    pts = [
+        (0, 0),
+        (80, 0),
+        (80, 35),
+        (170, 35),
+        (170, 0),
+        (250, 0),
+        (250, 80),
+        (170, 80),
+        (170, 45),
+        (80, 45),
+        (80, 80),
+        (0, 80),
+    ]
+    return Domain(outer_boundary=tuple((float(x), float(y)) for x, y in pts))
 
 
 # =============================================================================
@@ -261,6 +280,22 @@ def test_flat_pocket_empty_domain_allow_empty():
     """Test that small domain returns empty with allow_empty=True."""
     domain = Domain.from_rectangle(0.001, 0.001)
     params = FlatPocketParams(depth_mm=6.0)
+
+    items = flat_pocket_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_flat_pocket_disjoint_inset_raises_skip():
+    domain = _make_dumbbell_domain()
+    params = FlatPocketParams(depth_mm=6.0, allowance_mm=8.0)
+
+    with pytest.raises(GeneratorSkipError, match="disjoint regions"):
+        flat_pocket_generator(domain, params)
+
+
+def test_flat_pocket_disjoint_inset_allow_empty():
+    domain = _make_dumbbell_domain()
+    params = FlatPocketParams(depth_mm=6.0, allowance_mm=8.0)
 
     items = flat_pocket_generator(domain, params, allow_empty=True)
     assert items == []
@@ -768,6 +803,30 @@ def test_raised_panel_allow_empty():
     domain = Domain.from_rectangle(40, 40, center=(20, 20))
     params = RaisedPanelParams(
         border_width_mm=25.0,
+        border_depth_mm=6.0,
+        field_depth_mm=2.0,
+    )
+
+    items = raised_panel_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_raised_panel_disjoint_inset_raises_skip():
+    domain = _make_dumbbell_domain()
+    params = RaisedPanelParams(
+        border_width_mm=8.0,
+        border_depth_mm=6.0,
+        field_depth_mm=2.0,
+    )
+
+    with pytest.raises(GeneratorSkipError, match="disjoint regions"):
+        raised_panel_generator(domain, params)
+
+
+def test_raised_panel_disjoint_inset_allow_empty():
+    domain = _make_dumbbell_domain()
+    params = RaisedPanelParams(
+        border_width_mm=8.0,
         border_depth_mm=6.0,
         field_depth_mm=2.0,
     )
@@ -1454,6 +1513,22 @@ def test_hole_grid_inset_too_large():
     """Test hole grid with inset larger than domain."""
     domain = Domain.from_rectangle(100, 100, center=(50, 50))
     params = HoleGridParams(spacing_mm=20.0, diameter_mm=5.0, depth_mm=10.0, inset_mm=60.0)
+
+    items = hole_grid_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_hole_grid_disjoint_inset_raises_skip():
+    domain = _make_dumbbell_domain()
+    params = HoleGridParams(spacing_mm=20.0, diameter_mm=5.0, depth_mm=10.0, inset_mm=8.0)
+
+    with pytest.raises(GeneratorSkipError, match="disjoint regions"):
+        hole_grid_generator(domain, params)
+
+
+def test_hole_grid_disjoint_inset_allow_empty():
+    domain = _make_dumbbell_domain()
+    params = HoleGridParams(spacing_mm=20.0, diameter_mm=5.0, depth_mm=10.0, inset_mm=8.0)
 
     items = hole_grid_generator(domain, params, allow_empty=True)
     assert items == []

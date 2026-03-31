@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
-    GeneratorSkipError,
     generate_shape_id,
+    require_single_inset_domain,
     validate_domain_for_generation,
 )
 from generators.params.area import RaisedPanelParams
@@ -32,21 +32,18 @@ def raised_panel_generator(
 
     field_result = domain.inset(params.border_width_mm)
 
-    if field_result.is_empty:
-        if allow_empty:
-            return []
-        raise GeneratorSkipError(
+    field_domain = require_single_inset_domain(
+        field_result,
+        allow_empty=allow_empty,
+        generator_name="RaisedPanelGenerator",
+        empty_message=(
             f"RaisedPanelGenerator: border_width {params.border_width_mm}mm exceeds "
             f"half of domain minimum dimension. Domain bounds: "
             f"{domain.bounds.width}mm x {domain.bounds.height}mm"
-        )
-
-    if len(field_result.domains) != 1:
-        raise ValueError(
-            f"RaisedPanelGenerator: inset produced {len(field_result.domains)} disjoint regions, "
-            f"expected exactly 1. Domain may have complex geometry."
-        )
-    field_domain = field_result.domains[0]
+        ),
+    )
+    if field_domain is None:
+        return []
 
     items: list[Item] = []
 

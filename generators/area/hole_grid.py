@@ -11,6 +11,7 @@ from generators.core import (
     GeneratorResult,
     GeneratorSkipError,
     generate_shape_id,
+    require_single_inset_domain,
     validate_domain_for_generation,
 )
 from generators.params.area import HoleGridParams
@@ -31,16 +32,15 @@ def hole_grid_generator(
     effective_domain = domain
     if params.inset_mm > 0:
         inset_result = domain.inset(params.inset_mm)
-        if not inset_result.domains:
-            if allow_empty:
-                return []
-            raise GeneratorSkipError(f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm")
-        if len(inset_result.domains) != 1:
-            raise ValueError(
-                f"HoleGridGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
-                f"expected exactly 1. Domain may have complex geometry."
-            )
-        effective_domain = inset_result.domains[0]
+        result = require_single_inset_domain(
+            inset_result,
+            allow_empty=allow_empty,
+            generator_name="HoleGridGenerator",
+            empty_message=f"HoleGridGenerator: Domain too small for inset of {params.inset_mm}mm",
+        )
+        if result is None:
+            return []
+        effective_domain = result
 
     if not validate_domain_for_generation(
         effective_domain,

@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any
 
 from generators.core import (
     GeneratorResult,
-    GeneratorSkipError,
     generate_shape_id,
+    require_single_inset_domain,
     validate_domain_for_generation,
 )
 from generators.params.area import FlatPocketParams
@@ -24,20 +24,18 @@ def flat_pocket_generator(
 ) -> GeneratorResult:
     if params.allowance_mm > 0:
         inset_result = domain.inset(params.allowance_mm)
-        if inset_result.is_empty:
-            if allow_empty:
-                return []
-            raise GeneratorSkipError(
+        result = require_single_inset_domain(
+            inset_result,
+            allow_empty=allow_empty,
+            generator_name="FlatPocketGenerator",
+            empty_message=(
                 f"FlatPocketGenerator: allowance {params.allowance_mm}mm exceeds domain size. "
                 f"Domain bounds: {domain.bounds.width}mm x {domain.bounds.height}mm"
-            )
-
-        if len(inset_result.domains) != 1:
-            raise ValueError(
-                f"FlatPocketGenerator: inset produced {len(inset_result.domains)} disjoint regions, "
-                f"expected exactly 1. Domain may have complex geometry."
-            )
-        effective_domain = inset_result.domains[0]
+            ),
+        )
+        if result is None:
+            return []
+        effective_domain = result
     else:
         effective_domain = domain
 

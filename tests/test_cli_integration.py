@@ -70,8 +70,6 @@ def test_export_blueprint_produces_svg():
         assert "<svg" in svg_content, "SVG file missing <svg> tag"
         assert "</svg>" in svg_content, "SVG file missing closing </svg> tag"
 
-    print("  ✓ PASS")
-
 
 def test_convert_layout_pml_to_json():
 
@@ -100,8 +98,6 @@ def test_convert_layout_pml_to_json():
         assert "items" in data, "JSON missing 'items' key"
         assert data["sheet"]["width_mm"] == 450, f"Unexpected sheet width: {data['sheet']}"
         assert data["sheet"]["height_mm"] == 650, f"Unexpected sheet height: {data['sheet']}"
-
-    print("  ✓ PASS")
 
 
 def test_convert_layout_json_to_pml():
@@ -143,8 +139,6 @@ def test_convert_layout_json_to_pml():
         assert "450" in pml_content, "PML missing sheet width"
         assert "650" in pml_content, "PML missing sheet height"
 
-    print("  ✓ PASS")
-
 
 def test_cli_missing_input_fails():
 
@@ -162,8 +156,6 @@ def test_cli_missing_input_fails():
 
     assert result.returncode != 0, "CLI should fail with missing input"
     assert "not found" in result.stderr.lower() or "error" in result.stderr.lower()
-
-    print("  ✓ PASS")
 
 
 def test_cli_invalid_format_fails():
@@ -189,5 +181,3 @@ def test_cli_invalid_format_fails():
         assert "unsupported" in result.stderr.lower() or "error" in result.stderr.lower()
     finally:
         Path(invalid_file).unlink()
-
-    print("  ✓ PASS")

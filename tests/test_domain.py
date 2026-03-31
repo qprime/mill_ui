@@ -1673,8 +1673,3 @@ def test_arc_points_validation():
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "radius" in str(e).lower()
-
-
-# =============================================================================
-# Test Runner
-# =============================================================================

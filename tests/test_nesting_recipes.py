@@ -61,39 +61,3 @@ def test_nest_file(nest_path: Path):
     success, message, _metrics = _run_nest_file(nest_path)
     if not success:
         pytest.fail(message)
-
-
-def run_nesting_recipe_tests():
-    print("=" * 60)
-    print("Nesting Recipe Tests (.nest files)")
-    print("=" * 60)
-
-    nest_files = discover_nest_files()
-
-    if not nest_files:
-        print("No .nest.yml files found in docs/recipes/")
-
-    print(f"Found {len(nest_files)} .nest.yml file(s)\n")
-
-    passed = 0
-    failed = 0
-
-    for nest_path in nest_files:
-        rel_path = nest_path.relative_to(Path(__file__).parent.parent)
-        print(f"Testing: {rel_path}")
-
-        success, message, metrics = _run_nest_file(nest_path)
-
-        if success:
-            print(
-                f"  ✓ PASS - {metrics['algorithm']}: {metrics['total_parts']} parts → {metrics['total_sheets']} sheets ({metrics['utilization']} util, {metrics['time_ms']}ms)"
-            )
-            passed += 1
-        else:
-            print(f"  ✗ FAIL - {message}")
-            failed += 1
-
-    print()
-    print(f"Results: {passed}/{passed + failed} passed")
-
-    return failed == 0

@@ -72,7 +72,6 @@ def run_nesting_recipe_tests():
 
     if not nest_files:
         print("No .nest.yml files found in docs/recipes/")
-        return True
 
     print(f"Found {len(nest_files)} .nest.yml file(s)\n")
 
@@ -98,10 +97,3 @@ def run_nesting_recipe_tests():
     print(f"Results: {passed}/{passed + failed} passed")
 
     return failed == 0
-
-
-if __name__ == "__main__":
-    import sys
-
-    success = run_nesting_recipe_tests()
-    sys.exit(0 if success else 1)

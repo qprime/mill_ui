@@ -285,7 +285,3 @@ class TestShakerTemplate:
 
         assert pocket_w == pytest.approx(expected_pocket_w, rel=0.01)
         assert pocket_h == pytest.approx(expected_pocket_h, rel=0.01)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-
 from layout_ast.compositional import (
     Cell,
     ComponentDef,
@@ -22,14 +20,12 @@ from resolution.layout_resolver import resolve_layout
 
 
 def approx_eq(a, b, rel=1e-6):
-    """Check if two values are approximately equal."""
     if abs(b) < 1e-9:
         return abs(a - b) < 1e-9
     return abs(a - b) / abs(b) < rel
 
 
 def test_simple_panel_with_rect():
-    print("Running test_simple_panel_with_rect...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -54,12 +50,9 @@ def test_simple_panel_with_rect():
     assert item.placement.center_xy_mm == (200.0, 300.0)
     assert item.feature is not None
     assert item.feature.type == "profile"
-    print("  PASS")
-    return True
 
 
 def test_panel_with_inset():
-    print("Running test_panel_with_inset...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -88,12 +81,9 @@ def test_panel_with_inset():
 
     assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
-    print("  PASS")
-    return True
 
 
 def test_frame_insets_region_for_children():
-    print("Running test_frame_insets_region_for_children...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -136,12 +126,9 @@ def test_frame_insets_region_for_children():
     assert inner.geometry is not None
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
-    print("  PASS")
-    return True
 
 
 def test_frame_does_not_emit_profile():
-    print("Running test_frame_does_not_emit_profile...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -172,12 +159,9 @@ def test_frame_does_not_emit_profile():
     assert pocket_items[0].geometry is not None
     assert pocket_items[0].geometry.data["w_mm"] == 300.0
     assert pocket_items[0].geometry.data["h_mm"] == 500.0
-    print("  PASS")
-    return True
 
 
 def test_grid_subdivides_region():
-    print("Running test_grid_subdivides_region...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -211,13 +195,9 @@ def test_grid_subdivides_region():
         assert item.geometry is not None
         assert approx_eq(item.geometry.data["w_mm"], 195.0)
         assert approx_eq(item.geometry.data["h_mm"], 195.0)
-    print("  PASS")
-    return True
 
 
 def test_component_definition_and_use():
-    print("Running test_component_definition_and_use...")
-
     simple_panel = ComponentDef(
         name="SimplePanel",
         params={"recess_depth": 6.0},
@@ -245,13 +225,9 @@ def test_component_definition_and_use():
     assert len(flat.items) == 1
     item = flat.items[0]
     assert item.shape_id == "panel"
-    print("  PASS")
-    return True
 
 
 def test_place_grid_with_components():
-    print("Running test_place_grid_with_components...")
-
     shaker_panel = ComponentDef(
         name="ShakerPanel",
         params={"frame_width": 50.0, "recess_depth": 6.0},
@@ -295,13 +271,9 @@ def test_place_grid_with_components():
     assert first_outer.geometry is not None
     assert approx_eq(first_outer.geometry.data["w_mm"], 475.0)
     assert approx_eq(first_outer.geometry.data["h_mm"], 475.0)
-    print("  PASS")
-    return True
 
 
 def test_acceptance_4_instances_frame_grid_pocket():
-    print("Running test_acceptance_4_instances_frame_grid_pocket...")
-
     grid_panel = ComponentDef(
         name="GridPanel",
         params={},
@@ -368,14 +340,8 @@ def test_acceptance_4_instances_frame_grid_pocket():
 
     assert len(pocket_items) == 16
 
-    print("\n=== Acceptance Test FlatPML Output ===")
-    print(pml_output[:1000])
-    print("  PASS")
-    return True
-
 
 def test_grid_with_no_explicit_cell():
-    print("Running test_grid_with_no_explicit_cell...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=400, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -397,13 +363,9 @@ def test_grid_with_no_explicit_cell():
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 4
-    print("  PASS")
-    return True
 
 
 def test_rounded_rect_profile_inherits_geometry():
-    """Test that ProfileGen inside RoundedRect produces Polygon profile item with true geometry."""
-    print("Running test_rounded_rect_profile_inherits_geometry...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -435,13 +397,8 @@ def test_rounded_rect_profile_inherits_geometry():
     assert "points" in profile_item.geometry.data
     assert len(profile_item.geometry.data["points"]) > 4
 
-    print("  PASS")
-    return True
-
 
 def test_rounded_rect_selective_corners_profile_inherits():
-    """Test that ProfileGen inside RoundedRect with selective corners produces Polygon with true geometry."""
-    print("Running test_rounded_rect_selective_corners_profile_inherits...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -477,13 +434,8 @@ def test_rounded_rect_selective_corners_profile_inherits():
     points = profile_item.geometry.data["points"]
     assert len(points) > 4
 
-    print("  PASS")
-    return True
-
 
 def test_rect_profile_uses_domain():
-    """Test that ProfileGen inside Rect produces Polygon profile item via domain dispatch."""
-    print("Running test_rect_profile_uses_domain...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -512,13 +464,8 @@ def test_rect_profile_uses_domain():
     assert "points" in profile_item.geometry.data
     assert len(profile_item.geometry.data["points"]) == 4
 
-    print("  PASS")
-    return True
-
 
 def test_validation_mode_passes_for_correct_resolution():
-    """Test that validation mode passes when resolution is correct."""
-    print("Running test_validation_mode_passes_for_correct_resolution...")
     ast = CompositionalLayoutAST(
         sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
         root=Panel(
@@ -537,37 +484,3 @@ def test_validation_mode_passes_for_correct_resolution():
 
     assert len(flat.items) == 2
     assert flat.items[1].type == "Polygon"
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_simple_panel_with_rect,
-        test_panel_with_inset,
-        test_frame_insets_region_for_children,
-        test_frame_does_not_emit_profile,
-        test_grid_subdivides_region,
-        test_component_definition_and_use,
-        test_place_grid_with_components,
-        test_acceptance_4_instances_frame_grid_pocket,
-        test_grid_with_no_explicit_cell,
-        test_rounded_rect_profile_inherits_geometry,
-        test_rounded_rect_selective_corners_profile_inherits,
-        test_rect_profile_uses_domain,
-        test_validation_mode_passes_for_correct_resolution,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

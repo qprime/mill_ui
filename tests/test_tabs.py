@@ -7,7 +7,6 @@ from resolution.layout_resolver import resolve_layout
 
 
 def test_pml_parse_profile_with_tabs():
-    print("Running test_pml_parse_profile_with_tabs...")
 
     pml = """
 Sheet:
@@ -43,12 +42,8 @@ children:
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm == 10.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_parse_profile_with_tabs_no_width():
-    print("Running test_pml_parse_profile_with_tabs_no_width...")
 
     pml = """
 Sheet:
@@ -78,12 +73,8 @@ children:
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm is None
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_parse_profile_with_tabs_inside():
-    print("Running test_pml_parse_profile_with_tabs_inside...")
 
     pml = """
 Sheet:
@@ -117,12 +108,8 @@ children:
     assert item.feature.tab_height_mm == 2.0
     assert item.feature.tab_width_mm == 8.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_ast_construction_with_tabs():
-    print("Running test_ast_construction_with_tabs...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -152,12 +139,8 @@ def test_ast_construction_with_tabs():
     assert item.feature.tab_height_mm == 3.0
     assert item.feature.tab_width_mm == 10.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_ast_to_removal_intent_with_tabs():
-    print("Running test_ast_to_removal_intent_with_tabs...")
 
     item = Item(
         kind="shape",
@@ -188,12 +171,8 @@ def test_ast_to_removal_intent_with_tabs():
     assert intent.constraints.tabs.height_mm == 3.0
     assert intent.constraints.tabs.width_mm == 10.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_ast_to_removal_intent_with_tabs_no_width():
-    print("Running test_ast_to_removal_intent_with_tabs_no_width...")
 
     item = Item(
         kind="shape",
@@ -219,12 +198,8 @@ def test_ast_to_removal_intent_with_tabs_no_width():
     assert intent.constraints.tabs.height_mm == 3.0
     assert intent.constraints.tabs.width_mm is None
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_full_pipeline_pml_to_removal_intent():
-    print("Running test_full_pipeline_pml_to_removal_intent...")
 
     pml = """
 Sheet:
@@ -270,12 +245,8 @@ children:
     assert pocket_intent.hint_type == "pocket"
     assert pocket_intent.constraints.tabs is None
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_roundtrip_with_tabs():
-    print("Running test_pml_roundtrip_with_tabs...")
 
     pml_in = """
 Sheet:
@@ -311,53 +282,3 @@ children:
     assert item1.feature.tab_count == item2.feature.tab_count
     assert item1.feature.tab_height_mm == item2.feature.tab_height_mm
     assert item1.feature.tab_width_mm == item2.feature.tab_width_mm
-
-    print("  ✓ PASS")
-    return True
-
-
-def run_all_tests():
-    tests = [
-        test_pml_parse_profile_with_tabs,
-        test_pml_parse_profile_with_tabs_no_width,
-        test_pml_parse_profile_with_tabs_inside,
-        test_ast_construction_with_tabs,
-        test_ast_to_removal_intent_with_tabs,
-        test_ast_to_removal_intent_with_tabs_no_width,
-        test_full_pipeline_pml_to_removal_intent,
-        test_pml_roundtrip_with_tabs,
-    ]
-
-    print("\n" + "=" * 60)
-    print("Running Tab Tests")
-    print("=" * 60 + "\n")
-
-    passed = 0
-    failed = 0
-
-    for test_fn in tests:
-        try:
-            if test_fn():
-                passed += 1
-        except AssertionError as e:
-            print(f"  ✗ FAIL: {e}")
-            failed += 1
-        except Exception as e:
-            print(f"  ✗ ERROR: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print("\n" + "=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60 + "\n")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    import sys
-
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

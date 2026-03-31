@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
-import sys
 import tempfile
 from pathlib import Path
+
+import pytest
 
 from cli.introspect import dump_ast, dump_removal_intent
 
@@ -16,7 +17,6 @@ def approx_eq(a, b, rel=1e-6):
 
 
 def test_dump_ast_minimal_layout():
-    print("Running test_dump_ast_minimal_layout...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [
@@ -48,12 +48,9 @@ def test_dump_ast_minimal_layout():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_ast_deterministic():
-    print("Running test_dump_ast_deterministic...")
     layout_data = {
         "sheet": {"width_mm": 100.0, "height_mm": 100.0, "thickness_mm": 19.0},
         "items": [
@@ -80,12 +77,9 @@ def test_dump_ast_deterministic():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_profile():
-    print("Running test_dump_removal_intent_profile...")
     layout_data = {
         "sheet": {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 19.1},
         "items": [
@@ -124,12 +118,9 @@ def test_dump_removal_intent_profile():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_pocket():
-    print("Running test_dump_removal_intent_pocket...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 200.0, "thickness_mm": 12.0},
         "items": [
@@ -160,12 +151,9 @@ def test_dump_removal_intent_pocket():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_hole():
-    print("Running test_dump_removal_intent_hole...")
     layout_data = {
         "sheet": {"width_mm": 150.0, "height_mm": 150.0, "thickness_mm": 19.0},
         "items": [
@@ -196,12 +184,9 @@ def test_dump_removal_intent_hole():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_multiple_operations():
-    print("Running test_dump_removal_intent_multiple_operations...")
     layout_data = {
         "sheet": {"width_mm": 400.0, "height_mm": 300.0, "thickness_mm": 19.0},
         "items": [
@@ -249,12 +234,9 @@ def test_dump_removal_intent_multiple_operations():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_bounds_calculation():
-    print("Running test_dump_removal_intent_bounds_calculation...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 200.0, "thickness_mm": 12.0},
         "items": [
@@ -286,12 +268,9 @@ def test_dump_removal_intent_bounds_calculation():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_ast_parses_successfully():
-    print("Running test_dump_ast_parses_successfully...")
     layout_data = {
         "sheet": {"width_mm": 250.0, "height_mm": 150.0, "thickness_mm": 18.0},
         "items": [
@@ -327,12 +306,9 @@ def test_dump_ast_parses_successfully():
 
     finally:
         Path(temp_path).unlink()
-    print("  PASS")
-    return True
 
 
 def test_dump_removal_intent_real_template():
-    print("Running test_dump_removal_intent_real_template...")
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent
         / "memories"
@@ -344,8 +320,7 @@ def test_dump_removal_intent_real_template():
     )
 
     if not layout_path.exists():
-        print("  SKIP: ClampBar layout not found")
-        return True
+        pytest.skip("ClampBar layout not found")
 
     removal_json = dump_removal_intent(str(layout_path))
     removal_data = json.loads(removal_json)
@@ -358,33 +333,3 @@ def test_dump_removal_intent_real_template():
 
     assert has_profile
     assert has_pocket
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_dump_ast_minimal_layout,
-        test_dump_ast_deterministic,
-        test_dump_removal_intent_profile,
-        test_dump_removal_intent_pocket,
-        test_dump_removal_intent_hole,
-        test_dump_removal_intent_multiple_operations,
-        test_dump_removal_intent_bounds_calculation,
-        test_dump_ast_parses_successfully,
-        test_dump_removal_intent_real_template,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

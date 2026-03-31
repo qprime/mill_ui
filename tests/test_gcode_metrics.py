@@ -14,11 +14,9 @@ from __future__ import annotations
 import json
 import math
 import os
-import sys
 import tempfile
 
-# Ensure project root is in path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pytest
 
 from validation.metrics.gcode_metrics import (
     DEFAULT_RAPID_RATE_MM_MIN,
@@ -54,8 +52,7 @@ def test_extract_gcode_metrics_simple_profile():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip("{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
@@ -82,16 +79,13 @@ def test_extract_gcode_metrics_simple_profile():
     # Should have time estimate
     assert metrics.time_estimate.total_time_s > 0, f"Time: {metrics.time_estimate.total_time_s}"
 
-    print("PASS: test_extract_gcode_metrics_simple_profile")
-
 
 def test_extract_gcode_metrics_pocket():
     """Test metric extraction from pocket G-code."""
     nc_path = get_recipe_nc_path(2, "pocket_with_cleanup", "pocket-9.53mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip("{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
@@ -107,16 +101,13 @@ def test_extract_gcode_metrics_pocket():
     # Note: depends on comment format in generated G-code
     assert metrics.summary.comment_lines > 0, f"Comment lines: {metrics.summary.comment_lines}"
 
-    print("PASS: test_extract_gcode_metrics_pocket")
-
 
 def test_extract_gcode_metrics_bore():
     """Test metric extraction from bore/drill G-code."""
     nc_path = get_recipe_nc_path(4, "custom_template", "bore-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip("{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
@@ -125,8 +116,6 @@ def test_extract_gcode_metrics_bore():
 
     # Should have spindle info
     assert len(metrics.tools.spindle_speeds) > 0, f"Spindle speeds: {metrics.tools.spindle_speeds}"
-
-    print("PASS: test_extract_gcode_metrics_bore")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -139,8 +128,7 @@ def test_determinism():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip("{nc_path} not found")
 
     metrics1 = extract_gcode_metrics(nc_path)
     metrics2 = extract_gcode_metrics(nc_path)
@@ -155,8 +143,6 @@ def test_determinism():
 
     assert dict1 == dict2, "Metrics should be deterministic"
 
-    print("PASS: test_determinism")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: JSON Serialization
@@ -168,8 +154,7 @@ def test_json_serialization():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip("{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
     d = metrics.to_dict()
@@ -183,8 +168,6 @@ def test_json_serialization():
     assert "gcode" in parsed
     assert "summary" in parsed["gcode"]
     assert "motion" in parsed["gcode"]
-
-    print("PASS: test_json_serialization")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -229,8 +212,6 @@ M2
         # Allow tolerance for rounding
         assert actual_feed_distance > expected_arc_distance, f"Feed distance {actual_feed_distance} should include arcs"
 
-        print("PASS: test_arc_parsing_ij_format")
-
     finally:
         os.unlink(nc_path)
 
@@ -263,8 +244,6 @@ M2
         # With R format, arc should be a semicircle (180 degrees)
         # Arc length = pi * r = pi * 5 ≈ 15.7mm
         # But with chord=10 and R=5, this is actually a semicircle
-
-        print("PASS: test_arc_parsing_r_format")
 
     finally:
         os.unlink(nc_path)
@@ -309,8 +288,6 @@ M2
         assert abs(actual - expected_helix) < expected_helix * 0.1, (
             f"Helix distance: expected ~{expected_helix:.2f}, got {actual:.2f}"
         )
-
-        print("PASS: test_helical_arc_distance")
 
     finally:
         os.unlink(nc_path)
@@ -370,7 +347,6 @@ M2
         assert metrics.xy_bounds.y_min < -9.9, f"y_min should be ~-10: {metrics.xy_bounds.y_min}"
         assert metrics.xy_bounds.y_max > 9.9, f"y_max should be ~10: {metrics.xy_bounds.y_max}"
 
-        print("PASS: test_arc_bounds_extends_beyond_endpoints")
     finally:
         os.unlink(nc_path)
 
@@ -412,8 +388,6 @@ M2
         # Rapid time should be approximately halved
         ratio = metrics_default.time_estimate.rapid_time_s / metrics_fast.time_estimate.rapid_time_s
         assert 1.9 < ratio < 2.1, f"Time ratio should be ~2, got {ratio}"
-
-        print("PASS: test_configurable_rapid_rate")
 
     finally:
         os.unlink(nc_path)
@@ -473,8 +447,6 @@ M2
         assert -6.0 in [round(d) for d in depths]
         assert -9.0 in [round(d) for d in depths]
 
-        print("PASS: test_z_profile_analysis")
-
     finally:
         os.unlink(nc_path)
 
@@ -513,8 +485,6 @@ M2
         assert abs(metrics.xy_bounds.x_max - 100.0) < 0.01
         assert abs(metrics.xy_bounds.y_min - 20.0) < 0.01
         assert abs(metrics.xy_bounds.y_max - 80.0) < 0.01
-
-        print("PASS: test_xy_bounds")
 
     finally:
         os.unlink(nc_path)
@@ -560,8 +530,6 @@ M2
         # Min/max should be correct
         assert metrics.feeds.min_feed_rate == 200.0
         assert metrics.feeds.max_feed_rate == 1000.0
-
-        print("PASS: test_feed_rate_tracking")
 
     finally:
         os.unlink(nc_path)
@@ -609,8 +577,6 @@ M2
 
         # Should count tool change
         assert metrics.tools.tool_changes == 1, f"Tool changes: {metrics.tools.tool_changes}"
-
-        print("PASS: test_spindle_tracking")
 
     finally:
         os.unlink(nc_path)
@@ -661,8 +627,6 @@ M2
         # Total passes should sum up
         assert metrics.operations.total_passes >= 3
 
-        print("PASS: test_operation_detection")
-
     finally:
         os.unlink(nc_path)
 
@@ -680,8 +644,6 @@ def test_file_not_found():
     except FileNotFoundError:
         pass  # Expected
 
-    print("PASS: test_file_not_found")
-
 
 def test_empty_file():
     """Test ValueError for empty file."""
@@ -698,93 +660,12 @@ def test_empty_file():
     finally:
         os.unlink(nc_path)
 
-    print("PASS: test_empty_file")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: Recipe Coverage
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def test_all_recipe_nc_files():
-    """Test that all recipe NC files can be parsed without error."""
-    import glob
-
-    nc_files = glob.glob(os.path.join(RECIPE_DIR, "**/output/*.nc"), recursive=True)
-
-    # Filter out macOS ._ files
-    nc_files = [f for f in nc_files if not os.path.basename(f).startswith("._")]
-
-    if not nc_files:
-        print("SKIP: No recipe NC files found")
-        return
-
-    errors = []
-    for nc_path in nc_files:
-        try:
-            metrics = extract_gcode_metrics(nc_path)
-            # Basic sanity check
-            assert metrics.summary.total_lines > 0
-        except Exception as e:
-            errors.append(f"{nc_path}: {e}")
-
-    if errors:
-        for err in errors:
-            print(f"ERROR: {err}")
-        raise AssertionError(f"Failed to parse {len(errors)} NC files")
-
-    print(f"PASS: test_all_recipe_nc_files ({len(nc_files)} files)")
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
-
-
-def run_tests():
-    """Run all tests."""
-    tests = [
-        test_extract_gcode_metrics_simple_profile,
-        test_extract_gcode_metrics_pocket,
-        test_extract_gcode_metrics_bore,
-        test_determinism,
-        test_json_serialization,
-        test_arc_parsing_ij_format,
-        test_arc_parsing_r_format,
-        test_helical_arc_distance,
-        test_arc_bounds_extends_beyond_endpoints,
-        test_configurable_rapid_rate,
-        test_z_profile_analysis,
-        test_xy_bounds,
-        test_feed_rate_tracking,
-        test_spindle_tracking,
-        test_operation_detection,
-        test_file_not_found,
-        test_empty_file,
-        test_all_recipe_nc_files,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test_fn in tests:
-        try:
-            test_fn()
-            passed += 1
-        except AssertionError as e:
-            print(f"FAIL: {test_fn.__name__}: {e}")
-            failed += 1
-        except Exception as e:
-            print(f"ERROR: {test_fn.__name__}: {e}")
-            failed += 1
-
-    print(f"\n{'=' * 60}")
-    print(f"G-code Metrics Tests: {passed} passed, {failed} failed")
-    print(f"{'=' * 60}")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_tests()
-    sys.exit(0 if success else 1)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import sys
 
 from pml import PMLParseError, parse_pml
 from pml.yaml_formatter import format_pml_yaml
@@ -9,7 +8,6 @@ from pml.yaml_parser import parse_pml_yaml
 
 
 def test_pml_parse_minimal_layout():
-    print("Running test_pml_parse_minimal_layout...")
     pml = """
 Sheet:
   width: 450mm
@@ -40,12 +38,9 @@ children:
     assert item.feature.type == "profile"
     assert item.feature.is_through
     assert item.feature.side == "outside"
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_with_metadata():
-    print("Running test_pml_parse_with_metadata...")
     pml = """
 Sheet:
   width: 300mm
@@ -69,12 +64,9 @@ children:
     assert ast.project == "test_panel"
     assert ast.kerf_width_mm == 0.15
     assert ast.sheet.width_mm == 300.0
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_multiple_shapes():
-    print("Running test_pml_parse_multiple_shapes...")
     pml = """
 Sheet:
   width: 450mm
@@ -137,12 +129,9 @@ children:
     assert anchor1.type == "Circle"
     assert anchor1.feature.type == "hole"
     assert anchor1.feature.depth_mm == 8.0
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_circle_diameter_vs_radius():
-    print("Running test_pml_parse_circle_diameter_vs_radius...")
     pml = """
 Sheet:
   width: 200mm
@@ -182,12 +171,9 @@ children:
     hole2 = ast.items[1]
     assert "radius_mm" in hole2.geometry.data
     assert hole2.geometry.data["radius_mm"] == 8.0
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_roundedrect():
-    print("Running test_pml_parse_roundedrect...")
     pml = """
 Sheet:
   width: 300mm
@@ -214,12 +200,9 @@ children:
     assert item.geometry.data["h_mm"] == 300.0
     assert item.geometry.data["corner_radius_mm"] == 10.0
     assert item.feature.type == "pocket"
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_comments_and_blank_lines():
-    print("Running test_pml_parse_comments_and_blank_lines...")
     pml = """
 Sheet:
   width: 300mm
@@ -240,12 +223,9 @@ children:
 
     assert len(ast.items) == 1
     assert ast.sheet.width_mm == 300.0
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_error_missing_sheet():
-    print("Running test_pml_parse_error_missing_sheet...")
     pml = """
 children:
   - Rect:
@@ -259,15 +239,11 @@ children:
     try:
         parse_pml(pml)
         print("  FAIL: Expected PMLParseError")
-        return False
     except PMLParseError as e:
         assert "Sheet" in str(e)
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_error_invalid_sheet_syntax():
-    print("Running test_pml_parse_error_invalid_sheet_syntax...")
     pml = """
 Sheet:
   width: invalid_dimension
@@ -278,15 +254,11 @@ Sheet:
     try:
         parse_pml(pml)
         print("  FAIL: Expected PMLParseError or ValueError")
-        return False
     except (PMLParseError, ValueError):
         pass
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_error_invalid_feature():
-    print("Running test_pml_parse_error_invalid_feature...")
     pml = """
 Sheet:
   width: 300mm
@@ -304,12 +276,9 @@ children:
 
     ast = parse_pml(pml)
     assert ast.items[0].feature.type == "invalid_feature"
-    print("  PASS")
-    return True
 
 
 def test_pml_parse_error_invalid_profile_side():
-    print("Running test_pml_parse_error_invalid_profile_side...")
     pml = """
 Sheet:
   width: 300mm
@@ -328,12 +297,9 @@ children:
 
     ast = parse_pml(pml)
     assert ast.items[0].feature.side == "bad_side"
-    print("  PASS")
-    return True
 
 
 def test_pml_format_minimal_layout():
-    print("Running test_pml_format_minimal_layout...")
     pml = """
 Sheet:
   width: 450mm
@@ -356,12 +322,9 @@ children:
     assert "Sheet:" in formatted
     assert "width:" in formatted
     assert "450" in formatted
-    print("  PASS")
-    return True
 
 
 def test_pml_format_with_metadata():
-    print("Running test_pml_format_with_metadata...")
     pml = """
 Sheet:
   width: 300mm
@@ -385,12 +348,9 @@ children:
 
     assert "project:" in formatted
     assert "test_panel" in formatted
-    print("  PASS")
-    return True
 
 
 def test_pml_roundtrip_semantic_equivalence():
-    print("Running test_pml_roundtrip_semantic_equivalence...")
     original_pml = """
 Sheet:
   width: 450mm
@@ -435,12 +395,9 @@ children:
         assert item1.feature.type == item2.feature.type
         assert item1.feature.is_through == item2.feature.is_through
         assert item1.feature.depth_mm == item2.feature.depth_mm
-    print("  PASS")
-    return True
 
 
 def test_pml_to_json_to_ast_semantic_equivalence():
-    print("Running test_pml_to_json_to_ast_semantic_equivalence...")
     pml = """
 Sheet:
   width: 450mm
@@ -492,12 +449,9 @@ children:
     assert len(ast1.items) == 3
     assert ast1.project == "test_panel"
     assert ast1.kerf_width_mm == 0.15
-    print("  PASS")
-    return True
 
 
 def test_pml_canonical_formatting():
-    print("Running test_pml_canonical_formatting...")
     pml = """
 Sheet:
   width: 450.123mm
@@ -520,42 +474,3 @@ children:
     canonical_pml2 = format_pml_yaml(comp_ast2)
 
     assert canonical_pml == canonical_pml2
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_pml_parse_minimal_layout,
-        test_pml_parse_with_metadata,
-        test_pml_parse_multiple_shapes,
-        test_pml_parse_circle_diameter_vs_radius,
-        test_pml_parse_roundedrect,
-        test_pml_parse_comments_and_blank_lines,
-        test_pml_parse_error_missing_sheet,
-        test_pml_parse_error_invalid_sheet_syntax,
-        test_pml_parse_error_invalid_feature,
-        test_pml_parse_error_invalid_profile_side,
-        test_pml_format_minimal_layout,
-        test_pml_format_with_metadata,
-        test_pml_roundtrip_semantic_equivalence,
-        test_pml_to_json_to_ast_semantic_equivalence,
-        test_pml_canonical_formatting,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

@@ -320,27 +320,3 @@ children:
     cx, cy = item.placement.center_xy_mm
     assert approx_equal(cx, 50.0)
     assert approx_equal(cy, 45.0)
-
-
-if __name__ == "__main__":
-    test_polygon_parse_3_points()
-    print("  ✓ test_polygon_parse_3_points PASS")
-    test_polygon_parse_4_points()
-    print("  ✓ test_polygon_parse_4_points PASS")
-    test_polygon_resolve()
-    print("  ✓ test_polygon_resolve PASS")
-    test_polygon_with_profile_child()
-    print("  ✓ test_polygon_with_profile_child PASS")
-    test_polygon_with_id()
-    print("  ✓ test_polygon_with_id PASS")
-    test_triangle_parse()
-    print("  ✓ test_triangle_parse PASS")
-    test_triangle_resolve()
-    print("  ✓ test_triangle_resolve PASS")
-    test_triangle_with_profile_child()
-    print("  ✓ test_triangle_with_profile_child PASS")
-    test_triangle_centered_in_region()
-    print("  ✓ test_triangle_centered_in_region PASS")
-    test_polygon_bounds_calculation()
-    print("  ✓ test_polygon_bounds_calculation PASS")
-    print("\nAll tests passed!")

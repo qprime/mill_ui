@@ -6,6 +6,11 @@ from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
 class TestButtJoinery:
+    def test_valid_for_all_interfaces(self):
+        strategy = Butt()
+        for itype in InterfaceType:
+            assert itype in strategy.valid_interfaces
+
     def test_returns_unchanged_panels(self):
         panel_a = PanelSpec("front", 100, 50, 6)
         panel_b = PanelSpec("left_side", 50, 50, 6)
@@ -20,6 +25,21 @@ class TestButtJoinery:
 
 
 class TestFingerJoinery:
+    def test_valid_for_side_to_side(self):
+        assert InterfaceType.SIDE_TO_SIDE in Finger(width_mm=12.0).valid_interfaces
+
+    def test_valid_for_top(self):
+        assert InterfaceType.TOP in Finger(width_mm=12.0).valid_interfaces
+
+    def test_valid_for_bottom(self):
+        assert InterfaceType.BOTTOM in Finger(width_mm=12.0).valid_interfaces
+
+    def test_not_valid_for_internal(self):
+        assert InterfaceType.INTERNAL not in Finger(width_mm=12.0).valid_interfaces
+
+    def test_default_clearance(self):
+        assert Finger(width_mm=12.0).clearance_mm == 0.12
+
     def test_creates_notches_on_both_panels(self):
         panel_a = PanelSpec("front", 100, 50, 6)
         panel_b = PanelSpec("left_side", 50, 50, 6)

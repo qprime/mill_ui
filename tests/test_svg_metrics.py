@@ -10,10 +10,8 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 
-# Ensure project root is in path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pytest
 
 from validation.core import CAMValidationResult
 from validation.metrics.svg_metrics import (
@@ -49,8 +47,7 @@ def test_extract_svg_metrics_simple_profile():
     svg_path = get_recipe_svg_path(1, "simple_profile")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     metrics = extract_svg_metrics_from_file(svg_path)
 
@@ -65,16 +62,13 @@ def test_extract_svg_metrics_simple_profile():
     assert metrics.paths.total_count >= 1, f"Path count: {metrics.paths.total_count}"
     assert metrics.paths.closed_count >= 1, f"Closed count: {metrics.paths.closed_count}"
 
-    print("PASS: test_extract_svg_metrics_simple_profile")
-
 
 def test_extract_svg_metrics_shaker_door():
     """Test metric extraction from shaker door recipe."""
     svg_path = get_recipe_svg_path(3, "shaker_door_template")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     metrics = extract_svg_metrics_from_file(svg_path)
 
@@ -96,8 +90,6 @@ def test_extract_svg_metrics_shaker_door():
     assert metrics.text.count >= 1, f"Text count: {metrics.text.count}"
     assert len(metrics.text.dimension_labels) >= 1, f"Dimensions: {metrics.text.dimension_labels}"
 
-    print("PASS: test_extract_svg_metrics_shaker_door")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: Determinism
@@ -109,8 +101,7 @@ def test_svg_metrics_deterministic():
     svg_path = get_recipe_svg_path(1, "simple_profile")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     # Extract twice
     metrics1 = extract_svg_metrics_from_file(svg_path)
@@ -127,16 +118,13 @@ def test_svg_metrics_deterministic():
     # Compare
     assert dict1 == dict2, "Metrics should be deterministic"
 
-    print("PASS: test_svg_metrics_deterministic")
-
 
 def test_svg_metrics_deterministic_from_string():
     """Verify string input produces same metrics as file."""
     svg_path = get_recipe_svg_path(1, "simple_profile")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     # Read file content
     with open(svg_path) as f:
@@ -154,8 +142,6 @@ def test_svg_metrics_deterministic_from_string():
 
     assert dict1 == dict2, "File and string extraction should match"
 
-    print("PASS: test_svg_metrics_deterministic_from_string")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: JSON Serialization
@@ -167,8 +153,7 @@ def test_svg_metrics_json_serializable():
     svg_path = get_recipe_svg_path(1, "simple_profile")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     metrics = extract_svg_metrics_from_file(svg_path)
     metrics_dict = metrics.to_dict()
@@ -183,16 +168,13 @@ def test_svg_metrics_json_serializable():
     assert "document" in parsed["svg"]
     assert "layers" in parsed["svg"]
 
-    print("PASS: test_svg_metrics_json_serializable")
-
 
 def test_svg_metrics_schema_compliance():
     """Verify output matches expected schema structure."""
     svg_path = get_recipe_svg_path(3, "shaker_door_template")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     metrics = extract_svg_metrics_from_file(svg_path)
     d = metrics.to_dict()
@@ -231,8 +213,6 @@ def test_svg_metrics_schema_compliance():
     assert "closed_count" in paths
     assert "open_count" in paths
 
-    print("PASS: test_svg_metrics_schema_compliance")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: Edge Cases
@@ -256,8 +236,6 @@ def test_svg_metrics_empty_layers():
     assert metrics.layers["EMPTY_LAYER"].element_count == 0
     assert metrics.layers["WITH_CONTENT"].element_count == 1
 
-    print("PASS: test_svg_metrics_empty_layers")
-
 
 def test_svg_metrics_invalid_svg():
     """Test error handling for invalid SVG."""
@@ -269,8 +247,6 @@ def test_svg_metrics_invalid_svg():
     except ValueError as e:
         assert "Invalid SVG" in str(e)
 
-    print("PASS: test_svg_metrics_invalid_svg")
-
 
 def test_svg_metrics_minimal_svg():
     """Test handling of minimal valid SVG."""
@@ -281,8 +257,6 @@ def test_svg_metrics_minimal_svg():
     assert metrics.document.width_mm == 0.0
     assert metrics.document.height_mm == 0.0
     assert metrics.layer_count == 0
-
-    print("PASS: test_svg_metrics_minimal_svg")
 
 
 def test_svg_metrics_with_circles():
@@ -300,8 +274,6 @@ def test_svg_metrics_with_circles():
 
     assert metrics.circles.count == 3
     assert sorted(metrics.circles.radii_mm) == [5.0, 5.0, 10.0]
-
-    print("PASS: test_svg_metrics_with_circles")
 
 
 def test_svg_metrics_bounds_exclude_background():
@@ -326,8 +298,6 @@ def test_svg_metrics_bounds_exclude_background():
     # Rects count should also exclude background
     assert metrics.rects.count == 1, f"Should have 1 rect (excluding bg), got {metrics.rects.count}"
 
-    print("PASS: test_svg_metrics_bounds_exclude_background")
-
 
 def test_svg_metrics_dimension_text():
     """Test dimension label extraction."""
@@ -347,8 +317,6 @@ def test_svg_metrics_dimension_text():
     assert metrics.text.count == 3
     assert "200.0mm" in metrics.text.dimension_labels
     assert "150.0mm" in metrics.text.dimension_labels
-
-    print("PASS: test_svg_metrics_dimension_text")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -434,7 +402,6 @@ def test_svg_metrics_all_recipes():
                 print(f"FAIL: {os.path.basename(svg_path)} in {num:02d}_{name}: {e}")
                 failed += 1
 
-    print(f"PASS: test_svg_metrics_all_recipes ({passed} passed, {skipped} skipped, {failed} failed)")
     assert failed == 0, f"{failed} recipes failed"
 
 
@@ -448,8 +415,7 @@ def test_cam_validation_result_with_svg_metrics():
     svg_path = get_recipe_svg_path(1, "simple_profile")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     metrics = extract_svg_metrics_from_file(svg_path)
 
@@ -467,58 +433,7 @@ def test_cam_validation_result_with_svg_metrics():
     assert "metrics" in parsed["validation_result"]
     assert "svg" in parsed["validation_result"]["metrics"]
 
-    print("PASS: test_cam_validation_result_with_svg_metrics")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
-
-
-def run_tests():
-    """Run all tests."""
-    print("=" * 60)
-    print("SVG Metrics Tests")
-    print("=" * 60)
-
-    tests = [
-        test_extract_svg_metrics_simple_profile,
-        test_extract_svg_metrics_shaker_door,
-        test_svg_metrics_deterministic,
-        test_svg_metrics_deterministic_from_string,
-        test_svg_metrics_json_serializable,
-        test_svg_metrics_schema_compliance,
-        test_svg_metrics_empty_layers,
-        test_svg_metrics_invalid_svg,
-        test_svg_metrics_minimal_svg,
-        test_svg_metrics_with_circles,
-        test_svg_metrics_bounds_exclude_background,
-        test_svg_metrics_dimension_text,
-        test_svg_metrics_all_recipes,
-        test_cam_validation_result_with_svg_metrics,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except AssertionError as e:
-            print(f"FAIL: {test.__name__}: {e}")
-            failed += 1
-        except Exception as e:
-            print(f"ERROR: {test.__name__}: {e}")
-            failed += 1
-
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_tests()
-    sys.exit(0 if success else 1)

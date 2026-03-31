@@ -2,6 +2,8 @@ import re
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from export.blueprint_svg import render_blueprint_svg
 from layout_ast.compositional import CompositionalLayoutAST, Frame, PocketGen, ProfileGen, Rect
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
@@ -11,7 +13,6 @@ GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
 
 def test_svg_output_deterministic():
-    print("Running test_svg_output_deterministic...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=200.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
@@ -35,7 +36,6 @@ def test_svg_output_deterministic():
 
 
 def test_required_layers_exist():
-    print("Running test_required_layers_exist...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=150.0, height_mm=150.0, thickness_mm=19.0, margin_mm=0.0),
@@ -86,7 +86,6 @@ def _create_shaker_ast(
 
 
 def test_shaker_dimensions():
-    print("Running test_shaker_dimensions...")
 
     ast = _create_shaker_ast(
         outer_w=400.0,
@@ -106,7 +105,6 @@ def test_shaker_dimensions():
 
 
 def test_theme_toggle():
-    print("Running test_theme_toggle...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
@@ -142,7 +140,6 @@ def test_theme_toggle():
 
 
 def test_multiple_feature_types():
-    print("Running test_multiple_feature_types...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=19.0, margin_mm=0.0),
@@ -187,7 +184,6 @@ def test_multiple_feature_types():
 
 
 def test_viewbox_dimensions():
-    print("Running test_viewbox_dimensions...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=250.0, height_mm=180.0, thickness_mm=12.0, margin_mm=0.0),
@@ -204,7 +200,6 @@ def test_viewbox_dimensions():
 
 
 def test_rounded_rect_rendering():
-    print("Running test_rounded_rect_rendering...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
@@ -229,7 +224,6 @@ def test_rounded_rect_rendering():
 
 
 def test_golden_file_simple_profile():
-    print("Running test_golden_file_simple_profile...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=12.0, margin_mm=0.0),
@@ -268,7 +262,6 @@ def test_golden_file_simple_profile():
 
 
 def test_golden_file_shaker_door():
-    print("Running test_golden_file_shaker_door...")
 
     ast = _create_shaker_ast(
         outer_w=400.0,
@@ -302,7 +295,6 @@ def test_golden_file_shaker_door():
 
 
 def test_dimension_rendering():
-    print("Running test_dimension_rendering...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=12.0, margin_mm=0.0),
@@ -336,7 +328,6 @@ def test_dimension_rendering():
 
 
 def test_pdf_export():
-    print("Running test_pdf_export...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
@@ -364,10 +355,8 @@ def test_pdf_export():
             assert pdf_path.exists(), "PDF file was not created"
             assert pdf_path.stat().st_size > 0, "PDF file is empty"
 
-        print("  ✓ PASS (PDF export works)")
-
     except ImportError:
-        print("  ⚠ SKIP (cairosvg not installed - PDF export unavailable)")
+        pytest.skip("cairosvg not installed - PDF export unavailable")
 
 
 def _normalize_svg(svg_text: str) -> str:
@@ -378,39 +367,3 @@ def _normalize_svg(svg_text: str) -> str:
 
     normalized = "\n".join(line for line in normalized.split("\n") if line)
     return normalized
-
-
-if __name__ == "__main__":
-    import sys
-
-    tests = [
-        test_svg_output_deterministic,
-        test_required_layers_exist,
-        test_shaker_dimensions,
-        test_theme_toggle,
-        test_multiple_feature_types,
-        test_viewbox_dimensions,
-        test_rounded_rect_rendering,
-        test_golden_file_simple_profile,
-        test_golden_file_shaker_door,
-        test_dimension_rendering,
-        test_pdf_export,
-    ]
-
-    results = []
-    for test in tests:
-        try:
-            test()
-            results.append(True)
-        except Exception as e:
-            print(f"  ✗ FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            results.append(False)
-
-    passed = sum(1 for r in results if r)
-    total = len(results)
-    print(f"\n{passed}/{total} blueprint export tests passed")
-
-    sys.exit(0 if all(results) else 1)

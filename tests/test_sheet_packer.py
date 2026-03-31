@@ -1,11 +1,8 @@
-import sys
-
 from nesting.sheet_packer import pack_sheets
 from nesting.types import PartSpec, SheetSpec
 
 
 def test_single_part_single_sheet():
-    print("Running test_single_part_single_sheet...")
     parts = [PartSpec(name="door", width_mm=400, height_mm=600, quantity=1)]
     sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
 
@@ -18,7 +15,6 @@ def test_single_part_single_sheet():
 
 
 def test_multiple_parts_single_sheet():
-    print("Running test_multiple_parts_single_sheet...")
     parts = [PartSpec(name="panel", width_mm=200, height_mm=200, quantity=4)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10)
 
@@ -31,7 +27,6 @@ def test_multiple_parts_single_sheet():
 
 
 def test_parts_require_multiple_sheets():
-    print("Running test_parts_require_multiple_sheets...")
 
     parts = [PartSpec(name="large", width_mm=400, height_mm=400, quantity=4)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10, kerf_mm=0)
@@ -45,7 +40,6 @@ def test_parts_require_multiple_sheets():
 
 
 def test_mixed_part_sizes():
-    print("Running test_mixed_part_sizes...")
     parts = [
         PartSpec(name="large", width_mm=400, height_mm=400, quantity=2),
         PartSpec(name="small", width_mm=100, height_mm=100, quantity=10),
@@ -60,7 +54,6 @@ def test_mixed_part_sizes():
 
 
 def test_part_too_large():
-    print("Running test_part_too_large...")
     parts = [PartSpec(name="huge", width_mm=2000, height_mm=2000, quantity=1)]
     sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
 
@@ -74,7 +67,6 @@ def test_part_too_large():
 
 
 def test_some_parts_too_large():
-    print("Running test_some_parts_too_large...")
     parts = [
         PartSpec(name="fits", width_mm=200, height_mm=200, quantity=2),
         PartSpec(name="huge", width_mm=2000, height_mm=2000, quantity=1),
@@ -90,7 +82,6 @@ def test_some_parts_too_large():
 
 
 def test_zero_quantity_ignored():
-    print("Running test_zero_quantity_ignored...")
     parts = [
         PartSpec(name="real", width_mm=200, height_mm=200, quantity=1),
         PartSpec(name="placeholder", width_mm=100, height_mm=100, quantity=0),
@@ -104,7 +95,6 @@ def test_zero_quantity_ignored():
 
 
 def test_max_sheets_limit():
-    print("Running test_max_sheets_limit...")
 
     parts = [PartSpec(name="part", width_mm=400, height_mm=400, quantity=10)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10, kerf_mm=0)
@@ -118,7 +108,6 @@ def test_max_sheets_limit():
 
 
 def test_placements_have_correct_coords():
-    print("Running test_placements_have_correct_coords...")
     parts = [PartSpec(name="panel", width_mm=100, height_mm=100, quantity=1)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=20)
 
@@ -133,7 +122,6 @@ def test_placements_have_correct_coords():
 
 
 def test_utilization_calculated():
-    print("Running test_utilization_calculated...")
     parts = [PartSpec(name="half", width_mm=480, height_mm=480, quantity=1)]
     sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10)
 
@@ -146,7 +134,6 @@ def test_utilization_calculated():
 
 
 def test_rotation_improves_packing():
-    print("Running test_rotation_improves_packing...")
 
     parts = [PartSpec(name="long", width_mm=800, height_mm=200, quantity=2, allow_rotation=True)]
     sheet = SheetSpec(width_mm=1020, height_mm=520, thickness_mm=19, margin_mm=10, kerf_mm=6)
@@ -159,7 +146,6 @@ def test_rotation_improves_packing():
 
 
 def test_recipe16_scenario():
-    print("Running test_recipe16_scenario...")
     parts = [
         PartSpec(name="door", width_mm=457, height_mm=597, quantity=4),
         PartSpec(name="drawer", width_mm=254, height_mm=152, quantity=7),
@@ -197,7 +183,6 @@ def test_recipe16_scenario():
 
 
 def test_user_example_scenario():
-    print("Running test_user_example_scenario...")
     parts = [
         PartSpec(name="large_door", width_mm=457, height_mm=597, quantity=20),
         PartSpec(name="small_door", width_mm=305, height_mm=203, quantity=15),
@@ -229,7 +214,6 @@ def test_user_example_scenario():
 
 
 def test_sheet_index_increments():
-    print("Running test_sheet_index_increments...")
     parts = [PartSpec(name="part", width_mm=900, height_mm=900, quantity=3)]
     sheet = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10, kerf_mm=0)
 
@@ -244,7 +228,6 @@ def test_sheet_index_increments():
 
 
 def test_instance_ids_preserved():
-    print("Running test_instance_ids_preserved...")
     parts = [PartSpec(name="item", width_mm=100, height_mm=100, quantity=3)]
     sheet = SheetSpec(width_mm=500, height_mm=500, thickness_mm=19, margin_mm=10, kerf_mm=0)
 
@@ -257,53 +240,3 @@ def test_instance_ids_preserved():
 
     assert sorted(instance_ids) == [0, 1, 2]
     print("  PASSED")
-
-
-def run_all_tests():
-    print("=" * 60)
-    print("Phase 3: Multi-Sheet Packer Tests")
-    print("=" * 60)
-
-    tests = [
-        test_single_part_single_sheet,
-        test_multiple_parts_single_sheet,
-        test_parts_require_multiple_sheets,
-        test_mixed_part_sizes,
-        test_part_too_large,
-        test_some_parts_too_large,
-        test_zero_quantity_ignored,
-        test_max_sheets_limit,
-        test_placements_have_correct_coords,
-        test_utilization_calculated,
-        test_rotation_improves_packing,
-        test_recipe16_scenario,
-        test_user_example_scenario,
-        test_sheet_index_increments,
-        test_instance_ids_preserved,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print()
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

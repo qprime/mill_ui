@@ -8,6 +8,8 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from adapters.ast_to_removal import ast_to_removal_intents
 from cam.pipeline import run_pipeline
 from pml import parse_pml
@@ -173,30 +175,20 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
 
 
 def test_recipe_outputs():
-    print("Running test_recipe_outputs...")
     pml_files = discover_recipe_pml_files()
 
     if not pml_files:
-        print("  SKIP: No recipe PML files found")
-        return True
+        pytest.skip("No recipe PML files found")
 
-    all_passed = True
+    failures = []
     for pml_path in pml_files:
         try:
             _test_recipe_output_impl(pml_path, regenerate=False)
-            print(f"  {pml_path.name}: OK")
-        except AssertionError as e:
-            print(f"  {pml_path.name}: FAIL - {e}")
-            all_passed = False
-        except Exception as e:
-            print(f"  {pml_path.name}: ERROR - {e}")
-            all_passed = False
+        except (AssertionError, Exception) as e:
+            failures.append(f"{pml_path.name}: {e}")
 
-    if all_passed:
-        print("  PASS")
-        return True
-    else:
-        return False
+    if failures:
+        raise AssertionError("Recipe output mismatches:\n  " + "\n  ".join(failures))
 
 
 if __name__ == "__main__":

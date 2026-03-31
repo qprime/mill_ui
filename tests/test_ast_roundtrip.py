@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 from layout_ast.layout import LayoutAST
 
 
 def test_roundtrip_minimal_shape_layout():
-    print("Running test_roundtrip_minimal_shape_layout...")
     layout_data: dict[str, Any] = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [
@@ -48,12 +48,8 @@ def test_roundtrip_minimal_shape_layout():
     finally:
         Path(temp_path).unlink()
 
-    print("  PASS")
-    return True
-
 
 def test_roundtrip_cnc_clamp_v1_layout():
-    print("Running test_roundtrip_cnc_clamp_v1_layout...")
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent
         / "memories"
@@ -65,8 +61,7 @@ def test_roundtrip_cnc_clamp_v1_layout():
     )
 
     if not layout_path.exists():
-        print("  SKIP: Test layout not found")
-        return True
+        pytest.skip("Test layout not found")
 
     ast = LayoutAST.from_json(str(layout_path))
     json_str = ast.to_json()
@@ -94,12 +89,8 @@ def test_roundtrip_cnc_clamp_v1_layout():
     finally:
         Path(temp_path).unlink()
 
-    print("  PASS")
-    return True
-
 
 def test_roundtrip_mandelbrot_demo_layout():
-    print("Running test_roundtrip_mandelbrot_demo_layout...")
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent
         / "memories"
@@ -111,8 +102,7 @@ def test_roundtrip_mandelbrot_demo_layout():
     )
 
     if not layout_path.exists():
-        print("  SKIP: Test layout not found")
-        return True
+        pytest.skip("Test layout not found")
 
     ast = LayoutAST.from_json(str(layout_path))
     json_str = ast.to_json()
@@ -125,12 +115,8 @@ def test_roundtrip_mandelbrot_demo_layout():
     assert emitted_data["items"][0]["kind"] == "template"
     assert emitted_data["items"][0]["type"] == "MandelbrotOutlineFill"
 
-    print("  PASS")
-    return True
-
 
 def test_roundtrip_cnc_clamp_part_a_layout():
-    print("Running test_roundtrip_cnc_clamp_part_a_layout...")
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent
         / "memories"
@@ -142,8 +128,7 @@ def test_roundtrip_cnc_clamp_part_a_layout():
     )
 
     if not layout_path.exists():
-        print("  SKIP: Test layout not found")
-        return True
+        pytest.skip("Test layout not found")
 
     ast = LayoutAST.from_json(str(layout_path))
     json_str = ast.to_json()
@@ -153,12 +138,8 @@ def test_roundtrip_cnc_clamp_part_a_layout():
     assert emitted_data["layout"]["rows"] == 2
     assert len(emitted_data["items"]) == 1
 
-    print("  PASS")
-    return True
-
 
 def test_deterministic_emission():
-    print("Running test_deterministic_emission...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [
@@ -194,12 +175,8 @@ def test_deterministic_emission():
     finally:
         Path(temp_path).unlink()
 
-    print("  PASS")
-    return True
-
 
 def test_roundtrip_with_config():
-    print("Running test_roundtrip_with_config...")
     layout_data = {
         "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
         "items": [],
@@ -220,12 +197,8 @@ def test_roundtrip_with_config():
     finally:
         Path(temp_path).unlink()
 
-    print("  PASS")
-    return True
-
 
 def test_roundtrip_multiple_items():
-    print("Running test_roundtrip_multiple_items...")
     layout_data = {
         "sheet": {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 18.0},
         "items": [
@@ -263,35 +236,3 @@ def test_roundtrip_multiple_items():
         assert emitted_data["items"][1]["feature"]["depth_mm"] == 10.0
     finally:
         Path(temp_path).unlink()
-
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_roundtrip_minimal_shape_layout,
-        test_roundtrip_cnc_clamp_v1_layout,
-        test_roundtrip_mandelbrot_demo_layout,
-        test_roundtrip_cnc_clamp_part_a_layout,
-        test_deterministic_emission,
-        test_roundtrip_with_config,
-        test_roundtrip_multiple_items,
-    ]
-
-    results = []
-    for test in tests:
-        try:
-            results.append(test())
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            results.append(False)
-
-    passed = sum(1 for r in results if r)
-    total = len(results)
-    print(f"\n{passed}/{total} AST roundtrip tests passed")
-
-    sys.exit(0 if all(results) else 1)

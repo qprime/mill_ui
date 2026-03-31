@@ -7,12 +7,10 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import tempfile
 from typing import Any
 
-# Ensure project root is in path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pytest
 
 from validation.core import Verdict
 from validation.regression.comparator import (
@@ -101,7 +99,6 @@ def test_flatten_dict_simple():
     d = {"a": {"b": {"c": 1}}}
     flat = _flatten_dict(d)
     assert flat["a.b.c"] == 1
-    print("PASS: test_flatten_dict_simple")
 
 
 def test_flatten_dict_with_list():
@@ -110,7 +107,6 @@ def test_flatten_dict_with_list():
     flat = _flatten_dict(d)
     assert flat["items"] == [1, 2, 3]
     assert flat["nested.values"] == [4, 5]
-    print("PASS: test_flatten_dict_with_list")
 
 
 def test_compare_numeric_within_tolerance():
@@ -121,7 +117,6 @@ def test_compare_numeric_within_tolerance():
     assert result.delta == 0.05
     assert result.delta_percent is not None
     assert result.delta_percent < 0.1
-    print("PASS: test_compare_numeric_within_tolerance")
 
 
 def test_compare_numeric_exceeds_tolerance():
@@ -133,7 +128,6 @@ def test_compare_numeric_exceeds_tolerance():
     assert result.status == Verdict.WARN, f"Expected WARN, got {result.status} ({result.delta_percent}%)"
     assert result.delta_percent > 0.1
     assert result.delta_percent < 0.2
-    print("PASS: test_compare_numeric_exceeds_tolerance")
 
 
 def test_compare_numeric_fail_on_large_delta():
@@ -142,14 +136,12 @@ def test_compare_numeric_fail_on_large_delta():
     # 5% delta >> 0.01% tolerance = FAIL
     result = _compare_numeric("test.value", 105.0, 100.0, config)
     assert result.status == Verdict.FAIL
-    print("PASS: test_compare_numeric_fail_on_large_delta")
 
 
 def test_compare_exact_match():
     """Exact comparison passes on equal values."""
     result = _compare_exact("test.count", 42, 42)
     assert result.status == Verdict.PASS
-    print("PASS: test_compare_exact_match")
 
 
 def test_compare_exact_mismatch():
@@ -157,14 +149,12 @@ def test_compare_exact_mismatch():
     result = _compare_exact("test.count", 42, 43)
     assert result.status == Verdict.FAIL
     assert "expected 43" in result.message
-    print("PASS: test_compare_exact_mismatch")
 
 
 def test_compare_structural_match():
     """Structural comparison passes on same set (order-independent)."""
     result = _compare_structural("test.names", ["b", "a", "c"], ["a", "b", "c"])
     assert result.status == Verdict.PASS
-    print("PASS: test_compare_structural_match")
 
 
 def test_compare_structural_mismatch():
@@ -172,7 +162,6 @@ def test_compare_structural_mismatch():
     result = _compare_structural("test.names", ["a", "b"], ["a", "b", "c"])
     assert result.status == Verdict.FAIL
     assert "removed" in result.message
-    print("PASS: test_compare_structural_mismatch")
 
 
 def test_get_tolerance_default():
@@ -180,7 +169,6 @@ def test_get_tolerance_default():
     config = ComparisonConfig(default_tolerance_percent=0.5)
     tol = _get_tolerance("unknown.metric.path", config)
     assert tol == 0.5
-    print("PASS: test_get_tolerance_default")
 
 
 def test_get_tolerance_category():
@@ -189,7 +177,6 @@ def test_get_tolerance_category():
     # Distance paths use position tolerance (0.01%)
     tol = _get_tolerance("gcode.motion.total_rapid_distance_mm", config)
     assert tol == 0.1
-    print("PASS: test_get_tolerance_category")
 
 
 def test_get_tolerance_override():
@@ -200,7 +187,6 @@ def test_get_tolerance_override():
     )
     tol = _get_tolerance("gcode.motion.total_rapid_distance_mm", config)
     assert tol == 1.0
-    print("PASS: test_get_tolerance_override")
 
 
 def test_compare_numeric_near_zero_uses_absolute():
@@ -214,7 +200,6 @@ def test_compare_numeric_near_zero_uses_absolute():
     assert result.status == Verdict.PASS, f"Expected PASS, got {result.status}"
     assert result.delta_percent is None  # Not meaningful for near-zero
     assert "absolute" in result.message.lower()
-    print("PASS: test_compare_numeric_near_zero_uses_absolute")
 
 
 def test_compare_numeric_near_zero_fail():
@@ -227,7 +212,6 @@ def test_compare_numeric_near_zero_fail():
     # Golden is 0, current is 0.005 >> 0.001 absolute tolerance
     result = _compare_numeric("test.x_min", 0.005, 0.0, config)
     assert result.status == Verdict.FAIL, f"Expected FAIL, got {result.status}"
-    print("PASS: test_compare_numeric_near_zero_fail")
 
 
 # ============================================================================
@@ -242,7 +226,6 @@ def test_compare_metrics_golden_file_set():
     summary = compare_metrics(current, golden, golden_file="/path/to/golden.json")
 
     assert summary.golden_file == "/path/to/golden.json"
-    print("PASS: test_compare_metrics_golden_file_set")
 
 
 def test_compare_metrics_excludes_golden_metadata():
@@ -257,7 +240,6 @@ def test_compare_metrics_excludes_golden_metadata():
     assert len(golden_results) == 0, f"Unexpected golden.* results: {golden_results}"
     # Should pass overall (a matches)
     assert summary.verdict() == Verdict.PASS
-    print("PASS: test_compare_metrics_excludes_golden_metadata")
 
 
 def test_compare_metrics_identical():
@@ -270,7 +252,6 @@ def test_compare_metrics_identical():
     # All should pass (identical)
     failed = [r for r in summary.results if r.status == Verdict.FAIL]
     assert len(failed) == 0, f"Unexpected failures: {[r.metric_path for r in failed]}"
-    print(f"PASS: test_compare_metrics_identical ({summary.total} metrics compared)")
 
 
 def test_compare_metrics_new_metric():
@@ -282,7 +263,6 @@ def test_compare_metrics_new_metric():
     new_results = [r for r in summary.results if "New metric" in r.message]
     assert len(new_results) == 1
     assert new_results[0].status == Verdict.PASS
-    print("PASS: test_compare_metrics_new_metric")
 
 
 def test_compare_metrics_missing_metric():
@@ -294,7 +274,6 @@ def test_compare_metrics_missing_metric():
     missing_results = [r for r in summary.results if "Missing metric" in r.message]
     assert len(missing_results) == 1
     assert missing_results[0].status == Verdict.WARN
-    print("PASS: test_compare_metrics_missing_metric")
 
 
 def test_compare_metrics_excludes_extraction_time():
@@ -306,7 +285,6 @@ def test_compare_metrics_excludes_extraction_time():
     # extraction_time_ms should not appear in results
     time_results = [r for r in summary.results if "extraction_time" in r.metric_path]
     assert len(time_results) == 0
-    print("PASS: test_compare_metrics_excludes_extraction_time")
 
 
 def test_compare_metrics_count_exact_match():
@@ -318,7 +296,6 @@ def test_compare_metrics_count_exact_match():
     count_results = [r for r in summary.results if "total_count" in r.metric_path]
     assert len(count_results) == 1
     assert count_results[0].status == Verdict.FAIL
-    print("PASS: test_compare_metrics_count_exact_match")
 
 
 def test_compare_metrics_boolean_exact_match():
@@ -330,7 +307,6 @@ def test_compare_metrics_boolean_exact_match():
     bool_results = [r for r in summary.results if "has_closed" in r.metric_path]
     assert len(bool_results) == 1
     assert bool_results[0].status == Verdict.FAIL
-    print("PASS: test_compare_metrics_boolean_exact_match")
 
 
 def test_compare_metrics_structural_layers():
@@ -342,7 +318,6 @@ def test_compare_metrics_structural_layers():
     names_results = [r for r in summary.results if "names" in r.metric_path]
     # Should pass - same set
     assert all(r.status == Verdict.PASS for r in names_results)
-    print("PASS: test_compare_metrics_structural_layers")
 
 
 def test_compare_metrics_numeric_tolerance():
@@ -355,7 +330,6 @@ def test_compare_metrics_numeric_tolerance():
     assert len(dist_results) == 1
     # 0.005% < 0.1% tolerance = PASS
     assert dist_results[0].status == Verdict.PASS
-    print("PASS: test_compare_metrics_numeric_tolerance")
 
 
 # ============================================================================
@@ -373,7 +347,6 @@ def test_golden_store_initialize():
         store.initialize()
         assert store.exists()
         assert store.index_path.exists()
-        print("PASS: test_golden_store_initialize")
 
 
 def test_golden_store_save_load_metrics():
@@ -388,7 +361,6 @@ def test_golden_store_save_load_metrics():
         loaded = store.load_metrics("test_entry")
         assert loaded is not None
         assert loaded["test"]["value"] == 42
-        print("PASS: test_golden_store_save_load_metrics")
 
 
 def test_golden_store_list_entries():
@@ -403,7 +375,6 @@ def test_golden_store_list_entries():
         entries = store.list_entries()
         assert "entry1" in entries
         assert "entry2" in entries
-        print("PASS: test_golden_store_list_entries")
 
 
 def test_golden_store_has_entry():
@@ -415,7 +386,6 @@ def test_golden_store_has_entry():
         assert not store.has_entry("missing")
         store.save_metrics("exists", {"a": 1})
         assert store.has_entry("exists")
-        print("PASS: test_golden_store_has_entry")
 
 
 def test_golden_store_delete_entry():
@@ -429,7 +399,6 @@ def test_golden_store_delete_entry():
 
         store.delete_entry("to_delete")
         assert not store.has_entry("to_delete")
-        print("PASS: test_golden_store_delete_entry")
 
 
 def test_golden_index_serialization():
@@ -446,7 +415,6 @@ def test_golden_index_serialization():
 
     assert loaded.entries["test"].recipe_name == "test"
     assert loaded.entries["test"].notes == "Test entry"
-    print("PASS: test_golden_index_serialization")
 
 
 def test_create_golden_from_recipe():
@@ -462,7 +430,6 @@ def test_create_golden_from_recipe():
         assert loaded is not None
         assert "golden" in loaded
         assert loaded["golden"]["recipe_name"] == "test_recipe"
-        print("PASS: test_create_golden_from_recipe")
 
 
 # ============================================================================
@@ -477,8 +444,7 @@ def test_recipe_metrics_self_comparison():
     nc_path = os.path.join(recipe_01_dir, "profile-3.17mm.nc")
 
     if not os.path.exists(svg_path):
-        print("SKIP: test_recipe_metrics_self_comparison (recipe outputs not found)")
-        return
+        pytest.skip("test_recipe_metrics_self_comparison (recipe outputs not found)")
 
     from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
     from validation.metrics.svg_metrics import extract_svg_metrics_from_file
@@ -497,8 +463,6 @@ def test_recipe_metrics_self_comparison():
 
     failed = [r for r in summary.results if r.status == Verdict.FAIL]
     assert len(failed) == 0, f"Self-comparison failures: {[r.metric_path for r in failed]}"
-
-    print(f"PASS: test_recipe_metrics_self_comparison ({summary.total} metrics)")
 
 
 def test_all_recipes_against_golden():
@@ -576,7 +540,6 @@ def test_all_recipes_against_golden():
                     print(f"    - {issue}")
 
     assert failed == 0, f"{failed} recipes failed golden regression"
-    print(f"PASS: test_all_recipes_against_golden ({passed} recipes)")
 
 
 def test_recipe_metrics_with_perturbation():
@@ -585,8 +548,7 @@ def test_recipe_metrics_with_perturbation():
     svg_path = os.path.join(recipe_01_dir, "01_simple_profile.svg")
 
     if not os.path.exists(svg_path):
-        print("SKIP: test_recipe_metrics_with_perturbation (recipe outputs not found)")
-        return
+        pytest.skip("test_recipe_metrics_with_perturbation (recipe outputs not found)")
 
     from validation.metrics.svg_metrics import extract_svg_metrics_from_file
 
@@ -611,90 +573,3 @@ def test_recipe_metrics_with_perturbation():
     width_results = [r for r in summary.results if "width_mm" in r.metric_path]
     assert len(width_results) >= 1
     # 0.1% change exceeds 0.01% position tolerance
-
-    print("PASS: test_recipe_metrics_with_perturbation")
-
-
-# ============================================================================
-# Test runner
-# ============================================================================
-
-
-def run_tests() -> bool:
-    """Run all tests and report results."""
-    tests = [
-        # Comparator unit tests
-        test_flatten_dict_simple,
-        test_flatten_dict_with_list,
-        test_compare_numeric_within_tolerance,
-        test_compare_numeric_exceeds_tolerance,
-        test_compare_numeric_fail_on_large_delta,
-        test_compare_exact_match,
-        test_compare_exact_mismatch,
-        test_compare_structural_match,
-        test_compare_structural_mismatch,
-        test_get_tolerance_default,
-        test_get_tolerance_category,
-        test_get_tolerance_override,
-        test_compare_numeric_near_zero_uses_absolute,
-        test_compare_numeric_near_zero_fail,
-        # Compare metrics integration
-        test_compare_metrics_golden_file_set,
-        test_compare_metrics_excludes_golden_metadata,
-        test_compare_metrics_identical,
-        test_compare_metrics_new_metric,
-        test_compare_metrics_missing_metric,
-        test_compare_metrics_excludes_extraction_time,
-        test_compare_metrics_count_exact_match,
-        test_compare_metrics_boolean_exact_match,
-        test_compare_metrics_structural_layers,
-        test_compare_metrics_numeric_tolerance,
-        # Golden store tests
-        test_golden_store_initialize,
-        test_golden_store_save_load_metrics,
-        test_golden_store_list_entries,
-        test_golden_store_has_entry,
-        test_golden_store_delete_entry,
-        test_golden_index_serialization,
-        test_create_golden_from_recipe,
-        # Recipe integration tests
-        test_all_recipes_against_golden,
-        test_recipe_metrics_self_comparison,
-        test_recipe_metrics_with_perturbation,
-    ]
-
-    print("=" * 60)
-    print("Regression Comparator Tests")
-    print("=" * 60)
-
-    passed = 0
-    failed = 0
-    skipped = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except AssertionError as e:
-            print(f"FAIL: {test.__name__}")
-            print(f"  {e}")
-            failed += 1
-        except Exception as e:
-            # Check if it was a skip
-            if "SKIP" in str(e):
-                skipped += 1
-            else:
-                print(f"ERROR: {test.__name__}")
-                print(f"  {type(e).__name__}: {e}")
-                failed += 1
-
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed, {skipped} skipped")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_tests()
-    sys.exit(0 if success else 1)

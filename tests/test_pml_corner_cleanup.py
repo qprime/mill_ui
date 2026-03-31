@@ -7,7 +7,6 @@ from resolution.layout_resolver import resolve_layout
 
 
 def test_pml_parse_corner_cleanup():
-    print("Running test_pml_parse_corner_cleanup...")
 
     pml_text = """
 Sheet:
@@ -38,12 +37,8 @@ children:
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_format_corner_cleanup():
-    print("Running test_pml_format_corner_cleanup...")
 
     LayoutAST(
         sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
@@ -82,12 +77,8 @@ children:
     assert "pocket" in pml_output.lower() or "Pocket" in pml_output
     assert "3.17" in pml_output or "3.18" in pml_output
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_roundtrip_corner_cleanup():
-    print("Running test_pml_roundtrip_corner_cleanup...")
 
     pml_input = """
 Sheet:
@@ -125,12 +116,8 @@ children:
     )
     assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_pocket_without_corner_cleanup():
-    print("Running test_pml_pocket_without_corner_cleanup...")
 
     pml_text = """
 Sheet:
@@ -156,12 +143,8 @@ children:
     assert item.feature.depth_mm == 6.0
     assert item.feature.corner_cleanup_tool_diameter_mm is None
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_corner_cleanup_error_invalid_token():
-    print("Running test_pml_corner_cleanup_error_invalid_token...")
 
     pml_text = """
 Sheet:
@@ -184,12 +167,8 @@ children:
     assert flat.items[0].feature is not None
     assert flat.items[0].feature.corner_cleanup_tool_diameter_mm is None
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_pml_corner_cleanup_through_depth():
-    print("Running test_pml_corner_cleanup_through_depth...")
 
     pml_text = """
 Sheet:
@@ -215,38 +194,3 @@ children:
     assert item.feature.type == "pocket"
     assert item.feature.is_through
     assert item.feature.corner_cleanup_tool_diameter_mm == 3.175
-
-    print("  ✓ PASS")
-    return True
-
-
-if __name__ == "__main__":
-    import sys
-
-    tests = [
-        test_pml_parse_corner_cleanup,
-        test_pml_format_corner_cleanup,
-        test_pml_roundtrip_corner_cleanup,
-        test_pml_pocket_without_corner_cleanup,
-        test_pml_corner_cleanup_error_invalid_token,
-        test_pml_corner_cleanup_through_depth,
-    ]
-
-    print("Running PML corner cleanup syntax tests...")
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  ✗ FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print(f"\n{passed}/{len(tests)} corner cleanup tests passed")
-    sys.exit(0 if failed == 0 else 1)

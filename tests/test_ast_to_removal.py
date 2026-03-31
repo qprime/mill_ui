@@ -1,12 +1,9 @@
-import sys
-
 from adapters.ast_to_removal import ast_to_removal_intents
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 
 def test_warning_collection_on_invalid_item():
     """Test that warnings are collected when items fail to convert."""
-    print("Running test_warning_collection_on_invalid_item...")
 
     # Create AST with one valid item and one invalid item (missing geometry)
     ast = LayoutAST(
@@ -45,12 +42,10 @@ def test_warning_collection_on_invalid_item():
     assert "invalid_rect" in warnings[0]
 
     print("  ✓ PASS")
-    return True
 
 
 def test_no_warnings_when_all_valid():
     """Test that no warnings are collected when all items are valid."""
-    print("Running test_no_warnings_when_all_valid...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -81,12 +76,10 @@ def test_no_warnings_when_all_valid():
     assert len(warnings) == 0, f"Expected 0 warnings, got {len(warnings)}"
 
     print("  ✓ PASS")
-    return True
 
 
 def test_warnings_none_by_default():
     """Test that function works without warnings parameter (backward compat)."""
-    print("Running test_warnings_none_by_default...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -107,12 +100,10 @@ def test_warnings_none_by_default():
     assert len(intents) == 1
 
     print("  ✓ PASS")
-    return True
 
 
 def test_skips_non_shape_items():
     """Test that non-shape items are skipped without warnings."""
-    print("Running test_skips_non_shape_items...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -142,12 +133,10 @@ def test_skips_non_shape_items():
     assert len(warnings) == 0
 
     print("  ✓ PASS")
-    return True
 
 
 def test_unknown_feature_type_warning():
     """Test that unknown feature type generates a warning."""
-    print("Running test_unknown_feature_type_warning...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -172,12 +161,10 @@ def test_unknown_feature_type_warning():
     assert "Unknown feature type" in warnings[0]
 
     print("  ✓ PASS")
-    return True
 
 
 def test_multiple_warnings():
     """Test that multiple invalid items each generate warnings."""
-    print("Running test_multiple_warnings...")
 
     ast = LayoutAST(
         sheet=Sheet(width_mm=450, height_mm=650, thickness_mm=19, margin_mm=0.0),
@@ -212,32 +199,3 @@ def test_multiple_warnings():
     assert "bad2" in warnings[1]
 
     print("  ✓ PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_warning_collection_on_invalid_item,
-        test_no_warnings_when_all_valid,
-        test_warnings_none_by_default,
-        test_skips_non_shape_items,
-        test_unknown_feature_type_warning,
-        test_multiple_warnings,
-    ]
-
-    results = []
-    for test in tests:
-        try:
-            results.append(test())
-        except Exception as e:
-            print(f"  ✗ FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            results.append(False)
-
-    passed = sum(results)
-    total = len(results)
-    print(f"\n{passed}/{total} tests passed")
-
-    sys.exit(0 if all(results) else 1)

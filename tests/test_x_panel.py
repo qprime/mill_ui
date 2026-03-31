@@ -1,8 +1,3 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from domains import Domain
 from generators import XPanelParams
 from generators.area.x_panel import x_panel_generator
@@ -27,7 +22,6 @@ children:
 """
     ast = parse_pml_yaml(pml)
     assert ast is not None
-    print("  ✓ test_x_panel_parse PASS")
 
 
 def test_x_panel_resolve():
@@ -56,8 +50,6 @@ children:
         assert item.feature.type == "pocket"
         assert item.feature.depth_mm == 5.0
 
-    print("  ✓ test_x_panel_resolve PASS")
-
 
 def test_x_panel_generator_directly():
     domain = Domain.from_rectangle(200, 300, center=(100, 150))
@@ -74,8 +66,6 @@ def test_x_panel_generator_directly():
         assert item.geometry is not None
         assert "points" in item.geometry.data
         assert len(item.geometry.data["points"]) == 3
-
-    print("  ✓ test_x_panel_generator_directly PASS")
 
 
 def test_x_panel_uniform_bar_width():
@@ -102,8 +92,6 @@ def test_x_panel_uniform_bar_width():
     expected_gap = params.bar_width_mm
     actual_gap = top_apex_y - bottom_apex_y
     assert abs(actual_gap - expected_gap) < 0.01, f"Expected gap {expected_gap}, got {actual_gap}"
-
-    print("  ✓ test_x_panel_uniform_bar_width PASS")
 
 
 def test_x_panel_with_frame():
@@ -146,8 +134,6 @@ children:
             assert 50 <= x <= 350, f"x={x} outside frame bounds"
             assert 50 <= y <= 550, f"y={y} outside frame bounds"
 
-    print("  ✓ test_x_panel_with_frame PASS")
-
 
 def test_x_panel_too_small_domain():
     domain = Domain.from_rectangle(50, 50, center=(25, 25))
@@ -155,8 +141,6 @@ def test_x_panel_too_small_domain():
 
     items = x_panel_generator(domain, params, allow_empty=True)
     assert items == []
-
-    print("  ✓ test_x_panel_too_small_domain PASS")
 
 
 def test_x_panel_params_validation():
@@ -171,16 +155,3 @@ def test_x_panel_params_validation():
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "depth_mm must be positive" in str(e)
-
-    print("  ✓ test_x_panel_params_validation PASS")
-
-
-if __name__ == "__main__":
-    test_x_panel_parse()
-    test_x_panel_resolve()
-    test_x_panel_generator_directly()
-    test_x_panel_uniform_bar_width()
-    test_x_panel_with_frame()
-    test_x_panel_too_small_domain()
-    test_x_panel_params_validation()
-    print("\nAll tests passed!")

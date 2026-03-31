@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from nesting.template_expander import (
@@ -11,16 +9,13 @@ from nesting.types import NestedPart, PartSpec
 
 
 def test_get_part_bounds_simple():
-    print("Running test_get_part_bounds_simple...")
     part = PartSpec(name="panel", width_mm=400, height_mm=600)
     w, h = get_part_bounds(part)
     assert w == 400
     assert h == 600
-    print("  PASSED")
 
 
 def test_expand_simple_rect():
-    print("Running test_expand_simple_rect...")
     part = PartSpec(name="panel", width_mm=200, height_mm=300)
     items = expand_part_to_items(
         part_spec=part,
@@ -40,11 +35,9 @@ def test_expand_simple_rect():
     assert item.feature is not None
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
-    print("  PASSED")
 
 
 def test_expand_simple_rect_rotated():
-    print("Running test_expand_simple_rect_rotated...")
     part = PartSpec(name="panel", width_mm=200, height_mm=300)
     items = expand_part_to_items(
         part_spec=part,
@@ -59,11 +52,9 @@ def test_expand_simple_rect_rotated():
     assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 300
     assert item.geometry.data["h_mm"] == 200
-    print("  PASSED")
 
 
 def test_expand_shaker_template():
-    print("Running test_expand_shaker_template...")
     part = PartSpec(
         name="door",
         width_mm=400,
@@ -107,11 +98,8 @@ def test_expand_shaker_template():
     assert pocket.feature is not None
     assert pocket.feature.type == "pocket"
 
-    print("  PASSED")
-
 
 def test_placement_to_items():
-    print("Running test_placement_to_items...")
     part = PartSpec(name="panel", width_mm=200, height_mm=300)
     placement = NestedPart(
         part_spec=part,
@@ -132,11 +120,8 @@ def test_placement_to_items():
     assert "panel" in item.shape_id
     assert "2" in item.shape_id
 
-    print("  PASSED")
-
 
 def test_shape_id_prefix():
-    print("Running test_shape_id_prefix...")
     part = PartSpec(name="door", width_mm=400, height_mm=600)
     items = expand_part_to_items(
         part_spec=part,
@@ -150,11 +135,8 @@ def test_shape_id_prefix():
     assert items[0].shape_id is not None
     assert items[0].shape_id.startswith("sheet1_door3_")
 
-    print("  PASSED")
-
 
 def test_unknown_template_raises():
-    print("Running test_unknown_template_raises...")
     part = PartSpec(
         name="custom",
         width_mm=300,
@@ -170,8 +152,6 @@ def test_unknown_template_raises():
             sheet_thickness_mm=19,
         )
     assert "Template not found" in str(exc_info.value)
-
-    print("  PASSED")
 
 
 def test_expand_rounded_rect():
@@ -442,58 +422,3 @@ def test_holding_none_produces_bare_through():
     assert feature.is_through is True
     assert feature.onion_skin_mm is None
     assert feature.tab_count is None
-
-
-def run_all_tests():
-    print("=" * 60)
-    print("Template Expander Tests")
-    print("=" * 60)
-
-    tests = [
-        test_get_part_bounds_simple,
-        test_expand_simple_rect,
-        test_expand_simple_rect_rotated,
-        test_expand_shaker_template,
-        test_placement_to_items,
-        test_shape_id_prefix,
-        test_unknown_template_raises,
-        test_expand_rounded_rect,
-        test_expand_rounded_rect_selective_corners,
-        test_expand_rounded_rect_rotated,
-        test_expand_circle,
-        test_expand_no_shape,
-        test_expand_polygon,
-        test_expand_polygon_rotated,
-        test_expand_triangle,
-        test_triangle_normalizes_to_polygon,
-        test_expand_shape_id_suffix,
-        test_holding_onion_skin_on_feature,
-        test_holding_tabs_on_feature,
-        test_holding_none_produces_bare_through,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print()
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

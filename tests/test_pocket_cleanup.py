@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
@@ -17,36 +15,17 @@ def _create_test_setup():
     return Setup(stock=stock, tool=tool, machine=machine, safe_z=5.0)
 
 
-def _count_comments_with_text(moves: list[Move], text: str) -> int:
-    count = 0
-    for move in moves:
-        if isinstance(move, CommentMove) and text in move.text:
-            count += 1
-    return count
+def _comments_containing(moves: list[Move], text: str) -> list[CommentMove]:
+    return [m for m in moves if isinstance(m, CommentMove) and text in m.text]
 
 
-def _has_finish_profile_pass(moves: list[Move]) -> bool:
-    return _count_comments_with_text(moves, "finish profile pass") > 0
-
-
-def _has_rough_pocket_comment(moves: list[Move]) -> bool:
-    return _count_comments_with_text(moves, "rough pocket") > 0
-
-
-def _has_no_finish_comment(moves: list[Move]) -> bool:
-    return _count_comments_with_text(moves, "no finish") > 0
-
-
-@patch("cam.path.strategies.pocket_raster")
-@patch("cam.path.strategies.profile_outline")
-def test_pocket_cleanup_enabled_by_default(mock_profile, mock_raster):
-
-    mock_raster.return_value = [CommentMove(text="raster_moves")]
-    mock_profile.return_value = [CommentMove(text="profile_moves")]
-
+def _shape_at_center():
     shape = rectangle(100, 100)
-    shape = place(shape, Transform2D(tx=50, ty=50))
+    return place(shape, Transform2D(tx=50, ty=50))
 
+
+def test_pocket_cleanup_enabled_by_default():
+    shape = _shape_at_center()
     setup = _create_test_setup()
 
     moves = pocket_then_finish_profile(
@@ -57,24 +36,16 @@ def test_pocket_cleanup_enabled_by_default(mock_profile, mock_raster):
         pocket_strategy="raster",
     )
 
-    assert _has_rough_pocket_comment(moves), "Should have rough pocket comment"
-    assert _has_finish_profile_pass(moves), "Should have finish profile pass"
-    assert not _has_no_finish_comment(moves), "Should not have 'no finish' comment"
+    assert len(moves) > 0
+    assert len(_comments_containing(moves, "rough pocket")) > 0
+    assert len(_comments_containing(moves, "finish profile pass")) > 0
+    assert len(_comments_containing(moves, "no finish")) == 0
+    cut_moves = [m for m in moves if isinstance(m, CutMove)]
+    assert len(cut_moves) > 0
 
-    assert mock_raster.called, "pocket_raster should be called for rough pass"
-    assert mock_profile.called, "profile_outline should be called for finish pass"
 
-
-@patch("cam.path.strategies.pocket_raster")
-@patch("cam.path.strategies.profile_outline")
-def test_pocket_cleanup_disabled(mock_profile, mock_raster):
-
-    mock_raster.return_value = [CommentMove(text="raster_moves")]
-    mock_profile.return_value = [CommentMove(text="profile_moves")]
-
-    shape = rectangle(100, 100)
-    shape = place(shape, Transform2D(tx=50, ty=50))
-
+def test_pocket_cleanup_disabled():
+    shape = _shape_at_center()
     setup = _create_test_setup()
 
     moves = pocket_then_finish_profile(
@@ -85,24 +56,14 @@ def test_pocket_cleanup_disabled(mock_profile, mock_raster):
         pocket_strategy="raster",
     )
 
-    assert _has_no_finish_comment(moves), "Should have 'no finish' comment"
-    assert not _has_finish_profile_pass(moves), "Should NOT have finish profile pass"
-    assert not _has_rough_pocket_comment(moves), "Should not have 'rough pocket' comment when no finish"
-
-    assert mock_raster.called, "pocket_raster should be called"
-    assert not mock_profile.called, "profile_outline should NOT be called when finish disabled"
+    assert len(moves) > 0
+    assert len(_comments_containing(moves, "no finish")) > 0
+    assert len(_comments_containing(moves, "finish profile pass")) == 0
+    assert len(_comments_containing(moves, "rough pocket")) == 0
 
 
-@patch("cam.path.strategies.pocket_raster")
-@patch("cam.path.strategies.profile_outline")
-def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
-
-    mock_raster.return_value = [CommentMove(text="raster_moves")]
-    mock_profile.return_value = [CommentMove(text="profile_moves")]
-
-    shape = rectangle(100, 100)
-    shape = place(shape, Transform2D(tx=50, ty=50))
-
+def test_pocket_cleanup_with_custom_offset():
+    shape = _shape_at_center()
     setup = _create_test_setup()
 
     moves = pocket_then_finish_profile(
@@ -114,31 +75,13 @@ def test_pocket_cleanup_with_custom_offset(mock_profile, mock_raster):
         pocket_strategy="raster",
     )
 
-    assert _has_rough_pocket_comment(moves), "Should have rough pocket comment"
-    assert _has_finish_profile_pass(moves), "Should have finish profile pass"
-
-    found_offset = False
-    for move in moves:
-        if isinstance(move, CommentMove) and "cleanup=0.5" in move.text:
-            found_offset = True
-            break
-    assert found_offset, "Should mention cleanup offset in comment"
+    assert len(_comments_containing(moves, "rough pocket")) > 0
+    assert len(_comments_containing(moves, "finish profile pass")) > 0
+    assert len(_comments_containing(moves, "cleanup=0.5")) > 0
 
 
-@patch("cam.path.strategies.pocket_raster")
-@patch("cam.path.strategies.profile_outline")
-def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
-
-    mock_raster.return_value = [CommentMove(text="raster"), CutMove(x=10, y=10)]
-    mock_profile.return_value = [
-        CommentMove(text="profile"),
-        CutMove(x=20, y=20),
-        CutMove(x=30, y=30),
-    ]
-
-    shape = rectangle(100, 100)
-    shape = place(shape, Transform2D(tx=50, ty=50))
-
+def test_finish_pass_produces_profile_moves():
+    shape = _shape_at_center()
     setup = _create_test_setup()
 
     moves_with_finish = pocket_then_finish_profile(
@@ -149,9 +92,6 @@ def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
         pocket_strategy="raster",
     )
 
-    mock_raster.reset_mock()
-    mock_profile.reset_mock()
-
     moves_without_finish = pocket_then_finish_profile(
         shape,
         setup,
@@ -160,22 +100,7 @@ def test_pocket_cleanup_produces_moves(mock_profile, mock_raster):
         pocket_strategy="raster",
     )
 
-    assert len(moves_with_finish) > len(moves_without_finish), (
-        f"Finish pass should add moves: {len(moves_with_finish)} vs {len(moves_without_finish)}"
-    )
-
-
-if __name__ == "__main__":
-    test_pocket_cleanup_enabled_by_default()
-    print("✓ test_pocket_cleanup_enabled_by_default")
-
-    test_pocket_cleanup_disabled()
-    print("✓ test_pocket_cleanup_disabled")
-
-    test_pocket_cleanup_with_custom_offset()
-    print("✓ test_pocket_cleanup_with_custom_offset")
-
-    test_pocket_cleanup_produces_moves()
-    print("✓ test_pocket_cleanup_produces_moves")
-
-    print("\nAll pocket cleanup tests passed!")
+    finish_comments = _comments_containing(moves_with_finish, "finish profile pass")
+    no_finish_comments = _comments_containing(moves_without_finish, "finish profile pass")
+    assert len(finish_comments) > 0
+    assert len(no_finish_comments) == 0

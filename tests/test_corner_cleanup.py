@@ -208,23 +208,3 @@ def test_corner_cleanup_without_flag():
 
     assert len(passes) == 1
     assert passes[0].op == "pocket"
-
-
-if __name__ == "__main__":
-    print("Running corner cleanup tests...")
-    test_corner_cleanup_basic()
-    print("✓ test_corner_cleanup_basic")
-
-    test_corner_cleanup_planner()
-    print("✓ test_corner_cleanup_planner")
-
-    test_corner_cleanup_tool_not_found()
-    print("✓ test_corner_cleanup_tool_not_found")
-
-    test_corner_cleanup_non_rect_error()
-    print("✓ test_corner_cleanup_non_rect_error")
-
-    test_corner_cleanup_without_flag()
-    print("✓ test_corner_cleanup_without_flag")
-
-    print("\nAll corner cleanup tests passed!")

@@ -246,13 +246,3 @@ def test_roundedrect_inside_cut():
     assert len(passes) == 1
     gcode = write_gcode(passes[0].moves, unit="mm", prec=3, safe_z=5.0)
     assert "G1" in gcode
-
-
-if __name__ == "__main__":
-    test_polygon_triangle_profile()
-    test_polygon_l_shape_profile()
-    test_roundedrect_uniform_radius_profile()
-    test_roundedrect_selective_corners_profile()
-    test_polygon_inside_cut()
-    test_roundedrect_inside_cut()
-    print("All tests passed!")

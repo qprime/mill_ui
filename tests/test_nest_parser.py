@@ -1,11 +1,8 @@
-import sys
-
 from pml.nest_parser import nest_job_to_api_params
 from pml.yaml_parser import NestParseError, parse_nest_yaml
 
 
 def test_basic_nest_parsing():
-    print("Running test_basic_nest_parsing...")
 
     source = """
 Nest:
@@ -40,11 +37,8 @@ Nest:
     assert job.parts[0].height_mm == 600.0
     assert job.parts[0].quantity == 4
 
-    print("  PASSED")
-
 
 def test_guillotine_algorithm():
-    print("Running test_guillotine_algorithm...")
 
     source = """
 Nest:
@@ -72,11 +66,8 @@ Nest:
     assert job.kerf_mm == 6.35
     assert job.margin_mm == 10.0
 
-    print("  PASSED")
-
 
 def test_multiple_parts():
-    print("Running test_multiple_parts...")
 
     source = """
 Nest:
@@ -117,11 +108,8 @@ Nest:
     assert job.parts[2].name == "tall_door"
     assert job.parts[2].quantity == 2
 
-    print("  PASSED")
-
 
 def test_part_with_template():
-    print("Running test_part_with_template...")
 
     source = """
 Nest:
@@ -155,11 +143,8 @@ Nest:
     assert part.template_params["rail_h"] == 50.0
     assert part.template_params["panel_recess"] == 6.0
 
-    print("  PASSED")
-
 
 def test_mixed_parts_with_and_without_template():
-    print("Running test_mixed_parts_with_and_without_template...")
 
     source = """
 Nest:
@@ -217,11 +202,8 @@ Nest:
     assert job.parts[2].name == "tall_door"
     assert job.parts[2].template == "Shaker"
 
-    print("  PASSED")
-
 
 def test_quantity_default():
-    print("Running test_quantity_default...")
 
     source = """
 Nest:
@@ -242,11 +224,8 @@ Nest:
 
     assert job.parts[0].quantity == 1
 
-    print("  PASSED")
-
 
 def test_nest_job_to_api_params():
-    print("Running test_nest_job_to_api_params...")
 
     source = """
 Nest:
@@ -295,11 +274,8 @@ Nest:
     assert params["parts"][1]["name"] == "panel"
     assert "template" not in params["parts"][1]
 
-    print("  PASSED")
-
 
 def test_error_missing_nest_directive():
-    print("Running test_error_missing_nest_directive...")
 
     source = """
 Sheet:
@@ -319,11 +295,8 @@ parts:
     except NestParseError as e:
         assert "nest" in str(e).lower()
 
-    print("  PASSED")
-
 
 def test_error_missing_sheet():
-    print("Running test_error_missing_sheet...")
 
     source = """
 Nest:
@@ -341,11 +314,8 @@ Nest:
     except NestParseError as e:
         assert "sheet" in str(e).lower()
 
-    print("  PASSED")
-
 
 def test_error_no_parts():
-    print("Running test_error_no_parts...")
 
     source = """
 Nest:
@@ -365,11 +335,8 @@ Nest:
     except NestParseError as e:
         assert "parts" in str(e).lower() or "no parts" in str(e).lower()
 
-    print("  PASSED")
-
 
 def test_simple_template_reference():
-    print("Running test_simple_template_reference...")
 
     source = """
 Nest:
@@ -395,8 +362,6 @@ Nest:
     assert part.name == "door"
     assert part.template == "shaker"
     assert part.template_params == {}
-
-    print("  PASSED")
 
 
 def test_parse_shape_rounded_rect():
@@ -917,71 +882,3 @@ Nest:
     assert job2.parts[1].holding is not None
     assert job2.parts[1].holding.tab_count == 6
     assert job2.parts[1].holding.tab_height_mm == 3.0
-
-
-def run_all_tests():
-    print("=" * 60)
-    print("Nest YAML Parser Tests")
-    print("=" * 60)
-
-    tests = [
-        test_basic_nest_parsing,
-        test_guillotine_algorithm,
-        test_multiple_parts,
-        test_part_with_template,
-        test_mixed_parts_with_and_without_template,
-        test_quantity_default,
-        test_nest_job_to_api_params,
-        test_error_missing_nest_directive,
-        test_error_missing_sheet,
-        test_error_no_parts,
-        test_simple_template_reference,
-        test_parse_shape_rounded_rect,
-        test_parse_shape_rounded_rect_selective_corners,
-        test_parse_shape_circle,
-        test_parse_shape_circle_nonsquare_error,
-        test_parse_shape_omitted,
-        test_parse_shape_and_template_error,
-        test_parse_shape_unknown_type,
-        test_parse_shape_rounded_rect_missing_radius,
-        test_parse_shape_polygon_points_exceed_bounds,
-        test_parse_shape_polygon_points_within_bounds,
-        test_nest_job_to_api_params_with_shape,
-        test_holding_onion_skin_job_level,
-        test_holding_tabs_job_level,
-        test_holding_tabs_without_width,
-        test_holding_per_part_override,
-        test_holding_mutual_exclusivity_error,
-        test_holding_empty_block_error,
-        test_holding_tabs_missing_required_fields,
-        test_holding_api_params_propagation,
-        test_holding_no_default,
-        test_holding_unknown_key_error,
-        test_holding_roundtrip,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print()
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

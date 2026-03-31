@@ -1,22 +1,6 @@
-"""Comprehensive tests for Stage 5 generators: Wave, Grid, and Bead.
-
-This test module covers Stage 5 of the domain/generator system:
-- WaveParams, GridParams, BeadParams validation
-- wave_generator (area)
-- grid_generator (area)
-- bead_generator (loop)
-- Determinism verification
-- Integration with existing pipeline
-"""
-
 from __future__ import annotations
 
 import math
-import sys
-from pathlib import Path
-
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from domains import Domain
 from generators import (
@@ -695,55 +679,3 @@ def test_end_to_end_stage5_to_ast():
     )
 
     assert len(ast.items) > 0
-
-
-# =============================================================================
-# Test Runner
-# =============================================================================
-
-
-def run_tests():
-    """Run all tests and report results."""
-    import traceback
-
-    # Collect all test functions
-    tests = [(name, func) for name, func in globals().items() if name.startswith("test_") and callable(func)]
-
-    passed = 0
-    failed = 0
-    errors = []
-
-    print(f"Running {len(tests)} Stage 5 generator tests...")
-    print("-" * 60)
-
-    for name, func in sorted(tests):
-        try:
-            func()
-            print(f"PASS: {name}")
-            passed += 1
-        except AssertionError as e:
-            print(f"FAIL: {name}")
-            print(f"      {e}")
-            failed += 1
-            errors.append((name, "FAIL", str(e)))
-        except Exception as e:
-            print(f"ERROR: {name}")
-            print(f"       {type(e).__name__}: {e}")
-            traceback.print_exc()
-            failed += 1
-            errors.append((name, "ERROR", f"{type(e).__name__}: {e}"))
-
-    print("-" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-
-    if errors:
-        print("\nFailures:")
-        for name, status, msg in errors:
-            print(f"  {name}: {status} - {msg}")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_tests()
-    sys.exit(0 if success else 1)

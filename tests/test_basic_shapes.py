@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
@@ -12,8 +10,6 @@ def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
 
 
 def test_circle_with_explicit_diameter():
-    print("Running test_circle_with_explicit_diameter...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -43,13 +39,8 @@ children:
     assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_circle_fit_mode():
-    print("Running test_circle_fit_mode...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -75,13 +66,8 @@ children:
     assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_circle_fit_in_rect_region():
-    print("Running test_circle_fit_in_rect_region...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -113,13 +99,8 @@ children:
     assert item.placement is not None
     assert item.placement.center_xy_mm == (200.0, 300.0)
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_fills_region():
-    print("Running test_rounded_rect_fills_region...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -149,13 +130,8 @@ children:
     assert item.feature is not None
     assert item.feature.type == "pocket"
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_with_inset():
-    print("Running test_rounded_rect_with_inset...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -187,13 +163,8 @@ children:
 
     assert item.geometry.data["radius_mm"] == 12.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_line_horizontal():
-    print("Running test_line_horizontal...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -231,13 +202,8 @@ children:
     assert item.feature.type == "engrave"
     assert item.feature.depth_mm == 1.5
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_line_vertical():
-    print("Running test_line_vertical...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -271,13 +237,8 @@ children:
     assert item.feature is not None
     assert item.feature.depth_mm == 1.5
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_line_in_inset_region():
-    print("Running test_line_in_inset_region...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -314,13 +275,8 @@ children:
     assert item.feature is not None
     assert item.feature.depth_mm == 1.5
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_round_trip_circle():
-    print("Running test_round_trip_circle...")
-
     original_pml = """
 Sheet:
   width: 400mm
@@ -351,13 +307,8 @@ children:
     assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data == flat2.items[0].geometry.data
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_round_trip_rounded_rect():
-    print("Running test_round_trip_rounded_rect...")
-
     original_pml = """
 Sheet:
   width: 400mm
@@ -386,13 +337,8 @@ children:
     assert flat2.items[0].geometry is not None
     assert flat1.items[0].geometry.data["radius_mm"] == flat2.items[0].geometry.data["radius_mm"]
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_round_trip_line():
-    print("Running test_round_trip_line...")
-
     original_pml = """
 Sheet:
   width: 400mm
@@ -424,13 +370,8 @@ children:
     assert flat2.items[0].feature is not None
     assert flat1.items[0].feature.depth_mm == flat2.items[0].feature.depth_mm
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_mixed_shapes_composition():
-    print("Running test_mixed_shapes_composition...")
-
     pml = """
 Sheet:
   width: 800mm
@@ -495,13 +436,8 @@ children:
     assert lines[0].feature is not None
     assert lines[0].feature.depth_mm == 1.5
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_selective_corners():
-    print("Running test_rounded_rect_selective_corners...")
-
     pml = """
 Sheet:
   width: 686mm
@@ -532,13 +468,8 @@ children:
     assert item.geometry.data["radius_bl_mm"] == 12.7
     assert item.geometry.data["radius_br_mm"] == 0.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_all_corners_explicit():
-    print("Running test_rounded_rect_all_corners_explicit...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -566,13 +497,8 @@ children:
     assert item.geometry.data["radius_br_mm"] == 10.0
     assert item.geometry.data["radius_mm"] == 10.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_single_corner():
-    print("Running test_rounded_rect_single_corner...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -600,13 +526,8 @@ children:
     assert item.geometry.data["radius_bl_mm"] == 0.0
     assert item.geometry.data["radius_br_mm"] == 0.0
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_corners_round_trip():
-    print("Running test_rounded_rect_corners_round_trip...")
-
     original_pml = """
 Sheet:
   width: 686mm
@@ -641,13 +562,8 @@ children:
 
     assert "corners:" in formatted or "corners" in formatted
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_acceptance_canonical_formatting():
-    print("Running test_acceptance_canonical_formatting...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -690,13 +606,8 @@ children:
     assert "RoundedRect:" in formatted1
     assert "Line:" in formatted1
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rounded_rect_with_profile_child_inherits_geometry():
-    print("Running test_rounded_rect_with_profile_child_inherits_geometry...")
-
     pml = """
 Sheet:
   width: 584mm
@@ -730,13 +641,8 @@ children:
     assert item.feature.type == "profile"
     assert item.feature.side == "outside"
 
-    print("  ✓ PASS")
-    return True
-
 
 def test_rect_with_profile_child_stays_rect():
-    print("Running test_rect_with_profile_child_stays_rect...")
-
     pml = """
 Sheet:
   width: 400mm
@@ -763,50 +669,3 @@ children:
     assert item.geometry is not None
     assert "radius_mm" not in item.geometry.data
     assert "radius_bl_mm" not in item.geometry.data
-
-    print("  ✓ PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_circle_with_explicit_diameter,
-        test_circle_fit_mode,
-        test_circle_fit_in_rect_region,
-        test_rounded_rect_fills_region,
-        test_rounded_rect_with_inset,
-        test_rounded_rect_selective_corners,
-        test_rounded_rect_all_corners_explicit,
-        test_rounded_rect_single_corner,
-        test_rounded_rect_corners_round_trip,
-        test_line_horizontal,
-        test_line_vertical,
-        test_line_in_inset_region,
-        test_round_trip_circle,
-        test_round_trip_rounded_rect,
-        test_round_trip_line,
-        test_mixed_shapes_composition,
-        test_acceptance_canonical_formatting,
-        test_rounded_rect_with_profile_child_inherits_geometry,
-        test_rect_with_profile_child_stays_rect,
-    ]
-
-    results = []
-    for test in tests:
-        try:
-            results.append(test())
-        except Exception as e:
-            print(f"  ✗ FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            results.append(False)
-
-    passed = sum(1 for r in results if r)
-    total = len(results)
-    print(f"\n{passed}/{total} basic shape tests passed")
-
-    if all(results):
-        print("\n✅ Stage 14 basic shapes tests COMPLETE - All tests passed!")
-
-    sys.exit(0 if all(results) else 1)

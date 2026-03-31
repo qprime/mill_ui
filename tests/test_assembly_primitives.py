@@ -110,6 +110,21 @@ class TestBoxPrimitive:
 
 
 class TestBoxResolve:
+    def test_panel_dimensions_preserved(self):
+        assembly = box(
+            width=200,
+            length=150,
+            height=100,
+            thickness=6,
+            side_joinery=Finger(width_mm=12),
+        )
+        panels = assembly.resolve()
+
+        for panel in panels:
+            original = assembly.panels[panel.name]
+            assert panel.width_mm == original.width_mm
+            assert panel.height_mm == original.height_mm
+
     def test_finger_joints_create_notches(self):
         assembly = box(
             width=200,
@@ -151,6 +166,12 @@ class TestBoxResolve:
 
 
 class TestCarcassPrimitive:
+    def test_side_panel_dimensions(self):
+        assembly = carcass(width=600, length=560, height=720, thickness=18)
+        left = assembly.panels["left_side"]
+        assert left.width_mm == 560
+        assert left.height_mm == 720
+
     def test_creates_sides_and_caps(self):
         assembly = carcass(width=600, length=400, height=500, thickness=18)
         assert "left_side" in assembly.panels
@@ -405,6 +426,27 @@ class TestCarcassPrimitive:
 
 
 class TestCarcassResolve:
+    def test_full_carcass_panel_generation(self):
+        assembly = carcass(
+            width=600,
+            length=560,
+            height=720,
+            thickness=18,
+            back=Captured(),
+            back_thickness=6,
+            back_inset=18,
+            fixed_shelves=2,
+        )
+        panels = assembly.resolve()
+        panel_names = {p.name for p in panels}
+        assert "left_side" in panel_names
+        assert "right_side" in panel_names
+        assert "top" in panel_names
+        assert "bottom" in panel_names
+        assert "back" in panel_names
+        assert "shelf_1" in panel_names
+        assert "shelf_2" in panel_names
+
     def test_shelf_joinery_creates_dados_in_sides(self):
         assembly = carcass(
             width=600,

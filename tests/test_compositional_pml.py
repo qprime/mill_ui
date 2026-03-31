@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-
 from layout_ast.compositional import (
     Panel,
     Rect,
@@ -18,7 +16,6 @@ def approx_eq(a, b, rel=1e-6):
 
 
 def test_simple_rect():
-    print("Running test_simple_rect...")
     pml = """
 Sheet:
   width: 400mm
@@ -43,12 +40,9 @@ children:
     rect = ast.root.children[0]
     assert isinstance(rect, Rect)
     assert rect.id == "outer"
-    print("  PASS")
-    return True
 
 
 def test_rect_with_inset():
-    print("Running test_rect_with_inset...")
     pml = """
 Sheet:
   width: 400mm
@@ -74,12 +68,9 @@ children:
     assert item.geometry is not None
     assert item.geometry.data["w_mm"] == 350.0
     assert item.geometry.data["h_mm"] == 550.0
-    print("  PASS")
-    return True
 
 
 def test_frame_with_pocket():
-    print("Running test_frame_with_pocket...")
     pml = """
 Sheet:
   width: 400mm
@@ -123,12 +114,9 @@ children:
     assert inner.geometry is not None
     assert inner.geometry.data["w_mm"] == 300.0
     assert inner.geometry.data["h_mm"] == 500.0
-    print("  PASS")
-    return True
 
 
 def test_grid_with_pockets():
-    print("Running test_grid_with_pockets...")
     pml = """
 Sheet:
   width: 400mm
@@ -160,12 +148,9 @@ children:
         assert item.geometry is not None
         assert approx_eq(item.geometry.data["w_mm"], 195.0)
         assert approx_eq(item.geometry.data["h_mm"], 195.0)
-    print("  PASS")
-    return True
 
 
 def test_component_definition_and_use():
-    print("Running test_component_definition_and_use...")
     pml = """
 Sheet:
   width: 400mm
@@ -194,12 +179,9 @@ children:
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
     assert flat.items[0].shape_id == "panel"
-    print("  PASS")
-    return True
 
 
 def test_place_with_components():
-    print("Running test_place_with_components...")
     pml = """
 Sheet:
   width: 1000mm
@@ -242,12 +224,9 @@ children:
 
     assert first.geometry is not None
     assert approx_eq(first.geometry.data["w_mm"], 475.0)
-    print("  PASS")
-    return True
 
 
 def test_acceptance_stage12_gold_exemplar():
-    print("Running test_acceptance_stage12_gold_exemplar...")
     pml = """
 Sheet:
   width: 1200mm
@@ -333,12 +312,9 @@ children:
     assert first_pocket.geometry is not None
     assert approx_eq(first_pocket.geometry.data["w_mm"], 230.0)
     assert approx_eq(first_pocket.geometry.data["h_mm"], 230.0)
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_preserves_semantics():
-    print("Running test_roundtrip_preserves_semantics...")
     original_pml = """
 Sheet:
   width: 400mm
@@ -398,12 +374,9 @@ children:
     types1 = [item.feature.type if item.feature else None for item in flat1.items]
     types2 = [item.feature.type if item.feature else None for item in flat2.items]
     assert types1 == types2
-    print("  PASS")
-    return True
 
 
 def test_error_handling_unknown_keyword():
-    print("Running test_error_handling_unknown_keyword...")
     pml = """
 Sheet:
   width: 400mm
@@ -416,16 +389,12 @@ children:
 """
     try:
         parse_pml_yaml(pml)
-        print("  FAIL: Expected PMLParseError")
-        return False
+        raise AssertionError("Expected PMLParseError")
     except PMLParseError:
         pass
-    print("  PASS")
-    return True
 
 
 def test_formatter_produces_canonical_output():
-    print("Running test_formatter_produces_canonical_output...")
     pml = """
 Sheet:
   width: 1200mm
@@ -488,12 +457,9 @@ children:
     ast2 = parse_pml_yaml(formatted)
     formatted2 = format_pml_yaml(ast2)
     assert formatted == formatted2
-    print("  PASS")
-    return True
 
 
 def test_grid_without_explicit_cell():
-    print("Running test_grid_without_explicit_cell...")
     pml = """
 Sheet:
   width: 400mm
@@ -517,12 +483,9 @@ children:
     flat = resolve_layout(ast)
 
     assert len(flat.items) == 4
-    print("  PASS")
-    return True
 
 
 def test_project_optional():
-    print("Running test_project_optional...")
     pml = """
 Sheet:
   width: 400mm
@@ -542,36 +505,3 @@ children:
 
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_simple_rect,
-        test_rect_with_inset,
-        test_frame_with_pocket,
-        test_grid_with_pockets,
-        test_component_definition_and_use,
-        test_place_with_components,
-        test_acceptance_stage12_gold_exemplar,
-        test_roundtrip_preserves_semantics,
-        test_error_handling_unknown_keyword,
-        test_formatter_produces_canonical_output,
-        test_grid_without_explicit_cell,
-        test_project_optional,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

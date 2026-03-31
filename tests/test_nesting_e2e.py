@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from cam.config import Config
@@ -25,7 +23,6 @@ TEST_TOOL_DB = [
 
 
 def test_simple_rect_through_cam():
-    print("Running test_simple_rect_through_cam...")
 
     parts = [{"name": "panel", "width_mm": 200, "height_mm": 150}]
 
@@ -80,11 +77,8 @@ def test_simple_rect_through_cam():
         lines = gcode.strip().split("\n")
         assert len(lines) >= 5
 
-    print("  PASSED")
-
 
 def test_multiple_parts_through_cam():
-    print("Running test_multiple_parts_through_cam...")
 
     parts = [
         {"name": "door", "width_mm": 300, "height_mm": 400, "quantity": 2},
@@ -134,11 +128,8 @@ def test_multiple_parts_through_cam():
 
     assert total_gcode_lines > 20
 
-    print("  PASSED")
-
 
 def test_template_parts_through_cam():
-    print("Running test_template_parts_through_cam...")
 
     parts = [
         {
@@ -201,11 +192,8 @@ def test_template_parts_through_cam():
         assert len(gcode) > 0
         assert "G" in gcode
 
-    print("  PASSED")
-
 
 def test_multi_sheet_through_cam():
-    print("Running test_multi_sheet_through_cam...")
 
     parts = [
         {"name": "large_panel", "width_mm": 400, "height_mm": 400, "quantity": 5},
@@ -258,11 +246,8 @@ def test_multi_sheet_through_cam():
 
     assert len(sheet_gcodes) >= 2
 
-    print("  PASSED")
-
 
 def test_gcode_basic_invariants():
-    print("Running test_gcode_basic_invariants...")
 
     parts = [{"name": "test_part", "width_mm": 100, "height_mm": 80}]
 
@@ -304,8 +289,6 @@ def test_gcode_basic_invariants():
 
         has_coordinates = any("X" in line or "Y" in line or "Z" in line for line in lines)
         assert has_coordinates, "G-code should contain X, Y, or Z coordinates"
-
-    print("  PASSED")
 
 
 def test_rounded_rect_end_to_end():
@@ -423,46 +406,3 @@ def test_ast_and_pml_paths_equivalent():
         assert rt.feature is not None
         assert orig.feature.type == rt.feature.type
         assert orig.feature.is_through == rt.feature.is_through
-
-
-def run_all_tests():
-    print("=" * 60)
-    print("Nesting End-to-End Tests (Phase 8)")
-    print("=" * 60)
-
-    tests = [
-        test_simple_rect_through_cam,
-        test_multiple_parts_through_cam,
-        test_template_parts_through_cam,
-        test_multi_sheet_through_cam,
-        test_gcode_basic_invariants,
-        test_rounded_rect_end_to_end,
-        test_mixed_shapes_end_to_end,
-        test_selective_corners_format_pml,
-        test_ast_and_pml_paths_equivalent,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

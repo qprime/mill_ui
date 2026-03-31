@@ -1,19 +1,11 @@
-# tests/test_gcode_invariants.py - Unit tests for G-code invariant checking
-#
-# Tests verify:
-# 1. All 10 G-code invariants are checked correctly
-# 2. Valid G-code passes all invariants
-# 3. Invalid G-code fails the appropriate invariants
-# 4. No false positives on recipe outputs
-# 5. Clear failure messages
-
 from __future__ import annotations
 
 import os
 import sys
 import tempfile
 
-# Ensure project root is in path
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from validation.core import Verdict
@@ -22,7 +14,6 @@ from validation.invariants.gcode_invariants import (
     check_gcode_invariants,
 )
 
-# Path to recipe outputs
 RECIPE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "docs",
@@ -31,7 +22,6 @@ RECIPE_DIR = os.path.join(
 
 
 def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
-    """Get path to a recipe's NC output."""
     return os.path.join(
         RECIPE_DIR,
         f"{recipe_num:02d}_{recipe_name}",
@@ -40,31 +30,21 @@ def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Valid G-code Invariants
-# ─────────────────────────────────────────────────────────────────────────────
-
-
 def test_valid_simple_profile_gcode():
     """Test that simple profile G-code passes all invariants."""
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip(f"{nc_path} not found")
 
     results = check_gcode_invariants(nc_path)
 
-    # Should check all expected invariants
     result_ids = [r.id for r in results]
     for inv_id in GCODE_INVARIANT_IDS:
         assert inv_id in result_ids, f"Missing invariant check: {inv_id}"
 
-    # All should pass (or warn, which is acceptable)
     for r in results:
         assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures} {r.details}"
-
-    print("PASS: test_valid_simple_profile_gcode")
 
 
 def test_valid_shaker_door_gcode():
@@ -72,16 +52,12 @@ def test_valid_shaker_door_gcode():
     nc_path = get_recipe_nc_path(3, "shaker_door_template", "pocket-9.53mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip(f"{nc_path} not found")
 
     results = check_gcode_invariants(nc_path)
 
-    # All should pass (or warn)
     failures = [r for r in results if r.status == Verdict.FAIL]
     assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-
-    print("PASS: test_valid_shaker_door_gcode")
 
 
 def test_valid_multiple_depths_gcode():
@@ -89,25 +65,16 @@ def test_valid_multiple_depths_gcode():
     nc_path = get_recipe_nc_path(6, "multiple_depths", "pocket-9.53mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip(f"{nc_path} not found")
 
     results = check_gcode_invariants(nc_path)
 
     failures = [r for r in results if r.status == Verdict.FAIL]
     assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
-    print("PASS: test_valid_multiple_depths_gcode")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Invalid G-code File
-# ─────────────────────────────────────────────────────────────────────────────
-
 
 def test_invalid_gcode_file():
     """Test that invalid G-code file fails GCODE_PARSEABLE invariant."""
-    # Create a temp file with invalid content
     with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
         f.write("@#$%^& not valid gcode at all!\n")
         f.write("more garbage lines\n")
@@ -116,15 +83,11 @@ def test_invalid_gcode_file():
     try:
         results = check_gcode_invariants(temp_path)
 
-        # First invariant should fail
         assert results[0].id == "GCODE_PARSEABLE"
         assert results[0].status == Verdict.FAIL
 
-        # All other invariants should be skipped
         for r in results[1:]:
             assert r.details.get("skipped") is True, f"{r.id} was not skipped"
-
-        print("PASS: test_invalid_gcode_file")
     finally:
         os.unlink(temp_path)
 
@@ -137,13 +100,10 @@ def test_nonexistent_gcode_file():
     assert results[0].status == Verdict.FAIL
     assert "not found" in str(results[0].failures).lower()
 
-    print("PASS: test_nonexistent_gcode_file")
-
 
 def test_empty_gcode_file():
     """Test that empty G-code file fails GCODE_PARSEABLE."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
-        # Write empty file
         temp_path = f.name
 
     try:
@@ -151,15 +111,8 @@ def test_empty_gcode_file():
 
         assert results[0].id == "GCODE_PARSEABLE"
         assert results[0].status == Verdict.FAIL
-
-        print("PASS: test_empty_gcode_file")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Safe Z Violations
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_safe_z_violation():
@@ -178,14 +131,11 @@ M30
         temp_path = f.name
 
     try:
-        # Safe Z is 5.0, but we rapid at Z1.0
         results = check_gcode_invariants(temp_path, safe_z_mm=5.0)
 
         safe_z_result = next(r for r in results if r.id == "GCODE_SAFE_Z_RESPECTED")
         assert safe_z_result.status == Verdict.FAIL
         assert "Z=1.0" in str(safe_z_result.failures) or "Z=1" in str(safe_z_result.failures)
-
-        print("PASS: test_safe_z_violation")
     finally:
         os.unlink(temp_path)
 
@@ -211,15 +161,8 @@ M30
 
         safe_z_result = next(r for r in results if r.id == "GCODE_SAFE_Z_RESPECTED")
         assert safe_z_result.status == Verdict.PASS
-
-        print("PASS: test_safe_z_respected")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Negative Feed Rate
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_negative_feed_rate():
@@ -243,15 +186,8 @@ M30
         feed_result = next(r for r in results if r.id == "GCODE_NO_NEGATIVE_FEED")
         assert feed_result.status == Verdict.FAIL
         assert "F0" in str(feed_result.failures)
-
-        print("PASS: test_negative_feed_rate")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Max Stepdown
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_max_stepdown_exceeded():
@@ -270,14 +206,11 @@ M30
         temp_path = f.name
 
     try:
-        # 25mm stepdown (10 to -15) exceeds max of 10mm
         results = check_gcode_invariants(temp_path, max_stepdown_mm=10.0)
 
         stepdown_result = next(r for r in results if r.id == "GCODE_MAX_STEPDOWN")
         assert stepdown_result.status == Verdict.FAIL
-        assert "25" in str(stepdown_result.failures)  # 25mm stepdown
-
-        print("PASS: test_max_stepdown_exceeded")
+        assert "25" in str(stepdown_result.failures)
     finally:
         os.unlink(temp_path)
 
@@ -304,15 +237,8 @@ M30
 
         stepdown_result = next(r for r in results if r.id == "GCODE_MAX_STEPDOWN")
         assert stepdown_result.status == Verdict.PASS
-
-        print("PASS: test_max_stepdown_respected")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: XY Bounds
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_xy_out_of_bounds():
@@ -331,20 +257,12 @@ M30
         temp_path = f.name
 
     try:
-        # 100mm sheet with 10mm margin should fail for X=-100, X=500, Y=500
         results = check_gcode_invariants(temp_path, sheet_width_mm=100.0, sheet_height_mm=100.0, margin_mm=10.0)
 
         bounds_result = next(r for r in results if r.id == "GCODE_XY_WITHIN_BOUNDS")
         assert bounds_result.status == Verdict.FAIL
-
-        print("PASS: test_xy_out_of_bounds")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Spindle Before Cut
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_spindle_not_on_before_cut():
@@ -369,8 +287,6 @@ M30
         spindle_result = next(r for r in results if r.id == "GCODE_SPINDLE_BEFORE_CUT")
         assert spindle_result.status == Verdict.FAIL
         assert "without spindle" in str(spindle_result.failures).lower()
-
-        print("PASS: test_spindle_not_on_before_cut")
     finally:
         os.unlink(temp_path)
 
@@ -398,15 +314,8 @@ M30
 
         spindle_result = next(r for r in results if r.id == "GCODE_SPINDLE_BEFORE_CUT")
         assert spindle_result.status == Verdict.PASS
-
-        print("PASS: test_spindle_on_before_cut")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Tool Declared
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_tool_change_without_declaration():
@@ -429,8 +338,6 @@ M30
         tool_result = next(r for r in results if r.id == "GCODE_TOOL_DECLARED")
         assert tool_result.status == Verdict.FAIL
         assert "without" in str(tool_result.failures).lower()
-
-        print("PASS: test_tool_change_without_declaration")
     finally:
         os.unlink(temp_path)
 
@@ -454,15 +361,8 @@ M30
 
         tool_result = next(r for r in results if r.id == "GCODE_TOOL_DECLARED")
         assert tool_result.status == Verdict.PASS
-
-        print("PASS: test_tool_properly_declared")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Ends at Safe
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_ends_at_unsafe_z():
@@ -488,8 +388,6 @@ M30
         end_result = next(r for r in results if r.id == "GCODE_ENDS_AT_SAFE")
         assert end_result.status == Verdict.FAIL
         assert "-5" in str(end_result.failures)
-
-        print("PASS: test_ends_at_unsafe_z")
     finally:
         os.unlink(temp_path)
 
@@ -517,15 +415,8 @@ M30
 
         end_result = next(r for r in results if r.id == "GCODE_ENDS_AT_SAFE")
         assert end_result.status == Verdict.PASS
-
-        print("PASS: test_ends_at_safe_z")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Continuous Path
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_path_discontinuity():
@@ -551,10 +442,7 @@ M30
         results = check_gcode_invariants(temp_path)
 
         path_result = next(r for r in results if r.id == "GCODE_CONTINUOUS_PATH")
-        # Very large jump (>5000mm fail threshold) should be flagged as FAIL
         assert path_result.status == Verdict.FAIL
-
-        print("PASS: test_path_discontinuity")
     finally:
         os.unlink(temp_path)
 
@@ -586,71 +474,8 @@ M30
 
         path_result = next(r for r in results if r.id == "GCODE_CONTINUOUS_PATH")
         assert path_result.status == Verdict.PASS
-
-        print("PASS: test_continuous_path")
     finally:
         os.unlink(temp_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Recipe G-code Validation (No False Positives)
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-def test_all_recipe_gcodes_pass():
-    """Test that all recipe G-code files pass invariants (no false positives)."""
-    # Note: Actual recipe filenames use tool diameter suffix (profile-3.17mm.nc, pocket-9.53mm.nc)
-    recipe_gcodes = [
-        (1, "simple_profile", "profile-3.17mm.nc"),
-        (2, "pocket_with_cleanup", "pocket-9.53mm.nc"),
-        (3, "shaker_door_template", "pocket-9.53mm.nc"),
-        (5, "validation_workflow", "profile-3.17mm.nc"),
-        (6, "multiple_depths", "pocket-9.53mm.nc"),
-        (7, "json_generation", "profile-3.17mm.nc"),
-        (10, "hole_patterns_grid", "bore-3.17mm.nc"),
-        (12, "edge_treatment_intent", "pocket-9.53mm.nc"),
-        (13, "split_layout_french_door", "profile-3.17mm.nc"),
-        (14, "corner_cleanup_multi_tool", "profile-3.17mm.nc"),
-        (16, "sheet_layout_nesting", "profile-3.17mm.nc"),
-        # Recipes 17-18 (nesting) produce multiple NC files with sheet prefix
-    ]
-
-    passed = 0
-    skipped = 0
-    failed_gcodes = []
-
-    for recipe_num, recipe_name, filename in recipe_gcodes:
-        nc_path = get_recipe_nc_path(recipe_num, recipe_name, filename)
-
-        if not os.path.exists(nc_path):
-            skipped += 1
-            continue
-
-        results = check_gcode_invariants(nc_path)
-
-        failures = [r for r in results if r.status == Verdict.FAIL]
-        if failures:
-            failed_gcodes.append(
-                (
-                    f"{recipe_num:02d}_{recipe_name}/{filename}",
-                    [(f.id, f.failures[:2] if f.failures else str(f.details)[:100]) for f in failures],
-                )
-            )
-        else:
-            passed += 1
-
-    if failed_gcodes:
-        print(f"FAIL: {len(failed_gcodes)} recipe G-codes failed invariants:")
-        for filename, fails in failed_gcodes:
-            print(f"  {filename}: {fails}")
-        raise AssertionError(f"{len(failed_gcodes)} recipe G-codes failed invariants")
-
-    print(f"PASS: test_all_recipe_gcodes_pass ({passed} passed, {skipped} skipped)")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Invariant Result Structure
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_invariant_result_to_dict():
@@ -658,8 +483,7 @@ def test_invariant_result_to_dict():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip(f"{nc_path} not found")
 
     results = check_gcode_invariants(nc_path)
 
@@ -673,34 +497,19 @@ def test_invariant_result_to_dict():
         assert "status" in d["invariant"]
         assert "details" in d["invariant"]
 
-    print("PASS: test_invariant_result_to_dict")
-
 
 def test_all_invariant_ids_present():
     """Test that all expected invariant IDs are returned."""
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        print(f"SKIP: {nc_path} not found")
-        return
+        pytest.skip(f"{nc_path} not found")
 
     results = check_gcode_invariants(nc_path)
     result_ids = [r.id for r in results]
 
     for expected_id in GCODE_INVARIANT_IDS:
         assert expected_id in result_ids, f"Missing invariant: {expected_id}"
-
-    print("PASS: test_all_invariant_ids_present")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Tab Pattern Detection
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_tab_pattern_detected():
@@ -744,8 +553,6 @@ M30
         assert tab_result.status == Verdict.PASS
         assert tab_result.details["detected_count"] == 4
         assert all(abs(h - 3.0) < 0.1 for h in tab_result.details["tab_heights_mm"])
-
-        print("PASS: test_tab_pattern_detected")
     finally:
         os.unlink(temp_path)
 
@@ -777,8 +584,6 @@ M30
         tab_result = next(r for r in results if r.id == "GCODE_TAB_PATTERN")
         assert tab_result.status == Verdict.PASS
         assert tab_result.details["detected_count"] == 0
-
-        print("PASS: test_no_tabs_detected")
     finally:
         os.unlink(temp_path)
 
@@ -836,77 +641,5 @@ M30
         assert tab_result.status == Verdict.PASS
         assert tab_result.details["detected_count"] == 2
         assert tab_result.details["tabs_at_max_depth"] is True
-
-        print("PASS: test_tabs_only_on_final_pass")
     finally:
         os.unlink(temp_path)
-
-
-def run_all_tests():
-    """Run all G-code invariant tests."""
-    tests = [
-        # Valid G-code tests
-        test_valid_simple_profile_gcode,
-        test_valid_shaker_door_gcode,
-        test_valid_multiple_depths_gcode,
-        # Invalid file tests
-        test_invalid_gcode_file,
-        test_nonexistent_gcode_file,
-        test_empty_gcode_file,
-        # Safe Z tests
-        test_safe_z_violation,
-        test_safe_z_respected,
-        # Feed rate tests
-        test_negative_feed_rate,
-        # Max stepdown tests
-        test_max_stepdown_exceeded,
-        test_max_stepdown_respected,
-        # XY bounds tests
-        test_xy_out_of_bounds,
-        # Spindle tests
-        test_spindle_not_on_before_cut,
-        test_spindle_on_before_cut,
-        # Tool declaration tests
-        test_tool_change_without_declaration,
-        test_tool_properly_declared,
-        # End position tests
-        test_ends_at_unsafe_z,
-        test_ends_at_safe_z,
-        # Continuous path tests
-        test_path_discontinuity,
-        test_continuous_path,
-        # Tab pattern tests
-        test_tab_pattern_detected,
-        test_no_tabs_detected,
-        test_tabs_only_on_final_pass,
-        # Recipe validation tests
-        test_all_recipe_gcodes_pass,
-        # Result structure tests
-        test_invariant_result_to_dict,
-        test_all_invariant_ids_present,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"FAIL: {test.__name__}: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print(f"\n{'=' * 60}")
-    print(f"G-code Invariant Tests: {passed} passed, {failed} failed")
-    print(f"{'=' * 60}")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

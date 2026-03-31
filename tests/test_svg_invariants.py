@@ -10,10 +10,8 @@
 from __future__ import annotations
 
 import os
-import sys
 
-# Ensure project root is in path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pytest
 
 from validation.core import Verdict
 from validation.invariants.svg_invariants import (
@@ -49,8 +47,7 @@ def test_valid_simple_profile_svg():
     svg_path = get_recipe_svg_path(1, "simple_profile", "01_simple_profile.svg")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
@@ -66,16 +63,13 @@ def test_valid_simple_profile_svg():
     for r in results:
         assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures}"
 
-    print("PASS: test_valid_simple_profile_svg")
-
 
 def test_valid_shaker_door_svg():
     """Test that shaker door SVG (with pockets) passes all invariants."""
     svg_path = get_recipe_svg_path(3, "shaker_door_template", "03_shaker_door_template.svg")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
@@ -86,16 +80,13 @@ def test_valid_shaker_door_svg():
     failures = [r for r in results if r.status == Verdict.FAIL]
     assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
 
-    print("PASS: test_valid_shaker_door_svg")
-
 
 def test_valid_multiple_depths_svg():
     """Test that multiple depths SVG passes all invariants."""
     svg_path = get_recipe_svg_path(6, "multiple_depths", "06_multiple_depths.svg")
 
     if not os.path.exists(svg_path):
-        print(f"SKIP: {svg_path} not found")
-        return
+        pytest.skip("{svg_path} not found")
 
     with open(svg_path, encoding="utf-8") as f:
         svg_content = f.read()
@@ -104,8 +95,6 @@ def test_valid_multiple_depths_svg():
 
     failures = [r for r in results if r.status == Verdict.FAIL]
     assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-
-    print("PASS: test_valid_multiple_depths_svg")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -125,8 +114,6 @@ def test_invalid_xml():
     assert results[0].status == Verdict.FAIL
     assert "parse error" in str(results[0].failures).lower()
 
-    print("PASS: test_invalid_xml")
-
 
 def test_empty_content():
     """Test that empty content fails SVG_VALID_XML."""
@@ -135,8 +122,6 @@ def test_empty_content():
     assert len(results) >= 1
     assert results[0].id == "SVG_VALID_XML"
     assert results[0].status == Verdict.FAIL
-
-    print("PASS: test_empty_content")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -158,8 +143,6 @@ def test_missing_viewbox():
     assert viewbox_result.status == Verdict.FAIL
     assert "viewBox" in str(viewbox_result.failures)
 
-    print("PASS: test_missing_viewbox")
-
 
 def test_valid_viewbox():
     """Test that SVG with viewBox passes SVG_HAS_VIEWBOX."""
@@ -173,8 +156,6 @@ def test_valid_viewbox():
 
     viewbox_result = next(r for r in results if r.id == "SVG_HAS_VIEWBOX")
     assert viewbox_result.status == Verdict.PASS
-
-    print("PASS: test_valid_viewbox")
 
 
 def test_comma_separated_viewbox():
@@ -190,8 +171,6 @@ def test_comma_separated_viewbox():
     viewbox_result = next(r for r in results if r.id == "SVG_HAS_VIEWBOX")
     assert viewbox_result.status == Verdict.PASS
     assert viewbox_result.details.get("viewbox") == [0, 0, 100, 100]
-
-    print("PASS: test_comma_separated_viewbox")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -212,8 +191,6 @@ def test_zero_dimensions():
     dim_result = next(r for r in results if r.id == "SVG_POSITIVE_DIMENSIONS")
     assert dim_result.status == Verdict.FAIL
     assert "not positive" in str(dim_result.failures).lower()
-
-    print("PASS: test_zero_dimensions")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -237,8 +214,6 @@ def test_invalid_path_d():
     assert path_result.status == Verdict.FAIL
     assert "doesn't start with M" in str(path_result.failures)
 
-    print("PASS: test_invalid_path_d")
-
 
 def test_empty_path_d():
     """Test that paths with empty d attribute fail SVG_PATHS_VALID."""
@@ -256,8 +231,6 @@ def test_empty_path_d():
     assert path_result.status == Verdict.FAIL
     assert "empty" in str(path_result.failures).lower()
 
-    print("PASS: test_empty_path_d")
-
 
 def test_valid_paths():
     """Test that valid paths pass SVG_PATHS_VALID."""
@@ -273,8 +246,6 @@ def test_valid_paths():
 
     path_result = next(r for r in results if r.id == "SVG_PATHS_VALID")
     assert path_result.status == Verdict.PASS
-
-    print("PASS: test_valid_paths")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -298,8 +269,6 @@ def test_unclosed_profile():
     assert profile_result.status == Verdict.FAIL
     assert "not closed" in str(profile_result.failures).lower()
 
-    print("PASS: test_unclosed_profile")
-
 
 def test_closed_profile_path():
     """Test that closed profile paths pass SVG_CLOSED_PROFILES."""
@@ -315,8 +284,6 @@ def test_closed_profile_path():
 
     profile_result = next(r for r in results if r.id == "SVG_CLOSED_PROFILES")
     assert profile_result.status == Verdict.PASS
-
-    print("PASS: test_closed_profile_path")
 
 
 def test_profile_rect_inherently_closed():
@@ -336,8 +303,6 @@ def test_profile_rect_inherently_closed():
     assert profile_result.checked == 1
     assert profile_result.passed == 1
 
-    print("PASS: test_profile_rect_inherently_closed")
-
 
 def test_profile_polygon_inherently_closed():
     """Test that polygon elements in profile layer count as closed."""
@@ -355,8 +320,6 @@ def test_profile_polygon_inherently_closed():
     assert profile_result.status == Verdict.PASS
     assert profile_result.checked == 1
     assert profile_result.passed == 1
-
-    print("PASS: test_profile_polygon_inherently_closed")
 
 
 def test_profile_polyline_closed():
@@ -376,8 +339,6 @@ def test_profile_polyline_closed():
     assert profile_result.checked == 1
     assert profile_result.passed == 1
 
-    print("PASS: test_profile_polyline_closed")
-
 
 def test_profile_polyline_unclosed():
     """Test that unclosed polyline in profile layer fails."""
@@ -394,8 +355,6 @@ def test_profile_polyline_unclosed():
     profile_result = next(r for r in results if r.id == "SVG_CLOSED_PROFILES")
     assert profile_result.status == Verdict.FAIL
     assert "not closed" in str(profile_result.failures).lower()
-
-    print("PASS: test_profile_polyline_unclosed")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -419,8 +378,6 @@ def test_unclosed_pocket():
     assert pocket_result.status == Verdict.FAIL
     assert "not closed" in str(pocket_result.failures).lower()
 
-    print("PASS: test_unclosed_pocket")
-
 
 def test_closed_pocket():
     """Test that closed pocket paths pass SVG_CLOSED_POCKETS."""
@@ -436,8 +393,6 @@ def test_closed_pocket():
 
     pocket_result = next(r for r in results if r.id == "SVG_CLOSED_POCKETS")
     assert pocket_result.status == Verdict.PASS
-
-    print("PASS: test_closed_pocket")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -460,8 +415,6 @@ def test_empty_expected_layer():
     assert layer_result.status == Verdict.WARN
     assert "empty" in str(layer_result.failures).lower()
 
-    print("PASS: test_empty_expected_layer")
-
 
 def test_nonempty_expected_layer():
     """Test that non-empty expected layers pass."""
@@ -477,8 +430,6 @@ def test_nonempty_expected_layer():
 
     layer_result = next(r for r in results if r.id == "SVG_NO_EMPTY_LAYERS")
     assert layer_result.status == Verdict.PASS
-
-    print("PASS: test_nonempty_expected_layer")
 
 
 def test_missing_expected_layer():
@@ -499,8 +450,6 @@ def test_missing_expected_layer():
     assert "missing" in str(layer_result.failures).lower()
     assert layer_result.checked == 2
     assert layer_result.passed == 1  # PROFILE_CUTS passes
-
-    print("PASS: test_missing_expected_layer")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -523,8 +472,6 @@ def test_no_dimensions():
     dim_result = next(r for r in results if r.id == "SVG_DIMENSIONS_PRESENT")
     assert dim_result.status == Verdict.WARN
 
-    print("PASS: test_no_dimensions")
-
 
 def test_dimensions_in_layer():
     """Test that SVG with DIMENSIONS layer content passes."""
@@ -541,8 +488,6 @@ def test_dimensions_in_layer():
 
     dim_result = next(r for r in results if r.id == "SVG_DIMENSIONS_PRESENT")
     assert dim_result.status == Verdict.PASS
-
-    print("PASS: test_dimensions_in_layer")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -565,8 +510,6 @@ def test_content_within_viewbox():
     bounds_result = next(r for r in results if r.id == "SVG_BOUNDS_WITHIN_VIEWBOX")
     assert bounds_result.status == Verdict.PASS
 
-    print("PASS: test_content_within_viewbox")
-
 
 def test_content_outside_viewbox():
     """Test that content outside viewBox fails."""
@@ -583,8 +526,6 @@ def test_content_outside_viewbox():
     bounds_result = next(r for r in results if r.id == "SVG_BOUNDS_WITHIN_VIEWBOX")
     assert bounds_result.status == Verdict.FAIL
     assert "x_min" in str(bounds_result.failures)
-
-    print("PASS: test_content_outside_viewbox")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -641,8 +582,6 @@ def test_all_recipe_svgs_pass():
             print(f"  {filename}: {fails}")
         raise AssertionError(f"{len(failed_svgs)} recipe SVGs failed invariants")
 
-    print(f"PASS: test_all_recipe_svgs_pass ({passed} passed, {skipped} skipped)")
-
 
 def test_nesting_output_svgs():
     """Test that nesting output SVGs pass invariants."""
@@ -684,8 +623,6 @@ def test_nesting_output_svgs():
             print(f"  {filename}: {fails}")
         raise AssertionError(f"{len(failed_svgs)} nesting SVGs failed invariants")
 
-    print(f"PASS: test_nesting_output_svgs ({passed} passed, {skipped} skipped)")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Test: Invariant Result Structure
@@ -712,8 +649,6 @@ def test_invariant_result_to_dict():
         assert "status" in d["invariant"]
         assert "details" in d["invariant"]
 
-    print("PASS: test_invariant_result_to_dict")
-
 
 def test_all_invariant_ids_present():
     """Test that all expected invariant IDs are returned."""
@@ -734,80 +669,7 @@ def test_all_invariant_ids_present():
     for expected_id in SVG_INVARIANT_IDS:
         assert expected_id in result_ids, f"Missing invariant: {expected_id}"
 
-    print("PASS: test_all_invariant_ids_present")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
-
-
-def run_all_tests():
-    """Run all SVG invariant tests."""
-    tests = [
-        # Valid SVG tests
-        test_valid_simple_profile_svg,
-        test_valid_shaker_door_svg,
-        test_valid_multiple_depths_svg,
-        # Invalid XML tests
-        test_invalid_xml,
-        test_empty_content,
-        # ViewBox tests
-        test_missing_viewbox,
-        test_valid_viewbox,
-        test_comma_separated_viewbox,
-        # Dimension tests
-        test_zero_dimensions,
-        # Path validation tests
-        test_invalid_path_d,
-        test_empty_path_d,
-        test_valid_paths,
-        # Closed profiles tests
-        test_unclosed_profile,
-        test_closed_profile_path,
-        test_profile_rect_inherently_closed,
-        test_profile_polygon_inherently_closed,
-        test_profile_polyline_closed,
-        test_profile_polyline_unclosed,
-        # Closed pockets tests
-        test_unclosed_pocket,
-        test_closed_pocket,
-        # Empty layers tests
-        test_empty_expected_layer,
-        test_nonempty_expected_layer,
-        test_missing_expected_layer,
-        # Dimensions present tests
-        test_no_dimensions,
-        test_dimensions_in_layer,
-        # Bounds within viewBox tests
-        test_content_within_viewbox,
-        test_content_outside_viewbox,
-        # Recipe validation tests
-        test_all_recipe_svgs_pass,
-        test_nesting_output_svgs,
-        # Result structure tests
-        test_invariant_result_to_dict,
-        test_all_invariant_ids_present,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"FAIL: {test.__name__}: {e}")
-            failed += 1
-
-    print(f"\n{'=' * 60}")
-    print(f"SVG Invariant Tests: {passed} passed, {failed} failed")
-    print(f"{'=' * 60}")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

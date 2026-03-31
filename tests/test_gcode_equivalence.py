@@ -1,5 +1,4 @@
 import hashlib
-import sys
 from typing import Any
 
 from adapters.hints_to_removal import (
@@ -104,7 +103,6 @@ def _planner_input_from_hints(
 
 
 def test_profile_gcode_equivalence():
-    print("Running test_profile_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     machine = Machine(name="default_grbl")
@@ -130,12 +128,8 @@ def test_profile_gcode_equivalence():
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
-    print(f"  ✓ PASS (hash: {hash_v1[:16]}...)")
-    return True
-
 
 def test_pocket_gcode_equivalence():
-    print("Running test_pocket_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     machine = Machine(name="default_grbl")
@@ -160,12 +154,8 @@ def test_pocket_gcode_equivalence():
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
-    print(f"  ✓ PASS (hash: {hash_v1[:16]}...)")
-    return True
-
 
 def test_hole_gcode_equivalence():
-    print("Running test_hole_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=300.0, height=200.0, thickness=sheet_thickness)
     machine = Machine(name="default_grbl")
@@ -190,12 +180,8 @@ def test_hole_gcode_equivalence():
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
 
-    print(f"  ✓ PASS (hash: {hash_v1[:16]}...)")
-    return True
-
 
 def test_mixed_operations_gcode_equivalence():
-    print("Running test_mixed_operations_gcode_equivalence...")
     sheet_thickness = 19.0
     stock = Stock(width=400.0, height=300.0, thickness=sheet_thickness)
     machine = Machine(name="default_grbl")
@@ -243,37 +229,3 @@ def test_mixed_operations_gcode_equivalence():
 
     assert hash_v1 == hash_v2, f"G-code mismatch:\nv1 hash: {hash_v1}\nv2 hash: {hash_v2}"
     assert gcode_v1 == gcode_v2, "G-code should be byte-identical"
-
-    print(f"  ✓ PASS (hash: {hash_v1[:16]}...)")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_profile_gcode_equivalence,
-        test_pocket_gcode_equivalence,
-        test_hole_gcode_equivalence,
-        test_mixed_operations_gcode_equivalence,
-    ]
-
-    results = []
-    for test in tests:
-        try:
-            results.append(test())
-        except Exception as e:
-            print(f"  ✗ FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            results.append(False)
-
-    passed = sum(results)
-    total = len(results)
-    print(f"\n{passed}/{total} G-code equivalence tests passed")
-
-    if all(results):
-        print("\n✓ BYTE-IDENTICAL: v2 adapter path produces identical G-code to v1 direct path")
-    else:
-        print("\n✗ EQUIVALENCE FAILED: G-code differs between paths")
-
-    sys.exit(0 if all(results) else 1)

@@ -1,11 +1,8 @@
-import sys
-
 from nesting.api import nest_and_generate, nest_parts
 from nesting.maxrects import MaxRectsHeuristic, maxrects_pack
 
 
 def test_maxrects_basic():
-    print("Running test_maxrects_basic...")
     parts = [
         (100, 100, False, "p1"),
         (100, 100, False, "p2"),
@@ -24,11 +21,9 @@ def test_maxrects_basic():
 
     positions = [(p.x, p.y) for p in placements]
     assert len(set(positions)) == 4
-    print("  PASSED")
 
 
 def test_maxrects_with_gap():
-    print("Running test_maxrects_with_gap...")
     parts = [
         (100, 100, False, "p1"),
         (100, 100, False, "p2"),
@@ -46,12 +41,9 @@ def test_maxrects_with_gap():
     for p in placements:
         assert p.x + 100 + 10 <= 250 or p.x == placements[-1].x
         assert p.y + 100 + 10 <= 150 or p.y == placements[-1].y
-    print("  PASSED")
 
 
 def test_maxrects_rotation():
-    print("Running test_maxrects_rotation...")
-
     parts = [
         (200, 100, True, "p1"),
     ]
@@ -65,12 +57,9 @@ def test_maxrects_rotation():
 
     assert len(placements) == 1
     assert placements[0].rotated is True
-    print("  PASSED")
 
 
 def test_maxrects_no_rotation():
-    print("Running test_maxrects_no_rotation...")
-
     parts = [
         (200, 100, False, "p1"),
     ]
@@ -83,11 +72,9 @@ def test_maxrects_no_rotation():
     )
 
     assert len(placements) == 0
-    print("  PASSED")
 
 
 def test_maxrects_heuristics():
-    print("Running test_maxrects_heuristics...")
     parts = [
         (100, 150, True, "p1"),
         (80, 120, True, "p2"),
@@ -104,11 +91,8 @@ def test_maxrects_heuristics():
         )
         assert len(placements) == 3, f"Heuristic {heuristic.name} failed"
 
-    print("  PASSED")
-
 
 def test_maxrects_contact_point():
-    print("Running test_maxrects_contact_point...")
     parts = [
         (50, 50, False, "p1"),
         (50, 50, False, "p2"),
@@ -137,11 +121,9 @@ def test_maxrects_contact_point():
             y2_max = p2.y + 50
             overlaps = not (p1.x >= x2_max or p2.x >= x1_max or p1.y >= y2_max or p2.y >= y1_max)
             assert not overlaps, f"Parts {i} and {j} overlap"
-    print("  PASSED")
 
 
 def test_maxrects_api_integration():
-    print("Running test_maxrects_api_integration...")
     parts = [
         {"name": "panel", "width_mm": 400, "height_mm": 300, "quantity": 4},
     ]
@@ -156,11 +138,9 @@ def test_maxrects_api_integration():
 
     assert result["total_parts"] == 4
     assert result["total_sheets"] >= 1
-    print("  PASSED")
 
 
 def test_maxrects_vs_guillotine():
-    print("Running test_maxrects_vs_guillotine...")
     parts = [
         {"name": "large_door", "width_mm": 457, "height_mm": 597, "quantity": 20},
         {"name": "small_door", "width_mm": 305, "height_mm": 203, "quantity": 15},
@@ -187,17 +167,12 @@ def test_maxrects_vs_guillotine():
         algorithm="maxrects",
     )
 
-    print(f"  Guillotine: {guillotine_result['total_sheets']} sheets, {guillotine_result['utilization_percent']:.1f}%")
-    print(f"  MaxRects:   {maxrects_result['total_sheets']} sheets, {maxrects_result['utilization_percent']:.1f}%")
-
     assert maxrects_result["utilization_percent"] >= guillotine_result["utilization_percent"] - 5
 
     assert maxrects_result["total_sheets"] <= guillotine_result["total_sheets"]
-    print("  PASSED")
 
 
 def test_maxrects_generate_ast():
-    print("Running test_maxrects_generate_ast...")
     parts = [
         {"name": "panel", "width_mm": 300, "height_mm": 300, "quantity": 2},
     ]
@@ -217,11 +192,9 @@ def test_maxrects_generate_ast():
     ast = result["output"][0]
     assert hasattr(ast, "sheet")
     assert hasattr(ast, "items")
-    print("  PASSED")
 
 
 def test_maxrects_invalid_algorithm():
-    print("Running test_maxrects_invalid_algorithm...")
     parts = [{"name": "panel", "width_mm": 100, "height_mm": 100}]
 
     try:
@@ -235,50 +208,3 @@ def test_maxrects_invalid_algorithm():
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "Invalid algorithm" in str(e)
-
-    print("  PASSED")
-
-
-def run_all_tests():
-    print("=" * 60)
-    print("MaxRects Algorithm Tests")
-    print("=" * 60)
-
-    tests = [
-        test_maxrects_basic,
-        test_maxrects_with_gap,
-        test_maxrects_rotation,
-        test_maxrects_no_rotation,
-        test_maxrects_heuristics,
-        test_maxrects_contact_point,
-        test_maxrects_api_integration,
-        test_maxrects_vs_guillotine,
-        test_maxrects_generate_ast,
-        test_maxrects_invalid_algorithm,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print()
-    print("=" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-    print("=" * 60)
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)

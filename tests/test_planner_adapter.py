@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import Any
 
 from adapters.hints_to_removal import (
@@ -22,7 +21,6 @@ def approx_eq(a, b, rel=1e-6):
 
 
 def test_roundtrip_profile_through_cut():
-    print("Running test_roundtrip_profile_through_cut...")
     original_hint: dict[str, Any] = {
         "id": "rect_outline",
         "shape": "Rect",
@@ -44,12 +42,9 @@ def test_roundtrip_profile_through_cut():
     assert approx_eq(reconstructed_hint["center_xy_mm"][1], original_hint["center_xy_mm"][1])
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
     assert reconstructed_hint["side"] == original_hint["side"]
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_profile_with_tabs():
-    print("Running test_roundtrip_profile_with_tabs...")
     original_hint = {
         "id": "panel_outline",
         "shape": "Rect",
@@ -69,12 +64,9 @@ def test_roundtrip_profile_with_tabs():
     assert reconstructed_hint["tabs"]["count"] == 6
     assert approx_eq(reconstructed_hint["tabs"]["height_mm"], 3.0)
     assert approx_eq(reconstructed_hint["tabs"]["width_mm"], 10.0)
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_profile_inside_cut():
-    print("Running test_roundtrip_profile_inside_cut...")
     original_hint = {
         "id": "aperture",
         "shape": "Rect",
@@ -89,12 +81,9 @@ def test_roundtrip_profile_inside_cut():
 
     assert reconstructed_hint["side"] == "inside"
     assert approx_eq(reconstructed_hint["depth_mm"], 12.0)
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_pocket_basic():
-    print("Running test_roundtrip_pocket_basic...")
     original_hint: dict[str, Any] = {
         "id": "pocket_1",
         "shape": "Rect",
@@ -113,12 +102,9 @@ def test_roundtrip_pocket_basic():
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
 
     assert "start_depth_mm" not in reconstructed_hint
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_pocket_with_start_depth():
-    print("Running test_roundtrip_pocket_with_start_depth...")
     original_hint = {
         "id": "stepped_pocket",
         "shape": "Rect",
@@ -134,12 +120,9 @@ def test_roundtrip_pocket_with_start_depth():
     assert reconstructed_hint["id"] == original_hint["id"]
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
     assert approx_eq(reconstructed_hint["start_depth_mm"], original_hint["start_depth_mm"])
-    print("  PASS")
-    return True
 
 
 def test_roundtrip_hole_circle():
-    print("Running test_roundtrip_hole_circle...")
     original_hint: dict[str, Any] = {
         "id": "mounting_hole",
         "shape": "Circle",
@@ -157,12 +140,9 @@ def test_roundtrip_hole_circle():
     assert approx_eq(reconstructed_hint["center_xy_mm"][0], original_hint["center_xy_mm"][0])
     assert approx_eq(reconstructed_hint["center_xy_mm"][1], original_hint["center_xy_mm"][1])
     assert approx_eq(reconstructed_hint["depth_mm"], original_hint["depth_mm"])
-    print("  PASS")
-    return True
 
 
 def test_batch_conversion_to_hints_structure():
-    print("Running test_batch_conversion_to_hints_structure...")
     profile_hint = {
         "id": "outer",
         "shape": "Rect",
@@ -210,12 +190,9 @@ def test_batch_conversion_to_hints_structure():
 
     assert hints["holes"][0]["id"] == "mount"
     assert approx_eq(hints["holes"][0]["geometry"]["diameter_mm"], 6.0)
-    print("  PASS")
-    return True
 
 
 def test_geometry_preservation_rect():
-    print("Running test_geometry_preservation_rect...")
     hint: dict[str, Any] = {
         "id": "test_rect",
         "shape": "Rect",
@@ -231,12 +208,9 @@ def test_geometry_preservation_rect():
     assert approx_eq(reconstructed["geometry"]["h_mm"], hint["geometry"]["h_mm"], rel=1e-9)
     assert approx_eq(reconstructed["center_xy_mm"][0], hint["center_xy_mm"][0], rel=1e-9)
     assert approx_eq(reconstructed["center_xy_mm"][1], hint["center_xy_mm"][1], rel=1e-9)
-    print("  PASS")
-    return True
 
 
 def test_geometry_preservation_circle():
-    print("Running test_geometry_preservation_circle...")
     hint: dict[str, Any] = {
         "id": "test_circle",
         "shape": "Circle",
@@ -251,12 +225,9 @@ def test_geometry_preservation_circle():
     assert approx_eq(reconstructed["geometry"]["diameter_mm"], hint["geometry"]["diameter_mm"], rel=1e-9)
     assert approx_eq(reconstructed["center_xy_mm"][0], hint["center_xy_mm"][0], rel=1e-9)
     assert approx_eq(reconstructed["center_xy_mm"][1], hint["center_xy_mm"][1], rel=1e-9)
-    print("  PASS")
-    return True
 
 
 def test_depth_preservation():
-    print("Running test_depth_preservation...")
     hint = {
         "id": "deep_pocket",
         "shape": "Rect",
@@ -271,12 +242,9 @@ def test_depth_preservation():
 
     assert approx_eq(reconstructed["depth_mm"], hint["depth_mm"], rel=1e-9)
     assert approx_eq(reconstructed["start_depth_mm"], hint["start_depth_mm"], rel=1e-9)
-    print("  PASS")
-    return True
 
 
 def test_metadata_fields_preserved():
-    print("Running test_metadata_fields_preserved...")
     hint = {
         "id": "custom_id_123",
         "shape": "Rect",
@@ -292,35 +260,3 @@ def test_metadata_fields_preserved():
     assert reconstructed["id"] == hint["id"]
     assert reconstructed["shape"] == hint["shape"]
     assert reconstructed["side"] == hint["side"]
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_roundtrip_profile_through_cut,
-        test_roundtrip_profile_with_tabs,
-        test_roundtrip_profile_inside_cut,
-        test_roundtrip_pocket_basic,
-        test_roundtrip_pocket_with_start_depth,
-        test_roundtrip_hole_circle,
-        test_batch_conversion_to_hints_structure,
-        test_geometry_preservation_rect,
-        test_geometry_preservation_circle,
-        test_depth_preservation,
-        test_metadata_fields_preserved,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

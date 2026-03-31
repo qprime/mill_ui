@@ -39,13 +39,8 @@ Note:
 from __future__ import annotations
 
 import math
-import sys
 import time
 from collections.abc import Callable
-from pathlib import Path
-
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from domains import Domain
 from generators import (
@@ -600,56 +595,3 @@ def run_benchmarks():
     print("\n" + "=" * 70)
     print("Benchmark complete")
     print("=" * 70)
-
-
-def run_tests():
-    """Run performance tests with pass/fail criteria."""
-    print("Running performance validation tests...")
-    print("-" * 60)
-
-    passed = 0
-    failed = 0
-
-    # Define performance thresholds (in seconds)
-    thresholds = [
-        ("Rectangle construction", bench_domain_rectangle_construction, 0.001),  # 1ms
-        ("Polygon 100 vertices", bench_domain_polygon_construction, 0.010),  # 10ms
-        ("Domain with 10 holes", bench_domain_with_holes_construction, 0.050),  # 50ms
-        ("Inset operation", bench_domain_inset, 0.005),  # 5ms
-        ("Subtract operation", bench_domain_subtract, 0.005),  # 5ms
-        ("Flat pocket generator", bench_flat_pocket_generator, 0.005),  # 5ms
-        ("Profile generator", bench_profile_generator, 0.005),  # 5ms
-        ("Wave generator", bench_wave_generator, 0.100),  # 100ms
-        ("Grid generator", bench_grid_generator, 0.100),  # 100ms
-        ("Full pipeline", bench_full_pipeline_with_ir, 0.200),  # 200ms
-    ]
-
-    for name, bench_func, threshold in thresholds:
-        result = bench_func()
-        if result.avg_time <= threshold:
-            print(f"PASS: {name} ({result.avg_time * 1000:.2f}ms <= {threshold * 1000:.0f}ms)")
-            passed += 1
-        else:
-            print(f"FAIL: {name} ({result.avg_time * 1000:.2f}ms > {threshold * 1000:.0f}ms)")
-            failed += 1
-
-    print("-" * 60)
-    print(f"Results: {passed} passed, {failed} failed")
-
-    return failed == 0
-
-
-if __name__ == "__main__":
-    import os
-    import sys
-
-    # Allow skipping in CI via environment variable
-    if os.environ.get("SKIP_PERF_TESTS", "").lower() in ("1", "true", "yes"):
-        print("SKIP_PERF_TESTS is set, skipping performance tests")
-        sys.exit(0)
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--full":
-        run_benchmarks()
-    else:
-        success = run_tests()
-        sys.exit(0 if success else 1)

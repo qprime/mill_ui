@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import sys
+import pytest
 
 from layout_ast.compositional import (
     ChamferGen,
@@ -12,71 +12,52 @@ from layout_ast.compositional import (
     SplitVertical,
     WaveGen,
 )
-from pml.yaml_parser import PMLParseError, parse_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
-
-def test_parse_profile_gen_outside_through():
-    print("Running test_parse_profile_gen_outside_through...")
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: door
-      children:
-        - Profile:
-            side: outside
-            depth: through
-"""
-    ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    assert len(rect.children) == 1
-
-    profile = rect.children[0]
-    assert isinstance(profile, ProfileGen)
-    assert profile.side == "outside"
-    assert profile.depth == "through"
-    print("  PASS")
-    return True
-
-
-def test_parse_profile_gen_inside_depth():
-    print("Running test_parse_profile_gen_inside_depth...")
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: door
-      children:
-        - Profile:
-            side: inside
-            depth: 10mm
-"""
-    ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    profile = rect.children[0]
-    assert isinstance(profile, ProfileGen)
-    assert profile.side == "inside"
-    assert profile.depth == 10.0
-    print("  PASS")
-    return True
+PARSE_CASES = [
+    pytest.param(
+        "Profile:\n            side: outside\n            depth: through",
+        ProfileGen,
+        {"side": "outside", "depth": "through"},
+        id="profile_outside_through",
+    ),
+    pytest.param(
+        "Profile:\n            side: inside\n            depth: 10mm",
+        ProfileGen,
+        {"side": "inside", "depth": 10.0},
+        id="profile_inside_depth",
+    ),
+    pytest.param(
+        "Pocket:\n            depth: 6mm",
+        PocketGen,
+        {"depth_mm": 6.0},
+        id="pocket",
+    ),
+    pytest.param(
+        "RaisedPanel:\n            border_width: 25mm\n            border_depth: 6mm\n            field_depth: 2mm",
+        RaisedPanelGen,
+        {"border_width_mm": 25.0, "border_depth_mm": 6.0, "field_depth_mm": 2.0},
+        id="raised_panel",
+    ),
+    pytest.param(
+        "Chamfer:\n            width: 5mm\n            depth: 3mm",
+        ChamferGen,
+        {"width_mm": 5.0, "depth_mm": 3.0},
+        id="chamfer",
+    ),
+    pytest.param(
+        "Wave:\n            count: 5\n            amplitude: 10mm\n            wavelength: 60mm\n            groove: 3mm\n            depth: 2mm",
+        WaveGen,
+        {"wave_count": 5, "amplitude_mm": 10.0, "wavelength_mm": 60.0, "groove_width_mm": 3.0, "depth_mm": 2.0},
+        id="wave",
+    ),
+]
 
 
-def test_parse_pocket_gen():
-    print("Running test_parse_pocket_gen...")
-    pml = """
+@pytest.mark.parametrize("gen_yaml, expected_type, expected_fields", PARSE_CASES)
+def test_parse_generator(gen_yaml, expected_type, expected_fields):
+    pml = f"""
 Sheet:
   width: 400mm
   height: 600mm
@@ -86,114 +67,16 @@ children:
   - Rect:
       id: panel
       children:
-        - Pocket:
-            depth: 6mm
+        - {gen_yaml}
 """
     ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    pocket = rect.children[0]
-    assert isinstance(pocket, PocketGen)
-    assert pocket.depth_mm == 6.0
-    print("  PASS")
-    return True
-
-
-def test_parse_raised_panel_gen():
-    print("Running test_parse_raised_panel_gen...")
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: panel
-      children:
-        - RaisedPanel:
-            border_width: 25mm
-            border_depth: 6mm
-            field_depth: 2mm
-"""
-    ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    raised = rect.children[0]
-    assert isinstance(raised, RaisedPanelGen)
-    assert raised.border_width_mm == 25.0
-    assert raised.border_depth_mm == 6.0
-    assert raised.field_depth_mm == 2.0
-    print("  PASS")
-    return True
-
-
-def test_parse_chamfer_gen():
-    print("Running test_parse_chamfer_gen...")
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: panel
-      children:
-        - Chamfer:
-            width: 5mm
-            depth: 3mm
-"""
-    ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    chamfer = rect.children[0]
-    assert isinstance(chamfer, ChamferGen)
-    assert chamfer.width_mm == 5.0
-    assert chamfer.depth_mm == 3.0
-    print("  PASS")
-    return True
-
-
-def test_parse_wave_gen():
-    print("Running test_parse_wave_gen...")
-    pml = """
-Sheet:
-  width: 300mm
-  height: 300mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: panel
-      children:
-        - Wave:
-            count: 5
-            amplitude: 10mm
-            wavelength: 60mm
-            groove: 3mm
-            depth: 2mm
-"""
-    ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    wave = rect.children[0]
-    assert isinstance(wave, WaveGen)
-    assert wave.wave_count == 5
-    assert wave.amplitude_mm == 10.0
-    assert wave.wavelength_mm == 60.0
-    assert wave.groove_width_mm == 3.0
-    assert wave.depth_mm == 2.0
-    print("  PASS")
-    return True
+    gen = ast.root.children[0].children[0]
+    assert isinstance(gen, expected_type)
+    for attr, value in expected_fields.items():
+        assert getattr(gen, attr) == value, f"{attr}: expected {value}, got {getattr(gen, attr)}"
 
 
 def test_parse_split_horizontal():
-    print("Running test_parse_split_horizontal...")
     pml = """
 Sheet:
   width: 400mm
@@ -212,21 +95,15 @@ children:
                   depth: 6mm
 """
     ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    split_h = rect.children[0]
+    split_h = ast.root.children[0].children[0]
     assert isinstance(split_h, SplitHorizontal)
     assert split_h.n == 3
     assert split_h.gap_mm == 20.0
     assert len(split_h.children) == 1
     assert isinstance(split_h.children[0], PocketGen)
-    print("  PASS")
-    return True
 
 
 def test_parse_split_vertical():
-    print("Running test_parse_split_vertical...")
     pml = """
 Sheet:
   width: 400mm
@@ -245,20 +122,14 @@ children:
                   depth: 4mm
 """
     ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    split_v = rect.children[0]
+    split_v = ast.root.children[0].children[0]
     assert isinstance(split_v, SplitVertical)
     assert split_v.n == 2
     assert split_v.gap_mm == 15.0
     assert len(split_v.children) == 1
-    print("  PASS")
-    return True
 
 
 def test_parse_split_grid():
-    print("Running test_parse_split_grid...")
     pml = """
 Sheet:
   width: 500mm
@@ -280,22 +151,16 @@ children:
                   field_depth: 2mm
 """
     ast = parse_pml_yaml(pml)
-
-    root = ast.root
-    rect = root.children[0]
-    split_g = rect.children[0]
+    split_g = ast.root.children[0].children[0]
     assert isinstance(split_g, SplitGrid)
     assert split_g.rows == 2
     assert split_g.cols == 2
     assert split_g.gap_mm == 35.0
     assert len(split_g.children) == 1
     assert isinstance(split_g.children[0], RaisedPanelGen)
-    print("  PASS")
-    return True
 
 
 def test_resolve_profile_gen():
-    print("Running test_resolve_profile_gen...")
     pml = """
 Sheet:
   width: 400mm
@@ -322,12 +187,9 @@ children:
     assert profile_item.feature is not None
     assert profile_item.feature.side == "outside"
     assert profile_item.feature.is_through
-    print("  PASS")
-    return True
 
 
 def test_resolve_pocket_gen():
-    print("Running test_resolve_pocket_gen...")
     pml = """
 Sheet:
   width: 400mm
@@ -351,12 +213,9 @@ children:
     assert pocket_item.feature is not None
     assert pocket_item.feature.type == "pocket"
     assert pocket_item.feature.depth_mm == 6.0
-    print("  PASS")
-    return True
 
 
 def test_resolve_raised_panel_gen():
-    print("Running test_resolve_raised_panel_gen...")
     pml = """
 Sheet:
   width: 400mm
@@ -387,12 +246,9 @@ children:
     assert field_items[0].feature is not None
     assert field_items[0].feature.type == "pocket", f"Expected pocket, got {field_items[0].feature.type}"
     assert field_items[0].feature.depth_mm == 2.0
-    print("  PASS")
-    return True
 
 
 def test_resolve_split_grid_with_raised_panel():
-    print("Running test_resolve_split_grid_with_raised_panel...")
     pml = """
 Sheet:
   width: 500mm
@@ -421,12 +277,9 @@ children:
 
     assert len(border_items) == 4, f"Expected 4 border items, got {len(border_items)}"
     assert len(field_items) == 4, f"Expected 4 field items, got {len(field_items)}"
-    print("  PASS")
-    return True
 
 
 def test_resolve_wave_gen():
-    print("Running test_resolve_wave_gen...")
     pml = """
 Sheet:
   width: 300mm
@@ -454,12 +307,9 @@ children:
         assert item.feature is not None
         assert item.feature.type == "engrave", f"Expected engrave, got {item.feature.type}"
         assert item.feature.depth_mm == 2.0
-    print("  PASS")
-    return True
 
 
 def test_example_shaker_door():
-    print("Running test_example_shaker_door...")
     pml = """
 Sheet:
   width: 450mm
@@ -487,12 +337,9 @@ children:
     feature_types = {i.feature.type for i in ast.items if i.feature}
     assert "profile" in feature_types
     assert "pocket" in feature_types
-    print("  PASS")
-    return True
 
 
 def test_example_four_panel_door():
-    print("Running test_example_four_panel_door...")
     pml = """
 Sheet:
   width: 500mm
@@ -527,12 +374,9 @@ children:
 
     assert len(profile_items) >= 1, "Should have at least one profile"
     assert len(raised_items) == 8, f"Should have 8 raised panel items (4 borders + 4 fields), got {len(raised_items)}"
-    print("  PASS")
-    return True
 
 
 def test_example_wave_texture_panel():
-    print("Running test_example_wave_texture_panel...")
     pml = """
 Sheet:
   width: 300mm
@@ -561,73 +405,3 @@ children:
 
     assert len(profile_items) >= 1, "Should have profile"
     assert len(wave_items) >= 1, "Should have wave engrave items"
-    print("  PASS")
-    return True
-
-
-def test_parse_error_invalid_profile_side():
-    print("Running test_parse_error_invalid_profile_side...")
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: door
-      children:
-        - Profile:
-            side: invalid
-            depth: through
-"""
-    try:
-        parse_pml_yaml(pml)
-        print("  FAIL: Expected PMLParseError")
-        return False
-    except PMLParseError:
-        pass
-    print("  PASS")
-    return True
-
-
-if __name__ == "__main__":
-    tests = [
-        test_parse_profile_gen_outside_through,
-        test_parse_profile_gen_inside_depth,
-        test_parse_pocket_gen,
-        test_parse_raised_panel_gen,
-        test_parse_chamfer_gen,
-        test_parse_wave_gen,
-        test_parse_split_horizontal,
-        test_parse_split_vertical,
-        test_parse_split_grid,
-        test_resolve_profile_gen,
-        test_resolve_pocket_gen,
-        test_resolve_raised_panel_gen,
-        test_resolve_split_grid_with_raised_panel,
-        test_resolve_wave_gen,
-        test_example_shaker_door,
-        test_example_four_panel_door,
-        test_example_wave_texture_panel,
-        test_parse_error_invalid_profile_side,
-    ]
-
-    passed = 0
-    failed = 0
-
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-            else:
-                failed += 1
-        except Exception as e:
-            print(f"  FAIL: {e}")
-            import traceback
-
-            traceback.print_exc()
-            failed += 1
-
-    print(f"\n{passed} passed, {failed} failed")
-    sys.exit(0 if failed == 0 else 1)

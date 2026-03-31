@@ -105,7 +105,8 @@ def _plan_rest_pocket(
 ) -> None:
     from cam.ops.pocket import pocket_raster
 
-    assert entry.rest is not None
+    if entry.rest is None:
+        raise ValueError(f"Rest pocketing requires rest parameters on feature '{entry.id}'")
     rest = entry.rest
     shape_name = entry.shape.lower()
 

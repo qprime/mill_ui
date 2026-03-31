@@ -192,7 +192,8 @@ def _build_edge_feature_intent(
     depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm)
     shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
 
-    assert item.feature is not None
+    if item.feature is None:
+        raise ValueError(f"Edge feature item '{item.id}' has no feature specification")
     return RemovalIntent(
         region_id=f"{feature_type}_{hint[HintKeys.ID]}",
         bounds=bounds,

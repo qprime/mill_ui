@@ -158,7 +158,8 @@ def _generate_dogbone_input(
     feature: FeatureInput,
 ) -> DogboneInput:
     _validate_dogbone(intent)
-    assert intent.dogbone is not None
+    if intent.dogbone is None:
+        raise ValueError(f"Dogbone generation requires dogbone config on intent '{intent.region_id}'")
 
     if intent.dogbone_corners is not None:
         corners = intent.dogbone_corners

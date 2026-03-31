@@ -96,6 +96,20 @@ def parse_dimension_or_through(value: Any) -> float | str:
     return parse_dimension(value)
 
 
+def _safe_float(value: Any, field: str, path: str) -> float:
+    try:
+        return float(value)
+    except (ValueError, TypeError) as e:
+        raise PMLParseError(f"Invalid {field}: {e}", path) from e
+
+
+def _safe_int(value: Any, field: str, path: str) -> int:
+    try:
+        return int(value)
+    except (ValueError, TypeError) as e:
+        raise PMLParseError(f"Invalid {field}: {e}", path) from e
+
+
 def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
     dogbone_raw = data.get("dogbone")
     dogbone: DogboneSpec | bool | None = None
@@ -128,16 +142,19 @@ def parse_children(children_data: list[dict] | None, path: str = "") -> tuple[An
     return tuple(parse_node(child, f"{path}.children[{i}]") for i, child in enumerate(children_data))
 
 
-def _parse_feeds_override(data: dict | None) -> FeedsOverride | None:
+def _parse_feeds_override(data: dict | None, path: str = "") -> FeedsOverride | None:
     if not data:
         return None
-    return FeedsOverride(
-        rpm=float(data["rpm"]) if "rpm" in data else None,
-        feed_xy=float(data["feed_xy"]) if "feed_xy" in data else None,
-        feed_z=float(data["feed_z"]) if "feed_z" in data else None,
-        depth_per_pass=float(data["depth_per_pass"]) if "depth_per_pass" in data else None,
-        stepover_percent=float(data["stepover_percent"]) if "stepover_percent" in data else None,
-    )
+    try:
+        return FeedsOverride(
+            rpm=float(data["rpm"]) if "rpm" in data else None,
+            feed_xy=float(data["feed_xy"]) if "feed_xy" in data else None,
+            feed_z=float(data["feed_z"]) if "feed_z" in data else None,
+            depth_per_pass=float(data["depth_per_pass"]) if "depth_per_pass" in data else None,
+            stepover_percent=float(data["stepover_percent"]) if "stepover_percent" in data else None,
+        )
+    except (ValueError, TypeError) as e:
+        raise PMLParseError(f"Invalid feeds_override: {e}", path) from e
 
 
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
@@ -188,7 +205,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,
-        feeds_override=_parse_feeds_override(data.get("feeds")),
+        feeds_override=_parse_feeds_override(data.get("feeds"), f"{path}.feeds"),
     )
 
 
@@ -225,7 +242,10 @@ def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
     grid_raw = node_data.get("grid")
     grid = None
     if grid_raw and isinstance(grid_raw, list) and len(grid_raw) == 2:
-        grid = (int(grid_raw[0]), int(grid_raw[1]))
+        try:
+            grid = (int(grid_raw[0]), int(grid_raw[1]))
+        except (ValueError, TypeError) as e:
+            raise PMLParseError(f"Invalid grid values: {e}", path) from e
 
     shelf_joinery: str | InterfaceConfig = (
         _parse_joinery_field(node_data.get("shelf_joinery", "captured"), default_joinery="captured") or "captured"
@@ -418,7 +438,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             depth=depth,
             feature_type=node_data.get("feature", "engrave"),
             scale_mode=node_data.get("scale", "fit"),
-            svg_unit_mm=float(node_data.get("svg_unit", 1.0)),
+            svg_unit_mm=_safe_float(node_data.get("svg_unit", 1.0), "svg_unit", f"{path}.SvgStamp"),
             center=node_data.get("center", True),
             invert_y=node_data.get("invert_y", True),
         )
@@ -597,13 +617,13 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             tab_height_mm=parse_dimension(node_data["tab_height"]) if "tab_height" in node_data else None,
             tab_width_mm=parse_dimension(node_data["tab_width"]) if "tab_width" in node_data else None,
             onion_skin_mm=parse_dimension(node_data["onion_skin_mm"]) if "onion_skin_mm" in node_data else None,
-            feeds_override=_parse_feeds_override(node_data.get("feeds")),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), f"{path}.Profile.feeds"),
         )
 
     elif node_type == "Pocket":
         return PocketGen(
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")),
-            feeds_override=_parse_feeds_override(node_data.get("feeds")),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), f"{path}.Pocket.feeds"),
         )
 
     elif node_type == "RaisedPanel":
@@ -670,7 +690,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     elif node_type == "Lines":
         return LinesGen(
-            angle_deg=float(_require(node_data, "angle", f"{path}.Lines")),
+            angle_deg=_safe_float(_require(node_data, "angle", f"{path}.Lines"), "angle", f"{path}.Lines"),
             spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Lines")),
             line_width_mm=parse_dimension(_require(node_data, "width", f"{path}.Lines")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Lines")),
@@ -838,14 +858,14 @@ def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     depth_mm = parse_dimension(_require(block, "depth-per-pass", "Surface"))
     if depth_mm <= 0.0:
         raise PMLParseError("Surface depth-per-pass must be > 0", "Surface")
-    passes = int(block.get("passes", 1))
+    passes = _safe_int(block.get("passes", 1), "passes", "Surface")
     if passes < 1:
         raise PMLParseError("Surface passes must be >= 1", "Surface")
     stepover_raw = block.get("stepover", "70%")
     if isinstance(stepover_raw, str) and stepover_raw.endswith("%"):
-        stepover_pct = float(stepover_raw[:-1])
+        stepover_pct = _safe_float(stepover_raw[:-1], "stepover", "Surface")
     else:
-        stepover_pct = float(stepover_raw)
+        stepover_pct = _safe_float(stepover_raw, "stepover", "Surface")
     if stepover_pct <= 0.0 or stepover_pct > 100.0:
         raise PMLParseError("Surface stepover must be > 0% and <= 100%", "Surface")
     direction = str(block.get("direction", "x"))
@@ -854,14 +874,14 @@ def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     margin_mm = parse_dimension(block.get("margin-overrun", "0mm"))
     if margin_mm < 0.0:
         raise PMLParseError("Surface margin-overrun must be >= 0", "Surface")
-    cool_every = int(block.get("cool_every", 0))
+    cool_every = _safe_int(block.get("cool_every", 0), "cool_every", "Surface")
     if cool_every < 0:
         raise PMLParseError("Surface cool_every must be >= 0", "Surface")
     cool_dwell_raw = block.get("cool_dwell", "0s")
     if isinstance(cool_dwell_raw, str) and cool_dwell_raw.endswith("s"):
-        cool_dwell_s = float(cool_dwell_raw[:-1])
+        cool_dwell_s = _safe_float(cool_dwell_raw[:-1], "cool_dwell", "Surface")
     else:
-        cool_dwell_s = float(cool_dwell_raw)
+        cool_dwell_s = _safe_float(cool_dwell_raw, "cool_dwell", "Surface")
     if cool_dwell_s < 0.0:
         raise PMLParseError("Surface cool_dwell must be >= 0", "Surface")
     return SurfaceDecl(
@@ -1141,7 +1161,10 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
                 for pt in points_raw:
                     if not isinstance(pt, list) or len(pt) != 2:
                         raise NestParseError(f"Invalid point {pt} for part '{name}': expected [x, y]")
-                    points.append([float(pt[0]), float(pt[1])])
+                    try:
+                        points.append([float(pt[0]), float(pt[1])])
+                    except (ValueError, TypeError) as e:
+                        raise NestParseError(f"Invalid point coordinate for part '{name}': {e}") from e
                 half_w = width / 2
                 half_h = height / 2
                 for pt in points:

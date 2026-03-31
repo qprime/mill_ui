@@ -190,8 +190,12 @@ class Domain:
         join_style: JoinStyle = "mitre",
         mitre_limit: float = 5.0,
     ) -> MultiDomain:
+        if not math.isfinite(distance):
+            raise ValueError(f"Inset distance must be finite, got {distance}")
         if distance < 0:
             raise ValueError(f"Inset distance must be non-negative, got {distance}")
+        if not math.isfinite(mitre_limit) or mitre_limit <= 0:
+            raise ValueError(f"mitre_limit must be a positive finite number, got {mitre_limit}")
         if distance == 0:
             return MultiDomain(domains=(self,))
 
@@ -209,8 +213,12 @@ class Domain:
         join_style: JoinStyle = "mitre",
         mitre_limit: float = 5.0,
     ) -> MultiDomain:
+        if not math.isfinite(distance):
+            raise ValueError(f"Offset distance must be finite, got {distance}")
         if distance < 0:
             raise ValueError(f"Offset distance must be non-negative, got {distance}")
+        if not math.isfinite(mitre_limit) or mitre_limit <= 0:
+            raise ValueError(f"mitre_limit must be a positive finite number, got {mitre_limit}")
         if distance == 0:
             return MultiDomain(domains=(self,))
 

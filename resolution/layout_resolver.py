@@ -1688,12 +1688,12 @@ class LayoutResolver:
         inner_multi = domain.inset(node.wall_mm)
         if inner_multi.is_empty:
             bounds = domain.bounds
-            raise ValueError(
+            raise GeneratorSkipError(
                 f"Shell: wall {node.wall_mm}mm exceeds shape capacity. "
                 f"Domain bounds: {bounds.width:.1f}mm x {bounds.height:.1f}mm"
             )
         if len(inner_multi.domains) != 1:
-            raise ValueError(
+            raise GeneratorSkipError(
                 f"Shell: wall inset produced {len(inner_multi.domains)} disjoint regions. "
                 f"Concave shapes with thick walls may split — reduce wall thickness or simplify shape."
             )

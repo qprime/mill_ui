@@ -13,7 +13,6 @@ GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
 
 def test_svg_output_deterministic():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=200.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -32,11 +31,9 @@ def test_svg_output_deterministic():
     svg2 = render_blueprint_svg(ast, theme="dark")
 
     assert svg1 == svg2, "SVG output should be deterministic"
-    print("  ✓ PASS")
 
 
 def test_required_layers_exist():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=150.0, height_mm=150.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
@@ -63,8 +60,6 @@ def test_required_layers_exist():
 
     assert "<circle" in svg, "Hole should be rendered as circle"
 
-    print("  ✓ PASS")
-
 
 def _create_shaker_ast(
     outer_w: float, outer_h: float, stile_w: float, rail_h: float, panel_recess: float, sheet_thickness: float
@@ -86,7 +81,6 @@ def _create_shaker_ast(
 
 
 def test_shaker_dimensions():
-
     ast = _create_shaker_ast(
         outer_w=400.0,
         outer_h=600.0,
@@ -101,11 +95,8 @@ def test_shaker_dimensions():
     assert "PROFILE_CUTS" in svg
     assert "POCKET_REGIONS" in svg
 
-    print("  ✓ PASS")
-
 
 def test_theme_toggle():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -127,8 +118,6 @@ def test_theme_toggle():
     assert "#ffffff" in svg_print, "Print theme should have white background"
 
     def extract_rects(svg):
-        import re
-
         return re.findall(r'<rect[^>]*width="[^"]*"[^>]*height="[^"]*"[^>]*/>', svg)
 
     dark_rects = extract_rects(svg_dark)
@@ -136,11 +125,8 @@ def test_theme_toggle():
 
     assert len(dark_rects) == len(print_rects), "Themes should not change geometry count"
 
-    print("  ✓ PASS")
-
 
 def test_multiple_feature_types():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=19.0, margin_mm=0.0),
         items=(
@@ -180,11 +166,8 @@ def test_multiple_feature_types():
     assert svg.count("<rect") >= 3
     assert svg.count("<circle") >= 1
 
-    print("  ✓ PASS")
-
 
 def test_viewbox_dimensions():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=250.0, height_mm=180.0, thickness_mm=12.0, margin_mm=0.0),
         items=(),
@@ -196,11 +179,8 @@ def test_viewbox_dimensions():
     assert "width=" in svg, "SVG should have width attribute"
     assert "height=" in svg, "SVG should have height attribute"
 
-    print("  ✓ PASS")
-
 
 def test_rounded_rect_rendering():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -220,11 +200,8 @@ def test_rounded_rect_rendering():
     assert "<svg" in svg
     assert 'id="PROFILE_CUTS"' in svg
 
-    print("  ✓ PASS (RoundedRect support TBD)")
-
 
 def test_golden_file_simple_profile():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=200.0, height_mm=150.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -248,7 +225,6 @@ def test_golden_file_simple_profile():
         golden_svg = golden_path.read_text(encoding="utf-8")
         golden_normalized = _normalize_svg(golden_svg)
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
-        print("  ✓ PASS")
     else:
         import os
 
@@ -257,12 +233,9 @@ def test_golden_file_simple_profile():
 
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
-        print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
-        print("  ⚠ WARN (golden file was missing)")
 
 
 def test_golden_file_shaker_door():
-
     ast = _create_shaker_ast(
         outer_w=400.0,
         outer_h=600.0,
@@ -281,7 +254,6 @@ def test_golden_file_shaker_door():
         golden_svg = golden_path.read_text(encoding="utf-8")
         golden_normalized = _normalize_svg(golden_svg)
         assert svg_normalized == golden_normalized, f"SVG differs from golden file: {golden_path}"
-        print("  ✓ PASS")
     else:
         import os
 
@@ -290,12 +262,9 @@ def test_golden_file_shaker_door():
 
         GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(svg, encoding="utf-8")
-        print(f"  ⚠ Generated golden file: {golden_path} (run tests again to verify)")
-        print("  ⚠ WARN (golden file was missing)")
 
 
 def test_dimension_rendering():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=300.0, height_mm=200.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -324,11 +293,8 @@ def test_dimension_rendering():
     assert "<line" in svg, "Should have dimension lines"
     assert "<polygon" in svg, "Should have arrowheads"
 
-    print("  ✓ PASS")
-
 
 def test_pdf_export():
-
     ast = LayoutAST(
         sheet=Sheet(width_mm=100.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),
         items=(
@@ -356,7 +322,7 @@ def test_pdf_export():
             assert pdf_path.stat().st_size > 0, "PDF file is empty"
 
     except ImportError:
-        pytest.skip("cairosvg not installed - PDF export unavailable")
+        pytest.skip("cairosvg not installed")
 
 
 def _normalize_svg(svg_text: str) -> str:

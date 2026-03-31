@@ -1,14 +1,3 @@
-# tests/test_gcode_metrics.py - Unit tests for G-code metric extraction
-#
-# Tests verify:
-# 1. Correct metric extraction from known G-code files
-# 2. Determinism (same input -> same output)
-# 3. JSON serialization
-# 4. Motion command parsing (G0, G1, G2, G3)
-# 5. Z profile and XY bounds tracking
-# 6. Time estimation with configurable rapid rate
-# 7. Edge cases and error handling
-
 from __future__ import annotations
 
 import json
@@ -24,7 +13,6 @@ from validation.metrics.gcode_metrics import (
     extract_gcode_metrics,
 )
 
-# Path to recipe outputs
 RECIPE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "docs",
@@ -33,7 +21,6 @@ RECIPE_DIR = os.path.join(
 
 
 def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
-    """Get path to a recipe's G-code output."""
     return os.path.join(
         RECIPE_DIR,
         f"{recipe_num:02d}_{recipe_name}",
@@ -42,41 +29,25 @@ def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Basic G-code Parsing
-# ─────────────────────────────────────────────────────────────────────────────
-
-
 def test_extract_gcode_metrics_simple_profile():
     """Test metric extraction from simple profile recipe."""
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        pytest.skip("{nc_path} not found")
+        pytest.skip(f"{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
-    # Should have parsed lines
     assert metrics.summary.total_lines > 0, f"Total lines: {metrics.summary.total_lines}"
     assert metrics.summary.motion_lines > 0, f"Motion lines: {metrics.summary.motion_lines}"
-
-    # Should have motion commands
     assert metrics.motion.g0_count > 0, f"G0 count: {metrics.motion.g0_count}"
     assert metrics.motion.g1_count > 0, f"G1 count: {metrics.motion.g1_count}"
-
-    # Should have calculated distances
     assert metrics.motion.total_rapid_distance_mm > 0, f"Rapid distance: {metrics.motion.total_rapid_distance_mm}"
     assert metrics.motion.total_feed_distance_mm > 0, f"Feed distance: {metrics.motion.total_feed_distance_mm}"
-
-    # Should have Z profile
     assert metrics.z_profile.safe_z_mm > 0, f"Safe Z: {metrics.z_profile.safe_z_mm}"
     assert metrics.z_profile.max_plunge_z_mm < 0, f"Max plunge Z: {metrics.z_profile.max_plunge_z_mm}"
-
-    # Should have XY bounds
     assert metrics.xy_bounds.x_min < metrics.xy_bounds.x_max
     assert metrics.xy_bounds.y_min < metrics.xy_bounds.y_max
-
-    # Should have time estimate
     assert metrics.time_estimate.total_time_s > 0, f"Time: {metrics.time_estimate.total_time_s}"
 
 
@@ -85,20 +56,14 @@ def test_extract_gcode_metrics_pocket():
     nc_path = get_recipe_nc_path(2, "pocket_with_cleanup", "pocket-9.53mm.nc")
 
     if not os.path.exists(nc_path):
-        pytest.skip("{nc_path} not found")
+        pytest.skip(f"{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
-    # Pocket operations should have multiple Z depths
     assert len(metrics.z_profile.unique_cutting_depths) > 0, (
         f"Cutting depths: {metrics.z_profile.unique_cutting_depths}"
     )
-
-    # Should have feed rates
     assert len(metrics.feeds.feed_rates_used) > 0, f"Feed rates: {metrics.feeds.feed_rates_used}"
-
-    # Should detect operation names from comments
-    # Note: depends on comment format in generated G-code
     assert metrics.summary.comment_lines > 0, f"Comment lines: {metrics.summary.comment_lines}"
 
 
@@ -107,20 +72,12 @@ def test_extract_gcode_metrics_bore():
     nc_path = get_recipe_nc_path(4, "custom_template", "bore-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        pytest.skip("{nc_path} not found")
+        pytest.skip(f"{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
 
-    # Bore operations use helical interpolation (linearized)
     assert metrics.motion.g1_count > 0, f"G1 count: {metrics.motion.g1_count}"
-
-    # Should have spindle info
     assert len(metrics.tools.spindle_speeds) > 0, f"Spindle speeds: {metrics.tools.spindle_speeds}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Determinism
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_determinism():
@@ -128,25 +85,18 @@ def test_determinism():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        pytest.skip("{nc_path} not found")
+        pytest.skip(f"{nc_path} not found")
 
     metrics1 = extract_gcode_metrics(nc_path)
     metrics2 = extract_gcode_metrics(nc_path)
 
-    # Convert to dict, excluding extraction_time_ms
     dict1 = metrics1.to_dict()
     dict2 = metrics2.to_dict()
 
-    # Remove timing field
     del dict1["gcode"]["extraction_time_ms"]
     del dict2["gcode"]["extraction_time_ms"]
 
     assert dict1 == dict2, "Metrics should be deterministic"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: JSON Serialization
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_json_serialization():
@@ -154,25 +104,18 @@ def test_json_serialization():
     nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
 
     if not os.path.exists(nc_path):
-        pytest.skip("{nc_path} not found")
+        pytest.skip(f"{nc_path} not found")
 
     metrics = extract_gcode_metrics(nc_path)
     d = metrics.to_dict()
 
-    # Should serialize without errors
     json_str = json.dumps(d, indent=2)
     assert len(json_str) > 0
 
-    # Should deserialize back
     parsed = json.loads(json_str)
     assert "gcode" in parsed
     assert "summary" in parsed["gcode"]
     assert "motion" in parsed["gcode"]
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Arc Commands (G2/G3)
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_arc_parsing_ij_format():
@@ -199,17 +142,12 @@ M2
     try:
         metrics = extract_gcode_metrics(nc_path)
 
-        # Should detect arc commands
         assert metrics.motion.g2_count == 1, f"G2 count: {metrics.motion.g2_count}"
         assert metrics.motion.g3_count == 1, f"G3 count: {metrics.motion.g3_count}"
 
-        # Arc distance should be approximately half circles (r=5, so each is pi*5)
-        # Two half circles = full circle = 2*pi*5 ≈ 31.4mm
         expected_arc_distance = 2 * math.pi * 5
         actual_feed_distance = metrics.motion.total_feed_distance_mm
 
-        # Feed distance includes the plunge Z move (5mm + 1mm = 6mm) plus arcs
-        # Allow tolerance for rounding
         assert actual_feed_distance > expected_arc_distance, f"Feed distance {actual_feed_distance} should include arcs"
 
     finally:
@@ -240,10 +178,6 @@ M2
         metrics = extract_gcode_metrics(nc_path)
 
         assert metrics.motion.g2_count == 1, f"G2 count: {metrics.motion.g2_count}"
-
-        # With R format, arc should be a semicircle (180 degrees)
-        # Arc length = pi * r = pi * 5 ≈ 15.7mm
-        # But with chord=10 and R=5, this is actually a semicircle
 
     finally:
         os.unlink(nc_path)
@@ -277,13 +211,10 @@ M2
 
         assert metrics.motion.g2_count == 1, f"G2 count: {metrics.motion.g2_count}"
 
-        # Expected helix length: sqrt((2*pi*5)^2 + 10^2) ≈ 32.97mm
         xy_arc = 2 * math.pi * 5
         z_delta = 10
         expected_helix = math.sqrt(xy_arc**2 + z_delta**2)
 
-        # Feed distance should include the helix (main motion)
-        # Allow 10% tolerance for floating point
         actual = metrics.motion.total_feed_distance_mm
         assert abs(actual - expected_helix) < expected_helix * 0.1, (
             f"Helix distance: expected ~{expected_helix:.2f}, got {actual:.2f}"
@@ -295,9 +226,6 @@ M2
 
 def test_arc_bounds_extends_beyond_endpoints():
     """Test that arc bounds correctly include cardinal extrema beyond endpoints."""
-    # This arc starts at (10, 0), goes CCW to (0, 10) with center at (0, 0)
-    # This is a 90-degree arc in Q1. The arc passes through no cardinal extrema
-    # beyond its endpoints, so bounds should be just x:[0,10], y:[0,10]
     gcode_quarter = """\
 G90
 G21
@@ -306,8 +234,6 @@ G0 X10 Y0 Z5
 G3 X0 Y10 I-10 J0 F500
 M2
 """
-    # This arc starts at (10, 0), goes CCW 270 degrees to (0, -10) with center at (0, 0)
-    # It crosses: +Y at (0,10), -X at (-10,0), so bounds should be x:[-10,10], y:[-10,10]
     gcode_three_quarter = """\
 G90
 G21
@@ -317,7 +243,6 @@ G3 X0 Y-10 I-10 J0 F500
 M2
 """
 
-    # Test quarter arc
     with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
         f.write(gcode_quarter)
         f.flush()
@@ -325,7 +250,6 @@ M2
 
     try:
         metrics = extract_gcode_metrics(nc_path)
-        # Quarter arc from (10,0) to (0,10): bounds should be [0,10] x [0,10]
         assert metrics.xy_bounds.x_min >= -0.01, f"x_min: {metrics.xy_bounds.x_min}"
         assert metrics.xy_bounds.x_max <= 10.01, f"x_max: {metrics.xy_bounds.x_max}"
         assert metrics.xy_bounds.y_min >= -0.01, f"y_min: {metrics.xy_bounds.y_min}"
@@ -333,7 +257,6 @@ M2
     finally:
         os.unlink(nc_path)
 
-    # Test 3/4 arc
     with tempfile.NamedTemporaryFile(mode="w", suffix=".nc", delete=False) as f:
         f.write(gcode_three_quarter)
         f.flush()
@@ -341,19 +264,12 @@ M2
 
     try:
         metrics = extract_gcode_metrics(nc_path)
-        # 270-degree arc crosses +Y and -X: bounds should include (-10,0) and (0,10)
         assert metrics.xy_bounds.x_min < -9.9, f"x_min should be ~-10: {metrics.xy_bounds.x_min}"
         assert metrics.xy_bounds.x_max > 9.9, f"x_max should be ~10: {metrics.xy_bounds.x_max}"
         assert metrics.xy_bounds.y_min < -9.9, f"y_min should be ~-10: {metrics.xy_bounds.y_min}"
         assert metrics.xy_bounds.y_max > 9.9, f"y_max should be ~10: {metrics.xy_bounds.y_max}"
-
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Configurable Rapid Rate
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_configurable_rapid_rate():
@@ -377,25 +293,17 @@ M2
         nc_path = f.name
 
     try:
-        # Default rapid rate
         config_default = GCodeConfig()
         metrics_default = extract_gcode_metrics(nc_path, config_default)
 
-        # Double the rapid rate -> half the rapid time
         config_fast = GCodeConfig(rapid_rate_mm_min=DEFAULT_RAPID_RATE_MM_MIN * 2)
         metrics_fast = extract_gcode_metrics(nc_path, config_fast)
 
-        # Rapid time should be approximately halved
         ratio = metrics_default.time_estimate.rapid_time_s / metrics_fast.time_estimate.rapid_time_s
         assert 1.9 < ratio < 2.1, f"Time ratio should be ~2, got {ratio}"
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Z Profile Analysis
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_z_profile_analysis():
@@ -429,18 +337,12 @@ M2
     try:
         metrics = extract_gcode_metrics(nc_path)
 
-        # Safe Z should be 25.0
         assert abs(metrics.z_profile.safe_z_mm - 25.0) < 0.01, f"Safe Z: {metrics.z_profile.safe_z_mm}"
-
-        # Max plunge should be -9.0
         assert abs(metrics.z_profile.max_plunge_z_mm - (-9.0)) < 0.01, (
             f"Max plunge: {metrics.z_profile.max_plunge_z_mm}"
         )
-
-        # Should have 3 cutting depths
         assert metrics.z_profile.depth_count == 3, f"Depth count: {metrics.z_profile.depth_count}"
 
-        # Cutting depths should be -3, -6, -9
         depths = metrics.z_profile.unique_cutting_depths
         assert len(depths) == 3, f"Depths: {depths}"
         assert -3.0 in [round(d) for d in depths]
@@ -449,11 +351,6 @@ M2
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: XY Bounds
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_xy_bounds():
@@ -490,11 +387,6 @@ M2
         os.unlink(nc_path)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Feed Rate Tracking
-# ─────────────────────────────────────────────────────────────────────────────
-
-
 def test_feed_rate_tracking():
     """Test feed rate extraction."""
     gcode = """\
@@ -520,24 +412,17 @@ M2
     try:
         metrics = extract_gcode_metrics(nc_path)
 
-        # Should detect all feed rates
         feeds = metrics.feeds.feed_rates_used
         assert 200.0 in feeds, f"Missing F200 in {feeds}"
         assert 500.0 in feeds, f"Missing F500 in {feeds}"
         assert 750.0 in feeds, f"Missing F750 in {feeds}"
         assert 1000.0 in feeds, f"Missing F1000 in {feeds}"
 
-        # Min/max should be correct
         assert metrics.feeds.min_feed_rate == 200.0
         assert metrics.feeds.max_feed_rate == 1000.0
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Spindle and Tool Tracking
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_spindle_tracking():
@@ -567,24 +452,14 @@ M2
     try:
         metrics = extract_gcode_metrics(nc_path)
 
-        # Should detect spindle speeds
         assert 12000 in metrics.tools.spindle_speeds, f"Missing S12000 in {metrics.tools.spindle_speeds}"
         assert 18000 in metrics.tools.spindle_speeds, f"Missing S18000 in {metrics.tools.spindle_speeds}"
-
-        # Should detect tool numbers
         assert 1 in metrics.tools.tool_numbers
         assert 2 in metrics.tools.tool_numbers
-
-        # Should count tool change
         assert metrics.tools.tool_changes == 1, f"Tool changes: {metrics.tools.tool_changes}"
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Operation Detection from Comments
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_operation_detection():
@@ -623,17 +498,10 @@ M2
         assert metrics.operations.profile_passes >= 1, f"Profile passes: {metrics.operations.profile_passes}"
         assert metrics.operations.pocket_passes >= 1, f"Pocket passes: {metrics.operations.pocket_passes}"
         assert metrics.operations.bore_passes >= 1, f"Bore passes: {metrics.operations.bore_passes}"
-
-        # Total passes should sum up
         assert metrics.operations.total_passes >= 3
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Error Handling
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def test_file_not_found():
@@ -642,7 +510,7 @@ def test_file_not_found():
         extract_gcode_metrics("/nonexistent/file.nc")
         raise AssertionError("Should have raised FileNotFoundError")
     except FileNotFoundError:
-        pass  # Expected
+        pass
 
 
 def test_empty_file():
@@ -655,17 +523,7 @@ def test_empty_file():
         extract_gcode_metrics(nc_path)
         raise AssertionError("Should have raised ValueError")
     except ValueError:
-        pass  # Expected
+        pass
 
     finally:
         os.unlink(nc_path)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Test: Recipe Coverage
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────

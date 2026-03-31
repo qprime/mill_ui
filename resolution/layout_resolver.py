@@ -34,7 +34,7 @@ from generators.area.x_panel import x_panel_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.svg.params import SVGPathParams
-from generators.svg.parser import SVGParseError, extract_path_data
+from generators.svg.parser import extract_path_data
 from generators.svg.stamp import svg_stamp_generator
 from layout_ast.compositional import (
     Arch,
@@ -1438,7 +1438,7 @@ class LayoutResolver:
         try:
             generated_items = svg_stamp_generator(domain, generator_params, allow_empty=True)
             items.extend(generated_items)
-        except (GeneratorSkipError, SVGParseError):
+        except GeneratorSkipError:
             pass
 
     def _handle_split_horizontal(

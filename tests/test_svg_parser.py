@@ -1081,6 +1081,34 @@ children:
         resolve_layout(ast)
 
 
+def test_svg_stamp_malformed_inline_path_propagates():
+    import pytest
+
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    pml = """
+Sheet:
+  width: 200mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    at:
+      x: 100mm
+      y: 100mm
+      width: 80mm
+      height: 80mm
+    children:
+      - SvgStamp:
+          path: "X 0 0 L 50 0"
+          depth: 0.5mm
+"""
+    ast = parse_pml_yaml(pml)
+    with pytest.raises(SVGParseError):
+        resolve_layout(ast)
+
+
 # =============================================================================
 # Test Runner
 # =============================================================================

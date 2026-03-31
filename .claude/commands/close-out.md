@@ -14,25 +14,27 @@ This skill runs the full verification, summary, and commit cycle after an implem
 
 Run all verification steps. Do not skip any.
 
+**Context discipline:** Verification commands produce large output. Pipe to `tail` to keep only the summary. If a command fails, re-run it WITHOUT the tail to see the full error.
+
 ```bash
 source .venv/bin/activate
 
-# 1. Full test suite
-python -m pytest tests/ -x
+# 1. Full test suite — summary only
+python -m pytest tests/ -x -q 2>&1 | tail -5
 
-# 2. Recipe validation
-python -m tests.test_recipes
+# 2. Recipe validation — summary only
+python -m tests.test_recipes 2>&1 | tail -5
 
-# 3. Lint and type checks
-ruff check . && ruff format --check . && mypy .
+# 3. Lint and type checks — summary only
+ruff check . 2>&1 | tail -3 && ruff format --check . 2>&1 | tail -3 && mypy . 2>&1 | tail -3
 ```
 
-**ALL tests and recipes must pass. Zero failures, zero errors, no exceptions.** Do not classify any failure as "pre-existing" or "not part of this change" — if it fails, it blocks the commit. Fix it or raise it to the user. Do not proceed to Phase 2 with any failures.
+**ALL tests and recipes must pass. Zero failures, zero errors, no exceptions.** Do not classify any failure as "pre-existing" or "not part of this change" — if it fails, it blocks the commit. Re-run the failing command without `| tail` to diagnose, fix it, or raise it to the user. Do not proceed to Phase 2 with any failures.
 
 If recipes need regeneration (new recipe added or output format changed):
 ```bash
-python -m tests.test_recipes --regen_recipes
-python -m cli.generate_golden --all-recipes docs/recipes --update --force
+python -m tests.test_recipes --regen_recipes 2>&1 | tail -5
+python -m cli.generate_golden --all-recipes docs/recipes --update --force 2>&1 | tail -5
 ```
 
 Report the results: test count, pass/fail. Zero failures required.

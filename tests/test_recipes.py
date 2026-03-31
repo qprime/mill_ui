@@ -169,10 +169,6 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
             diff_summary = "\n  ".join(diffs)
             raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
 
-        metrics_path = output_dir / "metrics.json"
-        with open(metrics_path, "w") as f:
-            json.dump(metrics, f, indent=2)
-
 
 def test_recipe_outputs():
     pml_files = discover_recipe_pml_files()

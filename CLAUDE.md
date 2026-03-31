@@ -53,7 +53,9 @@ python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
 python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-python -m tests.test_recipes --regen_recipes
+python -m tests.test_recipes                    # validate recipes (pass/fail gate, no file changes)
+python -m tests.test_recipes --regen_recipes    # snapshot: regenerate all recipe outputs + commit hashes
+python -m cli.generate_golden --all-recipes docs/recipes --update --force  # snapshot: update golden metrics
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
@@ -100,6 +102,8 @@ Check before implementing — these already exist:
 | MCP server | `mill_mcp/server.py` |
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |
+| Recipe validation (pass/fail) | `python -m tests.test_recipes` |
+| Recipe snapshot (regen + golden) | `/snapshot-recipes` skill |
 
 ## Don't
 

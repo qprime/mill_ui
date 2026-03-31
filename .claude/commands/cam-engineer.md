@@ -69,11 +69,16 @@ Read `docs/invariants/testing.md` before adding or modifying tests. Key rules:
 - Recipe updates if adding capabilities
 - Clean, minimal diffs that do exactly what was asked
 
-## Committing Changes
+## Recipe Validation
 
-When committing, always include updated `docs/recipes/**/*.pml.yml` files. The `# mill_ui: <hash>` header at the top of each recipe tracks which commit the recipe last passed against — these updates are part of the implementation, not noise to be excluded.
+Run `python -m tests.test_recipes` (no `--regen`) as an integration gate — all recipes must pass. This validates without rewriting any recipe files.
 
-Run `python -m tests.test_recipes --regen_recipes` before committing to update all recipe headers, then stage the recipe files along with your implementation changes.
+If a recipe **fails** due to your changes:
+1. Diagnose the failure
+2. Fix the implementation or, if the output change is intentional, regenerate **only** the affected recipe(s) with `python -m tests.test_recipes --regen_recipes` (which regenerates all — then `git checkout` the ones you didn't intend to change)
+3. Stage the intentionally changed recipe outputs along with your implementation
+
+Do **not** run a blanket `--regen_recipes` on every commit. Snapshot updates (commit hashes, golden metrics) are a separate on-demand workflow (`/snapshot-recipes`).
 
 ## Issue Comment on Completion
 

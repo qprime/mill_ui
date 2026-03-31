@@ -31,26 +31,9 @@ ruff check . 2>&1 | tail -3 && ruff format --check . 2>&1 | tail -3 && mypy . 2>
 
 **ALL tests and recipes must pass. Zero failures, zero errors, no exceptions.** Do not classify any failure as "pre-existing" or "not part of this change" — if it fails, it blocks the commit. Re-run the failing command without `| tail` to diagnose, fix it, or raise it to the user. Do not proceed to Phase 2 with any failures.
 
-If recipes need regeneration (new recipe added or output format changed):
-```bash
-python -m tests.test_recipes --regen_recipes 2>&1 | tail -5
-python -m cli.generate_golden --all-recipes docs/recipes --update --force 2>&1 | tail -5
-```
-
 Report the results: test count, pass/fail. Zero failures required.
 
-### Recipe cleanup
-
-After verification passes, restore recipe output files to their committed state **unless** this implementation intentionally changed recipes (new recipe added, output format changed, or recipe regeneration was part of the work). Incidental recipe dirtiness from test runs must not leak into the commit.
-
-```bash
-git checkout -- docs/recipes/
-```
-
-If recipe files ARE part of the implementation:
-1. Regenerate with `python -m tests.test_recipes --regen_recipes`
-2. Update golden metrics with `python -m cli.generate_golden --all-recipes docs/recipes --update --force`
-3. Stage the recipe files explicitly in Phase 5
+Recipe validation is a pass/fail gate only — do **not** run `--regen_recipes` or update golden metrics here. If a recipe fails, fix the implementation. Snapshot updates (commit hashes, golden baselines) are a separate on-demand workflow (`/snapshot-recipes`).
 
 ---
 

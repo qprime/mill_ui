@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "74_multi_sheet_assembly",
-    "created_at": "2026-03-26T16:46:04.240463+00:00"
+    "created_at": "2026-03-31T18:28:31.704962+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.6,
+    "extraction_time_ms": 1.57,
     "document": {
       "width_mm": 673.175,
       "height_mm": 1131.175,
@@ -1083,7 +1083,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2205,
+    "extraction_time_ms": 0.2155,
     "summary": {
       "total_lines": 3488,
       "comment_lines": 99,

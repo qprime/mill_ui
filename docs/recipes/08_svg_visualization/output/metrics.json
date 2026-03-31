@@ -3,8 +3,8 @@
     "ir_ms": 0.03,
     "hints_ms": 0.02,
     "plan_ms": 0.78,
-    "gcode_ms": 0.95,
-    "svg_ms": 0.33,
+    "gcode_ms": 0.94,
+    "svg_ms": 0.34,
     "total_ms": 2.1
   },
   "constraint_audit": {},

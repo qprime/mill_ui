@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "58_dogbone_joinery",
-    "created_at": "2026-03-26T16:46:03.291843+00:00"
+    "created_at": "2026-03-31T18:28:30.774343+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -462,7 +462,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.1663,
+    "extraction_time_ms": 1.1688,
     "summary": {
       "total_lines": 933,
       "comment_lines": 29,

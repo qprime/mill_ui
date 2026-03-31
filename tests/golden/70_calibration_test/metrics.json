@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "70_calibration_test",
-    "created_at": "2026-03-26T16:46:03.783636+00:00"
+    "created_at": "2026-03-31T18:28:31.257763+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.63,
+    "extraction_time_ms": 0.61,
     "document": {
       "width_mm": 453.175,
       "height_mm": 561.175,
@@ -416,7 +416,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 14.3968,
+    "extraction_time_ms": 13.9982,
     "summary": {
       "total_lines": 8917,
       "comment_lines": 33,

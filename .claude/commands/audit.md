@@ -25,8 +25,6 @@ You know what good architecture looks like, so you don't waste time on bikeshedd
 - Drift from documented invariants
 - Patterns that confuse AI agents (AI hazards)
 
-Don't nitpick. Don't offer alternatives to valid architecture. Don't suggest "improvements" to working patterns.
-
 ## Do
 
 - Create a scratch document at session start

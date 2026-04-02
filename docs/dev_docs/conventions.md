@@ -27,7 +27,7 @@ These complement the invariant files. Invariants say "don't violate this." Conve
 
 ## Dispatch Patterns
 
-- **Feature-type dispatch in adapters**: `@register_feature` decorator populates `FEATURE_HANDLERS` dict; handler looked up via `FEATURE_HANDLERS.get(feature_type)`. Used in `adapters/layoutast_to_ir.py`.
+- **Feature-type dispatch in adapters**: `@register_feature` decorator populates `FEATURE_HANDLERS` dict; handler looked up via `FEATURE_HANDLERS.get(feature_type)`. Layer routing uses `FEATURE_LAYER` dict (feature_type → layer name), with `WASTE_LAYER` override for waste items. Both registries live in `adapters/layoutast_to_ir.py`. New feature types can pass `layer=` to `@register_feature` to register both handler and layer in one call.
 - **PML node-type dispatch**: Currently a large if/elif chain in `parse_node()`. Not registry-based (known debt, deferred).
 - **Generator dispatch**: No central registry. Layout resolver imports generators individually and dispatches by AST node type.
 - **Shape-type dispatch in planner**: Currently if/elif chains with `.lower()` comparison. Not registry-based (known debt, deferred).

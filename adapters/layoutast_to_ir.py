@@ -15,16 +15,30 @@ _logger = logging.getLogger(__name__)
 
 FEATURE_HANDLERS: dict[str, Callable[[Item, str, Callable, float], list[Shape]]] = {}
 
+FEATURE_LAYER: dict[str, str] = {
+    "profile": "PROFILE_CUTS",
+    "notch": "PROFILE_CUTS",
+    "pocket": "POCKET_REGIONS",
+    "hole": "HOLES",
+    "engrave": "ENGRAVE_PATHS",
+}
 
-def register_feature(feature_type: str):
+WASTE_LAYER = "WASTE_CUTS"
+
+_LAYER_ORDER = ("PROFILE_CUTS", "PROFILE_TOOLPATHS", "WASTE_CUTS", "POCKET_REGIONS", "HOLES", "ENGRAVE_PATHS", "LABELS")
+
+
+def register_feature(feature_type: str, *, layer: str | None = None):
     def decorator(fn: Callable[[Item, str, Callable, float], list[Shape]]):
         FEATURE_HANDLERS[feature_type] = fn
+        if layer is not None:
+            FEATURE_LAYER[feature_type] = layer
         return fn
 
     return decorator
 
 
-def layoutast_to_diagram_ir(  # noqa: C901 — adapter dispatcher
+def layoutast_to_diagram_ir(
     ast: LayoutAST,
     y_origin: str = "back",
     show_dimensions: bool = True,
@@ -52,13 +66,7 @@ def layoutast_to_diagram_ir(  # noqa: C901 — adapter dispatcher
     sheet_shapes = _build_sheet_layer(sheet, margin)
     layers.append(LayerIR(name="SHEET_OUTLINE", items=tuple(sheet_shapes)))
 
-    profile_shapes: list = []
-    waste_shapes: list = []
-    pocket_shapes: list = []
-    hole_shapes: list = []
-    engrave_shapes: list = []
-    label_shapes: list = []
-    toolpath_shapes: list = []
+    layer_shapes: dict[str, list[Shape]] = {}
 
     tool_radius = kerf_width_mm / 2.0
 
@@ -73,41 +81,26 @@ def layoutast_to_diagram_ir(  # noqa: C901 — adapter dispatcher
         if handler:
             style_token = _get_style_token(feature_type, bool(is_waste))
             shapes = handler(item, style_token, flip_y, margin)
-            _dispatch_shapes(
-                shapes,
-                feature_type,
-                bool(is_waste),
-                profile_shapes,
-                waste_shapes,
-                pocket_shapes,
-                hole_shapes,
-                engrave_shapes,
-            )
+
+            target_layer = FEATURE_LAYER.get(feature_type)
+            if target_layer:
+                if is_waste and target_layer == "PROFILE_CUTS":
+                    target_layer = WASTE_LAYER
+                layer_shapes.setdefault(target_layer, []).extend(shapes)
 
             if feature_type == "profile" and not is_waste and show_toolpaths and tool_radius > 0:
                 tp_shapes = _build_toolpath_shapes(item, tool_radius, flip_y, margin)
-                toolpath_shapes.extend(tp_shapes)
+                layer_shapes.setdefault("PROFILE_TOOLPATHS", []).extend(tp_shapes)
 
             if feature_type == "hole":
-                hole_shapes.extend(_build_hole_crosshairs(item, flip_y, margin))
+                layer_shapes.setdefault("HOLES", []).extend(_build_hole_crosshairs(item, flip_y, margin))
 
         if item.label and item.placement:
-            label_shapes.extend(_build_label(item, flip_y, margin))
+            layer_shapes.setdefault("LABELS", []).extend(_build_label(item, flip_y, margin))
 
-    if profile_shapes:
-        layers.append(LayerIR(name="PROFILE_CUTS", items=tuple(profile_shapes)))
-    if toolpath_shapes:
-        layers.append(LayerIR(name="PROFILE_TOOLPATHS", items=tuple(toolpath_shapes)))
-    if waste_shapes:
-        layers.append(LayerIR(name="WASTE_CUTS", items=tuple(waste_shapes)))
-    if pocket_shapes:
-        layers.append(LayerIR(name="POCKET_REGIONS", items=tuple(pocket_shapes)))
-    if hole_shapes:
-        layers.append(LayerIR(name="HOLES", items=tuple(hole_shapes)))
-    if engrave_shapes:
-        layers.append(LayerIR(name="ENGRAVE_PATHS", items=tuple(engrave_shapes)))
-    if label_shapes:
-        layers.append(LayerIR(name="LABELS", items=tuple(label_shapes)))
+    for layer_name in _LAYER_ORDER:
+        if layer_name in layer_shapes:
+            layers.append(LayerIR(name=layer_name, items=tuple(layer_shapes[layer_name])))
 
     dims: tuple[DimensionRequest, ...] = ()
     if show_dimensions and getattr(sheet, "show_dimensions", True):
@@ -140,29 +133,6 @@ def _get_style_token(feature_type: str, is_waste: bool) -> str:
     if feature_type == "profile":
         return "waste" if is_waste else "profile"
     return feature_type
-
-
-def _dispatch_shapes(
-    shapes: list[Shape],
-    feature_type: str,
-    is_waste: bool,
-    profile_shapes: list,
-    waste_shapes: list,
-    pocket_shapes: list,
-    hole_shapes: list,
-    engrave_shapes: list,
-) -> None:
-    if feature_type == "profile" or feature_type == "notch":
-        if is_waste:
-            waste_shapes.extend(shapes)
-        else:
-            profile_shapes.extend(shapes)
-    elif feature_type == "pocket":
-        pocket_shapes.extend(shapes)
-    elif feature_type == "hole":
-        hole_shapes.extend(shapes)
-    elif feature_type == "engrave":
-        engrave_shapes.extend(shapes)
 
 
 @register_feature("profile")  # type: ignore[untyped-decorator]
@@ -694,4 +664,4 @@ def _collect_edge_allowances(ast: LayoutAST) -> list[dict]:
     return sorted(result, key=lambda a: (-a["rough_allowance_mm"], -a["finish_allowance_mm"]))
 
 
-__all__ = ["FEATURE_HANDLERS", "layoutast_to_diagram_ir", "register_feature"]
+__all__ = ["FEATURE_HANDLERS", "FEATURE_LAYER", "WASTE_LAYER", "layoutast_to_diagram_ir", "register_feature"]

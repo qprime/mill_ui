@@ -19,8 +19,6 @@ def compute_shape_bounds(
 
     if center_xy is None:
         cx, cy = 0.0, 0.0
-    elif isinstance(center_xy, list):
-        cx, cy = float(center_xy[0]), float(center_xy[1])
     else:
         cx, cy = float(center_xy[0]), float(center_xy[1])
 

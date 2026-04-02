@@ -276,7 +276,51 @@ class RemovalIntent:
             result["feature_type"] = self.feature_type
         if self.shape_id is not None:
             result["shape_id"] = self.shape_id
+        if self.dogbone_corners is not None:
+            result["dogbone_corners"] = self.dogbone_corners
+        if self.dogbone_reference_point is not None:
+            result["dogbone_reference_point"] = self.dogbone_reference_point
+        self._serialize_shape_geometry(result)
+        self._serialize_feeds_override(result)
         return result
+
+    def _serialize_shape_geometry(self, result: dict[str, Any]) -> None:
+        geo: dict[str, Any] = {}
+        for fld in (
+            "w_mm",
+            "h_mm",
+            "diameter_mm",
+            "points",
+            "radius_mm",
+            "radius_tl_mm",
+            "radius_tr_mm",
+            "radius_br_mm",
+            "radius_bl_mm",
+            "start",
+            "end",
+        ):
+            val = getattr(self.shape_geometry, fld)
+            if val is not None:
+                geo[fld] = val
+        if geo:
+            result["shape_geometry"] = geo
+
+    def _serialize_feeds_override(self, result: dict[str, Any]) -> None:
+        if self.feeds_override is None:
+            return
+        feeds: dict[str, Any] = {}
+        for fld in (
+            "rpm",
+            "feed_xy",
+            "feed_z",
+            "depth_per_pass",
+            "stepover_percent",
+        ):
+            val = getattr(self.feeds_override, fld)
+            if val is not None:
+                feeds[fld] = val
+        if feeds:
+            result["feeds_override"] = feeds
 
 
 __all__ = [

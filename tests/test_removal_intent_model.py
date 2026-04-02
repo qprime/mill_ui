@@ -343,3 +343,93 @@ def test_depth_profile_to_dict():
     assert data3["mode"] == "v_carve"
     assert data3["v_angle_deg"] == 60.0
     assert "gradient_direction_deg" not in data3
+
+
+def test_to_dict_includes_shape_geometry():
+    from ir.removal_intent import ShapeGeometry
+
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    geo = ShapeGeometry(w_mm=80.0, h_mm=40.0, radius_mm=5.0)
+    intent = RemovalIntent(
+        region_id="geo_test",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+        shape_geometry=geo,
+    )
+    data = intent.to_dict()
+    assert data["shape_geometry"] == {
+        "w_mm": 80.0,
+        "h_mm": 40.0,
+        "radius_mm": 5.0,
+    }
+
+
+def test_to_dict_omits_default_shape_geometry():
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    intent = RemovalIntent(
+        region_id="no_geo",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+    )
+    data = intent.to_dict()
+    assert "shape_geometry" not in data
+
+
+def test_to_dict_includes_feeds_override():
+    from layout_ast.layout import FeedsOverride
+
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    feeds = FeedsOverride(rpm=18000.0, feed_xy=3000.0, depth_per_pass=2.0)
+    intent = RemovalIntent(
+        region_id="feeds_test",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+        feeds_override=feeds,
+    )
+    data = intent.to_dict()
+    assert data["feeds_override"] == {
+        "rpm": 18000.0,
+        "feed_xy": 3000.0,
+        "depth_per_pass": 2.0,
+    }
+    assert "feed_z" not in data["feeds_override"]
+    assert "stepover_percent" not in data["feeds_override"]
+
+
+def test_to_dict_omits_none_feeds_override():
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    intent = RemovalIntent(
+        region_id="no_feeds",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+    )
+    data = intent.to_dict()
+    assert "feeds_override" not in data
+
+
+def test_to_dict_includes_dogbone_corners_and_reference_point():
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    corners = ((0.0, 0.0), (100.0, 0.0), (100.0, 50.0), (0.0, 50.0))
+    ref = (50.0, 25.0)
+    intent = RemovalIntent(
+        region_id="dogbone_test",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+        dogbone_corners=corners,
+        dogbone_reference_point=ref,
+    )
+    data = intent.to_dict()
+    assert data["dogbone_corners"] == corners
+    assert data["dogbone_reference_point"] == ref
+
+
+def test_to_dict_omits_none_dogbone_corners():
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0)
+    intent = RemovalIntent(
+        region_id="no_dogbone_corners",
+        bounds=bounds,
+        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-6.0),
+    )
+    data = intent.to_dict()
+    assert "dogbone_corners" not in data
+    assert "dogbone_reference_point" not in data

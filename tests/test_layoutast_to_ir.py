@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from adapters.layoutast_to_ir import (
     FEATURE_HANDLERS,
+    FEATURE_LAYER,
     layoutast_to_diagram_ir,
 )
 from diagram_ir import Circle, DiagramIR, Rect, Text
@@ -51,6 +52,26 @@ def test_feature_handlers_registered():
     assert "hole" in FEATURE_HANDLERS
     assert "engrave" in FEATURE_HANDLERS
     assert "notch" in FEATURE_HANDLERS
+
+
+def test_feature_layer_covers_shape_producing_handlers():
+    shape_producing = {ft for ft in FEATURE_HANDLERS if ft != "surface"}
+    assert shape_producing == set(FEATURE_LAYER.keys())
+
+
+def test_no_empty_layer_when_handler_returns_empty():
+    item = Item(
+        kind="shape",
+        type="Rect",
+        geometry=None,
+        placement=None,
+        feature=Feature(type="profile", depth_mm=0.0, is_through=True, side="outside"),
+        shape_id="no_geom",
+    )
+    ast = LayoutAST(sheet=_make_sheet(), items=(item,))
+    ir = layoutast_to_diagram_ir(ast)
+    layer_names = {layer.name for layer in ir.layers}
+    assert "PROFILE_CUTS" not in layer_names
 
 
 def test_basic_diagram_ir_structure():

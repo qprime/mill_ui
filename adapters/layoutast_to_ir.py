@@ -99,7 +99,7 @@ def layoutast_to_diagram_ir(
             layer_shapes.setdefault("LABELS", []).extend(_build_label(item, flip_y, margin))
 
     for layer_name in _LAYER_ORDER:
-        if layer_name in layer_shapes:
+        if layer_shapes.get(layer_name):
             layers.append(LayerIR(name=layer_name, items=tuple(layer_shapes[layer_name])))
 
     dims: tuple[DimensionRequest, ...] = ()

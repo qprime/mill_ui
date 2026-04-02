@@ -9,7 +9,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.loop import BeadParams
-from generators.utils import extract_loops, loop_type_suffix
+from generators.utils import compute_centroid_and_normalize, extract_loops, loop_type_suffix
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -95,10 +95,7 @@ def bead_generator(
                 f"BeadGenerator: offset {params.offset_mm}mm collapses loop {loop_idx}. Use a smaller offset value."
             )
 
-        cx = sum(p[0] for p in offset_boundary) / len(offset_boundary)
-        cy = sum(p[1] for p in offset_boundary) / len(offset_boundary)
-
-        polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in offset_boundary]
+        (cx, cy), polygon_points = compute_centroid_and_normalize(offset_boundary)
 
         geometry_data = {
             "points": polygon_points,

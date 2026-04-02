@@ -86,6 +86,15 @@ def get_local_bounds(domain: Domain) -> Bounds2D:
     return Bounds2D.from_points(local_points)
 
 
+def compute_centroid_and_normalize(
+    boundary: tuple[tuple[float, float], ...] | list[tuple[float, float]],
+) -> tuple[tuple[float, float], list[list[float]]]:
+    cx = sum(p[0] for p in boundary) / len(boundary)
+    cy = sum(p[1] for p in boundary) / len(boundary)
+    normalized = [[pt[0] - cx, pt[1] - cy] for pt in boundary]
+    return (cx, cy), normalized
+
+
 def extract_loops(
     domain: Domain,
     selection: LoopSelection,
@@ -159,6 +168,7 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 
 __all__ = [
+    "compute_centroid_and_normalize",
     "create_line_item",
     "extract_loops",
     "get_local_bounds",

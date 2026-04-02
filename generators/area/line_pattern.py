@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from shapely.geometry import LineString
 
+from domains.domain import Bounds2D
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
@@ -36,86 +38,26 @@ def line_pattern_generator(
         return []
 
     if local_coords:
-        return _generate_local_coords(domain, params, allow_empty, shape_id_prefix)
+        bounds = get_local_bounds(domain)
+
+        def to_sheet(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+            return local_to_sheet_batch(pts, domain)
     else:
-        return _generate_sheet_coords(domain, params, allow_empty, shape_id_prefix)
+        bounds = domain.bounds
+        to_sheet: Callable[[list[tuple[float, float]]], list[tuple[float, float]]] | None = None
+
+    return _generate_lines(domain, params, bounds, allow_empty, shape_id_prefix, to_sheet)
 
 
-def _generate_local_coords(
+def _generate_lines(
     domain: Domain,
     params: LinePatternParams,
+    bounds: Bounds2D,
     allow_empty: bool,
     shape_id_prefix: str,
+    to_sheet: Callable[[list[tuple[float, float]]], list[tuple[float, float]]] | None,
 ) -> GeneratorResult:
-    local_bounds = get_local_bounds(domain)
-    local_width = local_bounds.x_max - local_bounds.x_min
-    local_height = local_bounds.y_max - local_bounds.y_min
-
     angle_rad = math.radians(params.angle_deg)
-    dx = math.cos(angle_rad)
-    dy = math.sin(angle_rad)
-    px = -dy
-    py = dx
-
-    diagonal = math.sqrt(local_width**2 + local_height**2)
-    extent = diagonal + params.spacing_mm
-
-    local_cx = (local_bounds.x_min + local_bounds.x_max) / 2
-    local_cy = (local_bounds.y_min + local_bounds.y_max) / 2
-
-    half_extent = extent / 2
-    num_lines_per_side = math.ceil(half_extent / params.spacing_mm)
-
-    items = []
-    line_idx = 0
-
-    for i in range(-num_lines_per_side, num_lines_per_side + 1):
-        offset = i * params.spacing_mm
-        line_cx = local_cx + offset * px
-        line_cy = local_cy + offset * py
-
-        local_start = (line_cx - extent * dx, line_cy - extent * dy)
-        local_end = (line_cx + extent * dx, line_cy + extent * dy)
-
-        sheet_points = local_to_sheet_batch([local_start, local_end], domain)
-        sheet_start, sheet_end = sheet_points[0], sheet_points[1]
-
-        line = LineString([sheet_start, sheet_end])
-        buffered = line.buffer(params.line_width_mm / 2, cap_style="flat", join_style="mitre")
-        clipped = buffered.intersection(domain.polygon)
-
-        for poly in iter_polygons(clipped):
-            if poly.area < 0.01:
-                continue
-
-            item = shapely_to_item(
-                poly,
-                feature_type="pocket",
-                depth_mm=params.depth_mm,
-                shape_id=generate_shape_id(shape_id_prefix, line_idx),
-            )
-            items.append(item)
-            line_idx += 1
-
-    if not items and not allow_empty:
-        raise GeneratorSkipError(
-            f"LinePatternGenerator: No lines fit within domain. "
-            f"Domain bounds: {local_width:.1f}mm x {local_height:.1f}mm, "
-            f"spacing: {params.spacing_mm}mm"
-        )
-
-    return items
-
-
-def _generate_sheet_coords(
-    domain: Domain,
-    params: LinePatternParams,
-    allow_empty: bool,
-    shape_id_prefix: str,
-) -> GeneratorResult:
-    bounds = domain.bounds
-    angle_rad = math.radians(params.angle_deg)
-
     dx = math.cos(angle_rad)
     dy = math.sin(angle_rad)
     px = -dy
@@ -139,6 +81,9 @@ def _generate_sheet_coords(
 
         start = (line_cx - extent * dx, line_cy - extent * dy)
         end = (line_cx + extent * dx, line_cy + extent * dy)
+
+        if to_sheet is not None:
+            start, end = to_sheet([start, end])
 
         line = LineString([start, end])
         buffered = line.buffer(params.line_width_mm / 2, cap_style="flat", join_style="mitre")

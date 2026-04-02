@@ -10,7 +10,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.loop import ProfileParams
-from generators.utils import extract_loops, loop_type_suffix
+from generators.utils import compute_centroid_and_normalize, extract_loops, loop_type_suffix
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -49,10 +49,7 @@ def profile_generator(
     items: list[Item] = []
 
     for loop_idx, boundary in loops:
-        cx = sum(p[0] for p in boundary) / len(boundary)
-        cy = sum(p[1] for p in boundary) / len(boundary)
-
-        polygon_points = [[pt[0] - cx, pt[1] - cy] for pt in boundary]
+        (cx, cy), polygon_points = compute_centroid_and_normalize(boundary)
 
         geometry_data = {
             "points": polygon_points,

@@ -15,7 +15,7 @@
 | AJ-5 | STRUCTURAL | BUTT_NO_REMOVAL | Butt joint has RemovalKind.NONE |
 | AJ-6 | STRUCTURAL | BUTT_ALL_INTERFACES | Butt valid for all InterfaceTypes |
 | AJ-7 | HARD | HALFLAP_INTERNAL_ONLY | HalfLap valid only for INTERNAL interfaces |
-| AJ-8 | HARD | HALFLAP_REQUIRES_POSITION | INTERNAL interfaces require position_along_edge_a_mm |
+| AJ-8 | HARD | HALFLAP_REQUIRES_POSITION | INTERNAL interfaces require position_along_edge_a_mm and position_along_edge_b_mm |
 | AJ-9 | HARD | CAPTURED_RECEIVING_NOT_INTERNAL | receiving='b' invalid for INTERNAL |
 | AJ-10 | HARD | NOTCH_U_START_NON_NEGATIVE | u_start_mm >= 0 |
 | AJ-11 | HARD | NOTCH_U_LEN_POSITIVE | u_len_mm > 0 |

@@ -236,3 +236,92 @@ def test_roundtrip_multiple_items():
         assert emitted_data["items"][1]["feature"]["depth_mm"] == 10.0
     finally:
         Path(temp_path).unlink()
+
+
+def test_roundtrip_all_feature_fields():
+    layout_data = {
+        "sheet": {"width_mm": 300.0, "height_mm": 300.0, "thickness_mm": 19.0},
+        "items": [
+            {
+                "kind": "shape",
+                "type": "Rect",
+                "geometry": {"w_mm": 200.0, "h_mm": 200.0},
+                "placement": {"center_xy_mm": [150.0, 150.0]},
+                "feature": {
+                    "type": "profile",
+                    "depth": "through",
+                    "side": "outside",
+                    "corner_cleanup_tool_diameter_mm": 3.0,
+                    "dogbone": {"style": "t-bone_x", "diameter_mm": 6.0, "overcut_mm": 0.5},
+                    "rest": {"tool_diameter_mm": 3.0, "rough_allowance_mm": 0.3, "finish_allowance_mm": 0.1},
+                    "tab_count": 4,
+                    "tab_height_mm": 3.0,
+                    "tab_width_mm": 10.0,
+                    "onion_skin_mm": 0.2,
+                    "bevel_width_mm": 2.0,
+                    "bevel_angle_deg": 45.0,
+                    "bevel_inner_depth_mm": 1.0,
+                    "chamfer_width_mm": 1.5,
+                    "chamfer_angle_deg": 30.0,
+                    "roundover_radius_mm": 3.0,
+                    "feeds_override": {
+                        "rpm": 18000.0,
+                        "feed_xy": 1500.0,
+                        "feed_z": 500.0,
+                        "depth_per_pass": 2.0,
+                        "stepover_percent": 40.0,
+                    },
+                },
+                "shape_id": "full_feature",
+            }
+        ],
+    }
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(layout_data, f)
+        temp_path = f.name
+
+    try:
+        ast = LayoutAST.from_json(temp_path)
+        feat = ast.items[0].feature
+        assert feat is not None
+
+        assert feat.corner_cleanup_tool_diameter_mm == 3.0
+        assert feat.dogbone is not None
+        assert feat.dogbone.style == "t-bone_x"
+        assert feat.dogbone.diameter_mm == 6.0
+        assert feat.dogbone.overcut_mm == 0.5
+        assert feat.rest is not None
+        assert feat.rest.tool_diameter_mm == 3.0
+        assert feat.rest.rough_allowance_mm == 0.3
+        assert feat.rest.finish_allowance_mm == 0.1
+        assert feat.tab_count == 4
+        assert feat.tab_height_mm == 3.0
+        assert feat.tab_width_mm == 10.0
+        assert feat.onion_skin_mm == 0.2
+        assert feat.roundover_radius_mm == 3.0
+        assert feat.feeds_override is not None
+        assert feat.feeds_override.rpm == 18000.0
+        assert feat.feeds_override.feed_xy == 1500.0
+
+        json_str = ast.to_json()
+        emitted = json.loads(json_str)
+        ef = emitted["items"][0]["feature"]
+
+        assert ef["dogbone"]["style"] == "t-bone_x"
+        assert ef["dogbone"]["diameter_mm"] == 6.0
+        assert ef["rest"]["tool_diameter_mm"] == 3.0
+        assert ef["onion_skin_mm"] == 0.2
+        assert ef["roundover_radius_mm"] == 3.0
+        assert ef["feeds_override"]["rpm"] == 18000.0
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f2:
+            f2.write(json_str)
+            temp_path2 = f2.name
+
+        ast2 = LayoutAST.from_json(temp_path2)
+        feat2 = ast2.items[0].feature
+        assert feat == feat2
+        Path(temp_path2).unlink()
+    finally:
+        Path(temp_path).unlink()

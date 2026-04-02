@@ -205,6 +205,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,
+        onion_skin_mm=parse_dimension(data["onion_skin_mm"]) if "onion_skin_mm" in data else None,
         feeds_override=_parse_feeds_override(data.get("feeds"), f"{path}.feeds"),
     )
 

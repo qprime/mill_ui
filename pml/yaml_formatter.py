@@ -52,7 +52,7 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import Feature
+from layout_ast.layout import DogboneSpec, Feature, FeedsOverride
 from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob
 
@@ -61,6 +61,36 @@ def dim(value: float) -> str:
     if value == int(value):
         return f"{int(value)}mm"
     return f"{value}mm"
+
+
+def _format_dogbone(dogbone: Any) -> Any:
+    if not isinstance(dogbone, DogboneSpec):
+        return dogbone
+    dogbone_dict: dict[str, Any] = {}
+    if dogbone.style != "dogbone":
+        dogbone_dict["style"] = dogbone.style
+    if dogbone.diameter_mm is not None:
+        dogbone_dict["diameter"] = dim(dogbone.diameter_mm)
+    if dogbone.overcut_mm != 0.0:
+        dogbone_dict["overcut"] = dim(dogbone.overcut_mm)
+    return dogbone_dict if dogbone_dict else True
+
+
+def _format_feeds_override(feeds: Any) -> dict[str, Any] | None:
+    if not isinstance(feeds, FeedsOverride):
+        return None
+    feeds_dict: dict[str, Any] = {}
+    if feeds.rpm is not None:
+        feeds_dict["rpm"] = feeds.rpm
+    if feeds.feed_xy is not None:
+        feeds_dict["feed_xy"] = feeds.feed_xy
+    if feeds.feed_z is not None:
+        feeds_dict["feed_z"] = feeds.feed_z
+    if feeds.depth_per_pass is not None:
+        feeds_dict["depth_per_pass"] = feeds.depth_per_pass
+    if feeds.stepover_percent is not None:
+        feeds_dict["stepover_percent"] = feeds.stepover_percent
+    return feeds_dict or None
 
 
 def format_feature(feature: Feature) -> dict[str, Any]:
@@ -90,12 +120,21 @@ def format_feature(feature: Feature) -> dict[str, Any]:
         else:
             result["rest_tool"] = dim(rest_spec.tool_diameter_mm)
 
+    if feature.dogbone is not None:
+        result["dogbone"] = _format_dogbone(feature.dogbone)
+
     if feature.tab_count is not None:
         result["tab_count"] = feature.tab_count
     if feature.tab_height_mm is not None:
         result["tab_height"] = dim(feature.tab_height_mm)
     if feature.tab_width_mm is not None:
         result["tab_width"] = dim(feature.tab_width_mm)
+    if feature.onion_skin_mm is not None:
+        result["onion_skin_mm"] = dim(feature.onion_skin_mm)
+
+    feeds_dict = _format_feeds_override(feature.feeds_override)
+    if feeds_dict is not None:
+        result["feeds"] = feeds_dict
 
     return result
 
@@ -296,10 +335,19 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["tab_height"] = dim(node.tab_height_mm)
         if node.tab_width_mm is not None:
             result["tab_width"] = dim(node.tab_width_mm)
+        if node.onion_skin_mm is not None:
+            result["onion_skin_mm"] = dim(node.onion_skin_mm)
+        feeds_dict = _format_feeds_override(node.feeds_override)
+        if feeds_dict is not None:
+            result["feeds"] = feeds_dict
         return {"Profile": result}
 
     elif isinstance(node, PocketGen):
-        return {"Pocket": {"depth": dim(node.depth_mm)}}
+        result: dict[str, Any] = {"depth": dim(node.depth_mm)}
+        feeds_dict = _format_feeds_override(node.feeds_override)
+        if feeds_dict is not None:
+            result["feeds"] = feeds_dict
+        return {"Pocket": result}
 
     elif isinstance(node, RaisedPanelGen):
         return {

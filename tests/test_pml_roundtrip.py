@@ -474,3 +474,231 @@ children:
     canonical_pml2 = format_pml_yaml(comp_ast2)
 
     assert canonical_pml == canonical_pml2
+
+
+def test_pml_roundtrip_feature_dogbone():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 10mm
+        dogbone:
+          style: t-bone_x
+          diameter: 4mm
+          overcut: 0.5mm
+"""
+    ast1 = parse_pml(pml)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+    ast2 = parse_pml(formatted)
+
+    assert ast1.items[0].feature.dogbone is not None
+    assert ast2.items[0].feature.dogbone is not None
+    assert ast1.items[0].feature.dogbone.style == ast2.items[0].feature.dogbone.style
+    assert ast1.items[0].feature.dogbone.diameter_mm == ast2.items[0].feature.dogbone.diameter_mm
+    assert ast1.items[0].feature.dogbone.overcut_mm == ast2.items[0].feature.dogbone.overcut_mm
+
+
+def test_pml_roundtrip_feature_dogbone_bool():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 10mm
+        dogbone: true
+"""
+    ast1 = parse_pml(pml)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+    ast2 = parse_pml(formatted)
+
+    assert ast1.items[0].feature.dogbone is not None
+    assert ast2.items[0].feature.dogbone is not None
+
+
+def test_pml_roundtrip_feature_onion_skin():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: profile
+        side: outside
+        depth: through
+        onion_skin_mm: 0.5mm
+"""
+    ast1 = parse_pml(pml)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+    ast2 = parse_pml(formatted)
+
+    assert ast1.items[0].feature.onion_skin_mm == 0.5
+    assert ast2.items[0].feature.onion_skin_mm == 0.5
+
+
+def test_pml_roundtrip_feature_feeds_override():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 5mm
+        feeds:
+          rpm: 18000
+          feed_xy: 1500
+          depth_per_pass: 2.0
+"""
+    ast1 = parse_pml(pml)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+    ast2 = parse_pml(formatted)
+
+    f1 = ast1.items[0].feature.feeds_override
+    f2 = ast2.items[0].feature.feeds_override
+    assert f1 is not None
+    assert f2 is not None
+    assert f1.rpm == f2.rpm == 18000.0
+    assert f1.feed_xy == f2.feed_xy == 1500.0
+    assert f1.depth_per_pass == f2.depth_per_pass == 2.0
+
+
+def test_pml_roundtrip_profile_feeds_and_onion_skin():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Profile:
+      side: outside
+      depth: through
+      onion_skin_mm: 0.3mm
+      feeds:
+        rpm: 16000
+        feed_xy: 1200
+"""
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+
+    assert "onion_skin_mm" in formatted
+    assert "feeds:" in formatted
+    assert "rpm:" in formatted
+
+    comp_ast2 = parse_pml_yaml(formatted)
+    formatted2 = format_pml_yaml(comp_ast2)
+    assert formatted == formatted2
+
+
+def test_pml_roundtrip_pocket_feeds():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Pocket:
+      depth: 5mm
+      feeds:
+        feed_z: 500
+        stepover_percent: 45.0
+"""
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+
+    assert "feeds:" in formatted
+    assert "feed_z:" in formatted
+
+    comp_ast2 = parse_pml_yaml(formatted)
+    formatted2 = format_pml_yaml(comp_ast2)
+    assert formatted == formatted2
+
+
+def test_pml_roundtrip_all_feature_fields():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  margin: 0mm
+
+children:
+  - Rect:
+      id: full_feature
+      feature:
+        type: profile
+        side: outside
+        depth: through
+        corner_cleanup: 3mm
+        dogbone:
+          style: t-bone_y
+          diameter: 6mm
+        rest:
+          tool: 3mm
+          rough_allowance: 0.3mm
+          finish_allowance: 0.1mm
+        tab_count: 4
+        tab_height: 3mm
+        tab_width: 10mm
+        onion_skin_mm: 0.2mm
+        feeds:
+          rpm: 18000
+          feed_xy: 1500
+          feed_z: 500
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+"""
+    ast1 = parse_pml(pml)
+    comp_ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(comp_ast)
+    ast2 = parse_pml(formatted)
+
+    f1 = ast1.items[0].feature
+    f2 = ast2.items[0].feature
+
+    assert f1.type == f2.type
+    assert f1.is_through == f2.is_through
+    assert f1.side == f2.side
+    assert f1.corner_cleanup_tool_diameter_mm == f2.corner_cleanup_tool_diameter_mm
+    assert f1.dogbone.style == f2.dogbone.style
+    assert f1.dogbone.diameter_mm == f2.dogbone.diameter_mm
+    assert f1.rest.tool_diameter_mm == f2.rest.tool_diameter_mm
+    assert f1.rest.rough_allowance_mm == f2.rest.rough_allowance_mm
+    assert f1.rest.finish_allowance_mm == f2.rest.finish_allowance_mm
+    assert f1.tab_count == f2.tab_count
+    assert f1.tab_height_mm == f2.tab_height_mm
+    assert f1.tab_width_mm == f2.tab_width_mm
+    assert f1.onion_skin_mm == f2.onion_skin_mm
+    assert f1.feeds_override == f2.feeds_override

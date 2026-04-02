@@ -6,13 +6,50 @@ from typing import Any
 
 from core.constants import DepthMode
 from layout_ast.layout import (
+    DogboneSpec,
     Feature,
+    FeedsOverride,
     Geometry,
     Item,
     LayoutAST,
     Placement,
+    RestSpec,
     Sheet,
 )
+
+
+def _parse_dogbone(raw: Any) -> DogboneSpec | None:
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        return DogboneSpec(
+            style=raw.get("style", "dogbone"),
+            diameter_mm=raw.get("diameter_mm"),
+            overcut_mm=raw.get("overcut_mm", 0.0),
+        )
+    return None
+
+
+def _parse_rest(raw: Any) -> RestSpec | None:
+    if not isinstance(raw, dict):
+        return None
+    return RestSpec(
+        tool_diameter_mm=raw["tool_diameter_mm"],
+        rough_allowance_mm=raw.get("rough_allowance_mm", 0.5),
+        finish_allowance_mm=raw.get("finish_allowance_mm", 0.0),
+    )
+
+
+def _parse_feeds_override(raw: Any) -> FeedsOverride | None:
+    if not isinstance(raw, dict):
+        return None
+    return FeedsOverride(
+        rpm=raw.get("rpm"),
+        feed_xy=raw.get("feed_xy"),
+        feed_z=raw.get("feed_z"),
+        depth_per_pass=raw.get("depth_per_pass"),
+        stepover_percent=raw.get("stepover_percent"),
+    )
 
 
 def parse_layout_json(path: str) -> LayoutAST:
@@ -111,12 +148,17 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
         side=side,
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=feature_data.get("corner_cleanup_tool_diameter_mm"),
+        dogbone=_parse_dogbone(feature_data.get("dogbone")),
+        rest=_parse_rest(feature_data.get("rest")),
         tab_count=feature_data.get("tab_count"),
         tab_height_mm=feature_data.get("tab_height_mm"),
         tab_width_mm=feature_data.get("tab_width_mm"),
+        onion_skin_mm=feature_data.get("onion_skin_mm"),
         bevel_width_mm=feature_data.get("bevel_width_mm"),
         bevel_angle_deg=feature_data.get("bevel_angle_deg"),
         bevel_inner_depth_mm=feature_data.get("bevel_inner_depth_mm"),
         chamfer_width_mm=feature_data.get("chamfer_width_mm"),
         chamfer_angle_deg=feature_data.get("chamfer_angle_deg"),
+        roundover_radius_mm=feature_data.get("roundover_radius_mm"),
+        feeds_override=_parse_feeds_override(feature_data.get("feeds_override")),
     )

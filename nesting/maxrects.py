@@ -42,8 +42,7 @@ def _score_contact_point(
     gap: float,
     bin_width: float,
     bin_height: float,
-    placements: list[PlacementResult],
-    parts_info: dict,
+    placed: list[tuple[PlacementResult, float, float]],
 ) -> float:
     needed_w = part_w + gap
     needed_h = part_h + gap
@@ -62,8 +61,7 @@ def _score_contact_point(
     if py2 >= bin_height:
         contact += needed_w
 
-    for p in placements:
-        pw, ph = parts_info.get(id(p.metadata), (0, 0))
+    for p, pw, ph in placed:
         if p.rotated:
             pw, ph = ph, pw
 
@@ -106,8 +104,7 @@ def _find_best_rect(
     heuristic: MaxRectsHeuristic,
     bin_width: float = 0,
     bin_height: float = 0,
-    placements: list[PlacementResult] | None = None,
-    parts_info: dict | None = None,
+    placed: list[tuple[PlacementResult, float, float]] | None = None,
 ) -> tuple[int, bool] | None:
     best_idx = -1
     best_rotated = False
@@ -137,9 +134,7 @@ def _find_best_rect(
                 score = _score_blsf(rect, pw, ph, gap)
                 secondary = _score_baf(rect, pw, ph, gap)
             elif heuristic == MaxRectsHeuristic.CONTACT_POINT:
-                score = _score_contact_point(
-                    rect, pw, ph, gap, bin_width, bin_height, placements or [], parts_info or {}
-                )
+                score = _score_contact_point(rect, pw, ph, gap, bin_width, bin_height, placed or [])
                 secondary = _score_baf(rect, pw, ph, gap)
             else:
                 score = _score_bssf(rect, pw, ph, gap)
@@ -244,17 +239,13 @@ def maxrects_pack(
     if sort_by_area:
         indexed_parts.sort(key=lambda p: p[1] * p[2], reverse=True)
 
-    parts_info = {}
-    for _, w, h, _, meta in indexed_parts:
-        parts_info[id(meta)] = (w, h)
-
     free_rects = [FreeRect(x=0, y=0, width=bin_width, height=bin_height)]
 
-    placements: list[PlacementResult] = []
+    placed: list[tuple[PlacementResult, float, float]] = []
 
     for _, part_w, part_h, allow_rotation, metadata in indexed_parts:
         result = _find_best_rect(
-            part_w, part_h, free_rects, gap, allow_rotation, heuristic, bin_width, bin_height, placements, parts_info
+            part_w, part_h, free_rects, gap, allow_rotation, heuristic, bin_width, bin_height, placed
         )
 
         if result is None:
@@ -272,14 +263,13 @@ def maxrects_pack(
         center_x = placed_x + actual_w / 2
         center_y = placed_y + actual_h / 2
 
-        placements.append(
-            PlacementResult(
-                x=center_x,
-                y=center_y,
-                rotated=rotated,
-                metadata=metadata,
-            )
+        placement = PlacementResult(
+            x=center_x,
+            y=center_y,
+            rotated=rotated,
+            metadata=metadata,
         )
+        placed.append((placement, part_w, part_h))
 
         placed_rect = FreeRect(
             x=placed_x,
@@ -298,7 +288,7 @@ def maxrects_pack(
 
         free_rects = _prune_contained_rects(new_free_rects)
 
-    return placements
+    return [p for p, _, _ in placed]
 
 
 __all__ = [

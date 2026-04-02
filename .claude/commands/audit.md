@@ -29,9 +29,13 @@ Every audit run follows this sequence before generating any findings:
 
 ## Scoping Rules
 
-### With arguments
+### `full` argument
 
-When called with an argument (issue number, file paths, subsystem name, or a specific question), audit that scope directly. Still load conventions and context — evaluate findings against them.
+When called with `full` (e.g., `/audit full`), perform a full audit of the entire codebase regardless of `last_audit_commit`. This is the comprehensive baseline audit.
+
+### With other arguments
+
+When called with an argument (issue number, file paths, subsystem name, or a specific question), audit that scope directly. Still load conventions and context — evaluate findings against them. This is a **scoped audit** — it does not advance `last_audit_commit`.
 
 ### Without arguments (change-aware default)
 
@@ -138,7 +142,7 @@ Include: new deferrals, dismissals, escalations, pruned items, updated last_audi
 At the end of every audit run, propose an update to `docs/dev_docs/audit_context.md`. Present the proposed changes to the user for approval — do not write the file directly.
 
 The proposed update should include:
-- **last_audit_commit**: Set to current HEAD commit hash
+- **last_audit_commit**: Set to current HEAD commit hash — but **only for `full` or change-aware (no-args) audits**. Scoped audits (specific files, subsystems, questions) do not advance the marker because they don't cover the full codebase.
 - **New deferrals**: Shareability debt findings with date, area, commit hash, and reason for deferral
 - **Escalations**: Items moving from deferred to filed, with the trigger
 - **Dismissals**: Taste findings the user explicitly dismisses (only if user says to dismiss during the session)

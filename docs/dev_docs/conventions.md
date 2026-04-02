@@ -204,3 +204,25 @@ Each `plan_X_passes()` function: pick tool → call ops function → append move
 - Recipe auto-discovery: `docs/recipes/*/*.pml.yml` discovered by glob, no manual registration
 - Parametrize with descriptive IDs: `pytest.param(..., id="profile_outside_through")`
 - Property-based tests use Hypothesis `@st.composite` strategies for domain geometry
+
+## Serialization Completeness
+
+`to_dict()` methods must serialize all non-private fields. If a field is intentionally omitted, document the omission with a comment at the serialization site explaining why. Silent omission is a data-loss bug.
+
+## Nullable Numeric Parsing
+
+Never use `or` for nullable numeric fields where `0` is a valid value. Python's `or` treats `0`, `0.0`, and `""` as falsy, silently falling through to the alternative.
+
+**Wrong:**
+```python
+width = node_data.get("width") or fallback_value
+```
+
+**Correct:**
+```python
+width = node_data.get("width")
+if width is None:
+    width = fallback_value
+```
+
+This applies to all YAML/JSON parsing where numeric fields may legitimately be zero.

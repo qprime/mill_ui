@@ -118,6 +118,30 @@ class TestLinesAngleCoercion:
             )
 
 
+class TestAssemblyDimensionFalsyValues:
+    @pytest.mark.parametrize("field", ["width", "depth", "height"])
+    def test_explicit_zero_not_overridden_by_dimensions(self, field: str) -> None:
+        base = {"type": "box", "width": 200, "depth": 300, "height": 100, "thickness": 19}
+        base[field] = 0
+        base["dimensions"] = [999, 999, 999]
+        node = {"Assembly": base}
+        result = parse_node(node, "test")
+        assert getattr(result, f"{field}_mm") == 0.0
+
+    def test_dimensions_fallback_still_works(self) -> None:
+        node = {
+            "Assembly": {
+                "type": "box",
+                "dimensions": [200, 300, 100],
+                "thickness": 19,
+            }
+        }
+        result = parse_node(node, "test")
+        assert result.width_mm == 200.0
+        assert result.depth_mm == 300.0
+        assert result.height_mm == 100.0
+
+
 class TestGridCoercion:
     def test_invalid_grid_values_raises_pml_error(self) -> None:
         with pytest.raises(PMLParseError, match="grid"):

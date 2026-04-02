@@ -255,29 +255,25 @@ def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
         _parse_joinery_field(node_data.get("partition_joinery", "captured"), default_joinery="captured") or "captured"
     )
 
+    dims = node_data.get("dimensions") if isinstance(node_data.get("dimensions"), list) else None
+
+    raw_w = node_data.get("width")
+    if raw_w is None:
+        raw_w = dims[0] if dims and len(dims) > 0 else _require(node_data, "width", f"{path}.Assembly")
+
+    raw_d = node_data.get("depth")
+    if raw_d is None:
+        raw_d = dims[1] if dims and len(dims) > 1 else _require(node_data, "depth", f"{path}.Assembly")
+
+    raw_h = node_data.get("height")
+    if raw_h is None:
+        raw_h = dims[2] if dims and len(dims) > 2 else _require(node_data, "height", f"{path}.Assembly")
+
     return AssemblyDecl(
         type=assembly_type,
-        width_mm=parse_dimension(
-            node_data.get("width") or node_data.get("dimensions", [0])[0]
-            if isinstance(node_data.get("dimensions"), list)
-            else _require(node_data, "width", f"{path}.Assembly")
-        ),
-        depth_mm=parse_dimension(
-            node_data.get("depth")
-            or (
-                node_data.get("dimensions", [0, 0])[1]
-                if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 1
-                else _require(node_data, "depth", f"{path}.Assembly")
-            )
-        ),
-        height_mm=parse_dimension(
-            node_data.get("height")
-            or (
-                node_data.get("dimensions", [0, 0, 0])[2]
-                if isinstance(node_data.get("dimensions"), list) and len(node_data.get("dimensions", [])) > 2
-                else _require(node_data, "height", f"{path}.Assembly")
-            )
-        ),
+        width_mm=parse_dimension(raw_w),
+        depth_mm=parse_dimension(raw_d),
+        height_mm=parse_dimension(raw_h),
         thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Assembly")),
         joinery=node_data.get("joinery", "finger"),
         finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,

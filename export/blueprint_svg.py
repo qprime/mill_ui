@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 from collections.abc import Sequence
 
 from ir.removal_intent import RemovalIntent
@@ -19,8 +18,8 @@ def render_blueprint_svg(
     from diagram_render.render_svg import DIAGRAM_THEMES
 
     kerf_width = 0.0
-    with contextlib.suppress(TypeError, ValueError):
-        kerf_width = float(layout_ast.kerf_width_mm or 0.0)
+    if layout_ast.kerf_width_mm is not None:
+        kerf_width = float(layout_ast.kerf_width_mm)
 
     diagram_ir = layoutast_to_diagram_ir(
         ast=layout_ast,

@@ -23,27 +23,11 @@ def test_rect_bounds():
     assert bounds.y_max == 175.0
 
 
-def test_rectangle_alias_bounds():
-    """Test bounds calculation for Rectangle (alias for Rect)."""
-    from core.geometry import compute_shape_bounds
-
-    bounds = compute_shape_bounds(
-        shape_type="Rectangle",
-        geometry_data={"w_mm": 60.0, "h_mm": 40.0},
-        center_xy=(100.0, 100.0),
-    )
-
-    assert bounds.x_min == 70.0
-    assert bounds.x_max == 130.0
-    assert bounds.y_min == 80.0
-    assert bounds.y_max == 120.0
-
-
 def test_rect_case_insensitive():
     """Test that rect shape comparison is case-insensitive."""
     from core.geometry import compute_shape_bounds
 
-    for shape in ["rect", "RECT", "Rect", "rectangle", "RECTANGLE", "Rectangle"]:
+    for shape in ["rect", "RECT", "Rect"]:
         bounds = compute_shape_bounds(
             shape_type=shape,
             geometry_data={"w_mm": 20.0, "h_mm": 10.0},

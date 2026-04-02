@@ -76,7 +76,6 @@ class FeatureType:
 
 class ShapeType:
     RECT = "Rect"
-    RECTANGLE = "Rectangle"
     CIRCLE = "Circle"
     ROUNDED_RECT = "RoundedRect"
     POLYGON = "Polygon"
@@ -84,7 +83,6 @@ class ShapeType:
     POLYLINE = "Polyline"
 
     RECT_LOWER = "rect"
-    RECTANGLE_LOWER = "rectangle"
     CIRCLE_LOWER = "circle"
     POLYGON_LOWER = "polygon"
     LINE_LOWER = "line"
@@ -92,7 +90,7 @@ class ShapeType:
 
     @classmethod
     def is_rect(cls, shape: str) -> bool:
-        return shape.lower() in (cls.RECT_LOWER, cls.RECTANGLE_LOWER)
+        return shape.lower() == cls.RECT_LOWER
 
     @classmethod
     def is_circle(cls, shape: str) -> bool:

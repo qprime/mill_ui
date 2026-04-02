@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-from core.constants import DepthMode
+from core.constants import DepthMode, ShapeType
 from diagram_ir import Circle, DiagramIR, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir.geometry import rounded_rect_path
@@ -256,7 +256,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y, margin: float) -> list
     data = item.geometry.data
     shape_id = item.shape_id or "unnamed"
 
-    if shape_type in ("Rect", "Rectangle"):
+    if ShapeType.is_rect(shape_type):
         w = float(data.get("w_mm") or data.get("width", 0))
         h = float(data.get("h_mm") or data.get("height", 0))
         return [
@@ -437,7 +437,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
     cx, cy = item.placement.center_xy_mm
     data = item.geometry.data
 
-    if shape_type in ("Rect", "Rectangle"):
+    if ShapeType.is_rect(shape_type):
         w = float(data.get("w_mm") or data.get("width", 0))
         h = float(data.get("h_mm") or data.get("height", 0))
         if w <= 0 or h <= 0:

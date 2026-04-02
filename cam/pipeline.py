@@ -229,6 +229,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         intents,
         kerf_width_mm=kerf_mm,
         min_channel_width_mm=min_channel_width_mm,
+        warnings=warnings,
     )
     planner_input = _attach_surface_cooling(planner_input, ast)
     _hints_ms = (time.perf_counter() - hints_start) * 1000
@@ -241,7 +242,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     machine = Machine(name="default_grbl")
 
     plan_start = time.perf_counter()
-    passes, _ = plan_passes(
+    passes, _, planner_warnings = plan_passes(
         planner_input,
         config=Config(),
         tool_db=tools,
@@ -251,6 +252,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         profile_opts={"cut_through_mm": 0.2},
     )
     _plan_ms = (time.perf_counter() - plan_start) * 1000
+    warnings.extend(planner_warnings)
 
     if planner_input.keepouts:
         keepout_dicts = [k.to_dict() for k in planner_input.keepouts]

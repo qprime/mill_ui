@@ -65,7 +65,7 @@ def test_polygon_triangle_profile():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -99,7 +99,7 @@ def test_polygon_l_shape_profile():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -133,7 +133,7 @@ def test_roundedrect_uniform_radius_profile():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -171,7 +171,7 @@ def test_roundedrect_selective_corners_profile():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -201,7 +201,7 @@ def test_polygon_inside_cut():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),
@@ -235,7 +235,7 @@ def test_roundedrect_inside_cut():
         ),
     )
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(TOOL_DB),

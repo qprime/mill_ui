@@ -134,30 +134,30 @@ class TestRestPlannerPasses:
         )
 
     def test_two_records(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
         ops = [p.op for p in passes]
         assert "pocket" in ops
         assert "pocket_rest" in ops
 
     def test_different_tools(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
         pocket_pass = next(p for p in passes if p.op == "pocket")
         rest_pass = next(p for p in passes if p.op == "pocket_rest")
         assert pocket_pass.tool_selection.diameter == 12.7
         assert rest_pass.tool_selection.diameter == 6.35
 
     def test_rough_has_moves(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
         pocket_pass = next(p for p in passes if p.op == "pocket")
         assert len(pocket_pass.moves) > 0
 
     def test_rest_has_moves(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
         rest_pass = next(p for p in passes if p.op == "pocket_rest")
         assert len(rest_pass.moves) > 0
 
     def test_rest_fewer_moves_than_full_pocket(self):
-        passes_rest, _ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
+        passes_rest, *_ = self._run_planner(RestSpec(tool_diameter_mm=6.35))
         rest_pass = next(p for p in passes_rest if p.op == "pocket_rest")
         pocket_pass = next(p for p in passes_rest if p.op == "pocket")
         assert len(rest_pass.moves) < len(pocket_pass.moves)
@@ -271,12 +271,12 @@ class TestRestPlannerPasses:
             )
 
     def test_rest_perimeter_profile_in_finish_pass(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=3.175))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=3.175))
         rest_pass = next(p for p in passes if p.op == "pocket_rest")
         assert rest_pass.count >= 1
 
     def test_rest_corner_regions(self):
-        passes, _ = self._run_planner(RestSpec(tool_diameter_mm=3.175))
+        passes, *_ = self._run_planner(RestSpec(tool_diameter_mm=3.175))
         rest_pass = next(p for p in passes if p.op == "pocket_rest")
         assert len(rest_pass.moves) > 0
         xs = [m.x for m in rest_pass.moves if hasattr(m, "x") and m.x is not None]

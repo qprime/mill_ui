@@ -79,6 +79,7 @@ class PassAccumulator:
         self._ramp_angle_deg = float(ramp_angle_deg)
         self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
+        self._warnings: list[str] = []
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
         setup = Setup(
@@ -112,6 +113,13 @@ class PassAccumulator:
     def get_feature_tool(self, feature_id: str) -> ToolSelection | None:
         return self._feature_tools.get(feature_id)
 
+    def add_warning(self, message: str) -> None:
+        self._warnings.append(message)
+
+    @property
+    def warnings(self) -> list[str]:
+        return list(self._warnings)
+
     def passes(self) -> list[PassRecord]:
         return list(self._records.values())
 
@@ -137,7 +145,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     safe_z: float | None = None,
     prime_spindle: bool = False,
     profile_opts: Mapping[str, Any] | None = None,
-) -> tuple[list[PassRecord], dict[str, Any]]:
+) -> tuple[list[PassRecord], dict[str, Any], list[str]]:
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(
@@ -404,7 +412,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         profile_options=profile_options_summary,
     )
 
-    return pass_records, summary
+    return pass_records, summary, accumulator.warnings
 
 
 def _extract_positive_float(value: Any) -> float:

@@ -682,6 +682,38 @@ class TestPlanEdgeFeaturePasses:
         plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
         assert len(acc.passes()) == 0
 
+    def test_no_vbit_warns(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
+        assert len(acc.warnings) == 1
+        assert "no V-bit" in acc.warnings[0]
+
+    def test_no_roundover_bit_warns(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=6.0)),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
+        assert len(acc.warnings) == 1
+        assert "no roundover bit" in acc.warnings[0]
+
+    def test_unsupported_shape_warns(self):
+        acc = _accumulator()
+        entries = (
+            _edge_feature(
+                "Hexagon", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
+            ),
+        )
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+        assert len(acc.passes()) == 0
+        assert len(acc.warnings) == 1
+        assert "unsupported shape" in acc.warnings[0].lower()
+
     def test_inside_offset_negative(self):
         acc = _accumulator()
         entries = (

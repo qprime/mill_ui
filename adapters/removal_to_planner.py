@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from cam.planner.planner_input import (
@@ -19,6 +20,8 @@ from core.constants import (
 )
 from core.geometry import extract_shape_geometry
 from ir.removal_intent import RemovalIntent
+
+_logger = logging.getLogger(__name__)
 
 
 def removal_intent_to_hint(intent: RemovalIntent) -> dict[str, Any]:
@@ -212,6 +215,7 @@ def removal_intents_to_planner_input(
     intents: list[RemovalIntent],
     kerf_width_mm: float = 3.175,
     min_channel_width_mm: float = 6.0,
+    warnings: list[str] | None = None,
 ) -> PlannerInput:
     buckets: dict[str, list[FeatureInput]] = {
         "profiles": [],
@@ -224,6 +228,11 @@ def removal_intents_to_planner_input(
     dogbones: list[DogboneInput] = []
     all_keepouts: list[KeepoutInput] = []
     seen_keepouts: set[tuple[int, int, int, int]] = set()
+
+    def _warn(msg: str) -> None:
+        _logger.warning("%s", msg)
+        if warnings is not None:
+            warnings.append(msg)
 
     for intent in intents:
         for keepout in intent.constraints.keepouts:
@@ -253,16 +262,25 @@ def removal_intents_to_planner_input(
             edge_features.append(_intent_to_edge_feature_input(intent))
         elif intent.dogbone_corners is not None and intent.dogbone is not None:
             feature = _intent_to_feature_input(intent)
-            dogbones.append(_generate_dogbone_input(intent, feature))
+            try:
+                dogbones.append(_generate_dogbone_input(intent, feature))
+            except ValueError as exc:
+                _warn(f"Dogbone '{intent.region_id}': {exc} — feature skipped")
         else:
             feature = _intent_to_feature_input(intent)
             buckets[bucket].append(feature)
 
             if bucket == "pockets" and intent.corner_cleanup_tool_diameter_mm is not None:
-                corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
+                try:
+                    corner_cleanups.append(_generate_corner_cleanup_input(intent, feature))
+                except ValueError as exc:
+                    _warn(f"Corner cleanup '{intent.region_id}': {exc} — feature skipped")
 
             if bucket == "pockets" and intent.dogbone is not None:
-                dogbones.append(_generate_dogbone_input(intent, feature))
+                try:
+                    dogbones.append(_generate_dogbone_input(intent, feature))
+                except ValueError as exc:
+                    _warn(f"Dogbone '{intent.region_id}': {exc} — feature skipped")
 
     return PlannerInput(
         units="mm",

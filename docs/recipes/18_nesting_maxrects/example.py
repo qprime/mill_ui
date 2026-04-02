@@ -145,7 +145,7 @@ def main():
         machine = Machine(name="default_grbl")
 
         plan_start = time.perf_counter()
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=Config(),
             tool_db=TOOL_DB,

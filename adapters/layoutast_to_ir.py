@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 
 from core.constants import DepthMode
@@ -9,6 +10,8 @@ from diagram_ir.geometry import rounded_rect_path
 from diagram_ir.shapes import Shape
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import Item, LayoutAST, Sheet
+
+_logger = logging.getLogger(__name__)
 
 FEATURE_HANDLERS: dict[str, Callable[[Item, str, Callable, float], list[Shape]]] = {}
 
@@ -377,7 +380,8 @@ def _build_notch_shapes(item: Item, flip_y, margin: float) -> list:
         inset_mm = float(data.get("inset_mm", data.get("depth_mm", 0.0)))
         panel_width_mm = float(data.get("panel_width_mm", 0.0))
         panel_height_mm = float(data.get("panel_height_mm", 0.0))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as exc:
+        _logger.warning("Notch '%s': invalid geometry data (%s) — skipped in diagram", item.shape_id or "unknown", exc)
         return []
 
     if u_len_mm <= 0 or inset_mm <= 0:
@@ -584,7 +588,7 @@ def _count_features(ast: LayoutAST) -> str:
         counts[ftype] = counts.get(ftype, 0) + 1
     if not counts:
         return ""
-    return ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in counts.items())
+    return ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in sorted(counts.items()))
 
 
 def _collect_depth_info(ast: LayoutAST) -> list[str]:

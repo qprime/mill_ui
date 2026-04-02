@@ -145,7 +145,7 @@ class TestDogboneAdapterToPlanner:
 
         assert planner_input.dogbones[0].tool_diameter_mm is None
 
-    def test_non_rect_raises(self):
+    def test_non_rect_skips_with_warning(self):
         ast = LayoutAST(
             sheet=Sheet(width_mm=200, height_mm=150, thickness_mm=19, margin_mm=0.0),
             items=(
@@ -160,8 +160,10 @@ class TestDogboneAdapterToPlanner:
             ),
         )
         intents = ast_to_removal_intents(ast)
-        with pytest.raises(ValueError, match="only supported for rectangular"):
-            removal_intents_to_planner_input(intents)
+        warnings: list[str] = []
+        planner_input = removal_intents_to_planner_input(intents, warnings=warnings)
+        assert len(planner_input.dogbones) == 0
+        assert any("only supported for rectangular" in w for w in warnings)
 
 
 class TestDogboneCenterComputation:
@@ -225,7 +227,7 @@ class TestDogbonePlanner:
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
-        passes, _summary = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
@@ -246,7 +248,7 @@ class TestDogbonePlanner:
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
@@ -267,7 +269,7 @@ class TestDogbonePlanner:
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
@@ -305,7 +307,7 @@ class TestDogbonePlanner:
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),
@@ -325,7 +327,7 @@ class TestDogbonePlanner:
         machine = Machine()
         stock = Stock(width=200, height=150, thickness=19)
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(TOOL_DB),

@@ -72,7 +72,7 @@ def test_corner_cleanup_planner():
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(tool_db),
@@ -131,7 +131,7 @@ def test_corner_cleanup_tool_not_found():
     stock = Stock(width=200, height=150, thickness=19)
 
     try:
-        _passes, _summary = plan_passes(
+        _passes, *_ = plan_passes(
             planner_input,
             config=config,
             tool_db=normalize_tool_entries(tool_db),
@@ -159,12 +159,10 @@ def test_corner_cleanup_non_rect_error():
     )
 
     intents = ast_to_removal_intents(ast)
-
-    try:
-        removal_intents_to_planner_input(intents)
-        raise AssertionError("Expected ValueError for non-rectangular pocket")
-    except ValueError as e:
-        assert "only supported for rectangular pockets" in str(e).lower()
+    warnings: list[str] = []
+    planner_input = removal_intents_to_planner_input(intents, warnings=warnings)
+    assert len(planner_input.corner_cleanups) == 0
+    assert any("only supported for rectangular pockets" in w.lower() for w in warnings)
 
 
 def test_corner_cleanup_without_flag():
@@ -198,7 +196,7 @@ def test_corner_cleanup_without_flag():
     machine = Machine()
     stock = Stock(width=200, height=150, thickness=19)
 
-    passes, _summary = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=config,
         tool_db=normalize_tool_entries(tool_db),

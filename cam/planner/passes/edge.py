@@ -45,7 +45,9 @@ def plan_edge_feature_passes(
     for entry in edge_features:
         spec = entry.edge_feature
         if spec is None:
-            _logger.warning("Edge feature '%s' has no edge_feature spec — skipping", entry.id)
+            msg = f"Edge feature '{entry.id}': no edge_feature spec — feature skipped"
+            _logger.warning("%s", msg)
+            accumulator.add_warning(msg)
             continue
 
         if isinstance(spec, (ChamferSpec, BevelSpec)):
@@ -53,7 +55,9 @@ def plan_edge_feature_passes(
         elif isinstance(spec, RoundoverSpec):
             _plan_roundover_pass(entry, spec, accumulator, tool_db)
         else:
-            _logger.warning("Edge feature '%s' has unknown spec type — skipping", entry.id)
+            msg = f"Edge feature '{entry.id}': unknown spec type '{type(spec).__name__}' — feature skipped"
+            _logger.warning("%s", msg)
+            accumulator.add_warning(msg)
 
 
 def _plan_vbit_pass(
@@ -67,7 +71,9 @@ def _plan_vbit_pass(
     try:
         tool = pick_tool_for_edge(tool_db, angle_deg=desired_angle)
     except ValueError:
-        _logger.warning("Edge feature '%s': no V-bit available — skipping", entry.id)
+        msg = f"Edge feature '{entry.id}': no V-bit with {desired_angle}° angle available — feature skipped"
+        _logger.warning("%s", msg)
+        accumulator.add_warning(msg)
         return
 
     cut_depth = vbit_cut_depth(spec.width_mm, spec.angle_deg)
@@ -76,7 +82,9 @@ def _plan_vbit_pass(
 
     v_angle = tool.v_angle_deg
     if v_angle is None or v_angle <= 0.0:
-        _logger.warning("Edge feature '%s': V-bit has no v_angle_deg — skipping", entry.id)
+        msg = f"Edge feature '{entry.id}': V-bit has no v_angle_deg — feature skipped"
+        _logger.warning("%s", msg)
+        accumulator.add_warning(msg)
         return
 
     offset = vbit_effective_radius(cut_depth, v_angle)
@@ -87,6 +95,9 @@ def _plan_vbit_pass(
 
     shape = _build_offset_shape(entry, offset)
     if shape is None:
+        msg = f"Edge feature '{entry.id}': unsupported shape '{entry.shape}' — feature skipped"
+        _logger.warning("%s", msg)
+        accumulator.add_warning(msg)
         return
 
     record = accumulator.get_record("edge", tool)
@@ -105,7 +116,9 @@ def _plan_roundover_pass(
     try:
         tool = pick_tool_for_roundover(tool_db, radius_mm=spec.radius_mm)
     except ValueError:
-        _logger.warning("Edge feature '%s': no roundover bit available — skipping", entry.id)
+        msg = f"Edge feature '{entry.id}': no roundover bit with {spec.radius_mm}mm radius available — feature skipped"
+        _logger.warning("%s", msg)
+        accumulator.add_warning(msg)
         return
 
     offset = spec.radius_mm
@@ -116,6 +129,9 @@ def _plan_roundover_pass(
 
     shape = _build_offset_shape(entry, offset)
     if shape is None:
+        msg = f"Edge feature '{entry.id}': unsupported shape '{entry.shape}' — feature skipped"
+        _logger.warning("%s", msg)
+        accumulator.add_warning(msg)
         return
 
     record = accumulator.get_record("edge", tool)

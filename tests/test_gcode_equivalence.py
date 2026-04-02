@@ -45,7 +45,7 @@ def _generate_gcode(
     stock: Stock,
     machine: Machine,
 ) -> str:
-    passes, _ = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TOOL_DB),

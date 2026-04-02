@@ -55,7 +55,7 @@ def test_simple_rect_through_cam():
     stock = Stock(width=500, height=500, thickness=19)
     machine = Machine(name="default_grbl")
 
-    passes, _ = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),
@@ -110,7 +110,7 @@ def test_multiple_parts_through_cam():
         )
         machine = Machine(name="default_grbl")
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=Config(),
             tool_db=normalize_tool_entries(TEST_TOOL_DB),
@@ -173,7 +173,7 @@ def test_template_parts_through_cam():
     )
     machine = Machine(name="default_grbl")
 
-    passes, _ = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),
@@ -224,7 +224,7 @@ def test_multi_sheet_through_cam():
         )
         machine = Machine(name="default_grbl")
 
-        passes, _ = plan_passes(
+        passes, *_ = plan_passes(
             planner_input,
             config=Config(),
             tool_db=normalize_tool_entries(TEST_TOOL_DB),
@@ -267,7 +267,7 @@ def test_gcode_basic_invariants():
     stock = Stock(width=300, height=300, thickness=19)
     machine = Machine(name="default_grbl")
 
-    passes, _ = plan_passes(
+    passes, *_ = plan_passes(
         planner_input,
         config=Config(),
         tool_db=normalize_tool_entries(TEST_TOOL_DB),

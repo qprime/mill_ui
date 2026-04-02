@@ -276,8 +276,12 @@ def _extract_edge_treatment_from_geometry(geometry_data: dict[str, Any]) -> Edge
     if not edge_data:
         return None
 
+    edge_type = edge_data.get(GeometryKeys.TYPE)
+    if edge_type is None:
+        raise ValueError(f"EdgeTreatment: type is required, got {edge_data!r}")
+
     return EdgeTreatment(
-        type=edge_data[GeometryKeys.TYPE],
+        type=edge_type,
         radius_mm=edge_data.get(GeometryKeys.RADIUS_MM),
         distance_mm=edge_data.get(GeometryKeys.DISTANCE_MM),
         rough_allowance_mm=edge_data.get(GeometryKeys.ROUGH_ALLOWANCE_MM),

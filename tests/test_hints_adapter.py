@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import pytest
+
 from adapters.hints_to_removal import (
+    _extract_edge_treatment_from_geometry,
     engrave_hint_to_removal_intent,
     hole_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
@@ -252,3 +255,24 @@ def test_metadata_preservation():
     assert intent.shape == "Rect"
     assert intent.side == "inside"
     assert intent.original_id == "custom_shape"
+
+
+def test_edge_treatment_missing_type_raises():
+    geometry = {"edge_treatment": {"radius_mm": 3.0}}
+
+    with pytest.raises(ValueError, match="EdgeTreatment: type is required"):
+        _extract_edge_treatment_from_geometry(geometry)
+
+
+def test_edge_treatment_none_when_absent():
+    assert _extract_edge_treatment_from_geometry({}) is None
+
+
+def test_edge_treatment_valid():
+    geometry = {"edge_treatment": {"type": "chamfer", "distance_mm": 2.0}}
+
+    result = _extract_edge_treatment_from_geometry(geometry)
+    assert result is not None
+
+    assert result.type == "chamfer"
+    assert result.distance_mm == 2.0

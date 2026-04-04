@@ -16,6 +16,7 @@ from layout_ast.compositional import (
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
+    Ellipse,
     EngraveTextGen,
     FlutingGen,
     Frame,
@@ -60,7 +61,7 @@ from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, RestSpec, She
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob, NestParseError, NestPart
 
-_VALID_SHAPE_TYPES = ("Rect", "RoundedRect", "Circle", "Polygon", "Triangle")
+_VALID_SHAPE_TYPES = ("Rect", "RoundedRect", "Circle", "Polygon", "Triangle", "Ellipse")
 
 
 class PMLParseError(Exception):
@@ -861,6 +862,28 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             id=node_id,
             label=node_label,
         )
+
+    elif node_type == "Ellipse":
+        rx_mm = parse_dimension(node_data["rx"]) if "rx" in node_data else None
+        ry_mm = parse_dimension(node_data["ry"]) if "ry" in node_data else None
+        at_data = node_data.get("at") if isinstance(node_data, dict) else None
+        ellipse = Ellipse(
+            rx_mm=rx_mm,
+            ry_mm=ry_mm,
+            children=children,
+            feature=feature,
+            id=node_id,
+            label=node_label,
+        )
+        if at_data:
+            return AtPosition(
+                x_mm=parse_dimension(at_data.get("x")),
+                y_mm=parse_dimension(at_data.get("y")),
+                width_mm=parse_dimension(at_data["width"]) if "width" in at_data else None,
+                height_mm=parse_dimension(at_data["height"]) if "height" in at_data else None,
+                child=ellipse,
+            )
+        return ellipse
 
     elif node_type == "HoleGrid":
         depth = parse_dimension_or_through(node_data.get("depth", "through"))

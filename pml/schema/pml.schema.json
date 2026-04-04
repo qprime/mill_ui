@@ -110,6 +110,7 @@
         "Arch": {"$ref": "#/$defs/archNode"},
         "Polygon": {"$ref": "#/$defs/polygonNode"},
         "Triangle": {"$ref": "#/$defs/triangleNode"},
+        "Ellipse": {"$ref": "#/$defs/ellipseNode"},
         "HoleGrid": {"$ref": "#/$defs/holeGridNode"},
         "MeasurementGrid": {"$ref": "#/$defs/measurementGridNode"},
         "GridLines": {"$ref": "#/$defs/gridLinesNode"},
@@ -434,6 +435,26 @@
         "base": {"$ref": "#/$defs/dimension"},
         "height": {"$ref": "#/$defs/dimension"},
         "feature": {"$ref": "#/$defs/feature"},
+        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "ellipseNode": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "rx": {"$ref": "#/$defs/dimension"},
+        "ry": {"$ref": "#/$defs/dimension"},
+        "feature": {"$ref": "#/$defs/feature"},
+        "at": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": {"$ref": "#/$defs/dimension"},
+            "y": {"$ref": "#/$defs/dimension"},
+            "width": {"$ref": "#/$defs/dimension"},
+            "height": {"$ref": "#/$defs/dimension"}
+          }
+        },
         "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
       }
     },

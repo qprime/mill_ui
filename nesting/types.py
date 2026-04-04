@@ -119,6 +119,8 @@ class PartSpec:
             return math.pi / 4 * diameter * diameter
         if shape in ("Polygon", "Triangle") and self.geometry_points:
             return _shoelace_area(self.geometry_points)
+        if shape == "Ellipse":
+            return math.pi * (self.width_mm / 2) * (self.height_mm / 2)
         return self.width_mm * self.height_mm
 
     @property

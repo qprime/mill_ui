@@ -68,6 +68,12 @@ def _build_geometry_data(
         ]
         return ("Polygon", {"points": points, "holes": []})
 
+    elif shape == "Ellipse":
+        from core.geometry import ellipse_points
+
+        pts = ellipse_points(0.0, 0.0, w / 2, h / 2)
+        return ("Polygon", {"points": pts, "holes": []})
+
     else:
         return ("Rect", {"w_mm": w, "h_mm": h})
 

@@ -102,7 +102,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["Rect", "RoundedRect", "Circle", "Polygon", "Triangle"],
+              "enum": ["Rect", "RoundedRect", "Circle", "Polygon", "Triangle", "Ellipse"],
               "description": "Shape primitive type"
             },
             "radius": {

@@ -291,6 +291,33 @@ With explicit position:
       depth: 5mm
 ```
 
+#### Ellipse
+
+```yaml
+- Ellipse:
+    rx: 50mm
+    ry: 30mm
+    feature:
+      type: pocket
+      depth: 6mm
+```
+
+With positioning (rx/ry omitted → fills region):
+
+```yaml
+- AtPosition:
+    x: 100mm
+    y: 150mm
+    width: 100mm
+    height: 60mm
+    child:
+      Ellipse:
+        feature:
+          type: profile
+          side: outside
+          depth: through
+```
+
 #### Arch
 
 ```yaml

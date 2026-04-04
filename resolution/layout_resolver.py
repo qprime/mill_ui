@@ -54,6 +54,7 @@ from layout_ast.compositional import (
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
+    Ellipse,
     EngraveTextGen,
     FlutingGen,
     Frame,
@@ -2114,6 +2115,52 @@ class LayoutResolver:
         for child in node.children:
             self._resolve_node(child, triangle_region, items, child_params)
 
+    def _handle_ellipse(
+        self,
+        node: Ellipse,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        from core.geometry import ellipse_points
+
+        cx, cy = region.center
+
+        if node.rx_mm is not None and node.ry_mm is not None:
+            rx = node.rx_mm
+            ry = node.ry_mm
+        else:
+            rx = region.width / 2
+            ry = region.height / 2
+
+        ellipse_center = (cx, cy)
+        relative_points = ellipse_points(0.0, 0.0, rx, ry)
+
+        if node.feature is not None:
+            ellipse_item = Item(
+                kind="shape",
+                type="Polygon",
+                geometry=Geometry(data={"points": relative_points, "holes": []}),
+                placement=Placement(center_xy_mm=ellipse_center),
+                feature=node.feature,
+                shape_id=node.id or self._next_shape_id("ellipse"),
+                label=node.label if node.label else node.id,
+            )
+            items.append(ellipse_item)
+
+        ellipse_region = ResolvedRegion(
+            x_min=cx - rx,
+            y_min=cy - ry,
+            x_max=cx + rx,
+            y_max=cy + ry,
+        )
+
+        abs_points = [(cx + px, cy + py) for px, py in relative_points]
+        domain = Domain.from_polygon(abs_points)
+        child_params = {**params, "domain": domain, "domain_center": ellipse_center}
+        for child in node.children:
+            self._resolve_node(child, ellipse_region, items, child_params)
+
     def _build_joinery_from_config(
         self,
         config: str | Any,
@@ -2841,6 +2888,7 @@ class LayoutResolver:
                 Arch: LayoutResolver._handle_arch,
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,
+                Ellipse: LayoutResolver._handle_ellipse,
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
                 RadialPocketGen: LayoutResolver._handle_radial_pocket_gen,
                 RadialSvgGen: LayoutResolver._handle_radial_svg_gen,

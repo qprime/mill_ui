@@ -18,6 +18,7 @@ from layout_ast.compositional import (
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
+    Ellipse,
     EngraveTextGen,
     FlutingGen,
     Frame,
@@ -219,6 +220,14 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             poly_data = format_polygon_node(node.child)
             poly_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             return {"Polygon": poly_data}
+        elif node.child and isinstance(node.child, Ellipse):
+            ell_data = format_ellipse_node(node.child)
+            ell_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
+            if node.width_mm is not None:
+                ell_data["at"]["width"] = dim(node.width_mm)
+            if node.height_mm is not None:
+                ell_data["at"]["height"] = dim(node.height_mm)
+            return {"Ellipse": ell_data}
         else:
             result = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             if node.width_mm is not None:
@@ -471,6 +480,9 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["children"] = [format_node(c) for c in node.children]
         return {"Triangle": result}
 
+    elif isinstance(node, Ellipse):
+        return {"Ellipse": format_ellipse_node(node)}
+
     elif isinstance(node, HoleGridGen):
         result: dict[str, Any] = {
             "spacing": dim(node.spacing_mm),
@@ -718,6 +730,21 @@ def format_rounded_rect_node(node: RoundedRect) -> dict[str, Any]:
 
 def format_polygon_node(node: Polygon) -> dict[str, Any]:
     result: dict[str, Any] = {"points": [[dim(p[0]), dim(p[1])] for p in node.points]}
+    if node.id:
+        result["id"] = node.id
+    if node.feature:
+        result["feature"] = format_feature(node.feature)
+    if node.children:
+        result["children"] = [format_node(c) for c in node.children]
+    return result
+
+
+def format_ellipse_node(node: Ellipse) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if node.rx_mm is not None:
+        result["rx"] = dim(node.rx_mm)
+    if node.ry_mm is not None:
+        result["ry"] = dim(node.ry_mm)
     if node.id:
         result["id"] = node.id
     if node.feature:

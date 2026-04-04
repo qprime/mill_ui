@@ -148,6 +148,28 @@ def arc_points(
     return points
 
 
+def ellipse_points(
+    cx: float,
+    cy: float,
+    rx: float,
+    ry: float,
+    segments: int = 64,
+) -> list[tuple[float, float]]:
+    if rx <= 0:
+        raise ValueError(f"rx must be positive, got {rx}")
+    if ry <= 0:
+        raise ValueError(f"ry must be positive, got {ry}")
+    if segments < 1:
+        raise ValueError(f"segments must be >= 1, got {segments}")
+    return [
+        (
+            cx + rx * math.cos(2 * math.pi * i / segments),
+            cy + ry * math.sin(2 * math.pi * i / segments),
+        )
+        for i in range(segments)
+    ]
+
+
 def calculate_angled_depth(width: float, angle_deg: float, fallback: float = 0.0) -> float:
     if 0.0 < angle_deg < 90.0:
         return width * math.tan(math.radians(angle_deg))

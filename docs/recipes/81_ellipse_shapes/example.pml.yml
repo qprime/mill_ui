@@ -1,0 +1,29 @@
+# mill_ui: 06bef978
+# generated: 2026-04-04
+
+Sheet:
+  width: 400mm
+  height: 300mm
+  thickness: 19mm
+children:
+- Ellipse:
+    rx: 80mm
+    ry: 50mm
+    id: oval_cutout
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 120mm
+      y: 150mm
+- Ellipse:
+    rx: 40mm
+    ry: 25mm
+    id: oval_pocket
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 300mm
+      y: 150mm

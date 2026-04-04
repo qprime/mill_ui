@@ -95,6 +95,24 @@ class RoundedRect:
 
 
 @dataclass(frozen=True)
+class Ellipse:
+    rx_mm: float | None = None
+    ry_mm: float | None = None
+    children: tuple[Any, ...] = ()
+    feature: Any = None
+    id: str | None = None
+    label: str | None = None
+
+    def __post_init__(self):
+        if (self.rx_mm is None) != (self.ry_mm is None):
+            raise ValueError("Ellipse requires both rx and ry, or neither (region-fill)")
+        if self.rx_mm is not None and self.rx_mm <= 0:
+            raise ValueError(f"Ellipse rx_mm must be positive, got {self.rx_mm}")
+        if self.ry_mm is not None and self.ry_mm <= 0:
+            raise ValueError(f"Ellipse ry_mm must be positive, got {self.ry_mm}")
+
+
+@dataclass(frozen=True)
 class Line:
     orientation: str
     feature: Any = None

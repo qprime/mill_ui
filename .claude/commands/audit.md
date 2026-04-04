@@ -151,6 +151,19 @@ The proposed update should include:
 
 Format the proposal as a complete replacement of the file contents so the user can review the full state, not just a diff.
 
+## When Audit Leads to Changes
+
+If the user asks you to modify a spec or issue based on audit findings, you are now wearing two hats — auditor and spec writer. The audit hat found the problems; the spec-writer hat must not introduce new ones.
+
+Before publishing any spec or issue edit:
+
+- Walk every row in the original implementation table — does each still apply, need updating, or need removal?
+- Check import layering for any function you relocate
+- Verify internal consistency between "what changes" and "what doesn't change" sections
+- If you changed the architectural approach (e.g., switched the analog pattern), walk every file the new analog touches and account for each
+
+Apply the same quality checks documented in `/spec` Quality Checks. If you haven't read that section recently, read it before publishing.
+
 ## Invariant Loading
 
 Load `docs/invariants/README.md` for global axioms. For each file in audit scope, load the relevant subsystem invariant file per the mapping in the README. You're checking for drift between documented invariants and actual implementation.

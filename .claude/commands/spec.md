@@ -69,6 +69,9 @@ Which invariant files apply to this change. For each:
 - Invariant ID and name
 - Whether this change complies or requires a documented exception
 
+### Edge Cases
+For each parameter that can be None/omitted independently, document what happens when only some are provided. Specify the resolution rule explicitly (both-or-neither, default to X, error). Omit this section only if the feature has no independently-optional parameters.
+
 ### Testing Strategy
 Named test cases with expected behavior. Not "write tests" — specific test names and what they verify:
 
@@ -111,3 +114,7 @@ Before presenting the draft, verify:
 - [ ] No section is vague hand-waving — if you can't be specific, you haven't researched enough
 - [ ] The "What NOT to do" section has at least one entry
 - [ ] Test cases have names, not just descriptions
+- [ ] Implementation table and "what doesn't change" section are mutually exclusive — no file appears in both
+- [ ] Every layer the data flows through has a row (or an explicit "no change needed because X") — check parser, formatter, resolver, adapter, planner, diagram, renderer, schema
+- [ ] Import layering: for each proposed function placement, verify the caller can import from that module (check conventions.md import layering)
+- [ ] If the design follows an existing feature as analog, walk every file that analog touches and account for each

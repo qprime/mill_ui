@@ -1,0 +1,26 @@
+# mill_ui: 640994c1
+# generated: 2026-04-04
+
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: sunburst_panel
+    at:
+      x: 200mm
+      y: 200mm
+      width: 350mm
+      height: 350mm
+    children:
+    - Radial:
+        rays: 12
+        depth: 4mm
+        element:
+          type: pocket
+          shape: arc
+          bar_width: 10mm
+          center_shape: circle
+          center_size: 50mm

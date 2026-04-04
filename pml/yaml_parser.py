@@ -412,6 +412,85 @@ def _parse_beam_node(node_data: dict, path: str) -> Any:
     )
 
 
+def _parse_radial_node(node_data: dict, path: str) -> Any:
+    from layout_ast.compositional import RadialLabelGen, RadialPocketGen, RadialTickGen
+
+    element = node_data.get("element", {})
+    element_type = element.get("type", "pocket")
+    ctx = f"{path}.Radial"
+
+    rays = _safe_int(_require(node_data, "rays", ctx), "rays", ctx)
+    depth_mm = parse_dimension(_require(node_data, "depth", ctx))
+    start_angle_deg = _safe_float(node_data.get("start_angle", 0), "start_angle", ctx)
+    end_angle_deg = _safe_float(node_data.get("end_angle", 360), "end_angle", ctx)
+    radius_mm = parse_dimension(node_data["radius"]) if "radius" in node_data else None
+
+    if element_type == "pocket":
+        return RadialPocketGen(
+            rays=rays,
+            depth_mm=depth_mm,
+            bar_width_mm=parse_dimension(element.get("bar_width", "0mm")),
+            shape=element.get("shape", "triangle"),
+            center_shape=element.get("center_shape"),
+            center_size_mm=parse_dimension(element["center_size"]) if "center_size" in element else None,
+            start_angle_deg=start_angle_deg,
+            end_angle_deg=end_angle_deg,
+            radius_mm=radius_mm,
+        )
+
+    if element_type == "tick":
+        label_list_raw = element.get("label_list")
+        label_list = tuple(str(v) for v in label_list_raw) if label_list_raw else None
+        return RadialTickGen(
+            rays=rays,
+            depth_mm=depth_mm,
+            minor_subdivisions=_safe_int(node_data.get("minor_subdivisions", 0), "minor_subdivisions", ctx),
+            tick_length_mm=parse_dimension(element["tick_length"]) if "tick_length" in element else None,
+            minor_tick_length_mm=(
+                parse_dimension(element["minor_tick_length"]) if "minor_tick_length" in element else None
+            ),
+            inward=element.get("inward", False),
+            labels=element.get("labels", False),
+            label_list=label_list,
+            label_height_mm=parse_dimension(element.get("label_height", "3mm")),
+            start_angle_deg=start_angle_deg,
+            end_angle_deg=end_angle_deg,
+            radius_mm=radius_mm,
+        )
+
+    if element_type == "label":
+        values_raw = element.get("values")
+        values = tuple(str(v) for v in values_raw) if values_raw else None
+        return RadialLabelGen(
+            rays=rays,
+            depth_mm=depth_mm,
+            values=values,
+            label_height_mm=parse_dimension(element.get("height", "3mm")),
+            start_angle_deg=start_angle_deg,
+            end_angle_deg=end_angle_deg,
+            radius_mm=radius_mm,
+        )
+
+    if element_type == "svg":
+        from layout_ast.compositional import RadialSvgGen
+
+        return RadialSvgGen(
+            rays=rays,
+            depth_mm=depth_mm,
+            svg_path=_require(element, "path", f"{ctx}.element"),
+            feature_type=element.get("feature", "engrave"),
+            scale_mode=element.get("scale", "fit"),
+            svg_unit_mm=_safe_float(element.get("svg_unit", 1.0), "svg_unit", ctx),
+            rotate_element=element.get("rotate", True),
+            start_angle_deg=start_angle_deg,
+            end_angle_deg=end_angle_deg,
+            radius_mm=radius_mm,
+            stamp_size_mm=parse_dimension(element["size"]) if "size" in element else None,
+        )
+
+    raise PMLParseError(f"Unknown Radial element type: '{element_type}'", ctx)
+
+
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
@@ -428,6 +507,9 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
     node_data = data[node_type]
     if node_data is None:
         node_data = {}
+
+    if node_type == "Radial":
+        return _parse_radial_node(node_data, path)
 
     if node_type == "SvgStamp":
         depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))

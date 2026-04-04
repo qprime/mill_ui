@@ -205,6 +205,111 @@ class HoleGridParams(BaseParams):
             raise ValueError(f"HoleGridParams: align must be one of {valid_aligns}, got '{self.align}'")
 
 
+@dataclass(frozen=True)
+class RadialPocketParams(BaseParams):
+    rays: int
+    depth_mm: float
+    bar_width_mm: float = 0.0
+    shape: Literal["triangle", "arc"] = "triangle"
+    center_shape: str | None = None
+    center_size_mm: float | None = None
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.rays < 2:
+            raise ValueError(f"RadialPocketParams: rays must be >= 2, got {self.rays}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"RadialPocketParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.bar_width_mm < 0:
+            raise ValueError(f"RadialPocketParams: bar_width_mm must be non-negative, got {self.bar_width_mm}")
+        valid_center_shapes = ("circle", "square", "diamond", "hexagon")
+        if self.center_shape is not None and self.center_shape not in valid_center_shapes:
+            raise ValueError(
+                f"RadialPocketParams: center_shape must be one of {valid_center_shapes}, got '{self.center_shape}'"
+            )
+        if self.center_shape is not None and self.center_size_mm is None:
+            raise ValueError("RadialPocketParams: center_size_mm required when center_shape is set")
+        if self.center_size_mm is not None and self.center_size_mm <= 0:
+            raise ValueError(f"RadialPocketParams: center_size_mm must be positive, got {self.center_size_mm}")
+        valid_shapes = ("triangle", "arc")
+        if self.shape not in valid_shapes:
+            raise ValueError(f"RadialPocketParams: shape must be one of {valid_shapes}, got '{self.shape}'")
+
+
+@dataclass(frozen=True)
+class RadialTickParams(BaseParams):
+    rays: int
+    depth_mm: float
+    minor_subdivisions: int = 0
+    tick_length_mm: float | None = None
+    minor_tick_length_mm: float | None = None
+    inward: bool = False
+    labels: bool = False
+    label_list: tuple[str, ...] | None = None
+    label_height_mm: float = 3.0
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.rays < 1:
+            raise ValueError(f"RadialTickParams: rays must be >= 1, got {self.rays}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"RadialTickParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.minor_subdivisions < 0:
+            raise ValueError(
+                f"RadialTickParams: minor_subdivisions must be non-negative, got {self.minor_subdivisions}"
+            )
+        if self.label_height_mm <= 0:
+            raise ValueError(f"RadialTickParams: label_height_mm must be positive, got {self.label_height_mm}")
+
+
+@dataclass(frozen=True)
+class RadialLabelParams(BaseParams):
+    rays: int
+    depth_mm: float
+    values: tuple[str, ...] | None = None
+    label_height_mm: float = 3.0
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.rays < 1:
+            raise ValueError(f"RadialLabelParams: rays must be >= 1, got {self.rays}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"RadialLabelParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.label_height_mm <= 0:
+            raise ValueError(f"RadialLabelParams: label_height_mm must be positive, got {self.label_height_mm}")
+        if self.values is not None and len(self.values) != self.rays:
+            raise ValueError(f"RadialLabelParams: values length ({len(self.values)}) must match rays ({self.rays})")
+
+
+@dataclass(frozen=True)
+class RadialSvgParams(BaseParams):
+    rays: int
+    depth_mm: float
+    svg_path: str
+    feature_type: Literal["engrave", "pocket", "profile"] = "engrave"
+    scale_mode: Literal["fit", "fill", "none"] = "fit"
+    svg_unit_mm: float = 1.0
+    rotate_element: bool = True
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+    stamp_size_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.rays < 1:
+            raise ValueError(f"RadialSvgParams: rays must be >= 1, got {self.rays}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"RadialSvgParams: depth_mm must be positive, got {self.depth_mm}")
+        if not self.svg_path or not self.svg_path.strip():
+            raise ValueError("RadialSvgParams: svg_path cannot be empty")
+
+
 __all__ = [
     "ConcentricBorderParams",
     "FlatPocketParams",
@@ -214,6 +319,10 @@ __all__ = [
     "HoleGridParams",
     "LinePatternParams",
     "MeasurementGridParams",
+    "RadialLabelParams",
+    "RadialPocketParams",
+    "RadialSvgParams",
+    "RadialTickParams",
     "RaisedPanelParams",
     "XPanelParams",
 ]

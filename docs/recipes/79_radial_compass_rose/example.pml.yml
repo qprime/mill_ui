@@ -1,0 +1,24 @@
+# mill_ui: 640994c1
+# generated: 2026-04-04
+
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: compass_rose
+    at:
+      x: 150mm
+      y: 150mm
+      width: 250mm
+      height: 250mm
+    children:
+    - Radial:
+        rays: 4
+        minor_subdivisions: 3
+        depth: 0.3mm
+        element:
+          type: tick
+          label_list: [N, E, S, W]

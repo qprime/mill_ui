@@ -523,6 +523,78 @@ Parameters:
 
 Best results with a ball-nose endmill for classical rounded groove cross-section.
 
+#### Radial
+
+Angular pattern placement around a center point. A single `Radial` key with an `element` sub-object that determines what gets placed.
+
+**Shared placement parameters (all element types):**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `rays` | Yes | — | Number of major angular divisions |
+| `minor_subdivisions` | No | 0 | Minor divisions per major interval |
+| `start_angle` | No | 0 | Starting angle in degrees |
+| `end_angle` | No | 360 | Ending angle (for arcs) |
+| `radius` | No | domain-derived | Distance from center |
+| `depth` | Yes | — | Engrave/pocket depth |
+
+**Element: pocket** — pocketed wedge regions between rays:
+
+```yaml
+- Radial:
+    rays: 12
+    depth: 4mm
+    element:
+      type: pocket
+      shape: arc           # triangle (default) or arc
+      bar_width: 10mm      # raised bar width between pockets (default: 0mm)
+      center_shape: circle # circle, square, diamond, hexagon (optional)
+      center_size: 50mm    # size of central island (required if center_shape set)
+```
+
+**Element: tick** — radial tick marks for dials, gauges:
+
+```yaml
+- Radial:
+    rays: 12
+    minor_subdivisions: 4
+    depth: 0.3mm
+    element:
+      type: tick
+      tick_length: 15mm       # major tick length (default: auto)
+      minor_tick_length: 8mm  # minor tick length (default: auto)
+      inward: false           # ticks point toward center (default: false)
+      labels: true            # add numeric labels (default: false)
+      label_list: [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # custom labels
+      label_height: 3mm       # text height (default: 3mm)
+```
+
+**Element: label** — text labels at angular positions:
+
+```yaml
+- Radial:
+    rays: 12
+    depth: 0.3mm
+    element:
+      type: label
+      values: [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+      height: 4mm            # text height (default: 3mm)
+```
+
+**Element: svg** — SVG stamp placed at each angular position:
+
+```yaml
+- Radial:
+    rays: 8
+    depth: 0.3mm
+    element:
+      type: svg
+      path: "M 0 0 L 20 10 L 0 20 Z"  # inline path data or .svg file
+      scale: fit           # fit (default), fill, none
+      rotate: true         # rotate to face outward (default: true)
+      size: 30mm           # stamp bounding box size (optional, auto-derived)
+```
+
 #### Wave
 
 Wavy groove pattern:

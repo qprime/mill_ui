@@ -239,6 +239,61 @@ class SplitGrid:
 
 
 @dataclass(frozen=True)
+class RadialPocketGen:
+    rays: int
+    depth_mm: float
+    bar_width_mm: float = 0.0
+    shape: str = "triangle"
+    center_shape: str | None = None
+    center_size_mm: float | None = None
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class RadialTickGen:
+    rays: int
+    depth_mm: float
+    minor_subdivisions: int = 0
+    tick_length_mm: float | None = None
+    minor_tick_length_mm: float | None = None
+    inward: bool = False
+    labels: bool = False
+    label_list: tuple[str, ...] | None = None
+    label_height_mm: float = 3.0
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class RadialLabelGen:
+    rays: int
+    depth_mm: float
+    values: tuple[str, ...] | None = None
+    label_height_mm: float = 3.0
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class RadialSvgGen:
+    rays: int
+    depth_mm: float
+    svg_path: str
+    feature_type: str = "engrave"
+    scale_mode: str = "fit"
+    svg_unit_mm: float = 1.0
+    rotate_element: bool = True
+    start_angle_deg: float = 0.0
+    end_angle_deg: float = 360.0
+    radius_mm: float | None = None
+    stamp_size_mm: float | None = None
+
+
+@dataclass(frozen=True)
 class FlutingGen:
     spacing_mm: float
     depth_mm: float

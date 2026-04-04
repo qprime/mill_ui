@@ -1,0 +1,25 @@
+# mill_ui: 640994c1
+# generated: 2026-04-04
+
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: radial_svg_panel
+    at:
+      x: 200mm
+      y: 200mm
+      width: 350mm
+      height: 350mm
+    children:
+    - Radial:
+        rays: 8
+        depth: 0.3mm
+        element:
+          type: svg
+          path: "M 0 0 L 20 10 L 0 20 Z"
+          scale: fit
+          rotate: true

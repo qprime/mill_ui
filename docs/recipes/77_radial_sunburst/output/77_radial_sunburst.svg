@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.588 -51.587 553.175 543.175" width="553.175mm" height="543.175mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
+  <rect x="-11.5875" y="-51.5875" width="553.175" height="543.175" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="400.000" height="400.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <path d="M 353.992 116.864 L 355.187 119.118 L 356.350 121.388 L 357.479 123.676 L 358.575 125.979 L 359.637 128.299 L 360.665 130.633 L 361.659 132.983 L 362.619 135.346 L 363.544 137.724 L 364.434 140.114 L 365.290 142.517 L 366.110 144.933 L 366.895 147.360 L 367.645 149.798 L 368.359 152.247 L 369.037 154.707 L 369.679 157.175 L 370.286 159.653 L 370.856 162.140 L 371.389 164.634 L 371.887 167.136 L 372.347 169.646 L 372.771 172.161 L 373.159 174.682 L 373.510 177.209 L 373.823 179.741 L 374.100 182.277 L 374.340 184.816 L 374.543 187.359 L 374.709 189.905 L 374.837 192.453 L 374.929 195.002 L 224.489 195.000 L 223.924 192.743 L 223.692 192.095 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_0" />
+    <path d="M 291.793 51.006 L 293.955 52.360 L 296.097 53.745 L 298.219 55.162 L 300.319 56.609 L 302.399 58.086 L 304.457 59.594 L 306.492 61.132 L 308.505 62.699 L 310.495 64.295 L 312.461 65.920 L 314.404 67.574 L 316.322 69.255 L 318.216 70.965 L 320.084 72.702 L 321.927 74.466 L 323.744 76.256 L 325.534 78.073 L 327.298 79.916 L 329.035 81.784 L 330.745 83.678 L 332.426 85.596 L 334.080 87.539 L 335.705 89.505 L 337.301 91.495 L 338.868 93.508 L 340.406 95.543 L 341.914 97.601 L 343.391 99.681 L 344.838 101.781 L 346.255 103.903 L 347.640 106.045 L 348.994 108.207 L 218.688 183.437 L 217.678 182.322 L 216.563 181.312 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_1" />
+    <path d="M 204.998 25.071 L 207.547 25.163 L 210.095 25.291 L 212.641 25.457 L 215.184 25.660 L 217.723 25.900 L 220.259 26.177 L 222.791 26.490 L 225.318 26.841 L 227.839 27.229 L 230.354 27.653 L 232.864 28.113 L 235.366 28.611 L 237.860 29.144 L 240.347 29.714 L 242.825 30.321 L 245.293 30.963 L 247.753 31.641 L 250.202 32.355 L 252.640 33.105 L 255.067 33.890 L 257.483 34.710 L 259.886 35.566 L 262.276 36.456 L 264.654 37.381 L 267.017 38.341 L 269.367 39.335 L 271.701 40.363 L 274.021 41.425 L 276.324 42.521 L 278.612 43.650 L 280.882 44.813 L 283.136 46.008 L 207.905 176.308 L 207.257 176.076 L 205.000 175.511 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_2" />
+    <path d="M 116.864 46.008 L 119.118 44.813 L 121.388 43.650 L 123.676 42.521 L 125.979 41.425 L 128.299 40.363 L 130.633 39.335 L 132.983 38.341 L 135.346 37.381 L 137.724 36.456 L 140.114 35.566 L 142.517 34.710 L 144.933 33.890 L 147.360 33.105 L 149.798 32.355 L 152.247 31.641 L 154.707 30.963 L 157.175 30.321 L 159.653 29.714 L 162.140 29.144 L 164.634 28.611 L 167.136 28.113 L 169.646 27.653 L 172.161 27.229 L 174.682 26.841 L 177.209 26.490 L 179.741 26.177 L 182.277 25.900 L 184.816 25.660 L 187.359 25.457 L 189.905 25.291 L 192.453 25.163 L 195.002 25.071 L 195.000 175.511 L 192.743 176.076 L 192.095 176.308 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_3" />
+    <path d="M 51.006 108.207 L 52.360 106.045 L 53.745 103.903 L 55.162 101.781 L 56.609 99.681 L 58.086 97.601 L 59.594 95.543 L 61.132 93.508 L 62.699 91.495 L 64.295 89.505 L 65.920 87.539 L 67.574 85.596 L 69.255 83.678 L 70.965 81.784 L 72.702 79.916 L 74.466 78.073 L 76.256 76.256 L 78.073 74.466 L 79.916 72.702 L 81.784 70.965 L 83.678 69.255 L 85.596 67.574 L 87.539 65.920 L 89.505 64.295 L 91.495 62.699 L 93.508 61.132 L 95.543 59.594 L 97.601 58.086 L 99.681 56.609 L 101.781 55.162 L 103.903 53.745 L 106.045 52.360 L 108.207 51.006 L 183.437 181.312 L 182.322 182.322 L 181.312 183.437 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_4" />
+    <path d="M 25.071 195.002 L 25.163 192.453 L 25.291 189.905 L 25.457 187.359 L 25.660 184.816 L 25.900 182.277 L 26.177 179.741 L 26.490 177.209 L 26.841 174.682 L 27.229 172.161 L 27.653 169.646 L 28.113 167.136 L 28.611 164.634 L 29.144 162.140 L 29.714 159.653 L 30.321 157.175 L 30.963 154.707 L 31.641 152.247 L 32.355 149.798 L 33.105 147.360 L 33.890 144.933 L 34.710 142.517 L 35.566 140.114 L 36.456 137.724 L 37.381 135.346 L 38.341 132.983 L 39.335 130.633 L 40.363 128.299 L 41.425 125.979 L 42.521 123.676 L 43.650 121.388 L 44.813 119.118 L 46.008 116.864 L 176.308 192.095 L 176.076 192.743 L 175.511 195.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_5" />
+    <path d="M 46.008 283.136 L 44.813 280.882 L 43.650 278.612 L 42.521 276.324 L 41.425 274.021 L 40.363 271.701 L 39.335 269.367 L 38.341 267.017 L 37.381 264.654 L 36.456 262.276 L 35.566 259.886 L 34.710 257.483 L 33.890 255.067 L 33.105 252.640 L 32.355 250.202 L 31.641 247.753 L 30.963 245.293 L 30.321 242.825 L 29.714 240.347 L 29.144 237.860 L 28.611 235.366 L 28.113 232.864 L 27.653 230.354 L 27.229 227.839 L 26.841 225.318 L 26.490 222.791 L 26.177 220.259 L 25.900 217.723 L 25.660 215.184 L 25.457 212.641 L 25.291 210.095 L 25.163 207.547 L 25.071 204.998 L 175.511 205.000 L 176.076 207.257 L 176.308 207.905 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_6" />
+    <path d="M 108.207 348.994 L 106.045 347.640 L 103.903 346.255 L 101.781 344.838 L 99.681 343.391 L 97.601 341.914 L 95.543 340.406 L 93.508 338.868 L 91.495 337.301 L 89.505 335.705 L 87.539 334.080 L 85.596 332.426 L 83.678 330.745 L 81.784 329.035 L 79.916 327.298 L 78.073 325.534 L 76.256 323.744 L 74.466 321.927 L 72.702 320.084 L 70.965 318.216 L 69.255 316.322 L 67.574 314.404 L 65.920 312.461 L 64.295 310.495 L 62.699 308.505 L 61.132 306.492 L 59.594 304.457 L 58.086 302.399 L 56.609 300.319 L 55.162 298.219 L 53.745 296.097 L 52.360 293.955 L 51.006 291.793 L 181.312 216.563 L 182.322 217.678 L 183.437 218.688 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_7" />
+    <path d="M 195.002 374.929 L 192.453 374.837 L 189.905 374.709 L 187.359 374.543 L 184.816 374.340 L 182.277 374.100 L 179.741 373.823 L 177.209 373.510 L 174.682 373.159 L 172.161 372.771 L 169.646 372.347 L 167.136 371.887 L 164.634 371.389 L 162.140 370.856 L 159.653 370.286 L 157.175 369.679 L 154.707 369.037 L 152.247 368.359 L 149.798 367.645 L 147.360 366.895 L 144.933 366.110 L 142.517 365.290 L 140.114 364.434 L 137.724 363.544 L 135.346 362.619 L 132.983 361.659 L 130.633 360.665 L 128.299 359.637 L 125.979 358.575 L 123.676 357.479 L 121.388 356.350 L 119.118 355.187 L 116.864 353.992 L 192.095 223.692 L 192.743 223.924 L 195.000 224.489 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_8" />
+    <path d="M 283.136 353.992 L 280.882 355.187 L 278.612 356.350 L 276.324 357.479 L 274.021 358.575 L 271.701 359.637 L 269.367 360.665 L 267.017 361.659 L 264.654 362.619 L 262.276 363.544 L 259.886 364.434 L 257.483 365.290 L 255.067 366.110 L 252.640 366.895 L 250.202 367.645 L 247.753 368.359 L 245.293 369.037 L 242.825 369.679 L 240.347 370.286 L 237.860 370.856 L 235.366 371.389 L 232.864 371.887 L 230.354 372.347 L 227.839 372.771 L 225.318 373.159 L 222.791 373.510 L 220.259 373.823 L 217.723 374.100 L 215.184 374.340 L 212.641 374.543 L 210.095 374.709 L 207.547 374.837 L 204.998 374.929 L 205.000 224.489 L 207.257 223.924 L 207.905 223.692 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_9" />
+    <path d="M 348.994 291.793 L 347.640 293.955 L 346.255 296.097 L 344.838 298.219 L 343.391 300.319 L 341.914 302.399 L 340.406 304.457 L 338.868 306.492 L 337.301 308.505 L 335.705 310.495 L 334.080 312.461 L 332.426 314.404 L 330.745 316.322 L 329.035 318.216 L 327.298 320.084 L 325.534 321.927 L 323.744 323.744 L 321.927 325.534 L 320.084 327.298 L 318.216 329.035 L 316.322 330.745 L 314.404 332.426 L 312.461 334.080 L 310.495 335.705 L 308.505 337.301 L 306.492 338.868 L 304.457 340.406 L 302.399 341.914 L 300.319 343.391 L 298.219 344.838 L 296.097 346.255 L 293.955 347.640 L 291.793 348.994 L 216.563 218.688 L 217.678 217.678 L 218.688 216.563 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_10" />
+    <path d="M 374.929 204.998 L 374.837 207.547 L 374.709 210.095 L 374.543 212.641 L 374.340 215.184 L 374.100 217.723 L 373.823 220.259 L 373.510 222.791 L 373.159 225.318 L 372.771 227.839 L 372.347 230.354 L 371.887 232.864 L 371.389 235.366 L 370.856 237.860 L 370.286 240.347 L 369.679 242.825 L 369.037 245.293 L 368.359 247.753 L 367.645 250.202 L 366.895 252.640 L 366.110 255.067 L 365.290 257.483 L 364.434 259.886 L 363.544 262.276 L 362.619 264.654 L 361.659 267.017 L 360.665 269.367 L 359.637 271.701 L 358.575 274.021 L 357.479 276.324 L 356.350 278.612 L 355.187 280.882 L 353.992 283.136 L 223.692 207.905 L 223.924 207.257 L 224.489 205.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_radial_pocket_0_wedge_11" />
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="223.69169518111696" y1="116.86405313617348" x2="223.69169518111696" y2="96.86405313617348" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="374.92861513062155" y1="116.86405313617348" x2="374.92861513062155" y2="96.86405313617348" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="223.69169518111696" y1="96.86405313617348" x2="374.92861513062155" y2="96.86405313617348" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="223.69169518111696,96.86405313617348 226.69169518111696,93.86405313617348 226.69169518111696,99.86405313617348" fill="#5ab9ea" />
+    <polygon points="374.92861513062155,96.86405313617348 371.92861513062155,93.86405313617348 371.92861513062155,99.86405313617348" fill="#5ab9ea" />
+    <text x="299.31015515586927" y="91.86405313617348" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">151.2mm</text>
+    <line x1="374.92861513062155" y1="116.86405313617348" x2="394.92861513062155" y2="116.86405313617348" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="374.92861513062155" y1="195.00203956769653" x2="394.92861513062155" y2="195.00203956769653" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="394.92861513062155" y1="116.86405313617348" x2="394.92861513062155" y2="195.00203956769653" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="394.92861513062155,116.86405313617348 391.92861513062155,119.86405313617348 397.92861513062155,119.86405313617348" fill="#5ab9ea" />
+    <polygon points="394.92861513062155,195.00203956769653 391.92861513062155,192.00203956769653 397.92861513062155,192.00203956769653" fill="#5ab9ea" />
+    <text x="399.92861513062155" y="155.933046351935" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 399.92861513062155 155.933046351935)" fill="#5ab9ea" font-family="monospace" font-size="10px">78.1mm</text>
+    <line x1="374.8371758141377" y1="192.4526856871935" x2="411.5875" y2="192.4526856871935" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="374.8371758141377" y1="195.00203956769653" x2="411.5875" y2="195.00203956769653" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="411.5875" y1="192.4526856871935" x2="411.5875" y2="195.00203956769653" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="411.5875,192.4526856871935 408.5875,195.4526856871935 414.5875,195.4526856871935" fill="#5ab9ea" />
+    <polygon points="411.5875,195.00203956769653 408.5875,192.00203956769653 414.5875,192.00203956769653" fill="#5ab9ea" />
+    <text x="416.5875" y="193.72736262744502" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 416.5875 193.72736262744502)" fill="#5ab9ea" font-family="monospace" font-size="10px">2.5mm</text>
+    <line x1="216.5629386116909" y1="51.00635566420249" x2="216.5629386116909" y2="11.006355664202488" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="348.9936443357975" y1="51.00635566420249" x2="348.9936443357975" y2="11.006355664202488" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="216.5629386116909" y1="11.006355664202488" x2="348.9936443357975" y2="11.006355664202488" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="216.5629386116909,11.006355664202488 219.5629386116909,8.006355664202488 219.5629386116909,14.006355664202488" fill="#5ab9ea" />
+    <polygon points="348.9936443357975,11.006355664202488 345.9936443357975,8.006355664202488 345.9936443357975,14.006355664202488" fill="#5ab9ea" />
+    <text x="282.7782914737442" y="6.006355664202488" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">132.4mm</text>
+    <line x1="348.9936443357975" y1="51.00635566420249" x2="408.9936443357975" y2="51.00635566420249" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="348.9936443357975" y1="183.4370613883091" x2="408.9936443357975" y2="183.4370613883091" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="408.9936443357975" y1="51.00635566420249" x2="408.9936443357975" y2="183.4370613883091" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="408.9936443357975,51.00635566420249 405.9936443357975,54.00635566420249 411.9936443357975,54.00635566420249" fill="#5ab9ea" />
+    <polygon points="408.9936443357975,183.4370613883091 405.9936443357975,180.4370613883091 411.9936443357975,180.4370613883091" fill="#5ab9ea" />
+    <text x="413.9936443357975" y="117.2217085262558" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 413.9936443357975 117.2217085262558)" fill="#5ab9ea" font-family="monospace" font-size="10px">132.4mm</text>
+    <line x1="204.9979604323035" y1="25.07138486937845" x2="204.9979604323035" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="283.1359468638265" y1="25.07138486937845" x2="283.1359468638265" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="204.9979604323035" y1="-11.5875" x2="283.1359468638265" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="204.9979604323035,-11.5875 207.9979604323035,-14.5875 207.9979604323035,-8.5875" fill="#5ab9ea" />
+    <polygon points="283.1359468638265,-11.5875 280.1359468638265,-14.5875 280.1359468638265,-8.5875" fill="#5ab9ea" />
+    <text x="244.066953648065" y="-16.5875" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">78.1mm</text>
+    <line x1="283.1359468638265" y1="25.07138486937845" x2="363.1359468638265" y2="25.07138486937845" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="283.1359468638265" y1="176.30830481888304" x2="363.1359468638265" y2="176.30830481888304" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.1359468638265" y1="25.07138486937845" x2="363.1359468638265" y2="176.30830481888304" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="363.1359468638265,25.07138486937845 360.1359468638265,28.07138486937845 366.1359468638265,28.07138486937845" fill="#5ab9ea" />
+    <polygon points="363.1359468638265,176.30830481888304 360.1359468638265,173.30830481888304 366.1359468638265,173.30830481888304" fill="#5ab9ea" />
+    <text x="368.1359468638265" y="100.68984484413075" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 368.1359468638265 100.68984484413075)" fill="#5ab9ea" font-family="monospace" font-size="10px">151.2mm</text>
+    <line x1="204.9979604323035" y1="25.07138486937845" x2="204.9979604323035" y2="5.0713848693784485" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="207.54731431280652" y1="25.07138486937845" x2="207.54731431280652" y2="5.0713848693784485" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="204.9979604323035" y1="5.0713848693784485" x2="207.54731431280652" y2="5.0713848693784485" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="204.9979604323035,5.0713848693784485 207.9979604323035,2.0713848693784485 207.9979604323035,8.071384869378448" fill="#5ab9ea" />
+    <polygon points="207.54731431280652,5.0713848693784485 204.54731431280652,2.0713848693784485 204.54731431280652,8.071384869378448" fill="#5ab9ea" />
+    <text x="206.272637372555" y="0.07138486937844846" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">2.5mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-1.5875000000000004" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-1.5875000000000004" y="-23.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="409.5875" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="409.5875" y1="-19.5875" x2="424.5875" y2="-19.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="429.5875" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <rect x="409.5875" y="-6.587499999999999" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="429.5875" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="409.5875" y1="12.412500000000001" x2="424.5875" y2="12.412500000000001" stroke="#5ab9ea" stroke-width="1" />
+    <text x="429.5875" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="421.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="433.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 400.0 × 400.0 × 19.0mm</text>
+    <text x="20.0" y="445.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 12 pockets</text>
+    <text x="20.0" y="457.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="469.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm</text>
+  </g>
+</svg>

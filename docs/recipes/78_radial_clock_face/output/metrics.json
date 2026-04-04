@@ -1,0 +1,37 @@
+{
+  "timing": {
+    "ir_ms": 1.71,
+    "hints_ms": 0.84,
+    "plan_ms": 1.64,
+    "gcode_ms": 4.14,
+    "svg_ms": 1.89,
+    "total_ms": 10.22
+  },
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 1792,
+    "rapid_moves": 224,
+    "cut_moves": 448,
+    "rapid_ratio": 0.125
+  },
+  "fidelity": {
+    "tool_changes": 1,
+    "passes": [
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 1792
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 23703,
+    "total_lines": 1360,
+    "files": {
+      "engrave-1.00mm": {
+        "bytes": 23703,
+        "lines": 1360
+      }
+    }
+  }
+}

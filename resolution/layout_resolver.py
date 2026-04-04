@@ -30,11 +30,16 @@ from generators.area.grid_lines import grid_lines_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.measurement_grid import measurement_grid_generator
+from generators.area.radial_label import radial_label_generator
+from generators.area.radial_pocket import radial_pocket_generator
+from generators.area.radial_svg import radial_svg_generator
+from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
+from generators.params.area import RadialLabelParams, RadialPocketParams, RadialSvgParams, RadialTickParams
 from generators.svg.params import SVGPathParams
 from generators.svg.parser import extract_path_data
 from generators.svg.stamp import svg_stamp_generator
@@ -67,6 +72,10 @@ from layout_ast.compositional import (
     Polygon,
     Polyline,
     ProfileGen,
+    RadialLabelGen,
+    RadialPocketGen,
+    RadialSvgGen,
+    RadialTickGen,
     RaisedPanelGen,
     Rect,
     ResolvedRegion,
@@ -1055,6 +1064,167 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("x_panel")
         try:
             generated_items = x_panel_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_radial_pocket_gen(
+        self,
+        node: RadialPocketGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = RadialPocketParams(
+            rays=node.rays,
+            depth_mm=node.depth_mm,
+            bar_width_mm=node.bar_width_mm,
+            shape=node.shape,  # type: ignore[arg-type]
+            center_shape=node.center_shape,
+            center_size_mm=node.center_size_mm,
+            start_angle_deg=node.start_angle_deg,
+            end_angle_deg=node.end_angle_deg,
+            radius_mm=node.radius_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("radial_pocket")
+        try:
+            generated_items = radial_pocket_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_radial_tick_gen(
+        self,
+        node: RadialTickGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = RadialTickParams(
+            rays=node.rays,
+            depth_mm=node.depth_mm,
+            minor_subdivisions=node.minor_subdivisions,
+            tick_length_mm=node.tick_length_mm,
+            minor_tick_length_mm=node.minor_tick_length_mm,
+            inward=node.inward,
+            labels=node.labels,
+            label_list=node.label_list,
+            label_height_mm=node.label_height_mm,
+            start_angle_deg=node.start_angle_deg,
+            end_angle_deg=node.end_angle_deg,
+            radius_mm=node.radius_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("radial_tick")
+        try:
+            generated_items = radial_tick_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_radial_svg_gen(
+        self,
+        node: RadialSvgGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        svg_path_data = node.svg_path
+        if svg_path_data.lower().endswith(".svg"):
+            if not self.ast.source_dir:
+                raise ValueError(f"Radial SVG references file '{svg_path_data}' but no source directory is available.")
+            file_path = os.path.join(self.ast.source_dir, svg_path_data)
+            try:
+                svg_path_data = extract_path_data(file_path)
+            except FileNotFoundError:
+                raise ValueError(f"Radial SVG: SVG file not found: {file_path}") from None
+
+        generator_params = RadialSvgParams(
+            rays=node.rays,
+            depth_mm=node.depth_mm,
+            svg_path=svg_path_data,
+            feature_type=node.feature_type,  # type: ignore[arg-type]
+            scale_mode=node.scale_mode,  # type: ignore[arg-type]
+            svg_unit_mm=node.svg_unit_mm,
+            rotate_element=node.rotate_element,
+            start_angle_deg=node.start_angle_deg,
+            end_angle_deg=node.end_angle_deg,
+            radius_mm=node.radius_mm,
+            stamp_size_mm=node.stamp_size_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("radial_svg")
+        try:
+            generated_items = radial_svg_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_radial_label_gen(
+        self,
+        node: RadialLabelGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = RadialLabelParams(
+            rays=node.rays,
+            depth_mm=node.depth_mm,
+            values=node.values,
+            label_height_mm=node.label_height_mm,
+            start_angle_deg=node.start_angle_deg,
+            end_angle_deg=node.end_angle_deg,
+            radius_mm=node.radius_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("radial_label")
+        try:
+            generated_items = radial_label_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -2672,6 +2842,10 @@ class LayoutResolver:
                 Polygon: LayoutResolver._handle_polygon,
                 Triangle: LayoutResolver._handle_triangle,
                 XPanelGen: LayoutResolver._handle_x_panel_gen,
+                RadialPocketGen: LayoutResolver._handle_radial_pocket_gen,
+                RadialSvgGen: LayoutResolver._handle_radial_svg_gen,
+                RadialTickGen: LayoutResolver._handle_radial_tick_gen,
+                RadialLabelGen: LayoutResolver._handle_radial_label_gen,
                 HoleGridGen: LayoutResolver._handle_hole_grid_gen,
                 MeasurementGridGen: LayoutResolver._handle_measurement_grid_gen,
                 MeasurementEdgeGen: LayoutResolver._handle_measurement_edge_gen,

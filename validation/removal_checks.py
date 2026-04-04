@@ -213,6 +213,16 @@ def _match_same_type(
     return a.hint_type == feature_type and b.hint_type == feature_type
 
 
+def _are_sibling_features(a: RemovalIntent, b: RemovalIntent) -> bool:
+    if a.hint_type != b.hint_type:
+        return False
+    if abs(a.depth_mm() - b.depth_mm()) > 0.001:
+        return False
+    prefix_a = a.region_id.rsplit("_", 1)[0]
+    prefix_b = b.region_id.rsplit("_", 1)[0]
+    return prefix_a == prefix_b and "generated_" in prefix_a
+
+
 def _are_perpendicular_pockets(a: RemovalIntent, b: RemovalIntent) -> bool:
     if not _match_same_type(a, b, FeatureType.POCKET):
         return False
@@ -259,6 +269,8 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
     for i, intent_a in enumerate(intents):
         for intent_b in intents[i + 1 :]:
             if _regions_overlap(intent_a, intent_b):
+                if _are_sibling_features(intent_a, intent_b):
+                    continue
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue
                 if _is_pocket_on_profile_edge(intent_a, intent_b):

@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "26_faux_shutter_panel",
-    "created_at": "2026-03-31T18:28:29.109451+00:00"
+    "created_at": "2026-04-04T15:44:28.089866+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.37,
+    "extraction_time_ms": 0.36,
     "document": {
       "width_mm": 403.175,
       "height_mm": 755.175,
@@ -368,13 +368,13 @@
         "\u2022 pocket: 8.0mm"
       ],
       "depth_annotations": [
-        "Features: 1 profile, 12 pockets, 12 chamfers",
+        "Features: 12 chamfers, 12 pockets, 1 profile",
         "\u2022 pocket: 8.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 250.0 \u00d7 600.0 \u00d7 19.0mm",
-        "Features: 1 profile, 12 pockets, 12 chamfers",
+        "Features: 12 chamfers, 12 pockets, 1 profile",
         "Depths:",
         "\u2022 chamfer: 2.0mm",
         "\u2022 pocket: 8.0mm"
@@ -448,7 +448,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.9313,
+    "extraction_time_ms": 0.9126,
     "summary": {
       "total_lines": 584,
       "comment_lines": 43,

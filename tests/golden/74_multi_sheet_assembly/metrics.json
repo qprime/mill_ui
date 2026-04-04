@@ -1,7 +1,7 @@
 {
   "golden": {
     "recipe_name": "74_multi_sheet_assembly",
-    "created_at": "2026-03-31T18:28:31.704962+00:00"
+    "created_at": "2026-04-04T15:44:30.662250+00:00"
   },
   "svg": {
     "version": "1.0.0",
@@ -846,12 +846,13 @@
         "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "depth_annotations": [
+        "Features: 38 pockets, 2 profiles",
         "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 500.0 \u00d7 500.0 \u00d7 6.0mm",
-        "Features: 2 profiles, 38 pockets",
+        "Features: 38 pockets, 2 profiles",
         "Depths:",
         "\u2022 pocket: 3.0mm, 6.0mm",
         "Parts (38):",
@@ -1083,7 +1084,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2155,
+    "extraction_time_ms": 0.2134,
     "summary": {
       "total_lines": 3488,
       "comment_lines": 99,

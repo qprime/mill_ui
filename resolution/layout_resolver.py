@@ -12,6 +12,7 @@ from core.geometry import compute_shape_bounds_dict
 from domains import Domain
 from generators import (
     ConcentricBorderParams,
+    FlutingParams,
     GeneratorSkipError,
     GridLinesParams,
     HoleGridParams,
@@ -24,6 +25,7 @@ from generators import (
 )
 from generators.area.concentric_border import concentric_border_generator
 from generators.area.engrave_text import engrave_text_at_position
+from generators.area.fluting import fluting_generator
 from generators.area.grid_lines import grid_lines_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.line_pattern import line_pattern_generator
@@ -48,6 +50,7 @@ from layout_ast.compositional import (
     ConcentricBorderGen,
     Edge,
     EngraveTextGen,
+    FlutingGen,
     Frame,
     Grid,
     GridLinesGen,
@@ -1186,6 +1189,39 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("wave")
         try:
             generated_items = wave_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_fluting_gen(
+        self,
+        node: FlutingGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        generator_params = FlutingParams(
+            spacing_mm=node.spacing_mm,
+            depth_mm=node.depth_mm,
+            ramp_mm=node.ramp_mm,
+            angle_deg=node.angle_deg,
+            inset_mm=node.inset_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("fluting")
+        try:
+            generated_items = fluting_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -2626,6 +2662,7 @@ class LayoutResolver:
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,
                 LinesGen: LayoutResolver._handle_lines_gen,
+                FlutingGen: LayoutResolver._handle_fluting_gen,
                 ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,

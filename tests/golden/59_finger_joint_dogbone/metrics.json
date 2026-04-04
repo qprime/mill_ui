@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "59_finger_joint_dogbone",
-    "created_at": "2026-03-31T18:28:30.817427+00:00"
+    "created_at": "2026-04-04T15:44:29.783786+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.47,
+    "extraction_time_ms": 1.45,
     "document": {
       "width_mm": 773.175,
       "height_mm": 1103.175,
@@ -942,12 +942,13 @@
         "\u2022 pocket: 12.0mm"
       ],
       "depth_annotations": [
+        "Features: 44 pockets, 4 profiles",
         "\u2022 pocket: 12.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 600.0 \u00d7 400.0 \u00d7 12.0mm",
-        "Features: 4 profiles, 44 pockets",
+        "Features: 44 pockets, 4 profiles",
         "Depths:",
         "\u2022 pocket: 12.0mm",
         "Parts (44):",
@@ -1209,7 +1210,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.1506,
+    "extraction_time_ms": 6.0019,
     "summary": {
       "total_lines": 3012,
       "comment_lines": 52,

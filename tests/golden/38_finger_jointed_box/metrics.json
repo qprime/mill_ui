@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "38_finger_jointed_box",
-    "created_at": "2026-03-31T18:28:29.781906+00:00"
+    "created_at": "2026-04-04T15:44:28.758356+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.33,
+    "extraction_time_ms": 1.35,
     "document": {
       "width_mm": 973.175,
       "height_mm": 1255.175,
@@ -895,12 +895,13 @@
         "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "depth_annotations": [
+        "Features: 40 pockets, 5 profiles",
         "\u2022 pocket: 3.0mm, 6.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 800.0 \u00d7 600.0 \u00d7 6.0mm",
-        "Features: 5 profiles, 40 pockets",
+        "Features: 40 pockets, 5 profiles",
         "Depths:",
         "\u2022 pocket: 3.0mm, 6.0mm",
         "Parts (40):",
@@ -1142,7 +1143,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.7088,
+    "extraction_time_ms": 3.6501,
     "summary": {
       "total_lines": 1985,
       "comment_lines": 59,

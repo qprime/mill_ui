@@ -501,6 +501,28 @@ X-pattern decoration:
     depth: 6mm
 ```
 
+#### Fluting
+
+Parallel decorative grooves with ramped Z entry/exit:
+
+```yaml
+- Fluting:
+    spacing: 20mm             # center-to-center distance between grooves
+    depth: 3mm                # max depth at center of groove
+    ramp: 15mm                # horizontal distance for Z entry/exit taper (default: 10mm)
+    angle: 0                  # groove direction in degrees, 0 = vertical (default: 0)
+    inset: 10mm               # margin from domain edge before first groove (default: 0mm)
+```
+
+Parameters:
+- `spacing` (required): Center-to-center distance between grooves
+- `depth` (required): Maximum groove depth
+- `ramp`: Horizontal ramp distance for Z entry/exit taper. 0 = flat-bottom (default: 10mm)
+- `angle`: Groove direction in degrees. 0 = vertical, 90 = horizontal (default: 0)
+- `inset`: Margin from domain edge before first groove (default: 0mm)
+
+Best results with a ball-nose endmill for classical rounded groove cross-section.
+
 #### Wave
 
 Wavy groove pattern:

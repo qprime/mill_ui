@@ -161,4 +161,5 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
         chamfer_angle_deg=feature_data.get("chamfer_angle_deg"),
         roundover_radius_mm=feature_data.get("roundover_radius_mm"),
         feeds_override=_parse_feeds_override(feature_data.get("feeds_override")),
+        ramp_mm=feature_data.get("ramp_mm"),
     )

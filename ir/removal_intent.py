@@ -204,6 +204,7 @@ class RemovalIntent:
     allowance: Allowance = field(default_factory=Allowance)
     constraints: Constraints = field(default_factory=Constraints)
     feeds_override: FeedsOverride | None = None
+    ramp_mm: float | None = None
 
     def depth_mm(self) -> float:
         return self.depth_profile.depth_mm()
@@ -282,6 +283,8 @@ class RemovalIntent:
             result["dogbone_reference_point"] = self.dogbone_reference_point
         self._serialize_shape_geometry(result)
         self._serialize_feeds_override(result)
+        if self.ramp_mm is not None:
+            result["ramp_mm"] = self.ramp_mm
         return result
 
     def _serialize_shape_geometry(self, result: dict[str, Any]) -> None:

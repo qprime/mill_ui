@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from domains import Domain
 from generators import (
     BeadParams,
+    FlutingParams,
     GridParams,
     WaveParams,
     bead_generator,
+    fluting_generator,
     grid_generator,
     wave_generator,
 )
+from generators.core import GeneratorSkipError
 from layout_ast.layout import LayoutAST, Sheet
 
 # =============================================================================
@@ -679,3 +684,122 @@ def test_end_to_end_stage5_to_ast():
     )
 
     assert len(ast.items) > 0
+
+
+# =============================================================================
+# FlutingParams Validation Tests
+# =============================================================================
+
+
+def test_fluting_params_valid():
+    FlutingParams(spacing_mm=20.0, depth_mm=3.0)
+    FlutingParams(spacing_mm=15.0, depth_mm=2.0, ramp_mm=10.0, angle_deg=45.0, inset_mm=5.0)
+
+
+def test_fluting_params_invalid_spacing():
+    with pytest.raises(ValueError, match="spacing_mm must be positive"):
+        FlutingParams(spacing_mm=0.0, depth_mm=3.0)
+    with pytest.raises(ValueError, match="spacing_mm must be positive"):
+        FlutingParams(spacing_mm=-5.0, depth_mm=3.0)
+
+
+def test_fluting_params_invalid_depth():
+    with pytest.raises(ValueError, match="depth_mm must be positive"):
+        FlutingParams(spacing_mm=20.0, depth_mm=0.0)
+    with pytest.raises(ValueError, match="depth_mm must be positive"):
+        FlutingParams(spacing_mm=20.0, depth_mm=-1.0)
+
+
+def test_fluting_params_invalid_ramp():
+    with pytest.raises(ValueError, match="ramp_mm must be non-negative"):
+        FlutingParams(spacing_mm=20.0, depth_mm=3.0, ramp_mm=-1.0)
+
+
+def test_fluting_params_invalid_inset():
+    with pytest.raises(ValueError, match="inset_mm must be non-negative"):
+        FlutingParams(spacing_mm=20.0, depth_mm=3.0, inset_mm=-1.0)
+
+
+# =============================================================================
+# Fluting Generator Tests
+# =============================================================================
+
+
+def test_fluting_basic():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, angle_deg=0.0)
+    items = fluting_generator(domain, params)
+    assert len(items) > 0
+    for item in items:
+        assert item.type == "Line"
+        assert item.feature is not None
+        assert item.feature.type == "engrave"
+        assert item.feature.depth_mm == 3.0
+
+
+def test_fluting_ramp_in_feature():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, ramp_mm=15.0)
+    items = fluting_generator(domain, params)
+    assert len(items) > 0
+    for item in items:
+        assert item.feature is not None
+        assert item.feature.ramp_mm == 15.0
+
+
+def test_fluting_zero_ramp():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, ramp_mm=0.0)
+    items = fluting_generator(domain, params)
+    assert len(items) > 0
+    for item in items:
+        assert item.feature is not None
+        assert item.feature.ramp_mm is None
+
+
+def test_fluting_angle_rotation():
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, angle_deg=45.0)
+    items = fluting_generator(domain, params)
+    assert len(items) > 0
+
+
+def test_fluting_inset():
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params_no_inset = FlutingParams(spacing_mm=20.0, depth_mm=3.0, inset_mm=0.0)
+    params_inset = FlutingParams(spacing_mm=20.0, depth_mm=3.0, inset_mm=80.0)
+    items_no_inset = fluting_generator(domain, params_no_inset)
+    items_inset = fluting_generator(domain, params_inset)
+    assert len(items_inset) < len(items_no_inset)
+
+
+def test_fluting_empty_domain():
+    domain = Domain.from_rectangle(0.001, 0.001)
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0)
+    items = fluting_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_fluting_inset_too_large():
+    domain = Domain.from_rectangle(50, 50, center=(25, 25))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, inset_mm=30.0)
+    items = fluting_generator(domain, params, allow_empty=True)
+    assert items == []
+
+
+def test_fluting_determinism():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, ramp_mm=10.0)
+    items1 = fluting_generator(domain, params)
+    items2 = fluting_generator(domain, params)
+    assert len(items1) == len(items2)
+    for a, b in zip(items1, items2, strict=True):
+        assert a.placement == b.placement
+        assert a.geometry == b.geometry
+
+
+def test_fluting_skip_error_when_not_allow_empty():
+    domain = Domain.from_rectangle(0.001, 0.001)
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0)
+    with pytest.raises(GeneratorSkipError):
+        fluting_generator(domain, params, allow_empty=False)

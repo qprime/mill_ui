@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "40a_frameless_cabinet_finger_back",
-    "created_at": "2026-03-31T18:28:30.020994+00:00"
+    "created_at": "2026-04-04T15:44:28.995415+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.7,
+    "extraction_time_ms": 3.82,
     "document": {
       "width_mm": 2613.175,
       "height_mm": 2499.175,
@@ -1688,12 +1688,13 @@
         "\u2022 pocket: 18.0mm, 9.0mm"
       ],
       "depth_annotations": [
+        "Features: 92 pockets, 6 profiles",
         "\u2022 pocket: 18.0mm, 9.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 2440.0 \u00d7 1220.0 \u00d7 18.0mm",
-        "Features: 6 profiles, 92 pockets",
+        "Features: 92 pockets, 6 profiles",
         "Depths:",
         "\u2022 pocket: 18.0mm, 9.0mm",
         "Parts (92):",
@@ -2195,7 +2196,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.155,
+    "extraction_time_ms": 1.1555,
     "summary": {
       "total_lines": 11688,
       "comment_lines": 118,

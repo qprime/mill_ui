@@ -124,6 +124,8 @@ def item_to_removal_intent(  # noqa: C901 — feature-type dispatcher
         intent = engrave_hint_to_removal_intent(hint)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
+        if item.feature.ramp_mm is not None:
+            intent = replace(intent, ramp_mm=item.feature.ramp_mm)
         return intent
 
     elif item.feature.type == FeatureType.BEVEL:

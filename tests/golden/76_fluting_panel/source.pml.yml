@@ -1,0 +1,22 @@
+# mill_ui: 45ac2c9d
+# generated: 2026-04-04
+
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: fluted_panel
+    at:
+      x: 150mm
+      y: 100mm
+      width: 200mm
+      height: 150mm
+    children:
+    - Fluting:
+        spacing: 20mm
+        depth: 3mm
+        ramp: 15mm
+        inset: 10mm

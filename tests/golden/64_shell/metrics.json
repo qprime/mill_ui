@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "64_shell",
-    "created_at": "2026-03-31T18:28:31.130549+00:00"
+    "created_at": "2026-04-04T15:44:30.094891+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.48,
+    "extraction_time_ms": 0.5,
     "document": {
       "width_mm": 653.175,
       "height_mm": 591.175,
@@ -218,13 +218,13 @@
         "\u2022 pocket: 8.0mm"
       ],
       "depth_annotations": [
-        "Features: 2 profiles, 1 pocket, 1 chamfer",
+        "Features: 1 chamfer, 1 pocket, 2 profiles",
         "\u2022 pocket: 8.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 500.0 \u00d7 400.0 \u00d7 19.0mm",
-        "Features: 2 profiles, 1 pocket, 1 chamfer",
+        "Features: 1 chamfer, 1 pocket, 2 profiles",
         "Depths:",
         "\u2022 chamfer: 2.0mm",
         "\u2022 pocket: 8.0mm",
@@ -253,7 +253,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.7904,
+    "extraction_time_ms": 0.7925,
     "summary": {
       "total_lines": 5287,
       "comment_lines": 14,

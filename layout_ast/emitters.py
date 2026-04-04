@@ -161,5 +161,7 @@ def _feature_to_dict(feature: Feature) -> dict[str, Any]:
         feeds_dict = _feeds_override_to_dict(feature.feeds_override)
         if feeds_dict is not None:
             data["feeds_override"] = feeds_dict
+    if feature.ramp_mm is not None:
+        data["ramp_mm"] = feature.ramp_mm
 
     return data

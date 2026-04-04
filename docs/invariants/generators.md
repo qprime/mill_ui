@@ -22,6 +22,8 @@
 | GN-12 | HARD | RAISED_PANEL_FIELD_LT_BORDER | field_depth_mm < border_depth_mm |
 | GN-13 | HARD | HOLE_DIAMETER_LT_SPACING | diameter_mm < spacing_mm (no overlap) |
 | GN-14 | HARD | TEXT_NOT_EMPTY | EngraveText text must not be empty |
+| GN-15 | HARD | RAMP_NON_NEGATIVE | ramp_mm must be >= 0 (0 = no ramp, flat-bottom) |
+| GN-16 | HARD | RAMP_CLAMPED | ramp_mm clamped to line_length/2 at G-code generation |
 
 ---
 

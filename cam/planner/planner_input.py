@@ -141,6 +141,7 @@ class FeatureInput:
     edge_treatment: EdgeTreatmentInput | None = None
     feeds_override: FeedsOverride | None = None
     surface_cooling: SurfaceCooling | None = None
+    ramp_mm: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -176,6 +177,8 @@ class FeatureInput:
                 "cool_dwell_s": self.surface_cooling.cool_dwell_s,
                 "start_depth_mm": self.surface_cooling.start_depth_mm,
             }
+        if self.ramp_mm is not None:
+            result["ramp_mm"] = self.ramp_mm
         return result
 
 
@@ -382,6 +385,7 @@ class PlannerInput:
                 rest=parse_rest(f.get("rest")),
                 edge_treatment=parse_edge_treatment(f.get("edge_treatment")),
                 surface_cooling=_parse_surface_cooling(f.get("surface_cooling")),
+                ramp_mm=float(f["ramp_mm"]) if f.get("ramp_mm") is not None else None,
             )
 
         def parse_corner_cleanup(c: dict[str, Any]) -> CornerCleanupInput:

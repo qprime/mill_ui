@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "70_calibration_test",
-    "created_at": "2026-03-31T18:28:31.257763+00:00"
+    "created_at": "2026-04-04T15:44:30.220538+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.61,
+    "extraction_time_ms": 0.65,
     "document": {
       "width_mm": 453.175,
       "height_mm": 561.175,
@@ -327,7 +327,7 @@
         "\u2022 \u23008.0mm"
       ],
       "depth_annotations": [
-        "Features: 2 profiles, 3 pockets, 3 holes",
+        "Features: 3 holes, 3 pockets, 2 profiles",
         "cal:hole_10mm",
         "cal:hole_6mm",
         "cal:hole_8mm",
@@ -345,7 +345,7 @@
       "notes_text": [
         "NOTES",
         "Sheet: 300.0 \u00d7 250.0 \u00d7 19.0mm",
-        "Features: 2 profiles, 3 pockets, 3 holes",
+        "Features: 3 holes, 3 pockets, 2 profiles",
         "Depths:",
         "\u2022 hole: through",
         "\u2022 pocket: 10.0mm, 3.0mm, 6.0mm",
@@ -416,7 +416,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 13.9982,
+    "extraction_time_ms": 13.8793,
     "summary": {
       "total_lines": 8917,
       "comment_lines": 33,

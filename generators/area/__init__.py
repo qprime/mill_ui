@@ -1,5 +1,6 @@
 from generators.area.concentric_border import concentric_border_generator
 from generators.area.flat import flat_pocket_generator
+from generators.area.fluting import fluting_generator
 from generators.area.grid import grid_generator
 from generators.area.grid_lines import grid_lines_generator
 from generators.area.hole_grid import hole_grid_generator
@@ -12,6 +13,7 @@ from generators.area.x_panel import x_panel_generator
 __all__ = [
     "concentric_border_generator",
     "flat_pocket_generator",
+    "fluting_generator",
     "grid_generator",
     "grid_lines_generator",
     "hole_grid_generator",

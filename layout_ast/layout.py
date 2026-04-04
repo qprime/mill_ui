@@ -112,6 +112,8 @@ class Feature:
 
     feeds_override: FeedsOverride | None = None
 
+    ramp_mm: float | None = None
+
 
 @dataclass(frozen=True)
 class Item:

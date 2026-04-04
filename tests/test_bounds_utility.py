@@ -300,3 +300,18 @@ def test_missing_geometry_keys():
     assert bounds.x_max == 50.0
     assert bounds.y_min == 50.0
     assert bounds.y_max == 50.0
+
+
+def test_extract_shape_geometry_line_preserves_start_end():
+    from core.geometry import extract_shape_geometry
+    from ir.removal_intent import Bounds2D, ShapeGeometry
+
+    sg = ShapeGeometry(start=(-50.0, 0.0), end=(50.0, 0.0))
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=45.0, y_max=55.0)
+
+    result = extract_shape_geometry("Line", bounds, sg)
+
+    assert result.start == (-50.0, 0.0)
+    assert result.end == (50.0, 0.0)
+    assert result.w_mm is None
+    assert result.h_mm is None

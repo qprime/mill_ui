@@ -239,6 +239,15 @@ class SplitGrid:
 
 
 @dataclass(frozen=True)
+class FlutingGen:
+    spacing_mm: float
+    depth_mm: float
+    ramp_mm: float = 10.0
+    angle_deg: float = 0.0
+    inset_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class LinesGen:
     angle_deg: float
     spacing_mm: float

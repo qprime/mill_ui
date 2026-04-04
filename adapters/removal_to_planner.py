@@ -119,6 +119,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         rest=intent.rest,
         edge_treatment=edge_treatment,
         feeds_override=intent.feeds_override,
+        ramp_mm=intent.ramp_mm,
     )
 
 

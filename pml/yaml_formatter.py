@@ -19,6 +19,7 @@ from layout_ast.compositional import (
     ConcentricBorderGen,
     Edge,
     EngraveTextGen,
+    FlutingGen,
     Frame,
     Grid,
     GridLinesGen,
@@ -414,6 +415,19 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
                 "depth": dim(node.depth_mm),
             }
         }
+
+    elif isinstance(node, FlutingGen):
+        result: dict[str, Any] = {
+            "spacing": dim(node.spacing_mm),
+            "depth": dim(node.depth_mm),
+        }
+        if node.ramp_mm != 10.0:
+            result["ramp"] = dim(node.ramp_mm)
+        if node.angle_deg != 0.0:
+            result["angle"] = node.angle_deg
+        if node.inset_mm != 0.0:
+            result["inset"] = dim(node.inset_mm)
+        return {"Fluting": result}
 
     elif isinstance(node, ConcentricBorderGen):
         return {

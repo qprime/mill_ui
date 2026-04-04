@@ -109,6 +109,25 @@ class XPanelParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class FlutingParams(BaseParams):
+    spacing_mm: float
+    depth_mm: float
+    ramp_mm: float = 10.0
+    angle_deg: float = 0.0
+    inset_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.spacing_mm <= 0:
+            raise ValueError(f"FlutingParams: spacing_mm must be positive, got {self.spacing_mm}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"FlutingParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.ramp_mm < 0:
+            raise ValueError(f"FlutingParams: ramp_mm must be non-negative, got {self.ramp_mm}")
+        if self.inset_mm < 0:
+            raise ValueError(f"FlutingParams: inset_mm must be non-negative, got {self.inset_mm}")
+
+
+@dataclass(frozen=True)
 class GridLinesParams(BaseParams):
     unit: Literal["metric", "imperial", "custom"] = "metric"
     spacing_mm: float | None = None
@@ -189,6 +208,7 @@ class HoleGridParams(BaseParams):
 __all__ = [
     "ConcentricBorderParams",
     "FlatPocketParams",
+    "FlutingParams",
     "GridLinesParams",
     "GridParams",
     "HoleGridParams",

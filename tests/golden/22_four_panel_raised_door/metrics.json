@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "22_four_panel_raised_door",
-    "created_at": "2026-03-31T18:28:29.078017+00:00"
+    "created_at": "2026-04-04T15:44:28.058557+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.33,
+    "extraction_time_ms": 0.31,
     "document": {
       "width_mm": 653.175,
       "height_mm": 855.175,
@@ -240,12 +240,13 @@
         "\u2022 pocket: 2.0mm"
       ],
       "depth_annotations": [
+        "Features: 4 bevels, 4 pockets, 1 profile",
         "\u2022 pocket: 2.0mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 500.0 \u00d7 700.0 \u00d7 19.0mm",
-        "Features: 1 profile, 4 bevels, 4 pockets",
+        "Features: 4 bevels, 4 pockets, 1 profile",
         "Depths:",
         "\u2022 bevel: 6.0mm",
         "\u2022 pocket: 2.0mm"
@@ -271,7 +272,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.8183,
+    "extraction_time_ms": 0.8331,
     "summary": {
       "total_lines": 548,
       "comment_lines": 19,

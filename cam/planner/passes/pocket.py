@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
-from cam.ops.engrave import engrave_lines
+from cam.ops.engrave import engrave_lines, engrave_lines_ramped
 from cam.ops.pocket_region import pocket_region_rect_raster
 from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
@@ -515,10 +515,16 @@ def plan_engrave_passes(
         tool = apply_feeds_override(tool, entry.feeds_override)
         record = accumulator.get_record("engrave", tool)
         depth = entry.depth_mm or 0.3
-        record.add_moves(
-            engrave_lines(lines, record.setup, z=-abs(depth)),
-            increment=len(lines),
-        )
+        if entry.ramp_mm is not None and entry.ramp_mm > 0:
+            record.add_moves(
+                engrave_lines_ramped(lines, record.setup, z=-abs(depth), ramp_mm=entry.ramp_mm),
+                increment=len(lines),
+            )
+        else:
+            record.add_moves(
+                engrave_lines(lines, record.setup, z=-abs(depth)),
+                increment=len(lines),
+            )
 
 
 def plan_corner_cleanup_passes(

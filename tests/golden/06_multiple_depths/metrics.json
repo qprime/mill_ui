@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "06_multiple_depths",
-    "created_at": "2026-03-31T18:28:27.429274+00:00"
+    "created_at": "2026-04-04T15:44:26.419700+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.53,
+    "extraction_time_ms": 0.52,
     "document": {
       "width_mm": 373.175,
       "height_mm": 423.175,
@@ -282,7 +282,7 @@
         "\u2022 \u23006.0mm"
       ],
       "depth_annotations": [
-        "Features: 1 profile, 1 pocket, 4 holes",
+        "Features: 4 holes, 1 pocket, 1 profile",
         "hole:1",
         "hole:2",
         "hole:3",
@@ -297,7 +297,7 @@
       "notes_text": [
         "NOTES",
         "Sheet: 220.0 \u00d7 160.0 \u00d7 19.0mm",
-        "Features: 1 profile, 1 pocket, 4 holes",
+        "Features: 4 holes, 1 pocket, 1 profile",
         "Depths:",
         "\u2022 hole: 10.0mm",
         "\u2022 pocket: 3.0mm",
@@ -349,7 +349,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 15.3246,
+    "extraction_time_ms": 15.3928,
     "summary": {
       "total_lines": 3807,
       "comment_lines": 16,

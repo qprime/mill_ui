@@ -1,6 +1,7 @@
 from generators.area import (
     concentric_border_generator,
     flat_pocket_generator,
+    fluting_generator,
     grid_generator,
     grid_lines_generator,
     hole_grid_generator,
@@ -33,6 +34,7 @@ from generators.panels import (
 from generators.params.area import (
     ConcentricBorderParams,
     FlatPocketParams,
+    FlutingParams,
     GridLinesParams,
     GridParams,
     HoleGridParams,
@@ -68,6 +70,7 @@ __all__ = [
     "EdgeSelection",
     "EngraveTextParams",
     "FlatPocketParams",
+    "FlutingParams",
     "Generator",
     "GeneratorResult",
     "GeneratorSkipError",
@@ -93,6 +96,7 @@ __all__ = [
     "engrave_number_label",
     "engrave_text_at_position",
     "flat_pocket_generator",
+    "fluting_generator",
     "generate_shape_id",
     "grid_generator",
     "grid_lines_generator",

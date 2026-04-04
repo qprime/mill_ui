@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "37_ruler_with_profile",
-    "created_at": "2026-03-31T18:28:29.753234+00:00"
+    "created_at": "2026-04-04T15:44:28.729660+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 8.16,
+    "extraction_time_ms": 8.42,
     "document": {
       "width_mm": 873.175,
       "height_mm": 461.175,
@@ -277,12 +277,13 @@
         "\u2022 engrave: 0.3mm"
       ],
       "depth_annotations": [
+        "Features: 2280 engraves, 3 profiles",
         "\u2022 engrave: 0.3mm"
       ],
       "notes_text": [
         "NOTES",
         "Sheet: 700.0 \u00d7 250.0 \u00d7 18.0mm",
-        "Features: 3 profiles, 2280 engraves",
+        "Features: 2280 engraves, 3 profiles",
         "Depths:",
         "\u2022 engrave: 0.3mm",
         "Parts (3):",
@@ -347,7 +348,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 39.1702,
+    "extraction_time_ms": 39.4331,
     "summary": {
       "total_lines": 14504,
       "comment_lines": 2296,
@@ -361,8 +362,8 @@
       "g1_count": 4872,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 53861.7418,
-      "total_feed_distance_mm": 48122.4
+      "total_rapid_distance_mm": 54880.5699,
+      "total_feed_distance_mm": 51572.139800000004
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -417,9 +418,9 @@
       "operation_names": []
     },
     "time_estimate": {
-      "rapid_time_s": 646.3409,
-      "feed_time_s": 5985.5856,
-      "total_time_s": 6631.9265
+      "rapid_time_s": 658.5668000000001,
+      "feed_time_s": 6813.5232,
+      "total_time_s": 7472.09
     },
     "tabs": {
       "detected_count": 0,

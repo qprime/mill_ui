@@ -220,6 +220,8 @@ def extract_shape_geometry(
         if shape_geometry.points is not None:
             return ShapeGeometry(points=shape_geometry.points)
         return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
+    elif shape == ShapeType.LINE:
+        return ShapeGeometry(start=shape_geometry.start, end=shape_geometry.end)
     else:
         return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
 

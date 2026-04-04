@@ -17,6 +17,7 @@ from layout_ast.compositional import (
     ConcentricBorderGen,
     Edge,
     EngraveTextGen,
+    FlutingGen,
     Frame,
     Grid,
     GridLinesGen,
@@ -691,6 +692,15 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Lines")),
             line_width_mm=parse_dimension(_require(node_data, "width", f"{path}.Lines")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Lines")),
+        )
+
+    elif node_type == "Fluting":
+        return FlutingGen(
+            spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Fluting")),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Fluting")),
+            ramp_mm=parse_dimension(node_data.get("ramp", "10mm")),
+            angle_deg=_safe_float(node_data.get("angle", 0), "angle", f"{path}.Fluting"),
+            inset_mm=parse_dimension(node_data.get("inset", "0mm")),
         )
 
     elif node_type == "ConcentricBorder":

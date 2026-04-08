@@ -43,6 +43,14 @@ Format: `[area] description — first observed [date], commit [hash]. Reason for
 
 - **[domains/domain.py] Split child creation pattern** — first observed 2026-04-02, commit cb44ce58. Domain construction with inherited local_origin/local_rotation_rad repeated 5+ times across split operations. Could be a `with_geometry()` helper. Stable count: 0
 
+### Hot-path Idioms
+
+- **[cam/native/core.py:22] `_dict_to_move` repeats dict lookups per field** — first observed 2026-04-08, commit 4d6e22da. Each field does `d.get(k)` followed by `float(d[k])`, a double lookup. Runs on every move returned from the native planner (~20k+ calls on busy recipes like `71_feature_test`). Deferred: subsumed by #174 if that issue takes the "skip dataclass materialization" path; independently fixable as a 15-minute cleanup otherwise. Stable count: 0
+
+### Algorithmic Scaling
+
+- **[validation/removal_checks.py:266] `check_overlap` is O(n²)** — first observed 2026-04-08, commit 4d6e22da. Naive nested loop over all intent pairs via `_regions_overlap`. Fine today (~8 ms on 225-intent `78_radial_clock_face`), but quadratic: 1000 intents → ~500k pair checks, 5000 → ~12.5M. Sweep-and-prune over `bounds.x_min` brings it to O(n log n). Escalate when any production recipe pushes `check_overlap` past ~50 ms, or when intent counts regularly exceed 500. Stable count: 0
+
 ---
 
 ## Dismissed Findings

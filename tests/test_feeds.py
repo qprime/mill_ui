@@ -243,19 +243,33 @@ class TestLoaderCaching:
         """)
         )
 
-    def test_endmills_cache_hit_returns_same_instance(self, tmp_path):
+    def test_endmills_cache_hit_avoids_reparse(self, tmp_path):
         yml = tmp_path / "endmills.yml"
         self._write_endmills(yml)
         first = load_endmills(yml)
         second = load_endmills(yml)
-        assert first is second
+        assert first is not second
+        assert first == second
+        assert all(a is b for a, b in zip(first, second, strict=True))
 
-    def test_feeds_cache_hit_returns_same_instance(self, tmp_path):
+    def test_feeds_cache_hit_avoids_reparse(self, tmp_path):
         yml = tmp_path / "feeds.yml"
         self._write_feeds(yml)
         first = load_feeds(yml)
         second = load_feeds(yml)
-        assert first is second
+        assert first is not second
+        assert first == second
+        assert all(a is b for a, b in zip(first, second, strict=True))
+
+    def test_mutating_returned_list_does_not_corrupt_cache(self, tmp_path):
+        yml = tmp_path / "endmills.yml"
+        self._write_endmills(yml, name="bit_a")
+        first = load_endmills(yml)
+        first.clear()
+        first.append(_endmill("bogus"))
+        second = load_endmills(yml)
+        assert len(second) == 1
+        assert second[0].name == "bit_a"
 
     def test_endmills_mtime_bump_forces_reparse(self, tmp_path):
         import os
@@ -296,8 +310,8 @@ class TestLoaderCaching:
         loaded_b = load_endmills(b)
         assert loaded_a[0].name == "bit_a"
         assert loaded_b[0].name == "bit_b"
-        assert load_endmills(a) is loaded_a
-        assert load_endmills(b) is loaded_b
+        assert load_endmills(a)[0] is loaded_a[0]
+        assert load_endmills(b)[0] is loaded_b[0]
 
     def test_reset_caches_forces_reparse(self, tmp_path):
         yml = tmp_path / "endmills.yml"
@@ -305,8 +319,8 @@ class TestLoaderCaching:
         first = load_endmills(yml)
         _reset_caches()
         second = load_endmills(yml)
-        assert second is not first
         assert second == first
+        assert second[0] is not first[0]
 
     def test_machine_tool_db_correct_across_materials(self):
         mdf_tools = load_machine_tool_db("mdf")

@@ -394,11 +394,11 @@ python -m cli.mill --recipe docs/recipes/74_multi_sheet_assembly
 Output for a 3-sheet assembly:
 ```
 output/
-  74_multi_sheet_assembly_sheet_1.rough.nc
+  sheet_1.rough.nc
   74_multi_sheet_assembly_sheet_1.svg
-  74_multi_sheet_assembly_sheet_2.rough.nc
+  sheet_2.rough.nc
   74_multi_sheet_assembly_sheet_2.svg
-  74_multi_sheet_assembly_sheet_3.rough.nc
+  sheet_3.rough.nc
   74_multi_sheet_assembly_sheet_3.svg
   manifest.json
 ```

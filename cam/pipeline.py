@@ -426,7 +426,7 @@ def write_pipeline_outputs(
     outputs: dict[str, Path] = {}
 
     for pass_name, gcode in result.gcode.items():
-        gcode_path = output_dir / f"{job_name}.{pass_name}.nc"
+        gcode_path = output_dir / f"{pass_name}.nc"
         gcode_path.write_text(gcode)
         outputs[f"gcode_{pass_name}"] = gcode_path
 

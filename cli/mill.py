@@ -217,6 +217,7 @@ def _run_and_write(
     update_header: bool = True,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
+    pass_prefix: str = "",
 ) -> None:
     pipeline_kwargs: dict = {
         "kerf_mm": kerf_mm,
@@ -229,6 +230,8 @@ def _run_and_write(
         pipeline_kwargs["feeds"] = feeds
 
     result = run_pipeline(ast, **pipeline_kwargs)
+    if pass_prefix:
+        result = replace(result, gcode={f"{pass_prefix}{k}": v for k, v in result.gcode.items()})
 
     if result.errors:
         print("\nErrors:", file=sys.stderr)
@@ -303,6 +306,7 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
 
     for sheet_idx, ast in enumerate(asts):
         job_name = f"{input_path.stem}_sheet_{sheet_idx + 1}" if multi_sheet else input_path.stem
+        pass_prefix = f"sheet_{sheet_idx + 1}." if multi_sheet else ""
 
         print(
             f"Compiling: {input_path.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
@@ -323,6 +327,7 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
             update_header=is_pml and not multi_sheet,
             endmills=endmills_list,
             feeds=feeds_list,
+            pass_prefix=pass_prefix,
         )
 
     if multi_sheet:
@@ -372,6 +377,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
     multi_sheet = len(asts) > 1
     for sheet_idx, ast in enumerate(asts):
         job_name = f"{recipe_dir.name}_sheet_{sheet_idx + 1}" if multi_sheet else recipe_dir.name
+        pass_prefix = f"sheet_{sheet_idx + 1}." if multi_sheet else ""
 
         print(
             f"Recipe: {recipe_dir.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
@@ -390,6 +396,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
             theme=theme,
             y_origin=args.y_origin,
             generate_svg=not args.no_svg,
+            pass_prefix=pass_prefix,
         )
 
     if multi_sheet:
@@ -436,7 +443,7 @@ Examples:
   python -m cli.mill --project my_table --init_project layout --sheet 1220x1220 --thickness 19
 
 Output files:
-  {basename}.{op}-{tool_diameter}mm.nc   G-code per pass
+  {op}-{tool_diameter}mm.nc   G-code per pass (multi-sheet: sheet_N.{op}-...)
   {basename}.svg              Blueprint drawing
   metrics.json                Pipeline metrics
         """,

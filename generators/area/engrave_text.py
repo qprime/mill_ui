@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from functools import cache
 
 from HersheyFonts import HersheyFonts
 
@@ -16,13 +17,19 @@ HERSHEY_BASE_LINE = 9
 HERSHEY_HEIGHT = HERSHEY_BASE_LINE - HERSHEY_CAP_LINE
 
 
-def _get_font_instance(font_name: str) -> HersheyFonts:
+@cache
+def _load_font(font_name: str) -> HersheyFonts:
     hf = HersheyFonts()
     try:
         hf.load_default_font(font_name)
-    except Exception:
+    except (ValueError, OSError):
+        hf = HersheyFonts()
         hf.load_default_font("rowmans")
     return hf
+
+
+def _reset_font_cache() -> None:
+    _load_font.cache_clear()
 
 
 def _get_text_lines(
@@ -31,7 +38,7 @@ def _get_text_lines(
     font_name: str,
     spacing_factor: float = 1.0,
 ) -> list[tuple[tuple[float, float], tuple[float, float]]]:
-    hf = _get_font_instance(font_name)
+    hf = _load_font(font_name)
 
     scale = height_mm / HERSHEY_HEIGHT
     hf.render_options["scalex"] = scale

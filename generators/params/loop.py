@@ -171,6 +171,10 @@ class EngraveTextParams(BaseParams):
             )
         if self.spacing_factor <= 0:
             raise ValueError(f"EngraveTextParams: spacing_factor must be positive, got {self.spacing_factor}")
+        from generators.area.engrave_text import VALID_FONT_NAMES
+
+        if self.font not in VALID_FONT_NAMES:
+            raise ValueError(f"EngraveTextParams: font must be one of {sorted(VALID_FONT_NAMES)}, got '{self.font}'")
 
 
 __all__ = [

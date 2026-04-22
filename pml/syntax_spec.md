@@ -755,10 +755,12 @@ Text engraving:
     text: "FRONT"
     height: 4mm         # Default: 4mm
     depth: 0.3mm        # Default: 0.3mm
-    font: rowmans
+    font: rowmans       # Must be a bundled HersheyFonts name (see below)
     alignment: center   # left | center | right
     orientation: horizontal
 ```
+
+Valid `font` values (bundled HersheyFonts set): `astrology`, `cursive`, `cyrilc_1`, `cyrillic`, `futural`, `futuram`, `gothgbt`, `gothgrt`, `gothiceng`, `gothicger`, `gothicita`, `gothitt`, `greek`, `greekc`, `greeks`, `japanese`, `markers`, `mathlow`, `mathupp`, `meteorology`, `music`, `rowmand`, `rowmans`, `rowmant`, `scriptc`, `scripts`, `symbolic`, `timesg`, `timesi`, `timesib`, `timesr`, `timesrb`. Unknown names raise `PMLParseError` at parse time.
 
 #### SvgStamp
 

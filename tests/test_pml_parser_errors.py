@@ -61,6 +61,18 @@ class TestInsetParsing:
             parse_node({"Inset": {}}, "test")
 
 
+class TestEngraveTextFontValidation:
+    def test_unknown_font_raises(self) -> None:
+        with pytest.raises(PMLParseError, match="Unknown font 'bogus'"):
+            parse_node({"EngraveText": {"text": "X", "font": "bogus"}}, "test")
+
+    def test_default_font_accepted(self) -> None:
+        parse_node({"EngraveText": {"text": "X"}}, "test")
+
+    def test_bundled_font_accepted(self) -> None:
+        parse_node({"EngraveText": {"text": "X", "font": "futural"}}, "test")
+
+
 class TestSurfaceBlockValidation:
     @pytest.mark.parametrize(
         ("override", "match"),

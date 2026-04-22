@@ -24,6 +24,7 @@
 | GN-14 | HARD | TEXT_NOT_EMPTY | EngraveText text must not be empty |
 | GN-15 | HARD | RAMP_NON_NEGATIVE | ramp_mm must be >= 0 (0 = no ramp, flat-bottom) |
 | GN-16 | HARD | RAMP_CLAMPED | ramp_mm clamped to line_length/2 at G-code generation |
+| GN-17 | HARD | FONT_NAME_VALID | EngraveText font must be a bundled HersheyFonts name; validated at PML parse and in params |
 
 ---
 

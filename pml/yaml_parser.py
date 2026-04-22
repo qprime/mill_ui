@@ -922,11 +922,19 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "EngraveText":
+        from generators.area.engrave_text import VALID_FONT_NAMES
+
+        font = node_data.get("font", "rowmans")
+        if font not in VALID_FONT_NAMES:
+            raise PMLParseError(
+                f"Unknown font '{font}'; valid fonts: {', '.join(sorted(VALID_FONT_NAMES))}",
+                f"{path}.EngraveText",
+            )
         return EngraveTextGen(
             text=_require(node_data, "text", f"{path}.EngraveText"),
             height_mm=parse_dimension(node_data.get("height", "4mm")),
             depth_mm=parse_dimension(node_data.get("depth", "0.3mm")),
-            font=node_data.get("font", "rowmans"),
+            font=font,
             alignment=node_data.get("alignment", "left"),
             orientation=node_data.get("orientation", "horizontal"),
         )

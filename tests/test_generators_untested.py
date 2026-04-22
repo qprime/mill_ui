@@ -299,9 +299,8 @@ class TestEngraveText:
 
 class TestEngraveTextCaching:
     def test_cache_returns_identical_instance(self):
-        from generators.area.engrave_text import _load_font, _reset_font_cache
+        from generators.area.engrave_text import _load_font
 
-        _reset_font_cache()
         first = _load_font("rowmans")
         second = _load_font("rowmans")
         assert first is second
@@ -321,19 +320,6 @@ class TestEngraveTextCaching:
         small_second = _get_text_lines("X", 5.0, "rowmans")
         assert small_first == small_second
 
-    def test_unknown_font_falls_back(self):
-        from generators.area.engrave_text import _get_text_lines, _load_font, _reset_font_cache
-
-        _reset_font_cache()
-        lines = _get_text_lines("X", 5.0, "definitely_not_a_real_font_xyz")
-        assert len(lines) > 0
-        cache_info = _load_font.cache_info()
-        assert cache_info.currsize <= 1
-
-    def test_reset_cache_forces_reload(self):
-        from generators.area.engrave_text import _load_font, _reset_font_cache
-
-        first = _load_font("rowmans")
-        _reset_font_cache()
-        second = _load_font("rowmans")
-        assert first is not second
+    def test_params_reject_unknown_font(self):
+        with pytest.raises(ValueError, match="font must be one of"):
+            EngraveTextParams(text="X", font="definitely_not_a_real_font_xyz")

@@ -365,8 +365,22 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
     return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, t_track=t_track, defaults=defaults)
 
 
+_endmills_cache: dict[tuple[str, float], list[Endmill]] = {}
+_feeds_cache: dict[tuple[str, float], list[FeedsEntry]] = {}
+
+
+def _reset_caches() -> None:
+    _endmills_cache.clear()
+    _feeds_cache.clear()
+
+
 def load_endmills(path: Path | str) -> list[Endmill]:
     path = Path(path)
+    key = (str(path), path.stat().st_mtime)
+    cached = _endmills_cache.get(key)
+    if cached is not None:
+        return cached
+
     yaml = YAML(typ="safe")
     with path.open() as f:
         data = yaml.load(f)
@@ -384,6 +398,7 @@ def load_endmills(path: Path | str) -> list[Endmill]:
         )
         endmills.append(endmill)
 
+    _endmills_cache[key] = endmills
     return endmills
 
 
@@ -407,6 +422,11 @@ def load_spindles(path: Path | str) -> list[Spindle]:
 
 def load_feeds(path: Path | str) -> list[FeedsEntry]:
     path = Path(path)
+    key = (str(path), path.stat().st_mtime)
+    cached = _feeds_cache.get(key)
+    if cached is not None:
+        return cached
+
     yaml = YAML(typ="safe")
     with path.open() as f:
         data = yaml.load(f)
@@ -424,6 +444,7 @@ def load_feeds(path: Path | str) -> list[FeedsEntry]:
         )
         entries.append(entry)
 
+    _feeds_cache[key] = entries
     return entries
 
 

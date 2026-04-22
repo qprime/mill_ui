@@ -10,8 +10,11 @@ from cam.planner.passes.tools import ToolSelection, apply_feeds_override
 from config.machine_loader import (
     Endmill,
     FeedsEntry,
+    _reset_caches,
     build_tool_db,
+    load_endmills,
     load_feeds,
+    load_machine_tool_db,
     resolve_tool_selection,
 )
 from layout_ast.layout import FeedsOverride, Sheet
@@ -170,8 +173,6 @@ class TestBuildToolDb:
         assert result[0]["name"] == "bit_a"
 
     def test_plywood_tools_resolve(self):
-        from config.machine_loader import load_endmills, load_feeds
-
         endmills = load_endmills("machines/endmills.yml")
         feeds = load_feeds("machines/feeds.yml")
         result = build_tool_db(endmills, feeds, "plywood")
@@ -207,6 +208,115 @@ class TestLoadFeeds:
         for entry in entries:
             assert entry.chipload > 0
             assert entry.rpm > 0
+
+
+class TestLoaderCaching:
+    @pytest.fixture(autouse=True)
+    def _clear_caches(self):
+        _reset_caches()
+        yield
+        _reset_caches()
+
+    def _write_endmills(self, path: Path, name: str = "bit_a", diameter: float = 6.35) -> None:
+        path.write_text(
+            textwrap.dedent(f"""\
+            endmills:
+              - name: "{name}"
+                diameter_mm: {diameter}
+                flute_length_mm: 25.4
+                shank_diameter_mm: {diameter}
+                flutes: 2
+                type: upcut_spiral
+        """)
+        )
+
+    def _write_feeds(self, path: Path, endmill: str = "bit_a", material: str = "mdf") -> None:
+        path.write_text(
+            textwrap.dedent(f"""\
+            feeds:
+              - endmill: "{endmill}"
+                material: {material}
+                chipload: 0.05
+                rpm: 18000
+                depth_per_pass: 3.0
+                plunge_factor: 0.33
+        """)
+        )
+
+    def test_endmills_cache_hit_returns_same_instance(self, tmp_path):
+        yml = tmp_path / "endmills.yml"
+        self._write_endmills(yml)
+        first = load_endmills(yml)
+        second = load_endmills(yml)
+        assert first is second
+
+    def test_feeds_cache_hit_returns_same_instance(self, tmp_path):
+        yml = tmp_path / "feeds.yml"
+        self._write_feeds(yml)
+        first = load_feeds(yml)
+        second = load_feeds(yml)
+        assert first is second
+
+    def test_endmills_mtime_bump_forces_reparse(self, tmp_path):
+        import os
+
+        yml = tmp_path / "endmills.yml"
+        self._write_endmills(yml, name="bit_a")
+        first = load_endmills(yml)
+        assert first[0].name == "bit_a"
+
+        self._write_endmills(yml, name="bit_b")
+        stat = yml.stat()
+        os.utime(yml, (stat.st_atime, stat.st_mtime + 10.0))
+        second = load_endmills(yml)
+        assert second[0].name == "bit_b"
+        assert second is not first
+
+    def test_feeds_mtime_bump_forces_reparse(self, tmp_path):
+        import os
+
+        yml = tmp_path / "feeds.yml"
+        self._write_feeds(yml, material="mdf")
+        first = load_feeds(yml)
+        assert first[0].material == "mdf"
+
+        self._write_feeds(yml, material="plywood")
+        stat = yml.stat()
+        os.utime(yml, (stat.st_atime, stat.st_mtime + 10.0))
+        second = load_feeds(yml)
+        assert second[0].material == "plywood"
+        assert second is not first
+
+    def test_different_paths_cached_independently(self, tmp_path):
+        a = tmp_path / "a.yml"
+        b = tmp_path / "b.yml"
+        self._write_endmills(a, name="bit_a")
+        self._write_endmills(b, name="bit_b")
+        loaded_a = load_endmills(a)
+        loaded_b = load_endmills(b)
+        assert loaded_a[0].name == "bit_a"
+        assert loaded_b[0].name == "bit_b"
+        assert load_endmills(a) is loaded_a
+        assert load_endmills(b) is loaded_b
+
+    def test_reset_caches_forces_reparse(self, tmp_path):
+        yml = tmp_path / "endmills.yml"
+        self._write_endmills(yml)
+        first = load_endmills(yml)
+        _reset_caches()
+        second = load_endmills(yml)
+        assert second is not first
+        assert second == first
+
+    def test_machine_tool_db_correct_across_materials(self):
+        mdf_tools = load_machine_tool_db("mdf")
+        plywood_tools = load_machine_tool_db("plywood")
+        assert len(mdf_tools) > 0
+        assert len(plywood_tools) > 0
+        mdf_again = load_machine_tool_db("mdf")
+        assert {t["name"] for t in mdf_tools} == {t["name"] for t in mdf_again}
+        for tool in mdf_tools:
+            assert "rpm" in tool and "feed_xy" in tool
 
 
 class TestAvailableMaterials:

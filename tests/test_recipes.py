@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -10,8 +9,7 @@ from typing import Any
 
 import pytest
 
-from adapters.ast_to_removal import ast_to_removal_intents
-from cam.pipeline import run_pipeline
+from cam.pipeline import PipelineResult, run_pipeline, write_pipeline_outputs
 from pml import parse_pml
 from pml.revision_header import update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -28,7 +26,7 @@ def discover_recipe_pml_files() -> list[Path]:
     return sorted(pml_files)
 
 
-def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict[str, Any]]:
+def generate_outputs_from_pml(pml_path: Path) -> PipelineResult:
     with open(pml_path) as f:
         pml_source = f.read()
 
@@ -39,11 +37,11 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
         asts = [parse_pml(pml_source)]
 
     combined_gcode: dict[str, str] = {}
-    all_asts = asts
-    multi_sheet = len(all_asts) > 1
+    multi_sheet = len(asts) > 1
     sheet_metrics: list[dict[str, Any]] = []
+    last_result: PipelineResult | None = None
 
-    for sheet_idx, ast in enumerate(all_asts):
+    for sheet_idx, ast in enumerate(asts):
         result = run_pipeline(
             ast,
             kerf_mm=3.175,
@@ -57,72 +55,35 @@ def generate_outputs_from_pml(pml_path: Path) -> tuple[Any, dict[str, str], dict
             for pass_name, gcode in result.gcode.items():
                 combined_gcode[f"{prefix}{pass_name}"] = gcode
         else:
-            combined_gcode = result.gcode
+            combined_gcode = dict(result.gcode)
 
         sheet_metrics.append(result.metrics)
+        last_result = result
+
+    assert last_result is not None
 
     if multi_sheet:
         metrics: dict[str, Any] = {
-            "total_sheets": len(all_asts),
+            "total_sheets": len(asts),
             "sheets": sheet_metrics,
             "timing": {"total_ms": sum(m["timing"]["total_ms"] for m in sheet_metrics)},
         }
     else:
         metrics = sheet_metrics[0]
 
-    return all_asts[-1], combined_gcode, metrics
-
-
-def write_outputs(
-    output_dir: Path,
-    recipe_name: str,
-    ast: Any,
-    gcode_dict: dict[str, str],
-    metrics: dict[str, Any],
-    pml_path: Path,
-):
-    import shutil
-
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    for pass_name, gcode in gcode_dict.items():
-        output_path = output_dir / f"{pass_name}.nc"
-        with open(output_path, "w") as f:
-            f.write(gcode)
-
-    try:
-        from export.blueprint_svg import render_blueprint_svg
-
-        # Keep SVG aligned with the G-code toolpath by stamping in the kerf used
-        # for this recipe run.
-        ast_with_kerf = replace(ast, kerf_width_mm=3.175)
-        removal_intents = ast_to_removal_intents(ast_with_kerf)
-        svg_string = render_blueprint_svg(ast_with_kerf, removal_intents=removal_intents, theme="dark")
-        recipe_dir_name = pml_path.parent.name
-        svg_path = output_dir / f"{recipe_dir_name}.svg"
-        with open(svg_path, "w", encoding="utf-8") as f:
-            f.write(svg_string)
-    except Exception as e:
-        print(f"  Warning: SVG generation failed: {e}")
-
-    metrics_path = output_dir / "metrics.json"
-    with open(metrics_path, "w") as f:
-        json.dump(metrics, f, indent=2)
+    return replace(last_result, gcode=combined_gcode, metrics=metrics)
 
 
 def compare_outputs(
     output_dir: Path,
-    gcode_dict: dict[str, str],
-    metrics: dict[str, Any],
+    result: PipelineResult,
 ) -> tuple[bool, list[str]]:
     if not output_dir.exists():
         return False, [f"Output directory does not exist: {output_dir}"]
 
     diffs = []
 
-    for pass_name, generated_gcode in gcode_dict.items():
+    for pass_name, generated_gcode in result.gcode.items():
         expected_path = output_dir / f"{pass_name}.nc"
         if not expected_path.exists():
             diffs.append(f"Missing expected file: {expected_path}")
@@ -151,19 +112,18 @@ def compare_outputs(
 
 
 def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
-    ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
+    result = generate_outputs_from_pml(pml_path)
 
     output_dir = pml_path.parent / "output"
-    recipe_name = pml_path.stem
 
     if regenerate:
-        write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
+        write_pipeline_outputs(result, output_dir, pml_path.parent.name)
         print(f"\n  Regenerated recipe outputs for {pml_path.name}")
         print(f"  Output: {output_dir}")
-        print(f"  Files: {len(gcode_dict)} G-code + SVG + metrics.json")
-        print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
+        print(f"  Files: {len(result.gcode)} G-code + SVG + metrics.json")
+        print(f"  Total time: {result.metrics['timing']['total_ms']:.1f}ms")
     else:
-        all_match, diffs = compare_outputs(output_dir, gcode_dict, metrics)
+        all_match, diffs = compare_outputs(output_dir, result)
 
         if not all_match:
             diff_summary = "\n  ".join(diffs)
@@ -206,15 +166,14 @@ if __name__ == "__main__":
         for pml_path in pml_files:
             print(f"Processing: {pml_path.relative_to(Path.cwd())}")
             try:
-                ast, gcode_dict, metrics = generate_outputs_from_pml(pml_path)
+                result = generate_outputs_from_pml(pml_path)
                 output_dir = pml_path.parent / "output"
-                recipe_name = pml_path.stem
 
-                write_outputs(output_dir, recipe_name, ast, gcode_dict, metrics, pml_path)
+                write_pipeline_outputs(result, output_dir, pml_path.parent.name)
                 update_file_header(pml_path)
 
-                print(f"  Generated {len(gcode_dict)} G-code pass(es) + SVG")
-                print(f"  Total time: {metrics['timing']['total_ms']:.1f}ms")
+                print(f"  Generated {len(result.gcode)} G-code pass(es) + SVG")
+                print(f"  Total time: {result.metrics['timing']['total_ms']:.1f}ms")
                 print(f"  Output: {output_dir}\n")
             except Exception as e:
                 print(f"  FAILED: {e}\n")

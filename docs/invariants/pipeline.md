@@ -17,6 +17,7 @@
 | PL-7 | STRUCTURAL | SHAPES_EMIT_ABSOLUTE | Shapes emit items with absolute coordinates |
 | PL-8 | HARD | NO_PASSTHROUGH_GEOMETRY | Do not add computed planner-geometry fields to Feature or RemovalIntent. See "Known Exception" below. |
 | PL-9 | STRUCTURAL | DOMAIN_VIA_PARAMS | Shape handlers pass true geometry to children via `params["domain"]` (Domain) and `params["domain_center"]` (Point2D). Domain-aware child handlers consume these when present, falling back to ResolvedRegion (Rect) when absent. Shape handlers must not special-case child types to pass geometry — all children receive the same params. Structural nodes (Frame, Inset, Grid, Split) strip domain from params before dispatching children. |
+| PL-10 | HARD | SINGLE_WRITER | Each serialized artifact type has exactly one canonical writer function. All code paths — CLI, tests, regen, batch — must call it. The writer owns filename and layout; callers pass data only. Any other path that writes this artifact type is a defect. |
 
 ---
 

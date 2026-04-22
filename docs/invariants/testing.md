@@ -13,6 +13,7 @@
 | TS-3 | HARD | TEST_PROJECT_CODE | Tests must exercise project logic, not Python builtins |
 | TS-4 | HARD | PYTEST_ONLY | Tests are collected by pytest. No hand-rolled runners or print-based reporting |
 | TS-5 | STRUCTURAL | ONE_RECIPE_LOOP | At most one test per validation concern may iterate all recipes |
+| TS-6 | HARD | GOLDENS_ARE_TRACKED | Any file a test reads from disk must be tracked by git. Goldens in gitignored paths make fresh clones fail the test for filesystem reasons, not code reasons. If the test reads it, git tracks it. |
 
 ---
 

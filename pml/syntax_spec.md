@@ -791,6 +791,36 @@ SvgStamp is a leaf node — it does not accept children.
 
 SVG files must contain `<path>` elements. Non-path elements (`<rect>`, `<circle>`, etc.) require "Object to Path" conversion in the design tool.
 
+#### Heightfield
+
+Relief carving from a 16-bit grayscale PNG. IR-only today; G-code generation is tracked in issues #2 (rough) and #3 (finish).
+
+```yaml
+- Rect:
+    id: relief_panel
+    at: { x: 150mm, y: 150mm, width: 200mm, height: 200mm }
+    children:
+      - Heightfield:
+          image: input/relief_dome.png          # Required. PNG path relative to PML file.
+          size:                                  # Required. XY extent of the field.
+            width: 128mm
+            height: 128mm
+          depth: 5mm                             # Required. Maximum carve depth.
+          white_is_high: true                    # Default true; false inverts polarity.
+```
+
+`Heightfield` is placed at the parent shape's CENTER (PM-12). It has no `at:` key — wrap in `Frame` or `AtPosition` for offset placement.
+
+Image requirements (strict):
+
+- Extension `.png`
+- PNG IHDR bit-depth == 16
+- PNG IHDR color-type == 0 (single-channel grayscale)
+- Square pixels: `size.width / image_W_px` must equal `size.height / image_H_px` within ε=1e-4
+- File must exist
+
+See `docs/heightfield.md` for full ingest requirements, error messages, and external-pipeline expectations.
+
 ### Assembly Generators
 
 #### Assembly

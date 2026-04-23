@@ -73,6 +73,8 @@ class FeatureType:
     CHAMFER = "chamfer"
     ROUNDOVER = "roundover"
 
+    HEIGHTFIELD = "heightfield"
+
 
 class ShapeType:
     RECT = "Rect"
@@ -81,6 +83,7 @@ class ShapeType:
     POLYGON = "Polygon"
     LINE = "Line"
     POLYLINE = "Polyline"
+    HEIGHTFIELD = "Heightfield"
 
     RECT_LOWER = "rect"
     CIRCLE_LOWER = "circle"

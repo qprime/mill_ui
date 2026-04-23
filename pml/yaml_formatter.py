@@ -24,6 +24,7 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HeightfieldGen,
     HoleGridGen,
     Inset,
     InterfaceConfig,
@@ -424,6 +425,16 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
                 "depth": dim(node.depth_mm),
             }
         }
+
+    elif isinstance(node, HeightfieldGen):
+        result: dict[str, Any] = {
+            "image": node.image_path,
+            "size": {"width": dim(node.width_mm), "height": dim(node.height_mm)},
+            "depth": dim(node.depth_mm),
+        }
+        if not node.white_is_high:
+            result["white_is_high"] = False
+        return {"Heightfield": result}
 
     elif isinstance(node, FlutingGen):
         result: dict[str, Any] = {

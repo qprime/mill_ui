@@ -236,6 +236,9 @@ def removal_intents_to_planner_input(
             warnings.append(msg)
 
     for intent in intents:
+        if intent.hint_type == FeatureType.HEIGHTFIELD:
+            _warn(f"Heightfield '{intent.region_id}': IR-only phase, no G-code planner yet — feature skipped")
+            continue
         for keepout in intent.constraints.keepouts:
             key = (
                 round(keepout.bounds.x_min * 1000),

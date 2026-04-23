@@ -33,7 +33,8 @@
 .callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
-.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }</style>
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
   <rect x="-10.0" y="-50.0" width="350.0" height="290.0" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="200.000" height="150.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />

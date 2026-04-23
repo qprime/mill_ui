@@ -206,6 +206,23 @@ Each `plan_X_passes()` function: pick tool → call ops function → append move
 - Parametrize with descriptive IDs: `pytest.param(..., id="profile_outside_through")`
 - Property-based tests use Hypothesis `@st.composite` strategies for domain geometry
 
+## Mode-Specific Fields on `DepthProfile`
+
+When a new depth mode adds fields, enforce cross-field invariants in `__post_init__`:
+- Field REQUIRED when mode matches (raise if absent)
+- Field FORBIDDEN when mode doesn't match (raise if present)
+
+Example from `DepthProfile.heightfield`:
+
+```python
+if self.mode == "heightfield" and self.image_path is None:
+    raise ValueError("image_path required for heightfield mode")
+if self.mode != "heightfield" and self.image_path is not None:
+    raise ValueError(f"image_path only valid for heightfield mode, got mode={self.mode!r}")
+```
+
+This preserves PL-8 spirit (DepthProfile is semantic, not computed geometry) while keeping mode-specific parameters on the single dataclass rather than forking `RemovalIntent`. Matching serializers (`to_dict` / `from_dict`) must emit/require the field only when mode matches.
+
 ## Serialization Completeness
 
 `to_dict()` methods must serialize all non-private fields. If a field is intentionally omitted, document the omission with a comment at the serialization site explaining why. Silent omission is a data-loss bug.

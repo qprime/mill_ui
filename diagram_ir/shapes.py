@@ -114,11 +114,37 @@ class Path:
     id: str | None = None
 
 
-Shape = Rect | Line | Polyline | Circle | Text | Path
+@dataclass(frozen=True)
+class Image:
+    x: float
+    y: float
+    width: float
+    height: float
+    href: str
+    opacity: float = 0.6
+    style_token: str = "default"
+    id: str | None = None
+
+    def __post_init__(self):
+        if self.width < 0:
+            raise ValueError(f"Image width must be non-negative, got {self.width}")
+        if self.height < 0:
+            raise ValueError(f"Image height must be non-negative, got {self.height}")
+        if not (0.0 <= self.opacity <= 1.0):
+            raise ValueError(f"Image opacity must be in [0, 1], got {self.opacity}")
+        for coord in (self.x, self.y, self.width, self.height):
+            if coord != coord:
+                raise ValueError("Image coordinates must not be NaN")
+        if not self.href:
+            raise ValueError("Image href cannot be empty")
+
+
+Shape = Rect | Line | Polyline | Circle | Text | Path | Image
 
 
 __all__ = [
     "Circle",
+    "Image",
     "Line",
     "Path",
     "Point2D",

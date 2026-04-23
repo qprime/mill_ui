@@ -22,6 +22,7 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HeightfieldGen,
     HoleGridGen,
     Inset,
     InterfaceConfig,
@@ -775,6 +776,18 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Lines")),
             line_width_mm=parse_dimension(_require(node_data, "width", f"{path}.Lines")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Lines")),
+        )
+
+    elif node_type == "Heightfield":
+        size_data = _require(node_data, "size", f"{path}.Heightfield")
+        if not isinstance(size_data, dict) or "width" not in size_data or "height" not in size_data:
+            raise PMLParseError("Heightfield 'size' must have 'width' and 'height' keys", path)
+        return HeightfieldGen(
+            image_path=_require(node_data, "image", f"{path}.Heightfield"),
+            width_mm=parse_dimension(size_data["width"]),
+            height_mm=parse_dimension(size_data["height"]),
+            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Heightfield")),
+            white_is_high=node_data.get("white_is_high", True),
         )
 
     elif node_type == "Fluting":

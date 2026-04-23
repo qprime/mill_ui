@@ -4,7 +4,7 @@ import logging
 from collections.abc import Callable
 
 from core.constants import DepthMode, ShapeType
-from diagram_ir import Circle, DiagramIR, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
+from diagram_ir import Circle, DiagramIR, Image, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir.geometry import rounded_rect_path
 from diagram_ir.shapes import Shape
@@ -21,11 +21,21 @@ FEATURE_LAYER: dict[str, str] = {
     "pocket": "POCKET_REGIONS",
     "hole": "HOLES",
     "engrave": "ENGRAVE_PATHS",
+    "heightfield": "HEIGHTFIELD_OVERLAYS",
 }
 
 WASTE_LAYER = "WASTE_CUTS"
 
-_LAYER_ORDER = ("PROFILE_CUTS", "PROFILE_TOOLPATHS", "WASTE_CUTS", "POCKET_REGIONS", "HOLES", "ENGRAVE_PATHS", "LABELS")
+_LAYER_ORDER = (
+    "PROFILE_CUTS",
+    "PROFILE_TOOLPATHS",
+    "WASTE_CUTS",
+    "POCKET_REGIONS",
+    "HOLES",
+    "ENGRAVE_PATHS",
+    "HEIGHTFIELD_OVERLAYS",
+    "LABELS",
+)
 
 
 def register_feature(feature_type: str, *, layer: str | None = None):
@@ -163,6 +173,77 @@ def _handle_surface(item: Item, style_token: str, flip_y: Callable, margin: floa
 @register_feature("notch")  # type: ignore[untyped-decorator]
 def _handle_notch(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
     return _build_notch_shapes(item, flip_y, margin)
+
+
+@register_feature("heightfield", layer="HEIGHTFIELD_OVERLAYS")  # type: ignore[untyped-decorator]
+def _handle_heightfield(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+    return _build_heightfield_shapes(item, flip_y, margin)
+
+
+def _build_heightfield_shapes(item: Item, flip_y: Callable, margin: float) -> list[Shape]:
+    if item.geometry is None or item.placement is None:
+        return []
+
+    data = item.geometry.data
+    image_path = data.get("image_path")
+    if not image_path:
+        _logger.warning(
+            "Heightfield '%s': missing image_path in geometry.data — skipped in diagram",
+            item.shape_id or "unknown",
+        )
+        return []
+
+    try:
+        w = float(data["w_mm"])
+        h = float(data["h_mm"])
+    except (KeyError, TypeError, ValueError) as exc:
+        _logger.warning(
+            "Heightfield '%s': invalid geometry dimensions (%s) — skipped in diagram",
+            item.shape_id or "unknown",
+            exc,
+        )
+        return []
+
+    href = _heightfield_image_href(image_path)
+
+    cx, cy = item.placement.center_xy_mm
+    sx = margin + cx
+    x = sx - w / 2
+    y_top_source = cy + h / 2
+    y = flip_y(y_top_source)
+    shape_id = item.shape_id or "heightfield"
+
+    return [
+        Image(
+            x=x,
+            y=y,
+            width=w,
+            height=h,
+            href=href,
+            id=shape_id,
+        ),
+        Rect(
+            x=x,
+            y=y,
+            width=w,
+            height=h,
+            style_token="heightfield-border",
+            id=f"{shape_id}_border",
+        ),
+    ]
+
+
+def _heightfield_image_href(image_path: str) -> str:
+    import os
+
+    from generators.area.heightfield_loader import load_heightfield_data_url
+
+    if not os.path.isabs(image_path):
+        raise ValueError(
+            f"Heightfield image_path must be absolute for blueprint rendering, got {image_path!r}. "
+            "Resolver should have joined it against source_dir."
+        )
+    return load_heightfield_data_url(image_path)
 
 
 def _build_sheet_layer(sheet: Sheet, margin: float) -> list:

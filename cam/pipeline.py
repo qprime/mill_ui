@@ -29,6 +29,7 @@ from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
     check_depth_feasibility,
     check_edge_feature,
+    check_heightfield,
     check_overlap,
     check_toolpath_clearance,
     check_working_area_bounds,
@@ -146,6 +147,14 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
                 errors.append(issue.message)
             for issue in depth_result.warnings:
                 warnings.append(issue.message)
+
+        if intent.depth_profile.mode == "heightfield":
+            heightfield_result = check_heightfield(intent, ast.sheet.thickness_mm)
+            if heightfield_result.has_issues():
+                for issue in heightfield_result.errors:
+                    errors.append(issue.message)
+                for issue in heightfield_result.warnings:
+                    warnings.append(issue.message)
 
         edge_result = check_edge_feature(intent, ast.sheet.thickness_mm, available_v_angles=v_angles)
         if edge_result.has_issues():

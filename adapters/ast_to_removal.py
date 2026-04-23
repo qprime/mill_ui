@@ -8,6 +8,7 @@ from adapters.hints_to_removal import (
     _geometry_dict_to_shape_geometry,
     _geometry_to_bounds,
     engrave_hint_to_removal_intent,
+    heightfield_hint_to_removal_intent,
     hole_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     profile_hint_to_removal_intent,
@@ -127,6 +128,10 @@ def item_to_removal_intent(  # noqa: C901 — feature-type dispatcher
         if item.feature.ramp_mm is not None:
             intent = replace(intent, ramp_mm=item.feature.ramp_mm)
         return intent
+
+    elif item.feature.type == FeatureType.HEIGHTFIELD:
+        intent = heightfield_hint_to_removal_intent(hint)
+        return replace(intent, item_type=item.type, feature_type=item.feature.type, shape_id=item.shape_id)
 
     elif item.feature.type == FeatureType.BEVEL:
         bevel_width = item.feature.bevel_width_mm or 0.0

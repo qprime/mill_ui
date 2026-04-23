@@ -312,6 +312,15 @@ class RadialSvgGen:
 
 
 @dataclass(frozen=True)
+class HeightfieldGen:
+    image_path: str
+    width_mm: float
+    height_mm: float
+    depth_mm: float
+    white_is_high: bool = True
+
+
+@dataclass(frozen=True)
 class FlutingGen:
     spacing_mm: float
     depth_mm: float

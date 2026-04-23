@@ -9,7 +9,7 @@ from diagram_ir.dimensions import (
     PlacedDimension,
     place_on_rails,
 )
-from diagram_ir.shapes import Circle, Line, Path, Polyline, Rect, Shape, Text
+from diagram_ir.shapes import Circle, Image, Line, Path, Polyline, Rect, Shape, Text
 
 
 @dataclass(frozen=True)
@@ -78,6 +78,7 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "callout-dim-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "8px"},
         "beam-dim-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "8px"},
         "beam-segment-text": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "7px"},
+        "heightfield-border": {"stroke": "#ffcc00", "fill": "none", "stroke-width": "1", "stroke-dasharray": "4,2"},
     },
 )
 
@@ -120,6 +121,7 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "callout-dim-text": {"fill": "#333333", "font-family": "monospace", "font-size": "8px"},
         "beam-dim-text": {"fill": "#333333", "font-family": "monospace", "font-size": "8px"},
         "beam-segment-text": {"fill": "#333333", "font-family": "monospace", "font-size": "7px"},
+        "heightfield-border": {"stroke": "#cc6600", "fill": "none", "stroke-width": "1", "stroke-dasharray": "4,2"},
     },
 )
 
@@ -399,6 +401,21 @@ def _render_shape(parent: ET.Element, shape: Shape, theme: DiagramTheme, transfo
         if shape.id:
             attrs["id"] = shape.id
         ET.SubElement(parent, "path", attrs)
+
+    elif isinstance(shape, Image):
+        y = transform_y(shape.y + shape.height) if y_flip else shape.y
+        attrs = {
+            "x": f"{shape.x:.3f}",
+            "y": f"{y:.3f}",
+            "width": f"{shape.width:.3f}",
+            "height": f"{shape.height:.3f}",
+            "href": shape.href,
+            "opacity": f"{shape.opacity:.3f}",
+            "preserveAspectRatio": "none",
+        }
+        if shape.id:
+            attrs["id"] = shape.id
+        ET.SubElement(parent, "image", attrs)
 
 
 def _render_dimensions(

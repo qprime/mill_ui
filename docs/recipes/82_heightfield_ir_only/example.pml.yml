@@ -1,0 +1,22 @@
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  material: mdf
+
+children:
+- Rect:
+    id: relief_panel
+    at:
+      x: 150mm
+      y: 150mm
+      width: 200mm
+      height: 200mm
+    children:
+      - Heightfield:
+          image: input/relief_dome.png
+          size:
+            width: 128mm
+            height: 128mm
+          depth: 5mm
+          white_is_high: true

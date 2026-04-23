@@ -6,5 +6,9 @@ shapely>=2.0.0
 # MCP server (Model Context Protocol for Claude integration)
 mcp[cli]>=1.25.0
 
+# Heightfield image ingest (16-bit PNG grayscale relief)
+Pillow>=10.0.0
+numpy>=1.26.0
+
 # Development dependencies (optional)
 # Install with: pip install -r requirements-dev.txt

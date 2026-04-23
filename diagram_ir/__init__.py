@@ -16,6 +16,7 @@ from diagram_ir.dimensions import (
 from diagram_ir.geometry import rounded_rect_path
 from diagram_ir.shapes import (
     Circle,
+    Image,
     Line,
     Path,
     Point2D,
@@ -30,6 +31,7 @@ __all__ = [
     "DiagramIR",
     "DimensionPlacement",
     "DimensionRequest",
+    "Image",
     "LayerIR",
     "Line",
     "Orientation",

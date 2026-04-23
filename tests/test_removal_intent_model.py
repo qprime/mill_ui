@@ -322,6 +322,77 @@ def test_depth_profile_v_carve_invalid_angle():
         assert "v_angle_deg must be between 0 and 180" in str(e)
 
 
+def test_depth_profile_heightfield_valid():
+    profile = DepthProfile.heightfield(
+        z_top=0.0,
+        z_bottom=-8.0,
+        image_path="/tmp/test.png",
+        white_is_high=True,
+    )
+    assert profile.mode == "heightfield"
+    assert profile.depth_mm() == 8.0
+    assert profile.image_path == "/tmp/test.png"
+    assert profile.white_is_high is True
+
+
+def test_depth_profile_heightfield_white_is_high_false():
+    profile = DepthProfile.heightfield(
+        z_top=0.0,
+        z_bottom=-3.0,
+        image_path="/tmp/test.png",
+        white_is_high=False,
+    )
+    assert profile.white_is_high is False
+
+
+def test_depth_profile_heightfield_requires_image_path():
+    try:
+        DepthProfile(mode="heightfield", z_top=0.0, z_bottom=-5.0)
+        raise AssertionError("Expected ValueError")
+    except ValueError as e:
+        assert "image_path required for heightfield" in str(e)
+
+
+def test_depth_profile_image_path_forbidden_on_other_modes():
+    try:
+        DepthProfile(mode="constant", z_top=0.0, z_bottom=-5.0, image_path="/tmp/x.png")
+        raise AssertionError("Expected ValueError")
+    except ValueError as e:
+        assert "image_path only valid for heightfield mode" in str(e)
+
+
+def test_depth_profile_heightfield_to_dict_roundtrip():
+    profile = DepthProfile.heightfield(
+        z_top=0.0,
+        z_bottom=-4.0,
+        image_path="/tmp/relief.png",
+        white_is_high=False,
+    )
+    data = profile.to_dict()
+    assert data["mode"] == "heightfield"
+    assert data["image_path"] == "/tmp/relief.png"
+    assert data["white_is_high"] is False
+
+    restored = DepthProfile.from_dict(data)
+    assert restored == profile
+
+
+def test_depth_profile_from_dict_heightfield_requires_image_path():
+    try:
+        DepthProfile.from_dict({"mode": "heightfield", "z_top": 0.0, "z_bottom": -5.0, "white_is_high": True})
+        raise AssertionError("Expected ValueError")
+    except ValueError as e:
+        assert "image_path" in str(e)
+
+
+def test_depth_profile_from_dict_heightfield_requires_white_is_high():
+    try:
+        DepthProfile.from_dict({"mode": "heightfield", "z_top": 0.0, "z_bottom": -5.0, "image_path": "/tmp/x.png"})
+        raise AssertionError("Expected ValueError")
+    except ValueError as e:
+        assert "white_is_high" in str(e)
+
+
 def test_depth_profile_to_dict():
     profile1 = DepthProfile.constant(z_top=0.0, z_bottom=-10.0)
     data1 = profile1.to_dict()

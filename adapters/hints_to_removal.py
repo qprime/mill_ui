@@ -153,6 +153,43 @@ def engrave_hint_to_removal_intent(
     return _simple_hint_to_removal_intent(hint, FeatureType.ENGRAVE, region_id_prefix, _engrave_extra_kwargs)
 
 
+def heightfield_hint_to_removal_intent(
+    hint: dict[str, Any],
+    region_id_prefix: str = "heightfield",
+) -> RemovalIntent:
+    hint_id = hint.get(HintKeys.ID, "")
+    region_id = _make_region_id(region_id_prefix, hint_id)
+    shape = hint.get(HintKeys.SHAPE, "")
+    geometry = hint.get(HintKeys.GEOMETRY, {})
+
+    if "image_path" not in geometry:
+        raise ValueError(f"Heightfield hint {hint_id!r}: geometry.data missing required 'image_path'")
+    if "white_is_high" not in geometry:
+        raise ValueError(f"Heightfield hint {hint_id!r}: geometry.data missing required 'white_is_high'")
+
+    image_path = str(geometry["image_path"])
+    white_is_high = bool(geometry["white_is_high"])
+    depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
+
+    bounds = _geometry_to_bounds(shape, geometry, hint.get(HintKeys.CENTER_XY_MM))
+
+    return RemovalIntent(
+        region_id=region_id,
+        bounds=bounds,
+        depth_profile=DepthProfile.heightfield(
+            z_top=0.0,
+            z_bottom=-depth_mm,
+            image_path=image_path,
+            white_is_high=white_is_high,
+        ),
+        hint_type=FeatureType.HEIGHTFIELD,
+        shape=shape,
+        original_id=hint_id,
+        allowance=Allowance(),
+        constraints=Constraints(),
+    )
+
+
 def _geometry_to_bounds(
     shape: str, geometry: dict[str, Any], center_xy: tuple[float, float] | list[float] | None
 ) -> Bounds2D:

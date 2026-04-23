@@ -1,0 +1,27 @@
+{
+  "timing": {
+    "ir_ms": 0.03,
+    "hints_ms": 0.08,
+    "plan_ms": 0.03,
+    "gcode_ms": 0.0,
+    "svg_ms": 7.11,
+    "total_ms": 7.25
+  },
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 0,
+    "rapid_moves": 0,
+    "cut_moves": 0,
+    "rapid_ratio": 0
+  },
+  "fidelity": {
+    "tool_changes": 0,
+    "passes": []
+  },
+  "output_size": {
+    "total_bytes": 0,
+    "total_lines": 0,
+    "files": {}
+  },
+  "timestamp": "2026-04-23T14:55:09.365155+00:00"
+}

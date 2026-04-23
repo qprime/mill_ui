@@ -27,6 +27,7 @@ from generators.area.concentric_border import concentric_border_generator
 from generators.area.engrave_text import engrave_text_at_position
 from generators.area.fluting import fluting_generator
 from generators.area.grid_lines import grid_lines_generator
+from generators.area.heightfield import heightfield_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.measurement_grid import measurement_grid_generator
@@ -39,7 +40,13 @@ from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
-from generators.params.area import RadialLabelParams, RadialPocketParams, RadialSvgParams, RadialTickParams
+from generators.params.area import (
+    HeightfieldParams,
+    RadialLabelParams,
+    RadialPocketParams,
+    RadialSvgParams,
+    RadialTickParams,
+)
 from generators.svg.params import SVGPathParams
 from generators.svg.parser import extract_path_data
 from generators.svg.stamp import svg_stamp_generator
@@ -60,6 +67,7 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HeightfieldGen,
     HoleGridGen,
     Inset,
     Keepout,
@@ -1602,6 +1610,43 @@ class LayoutResolver:
         except GeneratorSkipError:
             pass
 
+    def _handle_heightfield_gen(
+        self,
+        node: HeightfieldGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = Domain.from_rectangle(
+            width_mm=region.width,
+            height_mm=region.height,
+            center=region.center,
+        )
+
+        image_path = node.image_path
+        if self.ast.source_dir and not os.path.isabs(image_path):
+            image_path = os.path.join(self.ast.source_dir, image_path)
+
+        generator_params = HeightfieldParams(
+            image_path=image_path,
+            width_mm=node.width_mm,
+            height_mm=node.height_mm,
+            depth_mm=node.depth_mm,
+            white_is_high=node.white_is_high,
+        )
+
+        shape_id_prefix = self._next_shape_id("heightfield")
+        try:
+            generated_items = heightfield_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
     def _handle_svg_stamp_gen(
         self,
         node: SvgStampGen,
@@ -2900,6 +2945,7 @@ class LayoutResolver:
                 GridLinesGen: LayoutResolver._handle_grid_lines_gen,
                 EngraveTextGen: LayoutResolver._handle_engrave_text_gen,
                 SvgStampGen: LayoutResolver._handle_svg_stamp_gen,
+                HeightfieldGen: LayoutResolver._handle_heightfield_gen,
                 WasteCuts: LayoutResolver._handle_waste_cuts,
                 AssemblyDecl: LayoutResolver._handle_assembly,
                 BeamDecl: LayoutResolver._handle_beam_decl,

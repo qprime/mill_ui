@@ -286,6 +286,58 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
     return result
 
 
+def check_heightfield(intent: RemovalIntent, sheet_thickness_mm: float) -> ValidationResult:
+    result = ValidationResult()
+    profile = intent.depth_profile
+    if profile.mode != "heightfield":
+        return result
+
+    if profile.image_path is None:
+        result.add_error(
+            "Heightfield depth_profile missing image_path",
+            region_id=intent.region_id,
+        )
+        return result
+
+    from generators.area.heightfield_loader import load_heightfield, validate_square_pixels
+
+    try:
+        load_heightfield(profile.image_path)
+    except (ValueError, OSError) as exc:
+        result.add_error(
+            f"Heightfield image load failed: {exc}",
+            region_id=intent.region_id,
+            image_path=profile.image_path,
+        )
+        return result
+
+    width_mm = intent.bounds.width
+    height_mm = intent.bounds.height
+    try:
+        validate_square_pixels(profile.image_path, width_mm, height_mm)
+    except ValueError as exc:
+        result.add_error(
+            f"Heightfield square-pixel check failed: {exc}",
+            region_id=intent.region_id,
+        )
+
+    depth = abs(profile.z_bottom - profile.z_top)
+    if depth <= 0.0:
+        result.add_error(
+            f"Heightfield depth must be positive, got {depth:.2f}mm",
+            region_id=intent.region_id,
+        )
+    elif depth > sheet_thickness_mm:
+        result.add_error(
+            f"Heightfield depth ({depth:.2f}mm) exceeds sheet thickness ({sheet_thickness_mm:.2f}mm)",
+            region_id=intent.region_id,
+            depth_mm=depth,
+            sheet_thickness_mm=sheet_thickness_mm,
+        )
+
+    return result
+
+
 def check_depth_feasibility(intent: RemovalIntent, sheet_thickness_mm: float) -> ValidationResult:
     result = ValidationResult()
 

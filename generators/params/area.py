@@ -310,12 +310,33 @@ class RadialSvgParams(BaseParams):
             raise ValueError("RadialSvgParams: svg_path cannot be empty")
 
 
+@dataclass(frozen=True)
+class HeightfieldParams(BaseParams):
+    image_path: str
+    width_mm: float
+    height_mm: float
+    depth_mm: float
+    white_is_high: bool = True
+
+    def __post_init__(self) -> None:
+        if not self.image_path or not self.image_path.strip():
+            raise ValueError("HeightfieldParams: image_path cannot be empty")
+        if self.width_mm <= 0 or self.height_mm <= 0:
+            raise ValueError(
+                f"HeightfieldParams: width_mm and height_mm must be positive, "
+                f"got width_mm={self.width_mm}, height_mm={self.height_mm}"
+            )
+        if self.depth_mm <= 0:
+            raise ValueError(f"HeightfieldParams: depth_mm must be positive, got {self.depth_mm}")
+
+
 __all__ = [
     "ConcentricBorderParams",
     "FlatPocketParams",
     "FlutingParams",
     "GridLinesParams",
     "GridParams",
+    "HeightfieldParams",
     "HoleGridParams",
     "LinePatternParams",
     "MeasurementGridParams",

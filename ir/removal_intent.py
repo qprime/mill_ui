@@ -71,9 +71,11 @@ class DepthProfile:
     z_bottom: float
     gradient_direction_deg: float | None = None
     v_angle_deg: float | None = None
+    image_path: str | None = None
+    white_is_high: bool = True
 
     def __post_init__(self) -> None:
-        valid_modes = ("constant", "linear_gradient", "v_carve")
+        valid_modes = ("constant", "linear_gradient", "v_carve", "heightfield")
         if self.mode not in valid_modes:
             raise ValueError(f"Invalid depth mode '{self.mode}'. Must be one of: {valid_modes}")
         if self.z_bottom > self.z_top:
@@ -88,6 +90,10 @@ class DepthProfile:
             and (self.v_angle_deg <= 0 or self.v_angle_deg >= 180)
         ):
             raise ValueError(f"v_angle_deg must be between 0 and 180, got {self.v_angle_deg}")
+        if self.mode == "heightfield" and self.image_path is None:
+            raise ValueError("image_path required for heightfield mode")
+        if self.mode != "heightfield" and self.image_path is not None:
+            raise ValueError(f"image_path only valid for heightfield mode, got mode={self.mode!r}")
 
     def depth_mm(self) -> float:
         return self.z_top - self.z_bottom
@@ -119,8 +125,24 @@ class DepthProfile:
             v_angle_deg=v_angle_deg,
         )
 
+    @classmethod
+    def heightfield(
+        cls,
+        z_top: float,
+        z_bottom: float,
+        image_path: str,
+        white_is_high: bool = True,
+    ) -> DepthProfile:
+        return cls(
+            mode="heightfield",
+            z_top=z_top,
+            z_bottom=z_bottom,
+            image_path=image_path,
+            white_is_high=white_is_high,
+        )
+
     def to_dict(self) -> dict[str, Any]:
-        result = {
+        result: dict[str, Any] = {
             "mode": self.mode,
             "z_top": self.z_top,
             "z_bottom": self.z_bottom,
@@ -130,7 +152,42 @@ class DepthProfile:
             result["gradient_direction_deg"] = self.gradient_direction_deg
         if self.v_angle_deg is not None:
             result["v_angle_deg"] = self.v_angle_deg
+        if self.mode == "heightfield":
+            result["image_path"] = self.image_path
+            result["white_is_high"] = self.white_is_high
         return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> DepthProfile:
+        mode = data["mode"]
+        z_top = float(data["z_top"])
+        z_bottom = float(data["z_bottom"])
+        if mode == "constant":
+            return cls.constant(z_top=z_top, z_bottom=z_bottom)
+        if mode == "linear_gradient":
+            return cls.linear_gradient(
+                z_top=z_top,
+                z_bottom=z_bottom,
+                direction_deg=float(data["gradient_direction_deg"]),
+            )
+        if mode == "v_carve":
+            return cls.v_carve(
+                z_top=z_top,
+                z_bottom=z_bottom,
+                v_angle_deg=float(data["v_angle_deg"]),
+            )
+        if mode == "heightfield":
+            if "image_path" not in data:
+                raise ValueError("DepthProfile.from_dict: heightfield mode requires 'image_path'")
+            if "white_is_high" not in data:
+                raise ValueError("DepthProfile.from_dict: heightfield mode requires 'white_is_high'")
+            return cls.heightfield(
+                z_top=z_top,
+                z_bottom=z_bottom,
+                image_path=str(data["image_path"]),
+                white_is_high=bool(data["white_is_high"]),
+            )
+        raise ValueError(f"Unknown depth profile mode: {mode!r}")
 
 
 @dataclass(frozen=True)

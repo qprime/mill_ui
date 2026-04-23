@@ -22,7 +22,7 @@ def compute_shape_bounds(
     else:
         cx, cy = float(center_xy[0]), float(center_xy[1])
 
-    if ShapeType.is_rect(shape_type) or shape_type == ShapeType.ROUNDED_RECT:
+    if ShapeType.is_rect(shape_type) or shape_type == ShapeType.ROUNDED_RECT or shape_type == ShapeType.HEIGHTFIELD:
         w = float(geometry_data.get(GeometryKeys.W_MM, 0.0))
         h = float(geometry_data.get(GeometryKeys.H_MM, 0.0))
         half_w, half_h = w / 2.0, h / 2.0

@@ -3,6 +3,7 @@ from generators.area.flat import flat_pocket_generator
 from generators.area.fluting import fluting_generator
 from generators.area.grid import grid_generator
 from generators.area.grid_lines import grid_lines_generator
+from generators.area.heightfield import heightfield_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.measurement_grid import measurement_grid_generator
@@ -20,6 +21,7 @@ __all__ = [
     "fluting_generator",
     "grid_generator",
     "grid_lines_generator",
+    "heightfield_generator",
     "hole_grid_generator",
     "line_pattern_generator",
     "measurement_grid_generator",

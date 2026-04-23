@@ -116,8 +116,9 @@ Two pipelines apply margin and y-flip at different points. Never mix.
 - Renderer receives `ViewportSpec(y_flip=False)` — no second flip
 
 **CAM pipeline** — transforms late, at G-code export (`cam/post/gcode.py`):
-- `_apply_margin_offset()` adds margin to X and Y of all moves
-- `_flip_y_in_moves()` only applies when `y_origin="front"`
+- `_move_to_dict()` folds margin and optional Y-flip into the native-call dict in a single pass
+- X: `x + margin_mm`
+- Y: `sheet_height - (y + margin_mm)` when `y_origin="front"`, else `y + margin_mm`
 
 The rule: diagram path bakes transforms into shape coordinates during IR generation. CAM path preserves working-area coordinates through the entire pipeline and transforms at the output boundary.
 

@@ -111,6 +111,56 @@ def test_move_to_dict_retract():
     assert d == {"kind": "retract", "z": 6.0}
 
 
+def test_move_to_dict_rapid_with_margin():
+    d = _move_to_dict(RapidMove(x=100.0, y=200.0, z=5.0), margin_mm=10.0)
+    assert d == {"kind": "rapid", "x": 110.0, "y": 210.0, "z": 5.0}
+
+
+def test_move_to_dict_cut_with_margin():
+    d = _move_to_dict(CutMove(x=100.0, y=200.0, z=-5.0, feed=900.0), margin_mm=10.0)
+    assert d == {"kind": "cut", "x": 110.0, "y": 210.0, "z": -5.0, "feed": 900.0}
+
+
+def test_move_to_dict_rapid_with_margin_and_front_flip():
+    d = _move_to_dict(
+        RapidMove(x=100.0, y=200.0, z=5.0),
+        margin_mm=10.0,
+        sheet_height=800.0,
+        y_origin="front",
+    )
+    assert d == {"kind": "rapid", "x": 110.0, "y": 800.0 - 210.0, "z": 5.0}
+
+
+def test_move_to_dict_cut_with_margin_and_front_flip():
+    d = _move_to_dict(
+        CutMove(x=100.0, y=200.0, z=-5.0, feed=900.0),
+        margin_mm=10.0,
+        sheet_height=800.0,
+        y_origin="front",
+    )
+    assert d == {"kind": "cut", "x": 110.0, "y": 800.0 - 210.0, "z": -5.0, "feed": 900.0}
+
+
+def test_move_to_dict_preserves_none_xy_with_margin():
+    d = _move_to_dict(RapidMove(z=5.0), margin_mm=10.0)
+    assert d == {"kind": "rapid", "x": None, "y": None, "z": 5.0}
+
+
+def test_move_to_dict_preserves_none_y_with_front_flip():
+    d = _move_to_dict(
+        CutMove(x=100.0, z=-5.0, feed=900.0),
+        margin_mm=10.0,
+        sheet_height=800.0,
+        y_origin="front",
+    )
+    assert d == {"kind": "cut", "x": 110.0, "y": None, "z": -5.0, "feed": 900.0}
+
+
+def test_move_to_dict_non_xy_move_ignores_margin():
+    d = _move_to_dict(SetRpmMove(rpm=10000.0), margin_mm=10.0)
+    assert d == {"kind": "set_rpm", "rpm": 10000.0}
+
+
 def test_dict_to_move_comment_sparse():
     m = _dict_to_move({"kind": "comment", "text": "test"})
     assert isinstance(m, CommentMove)

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from cam.moves import Move, RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
-from cam.post.gcode import _apply_margin_offset
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from validation.removal_checks import check_working_area_bounds
@@ -51,39 +49,6 @@ children: []
         ast = parse_pml_yaml(pml)
         assert ast.sheet.working_width_mm == ast.sheet.width_mm
         assert ast.sheet.working_height_mm == ast.sheet.height_mm
-
-
-class TestMarginTransformGcode:
-    def test_margin_offset_applied_to_moves(self):
-        moves: list[Move] = [
-            RapidMove(x=100.0, y=200.0, z=5.0),
-            RapidMove(x=150.0, y=250.0, z=-5.0),
-        ]
-        margin = 10.0
-        offset_moves = _apply_margin_offset(moves, margin)
-
-        assert isinstance(offset_moves[0], RapidMove)
-        assert offset_moves[0].x == 110.0
-        assert offset_moves[0].y == 210.0
-        assert offset_moves[0].z == 5.0
-
-        assert isinstance(offset_moves[1], RapidMove)
-        assert offset_moves[1].x == 160.0
-        assert offset_moves[1].y == 260.0
-        assert offset_moves[1].z == -5.0
-
-    def test_zero_margin_no_offset(self):
-        moves: list[Move] = [RapidMove(x=100.0, y=200.0, z=5.0)]
-        offset_moves = _apply_margin_offset(moves, 0.0)
-        assert isinstance(offset_moves[0], RapidMove)
-        assert offset_moves[0].x == 100.0
-        assert offset_moves[0].y == 200.0
-
-    def test_none_coordinates_preserved(self):
-        moves: list[Move] = [SetRpmMove(rpm=10000)]
-        offset_moves = _apply_margin_offset(moves, 10.0)
-        assert isinstance(offset_moves[0], SetRpmMove)
-        assert offset_moves[0].rpm == 10000
 
 
 class TestResolverWorkingArea:

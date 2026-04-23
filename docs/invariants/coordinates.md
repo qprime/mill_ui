@@ -51,7 +51,7 @@ item_x = offset  # margin applied at export
 
 ### CS-14 Scope
 
-**CAM pipeline** (`cam/post/gcode.py`): Margin is applied at G-code export via `_apply_margin_offset()`. Internal coordinates (RemovalIntent, planner, passes) remain in working-area space. This is the canonical CS-14 path.
+**CAM pipeline** (`cam/post/gcode.py`): Margin (and optional Y-flip for `y_origin="front"`) is applied at G-code export while building the native-call dict in `_move_to_dict()`. Internal coordinates (RemovalIntent, planner, passes) remain in working-area space. This is the canonical CS-14 path.
 
 **Diagram/SVG pipeline** (`adapters/layoutast_to_ir.py`): The adapter converts working-area coordinates to sheet-space during DiagramIR generation, baking margin into shape positions (e.g. `sx = margin + cx`, `flip_y` includes margin offset). This is intentional — the DiagramIR represents physical sheet layout for blueprint rendering, so coordinates must be in sheet space. The margin transform happens once in the adapter rather than at final SVG export.
 

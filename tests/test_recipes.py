@@ -10,7 +10,6 @@ from typing import Any
 import pytest
 
 from cam.pipeline import PipelineResult, run_pipeline, write_pipeline_outputs
-from layout_ast.compositional import CompositionalLayoutAST, HeightfieldGen
 from pml import parse_pml
 from pml.revision_header import update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -27,32 +26,12 @@ def discover_recipe_pml_files() -> list[Path]:
     return sorted(pml_files)
 
 
-def _contains_heightfield(comp_ast: CompositionalLayoutAST) -> bool:
-    def _walk(node: Any) -> bool:
-        if isinstance(node, HeightfieldGen):
-            return True
-        if node is None:
-            return False
-        if hasattr(node, "children") and node.children:
-            for child in node.children:
-                if _walk(child):
-                    return True
-        return bool(hasattr(node, "child") and node.child is not None and _walk(node.child))
-
-    return _walk(comp_ast.root)
-
-
 def generate_outputs_from_pml(pml_path: Path) -> PipelineResult:
     with open(pml_path) as f:
         pml_source = f.read()
 
     try:
         comp_ast = parse_pml_yaml(pml_source)
-        if _contains_heightfield(comp_ast):
-            sys.stderr.write(
-                f"[HEIGHTFIELD] Golden metrics STUBBED for recipe {pml_path.parent.name}.\n"
-                "              Output is not pinned. Full implementation pending (see #3).\n"
-            )
         comp_ast = replace(comp_ast, source_dir=str(pml_path.parent.resolve()))
         asts = resolve_layout_multi(comp_ast)
     except ParseError:

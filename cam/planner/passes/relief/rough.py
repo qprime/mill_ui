@@ -12,6 +12,8 @@ from ir.removal_intent import HeightfieldToolAssignment
 from ..tools import ToolSelection
 from .bands import ToolSpec, compute_barriers
 from .common import load_surface, sample_barrier_at
+from .finish import _emit_finish_moves
+from .kernels import compute_center_z_ball
 
 if TYPE_CHECKING:
     from cam.config import Config
@@ -38,7 +40,7 @@ def _stepover_for(assignment: HeightfieldToolAssignment, tool: ToolSelection) ->
     return assignment.stepover_frac * tool.diameter
 
 
-def _emit_raster_moves(
+def _emit_rough_moves(
     feature: HeightfieldFeatureInput,
     tool: ToolSelection,
     assignment: HeightfieldToolAssignment,
@@ -118,34 +120,79 @@ def plan_heightfield_passes(
     safe_z = accumulator._safe_z
 
     for feature in heightfields:
-        surface, pixel_pitch_mm = load_surface(
-            image_path=feature.image_path,
-            width_mm=feature.width_mm,
-            height_mm=feature.height_mm,
-            depth_mm=feature.depth_mm,
-            z_top=feature.z_top,
-            white_is_high=feature.white_is_high,
+        _plan_one_heightfield(feature, accumulator=accumulator, tool_db=tool_db, safe_z=safe_z)
+
+
+def _resolve_tool(
+    assignment: HeightfieldToolAssignment, tool_db: Sequence[ToolSelection], feature_id: str
+) -> ToolSelection:
+    matching = [t for t in tool_db if t.name == assignment.tool_name]
+    if not matching:
+        raise ValueError(f"Heightfield '{feature_id}': tool {assignment.tool_name!r} not found in machine tool_db")
+    tool = matching[0]
+    if assignment.role == "finish" and tool.kind != "ball":
+        raise ValueError(
+            f"Heightfield '{feature_id}': finish role requires kind='ball' tool, got kind={tool.kind!r} "
+            f"for tool {assignment.tool_name!r}"
         )
+    return tool
 
-        resolved_tools: list[tuple[HeightfieldToolAssignment, ToolSelection]] = []
-        for assignment in feature.tools:
-            matching = [t for t in tool_db if t.name == assignment.tool_name]
-            if not matching:
-                raise ValueError(
-                    f"Heightfield '{feature.id}': tool {assignment.tool_name!r} not found in machine tool_db"
-                )
-            resolved_tools.append((assignment, matching[0]))
 
-        tool_specs = [ToolSpec(name=sel.name, diameter_mm=sel.diameter, kind=sel.kind) for _, sel in resolved_tools]
+def _plan_one_heightfield(
+    feature: HeightfieldFeatureInput,
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+    safe_z: float,
+) -> None:
+    surface, pixel_pitch_mm = load_surface(
+        image_path=feature.image_path,
+        width_mm=feature.width_mm,
+        height_mm=feature.height_mm,
+        depth_mm=feature.depth_mm,
+        z_top=feature.z_top,
+        white_is_high=feature.white_is_high,
+    )
+
+    resolved_tools: list[tuple[HeightfieldToolAssignment, ToolSelection]] = [
+        (a, _resolve_tool(a, tool_db, feature.id)) for a in feature.tools
+    ]
+
+    rough_pairs = [(a, t) for a, t in resolved_tools if a.role == "rough"]
+    finish_pairs = [(a, t) for a, t in resolved_tools if a.role == "finish"]
+
+    barriers: dict[str, np.ndarray] = {}
+    if rough_pairs:
+        tool_specs = [ToolSpec(name=t.name, diameter_mm=t.diameter, kind=t.kind) for _, t in rough_pairs]
         barriers = compute_barriers(surface, tool_specs, pixel_pitch_mm=pixel_pitch_mm)
 
-        resolved_tools.sort(key=lambda pair: -pair[1].diameter)
+    rough_pairs_sorted = sorted(rough_pairs, key=lambda pair: -pair[1].diameter)
+    for assignment, tool in rough_pairs_sorted:
+        barrier = _barrier_for_tool(barriers, assignment)
+        record = accumulator.get_record("heightfield-rough", tool)
+        moves = _emit_rough_moves(feature, tool, assignment, barrier, safe_z)
+        record.add_moves(moves, increment=1)
 
-        for assignment, tool in resolved_tools:
-            barrier = _barrier_for_tool(barriers, assignment)
-            record = accumulator.get_record("heightfield-rough", tool)
-            moves = _emit_raster_moves(feature, tool, assignment, barrier, safe_z)
-            record.add_moves(moves, increment=1)
+    if not finish_pairs:
+        return
+
+    finest_rough_barrier: np.ndarray | None = None
+    if rough_pairs:
+        finest_pair = min(rough_pairs, key=lambda pair: pair[1].diameter)
+        finest_rough_barrier = barriers[finest_pair[0].tool_name]
+
+    prev_safe_surface: np.ndarray | None = None
+    for assignment, tool in finish_pairs:
+        radius_mm = 0.5 * tool.diameter
+        safe_surface = compute_center_z_ball(surface, pixel_pitch_mm, radius_mm)
+        if finest_rough_barrier is not None:
+            safe_surface = np.maximum(safe_surface, finest_rough_barrier)
+        if prev_safe_surface is not None:
+            safe_surface = np.maximum(safe_surface, prev_safe_surface)
+        record = accumulator.get_record("heightfield-finish", tool)
+        moves = _emit_finish_moves(feature, tool, assignment, safe_surface, safe_z)
+        record.add_moves(moves, increment=1)
+        prev_safe_surface = safe_surface
 
 
 __all__ = ["plan_heightfield_passes"]

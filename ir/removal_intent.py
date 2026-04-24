@@ -196,19 +196,29 @@ class HeightfieldToolAssignment:
     role: str
     stepover_frac: float
     stepdown_mm: float | None = None
+    angle_deg: float | None = None
 
     def __post_init__(self) -> None:
-        if self.role not in ("rough",):
-            raise ValueError(
-                f"HeightfieldToolAssignment: role must be 'rough' (finish not yet implemented — see #3), "
-                f"got {self.role!r}"
-            )
+        from math import isfinite as _isfinite
+
+        if self.role not in ("rough", "finish"):
+            raise ValueError(f"HeightfieldToolAssignment: role must be 'rough' or 'finish', got {self.role!r}")
         if not self.tool_name:
             raise ValueError("HeightfieldToolAssignment: tool_name cannot be empty")
         if not (0.0 < self.stepover_frac <= 1.0):
             raise ValueError(f"HeightfieldToolAssignment: stepover_frac must be in (0, 1], got {self.stepover_frac}")
         if self.stepdown_mm is not None and self.stepdown_mm <= 0.0:
             raise ValueError(f"HeightfieldToolAssignment: stepdown_mm must be positive, got {self.stepdown_mm}")
+        if self.role == "finish" and self.stepdown_mm is not None:
+            raise ValueError("HeightfieldToolAssignment: stepdown_mm not valid for finish role (single-pass)")
+        if self.role == "rough" and self.angle_deg is not None:
+            raise ValueError("HeightfieldToolAssignment: angle_deg only valid for finish role")
+        if self.role == "finish" and self.angle_deg is None:
+            raise ValueError("HeightfieldToolAssignment: finish role requires angle_deg")
+        if self.angle_deg is not None and not _isfinite(self.angle_deg):
+            raise ValueError(f"HeightfieldToolAssignment: angle_deg must be finite, got {self.angle_deg}")
+        if self.angle_deg is not None and not (0.0 <= self.angle_deg < 180.0):
+            raise ValueError(f"HeightfieldToolAssignment: angle_deg must be in [0, 180), got {self.angle_deg}")
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -218,16 +228,23 @@ class HeightfieldToolAssignment:
         }
         if self.stepdown_mm is not None:
             result["stepdown_mm"] = self.stepdown_mm
+        if self.role == "finish":
+            result["angle_deg"] = self.angle_deg
         return result
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> HeightfieldToolAssignment:
         sd = data.get("stepdown_mm")
+        role = str(data["role"])
+        angle_raw = data.get("angle_deg")
+        if role == "finish" and angle_raw is None:
+            raise ValueError("HeightfieldToolAssignment.from_dict: finish role requires angle_deg")
         return cls(
             tool_name=str(data["tool_name"]),
-            role=str(data["role"]),
+            role=role,
             stepover_frac=float(data["stepover_frac"]),
             stepdown_mm=float(sd) if sd is not None else None,
+            angle_deg=float(angle_raw) if angle_raw is not None else None,
         )
 
 

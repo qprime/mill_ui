@@ -51,9 +51,61 @@ def test_heightfield_tool_assignment_valid():
     assert a.stepdown_mm == 2.0
 
 
-def test_heightfield_tool_assignment_rejects_finish():
-    with pytest.raises(ValueError, match="finish not yet implemented"):
-        HeightfieldToolAssignment(tool_name="1_4_ball", role="finish", stepover_frac=0.5, stepdown_mm=1.0)
+def test_heightfield_tool_assignment_finish_role_accepted():
+    a = HeightfieldToolAssignment(tool_name="1_4_ball", role="finish", stepover_frac=0.1, angle_deg=0.0)
+    assert a.role == "finish"
+    assert a.angle_deg == 0.0
+
+
+def test_heightfield_tool_assignment_rejects_unknown_role():
+    with pytest.raises(ValueError, match="must be 'rough' or 'finish'"):
+        HeightfieldToolAssignment(tool_name="t", role="semi", stepover_frac=0.5)
+
+
+def test_heightfield_tool_assignment_finish_requires_angle():
+    with pytest.raises(ValueError, match="finish role requires angle_deg"):
+        HeightfieldToolAssignment(tool_name="1_4_ball", role="finish", stepover_frac=0.1)
+
+
+def test_heightfield_tool_assignment_rough_rejects_angle():
+    with pytest.raises(ValueError, match="angle_deg only valid for finish"):
+        HeightfieldToolAssignment(tool_name="t", role="rough", stepover_frac=0.6, angle_deg=45.0)
+
+
+def test_heightfield_tool_assignment_finish_rejects_stepdown():
+    with pytest.raises(ValueError, match="stepdown_mm not valid for finish"):
+        HeightfieldToolAssignment(
+            tool_name="1_4_ball", role="finish", stepover_frac=0.1, stepdown_mm=0.5, angle_deg=0.0
+        )
+
+
+def test_heightfield_tool_assignment_angle_must_be_finite():
+    import math as _math
+
+    with pytest.raises(ValueError, match="angle_deg must be finite"):
+        HeightfieldToolAssignment(tool_name="t", role="finish", stepover_frac=0.1, angle_deg=_math.inf)
+    with pytest.raises(ValueError, match="angle_deg must be finite"):
+        HeightfieldToolAssignment(tool_name="t", role="finish", stepover_frac=0.1, angle_deg=_math.nan)
+
+
+def test_heightfield_tool_assignment_positional_construction_unchanged():
+    a = HeightfieldToolAssignment("6mm_flat", "rough", 0.6, 2.0)
+    assert a.tool_name == "6mm_flat"
+    assert a.stepdown_mm == 2.0
+    assert a.angle_deg is None
+
+
+def test_heightfield_tool_assignment_finish_to_dict_includes_angle():
+    a = HeightfieldToolAssignment(tool_name="1mm_ball", role="finish", stepover_frac=0.12, angle_deg=90.0)
+    d = a.to_dict()
+    assert d["angle_deg"] == 90.0
+    assert "stepdown_mm" not in d
+    assert HeightfieldToolAssignment.from_dict(d) == a
+
+
+def test_heightfield_tool_assignment_from_dict_finish_requires_angle():
+    with pytest.raises(ValueError, match="finish role requires angle_deg"):
+        HeightfieldToolAssignment.from_dict({"tool_name": "1mm_ball", "role": "finish", "stepover_frac": 0.12})
 
 
 def test_heightfield_tool_assignment_rejects_bad_stepover():
@@ -134,15 +186,88 @@ def test_pml_tools_list_parses(tmp_path: Path):
     assert intent.heightfield_tools[1].stepdown_mm == 1.0
 
 
-def test_pml_finish_role_rejected(tmp_path: Path):
+def test_pml_finish_role_accepted(tmp_path: Path):
+    _write_synthetic_png(tmp_path / "relief.png")
+    tools_block = """          tools:
+            - tool: 6mm_flat
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: 1mm_ball
+              role: finish
+              stepover: 12%
+              angle: 90"""
+    comp_ast = replace(parse_pml_yaml(_pml_with_tools("relief.png", tools_block)), source_dir=str(tmp_path))
+    flat = resolve_layout(comp_ast)
+    intents = ast_to_removal_intents(flat)
+    hf_intents = [i for i in intents if i.depth_profile.mode == "heightfield"]
+    assert len(hf_intents) == 1
+    intent = hf_intents[0]
+    assert len(intent.heightfield_tools) == 2
+    rough, finish = intent.heightfield_tools
+    assert rough.role == "rough"
+    assert finish.role == "finish"
+    assert finish.angle_deg == pytest.approx(90.0)
+    assert finish.stepdown_mm is None
+
+
+def test_pml_finish_rejects_stepdown(tmp_path: Path):
     _write_synthetic_png(tmp_path / "relief.png")
     tools_block = """          tools:
             - tool: 1mm_ball
               role: finish
-              stepover: 30%
+              stepover: 12%
+              angle: 0
               stepdown: 0.5mm"""
-    with pytest.raises(PMLParseError, match="finish role not yet implemented"):
+    with pytest.raises(PMLParseError, match="must not specify 'stepdown'"):
         parse_pml_yaml(_pml_with_tools("relief.png", tools_block))
+
+
+def test_pml_rough_rejects_angle(tmp_path: Path):
+    _write_synthetic_png(tmp_path / "relief.png")
+    tools_block = """          tools:
+            - tool: 6mm_flat
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+              angle: 45"""
+    with pytest.raises(PMLParseError, match=r"angle.*only valid on finish"):
+        parse_pml_yaml(_pml_with_tools("relief.png", tools_block))
+
+
+def test_pml_finish_angle_normalized_to_0_180(tmp_path: Path):
+    _write_synthetic_png(tmp_path / "relief.png")
+    tools_block = """          tools:
+            - tool: 6mm_flat
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: 1mm_ball
+              role: finish
+              stepover: 12%
+              angle: 270"""
+    comp_ast = replace(parse_pml_yaml(_pml_with_tools("relief.png", tools_block)), source_dir=str(tmp_path))
+    flat = resolve_layout(comp_ast)
+    intents = ast_to_removal_intents(flat)
+    finish = intents[0].heightfield_tools[1]
+    assert finish.angle_deg == pytest.approx(90.0)
+
+
+def test_pml_finish_omitted_angle_defaults_to_zero(tmp_path: Path):
+    _write_synthetic_png(tmp_path / "relief.png")
+    tools_block = """          tools:
+            - tool: 6mm_flat
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: 1mm_ball
+              role: finish
+              stepover: 12%"""
+    comp_ast = replace(parse_pml_yaml(_pml_with_tools("relief.png", tools_block)), source_dir=str(tmp_path))
+    flat = resolve_layout(comp_ast)
+    intents = ast_to_removal_intents(flat)
+    finish = intents[0].heightfield_tools[1]
+    assert finish.angle_deg == pytest.approx(0.0)
 
 
 def test_pml_missing_tools_list_resolves_but_skips_at_ir(tmp_path: Path):

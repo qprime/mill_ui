@@ -1,10 +1,8 @@
-# Heightfield Relief Carving (IR-Only Phase)
-
-**Status:** IR-only. G-code generation pending in issues #2 (rough) and #3 (finish).
+# Heightfield Relief Carving
 
 ## What a Heightfield Is
 
-A Heightfield encodes per-pixel Z displacement as a grayscale raster — bas-relief ready to machine. Unlike `pocket` or `engrave` (globally-defined Z), each pixel's brightness maps to a carving depth.
+A Heightfield encodes per-pixel Z displacement as a grayscale raster — bas-relief ready to machine. Each pixel's brightness maps to a carving depth.
 
 ## PML Syntax
 
@@ -14,13 +12,77 @@ A Heightfield encodes per-pixel Z displacement as a grayscale raster — bas-rel
     at: { x: 150mm, y: 150mm, width: 200mm, height: 200mm }
     children:
       - Heightfield:
-          image: input/relief_dome.png        # path relative to the PML file
-          size: { width: 128mm, height: 128mm }  # XY extent (required)
-          depth: 5mm                           # maximum carve depth (required)
-          white_is_high: true                  # default; true = white pixels stay highest
+          image: input/relief_dome.png
+          size: { width: 128mm, height: 128mm }
+          depth: 5mm
+          white_is_high: true
+          tools:
+            - tool: "1/4 upcut spiral"
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: "1/8 upcut spiral"
+              role: rough
+              stepover: 50%
+              stepdown: 1mm
+            - tool: "1/8 ball nose 2F"
+              role: finish
+              stepover: 12%
+              angle: 0
 ```
 
-`Heightfield` is placed at the parent shape's center (per PM-12 CENTER_COORDS). No `at:` on the child node — wrap in `Frame` or `AtPosition` for offset placement.
+`Heightfield` is placed at the parent shape's center (per PM-12 CENTER_COORDS).
+
+## Tools List
+
+Tools are ordered coarse→fine by role:
+
+| Field | Required | Applies to | Notes |
+|-------|----------|-----------|-------|
+| `tool` | yes | both | Name from machine tool_db |
+| `role` | yes | both | `rough` or `finish` |
+| `stepover` | yes | both | Percentage of tool diameter |
+| `stepdown` | yes | rough | Z-slice depth per pass; not valid on finish |
+| `angle` | yes | finish | Raster direction, degrees; normalized to `[0, 180)` |
+
+**Role rules:**
+- `rough` — flat, ball, or V-bit; Z-slice raster following morphological barrier stacking.
+- `finish` — **ball-end only**; single pass using spherical-cap dilation of the surface to compute a per-pixel no-gouge tool-center Z.
+
+## Finish-Pass Tuning
+
+Finish uses grayscale dilation of the surface with a spherical-cap kernel to compute the lowest safe tool-center Z at every pixel. The pass then sweeps scanlines at `angle`, sampling the dilated envelope at the nearest pixel. Nearest-neighbor sampling is deliberate: the safe-Z envelope is a maximum, so interpolating between pixels would drop below the true max and risk gouge. The toolpath resolution is therefore the image pixel pitch — pick `size`/`depth`/image resolution accordingly.
+
+Recommended starting points (MDF, 16-bit source):
+
+| Tool diameter | Stepover | Notes |
+|---------------|----------|-------|
+| 3mm ball | 10–15% | 0.3–0.45mm between scanlines |
+| 1.5mm ball | 8–12% | Fine detail, 0.12–0.18mm between scanlines |
+
+**Multi-angle finishing for directionality reduction:**
+
+```yaml
+- tool: "1/8 ball nose 2F"
+  role: finish
+  stepover: 12%
+  angle: 0
+- tool: "1/8 ball nose 2F"
+  role: finish
+  stepover: 12%
+  angle: 90
+```
+
+Duplicate tool names aren't allowed per feature today; use different tool names for two-angle passes (or run as separate heightfield features).
+
+## Rest-Material Floor
+
+The finish safe-surface is floored by:
+
+1. The finest rough tool's barrier — finish never cuts above material rough already cleared.
+2. The previous finish tool's safe-surface — a second (smaller) ball never revisits ground the first already covered.
+
+Both are applied automatically when both roles are present. No PML flag.
 
 ## Image Requirements (strict; loader rejects anything else)
 
@@ -32,38 +94,20 @@ A Heightfield encodes per-pixel Z displacement as a grayscale raster — bas-rel
 | Square pixels within ε=1e-4 | `width_mm / W_px` must equal `height_mm / H_px` |
 | File exists on disk | Path resolved relative to PML file |
 
-The loader reads the PNG IHDR chunk directly rather than relying on PIL's `mode` — PIL reports 16-bit PNGs as `mode='I'` (32-bit int container), which is ambiguous.
-
-## Image Pipeline
-
-mill_ui does not preprocess images. The external pipeline (e.g. gpt-image-2) is responsible for:
-
-1. Generating the relief as grayscale
-2. Converting to 16-bit precision
-3. Smoothing and mask flattening
-4. Honoring gpt-image-2 envelope constraints (long edge ≤ 3840, edges multiple of 16, aspect ≤ 3:1)
+The loader reads the PNG IHDR chunk directly rather than relying on PIL's `mode`.
 
 ## `white_is_high` Semantics
 
 - `true` (default): pure white (65535) stays at the top surface; pure black (0) carves to `depth`
 - `false`: inverted — black stays highest, white carves deepest
 
-## Pipeline Behavior
+## Known Limitations
 
-| Stage | Behavior |
-|-------|----------|
-| PML parser | Builds `HeightfieldGen` AST node |
-| Layout resolver | Resolves image path against `source_dir`; emits flat `Item(type="Heightfield", feature.type="heightfield", Geometry.data={image_path, white_is_high, w_mm, h_mm})` |
-| IR adapter | Emits `RemovalIntent` with `depth_profile.mode="heightfield"` carrying `image_path` + `white_is_high` |
-| Validation | Loads image (16-bit check, square-pixel check), verifies depth ≤ sheet thickness |
-| Planner input adapter | Filters out heightfield intents with a structured warning — no G-code planner yet |
-| Blueprint SVG | Base64 PNG embedded in `HEIGHTFIELD_OVERLAYS` layer with a dashed border |
-
-## Known Limitations (Phase 1)
-
-- No G-code output. Use a heightfield recipe for IR/validation/blueprint checks only.
-- `pixel_pitch_mm` is not stored on the IR (PL-8 NO_PASSTHROUGH_GEOMETRY). The planner (#2/#3) will derive it at consumption time from image dimensions and intent bounds.
-- Square-pixel tolerance ε = 1e-4 relative. Stricter than typical float epsilon; designed to catch user errors, not numeric noise.
+- **8-bit-sourced heightmaps show terracing.** The loader requires 16-bit; if your upstream pipeline outputs 8-bit and you convert without smoothing, the finish pass faithfully reproduces the terraces. Fix upstream.
+- **No adaptive stepover.** Fixed stepover throughout. Adaptive (denser on high-curvature regions) is a future optimization.
+- **Rotation angle is per-tool.** Crosshatch within a single tool is not supported — specify two tools at different angles instead.
+- **No cross-feature barrier cache.** Each heightfield feature recomputes its own surface and barriers.
+- **Flat-endmill finishing is not supported.** Finish requires a ball-end tool; flats have much higher gouge risk and use a different kernel.
 
 ## Common Loader Errors
 
@@ -73,7 +117,12 @@ mill_ui does not preprocess images. The external pipeline (e.g. gpt-image-2) is 
 | `Heightfield image must be single-channel grayscale, got color-type N` | Export as grayscale (PNG color-type 0), not RGB or indexed |
 | `Heightfield pixel aspect inconsistent` | Match PML `size` aspect to the image pixel aspect |
 | `Heightfield image not found` | Path is relative to the PML file; check `input/` subfolder convention |
+| `finish role requires kind='ball' tool` | Use a ball-nose endmill for finish entries |
 
-## Recipe Reference
+## Recipes
 
-See `docs/recipes/82_heightfield_ir_only/` for a minimal IR-only example with a committed 16-bit synthetic PNG.
+| Recipe | What it shows |
+|--------|---------------|
+| `82_heightfield_ir_only` | Minimal IR-only example (no toolpath) |
+| `83_heightfield_rough_synthetic` | Rough-only, two tools, morphological barrier stacking |
+| `85_heightfield_full_synthetic` | Full pipeline — two rough tools + ball-nose finish with rest-floor |

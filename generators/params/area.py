@@ -316,19 +316,23 @@ class HeightfieldToolEntryParams:
     role: str = "rough"
     stepover_frac: float = 0.6
     stepdown_mm: float | None = None
+    angle_deg: float | None = None
 
     def __post_init__(self) -> None:
         if not self.tool or not self.tool.strip():
             raise ValueError("HeightfieldToolEntryParams: tool name cannot be empty")
-        if self.role != "rough":
-            raise ValueError(
-                f"HeightfieldToolEntryParams: role must be 'rough' (finish not yet implemented — see #3), "
-                f"got {self.role!r}"
-            )
+        if self.role not in ("rough", "finish"):
+            raise ValueError(f"HeightfieldToolEntryParams: role must be 'rough' or 'finish', got {self.role!r}")
         if not (0.0 < self.stepover_frac <= 1.0):
             raise ValueError(f"HeightfieldToolEntryParams: stepover_frac must be in (0, 1], got {self.stepover_frac}")
         if self.stepdown_mm is not None and self.stepdown_mm <= 0:
             raise ValueError(f"HeightfieldToolEntryParams: stepdown_mm must be positive, got {self.stepdown_mm}")
+        if self.role == "finish" and self.stepdown_mm is not None:
+            raise ValueError("HeightfieldToolEntryParams: stepdown_mm not valid for finish role (single-pass)")
+        if self.role == "rough" and self.angle_deg is not None:
+            raise ValueError("HeightfieldToolEntryParams: angle_deg only valid for finish role")
+        if self.role == "finish" and self.angle_deg is None:
+            raise ValueError("HeightfieldToolEntryParams: finish role requires angle_deg")
 
 
 @dataclass(frozen=True)

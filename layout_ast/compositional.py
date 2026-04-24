@@ -317,6 +317,7 @@ class HeightfieldToolEntry:
     role: str = "rough"
     stepover_frac: float = 0.6
     stepdown_mm: float | None = None
+    angle_deg: float | None = None
 
 
 @dataclass(frozen=True)

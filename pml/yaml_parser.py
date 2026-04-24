@@ -115,15 +115,20 @@ def _safe_int(value: Any, field: str, path: str) -> int:
 
 
 def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry:
+    import math
+
     if not isinstance(entry, dict):
         raise PMLParseError(f"Heightfield tool entry must be a mapping, got {type(entry).__name__}", path)
     if "tool" not in entry:
         raise PMLParseError("Heightfield tool entry requires 'tool' (endmill name)", path)
     role = str(entry.get("role", "rough")).lower()
-    if role == "finish":
-        raise PMLParseError("Heightfield finish role not yet implemented — see #3", path)
-    if role != "rough":
-        raise PMLParseError(f"Heightfield tool role must be 'rough', got {role!r}", path)
+    if role not in ("rough", "finish"):
+        raise PMLParseError(f"Heightfield tool role must be 'rough' or 'finish', got {role!r}", path)
+    if role == "finish" and "stepover" not in entry:
+        raise PMLParseError(
+            "Heightfield finish entry requires explicit 'stepover' (no role-appropriate default)",
+            path,
+        )
     stepover_raw = entry.get("stepover", "60%")
     if isinstance(stepover_raw, str) and stepover_raw.strip().endswith("%"):
         stepover_frac = float(stepover_raw.strip().rstrip("%")) / 100.0
@@ -131,11 +136,26 @@ def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry
         stepover_frac = float(stepover_raw)
     stepdown_raw = entry.get("stepdown")
     stepdown_mm = parse_dimension(stepdown_raw) if stepdown_raw is not None else None
+    angle_raw = entry.get("angle")
+    angle_deg: float | None = None
+
+    if role == "finish":
+        if stepdown_mm is not None:
+            raise PMLParseError("Heightfield finish entry must not specify 'stepdown' (finish is single-pass)", path)
+        raw_angle = 0.0 if angle_raw is None else float(angle_raw)
+        if not math.isfinite(raw_angle):
+            raise PMLParseError(f"Heightfield finish 'angle' must be finite, got {raw_angle}", path)
+        angle_deg = raw_angle % 180.0
+    else:
+        if angle_raw is not None:
+            raise PMLParseError("Heightfield 'angle' only valid on finish entries", path)
+
     return HeightfieldToolEntry(
         tool=str(entry["tool"]),
         role=role,
         stepover_frac=stepover_frac,
         stepdown_mm=stepdown_mm,
+        angle_deg=angle_deg,
     )
 
 

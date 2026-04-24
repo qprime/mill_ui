@@ -178,9 +178,10 @@ def heightfield_hint_to_removal_intent(
     heightfield_tools = tuple(
         HeightfieldToolAssignment(
             tool_name=str(t["tool"]),
-            role=str(t.get("role", "rough")),
-            stepover_frac=float(t.get("stepover_frac", 0.6)),
+            role=str(t["role"]),
+            stepover_frac=float(t["stepover_frac"]),
             stepdown_mm=float(t["stepdown_mm"]) if t.get("stepdown_mm") is not None else None,
+            angle_deg=float(t["angle_deg"]) if t.get("angle_deg") is not None else None,
         )
         for t in tools_raw
     )

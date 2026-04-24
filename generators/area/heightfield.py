@@ -42,6 +42,7 @@ def heightfield_generator(
                 "role": t.role,
                 "stepover_frac": t.stepover_frac,
                 "stepdown_mm": t.stepdown_mm,
+                "angle_deg": t.angle_deg,
             }
             for t in params.tools
         ],

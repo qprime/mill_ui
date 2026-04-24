@@ -12,7 +12,11 @@ Draft a GitHub issue implementation specification for: $ARGUMENTS
 
 2. **Draft the spec** as a GitHub issue body using the section template below. Every section is required unless explicitly marked optional. Omit a section only if it genuinely does not apply (e.g., a pure deletion has no PML syntax).
 
-3. **Present the draft** to the user for review before creating the issue.
+3. **Check for a smaller change.** Before finalizing, ask: could a narrower scope — fewer files, fewer moving parts, less ceremony — achieve the same goal? If yes, redraft around that. Spec size should match change size. This is about scope, not about removing structure that serves invariants, type safety, or tests.
+
+4. **Self-review the draft.** Read it back as if you hadn't written it. Flag anything you're unsure about, anything that rests on an unverified assumption, and anything that sounds confident but isn't grounded in what you actually read. Surface those to the user with the draft.
+
+5. **Present the draft** to the user for review before creating the issue.
 
 ---
 
@@ -70,7 +74,7 @@ Which invariant files apply to this change. For each:
 - Whether this change complies or requires a documented exception
 
 ### Edge Cases
-For each parameter that can be None/omitted independently, document what happens when only some are provided. Specify the resolution rule explicitly (both-or-neither, default to X, error). Omit this section only if the feature has no independently-optional parameters.
+Scenarios worth calling out and the expected behavior. Cover what's actually at risk for this change — e.g. missing/None inputs where relevant, adjacent work having or not having landed, audit/analysis surfacing something unexpected, partial or conflicting state. For parameters that can be None/omitted independently, specify the resolution rule explicitly (both-or-neither, default to X, error).
 
 ### Testing Strategy
 Named test cases with expected behavior. Not "write tests" — specific test names and what they verify:
@@ -80,6 +84,8 @@ TestClassName:
     test_case_name — description of what it verifies and expected outcome
 ```
 
+Include at least one test whose failure would catch a plausible wrong implementation — not just one that passes when the code is correct.
+
 Include verification commands:
 ```bash
 python -m pytest tests/test_specific.py -x -v
@@ -87,7 +93,12 @@ python -m pytest tests/ -x
 ```
 
 ### What NOT to do
-Explicit anti-patterns and scope boundaries. Things that might seem like natural extensions but should not be done in this issue. Explain why for each.
+Anti-patterns and scope boundaries that aren't obvious from the positive rules above. Each bullet must earn its place by meeting at least one of:
+- Prevents a failure mode that actually happened in a prior issue/review
+- Non-obvious from the Design / Implementation sections (a reader would not infer it)
+- Draws a scope boundary against adjacent work (other open issues, sibling subsystems)
+
+If a bullet just restates a rule already given positively in Design or Implementation, cut it. Omit the whole section if nothing meets the bar.
 
 ### Files to Modify
 Master table of every file that will be created or modified:
@@ -112,7 +123,7 @@ Before presenting the draft, verify:
 - [ ] Function signatures match the actual codebase
 - [ ] Invariant IDs are real (check the invariant files)
 - [ ] No section is vague hand-waving — if you can't be specific, you haven't researched enough
-- [ ] The "What NOT to do" section has at least one entry
+- [ ] Every "What NOT to do" bullet meets the bar (prior failure, non-obvious, or scope boundary); no bullet restates a positive rule from Design/Implementation
 - [ ] Test cases have names, not just descriptions
 - [ ] Implementation table and "what doesn't change" section are mutually exclusive — no file appears in both
 - [ ] Every layer the data flows through has a row (or an explicit "no change needed because X") — check parser, formatter, resolver, adapter, planner, diagram, renderer, schema

@@ -50,3 +50,7 @@ Thumbs.db
 output/
 !docs/recipes/*/output/
 !docs/recipes/*/output/**
+
+# Claude Code local settings
+.claude/settings.json
+.claude/settings.local.json

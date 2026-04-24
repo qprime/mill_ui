@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from ir.removal_intent import EdgeFeatureSpec, EdgeTreatment, ShapeGeometry
+from ir.removal_intent import EdgeFeatureSpec, EdgeTreatment, HeightfieldToolAssignment, ShapeGeometry
 from layout_ast.layout import FeedsOverride, RestSpec
 
 
@@ -237,6 +237,32 @@ class DogboneInput:
 
 
 @dataclass(frozen=True)
+class HeightfieldFeatureInput:
+    id: str
+    center_xy_mm: tuple[float, float]
+    width_mm: float
+    height_mm: float
+    depth_mm: float
+    image_path: str
+    white_is_high: bool
+    tools: tuple[HeightfieldToolAssignment, ...]
+    z_top: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "center_xy_mm": self.center_xy_mm,
+            "width_mm": self.width_mm,
+            "height_mm": self.height_mm,
+            "depth_mm": self.depth_mm,
+            "image_path": self.image_path,
+            "white_is_high": self.white_is_high,
+            "z_top": self.z_top,
+            "tools": [t.to_dict() for t in self.tools],
+        }
+
+
+@dataclass(frozen=True)
 class EdgeFeatureInput:
     id: str
     shape: str
@@ -276,6 +302,7 @@ class PlannerInput:
     corner_cleanups: tuple[CornerCleanupInput, ...] = field(default_factory=tuple)
     dogbones: tuple[DogboneInput, ...] = field(default_factory=tuple)
     edge_features: tuple[EdgeFeatureInput, ...] = field(default_factory=tuple)
+    heightfields: tuple[HeightfieldFeatureInput, ...] = field(default_factory=tuple)
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
 
     def to_hints_dict(self) -> dict[str, Any]:

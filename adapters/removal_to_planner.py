@@ -10,6 +10,7 @@ from cam.planner.planner_input import (
     EdgeTreatmentInput,
     FeatureInput,
     GeometryInput,
+    HeightfieldFeatureInput,
     KeepoutInput,
     PlannerInput,
     TabsInput,
@@ -191,6 +192,26 @@ def _generate_dogbone_input(
     )
 
 
+def _intent_to_heightfield_feature_input(intent: RemovalIntent) -> HeightfieldFeatureInput:
+    cx, cy = intent.bounds.center
+    width = intent.bounds.width
+    height = intent.bounds.height
+    dp = intent.depth_profile
+    if dp.image_path is None:
+        raise ValueError(f"Heightfield intent '{intent.region_id}' missing image_path")
+    return HeightfieldFeatureInput(
+        id=intent.original_id if intent.original_id is not None else intent.region_id,
+        center_xy_mm=(cx, cy),
+        width_mm=width,
+        height_mm=height,
+        depth_mm=intent.depth_mm(),
+        image_path=dp.image_path,
+        white_is_high=dp.white_is_high,
+        tools=intent.heightfield_tools,
+        z_top=dp.z_top,
+    )
+
+
 def _intent_to_edge_feature_input(intent: RemovalIntent) -> EdgeFeatureInput:
     shape = intent.shape or ShapeType.RECT
     depth_mm = intent.depth_mm()
@@ -227,6 +248,7 @@ def removal_intents_to_planner_input(
     edge_features: list[EdgeFeatureInput] = []
     corner_cleanups: list[CornerCleanupInput] = []
     dogbones: list[DogboneInput] = []
+    heightfields: list[HeightfieldFeatureInput] = []
     all_keepouts: list[KeepoutInput] = []
     seen_keepouts: set[tuple[int, int, int, int]] = set()
 
@@ -237,7 +259,7 @@ def removal_intents_to_planner_input(
 
     for intent in intents:
         if intent.hint_type == FeatureType.HEIGHTFIELD:
-            _warn(f"Heightfield '{intent.region_id}': IR-only phase, no G-code planner yet — feature skipped")
+            heightfields.append(_intent_to_heightfield_feature_input(intent))
             continue
         for keepout in intent.constraints.keepouts:
             key = (
@@ -297,6 +319,7 @@ def removal_intents_to_planner_input(
         corner_cleanups=tuple(corner_cleanups),
         dogbones=tuple(dogbones),
         edge_features=tuple(edge_features),
+        heightfields=tuple(heightfields),
         keepouts=tuple(all_keepouts),
     )
 

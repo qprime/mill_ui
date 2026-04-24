@@ -36,6 +36,15 @@ def heightfield_generator(
         "h_mm": params.height_mm,
         "image_path": params.image_path,
         "white_is_high": params.white_is_high,
+        "tools": [
+            {
+                "tool": t.tool,
+                "role": t.role,
+                "stepover_frac": t.stepover_frac,
+                "stepdown_mm": t.stepdown_mm,
+            }
+            for t in params.tools
+        ],
     }
 
     item = Item(

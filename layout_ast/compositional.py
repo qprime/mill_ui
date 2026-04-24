@@ -312,12 +312,21 @@ class RadialSvgGen:
 
 
 @dataclass(frozen=True)
+class HeightfieldToolEntry:
+    tool: str
+    role: str = "rough"
+    stepover_frac: float = 0.6
+    stepdown_mm: float | None = None
+
+
+@dataclass(frozen=True)
 class HeightfieldGen:
     image_path: str
     width_mm: float
     height_mm: float
     depth_mm: float
     white_is_high: bool = True
+    tools: tuple[HeightfieldToolEntry, ...] = ()
 
 
 @dataclass(frozen=True)

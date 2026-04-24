@@ -23,6 +23,7 @@ from layout_ast.compositional import (
     Grid,
     GridLinesGen,
     HeightfieldGen,
+    HeightfieldToolEntry,
     HoleGridGen,
     Inset,
     InterfaceConfig,
@@ -111,6 +112,31 @@ def _safe_int(value: Any, field: str, path: str) -> int:
         return int(value)
     except (ValueError, TypeError) as e:
         raise PMLParseError(f"Invalid {field}: {e}", path) from e
+
+
+def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry:
+    if not isinstance(entry, dict):
+        raise PMLParseError(f"Heightfield tool entry must be a mapping, got {type(entry).__name__}", path)
+    if "tool" not in entry:
+        raise PMLParseError("Heightfield tool entry requires 'tool' (endmill name)", path)
+    role = str(entry.get("role", "rough")).lower()
+    if role == "finish":
+        raise PMLParseError("Heightfield finish role not yet implemented — see #3", path)
+    if role != "rough":
+        raise PMLParseError(f"Heightfield tool role must be 'rough', got {role!r}", path)
+    stepover_raw = entry.get("stepover", "60%")
+    if isinstance(stepover_raw, str) and stepover_raw.strip().endswith("%"):
+        stepover_frac = float(stepover_raw.strip().rstrip("%")) / 100.0
+    else:
+        stepover_frac = float(stepover_raw)
+    stepdown_raw = entry.get("stepdown")
+    stepdown_mm = parse_dimension(stepdown_raw) if stepdown_raw is not None else None
+    return HeightfieldToolEntry(
+        tool=str(entry["tool"]),
+        role=role,
+        stepover_frac=stepover_frac,
+        stepdown_mm=stepdown_mm,
+    )
 
 
 def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
@@ -782,12 +808,19 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         size_data = _require(node_data, "size", f"{path}.Heightfield")
         if not isinstance(size_data, dict) or "width" not in size_data or "height" not in size_data:
             raise PMLParseError("Heightfield 'size' must have 'width' and 'height' keys", path)
+        tools_raw = node_data.get("tools")
+        tools: tuple[HeightfieldToolEntry, ...] = ()
+        if tools_raw is not None:
+            if not isinstance(tools_raw, list) or not tools_raw:
+                raise PMLParseError("Heightfield 'tools' must be a non-empty list", path)
+            tools = tuple(_parse_heightfield_tool_entry(t, path) for t in tools_raw)
         return HeightfieldGen(
             image_path=_require(node_data, "image", f"{path}.Heightfield"),
             width_mm=parse_dimension(size_data["width"]),
             height_mm=parse_dimension(size_data["height"]),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Heightfield")),
             white_is_high=node_data.get("white_is_high", True),
+            tools=tools,
         )
 
     elif node_type == "Fluting":

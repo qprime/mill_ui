@@ -35,6 +35,7 @@ from .profile import (
     rect_shape,
     rounded_rect_shape,
 )
+from .relief.rough import plan_heightfield_passes
 from .summary import summarise_passes
 from .tools import (
     ToolSelection,
@@ -161,6 +162,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
     plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
     plan_dogbone_passes(planner_input.dogbones, accumulator=accumulator, tool_db=tool_db)
+    plan_heightfield_passes(planner_input.heightfields, accumulator=accumulator, tool_db=tool_db, config=config)
 
     plan_edge_feature_passes(planner_input.edge_features, accumulator=accumulator, tool_db=tool_db)
 

@@ -311,12 +311,34 @@ class RadialSvgParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class HeightfieldToolEntryParams:
+    tool: str
+    role: str = "rough"
+    stepover_frac: float = 0.6
+    stepdown_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if not self.tool or not self.tool.strip():
+            raise ValueError("HeightfieldToolEntryParams: tool name cannot be empty")
+        if self.role != "rough":
+            raise ValueError(
+                f"HeightfieldToolEntryParams: role must be 'rough' (finish not yet implemented — see #3), "
+                f"got {self.role!r}"
+            )
+        if not (0.0 < self.stepover_frac <= 1.0):
+            raise ValueError(f"HeightfieldToolEntryParams: stepover_frac must be in (0, 1], got {self.stepover_frac}")
+        if self.stepdown_mm is not None and self.stepdown_mm <= 0:
+            raise ValueError(f"HeightfieldToolEntryParams: stepdown_mm must be positive, got {self.stepdown_mm}")
+
+
+@dataclass(frozen=True)
 class HeightfieldParams(BaseParams):
     image_path: str
     width_mm: float
     height_mm: float
     depth_mm: float
     white_is_high: bool = True
+    tools: tuple[HeightfieldToolEntryParams, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.image_path or not self.image_path.strip():
@@ -337,6 +359,7 @@ __all__ = [
     "GridLinesParams",
     "GridParams",
     "HeightfieldParams",
+    "HeightfieldToolEntryParams",
     "HoleGridParams",
     "LinePatternParams",
     "MeasurementGridParams",

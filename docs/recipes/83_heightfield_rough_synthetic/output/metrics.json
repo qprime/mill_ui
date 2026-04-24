@@ -1,0 +1,53 @@
+{
+  "timing": {
+    "ir_ms": 0.05,
+    "hints_ms": 0.02,
+    "plan_ms": 151.54,
+    "gcode_ms": 193.45,
+    "svg_ms": 8.85,
+    "total_ms": 353.91
+  },
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 45961,
+    "rapid_moves": 1203,
+    "cut_moves": 44754,
+    "rapid_ratio": 0.026
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "heightfield-rough",
+        "tool_diameter_mm": 6.35,
+        "move_count": 4625
+      },
+      {
+        "name": "heightfield-rough",
+        "tool_diameter_mm": 3.175,
+        "move_count": 41336
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 1652807,
+    "total_lines": 45987,
+    "files": {
+      "heightfield-rough-6.35mm": {
+        "bytes": 163444,
+        "lines": 4638
+      },
+      "heightfield-rough-3.17mm": {
+        "bytes": 1489363,
+        "lines": 41349
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "timestamp": "2026-04-24T00:22:35.544261+00:00"
+}

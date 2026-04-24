@@ -18,6 +18,7 @@ from ir.removal_intent import (
     Constraints,
     DepthProfile,
     EdgeTreatment,
+    HeightfieldToolAssignment,
     Island,
     RemovalIntent,
     ShapeGeometry,
@@ -171,6 +172,19 @@ def heightfield_hint_to_removal_intent(
     white_is_high = bool(geometry["white_is_high"])
     depth_mm = float(hint.get(HintKeys.DEPTH_MM, 0.0))
 
+    tools_raw = geometry.get("tools") or ()
+    if not tools_raw:
+        raise ValueError(f"Heightfield hint {hint_id!r}: requires at least one tool entry")
+    heightfield_tools = tuple(
+        HeightfieldToolAssignment(
+            tool_name=str(t["tool"]),
+            role=str(t.get("role", "rough")),
+            stepover_frac=float(t.get("stepover_frac", 0.6)),
+            stepdown_mm=float(t["stepdown_mm"]) if t.get("stepdown_mm") is not None else None,
+        )
+        for t in tools_raw
+    )
+
     bounds = _geometry_to_bounds(shape, geometry, hint.get(HintKeys.CENTER_XY_MM))
 
     return RemovalIntent(
@@ -187,6 +201,7 @@ def heightfield_hint_to_removal_intent(
         original_id=hint_id,
         allowance=Allowance(),
         constraints=Constraints(),
+        heightfield_tools=heightfield_tools,
     )
 
 

@@ -47,6 +47,11 @@ children:
             height: 100mm
           depth: 4mm
           white_is_high: true
+          tools:
+            - tool: 1_4_flat
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
 """
 
 
@@ -116,7 +121,7 @@ def test_heightfield_intent_bounds_match_pml_size(tmp_path: Path):
     assert cy == pytest.approx(100.0)
 
 
-def test_heightfield_intent_ignored_by_planner_input(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_heightfield_intent_routes_to_planner_bucket(tmp_path: Path):
     from adapters.removal_to_planner import removal_intents_to_planner_input
 
     _write_synthetic_png(tmp_path / "relief.png")
@@ -124,11 +129,16 @@ def test_heightfield_intent_ignored_by_planner_input(tmp_path: Path, caplog: pyt
     flat = resolve_layout(comp_ast)
     intents = ast_to_removal_intents(flat)
 
-    warnings: list[str] = []
-    planner_input = removal_intents_to_planner_input(intents, warnings=warnings)
+    planner_input = removal_intents_to_planner_input(intents)
     assert planner_input.profiles == ()
     assert planner_input.pockets == ()
-    assert any("Heightfield" in w and "skipped" in w for w in warnings)
+    assert len(planner_input.heightfields) == 1
+    hf = planner_input.heightfields[0]
+    assert hf.width_mm == 100.0
+    assert hf.height_mm == 100.0
+    assert hf.depth_mm == 4.0
+    assert len(hf.tools) == 1
+    assert hf.tools[0].tool_name == "1_4_flat"
 
 
 def test_heightfield_blueprint_svg_embeds_image_and_border(tmp_path: Path):

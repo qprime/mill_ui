@@ -191,6 +191,47 @@ class DepthProfile:
 
 
 @dataclass(frozen=True)
+class HeightfieldToolAssignment:
+    tool_name: str
+    role: str
+    stepover_frac: float
+    stepdown_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.role not in ("rough",):
+            raise ValueError(
+                f"HeightfieldToolAssignment: role must be 'rough' (finish not yet implemented — see #3), "
+                f"got {self.role!r}"
+            )
+        if not self.tool_name:
+            raise ValueError("HeightfieldToolAssignment: tool_name cannot be empty")
+        if not (0.0 < self.stepover_frac <= 1.0):
+            raise ValueError(f"HeightfieldToolAssignment: stepover_frac must be in (0, 1], got {self.stepover_frac}")
+        if self.stepdown_mm is not None and self.stepdown_mm <= 0.0:
+            raise ValueError(f"HeightfieldToolAssignment: stepdown_mm must be positive, got {self.stepdown_mm}")
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "tool_name": self.tool_name,
+            "role": self.role,
+            "stepover_frac": self.stepover_frac,
+        }
+        if self.stepdown_mm is not None:
+            result["stepdown_mm"] = self.stepdown_mm
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> HeightfieldToolAssignment:
+        sd = data.get("stepdown_mm")
+        return cls(
+            tool_name=str(data["tool_name"]),
+            role=str(data["role"]),
+            stepover_frac=float(data["stepover_frac"]),
+            stepdown_mm=float(sd) if sd is not None else None,
+        )
+
+
+@dataclass(frozen=True)
 class Allowance:
     inside: float = 0.0
     outside: float = 0.0
@@ -262,6 +303,23 @@ class RemovalIntent:
     constraints: Constraints = field(default_factory=Constraints)
     feeds_override: FeedsOverride | None = None
     ramp_mm: float | None = None
+    heightfield_tools: tuple[HeightfieldToolAssignment, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        if self.depth_profile.mode == "heightfield" and not self.heightfield_tools:
+            raise ValueError(
+                f"RemovalIntent '{self.region_id}': heightfield mode requires at least one tool assignment"
+            )
+        if self.depth_profile.mode != "heightfield" and self.heightfield_tools:
+            raise ValueError(
+                f"RemovalIntent '{self.region_id}': heightfield_tools only valid for heightfield mode, "
+                f"got mode={self.depth_profile.mode!r}"
+            )
+        seen_names: set[str] = set()
+        for t in self.heightfield_tools:
+            if t.tool_name in seen_names:
+                raise ValueError(f"RemovalIntent '{self.region_id}': duplicate heightfield tool name {t.tool_name!r}")
+            seen_names.add(t.tool_name)
 
     def depth_mm(self) -> float:
         return self.depth_profile.depth_mm()
@@ -342,6 +400,8 @@ class RemovalIntent:
         self._serialize_feeds_override(result)
         if self.ramp_mm is not None:
             result["ramp_mm"] = self.ramp_mm
+        if self.heightfield_tools:
+            result["heightfield_tools"] = [t.to_dict() for t in self.heightfield_tools]
         return result
 
     def _serialize_shape_geometry(self, result: dict[str, Any]) -> None:
@@ -393,6 +453,7 @@ __all__ = [
     "DogboneSpec",
     "EdgeFeatureSpec",
     "EdgeTreatment",
+    "HeightfieldToolAssignment",
     "Island",
     "KeepoutRegion",
     "RemovalIntent",

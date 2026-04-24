@@ -66,6 +66,20 @@ def dim(value: float) -> str:
     return f"{value}mm"
 
 
+def _format_heightfield_tool_entry(entry: Any) -> dict[str, Any]:
+    result: dict[str, Any] = {"tool": entry.tool}
+    if entry.role != "rough":
+        result["role"] = entry.role
+    stepover_pct = round(entry.stepover_frac * 100)
+    if abs(stepover_pct - entry.stepover_frac * 100) < 1e-6:
+        result["stepover"] = f"{stepover_pct}%"
+    else:
+        result["stepover"] = entry.stepover_frac
+    if entry.stepdown_mm is not None:
+        result["stepdown"] = dim(entry.stepdown_mm)
+    return result
+
+
 def _format_dogbone(dogbone: Any) -> Any:
     if not isinstance(dogbone, DogboneSpec):
         return dogbone
@@ -434,6 +448,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         }
         if not node.white_is_high:
             result["white_is_high"] = False
+        if node.tools:
+            result["tools"] = [_format_heightfield_tool_entry(t) for t in node.tools]
         return {"Heightfield": result}
 
     elif isinstance(node, FlutingGen):

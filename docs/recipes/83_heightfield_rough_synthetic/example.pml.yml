@@ -17,14 +17,18 @@ children:
       height: 200mm
     children:
       - Heightfield:
-          image: input/relief_dome.png
+          image: input/synthetic_gradient.png
           size:
             width: 128mm
             height: 128mm
-          depth: 5mm
+          depth: 6mm
           white_is_high: true
           tools:
             - tool: "1/4 upcut spiral"
               role: rough
               stepover: 60%
               stepdown: 2mm
+            - tool: "1/8 upcut spiral"
+              role: rough
+              stepover: 50%
+              stepdown: 1mm

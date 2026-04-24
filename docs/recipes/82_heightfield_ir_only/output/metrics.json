@@ -1,27 +1,38 @@
 {
   "timing": {
     "ir_ms": 0.03,
-    "hints_ms": 0.08,
-    "plan_ms": 0.03,
-    "gcode_ms": 0.0,
-    "svg_ms": 7.11,
-    "total_ms": 7.25
+    "hints_ms": 0.02,
+    "plan_ms": 29.77,
+    "gcode_ms": 16.1,
+    "svg_ms": 0.27,
+    "total_ms": 46.18
   },
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 0,
-    "rapid_moves": 0,
-    "cut_moves": 0,
-    "rapid_ratio": 0
+    "total_moves": 4625,
+    "rapid_moves": 213,
+    "cut_moves": 4410,
+    "rapid_ratio": 0.046
   },
   "fidelity": {
-    "tool_changes": 0,
-    "passes": []
+    "tool_changes": 1,
+    "passes": [
+      {
+        "name": "heightfield-rough",
+        "tool_diameter_mm": 6.35,
+        "move_count": 4625
+      }
+    ]
   },
   "output_size": {
-    "total_bytes": 0,
-    "total_lines": 0,
-    "files": {}
+    "total_bytes": 163516,
+    "total_lines": 4638,
+    "files": {
+      "heightfield-rough-6.35mm": {
+        "bytes": 163516,
+        "lines": 4638
+      }
+    }
   },
-  "timestamp": "2026-04-23T14:55:09.365155+00:00"
+  "timestamp": "2026-04-24T00:21:25.109626+00:00"
 }

@@ -42,6 +42,7 @@ from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.params.area import (
     HeightfieldParams,
+    HeightfieldToolEntryParams,
     RadialLabelParams,
     RadialPocketParams,
     RadialSvgParams,
@@ -1627,12 +1628,22 @@ class LayoutResolver:
         if self.ast.source_dir and not os.path.isabs(image_path):
             image_path = os.path.join(self.ast.source_dir, image_path)
 
+        tool_entries = tuple(
+            HeightfieldToolEntryParams(
+                tool=t.tool,
+                role=t.role,
+                stepover_frac=t.stepover_frac,
+                stepdown_mm=t.stepdown_mm,
+            )
+            for t in node.tools
+        )
         generator_params = HeightfieldParams(
             image_path=image_path,
             width_mm=node.width_mm,
             height_mm=node.height_mm,
             depth_mm=node.depth_mm,
             white_is_high=node.white_is_high,
+            tools=tool_entries,
         )
 
         shape_id_prefix = self._next_shape_id("heightfield")

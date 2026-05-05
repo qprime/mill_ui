@@ -39,7 +39,6 @@ Read the invariant file that matches the files you are modifying:
 | `diagram_ir/*` | `docs/invariants/svg.md` |
 | `cli/*` | `docs/invariants/pipeline.md` |
 | `config/*` | `docs/invariants/coordinates.md` |
-| `mill_mcp/*` | `docs/invariants/pipeline.md` |
 | `machines/*` | `docs/invariants/defaults.md` |
 | `tools/*` | `docs/invariants/defaults.md` |
 | All geometry | `docs/invariants/coordinates.md` |

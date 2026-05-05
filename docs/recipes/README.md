@@ -49,10 +49,3 @@ Each recipe folder contains:
 ```bash
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 ```
-
-## MCP Access
-
-```
-get_docs(name="README", section="docs/recipes")           # This index
-get_docs(name="README", section="docs/recipes/21_simple_shaker_door")  # Specific recipe
-```

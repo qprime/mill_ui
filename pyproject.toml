@@ -30,7 +30,6 @@ omit = [
     "tests/*",
     ".venv/*",
     "build/*",
-    "mill_mcp/*",
 ]
 
 [tool.coverage.report]

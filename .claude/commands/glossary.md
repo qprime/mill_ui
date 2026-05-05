@@ -20,7 +20,6 @@ description: Look up mill_ui terminology, abbreviations, invariant ID prefixes, 
 | GN-n | Generator invariant n | Numbered axioms in `docs/invariants/generators.md` |
 | IR | Intermediate Representation | RemovalIntent semantic layer (`ir/`) |
 | JSON | JavaScript Object Notation | LayoutAST serialization format |
-| MCP | Model Context Protocol | IDE integration server (`mill_mcp/`) |
 | PDF | Portable Document Format | Blueprint export (`export/blueprint_pdf.py`) |
 | PL-n | Pipeline invariant n | Numbered axioms in `docs/invariants/pipeline.md` |
 | PML | Panel Machining Language | Declarative YAML layout language (`pml/`) |

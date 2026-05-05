@@ -199,7 +199,6 @@ mill_ui/
 ├── ir/                 # RemovalIntent IR
 ├── layout_ast/         # LayoutAST and CompositionalLayoutAST dataclasses
 ├── machines/           # Machine configs, endmill library, feed rates (YAML)
-├── mill_mcp/           # MCP server for IDE integration
 ├── nesting/            # Bin-packing algorithms (guillotine, maxrects)
 ├── pml/                # PML YAML parser and lifter
 ├── resolution/         # Compositional → Flat layout resolution
@@ -220,10 +219,10 @@ python -m tests.test_recipes
 ## Tests
 
 ```bash
-python -m pytest tests/ -x                     # Full suite
-python -m pytest tests/test_pml_yaml.py        # PML parser
-python -m pytest tests/test_ast_to_removal.py  # IR adapter
-python -m tests.test_recipes                   # Recipe verification
+pytest tests/ -x                     # Full suite
+pytest tests/test_pml_yaml.py        # PML parser
+pytest tests/test_ast_to_removal.py  # IR adapter
+python -m tests.test_recipes         # Recipe verification
 ```
 
 ## Building the Native Backend
@@ -249,3 +248,9 @@ cp build/native_cam/python/_native.*.so cam/native/
 | Validation plan | [docs/cam_validation_plan.md](docs/cam_validation_plan.md) |
 | Planner hint schema | [docs/dev_docs/planner_hint_schema.md](docs/dev_docs/planner_hint_schema.md) |
 | Common tasks | [docs/tasks.md](docs/tasks.md) |
+
+## License
+
+Copyright © 2026 Stephen S. Quinlan. All rights reserved.
+
+This repository is published for portfolio and review purposes. No license is granted to use, copy, modify, or distribute this code or its contents. If you're interested in using any part of this work, please get in touch.

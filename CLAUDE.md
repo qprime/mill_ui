@@ -61,6 +61,29 @@ python -m cli.generate_golden --all-recipes docs/recipes --update --force  # sna
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
+**Verification wrappers:** always invoke via the `tools/run_*.py` wrappers so the command passes the agent's allowed-command filters (no compound `source && ...` needed). Do not call `pytest`, `ruff`, `mypy`, or `pylint` directly.
+
+```bash
+# Unit tests (pytest + coverage)
+.venv/bin/python tools/run_tests.py                              # full suite
+.venv/bin/python tools/run_tests.py tests/test_foo.py -x -q      # single file, stop on first fail
+.venv/bin/python tools/run_tests.py -k finger_joint              # keyword filter
+
+# Lint / format (ruff, config in pyproject.toml)
+.venv/bin/python tools/run_ruff.py                               # lint repo
+.venv/bin/python tools/run_ruff.py --fix                         # lint + autofix
+.venv/bin/python tools/run_ruff.py --format --check              # verify formatting
+.venv/bin/python tools/run_ruff.py --format                      # apply formatting
+
+# Type check (mypy strict, config in pyproject.toml; runs in pre-commit)
+.venv/bin/python tools/run_mypy.py                               # type-check repo
+.venv/bin/python tools/run_mypy.py cam/ generators/              # specific packages
+
+# Duplicate-code audit (pylint duplicate-code only; run after refactors)
+.venv/bin/python tools/run_duplication.py                        # full repo, min 6 lines
+.venv/bin/python tools/run_duplication.py --min-lines 10         # looser threshold
+```
+
 The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:
 - `--project`: User workspace in `$MILL_UI_PROJECTS` (real manufacturing)
 - `--recipe`: Recipe directory in `docs/recipes/` (examples/documentation)
@@ -101,7 +124,6 @@ Check before implementing — these already exist:
 | SVG rendering | `diagram_render/render_svg.py` |
 | Machine configuration | `config/machine_loader.py` |
 | Layout resolution | `resolution/layout_resolver.py` |
-| MCP server | `mill_mcp/server.py` |
 | Radial pattern placement | `generators/area/radial_pocket.py`, `radial_tick.py`, `radial_label.py`, `radial_svg.py` |
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |

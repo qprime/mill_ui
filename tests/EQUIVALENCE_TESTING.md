@@ -111,7 +111,7 @@ The planner (`plan_passes`) calls these native functions:
 
 2. Rebuild the native extension:
    ```bash
-   cd /home/squinlan/cliff_ai
+   cd /path/to/mill_ui
    python3 setup.py build_ext --inplace
    # or
    pip install -e .

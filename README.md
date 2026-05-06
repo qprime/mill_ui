@@ -4,17 +4,28 @@ CAM system that turns declarative panel layouts into G-code for CNC routers. Des
 
 ## Why
 
-Most CAM workflows require manual toolpath setup in GUI software for every job. mill_ui replaces that with a declarative input language (PML) and a compiler-style pipeline that validates your design *before* generating toolpaths. The entire system is designed to be driven by natural language through an AI assistant — describe what you want to build, get PML, review the SVG blueprint, iterate, then cut.
+mill_ui is a CAM system architected from the ground up for AI-driven workflows. You describe what you want to build in natural language, an AI assistant generates PML, you review the SVG blueprint, iterate, then cut. The compiler-style pipeline and IR-level validation exist specifically to make AI-generated layouts safe to trust — every design is validated *before* any toolpath is generated, so errors surface as design problems rather than wrecked stock.
 
-## What It Does
+Most CAM software is built around a GUI for a human operator clicking through toolpath setup for every job. That workflow doesn't compose with AI assistants. mill_ui inverts the model: declarative input, explicit IRs, validation at each layer, and a reverse path from layout back to PML. The architecture is what makes it suitable as a platform — extensible in a way GUI-based CAM isn't.
 
-- **Declarative input** — PML (YAML) describes shapes, features, and layout. No manual toolpath editing.
-- **Compiler pipeline** — `PML → LayoutAST → RemovalIntent IR → CAM Planner → G-code`. Validates *what* to machine before deciding *how*.
+## Architecture
+
+These are the design decisions that distinguish mill_ui from conventional CAM software:
+
+- **Declarative input** — PML (YAML) describes shapes, features, and layout. No manual toolpath editing, no GUI clickthrough, no per-job procedural setup.
+- **Compiler pipeline** — `PML → LayoutAST → RemovalIntent IR → CAM Planner → G-code`. Explicit intermediate representations let each stage be validated and tested in isolation. A reverse path (`pml/lifter.py`) lifts LayoutAST back to PML, used by nesting output and format conversion.
+- **Validation before toolpaths** — IR-level checks (overlap, depth feasibility, toolability) catch errors against the *semantic* description of what to machine, before any G-code is generated. CAM artifact validation compares outputs against golden metrics for regression detection.
+- **Domain/Generator composition** — Machining features are built from two composable primitives: a *domain* (a bounded 2D region, with algebraic operations like inset, offset, subtract, intersect) and a *generator* (what to produce inside that region). New features arise from new combinations, not new special cases — which is what keeps the system extensible as the feature surface grows.
+
+## Capabilities
+
+- **Machining features** — profile (with tabs), pocket, surface facing, hole, engrave, bevel, chamfer, roundover, wave texture.
+- **Layout managers** — Frame, Grid, Split, Inset, Place, Panel, Keepout for relative positioning.
+- **Assembly system** — Boxes, cabinets, cubbies, and beam structures. Joinery (finger, half-lap, captured, butt) resolved automatically from panel interfaces. Multi-sheet partitioning when parts exceed a single sheet.
+- **Nesting** — Bin-pack parts across sheets with guillotine (~62% utilization) or maxrects (~83%) algorithms. Holding strategies (onion skin, tabs) and non-rectangular shapes supported.
 - **Blueprint export** — SVG and PDF blueprints with dimensions, generated alongside G-code.
-- **Assembly system** — Define boxes, cabinets, cubbies, and beam structures. Joinery (finger joints, dadoes, half-laps) is resolved automatically from panel interfaces. Multi-sheet partitioning when parts exceed a single sheet.
-- **Nesting** — Bin-pack parts across sheets with guillotine or maxrects algorithms. Supports holding strategies (onion skin, tabs) and non-rectangular shapes.
-- **Validation** — IR-level checks (overlap, depth feasibility, toolability) catch errors before G-code generation. CAM artifact validation compares outputs against golden metrics.
 - **Machine configuration** — YAML-based endmill library, feed rates, and per-machine profiles.
+- **Recipe test discipline** — 70+ worked examples with golden-metric validation provide regression coverage across the full feature surface.
 
 ## Quick Start
 
@@ -85,7 +96,7 @@ PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code + SVG
 
 `pml/lifter.py` provides the reverse path, lifting LayoutAST back to PML (used by nesting output and format conversion).
 
-## Features
+## Feature Reference
 
 ### Shapes
 
@@ -240,6 +251,7 @@ cp build/native_cam/python/_native.*.so cam/native/
 
 | Topic | Document |
 |-------|----------|
+| Project context & methodology | [ABOUT.md](ABOUT.md) |
 | System invariants | [docs/invariants/README.md](docs/invariants/README.md) |
 | Coordinate system | [docs/invariants/coordinates.md](docs/invariants/coordinates.md) |
 | PML syntax | [pml/syntax_spec.md](pml/syntax_spec.md) |

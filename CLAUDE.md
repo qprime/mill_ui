@@ -98,6 +98,16 @@ Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`, `--margin`, `--sheet`, `
 - Frozen dataclasses—use `replace()` to modify
 - Test at IR level, not CAM level
 
+## Coding Standards
+
+| Scope | Document |
+|-------|----------|
+| Universal Python patterns | [docs/python_guidelines.md](docs/python_guidelines.md) |
+| C++ (applies to `cam/native/cpp/`) | [docs/cpp_guidelines.md](docs/cpp_guidelines.md) |
+| Mill_ui-specific deltas | [docs/dev_docs/project_conventions.md](docs/dev_docs/project_conventions.md) |
+
+The language guidelines are universal; project_conventions.md documents the mill_ui-specific layer names, named protocols, and dispatch registries.
+
 ## Capabilities
 
 Check before implementing — these already exist:

@@ -127,5 +127,5 @@ Before presenting the draft, verify:
 - [ ] Test cases have names, not just descriptions
 - [ ] Implementation table and "what doesn't change" section are mutually exclusive — no file appears in both
 - [ ] Every layer the data flows through has a row (or an explicit "no change needed because X") — check parser, formatter, resolver, adapter, planner, diagram, renderer, schema
-- [ ] Import layering: for each proposed function placement, verify the caller can import from that module (check conventions.md import layering)
+- [ ] Import layering: for each proposed function placement, verify the caller can import from that module (check project_conventions.md import layering)
 - [ ] If the design follows an existing feature as analog, walk every file that analog touches and account for each

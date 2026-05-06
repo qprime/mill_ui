@@ -6,6 +6,23 @@ Load this document before modifying core system behavior.
 
 ---
 
+## What Invariants Are
+
+An invariant is a rule that, if violated, breaks the system's correctness guarantees. Invariants are not style preferences — they are load-bearing contracts.
+
+### Classification
+
+| Type | Meaning |
+|------|---------|
+| HARD | Violation breaks the system |
+| STRUCTURAL | Requires coordinated migration across multiple files to change |
+| POLICY | Current default, can change with care |
+| FALLBACK | Defensive behavior that signals an upstream bug |
+
+Invariant IDs in subsystem files (`CS-1`, `PL-2`, `DS-8`, etc.) carry one of these classifications. Before modifying a subsystem, read its invariant file and respect the classification.
+
+---
+
 ## Global Axioms
 
 These invariants affect everything. Violating any one breaks the system.
@@ -118,6 +135,18 @@ assert parse_pml(format_pml(ast1)) == ast1
 | Never allowed | Silent partial output | — |
 
 Error messages MUST include: what failed, what constraint was violated, actual vs expected. See [error_conventions.md](../dev_docs/error_conventions.md) for format details.
+
+---
+
+## Safety-Critical Constraints
+
+Some invariants protect against real-world harm — data loss, hardware damage, machined part rejected, tool collision. These get stricter treatment than ordinary invariants:
+
+- **Hard error on violation** — never warn-and-continue. Pipeline halts.
+- **Post-execution verification** — output is checked against the constraint, not just trusted from the generation logic. Belt and suspenders.
+- **Labeled in invariants** — the subsystem invariant file marks the safety level explicitly so future maintainers understand the stakes.
+
+Examples in this codebase: bounds containment (a removal intent outside the panel cuts the table), depth limits (cutting through clamps), tool/material compatibility, layer-collision checks in nested assemblies. When adding a new constraint, decide upfront whether it's safety-critical and label accordingly.
 
 ---
 

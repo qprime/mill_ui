@@ -14,7 +14,7 @@ Every audit run follows this sequence before generating any findings:
 
 1. **Load reference documents** (all three, every run):
    - `docs/invariants/README.md` — global axioms and subsystem index
-   - `docs/dev_docs/conventions.md` — established coding patterns
+   - `docs/dev_docs/project_conventions.md` — established coding patterns
    - `docs/dev_docs/audit_context.md` — prior findings, deferrals, dismissals
 
 2. **Determine scope** — see [Scoping Rules](#scoping-rules)
@@ -62,7 +62,7 @@ After scoping, note in the report how many files were audited vs skipped and why
 - Inconsistent terminology (especially within logical layers)
 - Patterns that confuse AI agents (AI hazards)
 
-**Conventions are the baseline.** Before flagging a pattern as inconsistent or recommending a change, check whether `docs/dev_docs/conventions.md` already documents the pattern. If the code matches a documented convention, it is correct — even if you would do it differently. If you observe an undocumented pattern that is consistent across the codebase, note it in the report as a potential convention to codify — do not treat it as a finding.
+**Conventions are the baseline.** Before flagging a pattern as inconsistent or recommending a change, check whether `docs/dev_docs/project_conventions.md` already documents the pattern. If the code matches a documented convention, it is correct — even if you would do it differently. If you observe an undocumented pattern that is consistent across the codebase, note it in the report as a potential convention to codify — do not treat it as a finding.
 
 ## Do
 
@@ -130,7 +130,7 @@ If yes to any: escalate from "Deferred" to "File These" and note it in the "Esca
 - observation — not recorded, just reported for context.
 
 ## Potential Conventions
-- Undocumented but consistent pattern observed: [description]. Consider codifying in conventions.md.
+- Undocumented but consistent pattern observed: [description]. Consider codifying in project_conventions.md.
 
 ## Proposed Audit Context Update
 [Present the exact edits to docs/dev_docs/audit_context.md for user approval.

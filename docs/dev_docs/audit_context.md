@@ -23,9 +23,9 @@ Format: `[area] description — first observed [date], commit [hash]. Reason for
 
 ### Dispatch Debt
 
-- **[pml/yaml_parser.py] `parse_node()` if/elif chain** — first observed 2026-04-02, commit 087504fd. 40+ node types in a single if/elif chain. Documented as known debt in conventions.md ("Not registry-based, known debt, deferred"). Not causing agent errors because conventions document it explicitly. Stable count: 1
+- **[pml/yaml_parser.py] `parse_node()` if/elif chain** — first observed 2026-04-02, commit 087504fd. 40+ node types in a single if/elif chain. Documented as known debt in project_conventions.md ("Not registry-based, known debt, deferred"). Not causing agent errors because conventions document it explicitly. Stable count: 1
 
-- **[cam/planner/passes] Shape-type dispatch if/elif chains** — first observed 2026-04-02, commit 087504fd. Profile planning dispatches on shape type via if/elif with `.lower()`. Documented as known debt in conventions.md. Stable count: 1
+- **[cam/planner/passes] Shape-type dispatch if/elif chains** — first observed 2026-04-02, commit 087504fd. Profile planning dispatches on shape type via if/elif with `.lower()`. Documented as known debt in project_conventions.md. Stable count: 1
 
 ### Duplication
 

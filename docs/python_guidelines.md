@@ -1,8 +1,24 @@
 # Python Coding Guidelines
 
-**Status:** Living Document
+**Status:** Standard | **Version:** 1.0 | **Scope:** all Python in QPrime / TenneCNC projects.
 
-Guidelines for writing consistent, correct, and maintainable Python code. Derived from production experience. Applicable to any Python project.
+Guidelines for writing consistent, correct, and maintainable Python code. Derived from production experience.
+
+---
+
+## Values
+
+These are the stances all rules below are derived from. When you encounter a case the rules don't address, return here.
+
+**Boring is a feature.** The reader's cognitive budget is finite. Code that uses two language features instead of seven, idiomatic patterns instead of clever ones, and explicit names instead of compressed ones is *better* even when it's longer. Default to the most boring construction that works. The test for whether something is appropriately boring: can the next reader understand what this does without leaving the file?
+
+**Failure modes are visible.** Errors don't get swallowed. Invalid states are unrepresentable when possible, validated at construction when not. A reader should answer "what happens when this goes wrong" by looking at the code, not by reading minds. Silent partial output is the worst possible failure mode in any system whose output drives downstream work.
+
+**Determinism is the default.** Same input must produce the same output. No hidden state, no randomness without explicit seeds, no dependence on dict ordering at runtime, no floating-point platform variance baked into outputs. Determinism is what makes golden-file testing meaningful and reproducible builds possible.
+
+**Defensive at boundaries, trusting inside.** Validate at system boundaries — user input, file parsing, API responses, FFI calls. Trust validated data internally. Re-validating in every internal function produces noise that hides the real defenses. Construction-time validation (§9) is the preferred way to convert "I should check this" into "the type system already did."
+
+**The type checker is your ally.** Make wrong code fail before it runs. Type hints on every public signature. Frozen dataclasses for data structures. Exhaustive union dispatch with a final `raise TypeError`. `Enum` for closed sets, `Literal` for inline constraints. `__post_init__` for construction-time validation. `mypy --strict` so the checker actually catches what the annotations promise. Each tool moves errors from runtime to authoring time; the value is to reach for them habitually, not after a bug demands them.
 
 ---
 
@@ -50,6 +66,41 @@ Use tuples instead of lists for collections that represent structural data. Tupl
 class Layout:
     items: tuple[Item, ...]        # not list[Item]
     boundaries: tuple[Point, ...]  # not list[Point]
+```
+
+### Field Ordering
+
+Dataclass fields follow a consistent order. This makes constructors predictable and avoids the `non-default argument follows default argument` error.
+
+1. **Required fields** (no default) — the essential identity of the object
+2. **Optional typed fields** (`field: Type | None = None`) — present or absent
+3. **Factory-default fields** (`field(default_factory=...)`) — complex defaults
+4. **Scalar defaults** (`field: Type = value`) — simple defaults
+
+```python
+@dataclass(frozen=True)
+class Feature:
+    # 1. Required
+    name: str
+    width_mm: float
+
+    # 2. Optional
+    description: str | None = None
+
+    # 3. Factory defaults
+    tags: tuple[str, ...] = field(default_factory=tuple)
+
+    # 4. Scalar defaults
+    enabled: bool = True
+```
+
+### `with_*()` Helpers
+
+When a frozen dataclass has a common mutation pattern, provide a named helper that wraps `replace()`. Keeps the call site readable and the boilerplate in one place.
+
+```python
+def with_tags(self, *new_tags: str) -> Feature:
+    return replace(self, tags=self.tags + new_tags)
 ```
 
 ---
@@ -105,10 +156,6 @@ def feature_to_backend_input(feature: Feature) -> BackendInput:
     return BackendInput(offset=offset)
 ```
 
-### Determinism
-
-Same input must always produce the same output. No hidden state, no randomness without explicit seeds, no dependency on dict ordering (before Python 3.7) or floating-point platform differences.
-
 ---
 
 ## 3. Function Purity
@@ -152,8 +199,12 @@ def split(region: Region) -> list[Region]:
 | Category | Behavior | Use When |
 |----------|----------|----------|
 | Hard error | Raise exception | Invalid input, constraint violation |
-| Soft failure | Return empty + flag | Optional operation, absence acceptable |
+| Soft failure | Return empty + flag, or raise `SkipError` (§18) | Optional operation, absence acceptable |
 | Never allowed | Silent partial output | — |
+
+`SkipError` (§18) is the canonical mechanism for the soft-failure row when the caller needs to distinguish "expected skip" from "actual bug." Use the empty + flag pattern only when no caller cares about the distinction.
+
+**Exceptions are not control flow.** Don't `try/except` to choose a code path that a conditional would express more clearly. Exceptions signal that something the caller didn't anticipate happened; routine branching uses `if`. The one exception (so to speak) is the expected-failure pattern in §18 — `SkipError` is a deliberate signal that an operation is impossible for valid inputs, and the layer above is expected to catch it. That's the whole rule, not the start of a list.
 
 ### Error Message Format
 
@@ -170,12 +221,6 @@ raise ValueError("invalid width")
 
 # Right
 raise ValueError("SheetConfig: width_mm must be > 0, got -3.5")
-```
-
-If the error maps to a documented invariant:
-
-```python
-raise ValueError("Joint at position 150mm aligns with adjacent layer (BM-9 violation)")
 ```
 
 ### No Silent Drops
@@ -393,57 +438,49 @@ class Box:
 
 Validate data at system boundaries: user input, file parsing, API responses, database reads. Internal code can trust validated data — don't re-validate at every function call.
 
+### Wrapper Types for Structural Preconditions
+
+Scalar preconditions (positive width, non-empty string) get enforced by `__post_init__` on the type that owns them. Structural preconditions (convex polygon, sorted range, non-empty buffer, monotonic sequence, oriented loop) deserve a *named wrapper type* — so that downstream functions can require the precondition by signature, not by docstring.
+
+The pattern: a frozen dataclass with `__post_init__` that rejects invalid inputs, plus a `try_from` classmethod that returns `None` instead of raising when the caller wants the soft-failure form.
+
+```python
+@dataclass(frozen=True)
+class ConvexPolygon:
+    points: tuple[Point, ...]
+
+    def __post_init__(self) -> None:
+        if not _is_convex(self.points):
+            raise ValueError(f"ConvexPolygon: points are not convex, got {len(self.points)} vertices")
+
+    @classmethod
+    def try_from(cls, points: tuple[Point, ...]) -> ConvexPolygon | None:
+        try:
+            return cls(points)
+        except ValueError:
+            return None
+
+
+def inset(poly: ConvexPolygon, offset: float) -> Polygon:
+    # signature proves the precondition; no defensive check needed inside
+    ...
+```
+
+Two things this buys you:
+1. The signature `inset(poly: ConvexPolygon, ...)` *proves* the precondition. A non-convex polygon cannot reach `inset` without going through the wrapper's check.
+2. The check happens *once*, at the boundary, not inside every algorithm that wants to assume the precondition.
+
+Use this pattern for: closed paths, non-self-intersecting curves, monotonic sequences, oriented loops with known winding, sorted ranges, non-empty containers, calibrated values, validated identifiers.
+
+When *not* to wrap: if the precondition is scalar and the type already owns it (e.g., `Box.width > 0` belongs on `Box`, not on a separate `PositiveWidth` wrapper). Wrap when the precondition is structural and the wrapped value is otherwise a generic collection or primitive that other code might pass unwrapped.
+
 ### Constraint Auditing
 
 When your system processes constraints or configuration, emit an audit summary showing what was honored, what was ignored, and what isn't implemented yet. This makes "it silently didn't work" impossible.
 
 ---
 
-## 10. Invariant Management
-
-### What Invariants Are
-
-An invariant is a rule that, if violated, breaks the system's correctness guarantees. Invariants are not style preferences — they are load-bearing contracts.
-
-### Classify Invariants
-
-| Type | Meaning |
-|------|---------|
-| HARD | Violation breaks the system |
-| STRUCTURAL | Requires coordinated migration across multiple files to change |
-| POLICY | Current default, can change with care |
-| FALLBACK | Defensive behavior that signals an upstream bug |
-
-### Document Invariants Per Subsystem
-
-Each subsystem should have a document listing its invariants with IDs, types, and descriptions. Before modifying a subsystem, read its invariants.
-
-### Amendment Process
-
-If a new feature needs to violate an invariant:
-
-1. **Stop** — do not work around it locally
-2. Determine if the invariant is wrong or the feature design is wrong
-3. If the invariant needs to change, amend the invariant document explicitly
-4. Code changes and invariant changes must be in the same commit
-
-Invariant violations are design bugs, not implementation bugs.
-
-### Regression Traps
-
-Document patterns that look like improvements but break the system. Common traps for AI-assisted development:
-
-| Trap | Why It's Wrong |
-|------|----------------|
-| Adding class hierarchies for variants | Flat type + data dict is intentionally extensible |
-| Shortcutting pipeline layers | The IR layer exists for validation, not bureaucracy |
-| Preserving syntax instead of semantics | Only AST equality matters in round-trips |
-| Mutating inputs for "efficiency" | Shared state corruption |
-| Threading computed data through semantic layers | Violates layer separation |
-
----
-
-## 11. Code Style
+## 10. Code Style
 
 ### Self-Documenting Code
 
@@ -474,7 +511,7 @@ Only change what's directly needed. A bug fix doesn't need surrounding code clea
 
 ---
 
-## 12. Output and Serialization
+## 11. Output and Serialization
 
 ### Deterministic Output
 
@@ -490,37 +527,7 @@ Output must always be valid according to its format specification. Malformed out
 
 ---
 
-## 13. Feature Completeness
-
-### End-to-End Coverage
-
-A feature isn't done when the implementation works. It's done when:
-
-1. The core logic is implemented
-2. The input format supports it (parser, schema, API)
-3. Validation covers it
-4. It's documented in the syntax/API reference
-5. An example or recipe demonstrates usage
-
-Partial implementation — logic without input support, or input support without validation — is tech debt that accumulates silently.
-
-### Declarative Input First
-
-If your system accepts user-facing input, the input format should be declarative — describing *what*, not *how*. If a feature requires users to write code (scripts, hooks, custom classes) to achieve something that should be expressible declaratively, the input format is incomplete.
-
----
-
-## 14. Safety-Critical Constraints
-
-When your system has constraints where violation causes real harm (data loss, hardware damage, security breach), those constraints get special treatment:
-
-- **Hard error on violation** — never warn-and-continue
-- **Post-execution verification** — check that the output respects the constraint, don't just trust the generation logic
-- **Labeled in invariants** — mark the safety level explicitly so future maintainers understand the stakes
-
----
-
-## 15. Dependency Direction
+## 12. Dependency Direction
 
 ### Imports Flow Downward
 
@@ -564,7 +571,7 @@ def feature_to_render_hint(feature: Feature) -> RenderHint:
 
 ---
 
-## 16. Enums vs String Literals
+## 13. Enums vs String Literals
 
 ### Closed Sets Use Enums
 
@@ -601,7 +608,7 @@ When the set of values is extensible without code changes (shape types in a flat
 
 ---
 
-## 17. Union Types and Exhaustiveness
+## 14. Union Types and Exhaustiveness
 
 ### Explicit Unions for Variant Types
 
@@ -616,15 +623,6 @@ FaceFeature = DrillHole | SquareMortise | CarvedDesign | GeometricPattern
 Match/if-else chains over union types must handle every variant. Adding a new variant to the union should cause visible failures, not silent fallthrough.
 
 ```python
-# Wrong — silent fallthrough on new variant
-def process(feature: FaceFeature) -> Output:
-    if isinstance(feature, DrillHole):
-        return process_hole(feature)
-    elif isinstance(feature, SquareMortise):
-        return process_mortise(feature)
-    # CarvedDesign silently returns None
-
-# Right — exhaustive with explicit failure
 def process(feature: FaceFeature) -> Output:
     if isinstance(feature, DrillHole):
         return process_hole(feature)
@@ -656,11 +654,15 @@ match feature:
 
 ---
 
-## 18. Logging and Diagnostics
+## 15. Logging and Diagnostics
 
-### print() Is for Debugging, Not Production
+### print() Is for CLI Output, Not Library Code
 
-`print()` is a temporary debugging tool. It should never appear in committed code. If you need runtime diagnostics, use the `logging` module.
+`print()` belongs in CLI entry points (`cli/`, `main()`, `if __name__ == "__main__":` blocks) and one-off scripts. It does not belong in library code, framework code, or anything imported by other modules. A function imported by other modules has no business deciding whether to write to stdout — that's the caller's job.
+
+The failure this rule prevents: a `print()` snuck into a deep helper for debugging, never removed, now spamming stdout every time the pipeline runs.
+
+If you need runtime diagnostics from library code, use the `logging` module.
 
 ```python
 # Wrong — print in production code
@@ -681,16 +683,6 @@ def process(items):
     return results
 ```
 
-### Why Logging Over Print
-
-| Concern | `print()` | `logging` |
-|---------|-----------|-----------|
-| Can be silenced | No (without redirecting stdout) | Yes (level filtering) |
-| Shows source location | No | Yes (formatter) |
-| Configurable per-module | No | Yes |
-| Can route to files, services | No (without plumbing) | Yes (handlers) |
-| Searchable in grep | Ambiguous (`print` is everywhere) | Clear (`logger.info`, `logger.warning`) |
-
 ### Level Discipline
 
 | Level | Use When |
@@ -705,7 +697,7 @@ Don't use `WARNING` for expected situations. Don't use `INFO` for per-item detai
 
 ---
 
-## 19. Exception Types
+## 16. Exception Types
 
 ### Standard Exception Hierarchy
 
@@ -752,7 +744,7 @@ The error message carries the specifics. The exception type carries the category
 
 ---
 
-## 20. Error Semantics by Layer
+## 17. Error Semantics by Layer
 
 ### Each Layer Has Its Own Failure Mode
 
@@ -800,7 +792,7 @@ Warning messages always include: item identity, the specific problem, and the ac
 
 ---
 
-## 21. Expected-Failure Exceptions
+## 18. Expected-Failure Exceptions
 
 ### The Skip Protocol
 
@@ -830,7 +822,7 @@ The layer above always catches `SkipError` and continues. It never propagates pa
 
 ---
 
-## 22. Dispatch Patterns
+## 19. Dispatch Patterns
 
 ### Registry Dict Over If/Elif
 
@@ -879,10 +871,6 @@ def handle_pocket(data):
     ...
 ```
 
-### When If/Elif Is Fine
-
-Short chains (2–3 branches) that are unlikely to grow don't need a registry. Don't over-engineer dispatch for simple cases. The registry pattern earns its keep at ~5+ branches or when new types are added regularly.
-
 ### Normalize Before Dispatch
 
 If your type tags come from external input with inconsistent casing, normalize at the dispatch entry point — not inside each handler.
@@ -895,7 +883,7 @@ def handle(feature_type: str, data):
 
 ---
 
-## 23. Function Signature Conventions
+## 20. Function Signature Conventions
 
 ### Frozen Params Objects
 
@@ -935,7 +923,7 @@ A function should take at most 3 positional parameters. Beyond that, use a param
 
 ---
 
-## 24. Naming Vocabulary
+## 21. Naming Vocabulary
 
 ### Consistent Verbs at Layer Boundaries
 
@@ -954,6 +942,18 @@ Use the same verb for the same operation across the codebase. When a new contrib
 | `render_*` | Emit visual/display output | `render_diagram`, `render_html` |
 | `expand_*` | Parameterized instantiation | `expand_template`, `expand_macro` |
 
+For predicates and constructor-style helpers:
+
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| `is_*` / `has_*` | Boolean predicates returning `bool` | `is_convex`, `has_through_cut` |
+| `try_from` / `try_*` | Constructor or operation that may fail; returns `T \| None` instead of raising | `ConvexPolygon.try_from`, `try_parse_dimension` |
+| `find_*` | Search that may not find; returns `T \| None` | `find_tool`, `find_intersection` |
+| `make_*` | Construct a value (factory function) | `make_default_config`, `make_tool_db` |
+| `get_*` | Accessor that cannot fail; precondition is the caller's responsibility | `get_bounds`, `get_active_tool` |
+
+The `try_from` idiom pairs with the wrapper-type pattern (§9): the wrapper's `__post_init__` raises, the `try_from` classmethod returns `None`, and callers pick the form that matches their failure semantics.
+
 ### Private Helper Prefixes
 
 Private helpers follow the same verb conventions with underscore prefix:
@@ -966,13 +966,9 @@ Private helpers follow the same verb conventions with underscore prefix:
 | `_collect_*` / `_count_*` | Aggregation helpers |
 | `_is_*` / `_has_*` | Boolean predicates |
 
-### Why This Matters
-
-Consistent naming eliminates guesswork. You don't search for "does it convert or transform or translate or map" — it's always `*_to_*`. You don't wonder "is it read or load or fetch" — it's always `load_*` for disk, `fetch_*` for network.
-
 ---
 
-## 25. Guard Clauses and Input Normalization
+## 22. Guard Clauses and Input Normalization
 
 ### Guard Clauses at Entry
 
@@ -1016,7 +1012,7 @@ Common normalizations:
 
 ---
 
-## 26. Collection Building
+## 23. Collection Building
 
 ### Explicit Loops Over Comprehensions
 
@@ -1064,7 +1060,7 @@ unique_items = tuple(seen.values())
 
 ---
 
-## 27. Serialization Completeness
+## 24. Serialization Completeness
 
 ### Serialize All Non-Private Fields
 
@@ -1098,7 +1094,7 @@ Formatters should emit only non-default fields for brevity. Parsers must accept 
 
 ---
 
-## 28. Nullable Numeric Parsing
+## 25. Nullable Numeric Parsing
 
 ### The `or` Trap
 
@@ -1115,25 +1111,11 @@ if width is None:
     width = default_width
 ```
 
-This applies to all parsed input (YAML, JSON, CLI args, database reads) where numeric fields may legitimately be zero.
-
-### Related: Empty String
-
-The same trap applies to string fields where empty string `""` is valid:
-
-```python
-# Wrong
-label = data.get("label") or "default"  # "" becomes "default"
-
-# Right
-label = data.get("label")
-if label is None:
-    label = "default"
-```
+This applies to all parsed input (YAML, JSON, CLI args, database reads) where numeric fields may legitimately be zero. The same trap applies to string fields where empty string `""` is valid — use the same `is None` pattern.
 
 ---
 
-## 29. Type System Conventions
+## 26. Type System Conventions
 
 ### Six Type Mechanisms
 
@@ -1148,76 +1130,13 @@ Python offers several ways to constrain types. Each has a specific use case — 
 | Pipe union (`A \| B`) | Sum types at module level | `Event = Click \| Hover \| Scroll` |
 | `@runtime_checkable Protocol` | Structural subtyping interfaces | `class Handler(Protocol): def handle(self) -> None: ...` |
 
-### Choosing Between Enum, Literal, and Constants
-
-- **Enum**: When you need the value to be a first-class object with identity, iteration, and membership testing (`if role in Role`). When adding a new variant requires a new code path.
-- **Literal**: When constraining a single field on a dataclass. Lighter than Enum — no import, no class. Best for 2–4 values that won't grow.
-- **Constants class**: When string values are used as dict keys for dispatch or lookup. Constants are just strings with names — they don't create a type, but they prevent typos and enable IDE navigation.
-
 ### Protocol Over ABC
 
-When defining an interface, prefer `@runtime_checkable Protocol` over `ABC`. Protocols use structural subtyping — any class with the right methods satisfies the protocol without inheriting from it. This is more Pythonic and avoids coupling through inheritance.
-
-```python
-# Prefer — structural subtyping
-@runtime_checkable
-class Handler(Protocol):
-    def handle(self, event: Event) -> Result: ...
-
-# Avoid (unless you need shared implementation) — nominal subtyping
-class Handler(ABC):
-    @abstractmethod
-    def handle(self, event: Event) -> Result: ...
-```
+When defining an interface, prefer `@runtime_checkable Protocol` over `ABC`. Protocols use structural subtyping — any class with the right methods satisfies the protocol without inheriting from it. Use ABC only when shared implementation is genuinely needed.
 
 ---
 
-## 30. Dataclass Field Ordering
-
-### Strict Field Order
-
-Dataclass fields follow a consistent ordering convention. This makes constructors predictable and prevents `TypeError` from fields-without-defaults preceding fields-with-defaults.
-
-1. **Required fields** (no default) — the essential identity of the object
-2. **Optional typed fields** (`field: Type | None = None`) — present or absent
-3. **Factory-default fields** (`field(default_factory=...)`) — complex defaults
-4. **Scalar defaults** (`field: Type = value`) — simple defaults
-
-```python
-@dataclass(frozen=True)
-class Feature:
-    # 1. Required
-    name: str
-    width_mm: float
-    height_mm: float
-
-    # 2. Optional
-    description: str | None = None
-    parent_id: str | None = None
-
-    # 3. Factory defaults
-    tags: tuple[str, ...] = field(default_factory=tuple)
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-    # 4. Scalar defaults
-    depth_mm: float = 1.0
-    enabled: bool = True
-```
-
-### `with_*()` Helpers
-
-When a frozen dataclass needs a common mutation pattern, provide a named helper that wraps `replace()`:
-
-```python
-def with_tags(self, *new_tags: str) -> Feature:
-    return replace(self, tags=self.tags + new_tags)
-```
-
-This makes the call site readable and keeps the `replace()` boilerplate in one place.
-
----
-
-## 31. The Amendment Culture
+## 27. The Amendment Culture
 
 These guidelines are not immutable. But they can't be ignored, either. The process for change:
 
@@ -1226,4 +1145,91 @@ These guidelines are not immutable. But they can't be ignored, either. The proce
 3. If the guideline needs to change, change it explicitly with rationale
 4. Never work around a guideline locally — that creates invisible technical debt
 
-The goal is a codebase where every rule is either followed or explicitly amended. The worst state is a rule that exists on paper but is routinely ignored — that's worse than having no rule at all.
+---
+
+## Tooling Commitments
+
+A standard that doesn't say what the build refuses leaves the most consequential decisions implicit. These are the QPrime defaults.
+
+**Enforcement is required.** Every project has an automated gate that, at minimum, runs the linter, the type checker, the formatter, and the test suite. A change that doesn't pass the gate doesn't merge.
+
+The QPrime mechanism is **pre-commit hooks** — checks colocate with the code, which lets both the human and AI collaborators run, diagnose, and fix them in a tight loop. CI is appropriate when a project grows beyond solo work; until then it's overhead without payoff.
+
+**Linting:** `ruff` with project-level configuration in `pyproject.toml`. The QPrime baseline enables `E`, `F`, `W` (pycodestyle/pyflakes), `I` (isort), `B` (bugbear), `UP` (pyupgrade), and `SIM` (simplify). Disabling a specific rule requires a comment explaining why, in either `pyproject.toml` or a `# noqa: <code>` at the call site.
+
+**Formatting:** `ruff format` with the project-level config. Decided once per project and not relitigated. The QPrime starter is line length 100, double quotes, and the default ruff style otherwise; deviations are project choices.
+
+**Type checking:** `mypy` in strict mode. New projects start strict. Selective relaxations (`# type: ignore[code]` with the specific code, never bare `# type: ignore`) are permitted at boundaries with untyped third-party libraries. Type-check findings block merge.
+
+**Testing:** `pytest`. Tests live in `tests/` parallel to the source tree. Coverage is measured but not gated on a percentage — the standards in §6 cover what to test and what not to test, which is more meaningful than a coverage number.
+
+**Python version:** projects target a specific Python version (3.12+ for new work) stated in `pyproject.toml`. Reaching for a Python 3.13 feature on a 3.12 project is a bug, not a clever optimization.
+
+**What's per-project, not QPrime-level:**
+- Specific ruff rule disables beyond the baseline
+- Line length (100 is a default, not a mandate)
+- Test framework choice (pytest is default; alternatives permitted with reason)
+- Build/packaging tool (`uv`, `poetry`, plain `pip` + `pyproject.toml`)
+- Dependency management policy (lockfile, version pinning, etc.)
+
+These are listed not because they don't matter, but because they're decisions where reasonable projects differ. The QPrime standard names the dimensions; the project picks the values.
+
+---
+
+## FFI Conventions
+
+The boundary between languages is where each language's conventions disagree most. AI generation defaults to applying each language's local conventions, which produces a seam that doesn't survive the trip. These rules apply identically on both sides of the FFI.
+
+**Names cross unchanged.** A function called `parse_layout` in Python pairs with `parse_layout` in C++. No `parseLayout`, no `_parse_layout_impl` on the C++ side that's only called from Python. The Naming Vocabulary (§21) applies to both languages.
+
+**Validation is the calling side's job.** The caller validates inputs before crossing the boundary. The called side may assert preconditions cheaply but does not re-validate as a defensive measure. This matches the "defensive at boundaries, trusting inside" value: the FFI boundary is the boundary, not every function on the called side.
+
+**Errors translate at the boundary, not in flight.** C++ exceptions become Python exceptions exactly once, at the pybind11 (or equivalent) layer. Python code does not wrap pybind11-translated exceptions in additional layers — the original type and message are preserved. C++ code does not catch exceptions to translate them mid-stack.
+
+**Absence maps to absence.** `Optional[T]` (or `T | None`) ↔ `std::optional<T>`. `None` ↔ `std::nullopt`. NaN does not appear in either direction; empty collections do not signal failure. When a value is genuinely optional, both sides see it as optional.
+
+**Units survive the trip.** If C++ takes millimeters, Python passes millimeters. If C++ takes seconds, Python passes seconds. Conversion happens at the *outer* boundary (user input, file parsing, §7) and never at the FFI seam — converting at the FFI is a category error that produces double-conversion bugs the moment a caller is added.
+
+**Ownership is explicit.** Objects passed across the FFI by value are copied; objects passed by reference are non-owning views with documented lifetime. Python does not pass mutable objects expecting C++ to retain them past the call. C++ does not return raw pointers to Python; ownership transfers via `std::unique_ptr` (which pybind11 wraps) or by-value copy.
+
+**The IR is the contract.** When the two languages share data structures (move IRs, parsed layouts, plan output), there is exactly one schema, defined in one place, and both sides agree on it. A change to the shared schema is a versioned change requiring both sides and the goldens to move together.
+
+---
+
+## What This Convention Deliberately Does Not Require
+
+- **No naming bikeshed.** `snake_case` for functions and variables, `PascalCase` for types, `SCREAMING_SNAKE_CASE` for module-level constants. PEP 8 is the default; don't relitigate it.
+- **No docstring quotas.** Docstrings are reserved for public API surface, non-obvious algorithms, and load-bearing assumptions a reader couldn't infer from the code. Don't write docstrings on every internal helper. Don't write docstrings that restate the function signature.
+- **No metaclass tricks.** Metaclasses, `__init_subclass__`, dynamic class generation — none of these appear unless the code already has at least two concrete cases that justify the abstraction, and the alternative is genuinely worse. The first instance is a function; the second instance is when you decide whether it's a pattern.
+- **No `__getattr__` magic.** Dynamic attribute access for things that could be explicit methods or dictionary lookups makes the code untraceable by IDE and reader. Use it only for genuine proxy/forwarding patterns at module boundaries.
+- **No decorator stacks more than two deep.** A decorator can replace a function; two decorators can compose; three or more is a sign that the wrapping is doing work that should be a real function call.
+- **No premature `Generic[T]`.** Generic type variables are appropriate when the code genuinely operates on multiple types with the same logic. They are not appropriate when the code has one concrete type and "might" need others — wait until the second type exists.
+- **No monkey-patching.** Don't reach into another module's namespace to replace its functions or classes. If you need different behavior, pass it in or wrap it explicitly.
+- **No exotic Python.** Walrus operators in obscure positions, structural pattern matching for things that are obviously dict lookups, descriptor protocol for things that are obviously properties — when the boring construction works, use the boring construction.
+
+---
+
+## Adoption
+
+For a new codebase: everything applies immediately.
+
+For an existing codebase: the rules represent a target state, not a flag-day requirement. Work toward them as files are touched. Suggested order:
+
+1. **Tooling first** — turn on the pre-commit gate (ruff, mypy strict, formatter), fix the resulting findings file by file. Mechanical; catches a category of issues before any rule-by-rule work.
+2. **Validation at construction** (§9) — frozen dataclasses with `__post_init__` checks. Adds protection at the type level without requiring caller changes.
+3. **Error message format and exception types** (§4, §16) — mechanical pass through error sites.
+4. **Union exhaustiveness** (§14) — adding the final `else: raise TypeError(...)` is one-line per dispatch site and immediately catches missing variants.
+5. **Naming vocabulary** (§21) — done as files are renamed or new functions are added; not worth a flag-day rename pass.
+6. **Layer separation, dependency direction** (§2, §12) — the deepest changes; do these as features or refactors create the opportunity.
+
+Trying to adopt all of it at once on a mature codebase produces a wall of findings nobody triages. The discipline is to land each tier deliberately and let the goldens (or your equivalent regression baseline) confirm the changes are refactors.
+
+---
+
+## Why This Convention Exists
+
+Python is a language that lets you write almost anything. That's its strength as a research and prototyping tool, and a liability when the same code is asked to drive production systems. Without explicit discipline, a Python codebase reflects the union of every contributor's habits: mixed mutation patterns, ad-hoc error handling, undocumented coordinate spaces, silently dropped fields in serializers, drifting naming conventions.
+
+This convention is the discipline. It's grounded in real patterns of weakness rather than abstract preferences. The values let the rules generalize beyond their stated cases. The rules let the values be checked at review time. The tooling section makes the build itself enforce what the values say should be enforced.
+
+The test for whether the standard is working: an AI session writing new code under it produces code that looks like the rules without anyone having to invoke them by name.

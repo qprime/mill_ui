@@ -54,3 +54,6 @@ output/
 # Claude Code local settings
 .claude/settings.json
 .claude/settings.local.json
+
+# Local project workspace symlink (points outside the repo)
+/projects

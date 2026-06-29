@@ -17,7 +17,7 @@ When an AI generates PML, the human reviewer cannot verify the resulting toolpat
 The codebase enforces design discipline through documents and tooling rather than per-line code review:
 
 - **Invariants** ([docs/invariants/](docs/invariants/)) — Subsystem-level axioms that any change must respect. Loaded via the `/check-invariants` skill before edits.
-- **Skills** ([.claude/skills/](.claude/skills/)) — Encoded workflows for review, debugging, extension, snapshot regeneration, and architectural audit. The skills define *how* the system is changed, not just *what*.
+- **Skills** ([.claude/commands/](.claude/commands/)) — Encoded workflows for review, debugging, extension, snapshot regeneration, and architectural audit. The skills define *how* the system is changed, not just *what*.
 - **Recipe tests** — 70+ worked examples with golden metrics. Regressions surface as concrete diffs against known-good output, not as unit-test failures with vague messages.
 - **PML-first principle** — Every machining capability must be expressible declaratively. Python-level generators without PML syntax are considered incomplete.
 

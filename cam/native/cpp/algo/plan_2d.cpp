@@ -4,13 +4,38 @@
 #include <cmath>
 #include <numbers>
 #include <optional>
+#include <span>
 #include <sstream>
+#include <vector>
 
 namespace millui::native::algo {
 
 namespace {
 
 constexpr double kEps = 1e-9;
+constexpr double kDefaultToolDiameterMm = 3.0;
+constexpr double kDefaultStepDownCapMm = 3.0;
+constexpr double kMinStepOverMm = 0.1;
+constexpr double kDefaultPeckMm = 3.0;
+constexpr double kDefaultRetractClearanceMm = 2.0;
+constexpr double kProfileDefaultStepDownMm = 2.0;
+constexpr double kBoreDefaultToolDiameterMm = 1.0;
+constexpr double kBoreDefaultStepDownMm = 2.5;
+constexpr int kHelixSegments = 60;
+
+std::vector<double> build_z_levels(double depth, double step_down) {
+  std::vector<double> z_levels;
+  double z = 0.0;
+  while (z > depth + kEps) {
+    double z_next = std::max(depth, z - step_down);
+    z_levels.push_back(z_next);
+    z = z_next;
+    if (std::abs(z - depth) < kEps) {
+      break;
+    }
+  }
+  return z_levels;
+}
 
 std::string fmt3(double v) {
   std::ostringstream oss;
@@ -72,12 +97,12 @@ double seg_length(const Vec2& a, const Vec2& b) {
   return std::hypot(b.x - a.x, b.y - a.y);
 }
 
-void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
+void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path,
                          double prev_z, double target_z,
                          double ramp_angle_deg, double safe_z,
                          double feed_xy, double feed_z,
                          bool keepdown = false) {
-  if (path_len == 0) return;
+  if (path.empty()) return;
 
   double step_down = std::abs(target_z - prev_z);
   double ramp_dist = 0.0;
@@ -85,16 +110,16 @@ void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
     ramp_dist = step_down / std::tan(ramp_angle_deg * std::numbers::pi / 180.0);
   }
 
-  const Vec2& end_point = path[path_len - 1];
+  const Vec2& end_point = path.back();
 
-  if (ramp_dist < kEps || path_len < 2) {
+  if (ramp_dist < kEps || path.size() < 2) {
     moves.push_back(make_rapid(end_point.x, end_point.y, safe_z));
     moves.push_back(make_cut(std::nullopt, std::nullopt, target_z, feed_z));
     return;
   }
 
   double avail = 0.0;
-  for (size_t i = 0; i + 1 < path_len; ++i) {
+  for (size_t i = 0; i + 1 < path.size(); ++i) {
     avail += seg_length(path[i], path[i + 1]);
   }
 
@@ -115,7 +140,7 @@ void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
 
   double remaining = ramp_dist;
   double z = prev_z;
-  for (size_t i = 0; i + 1 < path_len && remaining > kEps; ++i) {
+  for (size_t i = 0; i + 1 < path.size() && remaining > kEps; ++i) {
     double sl = seg_length(path[i], path[i + 1]);
     if (sl < kEps) continue;
     double use = std::min(sl, remaining);
@@ -246,6 +271,27 @@ Polygon inset_convex(const Polygon& poly, double offset) {
   return result;
 }
 
+class ConvexPolygon {
+ public:
+  static std::optional<ConvexPolygon> try_from(const Polygon& poly) {
+    Polygon p = ensure_cw(strip_closing_vertex(poly));
+    if (!is_convex(p)) {
+      return std::nullopt;
+    }
+    return ConvexPolygon(std::move(p));
+  }
+
+  const Polygon& points() const { return points_; }
+
+ private:
+  explicit ConvexPolygon(Polygon points) : points_(std::move(points)) {}
+  Polygon points_;
+};
+
+Polygon inset(const ConvexPolygon& poly, double offset) {
+  return inset_convex(poly.points(), offset);
+}
+
 size_t longest_edge_index(const Polygon& poly) {
   size_t n = poly.size();
   size_t best = 0;
@@ -292,11 +338,11 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
   const Bounds b = bounds_of(poly);
   const double safe_z = safe_z_mm;
   const double depth = -std::abs(depth_val);
-  const double tool_d = tool.diameter <= 0.0 ? 3.0 : tool.diameter;
+  const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
   const double tool_r = 0.5 * tool_d;
-  const double default_step_down = std::min(3.0, 0.5 * tool_d);
+  const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
   const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-  const double step_over = std::max(0.1, step_over_mm);
+  const double step_over = std::max(kMinStepOverMm, step_over_mm);
 
   Paths paths(1);
   Path& moves = paths.front();
@@ -308,14 +354,7 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
   moves.push_back(make_set_rpm(tool.rpm));
   moves.push_back(make_set_feed(tool.feed_xy));
 
-  std::vector<double> z_levels;
-  double z = 0.0;
-  while (z > depth + kEps) {
-    double z_next = std::max(depth, z - step_down);
-    z_levels.push_back(z_next);
-    z = z_next;
-    if (std::abs(z - depth) < kEps) break;
-  }
+  const std::vector<double> z_levels = build_z_levels(depth, step_down);
 
   int direction = 1;
   double prev_z = 0.0;
@@ -338,7 +377,7 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
           moves.push_back(make_cut(std::nullopt, std::nullopt, layer_z, tool.feed_z));
         } else {
           Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
-          emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z,
+          emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z,
                               ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
         }
         moves.push_back(make_set_feed(tool.feed_xy));
@@ -381,10 +420,10 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_o
   const Bounds b = bounds_of(face.outer);
   const double safe_z = safe_z_mm;
   const double depth = -std::abs(face.depth);
-  const double tool_d = tool.diameter <= 0.0 ? 3.0 : tool.diameter;
-  const double default_step_down = std::min(3.0, 0.5 * tool_d);
+  const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
+  const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
   const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-  const double step_over = std::max(0.1, step_over_mm);
+  const double step_over = std::max(kMinStepOverMm, step_over_mm);
 
   Paths paths(1);
   Path& moves = paths.front();
@@ -396,16 +435,7 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_o
   moves.push_back(make_set_rpm(tool.rpm));
   moves.push_back(make_set_feed(tool.feed_xy));
 
-  std::vector<double> z_levels;
-  double z = 0.0;
-  while (z > depth + kEps) {
-    double z_next = std::max(depth, z - step_down);
-    z_levels.push_back(z_next);
-    z = z_next;
-    if (std::abs(z - depth) < kEps) {
-      break;
-    }
-  }
+  const std::vector<double> z_levels = build_z_levels(depth, step_down);
 
   int direction = 1;
   double prev_z = 0.0;
@@ -415,7 +445,7 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_o
       double x_start = direction == 1 ? b.minx : b.maxx;
       double x_end = direction == 1 ? b.maxx : b.minx;
       Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
-      emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z, ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
+      emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z, ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
       moves.push_back(make_set_feed(tool.feed_xy));
       moves.push_back(make_cut(x_end, y, std::nullopt));
       moves.push_back(make_retract(safe_z));
@@ -433,16 +463,19 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
                          double safe_z_mm, double ramp_angle_deg) {
   const double safe_z = safe_z_mm;
   const double depth = -std::abs(depth_val);
-  const double tool_d = tool.diameter <= 0.0 ? 3.0 : tool.diameter;
+  const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
   const double tool_r = 0.5 * tool_d;
-  const double default_step_down = std::min(3.0, 0.5 * tool_d);
+  const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
   const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-  const double step_over = std::max(0.1, step_over_mm);
+  const double step_over = std::max(kMinStepOverMm, step_over_mm);
 
-  Polygon outer_raw = ensure_cw(outer_stripped);
+  std::optional<ConvexPolygon> boundary = ConvexPolygon::try_from(outer_stripped);
+  if (!boundary) {
+    return Paths(1);
+  }
 
-  Polygon outermost = inset_convex(outer_raw, tool_r);
-  if (outermost.empty()) {
+  std::optional<ConvexPolygon> outermost = ConvexPolygon::try_from(inset(*boundary, tool_r));
+  if (!outermost) {
     return Paths(1);
   }
 
@@ -458,12 +491,12 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
 
   std::vector<Polygon> rings;
   {
-    Polygon ring = outermost;
+    Polygon ring = outermost->points();
     double accumulated_offset = 0.0;
     while (!ring.empty()) {
       rings.push_back(ring);
       accumulated_offset += step_over;
-      ring = inset_convex(outermost, accumulated_offset);
+      ring = inset(*outermost, accumulated_offset);
     }
   }
 
@@ -476,7 +509,7 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
     double h = lb.maxy - lb.miny;
     double short_dim = std::min(w, h);
     double long_dim = std::max(w, h);
-    if (long_dim > kEps && short_dim > 2.0 * tool_r + kEps) {
+    if (long_dim > kEps && short_dim > tool_d + kEps) {
       double cx = 0.5 * (lb.minx + lb.maxx);
       double cy = 0.5 * (lb.miny + lb.maxy);
       if (w >= h) {
@@ -490,16 +523,7 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
     }
   }
 
-  std::vector<double> z_levels;
-  {
-    double z = 0.0;
-    while (z > depth + kEps) {
-      double z_next = std::max(depth, z - step_down);
-      z_levels.push_back(z_next);
-      z = z_next;
-      if (std::abs(z - depth) < kEps) break;
-    }
-  }
+  const std::vector<double> z_levels = build_z_levels(depth, step_down);
 
   double prev_z = 0.0;
   for (double layer_z : z_levels) {
@@ -509,7 +533,7 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
     size_t ramp_start_idx = ramp_edge;
     size_t ramp_end_idx = (ramp_edge + 1) % n0;
     Vec2 ramp_path[2] = {first_ring[ramp_start_idx], first_ring[ramp_end_idx]};
-    emit_ramp_or_plunge(moves, ramp_path, 2, prev_z, layer_z,
+    emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z,
                         ramp_angle_deg, safe_z, tool.feed_xy, tool.feed_z);
     moves.push_back(make_set_feed(tool.feed_xy));
 
@@ -605,7 +629,7 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
   moves.push_back(make_set_rpm(tool.rpm));
   moves.push_back(make_set_feed(tool.feed_xy));
 
-  const double step_down = step_down_mm <= 0.0 ? 2.0 : step_down_mm;
+  const double step_down = step_down_mm <= 0.0 ? kProfileDefaultStepDownMm : step_down_mm;
 
   bool closed = boundary.size() >= 2 &&
                 std::abs(boundary.front().x - boundary.back().x) < kEps &&
@@ -631,7 +655,7 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
         rev_path.push_back(boundary[i]);
       }
       rev_path.push_back(boundary[0]);
-      emit_ramp_or_plunge(moves, rev_path.data(), rev_path.size(),
+      emit_ramp_or_plunge(moves, rev_path,
                           prev_z, z, use_ramp, safe_z, tool.feed_xy, tool.feed_z,
                           can_keepdown);
     } else {
@@ -665,7 +689,7 @@ Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_m
   moves.push_back(make_set_rpm(tool.rpm));
   moves.push_back(make_set_feed(tool.feed_z));
 
-  const double peck = peck_mm <= 0.0 ? 3.0 : peck_mm;
+  const double peck = peck_mm <= 0.0 ? kDefaultPeckMm : peck_mm;
   const double r_plane = retract_clearance_mm;
   for (const auto& hole : holes) {
     moves.push_back(make_rapid(hole.x, hole.y, safe_z));
@@ -697,7 +721,7 @@ Paths plan_bore_helical(const Hole& hole, const Tool& tool, double step_down_mm,
   Paths paths(1);
   Path& moves = paths.front();
 
-  const double tool_d = tool.diameter <= 0.0 ? 1.0 : tool.diameter;
+  const double tool_d = tool.diameter <= 0.0 ? kBoreDefaultToolDiameterMm : tool.diameter;
   const double D = hole.diameter;
   if (D <= tool_d) {
     return paths;
@@ -705,8 +729,8 @@ Paths plan_bore_helical(const Hole& hole, const Tool& tool, double step_down_mm,
 
   const double target = -std::abs(hole.depth);
   const double r_eff = std::max(0.01, (D - tool_d) * 0.5);
-  const double step_down = step_down_mm <= 0.0 ? 2.5 : step_down_mm;
-  const int segments = 60;
+  const double step_down = step_down_mm <= 0.0 ? kBoreDefaultStepDownMm : step_down_mm;
+  const int segments = kHelixSegments;
 
   moves.push_back(make_comment("bore_helical D=" + fmt3(D) + " tool=" + fmt3(tool_d) + " r_eff=" + fmt3(r_eff)));
   moves.push_back(make_set_rpm(tool.rpm));
@@ -735,11 +759,7 @@ Paths plan_bore_helical(const Hole& hole, const Tool& tool, double step_down_mm,
 
     for (int i = 0; i <= segments; ++i) {
       Vec2 pt = circle_point(i, r_eff);
-      if (i == 0) {
-        moves.push_back(make_cut(pt.x, pt.y, std::nullopt));
-      } else {
-        moves.push_back(make_cut(pt.x, pt.y, std::nullopt));
-      }
+      moves.push_back(make_cut(pt.x, pt.y, std::nullopt));
     }
   }
 

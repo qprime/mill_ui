@@ -1,4 +1,6 @@
-#include "millui/native/facade.hpp"
+#include "millui/native/algo/plan_2d.hpp"
+#include "millui/native/algo/post_gcode.hpp"
+#include "millui/native/types.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -31,14 +33,6 @@ Polygon polygon_from_py(const py::sequence& seq) {
     poly.emplace_back(vec2_from_py(pair));
   }
   return poly;
-}
-
-py::list polygon_to_py(const Polygon& poly) {
-  py::list out;
-  for (const auto& pt : poly) {
-    out.append(py::make_tuple(pt.x, pt.y));
-  }
-  return out;
 }
 
 Tool tool_from_py(const py::object& obj) {
@@ -142,89 +136,10 @@ PostConfig post_cfg_from_dict(const py::dict& d) {
   return cfg;
 }
 
-py::dict face_to_dict(const PlanarFace& face) {
-  py::dict d;
-  d["z"] = face.z;
-  d["depth"] = face.depth;
-  d["safe_z"] = face.safe_z;
-  d["outer"] = polygon_to_py(face.outer);
-  py::list holes;
-  for (const auto& hole : face.holes) {
-    holes.append(polygon_to_py(hole));
-  }
-  d["holes"] = std::move(holes);
-  return d;
-}
-
-py::dict hole_to_dict(const Hole& hole) {
-  py::dict d;
-  d["x"] = hole.x;
-  d["y"] = hole.y;
-  d["diameter"] = hole.diameter;
-  d["depth"] = hole.depth;
-  return d;
-}
-
 }  // namespace
-
-// Provide a weak hook to let extra binders add symbols (e.g., mandelbrot)
-extern "C" void millui_native_register_extra(py::module_&);
 
 PYBIND11_MODULE(_native, m) {
   m.doc() = "Native CAM core bindings";
-
-  py::class_<Model>(m, "Model")
-      .def(py::init<>())
-      .def_readwrite("source_path", &Model::source_path);
-
-  py::class_<Setup>(m, "Setup")
-      .def(py::init<>())
-      .def_readwrite("tol_mm", &Setup::tol_mm)
-      .def_readwrite("safe_z", &Setup::safe_z);
-
-  m.def("load_step", [](const std::string& path) {
-    return load_step(path);
-  });
-
-  m.def("make_setup", [](const Model& model, double tol_mm) {
-    return make_setup(model, tol_mm);
-  });
-
-  m.def("detect_planar", [](const Model& model, const Setup& setup, double tol_mm) {
-    auto faces = detect_planar(model, setup, tol_mm);
-    py::list out;
-    for (const auto& face : faces) {
-      out.append(face_to_dict(face));
-    }
-    return out;
-  });
-
-  m.def("detect_holes", [](const Model& model, const Setup& setup, double tol_mm) {
-    auto holes = detect_holes(model, setup, tol_mm);
-    py::list out;
-    for (const auto& hole : holes) {
-      out.append(hole_to_dict(hole));
-    }
-    return out;
-  });
-
-  m.def("offset_inset", [](const py::sequence& poly, double radius_mm) {
-    auto polys = millui::native::offset_inset(polygon_from_py(poly), radius_mm);
-    py::list out;
-    for (const auto& p : polys) {
-      out.append(polygon_to_py(p));
-    }
-    return out;
-  });
-
-  m.def("offset_outset", [](const py::sequence& poly, double radius_mm) {
-    auto polys = millui::native::offset_outset(polygon_from_py(poly), radius_mm);
-    py::list out;
-    for (const auto& p : polys) {
-      out.append(polygon_to_py(p));
-    }
-    return out;
-  });
 
   m.def("plan_pocket", [](const py::dict& face_dict, const py::object& tool_obj, double step_over_mm,
                            std::optional<double> step_down_mm, double ramp_angle_deg,
@@ -233,7 +148,7 @@ PYBIND11_MODULE(_native, m) {
     Tool tool = tool_from_py(tool_obj);
     double step_down = step_down_mm.value_or(0.0);
     auto strat = (strategy == "raster") ? PocketStrategy::Raster : PocketStrategy::Spiral;
-    return paths_to_flat_list(millui::native::plan_pocket(face, tool, step_over_mm, step_down, face.safe_z, ramp_angle_deg, strat));
+    return paths_to_flat_list(algo::plan_pocket(face, tool, step_over_mm, step_down, face.safe_z, ramp_angle_deg, strat));
   }, py::arg("face"), py::arg("tool"), py::arg("step_over_mm"),
      py::arg("step_down_mm") = py::none(), py::arg("ramp_angle_deg") = 0.0,
      py::arg("strategy") = "spiral");
@@ -242,7 +157,7 @@ PYBIND11_MODULE(_native, m) {
                             double step_down_mm, double safe_z_mm, double ramp_angle_deg) {
     Polygon poly = polygon_from_py(boundary);
     Tool tool = tool_from_py(tool_obj);
-    return paths_to_flat_list(millui::native::plan_profile(poly, tool, total_depth_mm, step_down_mm, safe_z_mm, ramp_angle_deg));
+    return paths_to_flat_list(algo::plan_profile(poly, tool, total_depth_mm, step_down_mm, safe_z_mm, ramp_angle_deg));
   }, py::arg("boundary"), py::arg("tool"), py::arg("total_depth_mm"),
      py::arg("step_down_mm"), py::arg("safe_z_mm"), py::arg("ramp_angle_deg") = 0.0);
 
@@ -254,38 +169,19 @@ PYBIND11_MODULE(_native, m) {
       holes.push_back(hole_from_dict(py::reinterpret_borrow<py::dict>(item)));
     }
     Tool tool = tool_from_py(tool_obj);
-    return paths_to_flat_list(millui::native::plan_drill(holes, tool, peck_mm, safe_z_mm));
-  });
+    return paths_to_flat_list(algo::plan_drill(holes, tool, peck_mm, safe_z_mm));
+  }, py::arg("holes"), py::arg("tool"), py::arg("peck_mm"), py::arg("safe_z_mm"));
 
   m.def("plan_bore_helical", [](const py::dict& hole_dict, const py::object& tool_obj, double step_down_mm,
                                   double safe_z_mm) {
     Hole hole = hole_from_dict(hole_dict);
     Tool tool = tool_from_py(tool_obj);
-    return paths_to_flat_list(millui::native::plan_bore_helical(hole, tool, step_down_mm, safe_z_mm));
-  });
+    return paths_to_flat_list(algo::plan_bore_helical(hole, tool, step_down_mm, safe_z_mm));
+  }, py::arg("hole"), py::arg("tool"), py::arg("step_down_mm"), py::arg("safe_z_mm"));
 
   m.def("post_gcode", [](const py::sequence& paths_seq, const py::dict& cfg_dict) {
     Paths paths = paths_from_flat_list(paths_seq);
     PostConfig cfg = post_cfg_from_dict(cfg_dict);
-    return millui::native::post_gcode(paths, cfg);
-  });
-
-  m.def("create_stock", &millui::native::create_stock);
-  m.def("link_keepdown", [](const py::sequence& seq, double safe_z, double min_clearance) {
-    Paths paths = paths_from_flat_list(seq);
-    Paths linked = millui::native::link_keepdown(paths, safe_z, min_clearance);
-    return paths_to_flat_list(linked);
-  });
-  m.def("fit_arcs", [](const py::sequence& seq, double tol_mm) {
-    Paths paths = paths_from_flat_list(seq);
-    Paths fitted = millui::native::fit_arcs(paths, tol_mm);
-    return paths_to_flat_list(fitted);
-  });
-
-  // Allow optional extra bindings to register more functions (if object linked)
-  try {
-    millui_native_register_extra(m);
-  } catch (...) {
-    // no-op if not linked
-  }
+    return algo::post_gcode(paths, cfg);
+  }, py::arg("paths"), py::arg("cfg"));
 }

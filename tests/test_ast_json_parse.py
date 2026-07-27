@@ -235,36 +235,6 @@ def test_parse_cnc_clamp_v1_layout():
     assert item.feature is None
 
 
-def test_parse_mandelbrot_demo_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "mandelbrot_demo"
-        / "input"
-        / "layout.json"
-    )
-
-    if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
-
-    ast = LayoutAST.from_json(str(layout_path))
-
-    assert ast.project == "mandelbrot_demo"
-    assert ast.kerf_width_mm == 3.175
-
-    assert ast.sheet.width_mm == 400.0
-    assert ast.sheet.height_mm == 300.0
-    assert ast.sheet.thickness_mm == 18.0
-
-    assert len(ast.items) == 1
-    item = ast.items[0]
-    assert item.kind == "template"
-    assert item.type == "MandelbrotOutlineFill"
-    assert item.params is not None
-
-
 def test_parse_cnc_clamp_part_a_layout():
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent

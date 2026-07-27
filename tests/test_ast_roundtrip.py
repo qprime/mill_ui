@@ -90,32 +90,6 @@ def test_roundtrip_cnc_clamp_v1_layout():
         Path(temp_path).unlink()
 
 
-def test_roundtrip_mandelbrot_demo_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "mandelbrot_demo"
-        / "input"
-        / "layout.json"
-    )
-
-    if not layout_path.exists():
-        pytest.skip("Test layout not found")
-
-    ast = LayoutAST.from_json(str(layout_path))
-    json_str = ast.to_json()
-    emitted_data = json.loads(json_str)
-
-    assert emitted_data["project"] == "mandelbrot_demo"
-    assert emitted_data["kerf_width_mm"] == 3.175
-    assert emitted_data["sheet"]["width_mm"] == 400.0
-    assert len(emitted_data["items"]) == 1
-    assert emitted_data["items"][0]["kind"] == "template"
-    assert emitted_data["items"][0]["type"] == "MandelbrotOutlineFill"
-
-
 def test_roundtrip_cnc_clamp_part_a_layout():
     layout_path = (
         Path(__file__).parent.parent.parent.parent.parent

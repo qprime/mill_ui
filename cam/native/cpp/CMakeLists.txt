@@ -8,14 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(pybind11 CONFIG REQUIRED)
 
 set(SRC
-  src/facade.cpp
-  backends/occt/occt_backend.cpp
-  geom2d/clipper2_wrap.cpp
   algo/plan_2d.cpp
   algo/post_gcode.cpp
-  algo/mandelbrot.cpp
   bindings/py/cam_native_pybind.cpp
-  bindings/py/mandelbrot_pybind.cpp
 )
 
 add_library(_native MODULE ${SRC})

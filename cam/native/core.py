@@ -59,8 +59,8 @@ def is_native_available() -> bool:
 def _require_native() -> None:
     if _native is None:
         raise RuntimeError(
-            "skills.mill_ui.cam.native._native is not available. Install the project "
-            "with a modern C++ toolchain so the native CAM core can be built."
+            "cam.native._native is not available. Build the native CAM core with a "
+            "modern C++ toolchain (see cam/native/README.md) before using it."
         )
 
 
@@ -165,78 +165,3 @@ def post_gcode(
     if footer is not None:
         cfg["footer"] = list(footer)
     return str(_native.post_gcode(list(moves), cfg))
-
-
-def load_step(path: str):
-    _require_native()
-    return _native.load_step(str(path))
-
-
-def make_setup(model, tol_mm: float = 0.01):
-    _require_native()
-    return _native.make_setup(model, float(tol_mm))
-
-
-def detect_planar(model, setup, tol_mm: float = 0.01):
-    _require_native()
-    return _native.detect_planar(model, setup, float(tol_mm))
-
-
-def detect_holes(model, setup, tol_mm: float = 0.01):
-    _require_native()
-    return _native.detect_holes(model, setup, float(tol_mm))
-
-
-def offset_inset(polygon: Iterable[Iterable[float]], radius_mm: float):
-    _require_native()
-    pts = [[float(x), float(y)] for x, y in polygon]
-    return _native.offset_inset(pts, float(radius_mm))
-
-
-def offset_outset(polygon: Iterable[Iterable[float]], radius_mm: float):
-    _require_native()
-    pts = [[float(x), float(y)] for x, y in polygon]
-    return _native.offset_outset(pts, float(radius_mm))
-
-
-def create_stock(minx: float, miny: float, maxx: float, maxy: float, pitch_mm: float):
-    _require_native()
-    return _native.create_stock(float(minx), float(miny), float(maxx), float(maxy), float(pitch_mm))
-
-
-def link_keepdown(paths, safe_z: float, min_clearance: float):
-    _require_native()
-    return _native.link_keepdown(paths, float(safe_z), float(min_clearance))
-
-
-def fit_arcs(paths, tol_mm: float):
-    _require_native()
-    return _native.fit_arcs(paths, float(tol_mm))
-
-
-def mandelbrot_outline_fill(
-    *,
-    width_mm: float,
-    height_mm: float,
-    resolution_x: int,
-    resolution_y: int,
-    iterations: int = 100,
-    escape_radius: float = 2.0,
-    real_min: float = -2.0,
-    real_max: float = 1.0,
-    imag_min: float = -1.25,
-    imag_max: float = 1.25,
-):
-    _require_native()
-    return _native.mandelbrot_outline_fill(
-        float(width_mm),
-        float(height_mm),
-        int(resolution_x),
-        int(resolution_y),
-        int(iterations),
-        float(escape_radius),
-        float(real_min),
-        float(real_max),
-        float(imag_min),
-        float(imag_max),
-    )

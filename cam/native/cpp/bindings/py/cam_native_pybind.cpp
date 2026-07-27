@@ -5,17 +5,24 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <cmath>
 #include <optional>
 #include <stdexcept>
+#include <variant>
 
 namespace py = pybind11;
 using namespace millui::native;
 
 namespace {
 
-bool has(double v) {
-  return !std::isnan(v);
+template <class... Ts>
+struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+py::object opt_to_py(std::optional<double> v) {
+  return v ? py::cast(*v) : py::none();
 }
 
 Vec2 vec2_from_py(const py::sequence& seq) {
@@ -69,20 +76,54 @@ PlanarFace face_from_dict(const py::dict& d) {
   return face;
 }
 
-py::dict move_to_dict(const PathMove& mv) {
+py::dict move_to_dict(const Move& mv) {
   py::dict d;
-  d["kind"] = mv.kind;
-  d["x"] = has(mv.x) ? py::cast(mv.x) : py::none();
-  d["y"] = has(mv.y) ? py::cast(mv.y) : py::none();
-  d["z"] = has(mv.z) ? py::cast(mv.z) : py::none();
-  d["feed"] = has(mv.feed) ? py::cast(mv.feed) : py::none();
-  d["rpm"] = has(mv.rpm) ? py::cast(mv.rpm) : py::none();
-  d["seconds"] = has(mv.seconds) ? py::cast(mv.seconds) : py::none();
-  if (!mv.text.empty()) {
-    d["text"] = mv.text;
-  } else {
-    d["text"] = py::none();
-  }
+  d["x"] = py::none();
+  d["y"] = py::none();
+  d["z"] = py::none();
+  d["feed"] = py::none();
+  d["rpm"] = py::none();
+  d["seconds"] = py::none();
+  d["text"] = py::none();
+  std::visit(
+      overloaded{
+          [&](const Comment& c) {
+            d["kind"] = "comment";
+            if (!c.text.empty()) {
+              d["text"] = c.text;
+            }
+          },
+          [&](const SetRpm& s) {
+            d["kind"] = "set_rpm";
+            d["rpm"] = s.rpm;
+          },
+          [&](const SetFeed& s) {
+            d["kind"] = "set_feed";
+            d["feed"] = s.feed;
+          },
+          [&](const Rapid& r) {
+            d["kind"] = "rapid";
+            d["x"] = opt_to_py(r.x);
+            d["y"] = opt_to_py(r.y);
+            d["z"] = opt_to_py(r.z);
+          },
+          [&](const Cut& c) {
+            d["kind"] = "cut";
+            d["x"] = opt_to_py(c.x);
+            d["y"] = opt_to_py(c.y);
+            d["z"] = opt_to_py(c.z);
+            d["feed"] = opt_to_py(c.feed);
+          },
+          [&](const Retract& r) {
+            d["kind"] = "retract";
+            d["z"] = r.z;
+          },
+          [&](const Dwell& dw) {
+            d["kind"] = "dwell";
+            d["seconds"] = dw.seconds;
+          },
+      },
+      mv);
   return d;
 }
 
@@ -96,22 +137,41 @@ py::list paths_to_flat_list(const Paths& paths) {
   return out;
 }
 
+std::optional<double> opt_field(const py::dict& d, const char* key) {
+  if (d.contains(key) && !d[key].is_none()) {
+    return d[key].cast<double>();
+  }
+  return std::nullopt;
+}
+
 Paths paths_from_flat_list(const py::sequence& seq) {
   Paths paths(1);
   Path& path = paths.front();
   path.reserve(seq.size());
   for (const auto& item : seq) {
     py::dict d = py::reinterpret_borrow<py::dict>(item);
-    PathMove mv;
-    mv.kind = py::str(d["kind"]);
-    if (d.contains("x") && !d["x"].is_none()) mv.x = d["x"].cast<double>();
-    if (d.contains("y") && !d["y"].is_none()) mv.y = d["y"].cast<double>();
-    if (d.contains("z") && !d["z"].is_none()) mv.z = d["z"].cast<double>();
-    if (d.contains("feed") && !d["feed"].is_none()) mv.feed = d["feed"].cast<double>();
-    if (d.contains("rpm") && !d["rpm"].is_none()) mv.rpm = d["rpm"].cast<double>();
-    if (d.contains("seconds") && !d["seconds"].is_none()) mv.seconds = d["seconds"].cast<double>();
-    if (d.contains("text") && !d["text"].is_none()) mv.text = py::str(d["text"]);
-    path.push_back(std::move(mv));
+    const std::string kind = py::str(d["kind"]);
+    if (kind == "comment") {
+      std::string text;
+      if (d.contains("text") && !d["text"].is_none()) text = py::str(d["text"]);
+      path.push_back(Comment{std::move(text)});
+    } else if (kind == "set_rpm") {
+      path.push_back(SetRpm{opt_field(d, "rpm").value_or(0.0)});
+    } else if (kind == "set_feed") {
+      path.push_back(SetFeed{opt_field(d, "feed").value_or(0.0)});
+    } else if (kind == "rapid") {
+      path.push_back(Rapid{opt_field(d, "x"), opt_field(d, "y"), opt_field(d, "z")});
+    } else if (kind == "cut") {
+      path.push_back(Cut{opt_field(d, "x"), opt_field(d, "y"), opt_field(d, "z"), opt_field(d, "feed")});
+    } else if (kind == "retract") {
+      path.push_back(Retract{opt_field(d, "z").value_or(0.0)});
+    } else if (kind == "dwell") {
+      path.push_back(Dwell{opt_field(d, "seconds").value_or(0.0)});
+    } else {
+      throw std::invalid_argument("post_gcode: move.kind must be one of "
+                                  "comment|set_rpm|set_feed|rapid|cut|retract|dwell, got '" +
+                                  kind + "'");
+    }
   }
   return paths;
 }

@@ -1,7 +1,7 @@
 #include "millui/native/algo/post_gcode.hpp"
 
 #include <cmath>
-#include <limits>
+#include <optional>
 #include <sstream>
 #include <vector>
 
@@ -9,9 +9,12 @@ namespace millui::native::algo {
 
 namespace {
 
-bool has(double v) {
-  return !std::isnan(v);
-}
+template <class... Ts>
+struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 std::string fmt_num(double v, int prec) {
   std::ostringstream oss;
@@ -21,11 +24,11 @@ std::string fmt_num(double v, int prec) {
   return oss.str();
 }
 
-std::string g0(double x, double y, double z, int prec) {
+std::string g0(std::optional<double> x, std::optional<double> y, std::optional<double> z, int prec) {
   std::vector<std::string> parts{"G0"};
-  if (has(x)) parts.emplace_back("X" + fmt_num(x, prec));
-  if (has(y)) parts.emplace_back("Y" + fmt_num(y, prec));
-  if (has(z)) parts.emplace_back("Z" + fmt_num(z, prec));
+  if (x) parts.emplace_back("X" + fmt_num(*x, prec));
+  if (y) parts.emplace_back("Y" + fmt_num(*y, prec));
+  if (z) parts.emplace_back("Z" + fmt_num(*z, prec));
   std::ostringstream oss;
   for (std::size_t i = 0; i < parts.size(); ++i) {
     if (i) oss << ' ';
@@ -34,14 +37,15 @@ std::string g0(double x, double y, double z, int prec) {
   return oss.str();
 }
 
-std::string g1(double x, double y, double z, double feed, int prec) {
+std::string g1(std::optional<double> x, std::optional<double> y, std::optional<double> z,
+               std::optional<double> feed, int prec) {
   std::vector<std::string> parts{"G1"};
-  if (has(x)) parts.emplace_back("X" + fmt_num(x, prec));
-  if (has(y)) parts.emplace_back("Y" + fmt_num(y, prec));
-  if (has(z)) parts.emplace_back("Z" + fmt_num(z, prec));
-  if (has(feed)) {
+  if (x) parts.emplace_back("X" + fmt_num(*x, prec));
+  if (y) parts.emplace_back("Y" + fmt_num(*y, prec));
+  if (z) parts.emplace_back("Z" + fmt_num(*z, prec));
+  if (feed) {
     const int feed_prec = std::max(0, prec - 2);
-    parts.emplace_back("F" + fmt_num(feed, feed_prec));
+    parts.emplace_back("F" + fmt_num(*feed, feed_prec));
   }
   std::ostringstream oss;
   for (std::size_t i = 0; i < parts.size(); ++i) {
@@ -52,9 +56,6 @@ std::string g1(double x, double y, double z, double feed, int prec) {
 }
 
 std::string rpm_line(double rpm) {
-  if (!has(rpm)) {
-    return {};
-  }
   std::ostringstream oss;
   oss << "M3 S" << static_cast<int>(std::lround(rpm));
   return oss.str();
@@ -76,65 +77,69 @@ std::vector<std::string> default_footer() {
 
 std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
   std::vector<std::string> lines = cfg.header.empty() ? default_header(cfg) : cfg.header;
-  double current_feed = std::numeric_limits<double>::quiet_NaN();
-  double current_rpm = std::numeric_limits<double>::quiet_NaN();
-  double current_z = std::numeric_limits<double>::quiet_NaN();
+  std::optional<double> current_feed;
+  std::optional<double> current_rpm;
+  std::optional<double> current_z;
 
   for (const auto& path : paths) {
     for (const auto& move : path) {
-      if (move.kind == "comment") {
-        std::string text = move.text;
-        for (char& c : text) {
-          if (c == '(') c = '[';
-          if (c == ')') c = ']';
-        }
-        lines.emplace_back("(" + text + ")");
-      } else if (move.kind == "set_rpm") {
-        if (!has(move.rpm) || (has(current_rpm) && std::abs(current_rpm - move.rpm) < 1e-9)) {
-          continue;
-        }
-        current_rpm = move.rpm;
-        const std::string ln = rpm_line(move.rpm);
-        if (!ln.empty()) {
-          lines.emplace_back(ln);
-        }
-      } else if (move.kind == "set_feed") {
-        if (!has(move.feed) || (has(current_feed) && std::abs(current_feed - move.feed) < 1e-9)) {
-          continue;
-        }
-        current_feed = move.feed;
-        const int feed_prec = std::max(0, cfg.prec - 2);
-        lines.emplace_back("F" + fmt_num(move.feed, feed_prec));
-      } else if (move.kind == "rapid") {
-        lines.emplace_back(g0(move.x, move.y, move.z, cfg.prec));
-        if (has(move.z)) {
-          current_z = move.z;
-        }
-      } else if (move.kind == "cut") {
-        const double feed = has(move.feed) ? move.feed : current_feed;
-        lines.emplace_back(g1(move.x, move.y, move.z, feed, cfg.prec));
-        if (has(move.z)) {
-          current_z = move.z;
-        }
-        if (has(move.feed)) {
-          current_feed = move.feed;
-        }
-      } else if (move.kind == "retract") {
-        const double z = has(move.z) ? move.z : cfg.safe_z;
-        lines.emplace_back(g0(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), z, cfg.prec));
-        current_z = z;
-      } else if (move.kind == "dwell") {
-        if (has(move.seconds) && move.seconds > 0.0) {
-          lines.emplace_back("G4 P" + fmt_num(move.seconds, cfg.prec));
-        }
-      } else {
-        lines.emplace_back("(unhandled move kind: " + move.kind + ")");
-      }
+      std::visit(
+          overloaded{
+              [&](const Comment& c) {
+                std::string text = c.text;
+                for (char& ch : text) {
+                  if (ch == '(') ch = '[';
+                  if (ch == ')') ch = ']';
+                }
+                lines.emplace_back("(" + text + ")");
+              },
+              [&](const SetRpm& s) {
+                if (current_rpm && std::abs(*current_rpm - s.rpm) < 1e-9) {
+                  return;
+                }
+                current_rpm = s.rpm;
+                lines.emplace_back(rpm_line(s.rpm));
+              },
+              [&](const SetFeed& s) {
+                if (current_feed && std::abs(*current_feed - s.feed) < 1e-9) {
+                  return;
+                }
+                current_feed = s.feed;
+                const int feed_prec = std::max(0, cfg.prec - 2);
+                lines.emplace_back("F" + fmt_num(s.feed, feed_prec));
+              },
+              [&](const Rapid& r) {
+                lines.emplace_back(g0(r.x, r.y, r.z, cfg.prec));
+                if (r.z) {
+                  current_z = *r.z;
+                }
+              },
+              [&](const Cut& c) {
+                const std::optional<double> feed = c.feed ? c.feed : current_feed;
+                lines.emplace_back(g1(c.x, c.y, c.z, feed, cfg.prec));
+                if (c.z) {
+                  current_z = *c.z;
+                }
+                if (c.feed) {
+                  current_feed = *c.feed;
+                }
+              },
+              [&](const Retract& r) {
+                lines.emplace_back(g0(std::nullopt, std::nullopt, r.z, cfg.prec));
+                current_z = r.z;
+              },
+              [&](const Dwell& d) {
+                if (d.seconds > 0.0) {
+                  lines.emplace_back("G4 P" + fmt_num(d.seconds, cfg.prec));
+                }
+              },
+          },
+          move);
     }
   }
 
-  if (!has(current_z) || std::abs(current_z - cfg.safe_z) > 1e-9) {
-    lines.emplace_back(g0(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), cfg.safe_z, cfg.prec));
+  if (!current_z || std::abs(*current_z - cfg.safe_z) > 1e-9) {
+    lines.emplace_back(g0(std::nullopt, std::nullopt, cfg.safe_z, cfg.prec));
   }
 
   const auto footer = cfg.footer.empty() ? default_footer() : cfg.footer;

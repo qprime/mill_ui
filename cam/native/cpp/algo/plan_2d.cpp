@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <limits>
+#include <numbers>
 #include <optional>
 #include <sstream>
 
@@ -20,52 +20,29 @@ std::string fmt3(double v) {
   return oss.str();
 }
 
-PathMove make_comment(std::string text) {
-  PathMove mv;
-  mv.kind = "comment";
-  mv.text = std::move(text);
-  return mv;
+Move make_comment(std::string text) {
+  return Comment{std::move(text)};
 }
 
-PathMove make_set_rpm(double rpm) {
-  PathMove mv;
-  mv.kind = "set_rpm";
-  mv.rpm = rpm;
-  return mv;
+Move make_set_rpm(double rpm) {
+  return SetRpm{rpm};
 }
 
-PathMove make_set_feed(double feed) {
-  PathMove mv;
-  mv.kind = "set_feed";
-  mv.feed = feed;
-  return mv;
+Move make_set_feed(double feed) {
+  return SetFeed{feed};
 }
 
-PathMove make_rapid(double x, double y, double z) {
-  PathMove mv;
-  mv.kind = "rapid";
-  mv.x = x;
-  mv.y = y;
-  mv.z = z;
-  return mv;
+Move make_rapid(double x, double y, double z) {
+  return Rapid{x, y, z};  // planners always pass concrete axes; optionals fill from doubles
 }
 
-PathMove make_cut(std::optional<double> x, std::optional<double> y, std::optional<double> z,
-                  std::optional<double> feed = std::nullopt) {
-  PathMove mv;
-  mv.kind = "cut";
-  mv.x = x.value_or(std::numeric_limits<double>::quiet_NaN());
-  mv.y = y.value_or(std::numeric_limits<double>::quiet_NaN());
-  mv.z = z.value_or(std::numeric_limits<double>::quiet_NaN());
-  mv.feed = feed.value_or(std::numeric_limits<double>::quiet_NaN());
-  return mv;
+Move make_cut(std::optional<double> x, std::optional<double> y, std::optional<double> z,
+              std::optional<double> feed = std::nullopt) {
+  return Cut{x, y, z, feed};
 }
 
-PathMove make_retract(double z) {
-  PathMove mv;
-  mv.kind = "retract";
-  mv.z = z;
-  return mv;
+Move make_retract(double z) {
+  return Retract{z};
 }
 
 struct Bounds {
@@ -105,7 +82,7 @@ void emit_ramp_or_plunge(Path& moves, const Vec2* path, size_t path_len,
   double step_down = std::abs(target_z - prev_z);
   double ramp_dist = 0.0;
   if (ramp_angle_deg > kEps && step_down > kEps) {
-    ramp_dist = step_down / std::tan(ramp_angle_deg * M_PI / 180.0);
+    ramp_dist = step_down / std::tan(ramp_angle_deg * std::numbers::pi / 180.0);
   }
 
   const Vec2& end_point = path[path_len - 1];
@@ -737,7 +714,7 @@ Paths plan_bore_helical(const Hole& hole, const Tool& tool, double step_down_mm,
   moves.push_back(make_rapid(hole.x + r_eff, hole.y, safe_z));
 
   auto circle_point = [&](int i, double radius) {
-    const double t = 2.0 * M_PI * (static_cast<double>(i) / segments);
+    const double t = 2.0 * std::numbers::pi * (static_cast<double>(i) / segments);
     return Vec2{hole.x + radius * std::cos(t), hole.y + radius * std::sin(t)};
   };
 

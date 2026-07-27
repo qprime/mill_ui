@@ -1,7 +1,8 @@
 #pragma once
 
-#include <limits>
+#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace millui::native {
@@ -45,17 +46,35 @@ struct PostConfig {
   std::vector<std::string> footer;
 };
 
-struct PathMove {
-  std::string kind;  // comment|set_rpm|set_feed|rapid|cut|retract|dwell
-  double x = std::numeric_limits<double>::quiet_NaN();
-  double y = std::numeric_limits<double>::quiet_NaN();
-  double z = std::numeric_limits<double>::quiet_NaN();
-  double feed = std::numeric_limits<double>::quiet_NaN();
-  double rpm = std::numeric_limits<double>::quiet_NaN();
-  double seconds = std::numeric_limits<double>::quiet_NaN();
+struct Comment {
   std::string text;
 };
-using Path = std::vector<PathMove>;
+struct SetRpm {
+  double rpm = 0.0;
+};
+struct SetFeed {
+  double feed = 0.0;
+};
+struct Rapid {
+  std::optional<double> x;
+  std::optional<double> y;
+  std::optional<double> z;
+};
+struct Cut {
+  std::optional<double> x;
+  std::optional<double> y;
+  std::optional<double> z;
+  std::optional<double> feed;
+};
+struct Retract {
+  double z = 0.0;
+};
+struct Dwell {
+  double seconds = 0.0;
+};
+
+using Move = std::variant<Comment, SetRpm, SetFeed, Rapid, Cut, Retract, Dwell>;
+using Path = std::vector<Move>;
 using Paths = std::vector<Path>;
 
 enum class PocketStrategy { Raster, Spiral };

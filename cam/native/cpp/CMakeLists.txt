@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(millui_native LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -34,6 +34,6 @@ target_link_libraries(_native
     pybind11::module
 )
 
-target_compile_options(_native PRIVATE -Wall -Wextra -Werror)
+target_compile_options(_native PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
 install(TARGETS _native DESTINATION "skills/mill_ui/cam/native")

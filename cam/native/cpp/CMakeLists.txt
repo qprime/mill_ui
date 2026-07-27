@@ -7,9 +7,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(pybind11 CONFIG REQUIRED)
 
-set(SRC
+set(CORE_SRC
+  algo/geom2d.cpp
   algo/plan_2d.cpp
   algo/post_gcode.cpp
+)
+
+set(SRC
+  ${CORE_SRC}
   bindings/py/cam_native_pybind.cpp
 )
 
@@ -36,4 +41,34 @@ target_link_libraries(_native
 
 target_compile_options(_native PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
-install(TARGETS _native DESTINATION "skills/mill_ui/cam/native")
+install(TARGETS _native DESTINATION "cam/native")
+
+option(MILLUI_NATIVE_TESTS "Build native unit tests" OFF)
+
+if(MILLUI_NATIVE_TESTS)
+  include(FetchContent)
+  FetchContent_Declare(
+    doctest
+    GIT_REPOSITORY https://github.com/doctest/doctest.git
+    GIT_TAG v2.4.11
+    SOURCE_SUBDIR do_not_configure_doctest_cmake
+  )
+  FetchContent_MakeAvailable(doctest)
+
+  enable_testing()
+
+  add_executable(native_tests
+    tests/test_geometry.cpp
+    tests/test_post_gcode.cpp
+    ${CORE_SRC}
+  )
+  target_include_directories(native_tests
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${doctest_SOURCE_DIR}
+  )
+  target_compile_options(native_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
+  add_test(NAME native_tests COMMAND native_tests)
+endif()

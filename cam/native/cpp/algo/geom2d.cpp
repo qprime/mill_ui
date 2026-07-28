@@ -209,8 +209,8 @@ std::vector<double> scanline_intersections(const Polygon& poly, double y) {
 std::vector<double> build_z_levels(double depth, double step_down) {
     if (!std::isfinite(step_down) || step_down < kMinStepDownMm) {
         std::ostringstream oss;
-        oss << "build_z_levels: step_down must be finite and >= " << kMinStepDownMm << ", got "
-            << step_down;
+        oss << "plan_pocket: resolved step_down_mm must be finite and >= " << kMinStepDownMm
+            << ", got " << step_down;
         throw std::invalid_argument(oss.str());
     }
     std::vector<double> z_levels;

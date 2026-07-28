@@ -360,3 +360,14 @@ def test_pocket_none_step_down_still_defaults():
 
 def test_pocket_zero_step_over_still_clamps():
     assert _native.plan_pocket(FACE, TOOL, 0.0, 2.0, 0.0, "spiral")
+
+
+def test_pocket_resolved_default_step_down_names_the_binding():
+    tiny = Tool(name="tiny", diameter=0.0199, rpm=12000.0, feed_xy=900.0, feed_z=300.0)
+    with pytest.raises(ValueError, match=r"plan_pocket: resolved step_down_mm must be finite and >= 0.01"):
+        _native.plan_pocket(FACE, tiny, 3.0, None, 0.0, "spiral")
+
+
+def test_pocket_explicit_step_down_bypasses_resolved_default():
+    tiny = Tool(name="tiny", diameter=0.0199, rpm=12000.0, feed_xy=900.0, feed_z=300.0)
+    assert _native.plan_pocket(FACE, tiny, 3.0, 0.5, 0.0, "spiral")

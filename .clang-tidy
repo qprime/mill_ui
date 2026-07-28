@@ -1,0 +1,35 @@
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  cppcoreguidelines-*,
+  performance-*,
+  readability-*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-do-while,
+  -bugprone-unchecked-optional-access,
+  -bugprone-easily-swappable-parameters,
+  -readability-function-cognitive-complexity,
+  -performance-enum-size
+
+# readability-identifier-length: x/y/z/dx/dy and loop i/j are the geometry
+#   domain's correct names; renaming to satisfy a length floor hurts the math.
+# readability-magic-numbers, cppcoreguidelines-avoid-magic-numbers: fire on
+#   0.5 in the shoelace formula and 180.0 in degree conversion; the meaningful
+#   constants are already named.
+# cppcoreguidelines-avoid-do-while: every hit is doctest's CHECK/REQUIRE
+#   expanding to do-while(0), not project code.
+# bugprone-unchecked-optional-access: false positives in tests where the
+#   dereference is guarded by doctest REQUIRE, which the dataflow analysis
+#   cannot see through.
+# bugprone-easily-swappable-parameters: real signal on the adjacent doubles in
+#   plan_pocket_raster_clipped; fixing needs an options-struct refactor (#178
+#   excludes it) — revisit as its own issue.
+# readability-function-cognitive-complexity: same rationale as above; the
+#   planner functions need decomposition, not a suppression-driven rewrite.
+# performance-enum-size: PocketStrategy is passed by value, never stored in a
+#   struct or array, so a narrower base type buys nothing.
+
+HeaderFilterRegex: 'cam/native/cpp/include/millui/.*'

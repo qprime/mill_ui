@@ -9,6 +9,7 @@ CMake project in cam/native/cpp with the test target enabled, then runs CTest.
 
 Examples:
     python tools/run_native_tests.py
+    python tools/run_native_tests.py --sanitize    # ASan + UBSan
     python tools/run_native_tests.py --build-dir build/native_tests
     python tools/run_native_tests.py -v
 """
@@ -44,11 +45,13 @@ def main(argv: list[str]) -> int:
         prog="run_native_tests.py",
         description="Build and run the native C++ unit tests via CTest.",
     )
-    parser.add_argument("--build-dir", default="build/native_tests", help="CMake build directory.")
+    parser.add_argument("--build-dir", help="CMake build directory.")
+    parser.add_argument("--sanitize", action="store_true", help="Build and run under ASan + UBSan.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose CTest output.")
     ns = parser.parse_args(argv)
 
-    build_dir = REPO_ROOT / ns.build_dir
+    default_build_dir = "build/native_tests_asan" if ns.sanitize else "build/native_tests"
+    build_dir = REPO_ROOT / (ns.build_dir or default_build_dir)
 
     configure = [
         "cmake",
@@ -57,6 +60,7 @@ def main(argv: list[str]) -> int:
         "-B",
         str(build_dir),
         "-DMILLUI_NATIVE_TESTS=ON",
+        f"-DMILLUI_NATIVE_SANITIZE={'ON' if ns.sanitize else 'OFF'}",
     ]
     cmake_dir = pybind11_cmake_dir()
     if cmake_dir is not None:

@@ -11,3 +11,18 @@ repos:
           - mcp[cli]>=1.25
         pass_filenames: false
         args: [.]
+
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format (cam/native/cpp)
+        entry: .venv/bin/python tools/run_clang_format.py --check
+        language: system
+        files: ^cam/native/cpp/.*\.(cpp|hpp)$
+        pass_filenames: false
+      - id: clang-tidy
+        name: clang-tidy (cam/native/cpp)
+        entry: .venv/bin/python tools/run_clang_tidy.py
+        language: system
+        files: ^cam/native/cpp/.*\.(cpp|hpp)$
+        pass_filenames: false

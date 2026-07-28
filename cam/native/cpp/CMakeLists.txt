@@ -4,6 +4,7 @@ project(millui_native LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(pybind11 CONFIG REQUIRED)
 
@@ -44,6 +45,7 @@ target_compile_options(_native PRIVATE -Wall -Wextra -Wpedantic -Werror)
 install(TARGETS _native DESTINATION "cam/native")
 
 option(MILLUI_NATIVE_TESTS "Build native unit tests" OFF)
+option(MILLUI_NATIVE_SANITIZE "Build native unit tests with ASan and UBSan" OFF)
 
 if(MILLUI_NATIVE_TESTS)
   include(FetchContent)
@@ -69,6 +71,14 @@ if(MILLUI_NATIVE_TESTS)
       ${doctest_SOURCE_DIR}
   )
   target_compile_options(native_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
+  if(MILLUI_NATIVE_SANITIZE)
+    target_compile_options(native_tests PRIVATE
+      -fsanitize=address,undefined
+      -fno-omit-frame-pointer
+    )
+    target_link_options(native_tests PRIVATE -fsanitize=address,undefined)
+  endif()
 
   add_test(NAME native_tests COMMAND native_tests)
 endif()

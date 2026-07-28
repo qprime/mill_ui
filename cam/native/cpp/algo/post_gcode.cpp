@@ -27,12 +27,20 @@ std::string fmt_num(double v, int prec) {
 std::string g0(std::optional<double> x, std::optional<double> y, std::optional<double> z,
                int prec) {
     std::vector<std::string> parts{"G0"};
-    if (x) parts.emplace_back("X" + fmt_num(*x, prec));
-    if (y) parts.emplace_back("Y" + fmt_num(*y, prec));
-    if (z) parts.emplace_back("Z" + fmt_num(*z, prec));
+    if (x) {
+        parts.emplace_back("X" + fmt_num(*x, prec));
+    }
+    if (y) {
+        parts.emplace_back("Y" + fmt_num(*y, prec));
+    }
+    if (z) {
+        parts.emplace_back("Z" + fmt_num(*z, prec));
+    }
     std::ostringstream oss;
     for (std::size_t i = 0; i < parts.size(); ++i) {
-        if (i) oss << ' ';
+        if (i > 0) {
+            oss << ' ';
+        }
         oss << parts[i];
     }
     return oss.str();
@@ -41,16 +49,24 @@ std::string g0(std::optional<double> x, std::optional<double> y, std::optional<d
 std::string g1(std::optional<double> x, std::optional<double> y, std::optional<double> z,
                std::optional<double> feed, int prec) {
     std::vector<std::string> parts{"G1"};
-    if (x) parts.emplace_back("X" + fmt_num(*x, prec));
-    if (y) parts.emplace_back("Y" + fmt_num(*y, prec));
-    if (z) parts.emplace_back("Z" + fmt_num(*z, prec));
+    if (x) {
+        parts.emplace_back("X" + fmt_num(*x, prec));
+    }
+    if (y) {
+        parts.emplace_back("Y" + fmt_num(*y, prec));
+    }
+    if (z) {
+        parts.emplace_back("Z" + fmt_num(*z, prec));
+    }
     if (feed) {
         const int feed_prec = std::max(0, prec - 2);
         parts.emplace_back("F" + fmt_num(*feed, feed_prec));
     }
     std::ostringstream oss;
     for (std::size_t i = 0; i < parts.size(); ++i) {
-        if (i) oss << ' ';
+        if (i > 0) {
+            oss << ' ';
+        }
         oss << parts[i];
     }
     return oss.str();
@@ -86,8 +102,12 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
                            [&](const Comment& c) {
                                std::string text = c.text;
                                for (char& ch : text) {
-                                   if (ch == '(') ch = '[';
-                                   if (ch == ')') ch = ']';
+                                   if (ch == '(') {
+                                       ch = '[';
+                                   }
+                                   if (ch == ')') {
+                                       ch = ']';
+                                   }
                                }
                                lines.emplace_back("(" + text + ")");
                            },
@@ -109,17 +129,17 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
                            [&](const Rapid& r) {
                                lines.emplace_back(g0(r.x, r.y, r.z, cfg.prec));
                                if (r.z) {
-                                   current_z = *r.z;
+                                   current_z = r.z;
                                }
                            },
                            [&](const Cut& c) {
                                const std::optional<double> feed = c.feed ? c.feed : current_feed;
                                lines.emplace_back(g1(c.x, c.y, c.z, feed, cfg.prec));
                                if (c.z) {
-                                   current_z = *c.z;
+                                   current_z = c.z;
                                }
                                if (c.feed) {
-                                   current_feed = *c.feed;
+                                   current_feed = c.feed;
                                }
                            },
                            [&](const Retract& r) {

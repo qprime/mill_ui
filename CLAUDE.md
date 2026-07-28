@@ -61,7 +61,7 @@ python -m cli.generate_golden --all-recipes docs/recipes --update --force  # sna
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
-**Verification wrappers:** always invoke via the `tools/run_*.py` wrappers so the command passes the agent's allowed-command filters (no compound `source && ...` needed). Do not call `pytest`, `ruff`, `mypy`, or `pylint` directly.
+**Verification wrappers:** always invoke via the `tools/run_*.py` wrappers so the command passes the agent's allowed-command filters (no compound `source && ...` needed). Do not call `pytest`, `ruff`, `mypy`, `pylint`, `clang-format`, `clang-tidy`, or `ctest` directly.
 
 ```bash
 # Unit tests (pytest + coverage)
@@ -82,6 +82,14 @@ gh issue view <number> --json title,body,state,labels,comments,author,createdAt,
 # Duplicate-code audit (pylint duplicate-code only; run after refactors)
 .venv/bin/python tools/run_duplication.py                        # full repo, min 6 lines
 .venv/bin/python tools/run_duplication.py --min-lines 10         # looser threshold
+
+# C++ native tree (cam/native/cpp) — clang-format/clang-tidy pinned to 18
+.venv/bin/python tools/run_native_tests.py                       # configure + build + ctest
+.venv/bin/python tools/run_native_tests.py --sanitize            # ASan + UBSan (on-demand)
+.venv/bin/python tools/run_clang_format.py --check               # verify formatting (pre-commit)
+.venv/bin/python tools/run_clang_format.py                       # apply formatting
+.venv/bin/python tools/run_clang_tidy.py                         # static analysis (pre-commit)
+.venv/bin/python tools/run_clang_tidy.py --fix                   # apply mechanical fixes
 ```
 
 The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:

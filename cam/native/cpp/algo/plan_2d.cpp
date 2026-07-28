@@ -1,6 +1,7 @@
 #include "millui/native/algo/plan_2d.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <numbers>
 #include <optional>
@@ -18,7 +19,6 @@ constexpr double kDefaultToolDiameterMm = 3.0;
 constexpr double kDefaultStepDownCapMm = 3.0;
 constexpr double kMinStepOverMm = 0.1;
 constexpr double kDefaultPeckMm = 3.0;
-constexpr double kDefaultRetractClearanceMm = 2.0;
 constexpr double kProfileDefaultStepDownMm = 2.0;
 constexpr double kBoreDefaultToolDiameterMm = 1.0;
 constexpr double kBoreDefaultStepDownMm = 2.5;
@@ -52,7 +52,9 @@ Move make_retract(double z) { return Retract{z}; }
 void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z, double target_z,
                          double ramp_angle_deg, double safe_z, double feed_xy, double feed_z,
                          bool keepdown = false) {
-    if (path.empty()) return;
+    if (path.empty()) {
+        return;
+    }
 
     double step_down = std::abs(target_z - prev_z);
     double ramp_dist = 0.0;
@@ -92,7 +94,9 @@ void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z,
     double z = prev_z;
     for (size_t i = 0; i + 1 < path.size() && remaining > kEps; ++i) {
         double sl = seg_length(path[i], path[i + 1]);
-        if (sl < kEps) continue;
+        if (sl < kEps) {
+            continue;
+        }
         double use = std::min(sl, remaining);
         double frac = use / sl;
         double nx = path[i].x + (path[i + 1].x - path[i].x) * frac;
@@ -141,7 +145,9 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
             for (size_t k = 0; k + 1 < xs.size(); k += 2) {
                 double x_left = xs[k] + tool_r;
                 double x_right = xs[k + 1] - tool_r;
-                if (x_right < x_left + kEps) continue;
+                if (x_right < x_left + kEps) {
+                    continue;
+                }
 
                 double x_start = direction == 1 ? x_left : x_right;
                 double x_end = direction == 1 ? x_right : x_left;
@@ -150,7 +156,7 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
                     moves.push_back(make_rapid(x_start, y, safe_z));
                     moves.push_back(make_cut(std::nullopt, std::nullopt, layer_z, tool.feed_z));
                 } else {
-                    Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
+                    const std::array<Vec2, 2> ramp_path = {Vec2{x_start, y}, Vec2{x_end, y}};
                     emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z, ramp_angle_deg, safe_z,
                                         tool.feed_xy, tool.feed_z);
                 }
@@ -217,7 +223,7 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_o
         while (y <= b.maxy + kEps) {
             double x_start = direction == 1 ? b.minx : b.maxx;
             double x_end = direction == 1 ? b.maxx : b.minx;
-            Vec2 ramp_path[2] = {{x_start, y}, {x_end, y}};
+            const std::array<Vec2, 2> ramp_path = {Vec2{x_start, y}, Vec2{x_end, y}};
             emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z, ramp_angle_deg, safe_z,
                                 tool.feed_xy, tool.feed_z);
             moves.push_back(make_set_feed(tool.feed_xy));
@@ -273,7 +279,8 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
         }
     }
 
-    Vec2 sliver_a{}, sliver_b{};
+    Vec2 sliver_a{};
+    Vec2 sliver_b{};
     bool has_sliver = false;
     {
         const Polygon& last_ring = rings.back();
@@ -305,7 +312,8 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
         size_t ramp_edge = longest_edge_index(first_ring);
         size_t ramp_start_idx = ramp_edge;
         size_t ramp_end_idx = (ramp_edge + 1) % n0;
-        Vec2 ramp_path[2] = {first_ring[ramp_start_idx], first_ring[ramp_end_idx]};
+        const std::array<Vec2, 2> ramp_path = {first_ring[ramp_start_idx],
+                                               first_ring[ramp_end_idx]};
         emit_ramp_or_plunge(moves, ramp_path, prev_z, layer_z, ramp_angle_deg, safe_z, tool.feed_xy,
                             tool.feed_z);
         moves.push_back(make_set_feed(tool.feed_xy));

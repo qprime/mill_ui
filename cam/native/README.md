@@ -85,3 +85,19 @@ output.
 - All geometry is in millimetres.
 - Bindings are deterministic; no randomised behaviour inside C++ code.
 - The build compiles clean under `-Wall -Wextra -Wpedantic -Werror`.
+
+### Tooling gates
+
+Formatting and static analysis run as pre-commit hooks, so a violation is
+rejected at commit time. Both are pinned to clang 18 — a different major
+version reformats correctly-formatted code and reports `--check` failures.
+
+| Gate | Config | Command |
+|------|--------|---------|
+| Formatting | `.clang-format` (Google, IndentWidth 4, ColumnLimit 100) | `python tools/run_clang_format.py --check` |
+| Static analysis | `.clang-tidy` (`bugprone-*`, `cert-*`, `cppcoreguidelines-*`, `performance-*`, `readability-*`) | `python tools/run_clang_tidy.py` |
+| Sanitizers | `-DMILLUI_NATIVE_SANITIZE=ON` (ASan + UBSan on `native_tests`) | `python tools/run_native_tests.py --sanitize` |
+
+Sanitizers are on-demand rather than pre-commit; an instrumented build on
+every commit is disproportionate for a tree this size. Every `.clang-tidy`
+disable carries a one-line comment explaining it, per the guidelines.

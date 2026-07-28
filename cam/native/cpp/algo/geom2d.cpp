@@ -36,7 +36,9 @@ double shoelace_area(const Polygon& poly) {
 
 bool is_convex(const Polygon& poly) {
     size_t n = poly.size();
-    if (n < 3) return false;
+    if (n < 3) {
+        return false;
+    }
 
     bool has_pos = false;
     bool has_neg = false;
@@ -48,9 +50,15 @@ bool is_convex(const Polygon& poly) {
         double dx2 = poly[k].x - poly[j].x;
         double dy2 = poly[k].y - poly[j].y;
         double cross = dx1 * dy2 - dy1 * dx2;
-        if (cross > kEps) has_pos = true;
-        if (cross < -kEps) has_neg = true;
-        if (has_pos && has_neg) return false;
+        if (cross > kEps) {
+            has_pos = true;
+        }
+        if (cross < -kEps) {
+            has_neg = true;
+        }
+        if (has_pos && has_neg) {
+            return false;
+        }
     }
     return true;
 }
@@ -73,7 +81,9 @@ Polygon strip_closing_vertex(const Polygon& poly) {
 
 Polygon inset_convex(const Polygon& poly, double offset) {
     size_t n = poly.size();
-    if (n < 3 || offset < kEps) return poly;
+    if (n < 3 || offset < kEps) {
+        return poly;
+    }
 
     double area = shoelace_area(poly);
     double winding = (area > 0.0) ? -1.0 : 1.0;
@@ -170,13 +180,19 @@ std::vector<double> scanline_intersections(const Polygon& poly, double y) {
         const Vec2& a = poly[i];
         const Vec2& b = poly[j];
 
-        if (std::abs(a.y - b.y) < kEps) continue;
+        if (std::abs(a.y - b.y) < kEps) {
+            continue;
+        }
 
         double y_min = std::min(a.y, b.y);
         double y_max = std::max(a.y, b.y);
 
-        if (y < y_min - kEps || y > y_max + kEps) continue;
-        if (std::abs(y - y_max) < kEps) continue;
+        if (y < y_min - kEps || y > y_max + kEps) {
+            continue;
+        }
+        if (std::abs(y - y_max) < kEps) {
+            continue;
+        }
 
         double t = (y - a.y) / (b.y - a.y);
         t = std::clamp(t, 0.0, 1.0);

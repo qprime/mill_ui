@@ -143,7 +143,9 @@ Paths paths_from_flat_list(const py::sequence& seq) {
         const std::string kind = py::str(d["kind"]);
         if (kind == "comment") {
             std::string text;
-            if (d.contains("text") && !d["text"].is_none()) text = py::str(d["text"]);
+            if (d.contains("text") && !d["text"].is_none()) {
+                text = py::str(d["text"]);
+            }
             path.push_back(Comment{std::move(text)});
         } else if (kind == "set_rpm") {
             path.push_back(SetRpm{opt_field(d, "rpm").value_or(0.0)});

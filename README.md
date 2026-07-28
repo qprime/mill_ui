@@ -190,7 +190,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert between formats |
-| `python -m cli.generate_golden --all-recipes docs/recipes --update` | Regenerate golden metrics |
+| `python -m cli.generate_golden --all-recipes docs/recipes --update --force` | Regenerate golden metrics (snapshot — see [Recipes](#recipes)) |
 
 ## Project Structure
 
@@ -221,19 +221,34 @@ mill_ui/
 
 ## Recipes
 
-The `docs/recipes/` directory contains 70+ worked examples covering basic profiles, pockets, assemblies, joinery, nesting, edge treatments, surface facing, and more. Each recipe includes PML input, expected G-code, and SVG blueprint output. Run all recipes:
+The `docs/recipes/` directory contains 70+ worked examples covering basic profiles, pockets, assemblies, joinery, nesting, edge treatments, surface facing, and more. Each recipe includes PML input, expected G-code, and SVG blueprint output.
+
+Validate every recipe against its committed output. This is a pass/fail gate — it writes nothing:
 
 ```bash
 python -m tests.test_recipes
 ```
 
-## Tests
+Regenerating recipe outputs is a separate, on-demand **snapshot** operation. Recipe artifacts and golden metrics are two halves of one baseline, so update both together or the tree is left inconsistent:
 
 ```bash
-pytest tests/ -x                     # Full suite
-pytest tests/test_pml_yaml.py        # PML parser
-pytest tests/test_ast_to_removal.py  # IR adapter
-python -m tests.test_recipes         # Recipe verification
+python -m tests.test_recipes --regen_recipes                              # recipe outputs + commit hashes
+python -m cli.generate_golden --all-recipes docs/recipes --update --force # golden metrics
+```
+
+The `/snapshot-recipes` skill runs both in order. Do not snapshot on every commit — when a change intentionally alters one recipe, regenerate and stage only that recipe's output.
+
+## Tests
+
+All verification runs through the `tools/run_*.py` wrappers:
+
+```bash
+.venv/bin/python tools/run_tests.py                          # full suite
+.venv/bin/python tools/run_tests.py tests/test_pml_yaml.py   # PML parser
+.venv/bin/python tools/run_tests.py -k finger_joint          # keyword filter
+.venv/bin/python tools/run_ruff.py                           # lint
+.venv/bin/python tools/run_mypy.py                           # type check
+python -m tests.test_recipes                                 # recipe gate
 ```
 
 ## Building the Native Backend

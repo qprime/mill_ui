@@ -131,18 +131,24 @@ def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
             raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
 
 
+def validate_recipes(pml_files: list[Path]) -> list[str]:
+    failures = []
+    for pml_path in pml_files:
+        try:
+            _test_recipe_output_impl(pml_path, regenerate=False)
+        except Exception as e:
+            failures.append(f"{pml_path.name}: {e}")
+
+    return failures
+
+
 def test_recipe_outputs():
     pml_files = discover_recipe_pml_files()
 
     if not pml_files:
         pytest.skip("No recipe PML files found")
 
-    failures = []
-    for pml_path in pml_files:
-        try:
-            _test_recipe_output_impl(pml_path, regenerate=False)
-        except (AssertionError, Exception) as e:
-            failures.append(f"{pml_path.name}: {e}")
+    failures = validate_recipes(pml_files)
 
     if failures:
         raise AssertionError("Recipe output mismatches:\n  " + "\n  ".join(failures))
@@ -184,20 +190,18 @@ if __name__ == "__main__":
 
         print("Done!")
     else:
-        tests = [
-            test_recipe_outputs,
-        ]
+        pml_files = discover_recipe_pml_files()
 
-        passed = 0
-        failed = 0
+        if not pml_files:
+            print("No recipe PML files found under docs/recipes/")
+            sys.exit(1)
 
-        for test in tests:
-            try:
-                if test():
-                    passed += 1
-            except Exception as e:
-                print(f"  FAIL: {e}")
-                failed += 1
+        print(f"Validating {len(pml_files)} recipe(s)...")
 
-        print(f"\n{passed} passed, {failed} failed")
-        sys.exit(0 if failed == 0 else 1)
+        failures = validate_recipes(pml_files)
+
+        for failure in failures:
+            print(f"  FAIL: {failure}")
+
+        print(f"\n{len(pml_files) - len(failures)} passed, {len(failures)} failed")
+        sys.exit(1 if failures else 0)

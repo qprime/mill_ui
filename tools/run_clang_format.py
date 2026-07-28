@@ -18,10 +18,11 @@ from __future__ import annotations
 
 import argparse
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from clang_toolchain import resolve
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 NATIVE_ROOT = REPO_ROOT / "cam" / "native" / "cpp"
@@ -54,12 +55,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--diff", action="store_true", help="Show the reformatting diff.")
     ns = parser.parse_args(argv)
 
-    binary = shutil.which("clang-format")
+    binary, error = resolve("clang-format")
     if binary is None:
-        print(
-            "clang-format not found. Install it with:\n    sudo apt-get install -y clang-format",
-            file=sys.stderr,
-        )
+        print(error, file=sys.stderr)
         return 1
 
     sources = discover_sources(ns.targets)

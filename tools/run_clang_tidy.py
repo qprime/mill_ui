@@ -17,11 +17,13 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from clang_toolchain import resolve
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 NATIVE_ROOT = REPO_ROOT / "cam" / "native" / "cpp"
@@ -44,7 +46,10 @@ def run(cmd: list[str]) -> int:
 
 
 def ensure_compile_commands(build_dir: Path) -> int:
-    if (build_dir / "compile_commands.json").exists():
+    database = build_dir / "compile_commands.json"
+    cmake_lists = NATIVE_ROOT / "CMakeLists.txt"
+    if database.exists() and database.stat().st_mtime >= cmake_lists.stat().st_mtime:
+        dedupe_compile_commands(database)
         return 0
 
     configure = [
@@ -58,7 +63,25 @@ def ensure_compile_commands(build_dir: Path) -> int:
     cmake_dir = pybind11_cmake_dir()
     if cmake_dir is not None:
         configure.append(f"-Dpybind11_DIR={cmake_dir}")
-    return run(configure)
+    rc = run(configure)
+    if rc == 0:
+        dedupe_compile_commands(database)
+    return rc
+
+
+def dedupe_compile_commands(database: Path) -> None:
+    """Keep one compile command per file.
+
+    CORE_SRC builds into both _native and native_tests, so every core source
+    appears twice and clang-tidy would analyze it once per entry. The two
+    commands differ only in target-specific flags that do not affect analysis.
+    """
+    entries = json.loads(database.read_text())
+    unique: dict[str, dict[str, str]] = {}
+    for entry in entries:
+        unique.setdefault(entry["file"], entry)
+    if len(unique) != len(entries):
+        database.write_text(json.dumps(list(unique.values()), indent=2))
 
 
 def discover_sources(targets: list[str]) -> list[Path]:
@@ -91,12 +114,9 @@ def main(argv: list[str]) -> int:
     )
     ns = parser.parse_args(argv)
 
-    binary = shutil.which("clang-tidy")
+    binary, error = resolve("clang-tidy")
     if binary is None:
-        print(
-            "clang-tidy not found. Install it with:\n    sudo apt-get install -y clang-tidy",
-            file=sys.stderr,
-        )
+        print(error, file=sys.stderr)
         return 1
 
     build_dir = REPO_ROOT / ns.build_dir

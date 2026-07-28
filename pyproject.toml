@@ -77,6 +77,9 @@ no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 explicit_package_bases = true
+# tools/ holds standalone scripts, not a package; they import siblings via the
+# script-directory sys.path entry, which mypy does not emulate.
+mypy_path = "tools"
 exclude = ["^docs/", "^build/"]
 # Suppress annotation-noise errors codebase-wide; real logic errors are fixed explicitly
 disable_error_code = [

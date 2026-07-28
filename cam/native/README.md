@@ -91,6 +91,9 @@ output.
 Formatting and static analysis run as pre-commit hooks, so a violation is
 rejected at commit time. Both are pinned to clang 18 — a different major
 version reformats correctly-formatted code and reports `--check` failures.
+The wrappers enforce the pin: they prefer the version-suffixed binary
+(`clang-format-18`) and exit with a version-mismatch error rather than
+running an unpinned one.
 
 | Gate | Config | Command |
 |------|--------|---------|

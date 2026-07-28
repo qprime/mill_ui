@@ -1,8 +1,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cmath>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <variant>
 
 #include "millui/native/algo/plan_2d.hpp"
@@ -182,6 +185,29 @@ PostConfig post_cfg_from_dict(const py::dict& d) {
     return cfg;
 }
 
+std::string fmt_scalar(double v) {
+    std::ostringstream oss;
+    oss << v;
+    return oss.str();
+}
+
+double checked_scalar(double v, double min, const char* fn, const char* field) {
+    if (!std::isfinite(v) || v < min) {
+        throw std::invalid_argument(std::string(fn) + ": " + field + " must be finite and >= " +
+                                    fmt_scalar(min) + ", got " + fmt_scalar(v));
+    }
+    return v;
+}
+
+double checked_step_scalar(double v, const char* fn, const char* field) {
+    if (!std::isfinite(v) || v < 0.0 || (v > 0.0 && v < algo::kMinStepDownMm)) {
+        throw std::invalid_argument(std::string(fn) + ": " + field +
+                                    " must be finite and either 0 or >= " +
+                                    fmt_scalar(algo::kMinStepDownMm) + ", got " + fmt_scalar(v));
+    }
+    return v;
+}
+
 PocketStrategy strategy_from_string(const std::string& strategy) {
     if (strategy == "raster") {
         return PocketStrategy::Raster;
@@ -204,7 +230,10 @@ PYBIND11_MODULE(_native, m) {
            std::optional<double> step_down_mm, double ramp_angle_deg, const std::string& strategy) {
             PlanarFace face = face_from_dict(face_dict);
             Tool tool = tool_from_py(tool_obj);
-            double step_down = step_down_mm.value_or(0.0);
+            checked_scalar(step_over_mm, 0.0, "plan_pocket", "step_over_mm");
+            double step_down = step_down_mm ? checked_scalar(*step_down_mm, algo::kMinStepDownMm,
+                                                             "plan_pocket", "step_down_mm")
+                                            : 0.0;
             PocketStrategy strat = strategy_from_string(strategy);
             return paths_to_flat_list(algo::plan_pocket(face, tool, step_over_mm, step_down,
                                                         face.safe_z, ramp_angle_deg, strat));
@@ -219,6 +248,7 @@ PYBIND11_MODULE(_native, m) {
            double step_down_mm, double safe_z_mm, double ramp_angle_deg) {
             Polygon poly = polygon_from_py(boundary);
             Tool tool = tool_from_py(tool_obj);
+            checked_step_scalar(step_down_mm, "plan_profile", "step_down_mm");
             return paths_to_flat_list(algo::plan_profile(poly, tool, total_depth_mm, step_down_mm,
                                                          safe_z_mm, ramp_angle_deg));
         },
@@ -235,6 +265,7 @@ PYBIND11_MODULE(_native, m) {
                 holes.push_back(hole_from_dict(py::reinterpret_borrow<py::dict>(item)));
             }
             Tool tool = tool_from_py(tool_obj);
+            checked_step_scalar(peck_mm, "plan_drill", "peck_mm");
             return paths_to_flat_list(algo::plan_drill(holes, tool, peck_mm, safe_z_mm));
         },
         py::arg("holes"), py::arg("tool"), py::arg("peck_mm"), py::arg("safe_z_mm"));
@@ -245,6 +276,7 @@ PYBIND11_MODULE(_native, m) {
            double safe_z_mm) {
             Hole hole = hole_from_dict(hole_dict);
             Tool tool = tool_from_py(tool_obj);
+            checked_step_scalar(step_down_mm, "plan_bore_helical", "step_down_mm");
             return paths_to_flat_list(algo::plan_bore_helical(hole, tool, step_down_mm, safe_z_mm));
         },
         py::arg("hole"), py::arg("tool"), py::arg("step_down_mm"), py::arg("safe_z_mm"));

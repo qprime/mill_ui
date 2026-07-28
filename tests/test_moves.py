@@ -4,9 +4,11 @@ import dataclasses
 
 import pytest
 
+from cam.model.tool import Tool
 from cam.moves import (
     CommentMove,
     CutMove,
+    DwellMove,
     MotionMove,
     RapidMove,
     RetractMove,
@@ -14,6 +16,7 @@ from cam.moves import (
     SetRpmMove,
     XYMove,
 )
+from cam.native import _native  # type: ignore[attr-defined]
 from cam.native.core import _dict_to_move, post_gcode
 from cam.post.gcode import _move_to_dict
 
@@ -255,3 +258,105 @@ def test_round_trip_cut():
 def test_round_trip_comment():
     m = CommentMove(text="roundtrip")
     assert _dict_to_move(_move_to_dict(m)) == m
+
+
+def test_round_trip_set_rpm():
+    m = SetRpmMove(rpm=15000.0)
+    assert _dict_to_move(_move_to_dict(m)) == m
+
+
+def test_round_trip_set_feed():
+    m = SetFeedMove(feed=1200.0)
+    assert _dict_to_move(_move_to_dict(m)) == m
+
+
+def test_round_trip_retract():
+    m = RetractMove(z=7.5)
+    assert _dict_to_move(_move_to_dict(m)) == m
+
+
+def test_round_trip_dwell():
+    m = DwellMove(seconds=1.5)
+    assert _dict_to_move(_move_to_dict(m)) == m
+
+
+def test_post_gcode_round_trips_all_seven_kinds():
+    moves: list[dict] = [
+        {"kind": "comment", "text": "all kinds"},
+        {"kind": "set_rpm", "rpm": 12000.0},
+        {"kind": "set_feed", "feed": 900.0},
+        {"kind": "rapid", "x": 10.0, "y": 20.0, "z": 5.0},
+        {"kind": "cut", "x": 30.0, "y": 40.0, "z": -3.0, "feed": 600.0},
+        {"kind": "retract", "z": 6.0},
+        {"kind": "dwell", "seconds": 2.0},
+    ]
+    text = post_gcode(moves)
+    assert "(all kinds)" in text
+    assert "S12000" in text
+    assert "F900" in text
+    assert "G0 X10" in text
+    assert "X30" in text and "Y40" in text and "Z-3" in text
+    assert "Z6" in text
+    assert "G4 P2" in text
+
+
+TOOL = Tool(name="em6", diameter=6.0, rpm=12000.0, feed_xy=900.0, feed_z=300.0)
+SQUARE = [(0.0, 0.0), (50.0, 0.0), (50.0, 50.0), (0.0, 50.0), (0.0, 0.0)]
+FACE = {"outer": SQUARE, "depth": 5.0, "safe_z": 5.0}
+HOLES = [{"x": 10.0, "y": 10.0, "diameter": 6.0, "depth": 5.0}]
+BORE_HOLE = {"x": 10.0, "y": 10.0, "diameter": 12.0, "depth": 5.0}
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), -1.0, 0.001])
+def test_plan_profile_rejects_invalid_step_down(bad):
+    with pytest.raises(ValueError, match=r"plan_profile: step_down_mm must be finite"):
+        _native.plan_profile(SQUARE, TOOL, 5.0, bad, 5.0, 0.0)
+
+
+def test_plan_profile_rejects_negative_step_down_names_value():
+    with pytest.raises(ValueError, match=r"step_down_mm .* got -1"):
+        _native.plan_profile(SQUARE, TOOL, 5.0, -1.0, 5.0, 0.0)
+
+
+def test_plan_profile_zero_step_down_uses_default():
+    assert _native.plan_profile(SQUARE, TOOL, 5.0, 0.0, 5.0, 0.0)
+
+
+def test_plan_drill_rejects_subfloor_peck():
+    with pytest.raises(ValueError, match=r"plan_drill: peck_mm must be finite"):
+        _native.plan_drill(HOLES, TOOL, 0.001, 5.0)
+
+
+def test_plan_drill_zero_peck_uses_default():
+    assert _native.plan_drill(HOLES, TOOL, 0.0, 5.0)
+
+
+def test_plan_bore_rejects_subfloor_step_down():
+    with pytest.raises(ValueError, match=r"plan_bore_helical: step_down_mm must be finite"):
+        _native.plan_bore_helical(BORE_HOLE, TOOL, 0.001, 5.0)
+
+
+def test_plan_bore_zero_step_down_uses_default():
+    assert _native.plan_bore_helical(BORE_HOLE, TOOL, 0.0, 5.0)
+
+
+def test_pocket_rejects_subfloor_step_down():
+    with pytest.raises(ValueError, match=r"plan_pocket: step_down_mm must be finite and >= 0.01"):
+        _native.plan_pocket(FACE, TOOL, 3.0, 1e-9, 0.0, "spiral")
+
+
+def test_pocket_rejects_negative_step_over():
+    with pytest.raises(ValueError, match=r"plan_pocket: step_over_mm must be finite"):
+        _native.plan_pocket(FACE, TOOL, -1.0, 2.0, 0.0, "spiral")
+
+
+def test_pocket_accepts_floor_step_down():
+    assert _native.plan_pocket(FACE, TOOL, 3.0, 0.01, 0.0, "spiral")
+
+
+def test_pocket_none_step_down_still_defaults():
+    assert _native.plan_pocket(FACE, TOOL, 3.0, None, 0.0, "spiral")
+
+
+def test_pocket_zero_step_over_still_clamps():
+    assert _native.plan_pocket(FACE, TOOL, 0.0, 2.0, 0.0, "spiral")

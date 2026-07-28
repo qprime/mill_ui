@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
+#include <stdexcept>
 
 namespace millui::native::algo {
 
@@ -205,6 +207,12 @@ std::vector<double> scanline_intersections(const Polygon& poly, double y) {
 }
 
 std::vector<double> build_z_levels(double depth, double step_down) {
+    if (!std::isfinite(step_down) || step_down < kMinStepDownMm) {
+        std::ostringstream oss;
+        oss << "build_z_levels: step_down must be finite and >= " << kMinStepDownMm << ", got "
+            << step_down;
+        throw std::invalid_argument(oss.str());
+    }
     std::vector<double> z_levels;
     double z = 0.0;
     while (z > depth + kEps) {

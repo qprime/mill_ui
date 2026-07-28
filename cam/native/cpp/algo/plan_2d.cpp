@@ -435,8 +435,7 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
         }
 
         bool can_keepdown = use_ramp > kEps && std::abs(prev_z) > kEps;
-        bool is_last_pass = std::max(z - step_down, depth_target) >= depth_target - kEps &&
-                            std::abs(z - depth_target) < kEps;
+        bool is_last_pass = std::abs(z - depth_target) < kEps;
 
         if (use_ramp > kEps) {
             std::vector<Vec2> rev_path;

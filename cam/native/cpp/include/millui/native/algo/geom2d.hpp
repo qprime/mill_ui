@@ -8,6 +8,7 @@
 namespace millui::native::algo {
 
 inline constexpr double kEps = 1e-9;
+inline constexpr double kMinStepDownMm = 0.01;
 
 struct Bounds {
     double minx = 0.0;

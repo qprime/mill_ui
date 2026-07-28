@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
@@ -228,6 +230,20 @@ class TestScanlineEdgeCases:
         assert isinstance(moves, list)
         cuts = _cut_moves(moves)
         assert len(cuts) >= 0
+
+
+class TestStrategyValidation:
+    def test_rejects_unknown_strategy(self):
+        shape = polygon(_l_shape_pts())
+        with pytest.raises(ValueError, match=r"strategy must be one of raster\|spiral"):
+            native_core.pocket_raster(shape, _setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="bogus")
+
+    def test_rejects_miscased_strategy(self):
+        shape = polygon(_l_shape_pts())
+        with pytest.raises(ValueError, match=r"strategy must be one of raster\|spiral"):
+            native_core.pocket_raster(
+                shape, _setup(), depth_mm=3.0, stepover_mm=2.0, stepdown_mm=3.0, strategy="Raster"
+            )
 
 
 def _near_boundary(x: float, y: float, poly: list[tuple[float, float]], tol: float) -> bool:

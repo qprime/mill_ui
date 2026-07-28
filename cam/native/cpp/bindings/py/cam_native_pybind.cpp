@@ -190,6 +190,17 @@ PostConfig post_cfg_from_dict(const py::dict& d) {
     return cfg;
 }
 
+PocketStrategy strategy_from_string(const std::string& strategy) {
+    if (strategy == "raster") {
+        return PocketStrategy::Raster;
+    }
+    if (strategy == "spiral") {
+        return PocketStrategy::Spiral;
+    }
+    throw std::invalid_argument("plan_pocket: strategy must be one of raster|spiral, got '" +
+                                strategy + "'");
+}
+
 }  // namespace
 
 PYBIND11_MODULE(_native, m) {
@@ -202,7 +213,7 @@ PYBIND11_MODULE(_native, m) {
             PlanarFace face = face_from_dict(face_dict);
             Tool tool = tool_from_py(tool_obj);
             double step_down = step_down_mm.value_or(0.0);
-            auto strat = (strategy == "raster") ? PocketStrategy::Raster : PocketStrategy::Spiral;
+            PocketStrategy strat = strategy_from_string(strategy);
             return paths_to_flat_list(algo::plan_pocket(face, tool, step_over_mm, step_down,
                                                         face.safe_z, ramp_angle_deg, strat));
         },

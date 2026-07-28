@@ -24,11 +24,17 @@ Checks: >
 # bugprone-unchecked-optional-access: false positives in tests where the
 #   dereference is guarded by doctest REQUIRE, which the dataflow analysis
 #   cannot see through.
-# bugprone-easily-swappable-parameters: real signal on the adjacent doubles in
-#   plan_pocket_raster_clipped; fixing needs an options-struct refactor (#178
-#   excludes it) — revisit as its own issue.
-# readability-function-cognitive-complexity: same rationale as above; the
-#   planner functions need decomposition, not a suppression-driven rewrite.
+# bugprone-easily-swappable-parameters: the triplicated pocket preamble is now
+#   PocketParams (#183), but the check still fires on 14 sites. Eleven are the
+#   public plan_* FFI surface and emit_ramp_or_plunge; pybind passes those by
+#   keyword (py::arg), so the transposition the check warns about cannot occur
+#   at the only call site. The remaining three are pybind's own
+#   py::sequence-vs-py::object conversions, not project code. Enabling it would
+#   buy no defect prevention and would churn the binding contract.
+# readability-function-cognitive-complexity: post_gcode measures 52, almost
+#   entirely nesting penalty from its seven inline std::visit lambdas — an
+#   artifact of the metric, not real complexity. Enabling the check would
+#   red-gate idiomatic variant dispatch.
 # performance-enum-size: PocketStrategy is passed by value, never stored in a
 #   struct or array, so a narrower base type buys nothing.
 

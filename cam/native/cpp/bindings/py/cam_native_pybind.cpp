@@ -14,13 +14,6 @@ using namespace millui::native;
 
 namespace {
 
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 py::object opt_to_py(std::optional<double> v) { return v ? py::cast(*v) : py::none(); }
 
 Vec2 vec2_from_py(const py::sequence& seq) {
@@ -46,7 +39,6 @@ Tool tool_from_py(const py::object& obj) {
     tool.rpm = obj.attr("rpm").cast<double>();
     tool.feed_xy = obj.attr("feed_xy").cast<double>();
     tool.feed_z = obj.attr("feed_z").cast<double>();
-    tool.kind = py::str(obj.attr("kind"));
     return tool;
 }
 

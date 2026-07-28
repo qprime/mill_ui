@@ -15,9 +15,6 @@ namespace millui::native::algo {
 
 namespace {
 
-constexpr double kDefaultToolDiameterMm = 3.0;
-constexpr double kDefaultStepDownCapMm = 3.0;
-constexpr double kMinStepOverMm = 0.1;
 constexpr double kDefaultPeckMm = 3.0;
 constexpr double kProfileDefaultStepDownMm = 2.0;
 constexpr double kBoreDefaultToolDiameterMm = 1.0;
@@ -49,9 +46,52 @@ Move make_cut(std::optional<double> x, std::optional<double> y, std::optional<do
 
 Move make_retract(double z) { return Retract{z}; }
 
+}  // namespace
+
+PocketParams PocketParams::resolve(const Tool& tool, double depth_mm, double step_over_mm,
+                                   double step_down_mm) {
+    const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
+    const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
+    return PocketParams{
+        .tool_diameter = tool_d,
+        .tool_radius = 0.5 * tool_d,
+        .step_down = step_down_mm > kEps ? step_down_mm : default_step_down,
+        .step_over = std::max(kMinStepOverMm, step_over_mm),
+        .depth = -std::abs(depth_mm),
+    };
+}
+
+std::vector<Polygon> build_inset_rings(const ConvexPolygon& outermost, double step_over) {
+    std::vector<Polygon> rings;
+    Polygon ring = outermost.points();
+    double accumulated_offset = 0.0;
+    while (!ring.empty()) {
+        rings.push_back(ring);
+        accumulated_offset += step_over;
+        ring = inset(outermost, accumulated_offset);
+    }
+    return rings;
+}
+
+std::optional<std::pair<Vec2, Vec2>> find_sliver_span(const Polygon& last_ring,
+                                                      double tool_diameter) {
+    const Bounds lb = bounds_of(last_ring);
+    const double w = lb.maxx - lb.minx;
+    const double h = lb.maxy - lb.miny;
+    if (std::max(w, h) <= kEps || std::min(w, h) <= tool_diameter + kEps) {
+        return std::nullopt;
+    }
+    if (w >= h) {
+        const double cy = 0.5 * (lb.miny + lb.maxy);
+        return std::pair{Vec2{lb.minx, cy}, Vec2{lb.maxx, cy}};
+    }
+    const double cx = 0.5 * (lb.minx + lb.maxx);
+    return std::pair{Vec2{cx, lb.miny}, Vec2{cx, lb.maxy}};
+}
+
 void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z, double target_z,
                          double ramp_angle_deg, double safe_z, double feed_xy, double feed_z,
-                         bool keepdown = false) {
+                         bool keepdown) {
     if (path.empty()) {
         return;
     }
@@ -110,18 +150,18 @@ void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z,
     moves.push_back(make_cut(end_point.x, end_point.y, target_z, feed_xy));
 }
 
-Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool, double depth_val,
-                                 double step_over_mm, double step_down_mm, double safe_z_mm,
+namespace {
+
+Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool,
+                                 const PocketParams& params, double safe_z_mm,
                                  double ramp_angle_deg) {
     Polygon poly = ensure_cw(outer_stripped);
     const Bounds b = bounds_of(poly);
     const double safe_z = safe_z_mm;
-    const double depth = -std::abs(depth_val);
-    const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
-    const double tool_r = 0.5 * tool_d;
-    const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
-    const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-    const double step_over = std::max(kMinStepOverMm, step_over_mm);
+    const double depth = params.depth;
+    const double tool_r = params.tool_radius;
+    const double step_down = params.step_down;
+    const double step_over = params.step_over;
 
     Paths paths(1);
     Path& moves = paths.front();
@@ -195,15 +235,13 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
     return paths;
 }
 
-Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_over_mm,
-                         double step_down_mm, double safe_z_mm, double ramp_angle_deg) {
+Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, const PocketParams& params,
+                         double safe_z_mm, double ramp_angle_deg) {
     const Bounds b = bounds_of(face.outer);
     const double safe_z = safe_z_mm;
-    const double depth = -std::abs(face.depth);
-    const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
-    const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
-    const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-    const double step_over = std::max(kMinStepOverMm, step_over_mm);
+    const double depth = params.depth;
+    const double step_down = params.step_down;
+    const double step_over = params.step_over;
 
     Paths paths(1);
     Path& moves = paths.front();
@@ -238,23 +276,20 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, double step_o
     return paths;
 }
 
-Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double depth_val,
-                         double step_over_mm, double step_down_mm, double safe_z_mm,
-                         double ramp_angle_deg) {
+Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool,
+                         const PocketParams& params, double safe_z_mm, double ramp_angle_deg) {
     const double safe_z = safe_z_mm;
-    const double depth = -std::abs(depth_val);
-    const double tool_d = tool.diameter <= 0.0 ? kDefaultToolDiameterMm : tool.diameter;
-    const double tool_r = 0.5 * tool_d;
-    const double default_step_down = std::min(kDefaultStepDownCapMm, 0.5 * tool_d);
-    const double step_down = step_down_mm > kEps ? step_down_mm : default_step_down;
-    const double step_over = std::max(kMinStepOverMm, step_over_mm);
+    const double depth = params.depth;
+    const double step_down = params.step_down;
+    const double step_over = params.step_over;
 
     std::optional<ConvexPolygon> boundary = ConvexPolygon::try_from(outer_stripped);
     if (!boundary) {
         return Paths(1);
     }
 
-    std::optional<ConvexPolygon> outermost = ConvexPolygon::try_from(inset(*boundary, tool_r));
+    std::optional<ConvexPolygon> outermost =
+        ConvexPolygon::try_from(inset(*boundary, params.tool_radius));
     if (!outermost) {
         return Paths(1);
     }
@@ -268,40 +303,9 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
     moves.push_back(make_set_rpm(tool.rpm));
     moves.push_back(make_set_feed(tool.feed_xy));
 
-    std::vector<Polygon> rings;
-    {
-        Polygon ring = outermost->points();
-        double accumulated_offset = 0.0;
-        while (!ring.empty()) {
-            rings.push_back(ring);
-            accumulated_offset += step_over;
-            ring = inset(*outermost, accumulated_offset);
-        }
-    }
-
-    Vec2 sliver_a{};
-    Vec2 sliver_b{};
-    bool has_sliver = false;
-    {
-        const Polygon& last_ring = rings.back();
-        Bounds lb = bounds_of(last_ring);
-        double w = lb.maxx - lb.minx;
-        double h = lb.maxy - lb.miny;
-        double short_dim = std::min(w, h);
-        double long_dim = std::max(w, h);
-        if (long_dim > kEps && short_dim > tool_d + kEps) {
-            double cx = 0.5 * (lb.minx + lb.maxx);
-            double cy = 0.5 * (lb.miny + lb.maxy);
-            if (w >= h) {
-                sliver_a = {lb.minx, cy};
-                sliver_b = {lb.maxx, cy};
-            } else {
-                sliver_a = {cx, lb.miny};
-                sliver_b = {cx, lb.maxy};
-            }
-            has_sliver = true;
-        }
-    }
+    const std::vector<Polygon> rings = build_inset_rings(*outermost, step_over);
+    const std::optional<std::pair<Vec2, Vec2>> sliver =
+        find_sliver_span(rings.back(), params.tool_diameter);
 
     const std::vector<double> z_levels = build_z_levels(depth, step_down);
 
@@ -363,13 +367,13 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool, double
             }
         }
 
-        if (has_sliver) {
+        if (sliver) {
             const Polygon& last_ring = rings.back();
             const Vec2& ring_end = last_ring[0];
-            double da = std::hypot(sliver_a.x - ring_end.x, sliver_a.y - ring_end.y);
-            double db = std::hypot(sliver_b.x - ring_end.x, sliver_b.y - ring_end.y);
-            const Vec2& near = da <= db ? sliver_a : sliver_b;
-            const Vec2& far = da <= db ? sliver_b : sliver_a;
+            double da = std::hypot(sliver->first.x - ring_end.x, sliver->first.y - ring_end.y);
+            double db = std::hypot(sliver->second.x - ring_end.x, sliver->second.y - ring_end.y);
+            const Vec2& near = da <= db ? sliver->first : sliver->second;
+            const Vec2& far = da <= db ? sliver->second : sliver->first;
             moves.push_back(make_cut(near.x, near.y, std::nullopt));
             moves.push_back(make_cut(far.x, far.y, std::nullopt));
         }
@@ -387,14 +391,14 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
                   double step_down_mm, double safe_z_mm, double ramp_angle_deg,
                   PocketStrategy strategy) {
     Polygon outer = strip_closing_vertex(face.outer);
+    const PocketParams params = PocketParams::resolve(tool, face.depth, step_over_mm, step_down_mm);
+
     if (strategy == PocketStrategy::Spiral && is_convex(outer)) {
-        return plan_pocket_spiral(outer, tool, face.depth, step_over_mm, step_down_mm, safe_z_mm,
-                                  ramp_angle_deg);
+        return plan_pocket_spiral(outer, tool, params, safe_z_mm, ramp_angle_deg);
     }
 
     if (strategy == PocketStrategy::Spiral) {
-        Paths paths = plan_pocket_raster_clipped(outer, tool, face.depth, step_over_mm,
-                                                 step_down_mm, safe_z_mm, ramp_angle_deg);
+        Paths paths = plan_pocket_raster_clipped(outer, tool, params, safe_z_mm, ramp_angle_deg);
         if (!paths.empty() && !paths.front().empty()) {
             paths.front().insert(paths.front().begin(),
                                  make_comment("concave polygon: raster clipped to boundary"));
@@ -402,7 +406,7 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
         return paths;
     }
 
-    return plan_pocket_raster(face, tool, step_over_mm, step_down_mm, safe_z_mm, ramp_angle_deg);
+    return plan_pocket_raster(face, tool, params, safe_z_mm, ramp_angle_deg);
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm,

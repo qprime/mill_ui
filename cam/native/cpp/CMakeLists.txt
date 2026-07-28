@@ -61,6 +61,7 @@ if(MILLUI_NATIVE_TESTS)
 
   add_executable(native_tests
     tests/test_geometry.cpp
+    tests/test_plan_2d.cpp
     tests/test_post_gcode.cpp
     ${CORE_SRC}
   )

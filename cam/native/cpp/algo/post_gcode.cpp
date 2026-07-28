@@ -5,16 +5,11 @@
 #include <sstream>
 #include <vector>
 
+#include "millui/native/algo/geom2d.hpp"
+
 namespace millui::native::algo {
 
 namespace {
-
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
 
 std::string fmt_num(double v, int prec) {
     std::ostringstream oss;
@@ -112,14 +107,14 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
                                lines.emplace_back("(" + text + ")");
                            },
                            [&](const SetRpm& s) {
-                               if (current_rpm && std::abs(*current_rpm - s.rpm) < 1e-9) {
+                               if (current_rpm && std::abs(*current_rpm - s.rpm) < kEps) {
                                    return;
                                }
                                current_rpm = s.rpm;
                                lines.emplace_back(rpm_line(s.rpm));
                            },
                            [&](const SetFeed& s) {
-                               if (current_feed && std::abs(*current_feed - s.feed) < 1e-9) {
+                               if (current_feed && std::abs(*current_feed - s.feed) < kEps) {
                                    return;
                                }
                                current_feed = s.feed;
@@ -157,7 +152,7 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
         }
     }
 
-    if (!current_z || std::abs(*current_z - cfg.safe_z) > 1e-9) {
+    if (!current_z || std::abs(*current_z - cfg.safe_z) > kEps) {
         lines.emplace_back(g0(std::nullopt, std::nullopt, cfg.safe_z, cfg.prec));
     }
 

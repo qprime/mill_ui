@@ -7,7 +7,12 @@
 
 namespace millui::native {
 
-constexpr double kToleranceMm = 0.01;
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 struct Vec2 {
     double x = 0.0;
@@ -33,7 +38,6 @@ struct Tool {
     double rpm = 0.0;
     double feed_xy = 0.0;
     double feed_z = 0.0;
-    std::string kind;
 };
 
 struct PostConfig {

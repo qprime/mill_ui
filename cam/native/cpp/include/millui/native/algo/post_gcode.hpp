@@ -4,6 +4,6 @@
 
 namespace millui::native::algo {
 
-std::string post_gcode(const Paths& paths, const PostConfig& cfg);
+[[nodiscard]] std::string post_gcode(const Paths& paths, const PostConfig& cfg);
 
 }  // namespace millui::native::algo

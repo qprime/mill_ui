@@ -21,7 +21,9 @@ Bounds bounds_of(const Polygon& poly) {
     return b;
 }
 
-double seg_length(const Vec2& a, const Vec2& b) { return std::hypot(b.x - a.x, b.y - a.y); }
+double seg_length(const Vec2& a, const Vec2& b) noexcept {
+    return std::hypot(b.x - a.x, b.y - a.y);
+}
 
 double shoelace_area(const Polygon& poly) {
     double area = 0.0;

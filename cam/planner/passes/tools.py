@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from typing import Any
 
 from cam.model.tool import Tool, ToolKind
-from cam.planner.params import stepdown_for, stepover_for
+from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from layout_ast.layout import FeedsOverride
 
 
@@ -211,8 +211,8 @@ def pick_tool_by_diameter(
 
 def stepdown_for_tool(tool: ToolSelection) -> float:
     if tool.depth_per_pass is not None and tool.depth_per_pass > 0.0:
-        return float(tool.depth_per_pass)
-    return stepdown_for(tool_diameter=tool.diameter, cap_mm=3.0)
+        return max(MIN_STEPDOWN_MM, float(tool.depth_per_pass))
+    return max(MIN_STEPDOWN_MM, stepdown_for(tool_diameter=tool.diameter, cap_mm=3.0))
 
 
 def stepover_for_tool(tool: ToolSelection) -> float:

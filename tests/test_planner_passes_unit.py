@@ -12,7 +12,7 @@ from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
 from cam.ops.pocket_region import _interval_subtract
-from cam.planner.params import stepdown_for, stepover_for
+from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator
 from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
 from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges
@@ -211,6 +211,14 @@ class TestStepdownForTool:
     def test_small_tool(self):
         tool = ToolSelection(name="t", diameter=1.0, kind="flat", rpm=1, feed_xy=1, feed_z=1)
         assert stepdown_for_tool(tool) == 0.5
+
+    def test_stepdown_clamped_from_subfloor_depth_per_pass(self):
+        tool = ToolSelection(name="t", diameter=6.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, depth_per_pass=0.001)
+        assert stepdown_for_tool(tool) == MIN_STEPDOWN_MM
+
+    def test_stepdown_clamped_from_tiny_diameter(self):
+        tool = ToolSelection(name="t", diameter=0.005, kind="flat", rpm=1, feed_xy=1, feed_z=1)
+        assert stepdown_for_tool(tool) == MIN_STEPDOWN_MM
 
 
 class TestStepoverForTool:

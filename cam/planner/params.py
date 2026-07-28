@@ -5,6 +5,9 @@ def feeds_for(*, feed_xy: float, feed_z: float) -> tuple[float, float]:
     return float(feed_xy), float(feed_z)
 
 
+MIN_STEPDOWN_MM = 0.01
+
+
 def stepdown_for(*, tool_diameter: float, cap_mm: float | None = None) -> float:
     sd = 0.5 * float(tool_diameter)
     return min(sd, float(cap_mm)) if cap_mm is not None else sd

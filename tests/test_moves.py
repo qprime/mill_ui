@@ -14,7 +14,7 @@ from cam.moves import (
     SetRpmMove,
     XYMove,
 )
-from cam.native.core import _dict_to_move
+from cam.native.core import _dict_to_move, is_native_available, post_gcode
 from cam.post.gcode import _move_to_dict
 
 
@@ -229,6 +229,18 @@ def test_dict_to_move_retract():
 def test_dict_to_move_unknown_kind():
     with pytest.raises(ValueError, match="Unknown move kind"):
         _dict_to_move({"kind": "bogus"})
+
+
+@pytest.mark.skipif(not is_native_available(), reason="native extension not built")
+def test_post_gcode_rejects_unknown_move_kind():
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"post_gcode: move\.kind must be one of "
+            r"comment\|set_rpm\|set_feed\|rapid\|cut\|retract\|dwell, got 'bogus'"
+        ),
+    ):
+        post_gcode([{"kind": "bogus"}])
 
 
 def test_round_trip_rapid():

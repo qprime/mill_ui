@@ -125,8 +125,9 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
                 }
               },
               [&](const Retract& r) {
-                lines.emplace_back(g0(std::nullopt, std::nullopt, r.z, cfg.prec));
-                current_z = r.z;
+                const double z = r.z.value_or(cfg.safe_z);
+                lines.emplace_back(g0(std::nullopt, std::nullopt, z, cfg.prec));
+                current_z = z;
               },
               [&](const Dwell& d) {
                 if (d.seconds > 0.0) {

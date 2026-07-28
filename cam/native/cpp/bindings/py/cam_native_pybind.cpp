@@ -63,16 +63,9 @@ Hole hole_from_dict(const py::dict& d) {
 
 PlanarFace face_from_dict(const py::dict& d) {
   PlanarFace face;
-  face.z = d.contains("z") ? d["z"].cast<double>() : 0.0;
   face.depth = d.contains("depth") ? d["depth"].cast<double>() : 0.0;
   face.safe_z = d.contains("safe_z") ? d["safe_z"].cast<double>() : 5.0;
   face.outer = polygon_from_py(py::reinterpret_borrow<py::sequence>(d["outer"]));
-  if (d.contains("holes")) {
-    py::sequence holes_seq = py::reinterpret_borrow<py::sequence>(d["holes"]);
-    for (const auto& item : holes_seq) {
-      face.holes.push_back(polygon_from_py(py::reinterpret_borrow<py::sequence>(item)));
-    }
-  }
   return face;
 }
 
@@ -116,7 +109,7 @@ py::dict move_to_dict(const Move& mv) {
           },
           [&](const Retract& r) {
             d["kind"] = "retract";
-            d["z"] = r.z;
+            d["z"] = opt_to_py(r.z);
           },
           [&](const Dwell& dw) {
             d["kind"] = "dwell";
@@ -164,7 +157,7 @@ Paths paths_from_flat_list(const py::sequence& seq) {
     } else if (kind == "cut") {
       path.push_back(Cut{opt_field(d, "x"), opt_field(d, "y"), opt_field(d, "z"), opt_field(d, "feed")});
     } else if (kind == "retract") {
-      path.push_back(Retract{opt_field(d, "z").value_or(0.0)});
+      path.push_back(Retract{opt_field(d, "z")});
     } else if (kind == "dwell") {
       path.push_back(Dwell{opt_field(d, "seconds").value_or(0.0)});
     } else {

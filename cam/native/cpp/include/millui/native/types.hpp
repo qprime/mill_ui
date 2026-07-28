@@ -16,11 +16,9 @@ struct Vec2 {
 using Polygon = std::vector<Vec2>;
 
 struct PlanarFace {
-  double z = 0.0;
   double depth = 0.0;
   double safe_z = 5.0;
   Polygon outer;
-  std::vector<Polygon> holes;
 };
 
 struct Hole {
@@ -67,7 +65,7 @@ struct Cut {
   std::optional<double> feed;
 };
 struct Retract {
-  double z = 0.0;
+  std::optional<double> z;
 };
 struct Dwell {
   double seconds = 0.0;

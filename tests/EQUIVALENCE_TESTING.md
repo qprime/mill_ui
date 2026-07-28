@@ -81,13 +81,13 @@ assert gcode_v1 == gcode_v2
 
 ## Environmental Limitation
 
-**Current Status:** Tests cannot run in this environment because the native CAM core (`skills.mill_ui.cam.native._native`) requires a C++ build.
+**Current Status:** Tests cannot run in this environment because the native CAM core (`cam.native._native`) requires a C++ build.
 
 ### Error Message
 
 ```
-RuntimeError: skills.mill_ui.cam.native._native is not available.
-Install the project with a modern C++ toolchain so the native CAM core can be built.
+RuntimeError: cam.native._native is not available. Build the native CAM core
+with a modern C++ toolchain (see cam/native/README.md) before using it.
 ```
 
 ### What's Missing

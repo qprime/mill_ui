@@ -8,6 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(pybind11 CONFIG REQUIRED)
 
+set(MILLUI_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
+
 set(CORE_SRC
   algo/geom2d.cpp
   algo/plan_2d.cpp
@@ -40,7 +42,7 @@ target_link_libraries(_native
     pybind11::module
 )
 
-target_compile_options(_native PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_compile_options(_native PRIVATE ${MILLUI_WARNINGS})
 
 install(TARGETS _native DESTINATION "cam/native")
 
@@ -71,7 +73,7 @@ if(MILLUI_NATIVE_TESTS)
       ${CMAKE_CURRENT_SOURCE_DIR}
       ${doctest_SOURCE_DIR}
   )
-  target_compile_options(native_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  target_compile_options(native_tests PRIVATE ${MILLUI_WARNINGS})
 
   if(MILLUI_NATIVE_SANITIZE)
     target_compile_options(native_tests PRIVATE

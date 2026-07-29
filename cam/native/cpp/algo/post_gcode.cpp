@@ -1,6 +1,7 @@
 #include "millui/native/algo/post_gcode.hpp"
 
 #include <cmath>
+#include <format>
 #include <optional>
 #include <sstream>
 #include <vector>
@@ -12,11 +13,7 @@ namespace millui::native::algo {
 
 namespace {
 
-std::string rpm_line(double rpm) {
-    std::ostringstream oss;
-    oss << "M3 S" << static_cast<int>(std::lround(rpm));
-    return oss.str();
-}
+std::string rpm_line(double rpm) { return std::format("M3 S{}", std::lround(rpm)); }
 
 std::vector<std::string> default_header(const PostConfig& cfg) {
     std::vector<std::string> header{"(begin)", "G90", "G21", "G17", "G94"};

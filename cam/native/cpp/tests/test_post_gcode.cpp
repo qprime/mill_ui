@@ -82,3 +82,17 @@ TEST_CASE("a retract with absent Z falls back to the configured safe height") {
 TEST_CASE("a motion with no words emits the bare code") {
     CHECK(format_motion("G0", {}, 3) == "G0");
 }
+
+TEST_CASE("format_fixed keeps trailing zeros at the requested precision") {
+    CHECK(format_fixed(-0.0, 3) == "-0.000");
+    CHECK(format_fixed(0.001, 3) == "0.001");
+    CHECK(format_fixed(1e20, 3) == "100000000000000000000.000");
+    CHECK(format_fixed(1.0 / 3.0, 3) == "0.333");
+    CHECK(format_fixed(123456789.0, 3) == "123456789.000");
+}
+
+TEST_CASE("format_compact uses shortest round-trip spelling") {
+    CHECK(format_compact(1.0 / 3.0) == "0.3333333333333333");
+    CHECK(format_compact(0.0005) == "5e-04");
+    CHECK(format_compact(0.001) == "0.001");
+}

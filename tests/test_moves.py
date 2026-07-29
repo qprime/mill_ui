@@ -345,6 +345,11 @@ def test_pocket_rejects_subfloor_step_down():
         _native.plan_pocket(FACE, TOOL, 3.0, 1e-9, 0.0, "spiral")
 
 
+def test_pocket_rejects_subfloor_step_down_reports_full_precision_value():
+    with pytest.raises(ValueError, match=r"got 0\.0003333333333333333"):
+        _native.plan_pocket(FACE, TOOL, 3.0, 1.0 / 3000.0, 0.0, "spiral")
+
+
 def test_pocket_rejects_negative_step_over():
     with pytest.raises(ValueError, match=r"plan_pocket: step_over_mm must be finite"):
         _native.plan_pocket(FACE, TOOL, -1.0, 2.0, 0.0, "spiral")

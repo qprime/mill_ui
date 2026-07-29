@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+from functools import cache
 from typing import get_args
 
 import pytest
@@ -380,6 +381,7 @@ def test_pocket_explicit_step_down_bypasses_resolved_default():
     assert _native.plan_pocket(FACE, tiny, 3.0, 0.5, 0.0, "spiral")
 
 
+@cache
 def _native_planner_dicts() -> dict[str, list[dict]]:
     return {
         "plan_pocket": _native.plan_pocket(FACE, TOOL, 3.0, 2.0, 0.0, "raster"),
@@ -388,6 +390,8 @@ def _native_planner_dicts() -> dict[str, list[dict]]:
         "plan_bore_helical": _native.plan_bore_helical(BORE_HOLE, TOOL, 2.0, 5.0),
     }
 
+
+_EMITTED_DICT_KEYS = {"x", "y", "z", "feed", "rpm", "seconds", "text"}
 
 _EMITTED_PAYLOAD_FIELDS = {
     CommentMove: ("text",),
@@ -399,20 +403,38 @@ _EMITTED_PAYLOAD_FIELDS = {
     DwellMove: ("seconds",),
 }
 
+_KIND_PAYLOAD_KEYS = {
+    "comment": {"text"},
+    "set_rpm": {"rpm"},
+    "set_feed": {"feed"},
+    "rapid": {"x", "y", "z"},
+    "cut": {"x", "y", "z", "feed"},
+    "retract": {"z"},
+}
+
 
 @pytest.mark.parametrize("planner", sorted(_native_planner_dicts()))
 def test_native_emitter_kinds_all_decode(planner):
     dicts = _native_planner_dicts()[planner]
     assert dicts
     for d in dicts:
+        assert set(d) == _EMITTED_DICT_KEYS | {"kind"}
         move = _dict_to_move(d)
         for field in _EMITTED_PAYLOAD_FIELDS[type(move)]:
             assert getattr(move, field) == d[field]
 
 
+@pytest.mark.parametrize("kind", sorted(_KIND_PAYLOAD_KEYS))
+def test_native_emitter_populates_every_payload_key_of_each_kind(kind):
+    dicts = [d for ds in _native_planner_dicts().values() for d in ds if d["kind"] == kind]
+    assert dicts
+    populated = {key for d in dicts for key in _EMITTED_DICT_KEYS if d[key] is not None}
+    assert populated == _KIND_PAYLOAD_KEYS[kind]
+
+
 def test_native_emitter_covers_all_kinds_except_dwell():
     kinds = {d["kind"] for dicts in _native_planner_dicts().values() for d in dicts}
-    assert kinds == {"comment", "cut", "rapid", "retract", "set_feed", "set_rpm"}
+    assert kinds == set(_KIND_PAYLOAD_KEYS)
 
 
 def test_every_move_union_member_has_a_native_kind():

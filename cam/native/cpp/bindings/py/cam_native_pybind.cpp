@@ -74,9 +74,7 @@ py::dict move_to_dict(const Move& mv) {
     std::visit(overloaded{
                    [&](const Comment& c) {
                        d["kind"] = "comment";
-                       if (!c.text.empty()) {
-                           d["text"] = c.text;
-                       }
+                       d["text"] = c.text;
                    },
                    [&](const SetRpm& s) {
                        d["kind"] = "set_rpm";

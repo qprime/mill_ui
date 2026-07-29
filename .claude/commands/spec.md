@@ -14,7 +14,7 @@ Draft a GitHub issue implementation specification for: $ARGUMENTS
 
 3. **Check for a smaller change.** Before finalizing, ask: could a narrower scope — fewer files, fewer moving parts, less ceremony — achieve the same goal? If yes, redraft around that. Spec size should match change size. This is about scope, not about removing structure that serves invariants, type safety, or tests.
 
-4. **Self-review the draft.** Read it back as if you hadn't written it. Flag anything you're unsure about, anything that rests on an unverified assumption, and anything that sounds confident but isn't grounded in what you actually read. Surface those to the user with the draft.
+4. **Self-review the draft.** Read it back as if you hadn't written it. Flag anything you're unsure about, anything resting on an unverified assumption, and anything that sounds confident but isn't grounded in what you actually read. Surface those to the user with the draft. Do not pad self-reviews with non-issues. Zero flags is a valid self-review.
 
 5. **Present the draft** to the user for review before creating the issue.
 

@@ -393,8 +393,8 @@ The build refuses what the standard says it should. Pre-commit hooks colocate ch
 
 | Tool | Configuration |
 |------|--------------|
-| Warnings | `-Wall -Wextra -Wpedantic -Werror`. Per-disable requires a comment. |
-| `-Wconversion` | Recommended on new projects; judgment on existing code. |
+| Warnings | `-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror`. Per-disable requires a comment. |
+| `-Wconversion` | Adopted. Enabled with `-Wsign-conversion` on every native target. |
 | Sanitizers | UBSan + ASan in at least one configuration. TSan when concurrency is introduced. Findings block merge. |
 | Static analysis | `clang-tidy` with `bugprone-*`, `cert-*`, `cppcoreguidelines-*`, `performance-*`, `readability-*`. Project-level disables in `.clang-tidy` with a one-line comment per disable. |
 | Formatting | `clang-format` per project. Starter: `BasedOnStyle: Google`, `IndentWidth: 4`, `ColumnLimit: 100`. |

@@ -5,7 +5,8 @@ Exists so agent invocations stay within the allowed `Bash(python:*)` prefix
 without needing per-flag permission prompts, mirroring tools/run_tests.py.
 
 The native extension is built manually (not via pip); this wrapper drives the
-CMake project in cam/native/cpp with the test target enabled, then runs CTest.
+CMake project in cam/native/cpp, building both the pybind module and the test
+target so every translation unit is compiled under -Werror, then runs CTest.
 
 Examples:
     python tools/run_native_tests.py
@@ -70,7 +71,7 @@ def main(argv: list[str]) -> int:
     if rc != 0:
         return rc
 
-    rc = run(["cmake", "--build", str(build_dir), "--target", "native_tests"])
+    rc = run(["cmake", "--build", str(build_dir), "--target", "_native", "native_tests"])
     if rc != 0:
         return rc
 

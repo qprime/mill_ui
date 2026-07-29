@@ -85,7 +85,7 @@ TEST_CASE("a motion with no words emits the bare code") {
 
 TEST_CASE("format_fixed keeps trailing zeros at the requested precision") {
     CHECK(format_fixed(-0.0, 3) == "-0.000");
-    CHECK(format_fixed(0.001, 3) == "0.001");
+    CHECK(format_fixed(0.0005, 3) == "0.001");
     CHECK(format_fixed(1e20, 3) == "100000000000000000000.000");
     CHECK(format_fixed(1.0 / 3.0, 3) == "0.333");
     CHECK(format_fixed(123456789.0, 3) == "123456789.000");

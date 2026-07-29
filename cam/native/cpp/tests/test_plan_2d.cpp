@@ -161,8 +161,7 @@ TEST_CASE("plan_pocket spiral ends at safe z") {
 
     const auto* last = std::get_if<Retract>(&paths.front().back());
     REQUIRE(last != nullptr);
-    REQUIRE(last->z.has_value());
-    CHECK(near(*last->z, 5.0));
+    CHECK(near(last->z, 5.0));
 }
 
 TEST_CASE("plan_pocket falls back to clipped raster on a concave polygon") {

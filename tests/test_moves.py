@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import get_args
 
 import pytest
 
@@ -10,6 +11,7 @@ from cam.moves import (
     CutMove,
     DwellMove,
     MotionMove,
+    Move,
     RapidMove,
     RetractMove,
     SetFeedMove,
@@ -376,3 +378,58 @@ def test_pocket_resolved_default_step_down_names_the_binding():
 def test_pocket_explicit_step_down_bypasses_resolved_default():
     tiny = Tool(name="tiny", diameter=0.0199, rpm=12000.0, feed_xy=900.0, feed_z=300.0)
     assert _native.plan_pocket(FACE, tiny, 3.0, 0.5, 0.0, "spiral")
+
+
+def _native_planner_dicts() -> dict[str, list[dict]]:
+    return {
+        "plan_pocket": _native.plan_pocket(FACE, TOOL, 3.0, 2.0, 0.0, "raster"),
+        "plan_profile": _native.plan_profile(SQUARE, TOOL, 5.0, 2.0, 5.0, 0.0),
+        "plan_drill": _native.plan_drill(HOLES, TOOL, 2.0, 5.0),
+        "plan_bore_helical": _native.plan_bore_helical(BORE_HOLE, TOOL, 2.0, 5.0),
+    }
+
+
+_EMITTED_PAYLOAD_FIELDS = {
+    CommentMove: ("text",),
+    SetRpmMove: ("rpm",),
+    SetFeedMove: ("feed",),
+    RapidMove: ("x", "y", "z"),
+    CutMove: ("x", "y", "z", "feed"),
+    RetractMove: ("z",),
+    DwellMove: ("seconds",),
+}
+
+
+@pytest.mark.parametrize("planner", sorted(_native_planner_dicts()))
+def test_native_emitter_kinds_all_decode(planner):
+    dicts = _native_planner_dicts()[planner]
+    assert dicts
+    for d in dicts:
+        move = _dict_to_move(d)
+        for field in _EMITTED_PAYLOAD_FIELDS[type(move)]:
+            assert getattr(move, field) == d[field]
+
+
+def test_native_emitter_covers_all_kinds_except_dwell():
+    kinds = {d["kind"] for dicts in _native_planner_dicts().values() for d in dicts}
+    assert kinds == {"comment", "cut", "rapid", "retract", "set_feed", "set_rpm"}
+
+
+def test_every_move_union_member_has_a_native_kind():
+    samples: dict[type, dict] = {
+        CommentMove: {"kind": "comment", "text": "x"},
+        SetRpmMove: {"kind": "set_rpm", "rpm": 12000.0},
+        SetFeedMove: {"kind": "set_feed", "feed": 900.0},
+        RapidMove: {"kind": "rapid", "x": 1.0, "y": 2.0, "z": 5.0},
+        CutMove: {"kind": "cut", "x": 1.0, "y": 2.0, "z": -3.0, "feed": 600.0},
+        RetractMove: {"kind": "retract", "z": 6.0},
+        DwellMove: {"kind": "dwell", "seconds": 1.0},
+    }
+    assert set(get_args(Move)) == set(samples)
+    for sample in samples.values():
+        assert post_gcode([sample])
+
+
+def test_retract_absent_z_resolves_to_safe_z():
+    assert "G0 Z5.000" in post_gcode([{"kind": "retract", "z": None}], safe_z=5.0)
+    assert "G0 Z5.000" in post_gcode([{"kind": "retract"}], safe_z=5.0)

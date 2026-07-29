@@ -101,7 +101,7 @@ py::dict move_to_dict(const Move& mv) {
                    },
                    [&](const Retract& r) {
                        d["kind"] = "retract";
-                       d["z"] = opt_to_py(r.z);
+                       d["z"] = r.z;
                    },
                    [&](const Dwell& dw) {
                        d["kind"] = "dwell";
@@ -129,7 +129,7 @@ std::optional<double> opt_field(const py::dict& d, const char* key) {
     return std::nullopt;
 }
 
-Paths paths_from_flat_list(const py::sequence& seq) {
+Paths paths_from_flat_list(const py::sequence& seq, double safe_z) {
     Paths paths(1);
     Path& path = paths.front();
     path.reserve(seq.size());
@@ -152,7 +152,7 @@ Paths paths_from_flat_list(const py::sequence& seq) {
             path.push_back(
                 Cut{opt_field(d, "x"), opt_field(d, "y"), opt_field(d, "z"), opt_field(d, "feed")});
         } else if (kind == "retract") {
-            path.push_back(Retract{opt_field(d, "z")});
+            path.push_back(Retract{opt_field(d, "z").value_or(safe_z)});
         } else if (kind == "dwell") {
             path.push_back(Dwell{opt_field(d, "seconds").value_or(0.0)});
         } else {
@@ -278,8 +278,8 @@ PYBIND11_MODULE(_native, m) {
     m.def(
         "post_gcode",
         [](const py::sequence& paths_seq, const py::dict& cfg_dict) {
-            Paths paths = paths_from_flat_list(paths_seq);
             PostConfig cfg = post_cfg_from_dict(cfg_dict);
+            Paths paths = paths_from_flat_list(paths_seq, cfg.safe_z);
             return algo::post_gcode(paths, cfg);
         },
         py::arg("paths"), py::arg("cfg"));

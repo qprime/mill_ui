@@ -82,7 +82,7 @@ std::string post_gcode(const Paths& paths, const PostConfig& cfg) {
                         }
                     },
                     [&](const Retract& r) {
-                        const double z = r.z.value_or(cfg.safe_z);
+                        const double z = r.z;
                         lines.emplace_back(format_motion("G0", {.z = z}, cfg.prec));
                         current_z = z;
                     },

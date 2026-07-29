@@ -69,7 +69,7 @@ struct Cut {
     std::optional<double> feed;
 };
 struct Retract {
-    std::optional<double> z;
+    double z = 0.0;
 };
 struct Dwell {
     double seconds = 0.0;

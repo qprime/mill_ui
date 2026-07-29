@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <optional>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <variant>
 
+#include "millui/native/algo/format.hpp"
 #include "millui/native/algo/plan_2d.hpp"
 #include "millui/native/algo/post_gcode.hpp"
 #include "millui/native/types.hpp"
@@ -185,25 +185,19 @@ PostConfig post_cfg_from_dict(const py::dict& d) {
     return cfg;
 }
 
-std::string fmt_scalar(double v) {
-    std::ostringstream oss;
-    oss << v;
-    return oss.str();
-}
-
 double checked_scalar(double v, double min, const char* fn, const char* field) {
     if (!std::isfinite(v) || v < min) {
         throw std::invalid_argument(std::string(fn) + ": " + field + " must be finite and >= " +
-                                    fmt_scalar(min) + ", got " + fmt_scalar(v));
+                                    algo::format_compact(min) + ", got " + algo::format_compact(v));
     }
     return v;
 }
 
 double checked_step_scalar(double v, const char* fn, const char* field) {
     if (!std::isfinite(v) || v < 0.0 || (v > 0.0 && v < algo::kMinStepDownMm)) {
-        throw std::invalid_argument(std::string(fn) + ": " + field +
-                                    " must be finite and either 0 or >= " +
-                                    fmt_scalar(algo::kMinStepDownMm) + ", got " + fmt_scalar(v));
+        throw std::invalid_argument(
+            std::string(fn) + ": " + field + " must be finite and either 0 or >= " +
+            algo::format_compact(algo::kMinStepDownMm) + ", got " + algo::format_compact(v));
     }
     return v;
 }

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 
+#include "millui/native/algo/format.hpp"
 #include "millui/native/algo/geom2d.hpp"
 
 namespace millui::native::algo {
@@ -20,14 +21,7 @@ constexpr double kProfileDefaultStepDownMm = 2.0;
 constexpr double kBoreDefaultToolDiameterMm = 1.0;
 constexpr double kBoreDefaultStepDownMm = 2.5;
 constexpr int kHelixSegments = 60;
-
-std::string fmt3(double v) {
-    std::ostringstream oss;
-    oss.setf(std::ios::fixed, std::ios::floatfield);
-    oss.precision(3);
-    oss << v;
-    return oss.str();
-}
+constexpr int kCommentPrecision = 3;
 
 Move make_comment(std::string text) { return Comment{std::move(text)}; }
 
@@ -167,8 +161,10 @@ Paths plan_pocket_raster_clipped(const Polygon& outer_stripped, const Tool& tool
     Path& moves = paths.front();
     moves.reserve(128);
 
-    moves.push_back(make_comment("pocket_raster_clipped so=" + fmt3(step_over) +
-                                 " sd=" + fmt3(step_down) + " depth=" + fmt3(std::abs(depth))));
+    moves.push_back(
+        make_comment("pocket_raster_clipped so=" + format_fixed(step_over, kCommentPrecision) +
+                     " sd=" + format_fixed(step_down, kCommentPrecision) +
+                     " depth=" + format_fixed(std::abs(depth), kCommentPrecision)));
     moves.push_back(make_set_rpm(tool.rpm));
     moves.push_back(make_set_feed(tool.feed_xy));
 
@@ -247,8 +243,9 @@ Paths plan_pocket_raster(const PlanarFace& face, const Tool& tool, const PocketP
     Path& moves = paths.front();
     moves.reserve(64);
 
-    moves.push_back(make_comment("pocket_raster so=" + fmt3(step_over) + " sd=" + fmt3(step_down) +
-                                 " depth=" + fmt3(std::abs(depth))));
+    moves.push_back(make_comment("pocket_raster so=" + format_fixed(step_over, kCommentPrecision) +
+                                 " sd=" + format_fixed(step_down, kCommentPrecision) +
+                                 " depth=" + format_fixed(std::abs(depth), kCommentPrecision)));
     moves.push_back(make_set_rpm(tool.rpm));
     moves.push_back(make_set_feed(tool.feed_xy));
 
@@ -298,8 +295,9 @@ Paths plan_pocket_spiral(const Polygon& outer_stripped, const Tool& tool,
     Path& moves = paths.front();
     moves.reserve(256);
 
-    moves.push_back(make_comment("pocket_spiral so=" + fmt3(step_over) + " sd=" + fmt3(step_down) +
-                                 " depth=" + fmt3(std::abs(depth))));
+    moves.push_back(make_comment("pocket_spiral so=" + format_fixed(step_over, kCommentPrecision) +
+                                 " sd=" + format_fixed(step_down, kCommentPrecision) +
+                                 " depth=" + format_fixed(std::abs(depth), kCommentPrecision)));
     moves.push_back(make_set_rpm(tool.rpm));
     moves.push_back(make_set_feed(tool.feed_xy));
 
@@ -520,8 +518,9 @@ Paths plan_bore_helical(const Hole& hole, const Tool& tool, double step_down_mm,
     const double step_down = step_down_mm <= 0.0 ? kBoreDefaultStepDownMm : step_down_mm;
     const int segments = kHelixSegments;
 
-    moves.push_back(make_comment("bore_helical D=" + fmt3(D) + " tool=" + fmt3(tool_d) +
-                                 " r_eff=" + fmt3(r_eff)));
+    moves.push_back(make_comment("bore_helical D=" + format_fixed(D, kCommentPrecision) +
+                                 " tool=" + format_fixed(tool_d, kCommentPrecision) +
+                                 " r_eff=" + format_fixed(r_eff, kCommentPrecision)));
     moves.push_back(make_set_rpm(tool.rpm));
     moves.push_back(make_set_feed(tool.feed_xy));
     moves.push_back(make_rapid(hole.x + r_eff, hole.y, safe_z));

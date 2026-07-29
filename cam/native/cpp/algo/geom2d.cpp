@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <sstream>
 #include <stdexcept>
+
+#include "millui/native/algo/format.hpp"
 
 namespace millui::native::algo {
 
@@ -208,10 +209,9 @@ std::vector<double> scanline_intersections(const Polygon& poly, double y) {
 
 std::vector<double> build_z_levels(double depth, double step_down) {
     if (!std::isfinite(step_down) || step_down < kMinStepDownMm) {
-        std::ostringstream oss;
-        oss << "plan_pocket: resolved step_down_mm must be finite and >= " << kMinStepDownMm
-            << ", got " << step_down;
-        throw std::invalid_argument(oss.str());
+        throw std::invalid_argument("plan_pocket: resolved step_down_mm must be finite and >= " +
+                                    format_compact(kMinStepDownMm) + ", got " +
+                                    format_compact(step_down));
     }
     std::vector<double> z_levels;
     double z = 0.0;

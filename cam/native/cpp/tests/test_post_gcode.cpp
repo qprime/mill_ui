@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "millui/native/algo/format.hpp"
 #include "millui/native/algo/post_gcode.hpp"
 #include "millui/native/types.hpp"
 
@@ -76,4 +77,8 @@ TEST_CASE("a retract with absent Z falls back to the configured safe height") {
     Paths paths{{Retract{std::nullopt}}};
     const std::string g = post_gcode(paths, default_cfg());
     CHECK(contains(g, "G0 Z5.000"));
+}
+
+TEST_CASE("a motion with no words emits the bare code") {
+    CHECK(format_motion("G0", {}, 3) == "G0");
 }

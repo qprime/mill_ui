@@ -11,6 +11,7 @@ find_package(pybind11 CONFIG REQUIRED)
 set(MILLUI_WARNINGS -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
 
 set(CORE_SRC
+  algo/format.cpp
   algo/geom2d.cpp
   algo/plan_2d.cpp
   algo/post_gcode.cpp

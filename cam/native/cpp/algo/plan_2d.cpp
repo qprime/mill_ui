@@ -6,7 +6,6 @@
 #include <numbers>
 #include <optional>
 #include <span>
-#include <sstream>
 #include <vector>
 
 #include "millui/native/algo/format.hpp"

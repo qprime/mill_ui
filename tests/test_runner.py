@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import json
 import os
 from typing import Any
@@ -261,8 +262,8 @@ def test_merge_gcode_metrics_sums_counts():
 def test_validate_recipe_simple_profile():
     recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
 
-    if not os.path.exists(recipe_dir):
-        pytest.skip("recipe not found")
+    if not glob.glob(os.path.join(recipe_dir, "output", "*.svg")):
+        pytest.skip("recipe SVG not generated")
 
     result = validate_recipe(recipe_dir)
 

@@ -1,0 +1,62 @@
+{
+  "constraint_audit": {
+    "edge_feature": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 5277,
+    "rapid_moves": 6,
+    "cut_moves": 5218,
+    "rapid_ratio": 0.001
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 4882
+      },
+      {
+        "name": "edge",
+        "tool_diameter_mm": 12.7,
+        "move_count": 177
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 218
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 152250,
+    "total_lines": 5287,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 141504,
+        "lines": 4895
+      },
+      "edge-12.70mm": {
+        "bytes": 4998,
+        "lines": 188
+      },
+      "profile-3.17mm": {
+        "bytes": 5748,
+        "lines": 204
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

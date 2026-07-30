@@ -1,0 +1,47 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 454,
+    "rapid_moves": 86,
+    "cut_moves": 172,
+    "rapid_ratio": 0.189
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "surface",
+        "tool_diameter_mm": 25.4,
+        "move_count": 182
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 272
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 8324,
+    "total_lines": 474,
+    "files": {
+      "surface-25.40mm": {
+        "bytes": 3301,
+        "lines": 194
+      },
+      "profile-3.17mm": {
+        "bytes": 5023,
+        "lines": 280
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

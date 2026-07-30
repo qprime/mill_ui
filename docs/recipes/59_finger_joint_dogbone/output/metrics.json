@@ -1,0 +1,53 @@
+{
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 44,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 3104,
+    "rapid_moves": 92,
+    "cut_moves": 2748,
+    "rapid_ratio": 0.03
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 6.35,
+        "move_count": 1716
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 6.35,
+        "move_count": 1388
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 67898,
+    "total_lines": 3012,
+    "files": {
+      "dogbone-6.35mm": {
+        "bytes": 29042,
+        "lines": 1644
+      },
+      "profile-6.35mm": {
+        "bytes": 38856,
+        "lines": 1368
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

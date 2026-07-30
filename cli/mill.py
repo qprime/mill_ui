@@ -17,7 +17,7 @@ from cli.project import (
 )
 from config.machine_loader import Endmill, FeedsEntry, get_machines_dir, load_endmills, load_feeds
 from layout_ast.layout import LayoutAST
-from pml.revision_header import format_pml_header, update_file_header
+from pml.revision_header import format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
@@ -214,7 +214,6 @@ def _run_and_write(
     theme: str,
     y_origin: str,
     generate_svg: bool,
-    update_header: bool = True,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
     pass_prefix: str = "",
@@ -264,9 +263,6 @@ def _run_and_write(
 
     print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
 
-    if update_header and result.gcode:
-        update_file_header(source_path)
-
 
 def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
     machines_dir = get_machines_dir()
@@ -299,7 +295,6 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         return
 
     endmills_list, feeds_list = _load_tool_library(args)
-    is_pml = input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt")
     kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
     theme = args.theme if args.theme is not None else "dark"
     multi_sheet = len(asts) > 1
@@ -324,7 +319,6 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
             theme=theme,
             y_origin=args.y_origin,
             generate_svg=not args.no_svg,
-            update_header=is_pml and not multi_sheet,
             endmills=endmills_list,
             feeds=feeds_list,
             pass_prefix=pass_prefix,

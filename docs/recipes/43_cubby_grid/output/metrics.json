@@ -1,12 +1,4 @@
 {
-  "timing": {
-    "ir_ms": 0.21,
-    "hints_ms": 0.1,
-    "plan_ms": 6.89,
-    "gcode_ms": 8.5,
-    "svg_ms": 1.58,
-    "total_ms": 17.28
-  },
   "constraint_audit": {
     "dogbone": {
       "status": "honored",
@@ -66,5 +58,14 @@
         "lines": 687
       }
     }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
   }
 }

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import json
 import shutil
 import time
 from dataclasses import dataclass, replace
-from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +26,7 @@ from config.machine_loader import (
 )
 from ir.removal_intent import Bounds2D, RemovalIntent
 from layout_ast.layout import LayoutAST
+from pml.revision_header import build_provenance
 from validation.removal_checks import (
     check_depth_feasibility,
     check_edge_feature,
@@ -35,6 +36,8 @@ from validation.removal_checks import (
     check_working_area_bounds,
 )
 from validation.toolpath_checks import verify_passes_avoid_keepouts
+
+NON_DETERMINISTIC_METRICS = frozenset({"timing"})
 
 
 @dataclass(frozen=True)
@@ -420,6 +423,14 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     )
 
 
+def _strip_non_deterministic(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _strip_non_deterministic(v) for k, v in value.items() if k not in NON_DETERMINISTIC_METRICS}
+    if isinstance(value, list):
+        return [_strip_non_deterministic(v) for v in value]
+    return value
+
+
 def write_pipeline_outputs(
     result: PipelineResult,
     output_dir: Path,
@@ -444,16 +455,13 @@ def write_pipeline_outputs(
         svg_path.write_text(result.svg, encoding="utf-8")
         outputs["svg"] = svg_path
 
-    import json
-    from datetime import datetime
-
-    metrics_with_build = dict(result.metrics)
+    persisted_metrics = _strip_non_deterministic(result.metrics)
     if build_params:
-        metrics_with_build["build"] = build_params
-    metrics_with_build["timestamp"] = datetime.now(UTC).isoformat()
+        persisted_metrics["build"] = build_params
+    persisted_metrics["provenance"] = build_provenance()
 
     metrics_path = output_dir / "metrics.json"
-    metrics_path.write_text(json.dumps(metrics_with_build, indent=2))
+    metrics_path.write_text(json.dumps(persisted_metrics, indent=2))
     outputs["metrics"] = metrics_path
 
     return outputs

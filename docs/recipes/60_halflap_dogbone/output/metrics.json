@@ -1,0 +1,71 @@
+{
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 106,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 15750,
+    "rapid_moves": 238,
+    "cut_moves": 14832,
+    "rapid_ratio": 0.015
+  },
+  "fidelity": {
+    "tool_changes": 4,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 144
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 12.7,
+        "move_count": 204
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 3.175,
+        "move_count": 9706
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 5696
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 342827,
+    "total_lines": 15492,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 3843,
+        "lines": 140
+      },
+      "dogbone-12.70mm": {
+        "bytes": 3606,
+        "lines": 212
+      },
+      "dogbone-3.17mm": {
+        "bytes": 172490,
+        "lines": 9518
+      },
+      "profile-3.17mm": {
+        "bytes": 162888,
+        "lines": 5622
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

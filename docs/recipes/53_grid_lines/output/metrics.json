@@ -1,12 +1,4 @@
 {
-  "timing": {
-    "ir_ms": 6.72,
-    "hints_ms": 3.41,
-    "plan_ms": 6.21,
-    "gcode_ms": 23.08,
-    "svg_ms": 6.66,
-    "total_ms": 46.08
-  },
   "constraint_audit": {},
   "complexity": {
     "total_moves": 8184,
@@ -33,5 +25,14 @@
         "lines": 6154
       }
     }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
   }
 }

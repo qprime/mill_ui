@@ -1,0 +1,53 @@
+{
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 2,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 174,
+    "rapid_moves": 14,
+    "cut_moves": 126,
+    "rapid_ratio": 0.08
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 72
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 12.7,
+        "move_count": 102
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 3793,
+    "total_lines": 192,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 1941,
+        "lines": 78
+      },
+      "dogbone-12.70mm": {
+        "bytes": 1852,
+        "lines": 114
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

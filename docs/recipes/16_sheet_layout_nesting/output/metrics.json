@@ -1,12 +1,4 @@
 {
-  "timing": {
-    "ir_ms": 0.17,
-    "hints_ms": 0.09,
-    "plan_ms": 6.86,
-    "gcode_ms": 11.3,
-    "svg_ms": 0.81,
-    "total_ms": 19.23
-  },
   "constraint_audit": {
     "tabs": {
       "status": "honored",
@@ -48,5 +40,14 @@
         "lines": 1971
       }
     }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
   }
 }

@@ -1,0 +1,53 @@
+{
+  "constraint_audit": {
+    "rest": {
+      "status": "honored",
+      "count": 2,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 1126,
+    "rapid_moves": 66,
+    "cut_moves": 810,
+    "rapid_ratio": 0.059
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 210
+      },
+      {
+        "name": "pocket_rest",
+        "tool_diameter_mm": 3.175,
+        "move_count": 916
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 28277,
+    "total_lines": 1108,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 5527,
+        "lines": 210
+      },
+      "pocket_rest-3.17mm": {
+        "bytes": 22750,
+        "lines": 898
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

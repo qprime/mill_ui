@@ -11,7 +11,6 @@ import pytest
 
 from cam.pipeline import PipelineResult, run_pipeline, write_pipeline_outputs
 from pml import parse_pml
-from pml.revision_header import update_file_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
@@ -176,8 +175,17 @@ if __name__ == "__main__":
                 result = generate_outputs_from_pml(pml_path)
                 output_dir = pml_path.parent / "output"
 
-                write_pipeline_outputs(result, output_dir, pml_path.parent.name)
-                update_file_header(pml_path)
+                write_pipeline_outputs(
+                    result,
+                    output_dir,
+                    pml_path.parent.name,
+                    build_params={
+                        "source": pml_path.name,
+                        "kerf_mm": 3.175,
+                        "theme": "dark",
+                        "y_origin": "back",
+                    },
+                )
 
                 print(f"  Generated {len(result.gcode)} G-code pass(es) + SVG")
                 print(f"  Total time: {result.metrics['timing']['total_ms']:.1f}ms")

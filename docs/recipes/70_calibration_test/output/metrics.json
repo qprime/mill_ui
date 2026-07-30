@@ -1,0 +1,65 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 8883,
+    "rapid_moves": 165,
+    "cut_moves": 8309,
+    "rapid_ratio": 0.019
+  },
+  "fidelity": {
+    "tool_changes": 4,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 168
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 3208
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 4963
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 544
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 253086,
+    "total_lines": 8917,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 4593,
+        "lines": 178
+      },
+      "bore-3.17mm": {
+        "bytes": 102297,
+        "lines": 3220
+      },
+      "pocket-3.17mm": {
+        "bytes": 136419,
+        "lines": 4975
+      },
+      "profile-3.17mm": {
+        "bytes": 9777,
+        "lines": 544
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

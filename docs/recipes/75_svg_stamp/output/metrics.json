@@ -1,0 +1,56 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 1019,
+    "rapid_moves": 62,
+    "cut_moves": 778,
+    "rapid_ratio": 0.061
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 311
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 17
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 691
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 25952,
+    "total_lines": 1015,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 6128,
+        "lines": 323
+      },
+      "engrave-1.00mm": {
+        "bytes": 457,
+        "lines": 30
+      },
+      "profile-3.17mm": {
+        "bytes": 19367,
+        "lines": 662
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

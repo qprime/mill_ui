@@ -1,12 +1,4 @@
 {
-  "timing": {
-    "ir_ms": 0.02,
-    "hints_ms": 0.02,
-    "plan_ms": 0.58,
-    "gcode_ms": 0.71,
-    "svg_ms": 0.26,
-    "total_ms": 1.59
-  },
   "constraint_audit": {
     "edge_treatment": {
       "status": "honored",
@@ -48,5 +40,14 @@
         "lines": 30
       }
     }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
   }
 }

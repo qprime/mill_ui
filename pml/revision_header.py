@@ -30,20 +30,7 @@ def format_pml_header(revision: str | None = None, gen_date: date | None = None)
     return f"# mill_ui: {revision}\n# generated: {gen_date.isoformat()}\n"
 
 
-def has_mill_ui_header(content: str) -> bool:
-    lines = content.split("\n")
-    return len(lines) >= 2 and lines[0].startswith("# mill_ui:") and lines[1].startswith("# generated:")
-
-
-def update_pml_header(content: str, revision: str | None = None, gen_date: date | None = None) -> str:
-    header = format_pml_header(revision, gen_date)
-    if has_mill_ui_header(content):
-        lines = content.split("\n")
-        return header + "\n".join(lines[2:])
-    return header + "\n" + content
-
-
-def update_file_header(path: Path) -> None:
-    content = path.read_text()
-    updated = update_pml_header(content)
-    path.write_text(updated)
+def build_provenance(revision: str | None = None) -> dict[str, str]:
+    if revision is None:
+        revision = get_mill_ui_revision() or "unknown"
+    return {"mill_ui": revision}

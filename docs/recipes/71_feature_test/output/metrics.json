@@ -1,0 +1,99 @@
+{
+  "constraint_audit": {
+    "tabs": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    },
+    "edge_feature": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    },
+    "dogbone": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 24483,
+    "rapid_moves": 139,
+    "cut_moves": 23495,
+    "rapid_ratio": 0.006
+  },
+  "fidelity": {
+    "tool_changes": 6,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 256
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 19248
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 3226
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 12.7,
+        "move_count": 39
+      },
+      {
+        "name": "edge",
+        "tool_diameter_mm": 12.7,
+        "move_count": 218
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 1496
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 765982,
+    "total_lines": 24251,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 7141,
+        "lines": 263
+      },
+      "bore-3.17mm": {
+        "bytes": 632105,
+        "lines": 19240
+      },
+      "engrave-1.00mm": {
+        "bytes": 78964,
+        "lines": 3046
+      },
+      "dogbone-12.70mm": {
+        "bytes": 763,
+        "lines": 52
+      },
+      "edge-12.70mm": {
+        "bytes": 5977,
+        "lines": 228
+      },
+      "profile-3.17mm": {
+        "bytes": 41032,
+        "lines": 1422
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "e8bec190"
+  }
+}

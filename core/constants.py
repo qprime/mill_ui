@@ -76,6 +76,10 @@ class FeatureType:
     HEIGHTFIELD = "heightfield"
 
 
+BACK_FACE_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
+BACK_FACE_DEPTH_MODES = ("constant", "v_carve")
+
+
 class ShapeType:
     RECT = "Rect"
     CIRCLE = "Circle"

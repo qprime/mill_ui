@@ -240,7 +240,7 @@ def render_diagram_svg(
 
     drawing_bottom = bounds.y_max + padding
     layer_names = {layer.name for layer in diagram.layers}
-    _render_title_block(svg, viewbox_x, viewbox_y, theme)
+    _render_title_block(svg, viewbox_x, viewbox_y, theme, diagram.metadata.get("view_face", "front"))
     _render_legend(svg, viewbox_x, viewbox_y, viewbox_width, layer_names, theme)
     edge_profiles = diagram.metadata.get("edge_profiles", [])
     if edge_profiles:
@@ -552,6 +552,7 @@ def _render_title_block(
     viewbox_x: float,
     viewbox_y: float,
     theme: DiagramTheme,
+    view_face: str = "front",
 ) -> None:
     group = ET.SubElement(svg, "g", {"id": "TITLE_BLOCK", "class": "title-block"})
     x = viewbox_x + _TITLE_X_OFFSET
@@ -574,6 +575,16 @@ def _render_title_block(
     }
     units = ET.SubElement(group, "text", units_attrs)
     units.text = "Units: millimeters (mm)"
+
+    if view_face == "back":
+        banner_attrs = {
+            "x": str(x),
+            "y": str(y + 2 * _TITLE_UNITS_Y_OFFSET),
+            **{k: v for k, v in subtitle_style.items()},
+            "font-weight": "bold",
+        }
+        banner = ET.SubElement(group, "text", banner_attrs)
+        banner.text = "BACK FACE — SETUP 1 (flipped about X)"
 
 
 def _render_legend(

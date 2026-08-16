@@ -18,6 +18,7 @@
 | PL-8 | HARD | NO_PASSTHROUGH_GEOMETRY | Do not add computed planner-geometry fields to Feature or RemovalIntent. See "Known Exception" below. |
 | PL-9 | STRUCTURAL | DOMAIN_VIA_PARAMS | Shape handlers pass true geometry to children via `params["domain"]` (Domain) and `params["domain_center"]` (Point2D). Domain-aware child handlers consume these when present, falling back to ResolvedRegion (Rect) when absent. Shape handlers must not special-case child types to pass geometry — all children receive the same params. Structural nodes (Frame, Inset, Grid, Split) strip domain from params before dispatching children. |
 | PL-10 | HARD | SINGLE_WRITER | Each serialized artifact type has exactly one canonical writer function. All code paths — CLI, tests, regen, batch — must call it. The writer owns filename and layout; callers pass data only. Any other path that writes this artifact type is a defect. |
+| PL-11 | HARD | BACK_SETUP_FIRST | Back-face programs machine before front; through-cuts exist only in the front setup |
 
 ---
 
@@ -160,6 +161,24 @@ child_params = {**params, "domain": domain, "domain_center": bounds_center}
 for child in node.children:
     self._resolve_node(child, region, items, child_params)
 ```
+
+---
+
+## Back Setup First (PL-11)
+
+A job with any `face: back` feature machines in two setups. The back programs
+(`back-*.nc`) run first with the back face up. The operator then flips the
+sheet about the X axis and runs the front programs.
+
+Through-profiles are rejected on the back face, so every cut that frees a part
+from the sheet lives in the front setup. Parts stay captive through the whole
+back setup and through every front operation but the last.
+
+Both setups run the full plan-and-emit sequence against their own AST and
+intent set. `PipelineResult.intents` carries the authored-frame set for the
+whole job — the validation artifact. The mirrored back intents are internal to
+planning and feed the back blueprint view only; mixing the two frames renders
+toolpath overlays flipped relative to geometry.
 
 ---
 

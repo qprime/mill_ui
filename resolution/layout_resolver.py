@@ -903,6 +903,7 @@ class LayoutResolver:
                 feature=Feature(
                     type="pocket",
                     depth_mm=node.depth_mm,
+                    face=node.face,
                     feeds_override=node.feeds_override,
                 ),
                 shape_id=self._next_shape_id("generated_pocket"),
@@ -920,6 +921,7 @@ class LayoutResolver:
                 feature=Feature(
                     type="pocket",
                     depth_mm=node.depth_mm,
+                    face=node.face,
                     feeds_override=node.feeds_override,
                 ),
                 shape_id=self._next_shape_id("generated_pocket"),

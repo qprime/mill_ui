@@ -57,7 +57,14 @@ def ast_to_removal_intents(
     return intents
 
 
-def item_to_removal_intent(  # noqa: C901 — feature-type dispatcher
+def item_to_removal_intent(item: Item, sheet_thickness_mm: float) -> RemovalIntent:
+    intent = _dispatch_feature_intent(item, sheet_thickness_mm)
+    if item.feature is not None and item.feature.face != "front":
+        return replace(intent, face=item.feature.face)
+    return intent
+
+
+def _dispatch_feature_intent(  # noqa: C901 — feature-type dispatcher
     item: Item,
     sheet_thickness_mm: float,
 ) -> RemovalIntent:

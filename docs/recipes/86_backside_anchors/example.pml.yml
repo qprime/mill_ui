@@ -1,0 +1,94 @@
+Sheet:
+  width: 440mm
+  height: 640mm
+  thickness: 19mm
+  material: mdf
+  min_web: 4mm
+children:
+- Rect:
+    id: door
+    at:
+      x: 220mm
+      y: 320mm
+      width: 400mm
+      height: 600mm
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Frame:
+        width: 50mm
+        children:
+        - Pocket:
+            depth: 6mm
+- Circle:
+    id: hinge_cup_lower
+    diameter: 35mm
+    feature:
+      type: pocket
+      depth: 12.5mm
+      face: back
+    at:
+      x: 42.5mm
+      y: 120mm
+- Circle:
+    id: hinge_cup_upper
+    diameter: 35mm
+    feature:
+      type: pocket
+      depth: 12.5mm
+      face: back
+    at:
+      x: 42.5mm
+      y: 520mm
+- Circle:
+    id: hinge_pilot_lower_a
+    diameter: 3mm
+    feature:
+      type: hole
+      depth: 10mm
+      face: back
+    at:
+      x: 33mm
+      y: 97.5mm
+- Circle:
+    id: hinge_pilot_lower_b
+    diameter: 3mm
+    feature:
+      type: hole
+      depth: 10mm
+      face: back
+    at:
+      x: 33mm
+      y: 142.5mm
+- Circle:
+    id: hinge_pilot_upper_a
+    diameter: 3mm
+    feature:
+      type: hole
+      depth: 10mm
+      face: back
+    at:
+      x: 33mm
+      y: 497.5mm
+- Circle:
+    id: hinge_pilot_upper_b
+    diameter: 3mm
+    feature:
+      type: hole
+      depth: 10mm
+      face: back
+    at:
+      x: 33mm
+      y: 542.5mm
+- Rect:
+    id: catch_plate_recess
+    feature:
+      type: pocket
+      depth: 8mm
+      face: back
+    at:
+      x: 397.5mm
+      y: 560mm
+      width: 30mm
+      height: 14mm

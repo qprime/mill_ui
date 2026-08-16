@@ -3,9 +3,11 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from core.constants import FeatureType
+from core.constants import BACK_FACE_DEPTH_MODES, BACK_FACE_FEATURE_TYPES, FeatureType
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
+
+_WEB_TOLERANCE_MM = 1e-6
 
 
 def check_depth_profile(
@@ -268,6 +270,8 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
 
     for i, intent_a in enumerate(intents):
         for intent_b in intents[i + 1 :]:
+            if intent_a.face != intent_b.face:
+                continue
             if _regions_overlap(intent_a, intent_b):
                 if _are_sibling_features(intent_a, intent_b):
                     continue
@@ -284,6 +288,70 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
                 )
 
     return result
+
+
+def check_back_face_support(intent: RemovalIntent) -> ValidationResult:
+    result = ValidationResult()
+    if intent.face != "back":
+        return result
+
+    if intent.hint_type not in BACK_FACE_FEATURE_TYPES:
+        result.add_error(
+            f"Back-face machining supports {BACK_FACE_FEATURE_TYPES} only, got '{intent.hint_type}'",
+            region_id=intent.region_id,
+            feature_type=intent.hint_type,
+        )
+
+    mode = intent.depth_profile.mode
+    if mode not in BACK_FACE_DEPTH_MODES:
+        result.add_error(
+            f"Back-face machining does not support '{mode}' depth profiles (supported: {BACK_FACE_DEPTH_MODES})",
+            region_id=intent.region_id,
+            depth_mode=mode,
+        )
+
+    return result
+
+
+def check_cross_face_web(
+    intents: list[RemovalIntent],
+    sheet_thickness_mm: float,
+    min_web_mm: float,
+) -> ValidationResult:
+    result = ValidationResult()
+    if min_web_mm <= 0.0:
+        return result
+
+    front = [i for i in intents if i.face == "front" and i.hint_type in BACK_FACE_FEATURE_TYPES]
+    back = [i for i in intents if i.face == "back" and i.hint_type in BACK_FACE_FEATURE_TYPES]
+    if not front or not back:
+        return result
+
+    budget_mm = sheet_thickness_mm - min_web_mm
+
+    for front_intent in front:
+        for back_intent in back:
+            if not _bounds_overlap_xy(front_intent.bounds, back_intent.bounds):
+                continue
+            combined = front_intent.depth_mm() + back_intent.depth_mm()
+            if combined > budget_mm + _WEB_TOLERANCE_MM:
+                result.add_error(
+                    f"Cross-face web breach: {front_intent.region_id} ({front_intent.depth_mm():.2f}mm front) "
+                    f"and {back_intent.region_id} ({back_intent.depth_mm():.2f}mm back) leave "
+                    f"{sheet_thickness_mm - combined:.2f}mm of material, below the {min_web_mm:.2f}mm minimum web",
+                    region_id=front_intent.region_id,
+                    overlapping_with=back_intent.region_id,
+                    combined_depth_mm=combined,
+                    min_web_mm=min_web_mm,
+                )
+
+    return result
+
+
+def _bounds_overlap_xy(a: Bounds2D, b: Bounds2D) -> bool:
+    x_overlap = not (a.x_max <= b.x_min or b.x_max <= a.x_min)
+    y_overlap = not (a.y_max <= b.y_min or b.y_max <= a.y_min)
+    return x_overlap and y_overlap
 
 
 def check_heightfield(intent: RemovalIntent, sheet_thickness_mm: float) -> ValidationResult:

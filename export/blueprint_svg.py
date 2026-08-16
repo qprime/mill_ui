@@ -11,6 +11,7 @@ def render_blueprint_svg(
     removal_intents: Sequence[RemovalIntent] | None = None,
     theme: str = "dark",
     y_origin: str = "back",
+    view_face: str = "front",
 ) -> str:
     from adapters.layoutast_to_ir import layoutast_to_diagram_ir
     from diagram_ir.diagram import ViewportSpec
@@ -27,6 +28,7 @@ def render_blueprint_svg(
         show_dimensions=getattr(layout_ast.sheet, "show_dimensions", True),
         show_toolpaths=True,
         kerf_width_mm=kerf_width,
+        view_face=view_face,
     )
 
     diagram_theme = DIAGRAM_THEMES.get(theme, DIAGRAM_THEMES["dark"])

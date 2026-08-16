@@ -55,7 +55,7 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import DogboneSpec, Feature, FeedsOverride
+from layout_ast.layout import DEFAULT_MIN_WEB_MM, DogboneSpec, Feature, FeedsOverride
 from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob
 
@@ -120,6 +120,9 @@ def format_feature(feature: Feature) -> dict[str, Any]:
 
     if feature.side:
         result["side"] = feature.side
+
+    if feature.face != "front":
+        result["face"] = feature.face
 
     if feature.corner_cleanup_tool_diameter_mm is not None:
         result["corner_cleanup"] = dim(feature.corner_cleanup_tool_diameter_mm)
@@ -369,6 +372,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
 
     elif isinstance(node, PocketGen):
         result: dict[str, Any] = {"depth": dim(node.depth_mm)}
+        if node.face != "front":
+            result["face"] = node.face
         feeds_dict = _format_feeds_override(node.feeds_override)
         if feeds_dict is not None:
             result["feeds"] = feeds_dict
@@ -799,6 +804,8 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
         data["Sheet"]["margin"] = dim(ast.sheet.margin_mm)
     if ast.sheet.gcode_output != "per-operation":
         data["Sheet"]["gcode_output"] = ast.sheet.gcode_output
+    if ast.sheet.min_web_mm != DEFAULT_MIN_WEB_MM:
+        data["Sheet"]["min_web"] = dim(ast.sheet.min_web_mm)
 
     if ast.components:
         data["components"] = {}

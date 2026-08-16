@@ -702,3 +702,72 @@ children:
     assert f1.tab_width_mm == f2.tab_width_mm
     assert f1.onion_skin_mm == f2.onion_skin_mm
     assert f1.feeds_override == f2.feeds_override
+
+
+def test_feature_face_survives_roundtrip():
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: hinge_cup
+      diameter: 35mm
+      feature:
+        type: pocket
+        depth: 12.5mm
+        face: back
+      at:
+        x: 40mm
+        y: 100mm
+"""
+    comp_ast = parse_pml_yaml(pml)
+    reparsed = parse_pml_yaml(format_pml_yaml(comp_ast))
+
+    assert reparsed.root.children[0].child.feature.face == "back"
+
+
+def test_feature_face_front_not_emitted():
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: hole_1
+      diameter: 6mm
+      feature:
+        type: hole
+        depth: 10mm
+        face: front
+      at:
+        x: 40mm
+        y: 100mm
+"""
+    assert "face" not in format_pml_yaml(parse_pml_yaml(pml))
+
+
+def test_sheet_min_web_survives_roundtrip():
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+  min_web: 5mm
+
+children:
+  - Rect:
+      id: outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+"""
+    comp_ast = parse_pml_yaml(pml)
+    reparsed = parse_pml_yaml(format_pml_yaml(comp_ast))
+
+    assert reparsed.sheet.min_web_mm == 5.0

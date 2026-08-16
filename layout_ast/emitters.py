@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from layout_ast.layout import Feature, Item, LayoutAST, Placement, Sheet
+from layout_ast.layout import DEFAULT_MIN_WEB_MM, Feature, Item, LayoutAST, Placement, Sheet
 
 if TYPE_CHECKING:
     from layout_ast.layout import DogboneSpec, FeedsOverride, RestSpec
@@ -54,6 +54,8 @@ def _sheet_to_dict(sheet: Sheet) -> dict[str, Any]:
         data["margin_mm"] = sheet.margin_mm
     if not sheet.show_dimensions:
         data["show_dimensions"] = False
+    if sheet.min_web_mm != DEFAULT_MIN_WEB_MM:
+        data["min_web_mm"] = sheet.min_web_mm
     return data
 
 
@@ -152,6 +154,8 @@ def _feature_to_dict(feature: Feature) -> dict[str, Any]:
     data["depth_mm"] = feature.depth_mm
     if feature.side is not None:
         data["side"] = feature.side
+    if feature.face != "front":
+        data["face"] = feature.face
     if feature.dogbone is not None:
         data["dogbone"] = _dogbone_to_dict(feature.dogbone)
     if feature.rest is not None:

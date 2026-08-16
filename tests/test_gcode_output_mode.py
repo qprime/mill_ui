@@ -252,3 +252,111 @@ children:
         comp_ast = parse_pml_yaml(pml)
         yaml_out = format_pml_yaml(comp_ast)
         assert "gcode_output" not in yaml_out
+
+
+def _make_two_face_ast(gcode_output: str = "per-operation") -> LayoutAST:
+    return LayoutAST(
+        sheet=Sheet(
+            width_mm=400,
+            height_mm=300,
+            thickness_mm=19,
+            margin_mm=0.0,
+            gcode_output=gcode_output,
+        ),
+        items=(
+            Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(data={"w_mm": 100, "h_mm": 80}),
+                placement=Placement(center_xy_mm=(100, 100)),
+                feature=Feature(type="pocket", depth_mm=6.0),
+                shape_id="front_pocket",
+            ),
+            Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": 35.0}),
+                placement=Placement(center_xy_mm=(300, 60)),
+                feature=Feature(type="pocket", depth_mm=12.5, face="back"),
+                shape_id="hinge_cup",
+            ),
+        ),
+    )
+
+
+class TestTwoFaceOutput:
+    def test_back_items_produce_prefixed_gcode(self):
+        result = run_pipeline(_make_two_face_ast(), tool_db=TOOL_DB, generate_svg=False)
+
+        assert result.errors == []
+        back_keys = [k for k in result.gcode if k.startswith("back-")]
+        front_keys = [k for k in result.gcode if not k.startswith("back-")]
+        assert back_keys and front_keys
+        assert all(not k.startswith("back-back-") for k in back_keys)
+
+    def test_back_programs_precede_front_in_metrics(self):
+        result = run_pipeline(_make_two_face_ast(), tool_db=TOOL_DB, generate_svg=False)
+
+        keys = list(result.gcode)
+        first_back = next(k for k in keys if k.startswith("back-"))
+        first_front = next(k for k in keys if not k.startswith("back-"))
+        assert keys.index(first_back) < keys.index(first_front)
+
+    def test_back_pocket_gcode_uses_mirrored_y(self):
+        result = run_pipeline(_make_two_face_ast(), tool_db=TOOL_DB, generate_svg=False)
+
+        back_gcode = "".join(gc for name, gc in result.gcode.items() if name.startswith("back-"))
+        y_values = [
+            float(token[1:]) for line in back_gcode.splitlines() for token in line.split() if token.startswith("Y")
+        ]
+        cut_y = [y for y in y_values if y != 0.0]
+        assert cut_y
+        assert all(220.0 < y < 260.0 for y in cut_y)
+
+    def test_single_face_job_names_unchanged(self):
+        result = run_pipeline(_make_multi_tool_ast(), tool_db=TOOL_DB, generate_svg=False)
+
+        assert set(result.gcode) == {"pocket-9.53mm", "profile-6.35mm"}
+
+    def test_single_face_job_metrics_unchanged(self):
+        result = run_pipeline(_make_multi_tool_ast(), tool_db=TOOL_DB, generate_svg=False)
+        metrics = result.metrics
+
+        assert set(metrics["output_size"]["files"]) == set(result.gcode)
+        assert metrics["fidelity"]["tool_changes"] == len(result.passes)
+        assert [p["name"] for p in metrics["fidelity"]["passes"]] == [p.op for p in result.passes]
+        assert metrics["complexity"]["total_moves"] == sum(len(p.moves) for p in result.passes)
+        assert result.svg_back is None
+
+    def test_two_face_metrics_merge_across_setups(self):
+        result = run_pipeline(_make_two_face_ast(), tool_db=TOOL_DB, generate_svg=False)
+        metrics = result.metrics
+
+        assert set(metrics["output_size"]["files"]) == set(result.gcode)
+        assert metrics["fidelity"]["tool_changes"] == len(result.passes)
+        assert metrics["complexity"]["total_moves"] == sum(len(p.moves) for p in result.passes)
+
+    def test_per_tool_mode_groups_faces_separately(self):
+        result = run_pipeline(_make_two_face_ast("per-tool"), tool_db=TOOL_DB, generate_svg=False)
+
+        assert "back-12.70mm" not in result.gcode or "12.70mm" in result.gcode
+        for key in result.gcode:
+            stem = key[len("back-") :] if key.startswith("back-") else key
+            assert stem.endswith("mm")
+            assert stem[0].isdigit()
+
+    def test_cross_face_web_breach_reported(self):
+        ast = _make_two_face_ast()
+        deep_back = Item(
+            kind="shape",
+            type="Circle",
+            geometry=Geometry(data={"diameter_mm": 35.0}),
+            placement=Placement(center_xy_mm=(100, 100)),
+            feature=Feature(type="pocket", depth_mm=12.5, face="back"),
+            shape_id="overlapping_cup",
+        )
+        ast = LayoutAST(sheet=ast.sheet, items=(ast.items[0], deep_back))
+
+        result = run_pipeline(ast, tool_db=TOOL_DB, generate_svg=False)
+
+        assert any("web breach" in e for e in result.errors)

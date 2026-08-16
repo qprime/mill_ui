@@ -259,3 +259,35 @@ def test_parse_cnc_clamp_part_a_layout():
     item = ast.items[0]
     assert item.kind == "template"
     assert item.type == "ClampBar"
+
+
+def test_face_and_min_web_survive_json_roundtrip():
+    from layout_ast.emitters import emit_layout_json
+    from layout_ast.layout import Feature, Geometry, Item, Placement, Sheet
+
+    ast = LayoutAST(
+        sheet=Sheet(width_mm=400.0, height_mm=600.0, thickness_mm=19.0, min_web_mm=4.0),
+        items=(
+            Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": 35.0}),
+                placement=Placement(center_xy_mm=(40.0, 100.0)),
+                feature=Feature(type="pocket", depth_mm=12.5, face="back"),
+                shape_id="hinge_cup",
+            ),
+        ),
+    )
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        f.write(emit_layout_json(ast))
+        temp_path = f.name
+
+    try:
+        reparsed = LayoutAST.from_json(temp_path)
+        assert reparsed.sheet.min_web_mm == 4.0
+        feature = reparsed.items[0].feature
+        assert feature is not None
+        assert feature.face == "back"
+    finally:
+        Path(temp_path).unlink()

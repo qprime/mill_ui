@@ -8,6 +8,8 @@ from .core import (
     Verdict,
 )
 from .removal_checks import (
+    check_back_face_support,
+    check_cross_face_web,
     check_depth_feasibility,
     check_depth_profile,
     check_edge_feature,
@@ -33,6 +35,8 @@ __all__ = [
     "ValidationOptions",
     "ValidationResult",
     "Verdict",
+    "check_back_face_support",
+    "check_cross_face_web",
     "check_depth_feasibility",
     "check_depth_profile",
     "check_edge_feature",

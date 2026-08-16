@@ -54,6 +54,7 @@ def layoutast_to_diagram_ir(
     show_dimensions: bool = True,
     show_toolpaths: bool = True,
     kerf_width_mm: float = 0.0,
+    view_face: str = "front",
 ) -> DiagramIR:
     sheet = ast.sheet
     margin = sheet.margin_mm
@@ -122,6 +123,7 @@ def layoutast_to_diagram_ir(
         "sheet_height": str(sheet.height_mm),
         "sheet_thickness": str(sheet.thickness_mm),
         "y_origin": y_origin,
+        "view_face": view_face,
         "feature_counts": _count_features(ast),
         "depth_info": _collect_depth_info(ast),
         "hole_diameters": _collect_hole_diameters(ast),

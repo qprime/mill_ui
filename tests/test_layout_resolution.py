@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from layout_ast.compositional import (
     Cell,
     ComponentDef,
@@ -9,12 +11,13 @@ from layout_ast.compositional import (
     Inset,
     Panel,
     Place,
+    PocketGen,
     ProfileGen,
     Rect,
     RoundedRect,
     UseComponent,
 )
-from layout_ast.layout import Feature, Sheet
+from layout_ast.layout import Feature, Geometry, Item, Placement, Sheet, mirror_item_about_x
 from pml import format_pml
 from resolution.layout_resolver import resolve_layout
 
@@ -484,3 +487,149 @@ def test_validation_mode_passes_for_correct_resolution():
 
     assert len(flat.items) == 2
     assert flat.items[1].type == "Polygon"
+
+
+def _mirrored_geometry(item: Item, working_height_mm: float) -> dict:
+    mirrored = mirror_item_about_x(item, working_height_mm)
+    assert mirrored.geometry is not None
+    return mirrored.geometry.data
+
+
+def _mirrored_center(item: Item, working_height_mm: float) -> tuple[float, float]:
+    mirrored = mirror_item_about_x(item, working_height_mm)
+    assert mirrored.placement is not None
+    return mirrored.placement.center_xy_mm
+
+
+class TestMirrorItemAboutX:
+    def _item(self, geometry: dict, center=(100.0, 150.0), feature=None) -> Item:
+        return Item(
+            kind="shape",
+            type="Polygon",
+            geometry=Geometry(data=geometry),
+            placement=Placement(center_xy_mm=center),
+            feature=feature or Feature(type="pocket", depth_mm=6.0, face="back"),
+            shape_id="target",
+        )
+
+    def test_mirror_polygon_reverses_winding_and_negates_y(self) -> None:
+        item = self._item({"points": [[0.0, 0.0], [40.0, 0.0], [40.0, 10.0], [10.0, 10.0], [10.0, 30.0], [0.0, 30.0]]})
+
+        assert _mirrored_center(item, 600.0) == (100.0, 450.0)
+        assert _mirrored_geometry(item, 600.0)["points"] == [
+            [0.0, -30.0],
+            [10.0, -30.0],
+            [10.0, -10.0],
+            [40.0, -10.0],
+            [40.0, 0.0],
+            [0.0, 0.0],
+        ]
+
+    def test_mirror_rounded_rect_swaps_vertical_radii(self) -> None:
+        item = self._item(
+            {
+                "w_mm": 80.0,
+                "h_mm": 40.0,
+                "radius_tl_mm": 1.0,
+                "radius_tr_mm": 2.0,
+                "radius_br_mm": 3.0,
+                "radius_bl_mm": 4.0,
+            }
+        )
+
+        data = _mirrored_geometry(item, 600.0)
+
+        assert data["radius_bl_mm"] == 1.0
+        assert data["radius_br_mm"] == 2.0
+        assert data["radius_tr_mm"] == 3.0
+        assert data["radius_tl_mm"] == 4.0
+        assert data["w_mm"] == 80.0
+        assert data["h_mm"] == 40.0
+
+    def test_mirror_uniform_corner_radius_unchanged(self) -> None:
+        item = self._item({"w_mm": 80.0, "h_mm": 40.0, "radius_mm": 5.0, "corner_radius_mm": 5.0})
+
+        data = _mirrored_geometry(item, 600.0)
+
+        assert data["radius_mm"] == 5.0
+        assert data["corner_radius_mm"] == 5.0
+
+    def test_mirror_edge_treatment_unchanged(self) -> None:
+        treatment = {"type": "roundover", "radius_mm": 3.0, "finish_allowance_mm": 0.2}
+        item = self._item({"w_mm": 80.0, "h_mm": 40.0, "edge_treatment": treatment})
+
+        assert _mirrored_geometry(item, 600.0)["edge_treatment"] == treatment
+
+    def test_mirror_circle_moves_center_only(self) -> None:
+        item = self._item({"diameter_mm": 35.0}, center=(80.0, 120.0))
+
+        assert _mirrored_center(item, 640.0) == (80.0, 520.0)
+        assert _mirrored_geometry(item, 640.0) == {"diameter_mm": 35.0}
+
+    def test_mirror_polygon_holes_reverse_winding(self) -> None:
+        item = self._item(
+            {
+                "points": [[0.0, 0.0], [40.0, 0.0], [40.0, 40.0], [0.0, 40.0]],
+                "holes": [[[10.0, 10.0], [20.0, 10.0], [20.0, 25.0]]],
+            }
+        )
+
+        holes = _mirrored_geometry(item, 600.0)["holes"]
+
+        assert holes == [[[20.0, -25.0], [20.0, -10.0], [10.0, -10.0]]]
+
+    def test_mirror_line_endpoints_negate_y(self) -> None:
+        item = self._item({"start": [-20.0, -5.0], "end": [20.0, 15.0]})
+
+        data = _mirrored_geometry(item, 600.0)
+
+        assert data["start"] == [-20.0, 5.0]
+        assert data["end"] == [20.0, -15.0]
+
+    def test_mirror_islands_absolute_bounds(self) -> None:
+        item = self._item(
+            {
+                "w_mm": 200.0,
+                "h_mm": 100.0,
+                "islands": [{"x_min": 10.0, "x_max": 30.0, "y_min": 100.0, "y_max": 140.0}],
+            }
+        )
+
+        islands = _mirrored_geometry(item, 600.0)["islands"]
+
+        assert islands == [{"x_min": 10.0, "x_max": 30.0, "y_min": 460.0, "y_max": 500.0}]
+
+    def test_mirror_unknown_geometry_key_raises(self) -> None:
+        item = self._item({"w_mm": 80.0, "h_mm": 40.0, "image_path": "heights.png"})
+
+        with pytest.raises(ValueError, match="unrecognized geometry key 'image_path'"):
+            mirror_item_about_x(item, 600.0)
+
+    def test_mirror_raises_on_absolute_dogbone_fields(self) -> None:
+        feature = Feature(type="pocket", depth_mm=6.0, face="back", dogbone_corners=((10.0, 20.0),))
+        item = self._item({"w_mm": 80.0, "h_mm": 40.0}, feature=feature)
+
+        with pytest.raises(ValueError, match="dogbone_corners"):
+            mirror_item_about_x(item, 600.0)
+
+    def test_mirror_raises_on_dogbone_reference_point(self) -> None:
+        feature = Feature(type="pocket", depth_mm=6.0, face="back", dogbone_reference_point=(10.0, 20.0))
+        item = self._item({"w_mm": 80.0, "h_mm": 40.0}, feature=feature)
+
+        with pytest.raises(ValueError, match="dogbone_reference_point"):
+            mirror_item_about_x(item, 600.0)
+
+
+def test_pocket_gen_face_threaded_to_generated_item():
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
+        root=Panel(children=(Rect(children=(PocketGen(depth_mm=6.0, face="back"),), id="panel"),)),
+    )
+
+    flat = resolve_layout(ast)
+
+    pockets = [i for i in flat.items if i.feature and i.feature.type == "pocket"]
+    assert len(pockets) == 1
+    feature = pockets[0].feature
+    assert feature is not None
+    assert feature.face == "back"

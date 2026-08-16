@@ -20,6 +20,7 @@
 | PM-10 | HARD | PROFILE_REQUIRES_SIDE | Profile requires "side" key |
 | PM-11 | STRUCTURAL | PHYSICAL_OR_WORKING | Sheet uses physical or working dimensions |
 | PM-12 | STRUCTURAL | CENTER_COORDS | at.x and at.y specify part CENTER |
+| PM-13 | HARD | FACE_BACK_SCOPE | `face: back` valid only on pocket/hole/engrave with a finite depth |
 
 ---
 

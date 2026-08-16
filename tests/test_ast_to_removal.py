@@ -199,3 +199,34 @@ def test_multiple_warnings():
     assert "bad2" in warnings[1]
 
     print("  ✓ PASS")
+
+
+def _face_ast(face: str) -> LayoutAST:
+    return LayoutAST(
+        sheet=Sheet(width_mm=400, height_mm=600, thickness_mm=19, margin_mm=0.0),
+        items=(
+            Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": 35.0}),
+                placement=Placement(center_xy_mm=(40.0, 100.0)),
+                feature=Feature(type="pocket", depth_mm=12.5, face=face),
+                shape_id="hinge_cup",
+            ),
+        ),
+    )
+
+
+def test_intent_face_stamped_from_feature():
+    intents = ast_to_removal_intents(_face_ast("back"))
+
+    assert len(intents) == 1
+    assert intents[0].face == "back"
+    assert intents[0].to_dict()["face"] == "back"
+
+
+def test_intent_face_defaults_front():
+    intents = ast_to_removal_intents(_face_ast("front"))
+
+    assert intents[0].face == "front"
+    assert "face" not in intents[0].to_dict()

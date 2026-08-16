@@ -1330,6 +1330,69 @@ Or as generator children:
 | `hole` | Drill/bore operation |
 | `engrave` | Shallow surface marking |
 
+### Two-Sided Machining (`face`)
+
+`face` selects which surface of the panel a feature is machined from. Valid on
+`pocket`, `hole`, and `engrave` features and on the `Pocket` generator.
+
+```yaml
+Sheet:
+  width: 440mm
+  height: 640mm
+  thickness: 19mm
+  min_web: 4mm              # optional, default 3mm; 0 disables the web check
+
+children:
+- Circle:
+    id: hinge_cup
+    diameter: 35mm
+    feature:
+      type: pocket
+      depth: 12.5mm
+      face: back            # inline form
+    at: {x: 42.5mm, y: 120mm}
+- Rect:
+    children:
+    - Pocket:
+        depth: 6mm
+        face: back          # generator form
+```
+
+`face` and `side` are different axes. `face` (`front` | `back`) picks the
+surface the tool enters from. `side` (`inside` | `outside` | `on`) picks which
+side of a profile boundary the tool offsets to.
+
+**See-through authoring.** All coordinates are authored in the front-face frame
+regardless of `face`. A back feature is placed where you see it when looking
+through the panel from the front. The compiler mirrors back geometry about the
+X axis (`y → working_height − y`) before planning.
+
+**Setup order.** Back programs are named with a `back-` prefix
+(`back-pocket-12.70mm.nc`) and machine first, with the back face up. The
+operator then flips the sheet about the X axis — the top edge swaps with the
+bottom edge, left/right registration is unchanged — and runs the front
+programs. Through-profiles exist only in the front setup, so parts stay captive
+in the sheet until the final operation.
+
+**Blueprint.** A two-sided job writes a second drawing, `{job}.back.svg`, in
+setup-1 machine space with a `BACK FACE — SETUP 1` banner.
+
+**Restrictions.**
+
+| Rule | Reason |
+|------|--------|
+| `face: back` rejected with `depth: through` | Through cuts belong to the front setup |
+| Back `hole` requires an explicit `depth` | `depth` defaults to `through`, which the rule above rejects |
+| `face` rejected on `profile`, `surface`, `bevel`, `chamfer`, `roundover`, `heightfield` | Not supported in this version |
+| Gradient and heightfield depth profiles rejected on the back | Direction and image semantics under mirroring are unresolved |
+| `min_web` must be >= 0 | Negative web is meaningless |
+
+**Cross-face web.** Where a front and a back area feature overlap in XY, their
+combined depth may not exceed `thickness − min_web`. With 19mm stock and the
+4mm `min_web` above, a 12.5mm hinge cup may sit under a front pocket no deeper
+than 2.5mm. Profiles are excluded — their bounds cover the whole part and would
+flag every real job. Setting `min_web: 0` disables the check.
+
 ### Rest Pocketing
 
 Two-stage pocket machining: a large tool clears bulk material (rough pass), then a smaller tool clears remaining unmachined corners and profiles the perimeter (rest pass). Produces better surface finish and faster cycle times for deep or wide pockets.

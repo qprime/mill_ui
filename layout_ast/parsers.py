@@ -6,6 +6,7 @@ from typing import Any
 
 from core.constants import DepthMode
 from layout_ast.layout import (
+    DEFAULT_MIN_WEB_MM,
     DogboneSpec,
     Feature,
     FeedsOverride,
@@ -69,6 +70,7 @@ def parse_layout_json(path: str) -> LayoutAST:
         thickness_mm=float(sheet_data["thickness_mm"]),
         margin_mm=float(sheet_data.get("margin_mm", 0.0)),
         show_dimensions=sheet_data.get("show_dimensions", True),
+        min_web_mm=float(sheet_data.get("min_web_mm", DEFAULT_MIN_WEB_MM)),
     )
 
     items_data = data.get("items", [])
@@ -146,6 +148,7 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
         type=feature_type,
         depth_mm=depth_mm,
         side=side,
+        face=feature_data.get("face", "front"),
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=feature_data.get("corner_cleanup_tool_diameter_mm"),
         dogbone=_parse_dogbone(feature_data.get("dogbone")),

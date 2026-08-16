@@ -5,7 +5,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
-from core.constants import DepthMode
+from core.constants import BACK_FACE_FEATURE_TYPES, DepthMode
 from layout_ast.compositional import (
     Arch,
     AtPosition,
@@ -59,7 +59,15 @@ from layout_ast.compositional import (
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import DogboneSpec, Feature, FeedsOverride, RestSpec, Sheet
+from layout_ast.layout import (
+    DEFAULT_MIN_WEB_MM,
+    VALID_FACES,
+    DogboneSpec,
+    Feature,
+    FeedsOverride,
+    RestSpec,
+    Sheet,
+)
 from pml.measurement_fields import parse_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob, NestParseError, NestPart
 
@@ -206,6 +214,15 @@ def _parse_feeds_override(data: dict | None, path: str = "") -> FeedsOverride | 
         raise PMLParseError(f"Invalid feeds_override: {e}", path) from e
 
 
+def _parse_face(raw: Any, path: str) -> str:
+    if raw is None:
+        return "front"
+    face = str(raw)
+    if face not in VALID_FACES:
+        raise PMLParseError(f"Invalid face '{face}'. Must be one of: {VALID_FACES}", path)
+    return face
+
+
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
     feature_type = data.get("type")
     if feature_type is None:
@@ -215,6 +232,20 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
     is_through = DepthMode.is_through(depth)
 
     depth_mm = sheet_thickness_mm if is_through else float(parse_dimension(depth))
+
+    face = _parse_face(data.get("face"), path)
+    if face == "back":
+        if feature_type not in BACK_FACE_FEATURE_TYPES:
+            raise PMLParseError(
+                f"face: back is only valid on {BACK_FACE_FEATURE_TYPES} features, got '{feature_type}'",
+                path,
+            )
+        if is_through:
+            raise PMLParseError(
+                "face: back cannot be combined with depth: through — back features must "
+                "specify a finite depth (through cuts belong to the front setup)",
+                path,
+            )
 
     dogbone: DogboneSpec | None = None
     dogbone_raw = data.get("dogbone")
@@ -247,6 +278,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         type=feature_type,
         depth_mm=depth_mm,
         side=data.get("side"),
+        face=face,
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=parse_dimension(data["corner_cleanup"]) if "corner_cleanup" in data else None,
         dogbone=dogbone,
@@ -751,6 +783,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
     elif node_type == "Pocket":
         return PocketGen(
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")),
+            face=_parse_face(node_data.get("face"), f"{path}.Pocket"),
             feeds_override=_parse_feeds_override(node_data.get("feeds"), f"{path}.Pocket.feeds"),
         )
 
@@ -1118,6 +1151,10 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     else:
         raise PMLParseError("Sheet missing 'height', 'physical_height', or 'working_height'")
 
+    min_web_mm = parse_dimension(sheet_block["min_web"]) if "min_web" in sheet_block else DEFAULT_MIN_WEB_MM
+    if min_web_mm < 0.0:
+        raise PMLParseError(f"Sheet min_web must be >= 0, got {min_web_mm}", "Sheet")
+
     sheet = Sheet(
         width_mm=width_mm,
         height_mm=height_mm,
@@ -1126,6 +1163,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         show_dimensions=sheet_block.get("show_dimensions", True),
         material=str(sheet_block.get("material", "mdf")),
         gcode_output=str(sheet_block.get("gcode_output", "per-operation")),
+        min_web_mm=min_web_mm,
     )
 
     project = data.get("project")

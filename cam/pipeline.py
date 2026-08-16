@@ -25,9 +25,11 @@ from config.machine_loader import (
     load_machine_tool_db,
 )
 from ir.removal_intent import Bounds2D, RemovalIntent
-from layout_ast.layout import LayoutAST
+from layout_ast.layout import LayoutAST, mirror_item_about_x
 from pml.revision_header import build_provenance
 from validation.removal_checks import (
+    check_back_face_support,
+    check_cross_face_web,
     check_depth_feasibility,
     check_edge_feature,
     check_heightfield,
@@ -50,6 +52,7 @@ class PipelineResult:
     metrics: dict[str, Any]
     errors: list[str]
     warnings: list[str]
+    svg_back: str | None = None
 
 
 @dataclass(frozen=True)
@@ -60,6 +63,18 @@ class PipelineTiming:
     gcode_ms: float = 0.0
     svg_ms: float = 0.0
     total_ms: float = 0.0
+
+
+@dataclass(frozen=True)
+class FaceOutput:
+    passes: list[PassRecord]
+    gcode: dict[str, str]
+    total_moves: int
+    rapid_moves: int
+    cut_moves: int
+    hints_ms: float
+    plan_ms: float
+    gcode_ms: float
 
 
 def _attach_surface_cooling(planner_input, ast: LayoutAST):
@@ -91,6 +106,119 @@ def _attach_surface_cooling(planner_input, ast: LayoutAST):
             new_pockets.append(pocket)
 
     return _replace(planner_input, pockets=tuple(new_pockets))
+
+
+def _plan_and_emit_face(
+    ast: LayoutAST,
+    intents: list[RemovalIntent],
+    *,
+    gcode_prefix: str,
+    kerf_mm: float,
+    min_channel_width_mm: float,
+    tools: list[Any],
+    machine: Machine,
+    stock: Stock,
+    safe_z: float,
+    park_z_mm: float | None,
+    y_origin: str,
+    errors: list[str],
+    warnings: list[str],
+) -> FaceOutput:
+    hints_start = time.perf_counter()
+    planner_input = removal_intents_to_planner_input(
+        intents,
+        kerf_width_mm=kerf_mm,
+        min_channel_width_mm=min_channel_width_mm,
+        warnings=warnings,
+    )
+    planner_input = _attach_surface_cooling(planner_input, ast)
+    hints_ms = (time.perf_counter() - hints_start) * 1000
+
+    plan_start = time.perf_counter()
+    passes, _, planner_warnings = plan_passes(
+        planner_input,
+        config=Config(),
+        tool_db=tools,
+        machine=machine,
+        stock=stock,
+        safe_z=safe_z,
+        profile_opts={"cut_through_mm": 0.2},
+    )
+    plan_ms = (time.perf_counter() - plan_start) * 1000
+    warnings.extend(planner_warnings)
+
+    if planner_input.keepouts:
+        keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
+        keepout_result = verify_passes_avoid_keepouts(passes, keepout_dicts)
+        if keepout_result.has_violations():
+            for error_msg in keepout_result.format_errors():
+                errors.append(f"Keepout violation: {error_msg}")
+
+    gcode_start = time.perf_counter()
+    gcode_dict: dict[str, str] = {}
+    total_moves = 0
+    total_rapid_moves = 0
+    total_cut_moves = 0
+
+    margin_mm = ast.sheet.margin_mm
+
+    if ast.sheet.gcode_output == "per-tool":
+        tool_groups: dict[float, list[PassRecord]] = {}
+        for p in passes:
+            tool_groups.setdefault(p.setup.tool.diameter, []).append(p)
+
+        for diameter, group in tool_groups.items():
+            merged_moves: list = []
+            for p in group:
+                merged_moves.extend(p.moves)
+            setup = group[0].setup
+            gcode_dict[f"{gcode_prefix}{diameter:.2f}mm"] = write_gcode(
+                merged_moves,
+                safe_z=setup.safe_z,
+                machine=machine,
+                sheet_height=ast.sheet.height_mm,
+                y_origin=y_origin,
+                margin_mm=margin_mm,
+                park_z_mm=park_z_mm,
+            )
+
+            for move in merged_moves:
+                total_moves += 1
+                if isinstance(move, RapidMove):
+                    total_rapid_moves += 1
+                elif isinstance(move, CutMove):
+                    total_cut_moves += 1
+    else:
+        for p in passes:
+            gcode_dict[f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"] = write_gcode(
+                p.moves,
+                safe_z=p.setup.safe_z,
+                machine=machine,
+                sheet_height=ast.sheet.height_mm,
+                y_origin=y_origin,
+                margin_mm=margin_mm,
+                park_z_mm=park_z_mm,
+            )
+
+            total_moves += len(p.moves)
+            for move in p.moves:
+                if isinstance(move, RapidMove):
+                    total_rapid_moves += 1
+                elif isinstance(move, CutMove):
+                    total_cut_moves += 1
+
+    gcode_ms = (time.perf_counter() - gcode_start) * 1000
+
+    return FaceOutput(
+        passes=passes,
+        gcode=gcode_dict,
+        total_moves=total_moves,
+        rapid_moves=total_rapid_moves,
+        cut_moves=total_cut_moves,
+        hints_ms=hints_ms,
+        plan_ms=plan_ms,
+        gcode_ms=gcode_ms,
+    )
 
 
 def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
@@ -139,6 +267,12 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         for issue in overlap_result.warnings:
             warnings.append(issue.message)
 
+    web_result = check_cross_face_web(non_surface_intents, ast.sheet.thickness_mm, ast.sheet.min_web_mm)
+    for issue in web_result.errors:
+        errors.append(issue.message)
+    for issue in web_result.warnings:
+        warnings.append(issue.message)
+
     v_angles: list[float] | None = [
         float(t["v_angle_deg"]) for t in effective_tool_db if t.get("kind") == "v" and t.get("v_angle_deg") is not None
     ] or None
@@ -165,6 +299,12 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
                 errors.append(issue.message)
             for issue in edge_result.warnings:
                 warnings.append(issue.message)
+
+        face_result = check_back_face_support(intent)
+        for issue in face_result.errors:
+            errors.append(issue.message)
+        for issue in face_result.warnings:
+            warnings.append(issue.message)
 
     tool_radius = kerf_mm / 2.0
     bounds_result = check_working_area_bounds(
@@ -236,16 +376,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             warnings=warnings,
         )
 
-    hints_start = time.perf_counter()
-    planner_input = removal_intents_to_planner_input(
-        intents,
-        kerf_width_mm=kerf_mm,
-        min_channel_width_mm=min_channel_width_mm,
-        warnings=warnings,
-    )
-    planner_input = _attach_surface_cooling(planner_input, ast)
-    _hints_ms = (time.perf_counter() - hints_start) * 1000
-
     stock = Stock(
         width=ast.sheet.width_mm,
         height=ast.sheet.height_mm,
@@ -253,98 +383,74 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     )
     machine = Machine(name="default_grbl")
 
-    plan_start = time.perf_counter()
-    passes, _, planner_warnings = plan_passes(
-        planner_input,
-        config=Config(),
-        tool_db=tools,
-        machine=machine,
-        stock=stock,
-        safe_z=safe_z,
-        profile_opts={"cut_through_mm": 0.2},
-    )
-    _plan_ms = (time.perf_counter() - plan_start) * 1000
-    warnings.extend(planner_warnings)
+    back_items = ast.face_items("back")
+    front_ast = replace(ast, items=ast.face_items("front"))
+    front_intents = [i for i in intents if i.face == "front"]
 
-    if planner_input.keepouts:
-        keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
-        keepout_result = verify_passes_avoid_keepouts(passes, keepout_dicts)
-        if keepout_result.has_violations():
-            for error_msg in keepout_result.format_errors():
-                errors.append(f"Keepout violation: {error_msg}")
+    back_ast: LayoutAST | None = None
+    back_intents: list[RemovalIntent] = []
+    if back_items:
+        back_ast = replace(
+            ast,
+            items=tuple(mirror_item_about_x(item, ast.sheet.working_height_mm) for item in back_items),
+        )
+        back_intents = ast_to_removal_intents(back_ast, warnings=warnings)
 
-    gcode_start = time.perf_counter()
-    gcode_dict: dict[str, str] = {}
-    total_moves = 0
-    total_rapid_moves = 0
-    total_cut_moves = 0
+    face_runs: list[tuple[LayoutAST, list[RemovalIntent], str]] = []
+    if back_ast is not None:
+        face_runs.append((back_ast, back_intents, "back-"))
+    face_runs.append((front_ast, front_intents, ""))
 
-    margin_mm = ast.sheet.margin_mm
-    gcode_output = ast.sheet.gcode_output
+    outputs = [
+        _plan_and_emit_face(
+            face_ast,
+            face_intents,
+            gcode_prefix=prefix,
+            kerf_mm=kerf_mm,
+            min_channel_width_mm=min_channel_width_mm,
+            tools=tools,
+            machine=machine,
+            stock=stock,
+            safe_z=safe_z,
+            park_z_mm=park_z_mm,
+            y_origin=y_origin,
+            errors=errors,
+            warnings=warnings,
+        )
+        for face_ast, face_intents, prefix in face_runs
+    ]
 
-    if gcode_output == "per-tool":
-        tool_groups: dict[float, list[PassRecord]] = {}
-        for p in passes:
-            d = p.setup.tool.diameter
-            tool_groups.setdefault(d, []).append(p)
-
-        for diameter, group in tool_groups.items():
-            merged_moves: list = []
-            for p in group:
-                merged_moves.extend(p.moves)
-            setup = group[0].setup
-            gcode = write_gcode(
-                merged_moves,
-                safe_z=setup.safe_z,
-                machine=machine,
-                sheet_height=ast.sheet.height_mm,
-                y_origin=y_origin,
-                margin_mm=margin_mm,
-                park_z_mm=park_z_mm,
-            )
-            pass_name = f"{diameter:.2f}mm"
-            gcode_dict[pass_name] = gcode
-
-            for move in merged_moves:
-                total_moves += 1
-                if isinstance(move, RapidMove):
-                    total_rapid_moves += 1
-                elif isinstance(move, CutMove):
-                    total_cut_moves += 1
-    else:
-        for p in passes:
-            gcode = write_gcode(
-                p.moves,
-                safe_z=p.setup.safe_z,
-                machine=machine,
-                sheet_height=ast.sheet.height_mm,
-                y_origin=y_origin,
-                margin_mm=margin_mm,
-                park_z_mm=park_z_mm,
-            )
-
-            tool_diameter = p.setup.tool.diameter
-            pass_name = f"{p.op}-{tool_diameter:.2f}mm"
-            gcode_dict[pass_name] = gcode
-
-            total_moves += len(p.moves)
-            for move in p.moves:
-                if isinstance(move, RapidMove):
-                    total_rapid_moves += 1
-                elif isinstance(move, CutMove):
-                    total_cut_moves += 1
-
-    _gcode_ms = (time.perf_counter() - gcode_start) * 1000
+    passes = [record for output in outputs for record in output.passes]
+    gcode_dict = {name: gcode for output in outputs for name, gcode in output.gcode.items()}
+    total_moves = sum(output.total_moves for output in outputs)
+    total_rapid_moves = sum(output.rapid_moves for output in outputs)
+    total_cut_moves = sum(output.cut_moves for output in outputs)
+    _hints_ms = sum(output.hints_ms for output in outputs)
+    _plan_ms = sum(output.plan_ms for output in outputs)
+    _gcode_ms = sum(output.gcode_ms for output in outputs)
 
     svg_string: str | None = None
+    svg_back_string: str | None = None
     _svg_ms = 0.0
     if generate_svg:
         svg_start = time.perf_counter()
         try:
             from export.blueprint_svg import render_blueprint_svg
 
-            ast_with_kerf = replace(ast, kerf_width_mm=float(kerf_mm))
-            svg_string = render_blueprint_svg(ast_with_kerf, intents, theme=svg_theme, y_origin=y_origin)
+            svg_string = render_blueprint_svg(
+                replace(front_ast, kerf_width_mm=float(kerf_mm)),
+                front_intents,
+                theme=svg_theme,
+                y_origin=y_origin,
+            )
+            if back_ast is not None:
+                svg_back_string = render_blueprint_svg(
+                    replace(back_ast, kerf_width_mm=float(kerf_mm)),
+                    back_intents,
+                    theme=svg_theme,
+                    y_origin=y_origin,
+                    view_face="back",
+                )
         except Exception as e:
             warnings.append(f"SVG generation failed: {e}")
         _svg_ms = (time.perf_counter() - svg_start) * 1000
@@ -417,6 +523,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         passes=passes,
         gcode=gcode_dict,
         svg=svg_string,
+        svg_back=svg_back_string,
         metrics=metrics,
         errors=errors,
         warnings=warnings,
@@ -454,6 +561,11 @@ def write_pipeline_outputs(
         svg_path = output_dir / f"{job_name}.svg"
         svg_path.write_text(result.svg, encoding="utf-8")
         outputs["svg"] = svg_path
+
+    if result.svg_back is not None:
+        svg_back_path = output_dir / f"{job_name}.back.svg"
+        svg_back_path.write_text(result.svg_back, encoding="utf-8")
+        outputs["svg_back"] = svg_back_path
 
     persisted_metrics = _strip_non_deterministic(result.metrics)
     if build_params:

@@ -333,3 +333,46 @@ class TestNestHoldingValidation:
         )
         with pytest.raises(NestParseError, match="Invalid holding"):
             parse_nest_yaml(source)
+
+
+class TestFaceAttribute:
+    def _pml(self, feature_block: str, sheet_extra: str = "") -> str:
+        return (
+            f"Sheet:\n  width: 400mm\n  height: 300mm\n  thickness: 19mm\n{sheet_extra}"
+            f"children:\n- Circle:\n    id: anchor\n    diameter: 35mm\n"
+            f"    feature:\n{feature_block}"
+            f"    at:\n      x: 100mm\n      y: 100mm\n"
+        )
+
+    def test_face_back_with_through_depth_rejected(self) -> None:
+        source = self._pml("      type: pocket\n      depth: through\n      face: back\n")
+        with pytest.raises(PMLParseError, match="cannot be combined with depth: through"):
+            parse_pml_yaml(source)
+
+    def test_face_back_hole_without_depth_rejected(self) -> None:
+        source = self._pml("      type: hole\n      face: back\n")
+        with pytest.raises(PMLParseError, match="cannot be combined with depth: through"):
+            parse_pml_yaml(source)
+
+    def test_face_on_profile_feature_rejected(self) -> None:
+        source = self._pml("      type: profile\n      depth: 6mm\n      side: outside\n      face: back\n")
+        with pytest.raises(PMLParseError, match="only valid on"):
+            parse_pml_yaml(source)
+
+    def test_face_invalid_value_rejected(self) -> None:
+        source = self._pml("      type: pocket\n      depth: 6mm\n      face: top\n")
+        with pytest.raises(PMLParseError, match="Invalid face 'top'"):
+            parse_pml_yaml(source)
+
+    def test_negative_min_web_rejected(self) -> None:
+        source = self._pml("      type: pocket\n      depth: 6mm\n", sheet_extra="  min_web: -1mm\n")
+        with pytest.raises(PMLParseError, match="min_web must be >= 0"):
+            parse_pml_yaml(source)
+
+    def test_pocket_generator_rejects_invalid_face(self) -> None:
+        source = (
+            "Sheet:\n  width: 400mm\n  height: 300mm\n  thickness: 19mm\n"
+            "children:\n- Rect:\n    children:\n    - Pocket:\n        depth: 6mm\n        face: sideways\n"
+        )
+        with pytest.raises(PMLParseError, match="Invalid face 'sideways'"):
+            parse_pml_yaml(source)

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 VALID_GCODE_OUTPUT_MODES = ("per-operation", "per-tool")
+VALID_FACES = ("front", "back")
+DEFAULT_MIN_WEB_MM = 3.0
 
 
 @dataclass(frozen=True)
@@ -15,10 +17,13 @@ class Sheet:
     show_dimensions: bool = True
     material: str = "mdf"
     gcode_output: str = "per-operation"
+    min_web_mm: float = DEFAULT_MIN_WEB_MM
 
     def __post_init__(self) -> None:
         if self.gcode_output not in VALID_GCODE_OUTPUT_MODES:
             raise ValueError(f"Invalid gcode_output '{self.gcode_output}'. Must be one of: {VALID_GCODE_OUTPUT_MODES}")
+        if self.min_web_mm < 0.0:
+            raise ValueError(f"Sheet min_web_mm must be >= 0, got {self.min_web_mm}")
         from config.machine_loader import available_materials
 
         valid = available_materials()
@@ -89,6 +94,7 @@ class Feature:
     type: str
     depth_mm: float
     side: str | None = None
+    face: str = "front"
     is_through: bool = False
     corner_cleanup_tool_diameter_mm: float | None = None
     dogbone: DogboneSpec | None = None
@@ -139,6 +145,9 @@ class LayoutAST:
     layout: dict[str, Any] | None = None
     config: dict[str, Any] = field(default_factory=dict)
 
+    def face_items(self, face: str) -> tuple[Item, ...]:
+        return tuple(i for i in self.items if item_face(i) == face)
+
     @staticmethod
     def from_json(path: str) -> LayoutAST:
         from layout_ast.parsers import parse_layout_json
@@ -149,3 +158,80 @@ class LayoutAST:
         from layout_ast.emitters import emit_layout_json
 
         return emit_layout_json(self, path)
+
+
+def item_face(item: Item) -> str:
+    return item.feature.face if item.feature is not None else "front"
+
+
+_MIRROR_INVARIANT_KEYS = frozenset(
+    {
+        "w_mm",
+        "h_mm",
+        "diameter_mm",
+        "radius_mm",
+        "corner_radius_mm",
+        "edge_treatment",
+    }
+)
+
+_MIRROR_RADIUS_SWAP = {
+    "radius_tl_mm": "radius_bl_mm",
+    "radius_bl_mm": "radius_tl_mm",
+    "radius_tr_mm": "radius_br_mm",
+    "radius_br_mm": "radius_tr_mm",
+}
+
+
+def mirror_item_about_x(item: Item, working_height_mm: float) -> Item:
+    if item.feature is not None and (
+        item.feature.dogbone_corners is not None or item.feature.dogbone_reference_point is not None
+    ):
+        raise ValueError(
+            f"Cannot mirror item {item.shape_id!r}: dogbone_corners/dogbone_reference_point "
+            f"hold absolute-frame coordinates that the back-face mirror does not remap"
+        )
+
+    placement = item.placement
+    if placement is not None:
+        cx, cy = placement.center_xy_mm
+        placement = Placement(center_xy_mm=(cx, working_height_mm - cy))
+
+    geometry = item.geometry
+    if geometry is not None:
+        geometry = Geometry(data=_mirror_geometry_data(geometry.data, working_height_mm, item.shape_id))
+
+    return replace(item, placement=placement, geometry=geometry)
+
+
+def _mirror_geometry_data(data: dict[str, Any], working_height_mm: float, shape_id: str | None) -> dict[str, Any]:
+    mirrored: dict[str, Any] = {}
+    for key, value in data.items():
+        if key in _MIRROR_INVARIANT_KEYS:
+            mirrored[key] = value
+        elif key in _MIRROR_RADIUS_SWAP:
+            mirrored[_MIRROR_RADIUS_SWAP[key]] = value
+        elif key == "points":
+            mirrored[key] = _mirror_ring(value)
+        elif key == "holes":
+            mirrored[key] = [_mirror_ring(ring) for ring in value]
+        elif key in ("start", "end"):
+            mirrored[key] = [value[0], -value[1]]
+        elif key == "islands":
+            mirrored[key] = [
+                {
+                    **bounds,
+                    "y_min": working_height_mm - bounds["y_max"],
+                    "y_max": working_height_mm - bounds["y_min"],
+                }
+                for bounds in value
+            ]
+        else:
+            raise ValueError(
+                f"Cannot mirror item {shape_id!r}: unrecognized geometry key {key!r} has no back-face mapping"
+            )
+    return mirrored
+
+
+def _mirror_ring(points: Any) -> list[list[float]]:
+    return [[point[0], -point[1]] for point in reversed(list(points))]

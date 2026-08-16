@@ -190,6 +190,7 @@ class ProfileGen:
 @dataclass(frozen=True)
 class PocketGen:
     depth_mm: float
+    face: str = "front"
     feeds_override: FeedsOverride | None = None
 
 

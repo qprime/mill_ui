@@ -333,3 +333,73 @@ def _normalize_svg(svg_text: str) -> str:
 
     normalized = "\n".join(line for line in normalized.split("\n") if line)
     return normalized
+
+
+def _two_face_ast() -> LayoutAST:
+    return LayoutAST(
+        sheet=Sheet(width_mm=400.0, height_mm=300.0, thickness_mm=19.0, margin_mm=0.0),
+        items=(
+            Item(
+                kind="shape",
+                type="Rect",
+                geometry=Geometry(data={"w_mm": 100.0, "h_mm": 80.0}),
+                placement=Placement(center_xy_mm=(100.0, 100.0)),
+                feature=Feature(type="pocket", depth_mm=6.0),
+                shape_id="front_pocket",
+            ),
+            Item(
+                kind="shape",
+                type="Circle",
+                geometry=Geometry(data={"diameter_mm": 35.0}),
+                placement=Placement(center_xy_mm=(300.0, 60.0)),
+                feature=Feature(type="pocket", depth_mm=12.5, face="back"),
+                shape_id="hinge_cup",
+            ),
+        ),
+    )
+
+
+def test_back_svg_generated_when_back_items_present():
+    from cam.pipeline import run_pipeline
+
+    result = run_pipeline(_two_face_ast(), kerf_mm=3.175, min_channel_width_mm=6.0)
+
+    assert result.svg_back is not None
+    assert result.svg is not None
+    assert "BACK FACE" in result.svg_back
+    assert "BACK FACE" not in result.svg
+
+
+def test_back_svg_absent_for_single_face_job():
+    from cam.pipeline import run_pipeline
+
+    ast = _two_face_ast()
+    single_face = LayoutAST(sheet=ast.sheet, items=(ast.items[0],))
+
+    result = run_pipeline(single_face, kerf_mm=3.175, min_channel_width_mm=6.0)
+
+    assert result.svg_back is None
+
+
+def test_back_view_renders_mirrored_geometry():
+    from cam.pipeline import run_pipeline
+
+    ast = _two_face_ast()
+    result = run_pipeline(ast, kerf_mm=3.175, min_channel_width_mm=6.0)
+
+    authored_view = render_blueprint_svg(LayoutAST(sheet=ast.sheet, items=(ast.items[1],)))
+    authored_cy = [float(m) for m in re.findall(r'<circle[^>]*\scy="([-\d.]+)"', authored_view)]
+    assert result.svg_back is not None
+    back_cy = [float(m) for m in re.findall(r'<circle[^>]*\scy="([-\d.]+)"', result.svg_back)]
+
+    assert authored_cy == pytest.approx([240.0])
+    assert back_cy == pytest.approx([60.0])
+
+
+def test_front_view_omits_back_items():
+    from cam.pipeline import run_pipeline
+
+    result = run_pipeline(_two_face_ast(), kerf_mm=3.175, min_channel_width_mm=6.0)
+
+    assert result.svg is not None
+    assert "hinge_cup" not in result.svg

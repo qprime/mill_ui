@@ -305,6 +305,7 @@ class RemovalIntent:
     hint_type: str = ""
     shape: str = ""
     side: str | None = None
+    face: str = "front"
     original_id: str | None = None
     shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
     corner_cleanup_tool_diameter_mm: float | None = None
@@ -385,6 +386,8 @@ class RemovalIntent:
         }
         if self.side is not None:
             result["side"] = self.side
+        if self.face != "front":
+            result["face"] = self.face
         if self.original_id is not None:
             result["original_id"] = self.original_id
         if self.corner_cleanup_tool_diameter_mm is not None:

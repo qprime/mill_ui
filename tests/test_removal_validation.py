@@ -3,6 +3,8 @@ from __future__ import annotations
 from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
+    check_back_face_support,
+    check_cross_face_web,
     check_depth_feasibility,
     check_overlap,
     check_toolability,
@@ -455,3 +457,97 @@ def test_check_overlap_with_islands():
     )
     result = check_overlap([intent])
     assert result.is_valid()
+
+
+def _face_intent(
+    region_id: str,
+    bounds: Bounds2D,
+    depth_mm: float,
+    face: str,
+    hint_type: str = "pocket",
+    mode: str = "constant",
+) -> RemovalIntent:
+    if mode == "linear_gradient":
+        profile = DepthProfile.linear_gradient(z_top=0.0, z_bottom=-depth_mm, direction_deg=0.0)
+    else:
+        profile = DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm)
+    return RemovalIntent(
+        region_id=region_id,
+        bounds=bounds,
+        depth_profile=profile,
+        hint_type=hint_type,
+        face=face,
+    )
+
+
+class TestCrossFaceValidation:
+    def test_overlap_check_skips_cross_face_pairs(self) -> None:
+        front = _face_intent("front_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "front")
+        back = _face_intent("back_pocket", Bounds2D(10.0, 30.0, 10.0, 30.0), 5.0, "back")
+
+        assert not check_overlap([front, back]).has_issues()
+
+    def test_same_face_overlap_still_errors(self) -> None:
+        a = _face_intent("back_a", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "back")
+        b = _face_intent("back_b", Bounds2D(10.0, 30.0, 10.0, 30.0), 5.0, "back")
+
+        assert check_overlap([a, b]).has_issues()
+
+    def test_cross_face_web_error_on_breach(self) -> None:
+        front = _face_intent("front_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 5.0, "front")
+        back = _face_intent("back_cup", Bounds2D(10.0, 30.0, 10.0, 30.0), 12.5, "back")
+
+        result = check_cross_face_web([front, back], sheet_thickness_mm=19.0, min_web_mm=3.0)
+
+        assert result.has_issues()
+        assert "web breach" in result.errors[0].message
+
+    def test_cross_face_web_passes_at_exact_boundary(self) -> None:
+        front = _face_intent("front_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 3.5, "front")
+        back = _face_intent("back_cup", Bounds2D(10.0, 30.0, 10.0, 30.0), 12.5, "back")
+
+        assert not check_cross_face_web([front, back], sheet_thickness_mm=19.0, min_web_mm=3.0).has_issues()
+
+    def test_cross_face_web_ignores_non_overlapping_pairs(self) -> None:
+        front = _face_intent("front_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "front")
+        back = _face_intent("back_cup", Bounds2D(100.0, 140.0, 0.0, 40.0), 12.5, "back")
+
+        assert not check_cross_face_web([front, back], sheet_thickness_mm=19.0, min_web_mm=3.0).has_issues()
+
+    def test_cross_face_web_ignores_profiles(self) -> None:
+        profile = _face_intent("door_profile", Bounds2D(0.0, 400.0, 0.0, 600.0), 19.0, "front", hint_type="profile")
+        back = _face_intent("back_cup", Bounds2D(10.0, 45.0, 90.0, 125.0), 12.5, "back")
+
+        assert not check_cross_face_web([profile, back], sheet_thickness_mm=19.0, min_web_mm=3.0).has_issues()
+
+    def test_cross_face_web_disabled_at_zero(self) -> None:
+        front = _face_intent("front_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 10.0, "front")
+        back = _face_intent("back_cup", Bounds2D(10.0, 30.0, 10.0, 30.0), 12.5, "back")
+
+        assert not check_cross_face_web([front, back], sheet_thickness_mm=19.0, min_web_mm=0.0).has_issues()
+
+    def test_back_face_gradient_depth_rejected(self) -> None:
+        intent = _face_intent("back_gradient", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "back", mode="linear_gradient")
+
+        result = check_back_face_support(intent)
+
+        assert result.has_issues()
+        assert "linear_gradient" in result.errors[0].message
+
+    def test_back_face_constant_depth_accepted(self) -> None:
+        intent = _face_intent("back_pocket", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "back")
+
+        assert not check_back_face_support(intent).has_issues()
+
+    def test_back_face_profile_type_rejected(self) -> None:
+        intent = _face_intent("back_profile", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "back", hint_type="profile")
+
+        result = check_back_face_support(intent)
+
+        assert result.has_issues()
+        assert "profile" in result.errors[0].message
+
+    def test_front_intent_skips_back_face_check(self) -> None:
+        intent = _face_intent("front_gradient", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "front", mode="linear_gradient")
+
+        assert not check_back_face_support(intent).has_issues()

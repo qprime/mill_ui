@@ -599,6 +599,25 @@ class TestMirrorItemAboutX:
 
         assert islands == [{"x_min": 10.0, "x_max": 30.0, "y_min": 460.0, "y_max": 500.0}]
 
+    def test_mirror_spline_polyline_metadata_unchanged(self) -> None:
+        item = self._item(
+            {
+                "points": [[0.0, 0.0], [10.0, 20.0], [30.0, 5.0]],
+                "spline_source": True,
+                "spline_tolerance_mm": 0.1,
+                "is_open": True,
+                "width_mm": 3.0,
+            }
+        )
+
+        data = _mirrored_geometry(item, 600.0)
+
+        assert data["spline_source"] is True
+        assert data["spline_tolerance_mm"] == 0.1
+        assert data["is_open"] is True
+        assert data["width_mm"] == 3.0
+        assert data["points"] == [[30.0, -5.0], [10.0, -20.0], [0.0, 0.0]]
+
     def test_mirror_unknown_geometry_key_raises(self) -> None:
         item = self._item({"w_mm": 80.0, "h_mm": 40.0, "image_path": "heights.png"})
 

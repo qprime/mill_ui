@@ -78,6 +78,8 @@ class FeatureType:
 
 BACK_FACE_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
 BACK_FACE_DEPTH_MODES = ("constant", "v_carve")
+WEB_CHECK_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
+BACK_SVG_SUFFIX = ".back.svg"
 
 
 class ShapeType:

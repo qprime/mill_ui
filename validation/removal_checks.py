@@ -3,7 +3,12 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from core.constants import BACK_FACE_DEPTH_MODES, BACK_FACE_FEATURE_TYPES, FeatureType
+from core.constants import (
+    BACK_FACE_DEPTH_MODES,
+    BACK_FACE_FEATURE_TYPES,
+    WEB_CHECK_FEATURE_TYPES,
+    FeatureType,
+)
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
@@ -322,8 +327,8 @@ def check_cross_face_web(
     if min_web_mm <= 0.0:
         return result
 
-    front = [i for i in intents if i.face == "front" and i.hint_type in BACK_FACE_FEATURE_TYPES]
-    back = [i for i in intents if i.face == "back" and i.hint_type in BACK_FACE_FEATURE_TYPES]
+    front = [i for i in intents if i.face == "front" and i.hint_type in WEB_CHECK_FEATURE_TYPES]
+    back = [i for i in intents if i.face == "back" and i.hint_type in WEB_CHECK_FEATURE_TYPES]
     if not front or not back:
         return result
 

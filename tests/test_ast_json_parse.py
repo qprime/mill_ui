@@ -291,3 +291,29 @@ def test_face_and_min_web_survive_json_roundtrip():
         assert feature.face == "back"
     finally:
         Path(temp_path).unlink()
+
+
+def test_out_of_band_face_rejected_by_json_reader():
+    document = {
+        "sheet": {"width_mm": 400.0, "height_mm": 600.0, "thickness_mm": 19.0},
+        "items": [
+            {
+                "kind": "shape",
+                "type": "Circle",
+                "shape_id": "hinge_cup",
+                "geometry": {"diameter_mm": 35.0},
+                "placement": {"center_xy_mm": [40.0, 100.0]},
+                "feature": {"type": "pocket", "depth_mm": 12.5, "face": "Back"},
+            }
+        ],
+    }
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(document, f)
+        temp_path = f.name
+
+    try:
+        with pytest.raises(ValueError, match="Invalid face 'Back'"):
+            LayoutAST.from_json(temp_path)
+    finally:
+        Path(temp_path).unlink()

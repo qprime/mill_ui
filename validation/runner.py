@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, cast
 
+from core.constants import BACK_SVG_SUFFIX
 from layout_ast.layout import LayoutAST
 from validation.assertions import check_assertions, derive_assertions
 from validation.core import (
@@ -32,9 +33,11 @@ class ValidationInput:
     ast: LayoutAST | None = None
 
     svg_path: str | Path | None = None
+    svg_back_path: str | Path | None = None
     gcode_paths: list[str | Path] = field(default_factory=list)
 
     svg_content: str | None = None
+    svg_back_content: str | None = None
     gcode_content: list[str] = field(default_factory=list)
 
     golden_metrics: dict[str, Any] | None = None
@@ -71,10 +74,11 @@ def validate(
     )
 
     svg_metrics = None
+    svg_back_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     if options.extract_metrics:
-        svg_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
+        svg_metrics, svg_back_metrics, gcode_metrics_list = _extract_all_metrics(inputs)
 
         if svg_metrics:
             result.metrics.update(svg_metrics.to_dict())
@@ -87,6 +91,7 @@ def validate(
             result,
             inputs,
             svg_metrics,
+            svg_back_metrics,
             gcode_metrics_list,
             options,
         )
@@ -98,6 +103,14 @@ def validate(
             svg_metrics,
             gcode_metrics_list,
         )
+        if inputs.ast.face_items("back"):
+            _run_assertion_checks(
+                result,
+                inputs.ast,
+                svg_back_metrics,
+                gcode_metrics_list,
+                face="back",
+            )
 
     if options.check_regressions and inputs.golden_metrics is not None:
         _run_regression_checks(
@@ -131,13 +144,15 @@ def validate_recipe(
             break
 
     svg_path = None
+    svg_back_path = None
     gcode_paths: list[str | Path] = []
 
     if output_dir.exists():
-        for svg_file in output_dir.glob("*.svg"):
-            if not svg_file.name.startswith("."):
-                svg_path = svg_file
-                break
+        svg_files = sorted(f for f in output_dir.glob("*.svg") if not f.name.startswith("."))
+        front_svgs = [f for f in svg_files if not f.name.endswith(BACK_SVG_SUFFIX)]
+        back_svgs = [f for f in svg_files if f.name.endswith(BACK_SVG_SUFFIX)]
+        svg_path = front_svgs[0] if front_svgs else None
+        svg_back_path = back_svgs[0] if back_svgs else None
 
         for nc_file in sorted(output_dir.glob("*.nc")):
             if not nc_file.name.startswith("."):
@@ -153,6 +168,7 @@ def validate_recipe(
         source_file=source_file,
         ast=ast,
         svg_path=svg_path,
+        svg_back_path=svg_back_path,
         gcode_paths=gcode_paths,
         golden_metrics=golden_metrics,
         golden_file=golden_file,
@@ -166,14 +182,20 @@ def validate_recipe(
 
 def _extract_all_metrics(
     inputs: ValidationInput,
-) -> tuple[SVGMetrics | None, list[GCodeMetrics]]:
+) -> tuple[SVGMetrics | None, SVGMetrics | None, list[GCodeMetrics]]:
     svg_metrics = None
+    svg_back_metrics = None
     gcode_metrics_list: list[GCodeMetrics] = []
 
     if inputs.svg_content:
         svg_metrics = extract_svg_metrics(inputs.svg_content)
     elif inputs.svg_path and Path(inputs.svg_path).exists():
         svg_metrics = extract_svg_metrics_from_file(str(inputs.svg_path))
+
+    if inputs.svg_back_content:
+        svg_back_metrics = extract_svg_metrics(inputs.svg_back_content)
+    elif inputs.svg_back_path and Path(inputs.svg_back_path).exists():
+        svg_back_metrics = extract_svg_metrics_from_file(str(inputs.svg_back_path))
 
     for gcode_path in inputs.gcode_paths:
         if Path(gcode_path).exists():
@@ -184,7 +206,7 @@ def _extract_all_metrics(
 
         gcode_metrics_list.append(extract_gcode_metrics_from_content(gcode_content))
 
-    return svg_metrics, gcode_metrics_list
+    return svg_metrics, svg_back_metrics, gcode_metrics_list
 
 
 def _merge_gcode_metrics(gcode_list: list[GCodeMetrics]) -> dict[str, Any]:  # noqa: C901 — metric aggregation
@@ -306,20 +328,29 @@ def _run_invariant_checks(
     result: CAMValidationResult,
     inputs: ValidationInput,
     svg_metrics: SVGMetrics | None,
+    svg_back_metrics: SVGMetrics | None,
     gcode_metrics_list: list[GCodeMetrics],
     options: ValidationOptions,
 ) -> None:
 
-    if inputs.svg_path or inputs.svg_content:
-        svg_content = inputs.svg_content
-        if not svg_content and inputs.svg_path:
-            with open(inputs.svg_path) as f:
+    views = (
+        (inputs.svg_path, inputs.svg_content, svg_metrics),
+        (inputs.svg_back_path, inputs.svg_back_content, svg_back_metrics),
+    )
+
+    for view_path, view_content, view_metrics in views:
+        if not (view_path or view_content):
+            continue
+
+        svg_content = view_content
+        if not svg_content and view_path:
+            with open(view_path) as f:
                 svg_content = f.read()
 
         if svg_content:
             svg_results = check_svg_invariants(
                 svg_content,
-                metrics=svg_metrics,
+                metrics=view_metrics,
                 expected_layers=options.svg_expected_layers,
             )
             for inv_result in svg_results:
@@ -348,9 +379,10 @@ def _run_assertion_checks(
     ast: LayoutAST,
     svg_metrics: SVGMetrics | None,
     gcode_metrics_list: list[GCodeMetrics],
+    face: str = "front",
 ) -> None:
 
-    assertions = derive_assertions(ast)
+    assertions = derive_assertions(ast, face=face)
 
     svg_dict = svg_metrics.to_dict() if svg_metrics else None
 

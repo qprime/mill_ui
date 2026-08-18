@@ -345,6 +345,23 @@ class TestTwoFaceOutput:
             assert stem.endswith("mm")
             assert stem[0].isdigit()
 
+    def test_unmirrorable_back_item_reported_as_error(self):
+        ast = _make_two_face_ast()
+        dogboned_back = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 40.0, "h_mm": 40.0}),
+            placement=Placement(center_xy_mm=(300, 200)),
+            feature=Feature(type="pocket", depth_mm=6.0, face="back", dogbone_corners=((10.0, 20.0),)),
+            shape_id="notched_back_pocket",
+        )
+        ast = LayoutAST(sheet=ast.sheet, items=(ast.items[0], dogboned_back))
+
+        result = run_pipeline(ast, tool_db=TOOL_DB, generate_svg=False)
+
+        assert any("Back-face mirror" in e for e in result.errors)
+        assert result.gcode == {}
+
     def test_cross_face_web_breach_reported(self):
         ast = _make_two_face_ast()
         deep_back = Item(

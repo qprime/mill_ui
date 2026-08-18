@@ -120,6 +120,10 @@ class Feature:
 
     ramp_mm: float | None = None
 
+    def __post_init__(self) -> None:
+        if self.face not in VALID_FACES:
+            raise ValueError(f"Invalid face '{self.face}'. Must be one of: {VALID_FACES}")
+
 
 @dataclass(frozen=True)
 class Item:
@@ -172,6 +176,10 @@ _MIRROR_INVARIANT_KEYS = frozenset(
         "radius_mm",
         "corner_radius_mm",
         "edge_treatment",
+        "width_mm",
+        "is_open",
+        "spline_source",
+        "spline_tolerance_mm",
     }
 )
 

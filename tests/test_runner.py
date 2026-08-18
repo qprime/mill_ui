@@ -290,6 +290,26 @@ def test_validate_recipe_with_ast():
     assert result.assertions.total > 0
 
 
+def test_validate_recipe_two_sided():
+    recipe_dir = os.path.join(RECIPE_DIR, "86_backside_anchors")
+    pml_path = os.path.join(recipe_dir, "example.pml.yml")
+
+    if not glob.glob(os.path.join(recipe_dir, "output", "*.back.svg")):
+        pytest.skip("two-sided recipe output not generated")
+
+    from pml import parse_pml
+
+    with open(pml_path) as f:
+        ast = parse_pml(f.read())
+
+    result = validate_recipe(recipe_dir, ast=ast)
+
+    back_assertions = [r for r in result.assertions.results if r.source.startswith("ast:back")]
+    assert back_assertions
+    assert result.assertions.failed == 0
+    assert result.invariants.failed == 0
+
+
 def test_validate_recipe_pocket():
     recipe_dir = os.path.join(RECIPE_DIR, "02_pocket_with_cleanup")
 

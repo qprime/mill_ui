@@ -85,6 +85,14 @@ Each PML node must have exactly one uppercase key identifying its type:
 
 ---
 
+## Face Semantics
+
+`Feature.face` (`front` / `back`, PM-13) selects the panel surface a feature is machined from. It is unrelated to `Feature.side` (`inside` / `outside`), which selects the offset side of a profile.
+
+Beam primitives carry a separate `FaceFeature.face` (`assembly/beam.py`) naming a face of a beam blank. That field is stored and never consumed by the CAM pipeline; it does not select a machining setup and must not be routed into the panel face mechanism.
+
+---
+
 ## Sheet Dimensions
 
 Sheet can specify either:

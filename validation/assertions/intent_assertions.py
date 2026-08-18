@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, cast
 
-from layout_ast.layout import Feature, Item, LayoutAST
+from layout_ast.layout import Feature, Item, LayoutAST, mirror_item_about_x
 from validation.core import AssertionResult, Verdict
 
 ASSERTION_IDS = [
@@ -34,13 +34,18 @@ class IntentAssertion:
     artifact: str = "any"
 
 
-def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
+def derive_assertions(ast: LayoutAST, face: str = "front") -> list[IntentAssertion]:
+    items = ast.face_items(face)
+    if face == "back":
+        items = tuple(mirror_item_about_x(item, ast.sheet.working_height_mm) for item in items)
+    prefix = "ast" if face == "front" else f"ast:{face}"
+
     assertions: list[IntentAssertion] = []
 
     assertions.append(
         IntentAssertion(
             id="SHEET_DIMENSIONS",
-            source="ast:sheet",
+            source=f"{prefix}:sheet",
             intent=f"Sheet {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm",
             expected={
                 "width_mm": ast.sheet.width_mm,
@@ -53,11 +58,11 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
     )
 
     countable_types = {"profile", "pocket", "hole", "engrave"}
-    countable = [i for i in ast.items if i.feature and i.feature.type in countable_types]
+    countable = [i for i in items if i.feature and i.feature.type in countable_types]
     assertions.append(
         IntentAssertion(
             id="ITEM_COUNT",
-            source="ast:items",
+            source=f"{prefix}:items",
             intent=f"Layout has {len(countable)} countable items",
             expected={"count": len(countable)},
             tolerance=0,
@@ -65,14 +70,16 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
         )
     )
 
-    profile_count = sum(1 for i in ast.items if i.feature and i.feature.type == "profile")
-    for item in ast.items:
-        assertions.extend(_derive_item_assertions(item, ast.sheet.thickness_mm, ast.sheet.margin_mm, profile_count))
+    profile_count = sum(1 for i in items if i.feature and i.feature.type == "profile")
+    for item in items:
+        assertions.extend(
+            _derive_item_assertions(item, ast.sheet.thickness_mm, ast.sheet.margin_mm, profile_count, prefix)
+        )
 
     total_tab_count = 0
     tab_height_mm = None
     tab_profiles = []
-    for item in ast.items:
+    for item in items:
         if item.feature and item.feature.type == "profile" and item.feature.tab_count and item.feature.tab_count > 0:
             total_tab_count += item.feature.tab_count
             if tab_height_mm is None:
@@ -84,7 +91,7 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
         assertions.append(
             IntentAssertion(
                 id="TAB_COUNT",
-                source="ast:aggregate",
+                source=f"{prefix}:aggregate",
                 intent=f"Total {total_tab_count} tabs across {len(tab_profiles)} profiles",
                 expected={
                     "tab_count": total_tab_count,
@@ -100,7 +107,11 @@ def derive_assertions(ast: LayoutAST) -> list[IntentAssertion]:
 
 
 def _derive_item_assertions(
-    item: Item, sheet_thickness_mm: float, sheet_margin_mm: float = 0.0, profile_count: int = 1
+    item: Item,
+    sheet_thickness_mm: float,
+    sheet_margin_mm: float = 0.0,
+    profile_count: int = 1,
+    source_prefix: str = "ast",
 ) -> list[IntentAssertion]:
     assertions: list[IntentAssertion] = []
 
@@ -109,7 +120,7 @@ def _derive_item_assertions(
 
     feature = item.feature
     item_id = item.shape_id or item.id or "unnamed"
-    source = f"ast:item:{item_id}"
+    source = f"{source_prefix}:item:{item_id}"
 
     center_xy = None
     if item.placement:

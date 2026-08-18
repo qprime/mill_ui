@@ -24,6 +24,7 @@ from config.machine_loader import (
     build_tool_db,
     load_machine_tool_db,
 )
+from core.constants import BACK_SVG_SUFFIX
 from ir.removal_intent import Bounds2D, RemovalIntent
 from layout_ast.layout import LayoutAST, mirror_item_about_x
 from pml.revision_header import build_provenance
@@ -390,10 +391,23 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     back_ast: LayoutAST | None = None
     back_intents: list[RemovalIntent] = []
     if back_items:
-        back_ast = replace(
-            ast,
-            items=tuple(mirror_item_about_x(item, ast.sheet.working_height_mm) for item in back_items),
-        )
+        try:
+            back_ast = replace(
+                ast,
+                items=tuple(mirror_item_about_x(item, ast.sheet.working_height_mm) for item in back_items),
+            )
+        except ValueError as exc:
+            errors.append(f"Back-face mirror: {exc}")
+            return PipelineResult(
+                ast=ast,
+                intents=intents,
+                passes=[],
+                gcode={},
+                svg=None,
+                metrics={"timing": {"ir_ms": round(_ir_ms, 2), "total_ms": round(_ir_ms, 2)}},
+                errors=errors,
+                warnings=warnings,
+            )
         back_intents = ast_to_removal_intents(back_ast, warnings=warnings)
 
     face_runs: list[tuple[LayoutAST, list[RemovalIntent], str]] = []
@@ -563,7 +577,7 @@ def write_pipeline_outputs(
         outputs["svg"] = svg_path
 
     if result.svg_back is not None:
-        svg_back_path = output_dir / f"{job_name}.back.svg"
+        svg_back_path = output_dir / f"{job_name}{BACK_SVG_SUFFIX}"
         svg_back_path.write_text(result.svg_back, encoding="utf-8")
         outputs["svg_back"] = svg_back_path
 

@@ -150,12 +150,10 @@ def test_cli_gcode_only():
 
 def test_cli_multiple_gcode():
     """CLI validates multiple G-code files."""
-    recipe_dir = RECIPE_DIR / "02_simple_pocket"
-    output_dir = recipe_dir / "output"
+    output_dir = RECIPE_DIR / "06_multiple_depths" / "output"
 
-    nc_files = [f for f in output_dir.glob("*.nc") if not f.name.startswith("._")] if output_dir.exists() else []
-    if len(nc_files) < 2:
-        pytest.skip("not enough G-code files")
+    nc_files = sorted(f for f in output_dir.glob("*.nc") if not f.name.startswith("._"))
+    assert len(nc_files) >= 2, f"recipe 06 should ship multiple G-code files, found {len(nc_files)}"
 
     exit_code, stdout, stderr = run_cli("--gcode", str(nc_files[0]), str(nc_files[1]), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN), f"Unexpected exit {exit_code}: {stderr}"

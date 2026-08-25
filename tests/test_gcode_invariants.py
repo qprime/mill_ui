@@ -49,10 +49,7 @@ def test_valid_simple_profile_gcode():
 
 def test_valid_shaker_door_gcode():
     """Test that shaker door G-code (with pockets) passes all invariants."""
-    nc_path = get_recipe_nc_path(3, "shaker_door_template", "pocket-9.53mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
+    nc_path = get_recipe_nc_path(3, "shaker_door_template", "pocket-12.70mm.nc")
 
     results = check_gcode_invariants(nc_path)
 
@@ -62,10 +59,7 @@ def test_valid_shaker_door_gcode():
 
 def test_valid_multiple_depths_gcode():
     """Test that multiple depths G-code passes all invariants."""
-    nc_path = get_recipe_nc_path(6, "multiple_depths", "pocket-9.53mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
+    nc_path = get_recipe_nc_path(6, "multiple_depths", "pocket-12.70mm.nc")
 
     results = check_gcode_invariants(nc_path)
 

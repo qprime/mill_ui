@@ -53,10 +53,7 @@ def test_extract_gcode_metrics_simple_profile():
 
 def test_extract_gcode_metrics_pocket():
     """Test metric extraction from pocket G-code."""
-    nc_path = get_recipe_nc_path(2, "pocket_with_cleanup", "pocket-9.53mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
+    nc_path = get_recipe_nc_path(2, "pocket_with_cleanup", "pocket-12.70mm.nc")
 
     metrics = extract_gcode_metrics(nc_path)
 

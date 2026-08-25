@@ -98,13 +98,9 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
     item_type = item_data["type"]
 
     if kind == "template":
-        params = item_data.get("params")
-        template_id = item_data.get("id")
-        return Item(
-            kind=kind,
-            type=item_type,
-            params=params,
-            id=template_id,
+        raise ValueError(
+            f"Layout item '{item_data.get('id', item_type)}' uses kind 'template', which is no longer supported. "
+            f"Define reusable parts as PML templates instead."
         )
     else:
         geometry_data = item_data.get("geometry", {})

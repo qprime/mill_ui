@@ -6,8 +6,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from layout_ast.layout import LayoutAST
 
 
@@ -47,70 +45,6 @@ def test_roundtrip_minimal_shape_layout():
         assert emitted_item["feature"]["type"] == original_item["feature"]["type"]
     finally:
         Path(temp_path).unlink()
-
-
-def test_roundtrip_cnc_clamp_v1_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "cnc_clamp_v1"
-        / "input"
-        / "layout.json"
-    )
-
-    if not layout_path.exists():
-        pytest.skip("Test layout not found")
-
-    ast = LayoutAST.from_json(str(layout_path))
-    json_str = ast.to_json()
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        f.write(json_str)
-        temp_path = f.name
-
-    try:
-        ast2 = LayoutAST.from_json(temp_path)
-
-        assert ast2.project == ast.project
-        assert ast2.kerf_width_mm == ast.kerf_width_mm
-        assert ast2.sheet.width_mm == ast.sheet.width_mm
-        assert ast2.sheet.height_mm == ast.sheet.height_mm
-        assert ast2.sheet.thickness_mm == ast.sheet.thickness_mm
-        assert len(ast2.items) == len(ast.items)
-
-        item1 = ast.items[0]
-        item2 = ast2.items[0]
-        assert item2.kind == item1.kind
-        assert item2.type == item1.type
-        assert item2.id == item1.id
-        assert item2.params == item1.params
-    finally:
-        Path(temp_path).unlink()
-
-
-def test_roundtrip_cnc_clamp_part_a_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "cnc_clamp-part_a_layout"
-        / "input"
-        / "layout.json"
-    )
-
-    if not layout_path.exists():
-        pytest.skip("Test layout not found")
-
-    ast = LayoutAST.from_json(str(layout_path))
-    json_str = ast.to_json()
-    emitted_data = json.loads(json_str)
-
-    assert emitted_data["layout"]["cols"] == 2
-    assert emitted_data["layout"]["rows"] == 2
-    assert len(emitted_data["items"]) == 1
 
 
 def test_deterministic_emission():

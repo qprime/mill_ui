@@ -65,20 +65,14 @@ def _item_to_dict(item: Item) -> dict[str, Any]:
         "type": item.type,
     }
 
-    if item.kind == "template":
-        if item.params is not None:
-            data["params"] = item.params
-        if item.id is not None:
-            data["id"] = item.id
-    else:
-        if item.geometry is not None:
-            data["geometry"] = item.geometry.data
-        if item.placement is not None:
-            data["placement"] = _placement_to_dict(item.placement)
-        if item.feature is not None:
-            data["feature"] = _feature_to_dict(item.feature)
-        if item.shape_id is not None:
-            data["shape_id"] = item.shape_id
+    if item.geometry is not None:
+        data["geometry"] = item.geometry.data
+    if item.placement is not None:
+        data["placement"] = _placement_to_dict(item.placement)
+    if item.feature is not None:
+        data["feature"] = _feature_to_dict(item.feature)
+    if item.shape_id is not None:
+        data["shape_id"] = item.shape_id
 
     return data
 

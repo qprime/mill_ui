@@ -196,69 +196,21 @@ def test_parse_preserves_numeric_precision():
         Path(temp_path).unlink()
 
 
-def test_parse_cnc_clamp_v1_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "cnc_clamp_v1"
-        / "input"
-        / "layout.json"
-    )
+def test_parse_rejects_template_item():
+    layout_data = {
+        "sheet": {"width_mm": 200.0, "height_mm": 100.0, "thickness_mm": 12.0},
+        "items": [{"kind": "template", "type": "ShakerDoor", "id": "door", "params": {"length_mm": 200.0}}],
+    }
 
-    if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(layout_data, f)
+        temp_path = f.name
 
-    ast = LayoutAST.from_json(str(layout_path))
-
-    assert ast.project == "cnc_clamp_v1"
-    assert ast.kerf_width_mm == 6.35
-    assert ast.cam is not None
-    assert ast.layout is not None
-
-    assert ast.sheet.width_mm == 800.0
-    assert ast.sheet.height_mm == 250.0
-    assert ast.sheet.thickness_mm == 19.1
-
-    assert len(ast.items) == 1
-    item = ast.items[0]
-    assert item.kind == "template"
-    assert item.type == "ClampBar"
-    assert item.id == "clamp_bar"
-    assert item.params is not None
-    assert "length_mm" in item.params
-    assert item.params["length_mm"] == 200.0
-
-    assert item.geometry is None
-    assert item.placement is None
-    assert item.feature is None
-
-
-def test_parse_cnc_clamp_part_a_layout():
-    layout_path = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "memories"
-        / "cam_projects"
-        / "sheet_layouts"
-        / "cnc_clamp-part_a_layout"
-        / "input"
-        / "layout.json"
-    )
-
-    if not layout_path.exists():
-        pytest.skip(f"Test layout not found: {layout_path}")
-
-    ast = LayoutAST.from_json(str(layout_path))
-
-    assert ast.layout is not None
-    assert ast.layout["cols"] == 2
-    assert ast.layout["rows"] == 2
-
-    assert len(ast.items) == 1
-    item = ast.items[0]
-    assert item.kind == "template"
-    assert item.type == "ClampBar"
+    try:
+        with pytest.raises(ValueError, match="no longer supported"):
+            LayoutAST.from_json(temp_path)
+    finally:
+        Path(temp_path).unlink()
 
 
 def test_face_and_min_web_survive_json_roundtrip():

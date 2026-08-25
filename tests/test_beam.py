@@ -11,11 +11,13 @@ from assembly.beam import (
     EdgeDado,
     Fillet,
     LayerSpec,
+    Rabbet,
     Segment,
     SquareMortise,
     Tenon,
     compute_segments,
     validate_butts_never_align,
+    validate_feature_bounds,
     validate_stagger_minimum,
 )
 
@@ -365,6 +367,173 @@ class TestBeamSpecWithFeatures:
             end_features=(Tenon(end="right", extension_mm=38, width_mm=100, height_mm=19),),
         )
         assert len(beam.end_features) == 1
+
+
+class TestLayersReached:
+    def test_front_single_layer_depth(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("front", 19.0) == ((0, 19.0),)
+
+    def test_front_partial_second_layer(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("front", 30.0) == ((0, 19.0), (1, 11.0))
+
+    def test_back_counts_from_last_layer(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("back", 19.0) == ((2, 19.0),)
+
+    def test_back_partial_layer_is_innermost(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("back", 30.0) == ((1, 11.0), (2, 19.0))
+
+    def test_through_reaches_all_layers(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("front", None) == ((0, 19.0), (1, 19.0), (2, 19.0))
+
+    def test_full_stack_depth_reaches_all_layers(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        assert beam.layers_reached("front", 57.0) == ((0, 19.0), (1, 19.0), (2, 19.0))
+
+    def test_outer_edge_feature_applies_once_on_single_layer_beam(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=1)
+        rabbet = Rabbet(edge="bottom", width_mm=12, depth_mm=6)
+        assert beam._should_apply_edge_feature(rabbet, 0) is True
+
+    def test_single_layer_back_matches_front(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=1)
+        assert beam.layers_reached("back", 19.0) == beam.layers_reached("front", 19.0)
+
+    def test_depth_exceeding_total_thickness_raises(self):
+        beam = BeamSpec(name="post", length_mm=500, width_mm=76, thickness_mm=19, layers=3)
+        with pytest.raises(ValueError, match="BM-6"):
+            beam.layers_reached("front", 100.0)
+
+
+class TestFeatureBounds:
+    def test_mortise_past_beam_end_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            face_features=(SquareMortise(x_mm=490, y_mm=38, width_mm=38, height_mm=50, depth_mm=19),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_face_feature_at_exact_boundary_passes(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            face_features=(SquareMortise(x_mm=481, y_mm=38, width_mm=38, height_mm=50, depth_mm=19),),
+        )
+        validate_feature_bounds(beam)
+
+    def test_face_feature_depth_past_stack_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=2,
+            face_features=(SquareMortise(x_mm=250, y_mm=38, width_mm=38, height_mm=50, depth_mm=50),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_edge_feature_reversed_range_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            edge_features=(Rabbet(edge="top", width_mm=12, depth_mm=6, start_mm=300, end_mm=100),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_edge_feature_past_beam_end_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            edge_features=(EdgeDado(edge="top", position_mm=495, width_mm=19, depth_mm=9.5),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_edge_feature_deeper_than_beam_width_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            edge_features=(EdgeDado(edge="top", position_mm=100, width_mm=19, depth_mm=90),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_rabbet_deeper_than_layer_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            edge_features=(Rabbet(edge="bottom", width_mm=12, depth_mm=25),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_cutout_past_beam_width_raises(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=(
+                LayerSpec(length_mm=500),
+                LayerSpec(
+                    length_mm=500,
+                    cutouts=(Cutout(start_mm=100, length_mm=60, width_mm=200, offset_from_edge_mm=50),),
+                ),
+            ),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            validate_feature_bounds(beam)
+
+    def test_full_width_cutout_ignores_offset(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=(
+                LayerSpec(length_mm=500),
+                LayerSpec(length_mm=500, cutouts=(Cutout(start_mm=100, length_mm=60, offset_from_edge_mm=50),)),
+            ),
+        )
+        validate_feature_bounds(beam)
+
+    def test_expand_rejects_out_of_bounds_feature(self):
+        beam = BeamSpec(
+            name="post",
+            length_mm=500,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            face_features=(DrillHole(x_mm=250, y_mm=74, diameter_mm=10),),
+        )
+        with pytest.raises(ValueError, match="BM-6"):
+            beam.expand(sheet_size=1200)
 
 
 class TestOuterLayerDetection:

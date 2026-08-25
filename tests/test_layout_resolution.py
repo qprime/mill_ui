@@ -3,6 +3,9 @@ from __future__ import annotations
 import pytest
 
 from layout_ast.compositional import (
+    BeamDecl,
+    BeamFeatureDecl,
+    BeamLayerDecl,
     Cell,
     ComponentDef,
     CompositionalLayoutAST,
@@ -19,7 +22,7 @@ from layout_ast.compositional import (
 )
 from layout_ast.layout import Feature, Geometry, Item, Placement, Sheet, mirror_item_about_x
 from pml import format_pml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import ResolutionAssertionError, resolve_layout
 
 
 def approx_eq(a, b, rel=1e-6):
@@ -652,3 +655,312 @@ def test_pocket_gen_face_threaded_to_generated_item():
     feature = pockets[0].feature
     assert feature is not None
     assert feature.face == "back"
+
+
+def _beam_ast(beam: BeamDecl, sheet: Sheet | None = None) -> CompositionalLayoutAST:
+    return CompositionalLayoutAST(
+        sheet=sheet or Sheet(width_mm=800, height_mm=600, thickness_mm=19, margin_mm=0.0),
+        root=Panel(children=(beam,)),
+    )
+
+
+def _geometry_of(item: Item) -> dict:
+    assert item.geometry is not None
+    return item.geometry.data
+
+
+def _feature_of(item: Item) -> Feature:
+    assert item.feature is not None
+    return item.feature
+
+
+def _center_of(item: Item) -> tuple[float, float]:
+    assert item.placement is not None
+    return item.placement.center_xy_mm
+
+
+def _beam_removals(flat, feature_type: str) -> list[Item]:
+    return [i for i in flat.items if i.feature and _feature_of(i).type == feature_type]
+
+
+def test_beam_mortise_emits_pocket_on_reached_layer():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(
+            BeamFeatureDecl(
+                feature_type="SquareMortise",
+                params={"x_mm": 250, "y_mm": 38, "width_mm": 38, "height_mm": 50, "depth_mm": 19},
+            ),
+        ),
+    )
+
+    flat = resolve_layout(_beam_ast(beam))
+
+    pockets = _beam_removals(flat, "pocket")
+    assert len(pockets) == 1
+    assert _geometry_of(pockets[0]) == {"w_mm": 38.0, "h_mm": 50.0}
+    assert _feature_of(pockets[0]).is_through is True
+    assert _center_of(pockets[0]) == (256.35, 44.35)
+
+
+def test_beam_face_back_targets_last_layer():
+    params = {"x_mm": 250, "y_mm": 38, "width_mm": 38, "height_mm": 50, "depth_mm": 19}
+    front = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(BeamFeatureDecl(feature_type="SquareMortise", params=params),),
+    )
+    back = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(BeamFeatureDecl(feature_type="SquareMortise", params={**params, "face": "back"}),),
+    )
+
+    front_pocket = _beam_removals(resolve_layout(_beam_ast(front)), "pocket")[0]
+    back_pocket = _beam_removals(resolve_layout(_beam_ast(back)), "pocket")[0]
+
+    panel_pitch = 76.0 + 10.0
+    assert _center_of(back_pocket)[0] == _center_of(front_pocket)[0]
+    assert _center_of(back_pocket)[1] - _center_of(front_pocket)[1] == 2 * panel_pitch
+
+
+def test_beam_partial_depth_splits_across_two_layers():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(
+            BeamFeatureDecl(
+                feature_type="SquareMortise",
+                params={"x_mm": 250, "y_mm": 38, "width_mm": 38, "height_mm": 50, "depth_mm": 30},
+            ),
+        ),
+    )
+
+    pockets = _beam_removals(resolve_layout(_beam_ast(beam)), "pocket")
+
+    assert len(pockets) == 2
+    assert _feature_of(pockets[0]).is_through is True
+    assert _feature_of(pockets[1]).is_through is False
+    assert _feature_of(pockets[1]).depth_mm == 11.0
+
+
+def test_beam_mortise_position_ignores_tenon_extension():
+    beam = BeamDecl(
+        name="rail",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        end_features=(
+            BeamFeatureDecl(
+                feature_type="Tenon",
+                params={"end": "left", "extension_mm": 38, "width_mm": 76, "height_mm": 19, "layers": "center"},
+            ),
+        ),
+        face_features=(BeamFeatureDecl(feature_type="DrillHole", params={"x_mm": 250, "y_mm": 38, "diameter_mm": 10}),),
+    )
+
+    holes = _beam_removals(resolve_layout(_beam_ast(beam)), "hole")
+
+    assert len(holes) == 3
+    x_positions = [_center_of(h)[0] for h in holes]
+    assert x_positions[0] == x_positions[2]
+    assert x_positions[1] - x_positions[0] == 38.0
+
+
+def test_beam_edge_dado_all_layers():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        edge_features=(
+            BeamFeatureDecl(
+                feature_type="EdgeDado",
+                params={"edge": "top", "position_mm": 250, "width_mm": 19, "depth_mm": 9.5, "layers": "all"},
+            ),
+        ),
+    )
+
+    pockets = _beam_removals(resolve_layout(_beam_ast(beam)), "pocket")
+
+    assert len(pockets) == 3
+    assert all(_geometry_of(p) == {"w_mm": 19.0, "h_mm": 9.5} for p in pockets)
+    assert all(_feature_of(p).is_through for p in pockets)
+    assert _center_of(pockets[0]) == (265.85, 77.6)
+
+
+def test_beam_rabbet_outer_layers_only():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        edge_features=(
+            BeamFeatureDecl(
+                feature_type="Rabbet",
+                params={"edge": "bottom", "width_mm": 12, "depth_mm": 6},
+            ),
+        ),
+    )
+
+    pockets = _beam_removals(resolve_layout(_beam_ast(beam)), "pocket")
+
+    assert len(pockets) == 2
+    assert all(_feature_of(p).depth_mm == 6.0 and not _feature_of(p).is_through for p in pockets)
+    panel_pitch = 76.0 + 10.0
+    y_positions = [_center_of(p)[1] for p in pockets]
+    assert y_positions[1] - y_positions[0] == 2 * panel_pitch
+
+
+def test_beam_layer_cutout_emits_through_pocket():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=(
+            BeamLayerDecl(length_mm=500),
+            BeamLayerDecl(
+                length_mm=500,
+                cutouts=({"start_mm": 100, "length_mm": 60, "width_mm": 40, "offset_from_edge_mm": 18},),
+            ),
+            BeamLayerDecl(length_mm=500),
+        ),
+    )
+
+    pockets = _beam_removals(resolve_layout(_beam_ast(beam)), "pocket")
+
+    assert len(pockets) == 1
+    assert _geometry_of(pockets[0]) == {"w_mm": 60.0, "h_mm": 40.0}
+    assert _feature_of(pockets[0]).is_through is True
+    assert _center_of(pockets[0]) == (136.35, 130.35)
+
+
+def test_beam_explicit_layer_offset_shifts_feature_origin():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=(
+            BeamLayerDecl(length_mm=500),
+            BeamLayerDecl(length_mm=460, offset_mm=40),
+        ),
+        face_features=(BeamFeatureDecl(feature_type="DrillHole", params={"x_mm": 250, "y_mm": 38, "diameter_mm": 10}),),
+    )
+
+    holes = _beam_removals(resolve_layout(_beam_ast(beam)), "hole")
+
+    assert len(holes) == 2
+    assert _center_of(holes[0])[0] - _center_of(holes[1])[0] == pytest.approx(40.0)
+
+
+def test_spliced_beam_with_face_feature_raises():
+    beam = BeamDecl(
+        name="rail",
+        length_mm=2000,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(BeamFeatureDecl(feature_type="DrillHole", params={"x_mm": 250, "y_mm": 38, "diameter_mm": 10}),),
+    )
+
+    with pytest.raises(ResolutionAssertionError, match="splices across sheets"):
+        resolve_layout(_beam_ast(beam))
+
+
+def test_spliced_beam_with_tenon_still_resolves():
+    beam = BeamDecl(
+        name="rail",
+        length_mm=2000,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        end_features=(
+            BeamFeatureDecl(
+                feature_type="Tenon",
+                params={"end": "left", "extension_mm": 38, "width_mm": 76, "height_mm": 19, "layers": "center"},
+            ),
+        ),
+    )
+
+    flat = resolve_layout(_beam_ast(beam))
+
+    assert len(flat.items) > 3
+    assert all(_feature_of(i).type == "profile" for i in flat.items)
+
+
+def test_beam_edge_notch_emits_through_pocket():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        edge_features=(
+            BeamFeatureDecl(
+                feature_type="EdgeNotch",
+                params={"edge": "bottom", "position_mm": 100, "width_mm": 25, "depth_mm": 20, "layers": "outer"},
+            ),
+        ),
+    )
+
+    pockets = _beam_removals(resolve_layout(_beam_ast(beam)), "pocket")
+
+    assert len(pockets) == 2
+    assert all(_geometry_of(p) == {"w_mm": 25.0, "h_mm": 20.0} for p in pockets)
+    assert all(_feature_of(p).is_through for p in pockets)
+    assert _center_of(pockets[0]) == (118.85, 16.35)
+
+
+def test_beam_feature_items_are_machined_from_the_front():
+    beam = BeamDecl(
+        name="post",
+        length_mm=500,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        face_features=(
+            BeamFeatureDecl(
+                feature_type="SquareMortise",
+                params={
+                    "x_mm": 250,
+                    "y_mm": 38,
+                    "width_mm": 38,
+                    "height_mm": 50,
+                    "depth_mm": 19,
+                    "face": "back",
+                },
+            ),
+        ),
+        edge_features=(
+            BeamFeatureDecl(feature_type="Rabbet", params={"edge": "bottom", "width_mm": 12, "depth_mm": 6}),
+        ),
+    )
+
+    flat = resolve_layout(_beam_ast(beam))
+
+    assert all(_feature_of(i).face == "front" for i in flat.items)
+
+
+def test_beam_thickness_must_match_sheet_thickness():
+    beam = BeamDecl(name="post", length_mm=500, width_mm=76, thickness_mm=12, layers=3)
+
+    with pytest.raises(ResolutionAssertionError, match="does not match sheet thickness"):
+        resolve_layout(_beam_ast(beam))

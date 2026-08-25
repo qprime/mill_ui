@@ -551,3 +551,35 @@ class TestCrossFaceValidation:
         intent = _face_intent("front_gradient", Bounds2D(0.0, 40.0, 0.0, 40.0), 6.0, "front", mode="linear_gradient")
 
         assert not check_back_face_support(intent).has_issues()
+
+
+def test_check_overlap_pocket_inside_profile_exempt():
+    profile = _make_intent(
+        region_id="profile_panel",
+        bounds=Bounds2D(x_min=0.0, x_max=400.0, y_min=0.0, y_max=600.0),
+        hint_type="profile",
+    )
+    pocket = _make_intent(
+        region_id="pocket_field",
+        bounds=Bounds2D(x_min=50.0, x_max=350.0, y_min=50.0, y_max=550.0),
+        hint_type="pocket",
+    )
+
+    assert check_overlap([profile, pocket]).is_valid()
+
+
+def test_check_overlap_pocket_outside_profile_still_errors():
+    profile = _make_intent(
+        region_id="profile_panel",
+        bounds=Bounds2D(x_min=0.0, x_max=400.0, y_min=0.0, y_max=600.0),
+        hint_type="profile",
+    )
+    pocket = _make_intent(
+        region_id="pocket_stray",
+        bounds=Bounds2D(x_min=350.0, x_max=450.0, y_min=200.0, y_max=300.0),
+        hint_type="pocket",
+    )
+
+    result = check_overlap([profile, pocket])
+    assert not result.is_valid()
+    assert "pocket_stray" in result.errors[0].message

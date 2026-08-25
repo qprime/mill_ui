@@ -505,3 +505,123 @@ children:
 
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
+
+
+def _beam_pml(features_block: str) -> str:
+    return f"""
+Sheet:
+  width: 800mm
+  height: 600mm
+  thickness: 19mm
+
+children:
+  - Beam:
+      name: post
+      length: 500mm
+      width: 76mm
+      thickness: 19mm
+      layers: 3
+{features_block}
+"""
+
+
+def test_beam_carved_design_rejected():
+    pml = _beam_pml(
+        """      face_features:
+        - CarvedDesign:
+            x: 100mm
+            y: 38mm
+            design: rosette
+            depth: 3mm
+"""
+    )
+
+    try:
+        parse_pml_yaml(pml)
+        raise AssertionError("expected PMLParseError")
+    except PMLParseError as exc:
+        assert "CarvedDesign" in str(exc)
+        assert "face_features[0]" in str(exc)
+
+
+def test_beam_chamfer_rejected():
+    pml = _beam_pml(
+        """      edge_features:
+        - Chamfer:
+            edge: top
+            width: 3mm
+"""
+    )
+
+    try:
+        parse_pml_yaml(pml)
+        raise AssertionError("expected PMLParseError")
+    except PMLParseError as exc:
+        assert "Chamfer" in str(exc)
+
+
+def test_beam_end_cap_rejected_at_its_own_index():
+    pml = _beam_pml(
+        """      end_features:
+        - Tenon:
+            end: left
+            extension: 38mm
+            width: 76mm
+            height: 19mm
+        - EndCap:
+            end: right
+            profile: rounded
+"""
+    )
+
+    try:
+        parse_pml_yaml(pml)
+        raise AssertionError("expected PMLParseError")
+    except PMLParseError as exc:
+        assert "EndCap" in str(exc)
+        assert "end_features[1]" in str(exc)
+
+
+def test_beam_supported_features_parse_and_resolve():
+    pml = _beam_pml(
+        """      face_features:
+        - DrillHole:
+            x: 100mm
+            y: 38mm
+            diameter: 10mm
+        - SquareMortise:
+            x: 250mm
+            y: 38mm
+            width: 38mm
+            height: 50mm
+            depth: 19mm
+      edge_features:
+        - EdgeDado:
+            edge: top
+            position: 400mm
+            width: 19mm
+            depth: 9.5mm
+        - Rabbet:
+            edge: bottom
+            width: 12mm
+            depth: 6mm
+      end_features:
+        - Tenon:
+            end: left
+            extension: 38mm
+            width: 76mm
+            height: 19mm
+        - Tenon:
+            end: right
+            extension: 38mm
+            width: 76mm
+            height: 19mm
+"""
+    )
+
+    flat = resolve_layout(parse_pml_yaml(pml))
+
+    holes = [i for i in flat.items if i.feature and i.feature.type == "hole"]
+    pockets = [i for i in flat.items if i.feature and i.feature.type == "pocket"]
+    assert len(holes) == 3
+    assert len(pockets) == 6

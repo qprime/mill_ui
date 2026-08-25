@@ -256,17 +256,17 @@ def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
     )
 
 
-def _is_hole_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
-    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.HOLE, "drill"))
+def _is_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
+    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.HOLE, "drill", FeatureType.POCKET))
     if match is None:
         return False
-    profile, hole = match
+    profile, contained = match
 
     return (
-        hole.bounds.x_min >= profile.bounds.x_min
-        and hole.bounds.x_max <= profile.bounds.x_max
-        and hole.bounds.y_min >= profile.bounds.y_min
-        and hole.bounds.y_max <= profile.bounds.y_max
+        contained.bounds.x_min >= profile.bounds.x_min
+        and contained.bounds.x_max <= profile.bounds.x_max
+        and contained.bounds.y_min >= profile.bounds.y_min
+        and contained.bounds.y_max <= profile.bounds.y_max
     )
 
 
@@ -284,7 +284,7 @@ def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
                     continue
                 if _is_pocket_on_profile_edge(intent_a, intent_b):
                     continue
-                if _is_hole_inside_profile(intent_a, intent_b):
+                if _is_inside_profile(intent_a, intent_b):
                     continue
                 result.add_error(
                     f"Overlapping regions detected: {intent_a.region_id} and {intent_b.region_id}",

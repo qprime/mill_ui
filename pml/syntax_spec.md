@@ -1254,10 +1254,12 @@ Features can be added to faces, ends, or edges:
           height: 50mm
           depth: 19mm
     edge_features:
-      - Chamfer:
+      - EdgeDado:
           edge: top
-          width: 3mm
-          layers: outer    # outer (default) or all
+          position: 400mm
+          width: 19mm
+          depth: 9.5mm
+          layers: all      # outer (default for Rabbet) or all
     end_features:
       - Tenon:
           end: right
@@ -1267,35 +1269,76 @@ Features can be added to faces, ends, or edges:
           layers: center
 ```
 
+Feature coordinates are beam-local: `x` runs along the beam length from the left
+end, `y` across the beam width from the `bottom` edge. A tenon extension shifts
+the layer panel on the sheet but not the beam-local origin, so a feature at
+`x: 200mm` lands at the same place on every layer.
+
 ##### Face Features
 
 | Feature | Parameters | Description |
 |---------|------------|-------------|
 | DrillHole | x, y, diameter, depth, face, stage | Drill hole on face |
 | SquareMortise | x, y, width, height, depth, face | Rectangular mortise |
-| CarvedDesign | x, y, design, depth, face | Reference to design template |
-| GeometricPattern | x, y, pattern_type, params, depth | Geometric pattern (fluting, etc) |
+| CarvedDesign | — | **Unsupported** — no design-template registry exists |
+| GeometricPattern | — | **Unsupported** — no pattern generator exists |
+
+`depth` counts inward from the face named by `face` (`front`, the default, is
+layer 0; `back` is the last layer). It selects how far into the lamination stack
+the feature reaches: a 19mm-deep feature on 19mm stock cuts through one layer, a
+30mm-deep one cuts through the first layer and 11mm into the second. Omitting
+`depth` makes the feature through-cut on every layer. A `depth` greater than
+`layers × thickness` is an error.
+
+`face` here names an end of the lamination stack, not a CNC setup. It is
+unrelated to the panel-level `face` used for two-sided machining.
+
+`stage` (`segment` or `strip`) is accepted on face and edge features and has no
+effect on the emitted program. On an unspliced beam each layer is a single segment,
+so the segment and the layer strip are the same workpiece and the two stages are one
+operation. On a spliced beam the features that would distinguish them are rejected.
+The field becomes meaningful when Phase C strip programs exist.
 
 ##### End Features
 
 | Feature | Parameters | Description |
 |---------|------------|-------------|
 | Tenon | end, extension, width, height, layers | Projecting tenon |
-| EndCap | end, profile, params | End profile (square, rounded, etc) |
-| EndProfile | end, contour | Custom contour points |
+| EndCap | — | **Unsupported** — no end-cap profile registry exists |
+| EndProfile | — | **Unsupported** — requires a polygon layer outline |
 
 ##### Edge Features
 
 | Feature | Parameters | Description |
 |---------|------------|-------------|
-| Chamfer | edge, width, angle_deg, layers | Chamfered edge |
-| Fillet | edge, radius, layers | Rounded edge |
-| Rabbet | edge, width, depth, layers | Step profile |
-| EdgeDado | edge, position, width, depth, layers | Groove on edge |
-| EdgeNotch | edge, position, width, depth, layers | Notch on edge |
-| EdgeContour | edge, contour, layers | Custom edge profile |
+| Rabbet | edge, width, depth, start, end, layers | Step along the edge, `width` into the face, `depth` into the thickness |
+| EdgeDado | edge, position, width, depth, layers | Groove starting at `position`, `width` along the length, `depth` into the face, through the thickness |
+| EdgeNotch | edge, position, width, depth, layers | Same geometry as EdgeDado |
+| Chamfer | — | **Unsupported** — requires per-edge ranged edge treatment |
+| Fillet | — | **Unsupported** — requires per-edge ranged edge treatment |
+| EdgeContour | — | **Unsupported** — requires a polygon layer outline |
 
-Edge features default to `layers: outer` (first and last layers only) since middle layer edges are hidden by lamination. Use `layers: all` for structural features.
+`Rabbet` defaults to `layers: outer` (first and last layers only) since middle
+layer edges are hidden by lamination. `EdgeDado` and `EdgeNotch` default to
+`layers: all` because they are structural. `start` defaults to 0 and `end` to the
+beam length.
+
+##### Beam Feature Restrictions
+
+Unsupported feature types are rejected at parse time with the reason named.
+
+Beam `thickness` must equal `Sheet.thickness`. Layer panels are cut from the sheet,
+so a beam laminated from other stock cannot be machined in the same program, and the
+depth arithmetic above would describe a beam that does not exist.
+
+A `Rabbet` deeper than one layer thickness, a feature whose extent leaves the beam,
+and a layer cutout wider than the beam are all rejected.
+
+Face features, edge features, and layer cutouts are rejected on a **spliced**
+beam — one longer than the sheet, whose layers are cut in staggered segments.
+Those features are machined on the glued-up layer strip, which is longer than the
+sheet and therefore not part of the sheet program. Tenons continue to work on
+spliced beams because they change layer lengths rather than adding removals.
 
 ## Features
 

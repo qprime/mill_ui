@@ -89,7 +89,7 @@ Each PML node must have exactly one uppercase key identifying its type:
 
 `Feature.face` (`front` / `back`, PM-13) selects the panel surface a feature is machined from. It is unrelated to `Feature.side` (`inside` / `outside`), which selects the offset side of a profile.
 
-Beam primitives carry a separate `FaceFeature.face` (`assembly/beam.py`) naming a face of a beam blank. That field is stored and never consumed by the CAM pipeline; it does not select a machining setup and must not be routed into the panel face mechanism.
+Beam primitives carry a separate `FaceFeature.face` (`assembly/beam.py`) naming a face of a beam blank. It selects which end of the lamination stack the feature depth counts inward from — `front` starts at layer 0, `back` at the last layer — and is consumed entirely by `BeamSpec.layers_reached`. It does not select a machining setup and must not be routed into the panel face mechanism; every item emitted from a beam feature carries `Feature.face == "front"`, because each layer panel lies flat on the sheet and is machined from one side.
 
 ---
 

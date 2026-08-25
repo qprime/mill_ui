@@ -402,6 +402,17 @@ def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
     )
 
 
+_UNBACKED_BEAM_FEATURES = {
+    "CarvedDesign": "no design-template registry exists",
+    "GeometricPattern": "no pattern generator exists",
+    "EndCap": "no end-cap profile registry exists",
+    "EndProfile": "requires a polygon layer outline",
+    "EdgeContour": "requires a polygon layer outline",
+    "Fillet": "requires per-edge ranged edge treatment",
+    "Chamfer": "requires per-edge ranged edge treatment",
+}
+
+
 def _parse_beam_feature(feat_data: dict, feat_path: str):
     from layout_ast.compositional import BeamFeatureDecl
 
@@ -409,6 +420,11 @@ def _parse_beam_feature(feat_data: dict, feat_path: str):
     if len(feat_keys) != 1:
         raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
     feat_type = feat_keys[0]
+    if feat_type in _UNBACKED_BEAM_FEATURES:
+        raise PMLParseError(
+            f"Beam feature '{feat_type}' is not supported: {_UNBACKED_BEAM_FEATURES[feat_type]}",
+            feat_path,
+        )
     feat_params = feat_data[feat_type] or {}
     parsed_params: dict[str, Any] = {}
     dimension_keys = {

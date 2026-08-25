@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from collections.abc import Callable
 from dataclasses import replace
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from assembly.joinery import Butt, Captured, Finger, HalfLap
 from assembly.panel import PanelSpec
@@ -114,6 +114,9 @@ from layout_ast.layout import (
     LayoutAST,
     Placement,
 )
+
+if TYPE_CHECKING:
+    from assembly.beam import BeamSpec, Cutout, EdgeFeature, FaceFeature
 
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
 
@@ -2732,6 +2735,169 @@ class LayoutResolver:
 
         return result_items
 
+    def _beam_removal_item(
+        self,
+        spec: BeamSpec,
+        source: Any,
+        center: tuple[float, float],
+        geometry_data: dict[str, Any],
+        *,
+        shape_type: str,
+        feature_type: str,
+        depth_mm: float,
+        is_through: bool,
+    ) -> Item:
+        return Item(
+            kind="shape",
+            type=shape_type,
+            geometry=Geometry(data=geometry_data),
+            placement=Placement(center_xy_mm=center),
+            feature=Feature(
+                type=feature_type,
+                depth_mm=0.0 if is_through else depth_mm,
+                is_through=is_through,
+            ),
+            shape_id=self._next_shape_id(f"beam_{spec.name}_{type(source).__name__.lower()}"),
+        )
+
+    def _beam_face_items(
+        self,
+        spec: BeamSpec,
+        feat: FaceFeature,
+        origin: tuple[float, float],
+        layer_idx: int,
+    ) -> list[Item]:
+        from assembly.beam import BOUNDS_TOLERANCE_MM, DrillHole, SquareMortise
+
+        if not isinstance(feat, (DrillHole, SquareMortise)):
+            raise ResolutionAssertionError(f"Unsupported beam face feature: {type(feat).__name__}")
+
+        depth_into_layer = dict(spec.layers_reached(feat.face, feat.depth_mm)).get(layer_idx)
+        if depth_into_layer is None:
+            return []
+
+        is_through = depth_into_layer >= spec.thickness_mm - BOUNDS_TOLERANCE_MM
+        center = (origin[0] + feat.x_mm, origin[1] + feat.y_mm)
+
+        if isinstance(feat, DrillHole):
+            return [
+                self._beam_removal_item(
+                    spec,
+                    feat,
+                    center,
+                    {"diameter_mm": feat.diameter_mm},
+                    shape_type="Circle",
+                    feature_type="hole",
+                    depth_mm=depth_into_layer,
+                    is_through=is_through,
+                )
+            ]
+        return [
+            self._beam_removal_item(
+                spec,
+                feat,
+                center,
+                {"w_mm": feat.width_mm, "h_mm": feat.height_mm},
+                shape_type="Rect",
+                feature_type="pocket",
+                depth_mm=depth_into_layer,
+                is_through=is_through,
+            )
+        ]
+
+    def _beam_edge_items(
+        self,
+        spec: BeamSpec,
+        feat: EdgeFeature,
+        origin: tuple[float, float],
+        layer_idx: int,
+    ) -> list[Item]:
+        from assembly.beam import BOUNDS_TOLERANCE_MM, EdgeDado, EdgeNotch, Rabbet
+
+        if not isinstance(feat, (Rabbet, EdgeDado, EdgeNotch)):
+            raise ResolutionAssertionError(f"Unsupported beam edge feature: {type(feat).__name__}")
+        if not spec._should_apply_edge_feature(feat, layer_idx):
+            return []
+
+        if isinstance(feat, Rabbet):
+            u_start = feat.start_mm
+            u_end = feat.end_mm if feat.end_mm is not None else spec.length_mm
+            v_extent = feat.width_mm
+            depth_mm = feat.depth_mm
+            is_through = depth_mm >= spec.thickness_mm - BOUNDS_TOLERANCE_MM
+        else:
+            u_start = feat.position_mm
+            u_end = feat.position_mm + feat.width_mm
+            v_extent = feat.depth_mm
+            depth_mm = spec.thickness_mm
+            is_through = True
+
+        v_start = 0.0 if feat.edge == "bottom" else spec.width_mm - v_extent
+        center = (origin[0] + (u_start + u_end) / 2, origin[1] + v_start + v_extent / 2)
+
+        return [
+            self._beam_removal_item(
+                spec,
+                feat,
+                center,
+                {"w_mm": u_end - u_start, "h_mm": v_extent},
+                shape_type="Rect",
+                feature_type="pocket",
+                depth_mm=depth_mm,
+                is_through=is_through,
+            )
+        ]
+
+    def _beam_cutout_items(
+        self,
+        spec: BeamSpec,
+        cutout: Cutout,
+        panel_origin: tuple[float, float],
+    ) -> list[Item]:
+        v_extent = cutout.width_mm if cutout.width_mm is not None else spec.width_mm
+        v_start = cutout.offset_from_edge_mm if cutout.width_mm is not None else 0.0
+        center = (
+            panel_origin[0] + cutout.start_mm + cutout.length_mm / 2,
+            panel_origin[1] + v_start + v_extent / 2,
+        )
+
+        return [
+            self._beam_removal_item(
+                spec,
+                cutout,
+                center,
+                {"w_mm": cutout.length_mm, "h_mm": v_extent},
+                shape_type="Rect",
+                feature_type="pocket",
+                depth_mm=spec.thickness_mm,
+                is_through=True,
+            )
+        ]
+
+    def _beam_layer_feature_items(
+        self,
+        spec: BeamSpec,
+        layer_idx: int,
+        panel_origin: tuple[float, float],
+        left_exts: list[float],
+    ) -> list[Item]:
+        x_cursor, y_cursor = panel_origin
+        if isinstance(spec.layers, tuple):
+            beam_origin = (x_cursor - spec.layers[layer_idx].offset_mm, y_cursor)
+            cutouts = spec.layers[layer_idx].cutouts
+        else:
+            beam_origin = (x_cursor + left_exts[layer_idx], y_cursor)
+            cutouts = ()
+
+        result_items: list[Item] = []
+        for face_feature in spec.face_features:
+            result_items.extend(self._beam_face_items(spec, face_feature, beam_origin, layer_idx))
+        for edge_feature in spec.edge_features:
+            result_items.extend(self._beam_edge_items(spec, edge_feature, beam_origin, layer_idx))
+        for cutout in cutouts:
+            result_items.extend(self._beam_cutout_items(spec, cutout, panel_origin))
+        return result_items
+
     def _handle_beam_decl(
         self,
         node: BeamDecl,
@@ -2763,6 +2929,13 @@ class LayoutResolver:
             role=role,
         )
 
+        if abs(beam_spec.thickness_mm - self.ast.sheet.thickness_mm) > 1e-6:
+            raise ResolutionAssertionError(
+                f"Beam '{node.name}' layer thickness {beam_spec.thickness_mm}mm does not match sheet thickness "
+                f"{self.ast.sheet.thickness_mm}mm; layer panels are cut from the sheet, so a beam laminated "
+                f"from other stock cannot be machined in this program"
+            )
+
         tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
         edge_clearance = 2 * tool_radius
         sheet_size = max(self.ast.sheet.width_mm, self.ast.sheet.height_mm) - 2 * edge_clearance
@@ -2774,6 +2947,17 @@ class LayoutResolver:
         segments = None
         if isinstance(beam_spec.layers, int) and beam_spec.layers >= 1:
             segments = compute_segments(beam_spec.length_mm, sheet_size, beam_spec.layers)
+
+        layer_cutouts = (
+            tuple(layer.cutouts for layer in beam_spec.layers) if isinstance(beam_spec.layers, tuple) else ()
+        )
+        is_spliced = segments is not None and any(len(layer_segments) > 1 for layer_segments in segments)
+        if is_spliced and (face_features or edge_features or any(layer_cutouts)):
+            raise ResolutionAssertionError(
+                f"Beam '{node.name}' splices across sheets; its face, edge, and cutout features belong to the "
+                f"Phase C strip program, which is machined on the glued-up layer strip, not on the sheet"
+            )
+        panel_index_is_layer_index = len(panel_specs) == beam_spec.layer_count
 
         from assembly.beam import Tenon as _Tenon
 
@@ -2807,11 +2991,13 @@ class LayoutResolver:
         )
         self._beam_structures.append(beam_structure)
 
-        for spec, x_cursor, y_cursor in self._row_wrap_positions(
-            panel_specs,
-            region,
-            gap_mm=gap,
-            edge_clearance_mm=edge_clearance,
+        for layer_idx, (spec, x_cursor, y_cursor) in enumerate(
+            self._row_wrap_positions(
+                panel_specs,
+                region,
+                gap_mm=gap,
+                edge_clearance_mm=edge_clearance,
+            )
         ):
             panel_width = spec.width_mm
             panel_height = spec.height_mm
@@ -2842,6 +3028,9 @@ class LayoutResolver:
                 label=panel_label,
             )
             items.append(panel_item)
+
+            if panel_index_is_layer_index:
+                items.extend(self._beam_layer_feature_items(beam_spec, layer_idx, (x_cursor, y_cursor), left_exts))
 
     def resolve(self) -> LayoutAST:
         sheet_region = ResolvedRegion(

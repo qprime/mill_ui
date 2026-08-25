@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Literal
@@ -7,6 +8,8 @@ from typing import Any, Literal
 from assembly.panel import PanelSpec
 
 MachiningStage = Literal["segment", "strip"]
+
+BOUNDS_TOLERANCE_MM = 1e-6
 
 
 class BeamRole(Enum):
@@ -249,6 +252,117 @@ def compute_segments(
     return result
 
 
+def _face_feature_extent(feature: FaceFeature) -> tuple[float, float, float, float]:
+    if isinstance(feature, DrillHole):
+        radius = feature.diameter_mm / 2.0
+        return (
+            feature.x_mm - radius,
+            feature.x_mm + radius,
+            feature.y_mm - radius,
+            feature.y_mm + radius,
+        )
+    if isinstance(feature, SquareMortise):
+        half_width = feature.width_mm / 2.0
+        half_height = feature.height_mm / 2.0
+        return (
+            feature.x_mm - half_width,
+            feature.x_mm + half_width,
+            feature.y_mm - half_height,
+            feature.y_mm + half_height,
+        )
+    if isinstance(feature, (CarvedDesign, GeometricPattern)):
+        return (feature.x_mm, feature.x_mm, feature.y_mm, feature.y_mm)
+    raise ValueError(f"Cannot bound-check unknown face feature type {type(feature).__name__}")
+
+
+def _edge_feature_u_span(feature: EdgeFeature, length_mm: float) -> tuple[float, float]:
+    if isinstance(feature, (EdgeDado, EdgeNotch)):
+        return (feature.position_mm, feature.position_mm + feature.width_mm)
+    if isinstance(feature, EdgeContour):
+        points = [pt[0] for pt in feature.contour]
+        return (min(points), max(points)) if points else (0.0, 0.0)
+    if isinstance(feature, (Fillet, Chamfer, Rabbet)):
+        end_mm = feature.end_mm if feature.end_mm is not None else length_mm
+        return (feature.start_mm, end_mm)
+    raise ValueError(f"Cannot bound-check unknown edge feature type {type(feature).__name__}")
+
+
+def _edge_feature_v_extent(feature: EdgeFeature) -> float:
+    if isinstance(feature, Fillet):
+        return feature.radius_mm
+    if isinstance(feature, (EdgeDado, EdgeNotch)):
+        return feature.depth_mm
+    if isinstance(feature, EdgeContour):
+        points = [pt[1] for pt in feature.contour]
+        return max(points) if points else 0.0
+    if isinstance(feature, (Chamfer, Rabbet)):
+        return feature.width_mm
+    raise ValueError(f"Cannot bound-check unknown edge feature type {type(feature).__name__}")
+
+
+def validate_feature_bounds(spec: BeamSpec) -> None:
+    for face_feature in spec.face_features:
+        u_min, u_max, v_min, v_max = _face_feature_extent(face_feature)
+        if (
+            u_min < -BOUNDS_TOLERANCE_MM
+            or u_max > spec.length_mm + BOUNDS_TOLERANCE_MM
+            or v_min < -BOUNDS_TOLERANCE_MM
+            or v_max > spec.width_mm + BOUNDS_TOLERANCE_MM
+        ):
+            raise ValueError(
+                f"Beam '{spec.name}' {type(face_feature).__name__} spans "
+                f"U[{u_min}, {u_max}] V[{v_min}, {v_max}], outside beam bounds "
+                f"U[0, {spec.length_mm}] V[0, {spec.width_mm}] (BM-6 violation)"
+            )
+        if face_feature.depth_mm is not None and face_feature.depth_mm > spec.total_thickness + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{spec.name}' {type(face_feature).__name__} depth {face_feature.depth_mm}mm "
+                f"exceeds total thickness {spec.total_thickness}mm (BM-6 violation)"
+            )
+
+    for edge_feature in spec.edge_features:
+        u_start, u_end = _edge_feature_u_span(edge_feature, spec.length_mm)
+        if u_end <= u_start + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{spec.name}' {type(edge_feature).__name__} spans U[{u_start}, {u_end}], "
+                f"which is empty or reversed (BM-6 violation)"
+            )
+        if u_start < -BOUNDS_TOLERANCE_MM or u_end > spec.length_mm + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{spec.name}' {type(edge_feature).__name__} spans U[{u_start}, {u_end}], "
+                f"outside beam length {spec.length_mm}mm (BM-6 violation)"
+            )
+        v_extent = _edge_feature_v_extent(edge_feature)
+        if v_extent > spec.width_mm + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{spec.name}' {type(edge_feature).__name__} reaches {v_extent}mm into a beam "
+                f"only {spec.width_mm}mm wide (BM-6 violation)"
+            )
+        if isinstance(edge_feature, Rabbet) and edge_feature.depth_mm > spec.thickness_mm + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{spec.name}' Rabbet depth {edge_feature.depth_mm}mm exceeds the "
+                f"{spec.thickness_mm}mm layer it is cut into (BM-6 violation)"
+            )
+
+    if isinstance(spec.layers, tuple):
+        for layer_idx, layer in enumerate(spec.layers):
+            for cutout in layer.cutouts:
+                if cutout.offset_from_edge_mm < -BOUNDS_TOLERANCE_MM:
+                    raise ValueError(
+                        f"Beam '{spec.name}' layer {layer_idx} cutout offset "
+                        f"{cutout.offset_from_edge_mm}mm is negative (BM-6 violation)"
+                    )
+                if cutout.width_mm is None:
+                    continue
+                v_max = cutout.offset_from_edge_mm + cutout.width_mm
+                if v_max > spec.width_mm + BOUNDS_TOLERANCE_MM:
+                    raise ValueError(
+                        f"Beam '{spec.name}' layer {layer_idx} cutout spans V["
+                        f"{cutout.offset_from_edge_mm}, {v_max}], outside beam width "
+                        f"{spec.width_mm}mm (BM-6 violation)"
+                    )
+
+
 def _get_butt_positions(segments: list[list[Segment]]) -> list[float]:
     butts: list[float] = []
     for layer_segments in segments:
@@ -325,6 +439,30 @@ class BeamSpec:
     def total_thickness(self) -> float:
         return self.thickness_mm * self.layer_count
 
+    def layers_reached(self, face: Literal["front", "back"], depth_mm: float | None) -> tuple[tuple[int, float], ...]:
+        if depth_mm is None:
+            return tuple((layer_idx, self.thickness_mm) for layer_idx in range(self.layer_count))
+        if depth_mm <= 0:
+            raise ValueError(f"Beam '{self.name}' feature depth must be positive, got {depth_mm}")
+        if depth_mm > self.total_thickness + BOUNDS_TOLERANCE_MM:
+            raise ValueError(
+                f"Beam '{self.name}' feature depth {depth_mm}mm exceeds total thickness "
+                f"{self.total_thickness}mm (BM-6 violation)"
+            )
+
+        reached = min(math.ceil((depth_mm - BOUNDS_TOLERANCE_MM) / self.thickness_mm), self.layer_count)
+        remainder = min(depth_mm - (reached - 1) * self.thickness_mm, self.thickness_mm)
+
+        if face == "back":
+            innermost = self.layer_count - reached
+            return tuple(
+                (layer_idx, remainder if layer_idx == innermost else self.thickness_mm)
+                for layer_idx in range(innermost, self.layer_count)
+            )
+        return tuple(
+            (layer_idx, remainder if layer_idx == reached - 1 else self.thickness_mm) for layer_idx in range(reached)
+        )
+
     def _is_outer_layer(self, layer_idx: int) -> bool:
         return layer_idx == 0 or layer_idx == self.layer_count - 1
 
@@ -350,6 +488,8 @@ class BeamSpec:
         return total
 
     def expand(self, sheet_size: float) -> list[PanelSpec]:
+        validate_feature_bounds(self)
+
         if isinstance(self.layers, int):
             segments = compute_segments(self.length_mm, sheet_size, self.layers)
             validate_butts_never_align(segments)
@@ -394,6 +534,7 @@ class BeamSpec:
 
 
 __all__ = [
+    "BOUNDS_TOLERANCE_MM",
     "BeamRole",
     "BeamSpec",
     "CarvedDesign",
@@ -418,5 +559,6 @@ __all__ = [
     "Tenon",
     "compute_segments",
     "validate_butts_never_align",
+    "validate_feature_bounds",
     "validate_stagger_minimum",
 ]

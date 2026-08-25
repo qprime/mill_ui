@@ -134,7 +134,19 @@ Features are declarative specifications applied to beams. During expansion, feat
 
 ### FaceFeature
 
-Applied to front or back face of the beam. Replicated identically across all layers.
+Applied to front or back face of the beam.
+
+`face` names the end of the lamination stack that `depth_mm` counts inward from:
+`front` starts at layer 0, `back` at the last layer. `BeamSpec.layers_reached`
+turns `(face, depth_mm)` into the `(layer_index, depth_into_that_layer)` pairs the
+feature occupies. Layers before the last one reached are cut through; the last
+takes the remainder. `depth_mm is None` means through on every layer. A depth
+greater than `total_thickness` is a BM-6 violation.
+
+`CarvedDesign` and `GeometricPattern` are **unsupported** — no design-template
+registry and no pattern generator exist to resolve `design` and `pattern_type`.
+The dataclasses below remain the specification those registries implement against;
+the PML parser rejects both types by name.
 
 ```python
 MachiningStage = Literal["segment", "strip"]
@@ -184,6 +196,10 @@ FaceFeature = DrillHole | SquareMortise | CarvedDesign | GeometricPattern
 
 Applied to left or right end of the beam. May affect layer lengths differently.
 
+`EndCap` and `EndProfile` are **unsupported** — the first needs an end-cap profile
+registry to resolve `profile`, the second needs the layer panel outline to become a
+polygon instead of a rectangle. Both are rejected by name at the PML parser.
+
 ```python
 @dataclass(frozen=True)
 class Tenon:
@@ -211,6 +227,19 @@ EndFeature = Tenon | EndCap | EndProfile
 ### EdgeFeature
 
 Applied to top or bottom edge of the beam. By default, edge features apply only to outer layers (first and last) since middle layer edges are hidden by lamination.
+
+`Rabbet` takes `width_mm` into V from the named edge and `depth_mm` into W, because
+a rabbet is a step in the sheet thickness. A `depth_mm` greater than one
+`thickness_mm` is a BM-6 violation — the rabbet is cut into a single layer, not the
+stack. `EdgeDado` and `EdgeNotch` span
+`position_mm`..`position_mm + width_mm` along U and take `depth_mm` into V from the
+edge, cutting through the thickness — a groove in the 19mm edge face cannot be
+machined from above, so the 2.5D constraint forces this reading.
+
+`Fillet`, `Chamfer`, and `EdgeContour` are **unsupported**. The first two need a
+per-edge bevel ranged over `start_mm`..`end_mm`; `chamfer_generator` treats whole
+loops and planner `edge_treatment` is a finishing-allowance constraint. `EdgeContour`
+needs a polygon layer outline. All three are rejected by name at the PML parser.
 
 ```python
 @dataclass(frozen=True)
@@ -448,8 +477,19 @@ class BeamRole(Enum):
 3. **BeamSpec dataclass** - with expand() stub
 4. **Segment calculation** - pure function, testable in isolation
 5. **BeamSpec.expand()** - generates PanelSpecs from layers and segments
-6. **Feature expansion** - distribute features to appropriate panels
+6. **Feature expansion** - distribute features to appropriate panels — *partial*
 7. **Beam primitives** - post(), rail(), leg(), apron()
+
+Step 6 landed for unspliced beams only. `DrillHole`, `SquareMortise`, `Rabbet`,
+`EdgeDado`, `EdgeNotch`, and per-layer `cutouts` expand to panel-level removals
+in `_handle_beam_decl`; `validate_feature_bounds` enforces BM-6 over face
+features, edge features, and layer cutouts, and `_should_apply_edge_feature`
+enforces BM-15. `stage` is parsed and stored but has no effect: on an unspliced
+beam the segment and the layer strip are the same workpiece. What remains: the design-template,
+pattern, and end-cap registries; polygon layer outlines for `EndProfile` and
+`EdgeContour`; per-edge ranged bevels for `Fillet` and `Chamfer`; and Phase C
+strip programs, without which face, edge, and cutout features are rejected on a
+spliced beam.
 
 Each step is independently testable.
 

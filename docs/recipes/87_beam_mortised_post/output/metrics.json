@@ -1,0 +1,83 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 10960,
+    "rapid_moves": 241,
+    "cut_moves": 10099,
+    "rapid_ratio": 0.022
+  },
+  "fidelity": {
+    "tool_changes": 6,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 119
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 6.35,
+        "move_count": 222
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 9.525,
+        "move_count": 28
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 4812
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 4963
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 816
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 321511,
+    "total_lines": 11006,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 3167,
+        "lines": 131
+      },
+      "pocket-6.35mm": {
+        "bytes": 5405,
+        "lines": 232
+      },
+      "pocket-9.53mm": {
+        "bytes": 785,
+        "lines": 38
+      },
+      "bore-3.17mm": {
+        "bytes": 156537,
+        "lines": 4822
+      },
+      "pocket-3.17mm": {
+        "bytes": 141216,
+        "lines": 4975
+      },
+      "profile-3.17mm": {
+        "bytes": 14401,
+        "lines": 808
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "2a9afe39"
+  }
+}

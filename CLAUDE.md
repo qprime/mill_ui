@@ -111,7 +111,7 @@ Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`, `--margin`, `--sheet`, `
 | Scope | Document |
 |-------|----------|
 | Universal Python patterns | [docs/python_guidelines.md](docs/python_guidelines.md) |
-| C++ (applies to `cam/native/cpp/`) | [docs/cpp_guidelines.md](docs/cpp_guidelines.md) |
+| C++ (applies to `cam/native/cpp/`) | [docs/cpp/conventions.md](docs/cpp/conventions.md) — core; [docs/cpp/mechanisms.md](docs/cpp/mechanisms.md) + [docs/cpp/std/cpp20.md](docs/cpp/std/cpp20.md) for this project's standard |
 | Mill_ui-specific deltas | [docs/dev_docs/project_conventions.md](docs/dev_docs/project_conventions.md) |
 
 The language guidelines are universal; project_conventions.md documents the mill_ui-specific layer names, named protocols, and dispatch registries.

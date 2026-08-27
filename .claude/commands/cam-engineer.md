@@ -18,7 +18,7 @@ When choosing between a "safe" solution and the architecturally superior solutio
 3. Check docs/tasks.md and docs/patterns.md for examples
 4. Reason from file/folder structure
 
-**Coding standards.** Universal Python patterns live in [docs/python_guidelines.md](../../docs/python_guidelines.md); C++ work in `cam/native/cpp/` follows [docs/cpp_guidelines.md](../../docs/cpp_guidelines.md); mill_ui-specific deltas live in [docs/dev_docs/project_conventions.md](../../docs/dev_docs/project_conventions.md). Read the relevant doc before introducing new patterns.
+**Coding standards.** Universal Python patterns live in [docs/python_guidelines.md](../../docs/python_guidelines.md); C++ work in `cam/native/cpp/` follows [docs/cpp/conventions.md](../../docs/cpp/conventions.md) plus [docs/cpp/std/cpp20.md](../../docs/cpp/std/cpp20.md) (this project declares C++20); mill_ui-specific deltas live in [docs/dev_docs/project_conventions.md](../../docs/dev_docs/project_conventions.md). Read the relevant doc before introducing new patterns.
 
 On clear directives with known implementation paths, execute directly.
 

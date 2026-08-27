@@ -14,7 +14,7 @@ Draft a GitHub issue implementation specification for: $ARGUMENTS
 
 3. **Check for a smaller change.** Before finalizing, ask: could a narrower scope — fewer files, fewer moving parts, less ceremony — achieve the same goal? If yes, redraft around that. Spec size should match change size. This is about scope, not about removing structure that serves invariants, type safety, or tests.
 
-4. **Self-review the draft.** Read it back as if you hadn't written it. Flag anything you're unsure about, anything resting on an unverified assumption, and anything that sounds confident but isn't grounded in what you actually read. Surface those to the user with the draft. Do not pad self-reviews with non-issues. Zero flags is a valid self-review.
+4. **Resolve, don't flag.** Settle every uncertainty before the draft goes out: verify it against the code, cut the claim, or narrow the spec so it no longer rests on the guess. If a question genuinely gates the draft and only the user can answer it, ask it as a direct question *before* presenting — never as a flag attached to a finished draft. The draft you present carries no open items and no scope beyond what was asked; anything extra is a one-line proposal, not drafted content.
 
 5. **Present the draft** to the user for review before creating the issue.
 
@@ -116,7 +116,7 @@ Related issues, prerequisites, or things this supersedes.
 
 ## Quality Checks
 
-Before presenting the draft, verify:
+Before presenting the draft, verify — run these silently, fix failures, don't report the checklist:
 
 - [ ] Every file referenced actually exists (or is explicitly marked as new)
 - [ ] Line numbers are current (not stale from a previous version)

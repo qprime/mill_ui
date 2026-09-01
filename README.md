@@ -1,6 +1,8 @@
 # mill_ui
 
-CAM system that turns declarative panel layouts into G-code for CNC routers. Describe what you want to cut — profiles, pockets, joinery, assemblies — and the compiler pipeline handles toolpath generation, validation, and blueprint export.
+`mill_ui` started with a simple question: what would CAM look like if the primary way to create a design were describing what you wanted to build rather than drawing it manually in a GUI?
+
+The answer is a compiler-style CAM system that turns declarative panel layouts into validated G-code and blueprints. You describe the profiles, pockets, joinery, and assemblies you want; the pipeline handles layout resolution, toolpath generation, and validation.
 
 ## Why
 

@@ -26,6 +26,7 @@ from generators.core import (
     generate_shape_id,
     validate_domain_for_generation,
 )
+from generators.curves import rose_curve_generator, sample_parametric
 from generators.loop import (
     bead_generator,
     chamfer_generator,
@@ -51,6 +52,7 @@ from generators.params.area import (
     RadialSvgParams,
     RadialTickParams,
     RaisedPanelParams,
+    RoseCurveParams,
     XPanelParams,
 )
 from generators.params.loop import (
@@ -99,6 +101,7 @@ __all__ = [
     "RadialSvgParams",
     "RadialTickParams",
     "RaisedPanelParams",
+    "RoseCurveParams",
     "SVGParseError",
     "SVGPathParams",
     "TextAlignment",
@@ -130,6 +133,8 @@ __all__ = [
     "radial_svg_generator",
     "radial_tick_generator",
     "raised_panel_generator",
+    "rose_curve_generator",
+    "sample_parametric",
     "shapely_to_item",
     "svg_stamp_generator",
     "validate_domain_for_generation",

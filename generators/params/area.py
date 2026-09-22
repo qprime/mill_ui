@@ -311,6 +311,28 @@ class RadialSvgParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class RoseCurveParams(BaseParams):
+    lobes: int
+    depth_mm: float
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.lobes < 1:
+            raise ValueError(f"RoseCurveParams: lobes must be >= 1, got {self.lobes}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"RoseCurveParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.size_mm is not None and self.size_mm <= 0:
+            raise ValueError(f"RoseCurveParams: size_mm must be positive, got {self.size_mm}")
+        if self.tolerance_mm <= 0:
+            raise ValueError(f"RoseCurveParams: tolerance_mm must be positive, got {self.tolerance_mm}")
+        if self.min_length_mm < 0:
+            raise ValueError(f"RoseCurveParams: min_length_mm must be non-negative, got {self.min_length_mm}")
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntryParams:
     tool: str
     role: str = "rough"
@@ -372,5 +394,6 @@ __all__ = [
     "RadialSvgParams",
     "RadialTickParams",
     "RaisedPanelParams",
+    "RoseCurveParams",
     "XPanelParams",
 ]

@@ -587,6 +587,34 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
     raise PMLParseError(f"Unknown Radial element type: '{element_type}'", ctx)
 
 
+def _parse_curve_node(node_data: dict, path: str) -> Any:
+    from layout_ast.compositional import RoseCurveGen
+
+    ctx = f"{path}.Curve"
+    for key in ("children", "feature"):
+        if key in node_data:
+            raise PMLParseError(f"Curve does not accept '{key}'", ctx)
+
+    curve_type = _require(node_data, "type", ctx)
+    depth_mm = parse_dimension(_require(node_data, "depth", ctx))
+    size_mm = parse_dimension(node_data["size"]) if "size" in node_data else None
+    rotation_deg = _safe_float(node_data.get("rotation", 0.0), "rotation", ctx)
+    tolerance_mm = parse_dimension(node_data.get("tolerance", "0.05mm"))
+    min_length_mm = parse_dimension(node_data.get("min_length", "0mm"))
+
+    if curve_type == "rose":
+        return RoseCurveGen(
+            lobes=_safe_int(_require(node_data, "lobes", ctx), "lobes", ctx),
+            depth_mm=depth_mm,
+            size_mm=size_mm,
+            rotation_deg=rotation_deg,
+            tolerance_mm=tolerance_mm,
+            min_length_mm=min_length_mm,
+        )
+
+    raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: rose", ctx)
+
+
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
@@ -606,6 +634,9 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     if node_type == "Radial":
         return _parse_radial_node(node_data, path)
+
+    if node_type == "Curve":
+        return _parse_curve_node(node_data, path)
 
     if node_type == "SvgStamp":
         depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))

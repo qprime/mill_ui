@@ -11,8 +11,8 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.loop import WaveParams
-from generators.utils import clip_polylines_to_domain, get_local_bounds
-from layout_ast.layout import Feature, Geometry, Item, Placement
+from generators.utils import clip_polylines_to_domain, get_local_bounds, polyline_engrave_item, rotate_points
+from layout_ast.layout import Item
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -111,36 +111,16 @@ def wave_generator(
             continue
 
         if params.direction_rad != 0:
-            local_wave = _rotate_points(local_wave, params.direction_rad)
+            local_wave = rotate_points(local_wave, params.direction_rad)
 
         sheet_wave = local_to_sheet_batch(local_wave, domain)
 
         clipped_segments = clip_polylines_to_domain([sheet_wave], domain, min_length_mm=params.tool_width_mm)
 
         for segment in clipped_segments:
-            cx = sum(p[0] for p in segment) / len(segment)
-            cy = sum(p[1] for p in segment) / len(segment)
-
-            relative_points = [[pt[0] - cx, pt[1] - cy] for pt in segment]
-
-            geometry_data = {
-                "points": relative_points,
-                "is_open": True,
-            }
-
-            item = Item(
-                kind="shape",
-                type="Polyline",
-                geometry=Geometry(data=geometry_data),
-                placement=Placement(center_xy_mm=(cx, cy)),
-                feature=Feature(
-                    type="engrave",
-                    depth_mm=params.depth_mm,
-                ),
-                shape_id=generate_shape_id(shape_id_prefix, item_index),
+            items.append(
+                polyline_engrave_item(segment, params.depth_mm, generate_shape_id(shape_id_prefix, item_index))
             )
-
-            items.append(item)
             item_index += 1
 
         y += wave_spacing
@@ -152,25 +132,6 @@ def wave_generator(
         )
 
     return items
-
-
-def _rotate_points(
-    points: list[tuple[float, float]],
-    angle_rad: float,
-) -> list[tuple[float, float]]:
-    if angle_rad == 0:
-        return points
-
-    cos_a = math.cos(angle_rad)
-    sin_a = math.sin(angle_rad)
-
-    rotated = []
-    for x, y in points:
-        rx = x * cos_a - y * sin_a
-        ry = x * sin_a + y * cos_a
-        rotated.append((rx, ry))
-
-    return rotated
 
 
 __all__ = ["wave_generator"]

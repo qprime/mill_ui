@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-09-22T20:16:54.121410+00:00",
+  "updated_at": "2026-09-22T20:53:08.464296+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -199,7 +199,7 @@
       "recipe_name": "27_wave_texture_panel",
       "source_file": "docs/recipes/27_wave_texture_panel/example.pml.yml",
       "created_at": "2026-01-23T00:23:08.022251+00:00",
-      "updated_at": "2026-09-22T20:16:53.649409+00:00",
+      "updated_at": "2026-09-22T20:53:07.820871+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -487,7 +487,7 @@
       "recipe_name": "71_feature_test",
       "source_file": "docs/recipes/71_feature_test/example.pml.yml",
       "created_at": "2026-03-12T19:28:43.709031+00:00",
-      "updated_at": "2026-09-22T20:16:54.121405+00:00",
+      "updated_at": "2026-09-22T20:53:08.331013+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },
@@ -544,6 +544,14 @@
       "source_file": "docs/recipes/76_fluting_panel/example.pml.yml",
       "created_at": "2026-04-04T15:44:30.680183+00:00",
       "updated_at": "2026-04-04T15:44:30.680183+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "88_rose_curve": {
+      "recipe_name": "88_rose_curve",
+      "source_file": "docs/recipes/88_rose_curve/example.pml.yml",
+      "created_at": "2026-09-22T20:53:08.464294+00:00",
+      "updated_at": "2026-09-22T20:53:08.464294+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

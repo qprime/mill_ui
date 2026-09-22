@@ -405,3 +405,30 @@ children:
 
     assert len(profile_items) >= 1, "Should have profile"
     assert len(wave_items) >= 1, "Should have wave engrave items"
+
+
+def test_curve_rose_resolves_to_polyline_engraves():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: rose
+            lobes: 5
+            depth: 0.3mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 1
+    assert curves[0].feature is not None
+    assert curves[0].feature.type == "engrave"
+    assert curves[0].feature.depth_mm == pytest.approx(0.3)
+    assert curves[0].shape_id is not None
+    assert curves[0].shape_id.startswith("generated_rose")

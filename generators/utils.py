@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
+from itertools import pairwise
 from typing import TYPE_CHECKING
 
 from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon
@@ -16,6 +18,8 @@ from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
     from domains.domain import Domain
+
+_COINCIDENT_MM = 1e-6
 
 
 def shapely_to_item(
@@ -111,14 +115,73 @@ def clip_polylines_to_domain(
     for polyline in polylines:
         if len(polyline) < 2:
             continue
-        clipped = LineString(polyline).intersection(polygon)
-        for line in _iter_linestrings(clipped):
-            if line.length < min_length_mm:
-                continue
-            points = [(float(x), float(y)) for x, y in line.coords]
-            if len(points) >= 2:
+        line = LineString(polyline)
+        if polygon.covers(line):
+            candidates = [[(float(x), float(y)) for x, y in polyline]]
+        else:
+            candidates = _merge_contiguous(
+                [
+                    [(float(x), float(y)) for x, y in piece.coords]
+                    for piece in _iter_linestrings(line.intersection(polygon))
+                ]
+            )
+        for points in candidates:
+            if len(points) >= 2 and _polyline_length(points) >= min_length_mm:
                 pieces.append(points)
     return pieces
+
+
+def _merge_contiguous(pieces: list[list[Point2D]], tolerance_mm: float = _COINCIDENT_MM) -> list[list[Point2D]]:
+    merged: list[list[Point2D]] = []
+    for piece in pieces:
+        if merged and math.dist(merged[-1][-1], piece[0]) <= tolerance_mm:
+            merged[-1] = merged[-1] + piece[1:]
+        else:
+            merged.append(list(piece))
+    return merged
+
+
+def _polyline_length(points: Sequence[Point2D]) -> float:
+    return sum(math.dist(a, b) for a, b in pairwise(points))
+
+
+def rotate_points(points: Sequence[Point2D], angle_rad: float) -> list[Point2D]:
+    if angle_rad == 0.0:
+        return list(points)
+    cos_a = math.cos(angle_rad)
+    sin_a = math.sin(angle_rad)
+    return [(x * cos_a - y * sin_a, x * sin_a + y * cos_a) for x, y in points]
+
+
+def join_pieces_at_point(
+    pieces: list[list[Point2D]],
+    point: Point2D,
+    tolerance_mm: float = _COINCIDENT_MM,
+) -> list[list[Point2D]]:
+    if len(pieces) < 2:
+        return pieces
+    first, last = pieces[0], pieces[-1]
+    if math.dist(first[0], point) > tolerance_mm or math.dist(last[-1], point) > tolerance_mm:
+        return pieces
+    return [last + first[1:], *pieces[1:-1]]
+
+
+def polyline_engrave_item(
+    points: Sequence[Point2D],
+    depth_mm: float,
+    shape_id: str,
+) -> Item:
+    cx = sum(p[0] for p in points) / len(points)
+    cy = sum(p[1] for p in points) / len(points)
+    is_open = math.dist(points[0], points[-1]) > _COINCIDENT_MM
+    return Item(
+        kind="shape",
+        type="Polyline",
+        geometry=Geometry(data={"points": [[x - cx, y - cy] for x, y in points], "is_open": is_open}),
+        placement=Placement(center_xy_mm=(cx, cy)),
+        feature=Feature(type="engrave", depth_mm=depth_mm),
+        shape_id=shape_id,
+    )
 
 
 def get_local_bounds(domain: Domain) -> Bounds2D:
@@ -215,6 +278,9 @@ __all__ = [
     "get_local_bounds",
     "is_major_tick",
     "iter_polygons",
+    "join_pieces_at_point",
     "loop_type_suffix",
+    "polyline_engrave_item",
+    "rotate_points",
     "shapely_to_item",
 ]

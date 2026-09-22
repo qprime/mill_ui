@@ -622,6 +622,43 @@ Angular pattern placement around a center point. A single `Radial` key with an `
       size: 30mm           # stamp bounding box size (optional, auto-derived)
 ```
 
+#### Curve
+
+Analytic curve engraved as a polyline, centered on the parent shape and clipped to it. A single `Curve` key with a `type` that selects the curve family.
+
+**Shared parameters (all curve types):**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `type` | Yes | — | Curve family: `rose` |
+| `depth` | Yes | — | Engrave depth |
+| `size` | No | 90% of the smaller parent dimension | Diameter of the curve's bounding circle |
+| `rotation` | No | 0 | Rotation in degrees, counter-clockwise |
+| `tolerance` | No | 0.05mm | Maximum chord deviation when sampling the curve |
+| `min_length` | No | 0mm | Drop clipped pieces shorter than this |
+
+`Curve` is a leaf node; `children` and `feature` are rejected. Wrap it in `AtPosition` or `Frame` to place it off-center.
+
+**Type: rose** — `r = cos(k·θ)`. Odd `lobes` draws that many petals; even `lobes` draws twice as many.
+
+```yaml
+- Curve:
+    type: rose
+    lobes: 5
+    depth: 0.3mm
+```
+
+```yaml
+- Curve:
+    type: rose
+    lobes: 4
+    depth: 0.3mm
+    size: 120mm
+    rotation: 22.5
+    tolerance: 0.05mm
+    min_length: 3mm
+```
+
 #### Wave
 
 Wavy groove pattern:

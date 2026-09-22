@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from layout_ast.compositional import (
     Panel,
     Rect,
@@ -625,3 +627,69 @@ def test_beam_supported_features_parse_and_resolve():
     pockets = [i for i in flat.items if i.feature and i.feature.type == "pocket"]
     assert len(holes) == 3
     assert len(pockets) == 6
+
+
+def test_curve_rose_round_trip():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: rose
+            lobes: 4
+            depth: 0.3mm
+            size: 120mm
+            rotation: 22.5
+            tolerance: 0.02mm
+            min_length: 3mm
+"""
+    formatted = format_pml_yaml(parse_pml_yaml(pml))
+
+    for key in ("type: rose", "lobes: 4", "size: 120mm", "rotation: 22.5", "tolerance: 0.02mm", "min_length: 3mm"):
+        assert key in formatted
+
+    assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+def test_curve_unknown_type_rejected():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: spirograph
+            depth: 0.3mm
+"""
+    with pytest.raises(PMLParseError, match="Known types: rose"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_rejects_children():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Curve:
+      type: rose
+      lobes: 3
+      depth: 0.3mm
+      children:
+        - Pocket: {depth: 2mm}
+"""
+    with pytest.raises(PMLParseError, match="does not accept 'children'"):
+        parse_pml_yaml(pml)

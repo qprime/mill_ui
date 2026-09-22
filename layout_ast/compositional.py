@@ -313,6 +313,16 @@ class RadialSvgGen:
 
 
 @dataclass(frozen=True)
+class RoseCurveGen:
+    lobes: int
+    depth_mm: float
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntry:
     tool: str
     role: str = "rough"

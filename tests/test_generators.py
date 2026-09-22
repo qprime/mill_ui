@@ -37,6 +37,7 @@ from generators import (
     notched_panel_generator,
     profile_generator,
     raised_panel_generator,
+    rose_curve_generator,
     svg_stamp_generator,
     validate_domain_for_generation,
     wave_generator,
@@ -1690,6 +1691,20 @@ class TestClipPolylinesToDomain:
         pieces = clip_polylines_to_domain([short, long], self._square(), min_length_mm=3.0)
         assert pieces == [long]
 
+    def test_self_intersecting_path_inside_returned_unchanged(self):
+        from generators.utils import clip_polylines_to_domain
+
+        figure_eight = [(20.0, 20.0), (80.0, 80.0), (80.0, 20.0), (20.0, 80.0), (20.0, 20.0)]
+        pieces = clip_polylines_to_domain([figure_eight], self._square())
+        assert pieces == [figure_eight]
+
+    def test_grazing_edge_from_inside_returns_one_piece(self):
+        from generators.utils import clip_polylines_to_domain
+
+        path = [(10.0, 90.0), (30.0, 100.0), (50.0, 90.0), (70.0, 100.0), (90.0, 90.0)]
+        pieces = clip_polylines_to_domain([path], self._square())
+        assert pieces == [path]
+
     def test_negative_min_length_raises(self):
         from generators.utils import clip_polylines_to_domain
 
@@ -1719,6 +1734,7 @@ ALL_GENERATORS = [
     measurement_edge_generator,
     svg_stamp_generator,
     notched_panel_generator,
+    rose_curve_generator,
 ]
 
 

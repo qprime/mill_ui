@@ -41,6 +41,7 @@ from layout_ast.compositional import (
     ProfileGen,
     RaisedPanelGen,
     Rect,
+    RoseCurveGen,
     RoundedRect,
     SplinePath,
     Split,
@@ -401,6 +402,18 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
                 "depth": dim(node.depth_mm),
             }
         }
+
+    elif isinstance(node, RoseCurveGen):
+        curve: dict[str, Any] = {"type": "rose", "lobes": node.lobes, "depth": dim(node.depth_mm)}
+        if node.size_mm is not None:
+            curve["size"] = dim(node.size_mm)
+        if node.rotation_deg != 0.0:
+            curve["rotation"] = node.rotation_deg
+        if node.tolerance_mm != 0.05:
+            curve["tolerance"] = dim(node.tolerance_mm)
+        if node.min_length_mm != 0.0:
+            curve["min_length"] = dim(node.min_length_mm)
+        return {"Curve": curve}
 
     elif isinstance(node, XPanelGen):
         return {"XPanel": {"bar_width": dim(node.bar_width_mm), "depth": dim(node.depth_mm)}}

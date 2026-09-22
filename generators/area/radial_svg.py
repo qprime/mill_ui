@@ -14,16 +14,8 @@ from generators.params.area import RadialSvgParams
 from generators.radial_utils import generate_angular_positions, radial_point
 from generators.svg.params import SVGPathParams
 from generators.svg.stamp import svg_stamp_generator
+from generators.utils import rotate_points
 from layout_ast.layout import Geometry, Item, Placement
-
-
-def _rotate_geometry_points(
-    points: list[list[float]],
-    angle_rad: float,
-) -> list[list[float]]:
-    cos_a = math.cos(angle_rad)
-    sin_a = math.sin(angle_rad)
-    return [[p[0] * cos_a - p[1] * sin_a, p[0] * sin_a + p[1] * cos_a] for p in points]
 
 
 def _rotate_and_translate_item(
@@ -37,11 +29,11 @@ def _rotate_and_translate_item(
     data = dict(item.geometry.data)
 
     if "points" in data:
-        data["points"] = _rotate_geometry_points(data["points"], angle_rad)
+        data["points"] = [list(p) for p in rotate_points([(p[0], p[1]) for p in data["points"]], angle_rad)]
     elif "start" in data and "end" in data:
-        rotated = _rotate_geometry_points([data["start"], data["end"]], angle_rad)
-        data["start"] = rotated[0]
-        data["end"] = rotated[1]
+        start, end = rotate_points([tuple(data["start"]), tuple(data["end"])], angle_rad)
+        data["start"] = list(start)
+        data["end"] = list(end)
 
     cx, cy = item.placement.center_xy_mm
     cos_a = math.cos(angle_rad)

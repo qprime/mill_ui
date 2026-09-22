@@ -121,7 +121,7 @@ The rule: diagram path bakes transforms into shape coordinates during IR generat
 
 ## PML Round-Trip Convention
 
-All Feature fields must survive `parse → format → parse`. This is tested and enforced.
+Every field must survive `parse → format → parse` with an equal AST. `test_recipe_round_trips_to_identical_ast` in `tests/test_compositional_pml.py` enforces this for every recipe; a formatter that drops a field fails it even when formatting twice is stable.
 
 - Formatter emits only non-default fields (e.g., dogbone omitted when all defaults)
 - Parser accepts both detailed and simplified forms; formatter emits simplest valid form

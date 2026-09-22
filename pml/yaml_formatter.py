@@ -40,10 +40,16 @@ from layout_ast.compositional import (
     Polygon,
     Polyline,
     ProfileGen,
+    RadialLabelGen,
+    RadialPocketGen,
+    RadialSvgGen,
+    RadialTickGen,
     RaisedPanelGen,
     Rect,
     RoseCurveGen,
     RoundedRect,
+    RoundoverGen,
+    ShellGen,
     SpirographCurveGen,
     SplinePath,
     Split,
@@ -52,6 +58,8 @@ from layout_ast.compositional import (
     SplitHorizontalGaps,
     SplitVertical,
     Subtract,
+    SurfaceDecl,
+    SvgStampGen,
     Triangle,
     UseComponent,
     WasteCuts,
@@ -64,9 +72,45 @@ from pml.nest_parser import HoldingSpec, NestJob
 
 
 def dim(value: float) -> str:
+    return f"{_number(value)}mm"
+
+
+def _number(value: float) -> str:
     if value == int(value):
-        return f"{int(value)}mm"
-    return f"{value}mm"
+        return str(int(value))
+    return repr(value)
+
+
+def _format_surface(surface: SurfaceDecl) -> dict[str, Any]:
+    result: dict[str, Any] = {"depth-per-pass": dim(surface.depth_mm)}
+    if surface.passes != 1:
+        result["passes"] = surface.passes
+    if surface.stepover_pct != 70.0:
+        result["stepover"] = f"{_number(surface.stepover_pct)}%"
+    if surface.direction != "x":
+        result["direction"] = surface.direction
+    if surface.margin_mm != 0.0:
+        result["margin-overrun"] = dim(surface.margin_mm)
+    if surface.cool_every != 0:
+        result["cool_every"] = surface.cool_every
+    if surface.cool_dwell_s != 0.0:
+        result["cool_dwell"] = f"{_number(surface.cool_dwell_s)}s"
+    return result
+
+
+def _format_depth_or_through(depth: str | float) -> str:
+    return "through" if depth == "through" else dim(float(depth))
+
+
+def _format_radial_shared(node: RadialPocketGen | RadialTickGen | RadialLabelGen | RadialSvgGen) -> dict[str, Any]:
+    result: dict[str, Any] = {"rays": node.rays, "depth": dim(node.depth_mm)}
+    if node.start_angle_deg != 0.0:
+        result["start_angle"] = node.start_angle_deg
+    if node.end_angle_deg != 360.0:
+        result["end_angle"] = node.end_angle_deg
+    if node.radius_mm is not None:
+        result["radius"] = dim(node.radius_mm)
+    return result
 
 
 def _format_heightfield_tool_entry(entry: Any) -> dict[str, Any]:
@@ -449,6 +493,87 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         if node.height_mm is not None:
             curve["height"] = dim(node.height_mm)
         return {"Curve": {**curve, **_curve_shared_keys(node)}}
+
+    elif isinstance(node, RoundoverGen):
+        return {"Roundover": {"radius": dim(node.radius_mm)}}
+
+    elif isinstance(node, ShellGen):
+        shell: dict[str, Any] = {"wall": dim(node.wall_mm), "interior": node.interior}
+        if node.depth != "through":
+            shell["depth"] = _format_depth_or_through(node.depth)
+        if node.children:
+            shell["children"] = [format_node(c) for c in node.children]
+        return {"Shell": shell}
+
+    elif isinstance(node, SvgStampGen):
+        stamp: dict[str, Any] = {"path": node.svg_path, "depth": _format_depth_or_through(node.depth)}
+        if node.feature_type != "engrave":
+            stamp["feature"] = node.feature_type
+        if node.scale_mode != "fit":
+            stamp["scale"] = node.scale_mode
+        if node.svg_unit_mm != 1.0:
+            stamp["svg_unit"] = node.svg_unit_mm
+        if not node.center:
+            stamp["center"] = False
+        if not node.invert_y:
+            stamp["invert_y"] = False
+        return {"SvgStamp": stamp}
+
+    elif isinstance(node, RadialPocketGen):
+        radial = _format_radial_shared(node)
+        element: dict[str, Any] = {"type": "pocket"}
+        if node.bar_width_mm != 0.0:
+            element["bar_width"] = dim(node.bar_width_mm)
+        if node.shape != "triangle":
+            element["shape"] = node.shape
+        if node.center_shape is not None:
+            element["center_shape"] = node.center_shape
+        if node.center_size_mm is not None:
+            element["center_size"] = dim(node.center_size_mm)
+        return {"Radial": {**radial, "element": element}}
+
+    elif isinstance(node, RadialTickGen):
+        radial = _format_radial_shared(node)
+        if node.minor_subdivisions != 0:
+            radial["minor_subdivisions"] = node.minor_subdivisions
+        element = {"type": "tick"}
+        if node.tick_length_mm is not None:
+            element["tick_length"] = dim(node.tick_length_mm)
+        if node.minor_tick_length_mm is not None:
+            element["minor_tick_length"] = dim(node.minor_tick_length_mm)
+        if node.inward:
+            element["inward"] = True
+        if node.labels:
+            element["labels"] = True
+        if node.label_list is not None:
+            element["label_list"] = list(node.label_list)
+        if node.label_height_mm != 3.0:
+            element["label_height"] = dim(node.label_height_mm)
+        return {"Radial": {**radial, "element": element}}
+
+    elif isinstance(node, RadialLabelGen):
+        radial = _format_radial_shared(node)
+        element = {"type": "label"}
+        if node.values is not None:
+            element["values"] = list(node.values)
+        if node.label_height_mm != 3.0:
+            element["height"] = dim(node.label_height_mm)
+        return {"Radial": {**radial, "element": element}}
+
+    elif isinstance(node, RadialSvgGen):
+        radial = _format_radial_shared(node)
+        element = {"type": "svg", "path": node.svg_path}
+        if node.feature_type != "engrave":
+            element["feature"] = node.feature_type
+        if node.scale_mode != "fit":
+            element["scale"] = node.scale_mode
+        if node.svg_unit_mm != 1.0:
+            element["svg_unit"] = node.svg_unit_mm
+        if not node.rotate_element:
+            element["rotate"] = False
+        if node.stamp_size_mm is not None:
+            element["size"] = dim(node.stamp_size_mm)
+        return {"Radial": {**radial, "element": element}}
 
     elif isinstance(node, XPanelGen):
         return {"XPanel": {"bar_width": dim(node.bar_width_mm), "depth": dim(node.depth_mm)}}
@@ -854,6 +979,13 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
         data["Sheet"]["gcode_output"] = ast.sheet.gcode_output
     if ast.sheet.min_web_mm != DEFAULT_MIN_WEB_MM:
         data["Sheet"]["min_web"] = dim(ast.sheet.min_web_mm)
+    if ast.sheet.material != "mdf":
+        data["Sheet"]["material"] = ast.sheet.material
+    if not ast.sheet.show_dimensions:
+        data["Sheet"]["show_dimensions"] = False
+
+    if ast.surface is not None:
+        data["Surface"] = _format_surface(ast.surface)
 
     if ast.components:
         data["components"] = {}

@@ -881,7 +881,7 @@ SVG files must contain `<path>` elements. Non-path elements (`<rect>`, `<circle>
 
 #### Heightfield
 
-Relief carving from a 16-bit grayscale PNG. IR-only today; G-code generation is tracked in issues #2 (rough) and #3 (finish).
+Relief carving from a 16-bit grayscale PNG. Each `tools` entry with `role: rough` produces a rough pass with that tool; an entry with `role: finish` adds a single-depth finish pass (recipes 83 and 85).
 
 ```yaml
 - Rect:
@@ -895,7 +895,26 @@ Relief carving from a 16-bit grayscale PNG. IR-only today; G-code generation is 
             height: 128mm
           depth: 5mm                             # Required. Maximum carve depth.
           white_is_high: true                    # Default true; false inverts polarity.
+          tools:
+            - tool: "1/4 upcut spiral"
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: "1/8 ball nose 2F"
+              role: finish
+              stepover: 12%
+              angle: 0
 ```
+
+`tools` entries:
+
+| Key | Required | Default | Description |
+|-----|----------|---------|-------------|
+| `tool` | Yes | — | Endmill name; must exactly match a `name` in the machine's tool database. A `finish` entry must name a ball-nose tool (`kind: ball`) or planning fails |
+| `role` | No | `rough` | `rough` or `finish` |
+| `stepover` | Finish only | 60% (rough) | Percentage of tool diameter |
+| `stepdown` | No | tool's `depth_per_pass`, else the larger of 0.5mm and 25% of diameter | Depth per pass; rough entries only |
+| `angle` | No | 0 | Raster angle in degrees, taken modulo 180; finish entries only |
 
 `Heightfield` is placed at the parent shape's CENTER (PM-12). It has no `at:` key — wrap in `Frame` or `AtPosition` for offset placement.
 

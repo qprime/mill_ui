@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from layout_ast.compositional import (
@@ -779,3 +781,136 @@ children:
         assert key in formatted
 
     assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
+
+
+def test_recipe_round_trip_finds_recipes():
+    assert RECIPE_PML_FILES
+
+
+@pytest.mark.parametrize("pml_path", RECIPE_PML_FILES, ids=lambda p: p.parent.name)
+def test_recipe_round_trips_to_identical_ast(pml_path: Path):
+    ast = parse_pml_yaml(pml_path.read_text())
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_sheet_material_round_trips():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  material: plywood
+
+children:
+  - Rect:
+      id: panel
+"""
+    ast = parse_pml_yaml(pml)
+    assert ast.sheet.material == "plywood"
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_radial_label_round_trips():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: dial
+      children:
+        - Radial:
+            rays: 4
+            depth: 0.3mm
+            start_angle: 90
+            radius: 80mm
+            element:
+              type: label
+              values: [N, E, S, W]
+              height: 6mm
+"""
+    ast = parse_pml_yaml(pml)
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_surface_stepover_keeps_full_precision():
+    pml = f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+Surface:
+  depth-per-pass: 0.5mm
+  stepover: {100 / 3}%
+
+children:
+  - Rect:
+      id: panel
+"""
+    ast = parse_pml_yaml(pml)
+    assert ast.surface is not None
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+_NON_DEFAULT_NODES = [
+    pytest.param("Shell: {wall: 12mm, interior: pocket, depth: 6mm}", id="shell_numeric_depth"),
+    pytest.param(
+        "SvgStamp: {path: 'M 0 0 L 10 0 L 10 10 Z', depth: 1.5mm, feature: pocket, scale: none, "
+        "svg_unit: 0.5, center: false, invert_y: false}",
+        id="svg_stamp",
+    ),
+    pytest.param(
+        "Radial: {rays: 6, depth: 3mm, start_angle: 10, end_angle: 180, radius: 70mm, "
+        "element: {type: pocket, bar_width: 4mm, shape: arc, center_shape: hexagon, center_size: 20mm}}",
+        id="radial_pocket",
+    ),
+    pytest.param(
+        "Radial: {rays: 12, depth: 0.3mm, minor_subdivisions: 4, element: {type: tick, tick_length: 9mm, "
+        "minor_tick_length: 4mm, inward: true, labels: true, label_list: [a, b, c, d, e, f, g, h, i, j, k, l], "
+        "label_height: 5mm}}",
+        id="radial_tick",
+    ),
+    pytest.param(
+        "Radial: {rays: 5, depth: 0.3mm, element: {type: svg, path: 'M 0 0 L 20 10 L 0 20 Z', feature: pocket, "
+        "scale: fill, svg_unit: 2.0, rotate: false, size: 25mm}}",
+        id="radial_svg",
+    ),
+]
+
+
+@pytest.mark.parametrize("node_yaml", _NON_DEFAULT_NODES)
+def test_non_default_node_keys_round_trip(node_yaml: str):
+    pml = f"""
+Sheet: {{width: 300mm, height: 300mm, thickness: 19mm}}
+children:
+  - Rect:
+      id: panel
+      children:
+        - {node_yaml}
+"""
+    ast = parse_pml_yaml(pml)
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_non_default_surface_keys_round_trip():
+    pml = """
+Sheet: {width: 300mm, height: 300mm, thickness: 19mm}
+Surface:
+  depth-per-pass: 0.4mm
+  passes: 3
+  stepover: 55%
+  direction: y
+  margin-overrun: 5mm
+  cool_every: 4
+  cool_dwell: 2.5s
+children:
+  - Rect: {id: panel}
+"""
+    ast = parse_pml_yaml(pml)
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast

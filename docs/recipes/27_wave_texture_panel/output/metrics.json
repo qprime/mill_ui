@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 9142,
-    "rapid_moves": 159,
-    "cut_moves": 8176,
-    "rapid_ratio": 0.017
+    "total_moves": 9295,
+    "rapid_moves": 164,
+    "cut_moves": 8299,
+    "rapid_ratio": 0.018
   },
   "fidelity": {
     "tool_changes": 2,
@@ -12,7 +12,7 @@
       {
         "name": "engrave",
         "tool_diameter_mm": 1.0,
-        "move_count": 9046
+        "move_count": 9199
       },
       {
         "name": "profile",
@@ -22,12 +22,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 231499,
-    "total_lines": 8842,
+    "total_bytes": 235078,
+    "total_lines": 8985,
     "files": {
       "engrave-1.00mm": {
-        "bytes": 228962,
-        "lines": 8746
+        "bytes": 232541,
+        "lines": 8889
       },
       "profile-3.17mm": {
         "bytes": 2537,
@@ -42,6 +42,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "3b5c5379"
   }
 }

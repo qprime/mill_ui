@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 import pytest
+from shapely.geometry import Point as ShapelyPoint
 
 from domains import Domain
 from generators import (
@@ -284,6 +285,54 @@ def test_wave_small_domain():
 
     items = wave_generator(domain, params, allow_empty=True)
     assert items == []
+
+
+def _absolute_points(item) -> list[tuple[float, float]]:
+    cx, cy = item.placement.center_xy_mm
+    return [(cx + x, cy + y) for x, y in item.geometry.data["points"]]
+
+
+def test_wave_endpoints_lie_on_boundary():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0)
+
+    items = wave_generator(domain, params)
+
+    boundary = domain.polygon.boundary
+    for item in items:
+        points = _absolute_points(item)
+        for endpoint in (points[0], points[-1]):
+            assert boundary.distance(ShapelyPoint(endpoint)) < 1e-6
+
+
+def test_wave_in_circle_stays_inside_circle():
+    domain = Domain.from_circle(200, center=(100, 100))
+    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0)
+
+    items = wave_generator(domain, params)
+
+    inflated = domain.polygon.buffer(1e-6)
+    endpoint_gap_from_square = 0.0
+    for item in items:
+        points = _absolute_points(item)
+        for x, y in points:
+            assert inflated.contains(ShapelyPoint(x, y))
+        for x, y in (points[0], points[-1]):
+            gap = min(x, 200 - x, y, 200 - y)
+            endpoint_gap_from_square = max(endpoint_gap_from_square, gap)
+    assert endpoint_gap_from_square > 5.0
+
+
+def test_wave_drops_pieces_shorter_than_groove():
+    domain = Domain.from_rectangle(200, 100, center=(100, 50))
+    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, tool_width_mm=3.0)
+
+    items = wave_generator(domain, params)
+
+    for item in items:
+        points = _absolute_points(item)
+        length = sum(math.dist(points[i], points[i + 1]) for i in range(len(points) - 1))
+        assert length >= 3.0
 
 
 # =============================================================================

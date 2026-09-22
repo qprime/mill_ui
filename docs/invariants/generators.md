@@ -25,6 +25,7 @@
 | GN-15 | HARD | RAMP_NON_NEGATIVE | ramp_mm must be >= 0 (0 = no ramp, flat-bottom) |
 | GN-16 | HARD | RAMP_CLAMPED | ramp_mm clamped to line_length/2 at G-code generation |
 | GN-17 | HARD | FONT_NAME_VALID | EngraveText font must be a bundled HersheyFonts name; validated at PML parse and in params |
+| GN-18 | HARD | SEED_EXPLICIT | A generator that uses pseudo-random values takes `seed: int = 0` in its params and builds `numpy.random.default_rng(seed)` locally. No module-level RNG state. |
 
 ---
 
@@ -79,6 +80,28 @@ If `tab_count == 0`, tab dimensions are ignored.
 ## Output Coordinates
 
 Generators emit Items in absolute sheet coordinates, not domain-local coordinates. Coordinate transformation happens before output.
+
+---
+
+## Seeded Randomness (GN-18)
+
+GN-1 requires identical output for identical input. A generator that draws random values satisfies it only when the seed is an explicit input and the RNG is local to the call.
+
+**Wrong:**
+```python
+import random
+
+def generate(domain, params):
+    x = random.uniform(...)  # process-global state
+```
+
+**Correct:**
+```python
+rng = np.random.default_rng(params.seed)
+x = rng.uniform(...)
+```
+
+The PML key is `seed`. See "Deterministic Randomness" in `docs/dev_docs/project_conventions.md` for the params pattern.
 
 ---
 

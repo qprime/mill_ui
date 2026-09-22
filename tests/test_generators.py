@@ -1588,6 +1588,116 @@ def test_hole_grid_determinism():
 
 
 # =============================================================================
+# Polyline Clipping
+# =============================================================================
+
+
+class TestClipPolylinesToDomain:
+    def _square(self) -> Domain:
+        return Domain.from_rectangle(100, 100, center=(50, 50))
+
+    def test_fully_inside_returned_unchanged(self):
+        from generators.utils import clip_polylines_to_domain
+
+        path = [(10.0, 10.0), (50.0, 60.0), (90.0, 20.0)]
+        pieces = clip_polylines_to_domain([path], self._square())
+        assert pieces == [path]
+
+    def test_fully_outside_returns_empty(self):
+        from generators.utils import clip_polylines_to_domain
+
+        pieces = clip_polylines_to_domain([[(-50.0, -50.0), (-10.0, -10.0)]], self._square())
+        assert pieces == []
+
+    def test_crossing_once_ends_on_boundary(self):
+        from generators.utils import clip_polylines_to_domain
+
+        pieces = clip_polylines_to_domain([[(-10.0, 50.0), (50.0, 50.0)]], self._square())
+        assert len(pieces) == 1
+        assert pieces[0][0] == pytest.approx((0.0, 50.0), abs=1e-9)
+        assert pieces[0][-1] == pytest.approx((50.0, 50.0), abs=1e-9)
+
+    def test_in_out_in_returns_two_pieces(self):
+        from generators.utils import clip_polylines_to_domain
+
+        path = [(20.0, 50.0), (120.0, 50.0), (120.0, 80.0), (20.0, 80.0)]
+        pieces = clip_polylines_to_domain([path], self._square())
+        assert len(pieces) == 2
+        for piece in pieces:
+            assert any(abs(x - 100.0) < 1e-9 for x, _ in (piece[0], piece[-1]))
+
+    def test_touch_at_vertex_returns_empty(self):
+        from generators.utils import clip_polylines_to_domain
+
+        pieces = clip_polylines_to_domain([[(-10.0, 10.0), (0.0, 0.0), (10.0, -10.0)]], self._square())
+        assert pieces == []
+
+    def test_along_edge_is_kept(self):
+        from generators.utils import clip_polylines_to_domain
+
+        pieces = clip_polylines_to_domain([[(-10.0, 100.0), (110.0, 100.0)]], self._square())
+        assert len(pieces) == 1
+        assert pieces[0][0] == pytest.approx((0.0, 100.0), abs=1e-9)
+        assert pieces[0][-1] == pytest.approx((100.0, 100.0), abs=1e-9)
+
+    def test_crossing_hole_returns_two_pieces(self):
+        from generators.utils import clip_polylines_to_domain
+
+        domain = Domain.from_polygon(
+            [(0, 0), (100, 0), (100, 100), (0, 100)],
+            holes=[[(40, 40), (60, 40), (60, 60), (40, 60)]],
+        )
+        pieces = clip_polylines_to_domain([[(-10.0, 50.0), (110.0, 50.0)]], domain)
+        assert len(pieces) == 2
+        for piece in pieces:
+            assert all(not (40.0 < x < 60.0) for x, _ in piece)
+
+    def test_short_polyline_skipped(self):
+        from generators.utils import clip_polylines_to_domain
+
+        assert clip_polylines_to_domain([[(50.0, 50.0)]], self._square()) == []
+
+    def test_input_order_preserved(self):
+        from generators.utils import clip_polylines_to_domain
+
+        a = [(10.0, 10.0), (20.0, 10.0)]
+        b = [(10.0, 90.0), (20.0, 90.0)]
+        pieces = clip_polylines_to_domain([a, b], self._square())
+        assert pieces == [a, b]
+
+    def test_clip_is_deterministic(self):
+        from generators.utils import clip_polylines_to_domain
+
+        path = [(20.0, 50.0), (120.0, 50.0), (120.0, 80.0), (20.0, 80.0)]
+        first = clip_polylines_to_domain([path], self._square())
+        second = clip_polylines_to_domain([path], self._square())
+        assert first == second
+
+    def test_mixed_collection_keeps_only_lines(self):
+        from generators.utils import clip_polylines_to_domain
+
+        path = [(-10.0, 10.0), (0.0, 0.0), (10.0, -10.0), (50.0, -10.0), (50.0, 50.0)]
+        pieces = clip_polylines_to_domain([path], self._square())
+        assert len(pieces) == 1
+        assert pieces[0][0] == pytest.approx((50.0, 0.0), abs=1e-9)
+        assert pieces[0][-1] == pytest.approx((50.0, 50.0), abs=1e-9)
+
+    def test_drops_pieces_below_min_length(self):
+        from generators.utils import clip_polylines_to_domain
+
+        short = [(10.0, 10.0), (12.0, 10.0)]
+        long = [(10.0, 90.0), (60.0, 90.0)]
+        pieces = clip_polylines_to_domain([short, long], self._square(), min_length_mm=3.0)
+        assert pieces == [long]
+
+    def test_negative_min_length_raises(self):
+        from generators.utils import clip_polylines_to_domain
+
+        with pytest.raises(ValueError, match="min_length_mm"):
+            clip_polylines_to_domain([[(10.0, 10.0), (20.0, 10.0)]], self._square(), min_length_mm=-1.0)
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 

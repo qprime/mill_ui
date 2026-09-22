@@ -17,9 +17,9 @@
     }
   },
   "complexity": {
-    "total_moves": 24483,
-    "rapid_moves": 139,
-    "cut_moves": 23495,
+    "total_moves": 24589,
+    "rapid_moves": 143,
+    "cut_moves": 23577,
     "rapid_ratio": 0.006
   },
   "fidelity": {
@@ -38,7 +38,7 @@
       {
         "name": "engrave",
         "tool_diameter_mm": 1.0,
-        "move_count": 3226
+        "move_count": 3332
       },
       {
         "name": "dogbone",
@@ -58,8 +58,8 @@
     ]
   },
   "output_size": {
-    "total_bytes": 765982,
-    "total_lines": 24251,
+    "total_bytes": 768482,
+    "total_lines": 24349,
     "files": {
       "pocket-12.70mm": {
         "bytes": 7141,
@@ -70,8 +70,8 @@
         "lines": 19240
       },
       "engrave-1.00mm": {
-        "bytes": 78964,
-        "lines": 3046
+        "bytes": 81464,
+        "lines": 3144
       },
       "dogbone-12.70mm": {
         "bytes": 763,
@@ -94,6 +94,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "3b5c5379"
   }
 }

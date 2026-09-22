@@ -70,7 +70,7 @@ from generators.svg import (
     parse_svg_path,
     svg_stamp_generator,
 )
-from generators.utils import iter_polygons, shapely_to_item
+from generators.utils import clip_polylines_to_domain, iter_polygons, shapely_to_item
 
 __all__ = [
     "BaseParams",
@@ -107,6 +107,7 @@ __all__ = [
     "XPanelParams",
     "bead_generator",
     "chamfer_generator",
+    "clip_polylines_to_domain",
     "concentric_border_generator",
     "engrave_number_label",
     "engrave_text_at_position",

@@ -404,6 +404,13 @@ class LayoutResolver:
         self._shape_counter += 1
         return shape_id
 
+    @staticmethod
+    def _domain_for_region(params: dict[str, Any], region: ResolvedRegion) -> Domain:
+        domain = params.get("domain")
+        if isinstance(domain, Domain):
+            return domain
+        return Domain.from_rectangle(region.width, region.height, center=region.center)
+
     def _collect_island_bounds(
         self,
         children: tuple[Any, ...],
@@ -1065,11 +1072,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = XPanelParams(
             bar_width_mm=node.bar_width_mm,
@@ -1095,11 +1098,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = RadialPocketParams(
             rays=node.rays,
@@ -1132,11 +1131,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = RadialTickParams(
             rays=node.rays,
@@ -1172,11 +1167,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         svg_path_data = node.svg_path
         if svg_path_data.lower().endswith(".svg"):
@@ -1221,11 +1212,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = RadialLabelParams(
             rays=node.rays,
@@ -1256,11 +1243,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = HoleGridParams(
             spacing_mm=node.spacing_mm,
@@ -1357,11 +1340,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = WaveParams(
             amplitude_mm=node.amplitude_mm,
@@ -1390,11 +1369,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = FlutingParams(
             spacing_mm=node.spacing_mm,
@@ -1423,11 +1398,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = LinePatternParams(
             angle_deg=node.angle_deg,
@@ -1455,11 +1426,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = ConcentricBorderParams(
             insets_mm=node.insets_mm,
@@ -1486,11 +1453,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = MeasurementGridParams(
             unit=node.unit,  # type: ignore[arg-type]
@@ -1526,11 +1489,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = MeasurementEdgeParams(
             edges=node.edges,  # type: ignore[arg-type]
@@ -1567,11 +1526,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         generator_params = GridLinesParams(
             unit=node.unit,  # type: ignore[arg-type]
@@ -1623,11 +1578,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         image_path = node.image_path
         if self.ast.source_dir and not os.path.isabs(image_path):
@@ -1671,11 +1622,7 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        domain = Domain.from_rectangle(
-            width_mm=region.width,
-            height_mm=region.height,
-            center=region.center,
-        )
+        domain = self._domain_for_region(params, region)
 
         svg_path_data = node.svg_path
         if svg_path_data.lower().endswith(".svg"):

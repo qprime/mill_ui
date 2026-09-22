@@ -65,6 +65,26 @@ All generators follow: `generator_fn(domain: Domain, params: FrozenParams, *, al
 - `allow_empty` is keyword-only (after `*`)
 - No generator takes more than 3 positional parameters; everything else in the params object
 
+## Deterministic Randomness
+
+Generators that draw pseudo-random values (seed points, jitter, sampling) follow GN-18:
+
+```python
+@dataclass(frozen=True)
+class VoronoiParams(BaseParams):
+    seed_count: int
+    seed: int = 0
+
+
+def voronoi_generator(domain: Domain, params: VoronoiParams, *, allow_empty: bool = False) -> GeneratorResult:
+    rng = np.random.default_rng(params.seed)
+    ...
+```
+
+- `seed: int = 0` is the params field. The PML key is `seed`. The formatter emits it only when non-default.
+- Construct `numpy.random.default_rng(seed)` inside the generator call. Never call `random.*` or `np.random.*` module functions.
+- Draw order is part of the contract. Two calls with the same seed must consume the RNG in the same sequence, so reordering the sampling of an existing generator is a golden-output change.
+
 ## Import Layering
 
 No backward imports across layer boundaries:

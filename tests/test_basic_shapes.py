@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import pytest
+from shapely.geometry import Point as ShapelyPoint
+
+from domains import Domain
+from layout_ast.compositional import ResolvedRegion
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import LayoutResolver, resolve_layout
 
 
 def approx_equal(a: float, b: float, tolerance: float = 0.01) -> bool:
@@ -669,3 +674,136 @@ children:
     assert item.geometry is not None
     assert "radius_mm" not in item.geometry.data
     assert "radius_bl_mm" not in item.geometry.data
+
+
+def _wave_points(flat) -> list[tuple[float, float]]:
+    points: list[tuple[float, float]] = []
+    for item in flat.items:
+        if item.type != "Polyline":
+            continue
+        cx, cy = item.placement.center_xy_mm
+        points.extend((cx + x, cy + y) for x, y in item.geometry.data["points"])
+    return points
+
+
+def test_wave_under_circle_resolves_to_circle_domain():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      diameter: 200mm
+      children:
+        - Wave:
+            count: 4
+            amplitude: 8mm
+            wavelength: 50mm
+            groove: 3mm
+            depth: 1mm
+"""
+    flat = resolve_layout(parse_pml_yaml(pml))
+
+    points = _wave_points(flat)
+    assert points
+    circle = Domain.from_circle(200, center=(150, 150)).polygon.buffer(1e-6)
+    for x, y in points:
+        assert circle.contains(ShapelyPoint(x, y)), (x, y)
+
+
+def test_wave_under_inset_stays_in_inset_region():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Inset:
+            distance: 20mm
+            children:
+              - Wave:
+                  count: 4
+                  amplitude: 8mm
+                  wavelength: 50mm
+                  groove: 3mm
+                  depth: 1mm
+"""
+    flat = resolve_layout(parse_pml_yaml(pml))
+
+    points = _wave_points(flat)
+    assert points
+    for x, y in points:
+        assert 20.0 - 1e-6 <= x <= 280.0 + 1e-6, (x, y)
+        assert 20.0 - 1e-6 <= y <= 280.0 + 1e-6, (x, y)
+
+
+def test_domain_for_region_falls_back_to_rectangle():
+    region = ResolvedRegion(x_min=10.0, y_min=20.0, x_max=110.0, y_max=70.0)
+
+    fallback = LayoutResolver._domain_for_region({}, region)
+    assert fallback.bounds.x_min == pytest.approx(10.0)
+    assert fallback.bounds.x_max == pytest.approx(110.0)
+    assert fallback.bounds.y_min == pytest.approx(20.0)
+    assert fallback.bounds.y_max == pytest.approx(70.0)
+
+    circle = Domain.from_circle(50, center=(60, 45))
+    assert LayoutResolver._domain_for_region({"domain": circle}, region) is circle
+
+
+def _item_points(item) -> list[tuple[float, float]]:
+    cx, cy = item.placement.center_xy_mm
+    data = item.geometry.data
+    if "points" in data:
+        pts = [(cx + x, cy + y) for x, y in data["points"]]
+        for hole in data.get("holes", []):
+            pts.extend((cx + x, cy + y) for x, y in hole)
+        return pts
+    if "start" in data and "end" in data:
+        return [(cx + data["start"][0], cy + data["start"][1]), (cx + data["end"][0], cy + data["end"][1])]
+    if "diameter_mm" in data:
+        r = data["diameter_mm"] / 2
+        return [(cx + r, cy), (cx - r, cy), (cx, cy + r), (cx, cy - r)]
+    raise AssertionError(f"unhandled geometry for {item.type}: {sorted(data)}")
+
+
+_CIRCLE_CLIPPED_GENERATORS = [
+    pytest.param("HoleGrid: {spacing: 30mm, diameter: 6mm, depth: through}", id="hole_grid"),
+    pytest.param("Lines: {angle: 45, spacing: 25mm, width: 4mm, depth: 3mm}", id="lines"),
+    pytest.param("Fluting: {spacing: 20mm, depth: 3mm}", id="fluting"),
+    pytest.param("ConcentricBorder: {insets: [15mm, 30mm], groove: 3mm, depth: 2mm}", id="concentric_border"),
+    pytest.param("Radial: {rays: 8, depth: 4mm, element: {type: pocket}}", id="radial_pocket"),
+    pytest.param("Radial: {rays: 12, depth: 0.3mm, element: {type: tick}}", id="radial_tick"),
+    pytest.param(
+        'Radial: {rays: 6, depth: 0.3mm, element: {type: svg, path: "M 0 0 L 20 10 L 0 20 Z"}}', id="radial_svg"
+    ),
+]
+
+
+@pytest.mark.parametrize("generator_yaml", _CIRCLE_CLIPPED_GENERATORS)
+def test_decorative_generator_under_circle_stays_inside_circle(generator_yaml: str):
+    pml = f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: disc
+      diameter: 200mm
+      children:
+        - {generator_yaml}
+"""
+    flat = resolve_layout(parse_pml_yaml(pml))
+
+    generated = [item for item in flat.items if item.shape_id != "disc"]
+    assert generated
+    for item in generated:
+        for x, y in _item_points(item):
+            assert ((x - 150.0) ** 2 + (y - 150.0) ** 2) ** 0.5 <= 100.0 + 0.1, (item.shape_id, x, y)

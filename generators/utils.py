@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon
+from shapely.geometry.base import BaseGeometry
 
-from domains.domain import Bounds2D
+from domains.domain import Bounds2D, Point2D
 from domains.transforms import sheet_to_local
 from generators.core import (
     GeneratorSkipError,
@@ -79,6 +81,44 @@ def iter_polygons(geom) -> list[Polygon]:
             result.extend(iter_polygons(sub))
 
     return result
+
+
+def _iter_linestrings(geom: BaseGeometry) -> list[LineString]:
+    if geom.is_empty:
+        return []
+    if isinstance(geom, LineString):
+        return [geom]
+    if isinstance(geom, MultiLineString):
+        return list(geom.geoms)
+    if hasattr(geom, "geoms"):
+        result: list[LineString] = []
+        for sub in geom.geoms:
+            result.extend(_iter_linestrings(sub))
+        return result
+    return []
+
+
+def clip_polylines_to_domain(
+    polylines: Sequence[Sequence[Point2D]],
+    domain: Domain,
+    *,
+    min_length_mm: float = 0.0,
+) -> list[list[Point2D]]:
+    if min_length_mm < 0:
+        raise ValueError(f"clip_polylines_to_domain: min_length_mm must be non-negative, got {min_length_mm}")
+    polygon = domain.polygon
+    pieces: list[list[Point2D]] = []
+    for polyline in polylines:
+        if len(polyline) < 2:
+            continue
+        clipped = LineString(polyline).intersection(polygon)
+        for line in _iter_linestrings(clipped):
+            if line.length < min_length_mm:
+                continue
+            points = [(float(x), float(y)) for x, y in line.coords]
+            if len(points) >= 2:
+                pieces.append(points)
+    return pieces
 
 
 def get_local_bounds(domain: Domain) -> Bounds2D:
@@ -168,6 +208,7 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 
 __all__ = [
+    "clip_polylines_to_domain",
     "compute_centroid_and_normalize",
     "create_line_item",
     "extract_loops",

@@ -11,7 +11,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.loop import WaveParams
-from generators.utils import get_local_bounds
+from generators.utils import clip_polylines_to_domain, get_local_bounds
 from layout_ast.layout import Feature, Geometry, Item, Placement
 
 if TYPE_CHECKING:
@@ -48,35 +48,6 @@ def _generate_wave_line(
         points.append((x, y))
 
     return points
-
-
-def _clip_wave_to_domain(
-    wave_points: list[tuple[float, float]],
-    domain: Domain,
-) -> list[list[tuple[float, float]]]:
-    if not wave_points:
-        return []
-
-    polygon = domain.polygon
-    segments = []
-    current_segment = []
-
-    for point in wave_points:
-        from shapely.geometry import Point as ShapelyPoint
-
-        shapely_point = ShapelyPoint(point[0], point[1])
-
-        if polygon.contains(shapely_point) or polygon.boundary.distance(shapely_point) < 0.01:
-            current_segment.append(point)
-        else:
-            if len(current_segment) >= 2:
-                segments.append(current_segment)
-            current_segment = []
-
-    if len(current_segment) >= 2:
-        segments.append(current_segment)
-
-    return segments
 
 
 def wave_generator(
@@ -144,12 +115,9 @@ def wave_generator(
 
         sheet_wave = local_to_sheet_batch(local_wave, domain)
 
-        clipped_segments = _clip_wave_to_domain(sheet_wave, domain)
+        clipped_segments = clip_polylines_to_domain([sheet_wave], domain, min_length_mm=params.tool_width_mm)
 
         for segment in clipped_segments:
-            if len(segment) < 2:
-                continue
-
             cx = sum(p[0] for p in segment) / len(segment)
             cy = sum(p[1] for p in segment) / len(segment)
 

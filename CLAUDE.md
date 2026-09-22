@@ -143,6 +143,8 @@ Check before implementing — these already exist:
 | Machine configuration | `config/machine_loader.py` |
 | Layout resolution | `resolution/layout_resolver.py` |
 | Radial pattern placement | `generators/area/radial_pocket.py`, `radial_tick.py`, `radial_label.py`, `radial_svg.py` |
+| Phyllotaxis spiral placement | `generators/area/phyllotaxis.py` (see `docs/recipes/93_phyllotaxis`) |
+| Motif placement (scale/rotate/translate, containment) | `generators/placement.py` |
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |
 | Recipe validation (pass/fail) | `python -m tests.test_recipes` |

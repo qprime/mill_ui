@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from core.constants import GOLDEN_ANGLE_DEG
 from layout_ast.layout import DogboneSpec, FeedsOverride
 
 
@@ -310,6 +311,40 @@ class RadialSvgGen:
     end_angle_deg: float = 360.0
     radius_mm: float | None = None
     stamp_size_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class PhyllotaxisHoleGen:
+    count: int
+    spacing_mm: float
+    diameter_mm: float
+    depth_mm: str | float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+
+
+@dataclass(frozen=True)
+class PhyllotaxisPocketGen:
+    count: int
+    spacing_mm: float
+    diameter_mm: float
+    depth_mm: float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+    scale_with_radius: bool = False
+    min_size_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class PhyllotaxisSvgGen:
+    count: int
+    spacing_mm: float
+    svg_path: str
+    size_mm: float
+    depth_mm: float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+    scale_with_radius: bool = False
+    min_size_mm: float | None = None
+    feature_type: str = "engrave"
+    rotate_element: bool = True
 
 
 @dataclass(frozen=True)

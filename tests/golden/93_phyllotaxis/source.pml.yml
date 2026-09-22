@@ -1,0 +1,71 @@
+Sheet:
+  width: 700mm
+  height: 260mm
+  thickness: 12mm
+  material: mdf
+children:
+- Circle:
+    id: sunflower
+    diameter: 200mm
+    at:
+      x: 120mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    feature:
+      type: profile
+      side: outside
+      depth: through
+    children:
+    - Phyllotaxis:
+        count: 200
+        spacing: 7mm
+        depth: through
+        element:
+          type: hole
+          diameter: 5mm
+
+- Circle:
+    id: scaled_pockets
+    diameter: 200mm
+    at:
+      x: 350mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    feature:
+      type: profile
+      side: outside
+      depth: through
+    children:
+    - Phyllotaxis:
+        count: 150
+        spacing: 8mm
+        depth: 3mm
+        scale_with_radius: true
+        min_size: 4mm
+        element:
+          type: pocket
+          diameter: 6mm
+
+- Rect:
+    id: svg_motifs
+    at:
+      x: 580mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Phyllotaxis:
+        count: 120
+        spacing: 10mm
+        depth: 0.3mm
+        element:
+          type: svg
+          path: "M 0 0 L 20 10 L 0 20 Z"
+          size: 6mm
+          feature: engrave
+          rotate: true

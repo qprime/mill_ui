@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Literal
 
+from core.constants import GOLDEN_ANGLE_DEG
 from generators.core import BaseParams, resolve_major_spacing, resolve_minor_spacing
 from generators.params.measurement_base import MeasurementParamsBase
+from generators.radial_utils import closest_pair_distance, spiral_positions
+
+_SPIRAL_TOLERANCE_MM = 1e-9
 
 
 @dataclass(frozen=True)
@@ -310,6 +315,112 @@ class RadialSvgParams(BaseParams):
             raise ValueError("RadialSvgParams: svg_path cannot be empty")
 
 
+def _validate_spiral(
+    name: str,
+    count: int,
+    spacing_mm: float,
+    angle_deg: float,
+    motif_extent_mm: float,
+) -> None:
+    if count < 1:
+        raise ValueError(f"{name}: count must be >= 1, got {count}")
+    if spacing_mm <= 0:
+        raise ValueError(f"{name}: spacing_mm must be positive, got {spacing_mm}")
+    if motif_extent_mm <= 0:
+        raise ValueError(f"{name}: motif extent must be positive, got {motif_extent_mm}")
+    points = [point for point, _ in spiral_positions(count, spacing_mm, angle_deg)]
+    closest = closest_pair_distance(points)
+    if motif_extent_mm >= closest - _SPIRAL_TOLERANCE_MM:
+        raise ValueError(
+            f"{name}: motif extent {motif_extent_mm:.3f}mm must be less than the closest-pair distance "
+            f"{closest:.3f}mm of the {count} spiral points (spacing {spacing_mm}mm, angle {angle_deg} deg) "
+            f"to avoid overlapping motifs"
+        )
+
+
+def _validate_radius_scaling(
+    name: str,
+    scale_with_radius: bool,
+    min_size_mm: float | None,
+    size_mm: float,
+) -> None:
+    if not scale_with_radius:
+        if min_size_mm is not None:
+            raise ValueError(f"{name}: min_size_mm requires scale_with_radius")
+        return
+    if min_size_mm is None:
+        raise ValueError(f"{name}: scale_with_radius requires min_size_mm")
+    if min_size_mm <= 0:
+        raise ValueError(f"{name}: min_size_mm must be positive, got {min_size_mm}")
+    if min_size_mm > size_mm:
+        raise ValueError(f"{name}: min_size_mm ({min_size_mm}) must not exceed the motif size ({size_mm})")
+
+
+@dataclass(frozen=True)
+class PhyllotaxisHoleParams(BaseParams):
+    count: int
+    spacing_mm: float
+    diameter_mm: float
+    depth_mm: Literal["through"] | float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+
+    def __post_init__(self) -> None:
+        if self.depth_mm != "through":
+            if not isinstance(self.depth_mm, (int, float)):
+                raise ValueError(f"PhyllotaxisHoleParams: depth_mm must be 'through' or a number, got {self.depth_mm}")
+            if self.depth_mm <= 0:
+                raise ValueError(f"PhyllotaxisHoleParams: depth_mm must be positive when numeric, got {self.depth_mm}")
+        _validate_spiral("PhyllotaxisHoleParams", self.count, self.spacing_mm, self.angle_deg, self.diameter_mm)
+
+
+@dataclass(frozen=True)
+class PhyllotaxisPocketParams(BaseParams):
+    count: int
+    spacing_mm: float
+    diameter_mm: float
+    depth_mm: float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+    scale_with_radius: bool = False
+    min_size_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.depth_mm <= 0:
+            raise ValueError(f"PhyllotaxisPocketParams: depth_mm must be positive, got {self.depth_mm}")
+        _validate_spiral("PhyllotaxisPocketParams", self.count, self.spacing_mm, self.angle_deg, self.diameter_mm)
+        _validate_radius_scaling("PhyllotaxisPocketParams", self.scale_with_radius, self.min_size_mm, self.diameter_mm)
+
+
+@dataclass(frozen=True)
+class PhyllotaxisSvgParams(BaseParams):
+    count: int
+    spacing_mm: float
+    svg_path: str
+    size_mm: float
+    depth_mm: float
+    angle_deg: float = GOLDEN_ANGLE_DEG
+    scale_with_radius: bool = False
+    min_size_mm: float | None = None
+    feature_type: Literal["engrave", "pocket"] = "engrave"
+    rotate_element: bool = True
+
+    def __post_init__(self) -> None:
+        if not self.svg_path or not self.svg_path.strip():
+            raise ValueError("PhyllotaxisSvgParams: svg_path cannot be empty")
+        valid_features = ("engrave", "pocket")
+        if self.feature_type not in valid_features:
+            raise ValueError(
+                f"PhyllotaxisSvgParams: feature_type must be one of {valid_features}, got '{self.feature_type}'"
+            )
+        if self.size_mm <= 0:
+            raise ValueError(f"PhyllotaxisSvgParams: size_mm must be positive, got {self.size_mm}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"PhyllotaxisSvgParams: depth_mm must be positive, got {self.depth_mm}")
+        _validate_spiral(
+            "PhyllotaxisSvgParams", self.count, self.spacing_mm, self.angle_deg, self.size_mm * math.sqrt(2)
+        )
+        _validate_radius_scaling("PhyllotaxisSvgParams", self.scale_with_radius, self.min_size_mm, self.size_mm)
+
+
 def _validate_curve_shared(
     name: str,
     depth_mm: float,
@@ -462,6 +573,9 @@ __all__ = [
     "LinePatternParams",
     "LissajousCurveParams",
     "MeasurementGridParams",
+    "PhyllotaxisHoleParams",
+    "PhyllotaxisPocketParams",
+    "PhyllotaxisSvgParams",
     "RadialLabelParams",
     "RadialPocketParams",
     "RadialSvgParams",

@@ -9,11 +9,14 @@ This test module covers Stage 3 of the domain/generator system:
 
 from __future__ import annotations
 
+import itertools
 import math
+from dataclasses import replace
 
 import pytest
 
 # Add project root to path
+from core.constants import GOLDEN_ANGLE_DEG
 from domains import Domain
 from generators import (
     ChamferParams,
@@ -21,6 +24,9 @@ from generators import (
     Generator,
     GeneratorSkipError,
     HoleGridParams,
+    PhyllotaxisHoleParams,
+    PhyllotaxisPocketParams,
+    PhyllotaxisSvgParams,
     ProfileParams,
     RaisedPanelParams,
     bead_generator,
@@ -36,6 +42,9 @@ from generators import (
     measurement_edge_generator,
     measurement_grid_generator,
     notched_panel_generator,
+    phyllotaxis_hole_generator,
+    phyllotaxis_pocket_generator,
+    phyllotaxis_svg_generator,
     profile_generator,
     raised_panel_generator,
     rose_curve_generator,
@@ -45,7 +54,10 @@ from generators import (
     wave_generator,
     x_panel_generator,
 )
-from layout_ast.layout import LayoutAST, Sheet
+from generators.placement import item_inside_domain, place_item
+from generators.radial_utils import closest_pair_distance, spiral_positions
+from generators.utils import rotate_points
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 # =============================================================================
 # Test Helpers
@@ -1715,6 +1727,312 @@ class TestClipPolylinesToDomain:
 
 
 # =============================================================================
+# Phyllotaxis
+# =============================================================================
+
+
+def _spiral_points(count: int, spacing_mm: float, angle_deg: float) -> list[tuple[float, float]]:
+    return [point for point, _ in spiral_positions(count, spacing_mm, angle_deg)]
+
+
+class TestPlaceItem:
+    def test_scale_one_matches_old_radial_placement(self):
+        item = Item(
+            kind="shape",
+            type="Polyline",
+            geometry=Geometry(data={"points": [[1.0, 0.0], [0.0, 2.0]], "is_open": True}),
+            placement=Placement(center_xy_mm=(3.0, 0.0)),
+            feature=Feature(type="engrave", depth_mm=0.3),
+        )
+        placed = place_item(item, angle_rad=math.pi / 2, offset=(10.0, 20.0), shape_id="s")
+        assert placed.geometry is not None
+        assert placed.placement is not None
+        points = placed.geometry.data["points"]
+        assert points[0] == pytest.approx([0.0, 1.0], abs=1e-12)
+        assert points[1] == pytest.approx([-2.0, 0.0], abs=1e-12)
+        assert placed.placement.center_xy_mm == pytest.approx((10.0, 23.0), abs=1e-12)
+        assert placed.shape_id == "s"
+
+    def test_scales_circle_diameter(self):
+        item = Item(
+            kind="shape",
+            type="Circle",
+            geometry=Geometry(data={"diameter_mm": 6.0}),
+            placement=Placement(center_xy_mm=(0.0, 0.0)),
+            feature=Feature(type="pocket", depth_mm=3.0),
+        )
+        placed = place_item(item, angle_rad=0.0, offset=(5.0, 5.0), shape_id="c", scale=0.5)
+        assert placed.geometry is not None
+        assert placed.geometry.data["diameter_mm"] == pytest.approx(3.0)
+
+
+class TestItemInsideDomain:
+    def _holed_square(self) -> Domain:
+        return Domain.from_polygon(
+            [(0, 0), (100, 0), (100, 100), (0, 100)],
+            holes=[[(49, 49), (51, 49), (51, 51), (49, 51)]],
+        )
+
+    def _triangle(self, item_type: str) -> Item:
+        return Item(
+            kind="shape",
+            type=item_type,
+            geometry=Geometry(data={"points": [[-6.0, -6.0], [6.0, -6.0], [-6.0, 6.0], [-6.0, -6.0]]}),
+            placement=Placement(center_xy_mm=(52.0, 52.0)),
+            feature=Feature(type="pocket", depth_mm=1.0),
+        )
+
+    def test_polygon_covering_hole_is_outside(self):
+        assert not item_inside_domain(self._triangle("Polygon"), self._holed_square())
+
+    def test_polyline_around_hole_is_inside(self):
+        assert item_inside_domain(self._triangle("Polyline"), self._holed_square())
+
+    def test_polyline_crossing_hole_is_outside(self):
+        line = Item(
+            kind="shape",
+            type="Polyline",
+            geometry=Geometry(data={"points": [[-5.0, 0.0], [5.0, 0.0]]}),
+            placement=Placement(center_xy_mm=(50.0, 50.0)),
+            feature=Feature(type="engrave", depth_mm=0.3),
+        )
+        assert not item_inside_domain(line, self._holed_square())
+
+    def test_line_item_uses_start_and_end(self):
+        line = Item(
+            kind="shape",
+            type="Line",
+            geometry=Geometry(data={"start": [-5.0, 0.0], "end": [5.0, 0.0]}),
+            placement=Placement(center_xy_mm=(20.0, 20.0)),
+            feature=Feature(type="engrave", depth_mm=0.3),
+        )
+        assert item_inside_domain(line, self._holed_square())
+        assert not item_inside_domain(
+            replace(line, placement=Placement(center_xy_mm=(50.0, 50.0))), self._holed_square()
+        )
+
+
+class TestSpiralUtils:
+    def test_closest_pair_golden_equals_spacing(self):
+        assert closest_pair_distance(_spiral_points(200, 7.0, GOLDEN_ANGLE_DEG)) == pytest.approx(7.0, abs=1e-9)
+
+    def test_closest_pair_ninety_degrees(self):
+        assert closest_pair_distance(_spiral_points(200, 7.0, 90.0)) < 1.0
+
+    def test_closest_pair_single_point_is_inf(self):
+        assert closest_pair_distance([(0.0, 0.0)]) == math.inf
+
+
+class TestPhyllotaxisParams:
+    def test_rejects_diameter_equal_to_spacing(self):
+        with pytest.raises(ValueError, match=r"spacing 7\.0mm"):
+            PhyllotaxisHoleParams(count=200, spacing_mm=7.0, diameter_mm=7.0, depth_mm="through")
+
+    def test_rejects_overlap_at_non_golden_angle(self):
+        with pytest.raises(ValueError, match=r"closest-pair distance 0\.997mm"):
+            PhyllotaxisHoleParams(count=200, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through", angle_deg=90.0)
+
+    def test_short_non_golden_pattern_is_valid(self):
+        PhyllotaxisHoleParams(count=10, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through", angle_deg=90.0)
+
+    def test_single_point_has_no_spacing_limit(self):
+        PhyllotaxisHoleParams(count=1, spacing_mm=7.0, diameter_mm=50.0, depth_mm="through")
+
+    def test_svg_uses_diagonal_extent(self):
+        with pytest.raises(ValueError, match=r"11\.314mm"):
+            PhyllotaxisSvgParams(count=50, spacing_mm=10.0, svg_path="M 0 0 L 1 1", size_mm=8.0, depth_mm=0.3)
+        PhyllotaxisSvgParams(count=50, spacing_mm=10.0, svg_path="M 0 0 L 1 1", size_mm=7.0, depth_mm=0.3)
+
+    def test_svg_rejects_profile_feature(self):
+        with pytest.raises(ValueError, match="feature_type"):
+            PhyllotaxisSvgParams(
+                count=50,
+                spacing_mm=10.0,
+                svg_path="M 0 0 L 1 1",
+                size_mm=6.0,
+                depth_mm=0.3,
+                feature_type="profile",  # type: ignore[arg-type]
+            )
+
+    def test_scale_with_radius_requires_min_size(self):
+        with pytest.raises(ValueError, match="requires min_size_mm"):
+            PhyllotaxisPocketParams(count=50, spacing_mm=8.0, diameter_mm=6.0, depth_mm=3.0, scale_with_radius=True)
+
+    def test_min_size_rejected_without_scale_with_radius(self):
+        with pytest.raises(ValueError, match="requires scale_with_radius"):
+            PhyllotaxisPocketParams(count=50, spacing_mm=8.0, diameter_mm=6.0, depth_mm=3.0, min_size_mm=3.0)
+
+    def test_min_size_must_not_exceed_diameter(self):
+        with pytest.raises(ValueError, match="must not exceed"):
+            PhyllotaxisPocketParams(
+                count=50, spacing_mm=8.0, diameter_mm=6.0, depth_mm=3.0, scale_with_radius=True, min_size_mm=7.0
+            )
+
+
+class TestParamsImport:
+    def test_params_module_imports_without_area_package(self):
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, "-c", "import generators.params.area"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr
+
+
+class TestPhyllotaxisGenerators:
+    def _large_square(self) -> Domain:
+        return Domain.from_rectangle(1000, 1000, center=(500, 500))
+
+    def _centers(self, items: list[Item]) -> list[tuple[float, float]]:
+        centers = []
+        for item in items:
+            assert item.placement is not None
+            centers.append(item.placement.center_xy_mm)
+        return centers
+
+    def _data(self, item: Item) -> dict:
+        assert item.geometry is not None
+        return item.geometry.data
+
+    def test_consecutive_points_differ_by_golden_angle(self):
+        params = PhyllotaxisHoleParams(count=50, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through")
+        items = phyllotaxis_hole_generator(self._large_square(), params)
+        assert len(items) == 50
+        polar = [math.atan2(y - 500.0, x - 500.0) for x, y in self._centers(items)[1:]]
+        for a, b in itertools.pairwise(polar):
+            delta = math.degrees(b - a) % 360.0
+            assert delta == pytest.approx(GOLDEN_ANGLE_DEG, abs=1e-9)
+
+    def test_radius_is_spacing_times_sqrt_index(self):
+        params = PhyllotaxisHoleParams(count=50, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through")
+        items = phyllotaxis_hole_generator(self._large_square(), params)
+        for i, (x, y) in enumerate(self._centers(items)):
+            assert math.dist((x, y), (500.0, 500.0)) == pytest.approx(7.0 * math.sqrt(i), abs=1e-9)
+
+    def test_circle_parent_drops_edge_motifs(self):
+        domain = Domain.from_circle(200, center=(150, 150))
+        params = PhyllotaxisHoleParams(count=400, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through")
+        items = phyllotaxis_hole_generator(domain, params)
+        assert 0 < len(items) < 400
+        for item in items:
+            assert item.type == "Circle"
+            assert item.feature is not None
+            assert item.feature.is_through
+        for center in self._centers(items):
+            assert math.dist(center, (150.0, 150.0)) + 2.5 <= 100.0
+
+    def test_scale_with_radius_grows_pockets(self):
+        params = PhyllotaxisPocketParams(
+            count=100, spacing_mm=8.0, diameter_mm=6.0, depth_mm=3.0, scale_with_radius=True, min_size_mm=0.1
+        )
+        items = phyllotaxis_pocket_generator(self._large_square(), params)
+        diameters = [self._data(item)["diameter_mm"] for item in items]
+        radii = [math.dist(c, (500.0, 500.0)) for c in self._centers(items)]
+        assert radii == sorted(radii)
+        assert diameters == sorted(diameters)
+        assert diameters[-1] == pytest.approx(6.0)
+        assert all(item.feature is not None and item.feature.type == "pocket" for item in items)
+
+    def test_min_size_drops_inner_motifs(self):
+        params = PhyllotaxisPocketParams(
+            count=150, spacing_mm=8.0, diameter_mm=6.0, depth_mm=3.0, scale_with_radius=True, min_size_mm=3.0
+        )
+        items = phyllotaxis_pocket_generator(self._large_square(), params)
+        first_index = next(i for i in range(150) if 6.0 * math.sqrt((i + 1) / 150) >= 3.0)
+        assert len(items) == 150 - first_index
+        assert min(self._data(item)["diameter_mm"] for item in items) >= 3.0
+        first_radius = math.dist(self._centers(items)[0], (500.0, 500.0))
+        assert first_radius == pytest.approx(8.0 * math.sqrt(first_index), abs=1e-9)
+
+    def test_svg_motifs_face_outward(self):
+        params = PhyllotaxisSvgParams(
+            count=20, spacing_mm=10.0, svg_path="M 0 0 L 20 10 L 0 20 Z", size_mm=6.0, depth_mm=0.3
+        )
+        fixed = phyllotaxis_svg_generator(self._large_square(), replace(params, rotate_element=False))
+        turned = phyllotaxis_svg_generator(self._large_square(), params)
+        assert len(fixed) == len(turned) == 20
+        for i, (a, b) in enumerate(zip(fixed, turned, strict=True)):
+            theta = math.radians(i * GOLDEN_ANGLE_DEG)
+            expected = rotate_points([(p[0], p[1]) for p in self._data(a)["points"]], theta)
+            assert self._data(b)["points"][0] == pytest.approx(list(expected[0]), abs=1e-9)
+
+    def test_rotated_parent_rotates_spiral_and_motifs(self):
+        rotation = math.pi / 6
+        domain = replace(self._large_square(), local_rotation_rad=rotation)
+        params = PhyllotaxisSvgParams(
+            count=20,
+            spacing_mm=10.0,
+            svg_path="M 0 0 L 20 10 L 0 20 Z",
+            size_mm=6.0,
+            depth_mm=0.3,
+            rotate_element=False,
+        )
+        unrotated = phyllotaxis_svg_generator(self._large_square(), params)
+        rotated = phyllotaxis_svg_generator(domain, params)
+        assert len(rotated) == len(unrotated) == 20
+        for a, b in zip(unrotated, rotated, strict=True):
+            (ax, ay), (bx, by) = self._centers([a])[0], self._centers([b])[0]
+            expected_center = rotate_points([(ax - 500.0, ay - 500.0)], rotation)[0]
+            assert (bx - 500.0, by - 500.0) == pytest.approx(expected_center, abs=1e-9)
+            expected = rotate_points([(p[0], p[1]) for p in self._data(a)["points"]], rotation)
+            for actual, want in zip(self._data(b)["points"], expected, strict=True):
+                assert actual == pytest.approx(list(want), abs=1e-9)
+
+    def test_svg_scale_with_radius_drops_small_motifs(self):
+        params = PhyllotaxisSvgParams(
+            count=100,
+            spacing_mm=10.0,
+            svg_path="M 0 0 L 20 0 L 20 20 L 0 20 Z",
+            size_mm=6.0,
+            depth_mm=0.3,
+            rotate_element=False,
+            scale_with_radius=True,
+            min_size_mm=3.0,
+        )
+        items = phyllotaxis_svg_generator(self._large_square(), params)
+        first_index = next(i for i in range(100) if 6.0 * math.sqrt((i + 1) / 100) >= 3.0)
+        assert len(items) == 100 - first_index
+        widths = [
+            max(p[0] for p in self._data(i)["points"]) - min(p[0] for p in self._data(i)["points"]) for i in items
+        ]
+        assert min(widths) >= 3.0 - 1e-9
+        assert widths[-1] == pytest.approx(6.0)
+        assert widths == sorted(widths)
+
+    def test_holed_parent_drops_motifs_over_hole(self):
+        domain = Domain.from_polygon(
+            [(0, 0), (200, 0), (200, 200), (0, 200)],
+            holes=[[(80, 80), (120, 80), (120, 120), (80, 120)]],
+        )
+        params = PhyllotaxisHoleParams(count=200, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through")
+        items = phyllotaxis_hole_generator(domain, params)
+        assert items
+        for x, y in self._centers(items):
+            assert not (77.5 < x < 122.5 and 77.5 < y < 122.5)
+
+    def test_nothing_fits_raises_skip(self):
+        domain = Domain.from_rectangle(4, 4, center=(2, 2))
+        params = PhyllotaxisHoleParams(count=10, spacing_mm=7.0, diameter_mm=5.0, depth_mm="through")
+        with pytest.raises(GeneratorSkipError):
+            phyllotaxis_hole_generator(domain, params)
+        assert phyllotaxis_hole_generator(domain, params, allow_empty=True) == []
+
+    def test_deterministic(self):
+        params = PhyllotaxisSvgParams(
+            count=60, spacing_mm=10.0, svg_path="M 0 0 L 20 10 L 0 20 Z", size_mm=6.0, depth_mm=0.3
+        )
+        domain = Domain.from_circle(200, center=(150, 150))
+        first = phyllotaxis_svg_generator(domain, params)
+        second = phyllotaxis_svg_generator(domain, params)
+        assert [self._data(i) for i in first] == [self._data(i) for i in second]
+        assert self._centers(first) == self._centers(second)
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 
@@ -1739,6 +2057,9 @@ ALL_GENERATORS = [
     rose_curve_generator,
     spirograph_curve_generator,
     lissajous_curve_generator,
+    phyllotaxis_hole_generator,
+    phyllotaxis_pocket_generator,
+    phyllotaxis_svg_generator,
 ]
 
 

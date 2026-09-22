@@ -783,6 +783,96 @@ children:
     assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
 
 
+def test_phyllotaxis_round_trip():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Phyllotaxis:
+            count: 12
+            spacing: 8mm
+            angle: 100.5
+            depth: 3mm
+            scale_with_radius: true
+            min_size: 3mm
+            element:
+              type: pocket
+              diameter: 6mm
+"""
+    ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(ast)
+
+    for key in ("count: 12", "spacing: 8mm", "angle: 100.5", "scale_with_radius: true", "min_size: 3mm"):
+        assert key in formatted
+
+    assert parse_pml_yaml(formatted) == ast
+
+
+def _phyllotaxis_pml(shared: str, element: str) -> str:
+    return f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Phyllotaxis:
+            count: 50
+            spacing: 10mm
+            depth: 0.3mm
+{shared}
+            element:
+{element}
+"""
+
+
+def test_phyllotaxis_rejects_scale_with_radius_on_hole():
+    pml = _phyllotaxis_pml(
+        "            scale_with_radius: true\n            min_size: 2mm",
+        "              type: hole\n              diameter: 5mm",
+    )
+    with pytest.raises(PMLParseError, match="not supported for hole"):
+        parse_pml_yaml(pml)
+
+
+def test_phyllotaxis_rejects_svg_scale_key():
+    pml = _phyllotaxis_pml(
+        "",
+        "              type: svg\n              path: 'M 0 0 L 1 1'\n              size: 6mm\n              scale: fill",
+    )
+    with pytest.raises(PMLParseError, match="does not accept 'scale'"):
+        parse_pml_yaml(pml)
+
+
+def test_phyllotaxis_rejects_min_size_without_scale_with_radius():
+    pml = _phyllotaxis_pml("            min_size: 2mm", "              type: pocket\n              diameter: 5mm")
+    with pytest.raises(PMLParseError, match="requires 'scale_with_radius: true'"):
+        parse_pml_yaml(pml)
+
+
+def test_phyllotaxis_rejects_scale_with_radius_without_min_size():
+    pml = _phyllotaxis_pml(
+        "            scale_with_radius: true", "              type: pocket\n              diameter: 5mm"
+    )
+    with pytest.raises(PMLParseError, match="requires 'min_size'"):
+        parse_pml_yaml(pml)
+
+
+def test_phyllotaxis_rejects_unknown_element_type():
+    pml = _phyllotaxis_pml("", "              type: star")
+    with pytest.raises(PMLParseError, match="Known types: hole, pocket, svg"):
+        parse_pml_yaml(pml)
+
+
 RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
 
 

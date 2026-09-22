@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 from shapely.geometry import Point
 
-from core.constants import DepthMode
 from domains.transforms import local_to_sheet
 from generators.core import (
     GeneratorResult,
@@ -15,8 +14,8 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import HoleGridParams
-from generators.utils import get_local_bounds
-from layout_ast.layout import Feature, Geometry, Item, Placement
+from generators.utils import create_hole_item, get_local_bounds
+from layout_ast.layout import Item
 
 if TYPE_CHECKING:
     from domains.domain import Bounds2D, Domain
@@ -70,7 +69,7 @@ def hole_grid_generator(
         sheet_point = local_to_sheet((local_x, local_y), effective_domain)
 
         if _hole_fits_in_domain(sheet_point, hole_radius, effective_domain):
-            item = _create_hole_item(
+            item = create_hole_item(
                 center=sheet_point,
                 diameter_mm=params.diameter_mm,
                 depth=params.depth_mm,
@@ -140,33 +139,6 @@ def _hole_fits_in_domain(
 ) -> bool:
     hole_circle = Point(center).buffer(radius, resolution=16)
     return domain.polygon.contains(hole_circle)
-
-
-def _create_hole_item(
-    center: tuple[float, float],
-    diameter_mm: float,
-    depth: str | float,
-    shape_id: str,
-) -> Item:
-    is_through = DepthMode.is_through(depth)
-    depth_mm_val = 0.0 if is_through else float(depth)
-
-    geometry_data = {
-        "diameter_mm": diameter_mm,
-    }
-
-    return Item(
-        kind="shape",
-        type="Circle",
-        geometry=Geometry(data=geometry_data),
-        placement=Placement(center_xy_mm=center),
-        feature=Feature(
-            type="hole",
-            depth_mm=depth_mm_val,
-            is_through=is_through,
-        ),
-        shape_id=shape_id,
-    )
 
 
 __all__ = ["hole_grid_generator"]

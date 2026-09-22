@@ -1,0 +1,65 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 225990,
+    "rapid_moves": 660,
+    "cut_moves": 221136,
+    "rapid_ratio": 0.003
+  },
+  "fidelity": {
+    "tool_changes": 4,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 31718
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 191866
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 1090
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 1316
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 7073171,
+    "total_lines": 225087,
+    "files": {
+      "pocket-3.17mm": {
+        "bytes": 882001,
+        "lines": 31406
+      },
+      "bore-3.17mm": {
+        "bytes": 6136219,
+        "lines": 191494
+      },
+      "engrave-1.00mm": {
+        "bytes": 17742,
+        "lines": 888
+      },
+      "profile-3.17mm": {
+        "bytes": 37209,
+        "lines": 1299
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "36aa61d7"
+  }
+}

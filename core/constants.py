@@ -1,3 +1,6 @@
+import math
+
+
 class HintKeys:
     ID = "id"
     SHAPE = "shape"
@@ -80,6 +83,7 @@ BACK_FACE_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENG
 BACK_FACE_DEPTH_MODES = ("constant", "v_carve")
 WEB_CHECK_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
 BACK_SVG_SUFFIX = ".back.svg"
+GOLDEN_ANGLE_DEG = 180 * (3 - math.sqrt(5))
 
 
 class ShapeType:

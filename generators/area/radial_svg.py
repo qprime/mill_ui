@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-from dataclasses import replace
 
 from domains import Domain
 from generators.core import (
@@ -11,42 +10,11 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import RadialSvgParams
+from generators.placement import place_item
 from generators.radial_utils import generate_angular_positions, radial_point
 from generators.svg.params import SVGPathParams
 from generators.svg.stamp import svg_stamp_generator
-from generators.utils import rotate_points
-from layout_ast.layout import Geometry, Item, Placement
-
-
-def _rotate_and_translate_item(
-    item: Item,
-    angle_rad: float,
-    offset: tuple[float, float],
-    shape_id: str,
-) -> Item:
-    assert item.geometry is not None
-    assert item.placement is not None
-    data = dict(item.geometry.data)
-
-    if "points" in data:
-        data["points"] = [list(p) for p in rotate_points([(p[0], p[1]) for p in data["points"]], angle_rad)]
-    elif "start" in data and "end" in data:
-        start, end = rotate_points([tuple(data["start"]), tuple(data["end"])], angle_rad)
-        data["start"] = list(start)
-        data["end"] = list(end)
-
-    cx, cy = item.placement.center_xy_mm
-    cos_a = math.cos(angle_rad)
-    sin_a = math.sin(angle_rad)
-    new_cx = cx * cos_a - cy * sin_a + offset[0]
-    new_cy = cx * sin_a + cy * cos_a + offset[1]
-
-    return replace(
-        item,
-        geometry=Geometry(data=data),
-        placement=Placement(center_xy_mm=(new_cx, new_cy)),
-        shape_id=shape_id,
-    )
+from layout_ast.layout import Item
 
 
 def radial_svg_generator(
@@ -122,7 +90,7 @@ def radial_svg_generator(
 
         for item_idx, ref_item in enumerate(ref_items):
             sid = generate_shape_id(shape_id_prefix, ray_idx * len(ref_items) + item_idx)
-            translated = _rotate_and_translate_item(ref_item, rotation_rad, pos, sid)
+            translated = place_item(ref_item, angle_rad=rotation_rad, offset=pos, shape_id=sid)
             items.append(translated)
 
     if not items and not allow_empty:

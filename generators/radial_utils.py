@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
+
+import shapely
 
 
 def generate_angular_positions(
@@ -54,8 +57,32 @@ def rotate_point(
     )
 
 
+def spiral_positions(
+    count: int,
+    spacing_mm: float,
+    angle_deg: float,
+) -> list[tuple[tuple[float, float], float]]:
+    positions: list[tuple[tuple[float, float], float]] = []
+    for i in range(count):
+        radius = spacing_mm * math.sqrt(i)
+        theta = math.radians(i * angle_deg)
+        positions.append(((radius * math.cos(theta), radius * math.sin(theta)), theta))
+    return positions
+
+
+def closest_pair_distance(points: Sequence[tuple[float, float]]) -> float:
+    if len(points) < 2:
+        return math.inf
+    geometries = shapely.points(list(points))
+    tree = shapely.STRtree(geometries)
+    _, distances = tree.query_nearest(geometries, exclusive=True, return_distance=True)
+    return float(distances.min())
+
+
 __all__ = [
+    "closest_pair_distance",
     "generate_angular_positions",
     "radial_point",
     "rotate_point",
+    "spiral_positions",
 ]

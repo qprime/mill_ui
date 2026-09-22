@@ -31,6 +31,11 @@ from generators.area.heightfield import heightfield_generator
 from generators.area.hole_grid import hole_grid_generator
 from generators.area.line_pattern import line_pattern_generator
 from generators.area.measurement_grid import measurement_grid_generator
+from generators.area.phyllotaxis import (
+    phyllotaxis_hole_generator,
+    phyllotaxis_pocket_generator,
+    phyllotaxis_svg_generator,
+)
 from generators.area.radial_label import radial_label_generator
 from generators.area.radial_pocket import radial_pocket_generator
 from generators.area.radial_svg import radial_svg_generator
@@ -45,6 +50,9 @@ from generators.params.area import (
     HeightfieldParams,
     HeightfieldToolEntryParams,
     LissajousCurveParams,
+    PhyllotaxisHoleParams,
+    PhyllotaxisPocketParams,
+    PhyllotaxisSvgParams,
     RadialLabelParams,
     RadialPocketParams,
     RadialSvgParams,
@@ -82,6 +90,9 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     MeasurementGridGen,
     Panel,
+    PhyllotaxisHoleGen,
+    PhyllotaxisPocketGen,
+    PhyllotaxisSvgGen,
     Place,
     PocketGen,
     Polygon,
@@ -1167,6 +1178,17 @@ class LayoutResolver:
         except GeneratorSkipError:
             pass
 
+    def _resolve_svg_path_data(self, svg_path: str, node_label: str) -> str:
+        if not svg_path.lower().endswith(".svg"):
+            return svg_path
+        if not self.ast.source_dir:
+            raise ValueError(f"{node_label} references file '{svg_path}' but no source directory is available.")
+        file_path = os.path.join(self.ast.source_dir, svg_path)
+        try:
+            return extract_path_data(file_path)
+        except FileNotFoundError:
+            raise ValueError(f"{node_label}: SVG file not found: {file_path}") from None
+
     def _handle_radial_svg_gen(
         self,
         node: RadialSvgGen,
@@ -1175,16 +1197,7 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
         domain = self._domain_for_region(params, region)
-
-        svg_path_data = node.svg_path
-        if svg_path_data.lower().endswith(".svg"):
-            if not self.ast.source_dir:
-                raise ValueError(f"Radial SVG references file '{svg_path_data}' but no source directory is available.")
-            file_path = os.path.join(self.ast.source_dir, svg_path_data)
-            try:
-                svg_path_data = extract_path_data(file_path)
-            except FileNotFoundError:
-                raise ValueError(f"Radial SVG: SVG file not found: {file_path}") from None
+        svg_path_data = self._resolve_svg_path_data(node.svg_path, "Radial SVG")
 
         generator_params = RadialSvgParams(
             rays=node.rays,
@@ -1234,6 +1247,100 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("radial_label")
         try:
             generated_items = radial_label_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_phyllotaxis_hole_gen(
+        self,
+        node: PhyllotaxisHoleGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = PhyllotaxisHoleParams(
+            count=node.count,
+            spacing_mm=node.spacing_mm,
+            diameter_mm=node.diameter_mm,
+            depth_mm=node.depth_mm,  # type: ignore[arg-type]
+            angle_deg=node.angle_deg,
+        )
+
+        shape_id_prefix = self._next_shape_id("phyllotaxis_hole")
+        try:
+            generated_items = phyllotaxis_hole_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_phyllotaxis_pocket_gen(
+        self,
+        node: PhyllotaxisPocketGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = PhyllotaxisPocketParams(
+            count=node.count,
+            spacing_mm=node.spacing_mm,
+            diameter_mm=node.diameter_mm,
+            depth_mm=node.depth_mm,
+            angle_deg=node.angle_deg,
+            scale_with_radius=node.scale_with_radius,
+            min_size_mm=node.min_size_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("phyllotaxis_pocket")
+        try:
+            generated_items = phyllotaxis_pocket_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_phyllotaxis_svg_gen(
+        self,
+        node: PhyllotaxisSvgGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = PhyllotaxisSvgParams(
+            count=node.count,
+            spacing_mm=node.spacing_mm,
+            svg_path=self._resolve_svg_path_data(node.svg_path, "Phyllotaxis SVG"),
+            size_mm=node.size_mm,
+            depth_mm=node.depth_mm,
+            angle_deg=node.angle_deg,
+            scale_with_radius=node.scale_with_radius,
+            min_size_mm=node.min_size_mm,
+            feature_type=node.feature_type,  # type: ignore[arg-type]
+            rotate_element=node.rotate_element,
+        )
+
+        shape_id_prefix = self._next_shape_id("phyllotaxis_svg")
+        try:
+            generated_items = phyllotaxis_svg_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3178,6 +3285,9 @@ class LayoutResolver:
                 RoseCurveGen: LayoutResolver._handle_rose_curve_gen,
                 SpirographCurveGen: LayoutResolver._handle_spirograph_curve_gen,
                 LissajousCurveGen: LayoutResolver._handle_lissajous_curve_gen,
+                PhyllotaxisHoleGen: LayoutResolver._handle_phyllotaxis_hole_gen,
+                PhyllotaxisPocketGen: LayoutResolver._handle_phyllotaxis_pocket_gen,
+                PhyllotaxisSvgGen: LayoutResolver._handle_phyllotaxis_svg_gen,
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,

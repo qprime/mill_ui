@@ -622,6 +622,73 @@ Angular pattern placement around a center point. A single `Radial` key with an `
       size: 30mm           # stamp bounding box size (optional, auto-derived)
 ```
 
+#### Phyllotaxis
+
+Motifs placed on a golden-angle spiral centered on the parent shape. Point `i` sits at radius `spacing·√i` and polar angle `i·angle`. Points whose motif leaves the parent are dropped. A single `Phyllotaxis` key with an `element` sub-object that selects the motif.
+
+**Shared parameters (all element types):**
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `count` | Yes | — | Points attempted; points whose motif leaves the parent are dropped |
+| `spacing` | Yes | — | `c` in `r = c·√i`; at the golden angle this is the closest distance between any two points |
+| `angle` | No | 137.5077640500 | Degrees between consecutive points; default is the golden angle `180·(3 − √5)` |
+| `depth` | hole: No; pocket, svg: Yes | hole: `through` | `through` or a dimension for `hole`; a dimension for `pocket` and `svg` |
+| `scale_with_radius` | No | false | `pocket` and `svg` only: motif `i` is scaled by `√((i+1)/count)` |
+| `min_size` | With `scale_with_radius` | — | Motifs scaled below this size are dropped; required with `scale_with_radius` and rejected without it |
+
+`Phyllotaxis` is a leaf node; `children` and `feature` are rejected.
+
+**Spacing rule.** Let `d_min` be the closest distance between any two of the `count` spiral points. A hole or pocket requires `diameter < d_min`. An SVG motif requires `size·√2 < d_min`: the diagonal of its square bounds the motif under any rotation. At the golden angle `d_min = spacing`. At other angles `d_min` is computed from the points and can be much smaller, because points on the same arm converge as `i` grows (200 points at `spacing: 7mm, angle: 90` give `d_min` = 0.997mm). `count: 1` has no pair and no spacing limit.
+
+**Pocket size and tools.** A circular pocket must be larger than the flat tool that cuts it; a pocket at or below the tool diameter produces no toolpath. With `scale_with_radius`, choose `min_size` above the smallest flat tool on the machine so the inner motifs that remain can be cut.
+
+**Element: hole** — drilled or helix-bored holes (sunflower):
+
+```yaml
+- Phyllotaxis:
+    count: 200
+    spacing: 7mm
+    depth: through
+    element:
+      type: hole
+      diameter: 5mm
+```
+
+`scale_with_radius` and `min_size` are rejected for holes: each scaled diameter would need a different tool.
+
+**Element: pocket** — circular pockets:
+
+```yaml
+- Phyllotaxis:
+    count: 150
+    spacing: 8mm
+    angle: 137.5077640500
+    depth: 3mm
+    scale_with_radius: true
+    min_size: 4mm
+    element:
+      type: pocket
+      diameter: 6mm        # must be less than the closest-pair distance of the points
+```
+
+**Element: svg** — an SVG motif at each point:
+
+```yaml
+- Phyllotaxis:
+    count: 120
+    spacing: 10mm
+    depth: 0.3mm
+    element:
+      type: svg
+      path: "M 0 0 L 20 10 L 0 20 Z"   # inline path data or a .svg file, as Radial svg
+      size: 6mm            # stamp bounding square; the motif is always fitted inside it
+      feature: engrave     # engrave (default) | pocket
+      rotate: true         # turn each motif to face outward (default: true)
+```
+
+The motif is always fitted (`fit`) into the `size` square. `scale` and `svg_unit` are rejected, because `fill` and `none` let the motif exceed `size` and void the spacing rule.
+
 #### Curve
 
 Analytic curve engraved as a polyline, centered on the parent shape and clipped to it. A single `Curve` key with a `type` that selects the curve family.

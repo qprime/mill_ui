@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import math
+from dataclasses import replace
+
 import pytest
 
 from layout_ast.compositional import (
@@ -432,6 +435,78 @@ children:
     assert curves[0].feature.depth_mm == pytest.approx(0.3)
     assert curves[0].shape_id is not None
     assert curves[0].shape_id.startswith("generated_rose")
+
+
+def test_phyllotaxis_resolves_holes():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: disc
+      diameter: 200mm
+      at: {x: 150mm, y: 150mm}
+      children:
+        - Phyllotaxis:
+            count: 400
+            spacing: 7mm
+            depth: through
+            element:
+              type: hole
+              diameter: 5mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    holes = [item for item in ast.items if item.feature is not None and item.feature.type == "hole"]
+    assert 0 < len(holes) < 400
+    disc = next(item for item in ast.items if item.shape_id == "disc")
+    assert disc.placement is not None
+    for hole in holes:
+        assert hole.type == "Circle"
+        assert hole.feature is not None
+        assert hole.feature.is_through
+        assert hole.placement is not None
+        assert math.dist(hole.placement.center_xy_mm, disc.placement.center_xy_mm) + 2.5 <= 100.0
+
+
+_PHYLLOTAXIS_SVG_FILE_PML = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Phyllotaxis:
+            count: 30
+            spacing: 10mm
+            depth: 0.3mm
+            element:
+              type: svg
+              path: motif.svg
+              size: 6mm
+"""
+
+
+def test_phyllotaxis_svg_file_resolves_against_source_dir(tmp_path):
+    (tmp_path / "motif.svg").write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg"><path d="M 0 0 L 20 10 L 0 20 Z"/></svg>'
+    )
+    ast = resolve_layout(replace(parse_pml_yaml(_PHYLLOTAXIS_SVG_FILE_PML), source_dir=str(tmp_path)))
+
+    motifs = [item for item in ast.items if item.shape_id and item.shape_id.startswith("generated_phyllotaxis_svg")]
+    assert len(motifs) == 30
+    assert all(item.feature is not None and item.feature.type == "engrave" for item in motifs)
+
+
+def test_phyllotaxis_svg_file_without_source_dir_raises():
+    with pytest.raises(ValueError, match=r"Phyllotaxis SVG references file 'motif\.svg'"):
+        resolve_layout(parse_pml_yaml(_PHYLLOTAXIS_SVG_FILE_PML))
 
 
 def test_curve_spirograph_resolves_to_polyline_engrave():

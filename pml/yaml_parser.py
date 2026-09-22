@@ -5,7 +5,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
-from core.constants import BACK_FACE_FEATURE_TYPES, DepthMode
+from core.constants import BACK_FACE_FEATURE_TYPES, GOLDEN_ANGLE_DEG, DepthMode
 from layout_ast.compositional import (
     Arch,
     AtPosition,
@@ -587,6 +587,81 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
     raise PMLParseError(f"Unknown Radial element type: '{element_type}'", ctx)
 
 
+_PHYLLOTAXIS_ELEMENT_TYPES = ("hole", "pocket", "svg")
+
+
+def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
+    from layout_ast.compositional import PhyllotaxisHoleGen, PhyllotaxisPocketGen, PhyllotaxisSvgGen
+
+    ctx = f"{path}.Phyllotaxis"
+    for key in ("children", "feature"):
+        if key in node_data:
+            raise PMLParseError(f"Phyllotaxis does not accept '{key}'", ctx)
+
+    element = _require(node_data, "element", ctx)
+    element_ctx = f"{ctx}.element"
+    element_type = _require(element, "type", element_ctx)
+    if element_type not in _PHYLLOTAXIS_ELEMENT_TYPES:
+        raise PMLParseError(
+            f"Unknown Phyllotaxis element type: '{element_type}'. Known types: {', '.join(_PHYLLOTAXIS_ELEMENT_TYPES)}",
+            ctx,
+        )
+
+    count = _safe_int(_require(node_data, "count", ctx), "count", ctx)
+    spacing_mm = parse_dimension(_require(node_data, "spacing", ctx))
+    angle_deg = _safe_float(node_data.get("angle", GOLDEN_ANGLE_DEG), "angle", ctx)
+    scale_with_radius = node_data.get("scale_with_radius", False)
+    min_size_mm = parse_dimension(node_data["min_size"]) if "min_size" in node_data else None
+
+    if element_type == "hole":
+        for key in ("scale_with_radius", "min_size"):
+            if key in node_data:
+                raise PMLParseError(f"Phyllotaxis '{key}' is not supported for hole elements", ctx)
+        return PhyllotaxisHoleGen(
+            count=count,
+            spacing_mm=spacing_mm,
+            diameter_mm=parse_dimension(_require(element, "diameter", element_ctx)),
+            depth_mm=parse_dimension_or_through(node_data.get("depth", "through")),
+            angle_deg=angle_deg,
+        )
+
+    if scale_with_radius and min_size_mm is None:
+        raise PMLParseError("Phyllotaxis 'scale_with_radius' requires 'min_size'", ctx)
+    if min_size_mm is not None and not scale_with_radius:
+        raise PMLParseError("Phyllotaxis 'min_size' requires 'scale_with_radius: true'", ctx)
+    depth_mm = parse_dimension(_require(node_data, "depth", ctx))
+
+    if element_type == "pocket":
+        return PhyllotaxisPocketGen(
+            count=count,
+            spacing_mm=spacing_mm,
+            diameter_mm=parse_dimension(_require(element, "diameter", element_ctx)),
+            depth_mm=depth_mm,
+            angle_deg=angle_deg,
+            scale_with_radius=scale_with_radius,
+            min_size_mm=min_size_mm,
+        )
+
+    for key in ("scale", "svg_unit"):
+        if key in element:
+            raise PMLParseError(
+                f"Phyllotaxis svg element does not accept '{key}': the motif is always fitted to 'size'",
+                element_ctx,
+            )
+    return PhyllotaxisSvgGen(
+        count=count,
+        spacing_mm=spacing_mm,
+        svg_path=_require(element, "path", element_ctx),
+        size_mm=parse_dimension(_require(element, "size", element_ctx)),
+        depth_mm=depth_mm,
+        angle_deg=angle_deg,
+        scale_with_radius=scale_with_radius,
+        min_size_mm=min_size_mm,
+        feature_type=element.get("feature", "engrave"),
+        rotate_element=element.get("rotate", True),
+    )
+
+
 _CURVE_TYPES = ("rose", "spirograph", "lissajous")
 
 
@@ -670,6 +745,9 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     if node_type == "Curve":
         return _parse_curve_node(node_data, path)
+
+    if node_type == "Phyllotaxis":
+        return _parse_phyllotaxis_node(node_data, path)
 
     if node_type == "SvgStamp":
         depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))

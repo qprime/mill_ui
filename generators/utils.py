@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
+from core.constants import DepthMode
 from domains.domain import Bounds2D, Point2D
 from domains.transforms import sheet_to_local
 from generators.core import (
@@ -184,6 +185,33 @@ def polyline_engrave_item(
     )
 
 
+def create_hole_item(
+    center: tuple[float, float],
+    diameter_mm: float,
+    depth: str | float,
+    shape_id: str,
+) -> Item:
+    is_through = DepthMode.is_through(depth)
+    depth_mm_val = 0.0 if is_through else float(depth)
+
+    geometry_data = {
+        "diameter_mm": diameter_mm,
+    }
+
+    return Item(
+        kind="shape",
+        type="Circle",
+        geometry=Geometry(data=geometry_data),
+        placement=Placement(center_xy_mm=center),
+        feature=Feature(
+            type="hole",
+            depth_mm=depth_mm_val,
+            is_through=is_through,
+        ),
+        shape_id=shape_id,
+    )
+
+
 def get_local_bounds(domain: Domain) -> Bounds2D:
     local_points = [sheet_to_local(pt, domain) for pt in domain.outer_boundary]
     return Bounds2D.from_points(local_points)
@@ -273,6 +301,7 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 __all__ = [
     "clip_polylines_to_domain",
     "compute_centroid_and_normalize",
+    "create_hole_item",
     "create_line_item",
     "extract_loops",
     "get_local_bounds",

@@ -5,7 +5,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
-from core.constants import DepthMode
+from core.constants import GOLDEN_ANGLE_DEG, DepthMode
 from layout_ast.compositional import (
     Arch,
     AssemblyDecl,
@@ -35,6 +35,9 @@ from layout_ast.compositional import (
     MeasurementEdgeGen,
     MeasurementGridGen,
     Panel,
+    PhyllotaxisHoleGen,
+    PhyllotaxisPocketGen,
+    PhyllotaxisSvgGen,
     Place,
     PocketGen,
     Polygon,
@@ -110,6 +113,23 @@ def _format_radial_shared(node: RadialPocketGen | RadialTickGen | RadialLabelGen
         result["end_angle"] = node.end_angle_deg
     if node.radius_mm is not None:
         result["radius"] = dim(node.radius_mm)
+    return result
+
+
+def _format_phyllotaxis_shared(
+    node: PhyllotaxisHoleGen | PhyllotaxisPocketGen | PhyllotaxisSvgGen,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "count": node.count,
+        "spacing": dim(node.spacing_mm),
+        "depth": _format_depth_or_through(node.depth_mm),
+    }
+    if node.angle_deg != GOLDEN_ANGLE_DEG:
+        result["angle"] = node.angle_deg
+    if not isinstance(node, PhyllotaxisHoleGen) and node.scale_with_radius:
+        result["scale_with_radius"] = True
+        if node.min_size_mm is not None:
+            result["min_size"] = dim(node.min_size_mm)
     return result
 
 
@@ -574,6 +594,22 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         if node.stamp_size_mm is not None:
             element["size"] = dim(node.stamp_size_mm)
         return {"Radial": {**radial, "element": element}}
+
+    elif isinstance(node, PhyllotaxisHoleGen):
+        element = {"type": "hole", "diameter": dim(node.diameter_mm)}
+        return {"Phyllotaxis": {**_format_phyllotaxis_shared(node), "element": element}}
+
+    elif isinstance(node, PhyllotaxisPocketGen):
+        element = {"type": "pocket", "diameter": dim(node.diameter_mm)}
+        return {"Phyllotaxis": {**_format_phyllotaxis_shared(node), "element": element}}
+
+    elif isinstance(node, PhyllotaxisSvgGen):
+        element = {"type": "svg", "path": node.svg_path, "size": dim(node.size_mm)}
+        if node.feature_type != "engrave":
+            element["feature"] = node.feature_type
+        if not node.rotate_element:
+            element["rotate"] = False
+        return {"Phyllotaxis": {**_format_phyllotaxis_shared(node), "element": element}}
 
     elif isinstance(node, XPanelGen):
         return {"XPanel": {"bar_width": dim(node.bar_width_mm), "depth": dim(node.depth_mm)}}

@@ -432,3 +432,31 @@ children:
     assert curves[0].feature.depth_mm == pytest.approx(0.3)
     assert curves[0].shape_id is not None
     assert curves[0].shape_id.startswith("generated_rose")
+
+
+def test_curve_spirograph_resolves_to_polyline_engrave():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: spirograph
+            fixed_radius: 60mm
+            rolling_radius: 21mm
+            pen_offset: 15mm
+            depth: 0.3mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 1
+    assert curves[0].feature is not None
+    assert curves[0].feature.type == "engrave"
+    assert curves[0].shape_id is not None
+    assert curves[0].shape_id.startswith("generated_spirograph")

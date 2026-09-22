@@ -310,6 +310,23 @@ class RadialSvgParams(BaseParams):
             raise ValueError("RadialSvgParams: svg_path cannot be empty")
 
 
+def _validate_curve_shared(
+    name: str,
+    depth_mm: float,
+    size_mm: float | None,
+    tolerance_mm: float,
+    min_length_mm: float,
+) -> None:
+    if depth_mm <= 0:
+        raise ValueError(f"{name}: depth_mm must be positive, got {depth_mm}")
+    if size_mm is not None and size_mm <= 0:
+        raise ValueError(f"{name}: size_mm must be positive, got {size_mm}")
+    if tolerance_mm <= 0:
+        raise ValueError(f"{name}: tolerance_mm must be positive, got {tolerance_mm}")
+    if min_length_mm < 0:
+        raise ValueError(f"{name}: min_length_mm must be non-negative, got {min_length_mm}")
+
+
 @dataclass(frozen=True)
 class RoseCurveParams(BaseParams):
     lobes: int
@@ -322,14 +339,42 @@ class RoseCurveParams(BaseParams):
     def __post_init__(self) -> None:
         if self.lobes < 1:
             raise ValueError(f"RoseCurveParams: lobes must be >= 1, got {self.lobes}")
-        if self.depth_mm <= 0:
-            raise ValueError(f"RoseCurveParams: depth_mm must be positive, got {self.depth_mm}")
-        if self.size_mm is not None and self.size_mm <= 0:
-            raise ValueError(f"RoseCurveParams: size_mm must be positive, got {self.size_mm}")
-        if self.tolerance_mm <= 0:
-            raise ValueError(f"RoseCurveParams: tolerance_mm must be positive, got {self.tolerance_mm}")
-        if self.min_length_mm < 0:
-            raise ValueError(f"RoseCurveParams: min_length_mm must be non-negative, got {self.min_length_mm}")
+        _validate_curve_shared("RoseCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm)
+
+
+@dataclass(frozen=True)
+class SpirographCurveParams(BaseParams):
+    fixed_radius_mm: float
+    rolling_radius_mm: float
+    pen_offset_mm: float
+    depth_mm: float
+    mode: Literal["inside", "outside"] = "inside"
+    revolutions: int | None = None
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.fixed_radius_mm <= 0:
+            raise ValueError(f"SpirographCurveParams: fixed_radius_mm must be positive, got {self.fixed_radius_mm}")
+        if self.rolling_radius_mm <= 0:
+            raise ValueError(f"SpirographCurveParams: rolling_radius_mm must be positive, got {self.rolling_radius_mm}")
+        if self.pen_offset_mm < 0:
+            raise ValueError(f"SpirographCurveParams: pen_offset_mm must be non-negative, got {self.pen_offset_mm}")
+        valid_modes = ("inside", "outside")
+        if self.mode not in valid_modes:
+            raise ValueError(f"SpirographCurveParams: mode must be one of {valid_modes}, got '{self.mode}'")
+        if self.mode == "inside" and self.rolling_radius_mm >= self.fixed_radius_mm:
+            raise ValueError(
+                f"SpirographCurveParams: rolling_radius_mm ({self.rolling_radius_mm}) must be less than "
+                f"fixed_radius_mm ({self.fixed_radius_mm}) for mode 'inside'"
+            )
+        if self.revolutions is not None and self.revolutions < 1:
+            raise ValueError(f"SpirographCurveParams: revolutions must be >= 1 or None, got {self.revolutions}")
+        _validate_curve_shared(
+            "SpirographCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
+        )
 
 
 @dataclass(frozen=True)
@@ -395,5 +440,6 @@ __all__ = [
     "RadialTickParams",
     "RaisedPanelParams",
     "RoseCurveParams",
+    "SpirographCurveParams",
     "XPanelParams",
 ]

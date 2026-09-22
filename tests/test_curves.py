@@ -8,8 +8,8 @@ from shapely.geometry import Point as ShapelyPoint
 
 from domains import Domain
 from generators.core import GeneratorSkipError
-from generators.curves import rose_curve_generator, sample_parametric
-from generators.params.area import RoseCurveParams
+from generators.curves import rose_curve_generator, sample_parametric, spirograph_curve_generator
+from generators.params.area import RoseCurveParams, SpirographCurveParams
 from layout_ast.layout import Item
 
 
@@ -29,6 +29,13 @@ def _cyclic_radius_maxima(points: list[tuple[float, float]], center: tuple[float
     radii = [math.dist(p, center) for p in ring]
     n = len(radii)
     return sum(1 for i in range(n) if radii[i] > radii[i - 1] and radii[i] >= radii[(i + 1) % n])
+
+
+def _cyclic_radius_minima(points: list[tuple[float, float]], center: tuple[float, float]) -> int:
+    ring = points[:-1] if math.dist(points[0], points[-1]) < 1e-9 else points
+    radii = [math.dist(p, center) for p in ring]
+    n = len(radii)
+    return sum(1 for i in range(n) if radii[i] < radii[i - 1] and radii[i] <= radii[(i + 1) % n])
 
 
 class TestSampleParametric:
@@ -175,3 +182,111 @@ class TestRoseCurveGenerator:
         with pytest.raises(GeneratorSkipError):
             rose_curve_generator(domain, params)
         assert rose_curve_generator(domain, params, allow_empty=True) == []
+
+
+class TestSpirographCurveParams:
+    def test_inside_requires_rolling_smaller(self):
+        with pytest.raises(ValueError, match="rolling_radius"):
+            SpirographCurveParams(fixed_radius_mm=20, rolling_radius_mm=20, pen_offset_mm=5, depth_mm=0.3)
+
+    def test_outside_allows_larger_rolling(self):
+        SpirographCurveParams(fixed_radius_mm=20, rolling_radius_mm=30, pen_offset_mm=5, depth_mm=0.3, mode="outside")
+
+    def test_rejects_negative_pen_offset(self):
+        with pytest.raises(ValueError, match="pen_offset"):
+            SpirographCurveParams(fixed_radius_mm=60, rolling_radius_mm=21, pen_offset_mm=-1, depth_mm=0.3)
+
+    def test_rejects_bad_mode(self):
+        with pytest.raises(ValueError, match="mode"):
+            SpirographCurveParams(
+                fixed_radius_mm=60,
+                rolling_radius_mm=21,
+                pen_offset_mm=5,
+                depth_mm=0.3,
+                mode="around",  # type: ignore[arg-type]
+            )
+
+    def test_rejects_zero_revolutions(self):
+        with pytest.raises(ValueError, match="revolutions"):
+            SpirographCurveParams(
+                fixed_radius_mm=60, rolling_radius_mm=21, pen_offset_mm=5, depth_mm=0.3, revolutions=0
+            )
+
+
+class TestSpirographCurveGenerator:
+    def _square(self) -> Domain:
+        return Domain.from_rectangle(300, 300, center=(150, 150))
+
+    def _params(self, **overrides) -> SpirographCurveParams:
+        base = {"fixed_radius_mm": 60.0, "rolling_radius_mm": 21.0, "pen_offset_mm": 15.0, "depth_mm": 0.3}
+        return SpirographCurveParams(**{**base, **overrides})
+
+    def test_closes_after_reduced_denominator_turns(self):
+        items = spirograph_curve_generator(self._square(), self._params())
+        assert len(items) == 1
+        points = _absolute_points(items[0])
+        assert points[0] == points[-1]
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+        assert _cyclic_radius_maxima(points, (150, 150)) == 20
+
+    def test_epitrochoid_closes(self):
+        items = spirograph_curve_generator(self._square(), self._params(mode="outside"))
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+
+    def test_hypocycloid_three_cusps(self):
+        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=20.0, pen_offset_mm=20.0))
+        points = _absolute_points(items[0])
+        assert _cyclic_radius_minima(points, (150, 150)) == 3
+        assert min(math.dist(p, (150, 150)) for p in points) == pytest.approx(20.0, abs=0.1)
+
+    def test_pen_offset_zero_is_circle(self):
+        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=20.0, pen_offset_mm=0.0))
+        for p in _absolute_points(items[0]):
+            assert math.dist(p, (150, 150)) == pytest.approx(40.0, abs=0.1)
+
+    def test_revolutions_not_multiple_is_open(self):
+        items = spirograph_curve_generator(self._square(), self._params(revolutions=3))
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is True
+        points = _absolute_points(items[0])
+        assert math.dist(points[0], points[-1]) > 1.0
+
+    def test_size_scales_outer_diameter(self):
+        items = spirograph_curve_generator(self._square(), self._params(size_mm=100.0))
+        max_radius = max(math.dist(p, (150, 150)) for p in _absolute_points(items[0]))
+        assert max_radius == pytest.approx(50.0, abs=0.1)
+
+    def test_large_denominator_raises(self):
+        with pytest.raises(ValueError, match="revolutions"):
+            spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.001))
+
+    def test_near_miss_ratio_closes_within_tolerance(self):
+        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.37))
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+
+    def test_near_miss_ratio_stays_open_under_tight_tolerance(self):
+        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.37, tolerance_mm=0.01))
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is True
+
+    def test_clips_to_circle_domain(self):
+        domain = Domain.from_circle(80, center=(150, 150))
+        items = spirograph_curve_generator(domain, self._params())
+        assert len(items) > 1
+        inflated = domain.polygon.buffer(1e-6)
+        for item in items:
+            for x, y in _absolute_points(item):
+                assert inflated.contains(ShapelyPoint(x, y))
+
+    def test_deterministic(self):
+        params = self._params(rotation_deg=12.0)
+        first = spirograph_curve_generator(self._square(), params)
+        second = spirograph_curve_generator(self._square(), params)
+        assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]

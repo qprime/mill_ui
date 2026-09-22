@@ -587,8 +587,11 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
     raise PMLParseError(f"Unknown Radial element type: '{element_type}'", ctx)
 
 
+_CURVE_TYPES = ("rose", "spirograph")
+
+
 def _parse_curve_node(node_data: dict, path: str) -> Any:
-    from layout_ast.compositional import RoseCurveGen
+    from layout_ast.compositional import RoseCurveGen, SpirographCurveGen
 
     ctx = f"{path}.Curve"
     for key in ("children", "feature"):
@@ -612,7 +615,23 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
             min_length_mm=min_length_mm,
         )
 
-    raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: rose", ctx)
+    if curve_type == "spirograph":
+        return SpirographCurveGen(
+            fixed_radius_mm=parse_dimension(_require(node_data, "fixed_radius", ctx)),
+            rolling_radius_mm=parse_dimension(_require(node_data, "rolling_radius", ctx)),
+            pen_offset_mm=parse_dimension(_require(node_data, "pen_offset", ctx)),
+            depth_mm=depth_mm,
+            mode=node_data.get("mode", "inside"),
+            revolutions=(
+                _safe_int(node_data["revolutions"], "revolutions", ctx) if "revolutions" in node_data else None
+            ),
+            size_mm=size_mm,
+            rotation_deg=rotation_deg,
+            tolerance_mm=tolerance_mm,
+            min_length_mm=min_length_mm,
+        )
+
+    raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: {', '.join(_CURVE_TYPES)}", ctx)
 
 
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher

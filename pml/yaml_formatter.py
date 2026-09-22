@@ -43,6 +43,7 @@ from layout_ast.compositional import (
     Rect,
     RoseCurveGen,
     RoundedRect,
+    SpirographCurveGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -203,6 +204,19 @@ def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
         else:
             params[key] = value
     return {feat.feature_type: params if params else None}
+
+
+def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen) -> dict[str, Any]:
+    keys: dict[str, Any] = {}
+    if node.size_mm is not None:
+        keys["size"] = dim(node.size_mm)
+    if node.rotation_deg != 0.0:
+        keys["rotation"] = node.rotation_deg
+    if node.tolerance_mm != 0.05:
+        keys["tolerance"] = dim(node.tolerance_mm)
+    if node.min_length_mm != 0.0:
+        keys["min_length"] = dim(node.min_length_mm)
+    return keys
 
 
 def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type dispatcher
@@ -404,16 +418,21 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         }
 
     elif isinstance(node, RoseCurveGen):
-        curve: dict[str, Any] = {"type": "rose", "lobes": node.lobes, "depth": dim(node.depth_mm)}
-        if node.size_mm is not None:
-            curve["size"] = dim(node.size_mm)
-        if node.rotation_deg != 0.0:
-            curve["rotation"] = node.rotation_deg
-        if node.tolerance_mm != 0.05:
-            curve["tolerance"] = dim(node.tolerance_mm)
-        if node.min_length_mm != 0.0:
-            curve["min_length"] = dim(node.min_length_mm)
-        return {"Curve": curve}
+        return {"Curve": {"type": "rose", "lobes": node.lobes, "depth": dim(node.depth_mm), **_curve_shared_keys(node)}}
+
+    elif isinstance(node, SpirographCurveGen):
+        curve: dict[str, Any] = {
+            "type": "spirograph",
+            "fixed_radius": dim(node.fixed_radius_mm),
+            "rolling_radius": dim(node.rolling_radius_mm),
+            "pen_offset": dim(node.pen_offset_mm),
+            "depth": dim(node.depth_mm),
+        }
+        if node.mode != "inside":
+            curve["mode"] = node.mode
+        if node.revolutions is not None:
+            curve["revolutions"] = node.revolutions
+        return {"Curve": {**curve, **_curve_shared_keys(node)}}
 
     elif isinstance(node, XPanelGen):
         return {"XPanel": {"bar_width": dim(node.bar_width_mm), "depth": dim(node.depth_mm)}}

@@ -38,7 +38,7 @@ from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
-from generators.curves import rose_curve_generator
+from generators.curves import rose_curve_generator, spirograph_curve_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.params.area import (
@@ -49,6 +49,7 @@ from generators.params.area import (
     RadialSvgParams,
     RadialTickParams,
     RoseCurveParams,
+    SpirographCurveParams,
 )
 from generators.svg.params import SVGPathParams
 from generators.svg.parser import extract_path_data
@@ -95,6 +96,7 @@ from layout_ast.compositional import (
     RoundedRect,
     RoundoverGen,
     ShellGen,
+    SpirographCurveGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -1386,6 +1388,40 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("rose")
         try:
             generated_items = rose_curve_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_spirograph_curve_gen(
+        self,
+        node: SpirographCurveGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = SpirographCurveParams(
+            fixed_radius_mm=node.fixed_radius_mm,
+            rolling_radius_mm=node.rolling_radius_mm,
+            pen_offset_mm=node.pen_offset_mm,
+            depth_mm=node.depth_mm,
+            mode=node.mode,  # type: ignore[arg-type]
+            revolutions=node.revolutions,
+            size_mm=node.size_mm,
+            rotation_deg=node.rotation_deg,
+            tolerance_mm=node.tolerance_mm,
+            min_length_mm=node.min_length_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("spirograph")
+        try:
+            generated_items = spirograph_curve_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3104,6 +3140,7 @@ class LayoutResolver:
                 RoundoverGen: LayoutResolver._handle_roundover_gen,
                 WaveGen: LayoutResolver._handle_wave_gen,
                 RoseCurveGen: LayoutResolver._handle_rose_curve_gen,
+                SpirographCurveGen: LayoutResolver._handle_spirograph_curve_gen,
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,

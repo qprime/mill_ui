@@ -3,22 +3,14 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
-from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
     GeneratorSkipError,
-    generate_shape_id,
     validate_domain_for_generation,
 )
-from generators.curves.sampler import sample_parametric
+from generators.curves.emit import curve_items
 from generators.params.area import RoseCurveParams
-from generators.utils import (
-    clip_polylines_to_domain,
-    get_local_bounds,
-    join_pieces_at_point,
-    polyline_engrave_item,
-    rotate_points,
-)
+from generators.utils import get_local_bounds
 
 if TYPE_CHECKING:
     from domains import Domain
@@ -50,26 +42,17 @@ def rose_curve_generator(
         r = radius * math.cos(k * t)
         return (r * math.cos(t), r * math.sin(t))
 
-    local_points = sample_parametric(
+    items = curve_items(
+        domain,
         rose,
-        0.0,
         period,
-        tolerance_mm=params.tolerance_mm,
         initial_segments=32 * k,
+        tolerance_mm=params.tolerance_mm,
+        rotation_deg=params.rotation_deg,
+        min_length_mm=params.min_length_mm,
+        depth_mm=params.depth_mm,
+        shape_id_prefix=shape_id_prefix,
     )
-    local_points[-1] = local_points[0]
-
-    if params.rotation_deg != 0.0:
-        local_points = rotate_points(local_points, math.radians(params.rotation_deg))
-
-    sheet_points = local_to_sheet_batch(local_points, domain)
-    pieces = clip_polylines_to_domain([sheet_points], domain, min_length_mm=params.min_length_mm)
-    pieces = join_pieces_at_point(pieces, sheet_points[0])
-
-    items = [
-        polyline_engrave_item(piece, params.depth_mm, generate_shape_id(shape_id_prefix, index))
-        for index, piece in enumerate(pieces)
-    ]
 
     if not items and not allow_empty:
         raise GeneratorSkipError(

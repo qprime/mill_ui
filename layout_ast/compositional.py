@@ -323,6 +323,20 @@ class RoseCurveGen:
 
 
 @dataclass(frozen=True)
+class SpirographCurveGen:
+    fixed_radius_mm: float
+    rolling_radius_mm: float
+    pen_offset_mm: float
+    depth_mm: float
+    mode: str = "inside"
+    revolutions: int | None = None
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntry:
     tool: str
     role: str = "rough"

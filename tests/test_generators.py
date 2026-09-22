@@ -38,6 +38,7 @@ from generators import (
     profile_generator,
     raised_panel_generator,
     rose_curve_generator,
+    spirograph_curve_generator,
     svg_stamp_generator,
     validate_domain_for_generation,
     wave_generator,
@@ -1735,6 +1736,7 @@ ALL_GENERATORS = [
     svg_stamp_generator,
     notched_panel_generator,
     rose_curve_generator,
+    spirograph_curve_generator,
 ]
 
 

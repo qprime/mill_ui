@@ -669,10 +669,10 @@ children:
       id: panel
       children:
         - Curve:
-            type: spirograph
+            type: hexagram
             depth: 0.3mm
 """
-    with pytest.raises(PMLParseError, match="Known types: rose"):
+    with pytest.raises(PMLParseError, match="Known types: rose, spirograph"):
         parse_pml_yaml(pml)
 
 
@@ -693,3 +693,46 @@ children:
 """
     with pytest.raises(PMLParseError, match="does not accept 'children'"):
         parse_pml_yaml(pml)
+
+
+def test_curve_spirograph_round_trip():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: spirograph
+            fixed_radius: 60mm
+            rolling_radius: 21mm
+            pen_offset: 15mm
+            mode: outside
+            revolutions: 3
+            depth: 0.3mm
+            size: 120mm
+            rotation: 15
+            tolerance: 0.02mm
+            min_length: 2mm
+"""
+    formatted = format_pml_yaml(parse_pml_yaml(pml))
+
+    for key in (
+        "type: spirograph",
+        "fixed_radius: 60mm",
+        "rolling_radius: 21mm",
+        "pen_offset: 15mm",
+        "mode: outside",
+        "revolutions: 3",
+        "size: 120mm",
+        "rotation: 15",
+        "tolerance: 0.02mm",
+        "min_length: 2mm",
+    ):
+        assert key in formatted
+
+    assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted

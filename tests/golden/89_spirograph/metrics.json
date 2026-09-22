@@ -1,0 +1,312 @@
+{
+  "golden": {
+    "recipe_name": "89_spirograph",
+    "created_at": "2026-09-22T21:28:48.430166+00:00"
+  },
+  "svg": {
+    "version": "1.0.0",
+    "extraction_time_ms": 0.71,
+    "document": {
+      "width_mm": 853.175,
+      "height_mm": 403.175,
+      "viewbox": [
+        -11.588,
+        -51.587,
+        853.175,
+        403.175
+      ]
+    },
+    "layers": {
+      "count": 8,
+      "names": [
+        "DIMENSIONS",
+        "ENGRAVE_PATHS",
+        "LEGEND",
+        "NOTES",
+        "PROFILE_CUTS",
+        "PROFILE_TOOLPATHS",
+        "SHEET_OUTLINE",
+        "TITLE_BLOCK"
+      ],
+      "by_layer": {
+        "DIMENSIONS": {
+          "element_count": 12,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 6,
+          "polygon_count": 4,
+          "text_count": 2,
+          "elements": []
+        },
+        "ENGRAVE_PATHS": {
+          "element_count": 3,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "LEGEND": {
+          "element_count": 11,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 5,
+          "polygon_count": 0,
+          "text_count": 6,
+          "elements": []
+        },
+        "NOTES": {
+          "element_count": 5,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 5,
+          "elements": []
+        },
+        "PROFILE_CUTS": {
+          "element_count": 3,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 3,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "path",
+              "bounds": [
+                20.0,
+                30.0,
+                220.0,
+                230.0
+              ],
+              "center": [
+                120.0,
+                130.0
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                250.0,
+                30.0,
+                450.0,
+                230.0
+              ],
+              "center": [
+                350.0,
+                130.0
+              ]
+            },
+            {
+              "element_type": "path",
+              "bounds": [
+                480.0,
+                30.0,
+                680.0,
+                230.0
+              ],
+              "center": [
+                580.0,
+                130.0
+              ]
+            }
+          ]
+        },
+        "PROFILE_TOOLPATHS": {
+          "element_count": 3,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 3,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": []
+        },
+        "SHEET_OUTLINE": {
+          "element_count": 1,
+          "rect_count": 1,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 0,
+          "elements": [
+            {
+              "element_type": "rect",
+              "bounds": [
+                0.0,
+                0.0,
+                700.0,
+                260.0
+              ],
+              "center": [
+                350.0,
+                130.0
+              ],
+              "width": 700.0,
+              "height": 260.0
+            }
+          ]
+        },
+        "TITLE_BLOCK": {
+          "element_count": 2,
+          "rect_count": 0,
+          "circle_count": 0,
+          "path_count": 0,
+          "line_count": 0,
+          "polygon_count": 0,
+          "text_count": 2,
+          "elements": []
+        }
+      }
+    },
+    "paths": {
+      "total_count": 7,
+      "closed_count": 7,
+      "open_count": 0,
+      "total_length_mm": 3628.576,
+      "by_layer": {
+        "PROFILE_CUTS": {
+          "count": 3,
+          "closed": 3,
+          "length_mm": 1800.0
+        },
+        "PROFILE_TOOLPATHS": {
+          "count": 3,
+          "closed": 3,
+          "length_mm": 1828.576
+        },
+        "SHEET_OUTLINE": {
+          "count": 1,
+          "closed": 1,
+          "length_mm": 0.0
+        }
+      }
+    },
+    "bounds": {
+      "x_min": 0.0,
+      "x_max": 724.5875,
+      "y_min": -19.5875,
+      "y_max": 260.0
+    },
+    "text_elements": {
+      "count": 15,
+      "dimension_labels": [
+        "200.0mm",
+        "200.0mm",
+        "Sheet: 700.0 \u00d7 260.0 \u00d7 12.0mm",
+        "\u2022 engrave: 0.3mm"
+      ],
+      "depth_annotations": [
+        "Features: 3 engraves, 3 profiles",
+        "\u2022 engrave: 0.3mm"
+      ],
+      "notes_text": [
+        "NOTES",
+        "Sheet: 700.0 \u00d7 260.0 \u00d7 12.0mm",
+        "Features: 3 engraves, 3 profiles",
+        "Depths:",
+        "\u2022 engrave: 0.3mm"
+      ]
+    },
+    "circles": {
+      "count": 0,
+      "radii_mm": []
+    },
+    "rects": {
+      "count": 1,
+      "dimensions": [
+        [
+          700.0,
+          260.0
+        ]
+      ]
+    }
+  },
+  "gcode": {
+    "version": "1.0.0",
+    "extraction_time_ms": 8.656,
+    "summary": {
+      "total_lines": 1290,
+      "comment_lines": 10,
+      "motion_lines": 1255,
+      "tool_change_lines": 0,
+      "spindle_lines": 6,
+      "feed_lines": 1242
+    },
+    "motion": {
+      "g0_count": 18,
+      "g1_count": 1237,
+      "g2_count": 0,
+      "g3_count": 0,
+      "total_rapid_distance_mm": 2586.3514999999998,
+      "total_feed_distance_mm": 27648.1002
+    },
+    "z_profile": {
+      "safe_z_mm": 6.0,
+      "max_plunge_z_mm": -12.2,
+      "unique_cutting_depths": [
+        -12.2,
+        -12.0,
+        -10.5,
+        -9.0,
+        -7.5,
+        -6.0,
+        -4.5,
+        -3.0,
+        -1.5,
+        -0.3
+      ],
+      "depth_count": 10,
+      "max_single_plunge_mm": 7.5
+    },
+    "xy_bounds": {
+      "x_min": 0.0,
+      "x_max": 681.587,
+      "y_min": 0.0,
+      "y_max": 231.588
+    },
+    "feeds": {
+      "min_feed_rate": 100.0,
+      "max_feed_rate": 1200.0,
+      "feed_rates_used": [
+        100.0,
+        400.0,
+        1200.0
+      ]
+    },
+    "tools": {
+      "tool_numbers": [],
+      "tool_changes": 0,
+      "spindle_speeds": [
+        20000
+      ]
+    },
+    "operations": {
+      "profile_passes": 0,
+      "pocket_passes": 0,
+      "bore_passes": 0,
+      "total_passes": 0,
+      "operation_names": []
+    },
+    "time_estimate": {
+      "rapid_time_s": 31.036299999999997,
+      "feed_time_s": 2200.2883,
+      "total_time_s": 2231.3244
+    },
+    "tabs": {
+      "detected_count": 0,
+      "tab_heights_mm": [],
+      "max_cutting_depth_mm": -12.2,
+      "tabs_at_max_depth": true
+    },
+    "file_count": 2
+  }
+}

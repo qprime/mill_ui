@@ -630,7 +630,7 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `type` | Yes | — | Curve family: `rose` |
+| `type` | Yes | — | Curve family: `rose`, `spirograph` |
 | `depth` | Yes | — | Engrave depth |
 | `size` | No | 90% of the smaller parent dimension | Diameter of the curve's bounding circle |
 | `rotation` | No | 0 | Rotation in degrees, counter-clockwise |
@@ -658,6 +658,33 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
     tolerance: 0.05mm
     min_length: 3mm
 ```
+
+**Type: spirograph** — rolling-circle curves. `mode: inside` rolls inside the fixed circle (hypotrochoid); `mode: outside` rolls around it (epitrochoid). A `pen_offset` equal to `rolling_radius` gives the cycloid family with cusps.
+
+```yaml
+- Curve:
+    type: spirograph
+    fixed_radius: 60mm
+    rolling_radius: 21mm
+    pen_offset: 15mm
+    depth: 0.3mm
+```
+
+```yaml
+- Curve:
+    type: spirograph
+    fixed_radius: 60mm       # R, the fixed circle
+    rolling_radius: 21mm     # r, the rolling circle; inside requires r < R
+    pen_offset: 15mm         # d, pen distance from the rolling circle's center; 0 draws a circle
+    mode: inside             # inside (default) | outside
+    revolutions: 7           # turns to trace; default: the count that closes the figure
+    depth: 0.3mm
+    size: 150mm              # optional; scales the figure so its outer diameter equals size
+```
+
+With `fixed_radius / rolling_radius` reduced to `p / q`, the figure closes after `q` revolutions and has `p` outer lobes. Omitting `revolutions` uses `q`; when `q` exceeds 60 the parser accepts the node but generation fails asking for an explicit `revolutions`. A `revolutions` value that does not close the figure leaves it as an open path.
+
+Unlike `rose`, `size` has no default: the figure is drawn at the stated radii unless `size` is given.
 
 #### Wave
 

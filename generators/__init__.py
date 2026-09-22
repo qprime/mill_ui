@@ -26,7 +26,12 @@ from generators.core import (
     generate_shape_id,
     validate_domain_for_generation,
 )
-from generators.curves import rose_curve_generator, sample_parametric, spirograph_curve_generator
+from generators.curves import (
+    lissajous_curve_generator,
+    rose_curve_generator,
+    sample_parametric,
+    spirograph_curve_generator,
+)
 from generators.loop import (
     bead_generator,
     chamfer_generator,
@@ -46,6 +51,7 @@ from generators.params.area import (
     HeightfieldParams,
     HoleGridParams,
     LinePatternParams,
+    LissajousCurveParams,
     MeasurementGridParams,
     RadialLabelParams,
     RadialPocketParams,
@@ -92,6 +98,7 @@ __all__ = [
     "HeightfieldParams",
     "HoleGridParams",
     "LinePatternParams",
+    "LissajousCurveParams",
     "LoopSelection",
     "MeasurementEdgeParams",
     "MeasurementGridParams",
@@ -125,6 +132,7 @@ __all__ = [
     "hole_grid_generator",
     "iter_polygons",
     "line_pattern_generator",
+    "lissajous_curve_generator",
     "measurement_edge_generator",
     "measurement_grid_generator",
     "notched_panel_generator",

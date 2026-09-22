@@ -587,11 +587,11 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
     raise PMLParseError(f"Unknown Radial element type: '{element_type}'", ctx)
 
 
-_CURVE_TYPES = ("rose", "spirograph")
+_CURVE_TYPES = ("rose", "spirograph", "lissajous")
 
 
 def _parse_curve_node(node_data: dict, path: str) -> Any:
-    from layout_ast.compositional import RoseCurveGen, SpirographCurveGen
+    from layout_ast.compositional import LissajousCurveGen, RoseCurveGen, SpirographCurveGen
 
     ctx = f"{path}.Curve"
     for key in ("children", "feature"):
@@ -625,6 +625,20 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
             revolutions=(
                 _safe_int(node_data["revolutions"], "revolutions", ctx) if "revolutions" in node_data else None
             ),
+            size_mm=size_mm,
+            rotation_deg=rotation_deg,
+            tolerance_mm=tolerance_mm,
+            min_length_mm=min_length_mm,
+        )
+
+    if curve_type == "lissajous":
+        return LissajousCurveGen(
+            frequency_x=_safe_int(_require(node_data, "frequency_x", ctx), "frequency_x", ctx),
+            frequency_y=_safe_int(_require(node_data, "frequency_y", ctx), "frequency_y", ctx),
+            depth_mm=depth_mm,
+            phase_deg=_safe_float(node_data.get("phase", 90.0), "phase", ctx),
+            width_mm=parse_dimension(node_data["width"]) if "width" in node_data else None,
+            height_mm=parse_dimension(node_data["height"]) if "height" in node_data else None,
             size_mm=size_mm,
             rotation_deg=rotation_deg,
             tolerance_mm=tolerance_mm,

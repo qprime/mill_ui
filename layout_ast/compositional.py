@@ -337,6 +337,20 @@ class SpirographCurveGen:
 
 
 @dataclass(frozen=True)
+class LissajousCurveGen:
+    frequency_x: int
+    frequency_y: int
+    depth_mm: float
+    phase_deg: float = 90.0
+    width_mm: float | None = None
+    height_mm: float | None = None
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntry:
     tool: str
     role: str = "rough"

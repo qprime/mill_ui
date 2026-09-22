@@ -460,3 +460,30 @@ children:
     assert curves[0].feature.type == "engrave"
     assert curves[0].shape_id is not None
     assert curves[0].shape_id.startswith("generated_spirograph")
+
+
+def test_curve_lissajous_resolves_to_polyline_engrave():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: lissajous
+            frequency_x: 3
+            frequency_y: 2
+            depth: 0.3mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 1
+    assert curves[0].feature is not None
+    assert curves[0].feature.type == "engrave"
+    assert curves[0].shape_id is not None
+    assert curves[0].shape_id.startswith("generated_lissajous")

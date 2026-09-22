@@ -672,7 +672,7 @@ children:
             type: hexagram
             depth: 0.3mm
 """
-    with pytest.raises(PMLParseError, match="Known types: rose, spirograph"):
+    with pytest.raises(PMLParseError, match="Known types: rose, spirograph, lissajous"):
         parse_pml_yaml(pml)
 
 
@@ -728,6 +728,49 @@ children:
         "pen_offset: 15mm",
         "mode: outside",
         "revolutions: 3",
+        "size: 120mm",
+        "rotation: 15",
+        "tolerance: 0.02mm",
+        "min_length: 2mm",
+    ):
+        assert key in formatted
+
+    assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+def test_curve_lissajous_round_trip():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: lissajous
+            frequency_x: 5
+            frequency_y: 4
+            phase: 45
+            width: 160mm
+            height: 100mm
+            depth: 0.3mm
+            size: 120mm
+            rotation: 15
+            tolerance: 0.02mm
+            min_length: 2mm
+"""
+    formatted = format_pml_yaml(parse_pml_yaml(pml))
+
+    for key in (
+        "type: lissajous",
+        "frequency_x: 5",
+        "frequency_y: 4",
+        "phase: 45",
+        "width: 160mm",
+        "height: 100mm",
         "size: 120mm",
         "rotation: 15",
         "tolerance: 0.02mm",

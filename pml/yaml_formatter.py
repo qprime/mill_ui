@@ -31,6 +31,7 @@ from layout_ast.compositional import (
     Keepout,
     Line,
     LinesGen,
+    LissajousCurveGen,
     MeasurementEdgeGen,
     MeasurementGridGen,
     Panel,
@@ -206,7 +207,7 @@ def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
     return {feat.feature_type: params if params else None}
 
 
-def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen) -> dict[str, Any]:
+def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen | LissajousCurveGen) -> dict[str, Any]:
     keys: dict[str, Any] = {}
     if node.size_mm is not None:
         keys["size"] = dim(node.size_mm)
@@ -432,6 +433,21 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             curve["mode"] = node.mode
         if node.revolutions is not None:
             curve["revolutions"] = node.revolutions
+        return {"Curve": {**curve, **_curve_shared_keys(node)}}
+
+    elif isinstance(node, LissajousCurveGen):
+        curve = {
+            "type": "lissajous",
+            "frequency_x": node.frequency_x,
+            "frequency_y": node.frequency_y,
+            "depth": dim(node.depth_mm),
+        }
+        if node.phase_deg != 90.0:
+            curve["phase"] = node.phase_deg
+        if node.width_mm is not None:
+            curve["width"] = dim(node.width_mm)
+        if node.height_mm is not None:
+            curve["height"] = dim(node.height_mm)
         return {"Curve": {**curve, **_curve_shared_keys(node)}}
 
     elif isinstance(node, XPanelGen):

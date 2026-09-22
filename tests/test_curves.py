@@ -8,8 +8,13 @@ from shapely.geometry import Point as ShapelyPoint
 
 from domains import Domain
 from generators.core import GeneratorSkipError
-from generators.curves import rose_curve_generator, sample_parametric, spirograph_curve_generator
-from generators.params.area import RoseCurveParams, SpirographCurveParams
+from generators.curves import (
+    lissajous_curve_generator,
+    rose_curve_generator,
+    sample_parametric,
+    spirograph_curve_generator,
+)
+from generators.params.area import LissajousCurveParams, RoseCurveParams, SpirographCurveParams
 from layout_ast.layout import Item
 
 
@@ -29,6 +34,13 @@ def _cyclic_radius_maxima(points: list[tuple[float, float]], center: tuple[float
     radii = [math.dist(p, center) for p in ring]
     n = len(radii)
     return sum(1 for i in range(n) if radii[i] > radii[i - 1] and radii[i] >= radii[(i + 1) % n])
+
+
+def _axis_maxima(points: list[tuple[float, float]], axis: int) -> int:
+    ring = points[:-1] if math.dist(points[0], points[-1]) < 1e-9 else points
+    values = [p[axis] for p in ring]
+    n = len(values)
+    return sum(1 for i in range(n) if values[i] > values[i - 1] and values[i] >= values[(i + 1) % n])
 
 
 def _cyclic_radius_minima(points: list[tuple[float, float]], center: tuple[float, float]) -> int:
@@ -289,4 +301,94 @@ class TestSpirographCurveGenerator:
         params = self._params(rotation_deg=12.0)
         first = spirograph_curve_generator(self._square(), params)
         second = spirograph_curve_generator(self._square(), params)
+        assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]
+
+
+class TestLissajousCurveParams:
+    def test_rejects_zero_frequency(self):
+        with pytest.raises(ValueError, match="frequency_x"):
+            LissajousCurveParams(frequency_x=0, frequency_y=2, depth_mm=0.3)
+
+    def test_rejects_nonpositive_width(self):
+        with pytest.raises(ValueError, match="width_mm"):
+            LissajousCurveParams(frequency_x=3, frequency_y=2, depth_mm=0.3, width_mm=0.0)
+
+
+class TestLissajousCurveGenerator:
+    def _square(self) -> Domain:
+        return Domain.from_rectangle(200, 200, center=(100, 100))
+
+    def _params(self, **overrides) -> LissajousCurveParams:
+        base = {"frequency_x": 3, "frequency_y": 2, "depth_mm": 0.3}
+        return LissajousCurveParams(**{**base, **overrides})
+
+    def _extents(self, items: list[Item], center: tuple[float, float]) -> tuple[float, float]:
+        points = _absolute_points(items[0])
+        return (
+            max(abs(x - center[0]) for x, _ in points),
+            max(abs(y - center[1]) for _, y in points),
+        )
+
+    def test_closes_on_itself(self):
+        items = lissajous_curve_generator(self._square(), self._params())
+        assert len(items) == 1
+        points = _absolute_points(items[0])
+        assert points[0] == points[-1]
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+
+    def test_axis_maxima_match_frequencies(self):
+        items = lissajous_curve_generator(self._square(), self._params())
+        points = _absolute_points(items[0])
+        assert _axis_maxima(points, 0) == 3
+        assert _axis_maxima(points, 1) == 2
+
+    def test_common_factor_is_reduced(self):
+        reduced = lissajous_curve_generator(self._square(), self._params(frequency_x=3, frequency_y=2))
+        unreduced = lissajous_curve_generator(self._square(), self._params(frequency_x=6, frequency_y=4))
+        assert [i.geometry.data for i in reduced if i.geometry] == [i.geometry.data for i in unreduced if i.geometry]
+
+    def test_equal_frequencies_quarter_phase_is_ellipse(self):
+        items = lissajous_curve_generator(
+            self._square(), self._params(frequency_x=1, frequency_y=1, width_mm=160.0, height_mm=100.0)
+        )
+        assert self._extents(items, (100, 100)) == pytest.approx((80.0, 50.0), abs=0.1)
+
+    def test_equal_frequencies_zero_phase_is_line(self):
+        items = lissajous_curve_generator(
+            self._square(),
+            self._params(frequency_x=1, frequency_y=1, phase_deg=0.0, width_mm=160.0, height_mm=100.0),
+        )
+        for x, y in _absolute_points(items[0]):
+            assert abs((y - 100) / 50 - (x - 100) / 80) < 1e-3
+
+    def test_box_defaults_to_90_percent(self):
+        domain = Domain.from_rectangle(200, 100, center=(100, 50))
+        items = lissajous_curve_generator(domain, self._params())
+        assert self._extents(items, (100, 50)) == pytest.approx((90.0, 45.0), abs=0.1)
+
+    def test_size_fills_missing_dimensions(self):
+        items = lissajous_curve_generator(self._square(), self._params(size_mm=120.0, width_mm=160.0))
+        assert self._extents(items, (100, 100)) == pytest.approx((80.0, 60.0), abs=0.1)
+
+    def test_rotation_rotates_box(self):
+        items = lissajous_curve_generator(
+            self._square(),
+            self._params(frequency_x=1, frequency_y=1, width_mm=160.0, height_mm=100.0, rotation_deg=90.0),
+        )
+        assert self._extents(items, (100, 100)) == pytest.approx((50.0, 80.0), abs=0.1)
+
+    def test_clips_to_circle_domain(self):
+        domain = Domain.from_circle(100, center=(100, 100))
+        items = lissajous_curve_generator(domain, self._params(size_mm=140.0))
+        assert len(items) > 1
+        inflated = domain.polygon.buffer(1e-6)
+        for item in items:
+            for x, y in _absolute_points(item):
+                assert inflated.contains(ShapelyPoint(x, y))
+
+    def test_deterministic(self):
+        params = self._params(frequency_x=5, frequency_y=4, phase_deg=45.0)
+        first = lissajous_curve_generator(self._square(), params)
+        second = lissajous_curve_generator(self._square(), params)
         assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]

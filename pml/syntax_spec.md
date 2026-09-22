@@ -630,16 +630,16 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `type` | Yes | — | Curve family: `rose`, `spirograph` |
+| `type` | Yes | — | Curve family: `rose`, `spirograph`, `lissajous` |
 | `depth` | Yes | — | Engrave depth |
-| `size` | No | 90% of the smaller parent dimension | Diameter of the curve's bounding circle |
+| `size` | No | per type | Overall size of the figure; each type below states how it applies and whether it defaults |
 | `rotation` | No | 0 | Rotation in degrees, counter-clockwise |
 | `tolerance` | No | 0.05mm | Maximum chord deviation when sampling the curve |
 | `min_length` | No | 0mm | Drop clipped pieces shorter than this |
 
 `Curve` is a leaf node; `children` and `feature` are rejected. Wrap it in `AtPosition` or `Frame` to place it off-center.
 
-**Type: rose** — `r = cos(k·θ)`. Odd `lobes` draws that many petals; even `lobes` draws twice as many.
+**Type: rose** — `r = cos(k·θ)`. Odd `lobes` draws that many petals; even `lobes` draws twice as many. `size` is the diameter of the curve's bounding circle and defaults to 90% of the smaller parent dimension.
 
 ```yaml
 - Curve:
@@ -685,6 +685,30 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
 With `fixed_radius / rolling_radius` reduced to `p / q`, the figure closes after `q` revolutions and has `p` outer lobes. Omitting `revolutions` uses `q`; when `q` exceeds 60 the parser accepts the node but generation fails asking for an explicit `revolutions`. A `revolutions` value that does not close the figure leaves it as an open path.
 
 Unlike `rose`, `size` has no default: the figure is drawn at the stated radii unless `size` is given.
+
+**Type: lissajous** — `x = A·sin(fx·t + φ)`, `y = B·sin(fy·t)` with integer frequencies. A common factor in the frequencies is reduced away, so `6:4` draws the same figure as `3:2` once.
+
+```yaml
+- Curve:
+    type: lissajous
+    frequency_x: 3
+    frequency_y: 2
+    depth: 0.3mm
+```
+
+```yaml
+- Curve:
+    type: lissajous
+    frequency_x: 3           # integer >= 1
+    frequency_y: 2           # integer >= 1
+    phase: 90                # degrees added to the x term (default: 90)
+    width: 160mm             # 2A (default: size if given, else 90% of the parent's width)
+    height: 100mm            # 2B (default: size if given, else 90% of the parent's height)
+    depth: 0.3mm
+    size: 120mm              # optional; fills whichever of width and height is omitted
+```
+
+Equal frequencies draw an ellipse at `phase: 90` and a diagonal line traced twice at `phase: 0` or `180`.
 
 #### Wave
 

@@ -32,6 +32,7 @@ from generators import (
     grid_lines_generator,
     hole_grid_generator,
     line_pattern_generator,
+    lissajous_curve_generator,
     measurement_edge_generator,
     measurement_grid_generator,
     notched_panel_generator,
@@ -1737,6 +1738,7 @@ ALL_GENERATORS = [
     notched_panel_generator,
     rose_curve_generator,
     spirograph_curve_generator,
+    lissajous_curve_generator,
 ]
 
 

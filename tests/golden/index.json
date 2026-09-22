@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-09-22T21:28:48.430479+00:00",
+  "updated_at": "2026-09-22T21:49:39.660590+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -560,6 +560,14 @@
       "source_file": "docs/recipes/89_spirograph/example.pml.yml",
       "created_at": "2026-09-22T21:28:48.430477+00:00",
       "updated_at": "2026-09-22T21:28:48.430477+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "90_lissajous": {
+      "recipe_name": "90_lissajous",
+      "source_file": "docs/recipes/90_lissajous/example.pml.yml",
+      "created_at": "2026-09-22T21:49:39.660587+00:00",
+      "updated_at": "2026-09-22T21:49:39.660587+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

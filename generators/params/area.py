@@ -378,6 +378,33 @@ class SpirographCurveParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class LissajousCurveParams(BaseParams):
+    frequency_x: int
+    frequency_y: int
+    depth_mm: float
+    phase_deg: float = 90.0
+    width_mm: float | None = None
+    height_mm: float | None = None
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.frequency_x < 1:
+            raise ValueError(f"LissajousCurveParams: frequency_x must be >= 1, got {self.frequency_x}")
+        if self.frequency_y < 1:
+            raise ValueError(f"LissajousCurveParams: frequency_y must be >= 1, got {self.frequency_y}")
+        if self.width_mm is not None and self.width_mm <= 0:
+            raise ValueError(f"LissajousCurveParams: width_mm must be positive, got {self.width_mm}")
+        if self.height_mm is not None and self.height_mm <= 0:
+            raise ValueError(f"LissajousCurveParams: height_mm must be positive, got {self.height_mm}")
+        _validate_curve_shared(
+            "LissajousCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
+        )
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntryParams:
     tool: str
     role: str = "rough"
@@ -433,6 +460,7 @@ __all__ = [
     "HeightfieldToolEntryParams",
     "HoleGridParams",
     "LinePatternParams",
+    "LissajousCurveParams",
     "MeasurementGridParams",
     "RadialLabelParams",
     "RadialPocketParams",

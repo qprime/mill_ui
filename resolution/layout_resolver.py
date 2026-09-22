@@ -38,12 +38,13 @@ from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
-from generators.curves import rose_curve_generator, spirograph_curve_generator
+from generators.curves import lissajous_curve_generator, rose_curve_generator, spirograph_curve_generator
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.params.area import (
     HeightfieldParams,
     HeightfieldToolEntryParams,
+    LissajousCurveParams,
     RadialLabelParams,
     RadialPocketParams,
     RadialSvgParams,
@@ -77,6 +78,7 @@ from layout_ast.compositional import (
     Keepout,
     Line,
     LinesGen,
+    LissajousCurveGen,
     MeasurementEdgeGen,
     MeasurementGridGen,
     Panel,
@@ -1422,6 +1424,40 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("spirograph")
         try:
             generated_items = spirograph_curve_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_lissajous_curve_gen(
+        self,
+        node: LissajousCurveGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = LissajousCurveParams(
+            frequency_x=node.frequency_x,
+            frequency_y=node.frequency_y,
+            depth_mm=node.depth_mm,
+            phase_deg=node.phase_deg,
+            width_mm=node.width_mm,
+            height_mm=node.height_mm,
+            size_mm=node.size_mm,
+            rotation_deg=node.rotation_deg,
+            tolerance_mm=node.tolerance_mm,
+            min_length_mm=node.min_length_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("lissajous")
+        try:
+            generated_items = lissajous_curve_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3141,6 +3177,7 @@ class LayoutResolver:
                 WaveGen: LayoutResolver._handle_wave_gen,
                 RoseCurveGen: LayoutResolver._handle_rose_curve_gen,
                 SpirographCurveGen: LayoutResolver._handle_spirograph_curve_gen,
+                LissajousCurveGen: LayoutResolver._handle_lissajous_curve_gen,
                 SplitHorizontal: LayoutResolver._handle_split_horizontal,
                 SplitVertical: LayoutResolver._handle_split_vertical,
                 SplitGrid: LayoutResolver._handle_split_grid,

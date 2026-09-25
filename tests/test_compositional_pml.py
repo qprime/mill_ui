@@ -965,6 +965,101 @@ def test_concentric_rejects_invalid_forms(body, message):
         parse_pml_yaml(_concentric_pml(body))
 
 
+def _voronoi_pml(voronoi: str) -> str:
+    return f"""
+Sheet: {{width: 300mm, height: 300mm, thickness: 19mm}}
+children:
+  - Rect:
+      id: panel
+      children:
+        - Voronoi: {voronoi}
+"""
+
+
+def test_voronoi_round_trip_seeded():
+    ast = parse_pml_yaml(
+        _voronoi_pml(
+            "{seed_count: 30, seed: 5, min_spacing: 15mm, margin: 8mm, mode: pocket, "
+            "line_width: 4mm, cell_inset: 1mm, depth: 3mm}"
+        )
+    )
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_voronoi_round_trip_rest_tool():
+    ast = parse_pml_yaml(
+        _voronoi_pml("{seed_count: 20, mode: pocket, line_width: 4mm, rest_tool: 3.175mm, depth: 3mm}")
+    )
+    assert "rest_tool: 3.175mm" in format_pml_yaml(ast)
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_voronoi_round_trip_explicit_rest():
+    ast = parse_pml_yaml(
+        _voronoi_pml(
+            "{seed_count: 20, mode: pocket, line_width: 4mm, "
+            "rest: {tool: 3.175mm, rough_allowance: 0.3mm, finish_allowance: 0.1mm}, depth: 3mm}"
+        )
+    )
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_voronoi_round_trip_points():
+    ast = parse_pml_yaml(_voronoi_pml("{points: [[-40, -30], [35.5, -20], [0, 45mm]], min_length: 2mm, depth: 0.5mm}"))
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+@pytest.mark.parametrize(
+    ("voronoi", "message"),
+    [
+        ("{points: [[0, 0], [10, 0]], seed: 3, depth: 0.5mm}", "'seed' applies only to 'seed_count'"),
+        ("{points: [[0, 0], [10, 0]], margin: 5mm, depth: 0.5mm}", "'margin' applies only to 'seed_count'"),
+        ("{points: [[0, 0], [10, 0]], min_spacing: 5mm, depth: 0.5mm}", "'min_spacing' applies only to 'seed_count'"),
+        ("{seed_count: 10, points: [[0, 0], [10, 0]], depth: 0.5mm}", "exactly one of 'seed_count' or 'points'"),
+        ("{seed_count: 10, seed: -1, depth: 0.5mm}", "'seed' must be a non-negative integer"),
+        ("{seed_count: 10, line_width: 4mm, depth: 0.5mm}", "'line_width' is only valid with 'mode: pocket'"),
+        ("{seed_count: 10, mode: pocket, depth: 3mm}", "'mode: pocket' requires 'line_width'"),
+        ("{seed_count: 10, mode: groove, depth: 0.5mm}", "Known modes: engrave, pocket"),
+        ("{seed_count: 10, min_spacing: 0mm, depth: 0.5mm}", "'min_spacing' must be positive"),
+        ("{points: [[0, 0, 1], [10, 0]], depth: 0.5mm}", "point 0 must be an \\[x, y\\] pair"),
+        ("{points: [[5, 5], [5, 5]], depth: 0.5mm}", "at least 2 distinct locations"),
+        ("{seed_count: 10, rest_tool: 3.175mm, depth: 0.5mm}", "'rest_tool' is only valid with 'mode: pocket'"),
+        (
+            "{seed_count: 10, mode: pocket, line_width: 4mm, rest_tool: 3.175mm, rest: {tool: 3.175mm}, depth: 3mm}",
+            "Cannot specify both 'rest' and 'rest_tool'",
+        ),
+        ("{seed_count: 10, mode: pocket, line_width: 4mm, rest: 3.175mm, depth: 3mm}", "'rest' must be a mapping"),
+    ],
+    ids=[
+        "points_with_seed",
+        "points_with_margin",
+        "points_with_min_spacing",
+        "both_sources",
+        "negative_seed",
+        "engrave_with_line_width",
+        "pocket_without_line_width",
+        "unknown_mode",
+        "zero_min_spacing",
+        "three_number_point",
+        "one_location",
+        "engrave_with_rest_tool",
+        "rest_and_rest_tool",
+        "scalar_rest",
+    ],
+)
+def test_voronoi_rejects_invalid_forms(voronoi, message):
+    with pytest.raises(PMLParseError, match=message):
+        parse_pml_yaml(_voronoi_pml(voronoi))
+
+
+def test_voronoi_formatter_omits_default_seed():
+    ast = parse_pml_yaml(_voronoi_pml("{seed_count: 20, seed: 0, depth: 0.5mm}"))
+    formatted = format_pml_yaml(ast)
+    assert "seed:" not in formatted
+    reparsed = parse_pml_yaml(formatted)
+    assert reparsed == ast
+
+
 RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
 
 

@@ -257,7 +257,9 @@ def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
 
 
 def _is_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
-    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.HOLE, "drill", FeatureType.POCKET))
+    match = _match_feature_types(
+        a, b, FeatureType.PROFILE, (FeatureType.HOLE, "drill", FeatureType.POCKET, FeatureType.ENGRAVE)
+    )
     if match is None:
         return False
     profile, contained = match

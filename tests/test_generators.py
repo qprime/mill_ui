@@ -14,11 +14,15 @@ import math
 from dataclasses import replace
 from typing import Any
 
+import numpy as np
 import pytest
+from shapely.geometry import LineString, MultiPoint, MultiPolygon, Polygon
+from shapely.ops import voronoi_diagram
 
 # Add project root to path
 from core.constants import GOLDEN_ANGLE_DEG
 from domains import Domain
+from domains.transforms import local_to_sheet
 from generators import (
     ChamferParams,
     ConcentricBorderParams,
@@ -31,6 +35,7 @@ from generators import (
     PhyllotaxisSvgParams,
     ProfileParams,
     RaisedPanelParams,
+    VoronoiParams,
     bead_generator,
     chamfer_generator,
     concentric_border_generator,
@@ -53,13 +58,15 @@ from generators import (
     spirograph_curve_generator,
     svg_stamp_generator,
     validate_domain_for_generation,
+    voronoi_generator,
     wave_generator,
     x_panel_generator,
 )
+from generators.area.voronoi import _sample_seeds
 from generators.placement import item_inside_domain, place_item
 from generators.radial_utils import closest_pair_distance, spiral_positions
 from generators.utils import rotate_points
-from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, RestSpec, Sheet
 
 # =============================================================================
 # Test Helpers
@@ -2156,6 +2163,206 @@ class TestPhyllotaxisGenerators:
 
 
 # =============================================================================
+# Voronoi
+# =============================================================================
+
+
+def _voronoi_circle() -> Domain:
+    return Domain.from_circle(200, center=(150, 150))
+
+
+def _sheet_points(item: Item) -> list[tuple[float, float]]:
+    assert item.placement is not None
+    assert item.geometry is not None
+    cx, cy = item.placement.center_xy_mm
+    return [(x + cx, y + cy) for x, y in item.geometry.data["points"]]
+
+
+def _pocket_polygon(item: Item) -> Polygon:
+    assert item.placement is not None
+    assert item.geometry is not None
+    cx, cy = item.placement.center_xy_mm
+    holes = [[(x + cx, y + cy) for x, y in hole] for hole in item.geometry.data.get("holes", [])]
+    return Polygon(_sheet_points(item), holes)
+
+
+class TestVoronoiParams:
+    def test_requires_exactly_one_seed_source(self):
+        with pytest.raises(ValueError, match="exactly one"):
+            VoronoiParams(depth_mm=0.5)
+        with pytest.raises(ValueError, match="exactly one"):
+            VoronoiParams(depth_mm=0.5, seed_count=10, points=((0.0, 0.0), (10.0, 0.0)))
+
+    def test_points_require_two_distinct(self):
+        with pytest.raises(ValueError, match="distinct"):
+            VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (0.0, 0.0)))
+        VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (0.0, 0.0), (10.0, 0.0)))
+
+    def test_points_reject_seed(self):
+        with pytest.raises(ValueError, match="seed"):
+            VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (10.0, 0.0)), seed=3)
+
+    def test_points_reject_margin(self):
+        with pytest.raises(ValueError, match="margin"):
+            VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (10.0, 0.0)), margin_mm=5.0)
+
+    def test_points_reject_min_spacing(self):
+        with pytest.raises(ValueError, match="min_spacing"):
+            VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (10.0, 0.0)), min_spacing_mm=5.0)
+
+    def test_seed_must_be_non_negative(self):
+        with pytest.raises(ValueError, match="seed"):
+            VoronoiParams(depth_mm=0.5, seed_count=10, seed=-1)
+
+    def test_min_spacing_must_be_positive(self):
+        with pytest.raises(ValueError, match="min_spacing"):
+            VoronoiParams(depth_mm=0.5, seed_count=10, min_spacing_mm=0.0)
+
+    def test_pocket_requires_line_width(self):
+        with pytest.raises(ValueError, match="line_width"):
+            VoronoiParams(depth_mm=3.0, seed_count=10, mode="pocket")
+
+    def test_engrave_rejects_cell_inset(self):
+        with pytest.raises(ValueError, match="cell_inset"):
+            VoronoiParams(depth_mm=0.5, seed_count=10, cell_inset_mm=1.0)
+
+    def test_engrave_rejects_rest(self):
+        with pytest.raises(ValueError, match="rest"):
+            VoronoiParams(depth_mm=0.5, seed_count=10, rest=RestSpec(tool_diameter_mm=3.175))
+
+
+class TestVoronoiGenerator:
+    def _seeded(self, seed: int) -> VoronoiParams:
+        return VoronoiParams(depth_mm=0.5, seed_count=40, seed=seed, min_spacing_mm=12.0)
+
+    def _pocket_params(self) -> VoronoiParams:
+        return VoronoiParams(depth_mm=3.0, seed_count=25, seed=3, min_spacing_mm=18.0, mode="pocket", line_width_mm=4.0)
+
+    def _u_shape(self) -> Domain:
+        return Domain.from_polygon([(0, 0), (120, 0), (120, 100), (80, 100), (80, 30), (40, 30), (40, 100), (0, 100)])
+
+    def test_same_seed_same_output(self):
+        first = voronoi_generator(_voronoi_circle(), self._seeded(7))
+        second = voronoi_generator(_voronoi_circle(), self._seeded(7))
+        assert [_sheet_points(i) for i in first] == [_sheet_points(i) for i in second]
+
+    def test_different_seed_different_output(self):
+        first = voronoi_generator(_voronoi_circle(), self._seeded(1))
+        second = voronoi_generator(_voronoi_circle(), self._seeded(2))
+        assert [_sheet_points(i) for i in first] != [_sheet_points(i) for i in second]
+
+    def test_sampling_draws_x_then_y(self):
+        domain = Domain.from_rectangle(200, 100, center=(150, 100))
+        params = VoronoiParams(depth_mm=0.5, seed_count=10, seed=7)
+        rng = np.random.default_rng(7)
+        x_min, y_min, x_max, y_max = domain.polygon.bounds
+        expected = []
+        for _ in range(10):
+            x = float(rng.uniform(x_min, x_max))
+            y = float(rng.uniform(y_min, y_max))
+            expected.append((x, y))
+        assert _sample_seeds(domain, 10, params) == expected
+
+    def test_seeds_respect_min_spacing(self):
+        seeds = _sample_seeds(_voronoi_circle(), 40, self._seeded(7))
+        assert len(seeds) == 40
+        assert all(math.dist(a, b) >= 12.0 for a, b in itertools.combinations(seeds, 2))
+
+    def test_unsatisfiable_spacing_raises(self):
+        params = VoronoiParams(depth_mm=0.5, seed_count=40, min_spacing_mm=60.0)
+        with pytest.raises(ValueError, match="of 40 seeds") as excinfo:
+            voronoi_generator(_voronoi_circle(), params, allow_empty=True)
+        assert excinfo.type is ValueError
+
+    def test_empty_seed_region_names_margin(self):
+        params = VoronoiParams(depth_mm=0.5, seed_count=10, margin_mm=150.0)
+        with pytest.raises(ValueError, match="margin") as excinfo:
+            voronoi_generator(_voronoi_circle(), params, allow_empty=True)
+        assert excinfo.type is ValueError
+
+    def test_explicit_point_outside_parent_raises(self):
+        params = VoronoiParams(depth_mm=0.5, points=((0.0, 0.0), (150.0, 0.0)))
+        with pytest.raises(ValueError, match="point 1") as excinfo:
+            voronoi_generator(_voronoi_circle(), params, allow_empty=True)
+        assert excinfo.type is ValueError
+
+    def test_engrave_has_no_duplicate_segments(self):
+        items = voronoi_generator(_voronoi_circle(), self._seeded(7))
+        segments = [
+            tuple(sorted((tuple(round(v, 6) for v in a), tuple(round(v, 6) for v in b))))
+            for item in items
+            for a, b in itertools.pairwise(_sheet_points(item))
+        ]
+        assert len(segments) == len(set(segments))
+
+    def test_engrave_pieces_are_oriented_and_sorted(self):
+        pieces = [tuple(_sheet_points(item)) for item in voronoi_generator(_voronoi_circle(), self._seeded(7))]
+        assert all(piece[0] <= piece[-1] for piece in pieces)
+        assert pieces == sorted(pieces)
+
+    def test_engrave_omits_outline(self):
+        domain = _voronoi_circle()
+        outline = domain.polygon.boundary.buffer(1e-3)
+        items = voronoi_generator(domain, self._seeded(7))
+        assert items
+        assert not any(LineString(_sheet_points(item)).within(outline) for item in items)
+
+    def test_engrave_two_points(self):
+        params = VoronoiParams(depth_mm=0.5, points=((-40.0, 0.0), (40.0, 0.0)))
+        items = voronoi_generator(_voronoi_circle(), params)
+        assert len(items) == 1
+        assert all(x == pytest.approx(150.0, abs=1e-6) for x, _ in _sheet_points(items[0]))
+
+    def test_explicit_three_points(self):
+        local = ((-40.0, -30.0), (35.0, -20.0), (0.0, 45.0))
+        params = VoronoiParams(depth_mm=0.5, points=local)
+        items = voronoi_generator(_voronoi_circle(), params)
+        (ax, ay), (bx, by), (cx, cy) = ((x + 150.0, y + 150.0) for x, y in local)
+        d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+        ux = ((ax**2 + ay**2) * (by - cy) + (bx**2 + by**2) * (cy - ay) + (cx**2 + cy**2) * (ay - by)) / d
+        uy = ((ax**2 + ay**2) * (cx - bx) + (bx**2 + by**2) * (ax - cx) + (cx**2 + cy**2) * (bx - ax)) / d
+        assert len(items) == 3
+        for item in items:
+            points = _sheet_points(item)
+            assert min(math.dist(points[0], (ux, uy)), math.dist(points[-1], (ux, uy))) < 1e-6
+
+    def test_pocket_webs_are_line_width(self):
+        domain = Domain.from_rectangle(200, 200, center=(150, 150))
+        pockets = [_pocket_polygon(item) for item in voronoi_generator(domain, self._pocket_params())]
+        inner = domain.polygon.buffer(-2 + 1e-6)
+        assert len(pockets) == 25
+        assert all(inner.covers(pocket) for pocket in pockets)
+        assert all(a.distance(b) >= 4 - 1e-6 for a, b in itertools.combinations(pockets, 2))
+
+    def test_pocket_items_carry_rest(self):
+        rest = RestSpec(tool_diameter_mm=3.175, rough_allowance_mm=0.3)
+        domain = Domain.from_rectangle(200, 200, center=(150, 150))
+        items = voronoi_generator(domain, replace(self._pocket_params(), rest=rest))
+        assert items
+        assert all(item.feature is not None and item.feature.rest == rest for item in items)
+
+    def test_pocket_concave_parent_split_cell(self):
+        domain = self._u_shape()
+        sheet = [(20.0, 90.0), (60.0, 10.0), (110.0, 10.0)]
+        cells = voronoi_diagram(MultiPoint(sheet), envelope=domain.polygon).geoms
+        assert any(isinstance(cell.intersection(domain.polygon), MultiPolygon) for cell in cells)
+        ox, oy = domain.local_origin or (0.0, 0.0)
+        params = VoronoiParams(
+            depth_mm=3.0, points=tuple((x - ox, y - oy) for x, y in sheet), mode="pocket", line_width_mm=4.0
+        )
+        assert len(voronoi_generator(domain, params)) == 4
+
+    def test_explicit_points_follow_rotated_domain(self):
+        domain = Domain.from_rectangle(200, 200, center=(150, 150), rotation_rad=math.pi / 6)
+        local = ((-20.0, 0.0), (20.0, 0.0))
+        seeds = [local_to_sheet(point, domain) for point in local]
+        items = voronoi_generator(domain, VoronoiParams(depth_mm=0.5, points=local))
+        assert len(items) == 1
+        for vertex in _sheet_points(items[0]):
+            assert math.dist(vertex, seeds[0]) == pytest.approx(math.dist(vertex, seeds[1]), abs=1e-6)
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 
@@ -2183,6 +2390,7 @@ ALL_GENERATORS = [
     phyllotaxis_hole_generator,
     phyllotaxis_pocket_generator,
     phyllotaxis_svg_generator,
+    voronoi_generator,
 ]
 
 

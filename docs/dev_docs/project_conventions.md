@@ -72,7 +72,7 @@ Generators that draw pseudo-random values (seed points, jitter, sampling) follow
 ```python
 @dataclass(frozen=True)
 class VoronoiParams(BaseParams):
-    seed_count: int
+    seed_count: int | None = None
     seed: int = 0
 
 
@@ -84,6 +84,7 @@ def voronoi_generator(domain: Domain, params: VoronoiParams, *, allow_empty: boo
 - `seed: int = 0` is the params field. The PML key is `seed`. The formatter emits it only when non-default.
 - Construct `numpy.random.default_rng(seed)` inside the generator call. Never call `random.*` or `np.random.*` module functions.
 - Draw order is part of the contract. Two calls with the same seed must consume the RNG in the same sequence, so reordering the sampling of an existing generator is a golden-output change.
+- Reference implementation: `_sample_seeds` in `generators/area/voronoi.py`.
 
 ## Import Layering
 

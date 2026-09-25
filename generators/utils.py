@@ -15,7 +15,7 @@ from generators.core import (
     GeneratorSkipError,
     LoopSelection,
 )
-from layout_ast.layout import Feature, Geometry, Item, Placement
+from layout_ast.layout import Feature, Geometry, Item, Placement, RestSpec
 
 if TYPE_CHECKING:
     from domains.domain import Domain
@@ -30,6 +30,7 @@ def shapely_to_item(
     shape_id: str,
     *,
     side: str | None = None,
+    rest: RestSpec | None = None,
 ) -> Item:
     if polygon.is_empty:
         raise ValueError("Cannot convert empty polygon to Item")
@@ -57,6 +58,7 @@ def shapely_to_item(
         type=feature_type,
         depth_mm=depth_mm,
         side=side,
+        rest=rest,
     )
 
     return Item(

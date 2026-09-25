@@ -16,6 +16,7 @@ from generators.area import (
     radial_svg_generator,
     radial_tick_generator,
     raised_panel_generator,
+    voronoi_generator,
     wave_generator,
     x_panel_generator,
 )
@@ -66,6 +67,7 @@ from generators.params.area import (
     RaisedPanelParams,
     RoseCurveParams,
     SpirographCurveParams,
+    VoronoiParams,
     XPanelParams,
 )
 from generators.params.loop import (
@@ -124,6 +126,7 @@ __all__ = [
     "SpirographCurveParams",
     "TextAlignment",
     "TextOrientation",
+    "VoronoiParams",
     "WaveParams",
     "XPanelParams",
     "bead_generator",
@@ -161,6 +164,7 @@ __all__ = [
     "spirograph_curve_generator",
     "svg_stamp_generator",
     "validate_domain_for_generation",
+    "voronoi_generator",
     "wave_generator",
     "x_panel_generator",
 ]

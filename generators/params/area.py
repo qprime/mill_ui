@@ -6,10 +6,11 @@ from itertools import pairwise
 from typing import Literal
 
 from core.constants import GOLDEN_ANGLE_DEG
-from domains.domain import JoinStyle
+from domains.domain import JoinStyle, Point2D
 from generators.core import BaseParams, resolve_major_spacing, resolve_minor_spacing
 from generators.params.measurement_base import MeasurementParamsBase
 from generators.radial_utils import closest_pair_distance, spiral_positions
+from layout_ast.layout import RestSpec
 
 _SPIRAL_TOLERANCE_MM = 1e-9
 
@@ -540,6 +541,71 @@ class LissajousCurveParams(BaseParams):
         _validate_curve_shared(
             "LissajousCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
         )
+
+
+@dataclass(frozen=True)
+class VoronoiParams(BaseParams):
+    depth_mm: float
+    seed_count: int | None = None
+    points: tuple[Point2D, ...] | None = None
+    seed: int = 0
+    min_spacing_mm: float | None = None
+    margin_mm: float = 0.0
+    mode: Literal["engrave", "pocket"] = "engrave"
+    line_width_mm: float | None = None
+    cell_inset_mm: float = 0.0
+    min_length_mm: float = 0.0
+    rest: RestSpec | None = None
+
+    def __post_init__(self) -> None:
+        if self.depth_mm <= 0:
+            raise ValueError(f"VoronoiParams: depth_mm must be positive, got {self.depth_mm}")
+        self._validate_seed_source()
+        for name, value in (
+            ("margin_mm", self.margin_mm),
+            ("cell_inset_mm", self.cell_inset_mm),
+            ("min_length_mm", self.min_length_mm),
+        ):
+            if value < 0:
+                raise ValueError(f"VoronoiParams: {name} must be non-negative, got {value}")
+        self._validate_mode()
+
+    def _validate_seed_source(self) -> None:
+        if (self.seed_count is None) == (self.points is None):
+            raise ValueError("VoronoiParams: give exactly one of seed_count or points")
+        if self.seed < 0:
+            raise ValueError(f"VoronoiParams: seed must be a non-negative integer, got {self.seed}")
+        if self.min_spacing_mm is not None and self.min_spacing_mm <= 0:
+            raise ValueError(f"VoronoiParams: min_spacing_mm must be positive when given, got {self.min_spacing_mm}")
+        if self.seed_count is not None:
+            if self.seed_count < 2:
+                raise ValueError(f"VoronoiParams: seed_count must be at least 2, got {self.seed_count}")
+            return
+        if len(set(self.points or ())) < 2:
+            raise ValueError("VoronoiParams: points must include at least 2 distinct locations")
+        for name, ignored in (
+            ("seed", self.seed != 0),
+            ("min_spacing_mm", self.min_spacing_mm is not None),
+            ("margin_mm", self.margin_mm != 0),
+        ):
+            if ignored:
+                raise ValueError(f"VoronoiParams: {name} applies only to seed_count and would be ignored with points")
+
+    def _validate_mode(self) -> None:
+        if self.mode == "engrave":
+            if self.line_width_mm is not None:
+                raise ValueError("VoronoiParams: line_width_mm is only valid in pocket mode")
+            if self.cell_inset_mm != 0:
+                raise ValueError("VoronoiParams: cell_inset_mm is only valid in pocket mode")
+            if self.rest is not None:
+                raise ValueError("VoronoiParams: rest is only valid in pocket mode")
+            return
+        if self.mode != "pocket":
+            raise ValueError(f"VoronoiParams: mode must be 'engrave' or 'pocket', got {self.mode!r}")
+        if self.line_width_mm is None or self.line_width_mm <= 0:
+            raise ValueError(f"VoronoiParams: line_width_mm must be positive in pocket mode, got {self.line_width_mm}")
+        if self.min_length_mm != 0:
+            raise ValueError("VoronoiParams: min_length_mm is only valid in engrave mode")
 
 
 @dataclass(frozen=True)

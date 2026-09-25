@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import shapely
 from shapely.geometry import LinearRing, Polygon
 from shapely.geometry.base import BaseGeometry
@@ -10,6 +12,8 @@ from cam.moves import Move
 from cam.native import core as native_core
 from cam.shape import Shape2D
 from cam.types import Vec2
+
+_REST_SLIVER_MM = 0.01
 
 
 def pocket_raster(
@@ -87,3 +91,43 @@ def pocket_finish_contours(
         depth_mm=depth_mm,
         stepdown=stepdown,
     )
+
+
+def _drop_slivers(geometry: BaseGeometry) -> BaseGeometry:
+    return geometry.buffer(-_REST_SLIVER_MM).buffer(_REST_SLIVER_MM)
+
+
+def rest_loop_regions(
+    region: BaseGeometry,
+    *,
+    tool_radius_mm: float,
+    rough_tool_radius_mm: float,
+    rough_allowance_mm: float,
+    stepover: float,
+    wall_allowance_mm: float = 0.0,
+) -> list[BaseGeometry]:
+    rough_reach = region.buffer(-(rough_tool_radius_mm + rough_allowance_mm), join_style="round").buffer(
+        rough_tool_radius_mm, join_style="round"
+    )
+    reachable = region.buffer(-(tool_radius_mm + wall_allowance_mm), join_style="round")
+    remaining = _drop_slivers(reachable.buffer(tool_radius_mm, join_style="round").difference(rough_reach))
+    step = min(float(stepover), tool_radius_mm)
+    loops: list[BaseGeometry] = []
+    while not remaining.is_empty:
+        offset_region = region.buffer(-(tool_radius_mm + wall_allowance_mm + len(loops) * step), join_style="round")
+        if offset_region.is_empty:
+            break
+        loops.append(offset_region)
+        swept = offset_region.boundary.buffer(tool_radius_mm, join_style="round")
+        remaining = _drop_slivers(remaining.difference(swept))
+    return loops
+
+
+def pocket_rest_loops(
+    loops: Sequence[BaseGeometry],
+    setup: Setup,
+    *,
+    depth_mm: float,
+    stepdown: float,
+) -> list[Move]:
+    return [move for loop in loops for move in _contour_moves(loop, setup, depth_mm=depth_mm, stepdown=stepdown)]

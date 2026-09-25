@@ -562,3 +562,55 @@ children:
     assert curves[0].feature.type == "engrave"
     assert curves[0].shape_id is not None
     assert curves[0].shape_id.startswith("generated_lissajous")
+
+
+def _voronoi_pml(voronoi: str) -> str:
+    return f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: disc
+      diameter: 200mm
+      at: {{x: 150mm, y: 150mm}}
+      children:
+        - Voronoi: {voronoi}
+"""
+
+
+def test_voronoi_resolves_engraves():
+    ast = resolve_layout(parse_pml_yaml(_voronoi_pml("{seed_count: 40, seed: 7, min_spacing: 12mm, depth: 0.5mm}")))
+
+    engraves = [item for item in ast.items if item.feature is not None and item.feature.type == "engrave"]
+    assert engraves
+    for item in engraves:
+        assert item.type == "Polyline"
+        assert item.shape_id is not None
+        assert item.shape_id.startswith("generated_voronoi")
+        assert item.placement is not None
+        assert math.dist(item.placement.center_xy_mm, (150.0, 150.0)) < 100.0
+
+
+def test_voronoi_resolves_pockets():
+    ast = resolve_layout(
+        parse_pml_yaml(
+            _voronoi_pml("{seed_count: 12, seed: 3, min_spacing: 20mm, mode: pocket, line_width: 4mm, depth: 3mm}")
+        )
+    )
+
+    pockets = [item for item in ast.items if item.feature is not None and item.feature.type == "pocket"]
+    assert len(pockets) == 12
+    for item in pockets:
+        assert item.type == "Polygon"
+        assert item.feature is not None
+        assert item.feature.depth_mm == 3.0
+
+
+def test_voronoi_unsatisfiable_spacing_propagates():
+    ast = parse_pml_yaml(_voronoi_pml("{seed_count: 40, min_spacing: 60mm, depth: 0.5mm}"))
+
+    with pytest.raises(ValueError, match="of 40 seeds"):
+        resolve_layout(ast)

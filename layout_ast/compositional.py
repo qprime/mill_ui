@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from core.constants import GOLDEN_ANGLE_DEG
-from layout_ast.layout import DogboneSpec, FeedsOverride
+from layout_ast.layout import DogboneSpec, FeedsOverride, RestSpec
 
 
 @dataclass(frozen=True)
@@ -383,6 +383,21 @@ class LissajousCurveGen:
     rotation_deg: float = 0.0
     tolerance_mm: float = 0.05
     min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
+class VoronoiGen:
+    depth_mm: float
+    seed_count: int | None = None
+    points: tuple[tuple[float, float], ...] | None = None
+    seed: int = 0
+    min_spacing_mm: float | None = None
+    margin_mm: float = 0.0
+    mode: Literal["engrave", "pocket"] = "engrave"
+    line_width_mm: float | None = None
+    cell_inset_mm: float = 0.0
+    min_length_mm: float = 0.0
+    rest: RestSpec | None = None
 
 
 @dataclass(frozen=True)

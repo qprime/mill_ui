@@ -11,11 +11,12 @@ from shapely.ops import unary_union
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
 from cam.ops.engrave import engrave_lines, engrave_lines_ramped
-from cam.ops.pocket import pocket_finish_contours, pocket_offset_loops
+from cam.ops.pocket import pocket_finish_contours, pocket_offset_loops, pocket_rest_loops, rest_loop_regions
 from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import move_comment, offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
+from layout_ast.layout import RestSpec
 
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
@@ -33,6 +34,8 @@ from .tools import (
 
 if TYPE_CHECKING:
     from cam.config import Config
+    from cam.model.setup import Setup
+    from cam.moves import Move
 
     from . import PassAccumulator, PassRecord
 
@@ -85,23 +88,112 @@ def _pocket_with_allowance(
         finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
 
 
-def _extract_rect_dims(entry: FeatureInput) -> tuple[float, float]:
-    sg = entry.geometry.geometry
-    shape_name = entry.shape.lower()
-    if shape_name == "rect":
-        return float(sg.w_mm or 0.0), float(sg.h_mm or 0.0)
-    elif shape_name == "polygon":
-        pts = sg.points or ()
-        if not pts:
-            return 0.0, 0.0
-        xs = [float(p[0]) for p in pts]
-        ys = [float(p[1]) for p in pts]
-        return max(xs) - min(xs), max(ys) - min(ys)
-    raise ValueError(f"Cannot extract rect dims from shape '{shape_name}'")
+def _offset_pocket_moves(
+    region: BaseGeometry,
+    tool: ToolSelection,
+    setup: Setup,
+    *,
+    depth_mm: float,
+    wall_allowance_mm: float,
+) -> list[Move]:
+    step_over = stepover_for_tool(tool)
+    step_down = stepdown_for_tool(tool)
+    return [
+        move_comment(f"BEGIN offset pocket sd={step_down:.3f} so={min(step_over, tool.diameter / 2.0):.3f}"),
+        *pocket_offset_loops(
+            region,
+            setup,
+            depth_mm=depth_mm,
+            stepover=step_over,
+            stepdown=step_down,
+            wall_allowance_mm=wall_allowance_mm,
+        ),
+    ]
+
+
+def _plan_rest(
+    entry: FeatureInput,
+    region: BaseGeometry | None,
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+    config: Config,
+) -> None:
+    rest = entry.rest
+    if rest is None:
+        raise ValueError(f"Rest pocketing requires rest parameters on feature '{entry.id}'")
+    et = entry.edge_treatment
+    if et is not None and et.type == "allowance":
+        raise ValueError(
+            f"Cannot combine 'rest' and 'edge_treatment: allowance' on feature '{entry.id}'. "
+            f"Rest pocketing subsumes edge_treatment allowance — use rest alone."
+        )
+    if region is None:
+        _plan_rest_pocket(entry, rest, accumulator=accumulator, tool_db=tool_db, config=config)
+    else:
+        _plan_rest_region(entry, region, rest, accumulator=accumulator, tool_db=tool_db, config=config)
+
+
+def _plan_rest_region(
+    entry: FeatureInput,
+    region: BaseGeometry,
+    rest: RestSpec,
+    *,
+    accumulator: PassAccumulator,
+    tool_db: Sequence[ToolSelection],
+    config: Config,
+) -> None:
+    rough_tool = pick_tool_for_region(
+        tool_db, region, cleanup_offset_mm=config.cleanup_offset_mm + rest.rough_allowance_mm
+    )
+    if rough_tool is None:
+        _warn_no_fitting_tool(entry, tool_db, accumulator)
+        return
+    rough_tool = apply_feeds_override(rough_tool, entry.feeds_override)
+    finish_tool = apply_feeds_override(
+        pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat"), entry.feeds_override
+    )
+    accumulator.set_feature_tool(entry.id, rough_tool)
+
+    start_depth = max(0.0, entry.start_depth_mm)
+    cut_depth = entry.depth_mm - start_depth
+    if cut_depth <= 0.0:
+        return
+
+    single_pass = rough_tool.diameter <= finish_tool.diameter
+    rough_record = accumulator.get_record("pocket", rough_tool)
+    rough_moves = _offset_pocket_moves(
+        region,
+        rough_tool,
+        rough_record.setup,
+        depth_mm=cut_depth,
+        wall_allowance_mm=rest.finish_allowance_mm if single_pass else rest.rough_allowance_mm,
+    )
+    rough_record.add_moves(offset_moves_z(rough_moves, start_depth), increment=1)
+    if single_pass:
+        return
+
+    loops = rest_loop_regions(
+        region,
+        tool_radius_mm=finish_tool.diameter / 2.0,
+        rough_tool_radius_mm=rough_tool.diameter / 2.0,
+        rough_allowance_mm=rest.rough_allowance_mm,
+        stepover=stepover_for_tool(finish_tool),
+        wall_allowance_mm=rest.finish_allowance_mm,
+    )
+    if not loops:
+        return
+    rest_record = accumulator.get_record("pocket_rest", finish_tool)
+    rest_moves = [
+        move_comment(f"BEGIN rest loops count={len(loops)}"),
+        *pocket_rest_loops(loops, rest_record.setup, depth_mm=cut_depth, stepdown=stepdown_for_tool(finish_tool)),
+    ]
+    rest_record.add_moves(offset_moves_z(rest_moves, start_depth), increment=1)
 
 
 def _plan_rest_pocket(
     entry: FeatureInput,
+    rest: RestSpec,
     *,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
@@ -109,24 +201,14 @@ def _plan_rest_pocket(
 ) -> None:
     from cam.ops.pocket import pocket_raster
 
-    if entry.rest is None:
-        raise ValueError(f"Rest pocketing requires rest parameters on feature '{entry.id}'")
-    rest = entry.rest
-    shape_name = entry.shape.lower()
-
-    if shape_name not in ("rect", "polygon"):
+    if entry.shape.lower() != "rect":
         raise ValueError(
-            f"Rest pocketing only supported for rectangular pockets, got shape '{entry.shape}' on feature '{entry.id}'"
+            f"Rest pocketing only supported for rectangular and polygon pockets, got shape '{entry.shape}' "
+            f"on feature '{entry.id}'"
         )
 
-    et = entry.edge_treatment
-    if et is not None and et.type == "allowance":
-        raise ValueError(
-            f"Cannot combine 'rest' and 'edge_treatment: allowance' on feature '{entry.id}'. "
-            f"Rest pocketing subsumes edge_treatment allowance — use rest alone."
-        )
-
-    width, height = _extract_rect_dims(entry)
+    sg = entry.geometry.geometry
+    width, height = float(sg.w_mm or 0.0), float(sg.h_mm or 0.0)
     min_dim = min(width, height)
 
     if rest.tool_diameter_mm >= min_dim:
@@ -287,13 +369,8 @@ def _reject_unsupported_region_strategy(entry: FeatureInput) -> None:
     kind = "holes" if entry.geometry.geometry.holes else "islands" if entry.islands else None
     if kind is None:
         return
-    unsupported = (
-        ("surface_cooling", entry.surface_cooling is not None),
-        ("rest", entry.rest is not None),
-    )
-    for name, present in unsupported:
-        if present:
-            raise ValueError(f"Pocket '{entry.id}': {kind} are not supported with {name}")
+    if entry.surface_cooling is not None:
+        raise ValueError(f"Pocket '{entry.id}': {kind} are not supported with surface_cooling")
 
 
 def _pick_fitting_pocket_tool(
@@ -347,16 +424,17 @@ def plan_pocket_passes(
             _plan_surface_pass(entry, accumulator=accumulator, tool_db=tool_db)
             continue
 
-        if entry.rest is not None:
-            _plan_rest_pocket(entry, accumulator=accumulator, tool_db=tool_db, config=config)
-            continue
-
-        sg = entry.geometry.geometry
-        shape_name = entry.shape.lower()
         region = _pocket_region(entry)
         if region is not None and region.is_empty:
             accumulator.add_warning(f"Pocket '{entry.id}': islands cover the whole pocket — feature skipped")
             continue
+
+        if entry.rest is not None:
+            _plan_rest(entry, region, accumulator=accumulator, tool_db=tool_db, config=config)
+            continue
+
+        sg = entry.geometry.geometry
+        shape_name = entry.shape.lower()
 
         et = entry.edge_treatment
         allowance_et = et if et is not None and et.type == "allowance" else None
@@ -383,17 +461,9 @@ def plan_pocket_passes(
         center = entry.center_xy_mm
 
         if region is not None:
-            moves = [
-                move_comment(f"BEGIN offset pocket sd={step_down:.3f} so={min(step_over, tool.diameter / 2.0):.3f}"),
-                *pocket_offset_loops(
-                    region,
-                    setup,
-                    depth_mm=effective_depth,
-                    stepover=step_over,
-                    stepdown=step_down,
-                    wall_allowance_mm=rough_allowance,
-                ),
-            ]
+            moves = _offset_pocket_moves(
+                region, tool, setup, depth_mm=effective_depth, wall_allowance_mm=rough_allowance
+            )
             record.add_moves(offset_moves_z(moves, start_depth), increment=1)
             if allowance_et is not None:
                 finish_record = accumulator.get_record("finish", tool)

@@ -41,6 +41,7 @@ from generators.area.radial_pocket import radial_pocket_generator
 from generators.area.radial_svg import radial_svg_generator
 from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
+from generators.area.voronoi import voronoi_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
 from generators.curves import lissajous_curve_generator, rose_curve_generator, spirograph_curve_generator
@@ -59,6 +60,7 @@ from generators.params.area import (
     RadialTickParams,
     RoseCurveParams,
     SpirographCurveParams,
+    VoronoiParams,
 )
 from generators.svg.params import SVGPathParams
 from generators.svg.parser import extract_path_data
@@ -121,6 +123,7 @@ from layout_ast.compositional import (
     SvgStampGen,
     Triangle,
     UseComponent,
+    VoronoiGen,
     WasteCuts,
     WaveGen,
     XPanelGen,
@@ -1666,6 +1669,41 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("border")
         try:
             generated_items = concentric_border_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_voronoi_gen(
+        self,
+        node: VoronoiGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = VoronoiParams(
+            depth_mm=node.depth_mm,
+            seed_count=node.seed_count,
+            points=node.points,
+            seed=node.seed,
+            min_spacing_mm=node.min_spacing_mm,
+            margin_mm=node.margin_mm,
+            mode=node.mode,
+            line_width_mm=node.line_width_mm,
+            cell_inset_mm=node.cell_inset_mm,
+            min_length_mm=node.min_length_mm,
+            rest=node.rest,
+        )
+
+        shape_id_prefix = self._next_shape_id("voronoi")
+        try:
+            generated_items = voronoi_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3311,6 +3349,7 @@ class LayoutResolver:
                 LinesGen: LayoutResolver._handle_lines_gen,
                 FlutingGen: LayoutResolver._handle_fluting_gen,
                 ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
+                VoronoiGen: LayoutResolver._handle_voronoi_gen,
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,

@@ -29,11 +29,11 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | constraints.tabs | HONORED | — | Profiles only |
 | constraints.onion_skin_mm | HONORED | — | Profiles only; mutually exclusive with tabs |
 | constraints.keepouts | HONORED | CRITICAL | Toolpath avoids keepout bounds |
-| constraints.islands | HONORED | — | Pockets: island bounds are subtracted from the pocket region, cut with offset loops. Rejected with rest or surface_cooling. |
+| constraints.islands | HONORED | — | Pockets: island bounds are subtracted from the pocket region, cut with offset loops. Rejected with surface_cooling. |
 | constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes. Polygon pockets and pockets with islands: rough offset loops leave the rough allowance on every wall, finish contours cut to the finish allowance. |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
-| rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. Mutually exclusive with edge_treatment allowance. |
+| rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. A plain Rect uses the rectangle pass; a Polygon (holes allowed) or a Rect with islands uses offset loops that follow the region. Mutually exclusive with edge_treatment allowance. |
 | corner_cleanup | HONORED | — | Secondary tool pass for rectangular pocket internal corners |
 | dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
 | edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |

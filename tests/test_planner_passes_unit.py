@@ -19,6 +19,7 @@ from cam.moves import CutMove, RapidMove, RetractMove, XYMove
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
+from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator
 from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
@@ -48,6 +49,7 @@ from cam.planner.planner_input import (
     FeatureInput,
     GeometryInput,
     IslandInput,
+    SurfaceCooling,
 )
 from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec, ShapeGeometry
 from layout_ast.layout import RestSpec
@@ -679,21 +681,10 @@ class TestPlanPocketPasses:
         assert acc.passes() == []
         assert acc.warnings == ["Pocket 'covered': islands cover the whole pocket — feature skipped"]
 
-    def test_pocket_with_island_and_rest_raises(self):
+    def test_holed_polygon_with_surface_cooling_raises(self):
         acc = _accumulator()
-        island = IslandInput(x_min=120.0, x_max=180.0, y_min=70.0, y_max=130.0)
-        pocket = replace(
-            _feature("Rect", {"w_mm": 200.0, "h_mm": 160.0}, _RING_CENTER, 3.0, id="rest_rect"),
-            islands=(island,),
-            rest=RestSpec(tool_diameter_mm=3.0),
-        )
-        with pytest.raises(ValueError, match="Pocket 'rest_rect': islands are not supported with rest"):
-            plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
-
-    def test_holed_polygon_with_rest_raises(self):
-        acc = _accumulator()
-        pocket = _ring_feature(10.0, id="rest_ring", rest=RestSpec(tool_diameter_mm=3.0))
-        with pytest.raises(ValueError, match="Pocket 'rest_ring': holes are not supported with rest"):
+        pocket = _ring_feature(10.0, id="cooled_ring", surface_cooling=SurfaceCooling())
+        with pytest.raises(ValueError, match="Pocket 'cooled_ring': holes are not supported with surface_cooling"):
             plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
 
     def test_polygon_allowance_stays_inside_polygon(self):
@@ -753,6 +744,120 @@ class TestPlanPocketPasses:
             point = ShapelyPoint(x, y)
             assert region.contains(point)
             assert region.boundary.distance(point) >= radius - 1e-6
+
+
+_TRIANGLE_CENTER = (150.0, 100.0)
+_TRIANGLE_POINTS = [(-50.0, -20.0), (50.0, -20.0), (-30.0, 20.0)]
+
+
+def _rest_triangle(**kwargs) -> FeatureInput:
+    pocket: FeatureInput = _feature("Polygon", {"points": _TRIANGLE_POINTS}, _TRIANGLE_CENTER, 3.0, id="tri")
+    return replace(pocket, rest=RestSpec(tool_diameter_mm=3.0), **kwargs)
+
+
+def _placed_triangle() -> ShapelyPolygon:
+    return translate(ShapelyPolygon(_TRIANGLE_POINTS), *_TRIANGLE_CENTER)
+
+
+def _swept_area(record):
+    radius = record.tool_selection.diameter / 2.0
+    lines = [LineString([a[:2], b[:2]]) for a, b in _cut_segments(record.moves) if b[2] < 0.0 and a[:2] != b[:2]]
+    return unary_union(lines).buffer(radius)
+
+
+def _assert_clear_of_walls(record, region, clearance: float) -> None:
+    positions = _cut_positions(record.moves)
+    assert positions
+    for x, y, _ in positions:
+        point = ShapelyPoint(x, y)
+        assert region.contains(point)
+        assert region.boundary.distance(point) >= clearance - 1e-6
+
+
+class TestRegionRestPocket:
+    def _plan(self, pocket: FeatureInput) -> PassAccumulator:
+        acc: PassAccumulator = _accumulator()
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        return acc
+
+    def _records(self, acc: PassAccumulator) -> dict:
+        return {record.op: record for record in acc.passes()}
+
+    def test_polygon_rest_stays_inside_polygon(self):
+        records = self._records(self._plan(_rest_triangle()))
+        assert set(records) == {"pocket", "pocket_rest"}
+        assert records["pocket"].tool_selection.diameter == 12.0
+        assert records["pocket_rest"].tool_selection.diameter == 3.0
+        _assert_clear_of_walls(records["pocket"], _placed_triangle(), 6.0 + 0.5)
+        _assert_clear_of_walls(records["pocket_rest"], _placed_triangle(), 1.5)
+
+    def test_polygon_rest_clears_reachable_corners(self):
+        records = self._records(self._plan(_rest_triangle()))
+        cut = unary_union([_swept_area(record) for record in records.values()])
+        target = _placed_triangle().buffer(-1.5, join_style="round").buffer(1.5, join_style="round")
+        assert target.difference(cut).buffer(-0.02).is_empty
+
+    def test_polygon_rest_is_cheaper_than_full_small_pocket(self):
+        rest = self._records(self._plan(_rest_triangle()))["pocket_rest"]
+        full = pocket_offset_loops(
+            _placed_triangle(),
+            rest.setup,
+            depth_mm=3.0,
+            stepover=stepover_for_tool(rest.tool_selection),
+            stepdown=stepdown_for_tool(rest.tool_selection),
+        )
+        assert len(_cut_segments(rest.moves)) < len(_cut_segments(full))
+
+    def test_polygon_rest_skips_rest_pass_when_nothing_remains(self):
+        disc = [(float(x), float(y)) for x, y in ShapelyPoint(0.0, 0.0).buffer(40.0).exterior.coords[:-1]]
+        pocket = replace(
+            _feature("Polygon", {"points": disc}, _TRIANGLE_CENTER, 3.0, id="disc"),
+            rest=RestSpec(tool_diameter_mm=3.0, rough_allowance_mm=0.0),
+        )
+        acc = self._plan(pocket)
+        (record,) = acc.passes()
+        assert record.op == "pocket"
+        assert record.tool_selection.diameter == 12.0
+        assert acc.warnings == []
+
+    def test_polygon_rest_falls_back_when_no_larger_tool_fits(self):
+        square = [(-3.0, -3.0), (3.0, -3.0), (3.0, 3.0), (-3.0, 3.0)]
+        pocket = replace(
+            _feature("Polygon", {"points": square}, _TRIANGLE_CENTER, 3.0, id="small"),
+            rest=RestSpec(tool_diameter_mm=3.0),
+        )
+        acc = self._plan(pocket)
+        (record,) = acc.passes()
+        assert record.op == "pocket"
+        assert record.tool_selection.diameter == 3.0
+        assert acc.warnings == []
+        _assert_clear_of_walls(record, translate(ShapelyPolygon(square), *_TRIANGLE_CENTER), 1.5)
+
+    def test_holed_polygon_with_rest_cuts_around_hole(self):
+        records = self._records(self._plan(_ring_feature(20.0, id="rest_ring", rest=RestSpec(tool_diameter_mm=3.0))))
+        assert set(records) == {"pocket", "pocket_rest"}
+        _assert_clear_of_walls(records["pocket"], _placed_ring(20.0), 6.0 + 0.5)
+        _assert_clear_of_walls(records["pocket_rest"], _placed_ring(20.0), 1.5)
+
+    def test_rect_with_island_and_rest_cuts_around_island(self):
+        island = IslandInput(x_min=120.0, x_max=180.0, y_min=70.0, y_max=130.0)
+        pocket = replace(
+            _feature("Rect", {"w_mm": 200.0, "h_mm": 160.0}, _RING_CENTER, 3.0, id="rest_rect"),
+            islands=(island,),
+            rest=RestSpec(tool_diameter_mm=3.0),
+        )
+        records = self._records(self._plan(pocket))
+        region = box(50.0, 20.0, 250.0, 180.0).difference(box(120.0, 70.0, 180.0, 130.0))
+        assert set(records) == {"pocket", "pocket_rest"}
+        _assert_clear_of_walls(records["pocket"], region, 6.0 + 0.5)
+        _assert_clear_of_walls(records["pocket_rest"], region, 1.5)
+
+    def test_polygon_rest_with_allowance_edge_treatment_raises(self):
+        pocket = _rest_triangle(
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.0)
+        )
+        with pytest.raises(ValueError, match="Cannot combine"):
+            self._plan(pocket)
 
 
 class TestPlanHolePasses:

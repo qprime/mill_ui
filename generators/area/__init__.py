@@ -17,6 +17,7 @@ from generators.area.radial_pocket import radial_pocket_generator
 from generators.area.radial_svg import radial_svg_generator
 from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
+from generators.area.voronoi import voronoi_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
 
@@ -38,6 +39,7 @@ __all__ = [
     "radial_svg_generator",
     "radial_tick_generator",
     "raised_panel_generator",
+    "voronoi_generator",
     "wave_generator",
     "x_panel_generator",
 ]

@@ -293,6 +293,37 @@ def test_check_overlap_zero_width_inside_detects_overlap():
     assert not result.is_valid()
 
 
+def _through_profile() -> RemovalIntent:
+    return _make_intent(
+        region_id="profile_panel",
+        bounds=Bounds2D(x_min=0.0, x_max=200.0, y_min=0.0, y_max=200.0),
+        z_bottom=-12.0,
+        hint_type="profile",
+        side="outside",
+    )
+
+
+def test_check_overlap_engrave_inside_profile_exempt():
+    engrave = _make_intent(
+        region_id="engrave_mark",
+        bounds=Bounds2D(x_min=50.0, x_max=60.0, y_min=50.0, y_max=60.0),
+        z_bottom=-0.5,
+        hint_type="engrave",
+    )
+    assert check_overlap([_through_profile(), engrave]).is_valid()
+
+
+def test_check_overlap_engrave_past_profile_reported():
+    engrave = _make_intent(
+        region_id="engrave_mark",
+        bounds=Bounds2D(x_min=190.0, x_max=210.0, y_min=50.0, y_max=60.0),
+        z_bottom=-0.5,
+        hint_type="engrave",
+    )
+    result = check_overlap([_through_profile(), engrave])
+    assert len(result.errors) == 1
+
+
 def test_check_overlap_zero_width_outside_no_overlap():
     intent_a = _make_intent(
         region_id="normal",

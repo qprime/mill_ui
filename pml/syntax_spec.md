@@ -829,6 +829,65 @@ Unlike `rose`, `size` has no default: the figure is drawn at the stated radii un
 
 Equal frequencies draw an ellipse at `phase: 90` and a diagonal line traced twice at `phase: 0` or `180`.
 
+#### Voronoi
+
+Partitions the parent shape into Voronoi cells around seed points. `mode: engrave` engraves the edges shared between cells, each once; the parent's outline and hole boundaries are not engraved. `mode: pocket` pockets each cell, inset so a web of `line_width` stands between neighboring pockets. Seeds come from a seeded random sampler (`seed_count`) or from an explicit list (`points`).
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `seed_count` | One of `seed_count`, `points` | — | Number of random seeds, at least 2 |
+| `points` | One of `seed_count`, `points` | — | `[x, y]` pairs in mm from the parent's origin; at least 2 distinct points, each inside the parent and outside its holes |
+| `seed` | No | 0 | `seed_count` only: RNG seed, a non-negative integer. The same seed always gives the same cells |
+| `min_spacing` | No | — | `seed_count` only: accepted seeds keep at least this distance. Must be positive; omit it for plain uniform sampling |
+| `margin` | No | 0mm | `seed_count` only: seeds stay this far inside the outline and holes |
+| `mode` | No | `engrave` | `engrave` or `pocket` |
+| `line_width` | `pocket`: Yes | — | `pocket` only: the web left between neighboring pockets. Each cell is inset by half of it |
+| `cell_inset` | No | 0mm | `pocket` only: extra inset per cell, so the web is `line_width + 2·cell_inset` |
+| `min_length` | No | 0mm | `engrave` only: drop edge pieces shorter than this |
+| `rest_tool` / `rest` | No | — | `pocket` only: rest machining for each cell, as for a pocket feature (see [Rest Pocketing](#rest-pocketing)). A small tool cleans the corners the pocketing tool leaves round |
+| `depth` | Yes | — | Engrave or pocket depth |
+
+`Voronoi` is a leaf node; `children` and `feature` are rejected. `seed`, `min_spacing` and `margin` are rejected with `points`, because they would be ignored.
+
+The origin for `points` is the parent's local origin: the center of a `Rect` or `Circle`, and the area centroid of a `Polygon`, `Triangle` or `Ellipse`. Repeated points merge into one cell.
+
+Random seeds, engraved edges:
+
+```yaml
+- Voronoi:
+    seed_count: 40
+    seed: 7
+    min_spacing: 12mm
+    depth: 0.5mm
+```
+
+Pocketed cells:
+
+```yaml
+- Voronoi:
+    seed_count: 30
+    seed: 0
+    min_spacing: 15mm
+    margin: 8mm
+    mode: pocket
+    line_width: 4mm
+    cell_inset: 1mm
+    rest_tool: 3.175mm
+    depth: 3mm
+```
+
+Explicit seeds:
+
+```yaml
+- Voronoi:
+    points: [[-40, -30], [35, -20], [0, 45]]
+    depth: 0.5mm
+```
+
+**Sampling.** Each attempt draws a point uniformly over the bounds of the seed region (the parent inset by `margin`) and keeps it if it lies in the region and at least `min_spacing` from every kept seed. Sampling stops after `50·seed_count` attempts. If fewer than `seed_count` seeds fit, generation fails with an error naming how many were placed; lower `seed_count` or `min_spacing`. A `margin` that leaves no room for seeds, or an explicit point outside the parent, also fails with an error rather than producing an empty panel.
+
+**Cells in concave parents.** A cell clipped to a concave parent can split into several pieces. Pocket mode cuts one pocket per piece. Cells narrower than the web collapse under the inset and are dropped.
+
 #### Wave
 
 Wavy groove pattern:
@@ -1705,7 +1764,9 @@ Explicit form:
 | `rough_allowance` | no | `0.5mm` | Stock left by rough pass on all walls |
 | `finish_allowance` | no | `0mm` | Final surface allowance after rest pass |
 
-Only supported on rectangular pocket shapes (Rect, Polygon). Cannot specify both `rest` and `rest_tool`. Mutually exclusive with `edge_treatment: {type: allowance}` — rest pocketing subsumes the allowance pattern by adding a tool change between passes.
+Supported on `Rect` and `Polygon` pockets, and on `Voronoi` pocket cells. A plain `Rect` is roughed with a raster, then the small tool cleans its four corners and profiles its perimeter. A `Polygon` (holes allowed) or a `Rect` with islands follows its real outline: the large tool cuts offset loops that leave `rough_allowance` on every wall, then the small tool cuts contour loops from the wall inward until every corner it can reach is clear. When no tool larger than the rest tool fits a `Polygon` pocket, the pocket is cut in one pass with the largest tool that fits and has no rest pass; its corners already come out at least as sharp as the rest tool would leave them. The rest tool diameter must match a flat tool in the library.
+
+Cannot specify both `rest` and `rest_tool`. Mutually exclusive with `edge_treatment: {type: allowance}` — rest pocketing subsumes the allowance pattern by adding a tool change between passes.
 
 The rough pass uses the standard `pocket` operation name. Only the rest pass introduces `pocket_rest`. Operator workflow: run `pocket-*.nc`, tool change, run `pocket_rest-*.nc`.
 

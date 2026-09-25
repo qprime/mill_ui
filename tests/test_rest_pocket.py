@@ -401,6 +401,22 @@ children:
         with pytest.raises(PMLParseError, match="Cannot specify both"):
             parse_pml_yaml(pml)
 
+    def test_scalar_rest_error(self):
+        pml = """
+Sheet:
+  width: 400mm
+  height: 300mm
+  thickness: 19mm
+children:
+  - Rect:
+      feature:
+        type: pocket
+        depth: 12mm
+        rest: 3.175mm
+"""
+        with pytest.raises(PMLParseError, match="'rest' must be a mapping"):
+            parse_pml_yaml(pml)
+
     def test_no_rest(self):
         pml = """
 Sheet:

@@ -76,6 +76,7 @@ If `tab_count == 0`, tab dimensions are ignored.
 - For Phyllotaxis: motif extent (`diameter_mm`, or `size_mm·√2` for SVG) < the closest-pair distance of the generated spiral points, which equals `spacing_mm` only at the golden angle
 - For raised panels: `field_depth_mm < border_depth_mm`
 - For ConcentricBorder in pocket mode: sorted `insets_mm` differ by at least `groove_width_mm`; rings exactly `groove_width_mm` apart touch. Insets are distinct in both modes.
+- For Voronoi: `min_spacing_mm` is optional and > 0 when given. In pocket mode adjacent pockets are at least `line_width_mm` apart, because each cell is inset by `line_width_mm / 2`.
 
 ---
 

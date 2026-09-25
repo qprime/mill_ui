@@ -65,11 +65,12 @@ from layout_ast.compositional import (
     SvgStampGen,
     Triangle,
     UseComponent,
+    VoronoiGen,
     WasteCuts,
     WaveGen,
     XPanelGen,
 )
-from layout_ast.layout import DEFAULT_MIN_WEB_MM, DogboneSpec, Feature, FeedsOverride
+from layout_ast.layout import DEFAULT_MIN_WEB_MM, DogboneSpec, Feature, FeedsOverride, RestSpec
 from pml.measurement_fields import format_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob
 
@@ -177,6 +178,17 @@ def _format_feeds_override(feeds: Any) -> dict[str, Any] | None:
     return feeds_dict or None
 
 
+def _format_rest(rest: RestSpec) -> dict[str, Any]:
+    if rest.rough_allowance_mm == 0.5 and rest.finish_allowance_mm == 0.0:
+        return {"rest_tool": dim(rest.tool_diameter_mm)}
+    rest_dict: dict[str, Any] = {"tool": dim(rest.tool_diameter_mm)}
+    if rest.rough_allowance_mm != 0.5:
+        rest_dict["rough_allowance"] = dim(rest.rough_allowance_mm)
+    if rest.finish_allowance_mm != 0.0:
+        rest_dict["finish_allowance"] = dim(rest.finish_allowance_mm)
+    return {"rest": rest_dict}
+
+
 def format_feature(feature: Feature) -> dict[str, Any]:
     result: dict[str, Any] = {"type": feature.type}
 
@@ -195,17 +207,7 @@ def format_feature(feature: Feature) -> dict[str, Any]:
         result["corner_cleanup"] = dim(feature.corner_cleanup_tool_diameter_mm)
 
     if feature.rest is not None:
-        rest_spec = feature.rest
-        has_non_defaults = rest_spec.rough_allowance_mm != 0.5 or rest_spec.finish_allowance_mm != 0.0
-        if has_non_defaults:
-            rest_dict: dict[str, Any] = {"tool": dim(rest_spec.tool_diameter_mm)}
-            if rest_spec.rough_allowance_mm != 0.5:
-                rest_dict["rough_allowance"] = dim(rest_spec.rough_allowance_mm)
-            if rest_spec.finish_allowance_mm != 0.0:
-                rest_dict["finish_allowance"] = dim(rest_spec.finish_allowance_mm)
-            result["rest"] = rest_dict
-        else:
-            result["rest_tool"] = dim(rest_spec.tool_diameter_mm)
+        result.update(_format_rest(feature.rest))
 
     if feature.dogbone is not None:
         result["dogbone"] = _format_dogbone(feature.dogbone)
@@ -282,6 +284,32 @@ def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen | LissajousCurveG
     if node.min_length_mm != 0.0:
         keys["min_length"] = dim(node.min_length_mm)
     return keys
+
+
+def _format_voronoi(node: VoronoiGen) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if node.seed_count is not None:
+        result["seed_count"] = node.seed_count
+    if node.points is not None:
+        result["points"] = [[dim(x), dim(y)] for x, y in node.points]
+    if node.seed != 0:
+        result["seed"] = node.seed
+    if node.min_spacing_mm is not None:
+        result["min_spacing"] = dim(node.min_spacing_mm)
+    if node.margin_mm != 0.0:
+        result["margin"] = dim(node.margin_mm)
+    if node.mode != "engrave":
+        result["mode"] = node.mode
+    if node.line_width_mm is not None:
+        result["line_width"] = dim(node.line_width_mm)
+    if node.cell_inset_mm != 0.0:
+        result["cell_inset"] = dim(node.cell_inset_mm)
+    if node.min_length_mm != 0.0:
+        result["min_length"] = dim(node.min_length_mm)
+    if node.rest is not None:
+        result.update(_format_rest(node.rest))
+    result["depth"] = dim(node.depth_mm)
+    return result
 
 
 def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type dispatcher
@@ -697,6 +725,9 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["groove"] = dim(node.groove_width_mm)
         result["depth"] = dim(node.depth_mm)
         return {"ConcentricBorder": result}
+
+    elif isinstance(node, VoronoiGen):
+        return {"Voronoi": _format_voronoi(node)}
 
     elif isinstance(node, Subtract):
         result: dict[str, Any] = {"inner_inset": dim(node.inner_inset_mm)}

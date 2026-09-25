@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Literal
 
 from ruamel.yaml import YAML
 
@@ -55,6 +55,7 @@ from layout_ast.compositional import (
     TemplateDef,
     Triangle,
     UseComponent,
+    VoronoiGen,
     WasteCuts,
     WaveGen,
     XPanelGen,
@@ -274,6 +275,30 @@ def _parse_face(raw: Any, path: str) -> str:
     return face
 
 
+def _parse_rest(data: dict, path: str) -> RestSpec | None:
+    rest_raw = data.get("rest")
+    rest_tool_raw = data.get("rest_tool")
+    if rest_raw is not None and rest_tool_raw is not None:
+        raise PMLParseError("Cannot specify both 'rest' and 'rest_tool'", path)
+    if rest_raw is not None and not isinstance(rest_raw, dict):
+        raise PMLParseError(
+            f"'rest' must be a mapping such as 'rest: {{tool: 3.175mm}}', got {rest_raw!r}; "
+            "use 'rest_tool' for the diameter-only form",
+            path,
+        )
+    if isinstance(rest_raw, dict):
+        return RestSpec(
+            tool_diameter_mm=parse_dimension(_require(rest_raw, "tool", path + ".rest")),
+            rough_allowance_mm=parse_dimension(rest_raw["rough_allowance"]) if "rough_allowance" in rest_raw else 0.5,
+            finish_allowance_mm=parse_dimension(rest_raw["finish_allowance"])
+            if "finish_allowance" in rest_raw
+            else 0.0,
+        )
+    if rest_tool_raw is not None:
+        return RestSpec(tool_diameter_mm=parse_dimension(rest_tool_raw))
+    return None
+
+
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
     feature_type = data.get("type")
     if feature_type is None:
@@ -309,22 +334,6 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
             overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
         )
 
-    rest: RestSpec | None = None
-    rest_raw = data.get("rest")
-    rest_tool_raw = data.get("rest_tool")
-    if rest_raw is not None and rest_tool_raw is not None:
-        raise PMLParseError("Cannot specify both 'rest' and 'rest_tool'", path)
-    if isinstance(rest_raw, dict):
-        rest = RestSpec(
-            tool_diameter_mm=parse_dimension(_require(rest_raw, "tool", path + ".rest")),
-            rough_allowance_mm=parse_dimension(rest_raw["rough_allowance"]) if "rough_allowance" in rest_raw else 0.5,
-            finish_allowance_mm=parse_dimension(rest_raw["finish_allowance"])
-            if "finish_allowance" in rest_raw
-            else 0.0,
-        )
-    elif rest_tool_raw is not None:
-        rest = RestSpec(tool_diameter_mm=parse_dimension(rest_tool_raw))
-
     return Feature(
         type=feature_type,
         depth_mm=depth_mm,
@@ -333,7 +342,7 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         is_through=is_through,
         corner_cleanup_tool_diameter_mm=parse_dimension(data["corner_cleanup"]) if "corner_cleanup" in data else None,
         dogbone=dogbone,
-        rest=rest,
+        rest=_parse_rest(data, path),
         tab_count=data.get("tab_count"),
         tab_height_mm=parse_dimension(data["tab_height"]) if "tab_height" in data else None,
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,
@@ -774,6 +783,81 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
     raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: {', '.join(_CURVE_TYPES)}", ctx)
 
 
+_VORONOI_MODES = ("engrave", "pocket")
+
+
+def _parse_voronoi_points(raw: Any, ctx: str) -> tuple[tuple[float, float], ...]:
+    if not isinstance(raw, list):
+        raise PMLParseError("Voronoi 'points' must be a list of [x, y] pairs", ctx)
+    points: list[tuple[float, float]] = []
+    for index, point in enumerate(raw):
+        if not isinstance(point, list) or len(point) != 2:
+            raise PMLParseError(f"Voronoi point {index} must be an [x, y] pair, got {point!r}", ctx)
+        points.append((parse_dimension(point[0]), parse_dimension(point[1])))
+    if len(set(points)) < 2:
+        raise PMLParseError("Voronoi 'points' must include at least 2 distinct locations", ctx)
+    return tuple(points)
+
+
+def _check_voronoi_keys(node_data: dict, ctx: str) -> Literal["engrave", "pocket"]:
+    for key in ("children", "feature"):
+        if key in node_data:
+            raise PMLParseError(f"Voronoi does not accept '{key}'", ctx)
+    if ("seed_count" in node_data) == ("points" in node_data):
+        raise PMLParseError("Voronoi takes exactly one of 'seed_count' or 'points'", ctx)
+    if "points" in node_data:
+        for key in ("seed", "min_spacing", "margin"):
+            if key in node_data:
+                raise PMLParseError(
+                    f"Voronoi '{key}' applies only to 'seed_count' and would be ignored with 'points'", ctx
+                )
+
+    mode = node_data.get("mode", "engrave")
+    if mode == "engrave":
+        for key in ("line_width", "cell_inset", "rest", "rest_tool"):
+            if key in node_data:
+                raise PMLParseError(f"Voronoi '{key}' is only valid with 'mode: pocket'", ctx)
+        return "engrave"
+    if mode != "pocket":
+        raise PMLParseError(f"Unknown Voronoi mode: '{mode}'. Known modes: {', '.join(_VORONOI_MODES)}", ctx)
+    if "line_width" not in node_data:
+        raise PMLParseError("Voronoi 'mode: pocket' requires 'line_width'", ctx)
+    if "min_length" in node_data:
+        raise PMLParseError("Voronoi 'min_length' is only valid with 'mode: engrave'", ctx)
+    return "pocket"
+
+
+def _parse_voronoi_node(node_data: dict, path: str) -> VoronoiGen:
+    ctx = f"{path}.Voronoi"
+    mode = _check_voronoi_keys(node_data, ctx)
+
+    seed_count = _safe_int(node_data["seed_count"], "seed_count", ctx) if "seed_count" in node_data else None
+    if seed_count is not None and seed_count < 2:
+        raise PMLParseError(f"Voronoi 'seed_count' must be at least 2, got {seed_count}", ctx)
+    seed = _safe_int(node_data.get("seed", 0), "seed", ctx)
+    if seed < 0:
+        raise PMLParseError(f"Voronoi 'seed' must be a non-negative integer, got {seed}", ctx)
+    min_spacing_mm = parse_dimension(node_data["min_spacing"]) if "min_spacing" in node_data else None
+    if min_spacing_mm is not None and min_spacing_mm <= 0:
+        raise PMLParseError(
+            f"Voronoi 'min_spacing' must be positive, got {min_spacing_mm}mm; omit it for plain uniform sampling", ctx
+        )
+
+    return VoronoiGen(
+        depth_mm=parse_dimension(_require(node_data, "depth", ctx)),
+        seed_count=seed_count,
+        points=_parse_voronoi_points(node_data["points"], ctx) if "points" in node_data else None,
+        seed=seed,
+        min_spacing_mm=min_spacing_mm,
+        margin_mm=parse_dimension(node_data.get("margin", "0mm")),
+        mode=mode,
+        line_width_mm=parse_dimension(node_data["line_width"]) if "line_width" in node_data else None,
+        cell_inset_mm=parse_dimension(node_data.get("cell_inset", "0mm")),
+        min_length_mm=parse_dimension(node_data.get("min_length", "0mm")),
+        rest=_parse_rest(node_data, ctx),
+    )
+
+
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
@@ -799,6 +883,9 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     if node_type == "Phyllotaxis":
         return _parse_phyllotaxis_node(node_data, path)
+
+    if node_type == "Voronoi":
+        return _parse_voronoi_node(node_data, path)
 
     if node_type == "SvgStamp":
         depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))

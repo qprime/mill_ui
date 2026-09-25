@@ -1,4 +1,4 @@
-from adapters.hints_to_removal import simple_item_to_removal_intent
+from adapters.ast_to_removal import item_to_removal_intent
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
@@ -110,9 +110,9 @@ children:
     assert len(spline_items) == 1
     spline_item = spline_items[0]
 
-    removal = simple_item_to_removal_intent(spline_item, region_id_prefix="test_spline")
+    removal = item_to_removal_intent(spline_item, sheet_thickness_mm=19.0)
 
-    assert removal.region_id == "test_spline_decorative"
+    assert removal.region_id == "engrave_decorative"
     assert removal.depth_profile.z_top == 0.0
     assert abs(removal.depth_profile.z_bottom - (-0.8)) < 0.01
 
@@ -121,7 +121,7 @@ children:
     assert removal.bounds.y_min >= 0.0
     assert removal.bounds.y_max <= 400.0
 
-    assert removal.feature_type == "engrave"
+    assert removal.hint_type == "engrave"
 
 
 def test_tool_diameter_does_not_invalidate():

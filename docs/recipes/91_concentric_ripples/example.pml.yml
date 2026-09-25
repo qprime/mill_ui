@@ -39,7 +39,7 @@ children:
             count: 3
             step: 8mm
             join: round
-            groove: 3mm
+            groove: 4mm
             depth: 2mm
 
 - Circle:

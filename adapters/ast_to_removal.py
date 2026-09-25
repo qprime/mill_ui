@@ -204,7 +204,7 @@ def _build_edge_feature_intent(
     geometry = hint[HintKeys.GEOMETRY]
     bounds = _geometry_to_bounds(shape, geometry, hint[HintKeys.CENTER_XY_MM])
     depth_profile = DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm)
-    shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
+    shape_geometry = _geometry_dict_to_shape_geometry(geometry, hint[HintKeys.CENTER_XY_MM], bounds)
 
     if item.feature is None:
         raise ValueError(f"Edge feature item '{item.id}' has no feature specification")

@@ -1225,7 +1225,7 @@ def test_concentric_border_matches_recipe_25_pattern():
     PANEL_WIDTH = 350
     PANEL_HEIGHT = 450
     GROOVE_DEPTH = 2.0
-    GROOVE_WIDTH = 3.0
+    GROOVE_WIDTH = 4.0
     INSETS = (15.0, 30.0, 45.0)
 
     domain = Domain.from_rectangle(PANEL_WIDTH, PANEL_HEIGHT, center=(175, 225))

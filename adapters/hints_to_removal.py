@@ -24,7 +24,6 @@ from ir.removal_intent import (
     ShapeGeometry,
     TabConstraint,
 )
-from layout_ast.layout import Item
 
 
 def _make_region_id(prefix: str, hint_id: str | None) -> str:
@@ -53,7 +52,7 @@ def profile_hint_to_removal_intent(
 
     geometry = hint.get(HintKeys.GEOMETRY, {})
     shape = hint.get(HintKeys.SHAPE, "")
-    shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
+    shape_geometry = _geometry_dict_to_shape_geometry(geometry, hint.get(HintKeys.CENTER_XY_MM), bounds)
 
     tabs_data = hint.get(HintKeys.TABS)
     onion_skin_mm = hint.get(HintKeys.ONION_SKIN_MM)
@@ -93,7 +92,7 @@ def _simple_hint_to_removal_intent(
 
     bounds = _geometry_to_bounds(shape, geometry, hint.get(HintKeys.CENTER_XY_MM))
 
-    shape_geometry = _geometry_dict_to_shape_geometry(shape, geometry)
+    shape_geometry = _geometry_dict_to_shape_geometry(geometry, hint.get(HintKeys.CENTER_XY_MM), bounds)
 
     extra_kwargs: dict[str, Any] = {}
     if extra_fn:
@@ -137,7 +136,11 @@ def pocket_hint_to_removal_intent(
     hint: dict[str, Any],
     region_id_prefix: str = "pocket",
 ) -> RemovalIntent:
-    return _simple_hint_to_removal_intent(hint, FeatureType.POCKET, region_id_prefix, _pocket_extra_kwargs)
+    intent = _simple_hint_to_removal_intent(hint, FeatureType.POCKET, region_id_prefix, _pocket_extra_kwargs)
+    islands = _extract_islands_from_geometry(hint.get(HintKeys.GEOMETRY, {}))
+    if not islands:
+        return intent
+    return replace(intent, constraints=replace(intent.constraints, islands=tuple(islands)))
 
 
 def hole_hint_to_removal_intent(
@@ -212,20 +215,44 @@ def _geometry_to_bounds(
     return compute_shape_bounds(shape, geometry, center_xy)
 
 
-def _geometry_dict_to_shape_geometry(shape: str, geometry: dict[str, Any]) -> ShapeGeometry:
+_CENTER_TOLERANCE_MM = 1e-9
+
+
+def _center_offset(center: float, bounds_center: float) -> float:
+    offset = center - bounds_center
+    return offset if abs(offset) > _CENTER_TOLERANCE_MM else 0.0
+
+
+def _rebased_point(point: Any, dx: float, dy: float) -> tuple[float, float]:
+    return (float(point[0]) + dx, float(point[1]) + dy)
+
+
+def _geometry_dict_to_shape_geometry(
+    geometry: dict[str, Any],
+    center_xy: tuple[float, float] | list[float] | None,
+    bounds: Bounds2D,
+) -> ShapeGeometry:
+    cx, cy = (0.0, 0.0) if center_xy is None else (float(center_xy[0]), float(center_xy[1]))
+    bounds_cx, bounds_cy = bounds.center
+    dx, dy = _center_offset(cx, bounds_cx), _center_offset(cy, bounds_cy)
     points_raw = geometry.get(GeometryKeys.POINTS)
     points: tuple[tuple[float, float], ...] | None = None
     if points_raw is not None:
-        points = tuple((float(p[0]), float(p[1])) for p in points_raw)
+        points = tuple(_rebased_point(p, dx, dy) for p in points_raw)
+    holes_raw = geometry.get(GeometryKeys.HOLES)
+    holes: tuple[tuple[tuple[float, float], ...], ...] | None = None
+    if holes_raw:
+        holes = tuple(tuple(_rebased_point(p, dx, dy) for p in hole) for hole in holes_raw)
     start_raw = geometry.get("start")
-    start: tuple[float, float] | None = (float(start_raw[0]), float(start_raw[1])) if start_raw is not None else None
+    start = _rebased_point(start_raw, dx, dy) if start_raw is not None else None
     end_raw = geometry.get("end")
-    end: tuple[float, float] | None = (float(end_raw[0]), float(end_raw[1])) if end_raw is not None else None
+    end = _rebased_point(end_raw, dx, dy) if end_raw is not None else None
     return ShapeGeometry(
         w_mm=float(geometry[GeometryKeys.W_MM]) if GeometryKeys.W_MM in geometry else None,
         h_mm=float(geometry[GeometryKeys.H_MM]) if GeometryKeys.H_MM in geometry else None,
         diameter_mm=float(geometry[GeometryKeys.DIAMETER_MM]) if GeometryKeys.DIAMETER_MM in geometry else None,
         points=points,
+        holes=holes,
         radius_mm=float(geometry[GeometryKeys.RADIUS_MM]) if GeometryKeys.RADIUS_MM in geometry else None,
         radius_tl_mm=float(geometry[GeometryKeys.RADIUS_TL_MM]) if GeometryKeys.RADIUS_TL_MM in geometry else None,
         radius_tr_mm=float(geometry[GeometryKeys.RADIUS_TR_MM]) if GeometryKeys.RADIUS_TR_MM in geometry else None,
@@ -260,52 +287,6 @@ def _tabs_to_constraints(tabs_data: dict[str, Any] | None) -> Constraints:
 
     tab = TabConstraint(count=count, height_mm=height_mm, width_mm=width_mm)
     return Constraints(tabs=tab)
-
-
-def simple_item_to_removal_intent(
-    item: Item,
-    region_id_prefix: str = "item",
-) -> RemovalIntent:
-    if not item.geometry:
-        raise ValueError(f"Item {item.shape_id} has no geometry")
-    if not item.placement:
-        raise ValueError(f"Item {item.shape_id} has no placement")
-    if not item.feature:
-        raise ValueError(f"Item {item.shape_id} has no feature")
-
-    region_id = _make_region_id(region_id_prefix, item.shape_id)
-
-    depth_mm = float(item.feature.depth_mm) if item.feature.depth_mm is not None else 0.0
-
-    cx, cy = item.placement.center_xy_mm
-    bounds = _item_geometry_to_bounds(item.type, item.geometry.data, cx, cy)
-
-    allowance = Allowance()
-    if item.feature.type == FeatureType.PROFILE and item.feature.side:
-        allowance = _side_to_allowance(item.feature.side)
-
-    islands = _extract_islands_from_geometry(item.geometry.data)
-    edge_treatment = _extract_edge_treatment_from_geometry(item.geometry.data)
-
-    constraints = Constraints(islands=tuple(islands) if islands else (), edge_treatment=edge_treatment)
-
-    shape_geometry = _geometry_dict_to_shape_geometry(item.type, item.geometry.data)
-
-    return RemovalIntent(
-        region_id=region_id,
-        bounds=bounds,
-        depth_profile=DepthProfile.constant(z_top=0.0, z_bottom=-depth_mm),
-        allowance=allowance,
-        constraints=constraints,
-        item_type=item.type,
-        feature_type=item.feature.type,
-        shape_id=item.shape_id,
-        shape_geometry=shape_geometry,
-    )
-
-
-def _item_geometry_to_bounds(item_type: str, geometry_data: dict[str, Any], cx: float, cy: float) -> Bounds2D:
-    return compute_shape_bounds(item_type, geometry_data, (cx, cy))
 
 
 def _extract_islands_from_geometry(geometry_data: dict[str, Any]) -> list[Island]:

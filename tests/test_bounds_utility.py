@@ -315,3 +315,16 @@ def test_extract_shape_geometry_line_preserves_start_end():
     assert result.end == (50.0, 0.0)
     assert result.w_mm is None
     assert result.h_mm is None
+
+
+def test_extract_shape_geometry_polygon_keeps_holes():
+    from core.geometry import extract_shape_geometry
+    from ir.removal_intent import Bounds2D, ShapeGeometry
+
+    hole = ((-10.0, -10.0), (10.0, -10.0), (10.0, 10.0), (-10.0, 10.0))
+    sg = ShapeGeometry(points=((-50.0, -50.0), (50.0, -50.0), (50.0, 50.0), (-50.0, 50.0)), holes=(hole,))
+    bounds = Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=100.0)
+
+    result = extract_shape_geometry("Polygon", bounds, sg)
+
+    assert result.holes == (hole,)

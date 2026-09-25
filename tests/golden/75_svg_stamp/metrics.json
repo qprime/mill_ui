@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "75_svg_stamp",
-    "created_at": "2026-04-04T15:44:30.678052+00:00"
+    "created_at": "2026-09-25T20:20:24.301416+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.49,
+    "extraction_time_ms": 1.09,
     "document": {
       "width_mm": 753.175,
       "height_mm": 555.175,
@@ -276,22 +276,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.13,
+    "extraction_time_ms": 0.2301,
     "summary": {
-      "total_lines": 1015,
-      "comment_lines": 15,
-      "motion_lines": 911,
+      "total_lines": 1169,
+      "comment_lines": 18,
+      "motion_lines": 1118,
       "tool_change_lines": 0,
-      "spindle_lines": 7,
-      "feed_lines": 839
+      "spindle_lines": 8,
+      "feed_lines": 1091
     },
     "motion": {
-      "g0_count": 133,
-      "g1_count": 778,
+      "g0_count": 31,
+      "g1_count": 1087,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 3934.1548000000003,
-      "total_feed_distance_mm": 29672.1769
+      "total_rapid_distance_mm": 2987.1366,
+      "total_feed_distance_mm": 29370.7944
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -309,13 +309,77 @@
         -6.0,
         -4.5,
         -4.0,
+        -3.998,
+        -3.948,
+        -3.915,
+        -3.893,
+        -3.863,
+        -3.861,
+        -3.854,
+        -3.804,
+        -3.779,
+        -3.723,
+        -3.704,
+        -3.694,
+        -3.691,
+        -3.609,
+        -3.586,
+        -3.582,
+        -3.528,
+        -3.524,
+        -3.515,
         -3.5,
+        -3.457,
+        -3.44,
+        -3.398,
+        -3.369,
+        -3.339,
+        -3.281,
+        -3.222,
+        -3.163,
+        -3.104,
         -3.0,
+        -2.847,
         -1.5,
-        -0.3
+        -0.958,
+        -0.873,
+        -0.86,
+        -0.788,
+        -0.772,
+        -0.748,
+        -0.703,
+        -0.681,
+        -0.637,
+        -0.635,
+        -0.618,
+        -0.583,
+        -0.533,
+        -0.526,
+        -0.517,
+        -0.498,
+        -0.448,
+        -0.415,
+        -0.393,
+        -0.363,
+        -0.361,
+        -0.354,
+        -0.304,
+        -0.3,
+        -0.279,
+        -0.223,
+        -0.204,
+        -0.194,
+        -0.193,
+        -0.191,
+        -0.109,
+        -0.086,
+        -0.082,
+        -0.028,
+        -0.024,
+        -0.015
       ],
-      "depth_count": 16,
-      "max_single_plunge_mm": 10.0
+      "depth_count": 80,
+      "max_single_plunge_mm": 9.5
     },
     "xy_bounds": {
       "x_min": 0.0,
@@ -328,7 +392,6 @@
       "max_feed_rate": 1400.0,
       "feed_rates_used": [
         100.0,
-        350.0,
         400.0,
         1200.0,
         1400.0
@@ -350,9 +413,9 @@
       "operation_names": []
     },
     "time_estimate": {
-      "rapid_time_s": 47.2098,
-      "feed_time_s": 1690.7626,
-      "total_time_s": 1737.9723999999999
+      "rapid_time_s": 35.8456,
+      "feed_time_s": 1545.6843,
+      "total_time_s": 1581.5299
     },
     "tabs": {
       "detected_count": 0,

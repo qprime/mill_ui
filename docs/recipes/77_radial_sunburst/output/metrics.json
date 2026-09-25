@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 3540,
-    "rapid_moves": 520,
-    "cut_moves": 1890,
-    "rapid_ratio": 0.147
+    "total_moves": 3782,
+    "rapid_moves": 84,
+    "cut_moves": 3230,
+    "rapid_ratio": 0.022
   },
   "fidelity": {
     "tool_changes": 1,
@@ -12,17 +12,17 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 3540
+        "move_count": 3782
       }
     ]
   },
   "output_size": {
-    "total_bytes": 75084,
-    "total_lines": 3526,
+    "total_bytes": 102535,
+    "total_lines": 3534,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 75084,
-        "lines": 3526
+        "bytes": 102535,
+        "lines": 3534
       }
     }
   },
@@ -33,6 +33,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "dea21973"
   }
 }

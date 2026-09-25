@@ -74,7 +74,6 @@ def _planar_face_dict(shape, depth_mm: float, safe_z_mm: float) -> dict:
         "depth": float(depth_mm),
         "safe_z": float(safe_z_mm),
         "outer": _poly_from_shape(shape),
-        "holes": [],
     }
 
 

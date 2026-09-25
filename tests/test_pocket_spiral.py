@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.setup import Setup
@@ -110,15 +112,6 @@ class TestConvexGeometry:
         )
         assert len(moves) > 0
         assert _has_comment(moves, "pocket_spiral")
-
-    def test_is_convex_l_shape(self):
-        pts = _l_shape_pts()
-        shape = polygon(pts)
-        moves = native_core.pocket_raster(
-            shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
-        )
-        assert _has_comment(moves, "concave polygon: raster clipped to boundary")
-        assert _has_comment(moves, "pocket_raster_clipped")
 
     def test_inset_rectangle(self):
         moves = native_core.pocket_raster(
@@ -462,28 +455,12 @@ class TestSpiralSliverPass:
         assert len(center_cuts) >= 2
 
 
-class TestConcaveFallback:
-    def test_concave_uses_clipped_raster(self):
-        shape = polygon(_l_shape_pts())
-        moves = native_core.pocket_raster(
-            shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
-        )
-        assert _has_comment(moves, "pocket_raster_clipped")
-
-    def test_concave_emits_clipped_comment(self):
-        shape = polygon(_l_shape_pts())
-        moves = native_core.pocket_raster(
-            shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
-        )
-        assert _has_comment(moves, "concave polygon: raster clipped to boundary")
-
-    def test_concave_still_produces_moves(self):
-        shape = polygon(_l_shape_pts())
-        moves = native_core.pocket_raster(
-            shape, _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
-        )
-        cuts = _cut_moves(moves)
-        assert len(cuts) > 0
+class TestConcaveRejected:
+    def test_spiral_rejects_concave_polygon(self):
+        with pytest.raises(ValueError, match="plan_pocket: outer must be convex for strategy spiral"):
+            native_core.pocket_raster(
+                polygon(_l_shape_pts()), _setup(), depth_mm=6.0, stepover_mm=2.0, stepdown_mm=2.0, strategy="spiral"
+            )
 
 
 class TestPocketStrategyConfig:

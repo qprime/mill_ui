@@ -7,10 +7,10 @@
     }
   },
   "complexity": {
-    "total_moves": 564,
-    "rapid_moves": 9,
-    "cut_moves": 470,
-    "rapid_ratio": 0.016
+    "total_moves": 860,
+    "rapid_moves": 49,
+    "cut_moves": 526,
+    "rapid_ratio": 0.057
   },
   "fidelity": {
     "tool_changes": 3,
@@ -18,7 +18,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 252
+        "move_count": 548
       },
       {
         "name": "edge",
@@ -33,12 +33,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 15074,
-    "total_lines": 548,
+    "total_bytes": 19580,
+    "total_lines": 724,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 7165,
-        "lines": 256
+        "bytes": 11671,
+        "lines": 432
       },
       "edge-12.70mm": {
         "bytes": 5372,
@@ -57,6 +57,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "dea21973"
   }
 }

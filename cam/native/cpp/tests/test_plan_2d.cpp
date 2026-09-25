@@ -4,6 +4,7 @@
 #include <cmath>
 #include <optional>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -164,14 +165,22 @@ TEST_CASE("plan_pocket spiral ends at safe z") {
     CHECK(near(last->z, 5.0));
 }
 
-TEST_CASE("plan_pocket falls back to clipped raster on a concave polygon") {
+TEST_CASE("plan_pocket rejects a concave polygon for the spiral strategy") {
     PlanarFace face;
     face.depth = 4.0;
     face.safe_z = 5.0;
     face.outer = {{0.0, 0.0}, {60.0, 0.0}, {60.0, 30.0}, {30.0, 30.0}, {30.0, 60.0}, {0.0, 60.0}};
 
-    const Paths paths =
-        plan_pocket(face, make_tool(6.0), 3.0, 2.0, face.safe_z, 0.0, PocketStrategy::Spiral);
-    REQUIRE(paths.size() == 1);
-    CHECK(has_comment(paths.front(), "concave polygon: raster clipped"));
+    CHECK_THROWS_WITH_AS(
+        (void)plan_pocket(face, make_tool(6.0), 3.0, 2.0, face.safe_z, 0.0, PocketStrategy::Spiral),
+        "plan_pocket: outer must be convex for strategy spiral, got a non-convex polygon with 6 "
+        "vertices",
+        std::invalid_argument);
+
+    face.outer.push_back(face.outer.front());
+    CHECK_THROWS_WITH_AS(
+        (void)plan_pocket(face, make_tool(6.0), 3.0, 2.0, face.safe_z, 0.0, PocketStrategy::Spiral),
+        "plan_pocket: outer must be convex for strategy spiral, got a non-convex polygon with 6 "
+        "vertices",
+        std::invalid_argument);
 }

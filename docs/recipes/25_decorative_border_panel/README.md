@@ -7,7 +7,7 @@
 ## Overview
 
 This recipe creates a 350x450mm panel with three concentric rectangular
-border grooves. Each groove is 3mm wide and 2mm deep, inset at 15mm,
+border grooves. Each groove is 4mm wide and 2mm deep, inset at 15mm,
 30mm, and 45mm from the outer edge.
 
 ## Output

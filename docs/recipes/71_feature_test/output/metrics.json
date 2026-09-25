@@ -17,9 +17,9 @@
     }
   },
   "complexity": {
-    "total_moves": 24561,
-    "rapid_moves": 139,
-    "cut_moves": 23573,
+    "total_moves": 24781,
+    "rapid_moves": 150,
+    "cut_moves": 23709,
     "rapid_ratio": 0.006
   },
   "fidelity": {
@@ -28,7 +28,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 256
+        "move_count": 476
       },
       {
         "name": "bore",
@@ -58,12 +58,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 768166,
-    "total_lines": 24329,
+    "total_bytes": 773326,
+    "total_lines": 24504,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 7141,
-        "lines": 263
+        "bytes": 12301,
+        "lines": 438
       },
       "bore-3.17mm": {
         "bytes": 632105,
@@ -94,6 +94,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "fc086bf0"
+    "mill_ui": "dea21973"
   }
 }

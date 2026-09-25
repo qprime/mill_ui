@@ -55,6 +55,7 @@ class ShapeGeometry:
     h_mm: float | None = None
     diameter_mm: float | None = None
     points: tuple[tuple[float, float], ...] | None = None
+    holes: tuple[tuple[tuple[float, float], ...], ...] | None = None
     radius_mm: float | None = None
     radius_tl_mm: float | None = None
     radius_tr_mm: float | None = None
@@ -431,6 +432,7 @@ class RemovalIntent:
             "h_mm",
             "diameter_mm",
             "points",
+            "holes",
             "radius_mm",
             "radius_tl_mm",
             "radius_tr_mm",

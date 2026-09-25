@@ -1,4 +1,4 @@
-from adapters.hints_to_removal import simple_item_to_removal_intent
+from adapters.ast_to_removal import item_to_removal_intent
 from ir.removal_intent import DepthProfile
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
@@ -39,7 +39,7 @@ children:
     assert abs(edge["rough_allowance_mm"] - 0.5) < 0.01
     assert abs(edge["finish_allowance_mm"] - 0.1) < 0.01
 
-    removal = simple_item_to_removal_intent(profile, region_id_prefix="test_profile")
+    removal = item_to_removal_intent(profile, sheet_thickness_mm=19.0)
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "allowance"
@@ -75,7 +75,7 @@ children:
     assert len(profile_items) == 1
     profile = profile_items[0]
 
-    removal = simple_item_to_removal_intent(profile)
+    removal = item_to_removal_intent(profile, sheet_thickness_mm=19.0)
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "fillet"
@@ -109,7 +109,7 @@ children:
     assert len(profile_items) == 1
     profile = profile_items[0]
 
-    removal = simple_item_to_removal_intent(profile)
+    removal = item_to_removal_intent(profile, sheet_thickness_mm=19.0)
 
     assert removal.constraints.edge_treatment is not None
     assert removal.constraints.edge_treatment.type == "chamfer"
@@ -214,7 +214,7 @@ children:
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
-    base_removal = simple_item_to_removal_intent(profile_items[0])
+    base_removal = item_to_removal_intent(profile_items[0], sheet_thickness_mm=19.0)
 
     assert base_removal.constraints.edge_treatment is not None
     assert base_removal.constraints.edge_treatment.type == "allowance"
@@ -262,7 +262,7 @@ children:
     flat = resolve_layout(ast)
 
     profile_items = [item for item in flat.items if item.feature and item.feature.type == "profile"]
-    base_removal = simple_item_to_removal_intent(profile_items[0])
+    base_removal = item_to_removal_intent(profile_items[0], sheet_thickness_mm=19.0)
 
     assert base_removal.constraints.edge_treatment is not None
     assert base_removal.constraints.edge_treatment.rough_allowance_mm is not None

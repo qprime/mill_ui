@@ -50,7 +50,8 @@ PLANNER_CAPABILITIES: dict[str, ConstraintStatus] = {
         note="Toolpath avoids keepout bounds",
     ),
     "constraints.islands": ConstraintStatus(
-        ConstraintSupport.NOT_IMPLEMENTED,
+        ConstraintSupport.HONORED,
+        note="Pockets: island bounds are subtracted from the pocket region",
     ),
     "constraints.edge_treatment": ConstraintStatus(
         ConstraintSupport.HONORED,

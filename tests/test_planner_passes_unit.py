@@ -1,6 +1,14 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
+from shapely import get_parts, maximum_inscribed_circle
+from shapely.affinity import translate
+from shapely.geometry import LineString, box
+from shapely.geometry import Point as ShapelyPoint
+from shapely.geometry import Polygon as ShapelyPolygon
+from shapely.ops import unary_union
 
 from cam.config import Config
 from cam.model.machine import Machine
@@ -11,7 +19,6 @@ from cam.moves import CutMove, RapidMove, RetractMove, XYMove
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
-from cam.ops.pocket_region import _interval_subtract
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator
 from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
@@ -30,12 +37,20 @@ from cam.planner.passes.tools import (
     pick_tool_for_hole,
     pick_tool_for_pocket,
     pick_tool_for_profile,
+    pick_tool_for_region,
     pick_tool_for_roundover,
     stepdown_for_tool,
     stepover_for_tool,
 )
-from cam.planner.planner_input import EdgeFeatureInput, FeatureInput, GeometryInput
+from cam.planner.planner_input import (
+    EdgeFeatureInput,
+    EdgeTreatmentInput,
+    FeatureInput,
+    GeometryInput,
+    IslandInput,
+)
 from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec, ShapeGeometry
+from layout_ast.layout import RestSpec
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
 FLAT_6MM = {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280}
@@ -138,6 +153,44 @@ class TestPickToolForPocket:
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="No flat tools"):
             pick_tool_for_pocket(normalize_tool_entries([BALL_2MM]), required_width_mm=None, cleanup_offset_mm=0.0)
+
+
+def _square_ring(width: float) -> ShapelyPolygon:
+    inner = 100.0 - width
+    return ShapelyPolygon(
+        [(-100.0, -100.0), (100.0, -100.0), (100.0, 100.0), (-100.0, 100.0)],
+        [[(-inner, -inner), (inner, -inner), (inner, inner), (-inner, inner)]],
+    )
+
+
+class TestPickToolForRegion:
+    def test_picks_largest_tool_that_keeps_ring_topology(self):
+        tool = pick_tool_for_region(FLAT_ONLY, _square_ring(10.0), cleanup_offset_mm=0.25)
+        assert tool is not None
+        assert tool.name == "6mm_flat"
+
+    def test_rejects_tool_that_fits_only_ring_corners(self):
+        tool = pick_tool_for_region(FLAT_ONLY, _square_ring(12.0), cleanup_offset_mm=0.25)
+        assert tool is not None
+        assert tool.name == "6mm_flat"
+
+    def test_plain_strip_picks_tool_below_width(self):
+        strip = ShapelyPolygon([(0.0, 0.0), (100.0, 0.0), (100.0, 4.0), (0.0, 4.0)])
+        tool = pick_tool_for_region(FLAT_ONLY, strip, cleanup_offset_mm=0.25)
+        assert tool is not None
+        assert tool.name == "3mm_flat"
+
+    def test_empty_region_returns_none(self):
+        assert pick_tool_for_region(FLAT_ONLY, ShapelyPolygon(), cleanup_offset_mm=0.25) is None
+
+    def test_returns_none_when_no_tool_fits(self):
+        assert pick_tool_for_region(FLAT_ONLY, _square_ring(3.0), cleanup_offset_mm=0.25) is None
+
+    def test_prefers_upcut_like_pick_tool_for_pocket(self):
+        tools = normalize_tool_entries([FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM])
+        tool = pick_tool_for_region(tools, _square_ring(10.0), cleanup_offset_mm=0.25)
+        assert tool is not None
+        assert tool.name == "6mm_upcut"
 
 
 class TestPickToolForProfile:
@@ -252,40 +305,6 @@ class TestStepoverFor:
 
     def test_custom_ratio(self):
         assert stepover_for(tool_diameter=10.0, ratio=0.6) == pytest.approx(6.0)
-
-
-class TestIntervalSubtract:
-    def test_no_overlap(self):
-        assert _interval_subtract([(0, 10)], (15, 20)) == [(0, 10)]
-
-    def test_full_cover(self):
-        assert _interval_subtract([(2, 8)], (0, 10)) == []
-
-    def test_left_trim(self):
-        result = _interval_subtract([(0, 10)], (0, 5))
-        assert len(result) == 1
-        assert result[0] == pytest.approx((5, 10), abs=1e-9)
-
-    def test_right_trim(self):
-        result = _interval_subtract([(0, 10)], (5, 10))
-        assert len(result) == 1
-        assert result[0] == pytest.approx((0, 5), abs=1e-9)
-
-    def test_split(self):
-        result = _interval_subtract([(0, 10)], (3, 7))
-        assert len(result) == 2
-        assert result[0] == pytest.approx((0, 3), abs=1e-9)
-        assert result[1] == pytest.approx((7, 10), abs=1e-9)
-
-    def test_multiple_base_intervals(self):
-        result = _interval_subtract([(0, 5), (10, 20)], (12, 15))
-        assert len(result) == 3
-        assert result[0] == pytest.approx((0, 5), abs=1e-9)
-        assert result[1] == pytest.approx((10, 12), abs=1e-9)
-        assert result[2] == pytest.approx((15, 20), abs=1e-9)
-
-    def test_empty_base(self):
-        assert _interval_subtract([], (0, 5)) == []
 
 
 class TestPocketCircleConcentric:
@@ -450,6 +469,59 @@ def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
     )
 
 
+_RING_CENTER = (150.0, 100.0)
+
+
+def _ring_feature(width: float, *, id: str = "ring", **kwargs) -> FeatureInput:
+    ring = _square_ring(width)
+    shape_geometry = ShapeGeometry(
+        points=tuple((float(x), float(y)) for x, y in ring.exterior.coords[:-1]),
+        holes=tuple(tuple((float(x), float(y)) for x, y in interior.coords[:-1]) for interior in ring.interiors),
+    )
+    return FeatureInput(
+        id=id,
+        shape="Polygon",
+        geometry=GeometryInput(shape="Polygon", geometry=shape_geometry),
+        center_xy_mm=_RING_CENTER,
+        depth_mm=3.0,
+        **kwargs,
+    )
+
+
+def _placed_ring(width: float) -> ShapelyPolygon:
+    return translate(_square_ring(width), *_RING_CENTER)
+
+
+def _cut_segments(moves) -> list[tuple[tuple[float, float, float], tuple[float, float, float]]]:
+    x: float | None = None
+    y: float | None = None
+    z: float | None = None
+    segments: list[tuple[tuple[float, float, float], tuple[float, float, float]]] = []
+    for move in moves:
+        if isinstance(move, (RapidMove, CutMove)):
+            px, py, pz = x, y, z
+            x = move.x if move.x is not None else x
+            y = move.y if move.y is not None else y
+            z = move.z if move.z is not None else z
+            if (
+                isinstance(move, CutMove)
+                and px is not None
+                and py is not None
+                and pz is not None
+                and x is not None
+                and y is not None
+                and z is not None
+            ):
+                segments.append(((px, py, pz), (x, y, z)))
+        elif isinstance(move, RetractMove):
+            z = move.z
+    return segments
+
+
+def _cut_positions(moves) -> list[tuple[float, float, float]]:
+    return [end for _, end in _cut_segments(moves) if end[2] < 0.0]
+
+
 class TestPlanPocketPasses:
     def test_rect_pocket(self):
         acc = _accumulator()
@@ -496,6 +568,191 @@ class TestPlanPocketPasses:
         plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         total_moves = sum(len(r.moves) for r in acc.passes())
         assert total_moves == 0
+
+    def test_holed_polygon_pocket_stays_out_of_hole(self):
+        acc = _accumulator()
+        plan_pocket_passes((_ring_feature(10.0),), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2.0
+        region = _placed_ring(10.0)
+        positions = _cut_positions(record.moves)
+        assert positions
+        for x, y, _ in positions:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) >= radius - 1e-6
+
+    def test_holed_polygon_pocket_clears_ring(self):
+        tools = normalize_tool_entries([{**FLAT_12MM, "stepover_percent": 90.0}])
+        acc = _accumulator()
+        plan_pocket_passes((_ring_feature(30.0),), accumulator=acc, tool_db=tools, config=Config())
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2.0
+        cuts = _cut_segments(record.moves)
+        final_z = min(end[2] for _, end in cuts)
+        segments = [
+            LineString([(ax, ay), (bx, by)]).buffer(radius)
+            for (ax, ay, az), (bx, by, bz) in cuts
+            if az == final_z and bz == final_z and (ax, ay) != (bx, by)
+        ]
+        uncut = _placed_ring(30.0).difference(unary_union(segments))
+        worst = max((maximum_inscribed_circle(piece).length for piece in get_parts(uncut)), default=0.0)
+        assert worst <= 0.1716 * radius + 0.01
+
+    def test_narrow_polygon_pocket_uses_small_tool(self):
+        acc = _accumulator()
+        strip = _feature("Polygon", {"points": [[-50, -2], [50, -2], [50, 2], [-50, 2]]}, (150.0, 100.0), 3.0)
+        plan_pocket_passes((strip,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        (record,) = acc.passes()
+        assert record.tool_selection.diameter == 3.0
+        assert _cut_positions(record.moves)
+
+    def test_plain_concave_polygon_pocket_clears_walls(self):
+        acc = _accumulator()
+        l_points = [[-50, -50], [50, -50], [50, -10], [-10, -10], [-10, 50], [-50, 50]]
+        pocket = _feature("Polygon", {"points": l_points}, _RING_CENTER, 3.0)
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2.0
+        region = translate(ShapelyPolygon(l_points), *_RING_CENTER)
+        positions = _cut_positions(record.moves)
+        assert positions
+        for x, y, _ in positions:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) >= radius - 1e-6
+
+    def test_polygon_pocket_without_fitting_tool_warns_and_skips(self):
+        acc = _accumulator()
+        plan_pocket_passes((_ring_feature(3.0),), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert acc.passes() == []
+        (warning,) = acc.warnings
+        assert "no flat tool in the tool library fits" in warning
+        assert "3.000 mm" in warning
+
+    def test_rect_pocket_without_fitting_tool_warns_and_skips(self):
+        acc = _accumulator()
+        pocket = _feature("Rect", {"w_mm": 2.5, "h_mm": 50.0}, (150.0, 100.0), 3.0)
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert acc.passes() == []
+        (warning,) = acc.warnings
+        assert "no flat tool in the tool library fits" in warning
+
+    def test_circle_pocket_without_fitting_tool_warns_and_skips(self):
+        acc = _accumulator()
+        pocket = _feature("Circle", {"diameter_mm": 3.0}, (150.0, 100.0), 3.0)
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert acc.passes() == []
+        (warning,) = acc.warnings
+        assert "no flat tool in the tool library fits" in warning
+
+    def test_rect_pocket_just_wider_than_tool_still_cuts(self):
+        acc = _accumulator()
+        pocket = _feature("Rect", {"w_mm": 6.4, "h_mm": 50.0}, (150.0, 100.0), 3.0)
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=normalize_tool_entries([FLAT_6MM]), config=Config())
+        (record,) = acc.passes()
+        assert _cut_positions(record.moves)
+        assert acc.warnings == []
+
+    def test_rect_pocket_with_island_stays_out_of_island(self):
+        acc = _accumulator()
+        island = IslandInput(x_min=120.0, x_max=180.0, y_min=70.0, y_max=130.0)
+        pocket = replace(_feature("Rect", {"w_mm": 200.0, "h_mm": 160.0}, _RING_CENTER, 3.0), islands=(island,))
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2.0
+        region = box(50.0, 20.0, 250.0, 180.0).difference(box(120.0, 70.0, 180.0, 130.0))
+        positions = _cut_positions(record.moves)
+        assert positions
+        for x, y, _ in positions:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) >= radius - 1e-6
+
+    def test_islands_covering_pocket_warn_and_skip(self):
+        acc = _accumulator()
+        island = IslandInput(x_min=0.0, x_max=300.0, y_min=0.0, y_max=200.0)
+        pocket = replace(
+            _feature("Rect", {"w_mm": 50.0, "h_mm": 50.0}, _RING_CENTER, 3.0, id="covered"), islands=(island,)
+        )
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert acc.passes() == []
+        assert acc.warnings == ["Pocket 'covered': islands cover the whole pocket — feature skipped"]
+
+    def test_pocket_with_island_and_rest_raises(self):
+        acc = _accumulator()
+        island = IslandInput(x_min=120.0, x_max=180.0, y_min=70.0, y_max=130.0)
+        pocket = replace(
+            _feature("Rect", {"w_mm": 200.0, "h_mm": 160.0}, _RING_CENTER, 3.0, id="rest_rect"),
+            islands=(island,),
+            rest=RestSpec(tool_diameter_mm=3.0),
+        )
+        with pytest.raises(ValueError, match="Pocket 'rest_rect': islands are not supported with rest"):
+            plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+
+    def test_holed_polygon_with_rest_raises(self):
+        acc = _accumulator()
+        pocket = _ring_feature(10.0, id="rest_ring", rest=RestSpec(tool_diameter_mm=3.0))
+        with pytest.raises(ValueError, match="Pocket 'rest_ring': holes are not supported with rest"):
+            plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+
+    def test_polygon_allowance_stays_inside_polygon(self):
+        acc = _accumulator()
+        l_points = [[-50, -50], [50, -50], [50, -10], [-10, -10], [-10, 50], [-50, 50]]
+        pocket = replace(
+            _feature("Polygon", {"points": l_points}, _RING_CENTER, 3.0),
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.1),
+        )
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        records = {record.op: record for record in acc.passes()}
+        region = translate(ShapelyPolygon(l_points), *_RING_CENTER)
+        radius = records["pocket"].tool_selection.diameter / 2.0
+        rough = _cut_positions(records["pocket"].moves)
+        finish = _cut_positions(records["finish"].moves)
+        assert rough
+        assert finish
+        for x, y, _ in rough:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) >= radius + 0.5 - 1e-6
+        for x, y, _ in finish:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) == pytest.approx(radius + 0.1, abs=1e-6)
+
+    def test_holed_polygon_allowance_leaves_stock_then_finishes(self):
+        acc = _accumulator()
+        pocket = _ring_feature(
+            30.0, edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.0)
+        )
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        records = {record.op: record for record in acc.passes()}
+        region = _placed_ring(30.0)
+        radius = records["pocket"].tool_selection.diameter / 2.0
+        rough_distances = [
+            region.boundary.distance(ShapelyPoint(x, y)) for x, y, _ in _cut_positions(records["pocket"].moves)
+        ]
+        finish_distances = [
+            region.boundary.distance(ShapelyPoint(x, y)) for x, y, _ in _cut_positions(records["finish"].moves)
+        ]
+        assert min(rough_distances) >= radius + 0.5 - 1e-6
+        assert min(finish_distances) == pytest.approx(radius, abs=1e-6)
+
+    def test_island_splitting_pocket_cuts_both_regions(self):
+        acc = _accumulator()
+        island = IslandInput(x_min=130.0, x_max=170.0, y_min=0.0, y_max=200.0)
+        pocket = replace(_feature("Rect", {"w_mm": 200.0, "h_mm": 100.0}, (150.0, 100.0), 3.0), islands=(island,))
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2.0
+        region = box(50.0, 50.0, 250.0, 150.0).difference(box(130.0, 0.0, 170.0, 200.0))
+        positions = _cut_positions(record.moves)
+        assert any(x < 130.0 for x, _, _ in positions)
+        assert any(x > 170.0 for x, _, _ in positions)
+        for x, y, _ in positions:
+            point = ShapelyPoint(x, y)
+            assert region.contains(point)
+            assert region.boundary.distance(point) >= radius - 1e-6
 
 
 class TestPlanHolePasses:

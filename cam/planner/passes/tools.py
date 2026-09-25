@@ -4,6 +4,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from typing import Any
 
+import shapely
+from shapely.geometry import Polygon
+from shapely.geometry.base import BaseGeometry
+
 from cam.model.tool import Tool, ToolKind
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from layout_ast.layout import FeedsOverride
@@ -86,6 +90,40 @@ def _ball_or_v_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
     return [tool for tool in tool_db if tool.kind in {"ball", "v"}]
 
 
+def _pocket_candidates(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
+    candidates = _flat_tools(tool_db)
+    if not candidates:
+        raise ValueError("No flat tools available for pocketing")
+    candidates.sort(
+        key=lambda t: (
+            0 if (t.rotation or "").lower() in {"upcut", "compression"} else 1,
+            -t.diameter,
+        )
+    )
+    return candidates
+
+
+def _topology(geometry: BaseGeometry) -> tuple[int, int]:
+    parts = [part for part in shapely.get_parts(geometry) if isinstance(part, Polygon) and not part.is_empty]
+    return len(parts), sum(len(part.interiors) for part in parts)
+
+
+def pick_tool_for_region(
+    tool_db: Sequence[ToolSelection],
+    region: BaseGeometry,
+    *,
+    cleanup_offset_mm: float,
+) -> ToolSelection | None:
+    if region.is_empty:
+        return None
+    target = _topology(region)
+    for tool in _pocket_candidates(tool_db):
+        eroded = region.buffer(-(tool.diameter / 2.0 + cleanup_offset_mm), join_style="round")
+        if _topology(eroded) == target:
+            return tool
+    return None
+
+
 def pick_tool_for_pocket(
     tool_db: Sequence[ToolSelection],
     *,
@@ -93,16 +131,7 @@ def pick_tool_for_pocket(
     cleanup_offset_mm: float,
 ) -> ToolSelection:
 
-    candidates = _flat_tools(tool_db)
-    if not candidates:
-        raise ValueError("No flat tools available for pocketing")
-
-    candidates.sort(
-        key=lambda t: (
-            0 if (t.rotation or "").lower() in {"upcut", "compression"} else 1,
-            -t.diameter,
-        )
-    )
+    candidates = _pocket_candidates(tool_db)
 
     if required_width_mm and required_width_mm > 0.0:
         clearance = max(required_width_mm - 2.0 * cleanup_offset_mm, 0.0)
@@ -272,6 +301,7 @@ __all__ = [
     "pick_tool_for_hole",
     "pick_tool_for_pocket",
     "pick_tool_for_profile",
+    "pick_tool_for_region",
     "pick_tool_for_roundover",
     "pick_tool_for_surface",
     "stepdown_for_tool",

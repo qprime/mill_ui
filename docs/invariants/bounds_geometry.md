@@ -18,6 +18,7 @@
 | BG-8 | STRUCTURAL | RECT_CENTER_BASED | Rect bounds are ±half_width/half_height from center |
 | BG-9 | STRUCTURAL | CIRCLE_DIAMETER_RADIUS | Circle radius = diameter / 2 |
 | BG-10 | FALLBACK | UNKNOWN_SHAPE_FALLBACK | Unknown shapes return 1x1mm box at center |
+| BG-11 | HARD | IR_POINTS_BOUNDS_CENTERED | RemovalIntent `shape_geometry` points, holes, start and end are relative to `bounds.center` |
 
 ---
 
@@ -48,6 +49,14 @@ x_max = center_x + width / 2
 y_min = center_y - height / 2
 y_max = center_y + height / 2
 ```
+
+---
+
+## Point Frame in the IR (BG-11)
+
+An Item's `points`, `holes`, `start` and `end` are relative to `placement.center_xy_mm`, which is often not the bounds center: `shapely_to_item` uses the centroid, and `polyline_engrave_item` uses the mean of the points. Every planner pass adds these fields to `FeatureInput.center_xy_mm`, which the adapter takes from `RemovalIntent.bounds.center`.
+
+`_geometry_dict_to_shape_geometry` (`adapters/hints_to_removal.py`) therefore re-bases them onto the bounds center when an Item becomes a RemovalIntent. Offsets below 1e-9 mm are float noise and are treated as zero, so shapes already centered on their bounds keep their exact coordinates.
 
 ---
 

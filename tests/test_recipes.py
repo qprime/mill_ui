@@ -5,7 +5,8 @@ from __future__ import annotations
 import sys
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 
@@ -102,6 +103,11 @@ def compare_outputs(
                 f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
             )
 
+    generated_files = {f"{pass_name}.nc" for pass_name in result.gcode}
+    ungenerated = sorted(f.name for f in output_dir.glob("*.nc") if f.name not in generated_files)
+    if ungenerated:
+        diffs.append(f"Expected G-code no longer generated: {ungenerated}")
+
     expected_extensions = {".nc", ".svg", ".json"}
     actual_files = {f.name for f in output_dir.iterdir() if f.is_file()}
     extra_files = {f for f in actual_files if not any(f.endswith(ext) for ext in expected_extensions)}
@@ -139,6 +145,17 @@ def validate_recipes(pml_files: list[Path]) -> list[str]:
             failures.append(f"{pml_path.name}: {e}")
 
     return failures
+
+
+def test_compare_outputs_flags_expected_gcode_no_longer_generated(tmp_path: Path):
+    (tmp_path / "pocket-3.17mm.nc").write_text("G0\n")
+    (tmp_path / "profile-3.17mm.nc").write_text("G1\n")
+    result = cast(PipelineResult, SimpleNamespace(gcode={"profile-3.17mm": "G1\n"}))
+
+    matches, diffs = compare_outputs(tmp_path, result)
+
+    assert not matches
+    assert diffs == ["Expected G-code no longer generated: ['pocket-3.17mm.nc']"]
 
 
 def test_recipe_outputs():

@@ -57,6 +57,22 @@ class KeepoutInput:
 
 
 @dataclass(frozen=True)
+class IslandInput:
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "x_min": self.x_min,
+            "x_max": self.x_max,
+            "y_min": self.y_min,
+            "y_max": self.y_max,
+        }
+
+
+@dataclass(frozen=True)
 class TabsInput:
     count: int
     height_mm: float
@@ -87,6 +103,8 @@ class GeometryInput:
             result["diameter_mm"] = self.geometry.diameter_mm
         if self.geometry.points is not None:
             result["points"] = [list(p) for p in self.geometry.points]
+        if self.geometry.holes is not None:
+            result["holes"] = [[list(p) for p in hole] for hole in self.geometry.holes]
         if self.geometry.radius_mm is not None:
             result["radius_mm"] = self.geometry.radius_mm
         if self.geometry.radius_tl_mm is not None:
@@ -137,6 +155,7 @@ class FeatureInput:
     tabs: TabsInput | None = None
     onion_skin_mm: float | None = None
     keepouts: tuple[KeepoutInput, ...] = field(default_factory=tuple)
+    islands: tuple[IslandInput, ...] = field(default_factory=tuple)
     rest: RestSpec | None = None
     edge_treatment: EdgeTreatmentInput | None = None
     feeds_override: FeedsOverride | None = None
@@ -161,6 +180,8 @@ class FeatureInput:
             result["onion_skin_mm"] = self.onion_skin_mm
         if self.keepouts:
             result["keepouts"] = [k.to_dict() for k in self.keepouts]
+        if self.islands:
+            result["islands"] = [i.to_dict() for i in self.islands]
         if self.rest is not None:
             result["rest"] = {
                 "tool_diameter_mm": self.rest.tool_diameter_mm,
@@ -333,6 +354,14 @@ class PlannerInput:
                 reason=str(k.get("reason", "keepout")),
             )
 
+        def parse_island(i: dict[str, Any]) -> IslandInput:
+            return IslandInput(
+                x_min=float(i["x_min"]),
+                x_max=float(i["x_max"]),
+                y_min=float(i["y_min"]),
+                y_max=float(i["y_max"]),
+            )
+
         def parse_tabs(t: dict[str, Any] | None) -> TabsInput | None:
             if t is None:
                 return None
@@ -348,6 +377,10 @@ class PlannerInput:
             points: tuple[tuple[float, float], ...] | None = None
             if points_raw is not None:
                 points = tuple((float(p[0]), float(p[1])) for p in points_raw)
+            holes_raw = g.get("holes")
+            holes: tuple[tuple[tuple[float, float], ...], ...] | None = None
+            if holes_raw:
+                holes = tuple(tuple((float(p[0]), float(p[1])) for p in hole) for hole in holes_raw)
             start_raw = g.get("start")
             start: tuple[float, float] | None = (
                 (float(start_raw[0]), float(start_raw[1])) if start_raw is not None else None
@@ -359,6 +392,7 @@ class PlannerInput:
                 h_mm=float(g["h_mm"]) if "h_mm" in g else None,
                 diameter_mm=float(g["diameter_mm"]) if "diameter_mm" in g else None,
                 points=points,
+                holes=holes,
                 radius_mm=float(g["radius_mm"]) if "radius_mm" in g else None,
                 radius_tl_mm=float(g["radius_tl_mm"]) if "radius_tl_mm" in g else None,
                 radius_tr_mm=float(g["radius_tr_mm"]) if "radius_tr_mm" in g else None,
@@ -409,6 +443,7 @@ class PlannerInput:
                 side=f.get("side"),
                 tabs=parse_tabs(f.get("tabs")),
                 keepouts=keepouts,
+                islands=tuple(parse_island(i) for i in f.get("islands", [])),
                 rest=parse_rest(f.get("rest")),
                 edge_treatment=parse_edge_treatment(f.get("edge_treatment")),
                 surface_cooling=_parse_surface_cooling(f.get("surface_cooling")),

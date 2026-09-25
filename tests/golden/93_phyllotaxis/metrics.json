@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "93_phyllotaxis",
-    "created_at": "2026-09-22T23:20:07.131216+00:00"
+    "created_at": "2026-09-25T20:20:28.702575+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 6.71,
+    "extraction_time_ms": 11.42,
     "document": {
       "width_mm": 853.175,
       "height_mm": 487.175,
@@ -4449,7 +4449,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 858.3802,
+    "extraction_time_ms": 858.601,
     "summary": {
       "total_lines": 225087,
       "comment_lines": 560,
@@ -4463,8 +4463,8 @@
       "g1_count": 221136,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 59711.3203,
-      "total_feed_distance_mm": 47256.6177
+      "total_rapid_distance_mm": 59892.61699999999,
+      "total_feed_distance_mm": 47256.626099999994
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -5200,9 +5200,9 @@
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 716.5358,
-      "feed_time_s": 3667.4332000000004,
-      "total_time_s": 4383.969
+      "rapid_time_s": 718.7114,
+      "feed_time_s": 3667.4352000000003,
+      "total_time_s": 4386.1466
     },
     "tabs": {
       "detected_count": 0,

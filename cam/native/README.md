@@ -41,7 +41,7 @@ cp build/native_cam/python/_native.cpython-*.so cam/native/
 ## 4. Layout
 
 - `cam/native/cpp/algo/geom2d.{hpp,cpp}` — geometry primitives (convex
-  inset, scanline, winding, z-levels). No planner or emission logic.
+  inset, winding, z-levels). No planner or emission logic.
 - `cam/native/cpp/algo/plan_2d.cpp` — pocket / profile / drill / bore
   planners; consumes `geom2d`.
 - `cam/native/cpp/algo/post_gcode.cpp` — the G-code emitter (`std::visit`
@@ -55,7 +55,7 @@ cp build/native_cam/python/_native.cpython-*.so cam/native/
 ## 5. Public surface
 
 - `is_native_available()` — detect whether the extension loaded.
-- `pocket_raster(shape, setup, ...)` — plan a pocket (spiral or raster).
+- `pocket_raster(shape, setup, ...)` — plan a pocket: spiral for a convex outline (a concave one raises `ValueError`), or a bounding-box raster.
 - `profile_outline(shape, setup, ...)` — plan profile passes.
 - `drill_peck(points, setup, ...)` — plan peck drilling.
 - `bore_helical(center, hole_d, setup, ...)` — plan a helical bore.

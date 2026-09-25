@@ -299,7 +299,7 @@ children:
 
 
 def test_removal_intent_includes_islands():
-    from adapters.hints_to_removal import simple_item_to_removal_intent
+    from adapters.ast_to_removal import item_to_removal_intent
 
     pml = """
 Sheet:
@@ -330,7 +330,7 @@ children:
     assert len(pocket_items) == 1
     pocket = pocket_items[0]
 
-    removal = simple_item_to_removal_intent(pocket, region_id_prefix="test_pocket")
+    removal = item_to_removal_intent(pocket, sheet_thickness_mm=19.0)
 
     assert len(removal.constraints.islands) == 1
 
@@ -339,3 +339,63 @@ children:
     assert abs(island.bounds.x_max - 350.0) < 0.01
     assert abs(island.bounds.y_min - 50.0) < 0.01
     assert abs(island.bounds.y_max - 350.0) < 0.01
+
+
+def test_pocket_planning_preserves_keepout_island():
+    from shapely.geometry import Point, box
+
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from adapters.removal_to_planner import removal_intents_to_planner_input
+    from cam.config import Config
+    from cam.model.machine import Machine
+    from cam.model.stock import Stock
+    from cam.moves import CutMove, RapidMove
+    from cam.planner.passes import PassAccumulator
+    from cam.planner.passes.pocket import plan_pocket_passes
+    from cam.planner.passes.tools import normalize_tool_entries
+
+    pml = """
+Sheet:
+  width: 400mm
+  height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      feature:
+        type: pocket
+        depth: 6mm
+      children:
+        - Keepout:
+            children:
+              - Inset:
+                  distance: 60mm
+                  children:
+                    - Rect:
+                        id: island
+"""
+    planner_input = removal_intents_to_planner_input(ast_to_removal_intents(resolve_layout(parse_pml_yaml(pml))))
+    accumulator = PassAccumulator(
+        machine=Machine(), stock=Stock(width=400, height=400, thickness=19), safe_z=5.0, prime_spindle=False
+    )
+    tool_db = normalize_tool_entries(
+        [{"name": "12mm_flat", "diameter": 12.0, "kind": "flat", "rpm": 10000, "feed_xy": 800, "feed_z": 250}]
+    )
+
+    plan_pocket_passes(planner_input.pockets, accumulator=accumulator, tool_db=tool_db, config=Config())
+
+    (record,) = accumulator.passes()
+    island = box(60.0, 60.0, 340.0, 340.0)
+    x = y = None
+    z = 0.0
+    cut_points = []
+    for move in record.moves:
+        if isinstance(move, (RapidMove, CutMove)):
+            x = move.x if move.x is not None else x
+            y = move.y if move.y is not None else y
+            z = move.z if move.z is not None else z
+            if isinstance(move, CutMove) and x is not None and y is not None and z < 0.0:
+                cut_points.append(Point(x, y))
+    assert cut_points
+    assert min(island.distance(point) for point in cut_points) >= 6.0 - 1e-6

@@ -516,7 +516,7 @@ List form, one ring per inset:
 ```yaml
 - ConcentricBorder:
     insets: [15mm, 30mm, 45mm]
-    groove: 3mm
+    groove: 4mm
     depth: 2mm
 ```
 
@@ -550,7 +550,7 @@ In pocket mode, rings must not overlap: sorted insets must be at least `groove` 
 
 `join` only changes concave corners and holes. An inward offset of a convex corner is always sharp, so `join: round` has no effect on a plain `Rect`. For rounded rings on a convex panel, use a `RoundedRect`, `Circle` or `Ellipse` parent; the rings follow its outline.
 
-Rings that do not fit are skipped. An inset that splits the parent into several regions gives each region its own ring.
+Rings that do not fit are skipped. An inset that splits the parent into several regions gives each region its own ring. A pocket ring that no flat tool in the tool library fits is skipped with a warning naming the smallest flat tool.
 
 **Rings around a hole.** Under a parent whose region has a hole, each inset also grows the hole, so rings ripple outward from the island as well as inward from the edge. Use `Subtract`:
 
@@ -564,7 +564,7 @@ Rings that do not fit are skipped. An inset that splits the parent into several 
             count: 3
             step: 8mm
             join: round
-            groove: 3mm
+            groove: 4mm
             depth: 2mm
 ```
 

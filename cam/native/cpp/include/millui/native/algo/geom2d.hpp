@@ -25,7 +25,6 @@ struct Bounds {
 [[nodiscard]] Polygon strip_closing_vertex(const Polygon& poly);
 [[nodiscard]] Polygon inset_convex(const Polygon& poly, double offset);
 [[nodiscard]] size_t longest_edge_index(const Polygon& poly);
-[[nodiscard]] std::vector<double> scanline_intersections(const Polygon& poly, double y);
 [[nodiscard]] std::vector<double> build_z_levels(double depth, double step_down);
 
 class ConvexPolygon {

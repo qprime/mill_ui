@@ -70,11 +70,3 @@ TEST_CASE("inset shrinks a convex polygon inward for a valid offset") {
     REQUIRE(result.size() == 4);
     CHECK(std::abs(shoelace_area(result)) < std::abs(shoelace_area(convex->points())));
 }
-
-TEST_CASE("scanline_intersections skips horizontal edges yielding an even crossing count") {
-    const Polygon poly = square(10.0);
-    const std::vector<double> xs = scanline_intersections(poly, 5.0);
-    REQUIRE(xs.size() == 2);
-    CHECK(near(xs[0], 0.0));
-    CHECK(near(xs[1], 10.0));
-}

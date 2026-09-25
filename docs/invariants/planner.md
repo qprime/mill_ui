@@ -21,6 +21,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | RemovalIntent Field | Support Status | Safety | Notes |
 |---------------------|----------------|--------|-------|
 | bounds | HONORED | — | Geometry passed through |
+| shape_geometry.holes | HONORED | — | Polygon pockets: offset loops stay out of holes. Profile and edge passes follow the outer loop. |
 | depth_profile.z_top/z_bottom | HONORED | — | As depth_mm, start_depth_mm |
 | depth_profile.mode (constant) | HONORED | — | Default mode |
 | depth_profile.mode (v_carve) | NOT_IMPLEMENTED | — | v_angle_deg not passed |
@@ -28,8 +29,8 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | constraints.tabs | HONORED | — | Profiles only |
 | constraints.onion_skin_mm | HONORED | — | Profiles only; mutually exclusive with tabs |
 | constraints.keepouts | HONORED | CRITICAL | Toolpath avoids keepout bounds |
-| constraints.islands | NOT_IMPLEMENTED | — | Not yet passed to planner |
-| constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes |
+| constraints.islands | HONORED | — | Pockets: island bounds are subtracted from the pocket region, cut with offset loops. Rejected with rest or surface_cooling. |
+| constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes. Polygon pockets and pockets with islands: rough offset loops leave the rough allowance on every wall, finish contours cut to the finish allowance. |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
 | constraints.safe_z_mm | NOT_IMPLEMENTED | — | Uses global safe_z |
 | rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. Mutually exclusive with edge_treatment allowance. |
@@ -79,7 +80,7 @@ Every pipeline run emits a constraint audit summary:
 Constraint Audit:
   tabs: HONORED (3 intents)
   keepouts: HONORED (2 regions)
-  islands: NOT_IMPLEMENTED (1 intent) [warning]
+  islands: HONORED (1 intent)
   edge_treatment: HONORED (1 intent)
 ```
 

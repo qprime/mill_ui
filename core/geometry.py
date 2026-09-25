@@ -226,7 +226,7 @@ def extract_shape_geometry(
         return ShapeGeometry(diameter_mm=diameter_mm)
     elif ShapeType.is_polygon(shape):
         if shape_geometry.points is not None:
-            return ShapeGeometry(points=shape_geometry.points)
+            return ShapeGeometry(points=shape_geometry.points, holes=shape_geometry.holes)
         return ShapeGeometry(w_mm=bounds.width, h_mm=bounds.height)
     elif shape == ShapeType.ROUNDED_RECT:
         return ShapeGeometry(

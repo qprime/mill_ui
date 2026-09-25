@@ -177,36 +177,6 @@ size_t longest_edge_index(const Polygon& poly) {
     return best;
 }
 
-std::vector<double> scanline_intersections(const Polygon& poly, double y) {
-    std::vector<double> xs;
-    size_t n = poly.size();
-    for (size_t i = 0; i < n; ++i) {
-        size_t j = (i + 1) % n;
-        const Vec2& a = poly[i];
-        const Vec2& b = poly[j];
-
-        if (std::abs(a.y - b.y) < kEps) {
-            continue;
-        }
-
-        double y_min = std::min(a.y, b.y);
-        double y_max = std::max(a.y, b.y);
-
-        if (y < y_min - kEps || y > y_max + kEps) {
-            continue;
-        }
-        if (std::abs(y - y_max) < kEps) {
-            continue;
-        }
-
-        double t = (y - a.y) / (b.y - a.y);
-        t = std::clamp(t, 0.0, 1.0);
-        xs.push_back(a.x + t * (b.x - a.x));
-    }
-    std::sort(xs.begin(), xs.end());
-    return xs;
-}
-
 std::vector<double> build_z_levels(double depth, double step_down) {
     if (!std::isfinite(step_down) || step_down < kMinStepDownMm) {
         throw std::invalid_argument("plan_pocket: resolved step_down_mm must be finite and >= " +

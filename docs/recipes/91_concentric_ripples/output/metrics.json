@@ -1,9 +1,9 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 2778,
-    "rapid_moves": 26,
-    "cut_moves": 2592,
+    "total_moves": 3431,
+    "rapid_moves": 32,
+    "cut_moves": 3197,
     "rapid_ratio": 0.009
   },
   "fidelity": {
@@ -11,8 +11,8 @@
     "passes": [
       {
         "name": "pocket",
-        "tool_diameter_mm": 12.7,
-        "move_count": 1147
+        "tool_diameter_mm": 3.175,
+        "move_count": 1800
       },
       {
         "name": "engrave",
@@ -27,12 +27,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 76196,
-    "total_lines": 2741,
+    "total_bytes": 93846,
+    "total_lines": 3364,
     "files": {
-      "pocket-12.70mm": {
-        "bytes": 32536,
-        "lines": 1145
+      "pocket-3.17mm": {
+        "bytes": 50186,
+        "lines": 1768
       },
       "engrave-1.00mm": {
         "bytes": 22312,
@@ -51,6 +51,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "cb3f6c4e"
+    "mill_ui": "dea21973"
   }
 }

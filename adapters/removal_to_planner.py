@@ -11,6 +11,7 @@ from cam.planner.planner_input import (
     FeatureInput,
     GeometryInput,
     HeightfieldFeatureInput,
+    IslandInput,
     KeepoutInput,
     PlannerInput,
     TabsInput,
@@ -99,6 +100,11 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         for k in intent.constraints.keepouts
     )
 
+    islands = tuple(
+        IslandInput(x_min=i.bounds.x_min, x_max=i.bounds.x_max, y_min=i.bounds.y_min, y_max=i.bounds.y_max)
+        for i in intent.constraints.islands
+    )
+
     side = intent.side if hint_type == FeatureType.PROFILE else None
     start_depth_mm = abs(intent.depth_profile.z_top) if intent.depth_profile.z_top != 0.0 else 0.0
 
@@ -117,6 +123,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         tabs=tabs,
         onion_skin_mm=intent.constraints.onion_skin_mm,
         keepouts=keepouts,
+        islands=islands,
         rest=intent.rest,
         edge_treatment=edge_treatment,
         feeds_override=intent.feeds_override,

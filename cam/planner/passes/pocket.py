@@ -4,15 +4,18 @@ import math
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from shapely.geometry import Polygon, box
+from shapely.geometry.base import BaseGeometry
+from shapely.ops import unary_union
+
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
 from cam.ops.engrave import engrave_lines, engrave_lines_ramped
-from cam.ops.pocket_region import pocket_region_rect_raster
+from cam.ops.pocket import pocket_finish_contours, pocket_offset_loops
 from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
-from cam.path.toolpath import offset_moves_z
+from cam.path.toolpath import move_comment, offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
-from cam.primitives import polygon as polygon_prim
 
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
@@ -22,6 +25,7 @@ from .tools import (
     pick_tool_for_engrave,
     pick_tool_for_hole,
     pick_tool_for_pocket,
+    pick_tool_for_region,
     pick_tool_for_surface,
     stepdown_for_tool,
     stepover_for_tool,
@@ -259,6 +263,76 @@ def _plan_surface_pass(
     record.add_moves(offset_moves_z(moves, sc.start_depth_mm), increment=1)
 
 
+def _pocket_region(entry: FeatureInput) -> BaseGeometry | None:
+    sg = entry.geometry.geometry
+    shape_name = entry.shape.lower()
+    cx, cy = entry.center_xy_mm
+    base: BaseGeometry
+    if shape_name == "polygon" and sg.points:
+        shell = [(float(x) + cx, float(y) + cy) for x, y in sg.points]
+        holes = [[(float(x) + cx, float(y) + cy) for x, y in hole] for hole in sg.holes or ()]
+        base = Polygon(shell, holes)
+    elif entry.islands and shape_name == "rect":
+        half_w = float(sg.w_mm or 0.0) / 2.0
+        half_h = float(sg.h_mm or 0.0) / 2.0
+        base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
+    else:
+        return None
+    if not entry.islands:
+        return base
+    return base.difference(unary_union([box(i.x_min, i.y_min, i.x_max, i.y_max) for i in entry.islands]))
+
+
+def _reject_unsupported_region_strategy(entry: FeatureInput) -> None:
+    kind = "holes" if entry.geometry.geometry.holes else "islands" if entry.islands else None
+    if kind is None:
+        return
+    unsupported = (
+        ("surface_cooling", entry.surface_cooling is not None),
+        ("rest", entry.rest is not None),
+    )
+    for name, present in unsupported:
+        if present:
+            raise ValueError(f"Pocket '{entry.id}': {kind} are not supported with {name}")
+
+
+def _pick_fitting_pocket_tool(
+    entry: FeatureInput,
+    region: BaseGeometry | None,
+    *,
+    tool_db: Sequence[ToolSelection],
+    config: Config,
+    wall_allowance_mm: float,
+) -> ToolSelection | None:
+    if region is not None:
+        return pick_tool_for_region(tool_db, region, cleanup_offset_mm=config.cleanup_offset_mm + wall_allowance_mm)
+
+    sg = entry.geometry.geometry
+    shape_name = entry.shape.lower()
+    required_width = None
+    if shape_name == "rect":
+        required_width = min(float(sg.w_mm or 0.0), float(sg.h_mm or 0.0))
+    elif shape_name == "circle":
+        required_width = float(sg.diameter_mm or 0.0)
+
+    tool = pick_tool_for_pocket(
+        tool_db,
+        required_width_mm=required_width,
+        cleanup_offset_mm=config.cleanup_offset_mm,
+    )
+    if required_width is not None and tool.diameter >= required_width:
+        return None
+    return tool
+
+
+def _warn_no_fitting_tool(entry: FeatureInput, tool_db: Sequence[ToolSelection], accumulator: PassAccumulator) -> None:
+    smallest = min(t.diameter for t in tool_db if t.kind == "flat")
+    accumulator.add_warning(
+        f"Pocket '{entry.id}': no flat tool in the tool library fits (smallest flat tool {smallest:.3f} mm) "
+        "— feature skipped"
+    )
+
+
 def plan_pocket_passes(
     pockets: tuple[FeatureInput, ...],
     *,
@@ -267,6 +341,8 @@ def plan_pocket_passes(
     config: Config,
 ) -> None:
     for entry in pockets:
+        _reject_unsupported_region_strategy(entry)
+
         if entry.surface_cooling is not None:
             _plan_surface_pass(entry, accumulator=accumulator, tool_db=tool_db)
             continue
@@ -277,18 +353,22 @@ def plan_pocket_passes(
 
         sg = entry.geometry.geometry
         shape_name = entry.shape.lower()
-        required_width = None
-        if shape_name == "rect":
-            required_width = min(float(sg.w_mm or 0.0), float(sg.h_mm or 0.0))
-        elif shape_name == "circle":
-            required_width = float(sg.diameter_mm or 0.0)
+        region = _pocket_region(entry)
+        if region is not None and region.is_empty:
+            accumulator.add_warning(f"Pocket '{entry.id}': islands cover the whole pocket — feature skipped")
+            continue
 
-        tool = pick_tool_for_pocket(
-            tool_db,
-            required_width_mm=required_width,
-            cleanup_offset_mm=config.cleanup_offset_mm,
+        et = entry.edge_treatment
+        allowance_et = et if et is not None and et.type == "allowance" else None
+        rough_allowance = (allowance_et.rough_allowance_mm or 0.0) if allowance_et is not None else 0.0
+
+        picked = _pick_fitting_pocket_tool(
+            entry, region, tool_db=tool_db, config=config, wall_allowance_mm=rough_allowance
         )
-        tool = apply_feeds_override(tool, entry.feeds_override)
+        if picked is None:
+            _warn_no_fitting_tool(entry, tool_db, accumulator)
+            continue
+        tool = apply_feeds_override(picked, entry.feeds_override)
         accumulator.set_feature_tool(entry.id, tool)
         record = accumulator.get_record("pocket", tool)
         setup = record.setup
@@ -301,10 +381,34 @@ def plan_pocket_passes(
         step_down = stepdown_for_tool(tool)
 
         center = entry.center_xy_mm
-        et = entry.edge_treatment
-        allowance_et = et if et is not None and et.type == "allowance" else None
 
-        if shape_name == "rect":
+        if region is not None:
+            moves = [
+                move_comment(f"BEGIN offset pocket sd={step_down:.3f} so={min(step_over, tool.diameter / 2.0):.3f}"),
+                *pocket_offset_loops(
+                    region,
+                    setup,
+                    depth_mm=effective_depth,
+                    stepover=step_over,
+                    stepdown=step_down,
+                    wall_allowance_mm=rough_allowance,
+                ),
+            ]
+            record.add_moves(offset_moves_z(moves, start_depth), increment=1)
+            if allowance_et is not None:
+                finish_record = accumulator.get_record("finish", tool)
+                finish_moves = [
+                    move_comment("BEGIN finish contours"),
+                    *pocket_finish_contours(
+                        region,
+                        finish_record.setup,
+                        depth_mm=effective_depth,
+                        stepdown=step_down,
+                        wall_allowance_mm=allowance_et.finish_allowance_mm or 0.0,
+                    ),
+                ]
+                finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
+        elif shape_name == "rect":
             width = float(sg.w_mm or 0.0)
             height = float(sg.h_mm or 0.0)
             shape = rect_shape(width, height, center)
@@ -354,59 +458,6 @@ def plan_pocket_passes(
                 finish=True,
             )
             record.add_moves(offset_moves_z(moves, start_depth), increment=1)
-        elif shape_name == "region":
-            moves = pocket_region_rect_raster(
-                entry.to_dict(),
-                setup,
-                default_center_xy=center,
-                depth_mm=effective_depth,
-                stepover_mm=step_over,
-                stepdown_mm=step_down,
-            )
-            record.add_moves(offset_moves_z(moves, start_depth), increment=1)
-        elif shape_name == "polygon":
-            pts = sg.points or ()
-            if not pts:
-                continue
-            shape = polygon_prim(list(pts), center=center)
-            xs = [float(p[0]) for p in pts]
-            ys = [float(p[1]) for p in pts]
-            width = max(xs) - min(xs)
-            height = max(ys) - min(ys)
-            if allowance_et is not None:
-                rough_allow = allowance_et.rough_allowance_mm or 0.0
-                finish_allow = allowance_et.finish_allowance_mm or 0.0
-                _pocket_with_allowance(
-                    width,
-                    height,
-                    center,
-                    record=record,
-                    depth=depth,
-                    start_depth=start_depth,
-                    step_over=step_over,
-                    step_down=step_down,
-                    cleanup_offset_mm=config.cleanup_offset_mm,
-                    rough_allowance_mm=rough_allow,
-                    finish_allowance_mm=finish_allow,
-                    tool=tool,
-                    accumulator=accumulator,
-                    pocket_strategy=config.pocket_strategy,
-                )
-            else:
-                record.add_moves(
-                    pocket_then_finish_profile(
-                        shape,
-                        setup,
-                        total_depth_mm=depth,
-                        stepover_mm=step_over,
-                        step_down_mm=step_down,
-                        cleanup_offset_mm=config.cleanup_offset_mm,
-                        start_depth_mm=start_depth,
-                        finish_perimeter=config.pocket_finish_perimeter,
-                        pocket_strategy=config.pocket_strategy,
-                    ),
-                    increment=1,
-                )
         else:
             continue
 

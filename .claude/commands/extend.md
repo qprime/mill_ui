@@ -24,26 +24,23 @@ description: Step-by-step patterns for extending the system — adding shapes, t
 
 **Steps:**
 1. AST already supports arbitrary shapes via `Item.type` field (no change needed)
-2. Add bounds calculation in `adapters/hints_to_removal.py`
+2. Add bounds calculation in `core/geometry.py` `compute_shape_bounds()`; the Item → RemovalIntent adapters (`adapters/hints_to_removal.py`) call it through `_geometry_to_bounds()`
 3. Add tests
 
 **Files to modify:**
-- `adapters/hints_to_removal.py` — extend `_geometry_to_bounds()` and `_item_geometry_to_bounds()`
-- `core/geometry.py` — bounds calculation logic via `compute_shape_bounds()`
+- `core/geometry.py` — bounds calculation in `compute_shape_bounds()`
+
+The IR stores `points`, `holes`, `start` and `end` relative to `bounds.center` (BG-11); `_geometry_dict_to_shape_geometry` re-bases them. Any new point-like geometry key needs the same re-base.
 
 **Test location:** `tests/test_removal_intent_model.py`
 
-**Example:** Adding Ellipse bounds calculation
+**Example:** Adding Ellipse bounds calculation in `compute_shape_bounds()`
 
 ```python
-def _item_geometry_to_bounds(item_type, geometry_data, cx, cy):
-    if item_type == "Ellipse":
-        rx = geometry_data["rx_mm"]
-        ry = geometry_data["ry_mm"]
-        return Bounds2D(
-            x_min=cx - rx, x_max=cx + rx,
-            y_min=cy - ry, y_max=cy + ry
-        )
+    if shape_type == "Ellipse":
+        rx = float(geometry_data["rx_mm"])
+        ry = float(geometry_data["ry_mm"])
+        return Bounds2D(x_min=cx - rx, x_max=cx + rx, y_min=cy - ry, y_max=cy + ry)
 ```
 
 ---

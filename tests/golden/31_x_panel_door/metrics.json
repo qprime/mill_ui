@@ -1,11 +1,11 @@
 {
   "golden": {
     "recipe_name": "31_x_panel_door",
-    "created_at": "2026-04-04T15:44:28.272899+00:00"
+    "created_at": "2026-09-25T20:20:23.536932+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.34,
+    "extraction_time_ms": 0.83,
     "document": {
       "width_mm": 553.175,
       "height_mm": 743.175,
@@ -272,22 +272,22 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 3.0326,
+    "extraction_time_ms": 4.7065,
     "summary": {
-      "total_lines": 836,
-      "comment_lines": 13,
-      "motion_lines": 802,
+      "total_lines": 717,
+      "comment_lines": 61,
+      "motion_lines": 627,
       "tool_change_lines": 0,
       "spindle_lines": 5,
-      "feed_lines": 780
+      "feed_lines": 537
     },
     "motion": {
-      "g0_count": 24,
-      "g1_count": 778,
+      "g0_count": 100,
+      "g1_count": 527,
       "g2_count": 0,
       "g3_count": 0,
-      "total_rapid_distance_mm": 2855.461,
-      "total_feed_distance_mm": 93740.7692
+      "total_rapid_distance_mm": 3158.5272999999997,
+      "total_feed_distance_mm": 68424.742
     },
     "z_profile": {
       "safe_z_mm": 6.0,
@@ -303,13 +303,30 @@
         -9.0,
         -7.5,
         -6.0,
+        -5.794,
+        -5.664,
+        -5.078,
+        -4.833,
+        -4.758,
         -4.5,
         -3.5,
+        -3.255,
+        -3.156,
+        -3.071,
         -3.0,
-        -1.5
+        -2.951,
+        -2.884,
+        -2.591,
+        -2.516,
+        -2.294,
+        -2.164,
+        -1.578,
+        -1.5,
+        -1.333,
+        -1.258
       ],
-      "depth_count": 14,
-      "max_single_plunge_mm": 9.5
+      "depth_count": 31,
+      "max_single_plunge_mm": 12.0
     },
     "xy_bounds": {
       "x_min": -1.588,
@@ -335,25 +352,65 @@
       ]
     },
     "operations": {
-      "profile_passes": 0,
-      "pocket_passes": 8,
+      "profile_passes": 44,
+      "pocket_passes": 4,
       "bore_passes": 0,
-      "total_passes": 8,
+      "total_passes": 48,
       "operation_names": [
-        "BEGIN spiral pocket sd=3.500 so=5.080",
-        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
-        "BEGIN spiral pocket sd=3.500 so=5.080",
-        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
-        "BEGIN spiral pocket sd=3.500 so=5.080",
-        "pocket_spiral so=5.080 sd=3.500 depth=6.000",
-        "BEGIN spiral pocket sd=3.500 so=5.080",
-        "pocket_spiral so=5.080 sd=3.500 depth=6.000"
+        "BEGIN offset pocket sd=3.500 so=5.080",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "BEGIN offset pocket sd=3.500 so=5.080",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "BEGIN offset pocket sd=3.500 so=5.080",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "BEGIN offset pocket sd=3.500 so=5.080",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline",
+        "profile_outline"
       ]
     },
     "time_estimate": {
-      "rapid_time_s": 34.2656,
-      "feed_time_s": 5928.3819,
-      "total_time_s": 5962.6474
+      "rapid_time_s": 37.9023,
+      "feed_time_s": 4192.4257,
+      "total_time_s": 4230.328100000001
     },
     "tabs": {
       "detected_count": 0,

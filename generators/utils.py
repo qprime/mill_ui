@@ -148,6 +148,15 @@ def _polyline_length(points: Sequence[Point2D]) -> float:
     return sum(math.dist(a, b) for a, b in pairwise(points))
 
 
+def boundary_zone(domain: Domain) -> BaseGeometry:
+    return domain.polygon.boundary.buffer(_COINCIDENT_MM)
+
+
+def sorted_polylines(polylines: Sequence[Sequence[Point2D]]) -> list[list[Point2D]]:
+    oriented = (list(points) if points[0] <= points[-1] else list(points)[::-1] for points in polylines)
+    return sorted(oriented, key=tuple)
+
+
 def rotate_points(points: Sequence[Point2D], angle_rad: float) -> list[Point2D]:
     if angle_rad == 0.0:
         return list(points)
@@ -301,6 +310,7 @@ def is_major_tick(pos: float, origin: float, major_spacing: float) -> bool:
 
 
 __all__ = [
+    "boundary_zone",
     "clip_polylines_to_domain",
     "compute_centroid_and_normalize",
     "create_hole_item",
@@ -314,4 +324,5 @@ __all__ = [
     "polyline_engrave_item",
     "rotate_points",
     "shapely_to_item",
+    "sorted_polylines",
 ]

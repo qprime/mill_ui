@@ -145,6 +145,7 @@ Check before implementing — these already exist:
 | Radial pattern placement | `generators/area/radial_pocket.py`, `radial_tick.py`, `radial_label.py`, `radial_svg.py` |
 | Phyllotaxis spiral placement | `generators/area/phyllotaxis.py` (see `docs/recipes/93_phyllotaxis`) |
 | Voronoi cell partition (engraved edges, pocketed cells) | `generators/area/voronoi.py` (see `docs/recipes/94_voronoi`) |
+| String art chords between outline anchors | `generators/area/string_art.py` (see `docs/recipes/92_string_art`) |
 | Motif placement (scale/rotate/translate, containment) | `generators/placement.py` |
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |

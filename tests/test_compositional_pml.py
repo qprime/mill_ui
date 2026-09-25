@@ -1060,6 +1060,39 @@ def test_voronoi_formatter_omits_default_seed():
     assert reparsed == ast
 
 
+def _string_art_pml(string_art: str) -> str:
+    return f"""
+Sheet: {{width: 300mm, height: 300mm, thickness: 19mm}}
+children:
+  - Rect:
+      id: panel
+      children:
+        - StringArt: {string_art}
+"""
+
+
+def test_string_art_round_trip():
+    ast = parse_pml_yaml(
+        _string_art_pml("{anchors: 96, rule: skip, step: 37, phase: 15, min_length: 2mm, depth: 0.3mm}")
+    )
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+@pytest.mark.parametrize(
+    ("string_art", "message"),
+    [
+        ("{anchors: 72, rule: skip, step: 5, factor: 2, depth: 0.3mm}", "'factor' is only valid with 'rule: multiply'"),
+        ("{anchors: 72, rule: mirror, step: 5, depth: 0.3mm}", "'step' is only valid with 'rule: skip'"),
+        ("{anchors: 72, rule: multiply, depth: 0.3mm}", "Missing required key 'factor'"),
+        ("{anchors: 72, rule: spiral, depth: 0.3mm}", "Known rules: multiply, skip, mirror"),
+    ],
+    ids=["skip_with_factor", "mirror_with_step", "multiply_without_factor", "unknown_rule"],
+)
+def test_string_art_rejects_invalid_forms(string_art, message):
+    with pytest.raises(PMLParseError, match=message):
+        parse_pml_yaml(_string_art_pml(string_art))
+
+
 RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
 
 

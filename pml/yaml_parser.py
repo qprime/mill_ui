@@ -49,6 +49,7 @@ from layout_ast.compositional import (
     SplitHorizontal,
     SplitHorizontalGaps,
     SplitVertical,
+    StringArtGen,
     Subtract,
     SurfaceDecl,
     SvgStampGen,
@@ -858,6 +859,33 @@ def _parse_voronoi_node(node_data: dict, path: str) -> VoronoiGen:
     )
 
 
+_STRING_ART_RULES = ("multiply", "skip", "mirror")
+_STRING_ART_RULE_KEYS = {"multiply": "factor", "skip": "step"}
+
+
+def _parse_string_art_node(node_data: dict, path: str) -> StringArtGen:
+    ctx = f"{path}.StringArt"
+    for key in ("children", "feature"):
+        if key in node_data:
+            raise PMLParseError(f"StringArt does not accept '{key}'", ctx)
+    rule = _require(node_data, "rule", ctx)
+    if rule not in _STRING_ART_RULES:
+        raise PMLParseError(f"Unknown StringArt rule: '{rule}'. Known rules: {', '.join(_STRING_ART_RULES)}", ctx)
+    for key_rule, key in _STRING_ART_RULE_KEYS.items():
+        if key in node_data and rule != key_rule:
+            raise PMLParseError(f"StringArt '{key}' is only valid with 'rule: {key_rule}', not '{rule}'", ctx)
+
+    return StringArtGen(
+        anchors=_safe_int(_require(node_data, "anchors", ctx), "anchors", ctx),
+        rule=rule,
+        depth_mm=parse_dimension(_require(node_data, "depth", ctx)),
+        factor=_safe_int(_require(node_data, "factor", ctx), "factor", ctx) if rule == "multiply" else None,
+        step=_safe_int(_require(node_data, "step", ctx), "step", ctx) if rule == "skip" else None,
+        phase_deg=_safe_float(node_data.get("phase", 0.0), "phase", ctx),
+        min_length_mm=parse_dimension(node_data.get("min_length", "0mm")),
+    )
+
+
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
@@ -886,6 +914,9 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     if node_type == "Voronoi":
         return _parse_voronoi_node(node_data, path)
+
+    if node_type == "StringArt":
+        return _parse_string_art_node(node_data, path)
 
     if node_type == "SvgStamp":
         depth = parse_dimension_or_through(_require(node_data, "depth", f"{path}.SvgStamp"))

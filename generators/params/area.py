@@ -609,6 +609,40 @@ class VoronoiParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class StringArtParams(BaseParams):
+    anchors: int
+    rule: Literal["multiply", "skip", "mirror"]
+    depth_mm: float
+    factor: int | None = None
+    step: int | None = None
+    phase_deg: float = 0.0
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.anchors < 3:
+            raise ValueError(f"StringArtParams: anchors must be at least 3, got {self.anchors}")
+        if self.depth_mm <= 0:
+            raise ValueError(f"StringArtParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.min_length_mm < 0:
+            raise ValueError(f"StringArtParams: min_length_mm must be non-negative, got {self.min_length_mm}")
+        if self.rule not in ("multiply", "skip", "mirror"):
+            raise ValueError(f"StringArtParams: rule must be 'multiply', 'skip' or 'mirror', got {self.rule!r}")
+        self._validate_rule_keys()
+
+    def _validate_rule_keys(self) -> None:
+        if self.rule != "multiply" and self.factor is not None:
+            raise ValueError(f"StringArtParams: factor is only valid with rule 'multiply', not {self.rule!r}")
+        if self.rule != "skip" and self.step is not None:
+            raise ValueError(f"StringArtParams: step is only valid with rule 'skip', not {self.rule!r}")
+        if self.rule == "multiply" and (self.factor is None or self.factor < 2):
+            raise ValueError(f"StringArtParams: rule 'multiply' requires factor >= 2, got {self.factor}")
+        if self.rule == "skip" and (self.step is None or not 1 <= self.step < self.anchors):
+            raise ValueError(
+                f"StringArtParams: rule 'skip' requires 1 <= step < anchors ({self.anchors}), got {self.step}"
+            )
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntryParams:
     tool: str
     role: str = "rough"

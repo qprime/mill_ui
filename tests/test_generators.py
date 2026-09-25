@@ -35,6 +35,7 @@ from generators import (
     PhyllotaxisSvgParams,
     ProfileParams,
     RaisedPanelParams,
+    StringArtParams,
     VoronoiParams,
     bead_generator,
     chamfer_generator,
@@ -56,6 +57,7 @@ from generators import (
     raised_panel_generator,
     rose_curve_generator,
     spirograph_curve_generator,
+    string_art_generator,
     svg_stamp_generator,
     validate_domain_for_generation,
     voronoi_generator,
@@ -2363,6 +2365,144 @@ class TestVoronoiGenerator:
 
 
 # =============================================================================
+# StringArt
+# =============================================================================
+
+
+def _string_art_square() -> Domain:
+    return Domain.from_rectangle(200, 200, center=(100, 100))
+
+
+def _string_art_l_shape() -> Domain:
+    return Domain.from_polygon([(0, 0), (200, 0), (200, 200), (100, 200), (100, 100), (0, 100)])
+
+
+def _string_art_pieces(domain: Domain, params: StringArtParams) -> list[list[tuple[float, float]]]:
+    return [_sheet_points(item) for item in string_art_generator(domain, params)]
+
+
+def _has_piece(
+    pieces: list[list[tuple[float, float]]],
+    start: tuple[float, float],
+    end: tuple[float, float],
+    tolerance_mm: float = 1e-5,
+) -> bool:
+    return any(
+        max(math.dist(piece[0], start), math.dist(piece[-1], end)) < tolerance_mm
+        or max(math.dist(piece[0], end), math.dist(piece[-1], start)) < tolerance_mm
+        for piece in pieces
+    )
+
+
+def _boundary_overlap_mm(domain: Domain, piece: list[tuple[float, float]]) -> float:
+    return LineString(piece).intersection(domain.polygon.boundary.buffer(1e-6)).length
+
+
+class TestStringArtParams:
+    def test_multiply_requires_factor(self):
+        with pytest.raises(ValueError, match="factor"):
+            StringArtParams(anchors=72, rule="multiply", depth_mm=0.3)
+
+    def test_skip_rejects_factor(self):
+        with pytest.raises(ValueError, match="factor"):
+            StringArtParams(anchors=72, rule="skip", step=5, factor=2, depth_mm=0.3)
+
+    def test_step_must_be_less_than_anchors(self):
+        with pytest.raises(ValueError, match="step"):
+            StringArtParams(anchors=12, rule="skip", step=12, depth_mm=0.3)
+
+    def test_rejects_two_anchors(self):
+        with pytest.raises(ValueError, match="anchors"):
+            StringArtParams(anchors=2, rule="mirror", depth_mm=0.3)
+
+
+class TestStringArtGenerator:
+    def _circle(self) -> Domain:
+        return Domain.from_circle(200, center=(100, 100))
+
+    def test_cardioid_chord_count(self):
+        items = string_art_generator(
+            self._circle(), StringArtParams(anchors=72, rule="multiply", factor=2, depth_mm=0.3)
+        )
+        assert len(items) == 70
+
+    def test_skip_half_emits_each_diameter_once(self):
+        items = string_art_generator(self._circle(), StringArtParams(anchors=12, rule="skip", step=6, depth_mm=0.3))
+        assert len(items) == 6
+
+    def test_mirror_odd_drops_middle(self):
+        items = string_art_generator(self._circle(), StringArtParams(anchors=11, rule="mirror", depth_mm=0.3))
+        assert len(items) == 5
+
+    def test_anchors_evenly_spaced_on_circle(self):
+        pieces = _string_art_pieces(self._circle(), StringArtParams(anchors=40, rule="skip", step=1, depth_mm=0.3))
+        lengths = [math.dist(piece[0], piece[-1]) for piece in pieces]
+        assert len(lengths) == 40
+        assert max(lengths) - min(lengths) < 1e-9
+
+    def test_anchor_zero_at_boundary_start(self):
+        pieces = _string_art_pieces(_string_art_square(), StringArtParams(anchors=4, rule="skip", step=2, depth_mm=0.3))
+        assert len(pieces) == 2
+        assert _has_piece(pieces, (0.0, 0.0), (200.0, 200.0))
+        assert _has_piece(pieces, (200.0, 0.0), (0.0, 200.0))
+
+    def test_phase_shifts_anchors(self):
+        params = StringArtParams(anchors=4, rule="skip", step=2, phase_deg=45.0, depth_mm=0.3)
+        pieces = _string_art_pieces(_string_art_square(), params)
+        assert len(pieces) == 2
+        assert _has_piece(pieces, (100.0, 0.0), (100.0, 200.0))
+        assert _has_piece(pieces, (200.0, 100.0), (0.0, 100.0))
+
+    def test_boundary_chords_dropped(self):
+        domain = _string_art_square()
+        pieces = _string_art_pieces(domain, StringArtParams(anchors=80, rule="multiply", factor=2, depth_mm=0.3))
+        assert len(pieces) == 57
+        assert all(_boundary_overlap_mm(domain, piece) < 1e-3 for piece in pieces)
+
+    def test_all_boundary_chords_raise(self):
+        params = StringArtParams(anchors=4, rule="skip", step=1, depth_mm=0.3)
+        with pytest.raises(GeneratorSkipError):
+            string_art_generator(_string_art_square(), params)
+        assert string_art_generator(_string_art_square(), params, allow_empty=True) == []
+
+    def test_concave_parent_splits_chords(self):
+        domain = _string_art_l_shape()
+        pieces = _string_art_pieces(domain, StringArtParams(anchors=40, rule="skip", step=17, depth_mm=0.3))
+        assert len(pieces) == 46
+        inside = domain.polygon.buffer(1e-6)
+        assert all(inside.covers(LineString(piece)) for piece in pieces)
+        assert all(_boundary_overlap_mm(domain, piece) < 1e-3 for piece in pieces)
+        assert _has_piece(pieces, (100.0, 0.0), (100.0, 100.0))
+        assert _has_piece(pieces, (100.0, 100.0), (200.0, 100.0))
+
+    def test_min_length_drops_short_pieces(self):
+        params = StringArtParams(anchors=40, rule="skip", step=17, min_length_mm=50.0, depth_mm=0.3)
+        pieces = _string_art_pieces(_string_art_l_shape(), params)
+        assert len(pieces) == 44
+        assert all(math.dist(piece[0], piece[-1]) >= 50.0 for piece in pieces)
+
+    def test_chord_through_reflex_vertex_splits(self):
+        pieces = _string_art_pieces(
+            _string_art_l_shape(), StringArtParams(anchors=8, rule="skip", step=4, depth_mm=0.3)
+        )
+        expected = [
+            ((0.0, 0.0), (100.0, 100.0)),
+            ((100.0, 100.0), (200.0, 200.0)),
+            ((100.0, 0.0), (100.0, 100.0)),
+            ((100.0, 100.0), (200.0, 0.0)),
+            ((100.0, 100.0), (200.0, 100.0)),
+        ]
+        assert len(pieces) == len(expected)
+        assert all(_has_piece(pieces, start, end) for start, end in expected)
+
+    def test_deterministic(self):
+        params = StringArtParams(anchors=40, rule="skip", step=17, phase_deg=15.0, depth_mm=0.3)
+        first = _string_art_pieces(_string_art_l_shape(), params)
+        second = _string_art_pieces(_string_art_l_shape(), params)
+        assert first == second
+
+
+# =============================================================================
 # Test Runner
 # =============================================================================
 
@@ -2391,6 +2531,7 @@ ALL_GENERATORS = [
     phyllotaxis_pocket_generator,
     phyllotaxis_svg_generator,
     voronoi_generator,
+    string_art_generator,
 ]
 
 

@@ -41,6 +41,7 @@ from generators.area.radial_pocket import radial_pocket_generator
 from generators.area.radial_svg import radial_svg_generator
 from generators.area.radial_tick import radial_tick_generator
 from generators.area.raised_panel import raised_panel_generator
+from generators.area.string_art import string_art_generator
 from generators.area.voronoi import voronoi_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
@@ -60,6 +61,7 @@ from generators.params.area import (
     RadialTickParams,
     RoseCurveParams,
     SpirographCurveParams,
+    StringArtParams,
     VoronoiParams,
 )
 from generators.svg.params import SVGPathParams
@@ -118,6 +120,7 @@ from layout_ast.compositional import (
     SplitHorizontal,
     SplitHorizontalGaps,
     SplitVertical,
+    StringArtGen,
     Subtract,
     SurfaceDecl,
     SvgStampGen,
@@ -1704,6 +1707,37 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("voronoi")
         try:
             generated_items = voronoi_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_string_art_gen(
+        self,
+        node: StringArtGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = StringArtParams(
+            anchors=node.anchors,
+            rule=node.rule,  # type: ignore[arg-type]
+            depth_mm=node.depth_mm,
+            factor=node.factor,
+            step=node.step,
+            phase_deg=node.phase_deg,
+            min_length_mm=node.min_length_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("string_art")
+        try:
+            generated_items = string_art_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3350,6 +3384,7 @@ class LayoutResolver:
                 FlutingGen: LayoutResolver._handle_fluting_gen,
                 ConcentricBorderGen: LayoutResolver._handle_concentric_border_gen,
                 VoronoiGen: LayoutResolver._handle_voronoi_gen,
+                StringArtGen: LayoutResolver._handle_string_art_gen,
                 SplitHorizontalGaps: LayoutResolver._handle_split_horizontal_gaps,
                 AtPosition: LayoutResolver._handle_at_position,
                 Subtract: LayoutResolver._handle_subtract,

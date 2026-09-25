@@ -60,6 +60,7 @@ from layout_ast.compositional import (
     SplitHorizontal,
     SplitHorizontalGaps,
     SplitVertical,
+    StringArtGen,
     Subtract,
     SurfaceDecl,
     SvgStampGen,
@@ -309,6 +310,19 @@ def _format_voronoi(node: VoronoiGen) -> dict[str, Any]:
     if node.rest is not None:
         result.update(_format_rest(node.rest))
     result["depth"] = dim(node.depth_mm)
+    return result
+
+
+def _format_string_art(node: StringArtGen) -> dict[str, Any]:
+    result: dict[str, Any] = {"anchors": node.anchors, "rule": node.rule, "depth": dim(node.depth_mm)}
+    if node.factor is not None:
+        result["factor"] = node.factor
+    if node.step is not None:
+        result["step"] = node.step
+    if node.phase_deg != 0.0:
+        result["phase"] = node.phase_deg
+    if node.min_length_mm != 0.0:
+        result["min_length"] = dim(node.min_length_mm)
     return result
 
 
@@ -728,6 +742,9 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
 
     elif isinstance(node, VoronoiGen):
         return {"Voronoi": _format_voronoi(node)}
+
+    elif isinstance(node, StringArtGen):
+        return {"StringArt": _format_string_art(node)}
 
     elif isinstance(node, Subtract):
         result: dict[str, Any] = {"inner_inset": dim(node.inner_inset_mm)}

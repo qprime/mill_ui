@@ -17,7 +17,14 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.params.area import VoronoiParams
-from generators.utils import clip_polylines_to_domain, iter_polygons, polyline_engrave_item, shapely_to_item
+from generators.utils import (
+    boundary_zone,
+    clip_polylines_to_domain,
+    iter_polygons,
+    polyline_engrave_item,
+    shapely_to_item,
+    sorted_polylines,
+)
 
 if TYPE_CHECKING:
     from shapely.geometry.base import BaseGeometry
@@ -28,7 +35,6 @@ if TYPE_CHECKING:
 
 SEED_ATTEMPTS_PER_POINT = 50
 
-_BOUNDARY_TOLERANCE_MM = 1e-6
 _MIN_POCKET_AREA_MM2 = 0.01
 
 
@@ -81,16 +87,12 @@ def _cell_pieces(domain: Domain, seeds: Sequence[Point2D]) -> list[Polygon]:
     return [piece for cell in diagram.geoms for piece in iter_polygons(cell.intersection(domain.polygon))]
 
 
-def _oriented(points: list[Point2D]) -> list[Point2D]:
-    return points if points[0] <= points[-1] else points[::-1]
-
-
 def _engrave_edges(domain: Domain, pieces: list[Polygon], params: VoronoiParams, shape_id_prefix: str) -> list[Item]:
     boundaries = unary_union([piece.boundary for piece in pieces])
-    interior = boundaries.difference(domain.polygon.boundary.buffer(_BOUNDARY_TOLERANCE_MM))
+    interior = boundaries.difference(boundary_zone(domain))
     lines = [[(float(x), float(y)) for x, y in line.coords] for line in shapely.get_parts(shapely.line_merge(interior))]
     clipped = clip_polylines_to_domain(lines, domain, min_length_mm=params.min_length_mm)
-    edges = sorted((_oriented(edge) for edge in clipped), key=tuple)
+    edges = sorted_polylines(clipped)
     return [
         polyline_engrave_item(edge, params.depth_mm, generate_shape_id(shape_id_prefix, index))
         for index, edge in enumerate(edges)

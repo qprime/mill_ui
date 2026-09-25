@@ -614,3 +614,30 @@ def test_voronoi_unsatisfiable_spacing_propagates():
 
     with pytest.raises(ValueError, match="of 40 seeds"):
         resolve_layout(ast)
+
+
+def test_string_art_resolves_to_polyline_engraves():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Circle:
+      id: disc
+      diameter: 200mm
+      at: {x: 150mm, y: 150mm}
+      children:
+        - StringArt: {anchors: 72, rule: multiply, factor: 2, depth: 0.3mm}
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    engraves = [item for item in ast.items if item.feature is not None and item.feature.type == "engrave"]
+    assert len(engraves) == 70
+    for item in engraves:
+        assert item.type == "Polyline"
+        assert item.feature is not None
+        assert item.feature.depth_mm == 0.3
+        assert item.shape_id is not None
+        assert item.shape_id.startswith("generated_string_art")

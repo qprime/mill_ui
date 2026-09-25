@@ -888,6 +888,60 @@ Explicit seeds:
 
 **Cells in concave parents.** A cell clipped to a concave parent can split into several pieces. Pocket mode cuts one pocket per piece. Cells narrower than the web collapse under the inset and are dropped.
 
+#### StringArt
+
+Places `anchors` evenly spaced points along the parent's outline and engraves a straight chord from each anchor to a partner chosen by `rule`. The chords' envelope draws cardioids, star polygons and parabola-like curves.
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `anchors` | Yes | — | Number of anchors along the outline, at least 3 |
+| `rule` | Yes | — | `multiply`, `skip` or `mirror` |
+| `factor` | `multiply`: Yes | — | `multiply` only: an integer, at least 2 |
+| `step` | `skip`: Yes | — | `skip` only: an integer, `1 ≤ step < anchors` |
+| `phase` | No | 0 | Shift of every anchor along the outline, in degrees of arc length (360 = one full outline) |
+| `min_length` | No | 0mm | Drop chord pieces shorter than this |
+| `depth` | Yes | — | Engrave depth |
+
+`StringArt` is a leaf node; `children` and `feature` are rejected. `factor` and `step` are rejected under the other rules.
+
+With `n` anchors indexed from 0, the partner of anchor `i` is:
+
+| Rule | Partner | Typical result |
+|------|---------|----------------|
+| `multiply` | `(i · factor) mod n` | Circle: cardioid (`factor: 2`), nephroid (`factor: 3`) |
+| `skip` | `(i + step) mod n` | Star polygons; on a rectangle, parabola envelopes near the corners |
+| `mirror` | `n − 1 − i` | Parallel chords across the outline's start |
+
+An anchor that is its own partner draws nothing, and each pair of anchors is engraved once.
+
+Cardioid:
+
+```yaml
+- StringArt:
+    anchors: 72
+    rule: multiply
+    factor: 2
+    depth: 0.3mm
+```
+
+Star pattern:
+
+```yaml
+- StringArt:
+    anchors: 96
+    rule: skip
+    step: 37
+    phase: 15
+    min_length: 2mm
+    depth: 0.3mm
+```
+
+**Anchors and phase.** Anchor `k` sits at arc length `(k / n + phase / 360) · perimeter` from the start of the parent's outline, which runs counter-clockwise. A `Rect` outline starts at its bottom-left corner; a `Circle` starts at its rightmost point. `phase` is a fraction of the outline's length written in degrees, not a rotation. On a `Circle`, `phase: 90` is a 90° rotation. On a 200 × 100 mm `Rect` (perimeter 600 mm), `phase: 90` moves every anchor 150 mm along the outline. Holes carry no anchors.
+
+**Chords on the outline.** Any part of a chord that lies on the parent's outline or a hole boundary is not engraved. A chord between two anchors on the same straight edge disappears. On a concave parent, a chord that runs along an edge keeps only its interior part, and a chord that passes through an inward corner is split there. Chords that leave the shape or cross a hole are cut at the boundary; `min_length` drops the short stubs.
+
+**`skip` on straight edges.** `step: k` and `step: n − k` draw the same chords. On a straight-edged parent, `skip` keeps every chord only when both `step` and `n − step` are greater than the number of anchors on the longest edge. A 200 × 200 mm `Rect` with 80 anchors has 20 per edge: `step: 23` keeps all 80 chords, `step: 60` keeps 76 and `step: 79` keeps none.
+
 #### Wave
 
 Wavy groove pattern:

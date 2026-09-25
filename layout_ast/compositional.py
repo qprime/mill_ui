@@ -401,6 +401,17 @@ class VoronoiGen:
 
 
 @dataclass(frozen=True)
+class StringArtGen:
+    anchors: int
+    rule: str
+    depth_mm: float
+    factor: int | None = None
+    step: int | None = None
+    phase_deg: float = 0.0
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class HeightfieldToolEntry:
     tool: str
     role: str = "rough"

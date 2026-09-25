@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from itertools import pairwise
 from typing import Literal
 
 from core.constants import GOLDEN_ANGLE_DEG
+from domains.domain import JoinStyle
 from generators.core import BaseParams, resolve_major_spacing, resolve_minor_spacing
 from generators.params.measurement_base import MeasurementParamsBase
 from generators.radial_utils import closest_pair_distance, spiral_positions
@@ -86,8 +88,10 @@ class LinePatternParams(BaseParams):
 @dataclass(frozen=True)
 class ConcentricBorderParams(BaseParams):
     insets_mm: tuple[float, ...]
-    groove_width_mm: float = 3.0
     depth_mm: float = 2.0
+    groove_width_mm: float | None = 3.0
+    join_style: JoinStyle = "mitre"
+    mode: Literal["pocket", "engrave"] = "pocket"
 
     def __post_init__(self) -> None:
         if not self.insets_mm:
@@ -95,10 +99,33 @@ class ConcentricBorderParams(BaseParams):
         for i, inset in enumerate(self.insets_mm):
             if inset <= 0:
                 raise ValueError(f"ConcentricBorderParams: insets_mm[{i}] must be positive, got {inset}")
-        if self.groove_width_mm <= 0:
-            raise ValueError(f"ConcentricBorderParams: groove_width_mm must be positive, got {self.groove_width_mm}")
+        if len(set(self.insets_mm)) != len(self.insets_mm):
+            raise ValueError(f"ConcentricBorderParams: insets_mm contains a duplicate inset: {self.insets_mm}")
         if self.depth_mm <= 0:
             raise ValueError(f"ConcentricBorderParams: depth_mm must be positive, got {self.depth_mm}")
+        if self.join_style not in ("mitre", "round", "bevel"):
+            raise ValueError(
+                f"ConcentricBorderParams: join_style must be 'mitre', 'round' or 'bevel', got {self.join_style!r}"
+            )
+        if self.mode == "engrave":
+            if self.groove_width_mm is not None:
+                raise ValueError(
+                    "ConcentricBorderParams: groove_width_mm is only valid for pocket mode; "
+                    "pass groove_width_mm=None for engrave mode"
+                )
+            return
+        if self.mode != "pocket":
+            raise ValueError(f"ConcentricBorderParams: mode must be 'pocket' or 'engrave', got {self.mode!r}")
+        if self.groove_width_mm is None or self.groove_width_mm <= 0:
+            raise ValueError(
+                f"ConcentricBorderParams: groove_width_mm must be positive in pocket mode, got {self.groove_width_mm}"
+            )
+        for shallow, deep in pairwise(sorted(self.insets_mm)):
+            if deep - shallow < self.groove_width_mm:
+                raise ValueError(
+                    f"ConcentricBorderParams: insets {shallow} and {deep} are closer than "
+                    f"groove_width_mm {self.groove_width_mm}; the rings would overlap"
+                )
 
 
 @dataclass(frozen=True)

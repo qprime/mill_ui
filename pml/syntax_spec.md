@@ -509,7 +509,9 @@ Parallel line pattern:
 
 #### ConcentricBorder
 
-Nested border grooves:
+Rings inset from the parent outline, either pocketed as grooves or engraved as single lines.
+
+List form, one ring per inset:
 
 ```yaml
 - ConcentricBorder:
@@ -517,6 +519,56 @@ Nested border grooves:
     groove: 3mm
     depth: 2mm
 ```
+
+Count form, evenly spaced rings:
+
+```yaml
+- ConcentricBorder:
+    count: 6            # number of rings
+    step: 10mm          # distance between consecutive rings
+    start: 15mm         # first inset; default: step
+    join: round         # mitre (default) | round | bevel
+    mode: pocket        # pocket (default) | engrave
+    groove: 4mm         # pocket mode only
+    depth: 2mm
+```
+
+`count`, `step` and `start` expand to insets `start + i·step` for `i` in `0 .. count-1`.
+
+| Key | Required | Notes |
+|---|---|---|
+| `insets` | one form | List of positive, distinct insets. Not combined with `count`/`step`/`start`. |
+| `count` | one form | At least 1. Requires `step`. |
+| `step` | with `count` | Positive. In pocket mode, at least `groove`. |
+| `start` | no | Positive. Only valid with `count`. |
+| `join` | no | Corner style of each inset. See below. |
+| `mode` | no | `pocket` cuts each ring as a groove `groove` wide, starting at the inset. `engrave` cuts each ring boundary as a closed line with the engrave tool. |
+| `groove` | pocket mode | Groove width. Rejected in engrave mode. |
+| `depth` | yes | Cut depth. |
+
+In pocket mode, rings must not overlap: sorted insets must be at least `groove` apart. Rings exactly `groove` apart touch.
+
+`join` only changes concave corners and holes. An inward offset of a convex corner is always sharp, so `join: round` has no effect on a plain `Rect`. For rounded rings on a convex panel, use a `RoundedRect`, `Circle` or `Ellipse` parent; the rings follow its outline.
+
+Rings that do not fit are skipped. An inset that splits the parent into several regions gives each region its own ring.
+
+**Rings around a hole.** Under a parent whose region has a hole, each inset also grows the hole, so rings ripple outward from the island as well as inward from the edge. Use `Subtract`:
+
+```yaml
+- Rect:
+    children:
+    - Subtract:
+        inner_inset: 60mm
+        children:
+        - ConcentricBorder:
+            count: 3
+            step: 8mm
+            join: round
+            groove: 3mm
+            depth: 2mm
+```
+
+In engrave mode, each inset on a holed region cuts two lines: the shrunken outer boundary and the grown hole. Along the sides, rings stop once the inset reaches half the width of the `Subtract` ring. With `join: round` the corners can still leave small separate regions, and these are cut too; engrave mode skips regions under 1 mm². Keep the last inset below half the ring width.
 
 #### XPanel
 

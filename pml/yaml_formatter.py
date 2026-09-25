@@ -680,13 +680,23 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         return {"Fluting": result}
 
     elif isinstance(node, ConcentricBorderGen):
-        return {
-            "ConcentricBorder": {
-                "insets": [dim(i) for i in node.insets_mm],
-                "groove": dim(node.groove_width_mm),
-                "depth": dim(node.depth_mm),
-            }
-        }
+        result = {}
+        if node.insets_mm is not None:
+            result["insets"] = [dim(i) for i in node.insets_mm]
+        if node.count is not None:
+            result["count"] = node.count
+        if node.step_mm is not None:
+            result["step"] = dim(node.step_mm)
+        if node.start_mm is not None:
+            result["start"] = dim(node.start_mm)
+        if node.join != "mitre":
+            result["join"] = node.join
+        if node.mode != "pocket":
+            result["mode"] = node.mode
+        if node.groove_width_mm is not None:
+            result["groove"] = dim(node.groove_width_mm)
+        result["depth"] = dim(node.depth_mm)
+        return {"ConcentricBorder": result}
 
     elif isinstance(node, Subtract):
         result: dict[str, Any] = {"inner_inset": dim(node.inner_inset_mm)}

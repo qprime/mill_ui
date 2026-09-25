@@ -4,7 +4,8 @@ import pytest
 from shapely.geometry import Point as ShapelyPoint
 
 from domains import Domain
-from layout_ast.compositional import ResolvedRegion
+from layout_ast.compositional import CompositionalLayoutAST, ConcentricBorderGen, Panel, ResolvedRegion
+from layout_ast.layout import Sheet
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import LayoutResolver, resolve_layout
@@ -807,3 +808,49 @@ children:
     for item in generated:
         for x, y in _item_points(item):
             assert ((x - 150.0) ** 2 + (y - 150.0) ** 2) ** 0.5 <= 100.0 + 0.1, (item.shape_id, x, y)
+
+
+def test_concentric_rings_grow_around_subtract_hole():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      at: {x: 150mm, y: 150mm, width: 200mm, height: 200mm}
+      children:
+        - Subtract:
+            inner_inset: 60mm
+            children:
+              - ConcentricBorder: {count: 2, step: 10mm, mode: engrave, depth: 0.5mm}
+"""
+    flat = resolve_layout(parse_pml_yaml(pml))
+
+    engraves = [item for item in flat.items if item.feature is not None and item.feature.type == "engrave"]
+    extents = sorted(max(x for x, _ in _item_points(i)) - min(x for x, _ in _item_points(i)) for i in engraves)
+    assert extents == pytest.approx([100.0, 120.0, 160.0, 180.0])
+
+
+@pytest.mark.parametrize(
+    ("node", "message"),
+    [
+        (ConcentricBorderGen(depth_mm=1.0, count=3, mode="engrave"), "requires either insets_mm or count and step_mm"),
+        (ConcentricBorderGen(depth_mm=1.0, count=0, step_mm=5.0, mode="engrave"), "count must be at least 1"),
+        (ConcentricBorderGen(depth_mm=1.0, count=3, step_mm=-5.0, mode="engrave"), "step_mm must be positive"),
+        (
+            ConcentricBorderGen(depth_mm=1.0, count=3, step_mm=5.0, start_mm=0.0, mode="engrave"),
+            "start_mm must be positive",
+        ),
+    ],
+    ids=["no_form", "count_zero", "negative_step", "zero_start"],
+)
+def test_concentric_direct_ast_rejects_invalid_count_form(node, message):
+    ast = CompositionalLayoutAST(
+        sheet=Sheet(width_mm=300, height_mm=300, thickness_mm=19, margin_mm=0.0),
+        root=Panel(children=(node,)),
+    )
+    with pytest.raises(ValueError, match=message):
+        resolve_layout(ast)

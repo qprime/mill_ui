@@ -873,6 +873,98 @@ def test_phyllotaxis_rejects_unknown_element_type():
         parse_pml_yaml(pml)
 
 
+def _concentric_pml(body: str) -> str:
+    return f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - ConcentricBorder:
+{body}
+"""
+
+
+def test_concentric_count_form_round_trips():
+    ast = parse_pml_yaml(
+        _concentric_pml(
+            "            count: 6\n            step: 8mm\n            start: 12mm\n"
+            "            join: round\n            mode: engrave\n            depth: 0.5mm"
+        )
+    )
+    formatted = format_pml_yaml(ast)
+
+    assert "count: 6" in formatted
+    assert "insets:" not in formatted
+    assert parse_pml_yaml(formatted) == ast
+
+
+def test_concentric_rejects_insets_and_count():
+    pml = _concentric_pml(
+        "            insets: [15mm]\n            count: 3\n            step: 8mm\n            groove: 3mm\n            depth: 2mm"
+    )
+    with pytest.raises(PMLParseError, match=r"either 'insets' or 'count' \+ 'step', not both"):
+        parse_pml_yaml(pml)
+
+
+def test_concentric_rejects_count_without_step():
+    pml = _concentric_pml("            count: 3\n            groove: 3mm\n            depth: 2mm")
+    with pytest.raises(PMLParseError, match="requires either 'insets' or both 'count' and 'step'"):
+        parse_pml_yaml(pml)
+
+
+def test_concentric_engrave_rejects_groove():
+    pml = _concentric_pml(
+        "            insets: [15mm]\n            mode: engrave\n            groove: 3mm\n            depth: 1mm"
+    )
+    with pytest.raises(PMLParseError, match="'groove' is not valid with 'mode: engrave'"):
+        parse_pml_yaml(pml)
+
+
+def test_concentric_rejects_non_positive_step():
+    pml = _concentric_pml(
+        "            count: 3\n            step: 0mm\n            groove: 3mm\n            depth: 2mm"
+    )
+    with pytest.raises(PMLParseError, match="'step' must be positive"):
+        parse_pml_yaml(pml)
+
+
+def test_concentric_rejects_step_below_groove():
+    pml = _concentric_pml(
+        "            count: 5\n            step: 2mm\n            groove: 3mm\n            depth: 2mm"
+    )
+    with pytest.raises(PMLParseError, match=r"'step' \(2\.0mm\) is less than 'groove' \(3\.0mm\)"):
+        parse_pml_yaml(pml)
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        (
+            "            insets: [15mm]\n            start: 5mm\n            groove: 3mm\n            depth: 2mm",
+            "'start' is only valid with 'count' and 'step'",
+        ),
+        (
+            "            count: 0\n            step: 8mm\n            groove: 3mm\n            depth: 2mm",
+            "'count' must be at least 1",
+        ),
+        (
+            "            count: 3\n            step: 8mm\n            start: -5mm\n            groove: 3mm\n            depth: 2mm",
+            "'start' must be positive",
+        ),
+        ("            insets: [15mm]\n            depth: 2mm", "'mode: pocket' requires 'groove'"),
+    ],
+    ids=["start_with_insets", "count_zero", "negative_start", "pocket_without_groove"],
+)
+def test_concentric_rejects_invalid_forms(body, message):
+    with pytest.raises(PMLParseError, match=message):
+        parse_pml_yaml(_concentric_pml(body))
+
+
 RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
 
 

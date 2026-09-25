@@ -75,6 +75,7 @@ If `tab_count == 0`, tab dimensions are ignored.
 - For hole grids: `diameter_mm < spacing_mm` (prevents overlap)
 - For Phyllotaxis: motif extent (`diameter_mm`, or `size_mm·√2` for SVG) < the closest-pair distance of the generated spiral points, which equals `spacing_mm` only at the golden angle
 - For raised panels: `field_depth_mm < border_depth_mm`
+- For ConcentricBorder in pocket mode: sorted `insets_mm` differ by at least `groove_width_mm`; rings exactly `groove_width_mm` apart touch. Insets are distinct in both modes.
 
 ---
 

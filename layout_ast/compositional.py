@@ -423,9 +423,14 @@ class LinesGen:
 
 @dataclass(frozen=True)
 class ConcentricBorderGen:
-    insets_mm: tuple[float, ...]
-    groove_width_mm: float
     depth_mm: float
+    insets_mm: tuple[float, ...] | None = None
+    count: int | None = None
+    step_mm: float | None = None
+    start_mm: float | None = None
+    groove_width_mm: float | None = None
+    join: str = "mitre"
+    mode: str = "pocket"
 
 
 @dataclass(frozen=True)

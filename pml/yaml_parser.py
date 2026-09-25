@@ -122,6 +122,57 @@ def _safe_int(value: Any, field: str, path: str) -> int:
         raise PMLParseError(f"Invalid {field}: {e}", path) from e
 
 
+def _parse_concentric_border_node(node_data: dict, path: str) -> ConcentricBorderGen:
+    ctx = f"{path}.ConcentricBorder"
+    has_insets = "insets" in node_data
+    has_count = "count" in node_data
+    has_step = "step" in node_data
+    if has_insets and (has_count or has_step):
+        raise PMLParseError("ConcentricBorder takes either 'insets' or 'count' + 'step', not both", ctx)
+    if not has_insets and not (has_count and has_step):
+        raise PMLParseError("ConcentricBorder requires either 'insets' or both 'count' and 'step'", ctx)
+    if "start" in node_data and not has_count:
+        raise PMLParseError("ConcentricBorder 'start' is only valid with 'count' and 'step'", ctx)
+
+    mode = node_data.get("mode", "pocket")
+    if mode == "engrave" and "groove" in node_data:
+        raise PMLParseError("ConcentricBorder 'groove' is not valid with 'mode: engrave'", ctx)
+    groove_width_mm = parse_dimension(node_data["groove"]) if "groove" in node_data else None
+    if mode == "pocket" and groove_width_mm is None:
+        raise PMLParseError("ConcentricBorder 'mode: pocket' requires 'groove'", ctx)
+
+    insets_mm = None
+    count = step_mm = start_mm = None
+    if has_insets:
+        insets_mm = tuple(parse_dimension(i) for i in node_data["insets"])
+    else:
+        count = _safe_int(node_data["count"], "count", ctx)
+        step_mm = parse_dimension(node_data["step"])
+        start_mm = parse_dimension(node_data["start"]) if "start" in node_data else None
+        if count < 1:
+            raise PMLParseError(f"ConcentricBorder 'count' must be at least 1, got {count}", ctx)
+        if step_mm <= 0:
+            raise PMLParseError(f"ConcentricBorder 'step' must be positive, got {step_mm}mm", ctx)
+        if start_mm is not None and start_mm <= 0:
+            raise PMLParseError(f"ConcentricBorder 'start' must be positive, got {start_mm}mm", ctx)
+        if groove_width_mm is not None and step_mm < groove_width_mm:
+            raise PMLParseError(
+                f"ConcentricBorder 'step' ({step_mm}mm) is less than 'groove' ({groove_width_mm}mm); the rings would overlap",
+                ctx,
+            )
+
+    return ConcentricBorderGen(
+        depth_mm=parse_dimension(_require(node_data, "depth", ctx)),
+        insets_mm=insets_mm,
+        count=count,
+        step_mm=step_mm,
+        start_mm=start_mm,
+        groove_width_mm=groove_width_mm,
+        join=node_data.get("join", "mitre"),
+        mode=mode,
+    )
+
+
 def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry:
     import math
 
@@ -1044,12 +1095,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "ConcentricBorder":
-        insets = [parse_dimension(i) for i in _require(node_data, "insets", f"{path}.ConcentricBorder")]
-        return ConcentricBorderGen(
-            insets_mm=tuple(insets),
-            groove_width_mm=parse_dimension(_require(node_data, "groove", f"{path}.ConcentricBorder")),
-            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.ConcentricBorder")),
-        )
+        return _parse_concentric_border_node(node_data, path)
 
     elif node_type == "Place":
         layout_data = node_data.get("layout", {})

@@ -195,6 +195,21 @@ def sample_catmull_rom_spline(
     return sampled_points
 
 
+def _concentric_insets(node: ConcentricBorderGen) -> tuple[float, ...]:
+    if node.insets_mm is not None:
+        return node.insets_mm
+    if node.count is None or node.step_mm is None:
+        raise ValueError("ConcentricBorderGen requires either insets_mm or count and step_mm")
+    if node.count < 1:
+        raise ValueError(f"ConcentricBorderGen: count must be at least 1, got {node.count}")
+    if node.step_mm <= 0:
+        raise ValueError(f"ConcentricBorderGen: step_mm must be positive, got {node.step_mm}")
+    start_mm = node.step_mm if node.start_mm is None else node.start_mm
+    if start_mm <= 0:
+        raise ValueError(f"ConcentricBorderGen: start_mm must be positive, got {start_mm}")
+    return tuple(start_mm + i * node.step_mm for i in range(node.count))
+
+
 def _convert_beam_layer(layer_decl):
     from assembly.beam import Cutout, LayerSpec
 
@@ -1641,9 +1656,11 @@ class LayoutResolver:
         domain = self._domain_for_region(params, region)
 
         generator_params = ConcentricBorderParams(
-            insets_mm=node.insets_mm,
-            groove_width_mm=node.groove_width_mm,
+            insets_mm=_concentric_insets(node),
             depth_mm=node.depth_mm,
+            groove_width_mm=node.groove_width_mm,
+            join_style=node.join,  # type: ignore[arg-type]
+            mode=node.mode,  # type: ignore[arg-type]
         )
 
         shape_id_prefix = self._next_shape_id("border")

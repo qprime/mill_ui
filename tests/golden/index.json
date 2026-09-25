@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-09-22T23:20:07.133585+00:00",
+  "updated_at": "2026-09-25T18:00:35.135616+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -576,6 +576,14 @@
       "source_file": "docs/recipes/93_phyllotaxis/example.pml.yml",
       "created_at": "2026-09-22T23:20:07.133582+00:00",
       "updated_at": "2026-09-22T23:20:07.133582+00:00",
+      "metrics_file": "metrics.json",
+      "notes": ""
+    },
+    "91_concentric_ripples": {
+      "recipe_name": "91_concentric_ripples",
+      "source_file": "docs/recipes/91_concentric_ripples/example.pml.yml",
+      "created_at": "2026-09-25T18:00:35.135614+00:00",
+      "updated_at": "2026-09-25T18:00:35.135614+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     }

@@ -12,6 +12,7 @@ from __future__ import annotations
 import itertools
 import math
 from dataclasses import replace
+from typing import Any
 
 import pytest
 
@@ -20,6 +21,7 @@ from core.constants import GOLDEN_ANGLE_DEG
 from domains import Domain
 from generators import (
     ChamferParams,
+    ConcentricBorderParams,
     FlatPocketParams,
     Generator,
     GeneratorSkipError,
@@ -1267,6 +1269,127 @@ def test_concentric_border_skips_overflow_ring():
     items = concentric_border_generator(domain, params)
 
     assert len(items) == 1
+
+
+def _holed_square_domain() -> Domain:
+    return Domain(
+        outer_boundary=((0, 0), (200, 0), (200, 200), (0, 200)),
+        inner_boundaries=(((80, 80), (120, 80), (120, 120), (80, 120)),),
+    )
+
+
+def _ring_data(item: Item) -> dict[str, Any]:
+    assert item.geometry is not None
+    return item.geometry.data
+
+
+def _x_extent(item: Item) -> float:
+    xs = [float(p[0]) for p in _ring_data(item)["points"]]
+    return max(xs) - min(xs)
+
+
+def test_concentric_params_engrave_rejects_groove():
+    with pytest.raises(ValueError, match="groove_width_mm=None"):
+        ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=3.0, mode="engrave")
+
+
+def test_concentric_params_pocket_requires_groove():
+    with pytest.raises(ValueError, match="groove_width_mm must be positive in pocket mode"):
+        ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=None)
+
+
+def test_concentric_params_rejects_bad_join():
+    with pytest.raises(ValueError, match="join_style"):
+        ConcentricBorderParams(insets_mm=(10.0,), join_style="square")  # type: ignore[arg-type]
+
+
+def test_concentric_params_rejects_duplicate_insets():
+    with pytest.raises(ValueError, match="duplicate"):
+        ConcentricBorderParams(insets_mm=(15.0, 15.0), groove_width_mm=None, mode="engrave")
+
+
+@pytest.mark.parametrize("insets", [(15.0, 16.0), (16.0, 15.0)])
+def test_concentric_params_rejects_overlapping_pocket_rings(insets):
+    with pytest.raises(ValueError, match=r"15\.0 and 16\.0 are closer than groove_width_mm 3\.0"):
+        ConcentricBorderParams(insets_mm=insets, groove_width_mm=3.0)
+
+
+def test_concentric_params_allows_touching_and_engrave_close_rings():
+    ConcentricBorderParams(insets_mm=(15.0, 18.0), groove_width_mm=3.0)
+    ConcentricBorderParams(insets_mm=(15.0, 16.0), groove_width_mm=None, mode="engrave")
+
+
+def test_concentric_engrave_emits_closed_polylines():
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = ConcentricBorderParams(insets_mm=(10.0, 20.0, 30.0), groove_width_mm=None, mode="engrave")
+
+    items = concentric_border_generator(domain, params)
+
+    assert len(items) == 3
+    assert all(item.type == "Polyline" for item in items)
+    assert all(item.feature is not None and item.feature.type == "engrave" for item in items)
+    assert all(_ring_data(item)["is_open"] is False for item in items)
+    assert [_x_extent(item) for item in items] == pytest.approx([180.0, 160.0, 140.0])
+
+
+def test_concentric_engrave_holed_domain_emits_outer_and_hole():
+    params = ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=None, mode="engrave")
+
+    items = concentric_border_generator(_holed_square_domain(), params)
+
+    extents = sorted(_x_extent(item) for item in items)
+    assert extents == pytest.approx([60.0, 180.0])
+
+
+@pytest.mark.parametrize(("join_style", "expect_rounded"), [("round", True), ("mitre", False)])
+def test_concentric_round_join_rounds_hole_corners(join_style, expect_rounded):
+    params = ConcentricBorderParams(insets_mm=(10.0,), groove_width_mm=3.0, join_style=join_style)
+
+    items = concentric_border_generator(_holed_square_domain(), params)
+
+    assert len(items) == 2
+    (hole_ring,) = [item for item in items if _x_extent(item) == pytest.approx(66.0)]
+    exterior = _ring_data(hole_ring)["points"]
+    (interior,) = _ring_data(hole_ring)["holes"]
+    if expect_rounded:
+        assert len(exterior) > 4
+        assert len(interior) > 4
+    else:
+        assert len(exterior) == 4
+        assert len(interior) == 4
+
+
+def test_concentric_engrave_skips_regions_under_one_square_mm():
+    ring = Domain(
+        outer_boundary=((0, 0), (200, 0), (200, 200), (0, 200)),
+        inner_boundaries=(((60, 60), (140, 60), (140, 140), (60, 140)),),
+    )
+    params = ConcentricBorderParams(insets_mm=(32.0, 34.9), groove_width_mm=None, mode="engrave", join_style="round")
+
+    items = concentric_border_generator(ring, params)
+
+    assert len(items) == 4
+    assert all(_x_extent(item) == pytest.approx(12.55, abs=0.01) for item in items)
+
+
+def test_concentric_pocket_default_geometry():
+    domain = Domain.from_rectangle(200, 200, center=(100, 100))
+    params = ConcentricBorderParams(insets_mm=(15.0, 30.0, 45.0), groove_width_mm=3.0, depth_mm=2.0)
+
+    items = concentric_border_generator(domain, params)
+
+    assert len(items) == 3
+    ring = items[0]
+    assert ring.placement is not None
+    cx, cy = ring.placement.center_xy_mm
+    exterior = [(cx + x, cy + y) for x, y in _ring_data(ring)["points"]]
+    (hole,) = _ring_data(ring)["holes"]
+    interior = [(cx + x, cy + y) for x, y in hole]
+    for axis in (0, 1):
+        assert min(p[axis] for p in exterior) == pytest.approx(15.0)
+        assert max(p[axis] for p in exterior) == pytest.approx(185.0)
+        assert min(p[axis] for p in interior) == pytest.approx(18.0)
+        assert max(p[axis] for p in interior) == pytest.approx(182.0)
 
 
 # =============================================================================

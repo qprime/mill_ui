@@ -749,7 +749,7 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `type` | Yes | — | Curve family: `rose`, `spirograph`, `lissajous` |
+| `type` | Yes | — | Curve family: `rose`, `spirograph`, `lissajous`, `superformula`, `harmonograph` |
 | `depth` | Yes | — | Engrave depth |
 | `size` | No | per type | Overall size of the figure; each type below states how it applies and whether it defaults |
 | `rotation` | No | 0 | Rotation in degrees, counter-clockwise |
@@ -801,7 +801,7 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
     size: 150mm              # optional; scales the figure so its outer diameter equals size
 ```
 
-With `fixed_radius / rolling_radius` reduced to `p / q`, the figure closes after `q` revolutions and has `p` outer lobes. Omitting `revolutions` uses `q`; when `q` exceeds 60 the parser accepts the node but generation fails asking for an explicit `revolutions`. A `revolutions` value that does not close the figure leaves it as an open path.
+With `fixed_radius / rolling_radius` reduced to `p / q`, the figure closes after `q` revolutions and has `p` outer lobes. Omitting `revolutions` uses `q`; when `q` exceeds 60 the parser accepts the node but generation fails asking for an explicit `revolutions`. A `revolutions` value that does not close the figure leaves it as an open path. An explicit `revolutions` that exceeds the sampler's 20,000-point budget fails with an error naming `revolutions` and `tolerance`.
 
 Unlike `rose`, `size` has no default: the figure is drawn at the stated radii unless `size` is given.
 
@@ -828,6 +828,69 @@ Unlike `rose`, `size` has no default: the figure is drawn at the stated radii un
 ```
 
 Equal frequencies draw an ellipse at `phase: 90` and a diagonal line traced twice at `phase: 0` or `180`.
+
+**Type: superformula** — Gielis's polar superformula, `r(φ) = (|cos(mφ/4) / a|^n2 + |sin(mφ/4) / b|^n3)^(-1/n1)`. `m` sets the rotational symmetry; the exponents shape the lobes from rounded (`n ≈ 2`) to pinched stars (small `n1`). `size` is the diameter through the farthest point and defaults to 90% of the smaller parent dimension.
+
+```yaml
+- Curve:
+    type: superformula
+    m: 5
+    n1: 2
+    n2: 7
+    n3: 7
+    depth: 0.3mm
+```
+
+```yaml
+- Curve:
+    type: superformula
+    m: 6            # integer >= 1: rotational symmetry
+    n1: 0.3         # > 0
+    n2: 0.3         # > 0
+    n3: 0.3         # > 0
+    a: 1            # > 0 (default 1)
+    b: 1            # > 0 (default 1)
+    size: 150mm     # diameter through the farthest point (default: 90% of the smaller parent dimension)
+    rotation: 15
+    tolerance: 0.05mm
+    min_length: 2mm
+    depth: 0.3mm
+```
+
+`m` must be a whole number; `m: 2.5` is rejected. `a = b` with `n1 = n2 = n3 = 2` draws a circle for every `m`. `m: 4` with all exponents 1 draws a square standing on a corner. An odd `m` with `a ≠ b` or `n2 ≠ n3` repeats only after two revolutions, so it is traced over two revolutions to draw the full m-fold figure; every other combination is traced over one. Extreme exponents such as `n1: 0.01, n2: 100, n3: 100` are evaluated in log space and do not overflow. A large `m` exceeds the sampler's 20,000-point budget, because the curve starts from `32·m` segments per revolution traced: figures traced over two revolutions fail from `m: 313`, all others from `m: 625`. The error names `m` and `tolerance`.
+
+**Type: harmonograph** — a sum of damped sinusoids on each axis, as drawn by a pendulum harmonograph. For `t` from 0 to `cycles`, `x(t)` sums `A·sin(2π·f·t + φ)·e^(-d·t)` over the x pendulums and `y(t)` over the y pendulums. At least one pendulum per axis is required.
+
+```yaml
+- Curve:
+    type: harmonograph
+    cycles: 40
+    pendulums:
+      - {axis: x, amplitude: 60mm, frequency: 2, phase: 90, damping: 0.02}
+      - {axis: y, amplitude: 60mm, frequency: 3, damping: 0.02}
+    depth: 0.3mm
+```
+
+```yaml
+- Curve:
+    type: harmonograph
+    cycles: 60                 # > 0: trace length in units of t
+    pendulums:
+      - axis: x                # x | y
+        amplitude: 60mm        # > 0
+        frequency: 2           # > 0: oscillations per unit t
+        phase: 90              # degrees (default 0)
+        damping: 0.02          # >= 0: exponential decay per unit t (default 0)
+      - {axis: x, amplitude: 25mm, frequency: 3.01, damping: 0.01}
+      - {axis: y, amplitude: 60mm, frequency: 3, phase: 45, damping: 0.02}
+      - {axis: y, amplitude: 25mm, frequency: 2, damping: 0.015}
+    size: 160mm                # optional: scales so the larger side of the bounding box equals size
+    depth: 0.3mm
+```
+
+Pendulum keys other than `axis`, `amplitude`, `frequency`, `phase` and `damping` are rejected. The figure is centered on the parent's origin and is not re-centered on its bounding box. `size` has no default: amplitudes are drawn in millimeters unless `size` is given.
+
+Zero damping with rational frequency ratios and a whole number of periods closes the figure; any damping leaves it open. Long traces pack their late sweeps tightly near the center; `cycles` and `damping` control where the trace stops. A trace longer than the sampler's 20,000-point budget fails with an error naming `cycles` and `tolerance`; at the default tolerance two undamped 60mm pendulums at frequencies 2 and 3 fit at `cycles: 80` and exceed the budget by `cycles: 120`.
 
 #### Voronoi
 

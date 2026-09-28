@@ -2,19 +2,31 @@ from __future__ import annotations
 
 import math
 from itertools import pairwise
+from unittest.mock import patch
 
 import pytest
+from shapely.geometry import LineString
 from shapely.geometry import Point as ShapelyPoint
 
 from domains import Domain
 from generators.core import GeneratorSkipError
 from generators.curves import (
+    PointBudgetError,
+    harmonograph_curve_generator,
     lissajous_curve_generator,
     rose_curve_generator,
     sample_parametric,
     spirograph_curve_generator,
+    superformula_curve_generator,
 )
-from generators.params.area import LissajousCurveParams, RoseCurveParams, SpirographCurveParams
+from generators.params.area import (
+    HarmonographCurveParams,
+    HarmonographPendulumParams,
+    LissajousCurveParams,
+    RoseCurveParams,
+    SpirographCurveParams,
+    SuperformulaCurveParams,
+)
 from layout_ast.layout import Item
 
 
@@ -78,7 +90,7 @@ class TestSampleParametric:
         assert any(abs(x - 0.5) < 0.02 and y > 0.98 for x, y in points)
 
     def test_point_budget_raises(self):
-        with pytest.raises(ValueError, match="point budget"):
+        with pytest.raises(PointBudgetError, match="point budget"):
             sample_parametric(
                 lambda t: (math.cos(t), math.sin(t)),
                 0.0,
@@ -303,6 +315,11 @@ class TestSpirographCurveGenerator:
         second = spirograph_curve_generator(self._square(), params)
         assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]
 
+    def test_point_budget_names_revolutions(self):
+        with pytest.raises(ValueError, match="revolutions") as excinfo:
+            spirograph_curve_generator(self._square(), self._params(revolutions=300))
+        assert "tolerance" in str(excinfo.value)
+
 
 class TestLissajousCurveParams:
     def test_rejects_zero_frequency(self):
@@ -391,4 +408,242 @@ class TestLissajousCurveGenerator:
         params = self._params(frequency_x=5, frequency_y=4, phase_deg=45.0)
         first = lissajous_curve_generator(self._square(), params)
         second = lissajous_curve_generator(self._square(), params)
+        assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]
+
+
+def _polar_angle_sum(points: list[tuple[float, float]], center: tuple[float, float]) -> float:
+    angles = [math.atan2(y - center[1], x - center[0]) for x, y in points]
+    return sum(math.remainder(b - a, 2 * math.pi) for a, b in pairwise(angles))
+
+
+def _rotate_about(point: tuple[float, float], center: tuple[float, float], angle: float) -> tuple[float, float]:
+    dx = point[0] - center[0]
+    dy = point[1] - center[1]
+    return (
+        center[0] + dx * math.cos(angle) - dy * math.sin(angle),
+        center[1] + dx * math.sin(angle) + dy * math.cos(angle),
+    )
+
+
+class TestSuperformulaCurveParams:
+    def test_rejects_m_below_one(self):
+        with pytest.raises(ValueError, match="m must be"):
+            SuperformulaCurveParams(m=0, n1=1, n2=1, n3=1, depth_mm=0.3)
+
+    @pytest.mark.parametrize("name", ["n1", "n2", "n3"])
+    def test_rejects_nonpositive_exponents(self, name):
+        values = {"n1": 1.0, "n2": 1.0, "n3": 1.0, name: 0.0}
+        with pytest.raises(ValueError, match=name):
+            SuperformulaCurveParams(m=4, depth_mm=0.3, **values)
+
+    @pytest.mark.parametrize("name", ["a", "b"])
+    def test_rejects_nonpositive_a_b(self, name):
+        with pytest.raises(ValueError, match=f"{name} must be positive"):
+            SuperformulaCurveParams(m=4, n1=1, n2=1, n3=1, depth_mm=0.3, **{name: -1.0})
+
+
+class TestSuperformulaCurveGenerator:
+    CENTER = (150.0, 150.0)
+
+    def _square(self) -> Domain:
+        return Domain.from_rectangle(300, 300, center=self.CENTER)
+
+    def _points(self, **params) -> list[tuple[float, float]]:
+        items = superformula_curve_generator(self._square(), SuperformulaCurveParams(depth_mm=0.3, **params))
+        assert len(items) == 1
+        return _absolute_points(items[0])
+
+    def test_n_equal_two_is_circle(self):
+        for p in self._points(m=5, n1=2, n2=2, n3=2, size_mm=150.0):
+            assert math.dist(p, self.CENTER) == pytest.approx(75.0, abs=0.05)
+
+    def test_m4_unit_exponents_is_diamond(self):
+        for x, y in self._points(m=4, n1=1, n2=1, n3=1, size_mm=150.0):
+            assert abs(x - self.CENTER[0]) + abs(y - self.CENTER[1]) == pytest.approx(75.0, abs=0.05)
+
+    def test_symmetric_closes_after_one_turn(self):
+        items = superformula_curve_generator(
+            self._square(), SuperformulaCurveParams(m=5, n1=2, n2=7, n3=7, depth_mm=0.3, size_mm=150.0)
+        )
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+        points = _absolute_points(items[0])
+        assert points[0] == points[-1]
+        assert _polar_angle_sum(points, self.CENTER) == pytest.approx(2 * math.pi)
+
+    def test_odd_m_asymmetric_traces_two_turns(self):
+        items = superformula_curve_generator(
+            self._square(), SuperformulaCurveParams(m=3, n1=1, n2=2, n3=5, b=1.5, depth_mm=0.3, size_mm=150.0)
+        )
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+        points = _absolute_points(items[0])
+        assert points[0] == points[-1]
+        assert _polar_angle_sum(points, self.CENTER) == pytest.approx(4 * math.pi)
+
+    def test_odd_m_asymmetric_default_ab_has_m_fold_symmetry(self):
+        points = self._points(m=3, n1=1, n2=2, n3=5, size_mm=150.0)
+        line = LineString(points)
+        for p in points:
+            rotated = _rotate_about(p, self.CENTER, 2 * math.pi / 3)
+            assert line.distance(ShapelyPoint(rotated)) <= 0.05
+
+    def test_extreme_exponents_stay_finite(self):
+        points = self._points(m=4, n1=0.01, n2=100, n3=100, size_mm=150.0)
+        max_radius = max(math.dist(p, self.CENTER) for p in points)
+        assert max_radius == pytest.approx(75.0, rel=0.005)
+
+    def test_size_sets_max_radius(self):
+        points = self._points(m=6, n1=0.3, n2=0.3, n3=0.3, size_mm=200.0)
+        max_radius = max(math.dist(p, self.CENTER) for p in points)
+        assert max_radius == pytest.approx(100.0, rel=0.005)
+
+    def test_size_holds_for_off_grid_peak(self):
+        points = self._points(m=4, n1=0.02, n2=2, n3=100, size_mm=150.0)
+        max_radius = max(math.dist(p, self.CENTER) for p in points)
+        assert max_radius == pytest.approx(75.0, abs=0.05)
+
+    def test_point_budget_names_m(self):
+        params = SuperformulaCurveParams(m=313, n1=1, n2=2, n3=5, b=1.5, depth_mm=0.3, size_mm=150.0)
+        with pytest.raises(ValueError, match=r"313 lobes .* lower m or raise tolerance"):
+            superformula_curve_generator(self._square(), params)
+
+    def test_default_size_is_90_percent(self):
+        domain = Domain.from_rectangle(200, 100, center=(100, 50))
+        items = superformula_curve_generator(domain, SuperformulaCurveParams(m=5, n1=2, n2=7, n3=7, depth_mm=0.3))
+        max_radius = max(math.dist(p, (100, 50)) for p in _absolute_points(items[0]))
+        assert max_radius == pytest.approx(45.0, rel=0.005)
+
+    def test_clips_to_circle_domain(self):
+        domain = Domain.from_circle(200, center=(100, 100))
+        items = superformula_curve_generator(
+            domain, SuperformulaCurveParams(m=4, n1=1, n2=1, n3=1, depth_mm=0.3, size_mm=260.0)
+        )
+        assert len(items) > 1
+        inflated = domain.polygon.buffer(1e-6)
+        for item in items:
+            for x, y in _absolute_points(item):
+                assert inflated.contains(ShapelyPoint(x, y))
+
+    def test_deterministic(self):
+        params = SuperformulaCurveParams(m=7, n1=0.5, n2=1.5, n3=3.0, a=1.2, depth_mm=0.3, rotation_deg=10.0)
+        first = superformula_curve_generator(self._square(), params)
+        second = superformula_curve_generator(self._square(), params)
+        assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]
+
+
+def _pendulum(axis: str, amplitude_mm: float, frequency: float, **overrides) -> HarmonographPendulumParams:
+    return HarmonographPendulumParams(axis=axis, amplitude_mm=amplitude_mm, frequency=frequency, **overrides)  # type: ignore[arg-type]
+
+
+class TestHarmonographCurveParams:
+    def test_requires_pendulum_on_each_axis(self):
+        with pytest.raises(ValueError, match="axis 'y'"):
+            HarmonographCurveParams(cycles=10, pendulums=(_pendulum("x", 50, 2), _pendulum("x", 30, 3)), depth_mm=0.3)
+
+    def test_rejects_nonpositive_cycles(self):
+        with pytest.raises(ValueError, match="cycles"):
+            HarmonographCurveParams(cycles=0, pendulums=(_pendulum("x", 50, 2), _pendulum("y", 50, 3)), depth_mm=0.3)
+
+    def test_rejects_negative_damping(self):
+        with pytest.raises(ValueError, match="damping"):
+            _pendulum("x", 50, 2, damping=-0.01)
+
+    def test_rejects_bad_axis(self):
+        with pytest.raises(ValueError, match="axis"):
+            _pendulum("z", 50, 2)
+
+
+class TestHarmonographCurveGenerator:
+    CENTER = (150.0, 150.0)
+
+    def _square(self) -> Domain:
+        return Domain.from_rectangle(300, 300, center=self.CENTER)
+
+    def _params(self, cycles: float, *pendulums: HarmonographPendulumParams, **overrides) -> HarmonographCurveParams:
+        return HarmonographCurveParams(cycles=cycles, pendulums=pendulums, depth_mm=0.3, **overrides)
+
+    def test_undamped_integer_frequencies_close(self):
+        items = harmonograph_curve_generator(
+            self._square(), self._params(1, _pendulum("x", 60, 3, phase_deg=90), _pendulum("y", 40, 2))
+        )
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+        points = _absolute_points(items[0])
+        assert points[0] == points[-1]
+        xs = [x - self.CENTER[0] for x, _ in points]
+        ys = [y - self.CENTER[1] for _, y in points]
+        assert (max(xs), min(xs), max(ys), min(ys)) == pytest.approx((60.0, -60.0, 40.0, -40.0), abs=0.05)
+
+    def test_damping_shrinks_envelope(self):
+        items = harmonograph_curve_generator(
+            self._square(),
+            self._params(20, _pendulum("x", 60, 1, damping=0.05), _pendulum("y", 60, 1.5, damping=0.05)),
+        )
+        xs = [x - self.CENTER[0] for x, _ in _absolute_points(items[0])]
+        crossings = 0
+        previous = 0.0
+        last_cycle: list[float] = []
+        for x in xs:
+            if previous and x and (x > 0) != (previous > 0):
+                crossings += 1
+            if x:
+                previous = x
+            if crossings >= 38:
+                last_cycle.append(abs(x))
+        assert max(last_cycle) == pytest.approx(60 * math.exp(-0.05 * 19), rel=0.05)
+
+    def test_damped_is_open(self):
+        items = harmonograph_curve_generator(
+            self._square(),
+            self._params(10, _pendulum("x", 60, 2, phase_deg=90, damping=0.02), _pendulum("y", 60, 3, damping=0.02)),
+        )
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is True
+        points = _absolute_points(items[0])
+        assert math.dist(points[0], points[-1]) > 1.0
+
+    def test_size_scales_bounding_box(self):
+        items = harmonograph_curve_generator(
+            self._square(),
+            self._params(
+                40,
+                _pendulum("x", 60, 2, phase_deg=90, damping=0.02),
+                _pendulum("y", 40, 3, damping=0.02),
+                size_mm=100.0,
+            ),
+        )
+        points = _absolute_points(items[0])
+        width = max(x for x, _ in points) - min(x for x, _ in points)
+        height = max(y for _, y in points) - min(y for _, y in points)
+        assert max(width, height) == pytest.approx(100.0, abs=0.05)
+
+    def test_point_budget_names_cycles(self):
+        params = self._params(200, _pendulum("x", 60, 2, phase_deg=90), _pendulum("y", 60, 3))
+        with pytest.raises(ValueError, match="cycles") as excinfo:
+            harmonograph_curve_generator(self._square(), params)
+        assert "tolerance" in str(excinfo.value)
+
+    def test_unreachable_budget_fails_before_size_presample(self):
+        params = self._params(1_000_000, _pendulum("x", 60, 2, phase_deg=90), _pendulum("y", 60, 3), size_mm=160.0)
+        with (
+            patch("generators.curves.harmonograph._displacement", side_effect=AssertionError("pre-sample ran")),
+            pytest.raises(ValueError, match=r"1000000 cycles .* lower cycles or raise tolerance"),
+        ):
+            harmonograph_curve_generator(self._square(), params)
+
+    def test_deterministic(self):
+        params = self._params(
+            30,
+            _pendulum("x", 60, 2, phase_deg=90, damping=0.02),
+            _pendulum("x", 25, 3.01, damping=0.01),
+            _pendulum("y", 60, 3, phase_deg=45, damping=0.02),
+            rotation_deg=20.0,
+        )
+        first = harmonograph_curve_generator(self._square(), params)
+        second = harmonograph_curve_generator(self._square(), params)
         assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]

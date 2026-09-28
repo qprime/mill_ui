@@ -386,6 +386,41 @@ class LissajousCurveGen:
 
 
 @dataclass(frozen=True)
+class SuperformulaCurveGen:
+    m: int
+    n1: float
+    n2: float
+    n3: float
+    depth_mm: float
+    a: float = 1.0
+    b: float = 1.0
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
+class HarmonographPendulum:
+    axis: str
+    amplitude_mm: float
+    frequency: float
+    phase_deg: float = 0.0
+    damping: float = 0.0
+
+
+@dataclass(frozen=True)
+class HarmonographCurveGen:
+    cycles: float
+    pendulums: tuple[HarmonographPendulum, ...]
+    depth_mm: float
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+
+@dataclass(frozen=True)
 class VoronoiGen:
     depth_mm: float
     seed_count: int | None = None

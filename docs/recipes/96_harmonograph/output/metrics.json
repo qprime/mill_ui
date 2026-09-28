@@ -1,0 +1,47 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 10739,
+    "rapid_moves": 2,
+    "cut_moves": 10719,
+    "rapid_ratio": 0.0
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 10671
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 68
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 294337,
+    "total_lines": 10756,
+    "files": {
+      "engrave-1.00mm": {
+        "bytes": 292536,
+        "lines": 10684
+      },
+      "profile-3.17mm": {
+        "bytes": 1801,
+        "lines": 72
+      }
+    }
+  },
+  "build": {
+    "source": "example.pml.yml",
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back"
+  },
+  "provenance": {
+    "mill_ui": "c0da6db8"
+  }
+}

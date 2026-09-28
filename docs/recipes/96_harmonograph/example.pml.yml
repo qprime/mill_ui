@@ -1,0 +1,31 @@
+Sheet:
+  width: 240mm
+  height: 240mm
+  thickness: 12mm
+  material: mdf
+children:
+- Rect:
+    id: harmonograph
+    at:
+      x: 120mm
+      y: 120mm
+      width: 200mm
+      height: 200mm
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Curve:
+        type: harmonograph
+        cycles: 60
+        pendulums:
+        - axis: x
+          amplitude: 60mm
+          frequency: 2
+          phase: 90
+          damping: 0.02
+        - {axis: x, amplitude: 25mm, frequency: 3.01, damping: 0.01}
+        - {axis: y, amplitude: 60mm, frequency: 3, phase: 45, damping: 0.02}
+        - {axis: y, amplitude: 25mm, frequency: 2, damping: 0.015}
+        size: 160mm
+        depth: 0.3mm

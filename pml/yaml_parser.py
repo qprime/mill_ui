@@ -22,6 +22,8 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HarmonographCurveGen,
+    HarmonographPendulum,
     HeightfieldGen,
     HeightfieldToolEntry,
     HoleGridGen,
@@ -30,6 +32,7 @@ from layout_ast.compositional import (
     Keepout,
     Line,
     LinesGen,
+    LissajousCurveGen,
     MeasurementEdgeGen,
     MeasurementGridGen,
     Panel,
@@ -40,9 +43,11 @@ from layout_ast.compositional import (
     ProfileGen,
     RaisedPanelGen,
     Rect,
+    RoseCurveGen,
     RoundedRect,
     RoundoverGen,
     ShellGen,
+    SpirographCurveGen,
     SplinePath,
     Split,
     SplitGrid,
@@ -51,6 +56,7 @@ from layout_ast.compositional import (
     SplitVertical,
     StringArtGen,
     Subtract,
+    SuperformulaCurveGen,
     SurfaceDecl,
     SvgStampGen,
     TemplateDef,
@@ -723,12 +729,48 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
     )
 
 
-_CURVE_TYPES = ("rose", "spirograph", "lissajous")
+_CURVE_TYPES = ("rose", "spirograph", "lissajous", "superformula", "harmonograph")
+_HARMONOGRAPH_AXES = ("x", "y")
+_HARMONOGRAPH_PENDULUM_KEYS = ("axis", "amplitude", "frequency", "phase", "damping")
+
+
+def _parse_harmonograph_pendulums(raw: Any, ctx: str) -> tuple[HarmonographPendulum, ...]:
+    if not isinstance(raw, list):
+        raise PMLParseError(f"Curve harmonograph 'pendulums' must be a list, got {type(raw).__name__}", ctx)
+    pendulums: list[HarmonographPendulum] = []
+    for index, entry in enumerate(raw):
+        entry_ctx = f"{ctx}.pendulums[{index}]"
+        if not isinstance(entry, dict):
+            raise PMLParseError(f"Curve harmonograph pendulum must be a mapping, got {type(entry).__name__}", entry_ctx)
+        unknown = [str(key) for key in entry if key not in _HARMONOGRAPH_PENDULUM_KEYS]
+        if unknown:
+            raise PMLParseError(
+                f"Unknown harmonograph pendulum key(s): {', '.join(unknown)}. "
+                f"Known keys: {', '.join(_HARMONOGRAPH_PENDULUM_KEYS)}",
+                entry_ctx,
+            )
+        axis = _require(entry, "axis", entry_ctx)
+        if axis not in _HARMONOGRAPH_AXES:
+            raise PMLParseError(f"Curve harmonograph pendulum 'axis' must be x or y, got {axis!r}", entry_ctx)
+        pendulums.append(
+            HarmonographPendulum(
+                axis=axis,
+                amplitude_mm=parse_dimension(_require(entry, "amplitude", entry_ctx)),
+                frequency=_safe_float(_require(entry, "frequency", entry_ctx), "frequency", entry_ctx),
+                phase_deg=_safe_float(entry.get("phase", 0.0), "phase", entry_ctx),
+                damping=_safe_float(entry.get("damping", 0.0), "damping", entry_ctx),
+            )
+        )
+    missing = [axis for axis in _HARMONOGRAPH_AXES if all(p.axis != axis for p in pendulums)]
+    if missing:
+        raise PMLParseError(
+            f"Curve harmonograph 'pendulums' needs at least one pendulum on each axis; none on {', '.join(missing)}",
+            ctx,
+        )
+    return tuple(pendulums)
 
 
 def _parse_curve_node(node_data: dict, path: str) -> Any:
-    from layout_ast.compositional import LissajousCurveGen, RoseCurveGen, SpirographCurveGen
-
     ctx = f"{path}.Curve"
     for key in ("children", "feature"):
         if key in node_data:
@@ -775,6 +817,35 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
             phase_deg=_safe_float(node_data.get("phase", 90.0), "phase", ctx),
             width_mm=parse_dimension(node_data["width"]) if "width" in node_data else None,
             height_mm=parse_dimension(node_data["height"]) if "height" in node_data else None,
+            size_mm=size_mm,
+            rotation_deg=rotation_deg,
+            tolerance_mm=tolerance_mm,
+            min_length_mm=min_length_mm,
+        )
+
+    if curve_type == "superformula":
+        m = _safe_float(_require(node_data, "m", ctx), "m", ctx)
+        if not m.is_integer():
+            raise PMLParseError(f"Curve superformula 'm' must be a whole number, got {m}", ctx)
+        return SuperformulaCurveGen(
+            m=int(m),
+            n1=_safe_float(_require(node_data, "n1", ctx), "n1", ctx),
+            n2=_safe_float(_require(node_data, "n2", ctx), "n2", ctx),
+            n3=_safe_float(_require(node_data, "n3", ctx), "n3", ctx),
+            depth_mm=depth_mm,
+            a=_safe_float(node_data.get("a", 1.0), "a", ctx),
+            b=_safe_float(node_data.get("b", 1.0), "b", ctx),
+            size_mm=size_mm,
+            rotation_deg=rotation_deg,
+            tolerance_mm=tolerance_mm,
+            min_length_mm=min_length_mm,
+        )
+
+    if curve_type == "harmonograph":
+        return HarmonographCurveGen(
+            cycles=_safe_float(_require(node_data, "cycles", ctx), "cycles", ctx),
+            pendulums=_parse_harmonograph_pendulums(_require(node_data, "pendulums", ctx), ctx),
+            depth_mm=depth_mm,
             size_mm=size_mm,
             rotation_deg=rotation_deg,
             tolerance_mm=tolerance_mm,

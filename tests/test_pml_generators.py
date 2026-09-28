@@ -564,6 +564,64 @@ children:
     assert curves[0].shape_id.startswith("generated_lissajous")
 
 
+def test_curve_superformula_resolves_to_polyline_engrave():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: superformula
+            m: 5
+            n1: 2
+            n2: 7
+            n3: 7
+            depth: 0.3mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 1
+    assert curves[0].feature is not None
+    assert curves[0].feature.type == "engrave"
+    assert curves[0].shape_id is not None
+    assert curves[0].shape_id.startswith("generated_superformula")
+
+
+def test_curve_harmonograph_resolves_to_polyline_engrave():
+    pml = """
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+            type: harmonograph
+            cycles: 40
+            pendulums:
+              - {axis: x, amplitude: 60mm, frequency: 2, phase: 90, damping: 0.02}
+              - {axis: y, amplitude: 60mm, frequency: 3, damping: 0.02}
+            depth: 0.3mm
+"""
+    ast = resolve_layout(parse_pml_yaml(pml))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 1
+    assert curves[0].feature is not None
+    assert curves[0].feature.type == "engrave"
+    assert curves[0].shape_id is not None
+    assert curves[0].shape_id.startswith("generated_harmonograph")
+
+
 def _voronoi_pml(voronoi: str) -> str:
     return f"""
 Sheet:

@@ -6,6 +6,11 @@ from collections.abc import Callable
 from domains.domain import Point2D
 
 _MAX_SUBDIVISION_DEPTH = 16
+POINT_BUDGET = 20000
+
+
+class PointBudgetError(ValueError):
+    pass
 
 
 def sample_parametric(
@@ -15,7 +20,7 @@ def sample_parametric(
     *,
     tolerance_mm: float,
     initial_segments: int,
-    max_points: int = 20000,
+    max_points: int = POINT_BUDGET,
 ) -> list[Point2D]:
     if tolerance_mm <= 0:
         raise ValueError(f"sample_parametric: tolerance_mm must be positive, got {tolerance_mm}")
@@ -53,7 +58,7 @@ def _refine(
         _refine(fn, tm, pm, t1, p1, tolerance_mm, max_points, points, depth + 1)
         return
     if len(points) >= max_points:
-        raise ValueError(
+        raise PointBudgetError(
             f"sample_parametric: point budget of {max_points} exceeded at tolerance {tolerance_mm}mm; "
             "raise the tolerance or lower the curve's frequency"
         )
@@ -69,4 +74,4 @@ def _chord_deviation(p0: Point2D, pm: Point2D, p1: Point2D) -> float:
     return abs((pm[0] - p0[0]) * dy - (pm[1] - p0[1]) * dx) / math.sqrt(chord_sq)
 
 
-__all__ = ["sample_parametric"]
+__all__ = ["POINT_BUDGET", "PointBudgetError", "sample_parametric"]

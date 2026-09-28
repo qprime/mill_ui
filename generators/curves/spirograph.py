@@ -10,6 +10,7 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.curves.emit import curve_items
+from generators.curves.sampler import PointBudgetError
 from generators.params.area import SpirographCurveParams
 
 if TYPE_CHECKING:
@@ -63,17 +64,23 @@ def spirograph_curve_generator(
         y = base * math.sin(t) - pen * math.sin(ratio * t)
         return (scale * x, scale * y)
 
-    items = curve_items(
-        domain,
-        trochoid,
-        2 * math.pi * turns,
-        initial_segments=32 * turns * max(1, math.ceil(abs(ratio) + 1)),
-        tolerance_mm=params.tolerance_mm,
-        rotation_deg=params.rotation_deg,
-        min_length_mm=params.min_length_mm,
-        depth_mm=params.depth_mm,
-        shape_id_prefix=shape_id_prefix,
-    )
+    try:
+        items = curve_items(
+            domain,
+            trochoid,
+            2 * math.pi * turns,
+            initial_segments=32 * turns * max(1, math.ceil(abs(ratio) + 1)),
+            tolerance_mm=params.tolerance_mm,
+            rotation_deg=params.rotation_deg,
+            min_length_mm=params.min_length_mm,
+            depth_mm=params.depth_mm,
+            shape_id_prefix=shape_id_prefix,
+        )
+    except PointBudgetError as e:
+        raise ValueError(
+            f"SpirographCurveGenerator: {turns} revolutions exceed the sampler's point budget at tolerance "
+            f"{params.tolerance_mm}mm; lower revolutions or raise tolerance"
+        ) from e
 
     if not items and not allow_empty:
         raise GeneratorSkipError(

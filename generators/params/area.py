@@ -544,6 +544,72 @@ class LissajousCurveParams(BaseParams):
 
 
 @dataclass(frozen=True)
+class SuperformulaCurveParams(BaseParams):
+    m: int
+    n1: float
+    n2: float
+    n3: float
+    depth_mm: float
+    a: float = 1.0
+    b: float = 1.0
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.m < 1:
+            raise ValueError(f"SuperformulaCurveParams: m must be >= 1, got {self.m}")
+        for name, value in (("n1", self.n1), ("n2", self.n2), ("n3", self.n3), ("a", self.a), ("b", self.b)):
+            if value <= 0:
+                raise ValueError(f"SuperformulaCurveParams: {name} must be positive, got {value}")
+        _validate_curve_shared(
+            "SuperformulaCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
+        )
+
+
+@dataclass(frozen=True)
+class HarmonographPendulumParams:
+    axis: Literal["x", "y"]
+    amplitude_mm: float
+    frequency: float
+    phase_deg: float = 0.0
+    damping: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.axis not in ("x", "y"):
+            raise ValueError(f"HarmonographPendulumParams: axis must be 'x' or 'y', got {self.axis!r}")
+        if self.amplitude_mm <= 0:
+            raise ValueError(f"HarmonographPendulumParams: amplitude_mm must be positive, got {self.amplitude_mm}")
+        if self.frequency <= 0:
+            raise ValueError(f"HarmonographPendulumParams: frequency must be positive, got {self.frequency}")
+        if self.damping < 0:
+            raise ValueError(f"HarmonographPendulumParams: damping must be non-negative, got {self.damping}")
+
+
+@dataclass(frozen=True)
+class HarmonographCurveParams(BaseParams):
+    cycles: float
+    pendulums: tuple[HarmonographPendulumParams, ...]
+    depth_mm: float
+    size_mm: float | None = None
+    rotation_deg: float = 0.0
+    tolerance_mm: float = 0.05
+    min_length_mm: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.cycles <= 0:
+            raise ValueError(f"HarmonographCurveParams: cycles must be positive, got {self.cycles}")
+        axes = {pendulum.axis for pendulum in self.pendulums}
+        for axis in ("x", "y"):
+            if axis not in axes:
+                raise ValueError(f"HarmonographCurveParams: pendulums need at least one on axis '{axis}'")
+        _validate_curve_shared(
+            "HarmonographCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
+        )
+
+
+@dataclass(frozen=True)
 class VoronoiParams(BaseParams):
     depth_mm: float
     seed_count: int | None = None
@@ -694,6 +760,8 @@ __all__ = [
     "FlutingParams",
     "GridLinesParams",
     "GridParams",
+    "HarmonographCurveParams",
+    "HarmonographPendulumParams",
     "HeightfieldParams",
     "HeightfieldToolEntryParams",
     "HoleGridParams",
@@ -710,5 +778,6 @@ __all__ = [
     "RaisedPanelParams",
     "RoseCurveParams",
     "SpirographCurveParams",
+    "SuperformulaCurveParams",
     "XPanelParams",
 ]

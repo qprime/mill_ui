@@ -24,6 +24,8 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HarmonographCurveGen,
+    HarmonographPendulum,
     HeightfieldGen,
     HoleGridGen,
     Inset,
@@ -62,6 +64,7 @@ from layout_ast.compositional import (
     SplitVertical,
     StringArtGen,
     Subtract,
+    SuperformulaCurveGen,
     SurfaceDecl,
     SvgStampGen,
     Triangle,
@@ -274,7 +277,9 @@ def _format_beam_feature(feat: BeamFeatureDecl) -> dict[str, Any]:
     return {feat.feature_type: params if params else None}
 
 
-def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen | LissajousCurveGen) -> dict[str, Any]:
+def _curve_shared_keys(
+    node: RoseCurveGen | SpirographCurveGen | LissajousCurveGen | SuperformulaCurveGen | HarmonographCurveGen,
+) -> dict[str, Any]:
     keys: dict[str, Any] = {}
     if node.size_mm is not None:
         keys["size"] = dim(node.size_mm)
@@ -285,6 +290,19 @@ def _curve_shared_keys(node: RoseCurveGen | SpirographCurveGen | LissajousCurveG
     if node.min_length_mm != 0.0:
         keys["min_length"] = dim(node.min_length_mm)
     return keys
+
+
+def _format_harmonograph_pendulum(pendulum: HarmonographPendulum) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "axis": pendulum.axis,
+        "amplitude": dim(pendulum.amplitude_mm),
+        "frequency": pendulum.frequency,
+    }
+    if pendulum.phase_deg != 0.0:
+        result["phase"] = pendulum.phase_deg
+    if pendulum.damping != 0.0:
+        result["damping"] = pendulum.damping
+    return result
 
 
 def _format_voronoi(node: VoronoiGen) -> dict[str, Any]:
@@ -554,6 +572,30 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             curve["width"] = dim(node.width_mm)
         if node.height_mm is not None:
             curve["height"] = dim(node.height_mm)
+        return {"Curve": {**curve, **_curve_shared_keys(node)}}
+
+    elif isinstance(node, SuperformulaCurveGen):
+        curve = {
+            "type": "superformula",
+            "m": node.m,
+            "n1": node.n1,
+            "n2": node.n2,
+            "n3": node.n3,
+            "depth": dim(node.depth_mm),
+        }
+        if node.a != 1.0:
+            curve["a"] = node.a
+        if node.b != 1.0:
+            curve["b"] = node.b
+        return {"Curve": {**curve, **_curve_shared_keys(node)}}
+
+    elif isinstance(node, HarmonographCurveGen):
+        curve = {
+            "type": "harmonograph",
+            "cycles": node.cycles,
+            "pendulums": [_format_harmonograph_pendulum(p) for p in node.pendulums],
+            "depth": dim(node.depth_mm),
+        }
         return {"Curve": {**curve, **_curve_shared_keys(node)}}
 
     elif isinstance(node, RoundoverGen):

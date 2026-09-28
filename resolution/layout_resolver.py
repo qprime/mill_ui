@@ -45,10 +45,18 @@ from generators.area.string_art import string_art_generator
 from generators.area.voronoi import voronoi_generator
 from generators.area.wave import wave_generator
 from generators.area.x_panel import x_panel_generator
-from generators.curves import lissajous_curve_generator, rose_curve_generator, spirograph_curve_generator
+from generators.curves import (
+    harmonograph_curve_generator,
+    lissajous_curve_generator,
+    rose_curve_generator,
+    spirograph_curve_generator,
+    superformula_curve_generator,
+)
 from generators.loop.measurement_edge import measurement_edge_generator
 from generators.panels import NotchedPanelParams, notched_panel_generator
 from generators.params.area import (
+    HarmonographCurveParams,
+    HarmonographPendulumParams,
     HeightfieldParams,
     HeightfieldToolEntryParams,
     LissajousCurveParams,
@@ -62,6 +70,7 @@ from generators.params.area import (
     RoseCurveParams,
     SpirographCurveParams,
     StringArtParams,
+    SuperformulaCurveParams,
     VoronoiParams,
 )
 from generators.svg.params import SVGPathParams
@@ -84,6 +93,7 @@ from layout_ast.compositional import (
     Frame,
     Grid,
     GridLinesGen,
+    HarmonographCurveGen,
     HeightfieldGen,
     HoleGridGen,
     Inset,
@@ -122,6 +132,7 @@ from layout_ast.compositional import (
     SplitVertical,
     StringArtGen,
     Subtract,
+    SuperformulaCurveGen,
     SurfaceDecl,
     SvgStampGen,
     Triangle,
@@ -1586,6 +1597,81 @@ class LayoutResolver:
         shape_id_prefix = self._next_shape_id("lissajous")
         try:
             generated_items = lissajous_curve_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_superformula_curve_gen(
+        self,
+        node: SuperformulaCurveGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = SuperformulaCurveParams(
+            m=node.m,
+            n1=node.n1,
+            n2=node.n2,
+            n3=node.n3,
+            depth_mm=node.depth_mm,
+            a=node.a,
+            b=node.b,
+            size_mm=node.size_mm,
+            rotation_deg=node.rotation_deg,
+            tolerance_mm=node.tolerance_mm,
+            min_length_mm=node.min_length_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("superformula")
+        try:
+            generated_items = superformula_curve_generator(
+                domain,
+                generator_params,
+                allow_empty=True,
+                shape_id_prefix=shape_id_prefix,
+            )
+            items.extend(generated_items)
+        except GeneratorSkipError:
+            pass
+
+    def _handle_harmonograph_curve_gen(
+        self,
+        node: HarmonographCurveGen,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        domain = self._domain_for_region(params, region)
+
+        generator_params = HarmonographCurveParams(
+            cycles=node.cycles,
+            pendulums=tuple(
+                HarmonographPendulumParams(
+                    axis=pendulum.axis,  # type: ignore[arg-type]
+                    amplitude_mm=pendulum.amplitude_mm,
+                    frequency=pendulum.frequency,
+                    phase_deg=pendulum.phase_deg,
+                    damping=pendulum.damping,
+                )
+                for pendulum in node.pendulums
+            ),
+            depth_mm=node.depth_mm,
+            size_mm=node.size_mm,
+            rotation_deg=node.rotation_deg,
+            tolerance_mm=node.tolerance_mm,
+            min_length_mm=node.min_length_mm,
+        )
+
+        shape_id_prefix = self._next_shape_id("harmonograph")
+        try:
+            generated_items = harmonograph_curve_generator(
                 domain,
                 generator_params,
                 allow_empty=True,
@@ -3374,6 +3460,8 @@ class LayoutResolver:
                 RoseCurveGen: LayoutResolver._handle_rose_curve_gen,
                 SpirographCurveGen: LayoutResolver._handle_spirograph_curve_gen,
                 LissajousCurveGen: LayoutResolver._handle_lissajous_curve_gen,
+                SuperformulaCurveGen: LayoutResolver._handle_superformula_curve_gen,
+                HarmonographCurveGen: LayoutResolver._handle_harmonograph_curve_gen,
                 PhyllotaxisHoleGen: LayoutResolver._handle_phyllotaxis_hole_gen,
                 PhyllotaxisPocketGen: LayoutResolver._handle_phyllotaxis_pocket_gen,
                 PhyllotaxisSvgGen: LayoutResolver._handle_phyllotaxis_svg_gen,

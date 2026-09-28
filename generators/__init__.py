@@ -32,10 +32,12 @@ from generators.core import (
     validate_domain_for_generation,
 )
 from generators.curves import (
+    harmonograph_curve_generator,
     lissajous_curve_generator,
     rose_curve_generator,
     sample_parametric,
     spirograph_curve_generator,
+    superformula_curve_generator,
 )
 from generators.loop import (
     bead_generator,
@@ -53,6 +55,8 @@ from generators.params.area import (
     FlutingParams,
     GridLinesParams,
     GridParams,
+    HarmonographCurveParams,
+    HarmonographPendulumParams,
     HeightfieldParams,
     HoleGridParams,
     LinePatternParams,
@@ -69,6 +73,7 @@ from generators.params.area import (
     RoseCurveParams,
     SpirographCurveParams,
     StringArtParams,
+    SuperformulaCurveParams,
     VoronoiParams,
     XPanelParams,
 )
@@ -105,6 +110,8 @@ __all__ = [
     "GeneratorSkipError",
     "GridLinesParams",
     "GridParams",
+    "HarmonographCurveParams",
+    "HarmonographPendulumParams",
     "HeightfieldParams",
     "HoleGridParams",
     "LinePatternParams",
@@ -127,6 +134,7 @@ __all__ = [
     "SVGPathParams",
     "SpirographCurveParams",
     "StringArtParams",
+    "SuperformulaCurveParams",
     "TextAlignment",
     "TextOrientation",
     "VoronoiParams",
@@ -143,6 +151,7 @@ __all__ = [
     "generate_shape_id",
     "grid_generator",
     "grid_lines_generator",
+    "harmonograph_curve_generator",
     "heightfield_generator",
     "hole_grid_generator",
     "iter_polygons",
@@ -166,6 +175,7 @@ __all__ = [
     "shapely_to_item",
     "spirograph_curve_generator",
     "string_art_generator",
+    "superformula_curve_generator",
     "svg_stamp_generator",
     "validate_domain_for_generation",
     "voronoi_generator",

@@ -674,7 +674,7 @@ children:
             type: hexagram
             depth: 0.3mm
 """
-    with pytest.raises(PMLParseError, match="Known types: rose, spirograph, lissajous"):
+    with pytest.raises(PMLParseError, match="Known types: rose, spirograph, lissajous, superformula, harmonograph"):
         parse_pml_yaml(pml)
 
 
@@ -781,6 +781,165 @@ children:
         assert key in formatted
 
     assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+def _curve_pml(curve: str) -> str:
+    return f"""
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: panel
+      children:
+        - Curve:
+{curve}"""
+
+
+def test_curve_superformula_round_trip():
+    pml = _curve_pml(
+        """            type: superformula
+            m: 6
+            n1: 0.3
+            n2: 0.4
+            n3: 0.5
+            a: 1.5
+            b: 0.75
+            depth: 0.3mm
+            size: 150mm
+            rotation: 15
+            tolerance: 0.02mm
+            min_length: 2mm
+"""
+    )
+    formatted = format_pml_yaml(parse_pml_yaml(pml))
+
+    for key in (
+        "type: superformula",
+        "m: 6",
+        "n1: 0.3",
+        "n2: 0.4",
+        "n3: 0.5",
+        "a: 1.5",
+        "b: 0.75",
+        "size: 150mm",
+        "rotation: 15",
+        "tolerance: 0.02mm",
+        "min_length: 2mm",
+    ):
+        assert key in formatted
+
+    assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+def test_curve_superformula_rejects_non_integer_m():
+    pml = _curve_pml(
+        """            type: superformula
+            m: 2.5
+            n1: 1
+            n2: 1
+            n3: 1
+            depth: 0.3mm
+"""
+    )
+    with pytest.raises(PMLParseError, match="whole number"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_harmonograph_round_trip():
+    pml = _curve_pml(
+        """            type: harmonograph
+            cycles: 60
+            pendulums:
+              - {axis: x, amplitude: 60mm, frequency: 2, phase: 90, damping: 0.02}
+              - {axis: y, amplitude: 25mm, frequency: 3.01, damping: 0.015}
+            depth: 0.3mm
+            size: 160mm
+            rotation: 15
+            tolerance: 0.02mm
+            min_length: 2mm
+"""
+    )
+    formatted = format_pml_yaml(parse_pml_yaml(pml))
+
+    for key in (
+        "type: harmonograph",
+        "cycles: 60",
+        "axis: x",
+        "amplitude: 60mm",
+        "frequency: 2",
+        "phase: 90",
+        "damping: 0.02",
+        "axis: y",
+        "amplitude: 25mm",
+        "frequency: 3.01",
+        "damping: 0.015",
+        "size: 160mm",
+        "rotation: 15",
+        "tolerance: 0.02mm",
+        "min_length: 2mm",
+    ):
+        assert key in formatted
+
+    assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+def test_curve_harmonograph_rejects_single_axis():
+    pml = _curve_pml(
+        """            type: harmonograph
+            cycles: 10
+            pendulums:
+              - {axis: x, amplitude: 60mm, frequency: 2}
+              - {axis: x, amplitude: 30mm, frequency: 3}
+            depth: 0.3mm
+"""
+    )
+    with pytest.raises(PMLParseError, match="each axis; none on y"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_harmonograph_rejects_unknown_pendulum_key():
+    pml = _curve_pml(
+        """            type: harmonograph
+            cycles: 10
+            pendulums:
+              - {axis: x, amplitude: 60mm, frequency: 2, decay: 0.1}
+              - {axis: y, amplitude: 60mm, frequency: 3}
+            depth: 0.3mm
+"""
+    )
+    with pytest.raises(PMLParseError, match=r"Unknown harmonograph pendulum key.*decay"):
+        parse_pml_yaml(pml)
+
+
+@pytest.mark.parametrize(
+    ("pendulums", "match"),
+    [
+        pytest.param("{axis: x, amplitude: 60mm, frequency: 2}", "'pendulums' must be a list", id="not_a_list"),
+        pytest.param(
+            "[[x, 60mm, 2], {axis: y, amplitude: 60mm, frequency: 3}]",
+            "pendulum must be a mapping",
+            id="entry_not_mapping",
+        ),
+        pytest.param(
+            "[{axis: z, amplitude: 60mm, frequency: 2}, {axis: y, amplitude: 60mm, frequency: 3}]",
+            "'axis' must be x or y, got 'z'",
+            id="bad_axis",
+        ),
+    ],
+)
+def test_curve_harmonograph_rejects_malformed_pendulums(pendulums, match):
+    pml = _curve_pml(
+        f"""            type: harmonograph
+            cycles: 10
+            pendulums: {pendulums}
+            depth: 0.3mm
+"""
+    )
+    with pytest.raises(PMLParseError, match=match):
+        parse_pml_yaml(pml)
 
 
 def test_phyllotaxis_round_trip():

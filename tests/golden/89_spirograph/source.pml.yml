@@ -5,7 +5,7 @@ Sheet:
   material: mdf
 children:
 - Rect:
-    id: hypotrochoid
+    id: nested
     at:
       x: 120mm
       y: 130mm
@@ -17,14 +17,14 @@ children:
         depth: through
     - Curve:
         type: spirograph
-        fixed_radius: 60mm
-        rolling_radius: 21mm
-        pen_offset: 15mm
         depth: 0.3mm
-        size: 180mm
+        layers:
+        - points: 7
+          step: 3
+          pen: [1.0, 0.8, 0.6, 0.4]
 
 - Rect:
-    id: deltoid
+    id: swirl
     at:
       x: 350mm
       y: 130mm
@@ -36,14 +36,15 @@ children:
         depth: through
     - Curve:
         type: spirograph
-        fixed_radius: 60mm
-        rolling_radius: 20mm
-        pen_offset: 20mm
         depth: 0.3mm
-        size: 180mm
+        layers:
+        - points: 5
+          step: 2
+          pen: {from: 1.2, to: 0.4, count: 9}
+          rotation_step: 4
 
 - Rect:
-    id: epitrochoid
+    id: combined
     at:
       x: 580mm
       y: 130mm
@@ -55,9 +56,13 @@ children:
         depth: through
     - Curve:
         type: spirograph
-        fixed_radius: 40mm
-        rolling_radius: 10mm
-        pen_offset: 8mm
-        mode: outside
         depth: 0.3mm
-        size: 180mm
+        layers:
+        - points: 6
+          step: 1
+          mode: outside
+          pen: 0.6
+        - points: 12
+          step: 5
+          pen: 1.0
+          depth: 0.5mm

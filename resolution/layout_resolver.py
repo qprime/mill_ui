@@ -69,6 +69,7 @@ from generators.params.area import (
     RadialTickParams,
     RoseCurveParams,
     SpirographCurveParams,
+    SpirographLayerParams,
     StringArtParams,
     SuperformulaCurveParams,
     VoronoiParams,
@@ -124,6 +125,7 @@ from layout_ast.compositional import (
     RoundoverGen,
     ShellGen,
     SpirographCurveGen,
+    SpirographLayer,
     SplinePath,
     Split,
     SplitGrid,
@@ -225,6 +227,19 @@ def _concentric_insets(node: ConcentricBorderGen) -> tuple[float, ...]:
     if start_mm <= 0:
         raise ValueError(f"ConcentricBorderGen: start_mm must be positive, got {start_mm}")
     return tuple(start_mm + i * node.step_mm for i in range(node.count))
+
+
+def _spirograph_pens(layer: SpirographLayer) -> tuple[float, ...]:
+    if layer.pens is not None:
+        return layer.pens
+    if layer.pen_from is None or layer.pen_to is None or layer.pen_count is None:
+        raise ValueError("SpirographLayer requires either pens or pen_from, pen_to and pen_count")
+    if layer.pen_count < 2:
+        raise ValueError(f"SpirographLayer: pen sweep count must be at least 2, got {layer.pen_count}")
+    if layer.pen_from == layer.pen_to:
+        raise ValueError(f"SpirographLayer: pen sweep from and to must differ, both are {layer.pen_from}")
+    span = layer.pen_to - layer.pen_from
+    return tuple(layer.pen_from + span * i / (layer.pen_count - 1) for i in range(layer.pen_count))
 
 
 def _convert_beam_layer(layer_decl):
@@ -1548,16 +1563,24 @@ class LayoutResolver:
         domain = self._domain_for_region(params, region)
 
         generator_params = SpirographCurveParams(
-            fixed_radius_mm=node.fixed_radius_mm,
-            rolling_radius_mm=node.rolling_radius_mm,
-            pen_offset_mm=node.pen_offset_mm,
+            layers=tuple(
+                SpirographLayerParams(
+                    points=layer.points,
+                    step=layer.step,
+                    pens=_spirograph_pens(layer),
+                    mode=layer.mode,  # type: ignore[arg-type]
+                    rotation_deg=layer.rotation_deg,
+                    rotation_step_deg=layer.rotation_step_deg,
+                    depth_mm=layer.depth_mm,
+                )
+                for layer in node.layers
+            ),
             depth_mm=node.depth_mm,
-            mode=node.mode,  # type: ignore[arg-type]
-            revolutions=node.revolutions,
             size_mm=node.size_mm,
             rotation_deg=node.rotation_deg,
             tolerance_mm=node.tolerance_mm,
             min_length_mm=node.min_length_mm,
+            max_cut_length_mm=node.max_cut_length_mm,
         )
 
         shape_id_prefix = self._next_shape_id("spirograph")

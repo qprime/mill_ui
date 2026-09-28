@@ -358,17 +358,28 @@ class RoseCurveGen:
 
 
 @dataclass(frozen=True)
-class SpirographCurveGen:
-    fixed_radius_mm: float
-    rolling_radius_mm: float
-    pen_offset_mm: float
-    depth_mm: float
+class SpirographLayer:
+    points: int
+    step: int
+    pens: tuple[float, ...] | None = None
+    pen_from: float | None = None
+    pen_to: float | None = None
+    pen_count: int | None = None
     mode: str = "inside"
-    revolutions: int | None = None
+    rotation_deg: float = 0.0
+    rotation_step_deg: float = 0.0
+    depth_mm: float | None = None
+
+
+@dataclass(frozen=True)
+class SpirographCurveGen:
+    layers: tuple[SpirographLayer, ...]
+    depth_mm: float
     size_mm: float | None = None
     rotation_deg: float = 0.0
     tolerance_mm: float = 0.05
     min_length_mm: float = 0.0
+    max_cut_length_mm: float = 50000.0
 
 
 @dataclass(frozen=True)

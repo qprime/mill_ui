@@ -5,6 +5,7 @@ from dataclasses import replace
 
 import pytest
 
+from adapters.ast_to_removal import ast_to_removal_intents
 from layout_ast.compositional import (
     ChamferGen,
     PocketGen,
@@ -17,6 +18,7 @@ from layout_ast.compositional import (
 )
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
+from validation import check_overlap
 
 PARSE_CASES = [
     pytest.param(
@@ -509,8 +511,8 @@ def test_phyllotaxis_svg_file_without_source_dir_raises():
         resolve_layout(parse_pml_yaml(_PHYLLOTAXIS_SVG_FILE_PML))
 
 
-def test_curve_spirograph_resolves_to_polyline_engrave():
-    pml = """
+def _spirograph_pml(pen: str) -> str:
+    return f"""
 Sheet:
   width: 300mm
   height: 300mm
@@ -522,12 +524,16 @@ children:
       children:
         - Curve:
             type: spirograph
-            fixed_radius: 60mm
-            rolling_radius: 21mm
-            pen_offset: 15mm
             depth: 0.3mm
+            layers:
+              - points: 5
+                step: 2
+                pen: {pen}
 """
-    ast = resolve_layout(parse_pml_yaml(pml))
+
+
+def test_curve_spirograph_resolves_to_polyline_engrave():
+    ast = resolve_layout(parse_pml_yaml(_spirograph_pml("0.8")))
 
     curves = [item for item in ast.items if item.type == "Polyline"]
     assert len(curves) == 1
@@ -535,6 +541,25 @@ children:
     assert curves[0].feature.type == "engrave"
     assert curves[0].shape_id is not None
     assert curves[0].shape_id.startswith("generated_spirograph")
+
+
+def test_curve_spirograph_pen_sweep_resolves_count_strands():
+    ast = resolve_layout(parse_pml_yaml(_spirograph_pml("{from: 1.0, to: 0.4, count: 4}")))
+
+    curves = [item for item in ast.items if item.type == "Polyline"]
+    assert len(curves) == 4
+    assert all(curve.geometry is not None and curve.geometry.data["is_open"] is False for curve in curves)
+
+
+def test_curve_spirograph_same_depth_strands_pass_overlap_check():
+    ast = resolve_layout(parse_pml_yaml(_spirograph_pml("{from: 1.2, to: 0.4, count: 3}")))
+
+    assert check_overlap(ast_to_removal_intents(ast)).errors == []
+
+
+def test_curve_spirograph_sweep_rejects_count_below_two():
+    with pytest.raises(ValueError, match="count must be at least 2"):
+        resolve_layout(parse_pml_yaml(_spirograph_pml("{from: 1.0, to: 0.4, count: 1}")))
 
 
 def test_curve_lissajous_resolves_to_polyline_engrave():

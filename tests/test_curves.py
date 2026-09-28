@@ -25,6 +25,7 @@ from generators.params.area import (
     LissajousCurveParams,
     RoseCurveParams,
     SpirographCurveParams,
+    SpirographLayerParams,
     SuperformulaCurveParams,
 )
 from layout_ast.layout import Item
@@ -41,11 +42,15 @@ def _piece_length(points: list[tuple[float, float]]) -> float:
     return sum(math.dist(points[i], points[i + 1]) for i in range(len(points) - 1))
 
 
-def _cyclic_radius_maxima(points: list[tuple[float, float]], center: tuple[float, float]) -> int:
+def _cyclic_radius_maxima_indices(points: list[tuple[float, float]], center: tuple[float, float]) -> list[int]:
     ring = points[:-1] if math.dist(points[0], points[-1]) < 1e-9 else points
     radii = [math.dist(p, center) for p in ring]
     n = len(radii)
-    return sum(1 for i in range(n) if radii[i] > radii[i - 1] and radii[i] >= radii[(i + 1) % n])
+    return [i for i in range(n) if radii[i] > radii[i - 1] and radii[i] >= radii[(i + 1) % n]]
+
+
+def _cyclic_radius_maxima(points: list[tuple[float, float]], center: tuple[float, float]) -> int:
+    return len(_cyclic_radius_maxima_indices(points, center))
 
 
 def _axis_maxima(points: list[tuple[float, float]], axis: int) -> int:
@@ -208,117 +213,217 @@ class TestRoseCurveGenerator:
         assert rose_curve_generator(domain, params, allow_empty=True) == []
 
 
-class TestSpirographCurveParams:
-    def test_inside_requires_rolling_smaller(self):
-        with pytest.raises(ValueError, match="rolling_radius"):
-            SpirographCurveParams(fixed_radius_mm=20, rolling_radius_mm=20, pen_offset_mm=5, depth_mm=0.3)
+def _layer(points: int, step: int, *pens: float, **overrides) -> SpirographLayerParams:
+    return SpirographLayerParams(points=points, step=step, pens=pens, **overrides)
 
-    def test_outside_allows_larger_rolling(self):
-        SpirographCurveParams(fixed_radius_mm=20, rolling_radius_mm=30, pen_offset_mm=5, depth_mm=0.3, mode="outside")
 
-    def test_rejects_negative_pen_offset(self):
-        with pytest.raises(ValueError, match="pen_offset"):
-            SpirographCurveParams(fixed_radius_mm=60, rolling_radius_mm=21, pen_offset_mm=-1, depth_mm=0.3)
+class TestSpirographLayerParams:
+    def test_inside_requires_step_below_points(self):
+        with pytest.raises(ValueError, match=r"step \(7\) must be less than points \(5\)"):
+            _layer(5, 7, 0.8)
+
+    def test_outside_allows_step_above_points(self):
+        _layer(3, 5, 0.8, mode="outside")
+
+    def test_rejects_shared_factor(self):
+        with pytest.raises(ValueError, match="points 3, step 2"):
+            _layer(6, 4, 0.8)
+
+    def test_rejects_negative_pen(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            _layer(5, 2, 0.8, -0.1)
+
+    def test_rejects_empty_pens(self):
+        with pytest.raises(ValueError, match="pens must not be empty"):
+            _layer(5, 2)
+
+    def test_rotation_step_needs_two_pens(self):
+        with pytest.raises(ValueError, match="rotation_step_deg"):
+            _layer(5, 2, 0.8, rotation_step_deg=4.0)
+
+    def test_rejects_duplicate_pens_without_rotation_step(self):
+        with pytest.raises(ValueError, match="coincide"):
+            _layer(5, 2, 0.8, 0.8)
+
+    def test_allows_duplicate_pens_with_rotation_step(self):
+        _layer(5, 2, 0.8, 0.8, rotation_step_deg=10.0)
 
     def test_rejects_bad_mode(self):
         with pytest.raises(ValueError, match="mode"):
-            SpirographCurveParams(
-                fixed_radius_mm=60,
-                rolling_radius_mm=21,
-                pen_offset_mm=5,
-                depth_mm=0.3,
-                mode="around",  # type: ignore[arg-type]
-            )
+            _layer(5, 2, 0.8, mode="around")
 
-    def test_rejects_zero_revolutions(self):
-        with pytest.raises(ValueError, match="revolutions"):
-            SpirographCurveParams(
-                fixed_radius_mm=60, rolling_radius_mm=21, pen_offset_mm=5, depth_mm=0.3, revolutions=0
-            )
+    def test_rejects_nonpositive_layer_depth(self):
+        with pytest.raises(ValueError, match="depth_mm"):
+            _layer(5, 2, 0.8, depth_mm=0.0)
+
+
+class TestSpirographCurveParams:
+    def test_rejects_empty_layers(self):
+        with pytest.raises(ValueError, match="layers"):
+            SpirographCurveParams(layers=(), depth_mm=0.3)
+
+    def test_rejects_nonpositive_max_cut_length(self):
+        with pytest.raises(ValueError, match="max_cut_length_mm"):
+            SpirographCurveParams(layers=(_layer(5, 2, 0.8),), depth_mm=0.3, max_cut_length_mm=0.0)
 
 
 class TestSpirographCurveGenerator:
     def _square(self) -> Domain:
         return Domain.from_rectangle(300, 300, center=(150, 150))
 
-    def _params(self, **overrides) -> SpirographCurveParams:
-        base = {"fixed_radius_mm": 60.0, "rolling_radius_mm": 21.0, "pen_offset_mm": 15.0, "depth_mm": 0.3}
-        return SpirographCurveParams(**{**base, **overrides})
+    def _small_circle(self) -> Domain:
+        return Domain.from_circle(120, center=(150, 150))
 
-    def test_closes_after_reduced_denominator_turns(self):
-        items = spirograph_curve_generator(self._square(), self._params())
+    def _params(self, *layers: SpirographLayerParams, **overrides) -> SpirographCurveParams:
+        return SpirographCurveParams(layers=layers, **{"depth_mm": 0.3, **overrides})
+
+    def test_lobe_count_equals_points(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(20, 7, 0.7)))
+        assert len(items) == 1
+        assert items[0].geometry is not None
+        assert items[0].geometry.data["is_open"] is False
+        assert _cyclic_radius_maxima(_absolute_points(items[0]), (150, 150)) == 20
+
+    def test_lobes_visited_every_step(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(7, 3, 0.8)))
+        points = _absolute_points(items[0])
+        first, second = _cyclic_radius_maxima_indices(points, (150, 150))[:2]
+
+        def angle(index: int) -> float:
+            x, y = points[index]
+            return math.degrees(math.atan2(y - 150, x - 150))
+
+        assert (angle(second) - angle(first)) % 360 == pytest.approx(3 * 360 / 7, abs=0.5)
+
+    def test_closes_exactly(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(20, 7, 0.7), tolerance_mm=0.01))
         assert len(items) == 1
         points = _absolute_points(items[0])
         assert points[0] == points[-1]
         assert items[0].geometry is not None
         assert items[0].geometry.data["is_open"] is False
-        assert _cyclic_radius_maxima(points, (150, 150)) == 20
 
-    def test_epitrochoid_closes(self):
-        items = spirograph_curve_generator(self._square(), self._params(mode="outside"))
-        assert len(items) == 1
-        assert items[0].geometry is not None
-        assert items[0].geometry.data["is_open"] is False
-
-    def test_hypocycloid_three_cusps(self):
-        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=20.0, pen_offset_mm=20.0))
+    def test_hypocycloid_cusps(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(3, 1, 1.0)))
         points = _absolute_points(items[0])
         assert _cyclic_radius_minima(points, (150, 150)) == 3
-        assert min(math.dist(p, (150, 150)) for p in points) == pytest.approx(20.0, abs=0.1)
+        assert min(math.dist(p, (150, 150)) for p in points) == pytest.approx(45.0, abs=0.1)
 
-    def test_pen_offset_zero_is_circle(self):
-        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=20.0, pen_offset_mm=0.0))
-        for p in _absolute_points(items[0]):
-            assert math.dist(p, (150, 150)) == pytest.approx(40.0, abs=0.1)
-
-    def test_revolutions_not_multiple_is_open(self):
-        items = spirograph_curve_generator(self._square(), self._params(revolutions=3))
-        assert len(items) == 1
-        assert items[0].geometry is not None
-        assert items[0].geometry.data["is_open"] is True
-        points = _absolute_points(items[0])
-        assert math.dist(points[0], points[-1]) > 1.0
-
-    def test_size_scales_outer_diameter(self):
-        items = spirograph_curve_generator(self._square(), self._params(size_mm=100.0))
-        max_radius = max(math.dist(p, (150, 150)) for p in _absolute_points(items[0]))
-        assert max_radius == pytest.approx(50.0, abs=0.1)
-
-    def test_large_denominator_raises(self):
-        with pytest.raises(ValueError, match="revolutions"):
-            spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.001))
-
-    def test_near_miss_ratio_closes_within_tolerance(self):
-        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.37))
+    def test_pen_zero_is_circle_cut_once(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(3, 2, 0.0), size_mm=100.0))
         assert len(items) == 1
         assert items[0].geometry is not None
         assert items[0].geometry.data["is_open"] is False
+        points = _absolute_points(items[0])
+        for p in points:
+            assert math.dist(p, (150, 150)) == pytest.approx(50.0, abs=0.1)
+        assert _piece_length(points) == pytest.approx(2 * math.pi * 50, abs=0.5)
 
-    def test_near_miss_ratio_stays_open_under_tight_tolerance(self):
-        items = spirograph_curve_generator(self._square(), self._params(rolling_radius_mm=21.37, tolerance_mm=0.01))
-        assert len(items) == 1
-        assert items[0].geometry is not None
-        assert items[0].geometry.data["is_open"] is True
+    def test_default_size_uses_smaller_dimension(self):
+        domain = Domain.from_rectangle(300, 200, center=(150, 100))
+        items = spirograph_curve_generator(domain, self._params(_layer(5, 2, 0.8)))
+        max_radius = max(math.dist(p, (150, 100)) for p in _absolute_points(items[0]))
+        assert max_radius == pytest.approx(90.0, abs=0.1)
+
+    def test_size_is_stack_outer_diameter(self):
+        params = self._params(_layer(5, 2, 0.6), _layer(6, 1, 0.6, mode="outside"), size_mm=200.0)
+        items = spirograph_curve_generator(self._square(), params)
+
+        def max_radius(selected: list[Item]) -> float:
+            return max(math.dist(p, (150, 150)) for item in selected for p in _absolute_points(item))
+
+        assert len(items) == 2
+        assert max_radius(items) == pytest.approx(100.0, abs=0.1)
+        assert max_radius(items[:1]) == pytest.approx(100.0 * 0.84 / (7 / 6 + 0.1), abs=0.1)
+
+    def test_rotation_step_rotates_each_strand(self):
+        items = spirograph_curve_generator(self._square(), self._params(_layer(5, 2, 0.8, 0.8, rotation_step_deg=10.0)))
+        assert len(items) == 2
+        base = _absolute_points(items[0])
+        turned = _absolute_points(items[1])
+        assert len(base) == len(turned)
+        for expected, actual in zip(base, turned, strict=True):
+            rotated = _rotate_about(expected, (150, 150), math.radians(10.0))
+            assert actual == pytest.approx(rotated, abs=1e-6)
+
+    def test_rotation_sums_node_layer_and_step(self):
+        base = _absolute_points(spirograph_curve_generator(self._square(), self._params(_layer(5, 2, 0.8)))[0])
+        layer = _layer(5, 2, 0.8, 0.8, rotation_deg=5.0, rotation_step_deg=4.0)
+        items = spirograph_curve_generator(self._square(), self._params(layer, rotation_deg=10.0))
+        assert len(items) == 2
+        for item, angle_deg in zip(items, (15.0, 19.0), strict=True):
+            turned = _absolute_points(item)
+            assert len(turned) == len(base)
+            for expected, actual in zip(base, turned, strict=True):
+                assert actual == pytest.approx(_rotate_about(expected, (150, 150), math.radians(angle_deg)), abs=1e-6)
+
+    def test_layer_depth_overrides_node_depth(self):
+        params = self._params(_layer(5, 2, 0.8), _layer(7, 3, 0.8, depth_mm=0.5))
+        items = spirograph_curve_generator(self._square(), params)
+        assert [item.feature.depth_mm for item in items if item.feature] == [0.3, 0.5]
+
+    def test_shape_ids_run_across_strands(self):
+        items = spirograph_curve_generator(
+            self._small_circle(), self._params(_layer(5, 2, 1.0, 0.8, 0.6), size_mm=270.0)
+        )
+        assert len(items) > 3
+        assert [item.shape_id for item in items] == [f"generated_spirograph_{i:03d}" for i in range(len(items))]
+
+    def test_cut_length_cap_raises(self):
+        with pytest.raises(ValueError, match="max_cut_length"):
+            spirograph_curve_generator(self._square(), self._params(_layer(5, 2, 0.8), max_cut_length_mm=100.0))
+
+    def test_cut_length_counts_clipped_length(self):
+        layer = _layer(5, 2, 0.8)
+        items = spirograph_curve_generator(self._small_circle(), self._params(layer, size_mm=270.0))
+        clipped = sum(_piece_length(_absolute_points(item)) for item in items)
+
+        spirograph_curve_generator(
+            self._small_circle(), self._params(layer, size_mm=270.0, max_cut_length_mm=clipped + 1)
+        )
+        with pytest.raises(ValueError, match="max_cut_length"):
+            spirograph_curve_generator(
+                self._small_circle(), self._params(layer, size_mm=270.0, max_cut_length_mm=clipped - 1)
+            )
 
     def test_clips_to_circle_domain(self):
-        domain = Domain.from_circle(80, center=(150, 150))
-        items = spirograph_curve_generator(domain, self._params())
+        domain = self._small_circle()
+        items = spirograph_curve_generator(domain, self._params(_layer(5, 2, 0.8), size_mm=270.0))
         assert len(items) > 1
         inflated = domain.polygon.buffer(1e-6)
         for item in items:
             for x, y in _absolute_points(item):
                 assert inflated.contains(ShapelyPoint(x, y))
 
+    def test_some_strands_outside_keep_landed(self):
+        params = self._params(_layer(7, 1, 0.0), _layer(3, 1, 1.0), size_mm=270.0)
+        items = spirograph_curve_generator(self._small_circle(), params)
+        assert len(items) == 3
+        landed_alone = spirograph_curve_generator(self._small_circle(), self._params(_layer(3, 1, 1.0), size_mm=270.0))
+        assert items == landed_alone
+
+    def test_every_strand_outside_raises_skip(self):
+        params = self._params(_layer(7, 1, 0.0), size_mm=270.0)
+        with pytest.raises(GeneratorSkipError, match=r"stack of outer diameter 270\.0mm"):
+            spirograph_curve_generator(self._small_circle(), params)
+        assert spirograph_curve_generator(self._small_circle(), params, allow_empty=True) == []
+
     def test_deterministic(self):
-        params = self._params(rotation_deg=12.0)
+        params = self._params(_layer(5, 2, 1.2, 0.8, rotation_step_deg=4.0), _layer(6, 1, 0.6, mode="outside"))
         first = spirograph_curve_generator(self._square(), params)
         second = spirograph_curve_generator(self._square(), params)
         assert [i.geometry.data for i in first if i.geometry] == [i.geometry.data for i in second if i.geometry]
 
-    def test_point_budget_names_revolutions(self):
-        with pytest.raises(ValueError, match="revolutions") as excinfo:
-            spirograph_curve_generator(self._square(), self._params(revolutions=300))
+    def test_point_budget_names_layer(self):
+        with pytest.raises(ValueError, match="points 401 and step 200 in layer 0") as excinfo:
+            spirograph_curve_generator(self._square(), self._params(_layer(401, 200, 0.8)))
         assert "tolerance" in str(excinfo.value)
+
+    def test_starting_segments_over_budget(self):
+        with pytest.raises(ValueError, match="points 625 and step 1 in layer 0") as excinfo:
+            spirograph_curve_generator(self._square(), self._params(_layer(625, 1, 0.3)))
+        assert "starting segments" in str(excinfo.value)
+        assert "tolerance" not in str(excinfo.value)
 
 
 class TestLissajousCurveParams:

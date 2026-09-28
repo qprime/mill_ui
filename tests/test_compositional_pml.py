@@ -697,39 +697,57 @@ children:
         parse_pml_yaml(pml)
 
 
-def test_curve_spirograph_round_trip():
-    pml = """
-Sheet:
-  width: 300mm
-  height: 300mm
-  thickness: 19mm
+_SPIROGRAPH_CURVE = """            type: spirograph
+            depth: 0.3mm
+            layers:
+              - points: 5
+                step: 2
+                pen: 0.8
+"""
 
-children:
-  - Rect:
-      id: panel
-      children:
-        - Curve:
-            type: spirograph
-            fixed_radius: 60mm
-            rolling_radius: 21mm
-            pen_offset: 15mm
-            mode: outside
-            revolutions: 3
+
+def test_curve_spirograph_round_trip():
+    pml = _curve_pml(
+        """            type: spirograph
             depth: 0.3mm
             size: 120mm
             rotation: 15
             tolerance: 0.02mm
             min_length: 2mm
+            max_cut_length: 20000mm
+            layers:
+              - points: 5
+                step: 2
+                pen: 0.8
+              - points: 6
+                step: 1
+                mode: outside
+                pen: [1.0, 0.7]
+                rotation: 10
+                depth: 0.5mm
+              - points: 7
+                step: 3
+                pen: {from: 1.2, to: 0.4, count: 9}
+                rotation_step: 4
 """
-    formatted = format_pml_yaml(parse_pml_yaml(pml))
+    )
+    ast = parse_pml_yaml(pml)
+    formatted = format_pml_yaml(ast)
 
     for key in (
         "type: spirograph",
-        "fixed_radius: 60mm",
-        "rolling_radius: 21mm",
-        "pen_offset: 15mm",
+        "points: 5",
+        "step: 2",
+        "pen: 0.8",
         "mode: outside",
-        "revolutions: 3",
+        "- 0.7",
+        "rotation: 10",
+        "depth: 0.5mm",
+        "from: 1.2",
+        "to: 0.4",
+        "count: 9",
+        "rotation_step: 4",
+        "max_cut_length: 20000mm",
         "size: 120mm",
         "rotation: 15",
         "tolerance: 0.02mm",
@@ -737,7 +755,72 @@ children:
     ):
         assert key in formatted
 
+    assert parse_pml_yaml(formatted) == ast
     assert format_pml_yaml(parse_pml_yaml(formatted)) == formatted
+
+
+@pytest.mark.parametrize(
+    "removed",
+    ["fixed_radius: 60mm", "rolling_radius: 21mm", "pen_offset: 15mm", "revolutions: 3"],
+    ids=lambda key: key.split(":")[0],
+)
+def test_curve_spirograph_rejects_removed_keys(removed: str):
+    with pytest.raises(PMLParseError, match="Unknown spirograph key"):
+        parse_pml_yaml(_curve_pml(f"{_SPIROGRAPH_CURVE}            {removed}\n"))
+
+
+def test_curve_spirograph_rejects_unknown_layer_key():
+    pml = _curve_pml(_SPIROGRAPH_CURVE.replace("pen: 0.8", "pen: 0.8\n                lobes: 5"))
+    with pytest.raises(PMLParseError, match=r"Unknown spirograph layer key.*lobes"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_spirograph_rejects_partial_pen_sweep():
+    pml = _curve_pml(_SPIROGRAPH_CURVE.replace("pen: 0.8", "pen: {from: 1.2, to: 0.4}"))
+    with pytest.raises(PMLParseError, match="Missing required key 'count'"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_spirograph_rejects_extra_pen_sweep_key():
+    pml = _curve_pml(_SPIROGRAPH_CURVE.replace("pen: 0.8", "pen: {from: 1.2, to: 0.4, count: 9, step: 2}"))
+    with pytest.raises(PMLParseError, match=r"Unknown spirograph pen sweep key.*step"):
+        parse_pml_yaml(pml)
+
+
+def test_curve_spirograph_requires_layers():
+    pml = _curve_pml(
+        """            type: spirograph
+            depth: 0.3mm
+"""
+    )
+    with pytest.raises(PMLParseError, match="Missing required key 'layers'"):
+        parse_pml_yaml(pml)
+
+
+@pytest.mark.parametrize(
+    ("curve_type", "body"),
+    [
+        ("rose", "lobes: 5"),
+        ("lissajous", "frequency_x: 3\n            frequency_y: 2"),
+        ("superformula", "m: 6\n            n1: 0.3\n            n2: 0.4\n            n3: 0.4"),
+        (
+            "harmonograph",
+            "cycles: 10\n            pendulums:\n"
+            "              - {axis: x, amplitude: 60mm, frequency: 2}\n"
+            "              - {axis: y, amplitude: 60mm, frequency: 3}",
+        ),
+    ],
+)
+def test_curve_rejects_unknown_key(curve_type: str, body: str):
+    pml = _curve_pml(
+        f"""            type: {curve_type}
+            depth: 0.3mm
+            {body}
+            colour: red
+"""
+    )
+    with pytest.raises(PMLParseError, match=rf"Unknown {curve_type} key.*colour"):
+        parse_pml_yaml(pml)
 
 
 def test_curve_lissajous_round_trip():

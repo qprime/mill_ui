@@ -482,35 +482,67 @@ class RoseCurveParams(BaseParams):
 
 
 @dataclass(frozen=True)
-class SpirographCurveParams(BaseParams):
-    fixed_radius_mm: float
-    rolling_radius_mm: float
-    pen_offset_mm: float
-    depth_mm: float
+class SpirographLayerParams:
+    points: int
+    step: int
+    pens: tuple[float, ...]
     mode: Literal["inside", "outside"] = "inside"
-    revolutions: int | None = None
+    rotation_deg: float = 0.0
+    rotation_step_deg: float = 0.0
+    depth_mm: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.points < 1:
+            raise ValueError(f"SpirographLayerParams: points must be >= 1, got {self.points}")
+        if self.step < 1:
+            raise ValueError(f"SpirographLayerParams: step must be >= 1, got {self.step}")
+        factor = math.gcd(self.points, self.step)
+        if factor > 1:
+            raise ValueError(
+                f"SpirographLayerParams: points {self.points} and step {self.step} share a factor of {factor}; "
+                f"the same figure is points {self.points // factor}, step {self.step // factor}"
+            )
+        valid_modes = ("inside", "outside")
+        if self.mode not in valid_modes:
+            raise ValueError(f"SpirographLayerParams: mode must be one of {valid_modes}, got '{self.mode}'")
+        if self.mode == "inside" and self.step >= self.points:
+            raise ValueError(
+                f"SpirographLayerParams: step ({self.step}) must be less than points ({self.points}) for mode 'inside'"
+            )
+        if not self.pens:
+            raise ValueError("SpirographLayerParams: pens must not be empty")
+        for pen in self.pens:
+            if pen < 0:
+                raise ValueError(f"SpirographLayerParams: pen values must be non-negative, got {pen}")
+        if self.rotation_step_deg != 0 and len(self.pens) < 2:
+            raise ValueError(
+                f"SpirographLayerParams: rotation_step_deg ({self.rotation_step_deg}) needs 2 or more pen values, "
+                f"got {len(self.pens)}"
+            )
+        if self.rotation_step_deg == 0 and len(set(self.pens)) < len(self.pens):
+            raise ValueError(
+                f"SpirographLayerParams: pens {self.pens} repeat a value without a rotation_step_deg, "
+                "so those strands would coincide"
+            )
+        if self.depth_mm is not None and self.depth_mm <= 0:
+            raise ValueError(f"SpirographLayerParams: depth_mm must be positive, got {self.depth_mm}")
+
+
+@dataclass(frozen=True)
+class SpirographCurveParams(BaseParams):
+    layers: tuple[SpirographLayerParams, ...]
+    depth_mm: float
     size_mm: float | None = None
     rotation_deg: float = 0.0
     tolerance_mm: float = 0.05
     min_length_mm: float = 0.0
+    max_cut_length_mm: float = 50000.0
 
     def __post_init__(self) -> None:
-        if self.fixed_radius_mm <= 0:
-            raise ValueError(f"SpirographCurveParams: fixed_radius_mm must be positive, got {self.fixed_radius_mm}")
-        if self.rolling_radius_mm <= 0:
-            raise ValueError(f"SpirographCurveParams: rolling_radius_mm must be positive, got {self.rolling_radius_mm}")
-        if self.pen_offset_mm < 0:
-            raise ValueError(f"SpirographCurveParams: pen_offset_mm must be non-negative, got {self.pen_offset_mm}")
-        valid_modes = ("inside", "outside")
-        if self.mode not in valid_modes:
-            raise ValueError(f"SpirographCurveParams: mode must be one of {valid_modes}, got '{self.mode}'")
-        if self.mode == "inside" and self.rolling_radius_mm >= self.fixed_radius_mm:
-            raise ValueError(
-                f"SpirographCurveParams: rolling_radius_mm ({self.rolling_radius_mm}) must be less than "
-                f"fixed_radius_mm ({self.fixed_radius_mm}) for mode 'inside'"
-            )
-        if self.revolutions is not None and self.revolutions < 1:
-            raise ValueError(f"SpirographCurveParams: revolutions must be >= 1 or None, got {self.revolutions}")
+        if not self.layers:
+            raise ValueError("SpirographCurveParams: layers must not be empty")
+        if self.max_cut_length_mm <= 0:
+            raise ValueError(f"SpirographCurveParams: max_cut_length_mm must be positive, got {self.max_cut_length_mm}")
         _validate_curve_shared(
             "SpirographCurveParams", self.depth_mm, self.size_mm, self.tolerance_mm, self.min_length_mm
         )
@@ -778,6 +810,7 @@ __all__ = [
     "RaisedPanelParams",
     "RoseCurveParams",
     "SpirographCurveParams",
+    "SpirographLayerParams",
     "SuperformulaCurveParams",
     "XPanelParams",
 ]

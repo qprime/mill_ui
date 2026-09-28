@@ -1,9 +1,9 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 1297,
-    "rapid_moves": 6,
-    "cut_moves": 1237,
+    "total_moves": 3983,
+    "rapid_moves": 18,
+    "cut_moves": 3851,
     "rapid_ratio": 0.005
   },
   "fidelity": {
@@ -12,7 +12,7 @@
       {
         "name": "engrave",
         "tool_diameter_mm": 1.0,
-        "move_count": 1093
+        "move_count": 3779
       },
       {
         "name": "profile",
@@ -22,12 +22,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 34981,
-    "total_lines": 1290,
+    "total_bytes": 107994,
+    "total_lines": 3952,
     "files": {
       "engrave-1.00mm": {
-        "bytes": 29700,
-        "lines": 1103
+        "bytes": 102713,
+        "lines": 3765
       },
       "profile-3.17mm": {
         "bytes": 5281,
@@ -42,6 +42,6 @@
     "y_origin": "back"
   },
   "provenance": {
-    "mill_ui": "dea21973"
+    "mill_ui": "ea7375da"
   }
 }

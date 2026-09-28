@@ -129,7 +129,7 @@ def clip_polylines_to_domain(
                 ]
             )
         for points in candidates:
-            if len(points) >= 2 and _polyline_length(points) >= min_length_mm:
+            if len(points) >= 2 and polyline_length(points) >= min_length_mm:
                 pieces.append(points)
     return pieces
 
@@ -144,7 +144,7 @@ def _merge_contiguous(pieces: list[list[Point2D]], tolerance_mm: float = _COINCI
     return merged
 
 
-def _polyline_length(points: Sequence[Point2D]) -> float:
+def polyline_length(points: Sequence[Point2D]) -> float:
     return sum(math.dist(a, b) for a, b in pairwise(points))
 
 
@@ -322,6 +322,7 @@ __all__ = [
     "join_pieces_at_point",
     "loop_type_suffix",
     "polyline_engrave_item",
+    "polyline_length",
     "rotate_points",
     "shapely_to_item",
     "sorted_polylines",

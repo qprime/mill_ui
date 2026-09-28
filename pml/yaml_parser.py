@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from typing import Any, Literal
 
 from ruamel.yaml import YAML
@@ -48,6 +49,7 @@ from layout_ast.compositional import (
     RoundoverGen,
     ShellGen,
     SpirographCurveGen,
+    SpirographLayer,
     SplinePath,
     Split,
     SplitGrid,
@@ -94,6 +96,12 @@ def _require(node_data: dict, key: str, path: str) -> Any:
         return node_data[key]
     except KeyError:
         raise PMLParseError(f"Missing required key '{key}'", path) from None
+
+
+def _reject_unknown_keys(data: dict[str, Any], known: Sequence[str], label: str, ctx: str) -> None:
+    unknown = [str(key) for key in data if key not in known]
+    if unknown:
+        raise PMLParseError(f"Unknown {label} key(s): {', '.join(unknown)}. Known keys: {', '.join(known)}", ctx)
 
 
 def parse_dimension(value: Any) -> float:
@@ -729,7 +737,15 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
     )
 
 
-_CURVE_TYPES = ("rose", "spirograph", "lissajous", "superformula", "harmonograph")
+_CURVE_SHARED_KEYS = ("type", "depth", "size", "rotation", "tolerance", "min_length")
+_CURVE_TYPE_KEYS: dict[str, tuple[str, ...]] = {
+    "rose": ("lobes",),
+    "spirograph": ("layers", "max_cut_length"),
+    "lissajous": ("frequency_x", "frequency_y", "phase", "width", "height"),
+    "superformula": ("m", "n1", "n2", "n3", "a", "b"),
+    "harmonograph": ("cycles", "pendulums"),
+}
+_CURVE_TYPES = tuple(_CURVE_TYPE_KEYS)
 _HARMONOGRAPH_AXES = ("x", "y")
 _HARMONOGRAPH_PENDULUM_KEYS = ("axis", "amplitude", "frequency", "phase", "damping")
 
@@ -742,13 +758,7 @@ def _parse_harmonograph_pendulums(raw: Any, ctx: str) -> tuple[HarmonographPendu
         entry_ctx = f"{ctx}.pendulums[{index}]"
         if not isinstance(entry, dict):
             raise PMLParseError(f"Curve harmonograph pendulum must be a mapping, got {type(entry).__name__}", entry_ctx)
-        unknown = [str(key) for key in entry if key not in _HARMONOGRAPH_PENDULUM_KEYS]
-        if unknown:
-            raise PMLParseError(
-                f"Unknown harmonograph pendulum key(s): {', '.join(unknown)}. "
-                f"Known keys: {', '.join(_HARMONOGRAPH_PENDULUM_KEYS)}",
-                entry_ctx,
-            )
+        _reject_unknown_keys(entry, _HARMONOGRAPH_PENDULUM_KEYS, "harmonograph pendulum", entry_ctx)
         axis = _require(entry, "axis", entry_ctx)
         if axis not in _HARMONOGRAPH_AXES:
             raise PMLParseError(f"Curve harmonograph pendulum 'axis' must be x or y, got {axis!r}", entry_ctx)
@@ -770,6 +780,46 @@ def _parse_harmonograph_pendulums(raw: Any, ctx: str) -> tuple[HarmonographPendu
     return tuple(pendulums)
 
 
+_SPIROGRAPH_LAYER_KEYS = ("points", "step", "pen", "mode", "rotation", "rotation_step", "depth")
+_SPIROGRAPH_PEN_SWEEP_KEYS = ("from", "to", "count")
+
+
+def _parse_spirograph_pen(raw: Any, ctx: str) -> dict[str, Any]:
+    if isinstance(raw, dict):
+        _reject_unknown_keys(raw, _SPIROGRAPH_PEN_SWEEP_KEYS, "spirograph pen sweep", ctx)
+        return {
+            "pen_from": _safe_float(_require(raw, "from", ctx), "pen from", ctx),
+            "pen_to": _safe_float(_require(raw, "to", ctx), "pen to", ctx),
+            "pen_count": _safe_int(_require(raw, "count", ctx), "pen count", ctx),
+        }
+    if isinstance(raw, list):
+        return {"pens": tuple(_safe_float(value, "pen", ctx) for value in raw)}
+    return {"pens": (_safe_float(raw, "pen", ctx),)}
+
+
+def _parse_spirograph_layers(raw: Any, ctx: str) -> tuple[SpirographLayer, ...]:
+    if not isinstance(raw, list) or not raw:
+        raise PMLParseError("Curve spirograph 'layers' must be a non-empty list", ctx)
+    layers: list[SpirographLayer] = []
+    for index, entry in enumerate(raw):
+        entry_ctx = f"{ctx}.layers[{index}]"
+        if not isinstance(entry, dict):
+            raise PMLParseError(f"Curve spirograph layer must be a mapping, got {type(entry).__name__}", entry_ctx)
+        _reject_unknown_keys(entry, _SPIROGRAPH_LAYER_KEYS, "spirograph layer", entry_ctx)
+        layers.append(
+            SpirographLayer(
+                points=_safe_int(_require(entry, "points", entry_ctx), "points", entry_ctx),
+                step=_safe_int(_require(entry, "step", entry_ctx), "step", entry_ctx),
+                **_parse_spirograph_pen(_require(entry, "pen", entry_ctx), entry_ctx),
+                mode=entry.get("mode", "inside"),
+                rotation_deg=_safe_float(entry.get("rotation", 0.0), "rotation", entry_ctx),
+                rotation_step_deg=_safe_float(entry.get("rotation_step", 0.0), "rotation_step", entry_ctx),
+                depth_mm=parse_dimension(entry["depth"]) if "depth" in entry else None,
+            )
+        )
+    return tuple(layers)
+
+
 def _parse_curve_node(node_data: dict, path: str) -> Any:
     ctx = f"{path}.Curve"
     for key in ("children", "feature"):
@@ -777,6 +827,9 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
             raise PMLParseError(f"Curve does not accept '{key}'", ctx)
 
     curve_type = _require(node_data, "type", ctx)
+    if curve_type not in _CURVE_TYPES:
+        raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: {', '.join(_CURVE_TYPES)}", ctx)
+    _reject_unknown_keys(node_data, _CURVE_SHARED_KEYS + _CURVE_TYPE_KEYS[curve_type], curve_type, ctx)
     depth_mm = parse_dimension(_require(node_data, "depth", ctx))
     size_mm = parse_dimension(node_data["size"]) if "size" in node_data else None
     rotation_deg = _safe_float(node_data.get("rotation", 0.0), "rotation", ctx)
@@ -795,18 +848,13 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
 
     if curve_type == "spirograph":
         return SpirographCurveGen(
-            fixed_radius_mm=parse_dimension(_require(node_data, "fixed_radius", ctx)),
-            rolling_radius_mm=parse_dimension(_require(node_data, "rolling_radius", ctx)),
-            pen_offset_mm=parse_dimension(_require(node_data, "pen_offset", ctx)),
+            layers=_parse_spirograph_layers(_require(node_data, "layers", ctx), ctx),
             depth_mm=depth_mm,
-            mode=node_data.get("mode", "inside"),
-            revolutions=(
-                _safe_int(node_data["revolutions"], "revolutions", ctx) if "revolutions" in node_data else None
-            ),
             size_mm=size_mm,
             rotation_deg=rotation_deg,
             tolerance_mm=tolerance_mm,
             min_length_mm=min_length_mm,
+            max_cut_length_mm=parse_dimension(node_data.get("max_cut_length", "50000mm")),
         )
 
     if curve_type == "lissajous":
@@ -852,7 +900,7 @@ def _parse_curve_node(node_data: dict, path: str) -> Any:
             min_length_mm=min_length_mm,
         )
 
-    raise PMLParseError(f"Unknown Curve type: '{curve_type}'. Known types: {', '.join(_CURVE_TYPES)}", ctx)
+    raise TypeError(f"Unhandled Curve type: {curve_type!r}")
 
 
 _VORONOI_MODES = ("engrave", "pocket")

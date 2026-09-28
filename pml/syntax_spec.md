@@ -756,7 +756,7 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
 | `tolerance` | No | 0.05mm | Maximum chord deviation when sampling the curve |
 | `min_length` | No | 0mm | Drop clipped pieces shorter than this |
 
-`Curve` is a leaf node; `children` and `feature` are rejected. Wrap it in `AtPosition` or `Frame` to place it off-center.
+`Curve` is a leaf node; `children` and `feature` are rejected. A key that neither the shared table nor the curve's type lists is rejected with the type's known keys. Wrap it in `AtPosition` or `Frame` to place it off-center.
 
 **Type: rose** — `r = cos(k·θ)`. Odd `lobes` draws that many petals; even `lobes` draws twice as many. `size` is the diameter of the curve's bounding circle and defaults to 90% of the smaller parent dimension.
 
@@ -778,32 +778,61 @@ Analytic curve engraved as a polyline, centered on the parent shape and clipped 
     min_length: 3mm
 ```
 
-**Type: spirograph** — rolling-circle curves. `mode: inside` rolls inside the fixed circle (hypotrochoid); `mode: outside` rolls around it (epitrochoid). A `pen_offset` equal to `rolling_radius` gives the cycloid family with cusps.
+**Type: spirograph** — stacks of closed trochoids around one unit ring, grouped in `layers`. Each layer is drawn from integer `points` and `step` and a dimensionless `pen`. With `p = points`, `q = step`, `r = q / p`, `d = pen · r` and `k = c / r`:
+
+| `mode` | `c` | Curve, `t ∈ [0, 2πq]` |
+|---|---|---|
+| `inside` (hypotrochoid) | `1 − r` | `x = c·cos t + d·cos(k·t)`, `y = c·sin t − d·sin(k·t)` |
+| `outside` (epitrochoid) | `1 + r` | `x = c·cos t − d·cos(k·t)`, `y = c·sin t − d·sin(k·t)` |
+
+- The curve has exactly `points` outer lobes. Consecutive lobes along the path are `step · 360 / points` degrees apart, so the path visits every `step`-th lobe, like the star polygon {p/q}.
+- It closes exactly after `step` turns.
+- Its largest radius is `c + d`.
+- `pen: 0` draws a circle of radius `c`. `pen < 1` draws rounded lobes, `pen: 1` cusps, `pen > 1` loops.
 
 ```yaml
 - Curve:
     type: spirograph
-    fixed_radius: 60mm
-    rolling_radius: 21mm
-    pen_offset: 15mm
     depth: 0.3mm
+    layers:
+      - points: 5
+        step: 2
+        pen: 0.8
 ```
 
 ```yaml
 - Curve:
     type: spirograph
-    fixed_radius: 60mm       # R, the fixed circle
-    rolling_radius: 21mm     # r, the rolling circle; inside requires r < R
-    pen_offset: 15mm         # d, pen distance from the rolling circle's center; 0 draws a circle
-    mode: inside             # inside (default) | outside
-    revolutions: 7           # turns to trace; default: the count that closes the figure
-    depth: 0.3mm
-    size: 150mm              # optional; scales the figure so its outer diameter equals size
+    depth: 0.3mm                 # default depth for every layer
+    size: 180mm                  # outer diameter of the whole stack (default: 90% of the smaller parent dimension)
+    rotation: 0                  # degrees, added to every strand
+    tolerance: 0.05mm
+    min_length: 0mm
+    max_cut_length: 50000mm      # total engraved length allowed for this node
+    layers:
+      - points: 5                # outer lobes; integer >= 1
+        step: 2                  # lobe step and turns to close; integer >= 1, coprime with points, < points for inside
+        mode: inside             # inside (default) | outside
+        pen: {from: 1.2, to: 0.4, count: 9}   # number | list of numbers | from/to/count sweep; each value >= 0
+        rotation: 0              # degrees added to this layer's strands
+        rotation_step: 4         # degrees added per strand; needs 2+ pen values
+      - points: 12
+        step: 5
+        pen: [1.0, 0.8]
+        depth: 0.5mm             # overrides the node depth for this layer
 ```
 
-With `fixed_radius / rolling_radius` reduced to `p / q`, the figure closes after `q` revolutions and has `p` outer lobes. Omitting `revolutions` uses `q`; when `q` exceeds 60 the parser accepts the node but generation fails asking for an explicit `revolutions`. A `revolutions` value that does not close the figure leaves it as an open path. An explicit `revolutions` that exceeds the sampler's 20,000-point budget fails with an error naming `revolutions` and `tolerance`.
+Node keys: `type`, `depth` and `layers` are required; `size`, `rotation`, `tolerance`, `min_length` and `max_cut_length` are optional. Layer keys: `points`, `step` and `pen` are required; `mode`, `rotation`, `rotation_step` and `depth` are optional.
 
-Unlike `rose`, `size` has no default: the figure is drawn at the stated radii unless `size` is given.
+- **Pen forms.** `pen` takes exactly one of: a number, a list of numbers, or a `{from, to, count}` mapping with all three keys. Each pen value draws one strand. A sweep expands to `from + (to − from) · i / (count − 1)` for `i = 0 … count − 1`; it needs `count >= 2` and `from ≠ to`. Repeated pen values in one layer are rejected unless `rotation_step` is set, because the strands would coincide.
+- **Points and step.** `points` and `step` must share no common factor; `points: 6, step: 4` is rejected and names the same figure as `points: 3, step: 2`. `mode: inside` needs `step < points`.
+- **Strand rotation.** Strand `i` of a layer (0-based within the layer) is rotated by `rotation + layer rotation + i · rotation_step` degrees.
+- **Shared scale.** Every strand in the node uses one scale, set so the largest `c + d` over all strands of all layers reaches `size / 2`. `size` is the outer diameter of the whole stack and defaults to 90% of the smaller parent dimension.
+- **Depth.** A strand engraves at its layer's `depth` when set, else at the node's `depth`.
+- **`pen: 0`.** The circle is sampled over one turn, so it is cut once at any `step`.
+- **Point budget.** A strand with a nonzero pen starts from `32 · step · ⌈k + 1⌉` segments: about `32 · points` inside and `32 · (points + 2 · step)` outside. When that reaches the sampler's 20,000-point budget, generation fails before sampling with an error naming `points`, `step` and the layer; inside, this rejects every `points >= 625`. A strand that exceeds the budget while sampling fails with an error naming `points`, `step`, the layer and `tolerance`.
+- **`max_cut_length`.** After all strands are emitted and clipped to the parent, their total length is compared with `max_cut_length` (default `50000mm`, about 2 h at 400 mm/min). A longer stack fails with an error giving the engraved length.
+- **Clipping.** Each strand is clipped to the parent on its own. Strands that land nothing are dropped; the node emits nothing only when no strand lands.
 
 **Type: lissajous** — `x = A·sin(fx·t + φ)`, `y = B·sin(fy·t)` with integer frequencies. A common factor in the frequencies is reduced away, so `6:4` draws the same figure as `3:2` once.
 

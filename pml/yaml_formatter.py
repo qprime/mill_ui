@@ -56,6 +56,7 @@ from layout_ast.compositional import (
     RoundoverGen,
     ShellGen,
     SpirographCurveGen,
+    SpirographLayer,
     SplinePath,
     Split,
     SplitGrid,
@@ -305,6 +306,25 @@ def _format_harmonograph_pendulum(pendulum: HarmonographPendulum) -> dict[str, A
     return result
 
 
+def _format_spirograph_layer(layer: SpirographLayer) -> dict[str, Any]:
+    result: dict[str, Any] = {"points": layer.points, "step": layer.step}
+    if layer.pens is None:
+        result["pen"] = {"from": layer.pen_from, "to": layer.pen_to, "count": layer.pen_count}
+    elif len(layer.pens) == 1:
+        result["pen"] = layer.pens[0]
+    else:
+        result["pen"] = list(layer.pens)
+    if layer.mode != "inside":
+        result["mode"] = layer.mode
+    if layer.rotation_deg != 0.0:
+        result["rotation"] = layer.rotation_deg
+    if layer.rotation_step_deg != 0.0:
+        result["rotation_step"] = layer.rotation_step_deg
+    if layer.depth_mm is not None:
+        result["depth"] = dim(layer.depth_mm)
+    return result
+
+
 def _format_voronoi(node: VoronoiGen) -> dict[str, Any]:
     result: dict[str, Any] = {}
     if node.seed_count is not None:
@@ -548,15 +568,11 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
     elif isinstance(node, SpirographCurveGen):
         curve: dict[str, Any] = {
             "type": "spirograph",
-            "fixed_radius": dim(node.fixed_radius_mm),
-            "rolling_radius": dim(node.rolling_radius_mm),
-            "pen_offset": dim(node.pen_offset_mm),
+            "layers": [_format_spirograph_layer(layer) for layer in node.layers],
             "depth": dim(node.depth_mm),
         }
-        if node.mode != "inside":
-            curve["mode"] = node.mode
-        if node.revolutions is not None:
-            curve["revolutions"] = node.revolutions
+        if node.max_cut_length_mm != 50000.0:
+            curve["max_cut_length"] = dim(node.max_cut_length_mm)
         return {"Curve": {**curve, **_curve_shared_keys(node)}}
 
     elif isinstance(node, LissajousCurveGen):

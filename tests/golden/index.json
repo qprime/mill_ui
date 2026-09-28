@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-09-25T20:45:31.034639+00:00",
+  "updated_at": "2026-09-28T20:33:09.692379+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -559,7 +559,7 @@
       "recipe_name": "89_spirograph",
       "source_file": "docs/recipes/89_spirograph/example.pml.yml",
       "created_at": "2026-09-22T21:28:48.430477+00:00",
-      "updated_at": "2026-09-25T20:20:24.978054+00:00",
+      "updated_at": "2026-09-28T20:33:09.692375+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },

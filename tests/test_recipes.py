@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from cam.pipeline import SheetRun, run_sheets, write_run_outputs
+from cli.mill import RECIPE_KERF_MM, RECIPE_THEME
 from pml import parse_pml
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
@@ -26,8 +27,8 @@ def discover_recipe_pml_files() -> list[Path]:
 
 
 RECIPE_BUILD_PARAMS = {
-    "kerf_mm": 3.175,
-    "theme": "dark",
+    "kerf_mm": RECIPE_KERF_MM,
+    "theme": RECIPE_THEME,
     "y_origin": "back",
 }
 
@@ -47,9 +48,9 @@ def generate_outputs_from_pml(pml_path: Path) -> list[SheetRun]:
         asts,
         source=pml_path.name,
         job_stem=pml_path.parent.name,
-        kerf_mm=RECIPE_BUILD_PARAMS["kerf_mm"],
+        kerf_mm=RECIPE_KERF_MM,
         generate_svg=True,
-        svg_theme=RECIPE_BUILD_PARAMS["theme"],
+        svg_theme=RECIPE_THEME,
     )
 
 

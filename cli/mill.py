@@ -34,10 +34,8 @@ from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
 
-RECIPE_DEFAULTS = {
-    "kerf": 3.175,
-    "theme": "dark",
-}
+RECIPE_KERF_MM = 3.175
+RECIPE_THEME = "dark"
 
 
 def generate_layout_scaffold(
@@ -377,10 +375,8 @@ def process_recipe(recipe_dir: Path, args) -> None:
 
     output_dir = recipe_dir / "output"
 
-    _kerf_raw = args.kerf if args.kerf is not None else RECIPE_DEFAULTS["kerf"]
-    kerf = float(_kerf_raw)  # type: ignore[arg-type]
-    _theme_raw = args.theme if args.theme is not None else RECIPE_DEFAULTS["theme"]
-    theme = str(_theme_raw)
+    kerf = args.kerf if args.kerf is not None else RECIPE_KERF_MM
+    theme = args.theme if args.theme is not None else RECIPE_THEME
 
     input_text = source.read_text(encoding="utf-8")
     comp_ast = parse_pml_yaml(input_text)

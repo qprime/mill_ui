@@ -2,7 +2,7 @@
 
 import pytest
 
-from cam.pipeline import run_pipeline
+from cam.pipeline import GcodeNameCollisionError, run_pipeline
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, RestSpec, Sheet
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
@@ -413,3 +413,29 @@ class TestGcodeFileMap:
         assert faces
         assert all(face == ("back" if name.startswith("back-") else "front") for name, face in faces.items())
         assert "back" in faces.values()
+
+
+TWO_CHAMFER_ANGLES_PML = """Sheet:
+  width: 500mm
+  height: 300mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: a
+    at: {x: 125mm, y: 150mm, width: 150mm, height: 150mm}
+    children:
+    - Chamfer: {width: 4mm, depth: 4mm}
+- Rect:
+    id: b
+    at: {x: 375mm, y: 150mm, width: 150mm, height: 150mm}
+    children:
+    - Chamfer: {width: 6.93mm, depth: 4mm}
+"""
+
+
+def test_two_passes_with_one_gcode_name_raise():
+    ast = resolve_layout(parse_pml_yaml(TWO_CHAMFER_ANGLES_PML))
+
+    with pytest.raises(GcodeNameCollisionError, match=r"edge-12\.70mm\.nc"):
+        run_pipeline(ast, kerf_mm=3.175, generate_svg=False)

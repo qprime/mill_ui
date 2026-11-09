@@ -47,6 +47,10 @@ DEFAULT_SAFE_Z_MM = 6.0
 PROFILE_CUT_THROUGH_MM = 0.2
 
 
+class GcodeNameCollisionError(ValueError):
+    pass
+
+
 @dataclass(frozen=True)
 class GcodeFile:
     face: str
@@ -129,6 +133,14 @@ def _attach_surface_cooling(planner_input, ast: LayoutAST):
     return _replace(planner_input, pockets=tuple(new_pockets))
 
 
+def _claim_gcode_name(gcode_files: dict[str, GcodeFile], name: str, gcode_file: GcodeFile) -> None:
+    if name in gcode_files:
+        existing = gcode_files[name].passes[0].tool_selection.name
+        claimant = gcode_file.passes[0].tool_selection.name
+        raise GcodeNameCollisionError(f"Two passes would both write {name}.nc: '{existing}' and '{claimant}'")
+    gcode_files[name] = gcode_file
+
+
 def _plan_and_emit_face(
     ast: LayoutAST,
     intents: list[RemovalIntent],
@@ -193,7 +205,7 @@ def _plan_and_emit_face(
             for p in group:
                 merged_moves.extend(p.moves)
             setup = group[0].setup
-            gcode_files[f"{gcode_prefix}{diameter:.2f}mm"] = GcodeFile(face=face, passes=tuple(group))
+            _claim_gcode_name(gcode_files, f"{gcode_prefix}{diameter:.2f}mm", GcodeFile(face=face, passes=tuple(group)))
             gcode_dict[f"{gcode_prefix}{diameter:.2f}mm"] = write_gcode(
                 merged_moves,
                 safe_z=setup.safe_z,
@@ -212,8 +224,9 @@ def _plan_and_emit_face(
                     total_cut_moves += 1
     else:
         for p in passes:
-            gcode_files[f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"] = GcodeFile(face=face, passes=(p,))
-            gcode_dict[f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"] = write_gcode(
+            name = f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"
+            _claim_gcode_name(gcode_files, name, GcodeFile(face=face, passes=(p,)))
+            gcode_dict[name] = write_gcode(
                 p.moves,
                 safe_z=p.setup.safe_z,
                 machine=machine,
@@ -639,11 +652,31 @@ def _feature_counts(intents: Sequence[RemovalIntent]) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
-def _sheet_machining_summary(result: PipelineResult) -> dict[str, Any]:
+def _gcode_filenames(runs: Sequence[SheetRun]) -> list[dict[str, str]]:
+    multi_source = len({run.source for run in runs}) > 1
+    owners: dict[str, str] = {}
+    filenames: list[dict[str, str]] = []
+    for run in runs:
+        prefix = f"{Path(run.source).stem}." if multi_source else ""
+        run_filenames: dict[str, str] = {}
+        for name in run.result.gcode:
+            filename = f"{prefix}{name}.nc"
+            label = f"{run.source} sheet {run.sheet_index}"
+            if filename in owners:
+                raise GcodeNameCollisionError(
+                    f"G-code file {filename} would be written by {owners[filename]} and {label}"
+                )
+            owners[filename] = label
+            run_filenames[name] = filename
+        filenames.append(run_filenames)
+    return filenames
+
+
+def _sheet_machining_summary(result: PipelineResult, filenames: dict[str, str]) -> dict[str, Any]:
     sheet = result.ast.sheet
     files = [
         summarise_gcode_file(
-            f"{name}.nc",
+            filenames[name],
             gcode_file.passes,
             profile_intents=[
                 intent for intent in result.intents if intent.face == gcode_file.face and intent.hint_type == "profile"
@@ -667,16 +700,17 @@ def _sheet_machining_summary(result: PipelineResult) -> dict[str, Any]:
 
 
 def build_machining_summary(runs: Sequence[SheetRun], kerf_mm: float | None = None) -> dict[str, Any]:
+    filenames = _gcode_filenames(runs)
     if len(runs) == 1:
-        return {**_sheet_machining_summary(runs[0].result), "kerf_mm": kerf_mm}
+        return {**_sheet_machining_summary(runs[0].result, filenames[0]), "kerf_mm": kerf_mm}
     sheets = [
         {
             "source": run.source,
             "sheet_index": run.sheet_index,
             "job_name": run.job_name,
-            **_sheet_machining_summary(run.result),
+            **_sheet_machining_summary(run.result, run_filenames),
         }
-        for run in runs
+        for run, run_filenames in zip(runs, filenames, strict=True)
     ]
     return {
         "total_sheets": len(runs),
@@ -686,14 +720,31 @@ def build_machining_summary(runs: Sequence[SheetRun], kerf_mm: float | None = No
     }
 
 
-def _write_sheet_artifacts(run: SheetRun, output_dir: Path) -> dict[str, Path]:
+def build_run_manifest(runs: Sequence[SheetRun]) -> dict[str, Any]:
+    sources = list(dict.fromkeys(run.source for run in runs))
+    return {
+        **({"source": sources[0]} if len(sources) == 1 else {"sources": sources}),
+        "total_sheets": len(runs),
+        "sheets": [
+            {
+                "source": run.source,
+                "sheet_index": run.sheet_index,
+                "job_name": run.job_name,
+                "items": len(run.result.ast.items),
+            }
+            for run in runs
+        ],
+    }
+
+
+def _write_sheet_artifacts(run: SheetRun, output_dir: Path, filenames: dict[str, str]) -> dict[str, Path]:
     outputs: dict[str, Path] = {}
     result = run.result
 
-    for pass_name, gcode in result.gcode.items():
-        gcode_path = output_dir / f"{pass_name}.nc"
+    for name, gcode in result.gcode.items():
+        gcode_path = output_dir / filenames[name]
         gcode_path.write_text(gcode)
-        outputs[f"gcode_{pass_name}"] = gcode_path
+        outputs[f"gcode_{filenames[name]}"] = gcode_path
 
     if result.svg is not None:
         svg_path = output_dir / f"{run.job_name}.svg"
@@ -715,13 +766,15 @@ def write_run_outputs(
     clean_output_dir: bool = True,
     build_params: dict[str, Any] | None = None,
 ) -> dict[str, Path]:
+    filenames = _gcode_filenames(runs)
+
     if clean_output_dir and output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     outputs: dict[str, Path] = {}
-    for run in runs:
-        outputs.update(_write_sheet_artifacts(run, output_dir))
+    for run, run_filenames in zip(runs, filenames, strict=True):
+        outputs.update(_write_sheet_artifacts(run, output_dir, run_filenames))
 
     metrics_path = output_dir / "metrics.json"
     metrics_path.write_text(json.dumps(build_run_metrics(runs, build_params), indent=2))
@@ -731,5 +784,10 @@ def write_run_outputs(
     kerf_mm = (build_params or {}).get("kerf_mm")
     summary_path.write_text(json.dumps(build_machining_summary(runs, kerf_mm), indent=2))
     outputs["machining_summary"] = summary_path
+
+    if len(runs) > 1:
+        manifest_path = output_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(build_run_manifest(runs), indent=2))
+        outputs["manifest"] = manifest_path
 
     return outputs

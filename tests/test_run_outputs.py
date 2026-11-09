@@ -4,11 +4,14 @@ import json
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
+
 from cam.model.machine import Machine
 from cam.model.stock import Stock
 from cam.moves import CutMove, RapidMove
 from cam.pipeline import (
     GcodeFile,
+    GcodeNameCollisionError,
     PipelineResult,
     SheetRun,
     build_machining_summary,
@@ -127,6 +130,7 @@ def test_write_run_outputs_writes_every_sheet_and_one_metrics_file(tmp_path: Pat
         "box_sheet_1.svg",
         "box_sheet_2.svg",
         "machining_summary.json",
+        "manifest.json",
         "metrics.json",
         "sheet_1.profile-3.17mm.nc",
         "sheet_2.profile-3.17mm.nc",
@@ -203,3 +207,54 @@ def test_machining_summary_counts_features_and_waste_cuts():
     summary = build_machining_summary([run])
 
     assert summary["feature_counts"] == {"hole": 2, "profile": 1, "waste_cut": 1}
+
+
+def test_multi_file_run_prefixes_gcode_with_each_input_stem(tmp_path: Path):
+    runs = [_run("a.pml.yml", 1, "a.pml"), _run("b.pml.yml", 1, "b.pml")]
+
+    write_run_outputs(runs, tmp_path / "out", build_params=BUILD)
+
+    assert sorted(path.name for path in (tmp_path / "out").glob("*.nc")) == [
+        "a.pml.profile-3.17mm.nc",
+        "b.pml.profile-3.17mm.nc",
+    ]
+    manifest = json.loads((tmp_path / "out" / "manifest.json").read_text())
+    assert manifest["sources"] == ["a.pml.yml", "b.pml.yml"]
+    assert [(sheet["source"], sheet["job_name"]) for sheet in manifest["sheets"]] == [
+        ("a.pml.yml", "a.pml"),
+        ("b.pml.yml", "b.pml"),
+    ]
+
+
+def test_single_file_run_keeps_bare_gcode_names(tmp_path: Path):
+    write_run_outputs([_run("door.pml.yml", 1, "door.pml")], tmp_path / "out", build_params=BUILD)
+
+    assert [path.name for path in (tmp_path / "out").glob("*.nc")] == ["profile-3.17mm.nc"]
+    assert not (tmp_path / "out" / "manifest.json").exists()
+
+
+def test_colliding_gcode_names_raise_before_anything_is_written(tmp_path: Path):
+    runs = [_run("box.pml.yml", 1, "box_sheet_1"), _run("box.pml.yml", 2, "box_sheet_2")]
+
+    with pytest.raises(GcodeNameCollisionError, match=r"box\.pml\.yml sheet 1 and box\.pml\.yml sheet 2"):
+        write_run_outputs(runs, tmp_path / "out", build_params=BUILD)
+
+    assert not (tmp_path / "out").exists()
+
+
+def test_multi_file_machining_summary_uses_prefixed_names():
+    runs = [
+        SheetRun(
+            source="a.pml.yml", sheet_index=1, job_name="a.pml", result=_summary_run(1, "a", "profile-3.17mm").result
+        ),
+        SheetRun(
+            source="b.pml.yml", sheet_index=1, job_name="b.pml", result=_summary_run(1, "b", "profile-3.17mm").result
+        ),
+    ]
+
+    summary = build_machining_summary(runs)
+
+    assert [sheet["files"][0]["filename"] for sheet in summary["sheets"]] == [
+        "a.pml.profile-3.17mm.nc",
+        "b.pml.profile-3.17mm.nc",
+    ]

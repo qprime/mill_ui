@@ -130,7 +130,7 @@ A run with more than one sheet (a multi-sheet layout, or several input files) wr
 }
 ```
 
-`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json` and `machining_summary.json`; `cli.mill` and `tests.test_recipes --regen_recipes` both call it. `machining_summary.json` is a production artifact and is gitignored in recipe outputs.
+`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json`, `machining_summary.json` and `manifest.json` (runs with more than one sheet); `cli.mill` and `tests.test_recipes --regen_recipes` both call it. A run with several input files prefixes each `.nc` with its input stem (`door.pml.profile-6.35mm.nc`). The writer raises `GcodeNameCollisionError` if two G-code files would share a name. `machining_summary.json` is a production artifact and is gitignored in recipe outputs.
 
 ## Workflow Examples
 

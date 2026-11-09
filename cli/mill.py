@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import json
 import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
 
-from cam.pipeline import SheetRun, run_sheets, write_run_outputs
+from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
 from cli.project import (
     DEFAULT_KERF_MM,
     DEFAULT_MACHINE,
@@ -221,7 +220,6 @@ def _compile(
     asts: list[LayoutAST],
     source_path: Path,
     job_stem: str,
-    output_dir: Path,
     *,
     kerf_mm: float,
     theme: str,
@@ -266,28 +264,7 @@ def _compile(
 
         print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
 
-    if multi_sheet:
-        _write_manifest(source_path.name, runs, output_dir)
-
     return runs
-
-
-def _write_manifest(source_name: str, runs: list[SheetRun], output_dir: Path) -> None:
-    manifest = {
-        "source": source_name,
-        "total_sheets": len(runs),
-        "sheets": [
-            {
-                "sheet_index": run.sheet_index,
-                "job_name": run.job_name,
-                "items": len(run.result.ast.items),
-            }
-            for run in runs
-        ],
-    }
-    manifest_path = output_dir / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2))
-    print(f"\nGenerated {len(runs)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
 
 
 def _finish_run(runs: list[SheetRun], output_dir: Path, build_params: dict) -> None:
@@ -296,6 +273,8 @@ def _finish_run(runs: list[SheetRun], output_dir: Path, build_params: dict) -> N
     print("  Outputs:", file=sys.stderr)
     for path in outputs.values():
         print(f"    {path.name}", file=sys.stderr)
+    if "manifest" in outputs:
+        print(f"\nGenerated {len(runs)} sheets, manifest: {outputs['manifest'].name}", file=sys.stderr)
 
     if any(run.result.errors for run in runs):
         sys.exit(DESIGN_ERROR_EXIT_CODE)
@@ -331,7 +310,6 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
 
 def process_file(
     input_path: Path,
-    output_dir: Path,
     args,
     *,
     kerf_mm: float,
@@ -356,7 +334,6 @@ def process_file(
         asts,
         input_path,
         input_path.stem,
-        output_dir,
         kerf_mm=kerf_mm,
         theme=theme,
         y_origin=args.y_origin,
@@ -392,7 +369,6 @@ def process_recipe(recipe_dir: Path, args) -> None:
         asts,
         source,
         recipe_dir.name,
-        output_dir,
         kerf_mm=kerf,
         theme=theme,
         y_origin=args.y_origin,
@@ -426,14 +402,15 @@ Examples:
   python -m cli.mill --project my_table --init_project layout --sheet 1220x1220 --thickness 19
 
 Output files:
-  {op}-{tool_diameter}mm.nc   G-code per pass (multi-sheet: sheet_N.{op}-...)
+  {op}-{tool_diameter}mm.nc   G-code per pass (multi-sheet: sheet_N.{op}-...;
+                              several input files: {input_stem}.{op}-...)
   {basename}.svg              Blueprint drawing
   metrics.json                Pipeline metrics, errors and warnings for the whole run
                               (multi-sheet: one entry per sheet under "sheets")
   machining_summary.json      Stock, per-file tool, feeds, strategy and estimated runtime,
                               feature counts, safe Z and kerf for the whole run
                               (multi-sheet: one entry per sheet under "sheets")
-  manifest.json               Sheet list (multi-sheet only)
+  manifest.json               Every sheet with its source (runs with more than one sheet)
 
 Exit codes:
   0  success
@@ -581,7 +558,6 @@ Exit codes:
             runs.extend(
                 process_file(
                     input_path,
-                    output_dir,
                     args,
                     kerf_mm=kerf_mm,
                     theme=theme,
@@ -594,6 +570,9 @@ Exit codes:
 
     except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except GcodeNameCollisionError as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

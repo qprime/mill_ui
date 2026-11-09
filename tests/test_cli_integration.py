@@ -205,7 +205,7 @@ def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
     assert (out_dir / "part.pml.svg").exists()
 
 
-def test_cli_multi_file_run_writes_one_metrics_file(tmp_path: Path):
+def test_cli_multi_file_run_keeps_every_file_and_writes_one_metrics_file(tmp_path: Path):
     input_dir = tmp_path / "project"
     input_dir.mkdir()
     (input_dir / "a.pml.yml").write_text(PML_FILE.read_text())
@@ -219,6 +219,17 @@ def test_cli_multi_file_run_writes_one_metrics_file(tmp_path: Path):
     assert [sheet["source"] for sheet in metrics["sheets"]] == ["a.pml.yml", "b.pml.yml"]
     assert metrics["build"]["sources"] == ["a.pml.yml", "b.pml.yml"]
     assert metrics["errors"] == []
+    assert sorted(path.name for path in out_dir.glob("*.nc")) == [
+        "a.pml.profile-6.35mm.nc",
+        "b.pml.profile-6.35mm.nc",
+    ]
+    summary = json.loads((out_dir / "machining_summary.json").read_text())
+    assert [sheet["files"][0]["filename"] for sheet in summary["sheets"]] == [
+        "a.pml.profile-6.35mm.nc",
+        "b.pml.profile-6.35mm.nc",
+    ]
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["sources"] == ["a.pml.yml", "b.pml.yml"]
 
 
 OVERSIZED_SHEET_PML = (

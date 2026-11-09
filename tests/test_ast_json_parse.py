@@ -213,12 +213,12 @@ def test_parse_rejects_template_item():
         Path(temp_path).unlink()
 
 
-def test_face_and_min_web_survive_json_roundtrip():
+def test_face_min_web_and_safe_z_survive_json_roundtrip():
     from layout_ast.emitters import emit_layout_json
     from layout_ast.layout import Feature, Geometry, Item, Placement, Sheet
 
     ast = LayoutAST(
-        sheet=Sheet(width_mm=400.0, height_mm=600.0, thickness_mm=19.0, min_web_mm=4.0),
+        sheet=Sheet(width_mm=400.0, height_mm=600.0, thickness_mm=19.0, min_web_mm=4.0, safe_z_mm=12.0),
         items=(
             Item(
                 kind="shape",
@@ -238,6 +238,7 @@ def test_face_and_min_web_survive_json_roundtrip():
     try:
         reparsed = LayoutAST.from_json(temp_path)
         assert reparsed.sheet.min_web_mm == 4.0
+        assert reparsed.sheet.safe_z_mm == 12.0
         feature = reparsed.items[0].feature
         assert feature is not None
         assert feature.face == "back"

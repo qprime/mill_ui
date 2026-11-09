@@ -219,3 +219,45 @@ def test_cli_multi_file_run_writes_one_metrics_file(tmp_path: Path):
     assert [sheet["source"] for sheet in metrics["sheets"]] == ["a.pml.yml", "b.pml.yml"]
     assert metrics["build"]["sources"] == ["a.pml.yml", "b.pml.yml"]
     assert metrics["errors"] == []
+
+
+OVERSIZED_SHEET_PML = (
+    PML_FILE.read_text().replace("width: 450mm", "width: 1400mm").replace("height: 650mm", "height: 1400mm")
+)
+
+
+def test_cli_unknown_machine_exits_1_and_lists_machines(tmp_path: Path):
+    result = _run_cli(
+        ["-m", "cli.mill", "--input", str(PML_FILE), "--out", str(tmp_path / "out"), "--machine", "no_such_mill"],
+        check=False,
+    )
+
+    assert result.returncode == 1, result.stderr
+    assert "Unknown machine 'no_such_mill'" in result.stderr
+    assert "altmill_4x4" in result.stderr
+
+
+def test_cli_default_machine_rejects_sheet_beyond_envelope(tmp_path: Path):
+    source = tmp_path / "big.pml.yml"
+    source.write_text(OVERSIZED_SHEET_PML)
+    out_dir = tmp_path / "out"
+
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)], check=False)
+
+    assert result.returncode == 3, result.stderr
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    assert any(error.startswith("Machine bounds:") for error in metrics["errors"]), metrics["errors"]
+    assert list(out_dir.glob("*.nc")) == []
+    assert list(out_dir.glob("*.svg")) == []
+
+
+def test_cli_recipe_runs_without_default_machine(tmp_path: Path):
+    recipe_dir = tmp_path / "big_recipe"
+    recipe_dir.mkdir()
+    (recipe_dir / "example.pml.yml").write_text(OVERSIZED_SHEET_PML)
+
+    _run_cli(["-m", "cli.mill", "--recipe", str(recipe_dir), "--no-svg"])
+
+    metrics = json.loads((recipe_dir / "output" / "metrics.json").read_text())
+    assert metrics["errors"] == []
+    assert list((recipe_dir / "output").glob("*.nc"))

@@ -364,6 +364,11 @@ class TestFaceAttribute:
         with pytest.raises(PMLParseError, match="Invalid face 'top'"):
             parse_pml_yaml(source)
 
+    def test_non_positive_safe_z_rejected(self) -> None:
+        source = self._pml("      type: pocket\n      depth: 6mm\n", sheet_extra="  safe_z: 0mm\n")
+        with pytest.raises(PMLParseError, match="safe_z must be > 0"):
+            parse_pml_yaml(source)
+
     def test_negative_min_web_rejected(self) -> None:
         source = self._pml("      type: pocket\n      depth: 6mm\n", sheet_extra="  min_web: -1mm\n")
         with pytest.raises(PMLParseError, match="min_web must be >= 0"):

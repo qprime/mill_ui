@@ -36,7 +36,7 @@ spoilboard:                    # Optional: spoilboard dimensions
   offset_y: 25                 # Y offset from envelope origin
 
 defaults:                      # Optional: default machining parameters
-  safe_z_mm: 5.0              # Safe retract height
+  safe_z_mm: 5.0              # Retract height above the stock top; a PML Sheet safe_z overrides it
   feed_rate_mm_min: 1500      # Default XY feed rate
   plunge_rate_mm_min: 500     # Default Z plunge rate
 ```

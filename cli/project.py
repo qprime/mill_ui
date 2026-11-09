@@ -7,6 +7,7 @@ from pathlib import Path
 
 DEFAULT_MARGIN_MM = 10.0
 DEFAULT_KERF_MM = 6.35
+DEFAULT_MACHINE = "altmill_4x4"
 
 
 def parse_sheet_dimensions(sheet_str: str) -> tuple[float, float]:

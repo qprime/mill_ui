@@ -79,6 +79,7 @@ Sheet:                              # Required
   margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
   material: mdf                     # Optional, default "mdf" — validated against feeds.yml (data-driven)
   gcode_output: per-tool            # Optional, default "per-operation"
+  safe_z: 15mm                      # Optional retract height above the stock top (see below)
 Surface:                              # Optional — full-sheet facing passes
   depth: 0.5mm
   passes: 2
@@ -95,6 +96,12 @@ children:                           # Required - list of child nodes
   - Rect: {...}
   - Circle: {...}
 ```
+
+### Retract Height (`safe_z`)
+
+`safe_z` is the height above the stock top (Z0) that the tool lifts to between cuts. Rapids run at this height, and each cut entry feeds down from it. Set it when something taller than the stock sits in the cut area, such as a clamp or fixture inside the margin. It must be > 0.
+
+When `safe_z` is absent, the machine config's `defaults.safe_z_mm` applies (3mm for `altmill_4x4`, the `cli.mill` default for `--project` and `--input` runs). Runs without a machine config, such as recipes, use 6mm.
 
 ### Working-Area Dimensions
 

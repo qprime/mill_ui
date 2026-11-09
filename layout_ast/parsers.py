@@ -71,6 +71,7 @@ def parse_layout_json(path: str) -> LayoutAST:
         margin_mm=float(sheet_data.get("margin_mm", 0.0)),
         show_dimensions=sheet_data.get("show_dimensions", True),
         min_web_mm=float(sheet_data.get("min_web_mm", DEFAULT_MIN_WEB_MM)),
+        safe_z_mm=float(sheet_data["safe_z_mm"]) if "safe_z_mm" in sheet_data else None,
     )
 
     items_data = data.get("items", [])

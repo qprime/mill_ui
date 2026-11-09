@@ -771,3 +771,26 @@ children:
     reparsed = parse_pml_yaml(format_pml_yaml(comp_ast))
 
     assert reparsed.sheet.min_web_mm == 5.0
+
+
+def test_sheet_safe_z_survives_roundtrip():
+    pml = """
+Sheet:
+  width: 400mm
+  height: 600mm
+  thickness: 19mm
+  safe_z: 15mm
+
+children:
+  - Rect:
+      id: outer
+      feature:
+        type: profile
+        side: outside
+        depth: through
+"""
+    comp_ast = parse_pml_yaml(pml)
+    reparsed = parse_pml_yaml(format_pml_yaml(comp_ast))
+
+    assert comp_ast.sheet.safe_z_mm == 15.0
+    assert reparsed.sheet.safe_z_mm == 15.0

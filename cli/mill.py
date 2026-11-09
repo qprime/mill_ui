@@ -10,6 +10,7 @@ from pathlib import Path
 from cam.pipeline import SheetRun, run_sheets, write_run_outputs
 from cli.project import (
     DEFAULT_KERF_MM,
+    DEFAULT_MACHINE,
     DEFAULT_MARGIN_MM,
     add_project_arg,
     get_project_dir,
@@ -17,7 +18,16 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
-from config.machine_loader import Endmill, FeedsEntry, get_machines_dir, load_endmills, load_feeds
+from config.machine_loader import (
+    Endmill,
+    FeedsEntry,
+    MachineConfig,
+    get_machines_dir,
+    list_available_machines,
+    load_endmills,
+    load_feeds,
+    load_machine_by_name,
+)
 from layout_ast.layout import LayoutAST
 from pml.revision_header import format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -219,6 +229,7 @@ def _compile(
     theme: str,
     y_origin: str,
     generate_svg: bool,
+    machine_config: MachineConfig | None,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
 ) -> list[SheetRun]:
@@ -227,6 +238,7 @@ def _compile(
         "generate_svg": generate_svg,
         "svg_theme": theme,
         "y_origin": y_origin,
+        "machine_config": machine_config,
     }
     if endmills is not None and feeds is not None:
         pipeline_kwargs["endmills"] = endmills
@@ -291,6 +303,17 @@ def _finish_run(runs: list[SheetRun], output_dir: Path, build_params: dict) -> N
         sys.exit(DESIGN_ERROR_EXIT_CODE)
 
 
+def _load_machine(name: str | None) -> MachineConfig | None:
+    if name is None:
+        return None
+    try:
+        return load_machine_by_name(name)
+    except FileNotFoundError:
+        available = ", ".join(sorted(list_available_machines()))
+        print(f"Error: Unknown machine '{name}'. Available: {available}", file=sys.stderr)
+        sys.exit(1)
+
+
 def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
     machines_dir = get_machines_dir()
     endmills_path = Path(args.endmills) if args.endmills else machines_dir / "endmills.yml"
@@ -315,6 +338,7 @@ def process_file(
     *,
     kerf_mm: float,
     theme: str,
+    machine_config: MachineConfig | None,
     endmills: list[Endmill] | None,
     feeds: list[FeedsEntry] | None,
 ) -> list[SheetRun]:
@@ -339,6 +363,7 @@ def process_file(
         theme=theme,
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
+        machine_config=machine_config,
         endmills=endmills,
         feeds=feeds,
     )
@@ -376,6 +401,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
         theme=theme,
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
+        machine_config=_load_machine(args.machine),
     )
     _finish_run(runs, output_dir, {"kerf_mm": kerf, "theme": theme, "y_origin": args.y_origin})
 
@@ -414,7 +440,8 @@ Exit codes:
   0  success
   1  input, parse, or unexpected error
   2  command-line usage error
-  3  design errors (listed in metrics.json); outputs are still written
+  3  design errors (listed in metrics.json); outputs are still written, except
+     G-code and SVG when the sheet exceeds the machine envelope
         """,
     )
 
@@ -466,6 +493,11 @@ Exit codes:
         default="back",
         choices=["front", "back"],
         help="Y=0 reference: back (lower-left origin) or front (default: back)",
+    )
+    parser.add_argument(
+        "--machine",
+        default=None,
+        help=f"Machine config name in machines/cnc/ (default: {DEFAULT_MACHINE}; recipes run without one unless given)",
     )
     parser.add_argument(
         "--endmills",
@@ -540,6 +572,7 @@ Exit codes:
             shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        machine_config = _load_machine(args.machine or DEFAULT_MACHINE)
         endmills_list, feeds_list = _load_tool_library(args)
         kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
         theme = args.theme if args.theme is not None else "dark"
@@ -553,6 +586,7 @@ Exit codes:
                     args,
                     kerf_mm=kerf_mm,
                     theme=theme,
+                    machine_config=machine_config,
                     endmills=endmills_list,
                     feeds=feeds_list,
                 )

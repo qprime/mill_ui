@@ -1131,6 +1131,8 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
         data["Sheet"]["gcode_output"] = ast.sheet.gcode_output
     if ast.sheet.min_web_mm != DEFAULT_MIN_WEB_MM:
         data["Sheet"]["min_web"] = dim(ast.sheet.min_web_mm)
+    if ast.sheet.safe_z_mm is not None:
+        data["Sheet"]["safe_z"] = dim(ast.sheet.safe_z_mm)
     if ast.sheet.material != "mdf":
         data["Sheet"]["material"] = ast.sheet.material
     if not ast.sheet.show_dimensions:

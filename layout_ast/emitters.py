@@ -56,6 +56,8 @@ def _sheet_to_dict(sheet: Sheet) -> dict[str, Any]:
         data["show_dimensions"] = False
     if sheet.min_web_mm != DEFAULT_MIN_WEB_MM:
         data["min_web_mm"] = sheet.min_web_mm
+    if sheet.safe_z_mm is not None:
+        data["safe_z_mm"] = sheet.safe_z_mm
     return data
 
 

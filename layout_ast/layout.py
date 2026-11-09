@@ -18,12 +18,15 @@ class Sheet:
     material: str = "mdf"
     gcode_output: str = "per-operation"
     min_web_mm: float = DEFAULT_MIN_WEB_MM
+    safe_z_mm: float | None = None
 
     def __post_init__(self) -> None:
         if self.gcode_output not in VALID_GCODE_OUTPUT_MODES:
             raise ValueError(f"Invalid gcode_output '{self.gcode_output}'. Must be one of: {VALID_GCODE_OUTPUT_MODES}")
         if self.min_web_mm < 0.0:
             raise ValueError(f"Sheet min_web_mm must be >= 0, got {self.min_web_mm}")
+        if self.safe_z_mm is not None and self.safe_z_mm <= 0.0:
+            raise ValueError(f"Sheet safe_z_mm must be > 0, got {self.safe_z_mm}")
         from config.machine_loader import available_materials
 
         valid = available_materials()

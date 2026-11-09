@@ -42,6 +42,7 @@ from validation.removal_checks import (
 from validation.toolpath_checks import verify_passes_avoid_keepouts
 
 NON_DETERMINISTIC_METRICS = frozenset({"timing"})
+DEFAULT_SAFE_Z_MM = 6.0
 
 
 @dataclass(frozen=True)
@@ -237,7 +238,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     kerf_mm: float = 6.35,
     min_channel_width_mm: float = 12.0,
     tool_db: list[dict[str, Any]] | None = None,
-    safe_z: float = 6.0,
     generate_svg: bool = True,
     svg_theme: str = "dark",
     y_origin: str = "back",
@@ -336,6 +336,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         for issue in clearance_result.warnings:
             warnings.append(issue.message)
 
+    exceeds_machine = False
     if machine_config is not None and validate_machine_bounds:
         from validation.machine_checks import check_job_fits_machine
 
@@ -350,28 +351,32 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
 
         machine_result = check_job_fits_machine(job_bounds, machine_config, endmill)
         if machine_result.status.value == "fail":
+            exceeds_machine = True
             for failure in machine_result.failures:
                 errors.append(f"Machine bounds: {failure}")
         elif machine_result.status.value == "warn":
             for failure in machine_result.failures:
                 warnings.append(f"Machine bounds: {failure}")
 
-    park_z_mm: float | None = None
-    if machine_config is not None and safe_z == 6.0:
+    if ast.sheet.safe_z_mm is not None:
+        safe_z = ast.sheet.safe_z_mm
+    elif machine_config is not None:
         safe_z = machine_config.defaults.safe_z_mm
-    if machine_config is not None:
-        park_z_mm = machine_config.defaults.park_z_mm
+    else:
+        safe_z = DEFAULT_SAFE_Z_MM
+    park_z_mm = machine_config.defaults.park_z_mm if machine_config is not None else None
 
-    if constraint_audit.has_errors():
-        constraint_summary = {
-            entry.constraint: {
-                "status": entry.status.value,
-                "count": entry.count,
-                "safety_critical": entry.safety_critical,
-            }
-            for entry in constraint_audit.entries
-            if entry.count > 0
+    constraint_summary = {
+        entry.constraint: {
+            "status": entry.status.value,
+            "count": entry.count,
+            "safety_critical": entry.safety_critical,
         }
+        for entry in constraint_audit.entries
+        if entry.count > 0
+    }
+
+    if constraint_audit.has_errors() or exceeds_machine:
         return PipelineResult(
             ast=ast,
             intents=intents,
@@ -489,16 +494,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
 
     total_gcode_size = sum(len(gc) for gc in gcode_dict.values())
     total_gcode_lines = sum(gc.count("\n") for gc in gcode_dict.values())
-
-    constraint_summary = {
-        entry.constraint: {
-            "status": entry.status.value,
-            "count": entry.count,
-            "safety_critical": entry.safety_critical,
-        }
-        for entry in constraint_audit.entries
-        if entry.count > 0
-    }
 
     metrics = {
         "timing": {

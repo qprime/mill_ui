@@ -29,7 +29,7 @@ soft_limits:
   z_max_mm: 139
 
 defaults:
-  safe_z_mm: 10.0
+  safe_z_mm: 3.0
   feed_rate_mm_min: 5000
   plunge_rate_mm_min: 2000
   ramp_angle_deg: 3.0

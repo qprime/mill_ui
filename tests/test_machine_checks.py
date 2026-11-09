@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, Spoilboard2D
+from cam.pipeline import DEFAULT_SAFE_Z_MM, run_pipeline
+from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, MachineDefaults, Spoilboard2D
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import LayoutAST, Sheet
+from pml.yaml_parser import parse_pml_yaml
+from resolution.layout_resolver import resolve_layout_multi
 from validation.core import Verdict
 from validation.machine_checks import (
     check_job_fits_machine,
@@ -253,3 +256,56 @@ class TestValidateMachineConfig:
         results = validate_machine_config(mc)
         assert len(results) == 2
         assert all(r.status == Verdict.PASS for r in results)
+
+
+PROFILE_PML = """Sheet:
+  width: 450mm
+  height: 650mm
+  thickness: 19mm
+  material: mdf
+{sheet_extra}children:
+- Rect:
+    id: part
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 225mm
+      y: 325mm
+      width: 200mm
+      height: 150mm
+"""
+
+
+def _profile_ast(sheet_extra: str = "") -> LayoutAST:
+    return resolve_layout_multi(parse_pml_yaml(PROFILE_PML.format(sheet_extra=sheet_extra)))[0]
+
+
+class TestRunPipelineMachineConfig:
+    def test_sheet_exceeding_envelope_stops_before_planning(self):
+        result = run_pipeline(_profile_ast(), machine_config=_machine(x_max=300, y_max=300))
+
+        assert any(error.startswith("Machine bounds:") for error in result.errors)
+        assert result.gcode == {}
+        assert result.passes == []
+        assert result.svg is None
+
+    def test_machine_safe_z_applies_when_sheet_sets_none(self):
+        machine = MachineConfig(machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0))
+        result = run_pipeline(_profile_ast(), machine_config=machine, generate_svg=False)
+
+        assert result.errors == []
+        assert result.passes
+        assert {p.setup.safe_z for p in result.passes} == {3.0}
+
+    def test_sheet_safe_z_overrides_machine(self):
+        machine = MachineConfig(machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0))
+        result = run_pipeline(_profile_ast("  safe_z: 15mm\n"), machine_config=machine, generate_svg=False)
+
+        assert {p.setup.safe_z for p in result.passes} == {15.0}
+
+    def test_pipeline_default_safe_z_without_machine(self):
+        result = run_pipeline(_profile_ast(), generate_svg=False)
+
+        assert {p.setup.safe_z for p in result.passes} == {DEFAULT_SAFE_Z_MM}

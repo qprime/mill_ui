@@ -1596,6 +1596,10 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     if min_web_mm < 0.0:
         raise PMLParseError(f"Sheet min_web must be >= 0, got {min_web_mm}", "Sheet")
 
+    safe_z_mm = parse_dimension(sheet_block["safe_z"]) if "safe_z" in sheet_block else None
+    if safe_z_mm is not None and safe_z_mm <= 0.0:
+        raise PMLParseError(f"Sheet safe_z must be > 0, got {safe_z_mm}", "Sheet")
+
     sheet = Sheet(
         width_mm=width_mm,
         height_mm=height_mm,
@@ -1605,6 +1609,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         material=str(sheet_block.get("material", "mdf")),
         gcode_output=str(sheet_block.get("gcode_output", "per-operation")),
         min_web_mm=min_web_mm,
+        safe_z_mm=safe_z_mm,
     )
 
     project = data.get("project")

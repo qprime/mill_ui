@@ -403,7 +403,8 @@ Examples:
 
 Output files:
   {op}-{tool_diameter}mm.nc   G-code per pass (multi-sheet: sheet_N.{op}-...;
-                              several input files: {input_stem}.{op}-...)
+                              several input files: {input_stem}.{op}-...;
+                              same-diameter tools: ...mm-{kind|angle|radius|rotation})
   {basename}.svg              Blueprint drawing
   metrics.json                Pipeline metrics, errors and warnings for the whole run
                               (multi-sheet: one entry per sheet under "sheets")

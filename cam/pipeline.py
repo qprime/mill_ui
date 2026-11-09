@@ -17,7 +17,7 @@ from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.summary import summarise_gcode_file
-from cam.planner.passes.tools import normalize_tool_entries
+from cam.planner.passes.tools import ToolSelection, normalize_tool_entries, pass_key
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
     Endmill,
@@ -133,6 +133,43 @@ def _attach_surface_cooling(planner_input, ast: LayoutAST):
     return _replace(planner_input, pockets=tuple(new_pockets))
 
 
+TOOL_KIND_LABELS = {"v": "vbit"}
+
+
+def _tool_suffixes(tools: Sequence[ToolSelection]) -> list[str]:
+    attributes = (
+        lambda tool: TOOL_KIND_LABELS.get(tool.kind, tool.kind),
+        lambda tool: None if tool.v_angle_deg is None else f"{tool.v_angle_deg:g}deg",
+        lambda tool: None if tool.roundover_radius_mm is None else f"r{tool.roundover_radius_mm:g}mm",
+        lambda tool: None if tool.rotation is None else str(tool.rotation).replace(" ", "_"),
+    )
+    differing = [attribute for attribute in attributes if len({attribute(tool) for tool in tools}) > 1]
+    return ["-".join(value for attribute in differing if (value := attribute(tool))) for tool in tools]
+
+
+def gcode_file_groups(passes: Sequence[PassRecord], *, per_tool: bool) -> list[tuple[str, list[PassRecord]]]:
+    groups: dict[tuple[Any, ...], list[PassRecord]] = {}
+    for p in passes:
+        identity = pass_key(p.op, p.tool_selection)
+        groups.setdefault(identity[1:] if per_tool else identity, []).append(p)
+
+    by_base: dict[str, list[list[PassRecord]]] = {}
+    for group in groups.values():
+        diameter = f"{group[0].setup.tool.diameter:.2f}mm"
+        by_base.setdefault(diameter if per_tool else f"{group[0].op}-{diameter}", []).append(group)
+
+    named: list[tuple[str, list[PassRecord]]] = []
+    for base, sharing in by_base.items():
+        if len(sharing) == 1:
+            named.append((base, sharing[0]))
+            continue
+        suffixes = _tool_suffixes([group[0].tool_selection for group in sharing])
+        named.extend(
+            (f"{base}-{suffix}" if suffix else base, group) for suffix, group in zip(suffixes, sharing, strict=True)
+        )
+    return named
+
+
 def _claim_gcode_name(gcode_files: dict[str, GcodeFile], name: str, gcode_file: GcodeFile) -> None:
     if name in gcode_files:
         existing = gcode_files[name].passes[0].tool_selection.name
@@ -195,53 +232,26 @@ def _plan_and_emit_face(
 
     margin_mm = ast.sheet.margin_mm
 
-    if ast.sheet.gcode_output == "per-tool":
-        tool_groups: dict[float, list[PassRecord]] = {}
-        for p in passes:
-            tool_groups.setdefault(p.setup.tool.diameter, []).append(p)
+    for base_name, group in gcode_file_groups(passes, per_tool=ast.sheet.gcode_output == "per-tool"):
+        name = f"{gcode_prefix}{base_name}"
+        _claim_gcode_name(gcode_files, name, GcodeFile(face=face, passes=tuple(group)))
+        moves = [move for p in group for move in p.moves]
+        gcode_dict[name] = write_gcode(
+            moves,
+            safe_z=group[0].setup.safe_z,
+            machine=machine,
+            sheet_height=ast.sheet.height_mm,
+            y_origin=y_origin,
+            margin_mm=margin_mm,
+            park_z_mm=park_z_mm,
+        )
 
-        for diameter, group in tool_groups.items():
-            merged_moves: list = []
-            for p in group:
-                merged_moves.extend(p.moves)
-            setup = group[0].setup
-            _claim_gcode_name(gcode_files, f"{gcode_prefix}{diameter:.2f}mm", GcodeFile(face=face, passes=tuple(group)))
-            gcode_dict[f"{gcode_prefix}{diameter:.2f}mm"] = write_gcode(
-                merged_moves,
-                safe_z=setup.safe_z,
-                machine=machine,
-                sheet_height=ast.sheet.height_mm,
-                y_origin=y_origin,
-                margin_mm=margin_mm,
-                park_z_mm=park_z_mm,
-            )
-
-            for move in merged_moves:
-                total_moves += 1
-                if isinstance(move, RapidMove):
-                    total_rapid_moves += 1
-                elif isinstance(move, CutMove):
-                    total_cut_moves += 1
-    else:
-        for p in passes:
-            name = f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"
-            _claim_gcode_name(gcode_files, name, GcodeFile(face=face, passes=(p,)))
-            gcode_dict[name] = write_gcode(
-                p.moves,
-                safe_z=p.setup.safe_z,
-                machine=machine,
-                sheet_height=ast.sheet.height_mm,
-                y_origin=y_origin,
-                margin_mm=margin_mm,
-                park_z_mm=park_z_mm,
-            )
-
-            total_moves += len(p.moves)
-            for move in p.moves:
-                if isinstance(move, RapidMove):
-                    total_rapid_moves += 1
-                elif isinstance(move, CutMove):
-                    total_cut_moves += 1
+        total_moves += len(moves)
+        for move in moves:
+            if isinstance(move, RapidMove):
+                total_rapid_moves += 1
+            elif isinstance(move, CutMove):
+                total_cut_moves += 1
 
     gcode_ms = (time.perf_counter() - gcode_start) * 1000
 

@@ -193,9 +193,11 @@ Sheet:
 | Mode | Behavior | Use Case |
 |------|----------|----------|
 | `per-operation` | One file per operation+tool (e.g. `pocket-9.53mm.nc`, `profile-3.18mm.nc`) | Production runs, maximum control between operations |
-| `per-tool` | One file per tool diameter (e.g. `9.53mm.nc`, `3.18mm.nc`) | One-offs, fewer files, fewer operator mistakes |
+| `per-tool` | One file per tool (e.g. `9.53mm.nc`, `3.18mm.nc`) | One-offs, fewer files, fewer operator mistakes |
 
 In `per-tool` mode, all operations sharing the same tool are concatenated into a single G-code file. The planner's internal operation ordering (pockets before profiles) is preserved within each file.
+
+File names carry the tool diameter. When two different tools of the same diameter would share a name, each file gets a suffix from the attributes that differ, in this order: kind (`flat`, `ball`, `vbit`, `roundover`), V-angle (`60deg`), roundover radius (`r6mm`), rotation (`upcut`). A 90° and a 60° chamfer V-bit, both 12.7mm, write `edge-12.70mm-90deg.nc` and `edge-12.70mm-60deg.nc` (`12.70mm-90deg.nc` and `12.70mm-60deg.nc` in `per-tool` mode).
 
 ## Node Types
 

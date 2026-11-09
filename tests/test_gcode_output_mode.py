@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
+from dataclasses import replace
+
 import pytest
 
-from cam.pipeline import GcodeNameCollisionError, run_pipeline
+from cam.model.machine import Machine
+from cam.model.stock import Stock
+from cam.pipeline import GcodeFile, GcodeNameCollisionError, _claim_gcode_name, gcode_file_groups, run_pipeline
+from cam.planner.passes import PassAccumulator
+from cam.planner.passes.tools import ToolSelection
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, RestSpec, Sheet
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
@@ -434,8 +440,62 @@ children:
 """
 
 
-def test_two_passes_with_one_gcode_name_raise():
-    ast = resolve_layout(parse_pml_yaml(TWO_CHAMFER_ANGLES_PML))
+@pytest.mark.parametrize(
+    ("mode", "expected"),
+    [
+        ("per-operation", {"edge-12.70mm-90deg": 90.0, "edge-12.70mm-60deg": 60.0}),
+        ("per-tool", {"12.70mm-90deg": 90.0, "12.70mm-60deg": 60.0}),
+    ],
+)
+def test_same_diameter_vbits_get_one_file_each(mode, expected):
+    pml = TWO_CHAMFER_ANGLES_PML.replace("  material: mdf\n", f"  material: mdf\n  gcode_output: {mode}\n")
+    result = run_pipeline(resolve_layout(parse_pml_yaml(pml)), kerf_mm=3.175, generate_svg=False)
 
-    with pytest.raises(GcodeNameCollisionError, match=r"edge-12\.70mm\.nc"):
-        run_pipeline(ast, kerf_mm=3.175, generate_svg=False)
+    assert set(result.gcode) == set(expected)
+    for name, gcode_file in result.gcode_files.items():
+        assert {p.tool_selection.v_angle_deg for p in gcode_file.passes} == {expected[name]}
+
+
+def _record(op: str, **tool_fields):
+    tool = ToolSelection(name=op, diameter=6.35, kind="flat", rpm=18000, feed_xy=1200.0, feed_z=300.0)
+    accumulator = PassAccumulator(
+        machine=Machine(), stock=Stock(width=300, height=200, thickness=19), safe_z=3.0, prime_spindle=False
+    )
+    return accumulator.get_record(op, replace(tool, **tool_fields))
+
+
+class TestGcodeFileGroups:
+    def test_distinct_names_stay_bare(self):
+        groups = gcode_file_groups([_record("pocket"), _record("profile")], per_tool=False)
+
+        assert [name for name, _ in groups] == ["pocket-6.35mm", "profile-6.35mm"]
+
+    def test_kind_suffix_when_only_kind_differs(self):
+        groups = gcode_file_groups([_record("pocket"), _record("pocket", kind="ball")], per_tool=False)
+
+        assert [name for name, _ in groups] == ["pocket-6.35mm-flat", "pocket-6.35mm-ball"]
+
+    def test_rotation_suffix_when_only_rotation_differs(self):
+        records = [_record("profile", rotation="upcut"), _record("profile", rotation="downcut")]
+
+        assert [name for name, _ in gcode_file_groups(records, per_tool=False)] == [
+            "profile-6.35mm-upcut",
+            "profile-6.35mm-downcut",
+        ]
+
+    def test_per_tool_merges_ops_of_one_tool_and_splits_distinct_tools(self):
+        records = [_record("pocket"), _record("dogbone"), _record("pocket", kind="ball")]
+
+        groups = gcode_file_groups(records, per_tool=True)
+
+        assert [(name, [p.op for p in group]) for name, group in groups] == [
+            ("6.35mm-flat", ["pocket", "dogbone"]),
+            ("6.35mm-ball", ["pocket"]),
+        ]
+
+    def test_claiming_a_taken_name_raises(self):
+        gcode_files: dict = {}
+        _claim_gcode_name(gcode_files, "edge-12.70mm", GcodeFile(face="front", passes=(_record("edge"),)))
+
+        with pytest.raises(GcodeNameCollisionError, match=r"edge-12\.70mm\.nc"):
+            _claim_gcode_name(gcode_files, "edge-12.70mm", GcodeFile(face="front", passes=(_record("edge"),)))

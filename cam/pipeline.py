@@ -641,17 +641,49 @@ def build_run_metrics(runs: Sequence[SheetRun], build_params: dict[str, Any] | N
     return metrics
 
 
+def _feature_counts(intents: Sequence[RemovalIntent]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for intent in intents:
+        if not intent.hint_type:
+            continue
+        is_waste = intent.hint_type == "profile" and intent.region_id.startswith("profile_waste_")
+        key = "waste_cut" if is_waste else intent.hint_type
+        counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def _sheet_machining_summary(result: PipelineResult) -> dict[str, Any]:
-    files = [summarise_gcode_file(f"{name}.nc", gcode_file.passes) for name, gcode_file in result.gcode_files.items()]
+    sheet = result.ast.sheet
+    files = [
+        summarise_gcode_file(
+            f"{name}.nc",
+            gcode_file.passes,
+            profile_intents=[
+                intent
+                for intent in result.intents
+                if intent.face == gcode_file.face and intent.hint_type == "profile"
+            ],
+            cut_through_mm=PROFILE_CUT_THROUGH_MM,
+        )
+        for name, gcode_file in result.gcode_files.items()
+    ]
     return {
+        "stock": {
+            "width_mm": sheet.width_mm,
+            "height_mm": sheet.height_mm,
+            "thickness_mm": sheet.thickness_mm,
+            "material": sheet.material,
+        },
         "files": files,
         "total_runtime_min": round(sum(entry["estimated_runtime_min"] for entry in files), 1),
+        "feature_counts": _feature_counts(result.intents),
+        "safe_z_mm": result.passes[0].setup.safe_z if result.passes else None,
     }
 
 
-def build_machining_summary(runs: Sequence[SheetRun]) -> dict[str, Any]:
+def build_machining_summary(runs: Sequence[SheetRun], kerf_mm: float | None = None) -> dict[str, Any]:
     if len(runs) == 1:
-        return _sheet_machining_summary(runs[0].result)
+        return {**_sheet_machining_summary(runs[0].result), "kerf_mm": kerf_mm}
     sheets = [
         {
             "source": run.source,
@@ -665,6 +697,7 @@ def build_machining_summary(runs: Sequence[SheetRun]) -> dict[str, Any]:
         "total_sheets": len(runs),
         "sheets": sheets,
         "total_runtime_min": round(sum(sheet["total_runtime_min"] for sheet in sheets), 1),
+        "kerf_mm": kerf_mm,
     }
 
 
@@ -710,7 +743,8 @@ def write_run_outputs(
     outputs["metrics"] = metrics_path
 
     summary_path = output_dir / "machining_summary.json"
-    summary_path.write_text(json.dumps(build_machining_summary(runs), indent=2))
+    kerf_mm = (build_params or {}).get("kerf_mm")
+    summary_path.write_text(json.dumps(build_machining_summary(runs, kerf_mm), indent=2))
     outputs["machining_summary"] = summary_path
 
     return outputs

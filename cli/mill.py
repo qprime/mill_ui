@@ -434,7 +434,8 @@ Output files:
   {basename}.svg              Blueprint drawing
   metrics.json                Pipeline metrics, errors and warnings for the whole run
                               (multi-sheet: one entry per sheet under "sheets")
-  machining_summary.json      Per-file and total estimated runtime for the whole run
+  machining_summary.json      Stock, per-file tool, feeds, strategy and estimated runtime,
+                              feature counts, safe Z and kerf for the whole run
                               (multi-sheet: one entry per sheet under "sheets")
   manifest.json               Sheet list (multi-sheet only)
 

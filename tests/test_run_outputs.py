@@ -17,6 +17,7 @@ from cam.pipeline import (
 )
 from cam.planner.passes import PassAccumulator, PassRecord
 from cam.planner.passes.tools import ToolSelection
+from ir.removal_intent import Bounds2D, DepthProfile, RemovalIntent
 from layout_ast.layout import LayoutAST, Sheet
 
 BUILD = {"kerf_mm": 3.175, "theme": "dark", "y_origin": "back"}
@@ -145,28 +146,26 @@ def _profile_pass() -> PassRecord:
 
 
 def _summary_run(sheet_index: int, job_name: str, gcode_name: str) -> SheetRun:
-    result = _result(gcode_name=gcode_name)
-    gcode_files = {gcode_name: GcodeFile(face="front", passes=(_profile_pass(),))}
-    return SheetRun(
-        source="box.pml.yml",
-        sheet_index=sheet_index,
-        job_name=job_name,
-        result=replace(result, gcode_files=gcode_files),
+    profile = _profile_pass()
+    result = replace(
+        _result(gcode_name=gcode_name),
+        passes=[profile],
+        gcode_files={gcode_name: GcodeFile(face="front", passes=(profile,))},
     )
+    return SheetRun(source="box.pml.yml", sheet_index=sheet_index, job_name=job_name, result=result)
 
 
 def test_single_sheet_machining_summary_lists_files_and_total_runtime():
-    summary = build_machining_summary([_summary_run(1, "box", "profile-3.17mm")])
+    summary = build_machining_summary([_summary_run(1, "box", "profile-3.17mm")], kerf_mm=3.175)
 
-    assert summary["files"] == [
-        {
-            "filename": "profile-3.17mm.nc",
-            "operation": "profile",
-            "tool_diameter_mm": 3.175,
-            "estimated_runtime_min": 1.0,
-        }
+    assert [(f["filename"], f["operation"], f["strategy"]) for f in summary["files"]] == [
+        ("profile-3.17mm.nc", "profile", "contour")
     ]
+    assert summary["files"][0]["estimated_runtime_min"] == 1.0
     assert summary["total_runtime_min"] == 1.0
+    assert summary["stock"] == {"width_mm": 300.0, "height_mm": 200.0, "thickness_mm": 19.0, "material": "mdf"}
+    assert summary["safe_z_mm"] == 3.0
+    assert summary["kerf_mm"] == 3.175
 
 
 def test_multi_sheet_machining_summary_keeps_every_sheet_and_sums_runtime():
@@ -181,3 +180,26 @@ def test_multi_sheet_machining_summary_keeps_every_sheet_and_sums_runtime():
     assert [sheet["job_name"] for sheet in summary["sheets"]] == ["box_sheet_1", "box_sheet_2"]
     assert summary["sheets"][1]["files"][0]["filename"] == "sheet_2.profile-3.17mm.nc"
     assert summary["total_runtime_min"] == 2.0
+
+
+def _intent(region_id: str, hint_type: str) -> RemovalIntent:
+    return RemovalIntent(
+        region_id=region_id,
+        bounds=Bounds2D(x_min=0.0, x_max=10.0, y_min=0.0, y_max=10.0),
+        depth_profile=DepthProfile(mode="constant", z_top=0.0, z_bottom=-5.0),
+        hint_type=hint_type,
+    )
+
+
+def test_machining_summary_counts_features_and_waste_cuts():
+    intents = [
+        _intent("profile_part", "profile"),
+        _intent("profile_waste_0_1", "profile"),
+        _intent("hole_a", "hole"),
+        _intent("hole_b", "hole"),
+    ]
+    run = SheetRun(source="job.pml.yml", sheet_index=1, job_name="job", result=replace(_result(), intents=intents))
+
+    summary = build_machining_summary([run])
+
+    assert summary["feature_counts"] == {"hole": 2, "profile": 1, "waste_cut": 1}

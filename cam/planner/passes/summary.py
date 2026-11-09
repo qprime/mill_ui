@@ -10,6 +10,12 @@ from core.constants import RAPID_XY_MM_MIN, RAPID_Z_MM_MIN
 
 if TYPE_CHECKING:
     from cam.planner.passes import PassRecord
+    from ir.removal_intent import RemovalIntent
+
+OP_STRATEGIES = {
+    "bore": "helical_bore",
+    "pocket": "raster_pocket",
+}
 
 
 def _summarise_moves(moves: Sequence[Move], tool: ToolSelection | None = None) -> dict[str, float]:
@@ -90,15 +96,62 @@ def estimated_runtime_min(move_metrics: Mapping[str, float]) -> float:
     return round(total_s / 60.0, 1)
 
 
-def summarise_gcode_file(filename: str, passes: Sequence[PassRecord]) -> dict[str, Any]:
+def _profile_strategy(profile_intents: Sequence[RemovalIntent]) -> str:
+    if any((intent.constraints.onion_skin_mm or 0.0) > 0.0 for intent in profile_intents):
+        return "onion_skin_then_finish"
+    if any(intent.constraints.tabs is not None for intent in profile_intents):
+        return "tabbed_profile"
+    return "contour"
+
+
+def _strategy(op: str, profile_intents: Sequence[RemovalIntent]) -> str:
+    if op == "profile":
+        return _profile_strategy(profile_intents)
+    return OP_STRATEGIES.get(op, op)
+
+
+def _holding(profile_intents: Sequence[RemovalIntent]) -> str | None:
+    labels: list[str] = []
+    for intent in profile_intents:
+        onion_skin_mm = intent.constraints.onion_skin_mm
+        if onion_skin_mm:
+            labels.append(f"onion_skin {onion_skin_mm:g}mm")
+        tabs = intent.constraints.tabs
+        if tabs is not None:
+            labels.append(f"tabs {tabs.count}x{tabs.height_mm:g}mm")
+    return ", ".join(dict.fromkeys(labels)) or None
+
+
+def summarise_gcode_file(
+    filename: str,
+    passes: Sequence[PassRecord],
+    *,
+    profile_intents: Sequence[RemovalIntent] = (),
+    cut_through_mm: float | None = None,
+) -> dict[str, Any]:
     tool = passes[0].tool_selection
     moves = [move for entry in passes for move in entry.moves]
-    return {
+    move_metrics = _summarise_moves(moves, tool)
+    ops = list(dict.fromkeys(entry.op for entry in passes))
+    entry: dict[str, Any] = {
         "filename": filename,
-        "operation": ", ".join(dict.fromkeys(entry.op for entry in passes)),
+        "operation": ", ".join(ops),
         "tool_diameter_mm": float(tool.diameter),
-        "estimated_runtime_min": estimated_runtime_min(_summarise_moves(moves, tool)),
+        "rpm": round(tool.rpm, 3),
+        "feed_xy_mm_min": round(tool.feed_xy, 3),
+        "feed_z_mm_min": round(tool.feed_z, 3),
+        "stepdown_mm": tool.depth_per_pass,
+        "max_depth_mm": round(move_metrics["max_depth_mm"], 3),
+        "feature_count": sum(record.count for record in passes),
+        "strategy": ", ".join(_strategy(op, profile_intents) for op in ops),
     }
+    if "profile" in ops:
+        holding = _holding(profile_intents)
+        if holding is not None:
+            entry["holding"] = holding
+        entry["cut_through_mm"] = cut_through_mm
+    entry["estimated_runtime_min"] = estimated_runtime_min(move_metrics)
+    return entry
 
 
 def summarise_passes(

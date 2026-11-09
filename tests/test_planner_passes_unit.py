@@ -52,7 +52,17 @@ from cam.planner.planner_input import (
     IslandInput,
     SurfaceCooling,
 )
-from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec, ShapeGeometry
+from ir.removal_intent import (
+    BevelSpec,
+    Bounds2D,
+    ChamferSpec,
+    Constraints,
+    DepthProfile,
+    RemovalIntent,
+    RoundoverSpec,
+    ShapeGeometry,
+    TabConstraint,
+)
 from layout_ast.layout import RestSpec
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
@@ -1267,5 +1277,60 @@ class TestMoveTiming:
             "filename": "6.35mm.nc",
             "operation": "pocket, dogbone",
             "tool_diameter_mm": 6.35,
+            "rpm": 18000,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": None,
+            "max_depth_mm": 1.0,
+            "feature_count": 0,
+            "strategy": "raster_pocket, dogbone",
             "estimated_runtime_min": round(expected_s / 60.0, 1),
         }
+
+
+def _profile_intent(constraints: Constraints) -> RemovalIntent:
+    return RemovalIntent(
+        region_id="profile_part",
+        bounds=Bounds2D(x_min=0.0, x_max=100.0, y_min=0.0, y_max=50.0),
+        depth_profile=DepthProfile(mode="constant", z_top=0.0, z_bottom=-19.0),
+        hint_type="profile",
+        constraints=constraints,
+    )
+
+
+class TestGcodeFileStrategy:
+    def _entry(self, op: str, intents: list[RemovalIntent]) -> dict:
+        record = _accumulator().get_record(op, SUMMARY_TOOL)
+        record.add_moves([RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=300.0)], increment=2)
+        return summarise_gcode_file(f"{op}.nc", [record], profile_intents=intents, cut_through_mm=0.2)
+
+    def test_profile_with_onion_skin(self):
+        entry = self._entry("profile", [_profile_intent(Constraints(onion_skin_mm=0.3))])
+
+        assert entry["strategy"] == "onion_skin_then_finish"
+        assert entry["holding"] == "onion_skin 0.3mm"
+        assert entry["cut_through_mm"] == 0.2
+        assert entry["feature_count"] == 2
+
+    def test_profile_with_tabs(self):
+        tabs = TabConstraint(count=4, height_mm=3.0, width_mm=None)
+        entry = self._entry("profile", [_profile_intent(Constraints(tabs=tabs))])
+
+        assert entry["strategy"] == "tabbed_profile"
+        assert entry["holding"] == "tabs 4x3mm"
+
+    def test_profile_without_holding(self):
+        entry = self._entry("profile", [_profile_intent(Constraints())])
+
+        assert entry["strategy"] == "contour"
+        assert "holding" not in entry
+
+    def test_bore_is_helical_and_carries_no_profile_fields(self):
+        entry = self._entry("bore", [])
+
+        assert entry["strategy"] == "helical_bore"
+        assert "cut_through_mm" not in entry
+        assert "holding" not in entry
+
+    def test_unlabeled_op_uses_op_name(self):
+        assert self._entry("corner_cleanup", [])["strategy"] == "corner_cleanup"

@@ -27,7 +27,7 @@ from config.machine_loader import (
     load_machine_tool_db,
 )
 from core.constants import BACK_SVG_SUFFIX
-from ir.removal_intent import Bounds2D, RemovalIntent
+from ir.removal_intent import RemovalIntent
 from layout_ast.layout import LayoutAST, mirror_item_about_x
 from pml.revision_header import build_provenance
 from validation.removal_checks import (
@@ -353,18 +353,9 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
 
     exceeds_machine = False
     if machine_config is not None and validate_machine_bounds:
-        from validation.machine_checks import check_job_fits_machine
+        from validation.machine_checks import check_sheet_fits_machine
 
-        sheet = ast.sheet
-        margin = sheet.margin_mm
-        job_bounds = Bounds2D(
-            x_min=margin,
-            x_max=sheet.width_mm - margin,
-            y_min=margin,
-            y_max=sheet.height_mm - margin,
-        )
-
-        machine_result = check_job_fits_machine(job_bounds, machine_config, endmill)
+        machine_result = check_sheet_fits_machine(ast, machine_config, endmill)
         if machine_result.status.value == "fail":
             exceeds_machine = True
             for failure in machine_result.failures:

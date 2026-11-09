@@ -31,9 +31,15 @@ These are the design decisions that distinguish mill_ui from conventional CAM so
 
 ## Quick Start
 
+Requires Python 3.12+, CMake, and a C++20 compiler.
+
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+cmake -S cam/native/cpp -B build/native_cam -Dpybind11_DIR=$(python -m pybind11 --cmakedir)
+cmake --build build/native_cam
+cp build/native_cam/python/_native.*.so cam/native/
 
 python -m cli.mill --recipe docs/recipes/01_simple_profile
 ```
@@ -255,14 +261,15 @@ python -m tests.test_recipes                                 # recipe gate
 
 ## Building the Native Backend
 
-The native C++ backend is optional (improves performance for large jobs). IR-level tests work without it.
+`cli.mill` requires the native C++ backend: profile, pocket, drill, and bore toolpaths and G-code output run through it. IR-level tests work without it. The Quick Start builds it; rebuild after changing `cam/native/cpp`:
 
 ```bash
-pip install pybind11
-cmake -S cam/native/cpp -B build/native_cam -Dpybind11_DIR=$(python3 -m pybind11 --cmakedir)
+cmake -S cam/native/cpp -B build/native_cam -Dpybind11_DIR=$(python -m pybind11 --cmakedir)
 cmake --build build/native_cam
 cp build/native_cam/python/_native.*.so cam/native/
 ```
+
+See [cam/native/README.md](cam/native/README.md) for native tests and sanitizer builds.
 
 ## Further Reading
 

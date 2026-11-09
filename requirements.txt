@@ -10,5 +10,14 @@ mcp[cli]>=1.25.0
 Pillow>=10.0.0
 numpy>=1.26.0
 
+# PML parsing and machine/tool config loading (round-trip YAML)
+ruamel.yaml>=0.19.1
+
+# Single-stroke fonts for engraved text and labels
+Hershey-Fonts>=2.1.0
+
+# Native CAM extension build (cam/native/cpp, pybind11 bindings)
+pybind11>=3.0.1
+
 # Development dependencies (optional)
 # Install with: pip install -r requirements-dev.txt

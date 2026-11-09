@@ -1,9 +1,22 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
-from cam.pipeline import PipelineResult, SheetRun, build_run_metrics, write_run_outputs
+from cam.model.machine import Machine
+from cam.model.stock import Stock
+from cam.moves import CutMove, RapidMove
+from cam.pipeline import (
+    GcodeFile,
+    PipelineResult,
+    SheetRun,
+    build_machining_summary,
+    build_run_metrics,
+    write_run_outputs,
+)
+from cam.planner.passes import PassAccumulator, PassRecord
+from cam.planner.passes.tools import ToolSelection
 from layout_ast.layout import LayoutAST, Sheet
 
 BUILD = {"kerf_mm": 3.175, "theme": "dark", "y_origin": "back"}
@@ -112,9 +125,59 @@ def test_write_run_outputs_writes_every_sheet_and_one_metrics_file(tmp_path: Pat
     assert names == [
         "box_sheet_1.svg",
         "box_sheet_2.svg",
+        "machining_summary.json",
         "metrics.json",
         "sheet_1.profile-3.17mm.nc",
         "sheet_2.profile-3.17mm.nc",
     ]
     metrics = json.loads((tmp_path / "out" / "metrics.json").read_text())
     assert metrics["total_sheets"] == 2
+
+
+def _profile_pass() -> PassRecord:
+    tool = ToolSelection(name="t", diameter=3.175, kind="flat", rpm=18000, feed_xy=1200.0, feed_z=300.0)
+    acc = PassAccumulator(
+        machine=Machine(), stock=Stock(width=300, height=200, thickness=19), safe_z=3.0, prime_spindle=False
+    )
+    record = acc.get_record("profile", tool)
+    record.add_moves([RapidMove(x=0.0, y=0.0, z=3.0), CutMove(z=0.0, feed=300.0), CutMove(x=1200.0, feed=1200.0)])
+    return record
+
+
+def _summary_run(sheet_index: int, job_name: str, gcode_name: str) -> SheetRun:
+    result = _result(gcode_name=gcode_name)
+    gcode_files = {gcode_name: GcodeFile(face="front", passes=(_profile_pass(),))}
+    return SheetRun(
+        source="box.pml.yml",
+        sheet_index=sheet_index,
+        job_name=job_name,
+        result=replace(result, gcode_files=gcode_files),
+    )
+
+
+def test_single_sheet_machining_summary_lists_files_and_total_runtime():
+    summary = build_machining_summary([_summary_run(1, "box", "profile-3.17mm")])
+
+    assert summary["files"] == [
+        {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "estimated_runtime_min": 1.0,
+        }
+    ]
+    assert summary["total_runtime_min"] == 1.0
+
+
+def test_multi_sheet_machining_summary_keeps_every_sheet_and_sums_runtime():
+    runs = [
+        _summary_run(1, "box_sheet_1", "sheet_1.profile-3.17mm"),
+        _summary_run(2, "box_sheet_2", "sheet_2.profile-3.17mm"),
+    ]
+
+    summary = build_machining_summary(runs)
+
+    assert summary["total_sheets"] == 2
+    assert [sheet["job_name"] for sheet in summary["sheets"]] == ["box_sheet_1", "box_sheet_2"]
+    assert summary["sheets"][1]["files"][0]["filename"] == "sheet_2.profile-3.17mm.nc"
+    assert summary["total_runtime_min"] == 2.0

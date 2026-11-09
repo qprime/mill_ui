@@ -8,9 +8,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from core.constants import RAPID_XY_MM_MIN
 from validation.core import round_metric
 
-DEFAULT_RAPID_RATE_MM_MIN = 5000.0
+DEFAULT_RAPID_RATE_MM_MIN = RAPID_XY_MM_MIN
 
 
 @dataclass

@@ -4,7 +4,7 @@ import json
 import shutil
 import time
 from collections.abc import Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,7 @@ from cam.model.stock import Stock
 from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord, plan_passes
+from cam.planner.passes.summary import summarise_gcode_file
 from cam.planner.passes.tools import normalize_tool_entries
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
@@ -43,6 +44,13 @@ from validation.toolpath_checks import verify_passes_avoid_keepouts
 
 NON_DETERMINISTIC_METRICS = frozenset({"timing"})
 DEFAULT_SAFE_Z_MM = 6.0
+PROFILE_CUT_THROUGH_MM = 0.2
+
+
+@dataclass(frozen=True)
+class GcodeFile:
+    face: str
+    passes: tuple[PassRecord, ...]
 
 
 @dataclass(frozen=True)
@@ -56,6 +64,7 @@ class PipelineResult:
     errors: list[str]
     warnings: list[str]
     svg_back: str | None = None
+    gcode_files: dict[str, GcodeFile] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -80,6 +89,7 @@ class PipelineTiming:
 class FaceOutput:
     passes: list[PassRecord]
     gcode: dict[str, str]
+    gcode_files: dict[str, GcodeFile]
     total_moves: int
     rapid_moves: int
     cut_moves: int
@@ -134,6 +144,7 @@ def _plan_and_emit_face(
     y_origin: str,
     errors: list[str],
     warnings: list[str],
+    face: str,
 ) -> FaceOutput:
     hints_start = time.perf_counter()
     planner_input = removal_intents_to_planner_input(
@@ -153,7 +164,7 @@ def _plan_and_emit_face(
         machine=machine,
         stock=stock,
         safe_z=safe_z,
-        profile_opts={"cut_through_mm": 0.2},
+        profile_opts={"cut_through_mm": PROFILE_CUT_THROUGH_MM},
     )
     plan_ms = (time.perf_counter() - plan_start) * 1000
     warnings.extend(planner_warnings)
@@ -167,6 +178,7 @@ def _plan_and_emit_face(
 
     gcode_start = time.perf_counter()
     gcode_dict: dict[str, str] = {}
+    gcode_files: dict[str, GcodeFile] = {}
     total_moves = 0
     total_rapid_moves = 0
     total_cut_moves = 0
@@ -183,6 +195,7 @@ def _plan_and_emit_face(
             for p in group:
                 merged_moves.extend(p.moves)
             setup = group[0].setup
+            gcode_files[f"{gcode_prefix}{diameter:.2f}mm"] = GcodeFile(face=face, passes=tuple(group))
             gcode_dict[f"{gcode_prefix}{diameter:.2f}mm"] = write_gcode(
                 merged_moves,
                 safe_z=setup.safe_z,
@@ -201,6 +214,7 @@ def _plan_and_emit_face(
                     total_cut_moves += 1
     else:
         for p in passes:
+            gcode_files[f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"] = GcodeFile(face=face, passes=(p,))
             gcode_dict[f"{gcode_prefix}{p.op}-{p.setup.tool.diameter:.2f}mm"] = write_gcode(
                 p.moves,
                 safe_z=p.setup.safe_z,
@@ -223,6 +237,7 @@ def _plan_and_emit_face(
     return FaceOutput(
         passes=passes,
         gcode=gcode_dict,
+        gcode_files=gcode_files,
         total_moves=total_moves,
         rapid_moves=total_rapid_moves,
         cut_moves=total_cut_moves,
@@ -424,10 +439,10 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             )
         back_intents = ast_to_removal_intents(back_ast, warnings=warnings)
 
-    face_runs: list[tuple[LayoutAST, list[RemovalIntent], str]] = []
+    face_runs: list[tuple[LayoutAST, list[RemovalIntent], str, str]] = []
     if back_ast is not None:
-        face_runs.append((back_ast, back_intents, "back-"))
-    face_runs.append((front_ast, front_intents, ""))
+        face_runs.append((back_ast, back_intents, "back-", "back"))
+    face_runs.append((front_ast, front_intents, "", "front"))
 
     outputs = [
         _plan_and_emit_face(
@@ -444,12 +459,14 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             y_origin=y_origin,
             errors=errors,
             warnings=warnings,
+            face=face,
         )
-        for face_ast, face_intents, prefix in face_runs
+        for face_ast, face_intents, prefix, face in face_runs
     ]
 
     passes = [record for output in outputs for record in output.passes]
     gcode_dict = {name: gcode for output in outputs for name, gcode in output.gcode.items()}
+    gcode_files = {name: gcode_file for output in outputs for name, gcode_file in output.gcode_files.items()}
     total_moves = sum(output.total_moves for output in outputs)
     total_rapid_moves = sum(output.rapid_moves for output in outputs)
     total_cut_moves = sum(output.cut_moves for output in outputs)
@@ -545,6 +562,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         metrics=metrics,
         errors=errors,
         warnings=warnings,
+        gcode_files=gcode_files,
     )
 
 
@@ -570,7 +588,11 @@ def run_sheets(
         job_name = job_stem
         if multi_sheet:
             prefix = f"sheet_{sheet_index}."
-            result = replace(result, gcode={f"{prefix}{name}": gcode for name, gcode in result.gcode.items()})
+            result = replace(
+                result,
+                gcode={f"{prefix}{name}": gcode for name, gcode in result.gcode.items()},
+                gcode_files={f"{prefix}{name}": gcode_file for name, gcode_file in result.gcode_files.items()},
+            )
             job_name = f"{job_stem}_sheet_{sheet_index}"
         runs.append(SheetRun(source=source, sheet_index=sheet_index, job_name=job_name, result=result))
     return runs
@@ -619,6 +641,33 @@ def build_run_metrics(runs: Sequence[SheetRun], build_params: dict[str, Any] | N
     return metrics
 
 
+def _sheet_machining_summary(result: PipelineResult) -> dict[str, Any]:
+    files = [summarise_gcode_file(f"{name}.nc", gcode_file.passes) for name, gcode_file in result.gcode_files.items()]
+    return {
+        "files": files,
+        "total_runtime_min": round(sum(entry["estimated_runtime_min"] for entry in files), 1),
+    }
+
+
+def build_machining_summary(runs: Sequence[SheetRun]) -> dict[str, Any]:
+    if len(runs) == 1:
+        return _sheet_machining_summary(runs[0].result)
+    sheets = [
+        {
+            "source": run.source,
+            "sheet_index": run.sheet_index,
+            "job_name": run.job_name,
+            **_sheet_machining_summary(run.result),
+        }
+        for run in runs
+    ]
+    return {
+        "total_sheets": len(runs),
+        "sheets": sheets,
+        "total_runtime_min": round(sum(sheet["total_runtime_min"] for sheet in sheets), 1),
+    }
+
+
 def _write_sheet_artifacts(run: SheetRun, output_dir: Path) -> dict[str, Path]:
     outputs: dict[str, Path] = {}
     result = run.result
@@ -659,5 +708,9 @@ def write_run_outputs(
     metrics_path = output_dir / "metrics.json"
     metrics_path.write_text(json.dumps(build_run_metrics(runs, build_params), indent=2))
     outputs["metrics"] = metrics_path
+
+    summary_path = output_dir / "machining_summary.json"
+    summary_path.write_text(json.dumps(build_machining_summary(runs), indent=2))
+    outputs["machining_summary"] = summary_path
 
     return outputs

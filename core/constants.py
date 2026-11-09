@@ -83,6 +83,8 @@ BACK_FACE_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENG
 BACK_FACE_DEPTH_MODES = ("constant", "v_carve")
 WEB_CHECK_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
 BACK_SVG_SUFFIX = ".back.svg"
+RAPID_XY_MM_MIN = 5000.0
+RAPID_Z_MM_MIN = 1000.0
 GOLDEN_ANGLE_DEG = 180 * (3 - math.sqrt(5))
 
 

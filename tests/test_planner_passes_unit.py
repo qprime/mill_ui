@@ -15,7 +15,7 @@ from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
-from cam.moves import CutMove, RapidMove, RetractMove, XYMove
+from cam.moves import CutMove, DwellMove, Move, RapidMove, RetractMove, SetFeedMove, XYMove
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
@@ -29,6 +29,7 @@ from cam.planner.passes.pocket import (
     plan_hole_passes,
     plan_pocket_passes,
 )
+from cam.planner.passes.summary import _summarise_moves, estimated_runtime_min, summarise_gcode_file
 from cam.planner.passes.tools import (
     ToolSelection,
     normalize_tool_entries,
@@ -1202,3 +1203,69 @@ class TestPlanRoundoverPasses:
         records = acc.passes()
         assert len(records) == 1
         assert len(records[0].moves) > 0
+
+
+SUMMARY_TOOL = ToolSelection(name="t", diameter=6.35, kind="flat", rpm=18000, feed_xy=1200.0, feed_z=300.0)
+
+
+class TestMoveTiming:
+    def test_cut_time_uses_per_move_and_modal_feed(self):
+        moves: list[Move] = [
+            SetFeedMove(feed=600.0),
+            RapidMove(x=0.0, y=0.0, z=5.0),
+            CutMove(z=-1.0),
+            CutMove(x=100.0, feed=1200.0),
+            RetractMove(z=5.0),
+            DwellMove(seconds=2.0),
+            RapidMove(x=0.0),
+        ]
+
+        metrics = _summarise_moves(moves, SUMMARY_TOOL)
+
+        assert metrics["cut_time_s"] == pytest.approx(0.6 + 5.0)
+        assert metrics["rapid_distance_xy_mm"] == pytest.approx(100.0)
+        assert metrics["rapid_distance_z_mm"] == pytest.approx(6.0)
+        assert metrics["dwell_time_s"] == pytest.approx(2.0)
+        assert metrics["max_depth_mm"] == pytest.approx(1.0)
+
+    def test_cut_time_falls_back_to_tool_feeds_before_any_feed_is_set(self):
+        moves: list[Move] = [RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0), CutMove(x=60.0)]
+
+        metrics = _summarise_moves(moves, SUMMARY_TOOL)
+
+        assert metrics["cut_time_s"] == pytest.approx(6.0 / 300.0 * 60.0 + 60.0 / 1200.0 * 60.0)
+
+    def test_retract_updates_z_for_the_next_plunge(self):
+        moves: list[Move] = [RapidMove(x=0.0, y=0.0, z=-2.0), RetractMove(z=5.0), CutMove(z=-2.0, feed=700.0)]
+
+        metrics = _summarise_moves(moves, SUMMARY_TOOL)
+
+        assert metrics["plunge_travel_mm"] == pytest.approx(7.0)
+        assert metrics["cut_time_s"] == pytest.approx(7.0 / 700.0 * 60.0)
+
+    def test_runtime_adds_cut_rapid_and_dwell_time(self):
+        metrics = {
+            "rapid_distance_xy_mm": 5000.0,
+            "rapid_distance_z_mm": 1000.0,
+            "cut_time_s": 120.0,
+            "dwell_time_s": 30.0,
+        }
+
+        assert estimated_runtime_min(metrics) == pytest.approx(4.5)
+
+    def test_gcode_file_summary_joins_ops_and_times_the_merged_moves(self):
+        acc = _accumulator()
+        pocket = acc.get_record("pocket", SUMMARY_TOOL)
+        pocket.add_moves([RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=600.0), CutMove(x=1200.0, feed=1200.0)])
+        dogbone = acc.get_record("dogbone", SUMMARY_TOOL)
+        dogbone.add_moves([RetractMove(z=5.0), RapidMove(x=0.0), CutMove(z=-1.0, feed=600.0)])
+
+        entry = summarise_gcode_file("6.35mm.nc", [pocket, dogbone])
+
+        expected_s = 0.6 + 60.0 + 0.6 + (1200.0 / 5000.0 + 6.0 / 1000.0) * 60.0
+        assert entry == {
+            "filename": "6.35mm.nc",
+            "operation": "pocket, dogbone",
+            "tool_diameter_mm": 6.35,
+            "estimated_runtime_min": round(expected_s / 60.0, 1),
+        }

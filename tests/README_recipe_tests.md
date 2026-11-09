@@ -130,7 +130,7 @@ A run with more than one sheet (a multi-sheet layout, or several input files) wr
 }
 ```
 
-`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg` and `metrics.json`; `cli.mill` and `tests.test_recipes --regen_recipes` both call it.
+`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json` and `machining_summary.json`; `cli.mill` and `tests.test_recipes --regen_recipes` both call it. `machining_summary.json` is a production artifact and is gitignored in recipe outputs.
 
 ## Workflow Examples
 

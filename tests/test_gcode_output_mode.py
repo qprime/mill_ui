@@ -377,3 +377,39 @@ class TestTwoFaceOutput:
         result = run_pipeline(ast, tool_db=TOOL_DB, generate_svg=False)
 
         assert any("web breach" in e for e in result.errors)
+
+
+class TestGcodeFileMap:
+    @pytest.mark.parametrize("mode", ["per-operation", "per-tool"])
+    def test_every_gcode_file_lists_its_passes(self, mode):
+        result = run_pipeline(_make_multi_tool_ast(mode), tool_db=TOOL_DB, generate_svg=False)
+
+        assert set(result.gcode_files) == set(result.gcode)
+        mapped = [p for gcode_file in result.gcode_files.values() for p in gcode_file.passes]
+        assert sorted(id(p) for p in mapped) == sorted(id(p) for p in result.passes)
+        assert {gcode_file.face for gcode_file in result.gcode_files.values()} == {"front"}
+
+    def test_per_tool_file_holds_every_pass_of_its_diameter(self):
+        result = run_pipeline(_make_multi_tool_ast("per-tool"), tool_db=TOOL_DB, generate_svg=False)
+
+        for name, gcode_file in result.gcode_files.items():
+            assert {f"{p.setup.tool.diameter:.2f}mm" for p in gcode_file.passes} == {name}
+
+    def test_back_face_files_are_marked_back(self):
+        ast = _make_multi_tool_ast("per-operation")
+        back_pocket = Item(
+            kind="shape",
+            type="Rect",
+            geometry=Geometry(data={"w_mm": 40, "h_mm": 30}),
+            placement=Placement(center_xy_mm=(300, 200)),
+            feature=Feature(type="pocket", depth_mm=4.0, face="back"),
+            shape_id="back_pocket",
+        )
+        result = run_pipeline(
+            LayoutAST(sheet=ast.sheet, items=(*ast.items, back_pocket)), tool_db=TOOL_DB, generate_svg=False
+        )
+
+        faces = {name: gcode_file.face for name, gcode_file in result.gcode_files.items()}
+        assert faces
+        assert all(face == ("back" if name.startswith("back-") else "front") for name, face in faces.items())
+        assert "back" in faces.values()

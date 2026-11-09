@@ -1,29 +1,28 @@
 {
   "golden": {
     "recipe_name": "74_multi_sheet_assembly",
-    "created_at": "2026-04-04T15:44:30.662250+00:00"
+    "created_at": "2026-11-09T19:20:32.811240+00:00"
   },
   "svg": {
     "version": "1.0.0",
-    "extraction_time_ms": 1.57,
+    "extraction_time_ms": 0.61,
     "document": {
       "width_mm": 673.175,
-      "height_mm": 1131.175,
+      "height_mm": 643.175,
       "viewbox": [
         -21.587,
         -61.587,
         673.175,
-        1131.175
+        643.175
       ]
     },
     "layers": {
-      "count": 9,
+      "count": 8,
       "names": [
         "DIMENSIONS",
         "LABELS",
         "LEGEND",
         "NOTES",
-        "POCKET_REGIONS",
         "PROFILE_CUTS",
         "PROFILE_TOOLPATHS",
         "SHEET_OUTLINE",
@@ -31,631 +30,50 @@
       ],
       "by_layer": {
         "DIMENSIONS": {
-          "element_count": 54,
+          "element_count": 12,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
-          "line_count": 27,
-          "polygon_count": 18,
-          "text_count": 9,
+          "line_count": 6,
+          "polygon_count": 4,
+          "text_count": 2,
           "elements": []
         },
         "LABELS": {
-          "element_count": 2,
+          "element_count": 1,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 2,
+          "text_count": 1,
           "elements": []
         },
         "LEGEND": {
-          "element_count": 11,
-          "rect_count": 1,
+          "element_count": 9,
+          "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 4,
           "polygon_count": 0,
-          "text_count": 6,
+          "text_count": 5,
           "elements": []
         },
         "NOTES": {
-          "element_count": 44,
+          "element_count": 3,
           "rect_count": 0,
           "circle_count": 0,
           "path_count": 0,
           "line_count": 0,
           "polygon_count": 0,
-          "text_count": 44,
+          "text_count": 3,
           "elements": []
         },
-        "POCKET_REGIONS": {
-          "element_count": 38,
-          "rect_count": 38,
-          "circle_count": 0,
-          "path_count": 0,
-          "line_count": 0,
-          "polygon_count": 0,
-          "text_count": 0,
-          "elements": [
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                477.45,
-                304.35,
-                483.65
-              ],
-              "center": [
-                160.35,
-                480.55
-              ],
-              "width": 288.0,
-              "height": 6.2
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                471.848,
-                304.35,
-                483.65
-              ],
-              "center": [
-                301.35,
-                477.749
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                448.318,
-                304.35,
-                460.158
-              ],
-              "center": [
-                301.35,
-                454.238
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                424.789,
-                304.35,
-                436.629
-              ],
-              "center": [
-                301.35,
-                430.709
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                401.26,
-                304.35,
-                413.1
-              ],
-              "center": [
-                301.35,
-                407.18
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                377.73,
-                304.35,
-                389.57
-              ],
-              "center": [
-                301.35,
-                383.65
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                354.201,
-                304.35,
-                366.041
-              ],
-              "center": [
-                301.35,
-                360.121
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                330.671,
-                304.35,
-                342.511
-              ],
-              "center": [
-                301.35,
-                336.591
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                307.142,
-                304.35,
-                318.982
-              ],
-              "center": [
-                301.35,
-                313.062
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                283.65,
-                304.35,
-                295.452
-              ],
-              "center": [
-                301.35,
-                289.551
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                471.848,
-                22.35,
-                483.65
-              ],
-              "center": [
-                19.35,
-                477.749
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                448.318,
-                22.35,
-                460.158
-              ],
-              "center": [
-                19.35,
-                454.238
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                424.789,
-                22.35,
-                436.629
-              ],
-              "center": [
-                19.35,
-                430.709
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                401.26,
-                22.35,
-                413.1
-              ],
-              "center": [
-                19.35,
-                407.18
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                377.73,
-                22.35,
-                389.57
-              ],
-              "center": [
-                19.35,
-                383.65
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                354.201,
-                22.35,
-                366.041
-              ],
-              "center": [
-                19.35,
-                360.121
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                330.671,
-                22.35,
-                342.511
-              ],
-              "center": [
-                19.35,
-                336.591
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                307.142,
-                22.35,
-                318.982
-              ],
-              "center": [
-                19.35,
-                313.062
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                283.65,
-                22.35,
-                295.452
-              ],
-              "center": [
-                19.35,
-                289.551
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                267.45,
-                304.35,
-                273.65
-              ],
-              "center": [
-                160.35,
-                270.55
-              ],
-              "width": 288.0,
-              "height": 6.2
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                261.848,
-                22.35,
-                273.65
-              ],
-              "center": [
-                19.35,
-                267.749
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                238.318,
-                22.35,
-                250.158
-              ],
-              "center": [
-                19.35,
-                244.238
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                214.789,
-                22.35,
-                226.629
-              ],
-              "center": [
-                19.35,
-                220.709
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                191.26,
-                22.35,
-                203.1
-              ],
-              "center": [
-                19.35,
-                197.18
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                167.73,
-                22.35,
-                179.57
-              ],
-              "center": [
-                19.35,
-                173.65
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                144.201,
-                22.35,
-                156.041
-              ],
-              "center": [
-                19.35,
-                150.121
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                120.671,
-                22.35,
-                132.511
-              ],
-              "center": [
-                19.35,
-                126.591
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                97.142,
-                22.35,
-                108.982
-              ],
-              "center": [
-                19.35,
-                103.062
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                16.35,
-                73.65,
-                22.35,
-                85.452
-              ],
-              "center": [
-                19.35,
-                79.551
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                261.848,
-                304.35,
-                273.65
-              ],
-              "center": [
-                301.35,
-                267.749
-              ],
-              "width": 6.0,
-              "height": 11.802
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                238.318,
-                304.35,
-                250.158
-              ],
-              "center": [
-                301.35,
-                244.238
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                214.789,
-                304.35,
-                226.629
-              ],
-              "center": [
-                301.35,
-                220.709
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                191.26,
-                304.35,
-                203.1
-              ],
-              "center": [
-                301.35,
-                197.18
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                167.73,
-                304.35,
-                179.57
-              ],
-              "center": [
-                301.35,
-                173.65
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                144.201,
-                304.35,
-                156.041
-              ],
-              "center": [
-                301.35,
-                150.121
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                120.671,
-                304.35,
-                132.511
-              ],
-              "center": [
-                301.35,
-                126.591
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                97.142,
-                304.35,
-                108.982
-              ],
-              "center": [
-                301.35,
-                103.062
-              ],
-              "width": 6.0,
-              "height": 11.84
-            },
-            {
-              "element_type": "rect",
-              "bounds": [
-                298.35,
-                73.65,
-                304.35,
-                85.452
-              ],
-              "center": [
-                301.35,
-                79.551
-              ],
-              "width": 6.0,
-              "height": 11.802
-            }
-          ]
-        },
         "PROFILE_CUTS": {
-          "element_count": 2,
+          "element_count": 1,
           "rect_count": 0,
           "circle_count": 0,
-          "path_count": 2,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -664,35 +82,22 @@
               "element_type": "path",
               "bounds": [
                 16.35,
-                283.65,
-                304.35,
+                195.65,
+                404.35,
                 483.65
               ],
               "center": [
-                160.35,
-                383.65
-              ]
-            },
-            {
-              "element_type": "path",
-              "bounds": [
-                16.35,
-                73.65,
-                304.35,
-                273.65
-              ],
-              "center": [
-                160.35,
-                173.65
+                210.35,
+                339.65
               ]
             }
           ]
         },
         "PROFILE_TOOLPATHS": {
-          "element_count": 2,
+          "element_count": 1,
           "rect_count": 0,
           "circle_count": 0,
-          "path_count": 2,
+          "path_count": 1,
           "line_count": 0,
           "polygon_count": 0,
           "text_count": 0,
@@ -797,25 +202,20 @@
       }
     },
     "paths": {
-      "total_count": 47,
-      "closed_count": 47,
+      "total_count": 7,
+      "closed_count": 7,
       "open_count": 0,
-      "total_length_mm": 4577.406,
+      "total_length_mm": 1937.528,
       "by_layer": {
         "PROFILE_CUTS": {
-          "count": 2,
-          "closed": 2,
-          "length_mm": 2276.0
+          "count": 1,
+          "closed": 1,
+          "length_mm": 964.0
         },
         "PROFILE_TOOLPATHS": {
-          "count": 2,
-          "closed": 2,
-          "length_mm": 2301.406
-        },
-        "POCKET_REGIONS": {
-          "count": 38,
-          "closed": 38,
-          "length_mm": 0.0
+          "count": 1,
+          "closed": 1,
+          "length_mm": 973.528
         },
         "SHEET_OUTLINE": {
           "count": 5,
@@ -831,69 +231,17 @@
       "y_max": 500.0
     },
     "text_elements": {
-      "count": 63,
+      "count": 13,
       "dimension_labels": [
-        "11.7mm",
-        "11.8mm",
-        "200.0mm",
-        "276.0mm",
         "288.0mm",
-        "288.0mm",
-        "6.0mm",
-        "6.0mm",
-        "6.2mm",
-        "Sheet: 500.0 \u00d7 500.0 \u00d7 6.0mm",
-        "\u2022 pocket: 3.0mm, 6.0mm"
+        "388.0mm",
+        "Sheet: 500.0 \u00d7 500.0 \u00d7 6.0mm"
       ],
-      "depth_annotations": [
-        "Features: 38 pockets, 2 profiles",
-        "\u2022 pocket: 3.0mm, 6.0mm"
-      ],
+      "depth_annotations": [],
       "notes_text": [
         "NOTES",
         "Sheet: 500.0 \u00d7 500.0 \u00d7 6.0mm",
-        "Features: 38 pockets, 2 profiles",
-        "Depths:",
-        "\u2022 pocket: 3.0mm, 6.0mm",
-        "Parts (38):",
-        "\u2022 assembly_left_side_dado_1",
-        "\u2022 assembly_left_side_notch_dogbone_10",
-        "\u2022 assembly_left_side_notch_dogbone_11",
-        "\u2022 assembly_left_side_notch_dogbone_12",
-        "\u2022 assembly_left_side_notch_dogbone_13",
-        "\u2022 assembly_left_side_notch_dogbone_14",
-        "\u2022 assembly_left_side_notch_dogbone_15",
-        "\u2022 assembly_left_side_notch_dogbone_16",
-        "\u2022 assembly_left_side_notch_dogbone_17",
-        "\u2022 assembly_left_side_notch_dogbone_18",
-        "\u2022 assembly_left_side_notch_dogbone_19",
-        "\u2022 assembly_left_side_notch_dogbone_2",
-        "\u2022 assembly_left_side_notch_dogbone_3",
-        "\u2022 assembly_left_side_notch_dogbone_4",
-        "\u2022 assembly_left_side_notch_dogbone_5",
-        "\u2022 assembly_left_side_notch_dogbone_6",
-        "\u2022 assembly_left_side_notch_dogbone_7",
-        "\u2022 assembly_left_side_notch_dogbone_8",
-        "\u2022 assembly_left_side_notch_dogbone_9",
-        "\u2022 assembly_right_side_dado_21",
-        "\u2022 assembly_right_side_notch_dogbone_22",
-        "\u2022 assembly_right_side_notch_dogbone_23",
-        "\u2022 assembly_right_side_notch_dogbone_24",
-        "\u2022 assembly_right_side_notch_dogbone_25",
-        "\u2022 assembly_right_side_notch_dogbone_26",
-        "\u2022 assembly_right_side_notch_dogbone_27",
-        "\u2022 assembly_right_side_notch_dogbone_28",
-        "\u2022 assembly_right_side_notch_dogbone_29",
-        "\u2022 assembly_right_side_notch_dogbone_30",
-        "\u2022 assembly_right_side_notch_dogbone_31",
-        "\u2022 assembly_right_side_notch_dogbone_32",
-        "\u2022 assembly_right_side_notch_dogbone_33",
-        "\u2022 assembly_right_side_notch_dogbone_34",
-        "\u2022 assembly_right_side_notch_dogbone_35",
-        "\u2022 assembly_right_side_notch_dogbone_36",
-        "\u2022 assembly_right_side_notch_dogbone_37",
-        "\u2022 assembly_right_side_notch_dogbone_38",
-        "\u2022 assembly_right_side_notch_dogbone_39"
+        "Features: 1 profile"
       ]
     },
     "circles": {
@@ -901,171 +249,15 @@
       "radii_mm": []
     },
     "rects": {
-      "count": 44,
+      "count": 5,
       "dimensions": [
         [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.802
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
-          6.0,
-          11.84
-        ],
-        [
           10.0,
           480.0
         ],
         [
           10.0,
           480.0
-        ],
-        [
-          15.0,
-          8.0
-        ],
-        [
-          288.0,
-          6.2
-        ],
-        [
-          288.0,
-          6.2
         ],
         [
           500.0,
@@ -1084,7 +276,7 @@
   },
   "gcode": {
     "version": "1.0.0",
-    "extraction_time_ms": 0.2134,
+    "extraction_time_ms": 0.3755,
     "summary": {
       "total_lines": 3488,
       "comment_lines": 99,

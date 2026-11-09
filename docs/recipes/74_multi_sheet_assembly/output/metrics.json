@@ -2,6 +2,9 @@
   "total_sheets": 3,
   "sheets": [
     {
+      "source": "example.pml.yml",
+      "sheet_index": 1,
+      "job_name": "74_multi_sheet_assembly_sheet_1",
       "constraint_audit": {},
       "complexity": {
         "total_moves": 40,
@@ -28,9 +31,14 @@
             "lines": 48
           }
         }
-      }
+      },
+      "errors": [],
+      "warnings": []
     },
     {
+      "source": "example.pml.yml",
+      "sheet_index": 2,
+      "job_name": "74_multi_sheet_assembly_sheet_2",
       "constraint_audit": {
         "dogbone": {
           "status": "honored",
@@ -81,9 +89,14 @@
             "lines": 722
           }
         }
-      }
+      },
+      "errors": [],
+      "warnings": []
     },
     {
+      "source": "example.pml.yml",
+      "sheet_index": 3,
+      "job_name": "74_multi_sheet_assembly_sheet_3",
       "constraint_audit": {
         "dogbone": {
           "status": "honored",
@@ -134,16 +147,20 @@
             "lines": 738
           }
         }
-      }
+      },
+      "errors": [],
+      "warnings": []
     }
   ],
+  "errors": [],
+  "warnings": [],
   "build": {
-    "source": "example.pml.yml",
     "kerf_mm": 3.175,
     "theme": "dark",
-    "y_origin": "back"
+    "y_origin": "back",
+    "source": "example.pml.yml"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "3473d5e4"
   }
 }

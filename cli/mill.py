@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import json
+import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
 
-from cam.pipeline import run_pipeline, write_pipeline_outputs
+from cam.pipeline import SheetRun, run_sheets, write_run_outputs
 from cli.project import (
     DEFAULT_KERF_MM,
     DEFAULT_MARGIN_MM,
@@ -204,11 +206,14 @@ def collect_input_files(project: str | None, input_arg: str | None) -> list[Path
     sys.exit(1)
 
 
-def _run_and_write(
-    ast: LayoutAST,
-    output_dir: Path,
-    job_name: str,
+DESIGN_ERROR_EXIT_CODE = 3
+
+
+def _compile(
+    asts: list[LayoutAST],
     source_path: Path,
+    job_stem: str,
+    output_dir: Path,
     *,
     kerf_mm: float,
     theme: str,
@@ -216,8 +221,7 @@ def _run_and_write(
     generate_svg: bool,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
-    pass_prefix: str = "",
-) -> None:
+) -> list[SheetRun]:
     pipeline_kwargs: dict = {
         "kerf_mm": kerf_mm,
         "generate_svg": generate_svg,
@@ -228,40 +232,63 @@ def _run_and_write(
         pipeline_kwargs["endmills"] = endmills
         pipeline_kwargs["feeds"] = feeds
 
-    result = run_pipeline(ast, **pipeline_kwargs)
-    if pass_prefix:
-        result = replace(result, gcode={f"{pass_prefix}{k}": v for k, v in result.gcode.items()})
+    print(f"Compiling: {source_path.name}", file=sys.stderr)
+    runs = run_sheets(asts, source=source_path.name, job_stem=job_stem, **pipeline_kwargs)
+    multi_sheet = len(runs) > 1
 
-    if result.errors:
-        print("\nErrors:", file=sys.stderr)
-        for error in result.errors:
-            print(f"  - {error}", file=sys.stderr)
+    for run in runs:
+        result = run.result
+        if multi_sheet:
+            print(f"  Sheet {run.sheet_index}/{len(runs)}:", file=sys.stderr)
+        sheet = result.ast.sheet
+        print(f"  Sheet: {sheet.width_mm}x{sheet.height_mm}x{sheet.thickness_mm}mm", file=sys.stderr)
+        print(f"  Items: {len(result.ast.items)}", file=sys.stderr)
 
-    if result.warnings:
-        print("\nWarnings:", file=sys.stderr)
-        for warning in result.warnings:
-            print(f"  - {warning}", file=sys.stderr)
+        if result.errors:
+            print("\nErrors:", file=sys.stderr)
+            for error in result.errors:
+                print(f"  - {error}", file=sys.stderr)
 
-    build_params = {
-        "source": source_path.name,
-        "kerf_mm": kerf_mm,
-        "theme": theme,
-        "y_origin": y_origin,
+        if result.warnings:
+            print("\nWarnings:", file=sys.stderr)
+            for warning in result.warnings:
+                print(f"  - {warning}", file=sys.stderr)
+
+        print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
+
+    if multi_sheet:
+        _write_manifest(source_path.name, runs, output_dir)
+
+    return runs
+
+
+def _write_manifest(source_name: str, runs: list[SheetRun], output_dir: Path) -> None:
+    manifest = {
+        "source": source_name,
+        "total_sheets": len(runs),
+        "sheets": [
+            {
+                "sheet_index": run.sheet_index,
+                "job_name": run.job_name,
+                "items": len(run.result.ast.items),
+            }
+            for run in runs
+        ],
     }
+    manifest_path = output_dir / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2))
+    print(f"\nGenerated {len(runs)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
 
-    outputs = write_pipeline_outputs(
-        result,
-        output_dir,
-        job_name,
-        clean_output_dir=False,
-        build_params=build_params,
-    )
+
+def _finish_run(runs: list[SheetRun], output_dir: Path, build_params: dict) -> None:
+    outputs = write_run_outputs(runs, output_dir, clean_output_dir=False, build_params=build_params)
 
     print("  Outputs:", file=sys.stderr)
-    for _, path in outputs.items():
+    for path in outputs.values():
         print(f"    {path.name}", file=sys.stderr)
 
-    print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
+    if any(run.result.errors for run in runs):
+        sys.exit(DESIGN_ERROR_EXIT_CODE)
 
 
 def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
@@ -281,7 +308,16 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
         return None, None
 
 
-def process_file(input_path: Path, output_dir: Path, args) -> None:
+def process_file(
+    input_path: Path,
+    output_dir: Path,
+    args,
+    *,
+    kerf_mm: float,
+    theme: str,
+    endmills: list[Endmill] | None,
+    feeds: list[FeedsEntry] | None,
+) -> list[SheetRun]:
     input_name = input_path.name.lower()
     if input_name.endswith(".json"):
         asts = [LayoutAST.from_json(str(input_path))]
@@ -292,56 +328,20 @@ def process_file(input_path: Path, output_dir: Path, args) -> None:
         asts = resolve_layout_multi(comp_ast)
     else:
         print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
-        return
+        sys.exit(1)
 
-    endmills_list, feeds_list = _load_tool_library(args)
-    kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
-    theme = args.theme if args.theme is not None else "dark"
-    multi_sheet = len(asts) > 1
-
-    for sheet_idx, ast in enumerate(asts):
-        job_name = f"{input_path.stem}_sheet_{sheet_idx + 1}" if multi_sheet else input_path.stem
-        pass_prefix = f"sheet_{sheet_idx + 1}." if multi_sheet else ""
-
-        print(
-            f"Compiling: {input_path.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
-            file=sys.stderr,
-        )
-        print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
-        print(f"  Items: {len(ast.items)}", file=sys.stderr)
-
-        _run_and_write(
-            ast,
-            output_dir,
-            job_name,
-            input_path,
-            kerf_mm=kerf_mm,
-            theme=theme,
-            y_origin=args.y_origin,
-            generate_svg=not args.no_svg,
-            endmills=endmills_list,
-            feeds=feeds_list,
-            pass_prefix=pass_prefix,
-        )
-
-    if multi_sheet:
-        import json
-
-        manifest = {
-            "source": input_path.name,
-            "total_sheets": len(asts),
-            "sheets": [
-                {
-                    "sheet_index": i + 1,
-                    "job_name": f"{input_path.stem}_sheet_{i + 1}",
-                    "items": len(a.items),
-                }
-                for i, a in enumerate(asts)
-            ],
-        }
-        manifest_path = output_dir / "manifest.json"
-        manifest_path.write_text(json.dumps(manifest, indent=2))
-        print(f"\nGenerated {len(asts)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
+    return _compile(
+        asts,
+        input_path,
+        input_path.stem,
+        output_dir,
+        kerf_mm=kerf_mm,
+        theme=theme,
+        y_origin=args.y_origin,
+        generate_svg=not args.no_svg,
+        endmills=endmills,
+        feeds=feeds,
+    )
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
@@ -362,55 +362,22 @@ def process_recipe(recipe_dir: Path, args) -> None:
     comp_ast = replace(comp_ast, source_dir=str(source.parent.resolve()))
     asts = resolve_layout_multi(comp_ast)
 
-    import shutil
-
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    multi_sheet = len(asts) > 1
-    for sheet_idx, ast in enumerate(asts):
-        job_name = f"{recipe_dir.name}_sheet_{sheet_idx + 1}" if multi_sheet else recipe_dir.name
-        pass_prefix = f"sheet_{sheet_idx + 1}." if multi_sheet else ""
-
-        print(
-            f"Recipe: {recipe_dir.name}" + (f" (sheet {sheet_idx + 1}/{len(asts)})" if multi_sheet else ""),
-            file=sys.stderr,
-        )
-        print(f"  Source: {source.name}", file=sys.stderr)
-        print(f"  Sheet: {ast.sheet.width_mm}x{ast.sheet.height_mm}x{ast.sheet.thickness_mm}mm", file=sys.stderr)
-        print(f"  Items: {len(ast.items)}", file=sys.stderr)
-
-        _run_and_write(
-            ast,
-            output_dir,
-            job_name,
-            source,
-            kerf_mm=kerf,
-            theme=theme,
-            y_origin=args.y_origin,
-            generate_svg=not args.no_svg,
-            pass_prefix=pass_prefix,
-        )
-
-    if multi_sheet:
-        import json
-
-        manifest = {
-            "source": source.name,
-            "total_sheets": len(asts),
-            "sheets": [
-                {
-                    "sheet_index": i + 1,
-                    "job_name": f"{recipe_dir.name}_sheet_{i + 1}",
-                    "items": len(a.items),
-                }
-                for i, a in enumerate(asts)
-            ],
-        }
-        manifest_path = output_dir / "manifest.json"
-        manifest_path.write_text(json.dumps(manifest, indent=2))
-        print(f"\nGenerated {len(asts)} sheets, manifest: {manifest_path.name}", file=sys.stderr)
+    print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
+    runs = _compile(
+        asts,
+        source,
+        recipe_dir.name,
+        output_dir,
+        kerf_mm=kerf,
+        theme=theme,
+        y_origin=args.y_origin,
+        generate_svg=not args.no_svg,
+    )
+    _finish_run(runs, output_dir, {"kerf_mm": kerf, "theme": theme, "y_origin": args.y_origin})
 
 
 def main():
@@ -439,7 +406,15 @@ Examples:
 Output files:
   {op}-{tool_diameter}mm.nc   G-code per pass (multi-sheet: sheet_N.{op}-...)
   {basename}.svg              Blueprint drawing
-  metrics.json                Pipeline metrics
+  metrics.json                Pipeline metrics, errors and warnings for the whole run
+                              (multi-sheet: one entry per sheet under "sheets")
+  manifest.json               Sheet list (multi-sheet only)
+
+Exit codes:
+  0  success
+  1  input, parse, or unexpected error
+  2  command-line usage error
+  3  design errors (listed in metrics.json); outputs are still written
         """,
     )
 
@@ -562,13 +537,27 @@ Output files:
             if dangerous:
                 print(f"Error: Refusing to clean dangerous directory: {output_dir}", file=sys.stderr)
                 sys.exit(1)
-            import shutil
-
             shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        endmills_list, feeds_list = _load_tool_library(args)
+        kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
+        theme = args.theme if args.theme is not None else "dark"
+
+        runs: list[SheetRun] = []
         for input_path in input_files:
-            process_file(input_path, output_dir, args)
+            runs.extend(
+                process_file(
+                    input_path,
+                    output_dir,
+                    args,
+                    kerf_mm=kerf_mm,
+                    theme=theme,
+                    endmills=endmills_list,
+                    feeds=feeds_list,
+                )
+            )
+        _finish_run(runs, output_dir, {"kerf_mm": kerf_mm, "theme": theme, "y_origin": args.y_origin})
 
     except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)

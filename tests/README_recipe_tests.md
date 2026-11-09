@@ -107,9 +107,30 @@ docs/recipes/14_corner_cleanup_multi_tool/
         "lines": 1320
       }
     }
-  }
+  },
+  "errors": [],             // Design errors; non-empty makes cli.mill exit 3
+  "warnings": [],
+  "build": {...},           // kerf_mm, theme, y_origin, source
+  "provenance": {...}
 }
 ```
+
+`timing` is stripped before the file is written, so the committed file is deterministic.
+
+A run with more than one sheet (a multi-sheet layout, or several input files) writes one `metrics.json` with a `sheets` list. Each entry holds that sheet's metrics, `errors` and `warnings`, plus `source`, `sheet_index` and `job_name`. The top-level `errors` and `warnings` collect every sheet's messages, prefixed `sheet N: ` (or `<source> sheet N: ` when the run has several input files):
+
+```json
+{
+  "total_sheets": 3,
+  "sheets": [{"source": "example.pml.yml", "sheet_index": 1, "job_name": "74_multi_sheet_assembly_sheet_1", "...": "...", "errors": [], "warnings": []}],
+  "errors": [],
+  "warnings": [],
+  "build": {...},
+  "provenance": {...}
+}
+```
+
+`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg` and `metrics.json`; `cli.mill` and `tests.test_recipes --regen_recipes` both call it.
 
 ## Workflow Examples
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -54,6 +55,14 @@ class PipelineResult:
     errors: list[str]
     warnings: list[str]
     svg_back: str | None = None
+
+
+@dataclass(frozen=True)
+class SheetRun:
+    source: str
+    sheet_index: int
+    job_name: str
+    result: PipelineResult
 
 
 @dataclass(frozen=True)
@@ -552,10 +561,94 @@ def _strip_non_deterministic(value: Any) -> Any:
     return value
 
 
-def write_pipeline_outputs(
-    result: PipelineResult,
+def run_sheets(
+    asts: Sequence[LayoutAST],
+    *,
+    source: str,
+    job_stem: str,
+    **pipeline_kwargs: Any,
+) -> list[SheetRun]:
+    multi_sheet = len(asts) > 1
+    runs: list[SheetRun] = []
+    for sheet_index, ast in enumerate(asts, start=1):
+        result = run_pipeline(ast, **pipeline_kwargs)
+        job_name = job_stem
+        if multi_sheet:
+            prefix = f"sheet_{sheet_index}."
+            result = replace(result, gcode={f"{prefix}{name}": gcode for name, gcode in result.gcode.items()})
+            job_name = f"{job_stem}_sheet_{sheet_index}"
+        runs.append(SheetRun(source=source, sheet_index=sheet_index, job_name=job_name, result=result))
+    return runs
+
+
+def _sheet_label(run: SheetRun, multi_source: bool) -> str:
+    return f"{run.source} sheet {run.sheet_index}" if multi_source else f"sheet {run.sheet_index}"
+
+
+def build_run_metrics(runs: Sequence[SheetRun], build_params: dict[str, Any] | None = None) -> dict[str, Any]:
+    sources = list(dict.fromkeys(run.source for run in runs))
+    build = dict(build_params or {})
+    if len(sources) == 1:
+        build["source"] = sources[0]
+    else:
+        build["sources"] = sources
+
+    metrics: dict[str, Any]
+    if len(runs) == 1:
+        result = runs[0].result
+        metrics = {
+            **_strip_non_deterministic(result.metrics),
+            "errors": list(result.errors),
+            "warnings": list(result.warnings),
+        }
+    else:
+        multi_source = len(sources) > 1
+        metrics = {
+            "total_sheets": len(runs),
+            "sheets": [
+                {
+                    "source": run.source,
+                    "sheet_index": run.sheet_index,
+                    "job_name": run.job_name,
+                    **_strip_non_deterministic(run.result.metrics),
+                    "errors": list(run.result.errors),
+                    "warnings": list(run.result.warnings),
+                }
+                for run in runs
+            ],
+            "errors": [f"{_sheet_label(run, multi_source)}: {e}" for run in runs for e in run.result.errors],
+            "warnings": [f"{_sheet_label(run, multi_source)}: {w}" for run in runs for w in run.result.warnings],
+        }
+    metrics["build"] = build
+    metrics["provenance"] = build_provenance()
+    return metrics
+
+
+def _write_sheet_artifacts(run: SheetRun, output_dir: Path) -> dict[str, Path]:
+    outputs: dict[str, Path] = {}
+    result = run.result
+
+    for pass_name, gcode in result.gcode.items():
+        gcode_path = output_dir / f"{pass_name}.nc"
+        gcode_path.write_text(gcode)
+        outputs[f"gcode_{pass_name}"] = gcode_path
+
+    if result.svg is not None:
+        svg_path = output_dir / f"{run.job_name}.svg"
+        svg_path.write_text(result.svg, encoding="utf-8")
+        outputs[f"svg_{run.job_name}"] = svg_path
+
+    if result.svg_back is not None:
+        svg_back_path = output_dir / f"{run.job_name}{BACK_SVG_SUFFIX}"
+        svg_back_path.write_text(result.svg_back, encoding="utf-8")
+        outputs[f"svg_back_{run.job_name}"] = svg_back_path
+
+    return outputs
+
+
+def write_run_outputs(
+    runs: Sequence[SheetRun],
     output_dir: Path,
-    job_name: str,
     *,
     clean_output_dir: bool = True,
     build_params: dict[str, Any] | None = None,
@@ -565,29 +658,11 @@ def write_pipeline_outputs(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     outputs: dict[str, Path] = {}
-
-    for pass_name, gcode in result.gcode.items():
-        gcode_path = output_dir / f"{pass_name}.nc"
-        gcode_path.write_text(gcode)
-        outputs[f"gcode_{pass_name}"] = gcode_path
-
-    if result.svg is not None:
-        svg_path = output_dir / f"{job_name}.svg"
-        svg_path.write_text(result.svg, encoding="utf-8")
-        outputs["svg"] = svg_path
-
-    if result.svg_back is not None:
-        svg_back_path = output_dir / f"{job_name}{BACK_SVG_SUFFIX}"
-        svg_back_path.write_text(result.svg_back, encoding="utf-8")
-        outputs["svg_back"] = svg_back_path
-
-    persisted_metrics = _strip_non_deterministic(result.metrics)
-    if build_params:
-        persisted_metrics["build"] = build_params
-    persisted_metrics["provenance"] = build_provenance()
+    for run in runs:
+        outputs.update(_write_sheet_artifacts(run, output_dir))
 
     metrics_path = output_dir / "metrics.json"
-    metrics_path.write_text(json.dumps(persisted_metrics, indent=2))
+    metrics_path.write_text(json.dumps(build_run_metrics(runs, build_params), indent=2))
     outputs["metrics"] = metrics_path
 
     return outputs

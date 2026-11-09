@@ -158,26 +158,64 @@ def test_cli_missing_input_fails():
     assert "not found" in result.stderr.lower() or "error" in result.stderr.lower()
 
 
-def test_cli_invalid_format_fails():
+def test_cli_invalid_format_fails(tmp_path: Path):
+    invalid_file = tmp_path / "layout.xyz"
+    invalid_file.write_text("invalid content")
 
-    with tempfile.NamedTemporaryFile(suffix=".xyz", mode="w", delete=False) as f:
-        f.write("invalid content")
-        invalid_file = f.name
+    result = _run_cli(
+        ["-m", "cli.mill", "--input", str(invalid_file), "--out", str(tmp_path / "out")],
+        check=False,
+    )
 
-    try:
-        result = _run_cli(
-            [
-                "-m",
-                "cli.mill",
-                "--input",
-                invalid_file,
-                "--out",
-                "/tmp",
-            ],
-            check=False,
-        )
+    assert result.returncode == 1, result.stderr
+    assert "unsupported input format" in result.stderr.lower()
 
-        assert result.returncode != 0, "CLI should fail with unsupported format"
-        assert "unsupported" in result.stderr.lower() or "error" in result.stderr.lower()
-    finally:
-        Path(invalid_file).unlink()
+
+OUT_OF_BOUNDS_PML = """Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+  margin: 10mm
+  material: mdf
+children:
+- Rect:
+    id: part
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 52mm
+      y: 100mm
+      width: 100mm
+      height: 50mm
+"""
+
+
+def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
+    source = tmp_path / "part.pml.yml"
+    source.write_text(OUT_OF_BOUNDS_PML)
+    out_dir = tmp_path / "out"
+
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)], check=False)
+
+    assert result.returncode == 3, result.stderr
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    assert any("margin zone" in error for error in metrics["errors"]), metrics["errors"]
+    assert (out_dir / "part.pml.svg").exists()
+
+
+def test_cli_multi_file_run_writes_one_metrics_file(tmp_path: Path):
+    input_dir = tmp_path / "project"
+    input_dir.mkdir()
+    (input_dir / "a.pml.yml").write_text(PML_FILE.read_text())
+    (input_dir / "b.pml.yml").write_text(PML_FILE.read_text())
+    out_dir = tmp_path / "out"
+
+    _run_cli(["-m", "cli.mill", "--input", str(input_dir), "--out", str(out_dir), "--no-svg"])
+
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    assert metrics["total_sheets"] == 2
+    assert [sheet["source"] for sheet in metrics["sheets"]] == ["a.pml.yml", "b.pml.yml"]
+    assert metrics["build"]["sources"] == ["a.pml.yml", "b.pml.yml"]
+    assert metrics["errors"] == []

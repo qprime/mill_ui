@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
-from types import SimpleNamespace
-from typing import Any, cast
 
 import pytest
 
-from cam.pipeline import PipelineResult, run_pipeline, write_pipeline_outputs
+from cam.pipeline import SheetRun, run_sheets, write_run_outputs
 from pml import parse_pml
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
@@ -26,7 +25,14 @@ def discover_recipe_pml_files() -> list[Path]:
     return sorted(pml_files)
 
 
-def generate_outputs_from_pml(pml_path: Path) -> PipelineResult:
+RECIPE_BUILD_PARAMS = {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+}
+
+
+def generate_outputs_from_pml(pml_path: Path) -> list[SheetRun]:
     with open(pml_path) as f:
         pml_source = f.read()
 
@@ -37,54 +43,35 @@ def generate_outputs_from_pml(pml_path: Path) -> PipelineResult:
     except ParseError:
         asts = [parse_pml(pml_source)]
 
-    combined_gcode: dict[str, str] = {}
-    multi_sheet = len(asts) > 1
-    sheet_metrics: list[dict[str, Any]] = []
-    last_result: PipelineResult | None = None
+    return run_sheets(
+        asts,
+        source=pml_path.name,
+        job_stem=pml_path.parent.name,
+        kerf_mm=RECIPE_BUILD_PARAMS["kerf_mm"],
+        min_channel_width_mm=6.0,
+        generate_svg=True,
+        svg_theme=RECIPE_BUILD_PARAMS["theme"],
+    )
 
-    for sheet_idx, ast in enumerate(asts):
-        result = run_pipeline(
-            ast,
-            kerf_mm=3.175,
-            min_channel_width_mm=6.0,
-            generate_svg=True,
-            svg_theme="dark",
-        )
 
-        if multi_sheet:
-            prefix = f"sheet_{sheet_idx + 1}."
-            for pass_name, gcode in result.gcode.items():
-                combined_gcode[f"{prefix}{pass_name}"] = gcode
-        else:
-            combined_gcode = dict(result.gcode)
+def combined_gcode(runs: Sequence[SheetRun]) -> dict[str, str]:
+    return {name: gcode for run in runs for name, gcode in run.result.gcode.items()}
 
-        sheet_metrics.append(result.metrics)
-        last_result = result
 
-    assert last_result is not None
-
-    if multi_sheet:
-        metrics: dict[str, Any] = {
-            "total_sheets": len(asts),
-            "sheets": sheet_metrics,
-            "timing": {"total_ms": sum(m["timing"]["total_ms"] for m in sheet_metrics)},
-        }
-    else:
-        metrics = sheet_metrics[0]
-
-    return replace(last_result, gcode=combined_gcode, metrics=metrics)
+def write_recipe_outputs(pml_path: Path, runs: Sequence[SheetRun]) -> None:
+    write_run_outputs(runs, pml_path.parent / "output", build_params=RECIPE_BUILD_PARAMS)
 
 
 def compare_outputs(
     output_dir: Path,
-    result: PipelineResult,
+    gcode: Mapping[str, str],
 ) -> tuple[bool, list[str]]:
     if not output_dir.exists():
         return False, [f"Output directory does not exist: {output_dir}"]
 
     diffs = []
 
-    for pass_name, generated_gcode in result.gcode.items():
+    for pass_name, generated_gcode in gcode.items():
         expected_path = output_dir / f"{pass_name}.nc"
         if not expected_path.exists():
             diffs.append(f"Missing expected file: {expected_path}")
@@ -103,7 +90,7 @@ def compare_outputs(
                 f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
             )
 
-    generated_files = {f"{pass_name}.nc" for pass_name in result.gcode}
+    generated_files = {f"{pass_name}.nc" for pass_name in gcode}
     ungenerated = sorted(f.name for f in output_dir.glob("*.nc") if f.name not in generated_files)
     if ungenerated:
         diffs.append(f"Expected G-code no longer generated: {ungenerated}")
@@ -117,30 +104,20 @@ def compare_outputs(
     return len(diffs) == 0, diffs
 
 
-def _test_recipe_output_impl(pml_path: Path, regenerate: bool = False):
-    result = generate_outputs_from_pml(pml_path)
+def _test_recipe_output_impl(pml_path: Path) -> None:
+    runs = generate_outputs_from_pml(pml_path)
+    all_match, diffs = compare_outputs(pml_path.parent / "output", combined_gcode(runs))
 
-    output_dir = pml_path.parent / "output"
-
-    if regenerate:
-        write_pipeline_outputs(result, output_dir, pml_path.parent.name)
-        print(f"\n  Regenerated recipe outputs for {pml_path.name}")
-        print(f"  Output: {output_dir}")
-        print(f"  Files: {len(result.gcode)} G-code + SVG + metrics.json")
-        print(f"  Total time: {result.metrics['timing']['total_ms']:.1f}ms")
-    else:
-        all_match, diffs = compare_outputs(output_dir, result)
-
-        if not all_match:
-            diff_summary = "\n  ".join(diffs)
-            raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
+    if not all_match:
+        diff_summary = "\n  ".join(diffs)
+        raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
 
 
 def validate_recipes(pml_files: list[Path]) -> list[str]:
     failures = []
     for pml_path in pml_files:
         try:
-            _test_recipe_output_impl(pml_path, regenerate=False)
+            _test_recipe_output_impl(pml_path)
         except Exception as e:
             failures.append(f"{pml_path.name}: {e}")
 
@@ -150,9 +127,7 @@ def validate_recipes(pml_files: list[Path]) -> list[str]:
 def test_compare_outputs_flags_expected_gcode_no_longer_generated(tmp_path: Path):
     (tmp_path / "pocket-3.17mm.nc").write_text("G0\n")
     (tmp_path / "profile-3.17mm.nc").write_text("G1\n")
-    result = cast(PipelineResult, SimpleNamespace(gcode={"profile-3.17mm": "G1\n"}))
-
-    matches, diffs = compare_outputs(tmp_path, result)
+    matches, diffs = compare_outputs(tmp_path, {"profile-3.17mm": "G1\n"})
 
     assert not matches
     assert diffs == ["Expected G-code no longer generated: ['pocket-3.17mm.nc']"]
@@ -189,24 +164,13 @@ if __name__ == "__main__":
         for pml_path in pml_files:
             print(f"Processing: {pml_path.relative_to(Path.cwd())}")
             try:
-                result = generate_outputs_from_pml(pml_path)
-                output_dir = pml_path.parent / "output"
+                runs = generate_outputs_from_pml(pml_path)
+                write_recipe_outputs(pml_path, runs)
 
-                write_pipeline_outputs(
-                    result,
-                    output_dir,
-                    pml_path.parent.name,
-                    build_params={
-                        "source": pml_path.name,
-                        "kerf_mm": 3.175,
-                        "theme": "dark",
-                        "y_origin": "back",
-                    },
-                )
-
-                print(f"  Generated {len(result.gcode)} G-code pass(es) + SVG")
-                print(f"  Total time: {result.metrics['timing']['total_ms']:.1f}ms")
-                print(f"  Output: {output_dir}\n")
+                total_ms = sum(run.result.metrics["timing"]["total_ms"] for run in runs)
+                print(f"  Generated {len(combined_gcode(runs))} G-code pass(es) + SVG")
+                print(f"  Total time: {total_ms:.1f}ms")
+                print(f"  Output: {pml_path.parent / 'output'}\n")
             except Exception as e:
                 print(f"  FAILED: {e}\n")
                 import traceback

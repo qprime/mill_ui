@@ -44,13 +44,24 @@
       }
     }
   },
+  "errors": [
+    "Overlapping regions detected: pocket_panel:recess and hole_hole:1",
+    "Overlapping regions detected: pocket_panel:recess and hole_hole:2",
+    "Overlapping regions detected: pocket_panel:recess and hole_hole:3",
+    "Overlapping regions detected: pocket_panel:recess and hole_hole:4",
+    "Cutting edge extends 3.17mm into left margin zone",
+    "Cutting edge extends 3.17mm into bottom margin zone",
+    "Cutting edge extends 3.18mm into right margin zone",
+    "Cutting edge extends 3.18mm into top margin zone"
+  ],
+  "warnings": [],
   "build": {
-    "source": "example.pml.yml",
     "kerf_mm": 3.175,
     "theme": "dark",
-    "y_origin": "back"
+    "y_origin": "back",
+    "source": "example.pml.yml"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "3473d5e4"
   }
 }

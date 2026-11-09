@@ -59,13 +59,15 @@
       }
     }
   },
+  "errors": [],
+  "warnings": [],
   "build": {
-    "source": "example.pml.yml",
     "kerf_mm": 3.175,
     "theme": "dark",
-    "y_origin": "back"
+    "y_origin": "back",
+    "source": "example.pml.yml"
   },
   "provenance": {
-    "mill_ui": "48a8cb97"
+    "mill_ui": "3473d5e4"
   }
 }

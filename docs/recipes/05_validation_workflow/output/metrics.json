@@ -44,13 +44,18 @@
       }
     }
   },
+  "errors": [
+    "Overlapping regions detected: pocket_recess and hole_mount:1",
+    "Overlapping regions detected: pocket_recess and hole_mount:2"
+  ],
+  "warnings": [],
   "build": {
-    "source": "example.pml.yml",
     "kerf_mm": 3.175,
     "theme": "dark",
-    "y_origin": "back"
+    "y_origin": "back",
+    "source": "example.pml.yml"
   },
   "provenance": {
-    "mill_ui": "933e7567"
+    "mill_ui": "3473d5e4"
   }
 }

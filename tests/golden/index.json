@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "created_at": "2026-01-17T01:38:42.537428+00:00",
-  "updated_at": "2026-09-28T20:33:09.692379+00:00",
+  "updated_at": "2026-11-09T19:20:32.811582+00:00",
   "entries": {
     "01_simple_profile": {
       "recipe_name": "01_simple_profile",
@@ -519,7 +519,7 @@
       "recipe_name": "74_multi_sheet_assembly",
       "source_file": "docs/recipes/74_multi_sheet_assembly/example.pml.yml",
       "created_at": "2026-03-14T20:20:30.534364+00:00",
-      "updated_at": "2026-04-04T15:44:30.662812+00:00",
+      "updated_at": "2026-11-09T19:20:32.811578+00:00",
       "metrics_file": "metrics.json",
       "notes": ""
     },

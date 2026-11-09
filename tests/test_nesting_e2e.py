@@ -49,7 +49,7 @@ def test_simple_rect_through_cam():
     intents = ast_to_removal_intents(ast)
     assert len(intents) >= 1
 
-    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35)
     assert len(planner_input.profiles) + len(planner_input.pockets) + len(planner_input.holes) >= 1
 
     stock = Stock(width=500, height=500, thickness=19)
@@ -101,7 +101,7 @@ def test_multiple_parts_through_cam():
 
     for ast in asts:
         intents = ast_to_removal_intents(ast)
-        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -164,7 +164,7 @@ def test_template_parts_through_cam():
     assert "pocket" in feature_types
 
     intents = ast_to_removal_intents(ast)
-    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35)
 
     stock = Stock(
         width=ast.sheet.width_mm,
@@ -215,7 +215,7 @@ def test_multi_sheet_through_cam():
     sheet_gcodes = []
     for _, ast in enumerate(asts):
         intents = ast_to_removal_intents(ast)
-        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35)
 
         stock = Stock(
             width=ast.sheet.width_mm,
@@ -262,7 +262,7 @@ def test_gcode_basic_invariants():
 
     ast = result["output"][0]
     intents = ast_to_removal_intents(ast)
-    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35, min_channel_width_mm=12.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=6.35)
 
     stock = Stock(width=300, height=300, thickness=19)
     machine = Machine(name="default_grbl")

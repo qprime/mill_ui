@@ -135,7 +135,6 @@ def _plan_and_emit_face(
     *,
     gcode_prefix: str,
     kerf_mm: float,
-    min_channel_width_mm: float,
     tools: list[Any],
     machine: Machine,
     stock: Stock,
@@ -150,7 +149,6 @@ def _plan_and_emit_face(
     planner_input = removal_intents_to_planner_input(
         intents,
         kerf_width_mm=kerf_mm,
-        min_channel_width_mm=min_channel_width_mm,
         warnings=warnings,
     )
     planner_input = _attach_surface_cooling(planner_input, ast)
@@ -251,7 +249,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     ast: LayoutAST,
     *,
     kerf_mm: float = 6.35,
-    min_channel_width_mm: float = 12.0,
     tool_db: list[dict[str, Any]] | None = None,
     generate_svg: bool = True,
     svg_theme: str = "dark",
@@ -441,7 +438,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             face_intents,
             gcode_prefix=prefix,
             kerf_mm=kerf_mm,
-            min_channel_width_mm=min_channel_width_mm,
             tools=tools,
             machine=machine,
             stock=stock,
@@ -650,9 +646,7 @@ def _sheet_machining_summary(result: PipelineResult) -> dict[str, Any]:
             f"{name}.nc",
             gcode_file.passes,
             profile_intents=[
-                intent
-                for intent in result.intents
-                if intent.face == gcode_file.face and intent.hint_type == "profile"
+                intent for intent in result.intents if intent.face == gcode_file.face and intent.hint_type == "profile"
             ],
             cut_through_mm=PROFILE_CUT_THROUGH_MM,
         )

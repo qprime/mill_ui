@@ -48,7 +48,6 @@ def generate_outputs_from_pml(pml_path: Path) -> list[SheetRun]:
         source=pml_path.name,
         job_stem=pml_path.parent.name,
         kerf_mm=RECIPE_BUILD_PARAMS["kerf_mm"],
-        min_channel_width_mm=6.0,
         generate_svg=True,
         svg_theme=RECIPE_BUILD_PARAMS["theme"],
     )

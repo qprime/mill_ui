@@ -315,7 +315,6 @@ class EdgeFeatureInput:
 class PlannerInput:
     units: str = "mm"
     kerf_width_mm: float = 3.175
-    min_channel_width_mm: float = 6.0
     profiles: tuple[FeatureInput, ...] = field(default_factory=tuple)
     pockets: tuple[FeatureInput, ...] = field(default_factory=tuple)
     holes: tuple[FeatureInput, ...] = field(default_factory=tuple)
@@ -330,7 +329,6 @@ class PlannerInput:
         result: dict[str, Any] = {
             "units": self.units,
             "kerf_width_mm": self.kerf_width_mm,
-            "min_channel_width_mm": self.min_channel_width_mm,
             "profiles": [p.to_dict() for p in self.profiles],
             "pockets": [p.to_dict() for p in self.pockets],
             "holes": [h.to_dict() for h in self.holes],
@@ -533,7 +531,6 @@ class PlannerInput:
         return cls(
             units=str(hints.get("units", "mm")),
             kerf_width_mm=float(hints.get("kerf_width_mm", 3.175)),
-            min_channel_width_mm=float(hints.get("min_channel_width_mm", 6.0)),
             profiles=profiles,
             pockets=pockets,
             holes=holes,

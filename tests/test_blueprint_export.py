@@ -362,7 +362,7 @@ def _two_face_ast() -> LayoutAST:
 def test_back_svg_generated_when_back_items_present():
     from cam.pipeline import run_pipeline
 
-    result = run_pipeline(_two_face_ast(), kerf_mm=3.175, min_channel_width_mm=6.0)
+    result = run_pipeline(_two_face_ast(), kerf_mm=3.175)
 
     assert result.svg_back is not None
     assert result.svg is not None
@@ -376,7 +376,7 @@ def test_back_svg_absent_for_single_face_job():
     ast = _two_face_ast()
     single_face = LayoutAST(sheet=ast.sheet, items=(ast.items[0],))
 
-    result = run_pipeline(single_face, kerf_mm=3.175, min_channel_width_mm=6.0)
+    result = run_pipeline(single_face, kerf_mm=3.175)
 
     assert result.svg_back is None
 
@@ -385,7 +385,7 @@ def test_back_view_renders_mirrored_geometry():
     from cam.pipeline import run_pipeline
 
     ast = _two_face_ast()
-    result = run_pipeline(ast, kerf_mm=3.175, min_channel_width_mm=6.0)
+    result = run_pipeline(ast, kerf_mm=3.175)
 
     authored_view = render_blueprint_svg(LayoutAST(sheet=ast.sheet, items=(ast.items[1],)))
     authored_cy = [float(m) for m in re.findall(r'<circle[^>]*\scy="([-\d.]+)"', authored_view)]
@@ -399,7 +399,7 @@ def test_back_view_renders_mirrored_geometry():
 def test_front_view_omits_back_items():
     from cam.pipeline import run_pipeline
 
-    result = run_pipeline(_two_face_ast(), kerf_mm=3.175, min_channel_width_mm=6.0)
+    result = run_pipeline(_two_face_ast(), kerf_mm=3.175)
 
     assert result.svg is not None
     assert "hinge_cup" not in result.svg

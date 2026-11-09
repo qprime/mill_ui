@@ -30,7 +30,7 @@ def test_corner_cleanup_basic():
     assert len(intents) == 1
     assert intents[0].corner_cleanup_tool_diameter_mm == 3.175
 
-    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175)
     assert len(planner_input.corner_cleanups) == 1
 
     corner_cleanup = planner_input.corner_cleanups[0]
@@ -61,7 +61,7 @@ def test_corner_cleanup_planner():
     )
 
     intents = ast_to_removal_intents(ast)
-    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175, min_channel_width_mm=6.0)
+    planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=3.175)
 
     tool_db = [
         {"name": "1/8_endmill", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},

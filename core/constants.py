@@ -156,7 +156,6 @@ class DepthMode:
 class HintCollectionKeys:
     UNITS = "units"
     KERF_WIDTH_MM = "kerf_width_mm"
-    MIN_CHANNEL_WIDTH_MM = "min_channel_width_mm"
     PROFILES = "profiles"
     POCKETS = "pockets"
     HOLES = "holes"

@@ -419,7 +419,6 @@ class TestDogboneRoundtrip:
         planner_input = PlannerInput(
             units="mm",
             kerf_width_mm=3.175,
-            min_channel_width_mm=6.0,
             dogbones=(db_input,),
         )
 

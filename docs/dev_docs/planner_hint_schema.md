@@ -6,7 +6,6 @@ Planner hints MUST follow this top-level schema:
 {
     "units": "mm",
     "kerf_width_mm": float,
-    "min_channel_width_mm": float,
     "profiles": [<profile hint dict>],
     "pockets": [<pocket hint dict>],
     "holes": [<hole hint dict>],

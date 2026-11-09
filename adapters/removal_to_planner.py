@@ -243,7 +243,6 @@ def _intent_to_edge_feature_input(intent: RemovalIntent) -> EdgeFeatureInput:
 def removal_intents_to_planner_input(
     intents: list[RemovalIntent],
     kerf_width_mm: float = 3.175,
-    min_channel_width_mm: float = 6.0,
     warnings: list[str] | None = None,
 ) -> PlannerInput:
     buckets: dict[str, list[FeatureInput]] = {
@@ -318,7 +317,6 @@ def removal_intents_to_planner_input(
     return PlannerInput(
         units="mm",
         kerf_width_mm=float(kerf_width_mm),
-        min_channel_width_mm=float(min_channel_width_mm),
         profiles=tuple(buckets["profiles"]),
         pockets=tuple(buckets["pockets"]),
         holes=tuple(buckets["holes"]),
@@ -334,11 +332,9 @@ def removal_intents_to_planner_input(
 def removal_intents_to_hints(
     intents: list[RemovalIntent],
     kerf_width_mm: float = 3.175,
-    min_channel_width_mm: float = 6.0,
 ) -> dict[str, Any]:
     planner_input = removal_intents_to_planner_input(
         intents,
         kerf_width_mm=kerf_width_mm,
-        min_channel_width_mm=min_channel_width_mm,
     )
     return planner_input.to_hints_dict()

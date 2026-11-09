@@ -134,7 +134,7 @@ def main():
         ir_time = time.perf_counter() - ir_start
 
         hints_start = time.perf_counter()
-        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=job.kerf_mm, min_channel_width_mm=12.0)
+        planner_input = removal_intents_to_planner_input(intents, kerf_width_mm=job.kerf_mm)
         hints_time = time.perf_counter() - hints_start
 
         stock = Stock(

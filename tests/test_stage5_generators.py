@@ -806,11 +806,19 @@ def test_fluting_zero_ramp():
         assert item.feature.ramp_mm is None
 
 
-def test_fluting_angle_rotation():
+@pytest.mark.parametrize("angle_deg", [0.0, 45.0, 90.0])
+def test_fluting_groove_direction(angle_deg):
     domain = Domain.from_rectangle(200, 200, center=(100, 100))
-    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, angle_deg=45.0)
+    params = FlutingParams(spacing_mm=20.0, depth_mm=3.0, angle_deg=angle_deg)
     items = fluting_generator(domain, params)
     assert len(items) > 0
+    expected_x = math.cos(math.radians(angle_deg))
+    expected_y = math.sin(math.radians(angle_deg))
+    for item in items:
+        assert item.geometry is not None
+        (sx, sy), (ex, ey) = item.geometry.data["start"], item.geometry.data["end"]
+        length = math.hypot(ex - sx, ey - sy)
+        assert abs((ex - sx) / length * expected_x + (ey - sy) / length * expected_y) == pytest.approx(1.0)
 
 
 def test_fluting_inset():

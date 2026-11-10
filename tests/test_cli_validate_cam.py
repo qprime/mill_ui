@@ -1,17 +1,69 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
+from cli.mill import write_recipe_outputs
 from cli.validate_cam import EXIT_FAIL, EXIT_PASS, EXIT_WARN, main
 
-RECIPE_DIR = Path(__file__).parent.parent / "docs" / "recipes"
+FRAME_PML = """Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: frame
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 100mm
+      y: 75mm
+      width: 160mm
+      height: 110mm
+- Rect:
+    id: frame_rebate
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 100mm
+      y: 75mm
+      width: 80mm
+      height: 50mm
+- Circle:
+    id: frame_hole
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 8mm
+    at:
+      x: 35mm
+      y: 35mm
+"""
+
+
+def _make_recipe(tmp_path: Path) -> Path:
+    recipe_dir = tmp_path / "frame"
+    recipe_dir.mkdir()
+    source = recipe_dir / "example.pml.yml"
+    source.write_text(FRAME_PML)
+    write_recipe_outputs(source, recipe_dir.name, recipe_dir / "output")
+    return recipe_dir
+
+
+def _make_svg(tmp_path: Path) -> Path:
+    return _make_recipe(tmp_path) / "output" / "frame.svg"
+
+
+def _write_baseline(tmp_path: Path, metrics: dict) -> Path:
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(json.dumps(metrics))
+    return baseline_path
 
 
 def run_cli(*args: str) -> tuple[int, str, str]:
@@ -55,14 +107,9 @@ def test_cli_missing_file_fails():
     assert "not found" in stderr.lower() or "error" in stderr.lower()
 
 
-def test_cli_recipe_simple_profile():
-    """CLI validates recipe 01_simple_profile."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-
-    if not recipe_dir.exists():
-        pytest.skip("recipe not found")
-
-    exit_code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--quiet")
+def test_cli_recipe(tmp_path: Path):
+    """CLI validates a recipe directory."""
+    exit_code, stdout, stderr = run_cli("--recipe", str(_make_recipe(tmp_path)), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN), f"Unexpected exit code {exit_code}: {stderr}"
 
     data = json.loads(stdout)
@@ -72,58 +119,30 @@ def test_cli_recipe_simple_profile():
     assert result["verdict"] in ("pass", "warn")
 
 
-def test_cli_recipe_with_summary():
+def test_cli_recipe_with_summary(tmp_path: Path):
     """CLI --summary outputs human-readable text."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-
-    if not recipe_dir.exists():
-        pytest.skip("recipe not found")
-
-    exit_code, stdout, _stderr = run_cli("--recipe", str(recipe_dir), "--summary")
+    exit_code, stdout, _stderr = run_cli("--recipe", str(_make_recipe(tmp_path)), "--summary")
     assert exit_code in (EXIT_PASS, EXIT_WARN)
 
     assert "Validation Result:" in stdout
     assert "Metrics extracted:" in stdout or "Invariants:" in stdout
 
 
-def test_cli_recipe_with_output_file():
+def test_cli_recipe_with_output_file(tmp_path: Path):
     """CLI --output writes to file."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
+    output_path = tmp_path / "result.json"
 
-    if not recipe_dir.exists():
-        pytest.skip("recipe not found")
+    exit_code, _stdout, _stderr = run_cli("--recipe", str(_make_recipe(tmp_path)), "--output", str(output_path))
+    assert exit_code in (EXIT_PASS, EXIT_WARN)
 
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
-        output_path = f.name
-
-    try:
-        exit_code, _stdout, _stderr = run_cli(
-            "--recipe",
-            str(recipe_dir),
-            "--output",
-            output_path,
-        )
-        assert exit_code in (EXIT_PASS, EXIT_WARN)
-
-        assert os.path.exists(output_path)
-        with open(output_path) as f:
-            data = json.load(f)
-        result = data.get("validation_result", data)
-        assert "verdict" in result
-    finally:
-        if os.path.exists(output_path):
-            os.unlink(output_path)
+    data = json.loads(output_path.read_text())
+    result = data.get("validation_result", data)
+    assert "verdict" in result
 
 
-def test_cli_svg_only():
+def test_cli_svg_only(tmp_path: Path):
     """CLI validates single SVG file."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
-    exit_code, stdout, _stderr = run_cli("--svg", str(svg_path), "--quiet")
+    exit_code, stdout, _stderr = run_cli("--svg", str(_make_svg(tmp_path)), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN)
 
     data = json.loads(stdout)
@@ -131,14 +150,9 @@ def test_cli_svg_only():
     assert "svg" in result["metrics"]
 
 
-def test_cli_gcode_only():
+def test_cli_gcode_only(tmp_path: Path):
     """CLI validates single G-code file."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    output_dir = recipe_dir / "output"
-
-    nc_files = [f for f in output_dir.glob("*.nc") if not f.name.startswith("._")] if output_dir.exists() else []
-    if not nc_files:
-        pytest.skip("G-code not found")
+    nc_files = sorted((_make_recipe(tmp_path) / "output").glob("*.nc"))
 
     exit_code, stdout, stderr = run_cli("--gcode", str(nc_files[0]), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN), f"Unexpected exit {exit_code}: {stderr}"
@@ -148,12 +162,10 @@ def test_cli_gcode_only():
     assert "gcode" in result["metrics"]
 
 
-def test_cli_multiple_gcode():
+def test_cli_multiple_gcode(tmp_path: Path):
     """CLI validates multiple G-code files."""
-    output_dir = RECIPE_DIR / "06_multiple_depths" / "output"
-
-    nc_files = sorted(f for f in output_dir.glob("*.nc") if not f.name.startswith("._"))
-    assert len(nc_files) >= 2, f"recipe 06 should ship multiple G-code files, found {len(nc_files)}"
+    nc_files = sorted((_make_recipe(tmp_path) / "output").glob("*.nc"))
+    assert len(nc_files) >= 2, f"expected several G-code files, found {len(nc_files)}"
 
     exit_code, stdout, stderr = run_cli("--gcode", str(nc_files[0]), str(nc_files[1]), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN), f"Unexpected exit {exit_code}: {stderr}"
@@ -164,15 +176,9 @@ def test_cli_multiple_gcode():
     assert result["metrics"]["gcode"].get("file_count", 1) >= 2
 
 
-def test_cli_metrics_only():
+def test_cli_metrics_only(tmp_path: Path):
     """CLI --metrics-only skips invariant/assertion checks."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
-    exit_code, stdout, _stderr = run_cli("--svg", str(svg_path), "--metrics-only", "--quiet")
+    exit_code, stdout, _stderr = run_cli("--svg", str(_make_svg(tmp_path)), "--metrics-only", "--quiet")
     assert exit_code == EXIT_PASS
 
     data = json.loads(stdout)
@@ -181,44 +187,25 @@ def test_cli_metrics_only():
     assert result["invariants"]["total"] == 0
 
 
-def test_cli_metrics_only_with_golden():
+def test_cli_metrics_only_with_golden(tmp_path: Path):
     """CLI --metrics-only disables regression even with --golden."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
+    svg_path = _make_svg(tmp_path)
+    golden_path = _write_baseline(tmp_path, {"svg": {"document": {"width_mm": 9999.0}}})
 
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
+    exit_code, stdout, stderr = run_cli(
+        "--svg", str(svg_path), "--metrics-only", "--golden", str(golden_path), "--quiet"
+    )
+    assert exit_code == EXIT_PASS, f"Expected PASS, got {exit_code}: {stderr}"
 
-    golden_metrics = {"svg": {"document": {"width_mm": 9999.0}}}
-
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
-        json.dump(golden_metrics, f)
-        golden_path = f.name
-
-    try:
-        exit_code, stdout, stderr = run_cli(
-            "--svg", str(svg_path), "--metrics-only", "--golden", golden_path, "--quiet"
-        )
-        assert exit_code == EXIT_PASS, f"Expected PASS, got {exit_code}: {stderr}"
-
-        data = json.loads(stdout)
-        result = data.get("validation_result", data)
-        assert result["regressions"]["compared"] is False
-        assert result["regressions"]["total"] == 0
-    finally:
-        if os.path.exists(golden_path):
-            os.unlink(golden_path)
+    data = json.loads(stdout)
+    result = data.get("validation_result", data)
+    assert result["regressions"]["compared"] is False
+    assert result["regressions"]["total"] == 0
 
 
-def test_cli_compact_json():
+def test_cli_compact_json(tmp_path: Path):
     """CLI --compact outputs single-line JSON."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
-    exit_code, stdout, _stderr = run_cli("--svg", str(svg_path), "--compact", "--quiet")
+    exit_code, stdout, _stderr = run_cli("--svg", str(_make_svg(tmp_path)), "--compact", "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN)
 
     lines = [line for line in stdout.strip().split("\n") if line.strip()]
@@ -228,18 +215,11 @@ def test_cli_compact_json():
     assert "verdict" in result
 
 
-def test_cli_with_pml_assertions():
+def test_cli_with_pml_assertions(tmp_path: Path):
     """CLI --pml enables intent assertions."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
+    recipe_dir = _make_recipe(tmp_path)
+    svg_path = recipe_dir / "output" / "frame.svg"
     pml_path = recipe_dir / "example.pml.yml"
-    output_dir = recipe_dir / "output"
-
-    if not pml_path.exists() or not output_dir.exists():
-        pytest.skip("recipe not found")
-
-    svg_path = output_dir / "01_simple_profile.svg"
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
 
     exit_code, stdout, _stderr = run_cli("--svg", str(svg_path), "--pml", str(pml_path), "--quiet")
     assert exit_code in (EXIT_PASS, EXIT_WARN, EXIT_FAIL)
@@ -249,91 +229,48 @@ def test_cli_with_pml_assertions():
     assert result["assertions"]["total"] > 0
 
 
-def test_cli_with_golden_regression():
+def test_cli_with_golden_regression(tmp_path: Path):
     """CLI --golden enables regression comparison."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
     from validation.metrics.svg_metrics import extract_svg_metrics_from_file
 
-    golden_metrics = extract_svg_metrics_from_file(str(svg_path)).to_dict()
+    svg_path = _make_svg(tmp_path)
+    golden_path = _write_baseline(tmp_path, extract_svg_metrics_from_file(str(svg_path)).to_dict())
 
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
-        json.dump(golden_metrics, f)
-        golden_path = f.name
-
-    try:
-        exit_code, stdout, stderr = run_cli(
-            "--svg", str(svg_path), "--golden", golden_path, "--no-assertions", "--quiet"
-        )
-        assert exit_code == EXIT_PASS, f"Unexpected exit {exit_code}: {stderr}"
-
-        data = json.loads(stdout)
-        result = data.get("validation_result", data)
-        assert result["regressions"]["compared"] is True
-        assert result["regressions"]["total"] > 0
-    finally:
-        if os.path.exists(golden_path):
-            os.unlink(golden_path)
-
-
-def test_cli_golden_not_found():
-    """CLI with nonexistent golden file fails."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
-    exit_code, _stdout, stderr = run_cli(
-        "--svg",
-        str(svg_path),
-        "--golden",
-        "/nonexistent/golden.json",
+    exit_code, stdout, stderr = run_cli(
+        "--svg", str(svg_path), "--golden", str(golden_path), "--no-assertions", "--quiet"
     )
+    assert exit_code == EXIT_PASS, f"Unexpected exit {exit_code}: {stderr}"
+
+    data = json.loads(stdout)
+    result = data.get("validation_result", data)
+    assert result["regressions"]["compared"] is True
+    assert result["regressions"]["total"] > 0
+
+
+def test_cli_golden_not_found(tmp_path: Path):
+    """CLI with nonexistent golden file fails."""
+    exit_code, _stdout, stderr = run_cli("--svg", str(_make_svg(tmp_path)), "--golden", "/nonexistent/golden.json")
     assert exit_code == EXIT_FAIL
     assert "not found" in stderr.lower()
 
 
-def test_cli_tolerance_override():
+def test_cli_tolerance_override(tmp_path: Path):
     """CLI --tolerance overrides default comparison tolerance."""
-    recipe_dir = RECIPE_DIR / "01_simple_profile"
-    svg_path = recipe_dir / "output" / "01_simple_profile.svg"
-
-    if not svg_path.exists():
-        pytest.skip("SVG not found")
-
     from validation.metrics.svg_metrics import extract_svg_metrics_from_file
 
+    svg_path = _make_svg(tmp_path)
     golden_metrics = extract_svg_metrics_from_file(str(svg_path)).to_dict()
+    golden_metrics["svg"]["document"]["width_mm"] *= 0.9995
+    golden_path = _write_baseline(tmp_path, golden_metrics)
 
-    if (
-        "svg" in golden_metrics
-        and "document" in golden_metrics["svg"]
-        and "width_mm" in golden_metrics["svg"]["document"]
-    ):
-        golden_metrics["svg"]["document"]["width_mm"] *= 0.9995
+    exit_code1, _stdout1, _stderr1 = run_cli(
+        "--svg", str(svg_path), "--golden", str(golden_path), "--tolerance", "0.01", "--quiet"
+    )
+    exit_code2, _stdout2, _stderr2 = run_cli(
+        "--svg", str(svg_path), "--golden", str(golden_path), "--tolerance", "1.0", "--quiet"
+    )
 
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
-        json.dump(golden_metrics, f)
-        golden_path = f.name
-
-    try:
-        exit_code1, _stdout1, _stderr1 = run_cli(
-            "--svg", str(svg_path), "--golden", golden_path, "--tolerance", "0.01", "--quiet"
-        )
-
-        exit_code2, _stdout2, _stderr2 = run_cli(
-            "--svg", str(svg_path), "--golden", golden_path, "--tolerance", "1.0", "--quiet"
-        )
-
-        assert exit_code1 >= exit_code2
-    finally:
-        if os.path.exists(golden_path):
-            os.unlink(golden_path)
+    assert exit_code1 >= exit_code2
 
 
 def test_cli_exit_codes():

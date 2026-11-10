@@ -1,0 +1,10 @@
+Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: calibration_surface
+    children:
+    - MeasurementGrid:

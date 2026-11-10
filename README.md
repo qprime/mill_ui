@@ -198,7 +198,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert between formats |
-| `python -m cli.generate_golden --all-recipes docs/recipes --update --force` | Regenerate golden metrics. Off during the recipe rebuild (#245) |
+| `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
 
 ## Project Structure
 
@@ -207,7 +207,7 @@ mill_ui/
 ├── adapters/           # AST ↔ IR ↔ planner adapters, AST → DiagramIR
 ├── assembly/           # Assembly system (box, carcass, cubby, beams, joinery)
 ├── cam/                # CAM planner, passes, post-processor, G-code ops
-├── cli/                # Command-line tools (mill, nest, validate_cam, generate_golden)
+├── cli/                # Command-line tools (mill, nest, recipes, validate_cam)
 ├── config/             # Machine configuration loader
 ├── core/               # Shared geometry utilities and constants
 ├── diagram_ir/         # DiagramIR intermediate representation for visualization
@@ -234,17 +234,16 @@ The `docs/recipes/` directory contains 70+ worked examples covering basic profil
 Each recipe's `output/` holds exactly the files current code generates for it, byte for byte, and git tracks all of them. The recipe gate checks this. It writes nothing, and it also runs as the `recipe-outputs` pre-commit hook:
 
 ```bash
-python -m tests.test_recipes
+python -m cli.recipes
 ```
 
 When a change alters recipe output, regenerate every recipe, review every changed file, and commit all of them with the change. An unintended change is a regression to fix in code; outputs are never reverted to make the gate pass:
 
 ```bash
-python -m tests.test_recipes --regen_recipes                              # recipe outputs
-python -m cli.generate_golden --all-recipes docs/recipes --update --force # golden metrics: off during the recipe rebuild (#245), do not run
+python -m cli.recipes --regen
 ```
 
-The `/snapshot-recipes` skill runs both in order. See [tests/README_recipe_tests.md](tests/README_recipe_tests.md).
+Tests never read `docs/recipes/`. See [docs/recipe_outputs.md](docs/recipe_outputs.md).
 
 ## Tests
 
@@ -256,7 +255,7 @@ All verification runs through the `tools/run_*.py` wrappers:
 .venv/bin/python tools/run_tests.py -k finger_joint          # keyword filter
 .venv/bin/python tools/run_ruff.py                           # lint
 .venv/bin/python tools/run_mypy.py                           # type check
-python -m tests.test_recipes                                 # recipe gate
+python -m cli.recipes                                        # recipe gate
 ```
 
 ## Building the Native Backend

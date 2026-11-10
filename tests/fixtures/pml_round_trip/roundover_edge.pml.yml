@@ -1,0 +1,14 @@
+Sheet:
+  width: 300mm
+  height: 400mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: panel
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - Roundover:
+        radius: 6mm

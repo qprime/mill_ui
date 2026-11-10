@@ -141,7 +141,7 @@ Each `plan_X_passes()` function: pick tool → call ops function → append move
 
 - No shared pytest fixtures — all test state built via `_make_*()` factory functions inline in each test file
 - Golden file pattern: generate → normalize → compare; auto-create if missing locally, fail in CI
-- Recipe auto-discovery: `docs/recipes/*/*.pml.yml` discovered by glob, no manual registration
+- Tests never read `docs/recipes/`. Test inputs are inline PML or files under `tests/fixtures/`. `python -m cli.recipes` checks recipes
 - Parametrize with descriptive IDs: `pytest.param(..., id="profile_outside_through")`
 - Property-based tests use Hypothesis `@st.composite` strategies for domain geometry
 

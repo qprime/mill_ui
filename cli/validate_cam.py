@@ -33,7 +33,7 @@ Examples:
   python -m cli.validate_cam --svg output/drawing.svg --gcode output/toolpath.nc
 
 
-  python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --golden tests/golden/01_simple_profile/metrics.json
+  python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --golden baseline.json
 
 
   python -m cli.validate_cam --svg output/drawing.svg --metrics-only

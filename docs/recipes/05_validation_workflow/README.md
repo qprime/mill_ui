@@ -44,9 +44,8 @@ After CAM execution, validate the generated artifacts:
 # Validate this recipe
 python -m cli.validate_cam --recipe docs/recipes/05_validation_workflow --summary
 
-# Validate with golden baseline
-python -m cli.validate_cam --recipe docs/recipes/05_validation_workflow \
-    --golden tests/golden/05_validation_workflow/metrics.json
+# Compare against a saved metrics baseline
+python -m cli.validate_cam --recipe docs/recipes/05_validation_workflow --golden baseline.json
 
 # Extract metrics only (no checks)
 python -m cli.validate_cam --recipe docs/recipes/05_validation_workflow --metrics-only
@@ -75,15 +74,6 @@ if "svg" in result.metrics:
     print(f"SVG layers: {result.metrics['svg']['layers']['count']}")
 if "gcode" in result.metrics:
     print(f"G-code lines: {result.metrics['gcode']['summary']['total_lines']}")
-```
-
-## Golden Baseline
-
-This recipe has a golden baseline at `tests/golden/05_validation_workflow/metrics.json`.
-
-To regenerate after intentional changes:
-```bash
-python -m cli.generate_golden --recipe docs/recipes/05_validation_workflow --update
 ```
 
 ## Output Files

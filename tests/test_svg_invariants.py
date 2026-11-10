@@ -1,81 +1,63 @@
 from __future__ import annotations
 
-import os
-
-import pytest
-
+from cam.pipeline import run_pipeline
+from pml import parse_pml
 from validation.core import Verdict
 from validation.invariants.svg_invariants import (
     SVG_INVARIANT_IDS,
     check_svg_invariants,
 )
 
-RECIPE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "recipes",
-)
+PANEL_PML = """Sheet:
+  width: 260mm
+  height: 180mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: panel
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 130mm
+      y: 90mm
+      width: 200mm
+      height: 140mm
+- Rect:
+    id: panel_recess
+    feature:
+      type: pocket
+      depth: 4mm
+    at:
+      x: 130mm
+      y: 90mm
+      width: 110mm
+      height: 70mm
+- Circle:
+    id: panel_hole
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 12mm
+    at:
+      x: 45mm
+      y: 40mm
+"""
 
 
-def get_recipe_svg_path(recipe_num: int, recipe_name: str, filename: str) -> str:
-    return os.path.join(
-        RECIPE_DIR,
-        f"{recipe_num:02d}_{recipe_name}",
-        "output",
-        filename,
-    )
+def _make_pipeline_svg() -> str:
+    result = run_pipeline(parse_pml(PANEL_PML))
+    assert result.svg is not None
+    return result.svg
 
 
-def test_valid_simple_profile_svg():
-    """Test that simple profile SVG passes all invariants."""
-    svg_path = get_recipe_svg_path(1, "simple_profile", "01_simple_profile.svg")
+def test_pipeline_svg_passes_every_invariant():
+    results = check_svg_invariants(_make_pipeline_svg())
 
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    with open(svg_path, encoding="utf-8") as f:
-        svg_content = f.read()
-
-    results = check_svg_invariants(svg_content)
-
-    result_ids = [r.id for r in results]
-    for inv_id in SVG_INVARIANT_IDS:
-        assert inv_id in result_ids, f"Missing invariant check: {inv_id}"
-
-    for r in results:
-        assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures}"
-
-
-def test_valid_shaker_door_svg():
-    """Test that shaker door SVG (with pockets) passes all invariants."""
-    svg_path = get_recipe_svg_path(3, "shaker_door_template", "03_shaker_door_template.svg")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    with open(svg_path, encoding="utf-8") as f:
-        svg_content = f.read()
-
-    results = check_svg_invariants(svg_content)
-
-    failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-
-
-def test_valid_multiple_depths_svg():
-    """Test that multiple depths SVG passes all invariants."""
-    svg_path = get_recipe_svg_path(6, "multiple_depths", "06_multiple_depths.svg")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    with open(svg_path, encoding="utf-8") as f:
-        svg_content = f.read()
-
-    results = check_svg_invariants(svg_content)
-
-    failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
+    assert set(SVG_INVARIANT_IDS) <= {r.id for r in results}
+    assert [(r.id, r.failures) for r in results if r.status == Verdict.FAIL] == []
 
 
 def test_invalid_xml():
@@ -460,89 +442,6 @@ def test_content_outside_viewbox():
     bounds_result = next(r for r in results if r.id == "SVG_BOUNDS_WITHIN_VIEWBOX")
     assert bounds_result.status == Verdict.FAIL
     assert "x_min" in str(bounds_result.failures)
-
-
-def test_all_recipe_svgs_pass():
-    """Test that all recipe SVGs pass invariants (no false positives)."""
-    recipe_svgs = [
-        (1, "simple_profile", "01_simple_profile.svg"),
-        (2, "pocket_with_cleanup", "02_pocket_with_cleanup.svg"),
-        (3, "shaker_door_template", "03_shaker_door_template.svg"),
-        (4, "custom_template", "04_custom_template.svg"),
-        (5, "validation_workflow", "05_validation_workflow.svg"),
-        (6, "multiple_depths", "06_multiple_depths.svg"),
-        (7, "json_generation", "07_json_generation.svg"),
-        (8, "svg_visualization", "08_svg_visualization.svg"),
-        (9, "config_tuning", "09_config_tuning.svg"),
-        (10, "hole_patterns_grid", "10_hole_patterns_grid.svg"),
-        (11, "keepout_islands", "11_keepout_islands.svg"),
-        (12, "edge_treatment_intent", "12_edge_treatment_intent.svg"),
-        (13, "split_layout_french_door", "13_split_layout_french_door.svg"),
-        (14, "corner_cleanup_multi_tool", "14_corner_cleanup_multi_tool.svg"),
-        (15, "profile_with_tabs", "15_profile_with_tabs.svg"),
-        (16, "sheet_layout_nesting", "16_sheet_layout_nesting.svg"),
-    ]
-
-    passed = 0
-    skipped = 0
-    failed_svgs = []
-
-    for recipe_num, recipe_name, filename in recipe_svgs:
-        svg_path = get_recipe_svg_path(recipe_num, recipe_name, filename)
-
-        if not os.path.exists(svg_path):
-            skipped += 1
-            continue
-
-        with open(svg_path, encoding="utf-8") as f:
-            svg_content = f.read()
-
-        results = check_svg_invariants(svg_content)
-
-        failures = [r for r in results if r.status == Verdict.FAIL]
-        if failures:
-            failed_svgs.append((filename, [(f.id, f.failures) for f in failures]))
-        else:
-            passed += 1
-
-    if failed_svgs:
-        raise AssertionError(f"{len(failed_svgs)} recipe SVGs failed invariants")
-
-
-def test_nesting_output_svgs():
-    """Test that nesting output SVGs pass invariants."""
-    nesting_svgs = []
-
-    for i in range(1, 7):
-        nesting_svgs.append((17, "nesting_guillotine", f"sheet_{i}.svg"))
-
-    for i in range(1, 7):
-        nesting_svgs.append((18, "nesting_maxrects", f"sheet_{i}.svg"))
-
-    passed = 0
-    skipped = 0
-    failed_svgs = []
-
-    for recipe_num, recipe_name, filename in nesting_svgs:
-        svg_path = get_recipe_svg_path(recipe_num, recipe_name, filename)
-
-        if not os.path.exists(svg_path):
-            skipped += 1
-            continue
-
-        with open(svg_path, encoding="utf-8") as f:
-            svg_content = f.read()
-
-        results = check_svg_invariants(svg_content)
-
-        failures = [r for r in results if r.status == Verdict.FAIL]
-        if failures:
-            failed_svgs.append((filename, [(f.id, f.failures) for f in failures]))
-        else:
-            passed += 1
-
-    if failed_svgs:
-        raise AssertionError(f"{len(failed_svgs)} nesting SVGs failed invariants")
 
 
 def test_invariant_result_to_dict():

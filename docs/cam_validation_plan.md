@@ -66,8 +66,7 @@ validation/
 ├── assertions/
 │   └── intent_assertions.py # derive_assertions, check_assertions
 └── regression/
-    ├── comparator.py       # compare_metrics
-    └── golden_store.py     # GoldenStore
+    └── comparator.py       # compare_metrics
 ```
 
 ---
@@ -152,7 +151,7 @@ validation/
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile
 
 # With golden baseline
-python -m cli.validate_cam --recipe <path> --golden tests/golden/<name>/metrics.json
+python -m cli.validate_cam --recipe <path> --golden baseline.json
 
 # Extract metrics only
 python -m cli.validate_cam --svg output/drawing.svg --metrics-only
@@ -162,19 +161,6 @@ python -m cli.validate_cam --recipe <path> --summary
 ```
 
 Exit codes: 0=PASS, 1=WARN, 2=FAIL
-
----
-
-## Golden Baseline Structure
-
-```
-tests/golden/
-├── index.json
-├── 01_simple_profile/
-│   ├── metrics.json
-│   └── source.pml
-└── ...
-```
 
 ---
 
@@ -205,5 +191,3 @@ print(f"Verdict: {result.verdict}")  # pass, warn, fail
 |------|---------|
 | validation/runner.py | validate(), validate_recipe() |
 | cli/validate_cam.py | CLI interface |
-| cli/generate_golden.py | Golden baseline generation |
-| tests/golden/ | Golden metric store |

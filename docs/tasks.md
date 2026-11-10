@@ -274,7 +274,7 @@ python -m cli.nest job.nest.yml -o output/ --export-svg
 python -m pytest tests/ -x
 
 # Recipe validation
-python -m tests.test_recipes
+python -m cli.recipes
 
 # Validate specific recipe
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
@@ -312,7 +312,7 @@ python -m cli.mill --recipe docs/recipes/01_simple_profile
 
 **Regenerate all recipe outputs:**
 ```bash
-python -m tests.test_recipes --regen_recipes
+python -m cli.recipes --regen
 ```
 
 **Programmatic (using shared pipeline):**

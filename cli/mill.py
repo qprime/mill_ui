@@ -241,8 +241,10 @@ def _compile(
         pipeline_kwargs["endmills"] = endmills
         pipeline_kwargs["feeds"] = feeds
 
-    print(f"Compiling: {source_path.name}", file=sys.stderr)
-    runs = run_sheets(asts, source=source_path.name, job_stem=job_stem, **pipeline_kwargs)
+    return run_sheets(asts, source=source_path.name, job_stem=job_stem, **pipeline_kwargs)
+
+
+def _report_runs(runs: list[SheetRun]) -> None:
     multi_sheet = len(runs) > 1
 
     for run in runs:
@@ -265,8 +267,6 @@ def _compile(
 
         print(f"  Pipeline: {result.metrics['timing']['total_ms']:.1f}ms", file=sys.stderr)
 
-    return runs
-
 
 def _finish_run(
     runs: list[SheetRun],
@@ -277,7 +277,10 @@ def _finish_run(
     outputs = write_run_outputs(
         runs, output_dir, clean_output_dir=False, build_params=build_params, provenance=provenance
     )
+    _report_outputs(runs, outputs)
 
+
+def _report_outputs(runs: list[SheetRun], outputs: Mapping[str, Path]) -> None:
     print("  Outputs:", file=sys.stderr)
     for path in outputs.values():
         print(f"    {path.name}", file=sys.stderr)
@@ -330,15 +333,13 @@ def process_file(
     if input_name.endswith(".json"):
         asts = [LayoutAST.from_json(str(input_path))]
     elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
-        input_text = input_path.read_text(encoding="utf-8")
-        comp_ast = parse_pml_yaml(input_text)
-        comp_ast = replace(comp_ast, source_dir=str(input_path.parent.resolve()))
-        asts = resolve_layout_multi(comp_ast)
+        asts = load_pml_asts(input_path)
     else:
         print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
         sys.exit(1)
 
-    return _compile(
+    print(f"Compiling: {input_path.name}", file=sys.stderr)
+    runs = _compile(
         asts,
         input_path,
         input_path.stem,
@@ -350,6 +351,41 @@ def process_file(
         endmills=endmills,
         feeds=feeds,
     )
+    _report_runs(runs)
+    return runs
+
+
+def load_pml_asts(source: Path) -> list[LayoutAST]:
+    comp_ast = parse_pml_yaml(source.read_text(encoding="utf-8"))
+    comp_ast = replace(comp_ast, source_dir=str(source.parent.resolve()))
+    return resolve_layout_multi(comp_ast)
+
+
+def write_recipe_outputs(
+    source: Path,
+    job_stem: str,
+    output_dir: Path,
+    *,
+    kerf_mm: float = RECIPE_KERF_MM,
+    theme: str = RECIPE_THEME,
+    y_origin: str = "back",
+    generate_svg: bool = True,
+    machine_config: MachineConfig | None = None,
+) -> tuple[list[SheetRun], dict[str, Path]]:
+    runs = _compile(
+        load_pml_asts(source),
+        source,
+        job_stem,
+        kerf_mm=kerf_mm,
+        theme=theme,
+        y_origin=y_origin,
+        generate_svg=generate_svg,
+        machine_config=machine_config,
+    )
+    outputs = write_run_outputs(
+        runs, output_dir, build_params={"kerf_mm": kerf_mm, "theme": theme, "y_origin": y_origin}
+    )
+    return runs, outputs
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
@@ -358,32 +394,20 @@ def process_recipe(recipe_dir: Path, args) -> None:
         print(f"Error: No example.pml.yml or source.pml.yml in {recipe_dir}", file=sys.stderr)
         sys.exit(1)
 
-    output_dir = recipe_dir / "output"
-
-    kerf = args.kerf if args.kerf is not None else RECIPE_KERF_MM
-    theme = args.theme if args.theme is not None else RECIPE_THEME
-
-    input_text = source.read_text(encoding="utf-8")
-    comp_ast = parse_pml_yaml(input_text)
-    comp_ast = replace(comp_ast, source_dir=str(source.parent.resolve()))
-    asts = resolve_layout_multi(comp_ast)
-
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
-    runs = _compile(
-        asts,
+    print(f"Compiling: {source.name}", file=sys.stderr)
+    runs, outputs = write_recipe_outputs(
         source,
         recipe_dir.name,
-        kerf_mm=kerf,
-        theme=theme,
+        recipe_dir / "output",
+        kerf_mm=args.kerf if args.kerf is not None else RECIPE_KERF_MM,
+        theme=args.theme if args.theme is not None else RECIPE_THEME,
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
         machine_config=_load_machine(args.machine),
     )
-    _finish_run(runs, output_dir, {"kerf_mm": kerf, "theme": theme, "y_origin": args.y_origin}, None)
+    _report_runs(runs)
+    _report_outputs(runs, outputs)
 
 
 def main():

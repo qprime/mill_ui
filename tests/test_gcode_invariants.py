@@ -4,7 +4,9 @@ import os
 import sys
 import tempfile
 
-import pytest
+from cam.pipeline import run_pipeline
+from pml import parse_pml
+from validation.invariants.gcode_invariants import check_gcode_invariants_from_content
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -14,57 +16,57 @@ from validation.invariants.gcode_invariants import (
     check_gcode_invariants,
 )
 
-RECIPE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "recipes",
-)
+SHELF_PML = """Sheet:
+  width: 280mm
+  height: 170mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: shelf
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 140mm
+      y: 85mm
+      width: 220mm
+      height: 120mm
+- Rect:
+    id: shelf_dado
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 140mm
+      y: 85mm
+      width: 120mm
+      height: 50mm
+- Circle:
+    id: shelf_pin
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 9mm
+    at:
+      x: 50mm
+      y: 45mm
+"""
 
 
-def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
-    return os.path.join(
-        RECIPE_DIR,
-        f"{recipe_num:02d}_{recipe_name}",
-        "output",
-        filename,
-    )
+def _make_pipeline_gcode() -> dict[str, str]:
+    return run_pipeline(parse_pml(SHELF_PML), kerf_mm=3.175).gcode
 
 
-def test_valid_simple_profile_gcode():
-    """Test that simple profile G-code passes all invariants."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
+def test_pipeline_gcode_passes_every_invariant():
+    gcode_files = _make_pipeline_gcode()
+    assert len(gcode_files) >= 3, sorted(gcode_files)
 
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    results = check_gcode_invariants(nc_path)
-
-    result_ids = [r.id for r in results]
-    for inv_id in GCODE_INVARIANT_IDS:
-        assert inv_id in result_ids, f"Missing invariant check: {inv_id}"
-
-    for r in results:
-        assert r.status in (Verdict.PASS, Verdict.WARN), f"{r.id} failed: {r.failures} {r.details}"
-
-
-def test_valid_shaker_door_gcode():
-    """Test that shaker door G-code (with pockets) passes all invariants."""
-    nc_path = get_recipe_nc_path(3, "shaker_door_template", "pocket-12.70mm.nc")
-
-    results = check_gcode_invariants(nc_path)
-
-    failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
-
-
-def test_valid_multiple_depths_gcode():
-    """Test that multiple depths G-code passes all invariants."""
-    nc_path = get_recipe_nc_path(6, "multiple_depths", "pocket-12.70mm.nc")
-
-    results = check_gcode_invariants(nc_path)
-
-    failures = [r for r in results if r.status == Verdict.FAIL]
-    assert len(failures) == 0, f"Unexpected failures: {[(f.id, f.failures) for f in failures]}"
+    for name, gcode in gcode_files.items():
+        results = check_gcode_invariants_from_content(gcode)
+        assert set(GCODE_INVARIANT_IDS) <= {r.id for r in results}, name
+        assert [(r.id, r.failures) for r in results if r.status == Verdict.FAIL] == [], name
 
 
 def test_invalid_gcode_file():
@@ -470,40 +472,6 @@ M30
         assert path_result.status == Verdict.PASS
     finally:
         os.unlink(temp_path)
-
-
-def test_invariant_result_to_dict():
-    """Test that invariant results serialize correctly."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    results = check_gcode_invariants(nc_path)
-
-    for r in results:
-        d = r.to_dict()
-        assert "invariant" in d
-        assert "id" in d["invariant"]
-        assert "category" in d["invariant"]
-        assert "artifact" in d["invariant"]
-        assert "description" in d["invariant"]
-        assert "status" in d["invariant"]
-        assert "details" in d["invariant"]
-
-
-def test_all_invariant_ids_present():
-    """Test that all expected invariant IDs are returned."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    results = check_gcode_invariants(nc_path)
-    result_ids = [r.id for r in results]
-
-    for expected_id in GCODE_INVARIANT_IDS:
-        assert expected_id in result_ids, f"Missing invariant: {expected_id}"
 
 
 def test_tab_pattern_detected():

@@ -1,0 +1,35 @@
+Sheet:
+  width: 300mm
+  height: 300mm
+  thickness: 19mm
+  material: mdf
+
+children:
+- Rect:
+    id: relief_panel
+    at:
+      x: 150mm
+      y: 150mm
+      width: 200mm
+      height: 200mm
+    children:
+      - Heightfield:
+          image: input/synthetic_gradient.png
+          size:
+            width: 128mm
+            height: 128mm
+          depth: 6mm
+          white_is_high: true
+          tools:
+            - tool: "1/4 upcut spiral"
+              role: rough
+              stepover: 60%
+              stepdown: 2mm
+            - tool: "1/8 upcut spiral"
+              role: rough
+              stepover: 50%
+              stepdown: 1mm
+            - tool: "1/8 ball nose 2F"
+              role: finish
+              stepover: 12%
+              angle: 0

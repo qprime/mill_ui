@@ -1,0 +1,60 @@
+Sheet:
+  width: 700mm
+  height: 260mm
+  thickness: 12mm
+  material: mdf
+children:
+- Circle:
+    id: cardioid
+    diameter: 200mm
+    at:
+      x: 120mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    feature:
+      type: profile
+      side: outside
+      depth: through
+    children:
+    - StringArt:
+        anchors: 120
+        rule: multiply
+        factor: 2
+        depth: 0.3mm
+
+- Circle:
+    id: nephroid
+    diameter: 200mm
+    at:
+      x: 350mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    feature:
+      type: profile
+      side: outside
+      depth: through
+    children:
+    - StringArt:
+        anchors: 120
+        rule: multiply
+        factor: 3
+        depth: 0.3mm
+
+- Rect:
+    id: star_square
+    at:
+      x: 580mm
+      y: 130mm
+      width: 200mm
+      height: 200mm
+    children:
+    - Profile:
+        side: outside
+        depth: through
+    - StringArt:
+        anchors: 80
+        rule: skip
+        step: 23
+        depth: 0.3mm

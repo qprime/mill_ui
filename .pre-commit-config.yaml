@@ -28,7 +28,7 @@ repos:
         pass_filenames: false
       - id: recipe-outputs
         name: recipe outputs match current code
-        entry: .venv/bin/python -m tests.test_recipes
+        entry: .venv/bin/python -m cli.recipes
         language: system
         always_run: true
         pass_filenames: false

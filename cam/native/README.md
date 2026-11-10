@@ -74,7 +74,7 @@ This configures with `-DMILLUI_NATIVE_TESTS=ON`, builds the `native_tests`
 target, and runs CTest. `cpp/tests/test_geometry.cpp` covers the `geom2d`
 primitives; `cpp/tests/test_post_gcode.cpp` covers emitter behavior. The
 end-to-end equivalence gate is the Python recipe suite
-(`python -m tests.test_recipes`), which byte-compares every recipe's `.nc`
+(`python -m cli.recipes`), which byte-compares every recipe's `.nc`
 output.
 
 ## 7. Invariants & guardrails

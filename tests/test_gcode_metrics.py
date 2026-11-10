@@ -1,118 +1,81 @@
 from __future__ import annotations
 
-import json
 import math
 import os
 import tempfile
 
-import pytest
-
+from cam.pipeline import run_pipeline
+from pml import parse_pml
 from validation.metrics.gcode_metrics import (
     DEFAULT_RAPID_RATE_MM_MIN,
     GCodeConfig,
     extract_gcode_metrics,
+    extract_gcode_metrics_from_content,
 )
 
-RECIPE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "recipes",
-)
+BRACKET_PML = """Sheet:
+  width: 240mm
+  height: 180mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: bracket
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 120mm
+      y: 90mm
+      width: 190mm
+      height: 130mm
+- Rect:
+    id: bracket_seat
+    feature:
+      type: pocket
+      depth: 5mm
+    at:
+      x: 120mm
+      y: 90mm
+      width: 90mm
+      height: 60mm
+- Circle:
+    id: bracket_hole
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 45mm
+      y: 45mm
+"""
 
 
-def get_recipe_nc_path(recipe_num: int, recipe_name: str, filename: str) -> str:
-    return os.path.join(
-        RECIPE_DIR,
-        f"{recipe_num:02d}_{recipe_name}",
-        "output",
-        filename,
-    )
+def _make_gcode_by_operation() -> dict[str, str]:
+    gcode = run_pipeline(parse_pml(BRACKET_PML), kerf_mm=3.175).gcode
+    return {name.split("-")[0]: text for name, text in gcode.items()}
 
 
-def test_extract_gcode_metrics_simple_profile():
-    """Test metric extraction from simple profile recipe."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
+def _without_timing(metrics: dict) -> dict:
+    del metrics["gcode"]["extraction_time_ms"]
+    return metrics
 
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
 
-    metrics = extract_gcode_metrics(nc_path)
+def test_extract_gcode_metrics_profile():
+    metrics = extract_gcode_metrics_from_content(_make_gcode_by_operation()["profile"])
 
-    assert metrics.summary.total_lines > 0, f"Total lines: {metrics.summary.total_lines}"
-    assert metrics.summary.motion_lines > 0, f"Motion lines: {metrics.summary.motion_lines}"
-    assert metrics.motion.g0_count > 0, f"G0 count: {metrics.motion.g0_count}"
-    assert metrics.motion.g1_count > 0, f"G1 count: {metrics.motion.g1_count}"
-    assert metrics.motion.total_rapid_distance_mm > 0, f"Rapid distance: {metrics.motion.total_rapid_distance_mm}"
-    assert metrics.motion.total_feed_distance_mm > 0, f"Feed distance: {metrics.motion.total_feed_distance_mm}"
-    assert metrics.z_profile.safe_z_mm > 0, f"Safe Z: {metrics.z_profile.safe_z_mm}"
-    assert metrics.z_profile.max_plunge_z_mm < 0, f"Max plunge Z: {metrics.z_profile.max_plunge_z_mm}"
+    assert metrics.summary.total_lines > 0
+    assert metrics.summary.motion_lines > 0
+    assert metrics.motion.g0_count > 0
+    assert metrics.motion.g1_count > 0
+    assert metrics.motion.total_rapid_distance_mm > 0
+    assert metrics.motion.total_feed_distance_mm > 0
+    assert metrics.z_profile.safe_z_mm > 0
+    assert metrics.z_profile.max_plunge_z_mm < 0
     assert metrics.xy_bounds.x_min < metrics.xy_bounds.x_max
     assert metrics.xy_bounds.y_min < metrics.xy_bounds.y_max
-    assert metrics.time_estimate.total_time_s > 0, f"Time: {metrics.time_estimate.total_time_s}"
-
-
-def test_extract_gcode_metrics_pocket():
-    """Test metric extraction from pocket G-code."""
-    nc_path = get_recipe_nc_path(2, "pocket_with_cleanup", "pocket-12.70mm.nc")
-
-    metrics = extract_gcode_metrics(nc_path)
-
-    assert len(metrics.z_profile.unique_cutting_depths) > 0, (
-        f"Cutting depths: {metrics.z_profile.unique_cutting_depths}"
-    )
-    assert len(metrics.feeds.feed_rates_used) > 0, f"Feed rates: {metrics.feeds.feed_rates_used}"
-    assert metrics.summary.comment_lines > 0, f"Comment lines: {metrics.summary.comment_lines}"
-
-
-def test_extract_gcode_metrics_bore():
-    """Test metric extraction from bore/drill G-code."""
-    nc_path = get_recipe_nc_path(4, "custom_template", "bore-3.17mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    metrics = extract_gcode_metrics(nc_path)
-
-    assert metrics.motion.g1_count > 0, f"G1 count: {metrics.motion.g1_count}"
-    assert len(metrics.tools.spindle_speeds) > 0, f"Spindle speeds: {metrics.tools.spindle_speeds}"
-
-
-def test_determinism():
-    """Same G-code file should produce identical metrics."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    metrics1 = extract_gcode_metrics(nc_path)
-    metrics2 = extract_gcode_metrics(nc_path)
-
-    dict1 = metrics1.to_dict()
-    dict2 = metrics2.to_dict()
-
-    del dict1["gcode"]["extraction_time_ms"]
-    del dict2["gcode"]["extraction_time_ms"]
-
-    assert dict1 == dict2, "Metrics should be deterministic"
-
-
-def test_json_serialization():
-    """Metrics should serialize to valid JSON."""
-    nc_path = get_recipe_nc_path(1, "simple_profile", "profile-3.17mm.nc")
-
-    if not os.path.exists(nc_path):
-        pytest.skip(f"{nc_path} not found")
-
-    metrics = extract_gcode_metrics(nc_path)
-    d = metrics.to_dict()
-
-    json_str = json.dumps(d, indent=2)
-    assert len(json_str) > 0
-
-    parsed = json.loads(json_str)
-    assert "gcode" in parsed
-    assert "summary" in parsed["gcode"]
-    assert "motion" in parsed["gcode"]
+    assert metrics.time_estimate.total_time_s > 0
 
 
 def test_arc_parsing_ij_format():

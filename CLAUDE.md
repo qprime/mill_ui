@@ -55,13 +55,12 @@ python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
 python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-python -m tests.test_recipes                    # recipe gate: every output file matches current code (also a pre-commit hook)
-python -m tests.test_recipes --regen_recipes    # regenerate every recipe's output/
-python -m cli.generate_golden --all-recipes docs/recipes --update --force  # recipe goldens are off during the recipe rebuild (#245); do not run
+python -m cli.recipes                           # recipe gate: every output file matches current code (also a pre-commit hook)
+python -m cli.recipes --regen                   # regenerate every recipe's output/
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
-**Recipe outputs:** each recipe's `output/` must equal what current code generates, and git tracks every file in it. When a change alters recipe output, run `--regen_recipes`, review every changed file, and commit all of them with the change; they count as files touched this session. An unintended change is a regression to fix in code. Never revert outputs to make the gate pass.
+**Recipe outputs:** each recipe's `output/` must equal what current code generates, and git tracks every file in it. When a change alters recipe output, run `python -m cli.recipes --regen`, review every changed file, and commit all of them with the change; they count as files touched this session. An unintended change is a regression to fix in code. Never revert outputs to make the gate pass.
 
 **Verification wrappers:** always invoke via the `tools/run_*.py` wrappers so the command passes the agent's allowed-command filters (no compound `source && ...` needed). Do not call `pytest`, `ruff`, `mypy`, `pylint`, `clang-format`, `clang-tidy`, or `ctest` directly.
 
@@ -150,9 +149,8 @@ Check before implementing — these already exist:
 | String art chords between outline anchors | `generators/area/string_art.py` (see `docs/recipes/92_string_art`) |
 | Motif placement (scale/rotate/translate, containment) | `generators/placement.py` |
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
-| Golden metric generation | `cli/generate_golden.py` |
-| Recipe validation (pass/fail) | `python -m tests.test_recipes` |
-| Recipe snapshot (regen; golden step off, #245) | `/snapshot-recipes` skill |
+| Recipe validation (pass/fail) | `python -m cli.recipes` |
+| Recipe snapshot (regen) | `/snapshot-recipes` skill |
 
 ## Don't
 

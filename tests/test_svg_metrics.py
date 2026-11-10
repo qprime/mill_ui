@@ -1,171 +1,81 @@
 from __future__ import annotations
 
-import json
-import os
-
-import pytest
-
-from validation.core import CAMValidationResult
+from cam.pipeline import run_pipeline
+from pml import parse_pml
 from validation.metrics.svg_metrics import (
     extract_svg_metrics,
     extract_svg_metrics_from_file,
 )
 
-RECIPE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "recipes",
-)
+TRAY_PML = """Sheet:
+  width: 300mm
+  height: 220mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: tray
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 150mm
+      y: 110mm
+      width: 240mm
+      height: 160mm
+- Rect:
+    id: tray_well
+    feature:
+      type: pocket
+      depth: 6mm
+    at:
+      x: 150mm
+      y: 110mm
+      width: 180mm
+      height: 100mm
+"""
 
 
-def get_recipe_svg_path(recipe_num: int, recipe_name: str) -> str:
-    return os.path.join(
-        RECIPE_DIR,
-        f"{recipe_num:02d}_{recipe_name}",
-        "output",
-        f"{recipe_num:02d}_{recipe_name}.svg",
-    )
+def _make_svg() -> str:
+    result = run_pipeline(parse_pml(TRAY_PML))
+    assert result.svg is not None
+    return result.svg
 
 
-def test_extract_svg_metrics_simple_profile():
-    """Test metric extraction from simple profile recipe."""
-    svg_path = get_recipe_svg_path(1, "simple_profile")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    metrics = extract_svg_metrics_from_file(svg_path)
-
-    assert metrics.document.width_mm > 0, f"Width: {metrics.document.width_mm}"
-    assert metrics.document.height_mm > 0, f"Height: {metrics.document.height_mm}"
-    assert len(metrics.document.viewbox) == 4, "ViewBox should have 4 components"
-    assert metrics.layer_count >= 3, f"Layer count: {metrics.layer_count}"
-    assert "SHEET_OUTLINE" in metrics.layer_names
-    assert "PROFILE_CUTS" in metrics.layer_names
-    assert metrics.paths.total_count >= 1, f"Path count: {metrics.paths.total_count}"
-    assert metrics.paths.closed_count >= 1, f"Closed count: {metrics.paths.closed_count}"
+def _without_timing(metrics: dict) -> dict:
+    metrics["svg"]["extraction_time_ms"] = 0
+    return metrics
 
 
-def test_extract_svg_metrics_shaker_door():
-    """Test metric extraction from shaker door recipe."""
-    svg_path = get_recipe_svg_path(3, "shaker_door_template")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    metrics = extract_svg_metrics_from_file(svg_path)
+def test_extract_svg_metrics_from_pipeline_svg():
+    metrics = extract_svg_metrics(_make_svg())
 
     assert metrics.document.width_mm > 0
     assert metrics.document.height_mm > 0
-    assert "POCKET_REGIONS" in metrics.layer_names
+    assert len(metrics.document.viewbox) == 4
+    assert metrics.layer_count >= 3, f"Layer count: {metrics.layer_count}"
+    assert "SHEET_OUTLINE" in metrics.layer_names
     pocket_layer = metrics.layers.get("POCKET_REGIONS")
     assert pocket_layer is not None
     assert pocket_layer.rect_count >= 1, f"Pocket rects: {pocket_layer.rect_count}"
-    assert "PROFILE_CUTS" in metrics.layer_names
     profile_layer = metrics.layers.get("PROFILE_CUTS")
     assert profile_layer is not None
     assert profile_layer.rect_count >= 1, f"Profile rects: {profile_layer.rect_count}"
+    assert metrics.paths.total_count >= 1, f"Path count: {metrics.paths.total_count}"
+    assert metrics.paths.closed_count >= 1, f"Closed count: {metrics.paths.closed_count}"
     assert metrics.text.count >= 1, f"Text count: {metrics.text.count}"
     assert len(metrics.text.dimension_labels) >= 1, f"Dimensions: {metrics.text.dimension_labels}"
 
 
-def test_svg_metrics_deterministic():
-    """Verify same input produces identical metrics."""
-    svg_path = get_recipe_svg_path(1, "simple_profile")
+def test_svg_metrics_from_file_match_string(tmp_path):
+    svg = _make_svg()
+    svg_path = tmp_path / "tray.svg"
+    svg_path.write_text(svg, encoding="utf-8")
 
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
+    from_file = extract_svg_metrics_from_file(str(svg_path)).to_dict()
 
-    metrics1 = extract_svg_metrics_from_file(svg_path)
-    metrics2 = extract_svg_metrics_from_file(svg_path)
-
-    dict1 = metrics1.to_dict()
-    dict2 = metrics2.to_dict()
-
-    dict1["svg"]["extraction_time_ms"] = 0
-    dict2["svg"]["extraction_time_ms"] = 0
-
-    assert dict1 == dict2, "Metrics should be deterministic"
-
-
-def test_svg_metrics_deterministic_from_string():
-    """Verify string input produces same metrics as file."""
-    svg_path = get_recipe_svg_path(1, "simple_profile")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    with open(svg_path) as f:
-        svg_content = f.read()
-
-    metrics_file = extract_svg_metrics_from_file(svg_path)
-    metrics_string = extract_svg_metrics(svg_content)
-
-    dict1 = metrics_file.to_dict()
-    dict2 = metrics_string.to_dict()
-    dict1["svg"]["extraction_time_ms"] = 0
-    dict2["svg"]["extraction_time_ms"] = 0
-
-    assert dict1 == dict2, "File and string extraction should match"
-
-
-def test_svg_metrics_json_serializable():
-    """Verify metrics can be serialized to JSON."""
-    svg_path = get_recipe_svg_path(1, "simple_profile")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    metrics = extract_svg_metrics_from_file(svg_path)
-    metrics_dict = metrics.to_dict()
-
-    json_str = json.dumps(metrics_dict, indent=2)
-    assert len(json_str) > 0
-
-    parsed = json.loads(json_str)
-    assert "svg" in parsed
-    assert "document" in parsed["svg"]
-    assert "layers" in parsed["svg"]
-
-
-def test_svg_metrics_schema_compliance():
-    """Verify output matches expected schema structure."""
-    svg_path = get_recipe_svg_path(3, "shaker_door_template")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    metrics = extract_svg_metrics_from_file(svg_path)
-    d = metrics.to_dict()
-
-    assert "svg" in d
-    svg = d["svg"]
-
-    assert "version" in svg
-    assert "extraction_time_ms" in svg
-    assert "document" in svg
-    assert "layers" in svg
-    assert "paths" in svg
-    assert "bounds" in svg
-    assert "text_elements" in svg
-    assert "circles" in svg
-    assert "rects" in svg
-
-    doc = svg["document"]
-    assert "width_mm" in doc
-    assert "height_mm" in doc
-    assert "viewbox" in doc
-    assert len(doc["viewbox"]) == 4
-
-    layers = svg["layers"]
-    assert "count" in layers
-    assert "names" in layers
-    assert "by_layer" in layers
-
-    paths = svg["paths"]
-    assert "total_count" in paths
-    assert "closed_count" in paths
-    assert "open_count" in paths
+    assert _without_timing(from_file) == _without_timing(extract_svg_metrics(svg).to_dict())
 
 
 def test_svg_metrics_empty_layers():
@@ -262,98 +172,3 @@ def test_svg_metrics_dimension_text():
     assert metrics.text.count == 3
     assert "200.0mm" in metrics.text.dimension_labels
     assert "150.0mm" in metrics.text.dimension_labels
-
-
-def test_svg_metrics_all_recipes():
-    """Smoke test: extract metrics from all recipe SVGs without error."""
-    import glob
-
-    single_svg_recipes = [
-        (1, "simple_profile"),
-        (2, "pocket_with_cleanup"),
-        (3, "shaker_door_template"),
-        (4, "custom_template"),
-        (5, "validation_workflow"),
-        (6, "multiple_depths"),
-        (7, "json_generation"),
-        (8, "svg_visualization"),
-        (9, "config_tuning"),
-        (10, "hole_patterns_grid"),
-        (11, "keepout_islands"),
-        (12, "edge_treatment_intent"),
-        (13, "split_layout_french_door"),
-        (14, "corner_cleanup_multi_tool"),
-        (15, "profile_with_tabs"),
-        (16, "sheet_layout_nesting"),
-    ]
-
-    multi_sheet_recipes = [
-        (17, "nesting_guillotine"),
-        (18, "nesting_maxrects"),
-    ]
-
-    passed = 0
-    skipped = 0
-    failed = 0
-
-    for num, name in single_svg_recipes:
-        svg_path = get_recipe_svg_path(num, name)
-        if not os.path.exists(svg_path):
-            skipped += 1
-            continue
-
-        try:
-            metrics = extract_svg_metrics_from_file(svg_path)
-            assert metrics.document.width_mm > 0
-            assert metrics.document.height_mm > 0
-            assert metrics.layer_count > 0
-            passed += 1
-        except Exception:
-            failed += 1
-
-    for num, name in multi_sheet_recipes:
-        recipe_dir = os.path.join(RECIPE_DIR, f"{num:02d}_{name}", "output")
-        if not os.path.exists(recipe_dir):
-            skipped += 1
-            continue
-
-        sheet_svgs = sorted(
-            f for f in glob.glob(os.path.join(recipe_dir, "sheet_*.svg")) if not os.path.basename(f).startswith("._")
-        )
-
-        if not sheet_svgs:
-            skipped += 1
-            continue
-
-        for svg_path in sheet_svgs:
-            try:
-                metrics = extract_svg_metrics_from_file(svg_path)
-                assert metrics.document.width_mm > 0
-                assert metrics.document.height_mm > 0
-                assert metrics.layer_count > 0
-                passed += 1
-            except Exception:
-                failed += 1
-
-    assert failed == 0, f"{failed} recipes failed"
-
-
-def test_cam_validation_result_with_svg_metrics():
-    """Test integration of SVG metrics into CAMValidationResult."""
-    svg_path = get_recipe_svg_path(1, "simple_profile")
-
-    if not os.path.exists(svg_path):
-        pytest.skip(f"{svg_path} not found")
-
-    metrics = extract_svg_metrics_from_file(svg_path)
-
-    result = CAMValidationResult(input_file="simple_profile.pml.yml")
-    result.metrics["svg"] = metrics.to_dict()["svg"]
-
-    json_str = result.to_json()
-    assert len(json_str) > 0
-
-    parsed = json.loads(json_str)
-    assert "validation_result" in parsed
-    assert "metrics" in parsed["validation_result"]
-    assert "svg" in parsed["validation_result"]["metrics"]

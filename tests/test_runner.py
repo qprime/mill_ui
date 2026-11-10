@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import glob
 import json
-import os
+from pathlib import Path
 from typing import Any
 
-import pytest
-
+from cli.mill import write_recipe_outputs
 from layout_ast.layout import (
     Feature,
     Geometry,
@@ -15,6 +13,7 @@ from layout_ast.layout import (
     Placement,
     Sheet,
 )
+from pml import parse_pml
 from validation.core import CAMValidationResult, Verdict
 from validation.runner import (
     ValidationInput,
@@ -24,11 +23,108 @@ from validation.runner import (
     validate_recipe,
 )
 
-RECIPE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "recipes",
-)
+PLATE_PML = """Sheet:
+  width: 220mm
+  height: 160mm
+  thickness: 19mm
+  material: mdf
+children:
+- Rect:
+    id: plate
+    feature:
+      type: profile
+      depth: through
+      side: outside
+    at:
+      x: 110mm
+      y: 80mm
+      width: 180mm
+      height: 120mm
+- Rect:
+    id: plate_recess
+    feature:
+      type: pocket
+      depth: 3mm
+    at:
+      x: 110mm
+      y: 80mm
+      width: 100mm
+      height: 60mm
+- Circle:
+    id: plate_hole
+    diameter: 6mm
+    feature:
+      type: hole
+      depth: 10mm
+    at:
+      x: 40mm
+      y: 40mm
+"""
+
+BACK_FACE_DOOR_PML = """Sheet:
+  width: 440mm
+  height: 640mm
+  thickness: 19mm
+  material: mdf
+  min_web: 4mm
+children:
+- Rect:
+    id: door
+    at:
+      x: 220mm
+      y: 320mm
+      width: 400mm
+      height: 600mm
+    children:
+    - Profile:
+        side: outside
+        depth: through
+- Circle:
+    id: hinge_cup
+    diameter: 35mm
+    feature:
+      type: pocket
+      depth: 12.5mm
+      face: back
+    at:
+      x: 42.5mm
+      y: 120mm
+- Circle:
+    id: hinge_pilot
+    diameter: 3mm
+    feature:
+      type: hole
+      depth: 10mm
+      face: back
+    at:
+      x: 33mm
+      y: 97.5mm
+"""
+
+
+def _make_recipe(tmp_path: Path, pml: str) -> Path:
+    recipe_dir = tmp_path / "recipe"
+    recipe_dir.mkdir()
+    source = recipe_dir / "example.pml.yml"
+    source.write_text(pml)
+    write_recipe_outputs(source, recipe_dir.name, recipe_dir / "output")
+    return recipe_dir
+
+
+def test_validate_recipe_extracts_metrics_and_passes_invariants(tmp_path: Path):
+    result = validate_recipe(_make_recipe(tmp_path, PLATE_PML))
+
+    assert "svg" in result.metrics
+    assert "gcode" in result.metrics
+    assert result.invariants.total > 0
+    assert result.invariants.failed == 0
+
+
+def test_validate_recipe_with_ast_passes_assertions(tmp_path: Path):
+    result = validate_recipe(_make_recipe(tmp_path, PLATE_PML), ast=parse_pml(PLATE_PML))
+
+    assert result.assertions.total > 0
+    assert result.assertions.failed == 0
 
 
 def make_simple_profile_ast() -> LayoutAST:
@@ -201,29 +297,6 @@ M2
     assert len(gcode_invariants) > 0
 
 
-def test_validate_recipe_with_golden_file():
-    recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
-
-    if not os.path.exists(recipe_dir):
-        pytest.skip("recipe not found")
-
-    golden = {"svg": {"document": {"width_mm": 730.0}}}
-
-    from validation.regression import ComparisonConfig
-
-    config = ComparisonConfig(default_tolerance_percent=1.0)
-
-    result = validate_recipe(
-        recipe_dir,
-        golden_metrics=golden,
-        golden_file="/path/to/golden.json",
-        comparison_config=config,
-    )
-
-    assert result.regressions.compared is True
-    assert result.regressions.golden_file == "/path/to/golden.json"
-
-
 def test_merge_gcode_metrics_empty():
     result = _merge_gcode_metrics([])
     assert result == {}
@@ -257,92 +330,6 @@ def test_merge_gcode_metrics_sums_counts():
     assert result["summary"]["total_lines"] == 300
     assert result["motion"]["g1_count"] == 150
     assert result["file_count"] == 2
-
-
-def test_validate_recipe_simple_profile():
-    recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
-
-    if not glob.glob(os.path.join(recipe_dir, "output", "*.svg")):
-        pytest.skip("recipe SVG not generated")
-
-    result = validate_recipe(recipe_dir)
-
-    assert isinstance(result, CAMValidationResult)
-    assert "svg" in result.metrics
-    assert result.invariants.total > 0
-    assert result.invariants.failed == 0
-
-
-def test_validate_recipe_with_ast():
-    recipe_dir = os.path.join(RECIPE_DIR, "01_simple_profile")
-    pml_path = os.path.join(recipe_dir, "example.pml.yml")
-
-    if not os.path.exists(pml_path):
-        pytest.skip("recipe not found")
-
-    from pml import parse_pml
-
-    with open(pml_path) as f:
-        ast = parse_pml(f.read())
-
-    result = validate_recipe(recipe_dir, ast=ast)
-
-    assert result.assertions.total > 0
-
-
-def test_validate_recipe_two_sided():
-    recipe_dir = os.path.join(RECIPE_DIR, "86_backside_anchors")
-    pml_path = os.path.join(recipe_dir, "example.pml.yml")
-
-    if not glob.glob(os.path.join(recipe_dir, "output", "*.back.svg")):
-        pytest.skip("two-sided recipe output not generated")
-
-    from pml import parse_pml
-
-    with open(pml_path) as f:
-        ast = parse_pml(f.read())
-
-    result = validate_recipe(recipe_dir, ast=ast)
-
-    back_assertions = [r for r in result.assertions.results if r.source.startswith("ast:back")]
-    assert back_assertions
-    assert result.assertions.failed == 0
-    assert result.invariants.failed == 0
-
-
-def test_validate_recipe_pocket():
-    recipe_dir = os.path.join(RECIPE_DIR, "02_pocket_with_cleanup")
-
-    if not os.path.exists(recipe_dir):
-        pytest.skip("recipe not found")
-
-    result = validate_recipe(recipe_dir)
-
-    assert isinstance(result, CAMValidationResult)
-    assert result.invariants.failed == 0
-
-
-def test_validate_recipe_shaker_door():
-    recipe_dir = os.path.join(RECIPE_DIR, "03_shaker_door_template")
-
-    if not os.path.exists(recipe_dir):
-        pytest.skip("recipe not found")
-
-    result = validate_recipe(recipe_dir)
-
-    assert isinstance(result, CAMValidationResult)
-    assert result.invariants.failed == 0
-
-
-def test_validate_recipe_multi_tool():
-    recipe_dir = os.path.join(RECIPE_DIR, "03_shaker_door_template")
-
-    if not os.path.exists(recipe_dir):
-        pytest.skip("recipe not found")
-
-    result = validate_recipe(recipe_dir)
-
-    assert isinstance(result, CAMValidationResult)
 
 
 def test_output_format_matches_schema():

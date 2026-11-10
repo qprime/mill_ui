@@ -12,14 +12,14 @@
 | TS-2 | HARD | NO_DUPLICATE_COVERAGE | Before adding a test file, verify no existing file tests the same code paths |
 | TS-3 | HARD | TEST_PROJECT_CODE | Tests must exercise project logic, not Python builtins |
 | TS-4 | HARD | PYTEST_ONLY | Tests are collected by pytest. No hand-rolled runners or print-based reporting |
-| TS-5 | STRUCTURAL | ONE_RECIPE_LOOP | At most one test per validation concern may iterate all recipes |
+| TS-5 | STRUCTURAL | TESTS_OWN_INPUTS | Tests never read `docs/recipes/`. Inputs are inline PML or files under `tests/fixtures/` |
 | TS-6 | HARD | GOLDENS_ARE_TRACKED | Any file a test reads from disk must be tracked by git. Goldens in gitignored paths make fresh clones fail the test for filesystem reasons, not code reasons. If the test reads it, git tracks it. |
 
 ---
 
 ## Test at IR Level (TS-1)
 
-Canonical fast path: assert on `RemovalIntent` fields after `ast_to_removal_intents()`. Full pipeline tests exist in recipes; unit tests should not duplicate that path.
+Canonical fast path: assert on `RemovalIntent` fields after `ast_to_removal_intents()`.
 
 **Wrong:**
 ```python
@@ -33,7 +33,7 @@ intents = ast_to_removal_intents(ast)
 assert intents[0].bounds == Bounds2D(x_min=50, x_max=150, ...)
 ```
 
-**When full pipeline is appropriate:** Recipe golden tests (`test_recipes.py`) and the validation runner. These are intentionally slow integration tests with a specific purpose.
+**When full pipeline is appropriate:** Tests of the artifact checkers (SVG and G-code metrics and invariants, the validation runner, `validate_cam`) and CLI tests. They run the pipeline on a small inline PML to get real artifacts to check.
 
 ---
 
@@ -91,11 +91,11 @@ These are dead code in a pytest-collected suite. They clutter output and mislead
 
 ---
 
-## One Recipe Loop Per Concern (TS-5)
+## Tests Own Their Inputs (TS-5)
 
-Iterating all ~50 recipes is expensive (~4-14s per loop). Each validation concern (metrics extraction, invariant checks, golden regression) gets at most one recipe-loop test. If a higher-level test already calls `validate_recipe()` (which runs metrics + invariants internally), do not add separate recipe-loop tests for those sub-concerns.
+Recipes are documentation checked by `python -m cli.recipes`, not test fixtures. A test that reads a recipe breaks when the recipe is renamed or rebuilt, and silently loses coverage when it guards the read with a skip.
 
-**Check before adding a recipe-loop test:** Does `validate_recipe()` or `test_recipe_outputs()` already exercise this code path?
+A test that needs PML writes it inline, as a module constant in its own file. A test that needs a recipe folder (`validate_recipe`, `cli.mill --recipe`, `validate_cam --recipe`) writes one into `tmp_path`. A test over a corpus of PML files reads it from `tests/fixtures/` (see `tests/fixtures/pml_round_trip/`).
 
 ---
 

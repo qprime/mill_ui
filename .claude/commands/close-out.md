@@ -21,7 +21,7 @@ Run all verification steps. Do not skip any.
 .venv/bin/python tools/run_tests.py -x -q 2>&1 | tail -5
 
 # 2. Recipe validation — summary only
-.venv/bin/python -m tests.test_recipes 2>&1 | tail -5
+.venv/bin/python -m cli.recipes 2>&1 | tail -5
 
 # 3. Lint and type checks — summary only
 .venv/bin/python tools/run_ruff.py 2>&1 | tail -3
@@ -33,7 +33,7 @@ Run all verification steps. Do not skip any.
 
 Report the results: test count, pass/fail. Zero failures required.
 
-Recipe validation is a pass/fail gate only — do **not** run `--regen_recipes` or update golden metrics here. If a recipe fails, the implementation phase left outputs out of date or changed them unintentionally: raise it to the user.
+Recipe validation is a pass/fail gate only — do **not** run `--regen` here. If a recipe fails, the implementation phase left outputs out of date or changed them unintentionally: raise it to the user.
 
 ---
 

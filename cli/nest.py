@@ -21,7 +21,7 @@ from cli.project import (
 from layout_ast.layout import LayoutAST
 from nesting import nest_and_generate, nest_parts
 from pml.lifter import lift_layout_ast
-from pml.nest_parser import nest_job_to_api_params
+from pml.nest_parser import NestJob, nest_job_to_api_params
 from pml.revision_header import format_pml_header
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import NestParseError, parse_nest_yaml
@@ -122,6 +122,12 @@ def run_export_svg(ast: LayoutAST, pml_path: Path, output_dir: Path, theme: str)
     svg_path = output_dir / f"{pml_path.stem}.blueprint.{theme}.svg"
     svg_path.write_text(svg_string, encoding="utf-8")
     return svg_path
+
+
+def nest_job(job: NestJob) -> dict[str, Any]:
+    api_params = nest_job_to_api_params(job)
+    api_params["output_format"] = "ast"
+    return nest_and_generate(**api_params)
 
 
 def main():  # noqa: C901 — CLI entry point
@@ -232,10 +238,7 @@ Output files:
 
     start_time = time.perf_counter()
 
-    api_params = nest_job_to_api_params(job)
-    api_params["output_format"] = "ast"
-
-    result = nest_and_generate(**api_params)
+    result = nest_job(job)
 
     nest_time = time.perf_counter() - start_time
 

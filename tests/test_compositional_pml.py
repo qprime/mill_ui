@@ -1335,15 +1335,15 @@ def test_string_art_rejects_invalid_forms(string_art, message):
         parse_pml_yaml(_string_art_pml(string_art))
 
 
-RECIPE_PML_FILES = sorted((Path(__file__).parent.parent / "docs" / "recipes").glob("*/*.pml.yml"))
+ROUND_TRIP_PML_FILES = sorted((Path(__file__).parent / "fixtures" / "pml_round_trip").glob("*.pml.yml"))
 
 
-def test_recipe_round_trip_finds_recipes():
-    assert RECIPE_PML_FILES
+def test_round_trip_corpus_is_present():
+    assert ROUND_TRIP_PML_FILES
 
 
-@pytest.mark.parametrize("pml_path", RECIPE_PML_FILES, ids=lambda p: p.parent.name)
-def test_recipe_round_trips_to_identical_ast(pml_path: Path):
+@pytest.mark.parametrize("pml_path", ROUND_TRIP_PML_FILES, ids=lambda p: p.name.removesuffix(".pml.yml"))
+def test_corpus_round_trips_to_identical_ast(pml_path: Path):
     ast = parse_pml_yaml(pml_path.read_text())
     assert parse_pml_yaml(format_pml_yaml(ast)) == ast
 

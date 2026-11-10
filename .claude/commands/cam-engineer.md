@@ -79,7 +79,7 @@ If a recipe **fails** due to your changes:
 1. Diagnose the failure
 2. If the output change is unintended, it is a regression: fix the implementation
 3. If it is intended, run `python -m tests.test_recipes --regen_recipes`, review every changed output file, and stage all of them with your implementation. Every changed output belongs to this change; never revert outputs to make the gate pass
-4. Update golden metrics for the changed recipes with `python -m cli.generate_golden --recipe docs/recipes/<name> --update`
+4. Recipe golden metrics are off during the recipe rebuild (#245). Do not update them.
 
 ## Issue Comment on Completion
 

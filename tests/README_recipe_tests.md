@@ -100,7 +100,7 @@ A run with more than one sheet (a multi-sheet layout, or several input files) wr
 
 ## Golden metrics
 
-Golden metrics in `tests/golden/` are a separate baseline, built from the committed outputs. When outputs change on purpose, update the goldens for the changed recipes with `python -m cli.generate_golden --recipe docs/recipes/<name> --update`, or all of them with `/snapshot-recipes`.
+Recipe golden metrics in `tests/golden/` are off during the recipe rebuild. `test_all_recipes_against_golden` is skipped and nothing updates `tests/golden/`. #245 decides whether they return.
 
 ## Scope
 

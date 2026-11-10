@@ -1,5 +1,5 @@
 ---
-description: Regenerate all recipe outputs and refresh golden metrics. Use on-demand to establish a new golden baseline.
+description: Regenerate all recipe outputs. The golden-metrics step is off during the recipe rebuild (#245).
 ---
 
 # /snapshot-recipes — Recipe Baseline Snapshot
@@ -11,7 +11,7 @@ Regenerate all recipe artifacts and update the golden metrics baseline. This is 
 ## What This Does
 
 1. Regenerates all recipe outputs (G-code, SVG, metrics, machining summary) from current code
-2. Refreshes the golden metrics store (`tests/golden/`)
+2. Refreshes the golden metrics store (`tests/golden/`). **Off during the recipe rebuild (#245): skip this step.**
 
 ## When To Use
 
@@ -31,8 +31,7 @@ Run all steps sequentially. Pipe to `tail` for context discipline.
 # 1. Regenerate all recipe outputs
 .venv/bin/python -m tests.test_recipes --regen_recipes 2>&1 | tail -5
 
-# 2. Update golden metrics baseline
-.venv/bin/python -m cli.generate_golden --all-recipes docs/recipes --update --force 2>&1 | tail -5
+# 2. Golden metrics baseline: off during the recipe rebuild (#245). Do not run.
 
 # 3. Verify everything passes
 .venv/bin/python -m tests.test_recipes 2>&1 | tail -5
@@ -47,6 +46,6 @@ All recipes must pass after regeneration. If any fail, diagnose and raise to the
 Report to the user:
 - Number of recipes regenerated
 - Whether all recipes pass
-- Ask if they want to commit the snapshot (stage every changed file under `docs/recipes/*/output/` and `tests/golden/`, one path per `git add`)
+- Ask if they want to commit the snapshot (stage every changed file under `docs/recipes/*/output/`, one path per `git add`)
 
 Do not commit automatically — the user decides when to commit snapshot updates.

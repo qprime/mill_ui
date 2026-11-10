@@ -198,7 +198,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert between formats |
-| `python -m cli.generate_golden --all-recipes docs/recipes --update --force` | Regenerate golden metrics (snapshot — see [Recipes](#recipes)) |
+| `python -m cli.generate_golden --all-recipes docs/recipes --update --force` | Regenerate golden metrics. Off during the recipe rebuild (#245) |
 
 ## Project Structure
 
@@ -241,7 +241,7 @@ When a change alters recipe output, regenerate every recipe, review every change
 
 ```bash
 python -m tests.test_recipes --regen_recipes                              # recipe outputs
-python -m cli.generate_golden --all-recipes docs/recipes --update --force # golden metrics
+python -m cli.generate_golden --all-recipes docs/recipes --update --force # golden metrics: off during the recipe rebuild (#245), do not run
 ```
 
 The `/snapshot-recipes` skill runs both in order. See [tests/README_recipe_tests.md](tests/README_recipe_tests.md).

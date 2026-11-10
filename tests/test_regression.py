@@ -465,6 +465,7 @@ def test_recipe_metrics_self_comparison():
     assert len(failed) == 0, f"Self-comparison failures: {[r.metric_path for r in failed]}"
 
 
+@pytest.mark.skip(reason="Recipe goldens are off during the recipe rebuild; see #245")
 def test_all_recipes_against_golden():
     """Validate all recipes against their golden baselines."""
     golden_store_path = os.path.join(

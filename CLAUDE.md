@@ -57,7 +57,7 @@ python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
 python -m tests.test_recipes                    # recipe gate: every output file matches current code (also a pre-commit hook)
 python -m tests.test_recipes --regen_recipes    # regenerate every recipe's output/
-python -m cli.generate_golden --all-recipes docs/recipes --update --force  # snapshot: update golden metrics
+python -m cli.generate_golden --all-recipes docs/recipes --update --force  # recipe goldens are off during the recipe rebuild (#245); do not run
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
 
@@ -152,7 +152,7 @@ Check before implementing — these already exist:
 | Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
 | Golden metric generation | `cli/generate_golden.py` |
 | Recipe validation (pass/fail) | `python -m tests.test_recipes` |
-| Recipe snapshot (regen + golden) | `/snapshot-recipes` skill |
+| Recipe snapshot (regen; golden step off, #245) | `/snapshot-recipes` skill |
 
 ## Don't
 

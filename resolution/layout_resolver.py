@@ -98,6 +98,7 @@ from layout_ast.compositional import (
     HeightfieldGen,
     HoleGridGen,
     Inset,
+    Island,
     Keepout,
     Line,
     LinesGen,
@@ -485,12 +486,8 @@ class LayoutResolver:
         islands = []
 
         for child in children:
-            if isinstance(child, Keepout):
-                keepout_items: list[Item] = []
-                for keepout_child in child.children:
-                    self._resolve_node(keepout_child, region, keepout_items, params)
-
-                for item in keepout_items:
+            if isinstance(child, Island):
+                for item in self._resolve_zone_geometry(child, region, params):
                     if item.kind == "shape" and item.geometry and item.placement:
                         bounds_dict = compute_shape_bounds_dict(
                             item.type,
@@ -500,6 +497,23 @@ class LayoutResolver:
                         islands.append(bounds_dict)
 
         return islands
+
+    def _resolve_zone_geometry(
+        self, node: Island | Keepout, region: ResolvedRegion, params: dict[str, Any]
+    ) -> list[Item]:
+        items: list[Item] = []
+        for child in node.children:
+            self._resolve_node(child, region, items, params)
+        if not items:
+            raise ResolutionAssertionError(f"{type(node).__name__} '{node.id}': children produced no zone geometry")
+        for item in items:
+            if item.feature is not None or item.kind != "shape":
+                feature_type = item.feature.type if item.feature is not None else item.kind
+                raise ValueError(
+                    f"{type(node).__name__} '{node.id}': children define zone geometry and cannot carry features, "
+                    f"got {feature_type} on '{item.shape_id}'"
+                )
+        return items
 
     def _extract_edge_treatment(
         self,
@@ -677,7 +691,7 @@ class LayoutResolver:
             child_params["edge_treatment"] = edge_treatment
 
         for child in node.children:
-            if not isinstance(child, (Keepout, Edge)):
+            if not isinstance(child, (Island, Edge)):
                 self._resolve_node(child, region, items, child_params)
 
     def _handle_circle(
@@ -726,7 +740,7 @@ class LayoutResolver:
         child_params = {**params, "domain": domain, "domain_center": region.center}
 
         for child in node.children:
-            if not isinstance(child, (Keepout, Edge)):
+            if not isinstance(child, (Island, Edge)):
                 self._resolve_node(child, region, items, child_params)
 
     def _handle_rounded_rect(
@@ -784,7 +798,7 @@ class LayoutResolver:
         )
         child_params = {**params, "domain": domain, "domain_center": region.center}
         for child in node.children:
-            if not isinstance(child, (Keepout, Edge)):
+            if not isinstance(child, (Island, Edge)):
                 self._resolve_node(child, region, items, child_params)
 
     def _handle_line(
@@ -904,7 +918,8 @@ class LayoutResolver:
         params: dict[str, Any],
     ) -> None:
 
-        pass
+        for item in self._resolve_zone_geometry(node, region, params):
+            items.append(replace(item, kind="keepout", shape_id=node.id or "keepout", label=node.id or "keepout"))
 
     def _handle_item(
         self,

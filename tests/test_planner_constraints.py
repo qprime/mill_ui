@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from cam.moves import CutMove, Move, RapidMove, SetRpmMove
 from cam.pipeline import run_pipeline
 from cam.planner.capabilities import (
@@ -98,6 +100,62 @@ class TestConstraintAudit:
 
 
 class TestToolpathKeepoutVerification:
+    def test_unknown_cutting_position_is_rejected(self):
+        zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60}]
+        with pytest.raises(ValueError, match="unknown XY position"):
+            verify_toolpath_avoids_keepouts([CutMove(z=-1)], zones)
+
+    def test_modal_position_survives_pass_boundary(self):
+        from cam.model.machine import Machine
+        from cam.model.stock import Stock
+        from cam.planner.passes import PassAccumulator
+        from cam.planner.passes.tools import normalize_tool_entries
+        from validation.toolpath_checks import verify_passes_avoid_keepouts
+
+        accumulator = PassAccumulator(machine=Machine(), stock=Stock(300, 200, 19), safe_z=6, prime_spindle=False)
+        tool = normalize_tool_entries([{"diameter": 3.175, "kind": "flat"}])[0]
+        first = accumulator.get_record("pocket", tool)
+        first.add_moves([RapidMove(x=0, y=50)])
+        second = accumulator.get_record("profile", tool)
+        second.add_moves([CutMove(x=200)])
+        zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60}]
+
+        assert verify_passes_avoid_keepouts([first, second], zones).has_violations()
+
+    @pytest.mark.parametrize(
+        "moves",
+        [
+            [RapidMove(x=0, y=50), CutMove(x=200, y=50, z=-1)],
+            [RapidMove(x=0, y=50), CutMove(x=200, z=-1)],
+            [RapidMove(x=100, y=0), CutMove(y=100, z=-1)],
+            [RapidMove(x=100, y=50), CutMove(z=-1)],
+        ],
+        ids=["segment", "modal_x", "modal_y", "plunge"],
+    )
+    def test_cut_crossing_keepout_is_detected(self, moves):
+        zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60, "reason": "clamp"}]
+
+        result = verify_toolpath_avoids_keepouts(moves, zones)
+
+        assert result.has_violations()
+        assert result.keepout_violations[0].keepout_reason == "clamp"
+
+    def test_rapid_crossing_warns_instead_of_failing(self):
+        zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60, "reason": "clamp"}]
+        result = verify_toolpath_avoids_keepouts([RapidMove(x=0, y=50), RapidMove(x=200, y=50)], zones)
+
+        assert not result.has_violations()
+        assert len(result.rapid_crossings) == 1
+        assert "clamp" in result.format_warnings(6.0)[0]
+        assert "safe Z 6.0 mm" in result.format_warnings(6.0)[0]
+
+    def test_segment_clearance_includes_tool_radius(self):
+        zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60}]
+        moves: list[Move] = [RapidMove(x=0, y=37), CutMove(x=200)]
+
+        assert not verify_toolpath_avoids_keepouts(moves, zones, tool_radius_mm=2).has_violations()
+        assert verify_toolpath_avoids_keepouts(moves, zones, tool_radius_mm=4).has_violations()
+
     def test_no_keepouts_passes(self):
         moves = [
             CutMove(x=10, y=10, z=-5),
@@ -170,6 +228,44 @@ class TestToolpathKeepoutVerification:
 
 
 class TestPipelineKeepoutIntegration:
+    def test_keepout_violation_blocks_only_front_setup_gcode(self, tmp_path):
+        from dataclasses import replace
+
+        from cam.pipeline import SheetRun, write_run_outputs
+
+        pml = """Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    at: {x: 150mm, y: 100mm, width: 200mm, height: 100mm}
+    feature: {type: profile, side: outside, depth: through, tab_count: 4, tab_height: 3mm}
+- Circle:
+    diameter: 10mm
+    at: {x: 150mm, y: 100mm}
+    feature: {type: hole, face: back, depth: 3mm}
+- Keepout:
+    id: clamp
+    children:
+    - Rect:
+        at: {x: 50mm, y: 100mm, width: 20mm, height: 20mm}
+"""
+        ast = resolve_layout(parse_pml_yaml(pml))
+        valid_ast = replace(ast, items=tuple(item for item in ast.items if item.kind != "keepout"))
+        valid_result = run_pipeline(valid_ast, generate_svg=True)
+        write_run_outputs([SheetRun("part.pml.yml", 1, "part", valid_result)], tmp_path)
+        assert any(not path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
+        result = run_pipeline(ast, generate_svg=True)
+        write_run_outputs([SheetRun("part.pml.yml", 1, "part", result)], tmp_path)
+
+        assert any("Keepout violation" in error for error in result.errors)
+        assert result.gcode
+        assert all(name.startswith("back-") for name in result.gcode)
+        assert result.svg is not None
+        assert result.svg_back is not None
+        assert all(path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
+
     def test_pipeline_with_keepout_pocket_outside(self):
         pml = """
 Sheet:
@@ -180,18 +276,21 @@ Sheet:
 children:
   - Rect:
       id: panel
-      w: 100mm
-      h: 100mm
-      x: 50mm
-      y: 50mm
+      at: {x: 100mm, y: 100mm, width: 100mm, height: 100mm}
       feature:
         type: pocket
         depth: 6mm
+  - Keepout:
+      id: clamp
+      children:
+      - Rect: {at: {x: 300mm, y: 300mm, width: 30mm, height: 30mm}}
 """
         ast = parse_pml_yaml(pml)
         flat = resolve_layout(ast)
         result = run_pipeline(flat, generate_svg=False)
         assert len(result.errors) == 0
+        assert result.gcode
+        assert result.metrics["constraint_audit"]["keepouts"]["count"] == 1
 
     def test_constraint_audit_in_metrics(self):
         pml = """
@@ -243,6 +342,32 @@ class TestPlannerCapabilitiesRegistry:
 
 
 class TestAdapterKeepoutExtraction:
+    def test_pml_keepout_reaches_only_front_intents(self):
+        from adapters.ast_to_removal import ast_to_removal_intents
+
+        pml = """Sheet:
+  width: 300mm
+  height: 200mm
+  thickness: 19mm
+children:
+- Rect:
+    feature: {type: pocket, depth: 3mm}
+- Circle:
+    diameter: 10mm
+    feature: {type: hole, depth: 3mm, face: back}
+- Keepout:
+    id: screw
+    children:
+    - Circle:
+        diameter: 20mm
+        at: {x: 30mm, y: 40mm}
+"""
+        intents = ast_to_removal_intents(resolve_layout(parse_pml_yaml(pml)))
+
+        front, back = intents
+        assert front.constraints.keepouts == (KeepoutRegion(Bounds2D(20, 40, 30, 50), "screw"),)
+        assert back.constraints.keepouts == ()
+
     def test_keepouts_extracted_to_planner_input(self):
         from adapters.removal_to_planner import removal_intents_to_planner_input
 

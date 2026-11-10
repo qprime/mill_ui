@@ -140,6 +140,12 @@ class Polyline:
 
 
 @dataclass(frozen=True)
+class Island:
+    children: tuple[Any, ...] = ()
+    id: str | None = None
+
+
+@dataclass(frozen=True)
 class Keepout:
     children: tuple[Any, ...] = ()
     id: str | None = None

@@ -56,6 +56,7 @@ Defined in `adapters/layoutast_to_ir.py`:
 | notch | PROFILE_CUTS |
 | surface | (none — excluded from diagram) |
 | waste | WASTE_CUTS |
+| Item kind keepout (non-machining) | KEEPOUT_ZONES |
 
 ---
 
@@ -72,6 +73,7 @@ Defined in `diagram_render/render_svg.py` DiagramTheme:
 | hole | Drill holes |
 | engrave | Engraving paths |
 | waste | Waste cut lines |
+| keepout | Fixture zone outlines and translucent fills |
 | toolpath | Toolpath preview |
 | dimension | Dimension lines |
 | dimension-text | Dimension labels |

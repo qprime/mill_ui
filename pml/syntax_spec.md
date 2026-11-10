@@ -1597,7 +1597,7 @@ Equivalent to `feature: {type: engrave, depth: 0.5mm}` on the parent shape.
 
 #### Keepout
 
-No-machining zone:
+Clamp or fixture geometry that no cutting segment may enter. Zones apply to the front setup; the back setup uses independent fixturing. Bounds are conservatively expanded by tool radius. A cutting violation blocks that setup's G-code; rapid crossings warn with the zone and safe Z because clamp height is not modeled.
 
 ```yaml
 - Keepout:
@@ -1605,6 +1605,27 @@ No-machining zone:
     children:
       - Rect: {at: {x: 100mm, y: 100mm, width: 50mm, height: 50mm}}
 ```
+
+Both `Keepout` and `Island` require nonempty geometry-only children and may not contain either zone type. Keepout directly under a pocket shape is rejected with guidance to use Island.
+
+#### Island
+
+Material a pocket preserves. Island must be a direct child of a Rect with a pocket feature; unsupported placements raise an error.
+
+```yaml
+- Rect:
+    feature: {type: pocket, depth: 6mm}
+    children:
+      - Island:
+          id: boss
+          children:
+            - Inset:
+                distance: 50mm
+                children:
+                  - Rect: {}
+```
+
+Existing pocket layouts that used Keepout for preserved material must rename that node to Island. Fixture zones do not shape or reroute pockets or profiles.
 
 #### WasteCuts
 

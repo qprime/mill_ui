@@ -87,6 +87,7 @@
         "Polyline": {"$ref": "#/$defs/polylineNode"},
         "Spline": {"$ref": "#/$defs/splineNode"},
         "Keepout": {"$ref": "#/$defs/keepoutNode"},
+        "Island": {"$ref": "#/$defs/islandNode"},
         "Edge": {"$ref": "#/$defs/edgeNode"},
         "Inset": {"$ref": "#/$defs/insetNode"},
         "Frame": {"$ref": "#/$defs/frameNode"},
@@ -214,10 +215,19 @@
       }
     },
     "keepoutNode": {
-      "type": ["object", "null"],
+      "type": "object",
+      "required": ["children"],
       "properties": {
         "id": {"type": "string"},
-        "children": {"type": "array", "items": {"$ref": "#/$defs/node"}}
+        "children": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/node"}}
+      }
+    },
+    "islandNode": {
+      "type": "object",
+      "required": ["children"],
+      "properties": {
+        "id": {"type": "string"},
+        "children": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/node"}}
       }
     },
     "edgeNode": {

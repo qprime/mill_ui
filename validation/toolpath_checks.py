@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from cam.moves import Move, XYMove
+from shapely.geometry import LineString, Point, box
+
+from cam.moves import CutMove, Move, XYMove
 from ir.removal_intent import Bounds2D
 from validation.core import InvariantResult, Verdict
 
@@ -24,6 +27,8 @@ class KeepoutViolation:
 @dataclass(frozen=True)
 class ToolpathVerificationResult:
     keepout_violations: tuple[KeepoutViolation, ...]
+    rapid_crossings: tuple[KeepoutViolation, ...] = ()
+    final_xy: tuple[float | None, float | None] = (None, None)
 
     def has_violations(self) -> bool:
         return len(self.keepout_violations) > 0
@@ -39,6 +44,14 @@ class ToolpathVerificationResult:
             )
         return errors
 
+    def format_warnings(self, safe_z_mm: float) -> list[str]:
+        counts = Counter(v.keepout_reason for v in self.rapid_crossings)
+        return [
+            f"{count} rapid moves cross keepout '{reason}' at safe Z {safe_z_mm} mm; "
+            "confirm the clamp is lower than safe Z"
+            for reason, count in counts.items()
+        ]
+
     def to_invariant_result(self) -> InvariantResult:
         n = len(self.keepout_violations)
         return InvariantResult(
@@ -52,10 +65,6 @@ class ToolpathVerificationResult:
             failed=n,
             failures=tuple(self.format_errors()),
         )
-
-
-def _point_in_bounds(x: float, y: float, bounds: Bounds2D) -> bool:
-    return bounds.x_min <= x <= bounds.x_max and bounds.y_min <= y <= bounds.y_max
 
 
 def _keepout_dict_to_region(keepout: Mapping[str, Any]) -> tuple[Bounds2D, str]:
@@ -73,6 +82,8 @@ def verify_toolpath_avoids_keepouts(
     moves: Sequence[Move],
     keepouts: Sequence[Mapping[str, Any]],
     tool_radius_mm: float = 0.0,
+    *,
+    initial_xy: tuple[float | None, float | None] = (None, None),
 ) -> ToolpathVerificationResult:
     if not keepouts:
         return ToolpathVerificationResult(keepout_violations=())
@@ -81,43 +92,48 @@ def verify_toolpath_avoids_keepouts(
 
     expanded_regions = []
     for bounds, reason in keepout_regions:
-        expanded = Bounds2D(
-            x_min=bounds.x_min - tool_radius_mm,
-            x_max=bounds.x_max + tool_radius_mm,
-            y_min=bounds.y_min - tool_radius_mm,
-            y_max=bounds.y_max + tool_radius_mm,
+        expanded = box(
+            bounds.x_min - tool_radius_mm,
+            bounds.y_min - tool_radius_mm,
+            bounds.x_max + tool_radius_mm,
+            bounds.y_max + tool_radius_mm,
         )
         expanded_regions.append((expanded, bounds, reason))
 
     violations: list[KeepoutViolation] = []
+    rapid_crossings: list[KeepoutViolation] = []
+    x, y = initial_xy
 
     for i, move in enumerate(moves):
         if not isinstance(move, XYMove):
             continue
 
-        x = move.x
-        y = move.y
-
-        if x is None or y is None:
+        next_x = move.x if move.x is not None else x
+        next_y = move.y if move.y is not None else y
+        if next_x is None or next_y is None:
+            if isinstance(move, CutMove):
+                raise ValueError(f"Keepout verification: cutting move {i} has unknown XY position")
+            x, y = next_x, next_y
             continue
-
-        x = float(x)
-        y = float(y)
+        target = (next_x, next_y)
+        segment = Point(target) if x is None or y is None or (x, y) == target else LineString([(x, y), target])
 
         for expanded, original, reason in expanded_regions:
-            if _point_in_bounds(x, y, expanded):
-                violations.append(
+            if segment.intersects(expanded):
+                crossing = segment.intersection(expanded).representative_point()
+                collection = violations if isinstance(move, CutMove) else rapid_crossings
+                collection.append(
                     KeepoutViolation(
                         move_index=i,
-                        x=x,
-                        y=y,
+                        x=crossing.x,
+                        y=crossing.y,
                         keepout_reason=reason,
                         keepout_bounds=original,
                     )
                 )
-                break
+        x, y = target
 
-    return ToolpathVerificationResult(keepout_violations=tuple(violations))
+    return ToolpathVerificationResult(tuple(violations), tuple(rapid_crossings), (x, y))
 
 
 def verify_passes_avoid_keepouts(
@@ -128,10 +144,14 @@ def verify_passes_avoid_keepouts(
         return ToolpathVerificationResult(keepout_violations=())
 
     all_violations: list[KeepoutViolation] = []
+    all_rapid_crossings: list[KeepoutViolation] = []
+    xy: tuple[float | None, float | None] = (None, None)
 
     for p in passes:
         tool_radius = p.setup.tool.diameter / 2.0
-        result = verify_toolpath_avoids_keepouts(p.moves, keepouts, tool_radius)
+        result = verify_toolpath_avoids_keepouts(p.moves, keepouts, tool_radius, initial_xy=xy)
         all_violations.extend(result.keepout_violations)
+        all_rapid_crossings.extend(result.rapid_crossings)
+        xy = result.final_xy
 
-    return ToolpathVerificationResult(keepout_violations=tuple(all_violations))
+    return ToolpathVerificationResult(tuple(all_violations), tuple(all_rapid_crossings), xy)

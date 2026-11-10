@@ -96,6 +96,10 @@ guide:
         detect: [{param: rough_allowance}, {param: finish_allowance}]
       - name: Islands
         summary: Areas a pocket leaves standing.
+        spec: pml/syntax_spec.md#island
+        detect: [{node: Island}]
+      - name: Fixture keepouts
+        summary: Clamp and fixture zones checked against every front-setup cutting segment.
         spec: pml/syntax_spec.md#keepout
         detect: [{node: Keepout}]
       - name: Holes inside a recess

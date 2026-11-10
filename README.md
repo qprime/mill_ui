@@ -22,7 +22,7 @@ These are the design decisions that distinguish mill_ui from conventional CAM so
 ## Capabilities
 
 - **Machining features** — profile (with tabs), pocket, surface facing, hole, engrave, bevel, chamfer, roundover, wave texture.
-- **Layout managers** — Frame, Grid, Split, Inset, Place, Panel, Keepout for relative positioning.
+- **Layout managers** — Frame, Grid, Split, Inset, Place, and Panel for relative positioning. Island preserves pocket material; Keepout declares fixture zones.
 - **Assembly system** — Boxes, cabinets, cubbies, and beam structures. Joinery (finger, half-lap, captured, butt) resolved automatically from panel interfaces. Multi-sheet partitioning when parts exceed a single sheet.
 - **Nesting** — Bin-pack parts across sheets with guillotine (~62% utilization) or maxrects (~83%) algorithms. Holding strategies (onion skin, tabs) and non-rectangular shapes supported.
 - **Blueprint export** — SVG and PDF blueprints with dimensions, generated alongside G-code.
@@ -137,6 +137,7 @@ Profiles support **tabs** (holding bridges) to keep parts attached during throug
 | Place | Positioned children with explicit mapping. |
 | Panel | Basic panel container. |
 | Keepout | Exclusion zone (no machining). |
+| Island | Material preserved inside a Rect pocket. |
 
 ### Assembly System
 

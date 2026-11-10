@@ -28,7 +28,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | depth_profile.mode (linear_gradient) | NOT_IMPLEMENTED | — | gradient_direction_deg not passed |
 | constraints.tabs | HONORED | — | Profiles only |
 | constraints.onion_skin_mm | HONORED | — | Profiles only; mutually exclusive with tabs |
-| constraints.keepouts | HONORED | CRITICAL | Toolpath avoids keepout bounds |
+| constraints.keepouts | HONORED | CRITICAL | PML Keepout zones attach to front intents. Complete cutting segments are checked against bounds expanded by tool radius; a violation blocks that setup's G-code. |
 | constraints.islands | HONORED | — | Pockets: island bounds are subtracted from the pocket region, cut with offset loops. Rejected with surface_cooling. |
 | constraints.edge_treatment | HONORED | — | Allowance type splits pocket/profile into rough+finish passes. Polygon pockets and pockets with islands: rough offset loops leave the rough allowance on every wall, finish contours cut to the finish allowance. |
 | constraints.tolerance_mm | NOT_IMPLEMENTED | — | Uses global tolerance |
@@ -70,6 +70,10 @@ Keepouts represent regions where the tool must not enter (typically fixture/clam
 
 **Policy:** If any RemovalIntent specifies keepouts, the planner MUST avoid those regions. Failure to honor keepouts is a build error.
 
+PML `Keepout` declares fixture geometry; `Island` declares material a pocket preserves. Keepouts apply to the front setup only, whose fixtures are independent of the back setup. Verification follows modal XY positions across moves and passes in each emitted file, including Z-only plunges. An unknown cutting position is an error. The verifier does not clip or reroute paths.
+
+Rapid crossings warn with zone identity and safe Z. Clamp height is not modeled, so the operator confirms clearance. A cutting violation suppresses all `.nc` output for the affected setup while retaining diagnostic geometry and blueprints.
+
 ---
 
 ## Constraint Audit Output
@@ -107,7 +111,7 @@ For safety-critical constraints, the pipeline includes post-plan verification:
 
 | Constraint | Verification |
 |------------|--------------|
-| keepouts | `verify_toolpath_avoids_keepouts()` — checks XY bounds of all moves |
+| keepouts | `verify_toolpath_avoids_keepouts()` — checks complete cutting segments and plunges, expanded by tool radius; rapids warn |
 
 Post-plan verification runs after toolpath generation and before G-code output. Violations are errors.
 

@@ -20,7 +20,7 @@ children:
                   label: "Recess"
                   feature: {type: pocket, depth: 6mm}
                   children:
-                    - Keepout:
+                    - Island:
                         id: medallion
                         children:
                           - Circle: {diameter: 100mm, at: {x: 200mm, y: 200mm}}

@@ -30,6 +30,7 @@ from layout_ast.compositional import (
     HoleGridGen,
     Inset,
     InterfaceConfig,
+    Island,
     Keepout,
     Line,
     LinesGen,
@@ -451,13 +452,13 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["id"] = node.id
         return {"Spline": result}
 
-    elif isinstance(node, Keepout):
+    elif isinstance(node, (Island, Keepout)):
         result: dict[str, Any] = {}
         if node.id:
             result["id"] = node.id
         if node.children:
             result["children"] = [format_node(c) for c in node.children]
-        return {"Keepout": result if result else None}
+        return {type(node).__name__: result}
 
     elif isinstance(node, Edge):
         result: dict[str, Any] = {"treatment": node.treatment_type}

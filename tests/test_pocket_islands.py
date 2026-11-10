@@ -1,6 +1,101 @@
+from io import StringIO
+from typing import Any
+
+import pytest
+from ruamel.yaml import YAML
+
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
+
+
+def _zone_document(children, components=None):
+    data: dict[str, Any] = {"Sheet": {"width": 400, "height": 400, "thickness": 19}, "children": children}
+    if components is not None:
+        data["components"] = components
+    stream = StringIO()
+    YAML().dump(data, stream)
+    return stream.getvalue()
+
+
+@pytest.mark.parametrize("zone", ["Island", "Keepout"])
+def test_zone_requires_children(zone):
+    with pytest.raises(PMLParseError, match="requires nonempty children"):
+        parse_pml_yaml(_zone_document([{zone: {}}]))
+
+
+@pytest.mark.parametrize("parent", [None, "Circle", "RoundedRect", "Inset", "profile"])
+def test_island_rejects_unsupported_parent(parent):
+    island: dict[str, Any] = {"Island": {"children": [{"Rect": {}}]}}
+    children: list[dict[str, Any]]
+    if parent is None:
+        children = [island]
+    elif parent == "Inset":
+        children = [{"Inset": {"distance": 10, "children": [island]}}]
+    else:
+        node: dict[str, Any] = {
+            "feature": {"type": "profile" if parent == "profile" else "pocket", "depth": 3},
+            "children": [island],
+        }
+        if parent == "RoundedRect":
+            node["radius"] = 10
+        children = [{"Rect" if parent == "profile" else parent: node}]
+    with pytest.raises(PMLParseError, match="Island must be a direct child"):
+        parse_pml_yaml(_zone_document(children))
+
+
+@pytest.mark.parametrize("outer", ["Island", "Keepout"])
+@pytest.mark.parametrize("inner", ["Island", "Keepout"])
+def test_zones_cannot_nest(outer, inner):
+    nested: dict[str, Any] = {outer: {"children": [{"Rect": {"children": [{inner: {"children": [{"Rect": {}}]}}]}}]}}
+    children = (
+        [{"Rect": {"feature": {"type": "pocket", "depth": 3}, "children": [nested]}}] if outer == "Island" else [nested]
+    )
+    with pytest.raises(PMLParseError, match="Nested Island/Keepout"):
+        parse_pml_yaml(_zone_document(children))
+
+
+def test_old_keepout_under_pocket_points_to_island():
+    children = [
+        {"Rect": {"feature": {"type": "pocket", "depth": 3}, "children": [{"Keepout": {"children": [{"Rect": {}}]}}]}}
+    ]
+    with pytest.raises(PMLParseError, match="use Island"):
+        parse_pml_yaml(_zone_document(children))
+
+
+def test_component_body_island_without_pocket_is_rejected():
+    components: dict[str, Any] = {"zone": {"body": {"Island": {"children": [{"Rect": {}}]}}}}
+    with pytest.raises(PMLParseError, match="Island must be a direct child"):
+        parse_pml_yaml(_zone_document([], components))
+
+
+@pytest.mark.parametrize("zone", ["Island", "Keepout"])
+def test_zone_geometry_cannot_carry_features(zone):
+    node: dict[str, Any] = {
+        zone: {"id": "invalid", "children": [{"Rect": {"feature": {"type": "pocket", "depth": 3}}}]}
+    }
+    children = (
+        [{"Rect": {"feature": {"type": "pocket", "depth": 3}, "children": [node]}}] if zone == "Island" else [node]
+    )
+    with pytest.raises(ValueError, match="children define zone geometry and cannot carry features"):
+        resolve_layout(parse_pml_yaml(_zone_document(children)))
+
+
+def test_keepout_round_trip_preserves_zone_geometry():
+    children = [{"Keepout": {"id": "clamp", "children": [{"Circle": {"diameter": 20, "at": {"x": 30, "y": 40}}}]}}]
+    ast = parse_pml_yaml(_zone_document(children))
+
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+@pytest.mark.parametrize("parent", ["Rect", "Circle", "RoundedRect"])
+def test_fixture_keepout_is_not_dropped_by_shape_parent(parent):
+    node: dict[str, Any] = {"children": [{"Keepout": {"id": "clamp", "children": [{"Rect": {}}]}}]}
+    if parent == "RoundedRect":
+        node["radius"] = 10
+    flat = resolve_layout(parse_pml_yaml(_zone_document([{parent: node}])))
+
+    assert len([item for item in flat.items if item.kind == "keepout"]) == 1
 
 
 def test_simple_pocket_with_island():
@@ -17,7 +112,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -48,7 +143,7 @@ children:
     assert abs(island["y_max"] - 350.0) < 0.01
 
 
-def test_keepout_inside_grid():
+def test_island_inside_grid():
     pml = """
 Sheet:
   width: 600mm
@@ -68,7 +163,7 @@ children:
                     type: pocket
                     depth: 5mm
                   children:
-                    - Keepout:
+                    - Island:
                         children:
                           - Inset:
                               distance: 20mm
@@ -88,7 +183,7 @@ children:
         assert len(pocket.geometry.data["islands"]) == 1
 
 
-def test_multiple_keepouts_in_region():
+def test_multiple_islands_in_region():
     pml = """
 Sheet:
   width: 500mm
@@ -102,7 +197,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -112,7 +207,7 @@ children:
                         children:
                           - Rect:
                               id: island1
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 200mm
@@ -135,7 +230,7 @@ children:
     assert len(islands) == 2
 
 
-def test_keepout_roundtrip():
+def test_island_roundtrip():
     original_pml = """
 Sheet:
   width: 400mm
@@ -149,7 +244,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -182,7 +277,7 @@ children:
         assert abs(island1["y_max"] - island2["y_max"]) < 0.01
 
 
-def test_keepout_with_circle():
+def test_island_with_circle():
     pml = """
 Sheet:
   width: 400mm
@@ -196,7 +291,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Circle:
                   diameter: 100mm
@@ -221,7 +316,7 @@ children:
     assert abs(island["y_max"] - 250.0) < 0.01
 
 
-def test_keepout_with_rounded_rect():
+def test_island_with_rounded_rect():
     pml = """
 Sheet:
   width: 500mm
@@ -235,7 +330,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -263,7 +358,7 @@ children:
     assert abs(island["y_max"] - 350.0) < 0.01
 
 
-def test_nested_keepout_error():
+def test_nested_island_error():
     pml = """
 Sheet:
   width: 400mm
@@ -277,7 +372,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -285,7 +380,7 @@ children:
                     - Rect:
                         id: outer_island
                         children:
-                          - Keepout:
+                          - Island:
                               children:
                                 - Rect:
                                     id: nested_island
@@ -293,9 +388,9 @@ children:
 
     try:
         parse_pml_yaml(pml)
-        raise AssertionError("Should have raised PMLParseError for nested keepout")
+        raise AssertionError("Should have raised PMLParseError for nested island")
     except PMLParseError as e:
-        assert "nested keepout" in str(e).lower()
+        assert "nested island" in str(e).lower()
 
 
 def test_removal_intent_includes_islands():
@@ -314,7 +409,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 50mm
@@ -341,7 +436,7 @@ children:
     assert abs(island.bounds.y_max - 350.0) < 0.01
 
 
-def test_pocket_planning_preserves_keepout_island():
+def test_pocket_planning_preserves_island_island():
     from shapely.geometry import Point, box
 
     from adapters.ast_to_removal import ast_to_removal_intents
@@ -367,7 +462,7 @@ children:
         type: pocket
         depth: 6mm
       children:
-        - Keepout:
+        - Island:
             children:
               - Inset:
                   distance: 60mm

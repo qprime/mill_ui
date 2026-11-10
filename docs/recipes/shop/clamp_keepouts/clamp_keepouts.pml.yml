@@ -1,0 +1,50 @@
+project: clamp_keepouts
+Sheet:
+  physical_width: 600mm
+  physical_height: 400mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+children:
+  - Rect:
+      id: island_plate
+      label: Island plate
+      at: {x: 150mm, y: 110mm, width: 180mm, height: 120mm}
+      feature: {type: pocket, depth: 6mm}
+      children:
+        - Profile: {side: outside, depth: through, tab_count: 4, tab_height: 3mm}
+        - Island:
+            id: boss
+            children:
+              - Rect: {at: {x: 150mm, y: 110mm, width: 60mm, height: 40mm}}
+  - Rect:
+      id: plain_plate
+      label: Plain plate
+      at: {x: 150mm, y: 270mm, width: 180mm, height: 120mm}
+      feature: {type: profile, side: outside, depth: through, tab_count: 4, tab_height: 3mm}
+  - Circle:
+      id: disc
+      label: Disc
+      diameter: 200mm
+      at: {x: 420mm, y: 190mm}
+      feature: {type: profile, side: outside, depth: through, tab_count: 4, tab_height: 3mm}
+  - Keepout:
+      id: clamp_bottom_left
+      children:
+        - Rect: {at: {x: 25mm, y: 25mm, width: 40mm, height: 40mm}}
+  - Keepout:
+      id: clamp_bottom_right
+      children:
+        - Rect: {at: {x: 555mm, y: 25mm, width: 40mm, height: 40mm}}
+  - Keepout:
+      id: clamp_top_left
+      children:
+        - Rect: {at: {x: 25mm, y: 355mm, width: 40mm, height: 40mm}}
+  - Keepout:
+      id: clamp_top_right
+      children:
+        - Rect: {at: {x: 555mm, y: 355mm, width: 40mm, height: 40mm}}
+  - Keepout:
+      id: hold_down_screw
+      children:
+        - Circle: {at: {x: 290mm, y: 190mm}, diameter: 20mm}

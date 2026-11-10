@@ -152,6 +152,12 @@ Test pieces and machine upkeep: cut these to check the machine, the tools, and t
 
 Holes, pockets and profiles at known sizes for checking the machine.
 
+### [Clamp keepouts](shop/clamp_keepouts/)
+
+<img src="shop/clamp_keepouts/output/clamp_keepouts.svg" width="240">
+
+Fixture keepouts checked against every front-setup cutting segment, separately from a pocket's preserved island.
+
 ### [Joinery test coupons](shop/joinery_test_coupons/)
 
 <img src="shop/joinery_test_coupons/output/joinery_test_coupons.svg" width="240">

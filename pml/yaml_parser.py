@@ -30,6 +30,7 @@ from layout_ast.compositional import (
     HoleGridGen,
     Inset,
     InterfaceConfig,
+    Island,
     Keepout,
     Line,
     LinesGen,
@@ -1005,6 +1006,29 @@ def _parse_string_art_node(node_data: dict, path: str) -> StringArtGen:
     )
 
 
+def _validate_zones(node: Any, path: str, parent: Any = None, in_zone: bool = False) -> None:
+    is_zone = isinstance(node, (Island, Keepout))
+    if is_zone:
+        if in_zone:
+            raise PMLParseError("Nested Island/Keepout zones are not allowed", path)
+        if not node.children:
+            raise PMLParseError(f"{type(node).__name__} requires nonempty children", path)
+        parent_feature = getattr(parent, "feature", None)
+        pocket_parent = parent_feature is not None and parent_feature.type == "pocket"
+        if isinstance(node, Island) and not (isinstance(parent, Rect) and pocket_parent):
+            raise PMLParseError("Island must be a direct child of a Rect with a pocket feature", path)
+        if isinstance(node, Keepout) and pocket_parent:
+            raise PMLParseError(
+                "Keepout marks a clamp or fixture zone no cut may enter; use Island for material a pocket preserves",
+                path,
+            )
+    for index, child in enumerate(getattr(node, "children", ())):
+        _validate_zones(child, f"{path}.children[{index}]", node, in_zone or is_zone)
+    child = getattr(node, "child", None)
+    if child is not None:
+        _validate_zones(child, f"{path}.child", node, in_zone or is_zone)
+
+
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
@@ -1065,6 +1089,8 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     node_id = node_data.get("id") if isinstance(node_data, dict) else None
     node_label = node_data.get("label") if isinstance(node_data, dict) else None
+    if node_type in ("Island", "Keepout") and feature is not None:
+        raise PMLParseError(f"{node_type} defines zone geometry and cannot carry a feature", path)
 
     if node_type == "Panel":
         return Panel(children=children, id=node_id)
@@ -1146,18 +1172,10 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         tolerance_mm = parse_dimension(node_data.get("tolerance", "0.1mm"))
         return SplinePath(points=points, feature=feature, tolerance_mm=tolerance_mm, id=node_id, label=node_label)
 
+    elif node_type == "Island":
+        return Island(children=children, id=node_id)
+
     elif node_type == "Keepout":
-
-        def contains_keepout(nodes: tuple) -> bool:
-            for node in nodes:
-                if isinstance(node, Keepout):
-                    return True
-                if hasattr(node, "children") and node.children and contains_keepout(node.children):
-                    return True
-            return False
-
-        if contains_keepout(children):
-            raise PMLParseError("Nested Keepout is not allowed", path)
         return Keepout(children=children, id=node_id)
 
     elif node_type == "Edge":
@@ -1629,12 +1647,14 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
                 body = parse_node(body_data, f"components.{name}.body")
         else:
             body = None
+        _validate_zones(body, f"components.{name}.body")
         components[name] = ComponentDef(name=name, params=params, body=body)
 
     children_data = data.get("children", [])
     children = parse_children(children_data, "root")
 
     root = Panel(children=children) if children else None
+    _validate_zones(root, "root")
 
     return CompositionalLayoutAST(
         sheet=sheet,
@@ -1922,6 +1942,7 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
     body = None
     if parse_body and "body" in template_block:
         body = parse_node(template_block["body"], "Template.body")
+        _validate_zones(body, "Template.body")
 
     return TemplateDef(name=name, params=params, body=body)
 

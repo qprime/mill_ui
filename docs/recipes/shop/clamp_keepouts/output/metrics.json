@@ -1,0 +1,64 @@
+{
+  "constraint_audit": {
+    "tabs": {
+      "status": "honored",
+      "count": 3,
+      "safety_critical": false
+    },
+    "keepouts": {
+      "status": "honored",
+      "count": 20,
+      "safety_critical": true
+    },
+    "islands": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 2175,
+    "rapid_moves": 49,
+    "cut_moves": 1978,
+    "rapid_ratio": 0.023
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 829
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 1346
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 60863,
+    "total_lines": 2122,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 23502,
+        "lines": 805
+      },
+      "profile-3.17mm": {
+        "bytes": 37361,
+        "lines": 1317
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [
+    "1 rapid moves cross keepout 'hold_down_screw' at safe Z 6.0 mm; confirm the clamp is lower than safe Z"
+  ],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "clamp_keepouts.pml.yml"
+  }
+}

@@ -4,6 +4,7 @@ import logging
 from collections.abc import Callable
 
 from core.constants import DepthMode, ShapeType
+from core.geometry import compute_shape_bounds
 from diagram_ir import Circle, DiagramIR, Image, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir.geometry import rounded_rect_path
@@ -33,6 +34,7 @@ _LAYER_ORDER = (
     "POCKET_REGIONS",
     "HOLES",
     "ENGRAVE_PATHS",
+    "KEEPOUT_ZONES",
     "HEIGHTFIELD_OVERLAYS",
     "LABELS",
 )
@@ -46,6 +48,19 @@ def register_feature(feature_type: str, *, layer: str | None = None):
         return fn
 
     return decorator
+
+
+def _include_keepout_bounds(bounds: Bounds2D, item: Item, flip_y: Callable, margin: float) -> Bounds2D:
+    if item.geometry is None or item.placement is None:
+        return bounds
+    zone = compute_shape_bounds(item.type, item.geometry.data, item.placement.center_xy_mm)
+    ys = (flip_y(zone.y_min), flip_y(zone.y_max))
+    return Bounds2D(
+        min(bounds.x_min, margin + zone.x_min),
+        max(bounds.x_max, margin + zone.x_max),
+        min(bounds.y_min, *ys),
+        max(bounds.y_max, *ys),
+    )
 
 
 def layoutast_to_diagram_ir(
@@ -82,6 +97,11 @@ def layoutast_to_diagram_ir(
     tool_radius = kerf_width_mm / 2.0
 
     for item in ast.items:
+        if item.kind == "keepout":
+            bounds = _include_keepout_bounds(bounds, item, flip_y, margin)
+            layer_shapes.setdefault("KEEPOUT_ZONES", []).extend(_item_to_shapes(item, "keepout", flip_y, margin))
+            layer_shapes.setdefault("LABELS", []).extend(_build_label(item, flip_y, margin))
+            continue
         if item.kind != "shape" or item.feature is None:
             continue
 

@@ -10,7 +10,7 @@ Cut around a shape: outside, inside or on the line, through the sheet or to a de
 
 Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)
 
-Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/)
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [clamp_keepouts](recipes/shop/clamp_keepouts/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/)
 
 ### Tabs
 
@@ -18,7 +18,7 @@ Small bridges that keep a through-cut part attached to the sheet.
 
 Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)
 
-Recipes: [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/)
+Recipes: [clamp_keepouts](recipes/shop/clamp_keepouts/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/)
 
 ### Onion skin
 
@@ -76,7 +76,7 @@ Clear an enclosed area to a depth.
 
 Spec: [pml/syntax_spec.md#pocket](../pml/syntax_spec.md#pocket)
 
-Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/)
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [clamp_keepouts](recipes/shop/clamp_keepouts/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/)
 
 ### Holes
 
@@ -130,9 +130,17 @@ Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test
 
 Areas a pocket leaves standing.
 
+Spec: [pml/syntax_spec.md#island](../pml/syntax_spec.md#island)
+
+Recipes: [clamp_keepouts](recipes/shop/clamp_keepouts/), [pocket_with_island](recipes/panels/pocket_with_island/)
+
+### Fixture keepouts
+
+Clamp and fixture zones checked against every front-setup cutting segment.
+
 Spec: [pml/syntax_spec.md#keepout](../pml/syntax_spec.md#keepout)
 
-Recipes: [pocket_with_island](recipes/panels/pocket_with_island/)
+Recipes: [clamp_keepouts](recipes/shop/clamp_keepouts/)
 
 ### Holes inside a recess
 
@@ -192,7 +200,7 @@ The basic part outlines.
 
 Spec: [pml/syntax_spec.md#rect](../pml/syntax_spec.md#rect)
 
-Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [layout_board](recipes/engraving/layout_board/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [sign](recipes/engraving/sign/), [svg_artwork](recipes/engraving/svg_artwork/)
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [clamp_keepouts](recipes/shop/clamp_keepouts/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [layout_board](recipes/engraving/layout_board/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [sign](recipes/engraving/sign/), [svg_artwork](recipes/engraving/svg_artwork/)
 
 ### RoundedRect, Ellipse, Polygon, Triangle
 
@@ -496,7 +504,7 @@ A clamp margin, or a sheet given by its cuttable area.
 
 Spec: [pml/syntax_spec.md#working-area-dimensions](../pml/syntax_spec.md#working-area-dimensions)
 
-Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [layout_board](recipes/engraving/layout_board/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [side_table_frame](recipes/beams/side_table_frame/), [sign](recipes/engraving/sign/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/), [svg_artwork](recipes/engraving/svg_artwork/)
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [clamp_keepouts](recipes/shop/clamp_keepouts/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [layout_board](recipes/engraving/layout_board/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [side_table_frame](recipes/beams/side_table_frame/), [sign](recipes/engraving/sign/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/), [svg_artwork](recipes/engraving/svg_artwork/)
 
 ### Material
 
@@ -504,7 +512,7 @@ The stock material that selects feeds and speeds.
 
 Spec: [pml/syntax_spec.md#document-structure](../pml/syntax_spec.md#document-structure)
 
-Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/), [side_table_frame](recipes/beams/side_table_frame/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/)
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [clamp_keepouts](recipes/shop/clamp_keepouts/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/), [side_table_frame](recipes/beams/side_table_frame/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/)
 
 ### Kerf override
 

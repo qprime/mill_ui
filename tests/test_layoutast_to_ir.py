@@ -54,6 +54,42 @@ def test_feature_handlers_registered():
     assert "notch" in FEATURE_HANDLERS
 
 
+def test_keepout_has_own_layer_and_label():
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    pml = """Sheet:
+  width: 200mm
+  height: 150mm
+  thickness: 19mm
+children:
+- Keepout:
+    id: clamp_left
+    children:
+    - Rect: {at: {x: 30mm, y: 40mm, width: 20mm, height: 30mm}}
+"""
+    ir = layoutast_to_diagram_ir(resolve_layout(parse_pml_yaml(pml)))
+
+    layers = {layer.name: layer for layer in ir.layers}
+    assert "KEEPOUT_ZONES" in layers
+    assert len(layers["KEEPOUT_ZONES"].items) == 1
+    assert layers["KEEPOUT_ZONES"].items[0].style_token == "keepout"
+    assert any(isinstance(item, Text) and item.content == "clamp_left" for item in layers["LABELS"].items)
+    assert "POCKET_REGIONS" not in layers
+
+
+def test_keepout_outside_sheet_can_be_drawn_without_relaxing_cut_bounds():
+    from dataclasses import replace
+
+    item = _make_profile_item("fixture", 20, 20, 300, 300)
+    item = replace(item, kind="keepout", feature=None, label="fixture")
+    ir = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(), items=(item,)))
+
+    assert ir.bounds.x_max >= 310
+    assert ir.bounds.y_min <= -160
+    assert any(layer.name == "KEEPOUT_ZONES" for layer in ir.layers)
+
+
 def test_feature_layer_covers_shape_producing_handlers():
     shape_producing = {ft for ft in FEATURE_HANDLERS if ft != "surface"}
     assert shape_producing == set(FEATURE_LAYER.keys())

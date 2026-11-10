@@ -14,13 +14,14 @@
 | PM-4 | HARD | SINGLE_TYPE_KEY | Each node must have exactly one uppercase key |
 | PM-5 | HARD | FEATURE_REQUIRES_TYPE | Feature dict must have "type" key |
 | PM-6 | POLICY | DEPTH_DEFAULT_THROUGH | depth defaults to "through" |
-| PM-7 | HARD | KEEPOUT_NO_NESTING | Nested Keepout nodes not allowed |
+| PM-7 | HARD | KEEPOUT_NO_NESTING | Neither Keepout nor Island may contain either zone type; both require nonempty geometry-only children |
 | PM-8 | HARD | INSET_REQUIRES_DISTANCE | Inset requires "distance" key |
 | PM-9 | HARD | FRAME_REQUIRES_WIDTH | Frame requires "width" key |
 | PM-10 | HARD | PROFILE_REQUIRES_SIDE | Profile requires "side" key |
 | PM-11 | STRUCTURAL | PHYSICAL_OR_WORKING | Sheet uses physical or working dimensions |
 | PM-12 | STRUCTURAL | CENTER_COORDS | at.x and at.y specify part CENTER |
 | PM-13 | HARD | FACE_BACK_SCOPE | `face: back` valid only on pocket/hole/engrave with a finite depth |
+| PM-14 | HARD | ISLAND_UNDER_POCKET_RECT | Island must be a direct child of a Rect with a pocket feature; unsupported placements raise |
 
 ---
 

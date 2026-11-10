@@ -5,6 +5,7 @@
 .pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
 .hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
 .waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
 .toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
 .dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }

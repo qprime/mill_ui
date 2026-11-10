@@ -26,6 +26,7 @@ from ir.removal_intent import (
     Constraints,
     DepthProfile,
     EdgeFeatureSpec,
+    KeepoutRegion,
     RemovalIntent,
     RoundoverSpec,
 )
@@ -39,6 +40,17 @@ def ast_to_removal_intents(
     warnings: list[str] | None = None,
 ) -> list[RemovalIntent]:
     intents: list[RemovalIntent] = []
+    keepouts: list[KeepoutRegion] = []
+    for item in ast.items:
+        if item.kind == "keepout":
+            if item.geometry is None or item.placement is None:
+                raise ValueError(f"Keepout '{item.shape_id}' requires geometry and placement")
+            keepouts.append(
+                KeepoutRegion(
+                    bounds=_geometry_to_bounds(item.type, item.geometry.data, item.placement.center_xy_mm),
+                    reason=item.shape_id or "keepout",
+                )
+            )
 
     for item in ast.items:
         if item.kind != "shape" or not item.feature:
@@ -46,6 +58,11 @@ def ast_to_removal_intents(
 
         try:
             intent = item_to_removal_intent(item, sheet_thickness_mm=ast.sheet.thickness_mm)
+            if intent.face == "front" and keepouts:
+                intent = replace(
+                    intent,
+                    constraints=replace(intent.constraints, keepouts=intent.constraints.keepouts + tuple(keepouts)),
+                )
             intents.append(intent)
         except ValueError as e:
             msg = f"Skipping item '{item.shape_id}': {e}"

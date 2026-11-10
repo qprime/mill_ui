@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 1683.175" width="1393.1750000000002mm" height="1683.1750000000002mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="1683.1750000000002" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="1210.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
+    <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 316.350 603.650 L 316.350 603.650 L 316.350 621.650 L 302.034 621.650 L 302.034 603.650 L 287.809 603.650 L 287.809 621.650 L 273.463 621.650 L 273.463 603.650 L 259.237 603.650 L 259.237 621.650 L 244.891 621.650 L 244.891 603.650 L 230.666 603.650 L 230.666 621.650 L 216.320 621.650 L 216.320 603.650 L 202.094 603.650 L 202.094 621.650 L 187.749 621.650 L 187.749 603.650 L 173.523 603.650 L 173.523 621.650 L 159.177 621.650 L 159.177 603.650 L 144.951 603.650 L 144.951 621.650 L 130.606 621.650 L 130.606 603.650 L 116.380 603.650 L 116.380 621.650 L 102.034 621.650 L 102.034 603.650 L 87.809 603.650 L 87.809 621.650 L 73.463 621.650 L 73.463 603.650 L 59.237 603.650 L 59.237 621.650 L 44.891 621.650 L 44.891 603.650 L 30.666 603.650 L 30.666 621.650 L 16.350 621.650 L 16.350 1185.650 L 30.666 1185.650 L 30.666 1203.650 L 44.891 1203.650 L 44.891 1185.650 L 59.237 1185.650 L 59.237 1203.650 L 73.463 1203.650 L 73.463 1185.650 L 87.809 1185.650 L 87.809 1203.650 L 102.034 1203.650 L 102.034 1185.650 L 116.380 1185.650 L 116.380 1203.650 L 130.606 1203.650 L 130.606 1185.650 L 144.951 1185.650 L 144.951 1203.650 L 159.177 1203.650 L 159.177 1185.650 L 173.523 1185.650 L 173.523 1203.650 L 187.749 1203.650 L 187.749 1185.650 L 202.094 1185.650 L 202.094 1203.650 L 216.320 1203.650 L 216.320 1185.650 L 230.666 1185.650 L 230.666 1203.650 L 244.891 1203.650 L 244.891 1185.650 L 259.237 1185.650 L 259.237 1203.650 L 273.463 1203.650 L 273.463 1185.650 L 287.809 1185.650 L 287.809 1203.650 L 302.034 1203.650 L 302.034 1185.650 L 316.350 1185.650 L 316.350 1203.650 L 316.350 1203.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_0_right_side_outer" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 317.938 602.062 L 314.762 602.062 L 314.762 620.062 L 303.622 620.062 L 303.622 602.062 L 286.221 602.062 L 286.221 620.062 L 275.050 620.062 L 275.050 602.062 L 257.650 602.062 L 257.650 620.062 L 246.479 620.062 L 246.479 602.062 L 229.078 602.062 L 229.078 620.062 L 217.907 620.062 L 217.907 602.062 L 200.507 602.062 L 200.507 620.062 L 189.336 620.062 L 189.336 602.062 L 171.935 602.062 L 171.935 620.062 L 160.765 620.062 L 160.765 602.062 L 143.364 602.062 L 143.364 620.062 L 132.193 620.062 L 132.193 602.062 L 114.792 602.062 L 114.792 620.062 L 103.622 620.062 L 103.622 602.062 L 86.221 602.062 L 86.221 620.062 L 75.050 620.062 L 75.050 602.062 L 57.650 602.062 L 57.650 620.062 L 46.479 620.062 L 46.479 602.062 L 29.078 602.062 L 29.078 620.062 L 14.762 620.062 L 14.762 1187.237 L 29.078 1187.237 L 29.078 1205.237 L 46.479 1205.237 L 46.479 1187.237 L 57.650 1187.237 L 57.650 1205.237 L 75.050 1205.237 L 75.050 1187.237 L 86.221 1187.237 L 86.221 1205.237 L 103.622 1205.237 L 103.622 1187.237 L 114.792 1187.237 L 114.792 1205.237 L 132.193 1205.237 L 132.193 1187.237 L 143.364 1187.237 L 143.364 1205.237 L 160.765 1205.237 L 160.765 1187.237 L 171.935 1187.237 L 171.935 1205.237 L 189.336 1205.237 L 189.336 1187.237 L 200.507 1187.237 L 200.507 1205.237 L 217.907 1205.237 L 217.907 1187.237 L 229.078 1187.237 L 229.078 1205.237 L 246.479 1205.237 L 246.479 1187.237 L 257.650 1187.237 L 257.650 1205.237 L 275.050 1205.237 L 275.050 1187.237 L 286.221 1187.237 L 286.221 1205.237 L 303.622 1205.237 L 303.622 1187.237 L 314.762 1187.237 L 314.762 1205.237 L 317.938 1205.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_right_side_0_right_side_outer_toolpath" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="16.350" y="912.450" width="300.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_1" />
+    <rect x="16.350" y="603.650" width="18.200" height="600.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_2" />
+    <rect x="16.350" y="603.650" width="14.316" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_3" />
+    <rect x="44.891" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_4" />
+    <rect x="73.463" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_5" />
+    <rect x="102.034" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_6" />
+    <rect x="130.606" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_7" />
+    <rect x="159.177" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_8" />
+    <rect x="187.749" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_9" />
+    <rect x="216.320" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_10" />
+    <rect x="244.891" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_11" />
+    <rect x="273.463" y="603.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_12" />
+    <rect x="302.034" y="603.650" width="14.316" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_13" />
+    <rect x="16.350" y="1185.650" width="14.316" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_14" />
+    <rect x="44.891" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_15" />
+    <rect x="73.463" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_16" />
+    <rect x="102.034" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_17" />
+    <rect x="130.606" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_18" />
+    <rect x="159.177" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_19" />
+    <rect x="187.749" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_20" />
+    <rect x="216.320" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_21" />
+    <rect x="244.891" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_22" />
+    <rect x="273.463" y="1185.650" width="14.346" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_23" />
+    <rect x="302.034" y="1185.650" width="14.316" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_notch_dogbone_24" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="166.350" y="903.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_0_right_side_outer_label">RIGHT SIDE</text>
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="16.349999999999994" y1="912.4499999999999" x2="16.349999999999994" y2="892.4499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="912.4499999999999" x2="316.35" y2="892.4499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="892.4499999999999" x2="316.35" y2="892.4499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.349999999999994,892.4499999999999 19.349999999999994,889.4499999999999 19.349999999999994,895.4499999999999" fill="#5ab9ea" />
+    <polygon points="316.35,892.4499999999999 313.35,889.4499999999999 313.35,895.4499999999999" fill="#5ab9ea" />
+    <text x="166.35000000000002" y="887.4499999999999" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <line x1="316.35" y1="912.4499999999999" x2="336.35" y2="912.4499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="930.65" x2="336.35" y2="930.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="336.35" y1="912.4499999999999" x2="336.35" y2="930.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="336.35,912.4499999999999 333.35,915.4499999999999 339.35,915.4499999999999" fill="#5ab9ea" />
+    <polygon points="336.35,930.65 333.35,927.65 339.35,927.65" fill="#5ab9ea" />
+    <text x="341.35" y="921.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 341.35 921.55)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.2mm</text>
+    <line x1="16.349999999999994" y1="603.65" x2="16.349999999999994" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="34.55" y1="603.65" x2="34.55" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="563.65" x2="34.55" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.349999999999994,563.65 19.349999999999994,560.65 19.349999999999994,566.65" fill="#5ab9ea" />
+    <polygon points="34.55,563.65 31.549999999999997,560.65 31.549999999999997,566.65" fill="#5ab9ea" />
+    <text x="25.449999999999996" y="558.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">18.2mm</text>
+    <line x1="34.55" y1="603.65" x2="74.55" y2="603.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="34.55" y1="1203.65" x2="74.55" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="74.55" y1="603.65" x2="74.55" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="74.55,603.65 71.55,606.65 77.55,606.65" fill="#5ab9ea" />
+    <polygon points="74.55,1203.65 71.55,1200.65 77.55,1200.65" fill="#5ab9ea" />
+    <text x="79.55" y="903.6500000000001" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 79.55 903.6500000000001)" fill="#5ab9ea" font-family="monospace" font-size="10px">600.0mm</text>
+    <line x1="216.32" y1="603.65" x2="216.32" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="230.66571428571427" y1="603.65" x2="230.66571428571427" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="216.32" y1="563.65" x2="230.66571428571427" y2="563.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="216.32,563.65 219.32,560.65 219.32,566.65" fill="#5ab9ea" />
+    <polygon points="230.66571428571427,563.65 227.66571428571427,560.65 227.66571428571427,566.65" fill="#5ab9ea" />
+    <text x="223.49285714285713" y="558.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">14.3mm</text>
+    <line x1="230.66571428571427" y1="603.65" x2="250.66571428571427" y2="603.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="230.66571428571427" y1="621.65" x2="250.66571428571427" y2="621.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="250.66571428571427" y1="603.65" x2="250.66571428571427" y2="621.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="250.66571428571427,603.65 247.66571428571427,606.65 253.66571428571427,606.65" fill="#5ab9ea" />
+    <polygon points="250.66571428571427,621.65 247.66571428571427,618.65 253.66571428571427,618.65" fill="#5ab9ea" />
+    <text x="255.66571428571427" y="612.65" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 255.66571428571427 612.65)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.0mm</text>
+    <line x1="16.349999999999994" y1="603.65" x2="16.349999999999994" y2="543.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="603.65" x2="316.35" y2="543.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="543.65" x2="316.35" y2="543.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.349999999999994,543.65 19.349999999999994,540.65 19.349999999999994,546.65" fill="#5ab9ea" />
+    <polygon points="316.35,543.65 313.35,540.65 313.35,546.65" fill="#5ab9ea" />
+    <text x="166.35000000000002" y="538.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <line x1="316.35" y1="603.65" x2="376.35" y2="603.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="1203.65" x2="376.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="376.35" y1="603.65" x2="376.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="376.35,603.65 373.35,606.65 379.35,606.65" fill="#5ab9ea" />
+    <polygon points="376.35,1203.65 373.35,1200.65 379.35,1200.65" fill="#5ab9ea" />
+    <text x="381.35" y="903.6500000000001" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 381.35 903.6500000000001)" fill="#5ab9ea" font-family="monospace" font-size="10px">600.0mm</text>
+    <line x1="316.34999999999997" y1="603.65" x2="396.34999999999997" y2="603.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.34999999999997" y1="621.65" x2="396.34999999999997" y2="621.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="396.34999999999997" y1="603.65" x2="396.34999999999997" y2="621.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="396.34999999999997,603.65 393.34999999999997,606.65 399.34999999999997,606.65" fill="#5ab9ea" />
+    <polygon points="396.34999999999997,621.65 393.34999999999997,618.65 399.34999999999997,618.65" fill="#5ab9ea" />
+    <text x="401.34999999999997" y="612.65" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 401.34999999999997 612.65)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.0mm</text>
+    <line x1="302.0342857142857" y1="621.65" x2="302.0342857142857" y2="581.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.34999999999997" y1="621.65" x2="316.34999999999997" y2="581.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="302.0342857142857" y1="581.65" x2="316.34999999999997" y2="581.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="302.0342857142857,581.65 305.0342857142857,578.65 305.0342857142857,584.65" fill="#5ab9ea" />
+    <polygon points="316.34999999999997,581.65 313.34999999999997,578.65 313.34999999999997,584.65" fill="#5ab9ea" />
+    <text x="309.1921428571428" y="576.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">14.3mm</text>
+    <line x1="16.349999999999994" y1="621.65" x2="116.35" y2="621.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="1185.65" x2="116.35" y2="1185.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="116.35" y1="621.65" x2="116.35" y2="1185.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="116.35,621.65 113.35,624.65 119.35,624.65" fill="#5ab9ea" />
+    <polygon points="116.35,1185.65 113.35,1182.65 119.35,1182.65" fill="#5ab9ea" />
+    <text x="121.35" y="903.6500000000001" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 121.35 903.6500000000001)" fill="#5ab9ea" font-family="monospace" font-size="10px">564.0mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="1239.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="1239.5875" y1="-29.5875" x2="1254.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="1259.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="1239.5875" y1="-13.587499999999999" x2="1254.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
+    <text x="1259.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="1239.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="1259.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="1239.5875" y1="18.4125" x2="1254.5875" y2="18.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1259.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1239.5875" y1="34.4125" x2="1254.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1259.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="1251.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="1263.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1220.0 × 1220.0 × 18.0mm</text>
+    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 24 pockets, 1 profile</text>
+    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 9.0mm, through</text>
+    <text x="20.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (24):</text>
+    <text x="30.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_1</text>
+    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_2</text>
+    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_10</text>
+    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_11</text>
+    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_12</text>
+    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_13</text>
+    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_14</text>
+    <text x="30.0" y="1407.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_15</text>
+    <text x="30.0" y="1419.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_16</text>
+    <text x="30.0" y="1431.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_17</text>
+    <text x="30.0" y="1443.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_18</text>
+    <text x="30.0" y="1455.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_19</text>
+    <text x="30.0" y="1467.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_20</text>
+    <text x="30.0" y="1479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_21</text>
+    <text x="30.0" y="1491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_22</text>
+    <text x="30.0" y="1503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_23</text>
+    <text x="30.0" y="1515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_24</text>
+    <text x="30.0" y="1527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_3</text>
+    <text x="30.0" y="1539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_4</text>
+    <text x="30.0" y="1551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_5</text>
+    <text x="30.0" y="1563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_6</text>
+    <text x="30.0" y="1575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_7</text>
+    <text x="30.0" y="1587.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_8</text>
+    <text x="30.0" y="1599.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_9</text>
+  </g>
+</svg>

@@ -1,0 +1,28 @@
+# Recessed mounting plate
+
+![Blueprint](output/recessed_mounting_plate.svg)
+
+**Demonstrates:** Holes drilled through the floor of a pocket.
+
+## What gets cut
+
+A plate with a 3mm recess and four 6mm holes drilled 10mm deep through the recess floor, cut out with an outside profile.
+
+Sheet 300 × 250 × 19mm mdf.
+
+- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 3mm
+- `bore-3.17mm.nc`: bore, 3.175mm tool, 4 feature(s), to 10mm
+- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 19.2mm
+
+## Run
+
+`python -m cli.mill --recipe docs/recipes/panels/recessed_mounting_plate`
+
+## Outputs
+
+- `bore-3.17mm.nc`
+- `machining_summary.json`
+- `metrics.json`
+- `pocket-12.70mm.nc`
+- `profile-3.17mm.nc`
+- `recessed_mounting_plate.svg`

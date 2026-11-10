@@ -1,0 +1,70 @@
+{
+  "constraint_audit": {
+    "tabs": {
+      "status": "honored",
+      "count": 6,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 19870,
+    "rapid_moves": 103,
+    "cut_moves": 19305,
+    "rapid_ratio": 0.005
+  },
+  "fidelity": {
+    "tool_changes": 4,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 153
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 25.4,
+        "move_count": 1481
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 15824
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 2412
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 637191,
+    "total_lines": 19750,
+    "files": {
+      "12.70mm": {
+        "bytes": 4374,
+        "lines": 164
+      },
+      "25.40mm": {
+        "bytes": 49960,
+        "lines": 1494
+      },
+      "3.17mm-downcut": {
+        "bytes": 516722,
+        "lines": 15808
+      },
+      "3.17mm-upcut": {
+        "bytes": 66135,
+        "lines": 2284
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "production_sheet.pml.yml"
+  }
+}

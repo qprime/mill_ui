@@ -1,0 +1,64 @@
+{
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 216,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 11016,
+    "rapid_moves": 552,
+    "cut_moves": 8928,
+    "rapid_ratio": 0.05
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 792
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 3.175,
+        "move_count": 5832
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 4392
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 239912,
+    "total_lines": 10368,
+    "files": {
+      "pocket-3.17mm": {
+        "bytes": 20569,
+        "lines": 712
+      },
+      "dogbone-3.17mm": {
+        "bytes": 95786,
+        "lines": 5416
+      },
+      "profile-3.17mm": {
+        "bytes": 123557,
+        "lines": 4240
+      }
+    }
+  },
+  "errors": [
+    "Overlapping regions detected: pocket_assembly_bottom_notch_dogbone_159 and pocket_assembly_top_notch_dogbone_176",
+    "Overlapping regions detected: pocket_assembly_bottom_notch_dogbone_166 and pocket_assembly_top_notch_dogbone_183"
+  ],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "box_bottoms_and_lids.pml.yml"
+  }
+}

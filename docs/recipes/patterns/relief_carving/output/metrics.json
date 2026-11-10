@@ -1,0 +1,55 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 190300,
+    "rapid_moves": 2852,
+    "cut_moves": 187442,
+    "rapid_ratio": 0.015
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "heightfield-rough",
+        "tool_diameter_mm": 6.35,
+        "move_count": 8429
+      },
+      {
+        "name": "heightfield-rough",
+        "tool_diameter_mm": 3.175,
+        "move_count": 79256
+      },
+      {
+        "name": "heightfield-finish",
+        "tool_diameter_mm": 3.19,
+        "move_count": 102615
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 6876537,
+    "total_lines": 190339,
+    "files": {
+      "heightfield-rough-6.35mm": {
+        "bytes": 298849,
+        "lines": 8442
+      },
+      "heightfield-rough-3.17mm": {
+        "bytes": 2855017,
+        "lines": 79269
+      },
+      "heightfield-finish-3.19mm": {
+        "bytes": 3722671,
+        "lines": 102628
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "relief_carving.pml.yml"
+  }
+}

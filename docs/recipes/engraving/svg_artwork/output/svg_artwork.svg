@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 773.175 575.175" width="773.175mm" height="575.175mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-21.5875" y="-61.5875" width="773.175" height="575.175" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="600.000" height="400.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="600.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="390.000" width="600.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
+    <rect x="590.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 443.219 239.097 L 438.008 235.182 L 433.125 231.311 L 428.582 227.485 L 424.395 223.704 L 420.577 219.967 L 417.142 216.275 L 414.104 212.628 L 411.477 209.026 L 409.275 205.468 L 407.513 201.955 L 406.204 198.487 L 405.361 195.064 L 405.000 191.685 L 405.134 188.351 L 405.777 185.062 L 406.942 181.818 L 408.524 178.797 L 410.381 176.180 L 412.472 173.964 L 414.759 172.152 L 417.202 170.743 L 419.763 169.736 L 422.402 169.132 L 425.081 168.930 L 427.759 169.132 L 430.399 169.736 L 432.960 170.743 L 435.403 172.152 L 437.690 173.964 L 439.781 176.180 L 441.637 178.797 L 443.219 181.818 L 444.801 178.797 L 446.658 176.180 L 448.749 173.964 L 451.036 172.152 L 453.479 170.743 L 456.040 169.736 L 458.679 169.132 L 461.358 168.930 L 464.036 169.132 L 466.676 169.736 L 469.236 170.743 L 471.680 172.152 L 473.967 173.964 L 476.058 176.180 L 477.914 178.797 L 479.496 181.818 L 480.662 185.062 L 481.305 188.351 L 481.439 191.685 L 481.077 195.064 L 480.235 198.487 L 478.926 201.955 L 477.163 205.468 L 474.962 209.026 L 472.335 212.628 L 469.297 216.275 L 465.862 219.967 L 462.044 223.704 L 457.857 227.485 L 453.314 231.311 L 448.430 235.182 L 443.219 239.097 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_svg_000" />
+    <path d="M 538.685 164.634 L 547.659 190.467 L 575.000 191.021 L 553.215 207.536 L 561.129 233.713 L 538.685 218.095 L 516.241 233.713 L 524.155 207.536 L 502.370 191.021 L 529.711 190.467 L 538.685 164.634 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_svg_001" />
+    <path d="M 485.224 166.544 L 485.570 168.503 L 486.564 170.225 L 488.088 171.504 L 489.957 172.184 L 491.947 172.184 L 493.816 171.504 L 495.340 170.225 L 496.335 168.503 L 496.680 166.544 L 496.335 164.584 L 495.340 162.862 L 493.816 161.583 L 491.947 160.903 L 489.957 160.903 L 488.088 161.583 L 486.564 162.862 L 485.570 164.584 L 485.224 166.544 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_svg_002" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 443.219 241.083 L 449.400 236.439 L 454.319 232.540 L 458.900 228.681 L 463.132 224.860 L 466.999 221.076 L 470.489 217.325 L 473.587 213.605 L 476.280 209.912 L 478.550 206.243 L 480.382 202.593 L 481.754 198.959 L 482.645 195.339 L 483.030 191.738 L 482.886 188.166 L 482.197 184.639 L 480.953 181.178 L 479.271 177.966 L 477.289 175.171 L 475.043 172.791 L 472.574 170.835 L 469.927 169.308 L 467.146 168.215 L 464.274 167.557 L 461.358 167.338 L 458.441 167.557 L 455.570 168.215 L 452.788 169.308 L 450.141 170.835 L 447.673 172.791 L 445.427 175.171 L 443.445 177.966 L 443.219 178.397 L 442.994 177.966 L 441.012 175.171 L 438.766 172.791 L 436.298 170.835 L 433.650 169.308 L 430.869 168.215 L 427.997 167.557 L 425.081 167.338 L 422.164 167.557 L 419.293 168.215 L 416.511 169.308 L 413.864 170.835 L 411.396 172.791 L 409.150 175.171 L 407.168 177.966 L 405.485 181.178 L 404.242 184.639 L 403.552 188.166 L 403.409 191.738 L 403.794 195.339 L 404.685 198.959 L 406.057 202.593 L 407.888 206.243 L 410.159 209.912 L 412.851 213.605 L 415.950 217.325 L 419.440 221.076 L 423.307 224.860 L 427.538 228.681 L 432.120 232.540 L 437.038 236.439 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_000_toolpath" />
+    <path d="M 538.107 161.459 L 528.574 188.902 L 499.529 189.491 L 499.172 190.589 L 522.316 208.134 L 513.908 235.943 L 514.842 236.621 L 538.685 220.029 L 562.528 236.621 L 563.461 235.943 L 555.054 208.134 L 578.198 190.589 L 577.841 189.491 L 548.796 188.902 L 539.263 161.459 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_001_toolpath" />
+    <path d="M 483.612 166.544 L 484.055 169.054 L 485.329 171.262 L 487.282 172.900 L 489.678 173.772 L 492.227 173.772 L 494.622 172.900 L 496.575 171.262 L 497.849 169.054 L 498.292 166.544 L 497.849 164.033 L 496.575 161.826 L 494.622 160.187 L 492.227 159.315 L 489.678 159.315 L 487.282 160.187 L 485.329 161.826 L 484.055 164.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_002_toolpath" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <path d="M 253.219 239.097 L 248.008 235.182 L 243.125 231.311 L 238.582 227.485 L 234.395 223.704 L 230.577 219.967 L 227.142 216.275 L 224.104 212.628 L 221.477 209.026 L 219.275 205.468 L 217.513 201.955 L 216.204 198.487 L 215.361 195.064 L 215.000 191.685 L 215.134 188.351 L 215.777 185.062 L 216.942 181.818 L 218.524 178.797 L 220.381 176.180 L 222.472 173.964 L 224.759 172.152 L 227.202 170.743 L 229.763 169.736 L 232.402 169.132 L 235.081 168.930 L 237.759 169.132 L 240.399 169.736 L 242.960 170.743 L 245.403 172.152 L 247.690 173.964 L 249.781 176.180 L 251.637 178.797 L 253.219 181.818 L 254.801 178.797 L 256.658 176.180 L 258.749 173.964 L 261.036 172.152 L 263.479 170.743 L 266.040 169.736 L 268.679 169.132 L 271.358 168.930 L 274.036 169.132 L 276.676 169.736 L 279.236 170.743 L 281.680 172.152 L 283.967 173.964 L 286.058 176.180 L 287.914 178.797 L 289.496 181.818 L 290.662 185.062 L 291.305 188.351 L 291.439 191.685 L 291.077 195.064 L 290.235 198.487 L 288.926 201.955 L 287.163 205.468 L 284.962 209.026 L 282.335 212.628 L 279.297 216.275 L 275.862 219.967 L 272.044 223.704 L 267.857 227.485 L 263.314 231.311 L 258.430 235.182 L 253.219 239.097 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_svg_000" />
+    <path d="M 348.685 164.634 L 357.659 190.467 L 385.000 191.021 L 363.215 207.536 L 371.129 233.713 L 348.685 218.095 L 326.241 233.713 L 334.155 207.536 L 312.370 191.021 L 339.711 190.467 L 348.685 164.634 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_svg_001" />
+    <path d="M 295.224 166.544 L 295.570 168.503 L 296.564 170.225 L 298.088 171.504 L 299.957 172.184 L 301.947 172.184 L 303.816 171.504 L 305.340 170.225 L 306.335 168.503 L 306.680 166.544 L 306.335 164.584 L 305.340 162.862 L 303.816 161.583 L 301.947 160.903 L 299.957 160.903 L 298.088 161.583 L 296.564 162.862 L 295.570 164.584 L 295.224 166.544 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_svg_002" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths">
+    <polyline points="63.219,239.097 58.008,235.182 53.125,231.311 48.582,227.485 44.395,223.704 40.577,219.967 37.142,216.275 34.104,212.628 31.477,209.026 29.275,205.468 27.513,201.955 26.204,198.487 25.361,195.064 25.000,191.685 25.134,188.351 25.777,185.062 26.942,181.818 28.524,178.797 30.381,176.180 32.472,173.964 34.759,172.152 37.202,170.743 39.763,169.736 42.402,169.132 45.081,168.930 47.759,169.132 50.399,169.736 52.960,170.743 55.403,172.152 57.690,173.964 59.781,176.180 61.637,178.797 63.219,181.818 64.801,178.797 66.658,176.180 68.749,173.964 71.036,172.152 73.479,170.743 76.040,169.736 78.679,169.132 81.358,168.930 84.036,169.132 86.676,169.736 89.236,170.743 91.680,172.152 93.967,173.964 96.058,176.180 97.914,178.797 99.496,181.818 100.662,185.062 101.305,188.351 101.439,191.685 101.077,195.064 100.235,198.487 98.926,201.955 97.163,205.468 94.962,209.026 92.335,212.628 89.297,216.275 85.862,219.967 82.044,223.704 77.857,227.485 73.314,231.311 68.430,235.182 63.219,239.097" stroke="#888888" fill="none" stroke-width="0.25" id="generated_svg_000" />
+    <polyline points="158.685,164.634 167.659,190.467 195.000,191.021 173.215,207.536 181.129,233.713 158.685,218.095 136.241,233.713 144.155,207.536 122.370,191.021 149.711,190.467 158.685,164.634" stroke="#888888" fill="none" stroke-width="0.25" id="generated_svg_001" />
+    <polyline points="105.224,166.544 105.570,168.503 106.564,170.225 108.088,171.504 109.957,172.184 111.947,172.184 113.816,171.504 115.340,170.225 116.335,168.503 116.680,166.544 116.335,164.584 115.340,162.862 113.816,161.583 111.947,160.903 109.957,160.903 108.088,161.583 106.564,162.862 105.570,164.584 105.224,166.544" stroke="#888888" fill="none" stroke-width="0.25" id="generated_svg_002" />
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="215.0" y1="168.93017906996909" x2="215.0" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="291.4386493859065" y1="168.93017906996909" x2="291.4386493859065" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="215.0" y1="148.93017906996909" x2="291.4386493859065" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="215.0,148.93017906996909 218.0,145.93017906996909 218.0,151.93017906996909" fill="#5ab9ea" />
+    <polygon points="291.4386493859065,148.93017906996909 288.4386493859065,145.93017906996909 288.4386493859065,151.93017906996909" fill="#5ab9ea" />
+    <text x="253.21932469295325" y="143.93017906996909" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">76.4mm</text>
+    <line x1="291.4386493859065" y1="168.93017906996909" x2="311.4386493859065" y2="168.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="291.4386493859065" y1="239.09737433994835" x2="311.4386493859065" y2="239.09737433994835" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="311.4386493859065" y1="168.93017906996909" x2="311.4386493859065" y2="239.09737433994835" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="311.4386493859065,168.93017906996909 308.4386493859065,171.93017906996909 314.4386493859065,171.93017906996909" fill="#5ab9ea" />
+    <polygon points="311.4386493859065,239.09737433994835 308.4386493859065,236.09737433994835 314.4386493859065,236.09737433994835" fill="#5ab9ea" />
+    <text x="316.4386493859065" y="204.01377670495873" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 316.4386493859065 204.01377670495873)" fill="#5ab9ea" font-family="monospace" font-size="10px">70.2mm</text>
+    <line x1="312.36979297768676" y1="164.63422833915402" x2="312.36979297768676" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="385.0" y1="164.63422833915402" x2="385.0" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="312.36979297768676" y1="144.63422833915402" x2="385.0" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="312.36979297768676,144.63422833915402 315.36979297768676,141.63422833915402 315.36979297768676,147.63422833915402" fill="#5ab9ea" />
+    <polygon points="385.0,144.63422833915402 382.0,141.63422833915402 382.0,147.63422833915402" fill="#5ab9ea" />
+    <text x="348.6848964888434" y="139.63422833915402" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">72.6mm</text>
+    <line x1="385.0" y1="164.63422833915402" x2="425.0" y2="164.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="385.0" y1="233.71311609066012" x2="425.0" y2="233.71311609066012" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="425.0" y1="164.63422833915402" x2="425.0" y2="233.71311609066012" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="425.0,164.63422833915402 422.0,167.63422833915402 428.0,167.63422833915402" fill="#5ab9ea" />
+    <polygon points="425.0,233.71311609066012 422.0,230.71311609066012 428.0,230.71311609066012" fill="#5ab9ea" />
+    <text x="430.0" y="199.17367221490707" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 430.0 199.17367221490707)" fill="#5ab9ea" font-family="monospace" font-size="10px">69.1mm</text>
+    <line x1="295.2241762831449" y1="160.90262566005165" x2="295.2241762831449" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="306.6800448986518" y1="160.90262566005165" x2="306.6800448986518" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="295.2241762831449" y1="120.90262566005165" x2="306.6800448986518" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="295.2241762831449,120.90262566005165 298.2241762831449,117.90262566005165 298.2241762831449,123.90262566005165" fill="#5ab9ea" />
+    <polygon points="306.6800448986518,120.90262566005165 303.6800448986518,117.90262566005165 303.6800448986518,123.90262566005165" fill="#5ab9ea" />
+    <text x="300.9521105908983" y="115.90262566005165" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">11.5mm</text>
+    <line x1="306.6800448986518" y1="160.90262566005165" x2="366.6800448986518" y2="160.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="306.6800448986518" y1="172.18445389009202" x2="366.6800448986518" y2="172.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="366.6800448986518" y1="160.90262566005165" x2="366.6800448986518" y2="172.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="366.6800448986518,160.90262566005165 363.6800448986518,163.90262566005165 369.6800448986518,163.90262566005165" fill="#5ab9ea" />
+    <polygon points="366.6800448986518,172.18445389009202 363.6800448986518,169.18445389009202 369.6800448986518,169.18445389009202" fill="#5ab9ea" />
+    <text x="371.6800448986518" y="166.54353977507185" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 371.6800448986518 166.54353977507185)" fill="#5ab9ea" font-family="monospace" font-size="10px">11.3mm</text>
+    <line x1="299.95746523656106" y1="172.18445389009202" x2="299.95746523656106" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="301.9467559452356" y1="172.18445389009202" x2="301.9467559452356" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="299.95746523656106" y1="112.18445389009202" x2="301.9467559452356" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="299.95746523656106,112.18445389009202 302.95746523656106,109.18445389009202 302.95746523656106,115.18445389009202" fill="#5ab9ea" />
+    <polygon points="301.9467559452356,112.18445389009202 298.9467559452356,109.18445389009202 298.9467559452356,115.18445389009202" fill="#5ab9ea" />
+    <text x="300.9521105908983" y="107.18445389009202" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">2.0mm</text>
+    <line x1="405.0" y1="168.93017906996909" x2="405.0" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="481.4386493859065" y1="168.93017906996909" x2="481.4386493859065" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="405.0" y1="148.93017906996909" x2="481.4386493859065" y2="148.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="405.0,148.93017906996909 408.0,145.93017906996909 408.0,151.93017906996909" fill="#5ab9ea" />
+    <polygon points="481.4386493859065,148.93017906996909 478.4386493859065,145.93017906996909 478.4386493859065,151.93017906996909" fill="#5ab9ea" />
+    <text x="443.21932469295325" y="143.93017906996909" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">76.4mm</text>
+    <line x1="481.4386493859065" y1="168.93017906996909" x2="561.4386493859065" y2="168.93017906996909" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="481.4386493859065" y1="239.09737433994835" x2="561.4386493859065" y2="239.09737433994835" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="561.4386493859065" y1="168.93017906996909" x2="561.4386493859065" y2="239.09737433994835" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="561.4386493859065,168.93017906996909 558.4386493859065,171.93017906996909 564.4386493859065,171.93017906996909" fill="#5ab9ea" />
+    <polygon points="561.4386493859065,239.09737433994835 558.4386493859065,236.09737433994835 564.4386493859065,236.09737433994835" fill="#5ab9ea" />
+    <text x="566.4386493859065" y="204.01377670495873" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 566.4386493859065 204.01377670495873)" fill="#5ab9ea" font-family="monospace" font-size="10px">70.2mm</text>
+    <line x1="502.36979297768676" y1="164.63422833915402" x2="502.36979297768676" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="575.0" y1="164.63422833915402" x2="575.0" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="502.36979297768676" y1="144.63422833915402" x2="575.0" y2="144.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="502.36979297768676,144.63422833915402 505.36979297768676,141.63422833915402 505.36979297768676,147.63422833915402" fill="#5ab9ea" />
+    <polygon points="575.0,144.63422833915402 572.0,141.63422833915402 572.0,147.63422833915402" fill="#5ab9ea" />
+    <text x="538.6848964888434" y="139.63422833915402" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">72.6mm</text>
+    <line x1="575.0" y1="164.63422833915402" x2="621.5875" y2="164.63422833915402" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="575.0" y1="233.71311609066012" x2="621.5875" y2="233.71311609066012" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="621.5875" y1="164.63422833915402" x2="621.5875" y2="233.71311609066012" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="621.5875,164.63422833915402 618.5875,167.63422833915402 624.5875,167.63422833915402" fill="#5ab9ea" />
+    <polygon points="621.5875,233.71311609066012 618.5875,230.71311609066012 624.5875,230.71311609066012" fill="#5ab9ea" />
+    <text x="626.5875" y="199.17367221490707" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 626.5875 199.17367221490707)" fill="#5ab9ea" font-family="monospace" font-size="10px">69.1mm</text>
+    <line x1="485.2241762831449" y1="160.90262566005165" x2="485.2241762831449" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="496.6800448986518" y1="160.90262566005165" x2="496.6800448986518" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="485.2241762831449" y1="120.90262566005165" x2="496.6800448986518" y2="120.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="485.2241762831449,120.90262566005165 488.2241762831449,117.90262566005165 488.2241762831449,123.90262566005165" fill="#5ab9ea" />
+    <polygon points="496.6800448986518,120.90262566005165 493.6800448986518,117.90262566005165 493.6800448986518,123.90262566005165" fill="#5ab9ea" />
+    <text x="490.9521105908983" y="115.90262566005165" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">11.5mm</text>
+    <line x1="496.6800448986518" y1="160.90262566005165" x2="616.6800448986518" y2="160.90262566005165" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="496.6800448986518" y1="172.18445389009202" x2="616.6800448986518" y2="172.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="616.6800448986518" y1="160.90262566005165" x2="616.6800448986518" y2="172.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="616.6800448986518,160.90262566005165 613.6800448986518,163.90262566005165 619.6800448986518,163.90262566005165" fill="#5ab9ea" />
+    <polygon points="616.6800448986518,172.18445389009202 613.6800448986518,169.18445389009202 619.6800448986518,169.18445389009202" fill="#5ab9ea" />
+    <text x="621.6800448986518" y="166.54353977507185" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 621.6800448986518 166.54353977507185)" fill="#5ab9ea" font-family="monospace" font-size="10px">11.3mm</text>
+    <line x1="489.95746523656106" y1="172.18445389009202" x2="489.95746523656106" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="491.9467559452356" y1="172.18445389009202" x2="491.9467559452356" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="489.95746523656106" y1="112.18445389009202" x2="491.9467559452356" y2="112.18445389009202" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="489.95746523656106,112.18445389009202 492.95746523656106,109.18445389009202 492.95746523656106,115.18445389009202" fill="#5ab9ea" />
+    <polygon points="491.9467559452356,112.18445389009202 488.9467559452356,109.18445389009202 488.9467559452356,115.18445389009202" fill="#5ab9ea" />
+    <text x="490.9521105908983" y="107.18445389009202" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">2.0mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="619.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="619.5875" y1="-29.5875" x2="634.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="639.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="619.5875" y1="-13.587499999999999" x2="634.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
+    <text x="639.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="619.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="639.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="619.5875" y1="18.4125" x2="634.5875" y2="18.4125" stroke="#888888" stroke-width="0.25" />
+    <text x="639.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
+    <line x1="619.5875" y1="34.4125" x2="634.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="639.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="619.5875" y1="50.4125" x2="634.5875" y2="50.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="639.5875" y="53.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="431.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="443.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 600.0 × 400.0 × 19.0mm</text>
+    <text x="20.0" y="455.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 engraves, 3 pockets, 3 profiles</text>
+    <text x="20.0" y="467.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.5mm</text>
+    <text x="30.0" y="491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm</text>
+  </g>
+</svg>

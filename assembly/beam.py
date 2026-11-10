@@ -480,23 +480,37 @@ class BeamSpec:
             return self._is_outer_layer(layer_idx)
         return layer_idx in tenon.layers
 
-    def _tenon_extensions_for_layer(self, layer_idx: int) -> float:
+    def _tenon_extensions_for_layer(self, layer_idx: int, end: Literal["left", "right"] | None = None) -> float:
         total = 0.0
         for feat in self.end_features:
-            if isinstance(feat, Tenon) and self._should_apply_tenon(feat, layer_idx):
+            if (
+                isinstance(feat, Tenon)
+                and self._should_apply_tenon(feat, layer_idx)
+                and (end is None or feat.end == end)
+            ):
                 total += feat.extension_mm
         return total
+
+    def layer_segments(self, sheet_size: float) -> list[list[Segment]] | None:
+        if not isinstance(self.layers, int):
+            return None
+        max_extension = max(self._tenon_extensions_for_layer(i) for i in range(self.layer_count))
+        body_capacity = sheet_size - max_extension
+        if body_capacity <= 0:
+            raise ValueError(
+                f"Beam '{self.name}' tenon extensions ({max_extension}mm) leave no segment capacity "
+                f"on a {sheet_size}mm sheet"
+            )
+        segments = compute_segments(self.length_mm, body_capacity, self.layers)
+        validate_butts_never_align(segments)
+        if self.layer_count > 1:
+            validate_stagger_minimum(segments, self.thickness_mm)
+        return segments
 
     def expand(self, sheet_size: float) -> list[PanelSpec]:
         validate_feature_bounds(self)
 
-        if isinstance(self.layers, int):
-            segments = compute_segments(self.length_mm, sheet_size, self.layers)
-            validate_butts_never_align(segments)
-            if self.layer_count > 1:
-                validate_stagger_minimum(segments, self.thickness_mm)
-        else:
-            segments = None
+        segments = self.layer_segments(sheet_size)
 
         panels: list[PanelSpec] = []
 
@@ -508,13 +522,23 @@ class BeamSpec:
                 layer_spec = self.layers[layer_idx]
                 layer_length = layer_spec.length_mm
                 layer_segments = None
+                if layer_length > sheet_size:
+                    raise ValueError(
+                        f"Beam '{self.name}' explicit layer {layer_idx} length ({layer_length}mm) exceeds "
+                        f"sheet segment capacity ({sheet_size}mm). Use a layer count for automatic splicing."
+                    )
 
             if layer_segments and len(layer_segments) > 1:
                 for seg in layer_segments:
+                    segment_length = seg.length
+                    if seg.index == 0:
+                        segment_length += self._tenon_extensions_for_layer(layer_idx, "left")
+                    if seg.index == len(layer_segments) - 1:
+                        segment_length += self._tenon_extensions_for_layer(layer_idx, "right")
                     panel_name = f"{self.name}_L{layer_idx}_S{seg.index}"
                     panel = PanelSpec(
                         name=panel_name,
-                        width_mm=seg.length,
+                        width_mm=segment_length,
                         height_mm=self.width_mm,
                         thickness_mm=self.thickness_mm,
                     )

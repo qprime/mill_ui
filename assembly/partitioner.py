@@ -10,8 +10,15 @@ _PANEL_ID_SEP = "::"
 
 
 @dataclass(frozen=True)
+class PanelPlacement:
+    panel: PanelSpec
+    x_min_mm: float
+    y_min_mm: float
+
+
+@dataclass(frozen=True)
 class PartitionResult:
-    sheets: tuple[tuple[PanelSpec, ...], ...]
+    sheets: tuple[tuple[PanelPlacement, ...], ...]
     unplaceable: tuple[PanelSpec, ...]
 
 
@@ -59,12 +66,12 @@ def partition_panels(
 
     result = pack_sheets(part_specs, sheet_spec)
 
-    sheets: list[tuple[PanelSpec, ...]] = []
+    sheets: list[tuple[PanelPlacement, ...]] = []
     for sheet_layout in result.sheets:
-        group: list[PanelSpec] = []
+        group: list[PanelPlacement] = []
         for nested_part in sheet_layout.placements:
             original = panel_by_id[id(nested_part.part_spec)]
-            group.append(original)
+            group.append(PanelPlacement(original, nested_part.left_mm, nested_part.bottom_mm))
         sheets.append(tuple(group))
 
     unplaceable: list[PanelSpec] = []

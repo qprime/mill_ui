@@ -8,46 +8,220 @@ See the [feature guide](../feature_guide.md) for every PML capability.
 
 One-piece cabinet doors cut from a single sheet of 19mm MDF.
 
-No recipes yet.
+### [Decorated Shaker door](doors/decorated_shaker_door/)
+
+<img src="doors/decorated_shaker_door/output/decorated_shaker_door.svg" width="240">
+
+A face decoration combined with a frame: a groove cut around a Shaker door's frame.
+
+### [Hinge-cup door](doors/hinge_cup_door/)
+
+<img src="doors/hinge_cup_door/output/hinge_cup_door.svg" width="240">
+
+Two-sided machining: features cut on the back of the sheet after a flip.
+
+### [Multi-panel doors](doors/multi_panel_doors/)
+
+<img src="doors/multi_panel_doors/output/multi_panel_doors.svg" width="240">
+
+A reusable door component with the split layouts: Split, SplitGrid, SplitHorizontal and SplitVertical.
+
+### [Raised-panel doors](doors/raised_panel_doors/)
+
+<img src="doors/raised_panel_doors/output/raised_panel_doors.svg" width="240">
+
+Raised panels in a split grid and in an arched door.
+
+### [Shaker door](doors/shaker_door/)
+
+<img src="doors/shaker_door/output/shaker_door.svg" width="240">
+
+A one-piece cabinet door: a through outline with tabs, a 50mm frame left at full thickness, and a center panel recessed 6mm.
 
 ## Panels
 
 Flat parts: decorative faces, edge styles, frames, trays, and casework panels.
 
-No recipes yet.
+### [Cabinet side](panels/cabinet_side/)
+
+<img src="panels/cabinet_side/output/cabinet_side.svg" width="240">
+
+Hole grids, dados and a rabbet at mixed depths on one casework panel.
+
+### [Decorative panel faces](panels/decorative_panel_faces/)
+
+<img src="panels/decorative_panel_faces/output/decorative_panel_faces.svg" width="240">
+
+Six face decorations side by side: X-panel, louvers, wave, lattice, fluting and concentric border.
+
+### [Edge treatments](panels/edge_treatments/)
+
+<img src="panels/edge_treatments/output/edge_treatments.svg" width="240">
+
+Chamfer, roundover, and rough and finish allowances with a cross-section callout.
+
+### [Frames and trays](panels/frames_and_trays/)
+
+<img src="panels/frames_and_trays/output/frames_and_trays.svg" width="240">
+
+Non-rectangular outlines, inside profiles, Subtract and Shell.
+
+### [Pocket with island](panels/pocket_with_island/)
+
+<img src="panels/pocket_with_island/output/pocket_with_island.svg" width="240">
+
+A pocket that leaves an island of material standing.
+
+### [Recessed mounting plate](panels/recessed_mounting_plate/)
+
+<img src="panels/recessed_mounting_plate/output/recessed_mounting_plate.svg" width="240">
+
+Holes drilled through the floor of a pocket.
 
 ## Assemblies
 
 Multi-panel builds with interface joinery. Large assemblies split across 1220 × 1220 sheets.
 
-No recipes yet.
+### [Base cabinet](assemblies/base_cabinet/)
+
+<img src="assemblies/base_cabinet/output/base_cabinet_sheet_1.svg" width="240">
+
+A carcass assembly split across sheets by multi-sheet partitioning.
+
+### [Bookcase](assemblies/bookcase/)
+
+<img src="assemblies/bookcase/output/bookcase_sheet_1.svg" width="240">
+
+Carcass partitions and dadoed shelves.
+
+### [Box bottoms and lids](assemblies/box_bottoms_and_lids/)
+
+<img src="assemblies/box_bottoms_and_lids/output/box_bottoms_and_lids.svg" width="240">
+
+Box top and bottom joinery: captured, dado, finger and plug.
+
+### [Cubby organizer](assemblies/cubby_organizer/)
+
+<img src="assemblies/cubby_organizer/output/cubby_organizer_sheet_2.svg" width="240">
+
+A cubby assembly with half-lap dividers, a finger-jointed perimeter and a captured back.
+
+### [Finger-jointed box](assemblies/finger_jointed_box/)
+
+<img src="assemblies/finger_jointed_box/output/finger_jointed_box.svg" width="240">
+
+A box assembly with finger-jointed sides, a captured bottom, labels and edge colours.
 
 ## Beams
 
 Structural members laminated from sheet layers.
 
-No recipes yet.
+### [Long spliced rail](beams/long_spliced_rail/)
+
+<img src="beams/long_spliced_rail/output/long_spliced_rail.svg" width="240">
+
+Beam splicing: layers longer than the sheet, spliced with staggered joints.
+
+### [Side table frame](beams/side_table_frame/)
+
+<img src="beams/side_table_frame/output/side_table_frame.svg" width="240">
+
+Laminated beams with mortises, tenons, edge dados, rabbets and drill holes.
 
 ## Production
 
 Whole-sheet jobs laid out for the machine.
 
-No recipes yet.
+### [Nested cabinet job](production/nested_cabinet_job/)
+
+Nesting a part list with MaxRects, including templated parts, shaped parts and a per-part holding override.
+
+### [Production sheet](production/production_sheet/)
+
+<img src="production/production_sheet/output/production_sheet.svg" width="240">
+
+A whole-sheet job: tabs, onion skin, waste cuts, safe Z, per-tool G-code, feed overrides and a kerf override.
 
 ## Shop
 
 Test pieces and machine upkeep: cut these to check the machine, the tools, and the fit before a real job.
 
-No recipes yet.
+### [Calibration coupon](shop/calibration_coupon/)
+
+<img src="shop/calibration_coupon/output/calibration_coupon.svg" width="240">
+
+Holes, pockets and profiles at known sizes for checking the machine.
+
+### [Joinery test coupons](shop/joinery_test_coupons/)
+
+<img src="shop/joinery_test_coupons/output/joinery_test_coupons.svg" width="240">
+
+Every joinery type as a small fit coupon.
+
+### [Pocket corner test](shop/pocket_corner_test/)
+
+<img src="shop/pocket_corner_test/output/pocket_corner_test.svg" width="240">
+
+Pocket finishing options side by side: corner cleanup, dogbone, T-bone, rest pocketing and allowances.
+
+### [Spoilboard surfacing](shop/spoilboard_surfacing/)
+
+<img src="shop/spoilboard_surfacing/output/spoilboard_surfacing.svg" width="240">
+
+Full-sheet facing with cooling retracts.
 
 ## Engraving
 
 Shallow V-bit and engraving work: text, logos, and measuring tools.
 
-No recipes yet.
+### [Layout board](engraving/layout_board/)
+
+<img src="engraving/layout_board/output/layout_board.svg" width="240">
+
+A labelled measurement grid and plain grid lines.
+
+### [Shop ruler](engraving/shop_ruler/)
+
+<img src="engraving/shop_ruler/output/shop_ruler.svg" width="240">
+
+Measurement ticks and engraved text.
+
+### [Sign](engraving/sign/)
+
+<img src="engraving/sign/output/sign.svg" width="240">
+
+Engraved text with line, polyline and spline borders.
+
+### [SVG artwork](engraving/svg_artwork/)
+
+<img src="engraving/svg_artwork/output/svg_artwork.svg" width="240">
+
+Artwork from an SVG file, engraved, pocketed and cut through.
 
 ## Patterns
 
 Generated art, cut as coasters and discs so each family sits beside its siblings.
 
-No recipes yet.
+### [Curve coasters](patterns/curve_coasters/)
+
+<img src="patterns/curve_coasters/output/curve_coasters.svg" width="240">
+
+The curve families: rose, spirograph, Lissajous, superformula and harmonograph.
+
+### [Pattern coasters](patterns/pattern_coasters/)
+
+<img src="patterns/pattern_coasters/output/pattern_coasters.svg" width="240">
+
+Phyllotaxis, Voronoi, string art and concentric ripples.
+
+### [Radial patterns](patterns/radial_patterns/)
+
+<img src="patterns/radial_patterns/output/radial_patterns.svg" width="240">
+
+Ticks, labels, pockets and SVG motifs repeated around a center.
+
+### [Relief carving](patterns/relief_carving/)
+
+<img src="patterns/relief_carving/output/relief_carving.svg" width="240">
+
+Heightfield relief roughed with flat tools and finished with a ball-nose.

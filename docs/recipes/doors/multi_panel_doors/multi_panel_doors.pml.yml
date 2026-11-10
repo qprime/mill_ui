@@ -1,0 +1,87 @@
+project: multi_panel_doors
+
+Sheet:
+  working_width: 1200mm
+  working_height: 1200mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+
+components:
+  door:
+    body:
+      Rect:
+        children:
+          - Profile:
+              side: outside
+              depth: through
+              tab_count: 4
+              tab_height: 3mm
+
+children:
+  - AtPosition:
+      x: 220mm
+      y: 520mm
+      width: 400mm
+      height: 1000mm
+      child:
+        Place:
+          children:
+            - UseComponent:
+                name: door
+            - Inset:
+                distance: 50mm
+                children:
+                  - SplitGrid:
+                      rows: 3
+                      cols: 2
+                      gap: 50mm
+                      children:
+                        - Pocket:
+                            depth: 6mm
+
+  - AtPosition:
+      x: 640mm
+      y: 420mm
+      width: 360mm
+      height: 800mm
+      child:
+        Place:
+          children:
+            - UseComponent:
+                name: door
+            - Inset:
+                distance: 50mm
+                children:
+                  - SplitHorizontal:
+                      count: 2
+                      gap: 50mm
+                      children:
+                        - Pocket:
+                            depth: 6mm
+
+  - AtPosition:
+      x: 1010mm
+      y: 420mm
+      width: 340mm
+      height: 800mm
+      child:
+        SplitVertical:
+          count: 2
+          gap: 20mm
+          children:
+            - Place:
+                children:
+                  - UseComponent:
+                      name: door
+                  - Inset:
+                      distance: 50mm
+                      children:
+                        - Split:
+                            rows: 2
+                            cols: 1
+                            rail: 50mm
+                            mullion: 0mm
+                            children:
+                              - Pocket:
+                                  depth: 6mm

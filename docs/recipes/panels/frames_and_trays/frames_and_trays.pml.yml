@@ -1,0 +1,78 @@
+project: frames_and_trays
+
+Sheet:
+  physical_width: 1000mm
+  physical_height: 700mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: picture_frame
+      label: "Picture Frame"
+      at: {x: 160mm, y: 500mm, width: 260mm, height: 340mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 60mm
+            children:
+              - Profile: {side: inside, depth: through}
+              - Chamfer: {width: 5mm, depth: 5mm}
+
+  - RoundedRect:
+      id: serving_tray
+      label: "Serving Tray"
+      radius: 30mm
+      at: {x: 480mm, y: 570mm, width: 300mm, height: 200mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 20mm
+            children:
+              - RoundedRect:
+                  id: serving_tray_floor
+                  radius: 10mm
+                  children:
+                    - Pocket: {depth: 12mm}
+
+  - Ellipse:
+      id: oval_tray
+      label: "Oval Tray"
+      at: {x: 820mm, y: 570mm, width: 280mm, height: 180mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 20mm
+            children:
+              - Ellipse:
+                  id: oval_tray_floor
+                  children:
+                    - Pocket: {depth: 12mm}
+
+  - Polygon:
+      id: pentagon_frame
+      label: "Pentagon Frame"
+      points:
+        - [180mm, 310mm]
+        - [46.85mm, 213.26mm]
+        - [97.71mm, 56.74mm]
+        - [262.29mm, 56.74mm]
+        - [313.15mm, 213.26mm]
+      children:
+        - Profile: {side: outside, depth: through}
+        - Shell:
+            wall: 40mm
+            interior: profile
+
+  - AtPosition:
+      x: 500mm
+      y: 170mm
+      width: 240mm
+      height: 220mm
+      child:
+        Triangle:
+          id: trivet
+          label: "Trivet"
+          base: 240mm
+          height: 220mm
+          children:
+            - Profile: {side: outside, depth: through}

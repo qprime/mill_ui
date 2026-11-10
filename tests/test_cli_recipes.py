@@ -277,6 +277,19 @@ def test_check_reports_a_stale_output_file(tmp_path: Path):
     assert failures[0].startswith("door: metrics.json differs: ")
 
 
+def test_gate_rejects_design_errors_even_when_outputs_match(tmp_path: Path):
+    pml = PART_PML.replace("x: 150mm", "x: 100mm")
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "door", {"door.pml.yml": pml}))
+    assert recipe is not None
+    regenerate_recipe(recipe)
+
+    failures = check_pml_recipe(recipe, _altmill())
+
+    assert len(failures) == 1
+    assert "door.pml.yml sheet 1: Cutting edge extends" in failures[0]
+    assert "left margin zone" in failures[0]
+
+
 def test_run_on_recipes_reports_an_unreadable_source(tmp_path: Path):
     recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "door"))
     assert recipe is not None

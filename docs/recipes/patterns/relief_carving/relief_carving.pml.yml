@@ -1,0 +1,38 @@
+project: "Relief carving"
+
+Sheet:
+  physical_width: 300mm
+  physical_height: 300mm
+  thickness: 19mm
+  margin: 10mm
+
+children:
+  - Rect:
+      id: relief_panel
+      label: "Relief Panel"
+      at:
+        x: 140mm
+        y: 140mm
+        width: 200mm
+        height: 200mm
+      children:
+        - Heightfield:
+            image: synthetic_gradient.png
+            size:
+              width: 160mm
+              height: 160mm
+            depth: 6mm
+            white_is_high: true
+            tools:
+              - tool: "1/4 upcut spiral"
+                role: rough
+                stepover: 50%
+                stepdown: 2mm
+              - tool: "1/8 upcut spiral"
+                role: rough
+                stepover: 40%
+                stepdown: 1mm
+              - tool: "1/8 ball nose 2F"
+                role: finish
+                stepover: 10%
+                angle: 0

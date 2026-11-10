@@ -85,6 +85,7 @@ def check_pml_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
         runs, _ = write_recipe_outputs(recipe, generated)
         problems = compare_output_dirs(recipe.path / OUTPUT_DIR_NAME, generated)
     for run in runs:
+        problems += [f"{run.source} sheet {run.sheet_index}: {error}" for error in run.result.errors]
         problems += _fit_problems(
             check_sheet_fits_machine(run.result.ast, machine), f"{run.source} sheet {run.sheet_index}"
         )

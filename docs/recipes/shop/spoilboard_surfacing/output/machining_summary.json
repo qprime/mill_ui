@@ -1,0 +1,29 @@
+{
+  "stock": {
+    "width_mm": 1220.0,
+    "height_mm": 1220.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "surface-25.40mm.nc",
+      "operation": "surface",
+      "tool_diameter_mm": 25.4,
+      "rpm": 12000.0,
+      "feed_xy_mm_min": 4800.0,
+      "feed_z_mm_min": 1200.0,
+      "stepdown_mm": 1.0,
+      "max_depth_mm": 0.5,
+      "feature_count": 1,
+      "strategy": "surface",
+      "estimated_runtime_min": 19.5
+    }
+  ],
+  "total_runtime_min": 19.5,
+  "feature_counts": {
+    "pocket": 1
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

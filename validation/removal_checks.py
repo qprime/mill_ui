@@ -537,7 +537,7 @@ def _min_gap_between(a: Bounds2D, b: Bounds2D) -> float:
     y_gap = max(a.y_min, b.y_min) - min(a.y_max, b.y_max)
 
     if x_gap >= 0 and y_gap >= 0:
-        return min(x_gap, y_gap)
+        return math.hypot(x_gap, y_gap)
     elif x_gap >= 0:
         return x_gap
     elif y_gap >= 0:

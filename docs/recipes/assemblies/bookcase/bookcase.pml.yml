@@ -1,0 +1,36 @@
+project: bookcase
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+  material: mdf
+children:
+  - Assembly:
+      type: carcass
+      width: 900mm
+      depth: 300mm
+      height: 1100mm
+      thickness: 18mm
+      joinery: butt
+      clearance: 0.12mm
+      layout_gap: 10mm
+      cap_style: between_sides
+      top:
+        joinery: dado
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+      bottom:
+        joinery: dado
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+      back: none
+      fixed_shelves: 3
+      shelf_joinery: dado
+      shelf_dado_depth: 9mm
+      vertical_partitions: 2
+      partition_joinery: dado
+      partition_dado_depth: 9mm
+      show_labels: true

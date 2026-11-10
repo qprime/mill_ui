@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.588 -51.587 553.175 1027.175" width="553.175mm" height="1027.175mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-11.5875" y="-51.5875" width="553.175" height="1027.175" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="400.000" height="800.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 25.000 760.000 L 375.000 760.000 L 375.000 40.000 L 25.000 40.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 23.413 761.587 L 376.587 761.587 L 376.587 38.413 L 23.413 38.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="25.000" y="651.000" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_lower" />
+    <rect x="25.000" y="131.000" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_upper" />
+    <rect x="363.000" y="40.000" width="12.000" height="720.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="back_rabbet" />
+  </g>
+  <g id="HOLES" class="holes">
+    <circle cx="62.000" cy="592.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000" />
+    <line x1="59.000" y1="592.000" x2="65.000" y2="592.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_h" />
+    <line x1="62.000" y1="589.000" x2="62.000" y2="595.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_v" />
+    <circle cx="62.000" cy="560.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001" />
+    <line x1="59.000" y1="560.000" x2="65.000" y2="560.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_h" />
+    <line x1="62.000" y1="557.000" x2="62.000" y2="563.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_v" />
+    <circle cx="62.000" cy="528.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002" />
+    <line x1="59.000" y1="528.000" x2="65.000" y2="528.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_h" />
+    <line x1="62.000" y1="525.000" x2="62.000" y2="531.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_v" />
+    <circle cx="62.000" cy="496.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003" />
+    <line x1="59.000" y1="496.000" x2="65.000" y2="496.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_h" />
+    <line x1="62.000" y1="493.000" x2="62.000" y2="499.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_v" />
+    <circle cx="62.000" cy="464.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004" />
+    <line x1="59.000" y1="464.000" x2="65.000" y2="464.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_h" />
+    <line x1="62.000" y1="461.000" x2="62.000" y2="467.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_v" />
+    <circle cx="62.000" cy="432.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005" />
+    <line x1="59.000" y1="432.000" x2="65.000" y2="432.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_h" />
+    <line x1="62.000" y1="429.000" x2="62.000" y2="435.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_v" />
+    <circle cx="62.000" cy="400.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006" />
+    <line x1="59.000" y1="400.000" x2="65.000" y2="400.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_h" />
+    <line x1="62.000" y1="397.000" x2="62.000" y2="403.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_v" />
+    <circle cx="62.000" cy="368.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007" />
+    <line x1="59.000" y1="368.000" x2="65.000" y2="368.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_h" />
+    <line x1="62.000" y1="365.000" x2="62.000" y2="371.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_v" />
+    <circle cx="62.000" cy="336.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008" />
+    <line x1="59.000" y1="336.000" x2="65.000" y2="336.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_h" />
+    <line x1="62.000" y1="333.000" x2="62.000" y2="339.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_v" />
+    <circle cx="62.000" cy="304.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009" />
+    <line x1="59.000" y1="304.000" x2="65.000" y2="304.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_h" />
+    <line x1="62.000" y1="301.000" x2="62.000" y2="307.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_v" />
+    <circle cx="62.000" cy="272.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010" />
+    <line x1="59.000" y1="272.000" x2="65.000" y2="272.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_h" />
+    <line x1="62.000" y1="269.000" x2="62.000" y2="275.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_v" />
+    <circle cx="62.000" cy="240.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011" />
+    <line x1="59.000" y1="240.000" x2="65.000" y2="240.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_h" />
+    <line x1="62.000" y1="237.000" x2="62.000" y2="243.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_v" />
+    <circle cx="62.000" cy="208.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012" />
+    <line x1="59.000" y1="208.000" x2="65.000" y2="208.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_h" />
+    <line x1="62.000" y1="205.000" x2="62.000" y2="211.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_v" />
+    <circle cx="326.000" cy="592.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000" />
+    <line x1="323.000" y1="592.000" x2="329.000" y2="592.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_h" />
+    <line x1="326.000" y1="589.000" x2="326.000" y2="595.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_v" />
+    <circle cx="326.000" cy="560.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001" />
+    <line x1="323.000" y1="560.000" x2="329.000" y2="560.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_h" />
+    <line x1="326.000" y1="557.000" x2="326.000" y2="563.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_v" />
+    <circle cx="326.000" cy="528.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002" />
+    <line x1="323.000" y1="528.000" x2="329.000" y2="528.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_h" />
+    <line x1="326.000" y1="525.000" x2="326.000" y2="531.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_v" />
+    <circle cx="326.000" cy="496.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003" />
+    <line x1="323.000" y1="496.000" x2="329.000" y2="496.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_h" />
+    <line x1="326.000" y1="493.000" x2="326.000" y2="499.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_v" />
+    <circle cx="326.000" cy="464.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004" />
+    <line x1="323.000" y1="464.000" x2="329.000" y2="464.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_h" />
+    <line x1="326.000" y1="461.000" x2="326.000" y2="467.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_v" />
+    <circle cx="326.000" cy="432.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005" />
+    <line x1="323.000" y1="432.000" x2="329.000" y2="432.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_h" />
+    <line x1="326.000" y1="429.000" x2="326.000" y2="435.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_v" />
+    <circle cx="326.000" cy="400.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006" />
+    <line x1="323.000" y1="400.000" x2="329.000" y2="400.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_h" />
+    <line x1="326.000" y1="397.000" x2="326.000" y2="403.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_v" />
+    <circle cx="326.000" cy="368.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007" />
+    <line x1="323.000" y1="368.000" x2="329.000" y2="368.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_h" />
+    <line x1="326.000" y1="365.000" x2="326.000" y2="371.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_v" />
+    <circle cx="326.000" cy="336.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008" />
+    <line x1="323.000" y1="336.000" x2="329.000" y2="336.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_h" />
+    <line x1="326.000" y1="333.000" x2="326.000" y2="339.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_v" />
+    <circle cx="326.000" cy="304.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009" />
+    <line x1="323.000" y1="304.000" x2="329.000" y2="304.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_h" />
+    <line x1="326.000" y1="301.000" x2="326.000" y2="307.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_v" />
+    <circle cx="326.000" cy="272.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010" />
+    <line x1="323.000" y1="272.000" x2="329.000" y2="272.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_h" />
+    <line x1="326.000" y1="269.000" x2="326.000" y2="275.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_v" />
+    <circle cx="326.000" cy="240.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011" />
+    <line x1="323.000" y1="240.000" x2="329.000" y2="240.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_h" />
+    <line x1="326.000" y1="237.000" x2="326.000" y2="243.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_v" />
+    <circle cx="326.000" cy="208.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012" />
+    <line x1="323.000" y1="208.000" x2="329.000" y2="208.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_h" />
+    <line x1="326.000" y1="205.000" x2="326.000" y2="211.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_v" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="200.000" y="660.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_lower_label">Lower Shelf Dado</text>
+    <text x="200.000" y="140.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_upper_label">Upper Shelf Dado</text>
+    <text x="369.000" y="400.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="back_rabbet_label">Back Rabbet</text>
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="363.0" y1="40.0" x2="363.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="40.0" x2="375.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.0" y1="20.0" x2="375.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="363.0,20.0 366.0,17.0 366.0,23.0" fill="#5ab9ea" />
+    <polygon points="375.0,20.0 372.0,17.0 372.0,23.0" fill="#5ab9ea" />
+    <text x="369.0" y="15.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">12.0mm</text>
+    <line x1="375.0" y1="40.0" x2="395.0" y2="40.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="760.0" x2="395.0" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="395.0" y1="40.0" x2="395.0" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="395.0,40.0 392.0,43.0 398.0,43.0" fill="#5ab9ea" />
+    <polygon points="395.0,760.0 392.0,757.0 398.0,757.0" fill="#5ab9ea" />
+    <text x="400.0" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 400.0 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
+    <line x1="25.0" y1="651.0" x2="25.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="651.0" x2="375.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="25.0" y1="611.0" x2="375.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="25.0,611.0 28.0,608.0 28.0,614.0" fill="#5ab9ea" />
+    <polygon points="375.0,611.0 372.0,608.0 372.0,614.0" fill="#5ab9ea" />
+    <text x="200.0" y="606.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
+    <line x1="375.0" y1="651.0" x2="411.5875" y2="651.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="669.0" x2="411.5875" y2="669.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="411.5875" y1="651.0" x2="411.5875" y2="669.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="411.5875,651.0 408.5875,654.0 414.5875,654.0" fill="#5ab9ea" />
+    <polygon points="411.5875,669.0 408.5875,666.0 414.5875,666.0" fill="#5ab9ea" />
+    <text x="416.5875" y="660.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 416.5875 660.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.0mm</text>
+    <line x1="25.0" y1="40.0" x2="25.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="40.0" x2="375.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="25.0" y1="-11.5875" x2="375.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="25.0,-11.5875 28.0,-14.5875 28.0,-8.5875" fill="#5ab9ea" />
+    <polygon points="375.0,-11.5875 372.0,-14.5875 372.0,-8.5875" fill="#5ab9ea" />
+    <text x="200.0" y="-16.5875" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
+    <line x1="375.0" y1="40.0" x2="411.5875" y2="40.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="375.0" y1="760.0" x2="411.5875" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="411.5875" y1="40.0" x2="411.5875" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="411.5875,40.0 408.5875,43.0 414.5875,43.0" fill="#5ab9ea" />
+    <polygon points="411.5875,760.0 408.5875,757.0 414.5875,757.0" fill="#5ab9ea" />
+    <text x="416.5875" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 416.5875 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
+    <line x1="62.0" y1="208.0" x2="62.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="326.0" y1="208.0" x2="326.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="62.0" y1="188.0" x2="326.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="62.0,188.0 65.0,185.0 65.0,191.0" fill="#5ab9ea" />
+    <polygon points="326.0,188.0 323.0,185.0 323.0,191.0" fill="#5ab9ea" />
+    <text x="194.0" y="183.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">264.0mm</text>
+    <line x1="62.0" y1="208.0" x2="102.0" y2="208.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="62.0" y1="240.0" x2="102.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="102.0" y1="208.0" x2="102.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="102.0,208.0 99.0,211.0 105.0,211.0" fill="#5ab9ea" />
+    <polygon points="102.0,240.0 99.0,237.0 105.0,237.0" fill="#5ab9ea" />
+    <text x="107.0" y="224.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 107.0 224.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">32.0mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-1.5875000000000004" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-1.5875000000000004" y="-23.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="409.5875" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="409.5875" y1="-19.5875" x2="424.5875" y2="-19.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="429.5875" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="409.5875" y1="-3.5874999999999986" x2="424.5875" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
+    <text x="429.5875" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="409.5875" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="429.5875" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="409.5875" y1="28.4125" x2="424.5875" y2="28.4125" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="429.5875" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
+    <line x1="409.5875" y1="44.4125" x2="424.5875" y2="44.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="429.5875" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="409.5875" y1="60.4125" x2="424.5875" y2="60.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="429.5875" y="63.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="821.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="833.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 400.0 × 800.0 × 18.0mm</text>
+    <text x="20.0" y="845.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 26 holes, 3 pockets, 1 profile</text>
+    <text x="20.0" y="857.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="869.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
+    <text x="30.0" y="881.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 6.0mm, 9.0mm</text>
+    <text x="20.0" y="893.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
+    <text x="30.0" y="905.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀5.0mm</text>
+    <text x="20.0" y="917.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (3):</text>
+    <text x="30.0" y="929.5875" fill="#cccccc" font-family="monospace" font-size="10px">• back_rabbet</text>
+    <text x="30.0" y="941.5875" fill="#cccccc" font-family="monospace" font-size="10px">• dado_lower</text>
+    <text x="30.0" y="953.5875" fill="#cccccc" font-family="monospace" font-size="10px">• dado_upper</text>
+  </g>
+</svg>

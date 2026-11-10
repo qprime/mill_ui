@@ -1,0 +1,187 @@
+{
+  "total_sheets": 3,
+  "sheets": [
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 1,
+      "job_name": "base_cabinet_sheet_1",
+      "constraint_audit": {
+        "dogbone": {
+          "status": "honored",
+          "count": 8,
+          "safety_critical": false
+        }
+      },
+      "complexity": {
+        "total_moves": 940,
+        "rapid_moves": 58,
+        "cut_moves": 712,
+        "rapid_ratio": 0.062
+      },
+      "fidelity": {
+        "tool_changes": 3,
+        "passes": [
+          {
+            "name": "pocket",
+            "tool_diameter_mm": 12.7,
+            "move_count": 288
+          },
+          {
+            "name": "dogbone",
+            "tool_diameter_mm": 12.7,
+            "move_count": 408
+          },
+          {
+            "name": "profile",
+            "tool_diameter_mm": 3.175,
+            "move_count": 244
+          }
+        ]
+      },
+      "output_size": {
+        "total_bytes": 21203,
+        "total_lines": 902,
+        "files": {
+          "pocket-12.70mm": {
+            "bytes": 7515,
+            "lines": 264
+          },
+          "dogbone-12.70mm": {
+            "bytes": 7092,
+            "lines": 408
+          },
+          "profile-3.17mm": {
+            "bytes": 6596,
+            "lines": 230
+          }
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 2,
+      "job_name": "base_cabinet_sheet_2",
+      "constraint_audit": {
+        "dogbone": {
+          "status": "honored",
+          "count": 1,
+          "safety_critical": false
+        }
+      },
+      "complexity": {
+        "total_moves": 375,
+        "rapid_moves": 10,
+        "cut_moves": 297,
+        "rapid_ratio": 0.027
+      },
+      "fidelity": {
+        "tool_changes": 3,
+        "passes": [
+          {
+            "name": "pocket",
+            "tool_diameter_mm": 12.7,
+            "move_count": 36
+          },
+          {
+            "name": "dogbone",
+            "tool_diameter_mm": 12.7,
+            "move_count": 51
+          },
+          {
+            "name": "profile",
+            "tool_diameter_mm": 3.175,
+            "move_count": 288
+          }
+        ]
+      },
+      "output_size": {
+        "total_bytes": 9754,
+        "total_lines": 369,
+        "files": {
+          "pocket-12.70mm": {
+            "bytes": 1044,
+            "lines": 46
+          },
+          "dogbone-12.70mm": {
+            "bytes": 977,
+            "lines": 64
+          },
+          "profile-3.17mm": {
+            "bytes": 7733,
+            "lines": 259
+          }
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 3,
+      "job_name": "base_cabinet_sheet_3",
+      "constraint_audit": {
+        "dogbone": {
+          "status": "honored",
+          "count": 1,
+          "safety_critical": false
+        }
+      },
+      "complexity": {
+        "total_moves": 183,
+        "rapid_moves": 8,
+        "cut_moves": 141,
+        "rapid_ratio": 0.044
+      },
+      "fidelity": {
+        "tool_changes": 3,
+        "passes": [
+          {
+            "name": "pocket",
+            "tool_diameter_mm": 12.7,
+            "move_count": 36
+          },
+          {
+            "name": "dogbone",
+            "tool_diameter_mm": 12.7,
+            "move_count": 51
+          },
+          {
+            "name": "profile",
+            "tool_diameter_mm": 3.175,
+            "move_count": 96
+          }
+        ]
+      },
+      "output_size": {
+        "total_bytes": 4525,
+        "total_lines": 206,
+        "files": {
+          "pocket-12.70mm": {
+            "bytes": 992,
+            "lines": 46
+          },
+          "dogbone-12.70mm": {
+            "bytes": 969,
+            "lines": 64
+          },
+          "profile-3.17mm": {
+            "bytes": 2564,
+            "lines": 96
+          }
+        }
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "base_cabinet.pml.yml"
+  }
+}

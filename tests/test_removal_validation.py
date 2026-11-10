@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
@@ -396,6 +398,23 @@ def test_check_toolpath_clearance_sufficient_gap():
     )
     result = check_toolpath_clearance([intent_a, intent_b], tool_diameter_mm=6.35)
     assert result.is_valid()
+
+
+@pytest.mark.parametrize(
+    ("x_gap", "y_gap", "expected_gap", "valid"),
+    [(70, 1, 70.00714249, True), (5, 5, 7.07106781, True), (3, 4, 5.0, False), (0, 4, 4.0, False)],
+)
+def test_check_toolpath_clearance_diagonal_distance(x_gap, y_gap, expected_gap, valid):
+    a = _make_intent("a", Bounds2D(0, 50, 0, 50), hint_type="profile", side="outside")
+    b = _make_intent(
+        "b", Bounds2D(50 + x_gap, 100 + x_gap, 50 + y_gap, 100 + y_gap), hint_type="profile", side="outside"
+    )
+
+    for pair in ([a, b], [b, a]):
+        result = check_toolpath_clearance(pair, tool_diameter_mm=6.35)
+        assert result.is_valid() == valid
+        if not valid:
+            assert result.errors[0].metadata["gap_mm"] == pytest.approx(expected_gap)
 
 
 def test_check_working_area_bounds_inside():

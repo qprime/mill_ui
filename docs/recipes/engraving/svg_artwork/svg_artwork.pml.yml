@@ -1,0 +1,51 @@
+project: "SVG artwork three ways"
+
+Sheet:
+  physical_width: 600mm
+  physical_height: 400mm
+  thickness: 19mm
+  margin: 10mm
+
+children:
+  - Rect:
+      id: engraved_panel
+      label: "Engraved"
+      at:
+        x: 100mm
+        y: 190mm
+        width: 170mm
+        height: 120mm
+      children:
+        - SvgStamp:
+            path: "heart_star.svg"
+            feature: engrave
+            depth: 0.5mm
+            scale: fit
+  - Rect:
+      id: pocketed_panel
+      label: "Pocketed"
+      at:
+        x: 290mm
+        y: 190mm
+        width: 170mm
+        height: 120mm
+      children:
+        - SvgStamp:
+            path: "heart_star.svg"
+            feature: pocket
+            depth: 4mm
+            scale: fit
+  - Rect:
+      id: cut_through_panel
+      label: "Cut Through"
+      at:
+        x: 480mm
+        y: 190mm
+        width: 170mm
+        height: 120mm
+      children:
+        - SvgStamp:
+            path: "heart_star.svg"
+            feature: profile
+            depth: through
+            scale: fit

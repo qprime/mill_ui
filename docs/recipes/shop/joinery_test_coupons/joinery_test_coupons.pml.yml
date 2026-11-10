@@ -1,0 +1,143 @@
+project: joinery_test_coupons
+
+Sheet:
+  physical_width: 600mm
+  physical_height: 400mm
+  thickness: 18mm
+  margin: 10mm
+  material: mdf
+
+children:
+  - AtPosition:
+      x: 70mm
+      y: 316.67mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: butt
+          bottom: none
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 210mm
+      y: 316.67mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: finger
+          finger_width: 12mm
+          bottom: none
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 70mm
+      y: 190mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: step
+          bottom: none
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 210mm
+      y: 190mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: rabbet
+          bottom: none
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 70mm
+      y: 63.33mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: butt
+          bottom: captured
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 210mm
+      y: 63.33mm
+      width: 140mm
+      height: 126.67mm
+      child:
+        Assembly:
+          type: box
+          width: 55mm
+          depth: 50mm
+          height: 40mm
+          thickness: 18mm
+          joinery: butt
+          bottom: dado
+          top: none
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true
+
+  - AtPosition:
+      x: 430mm
+      y: 190mm
+      width: 300mm
+      height: 380mm
+      child:
+        Assembly:
+          type: cubby
+          width: 120mm
+          depth: 60mm
+          height: 120mm
+          thickness: 18mm
+          grid: [2, 2]
+          perimeter_joinery: butt
+          internal_joinery: half_lap
+          clearance: 0.2mm
+          layout_gap: 10mm
+          show_labels: true

@@ -1,0 +1,71 @@
+{
+  "constraint_audit": {
+    "edge_treatment": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    },
+    "edge_feature": {
+      "status": "honored",
+      "count": 2,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 431,
+    "rapid_moves": 5,
+    "cut_moves": 348,
+    "rapid_ratio": 0.012
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "edge",
+        "tool_diameter_mm": 12.7,
+        "move_count": 47
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 288
+      },
+      {
+        "name": "finish",
+        "tool_diameter_mm": 3.175,
+        "move_count": 96
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 11323,
+    "total_lines": 409,
+    "files": {
+      "edge-12.70mm": {
+        "bytes": 1212,
+        "lines": 54
+      },
+      "profile-3.17mm": {
+        "bytes": 7521,
+        "lines": 259
+      },
+      "finish-3.17mm": {
+        "bytes": 2590,
+        "lines": 96
+      }
+    }
+  },
+  "errors": [
+    "Overlapping regions detected: profile_generated_profile_0 and chamfer_generated_chamfer_1",
+    "Overlapping regions detected: profile_generated_profile_2 and roundover_generated_roundover_3"
+  ],
+  "warnings": [
+    "Edge feature 'roundover_generated_roundover_3': no roundover bit with 6.0mm radius available \u2014 feature skipped"
+  ],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "edge_treatments.pml.yml"
+  }
+}

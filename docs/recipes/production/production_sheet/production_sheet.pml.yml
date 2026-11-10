@@ -1,0 +1,125 @@
+project: production_sheet
+kerf: 6.35mm
+
+Sheet:
+  working_width: 1200mm
+  working_height: 1200mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+  gcode_output: per-tool
+  safe_z: 25mm
+
+children:
+  - AtPosition:
+      x: 320mm
+      y: 905mm
+      width: 600mm
+      height: 550mm
+      child:
+        Grid:
+          rows: 2
+          cols: 2
+          gap: 20mm
+          children:
+            - Cell:
+                children:
+                  - Rect:
+                      id: shelf
+                      label: "Shelf"
+                      children:
+                        - Profile:
+                            side: outside
+                            depth: through
+                            tab_count: 4
+                            tab_height: 3mm
+                            tab_width: 10mm
+                            feeds:
+                              rpm: 16000
+                              feed_xy: 1500
+
+  - AtPosition:
+      x: 920mm
+      y: 905mm
+      width: 520mm
+      height: 550mm
+      child:
+        Place:
+          layout:
+            Grid: {rows: 2, cols: 1, gap: 20mm}
+          children:
+            - Rect:
+                id: door
+                label: "Door"
+                children:
+                  - Profile:
+                      side: outside
+                      depth: through
+                      onion_skin_mm: 0.3
+                  - Frame:
+                      width: 60mm
+                      children:
+                        - Pocket:
+                            depth: 6mm
+                            feeds:
+                              feed_xy: 800
+                              depth_per_pass: 3
+            - Rect:
+                id: drawer_front
+                label: "Drawer Front"
+                children:
+                  - Profile:
+                      side: outside
+                      depth: through
+                      onion_skin_mm: 0.3
+                  - Circle:
+                      diameter: 35mm
+                      feature:
+                        type: hole
+                        depth: 12mm
+
+  - Rect:
+      id: side_panel
+      label: "Side Panel"
+      at:
+        x: 250mm
+        y: 300mm
+        width: 400mm
+        height: 300mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            onion_skin_mm: 0.3
+        - HoleGrid:
+            spacing: 64mm
+            diameter: 8mm
+            depth: 12mm
+            pattern: rectangular
+            inset: 40mm
+            align: center
+
+  - AtPosition:
+      x: 650mm
+      y: 300mm
+      width: 250mm
+      height: 250mm
+      child:
+        Circle:
+          id: lazy_susan
+          label: "Lazy Susan"
+          diameter: 250mm
+          children:
+            - Profile:
+                side: outside
+                depth: through
+                tab_count: 3
+                tab_height: 3mm
+
+  - WasteCuts:
+      min_width: 200mm
+      min_height: 200mm
+      margin: 5mm
+      tab_count: 2
+      tab_height: 3mm
+      strategy: largest

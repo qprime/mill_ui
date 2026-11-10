@@ -79,7 +79,7 @@ class TestPartitionPanels:
         )
         result = partition_panels([panel], usable_width_mm=1200, usable_height_mm=1200)
         assert len(result.sheets) == 1
-        recovered = result.sheets[0][0]
+        recovered = result.sheets[0][0].panel
         assert recovered is panel
         assert recovered.notches == (notch,)
         assert recovered.dados == (dado,)
@@ -100,7 +100,7 @@ class TestPartitionPanels:
         r2 = partition_panels(panels, usable_width_mm=700, usable_height_mm=700, gap_mm=10.0)
         assert len(r1.sheets) == len(r2.sheets)
         for s1, s2 in zip(r1.sheets, r2.sheets, strict=True):
-            assert [p.name for p in s1] == [p.name for p in s2]
+            assert s1 == s2
 
     def test_gap_inflation_one_sided(self):
         result_no_gap = partition_panels(

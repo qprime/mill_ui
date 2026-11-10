@@ -1,0 +1,98 @@
+project: "Curve coasters"
+
+Sheet:
+  physical_width: 700mm
+  physical_height: 260mm
+  thickness: 12mm
+  margin: 10mm
+
+children:
+  - Circle:
+      id: rose_coaster
+      label: "Rose"
+      diameter: 100mm
+      at: {x: 70mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Curve:
+            type: rose
+            lobes: 5
+            size: 84mm
+            depth: 0.5mm
+
+  - Circle:
+      id: spirograph_coaster
+      label: "Spirograph"
+      diameter: 100mm
+      at: {x: 205mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Curve:
+            type: spirograph
+            size: 84mm
+            depth: 0.5mm
+            layers:
+              - points: 7
+                step: 3
+                pen: {from: 1.0, to: 0.5, count: 3}
+                rotation_step: 8
+
+  - Circle:
+      id: lissajous_coaster
+      label: "Lissajous"
+      diameter: 100mm
+      at: {x: 340mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Curve:
+            type: lissajous
+            frequency_x: 3
+            frequency_y: 4
+            phase: 90
+            width: 64mm
+            height: 64mm
+            depth: 0.5mm
+
+  - Circle:
+      id: superformula_coaster
+      label: "Superformula"
+      diameter: 100mm
+      at: {x: 475mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Curve:
+            type: superformula
+            m: 6
+            n1: 0.4
+            n2: 1.2
+            n3: 1.2
+            size: 84mm
+            depth: 0.5mm
+
+  - Circle:
+      id: harmonograph_coaster
+      label: "Harmonograph"
+      diameter: 100mm
+      at: {x: 610mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Curve:
+            type: harmonograph
+            cycles: 30
+            size: 68mm
+            depth: 0.5mm
+            pendulums:
+              - {axis: x, amplitude: 40mm, frequency: 2, phase: 90, damping: 0.03}
+              - {axis: x, amplitude: 15mm, frequency: 3.01, damping: 0.02}
+              - {axis: y, amplitude: 40mm, frequency: 3, phase: 0, damping: 0.03}
+              - {axis: y, amplitude: 15mm, frequency: 2, damping: 0.02}

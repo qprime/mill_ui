@@ -1,0 +1,65 @@
+{
+  "constraint_audit": {
+    "edge_feature": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 6781,
+    "rapid_moves": 87,
+    "cut_moves": 6241,
+    "rapid_ratio": 0.013
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 4217
+      },
+      {
+        "name": "edge",
+        "tool_diameter_mm": 12.7,
+        "move_count": 40
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 2524
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 193030,
+    "total_lines": 6555,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 123007,
+        "lines": 4065
+      },
+      "edge-12.70mm": {
+        "bytes": 1057,
+        "lines": 48
+      },
+      "profile-3.17mm": {
+        "bytes": 68966,
+        "lines": 2442
+      }
+    }
+  },
+  "errors": [
+    "Overlapping regions detected: profile_generated_profile_0 and chamfer_generated_chamfer_2",
+    "Overlapping regions detected: profile_generated_profile_1 and chamfer_generated_chamfer_2",
+    "Overlapping regions detected: profile_generated_profile_7 and profile_shell_interior_8"
+  ],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "frames_and_trays.pml.yml"
+  }
+}

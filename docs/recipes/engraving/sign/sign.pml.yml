@@ -1,0 +1,110 @@
+project: "Shop sign"
+
+Sheet:
+  physical_width: 600mm
+  physical_height: 400mm
+  thickness: 19mm
+  margin: 10mm
+
+children:
+  - Rect:
+      id: sign
+      label: "Shop Sign"
+      at:
+        x: 290mm
+        y: 190mm
+        width: 540mm
+        height: 340mm
+      children:
+        - Inset:
+            distance: 15mm
+            children:
+              - Polyline:
+                  id: outer_border
+                  points: [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]
+                  children:
+                    - Engrave: {depth: 0.8mm}
+        - Inset:
+            distance: 30mm
+            children:
+              - Polyline:
+                  id: inner_border
+                  points: [[0.0, 0.1], [0.1, 0.0], [0.9, 0.0], [1.0, 0.1], [1.0, 0.9], [0.9, 1.0], [0.1, 1.0], [0.0, 0.9], [0.0, 0.1]]
+                  children:
+                    - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 290mm
+            y: 255mm
+            width: 400mm
+            height: 10mm
+            child:
+              Line:
+                id: top_rule
+                orientation: horizontal
+                children:
+                  - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 290mm
+            y: 125mm
+            width: 400mm
+            height: 10mm
+            child:
+              Line:
+                id: bottom_rule
+                orientation: horizontal
+                children:
+                  - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 75mm
+            y: 190mm
+            width: 10mm
+            height: 110mm
+            child:
+              Line:
+                id: left_rule
+                orientation: vertical
+                children:
+                  - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 505mm
+            y: 190mm
+            width: 10mm
+            height: 110mm
+            child:
+              Line:
+                id: right_rule
+                orientation: vertical
+                children:
+                  - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 290mm
+            y: 100mm
+            width: 360mm
+            height: 30mm
+            child:
+              Spline:
+                id: flourish
+                points: [[0.0, 0.5], [0.125, 0.9], [0.25, 0.5], [0.375, 0.1], [0.5, 0.5], [0.625, 0.9], [0.75, 0.5], [0.875, 0.1], [1.0, 0.5]]
+                tolerance: 0.1mm
+                children:
+                  - Engrave: {depth: 0.5mm}
+        - AtPosition:
+            x: 290mm
+            y: 210mm
+            child:
+              EngraveText:
+                text: "WORKSHOP"
+                height: 50mm
+                depth: 1mm
+                font: futuram
+                alignment: center
+        - AtPosition:
+            x: 290mm
+            y: 155mm
+            child:
+              EngraveText:
+                text: "EST. 2026"
+                height: 18mm
+                depth: 0.8mm
+                font: rowmans
+                alignment: center

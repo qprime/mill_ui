@@ -1,0 +1,29 @@
+project: long_spliced_rail
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 19mm
+  margin: 10mm
+  material: mdf
+children:
+  - Beam:
+      name: long_rail
+      length: 2000mm
+      width: 100mm
+      thickness: 19mm
+      role: RAIL
+      show_labels: true
+      layers: 3
+      end_features:
+        - Tenon:
+            end: left
+            extension: 38mm
+            width: 100mm
+            height: 19mm
+            layers: center
+        - Tenon:
+            end: right
+            extension: 38mm
+            width: 100mm
+            height: 19mm
+            layers: center

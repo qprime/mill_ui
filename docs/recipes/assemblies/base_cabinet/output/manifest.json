@@ -1,0 +1,24 @@
+{
+  "source": "base_cabinet.pml.yml",
+  "total_sheets": 3,
+  "sheets": [
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 1,
+      "job_name": "base_cabinet_sheet_1",
+      "items": 10
+    },
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 2,
+      "job_name": "base_cabinet_sheet_2",
+      "items": 4
+    },
+    {
+      "source": "base_cabinet.pml.yml",
+      "sheet_index": 3,
+      "job_name": "base_cabinet_sheet_3",
+      "items": 2
+    }
+  ]
+}

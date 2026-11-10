@@ -1,0 +1,360 @@
+project: side_table_frame
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 19mm
+  margin: 10mm
+  material: mdf
+children:
+  - AtPosition:
+      x: 275mm
+      y: 105mm
+      width: 550mm
+      height: 210mm
+      child:
+        Beam:
+          name: leg_1
+          length: 530mm
+          width: 57mm
+          thickness: 19mm
+          role: LEG
+          show_labels: true
+          layers:
+            - length: 530mm
+              offset: 0mm
+            - length: 530mm
+              offset: 0mm
+              cutouts:
+                - start: 450mm
+                  length: 70mm
+                  width: 19mm
+                  offset: 0mm
+            - length: 530mm
+              offset: 0mm
+          face_features:
+            - SquareMortise:
+                x: 485mm
+                y: 38mm
+                width: 70mm
+                height: 19mm
+                depth: 19mm
+                face: front
+          edge_features:
+            - EdgeDado:
+                edge: bottom
+                position: 120mm
+                width: 19mm
+                depth: 9.5mm
+                layers: all
+  - AtPosition:
+      x: 275mm
+      y: 315mm
+      width: 550mm
+      height: 210mm
+      child:
+        Beam:
+          name: leg_2
+          length: 530mm
+          width: 57mm
+          thickness: 19mm
+          role: LEG
+          show_labels: true
+          layers:
+            - length: 530mm
+              offset: 0mm
+            - length: 530mm
+              offset: 0mm
+              cutouts:
+                - start: 450mm
+                  length: 70mm
+                  width: 19mm
+                  offset: 0mm
+            - length: 530mm
+              offset: 0mm
+          face_features:
+            - SquareMortise:
+                x: 485mm
+                y: 38mm
+                width: 70mm
+                height: 19mm
+                depth: 19mm
+                face: front
+          edge_features:
+            - EdgeDado:
+                edge: bottom
+                position: 120mm
+                width: 19mm
+                depth: 9.5mm
+                layers: all
+  - AtPosition:
+      x: 275mm
+      y: 525mm
+      width: 550mm
+      height: 210mm
+      child:
+        Beam:
+          name: leg_3
+          length: 530mm
+          width: 57mm
+          thickness: 19mm
+          role: LEG
+          show_labels: true
+          layers:
+            - length: 530mm
+              offset: 0mm
+            - length: 530mm
+              offset: 0mm
+              cutouts:
+                - start: 450mm
+                  length: 70mm
+                  width: 19mm
+                  offset: 0mm
+            - length: 530mm
+              offset: 0mm
+          face_features:
+            - SquareMortise:
+                x: 485mm
+                y: 38mm
+                width: 70mm
+                height: 19mm
+                depth: 19mm
+                face: front
+          edge_features:
+            - EdgeDado:
+                edge: bottom
+                position: 120mm
+                width: 19mm
+                depth: 9.5mm
+                layers: all
+  - AtPosition:
+      x: 275mm
+      y: 735mm
+      width: 550mm
+      height: 210mm
+      child:
+        Beam:
+          name: leg_4
+          length: 530mm
+          width: 57mm
+          thickness: 19mm
+          role: LEG
+          show_labels: true
+          layers:
+            - length: 530mm
+              offset: 0mm
+            - length: 530mm
+              offset: 0mm
+              cutouts:
+                - start: 450mm
+                  length: 70mm
+                  width: 19mm
+                  offset: 0mm
+            - length: 530mm
+              offset: 0mm
+          face_features:
+            - SquareMortise:
+                x: 485mm
+                y: 38mm
+                width: 70mm
+                height: 19mm
+                depth: 19mm
+                face: front
+          edge_features:
+            - EdgeDado:
+                edge: bottom
+                position: 120mm
+                width: 19mm
+                depth: 9.5mm
+                layers: all
+  - AtPosition:
+      x: 800mm
+      y: 60mm
+      width: 400mm
+      height: 110mm
+      child:
+        Beam:
+          name: apron_1
+          length: 320mm
+          width: 90mm
+          thickness: 19mm
+          layers: 1
+          role: APRON
+          show_labels: true
+          end_features:
+            - Tenon:
+                end: left
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+            - Tenon:
+                end: right
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+          edge_features:
+            - Rabbet:
+                edge: top
+                width: 9.5mm
+                depth: 9.5mm
+                start: 0mm
+                end: 320mm
+                layers: outer
+          face_features:
+            - DrillHole:
+                x: 80mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+            - DrillHole:
+                x: 240mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+  - AtPosition:
+      x: 800mm
+      y: 180mm
+      width: 400mm
+      height: 110mm
+      child:
+        Beam:
+          name: apron_2
+          length: 320mm
+          width: 90mm
+          thickness: 19mm
+          layers: 1
+          role: APRON
+          show_labels: true
+          end_features:
+            - Tenon:
+                end: left
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+            - Tenon:
+                end: right
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+          edge_features:
+            - Rabbet:
+                edge: top
+                width: 9.5mm
+                depth: 9.5mm
+                start: 0mm
+                end: 320mm
+                layers: outer
+          face_features:
+            - DrillHole:
+                x: 80mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+            - DrillHole:
+                x: 240mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+  - AtPosition:
+      x: 800mm
+      y: 300mm
+      width: 400mm
+      height: 110mm
+      child:
+        Beam:
+          name: apron_3
+          length: 320mm
+          width: 90mm
+          thickness: 19mm
+          layers: 1
+          role: APRON
+          show_labels: true
+          end_features:
+            - Tenon:
+                end: left
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+            - Tenon:
+                end: right
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+          edge_features:
+            - Rabbet:
+                edge: top
+                width: 9.5mm
+                depth: 9.5mm
+                start: 0mm
+                end: 320mm
+                layers: outer
+          face_features:
+            - DrillHole:
+                x: 80mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+            - DrillHole:
+                x: 240mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+  - AtPosition:
+      x: 800mm
+      y: 420mm
+      width: 400mm
+      height: 110mm
+      child:
+        Beam:
+          name: apron_4
+          length: 320mm
+          width: 90mm
+          thickness: 19mm
+          layers: 1
+          role: APRON
+          show_labels: true
+          end_features:
+            - Tenon:
+                end: left
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+            - Tenon:
+                end: right
+                extension: 19mm
+                width: 70mm
+                height: 19mm
+                layers: all
+          edge_features:
+            - Rabbet:
+                edge: top
+                width: 9.5mm
+                depth: 9.5mm
+                start: 0mm
+                end: 320mm
+                layers: outer
+          face_features:
+            - DrillHole:
+                x: 80mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back
+            - DrillHole:
+                x: 240mm
+                y: 70mm
+                diameter: 8mm
+                depth: 10mm
+                face: back

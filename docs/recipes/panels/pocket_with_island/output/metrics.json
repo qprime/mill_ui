@@ -1,0 +1,52 @@
+{
+  "constraint_audit": {
+    "islands": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 1244,
+    "rapid_moves": 17,
+    "cut_moves": 1109,
+    "rapid_ratio": 0.014
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 1148
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 96
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 34217,
+    "total_lines": 1200,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 31680,
+        "lines": 1104
+      },
+      "profile-3.17mm": {
+        "bytes": 2537,
+        "lines": 96
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "pocket_with_island.pml.yml"
+  }
+}

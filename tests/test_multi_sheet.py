@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import pytest
 
+from adapters.ast_to_removal import ast_to_removal_intents
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import ResolutionAssertionError, resolve_layout, resolve_layout_multi
+from validation.removal_checks import check_working_area_bounds
 
 SMALL_BOX_PML = """\
 Sheet:
@@ -74,12 +76,95 @@ children:
 
 
 class TestResolveLayoutMulti:
+    def test_carcass_partitions_are_rejected_instead_of_omitted(self):
+        pml = """Sheet:
+  width: 1220mm
+  height: 1220mm
+  thickness: 18mm
+children:
+- Assembly:
+    type: carcass
+    width: 500mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    vertical_partitions: 2
+    fixed_shelves: 3
+"""
+        with pytest.raises(ResolutionAssertionError, match="vertical_partitions is not implemented; got 2"):
+            resolve_layout_multi(parse_pml_yaml(pml))
+
+    @pytest.mark.parametrize(
+        "assembly",
+        [
+            """type: carcass
+    width: 500mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    fixed_shelves: 2
+    shelf_joinery: dado
+    back: none""",
+            """type: cubby
+    width: 900mm
+    depth: 300mm
+    height: 600mm
+    thickness: 18mm
+    grid: [3, 2]
+    perimeter_joinery: finger
+    internal_joinery: half_lap
+    back: captured""",
+        ],
+        ids=["single_sheet_shelves", "multiple_sheet_dividers"],
+    )
+    def test_packed_profiles_stay_on_sheet_with_clearance(self, assembly):
+        pml = f"""Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+children:
+- Assembly:
+    {assembly}
+"""
+        results = resolve_layout_multi(parse_pml_yaml(pml))
+
+        assert results
+        for ast in results:
+            profiles = [intent for intent in ast_to_removal_intents(ast) if intent.hint_type == "profile"]
+            assert profiles
+            bounds_result = check_working_area_bounds(
+                profiles, ast.sheet.working_width_mm, ast.sheet.working_height_mm, tool_radius_mm=3.175
+            )
+            assert not bounds_result.errors
+            for index, a in enumerate(profiles):
+                for b in profiles[index + 1 :]:
+                    assert (
+                        a.bounds.x_max <= b.bounds.x_min
+                        or b.bounds.x_max <= a.bounds.x_min
+                        or a.bounds.y_max <= b.bounds.y_min
+                        or b.bounds.y_max <= a.bounds.y_min
+                    )
+
     def test_single_sheet_unchanged(self):
         comp_ast = parse_pml_yaml(SMALL_BOX_PML)
         results = resolve_layout_multi(comp_ast)
         assert len(results) == 1
         single = resolve_layout(comp_ast)
         assert len(results[0].items) == len(single.items)
+
+    def test_multiple_assemblies_on_one_sheet_are_preserved(self):
+        from dataclasses import replace
+
+        from layout_ast.compositional import Panel
+
+        ast = parse_pml_yaml(SMALL_BOX_PML)
+        assert ast.root is not None
+        node = ast.root.children[0]
+        single = resolve_layout_multi(ast)[0]
+        double = resolve_layout_multi(replace(ast, root=Panel(children=(node, node))))[0]
+
+        assert len(double.items) == 2 * len(single.items)
 
     def test_multi_sheet_produces_multiple_asts(self):
         comp_ast = parse_pml_yaml(LARGE_BOX_PML)

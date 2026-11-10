@@ -1438,7 +1438,7 @@ Grid of cubbies with perimeter and internal joinery:
 | shelf_joinery | no | captured | Shelf-to-side joinery |
 | shelf_dado_depth | no | t/2 | Shelf dado depth |
 | shelf_back_support | no | false | Add back panel support for shelves |
-| vertical_partitions | no | 0 | Number of vertical dividers |
+| vertical_partitions | no | 0 | Reserved for vertical dividers; nonzero values are currently rejected because carcass partition interfaces are not implemented |
 | partition_joinery | no | captured | Partition-to-cap joinery |
 | partition_dado_depth | no | t/2 | Partition dado depth |
 | toe_kick_height | no | - | Height of toe kick cutout |
@@ -1650,6 +1650,8 @@ Laminated 3D member that expands to multiple panel layers. Beams enable building
 
 When beam length exceeds sheet size, layers are automatically spliced with staggered butt joints:
 
+Automatic splicing uses a layer count. Segment lengths fit the current working region after profile clearance, including any end-tenon extensions. Tenons extend only the first or last segment of the selected layer.
+
 ```yaml
 - Beam:
     name: long_rail
@@ -1662,6 +1664,8 @@ When beam length exceeds sheet size, layers are automatically spliced with stagg
 ##### Explicit Layer Specs
 
 For beams with varying layer lengths (e.g., integral tenons):
+
+Explicit layers must each fit the working region; they are not automatically spliced. For a spliced beam with integral tenons, use a layer count and `Tenon` end features.
 
 ```yaml
 - Beam:

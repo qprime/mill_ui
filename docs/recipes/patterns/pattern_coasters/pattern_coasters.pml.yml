@@ -1,0 +1,89 @@
+project: "Pattern coasters"
+
+Sheet:
+  physical_width: 700mm
+  physical_height: 260mm
+  thickness: 12mm
+  margin: 10mm
+
+children:
+  - Circle:
+      id: phyllotaxis_coaster
+      label: "Phyllotaxis"
+      diameter: 100mm
+      at: {x: 100mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Circle:
+            diameter: 86mm
+            children:
+              - Phyllotaxis:
+                  count: 120
+                  spacing: 6.5mm
+                  depth: 4mm
+                  element:
+                    type: hole
+                    diameter: 4mm
+
+  - Circle:
+      id: voronoi_coaster
+      label: "Voronoi"
+      diameter: 100mm
+      at: {x: 260mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Circle:
+            diameter: 88mm
+            children:
+              - Voronoi:
+                  seed_count: 14
+                  seed: 3
+                  min_spacing: 16mm
+                  margin: 6mm
+                  mode: pocket
+                  line_width: 4mm
+                  depth: 2mm
+
+  - Circle:
+      id: string_art_coaster
+      label: "String Art"
+      diameter: 100mm
+      at: {x: 420mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Circle:
+            diameter: 90mm
+            children:
+              - StringArt:
+                  anchors: 72
+                  rule: multiply
+                  factor: 2
+                  min_length: 1mm
+                  depth: 0.3mm
+
+  - Circle:
+      id: ripple_coaster
+      label: "Ripples"
+      diameter: 100mm
+      at: {x: 580mm, y: 120mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Subtract:
+            inner_inset: 40mm
+            children:
+              - ConcentricBorder:
+                  count: 3
+                  step: 6mm
+                  start: 3mm
+                  join: round
+                  mode: pocket
+                  groove: 4mm
+                  depth: 2mm

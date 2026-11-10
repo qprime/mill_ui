@@ -1,0 +1,103 @@
+{
+  "constraint_audit": {
+    "edge_treatment": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    },
+    "dogbone": {
+      "status": "honored",
+      "count": 2,
+      "safety_critical": false
+    },
+    "corner_cleanup": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    },
+    "rest": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 6972,
+    "rapid_moves": 121,
+    "cut_moves": 6468,
+    "rapid_ratio": 0.017
+  },
+  "fidelity": {
+    "tool_changes": 6,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 821
+      },
+      {
+        "name": "pocket_rest",
+        "tool_diameter_mm": 3.175,
+        "move_count": 458
+      },
+      {
+        "name": "finish",
+        "tool_diameter_mm": 12.7,
+        "move_count": 27
+      },
+      {
+        "name": "corner_cleanup",
+        "tool_diameter_mm": 3.175,
+        "move_count": 5564
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 12.7,
+        "move_count": 51
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 6.35,
+        "move_count": 51
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 194758,
+    "total_lines": 6958,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 22387,
+        "lines": 772
+      },
+      "pocket_rest-3.17mm": {
+        "bytes": 11689,
+        "lines": 457
+      },
+      "finish-12.70mm": {
+        "bytes": 755,
+        "lines": 37
+      },
+      "corner_cleanup-3.17mm": {
+        "bytes": 157969,
+        "lines": 5564
+      },
+      "dogbone-12.70mm": {
+        "bytes": 979,
+        "lines": 64
+      },
+      "dogbone-6.35mm": {
+        "bytes": 979,
+        "lines": 64
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "pocket_corner_test.pml.yml"
+  }
+}

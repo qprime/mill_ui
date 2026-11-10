@@ -1,0 +1,26 @@
+project: pocket_with_island
+
+Sheet:
+  physical_width: 400mm
+  physical_height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: medallion_panel
+      label: "Medallion Panel"
+      at: {x: 200mm, y: 200mm, width: 320mm, height: 320mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 40mm
+            children:
+              - Rect:
+                  id: recess
+                  label: "Recess"
+                  feature: {type: pocket, depth: 6mm}
+                  children:
+                    - Keepout:
+                        id: medallion
+                        children:
+                          - Circle: {diameter: 100mm, at: {x: 200mm, y: 200mm}}

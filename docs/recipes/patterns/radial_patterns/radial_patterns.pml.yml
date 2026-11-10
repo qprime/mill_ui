@@ -1,0 +1,98 @@
+project: "Radial patterns"
+
+Sheet:
+  physical_width: 1000mm
+  physical_height: 400mm
+  thickness: 19mm
+  margin: 10mm
+
+children:
+  - Circle:
+      id: clock_face
+      label: "Clock Face"
+      diameter: 280mm
+      at: {x: 170mm, y: 190mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Radial:
+            rays: 12
+            minor_subdivisions: 4
+            radius: 125mm
+            depth: 0.5mm
+            element:
+              type: tick
+              tick_length: 15mm
+              minor_tick_length: 7mm
+              inward: true
+        - Radial:
+            rays: 12
+            start_angle: 90
+            radius: 92mm
+            depth: 0.5mm
+            element:
+              type: label
+              values: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+              height: 18mm
+
+  - Circle:
+      id: compass_rose
+      label: "Compass Rose"
+      diameter: 280mm
+      at: {x: 490mm, y: 190mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Radial:
+            rays: 4
+            start_angle: 0
+            radius: 55mm
+            depth: 0.5mm
+            element:
+              type: svg
+              path: "compass_point.svg"
+              scale: fit
+              rotate: true
+              size: 100mm
+        - Radial:
+            rays: 4
+            start_angle: 45
+            radius: 40mm
+            depth: 0.5mm
+            element:
+              type: svg
+              path: "compass_point.svg"
+              scale: fit
+              rotate: true
+              size: 60mm
+        - Radial:
+            rays: 4
+            start_angle: 90
+            radius: 120mm
+            depth: 0.5mm
+            element:
+              type: label
+              values: [N, W, S, E]
+              height: 16mm
+
+  - Circle:
+      id: sunburst
+      label: "Sunburst"
+      diameter: 280mm
+      at: {x: 810mm, y: 190mm}
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Radial:
+            rays: 16
+            radius: 120mm
+            depth: 4mm
+            element:
+              type: pocket
+              shape: triangle
+              bar_width: 6mm
+              center_shape: circle
+              center_size: 60mm

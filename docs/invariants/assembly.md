@@ -25,7 +25,7 @@
 | AJ-15 | HARD | NOTCHES_NO_OVERLAP | Adjacent notches cannot overlap |
 | AJ-16 | HARD | TOE_KICK_DADO_POSITION | bottom dado position_along_edge_a_mm = toe_kick_height (no thickness offset) |
 | AJ-17 | STRUCTURAL | DOGBONE_DEFAULT_ALL_CORNER_STRATEGIES | Dogbone fillets are default for all corner-producing strategies (Captured, Finger, HalfLap) |
-| AJ-18 | HARD | DOGBONE_DEPTH_MATCHES_PARENT | Dogbone bore depth must equal parent feature depth (dado or notch) |
+| AJ-18 | HARD | DOGBONE_DEPTH_MATCHES_PARENT | Dogbone bore depth equals the parent cut's Z depth: dado depth for a face groove, through the stock for an edge notch. Notch depth measures XY reach into the panel, not Z. |
 
 ---
 

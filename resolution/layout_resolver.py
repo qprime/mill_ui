@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
@@ -2655,10 +2655,12 @@ class LayoutResolver:
 
         items.extend(
             self._panels_to_items(
-                panel_specs,
-                region,
-                gap_mm=node.layout_gap_mm,
-                edge_clearance_mm=edge_clearance,
+                self._row_wrap_positions(
+                    panel_specs,
+                    region,
+                    gap_mm=node.layout_gap_mm,
+                    edge_clearance_mm=edge_clearance,
+                ),
                 show_labels=node.show_labels,
                 show_edge_colors=node.show_edge_colors,
             )
@@ -2713,6 +2715,11 @@ class LayoutResolver:
                 bottom=bottom_joinery,
             )
         elif assembly_type == "carcass":
+            if node.vertical_partitions != 0:
+                raise ResolutionAssertionError(
+                    f"Carcass vertical_partitions is not implemented; got {node.vertical_partitions}. "
+                    "Partition-to-shelf interfaces must be defined before these panels can be generated."
+                )
             perimeter_joinery_raw = self._build_joinery_from_config(
                 node.perimeter_joinery,
                 default_finger_width,
@@ -2882,11 +2889,8 @@ class LayoutResolver:
 
     def _panels_to_items(  # noqa: C901 — panel layout dispatcher
         self,
-        panel_specs: list[PanelSpec],
-        region: ResolvedRegion,
+        panel_positions: Sequence[tuple[PanelSpec, float, float]],
         *,
-        gap_mm: float,
-        edge_clearance_mm: float,
         show_labels: bool,
         show_edge_colors: bool,
     ) -> list[Item]:
@@ -2894,12 +2898,7 @@ class LayoutResolver:
 
         result_items: list[Item] = []
 
-        for spec, x_cursor, y_cursor in self._row_wrap_positions(
-            panel_specs,
-            region,
-            gap_mm=gap_mm,
-            edge_clearance_mm=edge_clearance_mm,
-        ):
+        for spec, x_cursor, y_cursor in panel_positions:
             panel_width = spec.width_mm
             panel_height = spec.height_mm
 
@@ -3081,7 +3080,8 @@ class LayoutResolver:
                     placement=Placement(center_xy_mm=notch_center),
                     feature=Feature(
                         type="pocket",
-                        depth_mm=depth,
+                        depth_mm=0.0,
+                        is_through=True,
                         dogbone=notch.dogbone,
                         dogbone_corners=(c1, c2),
                         dogbone_reference_point=panel_center,
@@ -3295,15 +3295,11 @@ class LayoutResolver:
 
         tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
         edge_clearance = 2 * tool_radius
-        sheet_size = max(self.ast.sheet.width_mm, self.ast.sheet.height_mm) - 2 * edge_clearance
+        sheet_size = region.width - 2 * edge_clearance
         panel_specs = beam_spec.expand(sheet_size)
         gap = 10.0
 
-        from assembly.beam import compute_segments
-
-        segments = None
-        if isinstance(beam_spec.layers, int) and beam_spec.layers >= 1:
-            segments = compute_segments(beam_spec.length_mm, sheet_size, beam_spec.layers)
+        segments = beam_spec.layer_segments(sheet_size)
 
         layer_cutouts = (
             tuple(layer.cutouts for layer in beam_spec.layers) if isinstance(beam_spec.layers, tuple) else ()
@@ -3559,13 +3555,6 @@ def _find_assembly_node(root: Any) -> AssemblyDecl | None:
     return None
 
 
-def _has_non_assembly_content(root: Any) -> bool:
-    children = getattr(root, "children", None)
-    if children is None:
-        return not isinstance(root, AssemblyDecl)
-    return any(not isinstance(child, AssemblyDecl) for child in children)
-
-
 def _has_beam_content(root: Any) -> bool:
     if isinstance(root, BeamDecl):
         return True
@@ -3610,37 +3599,30 @@ def resolve_layout_multi(
             + ", ".join(f"{n} ({d})" for n, d in zip(names, dims, strict=True))
         )
 
-    if len(partition.sheets) <= 1:
+    standalone_assembly = ast.root is assembly_node or getattr(ast.root, "children", ()) == (assembly_node,)
+    if len(partition.sheets) <= 1 and not standalone_assembly:
         return [resolver.resolve()]
 
-    if _has_non_assembly_content(ast.root):
+    if not standalone_assembly:
         raise ResolutionAssertionError(
             f"Assembly requires {len(partition.sheets)} sheets but PML contains "
-            f"non-assembly items. Move the assembly to its own PML file."
+            f"non-assembly items or additional assemblies. Move the assembly to its own PML file."
         )
 
     if _has_beam_content(ast.root):
         raise ResolutionAssertionError("Multi-sheet partitioning is not supported for beam assemblies.")
-
-    sheet_region = ResolvedRegion(
-        x_min=0.0,
-        y_min=0.0,
-        x_max=working_w,
-        y_max=working_h,
-    )
 
     results: list[LayoutAST] = []
     for sheet_panels in partition.sheets:
         sheet_resolver = LayoutResolver(ast, validate=validate)
 
         panel_items = sheet_resolver._panels_to_items(
-            list(sheet_panels),
-            sheet_region,
-            gap_mm=gap,
-            edge_clearance_mm=edge_clearance,
+            [(placement.panel, placement.x_min_mm, placement.y_min_mm) for placement in sheet_panels],
             show_labels=assembly_node.show_labels,
             show_edge_colors=assembly_node.show_edge_colors,
         )
+        if ast.surface is not None:
+            panel_items.extend(sheet_resolver._desugar_surface(ast.surface))
 
         results.append(
             LayoutAST(

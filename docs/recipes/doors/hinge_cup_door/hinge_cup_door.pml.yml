@@ -1,0 +1,48 @@
+project: hinge_cup_door
+
+Sheet:
+  working_width: 480mm
+  working_height: 680mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+  min_web: 4mm
+
+children:
+  - Rect:
+      id: door
+      label: Shaker Door
+      at:
+        x: 240mm
+        y: 340mm
+        width: 400mm
+        height: 600mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            tab_count: 4
+            tab_height: 3mm
+        - Frame:
+            width: 50mm
+            children:
+              - Pocket:
+                  depth: 6mm
+  - Circle:
+      id: hinge_cup_bottom
+      label: Hinge Cup
+      diameter: 35mm
+      at: {x: 62.5mm, y: 140mm}
+      feature:
+        type: hole
+        depth: 13mm
+        face: back
+  - Circle:
+      id: hinge_cup_top
+      label: Hinge Cup
+      diameter: 35mm
+      at: {x: 62.5mm, y: 540mm}
+      feature:
+        type: hole
+        depth: 13mm
+        face: back

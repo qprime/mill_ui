@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 1407.175" width="1393.1750000000002mm" height="1407.1750000000002mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="1407.1750000000002" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="1210.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
+    <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 580.350 1203.650 L 580.350 718.650 L 16.350 718.650 L 16.350 1203.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_0_bottom_outer" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 581.938 1205.237 L 581.938 717.062 L 14.763 717.062 L 14.763 1205.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_0_bottom_outer_toolpath" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <rect x="16.350" y="1185.450" width="564.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_bottom_dado_1" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="298.350" y="961.150" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_0_bottom_outer_label">BOTTOM</text>
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="16.350000000000023" y1="1185.45" x2="16.350000000000023" y2="1165.45" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="580.35" y1="1185.45" x2="580.35" y2="1165.45" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.350000000000023" y1="1165.45" x2="580.35" y2="1165.45" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.350000000000023,1165.45 19.350000000000023,1162.45 19.350000000000023,1168.45" fill="#5ab9ea" />
+    <polygon points="580.35,1165.45 577.35,1162.45 577.35,1168.45" fill="#5ab9ea" />
+    <text x="298.35" y="1160.45" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">564.0mm</text>
+    <line x1="580.35" y1="1185.45" x2="600.35" y2="1185.45" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="580.35" y1="1203.6499999999999" x2="600.35" y2="1203.6499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="600.35" y1="1185.45" x2="600.35" y2="1203.6499999999999" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="600.35,1185.45 597.35,1188.45 603.35,1188.45" fill="#5ab9ea" />
+    <polygon points="600.35,1203.6499999999999 597.35,1200.6499999999999 603.35,1200.6499999999999" fill="#5ab9ea" />
+    <text x="605.35" y="1194.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 605.35 1194.55)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.2mm</text>
+    <line x1="16.350000000000023" y1="718.65" x2="16.350000000000023" y2="678.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="580.35" y1="718.65" x2="580.35" y2="678.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.350000000000023" y1="678.65" x2="580.35" y2="678.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.350000000000023,678.65 19.350000000000023,675.65 19.350000000000023,681.65" fill="#5ab9ea" />
+    <polygon points="580.35,678.65 577.35,675.65 577.35,681.65" fill="#5ab9ea" />
+    <text x="298.35" y="673.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">564.0mm</text>
+    <line x1="580.35" y1="718.65" x2="620.35" y2="718.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="580.35" y1="1203.65" x2="620.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="620.35" y1="718.65" x2="620.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="620.35,718.65 617.35,721.65 623.35,721.65" fill="#5ab9ea" />
+    <polygon points="620.35,1203.65 617.35,1200.65 623.35,1200.65" fill="#5ab9ea" />
+    <text x="625.35" y="961.1500000000001" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 625.35 961.1500000000001)" fill="#5ab9ea" font-family="monospace" font-size="10px">485.0mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="1239.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="1239.5875" y1="-29.5875" x2="1254.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="1259.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="1239.5875" y1="-13.587499999999999" x2="1254.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
+    <text x="1259.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="1239.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="1259.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="1239.5875" y1="18.4125" x2="1254.5875" y2="18.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1259.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1239.5875" y1="34.4125" x2="1254.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1259.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="1251.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="1263.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1220.0 × 1220.0 × 18.0mm</text>
+    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 pocket, 1 profile</text>
+    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 9.0mm</text>
+    <text x="20.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (1):</text>
+    <text x="30.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_bottom_dado_1</text>
+  </g>
+</svg>

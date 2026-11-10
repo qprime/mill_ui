@@ -1,0 +1,55 @@
+project: base_cabinet
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+  material: mdf
+children:
+  - Assembly:
+      type: carcass
+      width: 600mm
+      depth: 560mm
+      height: 720mm
+      thickness: 18mm
+      joinery: butt
+      clearance: 0.12mm
+      layout_gap: 10mm
+      cap_style: between_sides
+      top:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+        dogbone:
+          style: dogbone
+      bottom:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+        dogbone:
+          style: dogbone
+      back:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+        dogbone:
+          style: dogbone
+      back_thickness: 18mm
+      back_inset: 12mm
+      fixed_shelves: 1
+      shelf_joinery:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        dogbone:
+          style: dogbone
+      shelf_dado_depth: 9mm
+      shelf_back_support: false
+      toe_kick_height: 100mm
+      toe_kick_depth: 75mm
+      toe_kick_style: open
+      toe_kick_cover: false
+      show_labels: true

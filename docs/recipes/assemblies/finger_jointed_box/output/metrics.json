@@ -1,0 +1,61 @@
+{
+  "constraint_audit": {
+    "dogbone": {
+      "status": "honored",
+      "count": 32,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 1692,
+    "rapid_moves": 85,
+    "cut_moves": 1362,
+    "rapid_ratio": 0.05
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 132
+      },
+      {
+        "name": "dogbone",
+        "tool_diameter_mm": 3.175,
+        "move_count": 864
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 696
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 36931,
+    "total_lines": 1625,
+    "files": {
+      "pocket-3.17mm": {
+        "bytes": 3497,
+        "lines": 132
+      },
+      "dogbone-3.17mm": {
+        "bytes": 14260,
+        "lines": 816
+      },
+      "profile-3.17mm": {
+        "bytes": 19174,
+        "lines": 677
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "finger_jointed_box.pml.yml"
+  }
+}

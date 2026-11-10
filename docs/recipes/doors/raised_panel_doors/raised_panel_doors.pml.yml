@@ -1,0 +1,62 @@
+project: raised_panel_doors
+
+Sheet:
+  working_width: 1080mm
+  working_height: 780mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+
+children:
+  - Rect:
+      id: four_panel_door
+      label: Four-Panel Raised Door
+      at:
+        x: 270mm
+        y: 390mm
+        width: 450mm
+        height: 700mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            tab_count: 4
+            tab_height: 3mm
+        - Frame:
+            width: 60mm
+            children:
+              - SplitGrid:
+                  rows: 2
+                  cols: 2
+                  gap: 50mm
+                  children:
+                    - RaisedPanel:
+                        border_width: 25mm
+                        border_depth: 6mm
+                        field_depth: 2mm
+
+  - AtPosition:
+      x: 810mm
+      y: 390mm
+      width: 450mm
+      height: 700mm
+      child:
+        Arch:
+          id: arch_door
+          label: Cathedral Arch Raised Door
+          width: 450mm
+          height: 700mm
+          radius: 175mm
+          children:
+            - Profile:
+                side: outside
+                depth: through
+                tab_count: 4
+                tab_height: 3mm
+            - Frame:
+                width: 60mm
+                children:
+                  - RaisedPanel:
+                      border_width: 25mm
+                      border_depth: 6mm
+                      field_depth: 2mm

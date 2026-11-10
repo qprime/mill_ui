@@ -601,6 +601,35 @@ class TestTenonLayerApplication:
 
 
 class TestExpandWithTenons:
+    @pytest.mark.parametrize("length", [600.0, 1150.0, 2000.0])
+    def test_splicing_preserves_tenon_lengths_and_sheet_capacity(self, length):
+        beam = BeamSpec(
+            name="rail",
+            length_mm=length,
+            width_mm=76,
+            thickness_mm=19,
+            layers=3,
+            end_features=(
+                Tenon(end="left", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
+                Tenon(end="right", extension_mm=38, width_mm=76, height_mm=19, layers="center"),
+            ),
+        )
+
+        panels = beam.expand(sheet_size=1200)
+
+        assert all(panel.width_mm <= 1200 for panel in panels)
+        for layer_index, expected_length in enumerate([length, length + 76, length]):
+            layer_panels = [panel for panel in panels if panel.name.startswith(f"rail_L{layer_index}")]
+            assert sum(panel.width_mm for panel in layer_panels) == pytest.approx(expected_length)
+        center_panels = [panel for panel in panels if panel.name.startswith("rail_L1")]
+        assert (len(center_panels) > 1) == (length + 76 > 1200)
+
+    def test_explicit_layer_exceeding_sheet_is_rejected(self):
+        beam = BeamSpec("rail", 2000, 100, 19, (LayerSpec(length_mm=2000),))
+
+        with pytest.raises(ValueError, match=r"explicit layer 0 length.*exceeds sheet segment capacity"):
+            beam.expand(sheet_size=1200)
+
     def test_center_tenons_extend_center_layer(self):
         beam = BeamSpec(
             name="rail",

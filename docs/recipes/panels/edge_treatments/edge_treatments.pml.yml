@@ -1,0 +1,34 @@
+project: edge_treatments
+
+Sheet:
+  physical_width: 900mm
+  physical_height: 400mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: chamfer_edge
+      label: "Chamfer Edge"
+      at: {x: 165mm, y: 200mm, width: 240mm, height: 300mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Chamfer: {width: 6mm, depth: 6mm}
+
+  - Rect:
+      id: roundover_edge
+      label: "Roundover Edge"
+      at: {x: 450mm, y: 200mm, width: 240mm, height: 300mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Roundover: {radius: 6mm}
+
+  - Rect:
+      id: allowance_edge
+      label: "Rough + Finish Edge"
+      at: {x: 735mm, y: 200mm, width: 240mm, height: 300mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Edge:
+            treatment: allowance
+            rough_allowance: 1mm
+            finish_allowance: 0.2mm

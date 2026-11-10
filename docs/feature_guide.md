@@ -10,11 +10,15 @@ Cut around a shape: outside, inside or on the line, through the sheet or to a de
 
 Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)
 
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/)
+
 ### Tabs
 
 Small bridges that keep a through-cut part attached to the sheet.
 
 Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)
+
+Recipes: [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/)
 
 ### Onion skin
 
@@ -22,11 +26,15 @@ A thin skin left under a through cut to hold the part.
 
 Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)
 
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/)
+
 ### Waste cuts
 
 Cuts that split the leftover sheet into usable offcuts.
 
 Spec: [pml/syntax_spec.md#wastecuts](../pml/syntax_spec.md#wastecuts)
+
+Recipes: [production_sheet](recipes/production/production_sheet/)
 
 ### Nesting
 
@@ -34,11 +42,15 @@ Bin-pack parts onto sheets from a .nest.yml job, with the guillotine or maxrects
 
 Spec: [pml/nest_syntax_spec.md#algorithms](../pml/nest_syntax_spec.md#algorithms)
 
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/)
+
 ### Nested part shapes
 
 Rounded, round, polygonal and triangular parts in a nesting job.
 
 Spec: [pml/nest_syntax_spec.md#parts-with-shape-primitives](../pml/nest_syntax_spec.md#parts-with-shape-primitives)
+
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/)
 
 ### Nested parts from templates
 
@@ -46,11 +58,15 @@ Nesting-job parts whose features come from a parametric template.
 
 Spec: [pml/nest_syntax_spec.md#parts-with-templates](../pml/nest_syntax_spec.md#parts-with-templates)
 
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/)
+
 ### Per-part holding override
 
 A nesting-job part that holds with tabs or onion skin different from the job default.
 
 Spec: [pml/nest_syntax_spec.md#per-part-override](../pml/nest_syntax_spec.md#per-part-override)
+
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/)
 
 ## Pockets and recesses
 
@@ -60,11 +76,15 @@ Clear an enclosed area to a depth.
 
 Spec: [pml/syntax_spec.md#pocket](../pml/syntax_spec.md#pocket)
 
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/)
+
 ### Holes
 
 Drilled or bored round holes.
 
 Spec: [pml/syntax_spec.md#feature-types](../pml/syntax_spec.md#feature-types)
+
+Recipes: [calibration_coupon](recipes/shop/calibration_coupon/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [pattern_coasters](recipes/patterns/pattern_coasters/), [production_sheet](recipes/production/production_sheet/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/)
 
 ### Hole grids
 
@@ -72,11 +92,15 @@ A rectangular array of holes.
 
 Spec: [pml/syntax_spec.md#holegrid](../pml/syntax_spec.md#holegrid)
 
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [production_sheet](recipes/production/production_sheet/)
+
 ### Rest pocketing
 
 A smaller tool clears what the pocket tool could not reach.
 
 Spec: [pml/syntax_spec.md#rest-pocketing](../pml/syntax_spec.md#rest-pocketing)
+
+Recipes: [pocket_corner_test](recipes/shop/pocket_corner_test/)
 
 ### Corner cleanup
 
@@ -84,11 +108,15 @@ A small tool sharpens a pocket's inside corners.
 
 Spec: [pml/syntax_spec.md#corner-cleanup](../pml/syntax_spec.md#corner-cleanup)
 
+Recipes: [pocket_corner_test](recipes/shop/pocket_corner_test/)
+
 ### Dogbone and T-bone
 
 Corner reliefs so a square part seats in a pocket.
 
 Spec: [pml/syntax_spec.md#dogbone-fillets](../pml/syntax_spec.md#dogbone-fillets)
+
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [pocket_corner_test](recipes/shop/pocket_corner_test/)
 
 ### Rough and finish allowance
 
@@ -96,11 +124,15 @@ A roughing pass leaves stock for a finishing pass.
 
 Spec: [pml/syntax_spec.md#edge](../pml/syntax_spec.md#edge)
 
+Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/)
+
 ### Islands
 
 Areas a pocket leaves standing.
 
 Spec: [pml/syntax_spec.md#keepout](../pml/syntax_spec.md#keepout)
+
+Recipes: [pocket_with_island](recipes/panels/pocket_with_island/)
 
 ### Holes inside a recess
 
@@ -108,11 +140,15 @@ Holes drilled through the floor of a pocket.
 
 Spec: [pml/syntax_spec.md#feature-types](../pml/syntax_spec.md#feature-types)
 
+Recipes: [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/)
+
 ### Back-face machining
 
 Features cut on the back of the sheet after a flip.
 
 Spec: [pml/syntax_spec.md#two-sided-machining-face](../pml/syntax_spec.md#two-sided-machining-face)
+
+Recipes: [hinge_cup_door](recipes/doors/hinge_cup_door/), [side_table_frame](recipes/beams/side_table_frame/)
 
 ## Edges
 
@@ -122,11 +158,15 @@ An angled edge cut with a V-bit.
 
 Spec: [pml/syntax_spec.md#chamfer](../pml/syntax_spec.md#chamfer)
 
+Recipes: [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/)
+
 ### Roundover
 
 A rounded edge cut with a roundover bit.
 
 Spec: [pml/syntax_spec.md#roundover](../pml/syntax_spec.md#roundover)
+
+Recipes: [edge_treatments](recipes/panels/edge_treatments/)
 
 ### Raised-panel bevel
 
@@ -134,11 +174,15 @@ A bevelled border around a raised field.
 
 Spec: [pml/syntax_spec.md#raisedpanel](../pml/syntax_spec.md#raisedpanel)
 
+Recipes: [raised_panel_doors](recipes/doors/raised_panel_doors/)
+
 ### Edge cross-section callouts
 
 Blueprint callouts that show an edge treatment's cross-section.
 
 Spec: [pml/syntax_spec.md#edge](../pml/syntax_spec.md#edge)
+
+Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/)
 
 ## Shapes
 
@@ -148,11 +192,15 @@ The basic part outlines.
 
 Spec: [pml/syntax_spec.md#rect](../pml/syntax_spec.md#rect)
 
+Recipes: [cabinet_side](recipes/panels/cabinet_side/), [calibration_coupon](recipes/shop/calibration_coupon/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [edge_treatments](recipes/panels/edge_treatments/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [layout_board](recipes/engraving/layout_board/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [sign](recipes/engraving/sign/), [svg_artwork](recipes/engraving/svg_artwork/)
+
 ### RoundedRect, Ellipse, Polygon, Triangle
 
 Outlines with rounded corners, curves or straight sides.
 
 Spec: [pml/syntax_spec.md#roundedrect](../pml/syntax_spec.md#roundedrect)
+
+Recipes: [frames_and_trays](recipes/panels/frames_and_trays/)
 
 ### Arch
 
@@ -160,11 +208,15 @@ A rectangle with an arched top.
 
 Spec: [pml/syntax_spec.md#arch](../pml/syntax_spec.md#arch)
 
+Recipes: [raised_panel_doors](recipes/doors/raised_panel_doors/)
+
 ### Line, Polyline, Spline
 
 Open paths for engraving and cutting.
 
 Spec: [pml/syntax_spec.md#line--polyline--spline](../pml/syntax_spec.md#line--polyline--spline)
+
+Recipes: [sign](recipes/engraving/sign/)
 
 ## Layout
 
@@ -174,11 +226,15 @@ A border region and an inner region of a parent shape.
 
 Spec: [pml/syntax_spec.md#frame](../pml/syntax_spec.md#frame)
 
+Recipes: [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [frames_and_trays](recipes/panels/frames_and_trays/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [layout_board](recipes/engraving/layout_board/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_with_island](recipes/panels/pocket_with_island/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [recessed_mounting_plate](recipes/panels/recessed_mounting_plate/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [sign](recipes/engraving/sign/)
+
 ### Split, SplitGrid, SplitHorizontal, SplitVertical
 
 Divide a region into panels.
 
 Spec: [pml/syntax_spec.md#split](../pml/syntax_spec.md#split)
+
+Recipes: [multi_panel_doors](recipes/doors/multi_panel_doors/), [raised_panel_doors](recipes/doors/raised_panel_doors/)
 
 ### Grid, Place, AtPosition
 
@@ -186,17 +242,23 @@ Repeat children in a grid, or place them at given positions.
 
 Spec: [pml/syntax_spec.md#grid](../pml/syntax_spec.md#grid)
 
+Recipes: [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [cabinet_side](recipes/panels/cabinet_side/), [frames_and_trays](recipes/panels/frames_and_trays/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shop_ruler](recipes/engraving/shop_ruler/), [side_table_frame](recipes/beams/side_table_frame/), [sign](recipes/engraving/sign/)
+
 ### Subtract, Shell
 
 Cut one shape from another, or keep a wall of a given width.
 
 Spec: [pml/syntax_spec.md#subtract](../pml/syntax_spec.md#subtract)
 
+Recipes: [frames_and_trays](recipes/panels/frames_and_trays/), [pattern_coasters](recipes/patterns/pattern_coasters/)
+
 ### Reusable components
 
 Named, parameterised pieces of PML used more than once.
 
 Spec: [pml/syntax_spec.md#components](../pml/syntax_spec.md#components)
+
+Recipes: [multi_panel_doors](recipes/doors/multi_panel_doors/)
 
 ## Face decorations
 
@@ -206,11 +268,15 @@ Diagonal grooves across a panel.
 
 Spec: [pml/syntax_spec.md#xpanel](../pml/syntax_spec.md#xpanel)
 
+Recipes: [decorative_panel_faces](recipes/panels/decorative_panel_faces/)
+
 ### Louvers
 
 Slats cut into the gaps of a horizontal split.
 
 Spec: [pml/syntax_spec.md#splithorizontalgaps](../pml/syntax_spec.md#splithorizontalgaps)
+
+Recipes: [decorative_panel_faces](recipes/panels/decorative_panel_faces/)
 
 ### Wave
 
@@ -218,11 +284,15 @@ A wave texture across a face.
 
 Spec: [pml/syntax_spec.md#wave](../pml/syntax_spec.md#wave)
 
+Recipes: [decorative_panel_faces](recipes/panels/decorative_panel_faces/)
+
 ### Lattice lines
 
 Parallel or crossing grooves across a region.
 
 Spec: [pml/syntax_spec.md#lines](../pml/syntax_spec.md#lines)
+
+Recipes: [decorative_panel_faces](recipes/panels/decorative_panel_faces/)
 
 ### Fluting
 
@@ -230,11 +300,15 @@ Parallel rounded grooves along a panel.
 
 Spec: [pml/syntax_spec.md#fluting](../pml/syntax_spec.md#fluting)
 
+Recipes: [decorative_panel_faces](recipes/panels/decorative_panel_faces/)
+
 ### Concentric border
 
 Rings inset from a shape's edge.
 
 Spec: [pml/syntax_spec.md#concentricborder](../pml/syntax_spec.md#concentricborder)
+
+Recipes: [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [decorative_panel_faces](recipes/panels/decorative_panel_faces/), [pattern_coasters](recipes/patterns/pattern_coasters/)
 
 ## Mathematical patterns
 
@@ -244,11 +318,15 @@ Rose, spirograph, Lissajous, superformula and harmonograph curves.
 
 Spec: [pml/syntax_spec.md#curve](../pml/syntax_spec.md#curve)
 
+Recipes: [curve_coasters](recipes/patterns/curve_coasters/)
+
 ### Phyllotaxis
 
 Points on a sunflower spiral.
 
 Spec: [pml/syntax_spec.md#phyllotaxis](../pml/syntax_spec.md#phyllotaxis)
+
+Recipes: [pattern_coasters](recipes/patterns/pattern_coasters/)
 
 ### Voronoi
 
@@ -256,11 +334,15 @@ Cells around seed points, engraved or pocketed.
 
 Spec: [pml/syntax_spec.md#voronoi](../pml/syntax_spec.md#voronoi)
 
+Recipes: [pattern_coasters](recipes/patterns/pattern_coasters/)
+
 ### String art
 
 Chords between anchors on an outline.
 
 Spec: [pml/syntax_spec.md#stringart](../pml/syntax_spec.md#stringart)
+
+Recipes: [pattern_coasters](recipes/patterns/pattern_coasters/)
 
 ### Concentric ripples
 
@@ -268,11 +350,15 @@ Rings that grow outward from a hole as well as inward from the edge.
 
 Spec: [pml/syntax_spec.md#concentricborder](../pml/syntax_spec.md#concentricborder)
 
+Recipes: [pattern_coasters](recipes/patterns/pattern_coasters/)
+
 ### Radial arrays
 
 Pockets, ticks, labels or artwork repeated around a center.
 
 Spec: [pml/syntax_spec.md#radial](../pml/syntax_spec.md#radial)
+
+Recipes: [radial_patterns](recipes/patterns/radial_patterns/)
 
 ## Text, images and measurement
 
@@ -282,11 +368,15 @@ Text engraved in a single-line font.
 
 Spec: [pml/syntax_spec.md#engravetext](../pml/syntax_spec.md#engravetext)
 
+Recipes: [shop_ruler](recipes/engraving/shop_ruler/), [sign](recipes/engraving/sign/)
+
 ### Engraving
 
 Shallow marking along a shape's outline.
 
 Spec: [pml/syntax_spec.md#engrave](../pml/syntax_spec.md#engrave)
+
+Recipes: [sign](recipes/engraving/sign/)
 
 ### SVG artwork from a file
 
@@ -294,17 +384,23 @@ Paths from an SVG file, engraved or pocketed.
 
 Spec: [pml/syntax_spec.md#svgstamp](../pml/syntax_spec.md#svgstamp)
 
+Recipes: [svg_artwork](recipes/engraving/svg_artwork/)
+
 ### Measurement ticks
 
 Ruler ticks and labels along an edge.
 
 Spec: [pml/syntax_spec.md#measurementedge](../pml/syntax_spec.md#measurementedge)
 
+Recipes: [shop_ruler](recipes/engraving/shop_ruler/)
+
 ### Measurement grid, grid lines
 
 A labelled measurement grid and plain grid lines.
 
 Spec: [pml/syntax_spec.md#measurementgrid](../pml/syntax_spec.md#measurementgrid)
+
+Recipes: [layout_board](recipes/engraving/layout_board/)
 
 ## Joinery and assemblies
 
@@ -314,11 +410,15 @@ Assemblies whose panels and joinery come from one block.
 
 Spec: [pml/syntax_spec.md#assembly](../pml/syntax_spec.md#assembly)
 
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/)
+
 ### Finger, captured, dado, half-lap
 
 Joinery that interlocks panel edges or seats one panel in another.
 
 Spec: [pml/syntax_spec.md#joinery-types](../pml/syntax_spec.md#joinery-types)
+
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/)
 
 ### Step, rabbet, butt
 
@@ -326,17 +426,23 @@ Joinery that steps, shoulders or butts panel edges.
 
 Spec: [pml/syntax_spec.md#joinery-types](../pml/syntax_spec.md#joinery-types)
 
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/)
+
 ### Partitions and shelves
 
 Dividers and fixed shelves inside a carcass.
 
 Spec: [pml/syntax_spec.md#carcass-assembly](../pml/syntax_spec.md#carcass-assembly)
 
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/)
+
 ### Multi-sheet partitioning
 
 Assembly panels split across sheets when they do not fit on one.
 
 Spec: [pml/syntax_spec.md#multi-sheet-partitioning](../pml/syntax_spec.md#multi-sheet-partitioning)
+
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/)
 
 ## Laminated beams
 
@@ -346,11 +452,15 @@ A beam laminated from sheet layers.
 
 Spec: [pml/syntax_spec.md#beam](../pml/syntax_spec.md#beam)
 
+Recipes: [long_spliced_rail](recipes/beams/long_spliced_rail/), [side_table_frame](recipes/beams/side_table_frame/)
+
 ### Mortise, tenon, edge dado, rabbet, drill hole
 
 Face, end and edge features cut into beam layers.
 
 Spec: [pml/syntax_spec.md#beam-features](../pml/syntax_spec.md#beam-features)
+
+Recipes: [long_spliced_rail](recipes/beams/long_spliced_rail/), [side_table_frame](recipes/beams/side_table_frame/)
 
 ### Explicit layer specs
 
@@ -358,11 +468,15 @@ Beam layers given one by one instead of by count.
 
 Spec: [pml/syntax_spec.md#explicit-layer-specs](../pml/syntax_spec.md#explicit-layer-specs)
 
+Recipes: [side_table_frame](recipes/beams/side_table_frame/)
+
 ### Splicing beyond sheet length
 
 Layers longer than the sheet, spliced with staggered butt joints.
 
 Spec: [pml/syntax_spec.md#splicing](../pml/syntax_spec.md#splicing)
+
+Recipes: [long_spliced_rail](recipes/beams/long_spliced_rail/)
 
 ## Relief
 
@@ -372,6 +486,8 @@ A relief carved from a height map with roughing and finishing tools.
 
 Spec: [pml/syntax_spec.md#heightfield](../pml/syntax_spec.md#heightfield)
 
+Recipes: [relief_carving](recipes/patterns/relief_carving/)
+
 ## Sheet and machine setup
 
 ### Margin, working-area dimensions
@@ -380,11 +496,15 @@ A clamp margin, or a sheet given by its cuttable area.
 
 Spec: [pml/syntax_spec.md#working-area-dimensions](../pml/syntax_spec.md#working-area-dimensions)
 
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [curve_coasters](recipes/patterns/curve_coasters/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [layout_board](recipes/engraving/layout_board/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [nested_cabinet_job](recipes/production/nested_cabinet_job/), [pattern_coasters](recipes/patterns/pattern_coasters/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [radial_patterns](recipes/patterns/radial_patterns/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [relief_carving](recipes/patterns/relief_carving/), [shaker_door](recipes/doors/shaker_door/), [shop_ruler](recipes/engraving/shop_ruler/), [side_table_frame](recipes/beams/side_table_frame/), [sign](recipes/engraving/sign/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/), [svg_artwork](recipes/engraving/svg_artwork/)
+
 ### Material
 
 The stock material that selects feeds and speeds.
 
 Spec: [pml/syntax_spec.md#document-structure](../pml/syntax_spec.md#document-structure)
+
+Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [box_bottoms_and_lids](recipes/assemblies/box_bottoms_and_lids/), [calibration_coupon](recipes/shop/calibration_coupon/), [cubby_organizer](recipes/assemblies/cubby_organizer/), [decorated_shaker_door](recipes/doors/decorated_shaker_door/), [finger_jointed_box](recipes/assemblies/finger_jointed_box/), [hinge_cup_door](recipes/doors/hinge_cup_door/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/), [long_spliced_rail](recipes/beams/long_spliced_rail/), [multi_panel_doors](recipes/doors/multi_panel_doors/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/), [raised_panel_doors](recipes/doors/raised_panel_doors/), [shaker_door](recipes/doors/shaker_door/), [side_table_frame](recipes/beams/side_table_frame/), [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/)
 
 ### Kerf override
 
@@ -392,11 +512,15 @@ A tool kerf set in the document.
 
 Spec: [pml/syntax_spec.md#document-structure](../pml/syntax_spec.md#document-structure)
 
+Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/)
+
 ### Safe Z
 
 The retract height between cuts.
 
 Spec: [pml/syntax_spec.md#retract-height-safe_z](../pml/syntax_spec.md#retract-height-safe_z)
+
+Recipes: [production_sheet](recipes/production/production_sheet/)
 
 ### Per-tool G-code files
 
@@ -404,11 +528,15 @@ One G-code file per tool instead of one per operation.
 
 Spec: [pml/syntax_spec.md#g-code-output-modes](../pml/syntax_spec.md#g-code-output-modes)
 
+Recipes: [production_sheet](recipes/production/production_sheet/)
+
 ### Feed overrides
 
 Spindle speed and feed rates set on a feature.
 
 Spec: [pml/syntax_spec.md#feed-overrides](../pml/syntax_spec.md#feed-overrides)
+
+Recipes: [production_sheet](recipes/production/production_sheet/)
 
 ### Spoilboard facing
 
@@ -416,70 +544,8 @@ Full-sheet facing passes with cooling retracts.
 
 Spec: [pml/syntax_spec.md#surface-full-sheet-facing](../pml/syntax_spec.md#surface-full-sheet-facing)
 
+Recipes: [spoilboard_surfacing](recipes/shop/spoilboard_surfacing/)
+
 ## No recipe yet
 
-- Profile (Cutting parts out)
-- Tabs (Cutting parts out)
-- Onion skin (Cutting parts out)
-- Waste cuts (Cutting parts out)
-- Nesting (Cutting parts out)
-- Nested part shapes (Cutting parts out)
-- Nested parts from templates (Cutting parts out)
-- Per-part holding override (Cutting parts out)
-- Pocket (Pockets and recesses)
-- Holes (Pockets and recesses)
-- Hole grids (Pockets and recesses)
-- Rest pocketing (Pockets and recesses)
-- Corner cleanup (Pockets and recesses)
-- Dogbone and T-bone (Pockets and recesses)
-- Rough and finish allowance (Pockets and recesses)
-- Islands (Pockets and recesses)
-- Holes inside a recess (Pockets and recesses)
-- Back-face machining (Pockets and recesses)
-- Chamfer (Edges)
-- Roundover (Edges)
-- Raised-panel bevel (Edges)
-- Edge cross-section callouts (Edges)
-- Rect, Circle (Shapes)
-- RoundedRect, Ellipse, Polygon, Triangle (Shapes)
-- Arch (Shapes)
-- Line, Polyline, Spline (Shapes)
-- Frame, Inset (Layout)
-- Split, SplitGrid, SplitHorizontal, SplitVertical (Layout)
-- Grid, Place, AtPosition (Layout)
-- Subtract, Shell (Layout)
-- Reusable components (Layout)
-- X-panel (Face decorations)
-- Louvers (Face decorations)
-- Wave (Face decorations)
-- Lattice lines (Face decorations)
-- Fluting (Face decorations)
-- Concentric border (Face decorations)
-- Curve families (Mathematical patterns)
-- Phyllotaxis (Mathematical patterns)
-- Voronoi (Mathematical patterns)
-- String art (Mathematical patterns)
-- Concentric ripples (Mathematical patterns)
-- Radial arrays (Mathematical patterns)
-- Engraved text (Text, images and measurement)
-- Engraving (Text, images and measurement)
-- SVG artwork from a file (Text, images and measurement)
-- Measurement ticks (Text, images and measurement)
-- Measurement grid, grid lines (Text, images and measurement)
-- Box, carcass, cubby (Joinery and assemblies)
-- Finger, captured, dado, half-lap (Joinery and assemblies)
-- Step, rabbet, butt (Joinery and assemblies)
-- Partitions and shelves (Joinery and assemblies)
-- Multi-sheet partitioning (Joinery and assemblies)
-- Beam layers (Laminated beams)
-- Mortise, tenon, edge dado, rabbet, drill hole (Laminated beams)
-- Explicit layer specs (Laminated beams)
-- Splicing beyond sheet length (Laminated beams)
-- Heightfield rough and finish (Relief)
-- Margin, working-area dimensions (Sheet and machine setup)
-- Material (Sheet and machine setup)
-- Kerf override (Sheet and machine setup)
-- Safe Z (Sheet and machine setup)
-- Per-tool G-code files (Sheet and machine setup)
-- Feed overrides (Sheet and machine setup)
-- Spoilboard facing (Sheet and machine setup)
+Every capability has a recipe.

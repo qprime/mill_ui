@@ -1,0 +1,29 @@
+project: shaker_door
+
+Sheet:
+  working_width: 480mm
+  working_height: 680mm
+  margin: 10mm
+  thickness: 19mm
+  material: mdf
+
+children:
+  - Rect:
+      id: door
+      label: Shaker Door
+      at:
+        x: 240mm
+        y: 340mm
+        width: 400mm
+        height: 600mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+            tab_count: 4
+            tab_height: 3mm
+        - Frame:
+            width: 50mm
+            children:
+              - Pocket:
+                  depth: 6mm

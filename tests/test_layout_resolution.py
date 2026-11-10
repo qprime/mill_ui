@@ -906,6 +906,39 @@ def test_spliced_beam_with_tenon_still_resolves():
     assert all(_feature_of(i).type == "profile" for i in flat.items)
 
 
+def test_spliced_beam_segments_fit_working_width_and_match_assembly_diagram():
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from validation.removal_checks import check_working_area_bounds
+
+    beam = BeamDecl(
+        name="rail",
+        length_mm=2000,
+        width_mm=76,
+        thickness_mm=19,
+        layers=3,
+        end_features=(
+            BeamFeatureDecl(
+                feature_type="Tenon",
+                params={"end": "left", "extension_mm": 38, "width_mm": 76, "height_mm": 19, "layers": "center"},
+            ),
+        ),
+    )
+    sheet = Sheet(width_mm=1220, height_mm=1600, thickness_mm=19, margin_mm=10)
+
+    flat = resolve_layout(_beam_ast(beam, sheet))
+    bounds_result = check_working_area_bounds(
+        ast_to_removal_intents(flat), sheet.working_width_mm, sheet.working_height_mm, tool_radius_mm=3.175
+    )
+
+    assert not bounds_result.errors
+    cut_lengths = [_geometry_of(item)["w_mm"] for item in flat.items]
+    diagram_lengths = [
+        segment["length_mm"] for layer in flat.config["beam_structures"][0]["layers"] for segment in layer["segments"]
+    ]
+    assert cut_lengths == pytest.approx(diagram_lengths)
+    assert sum(cut_lengths) == pytest.approx(6038)
+
+
 def test_beam_edge_notch_emits_through_pocket():
     beam = BeamDecl(
         name="post",

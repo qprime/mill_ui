@@ -1,0 +1,47 @@
+project: "Shop ruler"
+
+Sheet:
+  physical_width: 700mm
+  physical_height: 250mm
+  thickness: 18mm
+  margin: 10mm
+
+children:
+  - Rect:
+      id: ruler
+      label: "600mm Ruler"
+      at:
+        x: 340mm
+        y: 115mm
+        width: 640mm
+        height: 70mm
+      children:
+        - Profile:
+            side: outside
+            depth: through
+        - Frame:
+            width: 20mm
+            children:
+              - MeasurementEdge:
+                  edges: [top]
+                  unit: metric
+                  minor_spacing: 1mm
+                  major_spacing: 10mm
+                  minor_length: 4mm
+                  major_length: 10mm
+                  minor_ticks: true
+                  labels: true
+                  label_height: 3.5mm
+                  label_interval: 1
+                  label_start: 0
+                  depth: 0.4mm
+              - AtPosition:
+                  x: 340mm
+                  y: 107mm
+                  child:
+                    EngraveText:
+                      text: "SHOP RULE  600 MM"
+                      height: 8mm
+                      depth: 0.4mm
+                      font: rowmans
+                      alignment: center

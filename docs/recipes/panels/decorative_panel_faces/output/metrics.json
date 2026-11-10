@@ -1,0 +1,133 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 9301,
+    "rapid_moves": 215,
+    "cut_moves": 7849,
+    "rapid_ratio": 0.023
+  },
+  "fidelity": {
+    "tool_changes": 5,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 499
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 9.525,
+        "move_count": 112
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 2198
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 5916
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 576
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 240633,
+    "total_lines": 8737,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 11396,
+        "lines": 411
+      },
+      "pocket-9.53mm": {
+        "bytes": 2857,
+        "lines": 104
+      },
+      "pocket-3.17mm": {
+        "bytes": 56439,
+        "lines": 1990
+      },
+      "engrave-1.00mm": {
+        "bytes": 154801,
+        "lines": 5730
+      },
+      "profile-3.17mm": {
+        "bytes": 15140,
+        "lines": 502
+      }
+    }
+  },
+  "errors": [
+    "Overlapping regions detected: pocket_generated_lines_14_000 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_001 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_001 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_001 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_002 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_002 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_002 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_002 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_002 and pocket_generated_lines_15_008",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_008",
+    "Overlapping regions detected: pocket_generated_lines_14_003 and pocket_generated_lines_15_009",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_002",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_008",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_009",
+    "Overlapping regions detected: pocket_generated_lines_14_004 and pocket_generated_lines_15_010",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_001",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_002",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_008",
+    "Overlapping regions detected: pocket_generated_lines_14_005 and pocket_generated_lines_15_009",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_000",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_001",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_002",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_006 and pocket_generated_lines_15_008",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_001",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_002",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_007 and pocket_generated_lines_15_007",
+    "Overlapping regions detected: pocket_generated_lines_14_008 and pocket_generated_lines_15_002",
+    "Overlapping regions detected: pocket_generated_lines_14_008 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_008 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_008 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_008 and pocket_generated_lines_15_006",
+    "Overlapping regions detected: pocket_generated_lines_14_009 and pocket_generated_lines_15_003",
+    "Overlapping regions detected: pocket_generated_lines_14_009 and pocket_generated_lines_15_004",
+    "Overlapping regions detected: pocket_generated_lines_14_009 and pocket_generated_lines_15_005",
+    "Overlapping regions detected: pocket_generated_lines_14_010 and pocket_generated_lines_15_004"
+  ],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "decorative_panel_faces.pml.yml"
+  }
+}

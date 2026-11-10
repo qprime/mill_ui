@@ -1,0 +1,60 @@
+Nest:
+  algorithm: maxrects
+
+  Sheet:
+    width: 1220mm
+    height: 1220mm
+    thickness: 18mm
+
+  kerf: 6.35mm
+  margin: 10mm
+
+  holding:
+    onion_skin: 0.3mm
+
+  parts:
+    - name: upper_door
+      width: 397mm
+      height: 597mm
+      quantity: 2
+      template:
+        name: shaker
+        params:
+          stile_w: 57mm
+          rail_h: 70mm
+          panel_recess: 6mm
+
+    - name: drawer_front
+      width: 397mm
+      height: 180mm
+      quantity: 2
+      template: shaker
+
+    - name: side_panel
+      width: 300mm
+      height: 700mm
+      quantity: 1
+      holding:
+        tab_count: 4
+        tab_height: 3mm
+        tab_width: 10mm
+
+    - name: shelf
+      width: 560mm
+      height: 280mm
+      quantity: 2
+
+    - name: corner_shelf
+      width: 300mm
+      height: 200mm
+      quantity: 2
+      shape:
+        type: RoundedRect
+        radius: 25mm
+
+    - name: turntable
+      width: 250mm
+      height: 250mm
+      quantity: 1
+      shape:
+        type: Circle

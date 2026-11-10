@@ -1,0 +1,34 @@
+project: "Layout board"
+
+Sheet:
+  physical_width: 400mm
+  physical_height: 300mm
+  thickness: 19mm
+  margin: 10mm
+
+children:
+  - Rect:
+      id: board
+      label: "Layout Board"
+      at:
+        x: 190mm
+        y: 140mm
+        width: 360mm
+        height: 260mm
+      children:
+        - Inset:
+            distance: 20mm
+            children:
+              - MeasurementGrid:
+                  unit: metric
+                  depth: 0.4mm
+                  minor_ticks: true
+                  minor_length: 3mm
+                  major_length: 6mm
+                  labels: true
+                  label_height: 3mm
+                  label_interval: 2
+              - GridLines:
+                  spacing: 20mm
+                  minor_lines: false
+                  depth: 0.3mm

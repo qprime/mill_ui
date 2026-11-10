@@ -1,0 +1,46 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 9487,
+    "rapid_moves": 12,
+    "cut_moves": 9375,
+    "rapid_ratio": 0.001
+  },
+  "fidelity": {
+    "tool_changes": 2,
+    "passes": [
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 5447
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 4040
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 268488,
+    "total_lines": 9450,
+    "files": {
+      "engrave-1.00mm": {
+        "bytes": 151509,
+        "lines": 5449
+      },
+      "profile-3.17mm": {
+        "bytes": 116979,
+        "lines": 4001
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "curve_coasters.pml.yml"
+  }
+}

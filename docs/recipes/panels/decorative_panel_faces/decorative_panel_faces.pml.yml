@@ -1,0 +1,87 @@
+project: decorative_panel_faces
+
+Sheet:
+  physical_width: 1100mm
+  physical_height: 900mm
+  thickness: 19mm
+
+children:
+  - Rect:
+      id: x_panel
+      label: "X-Panel"
+      at: {x: 190mm, y: 675mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 40mm
+            children:
+              - XPanel: {bar_width: 40mm, depth: 6mm}
+
+  - Rect:
+      id: louvers
+      label: "Louvers"
+      at: {x: 550mm, y: 675mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 40mm
+            children:
+              - SplitHorizontalGaps:
+                  count: 8
+                  gap: 12mm
+                  children:
+                    - Pocket: {depth: 6mm}
+
+  - Rect:
+      id: wave
+      label: "Wave"
+      at: {x: 910mm, y: 675mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 30mm
+            children:
+              - Wave:
+                  count: 6
+                  amplitude: 10mm
+                  wavelength: 80mm
+                  groove: 6.35mm
+                  depth: 3mm
+
+  - Rect:
+      id: diamond_lattice
+      label: "Diamond Lattice"
+      at: {x: 190mm, y: 225mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Inset:
+            distance: 30mm
+            children:
+              - Lines: {angle: 45, spacing: 40mm, width: 6.35mm, depth: 3mm}
+              - Lines: {angle: 135, spacing: 40mm, width: 6.35mm, depth: 3mm}
+
+  - Rect:
+      id: fluting
+      label: "Fluting"
+      at: {x: 550mm, y: 225mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Fluting:
+            spacing: 25mm
+            depth: 4mm
+            ramp: 20mm
+            angle: 90
+            inset: 40mm
+
+  - Rect:
+      id: concentric_border
+      label: "Concentric Border"
+      at: {x: 910mm, y: 225mm, width: 300mm, height: 400mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - ConcentricBorder:
+            count: 4
+            step: 15mm
+            start: 20mm
+            groove: 6.35mm
+            depth: 3mm

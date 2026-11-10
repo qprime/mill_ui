@@ -1,0 +1,82 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 20833,
+    "rapid_moves": 140,
+    "cut_moves": 19835,
+    "rapid_ratio": 0.007
+  },
+  "fidelity": {
+    "tool_changes": 6,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 9.525,
+        "move_count": 42
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 147
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 1892
+      },
+      {
+        "name": "bore",
+        "tool_diameter_mm": 3.175,
+        "move_count": 14960
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 560
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 3232
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 638378,
+    "total_lines": 20589,
+    "files": {
+      "pocket-9.53mm": {
+        "bytes": 1013,
+        "lines": 52
+      },
+      "pocket-12.70mm": {
+        "bytes": 3189,
+        "lines": 141
+      },
+      "pocket-3.17mm": {
+        "bytes": 54225,
+        "lines": 1860
+      },
+      "bore-3.17mm": {
+        "bytes": 478727,
+        "lines": 14896
+      },
+      "engrave-1.00mm": {
+        "bytes": 7566,
+        "lines": 436
+      },
+      "profile-3.17mm": {
+        "bytes": 93658,
+        "lines": 3204
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "pattern_coasters.pml.yml"
+  }
+}

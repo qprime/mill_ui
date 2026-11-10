@@ -1,0 +1,64 @@
+{
+  "constraint_audit": {},
+  "complexity": {
+    "total_moves": 2670,
+    "rapid_moves": 13,
+    "cut_moves": 2544,
+    "rapid_ratio": 0.005
+  },
+  "fidelity": {
+    "tool_changes": 4,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 960
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 9.525,
+        "move_count": 27
+      },
+      {
+        "name": "engrave",
+        "tool_diameter_mm": 1.0,
+        "move_count": 113
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 1570
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 79013,
+    "total_lines": 2658,
+    "files": {
+      "pocket-12.70mm": {
+        "bytes": 28405,
+        "lines": 954
+      },
+      "pocket-9.53mm": {
+        "bytes": 780,
+        "lines": 40
+      },
+      "engrave-1.00mm": {
+        "bytes": 2865,
+        "lines": 123
+      },
+      "profile-3.17mm": {
+        "bytes": 46963,
+        "lines": 1541
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "svg_artwork.pml.yml"
+  }
+}

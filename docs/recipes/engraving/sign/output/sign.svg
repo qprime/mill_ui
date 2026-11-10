@@ -1,0 +1,367 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 773.175 659.175" width="773.175mm" height="659.175mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-21.5875" y="-61.5875" width="773.175" height="659.175" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="600.000" height="400.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="600.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="390.000" width="600.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
+    <rect x="590.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths">
+    <polyline points="45.000,355.000 555.000,355.000 555.000,45.000 45.000,45.000 45.000,355.000" stroke="#888888" fill="none" stroke-width="0.25" id="outer_border" />
+    <polyline points="60.000,312.000 108.000,340.000 492.000,340.000 540.000,312.000 540.000,88.000 492.000,60.000 108.000,60.000 60.000,88.000 60.000,312.000" stroke="#888888" fill="none" stroke-width="0.25" id="inner_border" />
+    <line x1="100.000" y1="135.000" x2="500.000" y2="135.000" stroke="#888888" fill="none" stroke-width="0.25" id="top_rule" />
+    <line x1="100.000" y1="265.000" x2="500.000" y2="265.000" stroke="#888888" fill="none" stroke-width="0.25" id="bottom_rule" />
+    <line x1="85.000" y1="255.000" x2="85.000" y2="145.000" stroke="#888888" fill="none" stroke-width="0.25" id="left_rule" />
+    <line x1="515.000" y1="255.000" x2="515.000" y2="145.000" stroke="#888888" fill="none" stroke-width="0.25" id="right_rule" />
+    <polyline points="120.000,290.000 120.468,289.871 120.971,289.723 121.507,289.557 122.076,289.376 122.678,289.178 123.309,288.966 123.970,288.739 124.660,288.499 125.377,288.247 126.120,287.984 126.888,287.710 127.681,287.426 128.497,287.134 129.334,286.834 130.192,286.526 131.071,286.212 131.968,285.893 132.882,285.569 133.813,285.242 134.760,284.912 135.721,284.580 136.695,284.247 137.682,283.914 138.680,283.581 139.688,283.250 140.704,282.921 141.729,282.596 142.761,282.275 143.798,281.958 144.840,281.648 145.886,281.344 146.934,281.048 147.983,280.761 149.033,280.482 150.083,280.214 151.130,279.957 152.174,279.712 153.215,279.479 154.251,279.260 155.280,279.056 156.302,278.867 157.316,278.694 158.321,278.539 159.315,278.401 160.298,278.282 161.268,278.183 162.224,278.104 163.165,278.047 164.091,278.012 165.000,278.000 165.900,278.010 166.800,278.038 167.700,278.084 168.600,278.147 169.500,278.228 170.400,278.325 171.300,278.437 172.200,278.565 173.100,278.708 174.000,278.864 174.900,279.034 175.800,279.217 176.700,279.411 177.600,279.618 178.500,279.836 179.400,280.064 180.300,280.303 181.200,280.551 182.100,280.807 183.000,281.072 183.900,281.345 184.800,281.624 185.700,281.910 186.600,282.202 187.500,282.500 188.400,282.802 189.300,283.109 190.200,283.419 191.100,283.732 192.000,284.048 192.900,284.366 193.800,284.685 194.700,285.004 195.600,285.324 196.500,285.644 197.400,285.963 198.300,286.280 199.200,286.595 200.100,286.907 201.000,287.216 201.900,287.521 202.800,287.822 203.700,288.118 204.600,288.408 205.500,288.692 206.400,288.969 207.300,289.239 208.200,289.502 209.100,289.755 210.000,290.000 210.900,290.245 211.800,290.498 212.700,290.761 213.600,291.031 214.500,291.308 215.400,291.592 216.300,291.882 217.200,292.178 218.100,292.479 219.000,292.784 219.900,293.093 220.800,293.405 221.700,293.720 222.600,294.037 223.500,294.356 224.400,294.676 225.300,294.996 226.200,295.315 227.100,295.634 228.000,295.952 228.900,296.268 229.800,296.581 230.700,296.891 231.600,297.198 232.500,297.500 233.400,297.798 234.300,298.090 235.200,298.376 236.100,298.655 237.000,298.928 237.900,299.193 238.800,299.449 239.700,299.697 240.600,299.936 241.500,300.164 242.400,300.382 243.300,300.589 244.200,300.783 245.100,300.966 246.000,301.136 246.900,301.292 247.800,301.435 248.700,301.563 249.600,301.675 250.500,301.772 251.400,301.853 252.300,301.916 253.200,301.962 254.100,301.990 255.000,302.000 255.900,301.990 256.800,301.962 257.700,301.916 258.600,301.853 259.500,301.772 260.400,301.675 261.300,301.563 262.200,301.435 263.100,301.292 264.000,301.136 264.900,300.966 265.800,300.783 266.700,300.589 267.600,300.382 268.500,300.164 269.400,299.936 270.300,299.697 271.200,299.449 272.100,299.193 273.000,298.928 273.900,298.655 274.800,298.376 275.700,298.090 276.600,297.798 277.500,297.500 278.400,297.198 279.300,296.891 280.200,296.581 281.100,296.268 282.000,295.952 282.900,295.634 283.800,295.315 284.700,294.996 285.600,294.676 286.500,294.356 287.400,294.037 288.300,293.720 289.200,293.405 290.100,293.093 291.000,292.784 291.900,292.479 292.800,292.178 293.700,291.882 294.600,291.592 295.500,291.308 296.400,291.031 297.300,290.761 298.200,290.498 299.100,290.245 300.000,290.000 300.900,289.755 301.800,289.502 302.700,289.239 303.600,288.969 304.500,288.692 305.400,288.408 306.300,288.118 307.200,287.822 308.100,287.521 309.000,287.216 309.900,286.907 310.800,286.595 311.700,286.280 312.600,285.963 313.500,285.644 314.400,285.324 315.300,285.004 316.200,284.685 317.100,284.366 318.000,284.048 318.900,283.732 319.800,283.419 320.700,283.109 321.600,282.802 322.500,282.500 323.400,282.202 324.300,281.910 325.200,281.624 326.100,281.345 327.000,281.072 327.900,280.807 328.800,280.551 329.700,280.303 330.600,280.064 331.500,279.836 332.400,279.618 333.300,279.411 334.200,279.217 335.100,279.034 336.000,278.864 336.900,278.708 337.800,278.565 338.700,278.437 339.600,278.325 340.500,278.228 341.400,278.147 342.300,278.084 343.200,278.038 344.100,278.010 345.000,278.000 345.900,278.010 346.800,278.038 347.700,278.084 348.600,278.147 349.500,278.228 350.400,278.325 351.300,278.437 352.200,278.565 353.100,278.708 354.000,278.864 354.900,279.034 355.800,279.217 356.700,279.411 357.600,279.618 358.500,279.836 359.400,280.064 360.300,280.303 361.200,280.551 362.100,280.807 363.000,281.072 363.900,281.345 364.800,281.624 365.700,281.910 366.600,282.202 367.500,282.500 368.400,282.802 369.300,283.109 370.200,283.419 371.100,283.732 372.000,284.048 372.900,284.366 373.800,284.685 374.700,285.004 375.600,285.324 376.500,285.644 377.400,285.963 378.300,286.280 379.200,286.595 380.100,286.907 381.000,287.216 381.900,287.521 382.800,287.822 383.700,288.118 384.600,288.408 385.500,288.692 386.400,288.969 387.300,289.239 388.200,289.502 389.100,289.755 390.000,290.000 390.900,290.245 391.800,290.498 392.700,290.761 393.600,291.031 394.500,291.308 395.400,291.592 396.300,291.882 397.200,292.178 398.100,292.479 399.000,292.784 399.900,293.093 400.800,293.405 401.700,293.720 402.600,294.037 403.500,294.356 404.400,294.676 405.300,294.996 406.200,295.315 407.100,295.634 408.000,295.952 408.900,296.268 409.800,296.581 410.700,296.891 411.600,297.198 412.500,297.500 413.400,297.798 414.300,298.090 415.200,298.376 416.100,298.655 417.000,298.928 417.900,299.193 418.800,299.449 419.700,299.697 420.600,299.936 421.500,300.164 422.400,300.382 423.300,300.589 424.200,300.783 425.100,300.966 426.000,301.136 426.900,301.292 427.800,301.435 428.700,301.563 429.600,301.675 430.500,301.772 431.400,301.853 432.300,301.916 433.200,301.962 434.100,301.990 435.000,302.000 435.909,301.988 436.835,301.953 437.776,301.896 438.732,301.817 439.703,301.718 440.685,301.599 441.679,301.461 442.684,301.306 443.698,301.133 444.720,300.944 445.749,300.740 446.785,300.521 447.826,300.288 448.870,300.043 449.918,299.786 450.967,299.518 452.017,299.239 453.066,298.952 454.114,298.656 455.160,298.352 456.202,298.042 457.239,297.725 458.271,297.404 459.296,297.079 460.312,296.750 461.320,296.419 462.318,296.086 463.305,295.753 464.279,295.420 465.240,295.088 466.187,294.758 467.118,294.431 468.032,294.107 468.929,293.788 469.807,293.474 470.666,293.166 471.503,292.866 472.319,292.574 473.112,292.290 473.880,292.016 474.623,291.753 475.340,291.501 476.030,291.261 476.691,291.034 477.322,290.822 477.924,290.624 478.493,290.443 479.029,290.277 479.532,290.129 480.000,290.000" stroke="#888888" fill="none" stroke-width="0.25" id="flourish" />
+    <line x1="100.000" y1="155.000" x2="114.286" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_000" />
+    <line x1="100.000" y1="155.000" x2="102.381" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_001" />
+    <line x1="102.381" y1="155.000" x2="114.286" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_002" />
+    <line x1="126.190" y1="155.000" x2="114.286" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_003" />
+    <line x1="126.190" y1="162.143" x2="114.286" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_004" />
+    <line x1="126.190" y1="162.143" x2="138.095" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_005" />
+    <line x1="126.190" y1="155.000" x2="138.095" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_006" />
+    <line x1="152.381" y1="155.000" x2="150.000" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_007" />
+    <line x1="150.000" y1="155.000" x2="138.095" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_008" />
+    <line x1="152.381" y1="155.000" x2="138.095" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_009" />
+    <line x1="178.571" y1="155.000" x2="173.810" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_010" />
+    <line x1="173.810" y1="157.381" x2="169.048" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_011" />
+    <line x1="169.048" y1="162.143" x2="166.667" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_012" />
+    <line x1="166.667" y1="166.905" x2="164.286" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_013" />
+    <line x1="164.286" y1="174.048" x2="164.286" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_014" />
+    <line x1="164.286" y1="185.952" x2="166.667" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_015" />
+    <line x1="166.667" y1="193.095" x2="169.048" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_016" />
+    <line x1="169.048" y1="197.857" x2="173.810" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_017" />
+    <line x1="173.810" y1="202.619" x2="178.571" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_018" />
+    <line x1="178.571" y1="205.000" x2="188.095" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_019" />
+    <line x1="188.095" y1="205.000" x2="192.857" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_020" />
+    <line x1="192.857" y1="202.619" x2="197.619" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_021" />
+    <line x1="197.619" y1="197.857" x2="200.000" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_022" />
+    <line x1="200.000" y1="193.095" x2="202.381" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_023" />
+    <line x1="202.381" y1="185.952" x2="202.381" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_024" />
+    <line x1="202.381" y1="174.048" x2="200.000" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_025" />
+    <line x1="200.000" y1="166.905" x2="197.619" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_026" />
+    <line x1="197.619" y1="162.143" x2="192.857" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_027" />
+    <line x1="192.857" y1="157.381" x2="188.095" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_028" />
+    <line x1="188.095" y1="155.000" x2="178.571" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_029" />
+    <line x1="180.952" y1="157.381" x2="173.810" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_030" />
+    <line x1="173.810" y1="159.762" x2="169.048" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_031" />
+    <line x1="169.048" y1="166.905" x2="166.667" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_032" />
+    <line x1="166.667" y1="174.048" x2="166.667" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_033" />
+    <line x1="166.667" y1="185.952" x2="169.048" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_034" />
+    <line x1="169.048" y1="193.095" x2="173.810" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_035" />
+    <line x1="173.810" y1="200.238" x2="180.952" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_036" />
+    <line x1="180.952" y1="202.619" x2="185.714" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_037" />
+    <line x1="185.714" y1="202.619" x2="192.857" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_038" />
+    <line x1="192.857" y1="200.238" x2="197.619" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_039" />
+    <line x1="197.619" y1="193.095" x2="200.000" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_040" />
+    <line x1="200.000" y1="185.952" x2="200.000" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_041" />
+    <line x1="200.000" y1="174.048" x2="197.619" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_042" />
+    <line x1="197.619" y1="166.905" x2="192.857" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_043" />
+    <line x1="192.857" y1="159.762" x2="185.714" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_044" />
+    <line x1="185.714" y1="157.381" x2="180.952" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_045" />
+    <line x1="219.048" y1="155.000" x2="219.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_046" />
+    <line x1="221.429" y1="157.381" x2="221.429" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_047" />
+    <line x1="221.429" y1="205.000" x2="219.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_048" />
+    <line x1="219.048" y1="155.000" x2="238.095" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_049" />
+    <line x1="238.095" y1="155.000" x2="245.238" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_050" />
+    <line x1="245.238" y1="157.381" x2="247.619" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_051" />
+    <line x1="247.619" y1="159.762" x2="250.000" y2="164.524" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_052" />
+    <line x1="250.000" y1="164.524" x2="250.000" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_053" />
+    <line x1="250.000" y1="171.667" x2="247.619" y2="176.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_054" />
+    <line x1="247.619" y1="176.429" x2="245.238" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_055" />
+    <line x1="245.238" y1="178.810" x2="238.095" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_056" />
+    <line x1="238.095" y1="181.190" x2="221.429" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_057" />
+    <line x1="221.429" y1="157.381" x2="238.095" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_058" />
+    <line x1="238.095" y1="157.381" x2="245.238" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_059" />
+    <line x1="245.238" y1="159.762" x2="247.619" y2="164.524" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_060" />
+    <line x1="247.619" y1="164.524" x2="247.619" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_061" />
+    <line x1="247.619" y1="171.667" x2="245.238" y2="176.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_062" />
+    <line x1="245.238" y1="176.429" x2="238.095" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_063" />
+    <line x1="238.095" y1="178.810" x2="221.429" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_064" />
+    <line x1="233.333" y1="181.190" x2="247.619" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_065" />
+    <line x1="247.619" y1="205.000" x2="250.000" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_066" />
+    <line x1="235.714" y1="181.190" x2="250.000" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_067" />
+    <line x1="266.667" y1="155.000" x2="266.667" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_068" />
+    <line x1="266.667" y1="205.000" x2="269.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_069" />
+    <line x1="266.667" y1="155.000" x2="269.048" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_070" />
+    <line x1="269.048" y1="155.000" x2="269.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_071" />
+    <line x1="300.000" y1="155.000" x2="297.619" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_072" />
+    <line x1="297.619" y1="155.000" x2="269.048" y2="183.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_073" />
+    <line x1="300.000" y1="155.000" x2="269.048" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_074" />
+    <line x1="276.190" y1="176.429" x2="297.619" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_075" />
+    <line x1="297.619" y1="205.000" x2="300.000" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_076" />
+    <line x1="278.571" y1="176.429" x2="300.000" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_077" />
+    <line x1="347.619" y1="162.143" x2="342.857" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_078" />
+    <line x1="342.857" y1="157.381" x2="335.714" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_079" />
+    <line x1="335.714" y1="155.000" x2="326.190" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_080" />
+    <line x1="326.190" y1="155.000" x2="319.048" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_081" />
+    <line x1="319.048" y1="157.381" x2="314.286" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_082" />
+    <line x1="314.286" y1="162.143" x2="314.286" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_083" />
+    <line x1="314.286" y1="166.905" x2="316.667" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_084" />
+    <line x1="316.667" y1="171.667" x2="319.048" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_085" />
+    <line x1="319.048" y1="174.048" x2="323.810" y2="176.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_086" />
+    <line x1="323.810" y1="176.429" x2="335.714" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_087" />
+    <line x1="335.714" y1="181.190" x2="340.476" y2="183.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_088" />
+    <line x1="340.476" y1="183.571" x2="342.857" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_089" />
+    <line x1="342.857" y1="185.952" x2="345.238" y2="190.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_090" />
+    <line x1="345.238" y1="190.714" x2="345.238" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_091" />
+    <line x1="345.238" y1="197.857" x2="342.857" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_092" />
+    <line x1="342.857" y1="200.238" x2="335.714" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_093" />
+    <line x1="335.714" y1="202.619" x2="326.190" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_094" />
+    <line x1="326.190" y1="202.619" x2="321.429" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_095" />
+    <line x1="321.429" y1="200.238" x2="319.048" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_096" />
+    <line x1="319.048" y1="197.857" x2="314.286" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_097" />
+    <line x1="347.619" y1="162.143" x2="342.857" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_098" />
+    <line x1="342.857" y1="162.143" x2="340.476" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_099" />
+    <line x1="340.476" y1="159.762" x2="335.714" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_100" />
+    <line x1="335.714" y1="157.381" x2="326.190" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_101" />
+    <line x1="326.190" y1="157.381" x2="319.048" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_102" />
+    <line x1="319.048" y1="159.762" x2="316.667" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_103" />
+    <line x1="316.667" y1="162.143" x2="316.667" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_104" />
+    <line x1="316.667" y1="166.905" x2="319.048" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_105" />
+    <line x1="319.048" y1="171.667" x2="323.810" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_106" />
+    <line x1="323.810" y1="174.048" x2="335.714" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_107" />
+    <line x1="335.714" y1="178.810" x2="340.476" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_108" />
+    <line x1="340.476" y1="181.190" x2="345.238" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_109" />
+    <line x1="345.238" y1="185.952" x2="347.619" y2="190.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_110" />
+    <line x1="347.619" y1="190.714" x2="347.619" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_111" />
+    <line x1="347.619" y1="197.857" x2="342.857" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_112" />
+    <line x1="342.857" y1="202.619" x2="335.714" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_113" />
+    <line x1="335.714" y1="205.000" x2="326.190" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_114" />
+    <line x1="326.190" y1="205.000" x2="319.048" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_115" />
+    <line x1="319.048" y1="202.619" x2="314.286" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_116" />
+    <line x1="364.286" y1="155.000" x2="364.286" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_117" />
+    <line x1="364.286" y1="155.000" x2="366.667" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_118" />
+    <line x1="366.667" y1="155.000" x2="366.667" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_119" />
+    <line x1="366.667" y1="205.000" x2="364.286" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_120" />
+    <line x1="397.619" y1="155.000" x2="395.238" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_121" />
+    <line x1="395.238" y1="155.000" x2="395.238" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_122" />
+    <line x1="395.238" y1="205.000" x2="397.619" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_123" />
+    <line x1="397.619" y1="155.000" x2="397.619" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_124" />
+    <line x1="366.667" y1="178.810" x2="395.238" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_125" />
+    <line x1="366.667" y1="181.190" x2="395.238" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_126" />
+    <line x1="428.571" y1="155.000" x2="423.810" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_127" />
+    <line x1="423.810" y1="157.381" x2="419.048" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_128" />
+    <line x1="419.048" y1="162.143" x2="416.667" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_129" />
+    <line x1="416.667" y1="166.905" x2="414.286" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_130" />
+    <line x1="414.286" y1="174.048" x2="414.286" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_131" />
+    <line x1="414.286" y1="185.952" x2="416.667" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_132" />
+    <line x1="416.667" y1="193.095" x2="419.048" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_133" />
+    <line x1="419.048" y1="197.857" x2="423.810" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_134" />
+    <line x1="423.810" y1="202.619" x2="428.571" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_135" />
+    <line x1="428.571" y1="205.000" x2="438.095" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_136" />
+    <line x1="438.095" y1="205.000" x2="442.857" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_137" />
+    <line x1="442.857" y1="202.619" x2="447.619" y2="197.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_138" />
+    <line x1="447.619" y1="197.857" x2="450.000" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_139" />
+    <line x1="450.000" y1="193.095" x2="452.381" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_140" />
+    <line x1="452.381" y1="185.952" x2="452.381" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_141" />
+    <line x1="452.381" y1="174.048" x2="450.000" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_142" />
+    <line x1="450.000" y1="166.905" x2="447.619" y2="162.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_143" />
+    <line x1="447.619" y1="162.143" x2="442.857" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_144" />
+    <line x1="442.857" y1="157.381" x2="438.095" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_145" />
+    <line x1="438.095" y1="155.000" x2="428.571" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_146" />
+    <line x1="430.952" y1="157.381" x2="423.810" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_147" />
+    <line x1="423.810" y1="159.762" x2="419.048" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_148" />
+    <line x1="419.048" y1="166.905" x2="416.667" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_149" />
+    <line x1="416.667" y1="174.048" x2="416.667" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_150" />
+    <line x1="416.667" y1="185.952" x2="419.048" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_151" />
+    <line x1="419.048" y1="193.095" x2="423.810" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_152" />
+    <line x1="423.810" y1="200.238" x2="430.952" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_153" />
+    <line x1="430.952" y1="202.619" x2="435.714" y2="202.619" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_154" />
+    <line x1="435.714" y1="202.619" x2="442.857" y2="200.238" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_155" />
+    <line x1="442.857" y1="200.238" x2="447.619" y2="193.095" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_156" />
+    <line x1="447.619" y1="193.095" x2="450.000" y2="185.952" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_157" />
+    <line x1="450.000" y1="185.952" x2="450.000" y2="174.048" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_158" />
+    <line x1="450.000" y1="174.048" x2="447.619" y2="166.905" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_159" />
+    <line x1="447.619" y1="166.905" x2="442.857" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_160" />
+    <line x1="442.857" y1="159.762" x2="435.714" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_161" />
+    <line x1="435.714" y1="157.381" x2="430.952" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_162" />
+    <line x1="469.048" y1="155.000" x2="469.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_163" />
+    <line x1="471.429" y1="157.381" x2="471.429" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_164" />
+    <line x1="471.429" y1="205.000" x2="469.048" y2="205.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_165" />
+    <line x1="469.048" y1="155.000" x2="490.476" y2="155.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_166" />
+    <line x1="490.476" y1="155.000" x2="495.238" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_167" />
+    <line x1="495.238" y1="157.381" x2="497.619" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_168" />
+    <line x1="497.619" y1="159.762" x2="500.000" y2="164.524" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_169" />
+    <line x1="500.000" y1="164.524" x2="500.000" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_170" />
+    <line x1="500.000" y1="171.667" x2="497.619" y2="176.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_171" />
+    <line x1="497.619" y1="176.429" x2="495.238" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_172" />
+    <line x1="495.238" y1="178.810" x2="490.476" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_173" />
+    <line x1="490.476" y1="181.190" x2="471.429" y2="181.190" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_174" />
+    <line x1="471.429" y1="157.381" x2="490.476" y2="157.381" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_175" />
+    <line x1="490.476" y1="157.381" x2="495.238" y2="159.762" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_176" />
+    <line x1="495.238" y1="159.762" x2="497.619" y2="164.524" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_177" />
+    <line x1="497.619" y1="164.524" x2="497.619" y2="171.667" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_178" />
+    <line x1="497.619" y1="171.667" x2="495.238" y2="176.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_179" />
+    <line x1="495.238" y1="176.429" x2="490.476" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_180" />
+    <line x1="490.476" y1="178.810" x2="471.429" y2="178.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_0_181" />
+    <line x1="234.000" y1="226.000" x2="234.000" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_000" />
+    <line x1="234.000" y1="226.000" x2="245.143" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_001" />
+    <line x1="234.000" y1="234.571" x2="240.857" y2="234.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_002" />
+    <line x1="234.000" y1="244.000" x2="245.143" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_003" />
+    <line x1="261.429" y1="228.571" x2="259.714" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_004" />
+    <line x1="259.714" y1="226.857" x2="257.143" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_005" />
+    <line x1="257.143" y1="226.000" x2="253.714" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_006" />
+    <line x1="253.714" y1="226.000" x2="251.143" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_007" />
+    <line x1="251.143" y1="226.857" x2="249.429" y2="228.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_008" />
+    <line x1="249.429" y1="228.571" x2="249.429" y2="230.286" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_009" />
+    <line x1="249.429" y1="230.286" x2="250.286" y2="232.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_010" />
+    <line x1="250.286" y1="232.000" x2="251.143" y2="232.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_011" />
+    <line x1="251.143" y1="232.857" x2="252.857" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_012" />
+    <line x1="252.857" y1="233.714" x2="258.000" y2="235.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_013" />
+    <line x1="258.000" y1="235.429" x2="259.714" y2="236.286" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_014" />
+    <line x1="259.714" y1="236.286" x2="260.571" y2="237.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_015" />
+    <line x1="260.571" y1="237.143" x2="261.429" y2="238.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_016" />
+    <line x1="261.429" y1="238.857" x2="261.429" y2="241.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_017" />
+    <line x1="261.429" y1="241.429" x2="259.714" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_018" />
+    <line x1="259.714" y1="243.143" x2="257.143" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_019" />
+    <line x1="257.143" y1="244.000" x2="253.714" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_020" />
+    <line x1="253.714" y1="244.000" x2="251.143" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_021" />
+    <line x1="251.143" y1="243.143" x2="249.429" y2="241.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_022" />
+    <line x1="270.857" y1="226.000" x2="270.857" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_023" />
+    <line x1="264.857" y1="226.000" x2="276.857" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_024" />
+    <line x1="282.000" y1="242.286" x2="281.143" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_025" />
+    <line x1="281.143" y1="243.143" x2="282.000" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_026" />
+    <line x1="282.000" y1="244.000" x2="282.857" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_027" />
+    <line x1="282.857" y1="243.143" x2="282.000" y2="242.286" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_028" />
+    <line x1="303.429" y1="230.286" x2="303.429" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_029" />
+    <line x1="303.429" y1="229.429" x2="304.286" y2="227.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_030" />
+    <line x1="304.286" y1="227.714" x2="305.143" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_031" />
+    <line x1="305.143" y1="226.857" x2="306.857" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_032" />
+    <line x1="306.857" y1="226.000" x2="310.286" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_033" />
+    <line x1="310.286" y1="226.000" x2="312.000" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_034" />
+    <line x1="312.000" y1="226.857" x2="312.857" y2="227.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_035" />
+    <line x1="312.857" y1="227.714" x2="313.714" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_036" />
+    <line x1="313.714" y1="229.429" x2="313.714" y2="231.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_037" />
+    <line x1="313.714" y1="231.143" x2="312.857" y2="232.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_038" />
+    <line x1="312.857" y1="232.857" x2="311.143" y2="235.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_039" />
+    <line x1="311.143" y1="235.429" x2="302.571" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_040" />
+    <line x1="302.571" y1="244.000" x2="314.571" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_041" />
+    <line x1="324.857" y1="226.000" x2="322.286" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_042" />
+    <line x1="322.286" y1="226.857" x2="320.571" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_043" />
+    <line x1="320.571" y1="229.429" x2="319.714" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_044" />
+    <line x1="319.714" y1="233.714" x2="319.714" y2="236.286" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_045" />
+    <line x1="319.714" y1="236.286" x2="320.571" y2="240.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_046" />
+    <line x1="320.571" y1="240.571" x2="322.286" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_047" />
+    <line x1="322.286" y1="243.143" x2="324.857" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_048" />
+    <line x1="324.857" y1="244.000" x2="326.571" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_049" />
+    <line x1="326.571" y1="244.000" x2="329.143" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_050" />
+    <line x1="329.143" y1="243.143" x2="330.857" y2="240.571" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_051" />
+    <line x1="330.857" y1="240.571" x2="331.714" y2="236.286" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_052" />
+    <line x1="331.714" y1="236.286" x2="331.714" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_053" />
+    <line x1="331.714" y1="233.714" x2="330.857" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_054" />
+    <line x1="330.857" y1="229.429" x2="329.143" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_055" />
+    <line x1="329.143" y1="226.857" x2="326.571" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_056" />
+    <line x1="326.571" y1="226.000" x2="324.857" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_057" />
+    <line x1="337.714" y1="230.286" x2="337.714" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_058" />
+    <line x1="337.714" y1="229.429" x2="338.571" y2="227.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_059" />
+    <line x1="338.571" y1="227.714" x2="339.429" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_060" />
+    <line x1="339.429" y1="226.857" x2="341.143" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_061" />
+    <line x1="341.143" y1="226.000" x2="344.571" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_062" />
+    <line x1="344.571" y1="226.000" x2="346.286" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_063" />
+    <line x1="346.286" y1="226.857" x2="347.143" y2="227.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_064" />
+    <line x1="347.143" y1="227.714" x2="348.000" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_065" />
+    <line x1="348.000" y1="229.429" x2="348.000" y2="231.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_066" />
+    <line x1="348.000" y1="231.143" x2="347.143" y2="232.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_067" />
+    <line x1="347.143" y1="232.857" x2="345.429" y2="235.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_068" />
+    <line x1="345.429" y1="235.429" x2="336.857" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_069" />
+    <line x1="336.857" y1="244.000" x2="348.857" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_070" />
+    <line x1="365.143" y1="228.571" x2="364.286" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_071" />
+    <line x1="364.286" y1="226.857" x2="361.714" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_072" />
+    <line x1="361.714" y1="226.000" x2="360.000" y2="226.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_073" />
+    <line x1="360.000" y1="226.000" x2="357.429" y2="226.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_074" />
+    <line x1="357.429" y1="226.857" x2="355.714" y2="229.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_075" />
+    <line x1="355.714" y1="229.429" x2="354.857" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_076" />
+    <line x1="354.857" y1="233.714" x2="354.857" y2="238.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_077" />
+    <line x1="354.857" y1="238.000" x2="355.714" y2="241.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_078" />
+    <line x1="355.714" y1="241.429" x2="357.429" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_079" />
+    <line x1="357.429" y1="243.143" x2="360.000" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_080" />
+    <line x1="360.000" y1="244.000" x2="360.857" y2="244.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_081" />
+    <line x1="360.857" y1="244.000" x2="363.429" y2="243.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_082" />
+    <line x1="363.429" y1="243.143" x2="365.143" y2="241.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_083" />
+    <line x1="365.143" y1="241.429" x2="366.000" y2="238.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_084" />
+    <line x1="366.000" y1="238.857" x2="366.000" y2="238.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_085" />
+    <line x1="366.000" y1="238.000" x2="365.143" y2="235.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_086" />
+    <line x1="365.143" y1="235.429" x2="363.429" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_087" />
+    <line x1="363.429" y1="233.714" x2="360.857" y2="232.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_088" />
+    <line x1="360.857" y1="232.857" x2="360.000" y2="232.857" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_089" />
+    <line x1="360.000" y1="232.857" x2="357.429" y2="233.714" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_090" />
+    <line x1="357.429" y1="233.714" x2="355.714" y2="235.429" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_091" />
+    <line x1="355.714" y1="235.429" x2="354.857" y2="238.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_engrave_text_1_092" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="300.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="outer_border_label">outer_border</text>
+    <text x="300.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="inner_border_label">inner_border</text>
+    <text x="300.000" y="135.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="top_rule_label">top_rule</text>
+    <text x="300.000" y="265.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="bottom_rule_label">bottom_rule</text>
+    <text x="85.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="left_rule_label">left_rule</text>
+    <text x="515.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="right_rule_label">right_rule</text>
+    <text x="300.000" y="290.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="flourish_label">flourish</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="619.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="619.5875" y1="-29.5875" x2="634.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="639.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="619.5875" y1="-13.587499999999999" x2="634.5875" y2="-13.587499999999999" stroke="#888888" stroke-width="0.25" />
+    <text x="639.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
+    <line x1="619.5875" y1="2.4125000000000014" x2="634.5875" y2="2.4125000000000014" stroke="#5ab9ea" stroke-width="1" />
+    <text x="639.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="431.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="443.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 600.0 × 400.0 × 19.0mm</text>
+    <text x="20.0" y="455.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 282 engraves</text>
+    <text x="20.0" y="467.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.5mm, 0.8mm, 1.0mm</text>
+    <text x="20.0" y="491.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (7):</text>
+    <text x="30.0" y="503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• bottom_rule</text>
+    <text x="30.0" y="515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• flourish</text>
+    <text x="30.0" y="527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• inner_border</text>
+    <text x="30.0" y="539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• left_rule</text>
+    <text x="30.0" y="551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• outer_border</text>
+    <text x="30.0" y="563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• right_rule</text>
+    <text x="30.0" y="575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• top_rule</text>
+  </g>
+</svg>

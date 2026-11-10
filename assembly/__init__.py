@@ -63,6 +63,7 @@ from assembly.panel import (
     PanelSpec,
 )
 from assembly.partitioner import (
+    PanelPlacement,
     PartitionResult,
     partition_panels,
 )
@@ -104,6 +105,7 @@ __all__ = [
     "MachiningStage",
     "MemberSpec",
     "NotchSpec",
+    "PanelPlacement",
     "PanelRole",
     "PanelSpec",
     "PartitionResult",

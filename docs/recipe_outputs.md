@@ -26,6 +26,8 @@ The gate is not part of the test suite: tests never read `docs/recipes/`. It run
 
 Each PML recipe is written into a temporary directory and compared with its `output/`:
 
+The gate also rejects design errors from every generated sheet, even when its files match `output/` exactly. Matching output proves reproducibility; each recipe must also have an empty `errors` list in `metrics.json`.
+
 | Message | Meaning |
 |---|---|
 | `Missing generated file: <name>` | Current code writes a file that `output/` does not have |

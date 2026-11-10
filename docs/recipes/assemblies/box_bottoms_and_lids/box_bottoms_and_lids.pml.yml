@@ -1,0 +1,118 @@
+project: box_bottoms_and_lids
+Sheet:
+  physical_width: 1200mm
+  physical_height: 800mm
+  thickness: 6mm
+  margin: 10mm
+  material: mdf
+children:
+  - AtPosition:
+      x: 295mm
+      y: 195mm
+      width: 580mm
+      height: 380mm
+      child:
+        Assembly:
+          type: box
+          width: 150mm
+          depth: 100mm
+          height: 80mm
+          thickness: 6mm
+          joinery: finger
+          finger_width: 12mm
+          clearance: 0.12mm
+          layout_gap: 10mm
+          bottom:
+            joinery: captured
+            receiving: a
+            dado_depth: 3mm
+            inset: 6mm
+          top:
+            joinery: captured
+            receiving: a
+            dado_depth: 3mm
+            inset: 6mm
+          show_labels: true
+          show_edge_colors: true
+  - AtPosition:
+      x: 885mm
+      y: 195mm
+      width: 580mm
+      height: 380mm
+      child:
+        Assembly:
+          type: box
+          width: 150mm
+          depth: 100mm
+          height: 80mm
+          thickness: 6mm
+          joinery: finger
+          finger_width: 12mm
+          clearance: 0.12mm
+          layout_gap: 10mm
+          bottom:
+            joinery: dado
+            receiving: a
+            dado_depth: 3mm
+            inset: 6mm
+          top:
+            joinery: dado
+            receiving: a
+            dado_depth: 3mm
+            inset: 6mm
+          show_labels: true
+          show_edge_colors: true
+  - AtPosition:
+      x: 295mm
+      y: 585mm
+      width: 580mm
+      height: 380mm
+      child:
+        Assembly:
+          type: box
+          width: 150mm
+          depth: 100mm
+          height: 80mm
+          thickness: 6mm
+          joinery: finger
+          finger_width: 12mm
+          clearance: 0.12mm
+          layout_gap: 10mm
+          bottom:
+            joinery: finger
+            finger_width: 12mm
+            clearance: 0.12mm
+          top:
+            joinery: finger
+            finger_width: 12mm
+            clearance: 0.12mm
+          show_labels: true
+          show_edge_colors: true
+  - AtPosition:
+      x: 885mm
+      y: 585mm
+      width: 580mm
+      height: 380mm
+      child:
+        Assembly:
+          type: box
+          width: 150mm
+          depth: 100mm
+          height: 80mm
+          thickness: 6mm
+          joinery: finger
+          finger_width: 12mm
+          clearance: 0.12mm
+          layout_gap: 10mm
+          bottom:
+            joinery: captured
+            receiving: b
+            dado_depth: 3mm
+            inset: 0mm
+          top:
+            joinery: captured
+            receiving: b
+            dado_depth: 3mm
+            inset: 0mm
+          show_labels: true
+          show_edge_colors: true

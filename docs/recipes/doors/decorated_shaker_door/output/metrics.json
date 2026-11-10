@@ -1,0 +1,63 @@
+{
+  "constraint_audit": {
+    "tabs": {
+      "status": "honored",
+      "count": 1,
+      "safety_critical": false
+    }
+  },
+  "complexity": {
+    "total_moves": 654,
+    "rapid_moves": 17,
+    "cut_moves": 587,
+    "rapid_ratio": 0.026
+  },
+  "fidelity": {
+    "tool_changes": 3,
+    "passes": [
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 3.175,
+        "move_count": 167
+      },
+      {
+        "name": "pocket",
+        "tool_diameter_mm": 12.7,
+        "move_count": 303
+      },
+      {
+        "name": "profile",
+        "tool_diameter_mm": 3.175,
+        "move_count": 184
+      }
+    ]
+  },
+  "output_size": {
+    "total_bytes": 18080,
+    "total_lines": 673,
+    "files": {
+      "pocket-3.17mm": {
+        "bytes": 4583,
+        "lines": 175
+      },
+      "pocket-12.70mm": {
+        "bytes": 8801,
+        "lines": 314
+      },
+      "profile-3.17mm": {
+        "bytes": 4696,
+        "lines": 184
+      }
+    }
+  },
+  "errors": [
+    "Overlapping regions detected: pocket_generated_border_1_000 and pocket_generated_pocket_2"
+  ],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 3.175,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "decorated_shaker_door.pml.yml"
+  }
+}

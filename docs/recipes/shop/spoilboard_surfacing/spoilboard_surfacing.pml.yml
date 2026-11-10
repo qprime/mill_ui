@@ -1,0 +1,19 @@
+project: spoilboard_surfacing
+
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 19mm
+  margin: 0mm
+  material: mdf
+
+Surface:
+  depth-per-pass: 0.5mm
+  passes: 1
+  stepover: 70%
+  direction: x
+  cool_every: 10
+  cool_dwell: 5s
+  margin-overrun: 5mm
+
+children: []

@@ -6,7 +6,7 @@ from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
 from assembly.core import Interface, InterfaceType
 from assembly.joinery import Captured, Finger, HalfLap
-from assembly.panel import DadoSpec, PanelSpec
+from assembly.panel import DadoSpec, Edge, NotchSpec, PanelSpec
 from assembly.primitives import box
 from layout_ast.layout import (
     DogboneSpec,
@@ -19,6 +19,7 @@ from layout_ast.layout import (
 )
 from pml import parse_pml
 from pml.yaml_parser import _parse_interface_config
+from resolution.layout_resolver import LayoutResolver
 
 
 class TestDadoSpecDogbone:
@@ -388,6 +389,32 @@ class TestDadoDogboneThroughPipeline:
 
 
 class TestNotchDogboneThroughPipeline:
+    @pytest.mark.parametrize("notch_depth", [6.0, 30.0, 144.0])
+    def test_assembly_notch_dogbone_cuts_through_stock(self, notch_depth):
+        from layout_ast.compositional import CompositionalLayoutAST
+
+        sheet = Sheet(width_mm=500, height_mm=500, thickness_mm=18, margin_mm=0.0)
+        resolver = LayoutResolver(CompositionalLayoutAST(sheet=sheet))
+        panel = PanelSpec(
+            name="notched",
+            width_mm=200,
+            height_mm=400,
+            thickness_mm=18,
+            notches=(NotchSpec(Edge.BOTTOM, 50, 18.2, notch_depth, dogbone=DogboneSpec()),),
+        )
+        items = resolver._panels_to_items(
+            [(panel, 10.0, 10.0)],
+            show_labels=False,
+            show_edge_colors=False,
+        )
+
+        intents = ast_to_removal_intents(LayoutAST(sheet=sheet, items=tuple(items)))
+        planner_input = removal_intents_to_planner_input(intents)
+
+        assert len(planner_input.dogbones) == 1
+        assert planner_input.dogbones[0].depth_mm == 18.0
+        assert planner_input.dogbones[0].corners == ((60.0, 10.0 + notch_depth), (78.2, 10.0 + notch_depth))
+
     def _make_notch_ast(self, dogbone: DogboneSpec | None = None) -> LayoutAST:
         corners = ((10.0, 5.0), (20.0, 5.0))
         ref = (15.0, 25.0)

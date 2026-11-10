@@ -1,0 +1,67 @@
+project: pocket_corner_test
+
+Sheet:
+  physical_width: 1000mm
+  physical_height: 300mm
+  thickness: 19mm
+  margin: 10mm
+  material: mdf
+
+children:
+  - Rect:
+      id: plain
+      label: "Plain"
+      at: {x: 100mm, y: 140mm, width: 120mm, height: 80mm}
+      feature:
+        type: pocket
+        depth: 10mm
+
+  - Rect:
+      id: corner_cleanup
+      label: "Corner Cleanup"
+      at: {x: 255mm, y: 140mm, width: 120mm, height: 80mm}
+      feature:
+        type: pocket
+        depth: 10mm
+        corner_cleanup: 3.175mm
+
+  - Rect:
+      id: dogbone
+      label: "Dogbone"
+      at: {x: 410mm, y: 140mm, width: 120mm, height: 80mm}
+      feature:
+        type: pocket
+        depth: 10mm
+        dogbone: true
+
+  - Rect:
+      id: t_bone
+      label: "T-Bone"
+      at: {x: 565mm, y: 140mm, width: 120mm, height: 80mm}
+      feature:
+        type: pocket
+        depth: 10mm
+        dogbone:
+          style: t-bone_x
+          diameter: 6.35mm
+
+  - Rect:
+      id: rest
+      label: "Rest"
+      at: {x: 720mm, y: 140mm, width: 120mm, height: 80mm}
+      feature:
+        type: pocket
+        depth: 10mm
+        rest_tool: 3.175mm
+
+  - Rect:
+      id: allowance
+      label: "Rough + Finish"
+      at: {x: 875mm, y: 140mm, width: 120mm, height: 80mm}
+      children:
+        - Pocket:
+            depth: 10mm
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0.1mm

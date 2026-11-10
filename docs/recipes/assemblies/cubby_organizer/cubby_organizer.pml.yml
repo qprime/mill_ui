@@ -1,0 +1,28 @@
+project: cubby_organizer
+Sheet:
+  physical_width: 1220mm
+  physical_height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+  material: mdf
+children:
+  - Assembly:
+      type: cubby
+      width: 900mm
+      depth: 300mm
+      height: 600mm
+      thickness: 18mm
+      grid: [3, 2]
+      perimeter_joinery: finger
+      internal_joinery: half_lap
+      finger_width: 15mm
+      clearance: 0.12mm
+      layout_gap: 10mm
+      back:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+      back_thickness: 18mm
+      back_inset: 12mm
+      show_labels: true

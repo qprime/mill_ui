@@ -62,6 +62,7 @@ guide:
       - name: Per-part holding override
         summary: A nesting-job part that holds with tabs or onion skin different from the job default.
         spec: pml/nest_syntax_spec.md#per-part-override
+        detect: [{recipes: [nested_cabinet_job]}]
 
   - group: Pockets and recesses
     capabilities:
@@ -100,6 +101,7 @@ guide:
       - name: Holes inside a recess
         summary: Holes drilled through the floor of a pocket.
         spec: pml/syntax_spec.md#feature-types
+        detect: [{recipes: [recessed_mounting_plate]}]
       - name: Back-face machining
         summary: Features cut on the back of the sheet after a flip.
         spec: pml/syntax_spec.md#two-sided-machining-face
@@ -214,6 +216,7 @@ guide:
       - name: Concentric ripples
         summary: Rings that grow outward from a hole as well as inward from the edge.
         spec: pml/syntax_spec.md#concentricborder
+        detect: [{recipes: [pattern_coasters]}]
       - name: Radial arrays
         summary: Pockets, ticks, labels or artwork repeated around a center.
         spec: pml/syntax_spec.md#radial
@@ -273,6 +276,7 @@ guide:
       - name: Multi-sheet partitioning
         summary: Assembly panels split across sheets when they do not fit on one.
         spec: pml/syntax_spec.md#multi-sheet-partitioning
+        detect: [{recipes: [base_cabinet]}]
 
   - group: Laminated beams
     capabilities:
@@ -293,9 +297,11 @@ guide:
       - name: Explicit layer specs
         summary: Beam layers given one by one instead of by count.
         spec: pml/syntax_spec.md#explicit-layer-specs
+        detect: [{recipes: [side_table_frame]}]
       - name: Splicing beyond sheet length
         summary: Layers longer than the sheet, spliced with staggered butt joints.
         spec: pml/syntax_spec.md#splicing
+        detect: [{recipes: [long_spliced_rail]}]
 
   - group: Relief
     capabilities:

@@ -1,0 +1,41 @@
+project: cabinet_side
+
+Sheet:
+  physical_width: 400mm
+  physical_height: 800mm
+  thickness: 18mm
+
+children:
+  - Rect:
+      id: cabinet_side
+      label: "Cabinet Side"
+      at: {x: 200mm, y: 400mm, width: 350mm, height: 720mm}
+      children:
+        - Profile: {side: outside, depth: through}
+        - Rect:
+            id: dado_lower
+            label: "Lower Shelf Dado"
+            at: {x: 200mm, y: 140mm, width: 350mm, height: 18mm}
+            feature: {type: pocket, depth: 6mm}
+        - Rect:
+            id: dado_upper
+            label: "Upper Shelf Dado"
+            at: {x: 200mm, y: 660mm, width: 350mm, height: 18mm}
+            feature: {type: pocket, depth: 6mm}
+        - Rect:
+            id: back_rabbet
+            label: "Back Rabbet"
+            at: {x: 369mm, y: 400mm, width: 12mm, height: 720mm}
+            feature: {type: pocket, depth: 9mm}
+        - AtPosition:
+            x: 194mm
+            y: 400mm
+            width: 274mm
+            height: 400mm
+            child:
+              Place:
+                layout:
+                  Grid: {rows: 1, cols: 2, gap: 254mm}
+                children:
+                  - HoleGrid: {spacing: 32mm, diameter: 5mm, depth: 10mm}
+                  - HoleGrid: {spacing: 32mm, diameter: 5mm, depth: 10mm}

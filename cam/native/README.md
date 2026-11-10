@@ -56,7 +56,9 @@ cp build/native_cam/python/_native.cpython-*.so cam/native/
 
 - `is_native_available()` — detect whether the extension loaded.
 - `pocket_raster(shape, setup, ...)` — plan a pocket: spiral for a convex outline (a concave one raises `ValueError`), or a bounding-box raster.
-- `profile_outline(shape, setup, ...)` — plan profile passes.
+- `profile_outline(shape, setup, ...)` — plan profile passes. Closed contours ramp
+  along the boundary and retrace the ramp segments to the start at depth, then
+  traverse the contour. Entry never shortcuts across a polygon corner.
 - `drill_peck(points, setup, ...)` — plan peck drilling.
 - `bore_helical(center, hole_d, setup, ...)` — plan a helical bore.
 - `post_gcode(moves, ...)` — emit G-code from a move-dict sequence.

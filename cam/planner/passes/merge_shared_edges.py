@@ -1,21 +1,28 @@
 from __future__ import annotations
 
-import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from itertools import combinations
 from typing import TYPE_CHECKING
+
+from shapely import set_precision
+from shapely.geometry import Polygon, box
+from shapely.ops import orient, unary_union
 
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import FeatureInput
 from cam.shape import Shape2D
 from cam.types import Vec2
 
+from .profile import offset_rect_shape, polygon_shape
 from .tools import ToolSelection, stepdown_for_tool
 
 if TYPE_CHECKING:
     from cam.config import Config
 
     from . import PassRecord
+
+_CENTERLINE_PRECISION_MM = 1e-9
 
 
 @dataclass(frozen=True)
@@ -24,25 +31,30 @@ class _Edge:
     coord: float
     a: float
     b: float
-    rect_id: str
-    x_min: float
-    y_min: float
-    x_max: float
-    y_max: float
+    profile_index: int
+    outward: int
 
     @property
     def length(self) -> float:
         return abs(self.b - self.a)
 
 
-def _rect_edges(cx: float, cy: float, w: float, h: float, rect_id: str) -> list[_Edge]:
+@dataclass(frozen=True)
+class SharedProfileGroup:
+    profile_indices: tuple[int, ...]
+    depth_mm: float
+    seams: tuple[Shape2D, ...]
+    outlines: tuple[Shape2D, ...]
+
+
+def _rect_edges(cx: float, cy: float, w: float, h: float, profile_index: int) -> list[_Edge]:
     x_min, y_min = cx - w / 2.0, cy - h / 2.0
     x_max, y_max = cx + w / 2.0, cy + h / 2.0
     return [
-        _Edge("v", x_min, y_min, y_max, rect_id, x_min, y_min, x_max, y_max),
-        _Edge("v", x_max, y_min, y_max, rect_id, x_min, y_min, x_max, y_max),
-        _Edge("h", y_min, x_min, x_max, rect_id, x_min, y_min, x_max, y_max),
-        _Edge("h", y_max, x_min, x_max, rect_id, x_min, y_min, x_max, y_max),
+        _Edge("v", x_min, y_min, y_max, profile_index, -1),
+        _Edge("v", x_max, y_min, y_max, profile_index, 1),
+        _Edge("h", y_min, x_min, x_max, profile_index, -1),
+        _Edge("h", y_max, x_min, x_max, profile_index, 1),
     ]
 
 
@@ -52,172 +64,145 @@ def _overlap_len(a1: float, a2: float, b1: float, b2: float) -> float:
     return max(0.0, hi - lo)
 
 
-def _find_and_cut_seams(
-    buckets: dict[tuple[str, int], list[_Edge]],
-    rect_depths: dict[str, float],
-    *,
-    record: PassRecord,
-    tool: ToolSelection,
-    merge_tol: float,
-    min_overlap_mm: float,
-    min_overlap_ratio: float,
-    cut_through_mm: float,
-) -> int:
-    setup = record.setup
-    step_down = stepdown_for_tool(tool)
-    seam_count = 0
-    used_pairs: set[tuple[str, str, int]] = set()
-
-    for _, bucket_edges in buckets.items():
-        if len(bucket_edges) < 2:
-            continue
-        n = len(bucket_edges)
-        for i in range(n):
-            for j in range(i + 1, n):
-                a, b = bucket_edges[i], bucket_edges[j]
-                if a.rect_id == b.rect_id:
-                    continue
-                if a.orient != b.orient:
-                    continue
-                if abs(a.coord - b.coord) > merge_tol:
-                    continue
-                sorted_ids = sorted((a.rect_id, b.rect_id))
-                pair_id: tuple[str, str, int] = (sorted_ids[0], sorted_ids[1], round(a.coord * 1e3))
-                if pair_id in used_pairs:
-                    continue
-                overlap = _overlap_len(a.a, a.b, b.a, b.b)
-                min_length = min(a.length, b.length)
-                required = max(min_overlap_mm, min_length * min_overlap_ratio, float(tool.diameter))
-                if overlap < required:
-                    continue
-
-                if a.orient == "v":
-                    x = 0.5 * (a.coord + b.coord)
-                    y0 = max(min(a.a, a.b), min(b.a, b.b))
-                    y1 = min(max(a.a, a.b), max(b.a, b.b))
-                    seam_shape = Shape2D((Vec2(x, y0), Vec2(x, y1)))
-                else:
-                    y = 0.5 * (a.coord + b.coord)
-                    x0 = max(min(a.a, a.b), min(b.a, b.b))
-                    x1 = min(max(a.a, a.b), max(b.a, b.b))
-                    seam_shape = Shape2D((Vec2(x0, y), Vec2(x1, y)))
-
-                depth = max(rect_depths[a.rect_id], rect_depths[b.rect_id]) + cut_through_mm
-                moves = profile_outline(seam_shape, setup, depth_mm=depth, step_down=step_down)
-                record.add_moves(moves, increment=1)
-                seam_count += 1
-                used_pairs.add(pair_id)
-
-    return seam_count
+def _material_region(profile: FeatureInput) -> Polygon:
+    cx, cy = profile.center_xy_mm
+    half_w = float(profile.geometry.geometry.w_mm or 0.0) / 2
+    half_h = float(profile.geometry.geometry.h_mm or 0.0) / 2
+    return box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
 
 
-def _cut_unpaired_edges(
-    edges: list[_Edge],
-    buckets: dict[tuple[str, int], list[_Edge]],
-    rect_depths: dict[str, float],
-    *,
-    record: PassRecord,
-    tool: ToolSelection,
-    merge_tol: float,
-    min_overlap_mm: float,
-    min_overlap_ratio: float,
-    cut_through_mm: float,
-) -> None:
-    setup = record.setup
-    tool_radius = float(tool.diameter) * 0.5
-    step_down = stepdown_for_tool(tool)
-
-    for edge in edges:
-        bucket = buckets.get((edge.orient, round(edge.coord / merge_tol)), [])
-        has_partner = False
-        for other in bucket:
-            if other.rect_id == edge.rect_id:
-                continue
-            if abs(other.coord - edge.coord) > merge_tol:
-                continue
-            overlap = _overlap_len(edge.a, edge.b, other.a, other.b)
-            min_length = min(edge.length, other.length)
-            required = max(min_overlap_mm, min_length * min_overlap_ratio)
-            if overlap >= required:
-                has_partner = True
-                break
-        if has_partner:
-            continue
-
-        rect_depth = rect_depths[edge.rect_id] + cut_through_mm
-        if edge.orient == "v":
-            x_off = (
-                edge.coord - tool_radius
-                if math.isclose(edge.coord, edge.x_min, abs_tol=merge_tol)
-                else edge.coord + tool_radius
+def validate_rect_profile_clearance(profiles: Sequence[FeatureInput], tool_diameter_mm: float) -> None:
+    outside = [profile for profile in profiles if profile.side == "outside" and profile.depth_mm > 0]
+    regions: list[Polygon] = []
+    for profile in outside:
+        region = _material_region(profile)
+        treatment = profile.edge_treatment
+        if treatment is not None and treatment.type == "allowance":
+            allowance = max(0.0, treatment.rough_allowance_mm or 0.0, treatment.finish_allowance_mm or 0.0)
+            region = region.buffer(allowance, join_style="mitre")
+        regions.append(region)
+    for a, b in combinations(range(len(outside)), 2):
+        gap = regions[a].distance(regions[b])
+        if gap < tool_diameter_mm - _CENTERLINE_PRECISION_MM:
+            raise ValueError(
+                f"Rectangle profiles '{outside[a].id}' and '{outside[b].id}' have {gap:.6f}mm clearance "
+                "after profile allowances; "
+                f"need {tool_diameter_mm:.6f}mm for the selected cutter to preserve nominal dimensions"
             )
-            seam_shape = Shape2D((Vec2(x_off, edge.a), Vec2(x_off, edge.b)))
-        else:
-            y_off = (
-                edge.coord - tool_radius
-                if math.isclose(edge.coord, edge.y_min, abs_tol=merge_tol)
-                else edge.coord + tool_radius
+
+
+def _merge_eligible(profile: FeatureInput) -> bool:
+    return (
+        profile.side == "outside"
+        and profile.depth_mm > 0
+        and profile.start_depth_mm == 0
+        and profile.tabs is None
+        and profile.onion_skin_mm is None
+        and profile.edge_treatment is None
+        and profile.feeds_override is None
+        and profile.ramp_mm is None
+    )
+
+
+def _centerline_region(profile: FeatureInput, tool_diameter_mm: float) -> Polygon:
+    shape = offset_rect_shape(
+        float(profile.geometry.geometry.w_mm or 0.0),
+        float(profile.geometry.geometry.h_mm or 0.0),
+        profile.center_xy_mm,
+        tool_diameter_mm / 2,
+    )
+    if shape is None:
+        raise ValueError(f"Cannot construct outside profile for rectangle '{profile.id}'")
+    region = set_precision(Polygon([(p.x, p.y) for p in shape.points]), _CENTERLINE_PRECISION_MM)
+    if not isinstance(region, Polygon) or region.is_empty:
+        raise ValueError(f"Outside profile for rectangle '{profile.id}' has no polygonal region")
+    return region
+
+
+def _shared_seams(
+    profiles: Sequence[FeatureInput], regions: dict[int, Polygon], tool_diameter_mm: float, config: Config
+) -> list[tuple[int, int, Shape2D]]:
+    buckets: dict[tuple[str, int], list[_Edge]] = {}
+    for index, region in regions.items():
+        x0, y0, x1, y1 = region.bounds
+        for edge in _rect_edges((x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, index):
+            buckets.setdefault((edge.orient, round(edge.coord / _CENTERLINE_PRECISION_MM)), []).append(edge)
+    seams: list[tuple[int, int, Shape2D]] = []
+    for edges in buckets.values():
+        for a, b in combinations(edges, 2):
+            if a.profile_index == b.profile_index or a.outward == b.outward:
+                continue
+            if profiles[a.profile_index].depth_mm != profiles[b.profile_index].depth_mm:
+                continue
+            overlap = _overlap_len(a.a, a.b, b.a, b.b)
+            required = max(config.min_overlap_mm, min(a.length, b.length) * config.min_overlap_ratio, tool_diameter_mm)
+            if overlap < required:
+                continue
+            start, end = max(a.a, b.a), min(a.b, b.b)
+            coord = a.coord
+            points = (
+                (Vec2(coord, start), Vec2(coord, end)) if a.orient == "v" else (Vec2(start, coord), Vec2(end, coord))
             )
-            seam_shape = Shape2D((Vec2(edge.a, y_off), Vec2(edge.b, y_off)))
-        moves = profile_outline(seam_shape, setup, depth_mm=rect_depth, step_down=step_down)
-        record.add_moves(moves, increment=1)
+            seams.append((a.profile_index, b.profile_index, Shape2D(points)))
+    return seams
+
+
+def _connected_profiles(seams: Sequence[tuple[int, int, Shape2D]]) -> list[tuple[int, ...]]:
+    adjacent: dict[int, set[int]] = {}
+    for a, b, _ in seams:
+        adjacent.setdefault(a, set()).add(b)
+        adjacent.setdefault(b, set()).add(a)
+    remaining = set(adjacent)
+    groups: list[tuple[int, ...]] = []
+    while remaining:
+        pending = [min(remaining)]
+        component: set[int] = set()
+        while pending:
+            index = pending.pop()
+            if index in component:
+                continue
+            component.add(index)
+            pending.extend(sorted(adjacent[index] - component))
+        remaining -= component
+        groups.append(tuple(sorted(component)))
+    return groups
 
 
 def merge_rect_profiles(
-    rect_profiles: Sequence[FeatureInput],
-    *,
-    record: PassRecord,
-    tool: ToolSelection,
-    config: Config,
-    cut_through_mm: float,
+    profiles: Sequence[FeatureInput], *, tool_diameter_mm: float, config: Config
+) -> tuple[SharedProfileGroup, ...]:
+    if config.merge_epsilon_mm <= 0:
+        return ()
+    regions = {
+        index: _centerline_region(profile, tool_diameter_mm)
+        for index, profile in enumerate(profiles)
+        if _merge_eligible(profile)
+    }
+    seams = _shared_seams(profiles, regions, tool_diameter_mm, config)
+    groups: list[SharedProfileGroup] = []
+    for indices in _connected_profiles(seams):
+        region = unary_union([regions[index] for index in indices])
+        if not isinstance(region, Polygon):
+            raise ValueError(f"Shared rectangle profiles {indices} do not form one connected centerline region")
+        region = orient(region, sign=1.0)
+        outlines = tuple(polygon_shape(list(ring.coords), (0.0, 0.0)) for ring in (region.exterior, *region.interiors))
+        group_seams = tuple(shape for a, b, shape in seams if a in indices and b in indices)
+        groups.append(SharedProfileGroup(indices, profiles[indices[0]].depth_mm, group_seams, outlines))
+    return tuple(groups)
+
+
+def plan_shared_rect_profiles(
+    groups: Sequence[SharedProfileGroup], *, record: PassRecord, tool: ToolSelection, cut_through_mm: float
 ) -> int:
-    if not rect_profiles:
-        return 0
-
-    merge_tol = max(config.merge_epsilon_mm, 1e-6)
-    min_overlap_mm = max(config.min_overlap_mm, 0.0)
-    min_overlap_ratio = max(config.min_overlap_ratio, 0.0)
-
-    edges: list[_Edge] = []
-    rect_depths: dict[str, float] = {}
-
-    for idx, rec in enumerate(rect_profiles):
-        rect_id = rec.id or f"rect@{idx}"
-        cx, cy = rec.center_xy_mm
-        width = float(rec.geometry.geometry.w_mm or 0.0)
-        height = float(rec.geometry.geometry.h_mm or 0.0)
-        depth = rec.depth_mm
-        rect_depths[rect_id] = depth
-        edges.extend(_rect_edges(cx, cy, width, height, rect_id))
-
-    buckets: dict[tuple[str, int], list[_Edge]] = {}
-    for edge in edges:
-        buckets.setdefault((edge.orient, round(edge.coord / merge_tol)), []).append(edge)
-
-    seam_count = _find_and_cut_seams(
-        buckets,
-        rect_depths,
-        record=record,
-        tool=tool,
-        merge_tol=merge_tol,
-        min_overlap_mm=min_overlap_mm,
-        min_overlap_ratio=min_overlap_ratio,
-        cut_through_mm=cut_through_mm,
-    )
-
-    _cut_unpaired_edges(
-        edges,
-        buckets,
-        rect_depths,
-        record=record,
-        tool=tool,
-        merge_tol=merge_tol,
-        min_overlap_mm=min_overlap_mm,
-        min_overlap_ratio=min_overlap_ratio,
-        cut_through_mm=cut_through_mm,
-    )
-
-    return seam_count
+    for group in groups:
+        for shape in (*group.seams, *group.outlines):
+            record.add_moves(
+                profile_outline(
+                    shape, record.setup, group.depth_mm + cut_through_mm, step_down=stepdown_for_tool(tool)
+                ),
+                increment=1,
+            )
+    return sum(len(group.seams) for group in groups)
 
 
-__all__ = ["merge_rect_profiles"]
+__all__ = ["SharedProfileGroup", "merge_rect_profiles", "plan_shared_rect_profiles", "validate_rect_profile_clearance"]

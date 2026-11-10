@@ -59,6 +59,39 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 
 ---
 
+## Rectangle Profiles and Shared Cuts
+
+Rectangle profiles use the canonical closed-profile operation with the requested
+`inside`, `outside`, or `on` cutter offset. Isolated or incompatible profiles keep
+their feed overrides, allowances, and existing holding operations.
+
+Combining profile edge allowances with tabs or onion skin is explicitly rejected:
+the existing rough/finish allowance path cannot preserve holding through both
+contours. Global holding options receive the same check as per-feature options.
+An inside rectangle whose compensated centerline collapses is also rejected.
+
+A shared cut preserves both nominal parts. It is eligible only where compensated
+outside tool centerlines coincide, with identical depth and no per-feature feeds,
+allowance, tabs, onion skin, ramp distance, or nonzero start depth. Any job using
+tabs or onion skin keeps ordinary profiles. Connected compatible rectangles use
+shared seams followed by closed contours around their union, including holes.
+Partial seams retain the rest of the boundary. All contours use the existing
+profile operation; ramp entries follow boundary segments without corner shortcuts.
+
+Two outside rectangle profiles require at least the selected cutter's diameter
+between retained material regions, including each profile's largest positive
+rough/finish allowance, even when merging is disabled. Touching nominal
+rectangles cannot share a cut while preserving dimensions and are rejected.
+Nesting must provide the configured kerf plus gap margin. A larger actual selected
+cutter can still cause the planner to reject that spacing.
+
+`merge_epsilon_mm <= 0` disables sharing. A positive value enables it but never
+permits moving separated tool centerlines together: only floating-point precision
+(1e-9 mm) is used to identify coincident paths. Existing minimum-overlap settings
+continue to limit eligible seams.
+
+---
+
 ## Keepouts: Safety-Critical Constraint
 
 Keepouts represent regions where the tool must not enter (typically fixture/clamp locations). Machining through a keepout can:

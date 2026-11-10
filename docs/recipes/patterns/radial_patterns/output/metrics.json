@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 6403,
+    "total_moves": 6522,
     "rapid_moves": 337,
-    "cut_moves": 4329,
-    "rapid_ratio": 0.053
+    "cut_moves": 4448,
+    "rapid_ratio": 0.052
   },
   "fidelity": {
     "tool_changes": 3,
@@ -12,7 +12,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 889
+        "move_count": 930
       },
       {
         "name": "engrave",
@@ -22,25 +22,25 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 3330
+        "move_count": 3408
       }
     ]
   },
   "output_size": {
-    "total_bytes": 145260,
-    "total_lines": 5706,
+    "total_bytes": 149698,
+    "total_lines": 5825,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 20318,
-        "lines": 745
+        "bytes": 21828,
+        "lines": 786
       },
       "engrave-1.00mm": {
         "bytes": 29472,
         "lines": 1660
       },
       "profile-3.17mm": {
-        "bytes": 95470,
-        "lines": 3301
+        "bytes": 98398,
+        "lines": 3379
       }
     }
   },

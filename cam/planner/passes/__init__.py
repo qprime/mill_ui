@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from cam.config import Config
@@ -15,7 +15,7 @@ from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 from cam.shape import Shape2D
 
 from .edge import plan_edge_feature_passes
-from .merge_shared_edges import merge_rect_profiles
+from .merge_shared_edges import merge_rect_profiles, plan_shared_rect_profiles, validate_rect_profile_clearance
 from .pocket import (
     plan_corner_cleanup_passes,
     plan_dogbone_passes,
@@ -32,7 +32,6 @@ from .profile import (
     onion_skin_rough_moves,
     polygon_shape,
     profile_moves_with_options,
-    rect_shape,
     rounded_rect_shape,
 )
 from .relief.rough import plan_heightfield_passes
@@ -55,6 +54,9 @@ class PassRecord:
     filename: str
     moves: list[Move] = field(default_factory=list)
     count: int = 0
+
+    def setup_for(self, tool: ToolSelection) -> Setup:
+        return replace(self.setup, tool=tool.as_model())
 
     def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
         for move in moves:
@@ -200,33 +202,45 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             return rec.onion_skin_mm
         return onion_skin_mm
 
+    for rec in profiles:
+        if (
+            rec.edge_treatment is not None
+            and rec.edge_treatment.type == "allowance"
+            and (_tabs_for_feature(rec) or _onion_skin_for_feature(rec) > 0.0)
+        ):
+            raise ValueError(
+                f"Profile '{rec.id}': combining edge allowances with tabs or onion skin is unsupported; "
+                "rough and finish contours must preserve the requested holding"
+            )
+
     rect_profiles = [rec for rec in profiles if rec.shape.lower() == "rect"]
     circle_profiles = [rec for rec in profiles if rec.shape.lower() == "circle"]
     polygon_profiles = [rec for rec in profiles if rec.shape.lower() == "polygon"]
     rounded_rect_profiles = [rec for rec in profiles if rec.shape.lower() == "roundedrect"]
 
-    deferred_finishes: list[tuple[Shape2D, PassRecord, float]] = []
+    deferred_finishes: list[tuple[Shape2D, PassRecord, Setup, float]] = []
 
     def _add_profile_moves(
         rec: FeatureInput, shape: Shape2D, record: PassRecord, depth: float, tool: ToolSelection
     ) -> None:
         skin = _onion_skin_for_feature(rec)
+        setup = record.setup_for(tool)
         if skin > 0.0:
             rough_moves, finish_depth = onion_skin_rough_moves(
                 shape,
-                setup=record.setup,
+                setup=setup,
                 depth_mm=depth,
                 tool=tool,
                 onion_skin_mm=skin,
                 cut_through_mm=cut_through_mm,
             )
             record.add_moves(rough_moves, increment=1)
-            deferred_finishes.append((shape, record, finish_depth))
+            deferred_finishes.append((shape, record, setup, finish_depth))
         else:
             record.add_moves(
                 profile_moves_with_options(
                     shape,
-                    setup=record.setup,
+                    setup=setup,
                     depth_mm=depth,
                     tool=tool,
                     onion_skin_mm=0.0,
@@ -236,44 +250,57 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             )
 
     merged_seams = 0
-    if merge_enabled and rect_profiles:
+    merged_indices: set[int] = set()
+    if rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-        record = accumulator.get_record("profile", profile_tool)
-        merged_seams = merge_rect_profiles(
-            rect_profiles,
-            record=record,
-            tool=profile_tool,
-            config=config,
-            cut_through_mm=cut_through_mm,
+        validate_rect_profile_clearance(rect_profiles, profile_tool.diameter)
+        groups = (
+            merge_rect_profiles(rect_profiles, tool_diameter_mm=profile_tool.diameter, config=config)
+            if merge_enabled
+            else ()
         )
-    else:
-        for rec in rect_profiles:
+        if groups:
+            record = accumulator.get_record("profile", profile_tool)
+            merged_seams = plan_shared_rect_profiles(
+                groups, record=record, tool=profile_tool, cut_through_mm=cut_through_mm
+            )
+            merged_indices = {index for group in groups for index in group.profile_indices}
+    for index, rec in enumerate(rect_profiles):
+        if index not in merged_indices:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
             profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
             width = float(rec.geometry.geometry.w_mm or 0.0)
             height = float(rec.geometry.geometry.h_mm or 0.0)
             depth = max(0.0, rec.depth_mm) + cut_through_mm
+            side = (rec.side or "on").lower()
+            sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
+            tool_radius = profile_tool.diameter / 2.0
             et = rec.edge_treatment
-            if et is not None and et.type == "allowance":
-                rough_allow = et.rough_allowance_mm or 0.0
-                finish_allow = et.finish_allowance_mm or 0.0
-                tool_r = 0.5 * profile_tool.diameter
-                rough_record = accumulator.get_record("profile", profile_tool)
-                rough_shape = offset_rect_shape(width, height, rec.center_xy_mm, tool_r + rough_allow)
-                if rough_shape is not None:
-                    step_down = stepdown_for_tool(profile_tool)
-                    rough_moves = profile_outline(rough_shape, rough_record.setup, depth, step_down=step_down)
-                    rough_record.add_moves(rough_moves, increment=1)
-                finish_record = accumulator.get_record("finish", profile_tool)
-                finish_shape = offset_rect_shape(width, height, rec.center_xy_mm, tool_r + finish_allow)
-                if finish_shape is not None:
-                    step_down = stepdown_for_tool(profile_tool)
-                    finish_moves = profile_outline(finish_shape, finish_record.setup, depth, step_down=step_down)
-                    finish_record.add_moves(finish_moves, increment=1)
-            else:
-                record = accumulator.get_record("profile", profile_tool)
-                shape = rect_shape(width + profile_tool.diameter, height + profile_tool.diameter, rec.center_xy_mm)
-                _add_profile_moves(rec, shape, record, depth, profile_tool)
+            has_allowance = et is not None and et.type == "allowance"
+            stages = (
+                [("profile", et.rough_allowance_mm or 0.0), ("finish", et.finish_allowance_mm or 0.0)]
+                if has_allowance and et is not None
+                else [("profile", 0.0)]
+            )
+            for label, allowance in stages:
+                offset = sign * (tool_radius + allowance)
+                shape = offset_rect_shape(width, height, rec.center_xy_mm, offset)
+                if shape is None:
+                    raise ValueError(
+                        f"Rectangle profile '{rec.id}' ({label}): {width}x{height}mm boundary "
+                        f"has no positive centerline dimensions at offset {offset}mm "
+                        f"with selected cutter diameter {profile_tool.diameter}mm"
+                    )
+                record = accumulator.get_record(label, profile_tool)
+                if has_allowance:
+                    record.add_moves(
+                        profile_outline(
+                            shape, record.setup_for(profile_tool), depth, step_down=stepdown_for_tool(profile_tool)
+                        ),
+                        increment=1,
+                    )
+                else:
+                    _add_profile_moves(rec, shape, record, depth, profile_tool)
 
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -295,7 +322,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                     continue
                 s = circle_shape_mm(r * 2.0, rec.center_xy_mm)
                 rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+                rec_pass.add_moves(
+                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
+                )
         else:
             if side == "outside":
                 radius += tool_radius
@@ -333,7 +362,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 if s is None:
                     continue
                 rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+                rec_pass.add_moves(
+                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
+                )
         else:
             record = accumulator.get_record("profile", profile_tool)
             offset = 0.0
@@ -382,7 +413,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 if s is None:
                     continue
                 rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(profile_outline(s, rec_pass.setup, depth, step_down=step_down), increment=1)
+                rec_pass.add_moves(
+                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
+                )
         else:
             record = accumulator.get_record("profile", profile_tool)
             offset = 0.0
@@ -399,10 +432,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 continue
             _add_profile_moves(rec, shape_rr, record, depth, profile_tool)
 
-    for shape_def, deferred_record, finish_depth in deferred_finishes:
-        deferred_record.add_moves(
-            onion_skin_finish_moves(shape_def, setup=deferred_record.setup, finish_depth=finish_depth)
-        )
+    for shape_def, deferred_record, deferred_setup, finish_depth in deferred_finishes:
+        deferred_record.add_moves(onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth))
 
     pass_records = accumulator.passes()
 

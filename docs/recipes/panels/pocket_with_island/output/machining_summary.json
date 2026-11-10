@@ -17,7 +17,7 @@
       "max_depth_mm": 6.0,
       "feature_count": 1,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 14.8
+      "estimated_runtime_min": 14.9
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -34,7 +34,7 @@
       "estimated_runtime_min": 14.6
     }
   ],
-  "total_runtime_min": 29.4,
+  "total_runtime_min": 29.5,
   "feature_counts": {
     "pocket": 1,
     "profile": 1

@@ -15,15 +15,15 @@ from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
-from cam.moves import CutMove, DwellMove, Move, RapidMove, RetractMove, SetFeedMove, XYMove
+from cam.moves import CutMove, DwellMove, Move, RapidMove, RetractMove, SetFeedMove, SetRpmMove, XYMove
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
 from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
-from cam.planner.passes import PassAccumulator
+from cam.planner.passes import PassAccumulator, plan_passes
 from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
-from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges
+from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges, merge_rect_profiles
 from cam.planner.passes.pocket import (
     plan_engrave_passes,
     plan_hole_passes,
@@ -50,6 +50,7 @@ from cam.planner.planner_input import (
     FeatureInput,
     GeometryInput,
     IslandInput,
+    PlannerInput,
     SurfaceCooling,
 )
 from ir.removal_intent import (
@@ -63,7 +64,7 @@ from ir.removal_intent import (
     ShapeGeometry,
     TabConstraint,
 )
-from layout_ast.layout import RestSpec
+from layout_ast.layout import FeedsOverride, RestSpec
 
 FLAT_3MM = {"name": "3mm_flat", "diameter": 3.0, "kind": "flat", "rpm": 18000, "feed_xy": 1000, "feed_z": 300}
 FLAT_6MM = {"name": "6mm_flat", "diameter": 6.0, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 280}
@@ -422,18 +423,18 @@ class TestFaceZigzag:
 
 class TestRectEdges:
     def test_four_edges(self):
-        edges = _rect_edges(50, 50, 20, 10, "r1")
+        edges = _rect_edges(50, 50, 20, 10, 0)
         assert len(edges) == 4
 
     def test_edge_orientations(self):
-        edges = _rect_edges(50, 50, 20, 10, "r1")
+        edges = _rect_edges(50, 50, 20, 10, 0)
         v_edges = [e for e in edges if e.orient == "v"]
         h_edges = [e for e in edges if e.orient == "h"]
         assert len(v_edges) == 2
         assert len(h_edges) == 2
 
     def test_edge_coordinates(self):
-        edges = _rect_edges(50, 50, 20, 10, "r1")
+        edges = _rect_edges(50, 50, 20, 10, 0)
         v_coords = sorted(e.coord for e in edges if e.orient == "v")
         h_coords = sorted(e.coord for e in edges if e.orient == "h")
         assert v_coords == pytest.approx([40.0, 60.0])
@@ -480,6 +481,246 @@ def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
         depth_mm=depth,
         start_depth_mm=start_depth,
     )
+
+
+class TestRectangleProfilePlanning:
+    @staticmethod
+    def _plan(feature, *, merge=True, profile_opts=None):
+        features = (feature,) if isinstance(feature, FeatureInput) else tuple(feature)
+        return plan_passes(
+            PlannerInput(profiles=features, kerf_width_mm=3.0),
+            config=Config(merge_epsilon_mm=0.1 if merge else 0.0),
+            tool_db=FLAT_ONLY,
+            machine=Machine(),
+            stock=Stock(300, 200, 19),
+            profile_opts=profile_opts,
+        )[0]
+
+    @pytest.mark.parametrize("merge", [True, False])
+    @pytest.mark.parametrize(
+        "side,minimum,maximum", [("inside", 76.5, 123.5), ("outside", 73.5, 126.5), ("on", 75, 125)]
+    )
+    def test_closed_rectangle_honors_profile_side(self, side, minimum, maximum, merge):
+        feature = replace(_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 100), 6), side=side)
+
+        (record,) = self._plan(feature, merge=merge)
+
+        xs = [move.x for move in record.moves if isinstance(move, CutMove) and move.x is not None]
+        assert min(xs) == pytest.approx(minimum)
+        assert max(xs) == pytest.approx(maximum)
+        assert record.count == 1
+
+    def test_isolated_rectangle_uses_ramped_closed_profile(self):
+        feature = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (100, 100), 6), side="outside")
+        (record,) = self._plan(feature)
+        x = y = None
+        for move in record.moves:
+            if not isinstance(move, (RapidMove, CutMove)):
+                continue
+            target = (move.x if move.x is not None else x, move.y if move.y is not None else y)
+            if isinstance(move, CutMove) and move.z is not None and move.z < 0:
+                assert target != (x, y)
+                break
+            x, y = target
+        else:
+            pytest.fail("Profile has no cutting entry")
+        assert record.count == 1
+
+    def test_inside_profile_smaller_than_cutter_fails_explicitly(self):
+        feature = replace(_feature("Rect", {"w_mm": 2, "h_mm": 30}, (100, 100), 6), side="inside")
+
+        with pytest.raises(ValueError, match="no positive centerline dimensions"):
+            self._plan(feature)
+
+    @pytest.mark.parametrize("holding", ["tabs", "onion_skin_mm"])
+    @pytest.mark.parametrize("global_option", [False, True])
+    def test_allowances_cannot_silently_drop_holding(self, holding, global_option):
+        from cam.planner.planner_input import TabsInput
+
+        feature = replace(
+            _feature("Rect", {"w_mm": 100, "h_mm": 60}, (100, 100), 19),
+            side="outside",
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.2),
+        )
+        options = {holding: {"count": 4, "height_mm": 2, "width_mm": 8} if holding == "tabs" else 0.3}
+        if not global_option:
+            feature = (
+                replace(feature, tabs=TabsInput(4, 2, 8)) if holding == "tabs" else replace(feature, onion_skin_mm=0.3)
+            )
+
+        with pytest.raises(ValueError, match="must preserve the requested holding"):
+            self._plan(feature, profile_opts=options if global_option else None)
+
+    @pytest.mark.parametrize("side,rough_min,finish_min", [("outside", 73.0, 73.3), ("inside", 77.0, 76.7)])
+    def test_allowances_and_feed_overrides_survive_dispatch(self, side, rough_min, finish_min):
+        feature = replace(
+            _feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 100), 6),
+            side=side,
+            feeds_override=FeedsOverride(feed_xy=650, feed_z=120, depth_per_pass=1),
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.2),
+        )
+
+        passes = self._plan(feature)
+
+        assert [record.op for record in passes] == ["profile", "finish"]
+        for record, expected_min in zip(passes, [rough_min, finish_min], strict=True):
+            xs = [move.x for move in record.moves if isinstance(move, CutMove) and move.x is not None]
+            assert min(xs) == pytest.approx(expected_min)
+            assert record.tool_selection.feed_xy == 650
+            assert record.tool_selection.feed_z == 120
+            assert record.tool_selection.depth_per_pass == 1
+            assert record.count == 1
+
+    @pytest.mark.parametrize("offset_y", [0.0, 20.0])
+    @pytest.mark.parametrize("transpose", [False, True])
+    def test_shared_cut_preserves_both_nominal_rectangles(self, offset_y, transpose):
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(163, 80 + offset_y))
+        materials: tuple[ShapelyPolygon, ...] = (box(10, 50, 110, 110), box(113, 50 + offset_y, 213, 110 + offset_y))
+        if transpose:
+            geometry = GeometryInput(shape="Rect", geometry=ShapeGeometry(w_mm=60, h_mm=100))
+            a, b = (replace(p, center_xy_mm=p.center_xy_mm[::-1], geometry=geometry) for p in (a, b))
+            materials = tuple(
+                box(region.bounds[1], region.bounds[0], region.bounds[3], region.bounds[2]) for region in materials
+            )
+
+        (record,) = self._plan((a, b))
+
+        assert record.count == 2
+        shared = []
+        axis = int(transpose)
+        along = 1 - axis
+        seam_start = max(region.bounds[along] for region in materials) - 1.5
+        seam_end = min(region.bounds[along + 2] for region in materials) + 1.5
+        for start, end in _cut_segments(record.moves):
+            if min(start[2], end[2]) >= 0:
+                continue
+            line = LineString([start[:2], end[:2]])
+            for material in materials:
+                assert line.buffer(1.5).intersection(material).area < 1e-6
+            if (
+                abs(start[axis] - 111.5) < 1e-9
+                and abs(end[axis] - 111.5) < 1e-9
+                and start[along] != end[along]
+                and min(start[along], end[along]) >= seam_start - 1e-9
+                and max(start[along], end[along]) <= seam_end + 1e-9
+            ):
+                shared.append((start, end))
+        assert shared
+        assert len({end[2] for _, end in shared}) == len(shared)
+
+    @pytest.mark.parametrize("ring", [False, True])
+    def test_connected_groups_preserve_all_seams_and_hole_boundaries(self, ring):
+        cells = ((x, y) for x in range(3 if ring else 2) for y in range(3 if ring else 2))
+        profiles = tuple(
+            replace(
+                _feature("Rect", {"w_mm": 100, "h_mm": 60}, (60 + x * 103, 50 + y * 63), 6, id=f"{x},{y}"),
+                side="outside",
+            )
+            for x, y in cells
+            if not ring or (x, y) != (1, 1)
+        )
+
+        (group,) = merge_rect_profiles(profiles, tool_diameter_mm=3, config=Config())
+
+        assert group.profile_indices == tuple(range(len(profiles)))
+        assert len(group.seams) == (8 if ring else 4)
+        assert len(group.outlines) == (2 if ring else 1)
+        assert all(shape.points[0] == shape.points[-1] for shape in group.outlines)
+
+    def test_clearance_uses_selected_tool_instead_of_requested_kerf(self):
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(164, 80))
+
+        with pytest.raises(ValueError, match=r"need 6\.000000mm"):
+            plan_passes(
+                PlannerInput(profiles=(a, b), kerf_width_mm=3),
+                config=Config(),
+                tool_db=normalize_tool_entries([FLAT_6MM]),
+                machine=Machine(),
+                stock=Stock(300, 200, 19),
+            )
+
+    @pytest.mark.parametrize("gap", [0.0, 1.0, 2.99])
+    @pytest.mark.parametrize("merge", [True, False])
+    def test_insufficient_kerf_gap_is_rejected(self, gap, merge):
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(160 + gap, 80))
+
+        with pytest.raises(ValueError, match="preserve nominal dimensions"):
+            self._plan((a, b), merge=merge)
+
+    def test_nearby_offset_centerlines_are_not_snapped_together(self):
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(163.05, 80))
+
+        (record,) = self._plan((a, b))
+
+        assert record.count == 2
+        xs = {move.x for move in record.moves if isinstance(move, CutMove) and move.x is not None}
+        assert any(abs(x - 111.5) < 1e-9 for x in xs)
+        assert any(abs(x - 111.55) < 1e-9 for x in xs)
+
+    @pytest.mark.parametrize("gap,valid", [(3.5, False), (3.75, True)])
+    def test_clearance_reserves_both_parts_allowance_stock(self, gap, valid):
+        a = replace(
+            _feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"),
+            side="outside",
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5),
+        )
+        b = replace(
+            a,
+            id="b",
+            center_xy_mm=(160 + gap, 80),
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.25),
+        )
+
+        if valid:
+            assert [record.count for record in self._plan((a, b))] == [2, 2]
+        else:
+            with pytest.raises(ValueError, match="after profile allowances"):
+                self._plan((a, b))
+
+    def test_mixed_profile_overrides_use_each_features_setup(self):
+        a = replace(_feature("Rect", {"w_mm": 50, "h_mm": 30}, (60, 80), 6, id="a"), side="outside")
+        b = replace(
+            a, id="b", center_xy_mm=(163, 80), feeds_override=FeedsOverride(rpm=12000, feed_xy=650, depth_per_pass=1)
+        )
+
+        (record,) = self._plan((a, b))
+
+        assert [move.rpm for move in record.moves if isinstance(move, SetRpmMove)] == [18000, 12000]
+        feeds = {move.feed for move in record.moves if isinstance(move, SetFeedMove)}
+        assert feeds == {1000, 650}
+
+    @pytest.mark.parametrize("option", ["depth", "feeds", "allowance", "tabs", "onion_skin"])
+    def test_incompatible_profiles_do_not_share_seams(self, option):
+        from cam.planner.planner_input import TabsInput
+
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(163, 80))
+        if option == "depth":
+            b = replace(b, depth_mm=3)
+        elif option == "feeds":
+            b = replace(b, feeds_override=FeedsOverride(feed_xy=650))
+        elif option == "allowance":
+            b = replace(
+                b, edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0, finish_allowance_mm=0)
+            )
+        elif option == "tabs":
+            b = replace(b, tabs=TabsInput(count=4, height_mm=2, width_mm=8))
+        else:
+            b = replace(b, onion_skin_mm=0.3)
+        passes, summary, _ = plan_passes(
+            PlannerInput(profiles=(a, b), kerf_width_mm=3),
+            config=Config(),
+            tool_db=FLAT_ONLY,
+            machine=Machine(),
+            stock=Stock(300, 200, 19),
+        )
+
+        assert passes
+        assert summary["merged_seams"] == 0
 
 
 _RING_CENTER = (150.0, 100.0)

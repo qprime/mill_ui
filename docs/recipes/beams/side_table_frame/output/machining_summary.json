@@ -54,13 +54,13 @@
       "feed_z_mm_min": 396.0,
       "stepdown_mm": 1.5,
       "max_depth_mm": 19.2,
-      "feature_count": 64,
+      "feature_count": 16,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 288.5
+      "estimated_runtime_min": 204.3
     }
   ],
-  "total_runtime_min": 314.9,
+  "total_runtime_min": 230.7,
   "feature_counts": {
     "hole": 8,
     "pocket": 24,

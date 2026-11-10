@@ -70,6 +70,28 @@ TEST_CASE("emit_ramp_or_plunge falls back to a plunge when the path is shorter t
     CHECK_FALSE(last->x.has_value());
 }
 
+TEST_CASE("emit_ramp_or_plunge follows every remaining corner after reaching depth") {
+    Path moves;
+    const std::array<Vec2, 4> path = {Vec2{0.0, 0.0}, Vec2{50.0, 0.0}, Vec2{50.0, 50.0},
+                                      Vec2{100.0, 50.0}};
+    emit_ramp_or_plunge(moves, path, 0.0, -2.0, 30.0, 5.0, 1000.0, 300.0);
+
+    std::vector<Vec2> at_depth;
+    for (const auto& move : moves) {
+        const auto* cut = std::get_if<Cut>(&move);
+        if (cut != nullptr && cut->x && cut->y && cut->z && near(*cut->z, -2.0)) {
+            at_depth.push_back({*cut->x, *cut->y});
+        }
+    }
+    REQUIRE(at_depth.size() == 4);
+    CHECK(near(at_depth[1].x, 50.0));
+    CHECK(near(at_depth[1].y, 0.0));
+    CHECK(near(at_depth[2].x, 50.0));
+    CHECK(near(at_depth[2].y, 50.0));
+    CHECK(near(at_depth[3].x, 100.0));
+    CHECK(near(at_depth[3].y, 50.0));
+}
+
 TEST_CASE("emit_ramp_or_plunge on an empty path emits nothing") {
     Path moves;
     emit_ramp_or_plunge(moves, std::span<const Vec2>{}, 0.0, -2.0, 30.0, 5.0, 1000.0, 300.0);

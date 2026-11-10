@@ -17,7 +17,7 @@
       "max_depth_mm": 6.0,
       "feature_count": 4,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 14.0
+      "estimated_runtime_min": 14.1
     },
     {
       "filename": "pocket-9.53mm.nc",
@@ -73,7 +73,7 @@
       "estimated_runtime_min": 96.1
     }
   ],
-  "total_runtime_min": 246.6,
+  "total_runtime_min": 246.7,
   "feature_counts": {
     "engrave": 101,
     "pocket": 38,

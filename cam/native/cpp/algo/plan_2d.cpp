@@ -127,6 +127,7 @@ void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z,
 
     double remaining = ramp_dist;
     double z = prev_z;
+    size_t next_vertex = 1;
     for (size_t i = 0; i + 1 < path.size() && remaining > kEps; ++i) {
         double sl = seg_length(path[i], path[i + 1]);
         if (sl < kEps) {
@@ -140,9 +141,19 @@ void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z,
         z -= dz;
         moves.push_back(make_cut(nx, ny, z, feed_xy));
         remaining -= use;
+        next_vertex = i + 1;
     }
 
-    moves.push_back(make_cut(end_point.x, end_point.y, target_z, feed_xy));
+    const bool closed = seg_length(path.front(), path.back()) < kEps;
+    if (closed) {
+        for (size_t i = next_vertex; i > 0; --i) {
+            moves.push_back(make_cut(path[i - 1].x, path[i - 1].y, target_z, feed_xy));
+        }
+    } else {
+        for (size_t i = next_vertex; i < path.size(); ++i) {
+            moves.push_back(make_cut(path[i].x, path[i].y, target_z, feed_xy));
+        }
+    }
 }
 
 namespace {

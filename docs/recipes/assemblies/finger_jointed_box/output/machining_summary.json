@@ -44,10 +44,10 @@
       "feature_count": 5,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 11.1
+      "estimated_runtime_min": 11.2
     }
   ],
-  "total_runtime_min": 22.6,
+  "total_runtime_min": 22.7,
   "feature_counts": {
     "pocket": 32,
     "profile": 5

@@ -1,5 +1,36 @@
-from nesting.sheet_packer import pack_sheets
+from itertools import combinations
+
+import pytest
+from shapely.geometry import box
+
+from nesting.sheet_packer import PackingAlgorithm, pack_sheets
 from nesting.types import PartSpec, SheetSpec
+
+
+@pytest.mark.parametrize("algorithm", list(PackingAlgorithm))
+def test_kerf_and_gap_margin_separate_nominal_parts(algorithm):
+    parts = [PartSpec(name="panel", width_mm=100, height_mm=60, quantity=4, allow_rotation=False)]
+    sheet = SheetSpec(width_mm=225, height_mm=145, thickness_mm=19, margin_mm=10, kerf_mm=3, gap_margin_mm=2)
+
+    result = pack_sheets(parts, sheet, algorithm=algorithm)
+
+    assert result.total_sheets == 1
+    assert result.total_parts == 4
+    regions = [box(p.x_mm - 50, p.y_mm - 30, p.x_mm + 50, p.y_mm + 30) for p in result.sheets[0].placements]
+    assert all(a.distance(b) >= 5 - 1e-9 for a, b in combinations(regions, 2))
+    assert all(box(10, 10, 215, 135).covers(region) for region in regions)
+
+
+@pytest.mark.parametrize("algorithm", list(PackingAlgorithm))
+def test_exact_sheet_fit_does_not_require_a_trailing_part_gap(algorithm):
+    parts = [PartSpec(name="panel", width_mm=200, height_mm=100, allow_rotation=False)]
+    sheet = SheetSpec(width_mm=220, height_mm=120, thickness_mm=19, margin_mm=10, kerf_mm=3)
+
+    result = pack_sheets(parts, sheet, algorithm=algorithm)
+
+    assert result.total_sheets == 1
+    assert result.total_parts == 1
+    assert not result.unplaced_parts
 
 
 def test_single_part_single_sheet():

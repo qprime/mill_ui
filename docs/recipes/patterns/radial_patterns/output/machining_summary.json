@@ -17,7 +17,7 @@
       "max_depth_mm": 4.0,
       "feature_count": 16,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 10.2
+      "estimated_runtime_min": 10.8
     },
     {
       "filename": "engrave-1.00mm.nc",
@@ -47,7 +47,7 @@
       "estimated_runtime_min": 30.9
     }
   ],
-  "total_runtime_min": 69.3,
+  "total_runtime_min": 69.9,
   "feature_counts": {
     "engrave": 270,
     "pocket": 16,

@@ -1838,6 +1838,14 @@ Or as generator children:
 | `hole` | Drill/bore operation |
 | `engrave` | Shallow surface marking |
 
+Rectangle profiles follow a closed, cutter-compensated boundary on the named
+`side`. Compatible outside rectangles can share a cut when their facing material
+edges are separated by exactly the cutter diameter. For example, two nominal
+100mm parts with a 3mm cutter need a 3mm gap; touching 100mm parts cannot both
+remain 100mm after cutting. Insufficient spacing between outside rectangles is an
+error. Profiles with feeds, allowances, tabs, or onion skin use ordinary profile
+operations instead of shared cuts.
+
 ### Two-Sided Machining (`face`)
 
 `face` selects which surface of the panel a feature is machined from. Valid on

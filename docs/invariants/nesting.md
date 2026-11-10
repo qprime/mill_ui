@@ -55,6 +55,11 @@ The gap between parts accounts for:
 - `kerf_mm`: Material removed by the cutting tool
 - `gap_margin_mm`: Additional clearance (optional)
 
+The sheet packer passes this gap to both packing algorithms. Their internal
+rectangles include a trailing gap, so the packing bin extends by one gap on each
+axis. This reserves space between parts without requiring an additional gap at
+the sheet's usable outer edge; nominal parts must still fit inside the usable area.
+
 ---
 
 ## Rotation

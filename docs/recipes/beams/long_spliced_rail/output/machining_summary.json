@@ -15,13 +15,13 @@
       "feed_z_mm_min": 396.0,
       "stepdown_mm": 1.5,
       "max_depth_mm": 19.2,
-      "feature_count": 32,
+      "feature_count": 8,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 211.0
+      "estimated_runtime_min": 155.4
     }
   ],
-  "total_runtime_min": 211.0,
+  "total_runtime_min": 155.4,
   "feature_counts": {
     "profile": 8
   },

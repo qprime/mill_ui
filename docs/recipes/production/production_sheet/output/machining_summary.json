@@ -58,10 +58,10 @@
       "strategy": "onion_skin_then_finish",
       "holding": "tabs 4x3mm, onion_skin 0.3mm, tabs 3x3mm, tabs 2x3mm",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 146.9
+      "estimated_runtime_min": 136.6
     }
   ],
-  "total_runtime_min": 181.0,
+  "total_runtime_min": 170.7,
   "feature_counts": {
     "hole": 17,
     "pocket": 1,

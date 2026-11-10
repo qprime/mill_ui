@@ -99,9 +99,9 @@ def pack_sheets(
 
         placements = _pack_single_sheet(
             parts_input=pack_input,
-            bin_width=sheet_spec.usable_width_mm,
-            bin_height=sheet_spec.usable_height_mm,
-            gap=0.0,
+            bin_width=sheet_spec.usable_width_mm + sheet_spec.gap_mm,
+            bin_height=sheet_spec.usable_height_mm + sheet_spec.gap_mm,
+            gap=sheet_spec.gap_mm,
             algorithm=algorithm,
         )
 

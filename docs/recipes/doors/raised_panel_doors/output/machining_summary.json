@@ -17,7 +17,7 @@
       "max_depth_mm": 2.0,
       "feature_count": 5,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 30.7
+      "estimated_runtime_min": 30.8
     },
     {
       "filename": "edge-12.70mm.nc",
@@ -48,7 +48,7 @@
       "estimated_runtime_min": 50.5
     }
   ],
-  "total_runtime_min": 150.1,
+  "total_runtime_min": 150.2,
   "feature_counts": {
     "bevel": 5,
     "pocket": 5,
